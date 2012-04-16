@@ -27,14 +27,14 @@ namespace YouCompleteMe
 namespace
 {
 
-int NumWordBoundaryCharMatches( const std::string &text,
+int NumWordBoundaryCharMatches( const std::string &query,
                                 const std::string &word_boundary_chars )
 {
   int i = 0;
   int j = 0;
-  while ( j < text.size() && i < word_boundary_chars.size() )
+  while ( j < query.size() && i < word_boundary_chars.size() )
   {
-    if ( toupper( text[ j ] ) == toupper( word_boundary_chars[ i ] ) )
+    if ( toupper( query[ j ] ) == toupper( word_boundary_chars[ i ] ) )
       ++i;
     ++j;
   }
@@ -69,7 +69,7 @@ Result::Result( bool is_subsequence,
   text_( text )
 {
   if ( is_subsequence )
-    SetResultFeaturesFromQuery( word_boundary_chars, query );
+    SetResultFeaturesFromQuery( query, word_boundary_chars );
 }
 
 
@@ -157,8 +157,9 @@ void Result::SetResultFeaturesFromQuery(
   if ( query.empty() || text_->empty() )
     return;
 
-  first_char_same_in_query_and_text_ = query[ 0 ] == (*text_)[ 0 ];
-  int num_wb_matches = NumWordBoundaryCharMatches( *text_,
+  first_char_same_in_query_and_text_ =
+    toupper( query[ 0 ] ) == toupper( (*text_)[ 0 ] );
+  int num_wb_matches = NumWordBoundaryCharMatches( query,
                                                    word_boundary_chars );
   ratio_of_word_boundary_chars_in_query_ =
     num_wb_matches / static_cast< double >( query.length() );

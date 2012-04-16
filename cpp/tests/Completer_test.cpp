@@ -42,6 +42,38 @@ std::vector<std::string> ToStringVector( const boost::python::list &pylist )
   return values;
 }
 
+Pylist Candidates( const std::string &a,
+                   const std::string &b = std::string(),
+                   const std::string &c = std::string(),
+                   const std::string &d = std::string(),
+                   const std::string &e = std::string(),
+                   const std::string &f = std::string(),
+                   const std::string &g = std::string(),
+                   const std::string &h = std::string(),
+                   const std::string &i = std::string() )
+{
+  Pylist candidates;
+	candidates.append( a );
+	if ( !b.empty() )
+    candidates.append( b );
+	if ( !c.empty() )
+    candidates.append( c );
+	if ( !d.empty() )
+    candidates.append( d );
+	if ( !e.empty() )
+    candidates.append( e );
+	if ( !f.empty() )
+    candidates.append( f );
+	if ( !g.empty() )
+    candidates.append( g );
+	if ( !h.empty() )
+    candidates.append( h );
+	if ( !i.empty() )
+    candidates.append( i );
+
+  return candidates;
+}
+
 } // unnamed namespace
 
 class CompleterTest : public ::testing::Test
@@ -56,30 +88,19 @@ class CompleterTest : public ::testing::Test
 
 TEST_F( CompleterTest, OneCandidate )
 {
-	Pylist candidates;
-	candidates.append( "foobar" );
-
-	Completer completer;
-	completer.AddCandidatesToDatabase( candidates );
-
 	Pylist results;
-	completer.GetCandidatesForQuery( "fbr", results );
+	Completer( Candidates( "foobar" ) ).GetCandidatesForQuery( "fbr", results );
 
 	EXPECT_THAT( ToStringVector( results ), ElementsAre( "foobar" ) );
 }
 
 TEST_F( CompleterTest, ManyCandidateSimple )
 {
-	Pylist candidates;
-	candidates.append( "foobar" );
-	candidates.append( "foobartest" );
-	candidates.append( "Foobartest" );
-
-	Completer completer;
-	completer.AddCandidatesToDatabase( candidates );
-
 	Pylist results;
-	completer.GetCandidatesForQuery( "fbr", results );
+	Completer( Candidates(
+	        "foobar",
+	        "foobartest",
+	        "Foobartest" ) ).GetCandidatesForQuery( "fbr", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             WhenSorted( ElementsAre( "Foobartest",
@@ -89,15 +110,10 @@ TEST_F( CompleterTest, ManyCandidateSimple )
 
 TEST_F( CompleterTest, FirstCharSameAsQueryWins )
 {
-	Pylist candidates;
-	candidates.append( "foobar" );
-	candidates.append( "afoobar" );
-
-	Completer completer;
-	completer.AddCandidatesToDatabase( candidates );
-
 	Pylist results;
-	completer.GetCandidatesForQuery( "fbr", results );
+	Completer( Candidates(
+	        "foobar",
+	        "afoobar" ) ).GetCandidatesForQuery( "fbr", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "foobar",
@@ -106,19 +122,67 @@ TEST_F( CompleterTest, FirstCharSameAsQueryWins )
 
 TEST_F( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
 {
-	Pylist candidates;
-	candidates.append( "FooBarQux" );
-	candidates.append( "FBaqux" );
-
-	Completer completer;
-	completer.AddCandidatesToDatabase( candidates );
-
 	Pylist results;
-	completer.GetCandidatesForQuery( "fbq", results );
+	Completer( Candidates(
+	        "FooBarQux",
+	        "FBaqux" ) ).GetCandidatesForQuery( "fbq", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "FooBarQux",
 	                          "FBaqux" ) );
+
+	Pylist results2;
+	Completer( Candidates(
+	        "CompleterTest",
+	        "CompleteMatchForWordBoundaryCharsWins"
+	        ) ).GetCandidatesForQuery( "ct", results2 );
+
+	EXPECT_THAT( ToStringVector( results2 ),
+	             ElementsAre( "CompleterTest",
+	                          "CompleteMatchForWordBoundaryCharsWins" ) );
+
+	Pylist results3;
+	Completer( Candidates(
+	        "FooBar",
+	        "FooBarRux"
+	        ) ).GetCandidatesForQuery( "fbr", results3 );
+
+	EXPECT_THAT( ToStringVector( results3 ),
+	             ElementsAre( "FooBarRux",
+	                          "FooBar" ) );
+}
+
+TEST_F( CompleterTest, RatioUtilizationTieBreak )
+{
+	Pylist results;
+	Completer( Candidates(
+	        "FooBarQux",
+	        "FooBarQuxZaa" ) ).GetCandidatesForQuery( "fbq", results );
+
+	EXPECT_THAT( ToStringVector( results ),
+	             ElementsAre( "FooBarQux",
+	                          "FooBarQuxZaa" ) );
+}
+
+TEST_F( CompleterTest, ShorterCandidateWins )
+{
+	Pylist results;
+	Completer( Candidates(
+	        "FooBarQux",
+	        "FaBarQux" ) ).GetCandidatesForQuery( "fbq", results );
+
+	EXPECT_THAT( ToStringVector( results ),
+	             ElementsAre( "FaBarQux",
+	                          "FooBarQux" ) );
+
+	Pylist results2;
+	Completer( Candidates(
+	        "CompleterT",
+	        "CompleterTest" ) ).GetCandidatesForQuery( "co", results2 );
+
+	EXPECT_THAT( ToStringVector( results2 ),
+	             ElementsAre( "CompleterT",
+	                          "CompleterTest" ) );
 }
 
 } // namespace YouCompleteMe

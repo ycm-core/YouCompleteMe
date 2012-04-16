@@ -37,6 +37,7 @@ class Completer
 {
 public:
   Completer() {}
+  Completer( const Pylist &candidates );
   ~Completer();
 
   void AddCandidatesToDatabase( const Pylist &candidates );

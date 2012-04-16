@@ -21,6 +21,11 @@
 namespace YouCompleteMe
 {
 
+Completer::Completer( const Pylist &candidates )
+{
+  AddCandidatesToDatabase( candidates );
+}
+
 Completer::~Completer()
 {
   foreach ( Candidate* candidate, candidates_ )

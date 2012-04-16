@@ -36,7 +36,7 @@ std::string GetWordBoundaryChars( const std::string &text )
          ( i > 0 && text[ i - 1 ] == '_' && isalpha( text[ i ] ) )
        )
     {
-      result.push_back( tolower( text[ 0 ] ) );
+      result.push_back( tolower( text[ i ] ) );
     }
   }
 
