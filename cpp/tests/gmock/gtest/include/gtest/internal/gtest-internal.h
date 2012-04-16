@@ -122,7 +122,7 @@ class TestInfoImpl;                    // Opaque implementation of TestInfo
 class UnitTestImpl;                    // Opaque implementation of UnitTest
 
 // How many times InitGoogleTest() has been called.
-extern int g_init_gtest_count;
+GTEST_API_ extern int g_init_gtest_count;
 
 // The text used in failure messages to indicate the start of the
 // stack trace.
@@ -797,11 +797,17 @@ struct RemoveConst<const T> { typedef T type; };  // NOLINT
 // MSVC 8.0, Sun C++, and IBM XL C++ have a bug which causes the above
 // definition to fail to remove the const in 'const int[3]' and 'const
 // char[3][4]'.  The following specialization works around the bug.
-// However, it causes trouble with GCC and thus needs to be
-// conditionally compiled.
-#if defined(_MSC_VER) || defined(__SUNPRO_CC) || defined(__IBMCPP__)
 template <typename T, size_t N>
 struct RemoveConst<const T[N]> {
+  typedef typename RemoveConst<T>::type type[N];
+};
+
+#if defined(_MSC_VER) && _MSC_VER < 1400
+// This is the only specialization that allows VC++ 7.1 to remove const in
+// 'const int[3] and 'const int[3][4]'.  However, it causes trouble with GCC
+// and thus needs to be conditionally compiled.
+template <typename T, size_t N>
+struct RemoveConst<T[N]> {
   typedef typename RemoveConst<T>::type type[N];
 };
 #endif

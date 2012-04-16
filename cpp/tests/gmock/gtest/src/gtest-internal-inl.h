@@ -112,6 +112,12 @@ GTEST_API_ bool ShouldUseColor(bool stdout_is_tty);
 // Formats the given time in milliseconds as seconds.
 GTEST_API_ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms);
 
+// Converts the given time in milliseconds to a date string in the ISO 8601
+// format, without the timezone information.  N.B.: due to the use the
+// non-reentrant localtime() function, this function is not thread safe.  Do
+// not use it in any code that can be called from multiple threads.
+GTEST_API_ std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms);
+
 // Parses a string for an Int32 flag, in the form of "--flag=value".
 //
 // On success, stores the value of the flag in *value, and returns
@@ -432,8 +438,12 @@ class OsStackTraceGetterInterface {
 class OsStackTraceGetter : public OsStackTraceGetterInterface {
  public:
   OsStackTraceGetter() : caller_frame_(NULL) {}
-  virtual String CurrentStackTrace(int max_depth, int skip_count);
+
+  virtual String CurrentStackTrace(int max_depth, int skip_count)
+      GTEST_LOCK_EXCLUDED_(mutex_);
+
   virtual void UponLeavingGTest();
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // This string is inserted in place of stack frames that are part of
   // Google Test's implementation.
@@ -547,6 +557,10 @@ class GTEST_API_ UnitTestImpl {
 
   // Gets the number of tests that should run.
   int test_to_run_count() const;
+
+  // Gets the time of the test program start, in ms from the start of the
+  // UNIX epoch.
+  TimeInMillis start_timestamp() const { return start_timestamp_; }
 
   // Gets the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
@@ -879,6 +893,10 @@ class GTEST_API_ UnitTestImpl {
 
   // Our random number generator.
   internal::Random random_;
+
+  // The time of the test program start, in ms from the start of the
+  // UNIX epoch.
+  TimeInMillis start_timestamp_;
 
   // How long the test took to run, in milliseconds.
   TimeInMillis elapsed_time_;

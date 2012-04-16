@@ -1107,11 +1107,13 @@ class GTEST_API_ UnitTest {
 
   // Returns the TestCase object for the test that's currently running,
   // or NULL if no test is running.
-  const TestCase* current_test_case() const;
+  const TestCase* current_test_case() const
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Returns the TestInfo object for the test that's currently running,
   // or NULL if no test is running.
-  const TestInfo* current_test_info() const;
+  const TestInfo* current_test_info() const
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Returns the random seed used at the start of the current test run.
   int random_seed() const;
@@ -1121,7 +1123,8 @@ class GTEST_API_ UnitTest {
   // value-parameterized tests and instantiate and register them.
   //
   // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-  internal::ParameterizedTestCaseRegistry& parameterized_test_registry();
+  internal::ParameterizedTestCaseRegistry& parameterized_test_registry()
+      GTEST_LOCK_EXCLUDED_(mutex_);
 #endif  // GTEST_HAS_PARAM_TEST
 
   // Gets the number of successful test cases.
@@ -1151,6 +1154,10 @@ class GTEST_API_ UnitTest {
 
   // Gets the number of tests that should run.
   int test_to_run_count() const;
+
+  // Gets the time of the test program start, in ms from the start of the
+  // UNIX epoch.
+  TimeInMillis start_timestamp() const;
 
   // Gets the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const;
@@ -1190,7 +1197,8 @@ class GTEST_API_ UnitTest {
                          const char* file_name,
                          int line_number,
                          const internal::String& message,
-                         const internal::String& os_stack_trace);
+                         const internal::String& os_stack_trace)
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Adds a TestProperty to the current TestResult object. If the result already
   // contains a property with the same key, the value will be updated.
@@ -1223,10 +1231,12 @@ class GTEST_API_ UnitTest {
 
   // Pushes a trace defined by SCOPED_TRACE() on to the per-thread
   // Google Test trace stack.
-  void PushGTestTrace(const internal::TraceInfo& trace);
+  void PushGTestTrace(const internal::TraceInfo& trace)
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Pops a trace from the per-thread Google Test trace stack.
-  void PopGTestTrace();
+  void PopGTestTrace()
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Protects mutable state in *impl_.  This is mutable as some const
   // methods need to lock it too.

@@ -9,11 +9,6 @@
 # make it prominent in the GUI.
 option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 
-# Forces BUILD_SHARED_LIBS to OFF as Google Mock currently does not support
-# working in a DLL.
-# TODO(vladl@google.com): Implement building gMock as a DLL.
-set(BUILD_SHARED_LIBS OFF)
-
 option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
 
 # A directory to find Google Test sources.
@@ -76,11 +71,16 @@ include_directories("${gmock_SOURCE_DIR}/include"
 # Google Mock libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that Google Mock can be compiled by
 # a user aggressive about warnings.
-cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
-target_link_libraries(gmock gtest)
+cxx_library(gmock
+            "${cxx_strict}"
+            "${gtest_dir}/src/gtest-all.cc"
+            src/gmock-all.cc)
 
-cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
-target_link_libraries(gmock_main gmock)
+cxx_library(gmock_main
+            "${cxx_strict}"
+            "${gtest_dir}/src/gtest-all.cc"
+            src/gmock-all.cc
+            src/gmock_main.cc)
 
 ########################################################################
 #
@@ -114,8 +114,11 @@ if (gmock_build_tests)
   cxx_test(gmock-port_test gmock_main)
   cxx_test(gmock-spec-builders_test gmock_main)
   cxx_test(gmock_link_test gmock_main test/gmock_link2_test.cc)
-  # cxx_test(gmock_stress_test gmock)
   cxx_test(gmock_test gmock_main)
+
+  if (CMAKE_USE_PTHREADS_INIT)
+    cxx_test(gmock_stress_test gmock)
+  endif()
 
   # gmock_all_test is commented to save time building and running tests.
   # Uncomment if necessary.
@@ -126,8 +129,10 @@ if (gmock_build_tests)
 
   cxx_library(gmock_main_no_exception "${cxx_no_exception}"
     "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+
   cxx_library(gmock_main_no_rtti "${cxx_no_rtti}"
     "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+
   cxx_library(gmock_main_use_own_tuple "${cxx_use_own_tuple}"
     "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
 
@@ -139,6 +144,20 @@ if (gmock_build_tests)
 
   cxx_test_with_flags(gmock_use_own_tuple_test "${cxx_use_own_tuple}"
     gmock_main_use_own_tuple test/gmock-spec-builders_test.cc)
+
+  cxx_shared_library(shared_gmock_main "${cxx_default}"
+    "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+
+  # Tests that a binary can be built with Google Mock as a shared library.  On
+  # some system configurations, it may not possible to run the binary without
+  # knowing more details about the system configurations. We do not try to run
+  # this binary. To get a more robust shared library coverage, configure with
+  # -DBUILD_SHARED_LIBS=ON.
+  cxx_executable_with_flags(shared_gmock_test_ "${cxx_default}"
+    shared_gmock_main test/gmock-spec-builders_test.cc)
+  set_target_properties(shared_gmock_test_
+    PROPERTIES
+    COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
 
   ############################################################
   # Python tests.

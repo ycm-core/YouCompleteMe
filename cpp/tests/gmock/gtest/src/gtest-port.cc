@@ -51,6 +51,11 @@
 # include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
+#if GTEST_OS_QNX
+# include <devctl.h>
+# include <sys/procfs.h>
+#endif  // GTEST_OS_QNX
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-internal.h"
@@ -93,6 +98,26 @@ size_t GetThreadCount() {
                   reinterpret_cast<vm_address_t>(thread_list),
                   sizeof(thread_t) * thread_count);
     return static_cast<size_t>(thread_count);
+  } else {
+    return 0;
+  }
+}
+
+#elif GTEST_OS_QNX
+
+// Returns the number of threads running in the process, or 0 to indicate that
+// we cannot detect it.
+size_t GetThreadCount() {
+  const int fd = open("/proc/self/as", O_RDONLY);
+  if (fd < 0) {
+    return 0;
+  }
+  procfs_info process_info;
+  const int status =
+      devctl(fd, DCMD_PROC_INFO, &process_info, sizeof(process_info), NULL);
+  close(fd);
+  if (status == EOK) {
+    return static_cast<size_t>(process_info.num_threads);
   } else {
     return 0;
   }
@@ -628,11 +653,23 @@ String GetCapturedStderr() { return GetCapturedStream(&g_captured_stderr); }
 #if GTEST_HAS_DEATH_TEST
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
-::std::vector<String> g_argvs;
+::std::vector<testing::internal::string> g_argvs;
 
-// Returns the command line as a vector of strings.
-const ::std::vector<String>& GetArgvs() { return g_argvs; }
+static const ::std::vector<testing::internal::string>* g_injected_test_argvs =
+                                        NULL;  // Owned.
 
+void SetInjectableArgvs(const ::std::vector<testing::internal::string>* argvs) {
+  if (g_injected_test_argvs != argvs)
+    delete g_injected_test_argvs;
+  g_injected_test_argvs = argvs;
+}
+
+const ::std::vector<testing::internal::string>& GetInjectableArgvs() {
+  if (g_injected_test_argvs != NULL) {
+    return *g_injected_test_argvs;
+  }
+  return g_argvs;
+}
 #endif  // GTEST_HAS_DEATH_TEST
 
 #if GTEST_OS_WINDOWS_MOBILE

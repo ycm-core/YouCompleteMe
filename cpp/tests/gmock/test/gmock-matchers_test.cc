@@ -52,11 +52,13 @@
 namespace testing {
 
 namespace internal {
-string JoinAsTuple(const Strings& fields);
+GTEST_API_ string JoinAsTuple(const Strings& fields);
 }  // namespace internal
 
 namespace gmock_matchers_test {
 
+using std::greater;
+using std::less;
 using std::list;
 using std::make_pair;
 using std::map;
@@ -118,6 +120,8 @@ using testing::StrNe;
 using testing::Truly;
 using testing::TypedEq;
 using testing::Value;
+using testing::WhenSorted;
+using testing::WhenSortedBy;
 using testing::_;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ExplainMatchFailureTupleTo;
@@ -541,6 +545,37 @@ TEST(MatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+// Implicitly convertible form any type.
+struct ConvertibleFromAny {
+  ConvertibleFromAny(int a_value) : value(a_value) {}
+  template <typename T>
+  ConvertibleFromAny(const T& a_value) : value(-1) {
+    ADD_FAILURE() << "Conversion constructor called";
+  }
+  int value;
+};
+
+bool operator==(const ConvertibleFromAny& a, const ConvertibleFromAny& b) {
+  return a.value == b.value;
+}
+
+ostream& operator<<(ostream& os, const ConvertibleFromAny& a) {
+  return os << a.value;
+}
+
+TEST(MatcherCastTest, ConversionConstructorIsUsed) {
+  Matcher<ConvertibleFromAny> m = MatcherCast<ConvertibleFromAny>(1);
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
+TEST(MatcherCastTest, FromConvertibleFromAny) {
+  Matcher<ConvertibleFromAny> m =
+      MatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
 class Base {};
 class Derived : public Base {};
 
@@ -614,6 +649,19 @@ TEST(SafeMatcherCastTest, FromSameType) {
   Matcher<int> m2 = SafeMatcherCast<int>(m1);
   EXPECT_TRUE(m2.Matches(0));
   EXPECT_FALSE(m2.Matches(1));
+}
+
+TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
+  Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
+TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
+  Matcher<ConvertibleFromAny> m =
+      SafeMatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 
 // Tests that A<T>() matches any value of type T.
@@ -1936,19 +1984,19 @@ TEST(AllOfTest, CanDescribeSelf) {
 
 
   m = AllOf(Gt(0), Ne(1), Ne(2), Ne(3));
-  EXPECT_EQ("(is > 0) and "
-            "((isn't equal to 1) and "
+  EXPECT_EQ("((is > 0) and "
+            "(isn't equal to 1)) and "
             "((isn't equal to 2) and "
-            "(isn't equal to 3)))",
+            "(isn't equal to 3))",
             Describe(m));
 
 
   m = AllOf(Ge(0), Lt(10), Ne(3), Ne(5), Ne(7));
-  EXPECT_EQ("(is >= 0) and "
-            "((is < 10) and "
+  EXPECT_EQ("((is >= 0) and "
+            "(is < 10)) and "
             "((isn't equal to 3) and "
             "((isn't equal to 5) and "
-            "(isn't equal to 7))))",
+            "(isn't equal to 7)))",
             Describe(m));
 }
 
@@ -1968,19 +2016,19 @@ TEST(AllOfTest, CanDescribeNegation) {
 
 
   m = AllOf(Gt(0), Ne(1), Ne(2), Ne(3));
-  EXPECT_EQ("(isn't > 0) or "
-            "((is equal to 1) or "
+  EXPECT_EQ("((isn't > 0) or "
+            "(is equal to 1)) or "
             "((is equal to 2) or "
-            "(is equal to 3)))",
+            "(is equal to 3))",
             DescribeNegation(m));
 
 
   m = AllOf(Ge(0), Lt(10), Ne(3), Ne(5), Ne(7));
-  EXPECT_EQ("(isn't >= 0) or "
-            "((isn't < 10) or "
+  EXPECT_EQ("((isn't >= 0) or "
+            "(isn't < 10)) or "
             "((is equal to 3) or "
             "((is equal to 5) or "
-            "(is equal to 7))))",
+            "(is equal to 7)))",
             DescribeNegation(m));
 }
 
@@ -2108,18 +2156,18 @@ TEST(AnyOfTest, CanDescribeSelf) {
             Describe(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("(is < 0) or "
-            "((is equal to 1) or "
+  EXPECT_EQ("((is < 0) or "
+            "(is equal to 1)) or "
             "((is equal to 2) or "
-            "(is equal to 3)))",
+            "(is equal to 3))",
             Describe(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("(is <= 0) or "
-            "((is > 10) or "
+  EXPECT_EQ("((is <= 0) or "
+            "(is > 10)) or "
             "((is equal to 3) or "
             "((is equal to 5) or "
-            "(is equal to 7))))",
+            "(is equal to 7)))",
             Describe(m));
 }
 
@@ -2136,18 +2184,18 @@ TEST(AnyOfTest, CanDescribeNegation) {
             DescribeNegation(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("(isn't < 0) and "
-            "((isn't equal to 1) and "
+  EXPECT_EQ("((isn't < 0) and "
+            "(isn't equal to 1)) and "
             "((isn't equal to 2) and "
-            "(isn't equal to 3)))",
+            "(isn't equal to 3))",
             DescribeNegation(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("(isn't <= 0) and "
-            "((isn't > 10) and "
+  EXPECT_EQ("((isn't <= 0) and "
+            "(isn't > 10)) and "
             "((isn't equal to 3) and "
             "((isn't equal to 5) and "
-            "(isn't equal to 7))))",
+            "(isn't equal to 7)))",
             DescribeNegation(m));
 }
 
@@ -3723,6 +3771,83 @@ TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
 
   a2[0][0] = "ha";
   EXPECT_THAT(a1, m);
+}
+
+TEST(WhenSortedByTest, WorksForEmptyContainer) {
+  const vector<int> numbers;
+  EXPECT_THAT(numbers, WhenSortedBy(less<int>(), ElementsAre()));
+  EXPECT_THAT(numbers, Not(WhenSortedBy(less<int>(), ElementsAre(1))));
+}
+
+TEST(WhenSortedByTest, WorksForNonEmptyContainer) {
+  vector<unsigned> numbers;
+  numbers.push_back(3);
+  numbers.push_back(1);
+  numbers.push_back(2);
+  numbers.push_back(2);
+  EXPECT_THAT(numbers, WhenSortedBy(greater<unsigned>(),
+                                    ElementsAre(3, 2, 2, 1)));
+  EXPECT_THAT(numbers, Not(WhenSortedBy(greater<unsigned>(),
+                                        ElementsAre(1, 2, 2, 3))));
+}
+
+TEST(WhenSortedByTest, WorksForNonVectorContainer) {
+  list<string> words;
+  words.push_back("say");
+  words.push_back("hello");
+  words.push_back("world");
+  EXPECT_THAT(words, WhenSortedBy(less<string>(),
+                                  ElementsAre("hello", "say", "world")));
+  EXPECT_THAT(words, Not(WhenSortedBy(less<string>(),
+                                      ElementsAre("say", "hello", "world"))));
+}
+
+TEST(WhenSortedByTest, WorksForNativeArray) {
+  const int numbers[] = { 1, 3, 2, 4 };
+  const int sorted_numbers[] = { 1, 2, 3, 4 };
+  EXPECT_THAT(numbers, WhenSortedBy(less<int>(), ElementsAre(1, 2, 3, 4)));
+  EXPECT_THAT(numbers, WhenSortedBy(less<int>(),
+                                    ElementsAreArray(sorted_numbers)));
+  EXPECT_THAT(numbers, Not(WhenSortedBy(less<int>(), ElementsAre(1, 3, 2, 4))));
+}
+
+TEST(WhenSortedByTest, CanDescribeSelf) {
+  const Matcher<vector<int> > m = WhenSortedBy(less<int>(), ElementsAre(1, 2));
+  EXPECT_EQ("(when sorted) has 2 elements where\n"
+            "element #0 is equal to 1,\n"
+            "element #1 is equal to 2",
+            Describe(m));
+  EXPECT_EQ("(when sorted) doesn't have 2 elements, or\n"
+            "element #0 isn't equal to 1, or\n"
+            "element #1 isn't equal to 2",
+            DescribeNegation(m));
+}
+
+TEST(WhenSortedByTest, ExplainsMatchResult) {
+  const int a[] = { 2, 1 };
+  EXPECT_EQ("which is { 1, 2 } when sorted, whose element #0 doesn't match",
+            Explain(WhenSortedBy(less<int>(), ElementsAre(2, 3)), a));
+  EXPECT_EQ("which is { 1, 2 } when sorted",
+            Explain(WhenSortedBy(less<int>(), ElementsAre(1, 2)), a));
+}
+
+// WhenSorted() is a simple wrapper on WhenSortedBy().  Hence we don't
+// need to test it as exhaustively as we test the latter.
+
+TEST(WhenSortedTest, WorksForEmptyContainer) {
+  const vector<int> numbers;
+  EXPECT_THAT(numbers, WhenSorted(ElementsAre()));
+  EXPECT_THAT(numbers, Not(WhenSorted(ElementsAre(1))));
+}
+
+TEST(WhenSortedTest, WorksForNonEmptyContainer) {
+  list<string> words;
+  words.push_back("3");
+  words.push_back("1");
+  words.push_back("2");
+  words.push_back("2");
+  EXPECT_THAT(words, WhenSorted(ElementsAre("1", "2", "2", "3")));
+  EXPECT_THAT(words, Not(WhenSorted(ElementsAre("3", "1", "2", "2"))));
 }
 
 // Tests IsReadableTypeName().
