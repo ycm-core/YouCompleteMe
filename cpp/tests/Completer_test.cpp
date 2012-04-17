@@ -164,6 +164,18 @@ TEST_F( CompleterTest, RatioUtilizationTieBreak )
 	                          "FooBarQuxZaa" ) );
 }
 
+TEST_F( CompleterTest, QueryPrefixOfCandidateWins )
+{
+	Pylist results;
+	Completer( Candidates(
+	        "foobar",
+	        "fbaroo" ) ).GetCandidatesForQuery( "foo", results );
+
+	EXPECT_THAT( ToStringVector( results ),
+	             ElementsAre( "foobar",
+	                          "fbaroo" ) );
+}
+
 TEST_F( CompleterTest, ShorterCandidateWins )
 {
 	Pylist results;
