@@ -197,5 +197,17 @@ TEST_F( CompleterTest, ShorterCandidateWins )
 	                          "CompleterTest" ) );
 }
 
+TEST_F( CompleterTest, SameLowercaseCandidateWins )
+{
+	Pylist results;
+	Completer( Candidates(
+	        "foobar",
+	        "Foobar" ) ).GetCandidatesForQuery( "foo", results );
+
+	EXPECT_THAT( ToStringVector( results ),
+	             ElementsAre( "foobar",
+	                          "Foobar" ) );
+}
+
 } // namespace YouCompleteMe
 

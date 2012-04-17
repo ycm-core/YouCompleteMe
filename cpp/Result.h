@@ -30,6 +30,7 @@ public:
 
   Result( bool is_subsequence,
           const std::string *text,
+          bool text_is_lowercase,
           const std::string &word_boundary_chars,
           const std::string &query );
 
@@ -62,6 +63,7 @@ private:
   // number of word boundary matches / number of all word boundary chars
   double word_boundary_char_utilization_;
   bool query_is_candidate_prefix_;
+  bool text_is_lowercase_;
   const std::string *text_;
 
 };

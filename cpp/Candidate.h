@@ -59,6 +59,7 @@ private:
 
   std::string text_;
   std::string word_boundary_chars_;
+  bool text_is_lowercase_;
   Bitset letters_present_;
   boost::scoped_ptr< LetterNode > root_node_;
 };

@@ -18,6 +18,10 @@
 #include "standard.h"
 #include "Candidate.h"
 #include <cctype>
+#include <boost/algorithm/string.hpp>
+
+using boost::algorithm::all;
+using boost::algorithm::is_lower;
 
 namespace YouCompleteMe
 {
@@ -57,14 +61,17 @@ Bitset LetterBitsetFromString( const std::string &text )
   return letter_bitset;
 }
 
+
 Candidate::Candidate( const std::string &text )
   :
   text_( text ),
   word_boundary_chars_( GetWordBoundaryChars( text ) ),
+  text_is_lowercase_( all( text, is_lower() ) ),
   letters_present_( LetterBitsetFromString( text ) ),
   root_node_( new LetterNode( text ) )
 {
 }
+
 
 Result Candidate::QueryMatchResult( const std::string &query ) const
 {
@@ -80,7 +87,8 @@ Result Candidate::QueryMatchResult( const std::string &query ) const
     node = list->front();
   }
 
-  return Result( true, &text_, word_boundary_chars_, query );
+  return Result( true, &text_, text_is_lowercase_, word_boundary_chars_,
+                 query );
 }
 
 } // namespace YouCompleteMe

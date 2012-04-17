@@ -52,12 +52,14 @@ Result::Result( bool is_subsequence )
   ratio_of_word_boundary_chars_in_query_( 0 ),
   word_boundary_char_utilization_( 0 ),
   query_is_candidate_prefix_( false ),
+  text_is_lowercase_( false ),
   text_( NULL )
 {
 }
 
 Result::Result( bool is_subsequence,
                 const std::string *text,
+                bool text_is_lowercase,
                 const std::string &word_boundary_chars,
                 const std::string &query )
   :
@@ -66,10 +68,11 @@ Result::Result( bool is_subsequence,
   ratio_of_word_boundary_chars_in_query_( 0 ),
   word_boundary_char_utilization_( 0 ),
   query_is_candidate_prefix_( false ),
+  text_is_lowercase_( text_is_lowercase ),
   text_( text )
 {
   if ( is_subsequence )
-    SetResultFeaturesFromQuery( query, word_boundary_chars );
+    SetResultFeaturesFromQuery( word_boundary_chars, query );
 }
 
 
@@ -82,6 +85,7 @@ Result::Result( const Result& other )
       other.ratio_of_word_boundary_chars_in_query_ ),
   word_boundary_char_utilization_( other.word_boundary_char_utilization_ ),
   query_is_candidate_prefix_( other.query_is_candidate_prefix_ ),
+  text_is_lowercase_( other.text_is_lowercase_ ),
   text_( other.text_ )
 {
 }
@@ -124,9 +128,7 @@ bool Result::operator< ( const Result &other ) const {
   }
 
   if ( query_is_candidate_prefix_ != other.query_is_candidate_prefix_ )
-  {
     return query_is_candidate_prefix_;
-  }
 
   if ( !equal_wb_ratios )
   {
@@ -142,17 +144,18 @@ bool Result::operator< ( const Result &other ) const {
   }
 
   if ( text_->length() != other.text_->length() )
-  {
     return text_->length() < other.text_->length();
-  }
+
+  if ( text_is_lowercase_ != other.text_is_lowercase_ )
+    return text_is_lowercase_;
 
   return *text_ < *other.text_;
 }
 
 
 void Result::SetResultFeaturesFromQuery(
-    const std::string &query,
-    const std::string &word_boundary_chars )
+    const std::string &word_boundary_chars,
+    const std::string &query)
 {
   if ( query.empty() || text_->empty() )
     return;
