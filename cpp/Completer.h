@@ -22,6 +22,7 @@
 
 #include <boost/utility.hpp>
 #include <boost/python.hpp>
+#include <boost/unordered_map.hpp>
 
 #include <set>
 #include <vector>
@@ -31,6 +32,7 @@ namespace YouCompleteMe
 {
 
 typedef boost::python::list Pylist;
+typedef boost::unordered_map< std::string, Candidate* > CandidateRepository;
 
 // class Completer : boost::noncopyable
 class Completer
@@ -38,9 +40,11 @@ class Completer
 public:
   Completer() {}
   Completer( const Pylist &candidates );
+  Completer( const Pylist &candidates, const std::string &filepath );
   ~Completer();
 
-  void AddCandidatesToDatabase( const Pylist &candidates );
+  void AddCandidatesToDatabase( const Pylist &candidates,
+                                const std::string &filepath );
 
 	void GetCandidatesForQuery(
 			const std::string &query, Pylist &candidates ) const;
@@ -54,6 +58,7 @@ private:
     }
   };
 
+  CandidateRepository candidate_repository_;
 	std::set< Candidate*, CandidatePointerLess > candidates_;
 };
 

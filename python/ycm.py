@@ -35,10 +35,11 @@ class CompletionSystem( object ):
 
   def AddBufferIdentifiers( self ):
     text = "\n".join( vim.current.buffer )
-    text = RemoveCppComments( text )
+    text = RemoveIdentFreeText( text )
 
     idents = re.findall( self.pattern, text )
-    self.completer.AddCandidatesToDatabase( idents )
+    filepath = vim.eval( "expand('%:p')" )
+    self.completer.AddCandidatesToDatabase( idents, filepath )
 
 def CurrentColumn():
   # vim's columns start at 1 while vim.current.line columns start at 0
@@ -74,7 +75,10 @@ def CurrentCursorText():
 def SanitizeQuery( query ):
   return query.strip()
 
-def RemoveCppComments( text ):
+def RemoveIdentFreeText( text ):
+  """Removes commented-out code and code in quotes."""
+
+  # TODO: do we still need this sub-func?
   def replacer( match ):
     s = match.group( 0 )
     if s.startswith( '/' ):
@@ -83,7 +87,7 @@ def RemoveCppComments( text ):
       return s
 
   pattern = re.compile(
-    r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+    r'//.*?$|#.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
     re.DOTALL | re.MULTILINE )
 
   return re.sub( pattern, replacer, text )

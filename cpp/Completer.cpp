@@ -17,32 +17,50 @@
 
 #include "standard.h"
 #include "Completer.h"
+#include "Utils.h"
 
 namespace YouCompleteMe
 {
 
 Completer::Completer( const Pylist &candidates )
 {
-  AddCandidatesToDatabase( candidates );
+  AddCandidatesToDatabase( candidates, "" );
 }
+
+
+Completer::Completer( const Pylist &candidates, const std::string &filepath)
+{
+  AddCandidatesToDatabase( candidates, filepath );
+}
+
 
 Completer::~Completer()
 {
-  foreach ( Candidate* candidate, candidates_ )
+  foreach ( const CandidateRepository::value_type &pair,
+            candidate_repository_ )
   {
-    delete candidate;
+    delete pair.second;
   }
 }
 
-void Completer::AddCandidatesToDatabase(
-		const Pylist &candidates )
+
+void Completer::AddCandidatesToDatabase( const Pylist &candidates,
+                                         const std::string &filepath )
 {
+  std::string candidate_text;
   for (int i = 0; i < boost::python::len( candidates ); ++i)
   {
-    candidates_.insert( new Candidate(
-      boost::python::extract< std::string >( candidates[ i ] ) ) );
+    candidate_text = boost::python::extract< std::string >( candidates[ i ] );
+    Candidate *&candidate = GetValueElseInsert( candidate_repository_,
+                                                candidate_text, NULL );
+    if ( !candidate )
+    {
+      candidate = new Candidate( candidate_text );
+      candidates_.insert( candidate );
+    }
   }
 }
+
 
 void Completer::GetCandidatesForQuery(
     const std::string &query, Pylist &candidates ) const
@@ -69,5 +87,6 @@ void Completer::GetCandidatesForQuery(
     candidates.append( *result.Text() );
   }
 }
+
 
 } // namespace YouCompleteMe
