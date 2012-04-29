@@ -162,6 +162,15 @@ TEST_F( CompleterTest, RatioUtilizationTieBreak )
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "FooBarQux",
 	                          "FooBarQuxZaa" ) );
+
+	Pylist results2;
+	Completer( Candidates(
+	        "FooBar",
+	        "FooBarRux" ) ).GetCandidatesForQuery( "fba", results2 );
+
+	EXPECT_THAT( ToStringVector( results2 ),
+	             ElementsAre( "FooBar",
+	                          "FooBarRux" ) );
 }
 
 TEST_F( CompleterTest, QueryPrefixOfCandidateWins )
