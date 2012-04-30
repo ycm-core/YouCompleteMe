@@ -28,6 +28,7 @@ LetterNode::LetterNode( char letter )
   is_root_node = false;
 }
 
+
 LetterNode::LetterNode( const std::string &text )
 {
   is_uppercase = false;

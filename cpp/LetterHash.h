@@ -40,8 +40,6 @@ public:
   LetterHash();
   ~LetterHash();
 
-  // const std::list< LetterNode* > operator[] ( char letter ) const;
-
   bool HasLetter( char letter );
 
   std::list< LetterNode* >& operator[] ( char letter );
@@ -53,9 +51,6 @@ public:
 private:
 
   std::vector< std::list< LetterNode* >* > letters_;
-  // TODO: remove this list, we can just create lists on the heap when we need
-  // them
-  // std::vector< std::list< LetterNode* > > letter_node_lists_;
 };
 
 } // namespace YouCompleteMe

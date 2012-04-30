@@ -217,5 +217,7 @@ TEST_F( CompleterTest, SameLowercaseCandidateWins )
 	                          "Foobar" ) );
 }
 
+// TODO: tests for filepath and filetype candidate storing
+
 } // namespace YouCompleteMe
 

@@ -23,12 +23,13 @@ namespace YouCompleteMe
 const int kNumLetters = NUM_LETTERS;
 static const int kLettersIndexStart = 0;
 static const int kNumbersIndexStart = 26;
-// static const int kNumbersIndexStart = 0;
+
 
 bool IsUppercase( char letter )
 {
   return 'A' <= letter && letter <= 'Z';
 }
+
 
 int IndexForChar( char letter )
 {
@@ -38,6 +39,7 @@ int IndexForChar( char letter )
 
   return letter;
 }
+
 
 LetterHash::LetterHash()
 {
@@ -49,6 +51,7 @@ LetterHash::LetterHash()
 	}
 }
 
+
 LetterHash::~LetterHash()
 {
 	for ( int i = 0; i < letters_.size(); ++i )
@@ -57,6 +60,7 @@ LetterHash::~LetterHash()
 	}
 }
 
+
 bool LetterHash::HasLetter( char letter )
 {
   int letter_index = IndexForChar( letter );
@@ -64,16 +68,6 @@ bool LetterHash::HasLetter( char letter )
   return list;
 }
 
-// const std::list< LetterNode* > LetterHash::operator[] ( char letter ) const
-// {
-//   int letter_index = IndexForChar( letter );
-//   std::list< LetterNode* > *list = letters_[ letter_index ];
-//   if ( list )
-//
-//     return *list;
-//
-//   return std::list< LetterNode* >();
-// }
 
 std::list< LetterNode* >& LetterHash::operator[] ( char letter )
 {
@@ -85,15 +79,14 @@ std::list< LetterNode* >& LetterHash::operator[] ( char letter )
 
   letters_[ letter_index ] = new std::list< LetterNode* >();
   return *letters_[ letter_index ];
-  // letter_node_lists_.push_back( std::list< LetterNode* >() );
-  // letters_[ letter_index ] = &letter_node_lists_.back();
-  // return letter_node_lists_.back();
 }
+
 
 std::list< LetterNode* >* LetterHash::ListPointerAt( char letter )
 {
   return letters_[ IndexForChar( letter ) ];
 }
+
 
 bool LetterHash::HasLetter( char letter ) const
 {

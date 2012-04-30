@@ -27,7 +27,6 @@
 #include <list>
 #include <string>
 
-// #include <boost/unordered_map.hpp>
 
 namespace YouCompleteMe
 {
@@ -45,20 +44,12 @@ public:
     return is_uppercase;
   }
 
-// 	inline const std::list< LetterNode* > NodesForLetter( char letter ) const
-//   {
-//     return letters_[ letter ];
-//   }
-//
-// 	inline const std::list< LetterNode* >& NodesForLetter( char letter )
-//   {
-//     return letters_[ letter ];
-//   }
 
 	inline const std::list< LetterNode* >* NodeListForLetter( char letter )
   {
     return letters_.ListPointerAt( letter );
   }
+
 
 	inline void PrependNodeForLetter( char letter, LetterNode* node )
   {
@@ -70,9 +61,6 @@ private:
   // TODO: rename LetterHash to LetterNodeListHash or LetterNodeListDict/Map?
   LetterHash letters_;
   std::vector< boost::shared_ptr< LetterNode > > letternode_per_text_index_;
-  // std::vector< std::list< LetterNode* >* > letters_;
-  // std::vector< std::list< LetterNode* > > letter_node_lists_;
-  // boost::unordered_map< std::list< LetterNode* > letters_;
 	bool is_uppercase;
 	bool is_root_node;
 };
