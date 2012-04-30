@@ -28,10 +28,8 @@ function! youcompleteme#Enable()
 
   augroup youcompleteme
     autocmd!
-    " Things are breaking currently, so until then, autocmds are commented out
     autocmd CursorMovedI * call s:OnMovedI()
     autocmd BufRead,BufEnter * call s:SetCompleteFunc()
-    " TODO first add the tests :)
     autocmd CursorHold,CursorHoldI * py csystem.AddBufferIdentifiers()
   augroup END
 
@@ -120,6 +118,7 @@ EOF
     " 7.3.475. It's possible that patch 404 was the one that fixed this issue,
     " but I haven't tested this assumption.
     let dict = { 'words' : results }
+    " A bug in vim causes the '.' register to break when we use set this... sigh
     let dict.refresh = 'always'
     return dict
   endif
