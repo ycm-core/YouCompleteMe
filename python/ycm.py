@@ -30,7 +30,10 @@ class CompletionSystem( object ):
 
   def CompletionCandidatesForQuery( self, query ):
     candidates = []
-    self.completer.GetCandidatesForQuery( SanitizeQuery( query ), candidates )
+    filetype = vim.eval( "&filetype" )
+    self.completer.CandidatesForQueryAndType( SanitizeQuery( query ),
+                                              filetype,
+                                              candidates )
     return candidates
 
   def AddBufferIdentifiers( self ):
@@ -38,8 +41,9 @@ class CompletionSystem( object ):
     text = RemoveIdentFreeText( text )
 
     idents = re.findall( self.pattern, text )
+    filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
-    self.completer.AddCandidatesToDatabase( idents, filepath )
+    self.completer.AddCandidatesToDatabase( idents, filetype, filepath )
 
 def CurrentColumn():
   # vim's columns start at 1 while vim.current.line columns start at 0

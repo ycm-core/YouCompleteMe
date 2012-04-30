@@ -23,8 +23,8 @@
 #include <boost/utility.hpp>
 #include <boost/python.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include <set>
 #include <vector>
 #include <string>
 
@@ -32,24 +32,49 @@ namespace YouCompleteMe
 {
 
 typedef boost::python::list Pylist;
+
+// candidate text string -> candidate objects
 typedef boost::unordered_map< std::string, Candidate* > CandidateRepository;
 
+// filepath -> *( *candidate )
+typedef boost::unordered_map< std::string,
+          boost::shared_ptr< std::vector< Candidate* > > > FilepathToCandidates;
+
+// filetype -> *( filepath -> *( *candidate ) )
+typedef boost::unordered_map< std::string,
+          boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
+
+
+// TODO: resolve problems with noncopyable
 // class Completer : boost::noncopyable
 class Completer
 {
 public:
   Completer() {}
   Completer( const Pylist &candidates );
-  Completer( const Pylist &candidates, const std::string &filepath );
+  Completer( const Pylist &candidates,
+             const std::string &filetype,
+             const std::string &filepath );
   ~Completer();
 
-  void AddCandidatesToDatabase( const Pylist &candidates,
+  void AddCandidatesToDatabase( const Pylist &new_candidates,
+                                const std::string &filetype,
                                 const std::string &filepath );
 
-	void GetCandidatesForQuery(
-			const std::string &query, Pylist &candidates ) const;
+  // Only provided for tests!
+	void CandidatesForQuery( const std::string &query,
+                           Pylist &candidates ) const;
+
+	void CandidatesForQueryAndType( const std::string &query,
+                                  const std::string &filetype,
+                                  Pylist &candidates ) const;
 
 private:
+
+  std::vector< Candidate* >& GetCandidateVector(
+      const std::string &filetype,
+      const std::string &filepath );
+
   struct CandidatePointerLess
   {
     bool operator() ( const Candidate *first, const Candidate *second )
@@ -58,8 +83,10 @@ private:
     }
   };
 
+  // This data structure owns all the Candidate pointers
   CandidateRepository candidate_repository_;
-	std::set< Candidate*, CandidatePointerLess > candidates_;
+
+  FiletypeMap filetype_map_;
 };
 
 } // namespace YouCompleteMe

@@ -89,7 +89,7 @@ class CompleterTest : public ::testing::Test
 TEST_F( CompleterTest, OneCandidate )
 {
 	Pylist results;
-	Completer( Candidates( "foobar" ) ).GetCandidatesForQuery( "fbr", results );
+	Completer( Candidates( "foobar" ) ).CandidatesForQuery( "fbr", results );
 
 	EXPECT_THAT( ToStringVector( results ), ElementsAre( "foobar" ) );
 }
@@ -98,9 +98,9 @@ TEST_F( CompleterTest, ManyCandidateSimple )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "foobar",
-	        "foobartest",
-	        "Foobartest" ) ).GetCandidatesForQuery( "fbr", results );
+    "foobar",
+    "foobartest",
+    "Foobartest" ) ).CandidatesForQuery( "fbr", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             WhenSorted( ElementsAre( "Foobartest",
@@ -112,8 +112,8 @@ TEST_F( CompleterTest, FirstCharSameAsQueryWins )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "foobar",
-	        "afoobar" ) ).GetCandidatesForQuery( "fbr", results );
+    "foobar",
+    "afoobar" ) ).CandidatesForQuery( "fbr", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "foobar",
@@ -124,8 +124,8 @@ TEST_F( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "FooBarQux",
-	        "FBaqux" ) ).GetCandidatesForQuery( "fbq", results );
+    "FooBarQux",
+    "FBaqux" ) ).CandidatesForQuery( "fbq", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "FooBarQux",
@@ -133,9 +133,9 @@ TEST_F( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
 
 	Pylist results2;
 	Completer( Candidates(
-	        "CompleterTest",
-	        "CompleteMatchForWordBoundaryCharsWins"
-	        ) ).GetCandidatesForQuery( "ct", results2 );
+    "CompleterTest",
+    "CompleteMatchForWordBoundaryCharsWins"
+    ) ).CandidatesForQuery( "ct", results2 );
 
 	EXPECT_THAT( ToStringVector( results2 ),
 	             ElementsAre( "CompleterTest",
@@ -143,9 +143,8 @@ TEST_F( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
 
 	Pylist results3;
 	Completer( Candidates(
-	        "FooBar",
-	        "FooBarRux"
-	        ) ).GetCandidatesForQuery( "fbr", results3 );
+    "FooBar",
+    "FooBarRux" ) ).CandidatesForQuery( "fbr", results3 );
 
 	EXPECT_THAT( ToStringVector( results3 ),
 	             ElementsAre( "FooBarRux",
@@ -156,8 +155,8 @@ TEST_F( CompleterTest, RatioUtilizationTieBreak )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "FooBarQux",
-	        "FooBarQuxZaa" ) ).GetCandidatesForQuery( "fbq", results );
+    "FooBarQux",
+    "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "FooBarQux",
@@ -165,8 +164,8 @@ TEST_F( CompleterTest, RatioUtilizationTieBreak )
 
 	Pylist results2;
 	Completer( Candidates(
-	        "FooBar",
-	        "FooBarRux" ) ).GetCandidatesForQuery( "fba", results2 );
+    "FooBar",
+    "FooBarRux" ) ).CandidatesForQuery( "fba", results2 );
 
 	EXPECT_THAT( ToStringVector( results2 ),
 	             ElementsAre( "FooBar",
@@ -177,8 +176,8 @@ TEST_F( CompleterTest, QueryPrefixOfCandidateWins )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "foobar",
-	        "fbaroo" ) ).GetCandidatesForQuery( "foo", results );
+    "foobar",
+    "fbaroo" ) ).CandidatesForQuery( "foo", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "foobar",
@@ -189,8 +188,8 @@ TEST_F( CompleterTest, ShorterCandidateWins )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "FooBarQux",
-	        "FaBarQux" ) ).GetCandidatesForQuery( "fbq", results );
+    "FooBarQux",
+    "FaBarQux" ) ).CandidatesForQuery( "fbq", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "FaBarQux",
@@ -198,8 +197,8 @@ TEST_F( CompleterTest, ShorterCandidateWins )
 
 	Pylist results2;
 	Completer( Candidates(
-	        "CompleterT",
-	        "CompleterTest" ) ).GetCandidatesForQuery( "co", results2 );
+    "CompleterT",
+    "CompleterTest" ) ).CandidatesForQuery( "co", results2 );
 
 	EXPECT_THAT( ToStringVector( results2 ),
 	             ElementsAre( "CompleterT",
@@ -210,8 +209,8 @@ TEST_F( CompleterTest, SameLowercaseCandidateWins )
 {
 	Pylist results;
 	Completer( Candidates(
-	        "foobar",
-	        "Foobar" ) ).GetCandidatesForQuery( "foo", results );
+    "foobar",
+    "Foobar" ) ).CandidatesForQuery( "foo", results );
 
 	EXPECT_THAT( ToStringVector( results ),
 	             ElementsAre( "foobar",

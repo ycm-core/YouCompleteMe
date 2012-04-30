@@ -27,6 +27,7 @@ namespace YouCompleteMe
 
 bool AlmostEqual( double a, double b );
 
+
 template <class Container, class Key>
 typename Container::mapped_type &
 GetValueElseInsert( Container &container,
@@ -36,6 +37,7 @@ GetValueElseInsert( Container &container,
   return container.insert( typename Container::value_type( key, value ) )
     .first->second;
 }
+
 
 template <class Container, class Key>
 bool ContainsKey( Container &container, Key const& key)

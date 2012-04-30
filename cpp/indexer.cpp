@@ -21,10 +21,10 @@
 
 BOOST_PYTHON_MODULE(indexer)
 {
-    using namespace boost::python;
-    using namespace YouCompleteMe;
+  using namespace boost::python;
+  using namespace YouCompleteMe;
 
-    class_<Completer>( "Completer" )
-      .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
-      .def( "GetCandidatesForQuery", &Completer::GetCandidatesForQuery );
+  class_<Completer>( "Completer" )
+    .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
+    .def( "CandidatesForQueryAndType", &Completer::CandidatesForQueryAndType );
 }

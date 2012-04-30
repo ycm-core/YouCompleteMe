@@ -19,18 +19,24 @@
 #include "Completer.h"
 #include "Utils.h"
 
+using boost::python::len;
+using boost::python::extract;
+
 namespace YouCompleteMe
 {
 
+
 Completer::Completer( const Pylist &candidates )
 {
-  AddCandidatesToDatabase( candidates, "" );
+  AddCandidatesToDatabase( candidates, "", "" );
 }
 
 
-Completer::Completer( const Pylist &candidates, const std::string &filepath)
+Completer::Completer( const Pylist &candidates,
+                      const std::string &filetype,
+                      const std::string &filepath)
 {
-  AddCandidatesToDatabase( candidates, filepath );
+  AddCandidatesToDatabase( candidates, filetype, filepath );
 }
 
 
@@ -44,48 +50,89 @@ Completer::~Completer()
 }
 
 
-void Completer::AddCandidatesToDatabase( const Pylist &candidates,
+void Completer::AddCandidatesToDatabase( const Pylist &new_candidates,
+                                         const std::string &filetype,
                                          const std::string &filepath )
 {
+  std::vector< Candidate *> &candidates =
+    GetCandidateVector( filetype, filepath );
+
+  int num_candidates = len( new_candidates );
+  candidates.clear();
+  candidates.reserve( num_candidates );
+
   std::string candidate_text;
-  for (int i = 0; i < boost::python::len( candidates ); ++i)
+  for (int i = 0; i < num_candidates; ++i)
   {
-    candidate_text = boost::python::extract< std::string >( candidates[ i ] );
+    candidate_text = extract< std::string >( new_candidates[ i ] );
     Candidate *&candidate = GetValueElseInsert( candidate_repository_,
                                                 candidate_text, NULL );
     if ( !candidate )
-    {
       candidate = new Candidate( candidate_text );
-      candidates_.insert( candidate );
-    }
+
+    candidates.push_back( candidate );
   }
 }
 
 
-void Completer::GetCandidatesForQuery(
-    const std::string &query, Pylist &candidates ) const
+void Completer::CandidatesForQuery( const std::string &query,
+                                    Pylist &candidates ) const
 {
+  CandidatesForQueryAndType( query, "", candidates );
+}
+
+
+void Completer::CandidatesForQueryAndType( const std::string &query,
+                                           const std::string &filetype,
+                                           Pylist &candidates ) const
+{
+  FiletypeMap::const_iterator it = filetype_map_.find( filetype );
+  if ( it == filetype_map_.end() )
+    return;
+
   Bitset query_bitset = LetterBitsetFromString( query );
   std::vector< Result > results;
 
-  foreach ( Candidate* candidate, candidates_ )
+  foreach ( const FilepathToCandidates::value_type &path_and_candidates,
+            *it->second )
   {
-    if ( !candidate->MatchesQueryBitset( query_bitset ) )
-      continue;
+    foreach ( Candidate* candidate, *path_and_candidates.second )
+    {
+      if ( !candidate->MatchesQueryBitset( query_bitset ) )
+        continue;
 
-    Result result = candidate->QueryMatchResult( query );
-    if ( result.IsSubsequence() )
-      results.push_back( result );
+      Result result = candidate->QueryMatchResult( query );
+      if ( result.IsSubsequence() )
+        results.push_back( result );
+    }
   }
 
-  // Needs to be stable to preserve the lexical sort of the candidates from the
-  // candidates_ container
-  std::stable_sort( results.begin(), results.end() );
+  std::sort( results.begin(), results.end() );
 
   foreach ( const Result& result, results )
   {
     candidates.append( *result.Text() );
   }
+}
+
+
+std::vector< Candidate* >& Completer::GetCandidateVector(
+    const std::string &filetype,
+    const std::string &filepath )
+{
+  boost::shared_ptr< FilepathToCandidates > &path_to_candidates =
+    filetype_map_[ filetype ];
+
+  if ( !path_to_candidates )
+    path_to_candidates.reset( new FilepathToCandidates() );
+
+  boost::shared_ptr< std::vector< Candidate* > > &candidates =
+    (*path_to_candidates)[ filepath ];
+
+  if ( !candidates )
+    candidates.reset( new std::vector< Candidate* >() );
+
+  return *candidates;
 }
 
 
