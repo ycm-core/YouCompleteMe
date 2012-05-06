@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "standard.h"
 #include "LetterNode.h"
+#include "standard.h"
 
 
 namespace YouCompleteMe
@@ -36,7 +36,7 @@ LetterNode::LetterNode( const std::string &text )
 
   letternode_per_text_index_.resize( text.size() );
 
-  for (int i = 0; i < text.size(); ++i)
+  for ( uint i = 0; i < text.size(); ++i)
   {
     char letter = text[ i ];
     LetterNode *node = new LetterNode( letter );
@@ -44,7 +44,8 @@ LetterNode::LetterNode( const std::string &text )
     letternode_per_text_index_[ i ] = boost::shared_ptr< LetterNode >( node );
   }
 
-  for ( int i = letternode_per_text_index_.size() - 1; i >= 0; --i )
+  for ( int i = static_cast< int >( letternode_per_text_index_.size() ) - 1;
+        i >= 0; --i )
   {
     LetterNode *node_to_add = letternode_per_text_index_[ i ].get();
 

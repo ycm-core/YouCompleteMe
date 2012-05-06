@@ -16,6 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LetterHash.h"
+#include "standard.h"
 
 namespace YouCompleteMe
 {
@@ -45,7 +46,7 @@ LetterHash::LetterHash()
 {
 	letters_.resize( kNumLetters );
 
-	for ( int i = 0; i < letters_.size(); ++i )
+	for ( uint i = 0; i < letters_.size(); ++i )
 	{
 		letters_[ i ] = NULL;
 	}
@@ -54,7 +55,7 @@ LetterHash::LetterHash()
 
 LetterHash::~LetterHash()
 {
-	for ( int i = 0; i < letters_.size(); ++i )
+	for ( uint i = 0; i < letters_.size(); ++i )
 	{
 	  delete letters_[ i ];
 	}

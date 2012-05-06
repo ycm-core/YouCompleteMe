@@ -33,7 +33,7 @@ std::string GetWordBoundaryChars( const std::string &text )
 {
   std::string result;
 
-  for ( int i = 0; i < text.size(); ++i )
+  for ( uint i = 0; i < text.size(); ++i )
   {
     if ( i == 0 ||
          IsUppercase( text[ i ] ) ||

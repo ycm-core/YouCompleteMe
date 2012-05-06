@@ -16,6 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Result.h"
+#include "standard.h"
 #include "Utils.h"
 #include <boost/algorithm/string.hpp>
 
@@ -30,8 +31,8 @@ namespace
 int NumWordBoundaryCharMatches( const std::string &query,
                                 const std::string &word_boundary_chars )
 {
-  int i = 0;
-  int j = 0;
+  uint i = 0;
+  uint j = 0;
   while ( j < query.size() && i < word_boundary_chars.size() )
   {
     if ( toupper( query[ j ] ) == toupper( word_boundary_chars[ i ] ) )
