@@ -19,14 +19,42 @@
 #include "Completer.h"
 #include "Utils.h"
 
+#include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
+#include <algorithm>
+
 using boost::python::len;
 using boost::python::extract;
+using boost::packaged_task;
+using boost::bind;
+using boost::unique_future;
+using boost::make_shared;
+using boost::shared_ptr;
+using boost::bind;
+using boost::thread;
 
 namespace YouCompleteMe
 {
 
+namespace
+{
+
+const unsigned int MAX_ASYNC_THREADS = 4;
+const unsigned int MIN_ASYNC_THREADS = 2;
+
+void ThreadMain( TaskStack &task_stack )
+{
+  while ( true )
+  {
+    ( *task_stack.Pop() )();
+  }
+}
+
+} // unnamed namespace
+
 
 Completer::Completer( const Pylist &candidates )
+  : threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, "", "" );
 }
@@ -34,7 +62,8 @@ Completer::Completer( const Pylist &candidates )
 
 Completer::Completer( const Pylist &candidates,
                       const std::string &filetype,
-                      const std::string &filepath)
+                      const std::string &filepath )
+  : threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, filetype, filepath );
 }
@@ -47,6 +76,15 @@ Completer::~Completer()
   {
     delete pair.second;
   }
+}
+
+
+// We need this mostly so that we can not use it in tests. Apparently the
+// GoogleTest framework goes apeshit on us if we enable threads by default.
+void Completer::EnableThreading()
+{
+  threading_enabled_ = true;
+  InitThreads();
 }
 
 
@@ -86,12 +124,56 @@ void Completer::CandidatesForQueryAndType( const std::string &query,
                                            const std::string &filetype,
                                            Pylist &candidates ) const
 {
+  std::vector< Result > results;
+  ResultsForQueryAndType( query, filetype, results );
+
+  foreach ( const Result& result, results )
+  {
+    candidates.append( *result.Text() );
+  }
+}
+
+
+Future Completer::CandidatesForQueryAndTypeAsync(
+    const std::string &query,
+    const std::string &filetype ) const
+{
+  // TODO: throw exception when threading is not enabled and this is called
+  if (!threading_enabled_)
+    return Future();
+
+  // Try not to look at this too hard, it may burn your eyes.
+  shared_ptr< packaged_task< AsyncResults > > task =
+    make_shared< packaged_task< AsyncResults > >(
+      bind( &Completer::ResultsForQueryAndType,
+                   boost::cref( *this ),
+                   query,
+                   filetype ) );
+
+  unique_future< AsyncResults > future = task->get_future();
+
+  task_stack_.Push( task );
+  return Future( move( future ) );
+}
+
+AsyncResults Completer::ResultsForQueryAndType(
+    const std::string &query,
+    const std::string &filetype ) const
+{
+  AsyncResults results = boost::make_shared< std::vector< Result > >();
+  ResultsForQueryAndType( query, filetype, *results );
+  return results;
+}
+
+void Completer::ResultsForQueryAndType( const std::string &query,
+                                        const std::string &filetype,
+                                        std::vector< Result > &results ) const
+{
   FiletypeMap::const_iterator it = filetype_map_.find( filetype );
   if ( it == filetype_map_.end() )
     return;
 
   Bitset query_bitset = LetterBitsetFromString( query );
-  std::vector< Result > results;
 
   foreach ( const FilepathToCandidates::value_type &path_and_candidates,
             *it->second )
@@ -108,11 +190,6 @@ void Completer::CandidatesForQueryAndType( const std::string &query,
   }
 
   std::sort( results.begin(), results.end() );
-
-  foreach ( const Result& result, results )
-  {
-    candidates.append( *result.Text() );
-  }
 }
 
 
@@ -133,6 +210,19 @@ std::vector< Candidate* >& Completer::GetCandidateVector(
     candidates.reset( new std::vector< Candidate* >() );
 
   return *candidates;
+}
+
+
+void Completer::InitThreads()
+{
+  int threads_to_create =
+    std::max( MIN_ASYNC_THREADS,
+      std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
+
+  for ( int i = 0; i < threads_to_create; ++i )
+  {
+    threads_.create_thread( bind( ThreadMain, boost::ref( task_stack_ ) ) );
+  }
 }
 
 

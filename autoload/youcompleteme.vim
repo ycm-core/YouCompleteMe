@@ -102,13 +102,27 @@ function! youcompleteme#Complete(findstart, base)
     return start_column
   else
     let s:old_cursor_text = a:base
-    let results = []
     if strlen( a:base ) < g:ycm_min_num_of_chars_for_completion
-      return results
+      return []
     endif
 
+	  py csystem.CandidatesForQueryAsync( vim.eval('a:base') )
+
+		let l:results_ready = 0
+		while !l:results_ready
+      py << EOF
+results_ready = csystem.AsyncCandidateRequestReady()
+if results_ready:
+  vim.command( 'let l:results_ready = 1' )
+EOF
+			if complete_check()
+				return { 'words' : [], 'refresh' : 'always'}
+			endif
+		endwhile
+
+    let l:results = []
     py << EOF
-results = csystem.CompletionCandidatesForQuery( vim.eval('a:base') )
+results = csystem.CandidatesFromStoredRequest()
 if results:
   vim.command( 'let l:results = ' + str( results ) )
 EOF
@@ -117,10 +131,8 @@ EOF
     " keystroke. The problem is still present in vim 7.3.390 but is fixed in
     " 7.3.475. It's possible that patch 404 was the one that fixed this issue,
     " but I haven't tested this assumption.
-    let dict = { 'words' : results }
     " A bug in vim causes the '.' register to break when we use set this... sigh
-    let dict.refresh = 'always'
-    return dict
+		return { 'words' : l:results, 'refresh' : 'always'}
   endif
 endfunction
 

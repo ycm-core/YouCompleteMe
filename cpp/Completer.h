@@ -19,6 +19,8 @@
 #define COMPLETER_H_7AR4UGXE
 
 #include "Candidate.h"
+#include "ConcurrentStack.h"
+#include "Future.h"
 
 #include <boost/utility.hpp>
 #include <boost/python.hpp>
@@ -27,6 +29,7 @@
 
 #include <vector>
 #include <string>
+
 
 namespace YouCompleteMe
 {
@@ -44,10 +47,12 @@ typedef boost::unordered_map< std::string,
 typedef boost::unordered_map< std::string,
           boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
 
+typedef ConcurrentStack<
+          boost::shared_ptr<
+            boost::packaged_task< AsyncResults > > > TaskStack;
 
-// TODO: resolve problems with noncopyable
-// class Completer : boost::noncopyable
-class Completer
+
+class Completer : boost::noncopyable
 {
 public:
   Completer() {}
@@ -56,6 +61,8 @@ public:
              const std::string &filetype,
              const std::string &filepath );
   ~Completer();
+
+  void EnableThreading();
 
   void AddCandidatesToDatabase( const Pylist &new_candidates,
                                 const std::string &filetype,
@@ -69,27 +76,41 @@ public:
                                   const std::string &filetype,
                                   Pylist &candidates ) const;
 
+	Future CandidatesForQueryAndTypeAsync( const std::string &query,
+                                         const std::string &filetype ) const;
+
 private:
+
+  AsyncResults ResultsForQueryAndType( const std::string &query,
+                                       const std::string &filetype ) const;
+
+  void ResultsForQueryAndType( const std::string &query,
+                               const std::string &filetype,
+                               std::vector< Result > &results ) const;
 
   std::vector< Candidate* >& GetCandidateVector(
       const std::string &filetype,
       const std::string &filepath );
 
-  struct CandidatePointerLess
-  {
-    bool operator() ( const Candidate *first, const Candidate *second )
-    {
-      return first->Text() < second->Text();
-    }
-  };
+  void InitThreads();
+
+
+  /////////////////////////////
+  // PRIVATE MEMBER VARIABLES
+  /////////////////////////////
 
   // This data structure owns all the Candidate pointers
   CandidateRepository candidate_repository_;
 
   FiletypeMap filetype_map_;
+
+  mutable TaskStack task_stack_;
+
+  bool threading_enabled_;
+
+  boost::thread_group threads_;
 };
 
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: COMPLETER_H_7AR4UGXE */
-

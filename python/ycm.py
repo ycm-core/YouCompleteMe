@@ -26,15 +26,26 @@ min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 class CompletionSystem( object ):
   def __init__( self ):
     self.completer = indexer.Completer()
+    self.completer.EnableThreading()
     self.pattern = re.compile( r"[_a-zA-Z]\w*" )
+    self.future = None
 
-  def CompletionCandidatesForQuery( self, query ):
-    candidates = []
+  def CandidatesForQueryAsync( self, query ):
     filetype = vim.eval( "&filetype" )
-    self.completer.CandidatesForQueryAndType( SanitizeQuery( query ),
-                                              filetype,
-                                              candidates )
-    return candidates
+    self.future = self.completer.CandidatesForQueryAndTypeAsync(
+      SanitizeQuery( query ),
+      filetype )
+
+  def AsyncCandidateRequestReady( self ):
+    return self.future.ResultsReady()
+
+  def CandidatesFromStoredRequest( self ):
+    if not self.future:
+      return []
+
+    results = []
+    self.future.GetResults( results )
+    return results
 
   def AddBufferIdentifiers( self ):
     text = "\n".join( vim.current.buffer )

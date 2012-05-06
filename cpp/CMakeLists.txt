@@ -86,7 +86,7 @@ endif()
 
 if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
   # We want all warnings, and warnings should be treated as errors
-  #add_definitions( -Wall -pedantic -Werror )
+	# TODO: -Wextra?
   add_definitions( -Wall -Werror )
 endif()
 

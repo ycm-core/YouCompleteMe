@@ -15,24 +15,33 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Completer.h"
-#include "Future.h"
+#ifndef FUTURE_H_NR1U6MZS
+#define FUTURE_H_NR1U6MZS
 
+#include <boost/thread.hpp>
 #include <boost/python.hpp>
-#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 
-BOOST_PYTHON_MODULE(indexer)
+namespace YouCompleteMe
 {
-  using namespace boost::python;
-  using namespace YouCompleteMe;
 
-  class_< Future >( "Future" )
-    .def( "ResultsReady", &Future::ResultsReady )
-    .def( "GetResults", &Future::GetResults );
+class Result;
 
-  class_< Completer, boost::noncopyable >( "Completer" )
-    .def( "EnableThreading", &Completer::EnableThreading )
-    .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
-    .def( "CandidatesForQueryAndTypeAsync",
-          &Completer::CandidatesForQueryAndTypeAsync );
-}
+typedef boost::python::list Pylist;
+typedef boost::shared_ptr< std::vector< Result > > AsyncResults;
+
+class Future
+{
+public:
+  Future() {}
+  Future( boost::shared_future< AsyncResults > future );
+  bool ResultsReady();
+  void GetResults( Pylist &candidates );
+
+private:
+  boost::shared_future< AsyncResults > future_;
+};
+
+} // namespace YouCompleteMe
+
+#endif /* end of include guard: FUTURE_H_NR1U6MZS */
