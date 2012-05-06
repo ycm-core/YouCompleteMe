@@ -43,6 +43,10 @@ class CompletionSystem( object ):
     idents = re.findall( self.pattern, text )
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
+
+    if not filetype or not filepath:
+      return
+
     self.completer.AddCandidatesToDatabase( idents, filetype, filepath )
 
 def CurrentColumn():
