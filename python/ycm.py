@@ -23,6 +23,7 @@ import indexer
 
 min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 
+
 class CompletionSystem( object ):
   def __init__( self ):
     self.completer = indexer.Completer()
@@ -30,14 +31,17 @@ class CompletionSystem( object ):
     self.pattern = re.compile( r"[_a-zA-Z]\w*" )
     self.future = None
 
+
   def CandidatesForQueryAsync( self, query ):
     filetype = vim.eval( "&filetype" )
     self.future = self.completer.CandidatesForQueryAndTypeAsync(
       SanitizeQuery( query ),
       filetype )
 
+
   def AsyncCandidateRequestReady( self ):
     return self.future.ResultsReady()
+
 
   def CandidatesFromStoredRequest( self ):
     if not self.future:
@@ -46,6 +50,7 @@ class CompletionSystem( object ):
     results = []
     self.future.GetResults( results )
     return results
+
 
   def AddBufferIdentifiers( self ):
     text = "\n".join( vim.current.buffer )
@@ -60,9 +65,11 @@ class CompletionSystem( object ):
 
     self.completer.AddCandidatesToDatabase( idents, filetype, filepath )
 
+
 def CurrentColumn():
   # vim's columns start at 1 while vim.current.line columns start at 0
   return int( vim.eval( "col('.')" ) ) - 1
+
 
 def CompletionStartColumn():
   line = vim.current.line
@@ -77,8 +84,10 @@ def CompletionStartColumn():
 
   return start_column
 
+
 def EscapeForVim( text ):
   return text.replace( "'", "''" )
+
 
 def CurrentCursorText():
   start_column = CompletionStartColumn()
@@ -93,6 +102,7 @@ def CurrentCursorText():
 
 def SanitizeQuery( query ):
   return query.strip()
+
 
 def RemoveIdentFreeText( text ):
   """Removes commented-out code and code in quotes."""
