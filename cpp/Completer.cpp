@@ -110,7 +110,7 @@ void Completer::AddCandidatesToDatabase(
     const std::string &filetype,
     const std::string &filepath )
 {
-  std::vector< Candidate *> &candidates =
+  std::vector< const Candidate *> &candidates =
     GetCandidateVector( filetype, filepath );
 
   int num_candidates = new_candidates.size();
@@ -120,8 +120,8 @@ void Completer::AddCandidatesToDatabase(
   for (int i = 0; i < num_candidates; ++i)
   {
     const std::string &candidate_text = new_candidates[ i ];
-    Candidate *&candidate = GetValueElseInsert( candidate_repository_,
-                                                candidate_text, NULL );
+    const Candidate *&candidate = GetValueElseInsert( candidate_repository_,
+                                                      candidate_text, NULL );
     if ( !candidate )
       candidate = new Candidate( candidate_text );
 
@@ -199,7 +199,7 @@ void Completer::ResultsForQueryAndType( const std::string &query,
   foreach ( const FilepathToCandidates::value_type &path_and_candidates,
             *it->second )
   {
-    foreach ( Candidate* candidate, *path_and_candidates.second )
+    foreach ( const Candidate* candidate, *path_and_candidates.second )
     {
       if ( !candidate->MatchesQueryBitset( query_bitset ) )
         continue;
@@ -214,7 +214,7 @@ void Completer::ResultsForQueryAndType( const std::string &query,
 }
 
 
-std::vector< Candidate* >& Completer::GetCandidateVector(
+std::vector< const Candidate* >& Completer::GetCandidateVector(
     const std::string &filetype,
     const std::string &filepath )
 {
@@ -224,11 +224,11 @@ std::vector< Candidate* >& Completer::GetCandidateVector(
   if ( !path_to_candidates )
     path_to_candidates.reset( new FilepathToCandidates() );
 
-  boost::shared_ptr< std::vector< Candidate* > > &candidates =
+  boost::shared_ptr< std::vector< const Candidate* > > &candidates =
     (*path_to_candidates)[ filepath ];
 
   if ( !candidates )
-    candidates.reset( new std::vector< Candidate* >() );
+    candidates.reset( new std::vector< const Candidate* >() );
 
   return *candidates;
 }

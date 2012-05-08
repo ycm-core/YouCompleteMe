@@ -37,11 +37,13 @@ namespace YouCompleteMe
 typedef boost::python::list Pylist;
 
 // candidate text string -> candidate objects
-typedef boost::unordered_map< std::string, Candidate* > CandidateRepository;
+typedef boost::unordered_map< std::string, const Candidate* >
+          CandidateRepository;
 
 // filepath -> *( *candidate )
 typedef boost::unordered_map< std::string,
-          boost::shared_ptr< std::vector< Candidate* > > > FilepathToCandidates;
+          boost::shared_ptr< std::vector< const Candidate* > > >
+            FilepathToCandidates;
 
 // filetype -> *( filepath -> *( *candidate ) )
 typedef boost::unordered_map< std::string,
@@ -93,7 +95,7 @@ private:
                                const std::string &filetype,
                                std::vector< Result > &results ) const;
 
-  std::vector< Candidate* >& GetCandidateVector(
+  std::vector< const Candidate* >& GetCandidateVector(
       const std::string &filetype,
       const std::string &filepath );
 
