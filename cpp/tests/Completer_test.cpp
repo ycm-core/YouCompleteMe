@@ -30,189 +30,134 @@ namespace YouCompleteMe
 namespace
 {
 
-std::vector<std::string> ToStringVector( const boost::python::list &pylist )
+std::vector< std::string > Candidates( const std::string &a,
+                                       const std::string &b = std::string(),
+                                       const std::string &c = std::string(),
+                                       const std::string &d = std::string(),
+                                       const std::string &e = std::string(),
+                                       const std::string &f = std::string(),
+                                       const std::string &g = std::string(),
+                                       const std::string &h = std::string(),
+                                       const std::string &i = std::string() )
 {
-	std::vector<std::string> values;
-  for (int i = 0; i < boost::python::len( pylist ); ++i)
-  {
-    values.push_back(
-      boost::python::extract< std::string >( pylist[ i ] ) );
-  }
-
-  return values;
-}
-
-Pylist Candidates( const std::string &a,
-                   const std::string &b = std::string(),
-                   const std::string &c = std::string(),
-                   const std::string &d = std::string(),
-                   const std::string &e = std::string(),
-                   const std::string &f = std::string(),
-                   const std::string &g = std::string(),
-                   const std::string &h = std::string(),
-                   const std::string &i = std::string() )
-{
-  Pylist candidates;
-	candidates.append( a );
+  std::vector< std::string > candidates;
+	candidates.push_back( a );
 	if ( !b.empty() )
-    candidates.append( b );
+    candidates.push_back( b );
 	if ( !c.empty() )
-    candidates.append( c );
+    candidates.push_back( c );
 	if ( !d.empty() )
-    candidates.append( d );
+    candidates.push_back( d );
 	if ( !e.empty() )
-    candidates.append( e );
+    candidates.push_back( e );
 	if ( !f.empty() )
-    candidates.append( f );
+    candidates.push_back( f );
 	if ( !g.empty() )
-    candidates.append( g );
+    candidates.push_back( g );
 	if ( !h.empty() )
-    candidates.append( h );
+    candidates.push_back( h );
 	if ( !i.empty() )
-    candidates.append( i );
+    candidates.push_back( i );
 
   return candidates;
 }
 
 } // unnamed namespace
 
-class CompleterTest : public ::testing::Test
+
+TEST( CompleterTest, OneCandidate )
 {
- protected:
-  virtual void SetUp()
-  {
-    Py_Initialize();
-  }
-};
-
-
-TEST_F( CompleterTest, OneCandidate )
-{
-	Pylist results;
-	Completer( Candidates( "foobar" ) ).CandidatesForQuery( "fbr", results );
-
-	EXPECT_THAT( ToStringVector( results ), ElementsAre( "foobar" ) );
+	EXPECT_THAT( Completer( Candidates(
+               "foobar" ) ).CandidatesForQuery( "fbr" ),
+	             ElementsAre( "foobar" ) );
 }
 
-TEST_F( CompleterTest, ManyCandidateSimple )
+TEST( CompleterTest, ManyCandidateSimple )
 {
-	Pylist results;
-	Completer( Candidates(
-    "foobar",
-    "foobartest",
-    "Foobartest" ) ).CandidatesForQuery( "fbr", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "foobar",
+               "foobartest",
+               "Foobartest" ) ).CandidatesForQuery( "fbr" ),
 	             WhenSorted( ElementsAre( "Foobartest",
 	                                      "foobar",
 	                                      "foobartest" ) ) );
 }
 
-TEST_F( CompleterTest, FirstCharSameAsQueryWins )
+TEST( CompleterTest, FirstCharSameAsQueryWins )
 {
-	Pylist results;
-	Completer( Candidates(
-    "foobar",
-    "afoobar" ) ).CandidatesForQuery( "fbr", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "foobar",
+               "afoobar" ) ).CandidatesForQuery( "fbr" ),
 	             ElementsAre( "foobar",
 	                          "afoobar" ) );
 }
 
-TEST_F( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
+TEST( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
 {
-	Pylist results;
-	Completer( Candidates(
-    "FooBarQux",
-    "FBaqux" ) ).CandidatesForQuery( "fbq", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "FooBarQux",
+               "FBaqux" ) ).CandidatesForQuery( "fbq" ),
 	             ElementsAre( "FooBarQux",
 	                          "FBaqux" ) );
 
-	Pylist results2;
-	Completer( Candidates(
-    "CompleterTest",
-    "CompleteMatchForWordBoundaryCharsWins"
-    ) ).CandidatesForQuery( "ct", results2 );
-
-	EXPECT_THAT( ToStringVector( results2 ),
+	EXPECT_THAT( Completer( Candidates(
+               "CompleterTest",
+               "CompleteMatchForWordBoundaryCharsWins" ) )
+                  .CandidatesForQuery( "ct" ),
 	             ElementsAre( "CompleterTest",
 	                          "CompleteMatchForWordBoundaryCharsWins" ) );
 
-	Pylist results3;
-	Completer( Candidates(
-    "FooBar",
-    "FooBarRux" ) ).CandidatesForQuery( "fbr", results3 );
-
-	EXPECT_THAT( ToStringVector( results3 ),
+	EXPECT_THAT( Completer( Candidates(
+               "FooBar",
+               "FooBarRux" ) ).CandidatesForQuery( "fbr" ),
 	             ElementsAre( "FooBarRux",
 	                          "FooBar" ) );
 }
 
-TEST_F( CompleterTest, RatioUtilizationTieBreak )
+TEST( CompleterTest, RatioUtilizationTieBreak )
 {
-	Pylist results;
-	Completer( Candidates(
-    "FooBarQux",
-    "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "FooBarQux",
+               "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq" ),
 	             ElementsAre( "FooBarQux",
 	                          "FooBarQuxZaa" ) );
 
-	Pylist results2;
-	Completer( Candidates(
-    "FooBar",
-    "FooBarRux" ) ).CandidatesForQuery( "fba", results2 );
-
-	EXPECT_THAT( ToStringVector( results2 ),
+	EXPECT_THAT( Completer( Candidates(
+               "FooBar",
+               "FooBarRux" ) ).CandidatesForQuery( "fba" ),
 	             ElementsAre( "FooBar",
 	                          "FooBarRux" ) );
 }
 
-TEST_F( CompleterTest, QueryPrefixOfCandidateWins )
+TEST( CompleterTest, QueryPrefixOfCandidateWins )
 {
-	Pylist results;
-	Completer( Candidates(
-    "foobar",
-    "fbaroo" ) ).CandidatesForQuery( "foo", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "foobar",
+               "fbaroo" ) ).CandidatesForQuery( "foo" ),
 	             ElementsAre( "foobar",
 	                          "fbaroo" ) );
 }
 
-TEST_F( CompleterTest, ShorterCandidateWins )
+TEST( CompleterTest, ShorterCandidateWins )
 {
-	Pylist results;
-	Completer( Candidates(
-    "FooBarQux",
-    "FaBarQux" ) ).CandidatesForQuery( "fbq", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "FooBarQux",
+               "FaBarQux" ) ).CandidatesForQuery( "fbq" ),
 	             ElementsAre( "FaBarQux",
 	                          "FooBarQux" ) );
 
-	Pylist results2;
-	Completer( Candidates(
-    "CompleterT",
-    "CompleterTest" ) ).CandidatesForQuery( "co", results2 );
-
-	EXPECT_THAT( ToStringVector( results2 ),
+	EXPECT_THAT( Completer( Candidates(
+               "CompleterT",
+               "CompleterTest" ) ).CandidatesForQuery( "co" ),
 	             ElementsAre( "CompleterT",
 	                          "CompleterTest" ) );
 }
 
-TEST_F( CompleterTest, SameLowercaseCandidateWins )
+TEST( CompleterTest, SameLowercaseCandidateWins )
 {
-	Pylist results;
-	Completer( Candidates(
-    "foobar",
-    "Foobar" ) ).CandidatesForQuery( "foo", results );
-
-	EXPECT_THAT( ToStringVector( results ),
+	EXPECT_THAT( Completer( Candidates(
+               "foobar",
+               "Foobar" ) ).CandidatesForQuery( "foo" ),
 	             ElementsAre( "foobar",
 	                          "Foobar" ) );
 }

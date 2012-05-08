@@ -56,25 +56,30 @@ class Completer : boost::noncopyable
 {
 public:
   Completer() {}
-  Completer( const Pylist &candidates );
-  Completer( const Pylist &candidates,
+  Completer( const std::vector< std::string > &candidates );
+  Completer( const std::vector< std::string > &candidates,
              const std::string &filetype,
              const std::string &filepath );
   ~Completer();
 
   void EnableThreading();
 
+  void AddCandidatesToDatabase(
+      const std::vector< std::string > &new_candidates,
+      const std::string &filetype,
+      const std::string &filepath );
+
   void AddCandidatesToDatabase( const Pylist &new_candidates,
                                 const std::string &filetype,
                                 const std::string &filepath );
 
   // Only provided for tests!
-	void CandidatesForQuery( const std::string &query,
-                           Pylist &candidates ) const;
+	std::vector< std::string > CandidatesForQuery(
+	    const std::string &query ) const;
 
-	void CandidatesForQueryAndType( const std::string &query,
-                                  const std::string &filetype,
-                                  Pylist &candidates ) const;
+  std::vector< std::string > CandidatesForQueryAndType(
+      const std::string &query,
+      const std::string &filetype ) const;
 
 	Future CandidatesForQueryAndTypeAsync( const std::string &query,
                                          const std::string &filetype ) const;

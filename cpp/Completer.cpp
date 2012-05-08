@@ -53,14 +53,14 @@ void ThreadMain( TaskStack &task_stack )
 } // unnamed namespace
 
 
-Completer::Completer( const Pylist &candidates )
+Completer::Completer( const std::vector< std::string > &candidates )
   : threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, "", "" );
 }
 
 
-Completer::Completer( const Pylist &candidates,
+Completer::Completer( const std::vector< std::string > &candidates,
                       const std::string &filetype,
                       const std::string &filepath )
   : threading_enabled_( false )
@@ -92,17 +92,34 @@ void Completer::AddCandidatesToDatabase( const Pylist &new_candidates,
                                          const std::string &filetype,
                                          const std::string &filepath )
 {
+  int num_candidates = len( new_candidates );
+  std::vector< std::string > candidates;
+  candidates.reserve( num_candidates );
+
+  for (int i = 0; i < num_candidates; ++i)
+  {
+    candidates.push_back( extract< std::string >( new_candidates[ i ] ) );
+  }
+
+  AddCandidatesToDatabase( candidates, filetype, filepath );
+}
+
+
+void Completer::AddCandidatesToDatabase(
+    const std::vector< std::string > &new_candidates,
+    const std::string &filetype,
+    const std::string &filepath )
+{
   std::vector< Candidate *> &candidates =
     GetCandidateVector( filetype, filepath );
 
-  int num_candidates = len( new_candidates );
+  int num_candidates = new_candidates.size();
   candidates.clear();
   candidates.reserve( num_candidates );
 
-  std::string candidate_text;
   for (int i = 0; i < num_candidates; ++i)
   {
-    candidate_text = extract< std::string >( new_candidates[ i ] );
+    const std::string &candidate_text = new_candidates[ i ];
     Candidate *&candidate = GetValueElseInsert( candidate_repository_,
                                                 candidate_text, NULL );
     if ( !candidate )
@@ -113,24 +130,26 @@ void Completer::AddCandidatesToDatabase( const Pylist &new_candidates,
 }
 
 
-void Completer::CandidatesForQuery( const std::string &query,
-                                    Pylist &candidates ) const
+std::vector< std::string > Completer::CandidatesForQuery(
+    const std::string &query ) const
 {
-  CandidatesForQueryAndType( query, "", candidates );
+  return CandidatesForQueryAndType( query, "" );
 }
 
 
-void Completer::CandidatesForQueryAndType( const std::string &query,
-                                           const std::string &filetype,
-                                           Pylist &candidates ) const
+std::vector< std::string > Completer::CandidatesForQueryAndType(
+    const std::string &query,
+    const std::string &filetype ) const
 {
   std::vector< Result > results;
   ResultsForQueryAndType( query, filetype, results );
 
+  std::vector< std::string > candidates;
   foreach ( const Result& result, results )
   {
-    candidates.append( *result.Text() );
+    candidates.push_back( *result.Text() );
   }
+  return candidates;
 }
 
 
@@ -156,6 +175,7 @@ Future Completer::CandidatesForQueryAndTypeAsync(
   return Future( move( future ) );
 }
 
+
 AsyncResults Completer::ResultsForQueryAndType(
     const std::string &query,
     const std::string &filetype ) const
@@ -164,6 +184,7 @@ AsyncResults Completer::ResultsForQueryAndType(
   ResultsForQueryAndType( query, filetype, *results );
   return results;
 }
+
 
 void Completer::ResultsForQueryAndType( const std::string &query,
                                         const std::string &filetype,

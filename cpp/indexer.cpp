@@ -30,9 +30,14 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "ResultsReady", &Future::ResultsReady )
     .def( "GetResults", &Future::GetResults );
 
+  void (Completer::*actd) (const Pylist&,
+                           const std::string&,
+                           const std::string&) =
+    &Completer::AddCandidatesToDatabase;
+
   class_< Completer, boost::noncopyable >( "Completer" )
     .def( "EnableThreading", &Completer::EnableThreading )
-    .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
+    .def( "AddCandidatesToDatabase", actd )
     .def( "CandidatesForQueryAndTypeAsync",
           &Completer::CandidatesForQueryAndTypeAsync );
 }
