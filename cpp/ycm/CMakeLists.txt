@@ -21,7 +21,12 @@ project( indexer )
 
 find_package( PythonLibs REQUIRED )
 
+# The SYSTEM flag makes sure that -isystem[header path] is passed to the
+# compiler instead of the standard -I[header path]. Headers included with
+# -isystem do not generate warnings (and they shouldn't; e.g. boost warnings are
+# just noise for us since we won't be changing them).
 include_directories(
+  SYSTEM
   ${BoostParts_SOURCE_DIR}
   ${PYTHON_INCLUDE_DIRS}
   )
