@@ -78,6 +78,13 @@ endif()
 
 #############################################################################
 
+# Linking fails without this
+if( NOT WIN32 AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+  set_target_properties( BoostParts PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
+
+#############################################################################
+
 # Special compiler and linker flags for MSVC
 if( MSVC )
     add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
