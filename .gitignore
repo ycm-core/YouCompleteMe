@@ -35,3 +35,6 @@ nosetests.xml
 #Mr Developer
 .mr.developer.cfg
 
+# custom
+indexer_tests
+
