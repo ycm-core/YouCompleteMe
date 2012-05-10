@@ -1,0 +1,87 @@
+# Copyright (C) 2011, 2012  Strahinja Val Markovic  <val@markovic.io>
+#
+# This file is part of YouCompleteMe.
+#
+# YouCompleteMe is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# YouCompleteMe is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
+
+# The interesting parts of Boost have been extracted using
+# the BCP tool:
+#   http://www.boost.org/doc/libs/1_49_0/tools/bcp/doc/html/index.html
+#
+# bcp call: bcp boost/python.hpp boost/bind.hpp boost/lambda/lambda.hpp boost/exception/all.hpp boost/tuple/tuple_io.hpp boost/tuple/tuple_comparison.hpp boost/regex.hpp boost/foreach.hpp boost/smart_ptr.hpp boost/algorithm/string_regex.hpp boost/thread.hpp boost/unordered_map.hpp boost/unordered_set.hpp boost/format.hpp boost/ptr_container/ptr_container.hpp ../BoostParts
+
+# WARNING: When doing this from fresh boost sources, note that
+# in the file /boost/config/user.hpp the BOOST_ALL_NO_LIB
+# define has been uncommented. Otherwise, we will get linker
+# errors on MSVC because of boost auto-linking.
+
+cmake_minimum_required( VERSION 2.8 )
+
+project( BoostParts )
+
+find_package( PythonLibs REQUIRED )
+
+file( GLOB_RECURSE SOURCES *.cpp )
+
+# We need to remove all the thread cpp files and then add them on a per-platform
+# basis
+file( GLOB_RECURSE to_remove libs/thread/*.cpp libs/detail/*.cpp )
+
+if( to_remove )
+  list( REMOVE_ITEM SOURCES ${to_remove} )
+endif()
+
+set( WINSOURCES
+    libs/thread/src/win32/thread.cpp
+    libs/thread/src/win32/timeconv.inl
+    libs/thread/src/win32/tss_dll.cpp
+    libs/thread/src/win32/tss_pe.cpp
+    )
+
+set( UNIXSOURCES
+    libs/thread/src/pthread/once.cpp
+    libs/thread/src/pthread/thread.cpp
+    libs/thread/src/pthread/timeconv.inl
+    )
+
+if ( WIN32 )
+    list( APPEND SOURCES ${WINSOURCES} )
+else()
+    list( APPEND SOURCES ${UNIXSOURCES} )
+endif()
+
+#############################################################################
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${PYTHON_INCLUDE_DIRS}
+  )
+
+add_library( BoostParts ${SOURCES} )
+
+#############################################################################
+
+if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
+  add_definitions( -Wno-parentheses-equality )
+endif()
+
+#############################################################################
+
+# Special compiler and linker flags for MSVC
+if( MSVC )
+    add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
+    set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL" )
+    set_target_properties( ${PROJECT_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG" )
+endif()
