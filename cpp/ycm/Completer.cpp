@@ -39,8 +39,8 @@ namespace YouCompleteMe
 namespace
 {
 
-const unsigned int MAX_ASYNC_THREADS = 1;
-const unsigned int MIN_ASYNC_THREADS = 1;
+const unsigned int MAX_ASYNC_THREADS = 4;
+const unsigned int MIN_ASYNC_THREADS = 2;
 
 void ThreadMain( TaskStack &task_stack )
 {
@@ -161,9 +161,9 @@ Future Completer::CandidatesForQueryAndTypeAsync(
   shared_ptr< packaged_task< AsyncResults > > task =
     make_shared< packaged_task< AsyncResults > >(
       bind( &Completer::ResultsForQueryAndType,
-                   boost::cref( *this ),
-                   query,
-                   filetype ) );
+            boost::cref( *this ),
+            query,
+            filetype ) );
 
   unique_future< AsyncResults > future = task->get_future();
 
