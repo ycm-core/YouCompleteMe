@@ -30,32 +30,38 @@ class ConcurrentStack : boost::noncopyable
 {
 public:
 
-  void Push( const T& data )
+  // TODO: rename this class, it's not a stack anymore
+  ConcurrentStack() : empty_( true ) {}
+
+  void Set( const T& data )
   {
     {
       boost::unique_lock< boost::mutex > lock( mutex_ );
-      stack_.push( data );
+      latest_ = data;
+      empty_ = false;
     }
 
     condition_variable_.notify_one();
   }
 
-  T Pop()
+  T Get()
   {
     boost::unique_lock< boost::mutex > lock( mutex_ );
 
-    while ( stack_.empty() )
+    while ( empty_ )
     {
       condition_variable_.wait( lock );
     }
 
-    T result = stack_.top();
-    stack_.pop();
-    return result;
+    empty_ = true;
+    return latest_;
   }
 
+
 private:
-  std::stack<T> stack_;
+  // std::stack< T > stack_;
+  T latest_;
+  bool empty_;
   boost::mutex mutex_;
   boost::condition_variable condition_variable_;
 

@@ -39,14 +39,14 @@ namespace YouCompleteMe
 namespace
 {
 
-const unsigned int MAX_ASYNC_THREADS = 4;
-const unsigned int MIN_ASYNC_THREADS = 2;
+const unsigned int MAX_ASYNC_THREADS = 1;
+const unsigned int MIN_ASYNC_THREADS = 1;
 
 void ThreadMain( TaskStack &task_stack )
 {
   while ( true )
   {
-    ( *task_stack.Pop() )();
+    ( *task_stack.Get() )();
   }
 }
 
@@ -167,7 +167,7 @@ Future Completer::CandidatesForQueryAndTypeAsync(
 
   unique_future< AsyncResults > future = task->get_future();
 
-  task_stack_.Push( task );
+  task_stack_.Set( task );
   return Future( move( future ) );
 }
 
