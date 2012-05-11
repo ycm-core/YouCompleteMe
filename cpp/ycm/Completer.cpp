@@ -110,16 +110,12 @@ void Completer::AddCandidatesToDatabase(
     const std::string &filetype,
     const std::string &filepath )
 {
-  std::vector< const Candidate *> &candidates =
-    GetCandidateVector( filetype, filepath );
-
-  int num_candidates = new_candidates.size();
+  std::list< const Candidate *> &candidates =
+    GetCandidateList( filetype, filepath );
   candidates.clear();
-  candidates.reserve( num_candidates );
 
-  for (int i = 0; i < num_candidates; ++i)
+  foreach ( const std::string &candidate_text, new_candidates )
   {
-    const std::string &candidate_text = new_candidates[ i ];
     const Candidate *&candidate = GetValueElseInsert( candidate_repository_,
                                                       candidate_text, NULL );
     if ( !candidate )
@@ -214,7 +210,7 @@ void Completer::ResultsForQueryAndType( const std::string &query,
 }
 
 
-std::vector< const Candidate* >& Completer::GetCandidateVector(
+std::list< const Candidate* >& Completer::GetCandidateList(
     const std::string &filetype,
     const std::string &filepath )
 {
@@ -224,11 +220,11 @@ std::vector< const Candidate* >& Completer::GetCandidateVector(
   if ( !path_to_candidates )
     path_to_candidates.reset( new FilepathToCandidates() );
 
-  boost::shared_ptr< std::vector< const Candidate* > > &candidates =
+  boost::shared_ptr< std::list< const Candidate* > > &candidates =
     (*path_to_candidates)[ filepath ];
 
   if ( !candidates )
-    candidates.reset( new std::vector< const Candidate* >() );
+    candidates.reset( new std::list< const Candidate* >() );
 
   return *candidates;
 }

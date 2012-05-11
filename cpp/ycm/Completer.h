@@ -42,7 +42,7 @@ typedef boost::unordered_map< std::string, const Candidate* >
 
 // filepath -> *( *candidate )
 typedef boost::unordered_map< std::string,
-          boost::shared_ptr< std::vector< const Candidate* > > >
+          boost::shared_ptr< std::list< const Candidate* > > >
             FilepathToCandidates;
 
 // filetype -> *( filepath -> *( *candidate ) )
@@ -95,7 +95,7 @@ private:
                                const std::string &filetype,
                                std::vector< Result > &results ) const;
 
-  std::vector< const Candidate* >& GetCandidateVector(
+  std::list< const Candidate* >& GetCandidateList(
       const std::string &filetype,
       const std::string &filepath );
 
