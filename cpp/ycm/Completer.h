@@ -69,11 +69,13 @@ public:
   void AddCandidatesToDatabase(
       const std::vector< std::string > &new_candidates,
       const std::string &filetype,
-      const std::string &filepath );
+      const std::string &filepath,
+      bool clear_database );
 
   void AddCandidatesToDatabase( const Pylist &new_candidates,
                                 const std::string &filetype,
-                                const std::string &filepath );
+                                const std::string &filepath,
+                                bool clear_database );
 
   // Only provided for tests!
 	std::vector< std::string > CandidatesForQuery(

@@ -56,7 +56,7 @@ void ThreadMain( TaskStack &task_stack )
 Completer::Completer( const std::vector< std::string > &candidates )
   : threading_enabled_( false )
 {
-  AddCandidatesToDatabase( candidates, "", "" );
+  AddCandidatesToDatabase( candidates, "", "", true );
 }
 
 
@@ -65,7 +65,7 @@ Completer::Completer( const std::vector< std::string > &candidates,
                       const std::string &filepath )
   : threading_enabled_( false )
 {
-  AddCandidatesToDatabase( candidates, filetype, filepath );
+  AddCandidatesToDatabase( candidates, filetype, filepath, true );
 }
 
 
@@ -90,7 +90,8 @@ void Completer::EnableThreading()
 
 void Completer::AddCandidatesToDatabase( const Pylist &new_candidates,
                                          const std::string &filetype,
-                                         const std::string &filepath )
+                                         const std::string &filepath,
+                                         bool clear_database )
 {
   int num_candidates = len( new_candidates );
   std::vector< std::string > candidates;
@@ -101,18 +102,21 @@ void Completer::AddCandidatesToDatabase( const Pylist &new_candidates,
     candidates.push_back( extract< std::string >( new_candidates[ i ] ) );
   }
 
-  AddCandidatesToDatabase( candidates, filetype, filepath );
+  AddCandidatesToDatabase( candidates, filetype, filepath, clear_database );
 }
 
 
 void Completer::AddCandidatesToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
-    const std::string &filepath )
+    const std::string &filepath,
+    bool clear_database )
 {
   std::list< const Candidate *> &candidates =
     GetCandidateList( filetype, filepath );
-  candidates.clear();
+
+  if ( clear_database )
+    candidates.clear();
 
   foreach ( const std::string &candidate_text, new_candidates )
   {

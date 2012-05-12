@@ -52,6 +52,24 @@ class CompletionSystem( object ):
     return results
 
 
+  def AddIdentifier( self, identifier ):
+    # print identifier
+    filetype = vim.eval( "&filetype" )
+    filepath = vim.eval( "expand('%:p')" )
+
+    if not filetype or not filepath or not identifier:
+      return
+
+    self.completer.AddCandidatesToDatabase( [ identifier ],
+                                            filetype,
+                                            filepath,
+                                            False )
+
+
+  def AddPreviousIdentifier( self ):
+    self.AddIdentifier( PreviousIdentifier() )
+
+
   def AddBufferIdentifiers( self ):
     text = "\n".join( vim.current.buffer )
     text = RemoveIdentFreeText( text )
@@ -63,12 +81,29 @@ class CompletionSystem( object ):
     if not filetype or not filepath:
       return
 
-    self.completer.AddCandidatesToDatabase( idents, filetype, filepath )
+    self.completer.AddCandidatesToDatabase( idents,
+                                            filetype,
+                                            filepath,
+                                            True )
 
 
 def CurrentColumn():
+  """Do NOT access the CurrentColumn in vim.current.line. It doesn't exist yet.
+  Only the chars befor the current column exist in vim.current.line."""
+
   # vim's columns start at 1 while vim.current.line columns start at 0
   return int( vim.eval( "col('.')" ) ) - 1
+
+
+def CurrentLineAndColumn():
+  result = vim.eval( "getpos('.')")
+  line_num = int( result[ 1 ] ) - 1
+  column_num = int( result[ 2 ] ) - 1
+  return line_num, column_num
+
+
+def IsIdentifierChar( char ):
+  return char.isalnum() or char == '_'
 
 
 def CompletionStartColumn():
@@ -76,17 +111,49 @@ def CompletionStartColumn():
   current_column = CurrentColumn()
   start_column = current_column
 
-  while start_column > 0 and line[ start_column - 1 ].isalnum():
+  while start_column > 0 and IsIdentifierChar( line[ start_column - 1 ] ):
     start_column -= 1
 
   if current_column - start_column < min_num_chars:
-    return -1
+    # for vim, -2 means not found but don't trigger an error message
+    return -2
 
   return start_column
 
 
 def EscapeForVim( text ):
   return text.replace( "'", "''" )
+
+
+def PreviousIdentifier():
+  line_num, column_num = CurrentLineAndColumn()
+  buffer = vim.current.buffer
+  line = buffer[ line_num ]
+
+  end_column = column_num
+
+  while end_column > 0 and not IsIdentifierChar( line[ end_column - 1 ] ):
+    end_column -= 1
+
+  # Look at the previous line if we reached the end of the current one
+  if end_column == 0:
+    try:
+      line = buffer[ line_num - 1]
+    except:
+      return ""
+    end_column = len( line )
+    while end_column > 0 and not IsIdentifierChar( line[ end_column - 1 ] ):
+      end_column -= 1
+    print end_column, line
+
+  start_column = end_column
+  while start_column > 0 and IsIdentifierChar( line[ start_column - 1 ] ):
+    start_column -= 1
+
+  if end_column - start_column < min_num_chars:
+    return ""
+
+  return line[ start_column : end_column ]
 
 
 def CurrentCursorText():
@@ -96,8 +163,37 @@ def CurrentCursorText():
   if current_column - start_column < min_num_chars:
     return ""
 
-  cursor_text = vim.current.line[ start_column : current_column ]
-  return EscapeForVim( cursor_text )
+  return vim.current.line[ start_column : current_column ]
+
+
+def CurrentCursorTextVim():
+  return EscapeForVim( CurrentCursorText() )
+
+
+def ShouldAddIdentifier():
+  current_column = CurrentColumn()
+  previous_char_index = current_column - 1
+  if previous_char_index < 0:
+    return 1
+
+  line = vim.current.line
+  try:
+    previous_char = line[ previous_char_index ]
+  except IndexError:
+    return 0
+
+  if IsIdentifierChar( previous_char ):
+    return 0
+
+  if ( not IsIdentifierChar( previous_char ) and
+       previous_char_index > 0 and
+       IsIdentifierChar( line[ previous_char_index - 1 ] ) ):
+    return 1
+  else:
+    if line[ : current_column ].strip():
+      return 0
+    else:
+      return 1
 
 
 def SanitizeQuery( query ):

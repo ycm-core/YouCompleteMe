@@ -23,6 +23,7 @@ set cpo&vim
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:old_cursor_text = ''
 let g:ycm_min_num_of_chars_for_completion = 2
+
 " Set up the plugin, load all our modules, bind our keys etc.
 function! youcompleteme#Enable()
 
@@ -60,24 +61,44 @@ function! youcompleteme#Enable()
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
   py csystem = ycm.CompletionSystem()
-
 endfunction
+
 
 function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 endfunction
 
+
 function! s:OnMovedI()
+  " Technically, what we are doing here is not thread-safe. We are adding a new
+  " identifier to the database while a background thread may be going through
+  " that db, searching for matches for the previous query. BUT, we don't care
+  " what junk that thread may get; those results don't matter anymore since
+  " right after this function is called, we start a new candidate search with a
+  " new query, and the old one is thrown away. The background thread never
+  " modifies the db, only reads it.
+  call s:AddIdentifierIfNeeded()
   call s:InvokeCompletion()
 endfunction
+
+
+function! s:AddIdentifierIfNeeded()
+  py vim.command( "let should_add_identifier = '" +
+        \ str( ycm.ShouldAddIdentifier() ) + "'" )
+  if should_add_identifier != 1
+    return
+  endif
+  py csystem.AddPreviousIdentifier()
+endfunction
+
 
 function! s:InvokeCompletion()
   if &completefunc != "youcompleteme#Complete"
     return
   endif
 
-  py vim.command( "let cursor_text = '" + ycm.CurrentCursorText() + "'" )
+  py vim.command( "let cursor_text = '" + ycm.CurrentCursorTextVim() + "'" )
 
   " infinite loops are bad, mkay?
   if cursor_text == '' || cursor_text == s:old_cursor_text
@@ -93,6 +114,7 @@ function! s:InvokeCompletion()
   " until he explicitly chooses to replace it with a completion.
   call feedkeys( "\<C-X>\<C-U>\<C-P>", 'n' )
 endfunction
+
 
 " This is our main entry point. This is what vim calls to get completions.
 function! youcompleteme#Complete(findstart, base)

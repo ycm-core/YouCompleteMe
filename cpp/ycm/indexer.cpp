@@ -32,7 +32,8 @@ BOOST_PYTHON_MODULE(indexer)
 
   void (Completer::*actd) (const Pylist&,
                            const std::string&,
-                           const std::string&) =
+                           const std::string&,
+                           bool) =
     &Completer::AddCandidatesToDatabase;
 
   class_< Completer, boost::noncopyable >( "Completer" )
