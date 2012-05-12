@@ -30,7 +30,7 @@ function! youcompleteme#Enable()
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnMovedI()
-    autocmd BufRead,BufEnter * call s:SetCompleteFunc()
+    autocmd BufRead,BufEnter * call s:OnBufferVisit()
     autocmd CursorHold,CursorHoldI * py csystem.AddBufferIdentifiers()
   augroup END
 
@@ -61,6 +61,12 @@ function! youcompleteme#Enable()
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
   py csystem = ycm.CompletionSystem()
+endfunction
+
+
+function! s:OnBufferVisit()
+  call s:SetCompleteFunc()
+  py csystem.AddBufferIdentifiers()
 endfunction
 
 
