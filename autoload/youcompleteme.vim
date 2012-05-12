@@ -31,7 +31,7 @@ function! youcompleteme#Enable()
     autocmd!
     autocmd CursorMovedI * call s:OnMovedI()
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
-    autocmd CursorHold,CursorHoldI * py csystem.AddBufferIdentifiers()
+    autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
   augroup END
 
   " We need menuone in completeopt, otherwise when there's only one candidate
@@ -66,6 +66,11 @@ endfunction
 
 function! s:OnBufferVisit()
   call s:SetCompleteFunc()
+  py csystem.AddBufferIdentifiers()
+endfunction
+
+
+function! s:OnCursorHold()
   py csystem.AddBufferIdentifiers()
 endfunction
 
