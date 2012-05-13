@@ -174,26 +174,22 @@ def ShouldAddIdentifier():
   current_column = CurrentColumn()
   previous_char_index = current_column - 1
   if previous_char_index < 0:
-    return 1
-
+    return True
   line = vim.current.line
   try:
     previous_char = line[ previous_char_index ]
   except IndexError:
-    return 0
+    return False
 
   if IsIdentifierChar( previous_char ):
-    return 0
+    return False
 
   if ( not IsIdentifierChar( previous_char ) and
        previous_char_index > 0 and
        IsIdentifierChar( line[ previous_char_index - 1 ] ) ):
-    return 1
+    return True
   else:
-    if line[ : current_column ].strip():
-      return 0
-    else:
-      return 1
+    return line[ : current_column ].isspace()
 
 
 def SanitizeQuery( query ):

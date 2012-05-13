@@ -96,7 +96,7 @@ endfunction
 
 function! s:AddIdentifierIfNeeded()
   py vim.command( "let should_add_identifier = '" +
-        \ str( ycm.ShouldAddIdentifier() ) + "'" )
+        \ str( int( ycm.ShouldAddIdentifier() ) ) + "'" )
   if should_add_identifier != 1
     return
   endif
