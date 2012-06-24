@@ -117,6 +117,18 @@ TEST( CompleterTest, CompleteMatchForWordBoundaryCharsWins )
 TEST( CompleterTest, RatioUtilizationTieBreak )
 {
 	EXPECT_THAT( Completer( Candidates(
+               "aGaaFooBarQux",
+               "aBaafbq" ) ).CandidatesForQuery( "fbq" ),
+	             ElementsAre( "aGaaFooBarQux",
+	                          "aBaafbq" ) );
+
+	EXPECT_THAT( Completer( Candidates(
+               "aFooBarQux",
+               "afbq" ) ).CandidatesForQuery( "fbq" ),
+	             ElementsAre( "aFooBarQux",
+	                          "afbq" ) );
+
+	EXPECT_THAT( Completer( Candidates(
                "FooBarQux",
                "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq" ),
 	             ElementsAre( "FooBarQux",

@@ -36,11 +36,11 @@ int NumWordBoundaryCharMatches( const std::string &query,
   while ( j < query.size() && i < word_boundary_chars.size() )
   {
     if ( toupper( query[ j ] ) == toupper( word_boundary_chars[ i ] ) )
-      ++i;
-    ++j;
+      ++j;
+    ++i;
   }
 
-  return i;
+  return j;
 }
 
 } // unnamed namespace
