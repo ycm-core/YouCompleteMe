@@ -104,8 +104,23 @@ function! s:AddIdentifierIfNeeded()
 endfunction
 
 
+function! s:InsideCommentOrString()
+  " Has to be col('.') -1 because col('.') doesn't exist at this point. We are
+  " in insert mode when this func is called.
+  let syntax_group = synIDattr( synID( line( '.' ), col( '.' ) - 1, 1 ), 'name')
+  if stridx(syntax_group, 'Comment') > -1 || stridx(syntax_group, 'String') > -1
+    return 1
+  endif
+  return 0
+endfunction
+
+
 function! s:InvokeCompletion()
   if &completefunc != "youcompleteme#Complete"
+    return
+  endif
+
+  if s:InsideCommentOrString()
     return
   endif
 
