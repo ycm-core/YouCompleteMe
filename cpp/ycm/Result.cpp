@@ -54,6 +54,7 @@ Result::Result( bool is_subsequence )
   word_boundary_char_utilization_( 0 ),
   query_is_candidate_prefix_( false ),
   text_is_lowercase_( false ),
+  char_match_index_sum_( 0 ),
   text_( NULL )
 {
 }
@@ -61,6 +62,7 @@ Result::Result( bool is_subsequence )
 Result::Result( bool is_subsequence,
                 const std::string *text,
                 bool text_is_lowercase,
+                int char_match_index_sum,
                 const std::string &word_boundary_chars,
                 const std::string &query )
   :
@@ -70,6 +72,7 @@ Result::Result( bool is_subsequence,
   word_boundary_char_utilization_( 0 ),
   query_is_candidate_prefix_( false ),
   text_is_lowercase_( text_is_lowercase ),
+  char_match_index_sum_( char_match_index_sum ),
   text_( text )
 {
   if ( is_subsequence )
@@ -77,6 +80,7 @@ Result::Result( bool is_subsequence,
 }
 
 
+// TODO: do we need a custom copy ctor?
 Result::Result( const Result& other )
   :
   is_subsequence_( other.is_subsequence_ ),
@@ -87,6 +91,7 @@ Result::Result( const Result& other )
   word_boundary_char_utilization_( other.word_boundary_char_utilization_ ),
   query_is_candidate_prefix_( other.query_is_candidate_prefix_ ),
   text_is_lowercase_( other.text_is_lowercase_ ),
+  char_match_index_sum_( other.char_match_index_sum_ ),
   text_( other.text_ )
 {
 }
@@ -143,6 +148,9 @@ bool Result::operator< ( const Result &other ) const {
       return word_boundary_char_utilization_ >
         other.word_boundary_char_utilization_;
   }
+
+  if ( char_match_index_sum_ != other.char_match_index_sum_ )
+    return char_match_index_sum_ < other.char_match_index_sum_;
 
   if ( text_->length() != other.text_->length() )
     return text_->length() < other.text_->length();

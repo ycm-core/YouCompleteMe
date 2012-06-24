@@ -34,14 +34,14 @@ namespace YouCompleteMe
 class LetterNode : boost::noncopyable
 {
 public:
-	explicit LetterNode( char letter );
+	explicit LetterNode( char letter, int index );
 
   // this is for root nodes
 	explicit LetterNode( const std::string &text );
 
   inline bool LetterIsUppercase() const
   {
-    return is_uppercase;
+    return is_uppercase_;
   }
 
 
@@ -56,13 +56,19 @@ public:
     letters_[ letter ].push_front( node );
   }
 
+  inline int Index()
+  {
+    return index_;
+  }
+
 private:
 
   // TODO: rename LetterHash to LetterNodeListHash or LetterNodeListDict/Map?
   LetterHash letters_;
   std::vector< boost::shared_ptr< LetterNode > > letternode_per_text_index_;
-	bool is_uppercase;
-	bool is_root_node;
+	bool is_uppercase_;
+	bool is_root_node_;
+	int index_;
 };
 
 } // namespace YouCompleteMe

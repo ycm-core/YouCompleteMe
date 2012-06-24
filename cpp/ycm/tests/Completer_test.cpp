@@ -150,17 +150,45 @@ TEST( CompleterTest, QueryPrefixOfCandidateWins )
 	                          "fbaroo" ) );
 }
 
-TEST( CompleterTest, ShorterCandidateWins )
+TEST( CompleterTest, LowerMatchCharIndexSumWins )
 {
+	EXPECT_THAT( Completer( Candidates(
+              "ratio_of_word_boundary_chars_in_query_",
+              "first_char_same_in_query_and_text_") )
+                 .CandidatesForQuery( "charinq" ),
+              ElementsAre( "first_char_same_in_query_and_text_",
+                           "ratio_of_word_boundary_chars_in_query_") );
+
+	EXPECT_THAT( Completer( Candidates(
+               "barfooq",
+               "barquxfoo" ) ).CandidatesForQuery( "foo" ),
+	             ElementsAre( "barfooq",
+                            "barquxfoo") );
+
+	EXPECT_THAT( Completer( Candidates(
+               "xxxxxxabc",
+               "xxabcxxxx" ) ).CandidatesForQuery( "abc" ),
+	             ElementsAre( "xxabcxxxx",
+                            "xxxxxxabc") );
+
 	EXPECT_THAT( Completer( Candidates(
                "FooBarQux",
                "FaBarQux" ) ).CandidatesForQuery( "fbq" ),
 	             ElementsAre( "FaBarQux",
 	                          "FooBarQux" ) );
+}
 
+TEST( CompleterTest, ShorterCandidateWins )
+{
 	EXPECT_THAT( Completer( Candidates(
                "CompleterT",
                "CompleterTest" ) ).CandidatesForQuery( "co" ),
+	             ElementsAre( "CompleterT",
+	                          "CompleterTest" ) );
+
+	EXPECT_THAT( Completer( Candidates(
+               "CompleterT",
+               "CompleterTest" ) ).CandidatesForQuery( "plet" ),
 	             ElementsAre( "CompleterT",
 	                          "CompleterTest" ) );
 }

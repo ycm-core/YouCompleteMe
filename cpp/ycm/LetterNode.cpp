@@ -22,24 +22,26 @@
 namespace YouCompleteMe
 {
 
-LetterNode::LetterNode( char letter )
+LetterNode::LetterNode( char letter, int index )
+  : is_uppercase_( IsUppercase( letter ) ),
+    is_root_node_( false ),
+    index_( index )
 {
-  is_uppercase = IsUppercase( letter );
-  is_root_node = false;
 }
 
 
+// TODO: this class needs tests
 LetterNode::LetterNode( const std::string &text )
+  : is_uppercase_( false ),
+    is_root_node_( true ),
+    index_( -1 )
 {
-  is_uppercase = false;
-  is_root_node = true;
-
   letternode_per_text_index_.resize( text.size() );
 
   for ( uint i = 0; i < text.size(); ++i)
   {
     char letter = text[ i ];
-    LetterNode *node = new LetterNode( letter );
+    LetterNode *node = new LetterNode( letter, i );
     letters_[ letter ].push_back( node );
     letternode_per_text_index_[ i ] = boost::shared_ptr< LetterNode >( node );
   }

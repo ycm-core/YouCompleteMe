@@ -76,6 +76,7 @@ Candidate::Candidate( const std::string &text )
 Result Candidate::QueryMatchResult( const std::string &query ) const
 {
   LetterNode *node = root_node_.get();
+  int index_sum = 0;
 
   foreach ( char letter, query )
   {
@@ -85,10 +86,11 @@ Result Candidate::QueryMatchResult( const std::string &query ) const
       return Result( false );
 
     node = list->front();
+    index_sum += node->Index();
   }
 
-  return Result( true, &text_, text_is_lowercase_, word_boundary_chars_,
-                 query );
+  return Result( true, &text_, text_is_lowercase_, index_sum,
+                 word_boundary_chars_, query );
 }
 
 } // namespace YouCompleteMe
