@@ -19,6 +19,7 @@
 #include "standard.h"
 #include "Utils.h"
 #include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 using boost::algorithm::istarts_with;
 
@@ -28,19 +29,42 @@ namespace YouCompleteMe
 namespace
 {
 
+template< class T >
+int LongestCommonSubsequenceLength(const T &first, const T &second)
+{
+  const T &longer  = first.size() > second.size() ? first  : second;
+  const T &shorter = first.size() > second.size() ? second : first;
+
+  int longer_len  = longer.size();
+  int shorter_len = shorter.size();
+
+  std::vector<int> previous( shorter_len + 1, 0 );
+  std::vector<int> current(  shorter_len + 1, 0 );
+
+  for (int i = 0; i < longer_len; ++i )
+  {
+    for (int j = 0; j < shorter_len; ++j )
+    {
+      if ( longer[ i ] == shorter[ j ] )
+        current[ j + 1 ] = previous[ j ] + 1;
+      else
+        current[ j + 1 ] = std::max( current[ j ], previous[ j + 1 ] );
+    }
+
+    for (int j = 0; j < shorter_len; ++j )
+    {
+      previous[ j + 1 ] = current[ j + 1 ];
+    }
+  }
+
+  return current[ shorter_len ];
+}
+
+
 int NumWordBoundaryCharMatches( const std::string &query,
                                 const std::string &word_boundary_chars )
 {
-  uint i = 0;
-  uint j = 0;
-  while ( j < query.size() && i < word_boundary_chars.size() )
-  {
-    if ( toupper( query[ j ] ) == toupper( word_boundary_chars[ i ] ) )
-      ++j;
-    ++i;
-  }
-
-  return j;
+  return LongestCommonSubsequenceLength(query, word_boundary_chars);
 }
 
 } // unnamed namespace
