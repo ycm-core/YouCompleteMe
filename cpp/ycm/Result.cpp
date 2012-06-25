@@ -29,11 +29,11 @@ namespace YouCompleteMe
 namespace
 {
 
-template< class T >
-int LongestCommonSubsequenceLength(const T &first, const T &second)
+int LongestCommonSubsequenceLength(const std::string &first,
+                                   const std::string &second)
 {
-  const T &longer  = first.size() > second.size() ? first  : second;
-  const T &shorter = first.size() > second.size() ? second : first;
+  const std::string &longer  = first.size() > second.size() ? first  : second;
+  const std::string &shorter = first.size() > second.size() ? second : first;
 
   int longer_len  = longer.size();
   int shorter_len = shorter.size();
@@ -45,7 +45,7 @@ int LongestCommonSubsequenceLength(const T &first, const T &second)
   {
     for (int j = 0; j < shorter_len; ++j )
     {
-      if ( longer[ i ] == shorter[ j ] )
+      if ( toupper( longer[ i ] ) == toupper( shorter[ j ] ) )
         current[ j + 1 ] = previous[ j ] + 1;
       else
         current[ j + 1 ] = std::max( current[ j ], previous[ j + 1 ] );

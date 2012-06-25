@@ -135,6 +135,12 @@ TEST( CompleterTest, RatioUtilizationTieBreak )
 	                          "aCaafoog" ) );
 
 	EXPECT_THAT( Completer( Candidates(
+               "acaaCaaFooGxx",
+               "aCaafoog" ) ).CandidatesForQuery( "caaFoo" ),
+	             ElementsAre( "acaaCaaFooGxx",
+	                          "aCaafoog" ) );
+
+	EXPECT_THAT( Completer( Candidates(
                "FooBarQux",
                "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq" ),
 	             ElementsAre( "FooBarQux",
