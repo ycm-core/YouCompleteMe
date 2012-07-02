@@ -29,8 +29,8 @@ namespace YouCompleteMe
 namespace
 {
 
-int LongestCommonSubsequenceLength(const std::string &first,
-                                   const std::string &second)
+int LongestCommonSubsequenceLength( const std::string &first,
+                                    const std::string &second )
 {
   const std::string &longer  = first.size() > second.size() ? first  : second;
   const std::string &shorter = first.size() > second.size() ? second : first;
