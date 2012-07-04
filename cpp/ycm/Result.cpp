@@ -121,7 +121,8 @@ Result::Result( const Result& other )
 }
 
 
-bool Result::operator< ( const Result &other ) const {
+bool Result::operator< ( const Result &other ) const
+{
   // Yes, this is ugly but it also needs to be fast.  Since this is called a
   // bazillion times, we have to make sure only the required comparisons are
   // made, and no more.
