@@ -59,7 +59,6 @@ target_link_libraries( ${PROJECT_NAME}
 
 #############################################################################
 
-
 # We don't want the "lib" prefix, it can screw up python when it tries to search
 # for our module
 set_target_properties( ${PROJECT_NAME} PROPERTIES PREFIX "")
@@ -74,13 +73,13 @@ endif()
 set_target_properties( ${PROJECT_NAME} PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../python )
 
-if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
-  set( COMPILER_IS_CLANG true )
-endif()
+#############################################################################
 
 if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
   # We want all warnings, and warnings should be treated as errors
   add_definitions( -Wall -Wextra -Werror )
 endif()
+
+#############################################################################
 
 add_subdirectory( tests )
