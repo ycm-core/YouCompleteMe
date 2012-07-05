@@ -23,17 +23,14 @@ if ( COMPILER_IS_CLANG )
   add_definitions( -Wno-long-long -Wno-variadic-macros )
 endif()
 
-# For whatever reason, cmake does something stupid with pthread detection on
-# Mac which makes gtest go stupid too, so we turn of pthread use in gtest; we
-# don't really need it either way
-if ( APPLE )
-  add_definitions( -DGTEST_HAS_PTHREAD=0 )
-endif()
-
 add_subdirectory( gmock )
 
 include_directories(
   ${indexer_SOURCE_DIR}
+  )
+
+include_directories(
+  SYSTEM
   ${gtest_SOURCE_DIR}
   ${gtest_SOURCE_DIR}/include
   ${gmock_SOURCE_DIR}

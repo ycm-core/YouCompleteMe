@@ -21,10 +21,11 @@
 #
 # bcp call: bcp boost/python.hpp boost/bind.hpp boost/lambda/lambda.hpp boost/exception/all.hpp boost/tuple/tuple_io.hpp boost/tuple/tuple_comparison.hpp boost/regex.hpp boost/foreach.hpp boost/smart_ptr.hpp boost/algorithm/string_regex.hpp boost/thread.hpp boost/unordered_map.hpp boost/unordered_set.hpp boost/format.hpp boost/ptr_container/ptr_container.hpp ../BoostParts
 
-# WARNING: When doing this from fresh boost sources, note that
-# in the file /boost/config/user.hpp the BOOST_ALL_NO_LIB
-# define has been uncommented. Otherwise, we will get linker
-# errors on MSVC because of boost auto-linking.
+# WARNING: When doing this from fresh boost sources, note that in the file
+# /boost/config/user.hpp the BOOST_ALL_NO_LIB define has been uncommented.
+# Otherwise, we will get linker errors on MSVC because of boost auto-linking. If
+# you don't care about Windows then feel free to use the raw boost version of
+# /boost/config/user.hpp
 
 cmake_minimum_required( VERSION 2.8 )
 
@@ -64,6 +65,7 @@ endif()
 #############################################################################
 
 include_directories(
+  SYSTEM
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${PYTHON_INCLUDE_DIRS}
   )
@@ -73,7 +75,9 @@ add_library( BoostParts ${SOURCES} )
 #############################################################################
 
 if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
-  add_definitions( -Wno-parentheses-equality )
+  # No warnings. We just use Boost as is so warnings coming from it are just
+  # noise.
+  add_definitions( -w )
 endif()
 
 #############################################################################
