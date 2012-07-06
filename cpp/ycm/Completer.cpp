@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "standard.h"
 #include "Completer.h"
+#include "standard.h"
 #include "Utils.h"
 
 #include <boost/bind.hpp>
