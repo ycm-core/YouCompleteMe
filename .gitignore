@@ -40,9 +40,8 @@ indexer_tests
 
 # These folders in cpp/llvm contain lots of upstream cruft we don't care
 # about and would rather not have in our tree...
-docs/*
-examples/*
-www/*
+cpp/llvm/docs/*
+cpp/llvm/tools/clang/www/*
 
 # ... but excluding these LLVMBuild.txt files breaks the build so we need to
 # explicitely include them
