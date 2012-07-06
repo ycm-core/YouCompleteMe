@@ -31,8 +31,8 @@ include_directories(
 
 include_directories(
   SYSTEM
-  ${gtest_SOURCE_DIR}
-  ${gtest_SOURCE_DIR}/include
+  ${gtest_ycm_SOURCE_DIR}
+  ${gtest_ycm_SOURCE_DIR}/include
   ${gmock_SOURCE_DIR}
   ${gmock_SOURCE_DIR}/include
   )
