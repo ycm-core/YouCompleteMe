@@ -33,6 +33,8 @@ include_directories(
   SYSTEM
   ${BoostParts_SOURCE_DIR}
   ${PYTHON_INCLUDE_DIRS}
+  "${LLVM_SOURCE_DIR}/include"
+  "${LLVM_SOURCE_DIR}/tools/clang/include"
   )
 
 file( GLOB_RECURSE SOURCES *.h *.cpp )
@@ -55,6 +57,7 @@ add_library( ${PROJECT_NAME} SHARED
 target_link_libraries( ${PROJECT_NAME}
                        BoostParts
                        ${PYTHON_LIBRARIES}
+                       libclang_static
                      )
 
 #############################################################################

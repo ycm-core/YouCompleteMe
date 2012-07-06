@@ -34,5 +34,6 @@ if( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE RELEASE )
 endif()
 
+add_subdirectory( llvm )
 add_subdirectory( BoostParts )
 add_subdirectory( ycm )
