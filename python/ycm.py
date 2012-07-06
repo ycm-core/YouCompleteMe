@@ -116,6 +116,7 @@ def CompletionStartColumn():
 
   if current_column - start_column < min_num_chars:
     # for vim, -2 means not found but don't trigger an error message
+    # see :h complete-functions
     return -2
 
   return start_column

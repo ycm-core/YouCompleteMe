@@ -42,11 +42,11 @@ namespace
 const unsigned int MAX_ASYNC_THREADS = 4;
 const unsigned int MIN_ASYNC_THREADS = 2;
 
-void ThreadMain( TaskStack &task_stack )
+void ThreadMain( LatestTask &latest_task )
 {
   while ( true )
   {
-    ( *task_stack.Get() )();
+    ( *latest_task.Get() )();
   }
 }
 
@@ -171,7 +171,7 @@ Future Completer::CandidatesForQueryAndTypeAsync(
 
   unique_future< AsyncResults > future = task->get_future();
 
-  task_stack_.Set( task );
+  latest_task_.Set( task );
   return Future( move( future ) );
 }
 
@@ -242,7 +242,7 @@ void Completer::InitThreads()
 
   for ( int i = 0; i < threads_to_create; ++i )
   {
-    threads_.create_thread( bind( ThreadMain, boost::ref( task_stack_ ) ) );
+    threads_.create_thread( bind( ThreadMain, boost::ref( latest_task_ ) ) );
   }
 }
 

@@ -19,7 +19,7 @@
 #define COMPLETER_H_7AR4UGXE
 
 #include "Candidate.h"
-#include "ConcurrentStack.h"
+#include "ConcurrentLatestValue.h"
 #include "Future.h"
 
 #include <boost/utility.hpp>
@@ -49,9 +49,9 @@ typedef boost::unordered_map< std::string,
 typedef boost::unordered_map< std::string,
           boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
 
-typedef ConcurrentStack<
+typedef ConcurrentLatestValue<
           boost::shared_ptr<
-            boost::packaged_task< AsyncResults > > > TaskStack;
+            boost::packaged_task< AsyncResults > > > LatestTask;
 
 
 class Completer : boost::noncopyable
@@ -113,7 +113,7 @@ private:
 
   FiletypeMap filetype_map_;
 
-  mutable TaskStack task_stack_;
+  mutable LatestTask latest_task_;
 
   bool threading_enabled_;
 
