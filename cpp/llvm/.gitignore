@@ -36,6 +36,9 @@ projects/*
 !projects/sample
 !projects/CMakeLists.txt
 !projects/Makefile
+
+# The build breakes without this file
+!projects/LLVMBuild.txt
 # Clang, which is tracked independently.
 # tools/clang
 # LLDB, which is tracked independently.
