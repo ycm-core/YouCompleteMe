@@ -20,6 +20,7 @@
 
 #include <boost/python.hpp>
 #include <boost/utility.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 BOOST_PYTHON_MODULE(indexer)
 {
@@ -30,15 +31,13 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "ResultsReady", &Future::ResultsReady )
     .def( "GetResults", &Future::GetResults );
 
-  void (Completer::*actd) (const Pylist&,
-                           const std::string&,
-                           const std::string&,
-                           bool) =
-    &Completer::AddCandidatesToDatabase;
-
   class_< Completer, boost::noncopyable >( "Completer" )
     .def( "EnableThreading", &Completer::EnableThreading )
-    .def( "AddCandidatesToDatabase", actd )
+    // .def( "AddCandidatesToDatabase", actd )
+    .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
     .def( "CandidatesForQueryAndTypeAsync",
           &Completer::CandidatesForQueryAndTypeAsync );
+
+	class_< std::vector< std::string > >( "StringVec" )
+		.def( vector_indexing_suite< std::vector< std::string > >() );
 }

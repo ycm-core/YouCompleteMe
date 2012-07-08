@@ -36,7 +36,7 @@ public:
   Future() {}
   Future( boost::shared_future< AsyncResults > future );
   bool ResultsReady();
-  void GetResults( Pylist &candidates );
+  Pylist GetResults();
 
 private:
   boost::shared_future< AsyncResults > future_;

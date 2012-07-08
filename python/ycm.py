@@ -47,20 +47,19 @@ class CompletionSystem( object ):
     if not self.future:
       return []
 
-    results = []
-    self.future.GetResults( results )
-    return results
+    return self.future.GetResults()
 
 
   def AddIdentifier( self, identifier ):
-    # print identifier
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
 
     if not filetype or not filepath or not identifier:
       return
 
-    self.completer.AddCandidatesToDatabase( [ identifier ],
+    vector = indexer.StringVec()
+    vector.append( identifier )
+    self.completer.AddCandidatesToDatabase( vector,
                                             filetype,
                                             filepath,
                                             False )
@@ -81,7 +80,9 @@ class CompletionSystem( object ):
     if not filetype or not filepath:
       return
 
-    self.completer.AddCandidatesToDatabase( idents,
+    vector = indexer.StringVec()
+    vector.extend( idents )
+    self.completer.AddCandidatesToDatabase( vector,
                                             filetype,
                                             filepath,
                                             True )

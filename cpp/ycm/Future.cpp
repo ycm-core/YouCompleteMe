@@ -32,8 +32,9 @@ bool Future::ResultsReady()
   return future_.is_ready();
 }
 
-void Future::GetResults( Pylist &candidates )
+Pylist Future::GetResults()
 {
+  Pylist candidates;
   AsyncResults results;
 
   try
@@ -43,13 +44,15 @@ void Future::GetResults( Pylist &candidates )
 
   catch ( boost::future_uninitialized & )
   {
-    return;
+    return candidates;
   }
 
   foreach ( const Result& result, *results )
   {
     candidates.append( *result.Text() );
   }
+
+  return candidates;
 }
 
 } // namespace YouCompleteMe

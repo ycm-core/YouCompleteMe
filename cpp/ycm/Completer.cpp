@@ -88,24 +88,6 @@ void Completer::EnableThreading()
 }
 
 
-void Completer::AddCandidatesToDatabase( const Pylist &new_candidates,
-                                         const std::string &filetype,
-                                         const std::string &filepath,
-                                         bool clear_database )
-{
-  int num_candidates = len( new_candidates );
-  std::vector< std::string > candidates;
-  candidates.reserve( num_candidates );
-
-  for (int i = 0; i < num_candidates; ++i)
-  {
-    candidates.push_back( extract< std::string >( new_candidates[ i ] ) );
-  }
-
-  AddCandidatesToDatabase( candidates, filetype, filepath, clear_database );
-}
-
-
 void Completer::AddCandidatesToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,

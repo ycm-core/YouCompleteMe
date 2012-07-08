@@ -19,7 +19,6 @@
 #include <gmock/gmock.h>
 #include "Completer.h"
 #include "Utils.h"
-#include <boost/python.hpp>
 
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
