@@ -18,10 +18,6 @@
 cmake_minimum_required( VERSION 2.8 )
 project( YouCompleteMe )
 
-if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
-  set( COMPILER_IS_CLANG true )
-endif()
-
 # This is needed so that on macs, the library is built in both 32 bit and 64 bit
 # versions. Without this python might refuse to load the module, depending on
 # how python was built.
@@ -30,9 +26,35 @@ endif()
 set( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
 
 # Force release build, speed is of the essence
-if( NOT CMAKE_BUILD_TYPE )
+if ( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE RELEASE )
 endif()
+
+if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+  set( COMPILER_IS_CLANG true )
+endif()
+
+# Determining the presence of C++11 support in the compiler
+set( CPP11_AVAILABLE false )
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+  if ( GCC_VERSION VERSION_GREATER 4.6 OR GCC_VERSION VERSION_EQUAL 4.6 )
+    set( CPP11_AVAILABLE true )
+  endif()
+elseif( COMPILER_IS_CLANG )
+  set( CPP11_AVAILABLE true )
+endif()
+
+if ( CPP11_AVAILABLE )
+  message( "Your C++ compiler supports C++11, compiling in that mode." )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(
+    "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
+endif()
+
+#-Wc++11-extensions
 
 add_subdirectory( llvm )
 add_subdirectory( BoostParts )
