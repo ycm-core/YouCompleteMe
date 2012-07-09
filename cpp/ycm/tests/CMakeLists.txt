@@ -20,7 +20,8 @@ cmake_minimum_required( VERSION 2.8 )
 
 # The gtest library triggers these silly warnings, so we turn them off
 if ( COMPILER_IS_CLANG )
-  add_definitions( -Wno-long-long -Wno-variadic-macros )
+  set( CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -Wno-long-long -Wno-variadic-macros" )
 endif()
 
 add_subdirectory( gmock )

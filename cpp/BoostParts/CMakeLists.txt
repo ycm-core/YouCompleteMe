@@ -77,7 +77,7 @@ add_library( BoostParts ${SOURCES} )
 if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
   # No warnings. We just use Boost as is so warnings coming from it are just
   # noise.
-  add_definitions( -w )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 endif()
 
 #############################################################################

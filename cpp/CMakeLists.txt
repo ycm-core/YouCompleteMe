@@ -21,17 +21,18 @@ project( YouCompleteMe )
 # This is needed so that on macs, the library is built in both 32 bit and 64 bit
 # versions. Without this python might refuse to load the module, depending on
 # how python was built.
-# On Mac, boost needs to be compiled universal as well. For brew, that's
+# On Mac, boost needs to be compiled universal as well, if used instead of the
+# included BoostParts lib. For brew, that's
 # "brew install boost --universal"
 set( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
 
-# Force release build, speed is of the essence
-if ( NOT CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE RELEASE )
-endif()
-
 if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( COMPILER_IS_CLANG true )
+endif()
+
+# Force release build by default, speed is of the essence
+if ( NOT CMAKE_BUILD_TYPE )
+  set( CMAKE_BUILD_TYPE Release )
 endif()
 
 # Determining the presence of C++11 support in the compiler
@@ -46,15 +47,22 @@ elseif( COMPILER_IS_CLANG )
   set( CPP11_AVAILABLE true )
 endif()
 
+# When used with Clang, adding the -std=c++0x flag to CMAKE_CXX_FLAGS will cause
+# the compiler to output a warning during linking:
+#  clang: warning: argument unused during compilation: '-std=c++0x'
+# This is caused by cmake passing this flag to the linking stage which it
+# shouldn't do. It's ignored so it does no harm, but the warning is annoying and
+# there's no way around the problem (the flag is correctly used during the
+# compilation stage). We could use add_definitions(-std=c++0x), but this will
+# break the llvm build since the flag will then be used when compiling C code
+# too. Sadly there's no way around the warning.
 if ( CPP11_AVAILABLE )
   message( "Your C++ compiler supports C++11, compiling in that mode." )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x" )
 else()
   message(
     "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
 endif()
-
-#-Wc++11-extensions
 
 add_subdirectory( llvm )
 add_subdirectory( BoostParts )

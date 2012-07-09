@@ -30,6 +30,7 @@ function! youcompleteme#Enable()
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnMovedI()
+    " BufWinEnter/Leave?
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
   augroup END
