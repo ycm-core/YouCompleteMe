@@ -23,6 +23,7 @@ set cpo&vim
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:searched_and_no_results_found = 0
 let s:should_use_clang = 0
+let s:completion_start_column = 0
 let g:ycm_min_num_of_chars_for_completion = 2
 
 " TODO: check for a non-broken version of Vim and stop executing (with an error
@@ -207,23 +208,23 @@ function! youcompleteme#Complete( findstart, base )
   if a:findstart
     py << EOF
 start_column = ycm.CompletionStartColumn()
-vim.command( 'let l:start_column = ' + str( start_column ) )
+vim.command( 'let s:completion_start_column = ' + str( start_column ) )
 vim.command( 'let s:should_use_clang = ' +
               str( int( ycm.ShouldUseClang( start_column ) ) ) )
 EOF
 
     if ( s:should_use_clang )
-      return start_column
+      return s:completion_start_column
     else
       let l:current_column = col('.') - 1
-      let l:query_length = current_column - start_column
+      let l:query_length = current_column - s:completion_start_column
 
       if ( query_length < g:ycm_min_num_of_chars_for_completion )
         " for vim, -2 means not found but don't trigger an error message
         " see :h complete-functions
         return -2
       endif
-      return start_column
+      return s:completion_start_column
     endif
   else
     if ( s:should_use_clang )

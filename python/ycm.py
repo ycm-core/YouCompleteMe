@@ -110,7 +110,7 @@ class ClangComplete( object ):
     files.append( unsaved_file )
 
     line = int( vim.eval( "line('.')" ) )
-    column = CompletionStartColumn() + 1
+    column = int( vim.eval( "s:completion_start_column" ) ) + 1
     results = self.completer.CandidatesForLocationInFile( buffer.name,
                                                           line,
                                                           column,
