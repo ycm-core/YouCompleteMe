@@ -31,8 +31,20 @@ namespace YouCompleteMe
 
 struct UnsavedFile
 {
-  std::string *filename_;
-  std::string *contents_;
+  UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
+
+  const char *filename_;
+  const char *contents_;
+  unsigned long length_;
+
+  // We need this to be able to export this struct to Python via Boost.Python's
+  // methods. I have no clue why, but it won't compile without it.
+  // TODO: report this problem on the Boost bug tracker, the default equality
+  // operator should be more than adequate here
+  bool operator==( const UnsavedFile &other) const
+  {
+    return filename_ == other.filename_ && contents_ == other.contents_;
+  }
 };
 
 

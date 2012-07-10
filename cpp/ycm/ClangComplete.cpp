@@ -31,9 +31,10 @@ std::vector< CXUnsavedFile > ToCXUnsavedFiles(
   std::vector< CXUnsavedFile > clang_unsaved_files( unsaved_files.size() );
   for ( uint i = 0; i < unsaved_files.size(); ++i )
   {
-    clang_unsaved_files[ i ].Filename = unsaved_files[ i ].filename_->c_str();
-    clang_unsaved_files[ i ].Contents = unsaved_files[ i ].contents_->c_str();
-    clang_unsaved_files[ i ].Length   = unsaved_files[ i ].contents_->length();
+    // TODO: assert non-null
+    clang_unsaved_files[ i ].Filename = unsaved_files[ i ].filename_;
+    clang_unsaved_files[ i ].Contents = unsaved_files[ i ].contents_;
+    clang_unsaved_files[ i ].Length   = unsaved_files[ i ].length_;
   }
 
   return clang_unsaved_files;
@@ -155,9 +156,15 @@ std::vector< std::string > ClangComplete::CandidatesForLocationInFile(
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
 
-  // TODO: figure out does codeCompleteAt reparse the TU if the underlying
-  // source file has changed on disk since the last time the TU was updated and
-  // there are no unsaved files.
+  // codeCompleteAt reparses the TU if the underlying source file has changed on
+  // disk since the last time the TU was updated and there are no unsaved files.
+  // If there are unsaved files, then codeCompleteAt will parse the in-memory
+  // file contents we are giving it. In short, it is NEVER a good idea to call
+  // clang_reparseTranslationUnit right before a call to clang_codeCompleteAt.
+  // The only makes clang reparse the whole file TWICE, which has a huge impact
+  // on latency. At the time of writing, it seems that most users of libclang
+  // in the open-source world don't realize this (I checked). Some don't even
+  // call reparse*, but parse* which is even less efficient.
 
   CXCodeCompleteResults *results =
     clang_codeCompleteAt( GetTranslationUnitForFile( filename, unsaved_files ),
@@ -189,7 +196,7 @@ CXTranslationUnit ClangComplete::CreateTranslationUnit(
       flags.size(),
       &cxunsaved_files[ 0 ],
       cxunsaved_files.size(),
-      clang_defaultEditingTranslationUnitOptions());
+      clang_defaultEditingTranslationUnitOptions() );
 }
 
 

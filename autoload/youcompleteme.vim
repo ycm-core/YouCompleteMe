@@ -21,16 +21,19 @@ set cpo&vim
 
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
-let s:old_cursor_text = ''
+let s:searched_and_no_results_found = 0
+let s:should_use_clang = 0
 let g:ycm_min_num_of_chars_for_completion = 2
 
-" Set up the plugin, load all our modules, bind our keys etc.
+" TODO: check for a non-broken version of Vim and stop executing (with an error
+" message) if the detected version is too old
+
 function! youcompleteme#Enable()
 
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnMovedI()
-    " BufWinEnter/Leave?
+    " TODO: BufWinEnter/Leave?
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
   augroup END
@@ -62,6 +65,7 @@ function! youcompleteme#Enable()
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
   py csystem = ycm.CompletionSystem()
+  py clangcomp = ycm.ClangComplete()
 endfunction
 
 
@@ -96,8 +100,8 @@ endfunction
 
 
 function! s:AddIdentifierIfNeeded()
-  py vim.command( "let should_add_identifier = '" +
-        \ str( int( ycm.ShouldAddIdentifier() ) ) + "'" )
+  py vim.command( "let should_add_identifier = " +
+        \ str( int( ycm.ShouldAddIdentifier() ) ) )
   if should_add_identifier != 1
     return
   endif
@@ -125,63 +129,108 @@ function! s:InvokeCompletion()
     return
   endif
 
-  py vim.command( "let cursor_text = '" + ycm.CurrentCursorTextVim() + "'" )
-
-  " infinite loops are bad, mkay?
-  if cursor_text == '' || cursor_text == s:old_cursor_text
+  " This is tricky. First, having 'refresh' set to 'always' in the dictionary
+  " that our completion function returns makes sure that our completion function
+  " is called on every keystroke when the completion menu is showing
+  " (pumvisible() == true). So there's no point in invoking the completion menu
+  " with our feedkeys call then.
+  " Secondly, when the sequence of characters the user typed produces no
+  " results in our search an infinite loop can occur. The problem is that our
+  " feedkeys call triggers the OnCursorMovedI event which we are tied to.
+  " So we solve this with the searched_and_no_results_found script-scope
+  " variable that prevents this infinite loop from starting.
+  if pumvisible() || s:searched_and_no_results_found
+    let s:searched_and_no_results_found = 0
     return
   endif
 
   " <c-x><c-u> invokes the user's completion function (which we have set to
-  " youcompleteme#Complete), and <c-p> tells vim to select the previous
-  " completion candidate. This is necessary because by default, vim selects the
+  " youcompleteme#Complete), and <c-p> tells Vim to select the previous
+  " completion candidate. This is necessary because by default, Vim selects the
   " first candidate when completion is invoked, and selecting a candidate
-  " automatically replaces the current text with it. Calling <c-p> forces vim to
+  " automatically replaces the current text with it. Calling <c-p> forces Vim to
   " deselect the first candidate and in turn preserve the user's current text
   " until he explicitly chooses to replace it with a completion.
   call feedkeys( "\<C-X>\<C-U>\<C-P>", 'n' )
 endfunction
 
 
-" This is our main entry point. This is what vim calls to get completions.
-function! youcompleteme#Complete(findstart, base)
-  if a:findstart
-    py vim.command( 'let start_column = ' + str(
-                   \ ycm.CompletionStartColumn() ) )
-    return start_column
-  else
-    let s:old_cursor_text = a:base
-    if strlen( a:base ) < g:ycm_min_num_of_chars_for_completion
-      return []
-    endif
+function! s:IdentifierCompletion(query)
+  if strlen( a:query ) < g:ycm_min_num_of_chars_for_completion
+    return []
+  endif
 
-	  py csystem.CandidatesForQueryAsync( vim.eval('a:base') )
+  py csystem.CandidatesForQueryAsync( vim.eval('a:query') )
 
-		let l:results_ready = 0
-		while !l:results_ready
+  let l:results_ready = 0
+  while !l:results_ready
       py << EOF
 results_ready = csystem.AsyncCandidateRequestReady()
 if results_ready:
   vim.command( 'let l:results_ready = 1' )
 EOF
-			if complete_check()
-				return { 'words' : [], 'refresh' : 'always'}
-			endif
-		endwhile
+    if complete_check()
+      return { 'words' : [], 'refresh' : 'always'}
+    endif
+  endwhile
 
-    let l:results = []
+  let l:results = []
     py << EOF
 results = csystem.CandidatesFromStoredRequest()
 if results:
   vim.command( 'let l:results = ' + str( results ) )
 EOF
-    " We need a very recent version of vim for this to work; otherwise, even
-    " when we set refresh = always, vim won't call our completefunc on every
-    " keystroke. The problem is still present in vim 7.3.390 but is fixed in
-    " 7.3.475. It's possible that patch 404 was the one that fixed this issue,
-    " but I haven't tested this assumption.
-    " A bug in vim causes the '.' register to break when we use set this... sigh
-		return { 'words' : l:results, 'refresh' : 'always'}
+
+  let s:searched_and_no_results_found = len( l:results ) == 0
+
+  " We need a very recent version of vim for this to work; otherwise, even
+  " when we set refresh = always, vim won't call our completefunc on every
+  " keystroke. The problem is still present in vim 7.3.390 but is fixed in
+  " 7.3.475. It's possible that patch 404 was the one that fixed this issue,
+  " but I haven't tested this assumption.
+  " A bug in vim causes the '.' register to break when we use set this... sigh
+  return { 'words' : l:results, 'refresh' : 'always' }
+endfunction
+
+
+function! s:ClangCompletion( query )
+  py vim.command( 'let l:results = ' +
+        \ str( clangcomp.CandidatesForQuery( vim.eval( 'a:query' ) ) ) )
+
+  let s:searched_and_no_results_found = len( l:results ) == 0
+  return { 'words' : l:results, 'refresh' : 'always' }
+endfunction
+
+
+" This is our main entry point. This is what vim calls to get completions.
+function! youcompleteme#Complete( findstart, base )
+  if a:findstart
+    py << EOF
+start_column = ycm.CompletionStartColumn()
+vim.command( 'let l:start_column = ' + str( start_column ) )
+vim.command( 'let s:should_use_clang = ' +
+              str( int( ycm.ShouldUseClang( start_column ) ) ) )
+EOF
+
+    if ( s:should_use_clang )
+      return start_column
+    else
+      let l:current_column = col('.') - 1
+      let l:query_length = current_column - start_column
+
+      if ( query_length < g:ycm_min_num_of_chars_for_completion )
+        " for vim, -2 means not found but don't trigger an error message
+        " see :h complete-functions
+        return -2
+      endif
+      return start_column
+    endif
+  else
+    if ( s:should_use_clang )
+      return s:ClangCompletion( a:base )
+    else
+      return s:IdentifierCompletion( a:base )
+    endif
   endif
 endfunction
 

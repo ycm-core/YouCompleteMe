@@ -16,6 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Completer.h"
+#include "ClangComplete.h"
 #include "Future.h"
 
 #include <boost/python.hpp>
@@ -27,17 +28,41 @@ BOOST_PYTHON_MODULE(indexer)
   using namespace boost::python;
   using namespace YouCompleteMe;
 
+	class_< std::vector< std::string > >( "StringVec" )
+		.def( vector_indexing_suite< std::vector< std::string > >() );
+
   class_< Future >( "Future" )
     .def( "ResultsReady", &Future::ResultsReady )
     .def( "GetResults", &Future::GetResults );
 
   class_< Completer, boost::noncopyable >( "Completer" )
     .def( "EnableThreading", &Completer::EnableThreading )
-    // .def( "AddCandidatesToDatabase", actd )
     .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
     .def( "CandidatesForQueryAndTypeAsync",
           &Completer::CandidatesForQueryAndTypeAsync );
 
-	class_< std::vector< std::string > >( "StringVec" )
-		.def( vector_indexing_suite< std::vector< std::string > >() );
+  // CAREFUL HERE! For filename and contents we are referring directly to
+  // Python-allocated and -managed memory since we are accepting pointers to
+  // data members of python objects. We need to ensure that those objects
+  // outlive our UnsavedFile objects.
+	class_< UnsavedFile >( "UnsavedFile" )
+    .add_property( "filename_",
+      make_getter( &UnsavedFile::filename_ ),
+      make_setter( &UnsavedFile::filename_,
+                   return_value_policy< reference_existing_object >() ) )
+    .add_property( "contents_",
+      make_getter( &UnsavedFile::contents_ ),
+      make_setter( &UnsavedFile::contents_,
+                   return_value_policy< reference_existing_object >() ) )
+    .def_readwrite( "length_", &UnsavedFile::length_ );
+
+	class_< std::vector< UnsavedFile > >( "UnsavedFileVec" )
+		.def( vector_indexing_suite< std::vector< UnsavedFile > >() );
+
+  class_< ClangComplete, boost::noncopyable >( "ClangComplete" )
+    .def( "SetGlobalCompileFlags", &ClangComplete::SetGlobalCompileFlags )
+    .def( "SetFileCompileFlags", &ClangComplete::SetFileCompileFlags )
+    .def( "UpdateTranslationUnit", &ClangComplete::UpdateTranslationUnit )
+    .def( "CandidatesForLocationInFile",
+          &ClangComplete::CandidatesForLocationInFile );
 }

@@ -23,6 +23,7 @@ import indexer
 
 min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 
+clang_filetypes = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 
 class CompletionSystem( object ):
   def __init__( self ):
@@ -87,6 +88,34 @@ class CompletionSystem( object ):
                                             filepath,
                                             True )
 
+class ClangComplete( object ):
+  def __init__( self ):
+    self.completer = indexer.ClangComplete()
+
+  def CandidatesForQuery( self, query ):
+    buffer = vim.current.buffer
+
+    # CAREFUL HERE! For UnsavedFile filename and contents we are referring
+    # directly to Python-allocated and -managed memory since we are accepting
+    # pointers to data members of python objects. We need to ensure that those
+    # objects outlive our UnsavedFile objects.
+    # We do this to avoid an extra copy of the entire file contents.
+    contents = '\n'.join( buffer )
+    unsaved_file = indexer.UnsavedFile()
+    unsaved_file.contents_ = contents
+    unsaved_file.length_ = len( contents )
+    unsaved_file.filename_ = buffer.name
+
+    files = indexer.UnsavedFileVec()
+    files.append( unsaved_file )
+
+    line = int( vim.eval( "line('.')" ) )
+    column = CompletionStartColumn() + 1
+    results = self.completer.CandidatesForLocationInFile( buffer.name,
+                                                          line,
+                                                          column,
+                                                          files )
+    return list( results )
 
 def CurrentColumn():
   """Do NOT access the CurrentColumn in vim.current.line. It doesn't exist yet.
@@ -103,23 +132,48 @@ def CurrentLineAndColumn():
   return line_num, column_num
 
 
+def ShouldUseClang( start_column ):
+  filetype = vim.eval( "&filetype" )
+  if filetype not in clang_filetypes:
+    return False
+
+  line = vim.current.line
+  previous_char_index = start_column - 1
+  if ( not len( line ) or
+       previous_char_index < 0 or
+       previous_char_index >= len( line ) ):
+    return False
+
+  if line[ previous_char_index ] == '.':
+    return True
+
+  if previous_char_index - 1 < 0:
+    return False
+
+  two_previous_chars = line[ previous_char_index - 1 : start_column ]
+  if ( two_previous_chars == '->' or two_previous_chars == '::' ):
+    return True
+
+  return False
+
+
 def IsIdentifierChar( char ):
   return char.isalnum() or char == '_'
 
 
 def CompletionStartColumn():
+  """Returns the 0-based index where the completion string should start. So if
+  the user enters:
+    foo.bar^
+  with the cursor being at the location of the caret, then the starting column
+  would be the index of the letter 'b'.
+  """
+
   line = vim.current.line
-  current_column = CurrentColumn()
-  start_column = current_column
+  start_column = CurrentColumn()
 
   while start_column > 0 and IsIdentifierChar( line[ start_column - 1 ] ):
     start_column -= 1
-
-  if current_column - start_column < min_num_chars:
-    # for vim, -2 means not found but don't trigger an error message
-    # see :h complete-functions
-    return -2
-
   return start_column
 
 
@@ -156,20 +210,6 @@ def PreviousIdentifier():
     return ""
 
   return line[ start_column : end_column ]
-
-
-def CurrentCursorText():
-  start_column = CompletionStartColumn()
-  current_column = CurrentColumn()
-
-  if current_column - start_column < min_num_chars:
-    return ""
-
-  return vim.current.line[ start_column : current_column ]
-
-
-def CurrentCursorTextVim():
-  return EscapeForVim( CurrentCursorText() )
 
 
 def ShouldAddIdentifier():
