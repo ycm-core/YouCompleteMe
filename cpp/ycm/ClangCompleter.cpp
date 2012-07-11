@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "ClangComplete.h"
+#include "ClangCompleter.h"
 #include "standard.h"
 #include <clang-c/Index.h>
 
@@ -87,13 +87,13 @@ std::vector< std::string > ToStringVector( CXCodeCompleteResults *results )
 } // unnamed namespace
 
 
-ClangComplete::ClangComplete()
+ClangCompleter::ClangCompleter()
 {
   clang_index_ = clang_createIndex( 0, 0 );
 }
 
 
-ClangComplete::~ClangComplete()
+ClangCompleter::~ClangCompleter()
 {
   foreach ( const TranslationUnitForFilename::value_type &filename_unit,
             filename_to_translation_unit_ )
@@ -105,14 +105,14 @@ ClangComplete::~ClangComplete()
 }
 
 
-void ClangComplete::SetGlobalCompileFlags(
+void ClangCompleter::SetGlobalCompileFlags(
     const std::vector< std::string > &flags )
 {
   global_flags_ = flags;
 }
 
 
-void ClangComplete::SetFileCompileFlags(
+void ClangCompleter::SetFileCompileFlags(
     const std::string &filename,
     const std::vector< std::string > &flags )
 {
@@ -120,7 +120,7 @@ void ClangComplete::SetFileCompileFlags(
 }
 
 
-void ClangComplete::UpdateTranslationUnit(
+void ClangCompleter::UpdateTranslationUnit(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files )
 {
@@ -147,7 +147,7 @@ void ClangComplete::UpdateTranslationUnit(
 }
 
 
-std::vector< std::string > ClangComplete::CandidatesForLocationInFile(
+std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
     const std::string &filename,
     int line,
     int column,
@@ -181,7 +181,7 @@ std::vector< std::string > ClangComplete::CandidatesForLocationInFile(
 }
 
 
-CXTranslationUnit ClangComplete::CreateTranslationUnit(
+CXTranslationUnit ClangCompleter::CreateTranslationUnit(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files )
 {
@@ -200,7 +200,7 @@ CXTranslationUnit ClangComplete::CreateTranslationUnit(
 }
 
 
-std::vector< const char* > ClangComplete::ClangFlagsForFilename(
+std::vector< const char* > ClangCompleter::ClangFlagsForFilename(
     const std::string &filename )
 {
   std::vector< const char* > flags;
@@ -222,7 +222,7 @@ std::vector< const char* > ClangComplete::ClangFlagsForFilename(
 }
 
 
-CXTranslationUnit ClangComplete::GetTranslationUnitForFile(
+CXTranslationUnit ClangCompleter::GetTranslationUnitForFile(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files )
 {

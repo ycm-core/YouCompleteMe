@@ -88,9 +88,9 @@ class CompletionSystem( object ):
                                             filepath,
                                             True )
 
-class ClangComplete( object ):
+class ClangCompleter( object ):
   def __init__( self ):
-    self.completer = indexer.ClangComplete()
+    self.completer = indexer.ClangCompleter()
 
   def CandidatesForQuery( self, query ):
     files = indexer.UnsavedFileVec()

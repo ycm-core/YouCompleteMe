@@ -16,7 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IdentifierCompleter.h"
-#include "ClangComplete.h"
+#include "ClangCompleter.h"
 #include "Future.h"
 
 #include <boost/python.hpp>
@@ -60,10 +60,10 @@ BOOST_PYTHON_MODULE(indexer)
 	class_< std::vector< UnsavedFile > >( "UnsavedFileVec" )
 		.def( vector_indexing_suite< std::vector< UnsavedFile > >() );
 
-  class_< ClangComplete, boost::noncopyable >( "ClangComplete" )
-    .def( "SetGlobalCompileFlags", &ClangComplete::SetGlobalCompileFlags )
-    .def( "SetFileCompileFlags", &ClangComplete::SetFileCompileFlags )
-    .def( "UpdateTranslationUnit", &ClangComplete::UpdateTranslationUnit )
+  class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
+    .def( "SetGlobalCompileFlags", &ClangCompleter::SetGlobalCompileFlags )
+    .def( "SetFileCompileFlags", &ClangCompleter::SetFileCompileFlags )
+    .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
     .def( "CandidatesForLocationInFile",
-          &ClangComplete::CandidatesForLocationInFile );
+          &ClangCompleter::CandidatesForLocationInFile );
 }

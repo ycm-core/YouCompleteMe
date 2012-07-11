@@ -66,7 +66,7 @@ function! youcompleteme#Enable()
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
   py csystem = ycm.CompletionSystem()
-  py clangcomp = ycm.ClangComplete()
+  py clangcomp = ycm.ClangCompleter()
 endfunction
 
 

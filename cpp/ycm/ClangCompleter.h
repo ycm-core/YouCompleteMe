@@ -54,11 +54,11 @@ typedef boost::unordered_map< std::string, CXTranslationUnit >
   TranslationUnitForFilename;
 
 
-class ClangComplete : boost::noncopyable
+class ClangCompleter : boost::noncopyable
 {
 public:
-  ClangComplete();
-  ~ClangComplete();
+  ClangCompleter();
+  ~ClangCompleter();
 
   void SetGlobalCompileFlags( const std::vector< std::string > &flags );
 
