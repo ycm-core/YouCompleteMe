@@ -58,7 +58,6 @@ class ClangComplete : boost::noncopyable
 {
 public:
   ClangComplete();
-
   ~ClangComplete();
 
   void SetGlobalCompileFlags( const std::vector< std::string > &flags );

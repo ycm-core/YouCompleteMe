@@ -22,12 +22,12 @@ import vim
 import indexer
 
 min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
-
 clang_filetypes = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
+
 
 class CompletionSystem( object ):
   def __init__( self ):
-    self.completer = indexer.Completer()
+    self.completer = indexer.IdentifierCompleter()
     self.completer.EnableThreading()
     self.pattern = re.compile( r"[_a-zA-Z]\w*" )
     self.future = None

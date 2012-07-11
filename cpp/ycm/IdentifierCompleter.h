@@ -54,15 +54,15 @@ typedef ConcurrentLatestValue<
             boost::packaged_task< AsyncResults > > > LatestTask;
 
 
-class Completer : boost::noncopyable
+class IdentifierCompleter : boost::noncopyable
 {
 public:
-  Completer() {}
-  Completer( const std::vector< std::string > &candidates );
-  Completer( const std::vector< std::string > &candidates,
+  IdentifierCompleter() {}
+  IdentifierCompleter( const std::vector< std::string > &candidates );
+  IdentifierCompleter( const std::vector< std::string > &candidates,
              const std::string &filetype,
              const std::string &filepath );
-  ~Completer();
+  ~IdentifierCompleter();
 
   void EnableThreading();
 

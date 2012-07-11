@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Completer.h"
+#include "IdentifierCompleter.h"
 #include "standard.h"
 #include "Utils.h"
 
@@ -53,23 +53,25 @@ void ThreadMain( LatestTask &latest_task )
 } // unnamed namespace
 
 
-Completer::Completer( const std::vector< std::string > &candidates )
+IdentifierCompleter::IdentifierCompleter(
+    const std::vector< std::string > &candidates )
   : threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, "", "", true );
 }
 
 
-Completer::Completer( const std::vector< std::string > &candidates,
-                      const std::string &filetype,
-                      const std::string &filepath )
+IdentifierCompleter::IdentifierCompleter(
+    const std::vector< std::string > &candidates,
+    const std::string &filetype,
+    const std::string &filepath )
   : threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, filetype, filepath, true );
 }
 
 
-Completer::~Completer()
+IdentifierCompleter::~IdentifierCompleter()
 {
   foreach ( const CandidateRepository::value_type &pair,
             candidate_repository_ )
@@ -81,14 +83,14 @@ Completer::~Completer()
 
 // We need this mostly so that we can not use it in tests. Apparently the
 // GoogleTest framework goes apeshit on us if we enable threads by default.
-void Completer::EnableThreading()
+void IdentifierCompleter::EnableThreading()
 {
   threading_enabled_ = true;
   InitThreads();
 }
 
 
-void Completer::AddCandidatesToDatabase(
+void IdentifierCompleter::AddCandidatesToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
     const std::string &filepath,
@@ -112,14 +114,14 @@ void Completer::AddCandidatesToDatabase(
 }
 
 
-std::vector< std::string > Completer::CandidatesForQuery(
+std::vector< std::string > IdentifierCompleter::CandidatesForQuery(
     const std::string &query ) const
 {
   return CandidatesForQueryAndType( query, "" );
 }
 
 
-std::vector< std::string > Completer::CandidatesForQueryAndType(
+std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
     const std::string &query,
     const std::string &filetype ) const
 {
@@ -135,7 +137,7 @@ std::vector< std::string > Completer::CandidatesForQueryAndType(
 }
 
 
-Future Completer::CandidatesForQueryAndTypeAsync(
+Future IdentifierCompleter::CandidatesForQueryAndTypeAsync(
     const std::string &query,
     const std::string &filetype ) const
 {
@@ -146,7 +148,7 @@ Future Completer::CandidatesForQueryAndTypeAsync(
   // Try not to look at this too hard, it may burn your eyes.
   shared_ptr< packaged_task< AsyncResults > > task =
     make_shared< packaged_task< AsyncResults > >(
-      bind( &Completer::ResultsForQueryAndType,
+      bind( &IdentifierCompleter::ResultsForQueryAndType,
             boost::cref( *this ),
             query,
             filetype ) );
@@ -158,7 +160,7 @@ Future Completer::CandidatesForQueryAndTypeAsync(
 }
 
 
-AsyncResults Completer::ResultsForQueryAndType(
+AsyncResults IdentifierCompleter::ResultsForQueryAndType(
     const std::string &query,
     const std::string &filetype ) const
 {
@@ -168,9 +170,10 @@ AsyncResults Completer::ResultsForQueryAndType(
 }
 
 
-void Completer::ResultsForQueryAndType( const std::string &query,
-                                        const std::string &filetype,
-                                        std::vector< Result > &results ) const
+void IdentifierCompleter::ResultsForQueryAndType(
+    const std::string &query,
+    const std::string &filetype,
+    std::vector< Result > &results ) const
 {
   FiletypeMap::const_iterator it = filetype_map_.find( filetype );
   if ( it == filetype_map_.end() )
@@ -196,7 +199,7 @@ void Completer::ResultsForQueryAndType( const std::string &query,
 }
 
 
-std::list< const Candidate* >& Completer::GetCandidateList(
+std::list< const Candidate* >& IdentifierCompleter::GetCandidateList(
     const std::string &filetype,
     const std::string &filepath )
 {
@@ -216,7 +219,7 @@ std::list< const Candidate* >& Completer::GetCandidateList(
 }
 
 
-void Completer::InitThreads()
+void IdentifierCompleter::InitThreads()
 {
   int threads_to_create =
     std::max( MIN_ASYNC_THREADS,

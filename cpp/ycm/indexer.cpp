@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Completer.h"
+#include "IdentifierCompleter.h"
 #include "ClangComplete.h"
 #include "Future.h"
 
@@ -35,11 +35,12 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "ResultsReady", &Future::ResultsReady )
     .def( "GetResults", &Future::GetResults );
 
-  class_< Completer, boost::noncopyable >( "Completer" )
-    .def( "EnableThreading", &Completer::EnableThreading )
-    .def( "AddCandidatesToDatabase", &Completer::AddCandidatesToDatabase )
+  class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
+    .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
+    .def( "AddCandidatesToDatabase",
+          &IdentifierCompleter::AddCandidatesToDatabase )
     .def( "CandidatesForQueryAndTypeAsync",
-          &Completer::CandidatesForQueryAndTypeAsync );
+          &IdentifierCompleter::CandidatesForQueryAndTypeAsync );
 
   // CAREFUL HERE! For filename and contents we are referring directly to
   // Python-allocated and -managed memory since we are accepting pointers to
