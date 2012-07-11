@@ -93,29 +93,46 @@ class ClangComplete( object ):
     self.completer = indexer.ClangComplete()
 
   def CandidatesForQuery( self, query ):
-    buffer = vim.current.buffer
+    files = indexer.UnsavedFileVec()
 
     # CAREFUL HERE! For UnsavedFile filename and contents we are referring
     # directly to Python-allocated and -managed memory since we are accepting
     # pointers to data members of python objects. We need to ensure that those
-    # objects outlive our UnsavedFile objects.
-    # We do this to avoid an extra copy of the entire file contents.
-    contents = '\n'.join( buffer )
-    unsaved_file = indexer.UnsavedFile()
-    unsaved_file.contents_ = contents
-    unsaved_file.length_ = len( contents )
-    unsaved_file.filename_ = buffer.name
+    # objects outlive our UnsavedFile objects. This is why we need the
+    # contents_holder and filename_holder lists, to make sure the string objects
+    # are still around when we call CandidatesForLocationInFile.  We do this to
+    # avoid an extra copy of the entire file contents.
 
-    files = indexer.UnsavedFileVec()
-    files.append( unsaved_file )
+    contents_holder = []
+    filename_holder = []
+    for buffer in GetUnsavedBuffers():
+      contents_holder.append( '\n'.join( buffer ) )
+      filename_holder.append( buffer.name )
+
+      unsaved_file = indexer.UnsavedFile()
+      unsaved_file.contents_ = contents_holder[ -1 ]
+      unsaved_file.length_ = len( contents_holder[ -1 ] )
+      unsaved_file.filename_ = filename_holder[ -1 ]
+
+      files.append( unsaved_file )
 
     line = int( vim.eval( "line('.')" ) )
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
-    results = self.completer.CandidatesForLocationInFile( buffer.name,
+    current_buffer = vim.current.buffer
+    results = self.completer.CandidatesForLocationInFile( current_buffer.name,
                                                           line,
                                                           column,
                                                           files )
     return list( results )
+
+
+def GetUnsavedBuffers():
+  def BufferModified( buffer_number ):
+    to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )
+    return bool( int( vim.eval( to_eval ) ) )
+
+  return ( x for x in vim.buffers if BufferModified( x.number ) )
+
 
 def CurrentColumn():
   """Do NOT access the CurrentColumn in vim.current.line. It doesn't exist yet.
