@@ -116,7 +116,7 @@ class ClangComplete( object ):
 
       files.append( unsaved_file )
 
-    line = int( vim.eval( "line('.')" ) )
+    line, _ = vim.current.window.cursor
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
     current_buffer = vim.current.buffer
     results = self.completer.CandidatesForLocationInFile( current_buffer.name,
@@ -136,17 +136,21 @@ def GetUnsavedBuffers():
 
 def CurrentColumn():
   """Do NOT access the CurrentColumn in vim.current.line. It doesn't exist yet.
-  Only the chars befor the current column exist in vim.current.line."""
+  Only the chars before the current column exist in vim.current.line."""
 
-  # vim's columns start at 1 while vim.current.line columns start at 0
-  return int( vim.eval( "col('.')" ) ) - 1
+  # vim's columns are 1-based while vim.current.line columns are 0-based
+  # ... but vim.current.window.cursor (which returns a (line, column) tuple)
+  # columns are 0-based, while the line from that same tuple is 1-based.
+  # Pigs have wings and I'm a loopy purple duck. Everything makes sense now.
+  return vim.current.window.cursor[ 1 ]
 
 
 def CurrentLineAndColumn():
-  result = vim.eval( "getpos('.')")
-  line_num = int( result[ 1 ] ) - 1
-  column_num = int( result[ 2 ] ) - 1
-  return line_num, column_num
+  # See the comment in CurrentColumn about the calculation for the line and
+  # column number
+  line, column = vim.current.window.cursor
+  line -= 1
+  return line, column
 
 
 def ShouldUseClang( start_column ):
