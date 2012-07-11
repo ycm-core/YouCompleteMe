@@ -25,7 +25,7 @@ min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 clang_filetypes = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 
 
-class CompletionSystem( object ):
+class IdentifierCompleter( object ):
   def __init__( self ):
     self.completer = indexer.IdentifierCompleter()
     self.completer.EnableThreading()

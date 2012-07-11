@@ -65,19 +65,19 @@ function! youcompleteme#Enable()
   py import vim
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
-  py csystem = ycm.CompletionSystem()
+  py identcomp = ycm.IdentifierCompleter()
   py clangcomp = ycm.ClangCompleter()
 endfunction
 
 
 function! s:OnBufferVisit()
   call s:SetCompleteFunc()
-  py csystem.AddBufferIdentifiers()
+  py identcomp.AddBufferIdentifiers()
 endfunction
 
 
 function! s:OnCursorHold()
-  py csystem.AddBufferIdentifiers()
+  py identcomp.AddBufferIdentifiers()
 endfunction
 
 
@@ -106,7 +106,7 @@ function! s:AddIdentifierIfNeeded()
   if should_add_identifier != 1
     return
   endif
-  py csystem.AddPreviousIdentifier()
+  py identcomp.AddPreviousIdentifier()
 endfunction
 
 
@@ -161,12 +161,12 @@ function! s:IdentifierCompletion(query)
     return []
   endif
 
-  py csystem.CandidatesForQueryAsync( vim.eval('a:query') )
+  py identcomp.CandidatesForQueryAsync( vim.eval('a:query') )
 
   let l:results_ready = 0
   while !l:results_ready
       py << EOF
-results_ready = csystem.AsyncCandidateRequestReady()
+results_ready = identcomp.AsyncCandidateRequestReady()
 if results_ready:
   vim.command( 'let l:results_ready = 1' )
 EOF
@@ -177,7 +177,7 @@ EOF
 
   let l:results = []
     py << EOF
-results = csystem.CandidatesFromStoredRequest()
+results = identcomp.CandidatesFromStoredRequest()
 if results:
   vim.command( 'let l:results = ' + str( results ) )
 EOF
