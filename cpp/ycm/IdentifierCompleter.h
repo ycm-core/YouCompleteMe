@@ -18,8 +18,6 @@
 #ifndef COMPLETER_H_7AR4UGXE
 #define COMPLETER_H_7AR4UGXE
 
-// TODO: can we remove the inclusion of Candidate.h now?
-#include "Candidate.h"
 #include "ConcurrentLatestValue.h"
 #include "Future.h"
 
@@ -34,11 +32,8 @@
 namespace YouCompleteMe
 {
 
+class Candidate;
 class CandidateRepository;
-
-// candidate text string -> candidate objects
-// typedef boost::unordered_map< std::string, const Candidate* >
-//           CandidateRepository;
 
 // filepath -> *( *candidate )
 typedef boost::unordered_map< std::string,
