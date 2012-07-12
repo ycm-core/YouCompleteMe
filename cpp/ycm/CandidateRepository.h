@@ -18,8 +18,6 @@
 #ifndef CANDIDATEREPOSITORY_H_K9OVCMHG
 #define CANDIDATEREPOSITORY_H_K9OVCMHG
 
-#include "Candidate.h"
-
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/thread/mutex.hpp>
@@ -29,6 +27,8 @@
 
 namespace YouCompleteMe
 {
+
+class Candidate;
 
 typedef boost::unordered_map< std::string, const Candidate* >
           CandidateHolder;

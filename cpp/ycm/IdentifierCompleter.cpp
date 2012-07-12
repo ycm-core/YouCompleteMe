@@ -18,6 +18,7 @@
 #include "IdentifierCompleter.h"
 #include "standard.h"
 #include "CandidateRepository.h"
+#include "Candidate.h"
 #include "Utils.h"
 
 #include <boost/bind.hpp>
