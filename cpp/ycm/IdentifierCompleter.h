@@ -18,12 +18,12 @@
 #ifndef COMPLETER_H_7AR4UGXE
 #define COMPLETER_H_7AR4UGXE
 
+// TODO: can we remove the inclusion of Candidate.h now?
 #include "Candidate.h"
 #include "ConcurrentLatestValue.h"
 #include "Future.h"
 
 #include <boost/utility.hpp>
-#include <boost/python.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -34,11 +34,11 @@
 namespace YouCompleteMe
 {
 
-typedef boost::python::list Pylist;
+class CandidateRepository;
 
 // candidate text string -> candidate objects
-typedef boost::unordered_map< std::string, const Candidate* >
-          CandidateRepository;
+// typedef boost::unordered_map< std::string, const Candidate* >
+//           CandidateRepository;
 
 // filepath -> *( *candidate )
 typedef boost::unordered_map< std::string,
@@ -57,12 +57,11 @@ typedef ConcurrentLatestValue<
 class IdentifierCompleter : boost::noncopyable
 {
 public:
-  IdentifierCompleter() {}
+  IdentifierCompleter();
   IdentifierCompleter( const std::vector< std::string > &candidates );
   IdentifierCompleter( const std::vector< std::string > &candidates,
              const std::string &filetype,
              const std::string &filepath );
-  ~IdentifierCompleter();
 
   void EnableThreading();
 
@@ -103,8 +102,7 @@ private:
   // PRIVATE MEMBER VARIABLES
   /////////////////////////////
 
-  // This data structure owns all the Candidate pointers
-  CandidateRepository candidate_repository_;
+  CandidateRepository &candidate_repository_;
 
   FiletypeMap filetype_map_;
 

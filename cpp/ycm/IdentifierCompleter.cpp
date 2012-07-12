@@ -17,6 +17,7 @@
 
 #include "IdentifierCompleter.h"
 #include "standard.h"
+#include "CandidateRepository.h"
 #include "Utils.h"
 
 #include <boost/bind.hpp>
@@ -53,9 +54,17 @@ void ThreadMain( LatestTask &latest_task )
 } // unnamed namespace
 
 
+IdentifierCompleter::IdentifierCompleter()
+  : candidate_repository_( CandidateRepository::Instance() ),
+    threading_enabled_( false )
+{
+}
+
+
 IdentifierCompleter::IdentifierCompleter(
     const std::vector< std::string > &candidates )
-  : threading_enabled_( false )
+  : candidate_repository_( CandidateRepository::Instance() ),
+    threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, "", "", true );
 }
@@ -65,19 +74,10 @@ IdentifierCompleter::IdentifierCompleter(
     const std::vector< std::string > &candidates,
     const std::string &filetype,
     const std::string &filepath )
-  : threading_enabled_( false )
+  : candidate_repository_( CandidateRepository::Instance() ),
+    threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, filetype, filepath, true );
-}
-
-
-IdentifierCompleter::~IdentifierCompleter()
-{
-  foreach ( const CandidateRepository::value_type &pair,
-            candidate_repository_ )
-  {
-    delete pair.second;
-  }
 }
 
 
@@ -102,15 +102,12 @@ void IdentifierCompleter::AddCandidatesToDatabase(
   if ( clear_database )
     candidates.clear();
 
-  foreach ( const std::string &candidate_text, new_candidates )
-  {
-    const Candidate *&candidate = GetValueElseInsert( candidate_repository_,
-                                                      candidate_text, NULL );
-    if ( !candidate )
-      candidate = new Candidate( candidate_text );
+  std::vector< const Candidate* > repository_candidates =
+    candidate_repository_.GetCandidatesForStrings( new_candidates );
 
-    candidates.push_back( candidate );
-  }
+  candidates.insert( candidates.end(),
+                     repository_candidates.begin(),
+                     repository_candidates.end() );
 }
 
 
