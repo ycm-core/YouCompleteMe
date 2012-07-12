@@ -29,6 +29,8 @@ typedef struct CXTranslationUnitImpl *CXTranslationUnit;
 namespace YouCompleteMe
 {
 
+class CandidateRepository;
+
 struct UnsavedFile
 {
   UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
@@ -68,7 +70,9 @@ public:
   void UpdateTranslationUnit( const std::string &filename,
                               const std::vector< UnsavedFile > &unsaved_files );
 
+  // TODO: rename this
   std::vector< std::string > CandidatesForLocationInFile(
+      const std::string &query,
       const std::string &filename,
       int line,
       int column,
@@ -88,10 +92,20 @@ private:
       const std::string &filename,
       const std::vector< UnsavedFile > &unsaved_files );
 
+  std::vector< std::string > SortCandidatesForQuery(
+      const std::string &query,
+      const std::vector< std::string > &candidates );
+
+
+  /////////////////////////////
+  // PRIVATE MEMBER VARIABLES
+  /////////////////////////////
+
   CXIndex clang_index_;
   FlagsForFile flags_for_file_;
   TranslationUnitForFilename filename_to_translation_unit_;
   std::vector< std::string > global_flags_;
+  CandidateRepository &candidate_repository_;
 
 };
 

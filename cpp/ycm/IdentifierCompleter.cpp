@@ -127,6 +127,8 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
   ResultsForQueryAndType( query, filetype, results );
 
   std::vector< std::string > candidates;
+  candidates.reserve( results.size() );
+
   foreach ( const Result& result, results )
   {
     candidates.push_back( *result.Text() );

@@ -119,7 +119,8 @@ class ClangCompleter( object ):
     line, _ = vim.current.window.cursor
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
     current_buffer = vim.current.buffer
-    results = self.completer.CandidatesForLocationInFile( current_buffer.name,
+    results = self.completer.CandidatesForLocationInFile( query,
+                                                          current_buffer.name,
                                                           line,
                                                           column,
                                                           files )

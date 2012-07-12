@@ -195,6 +195,7 @@ endfunction
 
 
 function! s:ClangCompletion( query )
+  " TODO: don't trigger on a dot inside a string constant
   py vim.command( 'let l:results = ' +
         \ str( clangcomp.CandidatesForQuery( vim.eval( 'a:query' ) ) ) )
 

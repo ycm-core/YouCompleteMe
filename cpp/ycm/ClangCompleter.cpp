@@ -16,7 +16,10 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ClangCompleter.h"
+#include "Candidate.h"
 #include "standard.h"
+#include "CandidateRepository.h"
+
 #include <clang-c/Index.h>
 
 namespace YouCompleteMe
@@ -88,6 +91,7 @@ std::vector< std::string > ToStringVector( CXCodeCompleteResults *results )
 
 
 ClangCompleter::ClangCompleter()
+  : candidate_repository_( CandidateRepository::Instance() )
 {
   clang_index_ = clang_createIndex( 0, 0 );
 }
@@ -148,6 +152,7 @@ void ClangCompleter::UpdateTranslationUnit(
 
 
 std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
+    const std::string &query,
     const std::string &filename,
     int line,
     int column,
@@ -176,6 +181,9 @@ std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
                           clang_defaultCodeCompleteOptions());
 
   std::vector< std::string > completions = ToStringVector( results );
+  if ( !query.empty() )
+    completions = SortCandidatesForQuery( query, completions );
+
   clang_disposeCodeCompleteResults( results );
   return completions;
 }
@@ -235,6 +243,42 @@ CXTranslationUnit ClangCompleter::GetTranslationUnitForFile(
   CXTranslationUnit unit = CreateTranslationUnit( filename, unsaved_files );
   filename_to_translation_unit_[ filename ] = unit;
   return unit;
+}
+
+
+std::vector< std::string > ClangCompleter::SortCandidatesForQuery(
+    const std::string &query,
+    const std::vector< std::string > &candidates )
+{
+  Bitset query_bitset = LetterBitsetFromString( query );
+
+  std::vector< const Candidate* > repository_candidates =
+    candidate_repository_.GetCandidatesForStrings( candidates );
+
+  std::vector< Result > results;
+
+  // This loop needs to be a separate function
+  foreach ( const Candidate* candidate, repository_candidates )
+  {
+    if ( !candidate->MatchesQueryBitset( query_bitset ) )
+      continue;
+
+    Result result = candidate->QueryMatchResult( query );
+    if ( result.IsSubsequence() )
+      results.push_back( result );
+  }
+
+  std::sort( results.begin(), results.end() );
+
+  std::vector< std::string > sorted_candidates;
+  sorted_candidates.reserve( results.size() );
+
+  foreach ( const Result& result, results )
+  {
+    sorted_candidates.push_back( *result.Text() );
+  }
+
+  return sorted_candidates;
 }
 
 } // namespace YouCompleteMe
