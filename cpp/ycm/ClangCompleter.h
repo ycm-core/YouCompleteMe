@@ -43,9 +43,12 @@ struct UnsavedFile
   // methods. I have no clue why, but it won't compile without it.
   // TODO: report this problem on the Boost bug tracker, the default equality
   // operator should be more than adequate here
-  bool operator==( const UnsavedFile &other) const
+  bool operator== ( const UnsavedFile &other ) const
   {
-    return filename_ == other.filename_ && contents_ == other.contents_;
+    return
+      filename_ == other.filename_ &&
+      contents_ == other.contents_ &&
+      length_   == other.length_;
   }
 };
 
