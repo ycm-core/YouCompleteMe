@@ -26,9 +26,14 @@ namespace YouCompleteMe
 {
 
 class Result;
+template< typename T > class ConcurrentLatestValue;
 
 typedef boost::python::list Pylist;
 typedef boost::shared_ptr< std::vector< Result > > AsyncResults;
+
+typedef ConcurrentLatestValue<
+          boost::shared_ptr<
+            boost::packaged_task< AsyncResults > > > LatestTask;
 
 class Future
 {

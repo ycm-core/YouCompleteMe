@@ -44,10 +44,6 @@ typedef boost::unordered_map< std::string,
 typedef boost::unordered_map< std::string,
           boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
 
-typedef ConcurrentLatestValue<
-          boost::shared_ptr<
-            boost::packaged_task< AsyncResults > > > LatestTask;
-
 
 class IdentifierCompleter : boost::noncopyable
 {
