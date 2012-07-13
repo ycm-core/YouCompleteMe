@@ -25,8 +25,6 @@
 #include <boost/make_shared.hpp>
 #include <algorithm>
 
-using boost::python::len;
-using boost::python::extract;
 using boost::packaged_task;
 using boost::bind;
 using boost::unique_future;
