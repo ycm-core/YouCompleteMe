@@ -64,6 +64,16 @@ std::vector< std::string > Candidates( const std::string &a,
 } // unnamed namespace
 
 
+// This differs from what we expect from the ClangCompleter. That one should
+// return results for an empty query.
+TEST( IdentifierCompleterTest, EmptyQueryNoResults )
+{
+	EXPECT_THAT( IdentifierCompleter( Candidates(
+               "foobar" ) ).CandidatesForQuery( "" ),
+	             ElementsAre() );
+}
+
+
 TEST( IdentifierCompleterTest, OneCandidate )
 {
 	EXPECT_THAT( IdentifierCompleter( Candidates(

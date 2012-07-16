@@ -174,7 +174,7 @@ void IdentifierCompleter::ResultsForQueryAndType(
     std::vector< Result > &results ) const
 {
   FiletypeMap::const_iterator it = filetype_map_.find( filetype );
-  if ( it == filetype_map_.end() )
+  if ( it == filetype_map_.end() || query.empty() )
     return;
 
   Bitset query_bitset = LetterBitsetFromString( query );
