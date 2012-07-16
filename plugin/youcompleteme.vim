@@ -20,6 +20,14 @@ if exists("g:loaded_youcompleteme")
 endif
 let g:loaded_youcompleteme = 1
 
+if !exists( 'g:ycm_min_num_of_chars_for_completion' )
+  let g:ycm_min_num_of_chars_for_completion = 2
+endif
+
+if !exists( 'g:ycm_filetypes_to_ignore' )
+  let g:ycm_filetypes_to_ignore = { 'notes' : 1 }
+endif
+
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim

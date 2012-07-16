@@ -22,10 +22,14 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:old_cursor_text = ''
-let g:ycm_min_num_of_chars_for_completion = 2
 
 " Set up the plugin, load all our modules, bind our keys etc.
 function! youcompleteme#Enable()
+  " If the user set the current filetype as a filetype that YCM should ignore,
+  " then we don't do anything
+  if get( g:ycm_filetypes_to_ignore, &filetype, 0 )
+    return
+  endif
 
   augroup youcompleteme
     autocmd!
