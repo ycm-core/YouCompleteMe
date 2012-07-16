@@ -72,6 +72,7 @@ int NumWordBoundaryCharMatches( const std::string &query,
 
 Result::Result( bool is_subsequence )
   :
+  query_is_empty_( true ),
   is_subsequence_( is_subsequence ),
   first_char_same_in_query_and_text_( false ),
   ratio_of_word_boundary_chars_in_query_( 0 ),
@@ -90,6 +91,7 @@ Result::Result( bool is_subsequence,
                 const std::string &word_boundary_chars,
                 const std::string &query )
   :
+  query_is_empty_( true ),
   is_subsequence_( is_subsequence ),
   first_char_same_in_query_and_text_( false ),
   ratio_of_word_boundary_chars_in_query_( 0 ),
@@ -104,46 +106,48 @@ Result::Result( bool is_subsequence,
 }
 
 
-// TODO: do we need a custom copy ctor?
-Result::Result( const Result& other )
-  :
-  is_subsequence_( other.is_subsequence_ ),
-  first_char_same_in_query_and_text_(
-      other.first_char_same_in_query_and_text_ ),
-  ratio_of_word_boundary_chars_in_query_(
-      other.ratio_of_word_boundary_chars_in_query_ ),
-  word_boundary_char_utilization_( other.word_boundary_char_utilization_ ),
-  query_is_candidate_prefix_( other.query_is_candidate_prefix_ ),
-  text_is_lowercase_( other.text_is_lowercase_ ),
-  char_match_index_sum_( other.char_match_index_sum_ ),
-  text_( other.text_ )
-{
-}
-
-
 bool Result::operator< ( const Result &other ) const
 {
   // Yes, this is ugly but it also needs to be fast.  Since this is called a
   // bazillion times, we have to make sure only the required comparisons are
   // made, and no more.
 
-  if ( first_char_same_in_query_and_text_ !=
-       other.first_char_same_in_query_and_text_ )
+  if ( !query_is_empty_ )
   {
-    return first_char_same_in_query_and_text_;
-  }
+    if ( first_char_same_in_query_and_text_ !=
+        other.first_char_same_in_query_and_text_ )
+    {
+      return first_char_same_in_query_and_text_;
+    }
 
-  bool equal_wb_ratios = AlmostEqual(
-      ratio_of_word_boundary_chars_in_query_,
-      other.ratio_of_word_boundary_chars_in_query_ );
+    bool equal_wb_ratios = AlmostEqual(
+        ratio_of_word_boundary_chars_in_query_,
+        other.ratio_of_word_boundary_chars_in_query_ );
 
-  bool equal_wb_utilization = AlmostEqual(
-      word_boundary_char_utilization_,
-      other.word_boundary_char_utilization_ );
+    bool equal_wb_utilization = AlmostEqual(
+        word_boundary_char_utilization_,
+        other.word_boundary_char_utilization_ );
 
-  if ( AlmostEqual( ratio_of_word_boundary_chars_in_query_, 1.0 ) ||
-       AlmostEqual( other.ratio_of_word_boundary_chars_in_query_, 1.0 ) )
-  {
+    if ( AlmostEqual( ratio_of_word_boundary_chars_in_query_, 1.0 ) ||
+        AlmostEqual( other.ratio_of_word_boundary_chars_in_query_, 1.0 ) )
+    {
+      if ( !equal_wb_ratios )
+      {
+        return ratio_of_word_boundary_chars_in_query_ >
+          other.ratio_of_word_boundary_chars_in_query_;
+      }
+
+      else
+      {
+        if ( !equal_wb_utilization )
+          return word_boundary_char_utilization_ >
+            other.word_boundary_char_utilization_;
+      }
+    }
+
+    if ( query_is_candidate_prefix_ != other.query_is_candidate_prefix_ )
+      return query_is_candidate_prefix_;
+
     if ( !equal_wb_ratios )
     {
       return ratio_of_word_boundary_chars_in_query_ >
@@ -156,33 +160,18 @@ bool Result::operator< ( const Result &other ) const
         return word_boundary_char_utilization_ >
           other.word_boundary_char_utilization_;
     }
+
+    if ( char_match_index_sum_ != other.char_match_index_sum_ )
+      return char_match_index_sum_ < other.char_match_index_sum_;
+
+    if ( text_->length() != other.text_->length() )
+      return text_->length() < other.text_->length();
+
+    if ( text_is_lowercase_ != other.text_is_lowercase_ )
+      return text_is_lowercase_;
   }
 
-  if ( query_is_candidate_prefix_ != other.query_is_candidate_prefix_ )
-    return query_is_candidate_prefix_;
-
-  if ( !equal_wb_ratios )
-  {
-    return ratio_of_word_boundary_chars_in_query_ >
-      other.ratio_of_word_boundary_chars_in_query_;
-  }
-
-  else
-  {
-    if ( !equal_wb_utilization )
-      return word_boundary_char_utilization_ >
-        other.word_boundary_char_utilization_;
-  }
-
-  if ( char_match_index_sum_ != other.char_match_index_sum_ )
-    return char_match_index_sum_ < other.char_match_index_sum_;
-
-  if ( text_->length() != other.text_->length() )
-    return text_->length() < other.text_->length();
-
-  if ( text_is_lowercase_ != other.text_is_lowercase_ )
-    return text_is_lowercase_;
-
+  // Lexicographic comparison
   return *text_ < *other.text_;
 }
 
@@ -191,6 +180,8 @@ void Result::SetResultFeaturesFromQuery(
     const std::string &word_boundary_chars,
     const std::string &query)
 {
+  query_is_empty_ = query.empty();
+
   if ( query.empty() || text_->empty() )
     return;
 

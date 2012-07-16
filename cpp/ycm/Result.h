@@ -35,8 +35,6 @@ public:
           const std::string &word_boundary_chars,
           const std::string &query );
 
-  Result( const Result& other );
-
   bool operator< ( const Result &other ) const;
 
   inline bool IsSubsequence() const
@@ -54,6 +52,9 @@ private:
       const std::string &query,
       const std::string &word_boundary_chars );
 
+  // true when the query for which the result was created was an empty string;
+  // in these cases we just use a lexicographic comparison
+  bool query_is_empty_;
 
   // true when the characters of the query are a subsequence of the characters
   // in the candidate text, e.g. the characters "abc" are a subsequence for

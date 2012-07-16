@@ -94,6 +94,7 @@ class ClangCompleter( Completer ):
     self.completer = indexer.ClangCompleter()
 
   def CandidatesForQuery( self, query ):
+    # TODO: sanitize query
     files = indexer.UnsavedFileVec()
 
     # CAREFUL HERE! For UnsavedFile filename and contents we are referring
