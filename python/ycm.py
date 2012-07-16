@@ -24,21 +24,9 @@ import indexer
 min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 clang_filetypes = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 
-
-class IdentifierCompleter( object ):
+class Completer( object ):
   def __init__( self ):
-    self.completer = indexer.IdentifierCompleter()
-    self.completer.EnableThreading()
-    self.pattern = re.compile( r"[_a-zA-Z]\w*" )
     self.future = None
-
-
-  def CandidatesForQueryAsync( self, query ):
-    filetype = vim.eval( "&filetype" )
-    self.future = self.completer.CandidatesForQueryAndTypeAsync(
-      SanitizeQuery( query ),
-      filetype )
-
 
   def AsyncCandidateRequestReady( self ):
     return self.future.ResultsReady()
@@ -47,8 +35,21 @@ class IdentifierCompleter( object ):
   def CandidatesFromStoredRequest( self ):
     if not self.future:
       return []
-
     return self.future.GetResults()
+
+
+class IdentifierCompleter( Completer ):
+  def __init__( self ):
+    self.completer = indexer.IdentifierCompleter()
+    self.completer.EnableThreading()
+    self.pattern = re.compile( r"[_a-zA-Z]\w*" )
+
+
+  def CandidatesForQueryAsync( self, query ):
+    filetype = vim.eval( "&filetype" )
+    self.future = self.completer.CandidatesForQueryAndTypeAsync(
+      SanitizeQuery( query ),
+      filetype )
 
 
   def AddIdentifier( self, identifier ):
@@ -88,7 +89,7 @@ class IdentifierCompleter( object ):
                                             filepath,
                                             True )
 
-class ClangCompleter( object ):
+class ClangCompleter( Completer ):
   def __init__( self ):
     self.completer = indexer.ClangCompleter()
 
@@ -142,6 +143,7 @@ def CurrentColumn():
   # vim's columns are 1-based while vim.current.line columns are 0-based
   # ... but vim.current.window.cursor (which returns a (line, column) tuple)
   # columns are 0-based, while the line from that same tuple is 1-based.
+  # vim.buffers buffer objects OTOH have 0-based lines and columns.
   # Pigs have wings and I'm a loopy purple duck. Everything makes sense now.
   return vim.current.window.cursor[ 1 ]
 
