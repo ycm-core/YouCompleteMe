@@ -28,12 +28,13 @@ BOOST_PYTHON_MODULE(indexer)
   using namespace boost::python;
   using namespace YouCompleteMe;
 
-	class_< std::vector< std::string > >( "StringVec" )
+	class_< std::vector< std::string >,
+	        boost::shared_ptr< std::vector< std::string > > >( "StringVec" )
 		.def( vector_indexing_suite< std::vector< std::string > >() );
 
-  class_< Future >( "Future" )
-    .def( "ResultsReady", &Future::ResultsReady )
-    .def( "GetResults", &Future::GetResults );
+  class_< Future< AsyncResults > >( "Future" )
+    .def( "ResultsReady", &Future< AsyncResults >::ResultsReady )
+    .def( "GetResults", &Future< AsyncResults >::GetResults );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
@@ -61,9 +62,10 @@ BOOST_PYTHON_MODULE(indexer)
 		.def( vector_indexing_suite< std::vector< UnsavedFile > >() );
 
   class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
+    .def( "EnableThreading", &ClangCompleter::EnableThreading )
     .def( "SetGlobalCompileFlags", &ClangCompleter::SetGlobalCompileFlags )
     .def( "SetFileCompileFlags", &ClangCompleter::SetFileCompileFlags )
     .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
-    .def( "CandidatesForLocationInFile",
-          &ClangCompleter::CandidatesForLocationInFile );
+    .def( "CandidatesForQueryAndLocationInFileAsync",
+          &ClangCompleter::CandidatesForQueryAndLocationInFileAsync );
 }

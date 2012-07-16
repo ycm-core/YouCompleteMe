@@ -18,6 +18,9 @@
 #ifndef CLANGCOMPLETE_H_WLKDU0ZV
 #define CLANGCOMPLETE_H_WLKDU0ZV
 
+#include "ConcurrentLatestValue.h"
+#include "Future.h"
+
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 
@@ -55,6 +58,7 @@ struct UnsavedFile
 
 typedef boost::unordered_map< std::string, std::vector< std::string > >
   FlagsForFile;
+
 typedef boost::unordered_map< std::string, CXTranslationUnit >
   TranslationUnitForFilename;
 
@@ -65,6 +69,8 @@ public:
   ClangCompleter();
   ~ClangCompleter();
 
+  void EnableThreading();
+
   void SetGlobalCompileFlags( const std::vector< std::string > &flags );
 
   void SetFileCompileFlags( const std::string &filename,
@@ -73,8 +79,13 @@ public:
   void UpdateTranslationUnit( const std::string &filename,
                               const std::vector< UnsavedFile > &unsaved_files );
 
-  // TODO: rename this
   std::vector< std::string > CandidatesForLocationInFile(
+      const std::string &filename,
+      int line,
+      int column,
+      const std::vector< UnsavedFile > &unsaved_files );
+
+  Future< AsyncResults > CandidatesForQueryAndLocationInFileAsync(
       const std::string &query,
       const std::string &filename,
       int line,
@@ -82,6 +93,9 @@ public:
       const std::vector< UnsavedFile > &unsaved_files );
 
 private:
+  typedef ConcurrentLatestValue<
+            boost::shared_ptr<
+              boost::packaged_task< AsyncResults > > > LatestTask;
 
   // caller takes ownership of translation unit
   CXTranslationUnit CreateTranslationUnit(
@@ -99,17 +113,47 @@ private:
       const std::string &query,
       const std::vector< std::string > &candidates );
 
+  void InitThreads();
+
+  void ClangThreadMain( LatestTask &clang_task );
+
+  void SortingThreadMain( LatestTask &sorting_task );
+
 
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES
   /////////////////////////////
 
   CXIndex clang_index_;
+
   FlagsForFile flags_for_file_;
+
   TranslationUnitForFilename filename_to_translation_unit_;
+
   std::vector< std::string > global_flags_;
+
   CandidateRepository &candidate_repository_;
 
+  mutable LatestTask clang_task_;
+
+  mutable LatestTask sorting_task_;
+
+  bool threading_enabled_;
+
+  // TODO: use boost.atomic for clang_data_ready_
+  bool clang_data_ready_;
+  boost::mutex clang_data_ready_mutex_;
+  boost::condition_variable clang_data_ready_condition_variable_;
+
+  std::vector< std::string > latest_clang_results_;
+  boost::shared_mutex latest_clang_results_shared_mutex_;
+
+  // Unfortunately clang is not thread-safe so we can only ever use one thread
+  // to access it. So this one background thread will be the only thread that
+  // can access libclang.
+  boost::thread clang_thread_;
+
+  boost::thread_group sorting_threads_;
 };
 
 } // namespace YouCompleteMe

@@ -19,14 +19,28 @@
 #include "Candidate.h"
 #include "standard.h"
 #include "CandidateRepository.h"
+#include "ConcurrentLatestValue.h"
 
 #include <clang-c/Index.h>
+#include <boost/make_shared.hpp>
+
+using boost::packaged_task;
+using boost::bind;
+using boost::unique_future;
+using boost::make_shared;
+using boost::shared_ptr;
+using boost::bind;
+using boost::thread;
 
 namespace YouCompleteMe
 {
 
+extern const unsigned int MAX_ASYNC_THREADS;
+extern const unsigned int MIN_ASYNC_THREADS;
+
 namespace
 {
+
 
 std::vector< CXUnsavedFile > ToCXUnsavedFiles(
     const std::vector< UnsavedFile > &unsaved_files )
@@ -91,7 +105,9 @@ std::vector< std::string > ToStringVector( CXCodeCompleteResults *results )
 
 
 ClangCompleter::ClangCompleter()
-  : candidate_repository_( CandidateRepository::Instance() )
+  : candidate_repository_( CandidateRepository::Instance() ),
+    threading_enabled_( false ),
+    clang_data_ready_( false )
 {
   clang_index_ = clang_createIndex( 0, 0 );
 }
@@ -106,6 +122,15 @@ ClangCompleter::~ClangCompleter()
   }
 
   clang_disposeIndex( clang_index_ );
+}
+
+
+// We need this mostly so that we can not use it in tests. Apparently the
+// GoogleTest framework goes apeshit on us if we enable threads by default.
+void ClangCompleter::EnableThreading()
+{
+  threading_enabled_ = true;
+  InitThreads();
 }
 
 
@@ -152,7 +177,6 @@ void ClangCompleter::UpdateTranslationUnit(
 
 
 std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
-    const std::string &query,
     const std::string &filename,
     int line,
     int column,
@@ -166,7 +190,7 @@ std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
   // If there are unsaved files, then codeCompleteAt will parse the in-memory
   // file contents we are giving it. In short, it is NEVER a good idea to call
   // clang_reparseTranslationUnit right before a call to clang_codeCompleteAt.
-  // The only makes clang reparse the whole file TWICE, which has a huge impact
+  // This only makes clang reparse the whole file TWICE, which has a huge impact
   // on latency. At the time of writing, it seems that most users of libclang
   // in the open-source world don't realize this (I checked). Some don't even
   // call reparse*, but parse* which is even less efficient.
@@ -180,12 +204,64 @@ std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
                           cxunsaved_files.size(),
                           clang_defaultCodeCompleteOptions());
 
-  std::vector< std::string > completions = ToStringVector( results );
-  if ( !query.empty() )
-    completions = SortCandidatesForQuery( query, completions );
-
+  std::vector< std::string > candidates = ToStringVector( results );
   clang_disposeCodeCompleteResults( results );
-  return completions;
+  return candidates;
+}
+
+
+Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
+    const std::string &query,
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files )
+{
+  // TODO: throw exception when threading is not enabled and this is called
+  if ( !threading_enabled_ )
+    return Future< AsyncResults >();
+
+  if ( query.empty() )
+  {
+    {
+      boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
+      clang_data_ready_ = false;
+    }
+    sorting_threads_.interrupt_all();
+  }
+
+  // the sorting task needs to be set before the clang task (if any) just in
+  // case the clang task finishes (and therefore notifies a sorting thread to
+  // consume a sorting task) before the sorting task is set
+  shared_ptr< packaged_task< AsyncResults > > task =
+    make_shared< packaged_task< AsyncResults > >(
+      bind( ReturnValueAsShared< std::vector< std::string > >,
+        static_cast< FunctionReturnsStringVector >(
+          bind( &ClangCompleter::SortCandidatesForQuery,
+                boost::ref( *this ),
+                query,
+                boost::cref( latest_clang_results_ ) ) ) ) );
+
+  unique_future< AsyncResults > future = task->get_future();
+  sorting_task_.Set( task );
+
+  if ( query.empty() )
+  {
+    shared_ptr< packaged_task< AsyncResults > > task =
+      make_shared< packaged_task< AsyncResults > >(
+        bind( ReturnValueAsShared< std::vector< std::string > >,
+          static_cast< FunctionReturnsStringVector >(
+            bind( &ClangCompleter::CandidatesForLocationInFile,
+                  boost::ref( *this ),
+                  filename,
+                  line,
+                  column,
+                  unsaved_files ) ) ) );
+
+    clang_task_.Set( task );
+  }
+
+  return Future< AsyncResults >( move( future ) );
 }
 
 
@@ -280,5 +356,83 @@ std::vector< std::string > ClangCompleter::SortCandidatesForQuery(
 
   return sorted_candidates;
 }
+
+
+void ClangCompleter::InitThreads()
+{
+  int threads_to_create =
+    std::max( MIN_ASYNC_THREADS,
+      std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
+
+  for ( int i = 0; i < threads_to_create; ++i )
+  {
+    sorting_threads_.create_thread(
+        bind( &ClangCompleter::SortingThreadMain,
+              boost::ref( *this ),
+              boost::ref( sorting_task_ ) ) );
+  }
+
+  clang_thread_ = boost::thread( &ClangCompleter::ClangThreadMain,
+                                 boost::ref( *this ),
+                                 boost::ref( clang_task_ ) );
+}
+
+
+void ClangCompleter::ClangThreadMain( LatestTask &clang_task )
+{
+  while ( true )
+  {
+    shared_ptr< packaged_task< AsyncResults > > task = clang_task.Get();
+    ( *task )();
+    unique_future< AsyncResults > future = task->get_future();
+
+    {
+      boost::unique_lock< boost::shared_mutex > writer_lock(
+          latest_clang_results_shared_mutex_ );
+      latest_clang_results_ = *future.get();
+    }
+
+    {
+      boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
+      clang_data_ready_ = true;
+    }
+
+    clang_data_ready_condition_variable_.notify_all();
+  }
+}
+
+
+void ClangCompleter::SortingThreadMain( LatestTask &sorting_task )
+{
+  while ( true )
+  {
+    try
+    {
+      {
+        boost::unique_lock< boost::mutex > lock( clang_data_ready_mutex_ );
+
+        while ( !clang_data_ready_ )
+        {
+          clang_data_ready_condition_variable_.wait( lock );
+        }
+      }
+
+      shared_ptr< packaged_task< AsyncResults > > task = sorting_task.Get();
+
+      {
+        boost::shared_lock< boost::shared_mutex > reader_lock(
+            latest_clang_results_shared_mutex_ );
+
+        ( *task )();
+      }
+    }
+
+    catch ( boost::thread_interrupted& )
+    {
+      // Do nothing and re-enter the loop
+    }
+  }
+}
+
 
 } // namespace YouCompleteMe

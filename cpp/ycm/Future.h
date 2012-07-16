@@ -19,8 +19,10 @@
 #define FUTURE_H_NR1U6MZS
 
 #include <boost/thread.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 namespace YouCompleteMe
 {
@@ -29,22 +31,50 @@ class Result;
 template< typename T > class ConcurrentLatestValue;
 
 typedef boost::python::list Pylist;
-typedef boost::shared_ptr< std::vector< Result > > AsyncResults;
+typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
 
-typedef ConcurrentLatestValue<
-          boost::shared_ptr<
-            boost::packaged_task< AsyncResults > > > LatestTask;
+typedef boost::function< std::vector< std::string >() >
+  FunctionReturnsStringVector;
 
+template< typename T >
+boost::shared_ptr< T > ReturnValueAsShared(
+    boost::function< T() > func )
+{
+  return boost::make_shared< T >( func() );
+}
+
+
+template< typename T >
 class Future
 {
 public:
-  Future() {}
-  Future( boost::shared_future< AsyncResults > future );
-  bool ResultsReady();
-  Pylist GetResults();
+  Future() {};
+  Future( boost::shared_future< T > future )
+    : future_( boost::move( future ) ) {}
+
+  bool ResultsReady()
+  {
+    return future_.is_ready();
+  }
+
+
+  T GetResults()
+  {
+    try
+    {
+      return future_.get();
+    }
+
+    catch ( boost::future_uninitialized & )
+    {
+      // Do nothing and return a T()
+    }
+
+    return T();
+  }
 
 private:
-  boost::shared_future< AsyncResults > future_;
+  boost::shared_future< T > future_;
 };
 
 } // namespace YouCompleteMe

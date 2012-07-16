@@ -77,6 +77,7 @@ endfunction
 
 
 function! s:OnCursorHold()
+  " TODO: make this async, it's causing lag
   py identcomp.AddBufferIdentifiers()
 endfunction
 
@@ -178,8 +179,10 @@ EOF
   let l:results = []
     py << EOF
 results = identcomp.CandidatesFromStoredRequest()
+result_string = ycm.StringVectorToString( results )
+
 if results:
-  vim.command( 'let l:results = ' + str( results ) )
+  vim.command( 'let l:results = ' + result_string )
 EOF
 
   let s:searched_and_no_results_found = len( l:results ) == 0
@@ -196,8 +199,29 @@ endfunction
 
 function! s:ClangCompletion( query )
   " TODO: don't trigger on a dot inside a string constant
-  py vim.command( 'let l:results = ' +
-        \ str( clangcomp.CandidatesForQuery( vim.eval( 'a:query' ) ) ) )
+
+  py clangcomp.CandidatesForQueryAsync( vim.eval('a:query') )
+
+  let l:results_ready = 0
+  while !l:results_ready
+      py << EOF
+results_ready = clangcomp.AsyncCandidateRequestReady()
+if results_ready:
+  vim.command( 'let l:results_ready = 1' )
+EOF
+    if complete_check()
+      return { 'words' : [], 'refresh' : 'always'}
+    endif
+  endwhile
+
+  let l:results = []
+    py << EOF
+results = clangcomp.CandidatesFromStoredRequest()
+result_string = ycm.StringVectorToString( results )
+
+if results:
+  vim.command( 'let l:results = ' + result_string )
+EOF
 
   let s:searched_and_no_results_found = len( l:results ) == 0
   return { 'words' : l:results, 'refresh' : 'always' }

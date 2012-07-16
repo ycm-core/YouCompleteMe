@@ -36,11 +36,11 @@ using boost::thread;
 namespace YouCompleteMe
 {
 
+extern const unsigned int MAX_ASYNC_THREADS = 4;
+extern const unsigned int MIN_ASYNC_THREADS = 2;
+
 namespace
 {
-
-const unsigned int MAX_ASYNC_THREADS = 4;
-const unsigned int MIN_ASYNC_THREADS = 2;
 
 void ThreadMain( LatestTask &latest_task )
 {
@@ -135,36 +135,29 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
 }
 
 
-Future IdentifierCompleter::CandidatesForQueryAndTypeAsync(
+Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
     const std::string &query,
     const std::string &filetype ) const
 {
   // TODO: throw exception when threading is not enabled and this is called
-  if (!threading_enabled_)
-    return Future();
+  if ( !threading_enabled_ )
+    return Future< AsyncResults >();
 
   // Try not to look at this too hard, it may burn your eyes.
+  // TODO: refactor this so it's more readable
   shared_ptr< packaged_task< AsyncResults > > task =
     make_shared< packaged_task< AsyncResults > >(
-      bind( &IdentifierCompleter::ResultsForQueryAndType,
-            boost::cref( *this ),
-            query,
-            filetype ) );
+      bind( ReturnValueAsShared< std::vector< std::string > >,
+        static_cast< FunctionReturnsStringVector >(
+          bind( &IdentifierCompleter::CandidatesForQueryAndType,
+                boost::cref( *this ),
+                query,
+                filetype ) ) ) );
 
   unique_future< AsyncResults > future = task->get_future();
 
   latest_task_.Set( task );
-  return Future( move( future ) );
-}
-
-
-AsyncResults IdentifierCompleter::ResultsForQueryAndType(
-    const std::string &query,
-    const std::string &filetype ) const
-{
-  AsyncResults results = boost::make_shared< std::vector< Result > >();
-  ResultsForQueryAndType( query, filetype, *results );
-  return results;
+  return Future< AsyncResults >( move( future ) );
 }
 
 

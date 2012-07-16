@@ -35,6 +35,7 @@ namespace YouCompleteMe
 class Candidate;
 class CandidateRepository;
 
+// TODO: move to private
 // filepath -> *( *candidate )
 typedef boost::unordered_map< std::string,
           boost::shared_ptr< std::list< const Candidate* > > >
@@ -44,6 +45,9 @@ typedef boost::unordered_map< std::string,
 typedef boost::unordered_map< std::string,
           boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
 
+typedef ConcurrentLatestValue<
+          boost::shared_ptr<
+            boost::packaged_task< AsyncResults > > > LatestTask;
 
 class IdentifierCompleter : boost::noncopyable
 {
@@ -70,13 +74,11 @@ public:
       const std::string &query,
       const std::string &filetype ) const;
 
-	Future CandidatesForQueryAndTypeAsync( const std::string &query,
-                                         const std::string &filetype ) const;
+	Future< AsyncResults > CandidatesForQueryAndTypeAsync(
+	    const std::string &query,
+      const std::string &filetype ) const;
 
 private:
-
-  AsyncResults ResultsForQueryAndType( const std::string &query,
-                                       const std::string &filetype ) const;
 
   void ResultsForQueryAndType( const std::string &query,
                                const std::string &filetype,

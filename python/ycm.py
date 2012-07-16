@@ -89,11 +89,15 @@ class IdentifierCompleter( Completer ):
                                             filepath,
                                             True )
 
+
 class ClangCompleter( Completer ):
   def __init__( self ):
     self.completer = indexer.ClangCompleter()
+    self.completer.EnableThreading()
+    self.contents_holder = []
+    self.filename_holder = []
 
-  def CandidatesForQuery( self, query ):
+  def CandidatesForQueryAsync( self, query ):
     # TODO: sanitize query
     files = indexer.UnsavedFileVec()
 
@@ -102,31 +106,32 @@ class ClangCompleter( Completer ):
     # pointers to data members of python objects. We need to ensure that those
     # objects outlive our UnsavedFile objects. This is why we need the
     # contents_holder and filename_holder lists, to make sure the string objects
-    # are still around when we call CandidatesForLocationInFile.  We do this to
-    # avoid an extra copy of the entire file contents.
+    # are still around when we call CandidatesForQueryAndLocationInFile.  We do
+    # this to avoid an extra copy of the entire file contents.
 
-    contents_holder = []
-    filename_holder = []
-    for buffer in GetUnsavedBuffers():
-      contents_holder.append( '\n'.join( buffer ) )
-      filename_holder.append( buffer.name )
+    if not query:
+      self.contents_holder = []
+      self.filename_holder = []
+      for buffer in GetUnsavedBuffers():
+        self.contents_holder.append( '\n'.join( buffer ) )
+        self.filename_holder.append( buffer.name )
 
-      unsaved_file = indexer.UnsavedFile()
-      unsaved_file.contents_ = contents_holder[ -1 ]
-      unsaved_file.length_ = len( contents_holder[ -1 ] )
-      unsaved_file.filename_ = filename_holder[ -1 ]
+        unsaved_file = indexer.UnsavedFile()
+        unsaved_file.contents_ = self.contents_holder[ -1 ]
+        unsaved_file.length_ = len( self.contents_holder[ -1 ] )
+        unsaved_file.filename_ = self.filename_holder[ -1 ]
 
-      files.append( unsaved_file )
+        files.append( unsaved_file )
 
     line, _ = vim.current.window.cursor
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
     current_buffer = vim.current.buffer
-    results = self.completer.CandidatesForLocationInFile( query,
-                                                          current_buffer.name,
-                                                          line,
-                                                          column,
-                                                          files )
-    return list( results )
+    self.future = self.completer.CandidatesForQueryAndLocationInFileAsync(
+      query,
+      current_buffer.name,
+      line,
+      column,
+      files )
 
 
 def GetUnsavedBuffers():
@@ -135,6 +140,15 @@ def GetUnsavedBuffers():
     return bool( int( vim.eval( to_eval ) ) )
 
   return ( x for x in vim.buffers if BufferModified( x.number ) )
+
+
+# TODO: just implement __str__/__repr__ on StringVec
+def StringVectorToString( stringvec ):
+  result = [ "[" ]
+  for text in stringvec:
+    result.append( '"{0}",'.format( text ) )
+  result.append( "]" )
+  return ''.join( result )
 
 
 def CurrentColumn():
