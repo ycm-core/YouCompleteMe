@@ -73,6 +73,16 @@ std::string ChunkToString( CXCompletionString completion_string, int chunk_num )
 }
 
 
+// Returns true when the provided completion string is available to the user;
+// unavailable completion strings refer to entities that are private/protected,
+// deprecated etc.
+bool CompletionStringAvailable( CXCompletionString completion_string )
+{
+  return clang_getCompletionAvailability( completion_string ) ==
+    CXAvailability_Available;
+}
+
+
 std::vector< std::string > ToStringVector( CXCodeCompleteResults *results )
 {
   std::vector< std::string > completions;
@@ -82,6 +92,9 @@ std::vector< std::string > ToStringVector( CXCodeCompleteResults *results )
   {
     CXCompletionString completion_string =
       results->Results[ i ].CompletionString;
+
+    if ( !CompletionStringAvailable( completion_string ) )
+      continue;
 
     uint num_chunks = clang_getNumCompletionChunks( completion_string );
     for ( uint j = 0; j < num_chunks; ++j )
@@ -265,7 +278,7 @@ Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
     shared_ptr< packaged_task< AsyncResults > > task =
       make_shared< packaged_task< AsyncResults > >(
         bind( ReturnValueAsShared< std::vector< std::string > >,
-              sort_candidates_for_query_functor ) );
+              candidates_for_location_in_file_functor ) );
 
     clang_task_.Set( task );
   }
