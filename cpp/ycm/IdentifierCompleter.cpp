@@ -143,16 +143,17 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
   if ( !threading_enabled_ )
     return Future< AsyncResults >();
 
+  FunctionReturnsStringVector functor =
+    bind( &IdentifierCompleter::CandidatesForQueryAndType,
+          boost::cref( *this ),
+          query,
+          filetype );
+
   // Try not to look at this too hard, it may burn your eyes.
-  // TODO: refactor this so it's more readable
   shared_ptr< packaged_task< AsyncResults > > task =
     make_shared< packaged_task< AsyncResults > >(
       bind( ReturnValueAsShared< std::vector< std::string > >,
-        static_cast< FunctionReturnsStringVector >(
-          bind( &IdentifierCompleter::CandidatesForQueryAndType,
-                boost::cref( *this ),
-                query,
-                filetype ) ) ) );
+            functor ) );
 
   unique_future< AsyncResults > future = task->get_future();
 

@@ -227,36 +227,45 @@ Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
       boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
       clang_data_ready_ = false;
     }
+
+    // Needed to "reset" the sorting threads to the start of their loop. This
+    // way any threads blocking on a read in sorting_task_.Get() are reset to
+    // wait on the clang_data_ready_condition_variable_.
     sorting_threads_.interrupt_all();
   }
 
   // the sorting task needs to be set before the clang task (if any) just in
   // case the clang task finishes (and therefore notifies a sorting thread to
   // consume a sorting task) before the sorting task is set
+
+  FunctionReturnsStringVector sort_candidates_for_query_functor =
+    bind( &ClangCompleter::SortCandidatesForQuery,
+          boost::ref( *this ),
+          query,
+          boost::cref( latest_clang_results_ ) );
+
   shared_ptr< packaged_task< AsyncResults > > task =
     make_shared< packaged_task< AsyncResults > >(
       bind( ReturnValueAsShared< std::vector< std::string > >,
-        static_cast< FunctionReturnsStringVector >(
-          bind( &ClangCompleter::SortCandidatesForQuery,
-                boost::ref( *this ),
-                query,
-                boost::cref( latest_clang_results_ ) ) ) ) );
+            sort_candidates_for_query_functor ) );
 
   unique_future< AsyncResults > future = task->get_future();
   sorting_task_.Set( task );
 
   if ( query.empty() )
   {
+    FunctionReturnsStringVector candidates_for_location_in_file_functor =
+      bind( &ClangCompleter::CandidatesForLocationInFile,
+            boost::ref( *this ),
+            filename,
+            line,
+            column,
+            unsaved_files );
+
     shared_ptr< packaged_task< AsyncResults > > task =
       make_shared< packaged_task< AsyncResults > >(
         bind( ReturnValueAsShared< std::vector< std::string > >,
-          static_cast< FunctionReturnsStringVector >(
-            bind( &ClangCompleter::CandidatesForLocationInFile,
-                  boost::ref( *this ),
-                  filename,
-                  line,
-                  column,
-                  unsaved_files ) ) ) );
+              sort_candidates_for_query_functor ) );
 
     clang_task_.Set( task );
   }
