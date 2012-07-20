@@ -20,7 +20,6 @@
 
 #include <boost/thread.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
@@ -29,12 +28,6 @@ namespace YouCompleteMe
 
 class Result;
 template< typename T > class ConcurrentLatestValue;
-
-typedef boost::python::list Pylist;
-typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
-
-typedef boost::function< std::vector< std::string >() >
-  FunctionReturnsStringVector;
 
 template< typename T >
 boost::shared_ptr< T > ReturnValueAsShared(

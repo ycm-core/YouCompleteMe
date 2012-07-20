@@ -17,6 +17,7 @@
 
 #include "ClangCompleter.h"
 #include "Candidate.h"
+#include "CompletionData.h"
 #include "standard.h"
 #include "CandidateRepository.h"
 #include "ConcurrentLatestValue.h"
@@ -35,11 +36,29 @@ using boost::thread;
 namespace YouCompleteMe
 {
 
+typedef boost::function< std::vector< CompletionData >() >
+  FunctionReturnsCompletionDataVector;
+
 extern const unsigned int MAX_ASYNC_THREADS;
 extern const unsigned int MIN_ASYNC_THREADS;
 
 namespace
 {
+
+struct CompletionDataAndResult
+{
+  CompletionDataAndResult( const CompletionData *completion_data,
+                           const Result &result )
+    : completion_data_( completion_data ), result_( result ) {}
+
+  bool operator< ( const CompletionDataAndResult &other ) const
+  {
+    return result_ < other.result_;
+  }
+
+  const CompletionData *completion_data_;
+  Result result_;
+};
 
 
 std::vector< CXUnsavedFile > ToCXUnsavedFiles(
@@ -83,31 +102,110 @@ bool CompletionStringAvailable( CXCompletionString completion_string )
 }
 
 
-std::vector< std::string > ToStringVector( CXCodeCompleteResults *results )
+bool IsChunkKindForExtraMenuInfo( CXCompletionChunkKind kind )
 {
-  std::vector< std::string > completions;
+  return
+    kind == CXCompletionChunk_Optional     ||
+    kind == CXCompletionChunk_TypedText    ||
+    kind == CXCompletionChunk_Placeholder  ||
+    kind == CXCompletionChunk_LeftParen    ||
+    kind == CXCompletionChunk_RightParen   ||
+    kind == CXCompletionChunk_RightBracket ||
+    kind == CXCompletionChunk_LeftBracket  ||
+    kind == CXCompletionChunk_LeftBrace    ||
+    kind == CXCompletionChunk_RightBrace   ||
+    kind == CXCompletionChunk_RightAngle   ||
+    kind == CXCompletionChunk_LeftAngle    ||
+    kind == CXCompletionChunk_Comma        ||
+    kind == CXCompletionChunk_ResultType   ||
+    kind == CXCompletionChunk_Colon        ||
+    kind == CXCompletionChunk_SemiColon    ||
+    kind == CXCompletionChunk_Equal        ||
+    kind == CXCompletionChunk_HorizontalSpace;
+
+}
+
+
+char CursorKindToVimKind( CXCursorKind kind )
+{
+  switch ( kind )
+  {
+    case CXCursor_UnexposedDecl:
+    case CXCursor_StructDecl:
+    case CXCursor_UnionDecl:
+    case CXCursor_ClassDecl:
+    case CXCursor_EnumDecl:
+    case CXCursor_TypedefDecl:
+      return 't';
+
+    case CXCursor_FieldDecl:
+      return 'm';
+
+    case CXCursor_FunctionDecl:
+    case CXCursor_CXXMethod:
+    case CXCursor_FunctionTemplate:
+      return 'f';
+
+    case CXCursor_VarDecl:
+      return 'v';
+
+    case CXCursor_MacroDefinition:
+      return 'd';
+
+    default:
+      return 'u'; // for 'unknown', 'unsupported'... whatever you like
+  }
+}
+
+
+CompletionData CompletionResultToCompletionData(
+    const CXCompletionResult &completion_result )
+{
+  CompletionData data;
+  CXCompletionString completion_string = completion_result.CompletionString;
+
+  uint num_chunks = clang_getNumCompletionChunks( completion_string );
+  for ( uint j = 0; j < num_chunks; ++j )
+  {
+    CXCompletionChunkKind kind = clang_getCompletionChunkKind(
+        completion_string, j );
+
+    if ( IsChunkKindForExtraMenuInfo( kind ) )
+    {
+      data.extra_menu_info_.append( ChunkToString( completion_string, j ) );
+
+      // by default, there's no space after the return type
+      if ( kind == CXCompletionChunk_ResultType )
+        data.extra_menu_info_.append( " " );
+    }
+
+    if ( kind == CXCompletionChunk_TypedText )
+      data.original_string_ = ChunkToString( completion_string, j );
+
+    if ( kind == CXCompletionChunk_Informative )
+      data.detailed_info_ = ChunkToString( completion_string, j );
+  }
+
+  data.kind_ = CursorKindToVimKind( completion_result.CursorKind );
+  return data;
+}
+
+
+std::vector< CompletionData > ToCompletionDataVector(
+    CXCodeCompleteResults *results )
+{
+  std::vector< CompletionData > completions;
   completions.reserve( results->NumResults );
 
   for ( uint i = 0; i < results->NumResults; ++i )
   {
-    CXCompletionString completion_string =
-      results->Results[ i ].CompletionString;
+    CXCompletionResult completion_result = results->Results[ i ];
 
-    if ( !CompletionStringAvailable( completion_string ) )
+    if ( !CompletionStringAvailable( completion_result.CompletionString ) )
       continue;
 
-    uint num_chunks = clang_getNumCompletionChunks( completion_string );
-    for ( uint j = 0; j < num_chunks; ++j )
-    {
-      CXCompletionChunkKind kind = clang_getCompletionChunkKind(
-          completion_string, j );
-
-      if ( kind == CXCompletionChunk_TypedText )
-      {
-        completions.push_back( ChunkToString( completion_string, j ) );
-        break;
-      }
-    }
+    completions.push_back(
+        CompletionResultToCompletionData( completion_result ) );
   }
 
   return completions;
@@ -189,7 +287,7 @@ void ClangCompleter::UpdateTranslationUnit(
 }
 
 
-std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
+std::vector< CompletionData > ClangCompleter::CandidatesForLocationInFile(
     const std::string &filename,
     int line,
     int column,
@@ -217,13 +315,14 @@ std::vector< std::string > ClangCompleter::CandidatesForLocationInFile(
                           cxunsaved_files.size(),
                           clang_defaultCodeCompleteOptions());
 
-  std::vector< std::string > candidates = ToStringVector( results );
+  std::vector< CompletionData > candidates = ToCompletionDataVector( results );
   clang_disposeCodeCompleteResults( results );
   return candidates;
 }
 
 
-Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
+Future< AsyncCompletions >
+ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
     const std::string &query,
     const std::string &filename,
     int line,
@@ -232,7 +331,7 @@ Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
-    return Future< AsyncResults >();
+    return Future< AsyncCompletions >();
 
   if ( query.empty() )
   {
@@ -251,23 +350,24 @@ Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   // case the clang task finishes (and therefore notifies a sorting thread to
   // consume a sorting task) before the sorting task is set
 
-  FunctionReturnsStringVector sort_candidates_for_query_functor =
+  FunctionReturnsCompletionDataVector sort_candidates_for_query_functor =
     bind( &ClangCompleter::SortCandidatesForQuery,
           boost::ref( *this ),
           query,
           boost::cref( latest_clang_results_ ) );
 
-  shared_ptr< packaged_task< AsyncResults > > task =
-    make_shared< packaged_task< AsyncResults > >(
-      bind( ReturnValueAsShared< std::vector< std::string > >,
+  shared_ptr< packaged_task< AsyncCompletions > > task =
+    make_shared< packaged_task< AsyncCompletions > >(
+      bind( ReturnValueAsShared< std::vector< CompletionData > >,
             sort_candidates_for_query_functor ) );
 
-  unique_future< AsyncResults > future = task->get_future();
+  unique_future< AsyncCompletions > future = task->get_future();
   sorting_task_.Set( task );
 
   if ( query.empty() )
   {
-    FunctionReturnsStringVector candidates_for_location_in_file_functor =
+    FunctionReturnsCompletionDataVector
+      candidates_for_location_in_file_functor =
       bind( &ClangCompleter::CandidatesForLocationInFile,
             boost::ref( *this ),
             filename,
@@ -275,15 +375,15 @@ Future< AsyncResults > ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
             column,
             unsaved_files );
 
-    shared_ptr< packaged_task< AsyncResults > > task =
-      make_shared< packaged_task< AsyncResults > >(
-        bind( ReturnValueAsShared< std::vector< std::string > >,
+    shared_ptr< packaged_task< AsyncCompletions > > task =
+      make_shared< packaged_task< AsyncCompletions > >(
+        bind( ReturnValueAsShared< std::vector< CompletionData > >,
               candidates_for_location_in_file_functor ) );
 
     clang_task_.Set( task );
   }
 
-  return Future< AsyncResults >( move( future ) );
+  return Future< AsyncCompletions >( boost::move( future ) );
 }
 
 
@@ -344,39 +444,42 @@ CXTranslationUnit ClangCompleter::GetTranslationUnitForFile(
 }
 
 
-std::vector< std::string > ClangCompleter::SortCandidatesForQuery(
+std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
     const std::string &query,
-    const std::vector< std::string > &candidates )
+    const std::vector< CompletionData > &completion_datas )
 {
   Bitset query_bitset = LetterBitsetFromString( query );
 
   std::vector< const Candidate* > repository_candidates =
-    candidate_repository_.GetCandidatesForStrings( candidates );
+    candidate_repository_.GetCandidatesForStrings( completion_datas );
 
-  std::vector< Result > results;
+  std::vector< CompletionDataAndResult > data_and_results;
 
-  // This loop needs to be a separate function
-  foreach ( const Candidate* candidate, repository_candidates )
+  for ( uint i = 0; i < repository_candidates.size(); ++i )
   {
+    const Candidate* candidate = repository_candidates[ i ];
     if ( !candidate->MatchesQueryBitset( query_bitset ) )
       continue;
 
     Result result = candidate->QueryMatchResult( query );
     if ( result.IsSubsequence() )
-      results.push_back( result );
+    {
+      CompletionDataAndResult data_and_result( &completion_datas[ i ], result );
+      data_and_results.push_back( data_and_result );
+    }
   }
 
-  std::sort( results.begin(), results.end() );
+  std::sort( data_and_results.begin(), data_and_results.end() );
 
-  std::vector< std::string > sorted_candidates;
-  sorted_candidates.reserve( results.size() );
+  std::vector< CompletionData > sorted_completion_datas;
+  sorted_completion_datas.reserve( data_and_results.size() );
 
-  foreach ( const Result& result, results )
+  foreach ( const CompletionDataAndResult& data_and_result, data_and_results )
   {
-    sorted_candidates.push_back( *result.Text() );
+    sorted_completion_datas.push_back( *data_and_result.completion_data_ );
   }
 
-  return sorted_candidates;
+  return sorted_completion_datas;
 }
 
 
@@ -404,9 +507,9 @@ void ClangCompleter::ClangThreadMain( LatestTask &clang_task )
 {
   while ( true )
   {
-    shared_ptr< packaged_task< AsyncResults > > task = clang_task.Get();
+    shared_ptr< packaged_task< AsyncCompletions > > task = clang_task.Get();
     ( *task )();
-    unique_future< AsyncResults > future = task->get_future();
+    unique_future< AsyncCompletions > future = task->get_future();
 
     {
       boost::unique_lock< boost::shared_mutex > writer_lock(
@@ -439,7 +542,7 @@ void ClangCompleter::SortingThreadMain( LatestTask &sorting_task )
         }
       }
 
-      shared_ptr< packaged_task< AsyncResults > > task = sorting_task.Get();
+      shared_ptr< packaged_task< AsyncCompletions > > task = sorting_task.Get();
 
       {
         boost::shared_lock< boost::shared_mutex > reader_lock(

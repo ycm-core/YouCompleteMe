@@ -151,6 +151,21 @@ def StringVectorToString( stringvec ):
   return ''.join( result )
 
 
+def CompletionDataToDict( completion_data ):
+  # see :h complete-items for a description of the dictionary fields
+  return {
+    'word' : completion_data.TextToInsertInBuffer(),
+    'abbr' : completion_data.original_string_,
+    'menu' : completion_data.extra_menu_info_,
+    'kind' : completion_data.kind_,
+    # TODO: add detailed_info_ as 'info'
+  }
+
+
+def CompletionDataVectorToString( datavec ):
+  return str( [ CompletionDataToDict( x ) for x in datavec ] )
+
+
 def CurrentColumn():
   """Do NOT access the CurrentColumn in vim.current.line. It doesn't exist yet.
   Only the chars before the current column exist in vim.current.line."""

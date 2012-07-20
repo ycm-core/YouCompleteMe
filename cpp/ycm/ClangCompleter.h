@@ -33,7 +33,9 @@ namespace YouCompleteMe
 {
 
 class CandidateRepository;
+struct CompletionData;
 
+// TODO: put this in a separated header file
 struct UnsavedFile
 {
   UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
@@ -55,6 +57,7 @@ struct UnsavedFile
   }
 };
 
+typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
 
 typedef boost::unordered_map< std::string, std::vector< std::string > >
   FlagsForFile;
@@ -79,13 +82,13 @@ public:
   void UpdateTranslationUnit( const std::string &filename,
                               const std::vector< UnsavedFile > &unsaved_files );
 
-  std::vector< std::string > CandidatesForLocationInFile(
+  std::vector< CompletionData > CandidatesForLocationInFile(
       const std::string &filename,
       int line,
       int column,
       const std::vector< UnsavedFile > &unsaved_files );
 
-  Future< AsyncResults > CandidatesForQueryAndLocationInFileAsync(
+  Future< AsyncCompletions > CandidatesForQueryAndLocationInFileAsync(
       const std::string &query,
       const std::string &filename,
       int line,
@@ -95,7 +98,7 @@ public:
 private:
   typedef ConcurrentLatestValue<
             boost::shared_ptr<
-              boost::packaged_task< AsyncResults > > > LatestTask;
+              boost::packaged_task< AsyncCompletions > > > LatestTask;
 
   // caller takes ownership of translation unit
   CXTranslationUnit CreateTranslationUnit(
@@ -109,9 +112,9 @@ private:
       const std::string &filename,
       const std::vector< UnsavedFile > &unsaved_files );
 
-  std::vector< std::string > SortCandidatesForQuery(
+  std::vector< CompletionData > SortCandidatesForQuery(
       const std::string &query,
-      const std::vector< std::string > &candidates );
+      const std::vector< CompletionData > &completion_datas );
 
   void InitThreads();
 
@@ -145,7 +148,7 @@ private:
   boost::mutex clang_data_ready_mutex_;
   boost::condition_variable clang_data_ready_condition_variable_;
 
-  std::vector< std::string > latest_clang_results_;
+  std::vector< CompletionData > latest_clang_results_;
   boost::shared_mutex latest_clang_results_shared_mutex_;
 
   // Unfortunately clang is not thread-safe so we can only ever use one thread

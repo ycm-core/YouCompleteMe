@@ -158,7 +158,7 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
   unique_future< AsyncResults > future = task->get_future();
 
   latest_task_.Set( task );
-  return Future< AsyncResults >( move( future ) );
+  return Future< AsyncResults >( boost::move( future ) );
 }
 
 

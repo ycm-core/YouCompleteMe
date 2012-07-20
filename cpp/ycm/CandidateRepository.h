@@ -29,6 +29,7 @@ namespace YouCompleteMe
 {
 
 class Candidate;
+struct CompletionData;
 
 typedef boost::unordered_map< std::string, const Candidate* >
           CandidateHolder;
@@ -40,6 +41,9 @@ public:
 
   std::vector< const Candidate* > GetCandidatesForStrings(
       const std::vector< std::string > &strings );
+
+  std::vector< const Candidate* > GetCandidatesForStrings(
+      const std::vector< CompletionData > &datas );
 
 private:
   CandidateRepository() {};

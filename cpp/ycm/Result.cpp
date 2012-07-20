@@ -69,6 +69,20 @@ int NumWordBoundaryCharMatches( const std::string &query,
 
 } // unnamed namespace
 
+Result::Result()
+  :
+  query_is_empty_( true ),
+  is_subsequence_( false ),
+  first_char_same_in_query_and_text_( false ),
+  ratio_of_word_boundary_chars_in_query_( 0 ),
+  word_boundary_char_utilization_( 0 ),
+  query_is_candidate_prefix_( false ),
+  text_is_lowercase_( false ),
+  char_match_index_sum_( 0 ),
+  text_( NULL )
+{
+}
+
 
 Result::Result( bool is_subsequence )
   :
@@ -83,6 +97,7 @@ Result::Result( bool is_subsequence )
   text_( NULL )
 {
 }
+
 
 Result::Result( bool is_subsequence,
                 const std::string *text,

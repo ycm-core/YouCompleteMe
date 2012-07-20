@@ -18,6 +18,7 @@
 #include "IdentifierCompleter.h"
 #include "ClangCompleter.h"
 #include "Future.h"
+#include "CompletionData.h"
 
 #include <boost/python.hpp>
 #include <boost/utility.hpp>
@@ -28,13 +29,30 @@ BOOST_PYTHON_MODULE(indexer)
   using namespace boost::python;
   using namespace YouCompleteMe;
 
+  // TODO: rename these *Vec classes to *Vector; don't forget the python file
 	class_< std::vector< std::string >,
 	        boost::shared_ptr< std::vector< std::string > > >( "StringVec" )
 		.def( vector_indexing_suite< std::vector< std::string > >() );
 
+  class_< CompletionData >( "CompletionData" )
+    .def( "TextToInsertInBuffer", &CompletionData::TextToInsertInBuffer )
+    .def_readonly( "detailed_info_", &CompletionData::detailed_info_ )
+    .def_readonly( "extra_menu_info_", &CompletionData::extra_menu_info_ )
+    .def_readonly( "kind_", &CompletionData::kind_ )
+    .def_readonly( "original_string_", &CompletionData::original_string_ );
+
+	class_< std::vector< CompletionData >,
+	        boost::shared_ptr< std::vector< CompletionData > > >(
+	            "CompletionVec" )
+		.def( vector_indexing_suite< std::vector< CompletionData > >() );
+
   class_< Future< AsyncResults > >( "Future" )
     .def( "ResultsReady", &Future< AsyncResults >::ResultsReady )
     .def( "GetResults", &Future< AsyncResults >::GetResults );
+
+  class_< Future< AsyncCompletions > >( "Future" )
+    .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
+    .def( "GetResults", &Future< AsyncCompletions >::GetResults );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )

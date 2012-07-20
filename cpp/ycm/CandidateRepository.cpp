@@ -17,6 +17,7 @@
 
 #include "CandidateRepository.h"
 #include "Candidate.h"
+#include "CompletionData.h"
 #include "standard.h"
 #include "Utils.h"
 
@@ -43,7 +44,7 @@ CandidateRepository& CandidateRepository::Instance()
 
 
 std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
-    const std::vector< std::string > &strings)
+    const std::vector< std::string > &strings )
 {
   std::vector< const Candidate* > candidates;
   candidates.reserve( strings.size() );
@@ -58,6 +59,31 @@ std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
                                                         NULL );
       if ( !candidate )
         candidate = new Candidate( candidate_text );
+
+      candidates.push_back( candidate );
+    }
+  }
+
+  return candidates;
+}
+
+
+std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
+    const std::vector< CompletionData > &datas )
+{
+  std::vector< const Candidate* > candidates;
+  candidates.reserve( datas.size() );
+
+  {
+    boost::lock_guard< boost::mutex > locker( holder_mutex_ );
+
+    foreach ( const CompletionData &data, datas )
+    {
+      const Candidate *&candidate = GetValueElseInsert( candidate_holder_,
+                                                        data.original_string_,
+                                                        NULL );
+      if ( !candidate )
+        candidate = new Candidate( data.original_string_ );
 
       candidates.push_back( candidate );
     }

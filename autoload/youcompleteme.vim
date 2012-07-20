@@ -217,7 +217,7 @@ EOF
   let l:results = []
     py << EOF
 results = clangcomp.CandidatesFromStoredRequest()
-result_string = ycm.StringVectorToString( results )
+result_string = ycm.CompletionDataVectorToString( results )
 
 if results:
   vim.command( 'let l:results = ' + result_string )

@@ -26,6 +26,7 @@ namespace YouCompleteMe
 class Result
 {
 public:
+  Result();
   explicit Result( bool is_subsequence );
 
   Result( bool is_subsequence,
