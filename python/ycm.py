@@ -21,8 +21,10 @@ import re
 import vim
 import indexer
 
-min_num_chars = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
-clang_filetypes = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
+MIN_NUM_CHARS = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
+CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
+MAX_IDENTIFIER_COMPLETIONS_RETURNED = 20
+
 
 class Completer( object ):
   def __init__( self ):
@@ -88,6 +90,11 @@ class IdentifierCompleter( Completer ):
                                             filetype,
                                             filepath,
                                             True )
+
+  def CandidatesFromStoredRequest( self ):
+    if not self.future:
+      return []
+    return self.future.GetResults()[ : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
 
 
 class ClangCompleter( Completer ):
@@ -181,7 +188,7 @@ def CurrentLineAndColumn():
 
 def ShouldUseClang( start_column ):
   filetype = vim.eval( "&filetype" )
-  if filetype not in clang_filetypes:
+  if filetype not in CLANG_FILETYPES:
     return False
 
   line = vim.current.line
@@ -253,7 +260,7 @@ def PreviousIdentifier():
   while start_column > 0 and IsIdentifierChar( line[ start_column - 1 ] ):
     start_column -= 1
 
-  if end_column - start_column < min_num_chars:
+  if end_column - start_column < MIN_NUM_CHARS:
     return ""
 
   return line[ start_column : end_column ]

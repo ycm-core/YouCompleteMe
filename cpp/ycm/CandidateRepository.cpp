@@ -43,6 +43,13 @@ CandidateRepository& CandidateRepository::Instance()
 }
 
 
+int CandidateRepository::NumStoredCandidates()
+{
+  boost::lock_guard< boost::mutex > locker( holder_mutex_ );
+  return candidate_holder_.size();
+}
+
+
 std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
     const std::vector< std::string > &strings )
 {

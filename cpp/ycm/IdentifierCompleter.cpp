@@ -21,6 +21,7 @@
 #include "Candidate.h"
 #include "Utils.h"
 
+#include <boost/unordered_set.hpp>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <algorithm>
@@ -173,11 +174,19 @@ void IdentifierCompleter::ResultsForQueryAndType(
 
   Bitset query_bitset = LetterBitsetFromString( query );
 
+  boost::unordered_set< const Candidate* > seen_candidates;
+  seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
+
   foreach ( const FilepathToCandidates::value_type &path_and_candidates,
             *it->second )
   {
     foreach ( const Candidate* candidate, *path_and_candidates.second )
     {
+      if ( ContainsKey( seen_candidates, candidate ) )
+        continue;
+      else
+        seen_candidates.insert( candidate );
+
       if ( !candidate->MatchesQueryBitset( query_bitset ) )
         continue;
 

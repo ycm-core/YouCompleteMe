@@ -73,6 +73,15 @@ TEST( IdentifierCompleterTest, EmptyQueryNoResults )
 	             ElementsAre() );
 }
 
+TEST( IdentifierCompleterTest, NoDuplicatesReturned )
+{
+	EXPECT_THAT( IdentifierCompleter( Candidates(
+               "foobar",
+               "foobar",
+               "foobar" ) ).CandidatesForQuery( "foo" ),
+	             ElementsAre( "foobar" ) );
+}
+
 
 TEST( IdentifierCompleterTest, OneCandidate )
 {

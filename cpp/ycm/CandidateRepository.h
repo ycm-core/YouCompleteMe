@@ -39,6 +39,8 @@ class CandidateRepository : boost::noncopyable
 public:
   static CandidateRepository& Instance();
 
+  int NumStoredCandidates();
+
   std::vector< const Candidate* > GetCandidatesForStrings(
       const std::vector< std::string > &strings );
 

@@ -128,6 +128,8 @@ bool IsChunkKindForExtraMenuInfo( CXCompletionChunkKind kind )
 
 char CursorKindToVimKind( CXCursorKind kind )
 {
+  // TODO: actually it appears that Vim will show returned kinds even when they
+  // do not match the "approved" list, so let's use that
   switch ( kind )
   {
     case CXCursor_UnexposedDecl:
