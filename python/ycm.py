@@ -30,6 +30,7 @@ class Completer( object ):
   def __init__( self ):
     self.future = None
 
+
   def AsyncCandidateRequestReady( self ):
     return self.future.ResultsReady()
 
@@ -38,6 +39,10 @@ class Completer( object ):
     if not self.future:
       return []
     return self.future.GetResults()
+
+
+  def OnFileEnter( self ):
+    pass
 
 
 class IdentifierCompleter( Completer ):
@@ -90,6 +95,11 @@ class IdentifierCompleter( Completer ):
                                             filetype,
                                             filepath,
                                             True )
+
+
+  def OnFileEnter( self ):
+    self.AddBufferIdentifiers()
+
 
   def CandidatesFromStoredRequest( self ):
     if not self.future:

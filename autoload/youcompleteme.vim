@@ -26,15 +26,15 @@ let s:should_use_clang = 0
 let s:completion_start_column = 0
 let g:ycm_min_num_of_chars_for_completion = 2
 
-" TODO: check for a non-broken version of Vim and stop executing (with an error
-" message) if the detected version is too old
-
 function! youcompleteme#Enable()
-
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnMovedI()
-    " TODO: BufWinEnter/Leave?
+    " Note that these events will NOT trigger for the file vim is started with;
+    " so if you do "vim foo.cc", these events will not trigger when that buffer
+    " is read. This is because youcompleteme#Enable() is called on VimEnter and
+    " that happens *after" BufRead/BufEnter has already triggered for the
+    " initial file.
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
   augroup END
@@ -51,12 +51,6 @@ function! youcompleteme#Enable()
   " Also, having this option set breaks the plugin.
   set completeopt-=longest
 
-  " We need this in spite of binding SetCompleteFunc to bufread and bufenter
-  " because neither event is called when vim is started and the cursor is placed
-  " in the file that was previously open (with for instance the session.vim
-  " plugin)
-  call s:SetCompleteFunc()
-
   " With this command, when the completion window is visible, the tab key will
   " select the next candidate in the window. In vim, this also changes the
   " typed-in text to that of the candidate completion.
@@ -67,12 +61,17 @@ function! youcompleteme#Enable()
   py import ycm
   py identcomp = ycm.IdentifierCompleter()
   py clangcomp = ycm.ClangCompleter()
+
+  " Calling this once solves the problem of BufRead/BufEnter not triggering for
+  " the first loaded file. This should be the last command executed in this
+  " function!
+  call s:OnBufferVisit()
 endfunction
 
 
 function! s:OnBufferVisit()
   call s:SetCompleteFunc()
-  py identcomp.AddBufferIdentifiers()
+  py identcomp.OnFileEnter()
 endfunction
 
 
@@ -171,20 +170,12 @@ function! s:IdentifierCompletion(query)
 
   let l:results = pyeval( 'identcomp.CandidatesFromStoredRequest()' )
   let s:searched_and_no_results_found = len( l:results ) == 0
-
-  " We need a very recent version of vim for this to work; otherwise, even
-  " when we set refresh = always, vim won't call our completefunc on every
-  " keystroke. The problem is still present in vim 7.3.390 but is fixed in
-  " 7.3.475. It's possible that patch 404 was the one that fixed this issue,
-  " but I haven't tested this assumption.
-  " A bug in vim causes the '.' register to break when we use set this... sigh
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction
 
 
 function! s:ClangCompletion( query )
   " TODO: don't trigger on a dot inside a string constant
-
   py clangcomp.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
 
   let l:results_ready = 0
