@@ -146,9 +146,6 @@
 #  endif
 #endif
 
-// C++0x features not implemented in any GCC version
-//
-#define BOOST_NO_TEMPLATE_ALIASES
 
 // C++0x features in 4.3.n and later
 //
@@ -182,7 +179,7 @@
 #  define BOOST_NO_AUTO_MULTIDECLARATIONS
 #  define BOOST_NO_CHAR16_T
 #  define BOOST_NO_CHAR32_T
-#  define BOOST_NO_INITIALIZER_LISTS
+#  define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
 #  define BOOST_NO_DEFAULTED_FUNCTIONS
 #  define BOOST_NO_DELETED_FUNCTIONS
 #endif
@@ -196,6 +193,7 @@
 #if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 5) || !defined(__GXX_EXPERIMENTAL_CXX0X__)
 #  define BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
 #  define BOOST_NO_LAMBDAS
+#  define BOOST_NO_LOCAL_CLASS_TEMPLATE_PARAMETERS
 #  define BOOST_NO_RAW_LITERALS
 #  define BOOST_NO_UNICODE_LITERALS
 #endif
@@ -217,6 +215,9 @@
 #define BOOST_NO_UNIFIED_INITIALIZATION_SYNTAX
 #endif
 
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7) || !defined(__GXX_EXPERIMENTAL_CXX0X__)
+#  define BOOST_NO_TEMPLATE_ALIASES
+#endif
 // C++0x features not supported at all yet
 //
 #define BOOST_NO_DECLTYPE_N3276

@@ -43,23 +43,29 @@ if( to_remove )
   list( REMOVE_ITEM SOURCES ${to_remove} )
 endif()
 
-set( WINSOURCES
+set( COMMON_SOURCES
+    libs/thread/src/future.cpp
+    )
+
+set( WIN_SOURCES
     libs/thread/src/win32/thread.cpp
     libs/thread/src/win32/timeconv.inl
     libs/thread/src/win32/tss_dll.cpp
     libs/thread/src/win32/tss_pe.cpp
     )
 
-set( UNIXSOURCES
+set( UNIX_SOURCES
     libs/thread/src/pthread/once.cpp
     libs/thread/src/pthread/thread.cpp
     libs/thread/src/pthread/timeconv.inl
     )
 
+list( APPEND SOURCES ${COMMON_SOURCES} )
+
 if ( WIN32 )
-    list( APPEND SOURCES ${WINSOURCES} )
+    list( APPEND SOURCES ${WIN_SOURCES} )
 else()
-    list( APPEND SOURCES ${UNIXSOURCES} )
+    list( APPEND SOURCES ${UNIX_SOURCES} )
 endif()
 
 #############################################################################

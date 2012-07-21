@@ -24,6 +24,7 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/iterator/filter_iterator.hpp>
+#include <boost/iterator/iterator_traits.hpp>
 
 //#include <boost/detail/workaround.hpp>
 //#if ! BOOST_WORKAROUND(BOOST_MSVC, <=1300)
@@ -140,13 +141,19 @@ public:
 template<class Base>
 class remove_whitespace : 
     public filter_iterator<
-        remove_whitespace_predicate<BOOST_DEDUCED_TYPENAME Base::value_type>,
+        remove_whitespace_predicate<
+            BOOST_DEDUCED_TYPENAME boost::iterator_value<Base>::type
+            //BOOST_DEDUCED_TYPENAME Base::value_type
+        >,
         Base
     >
 {
     friend class boost::iterator_core_access;
     typedef filter_iterator<
-        remove_whitespace_predicate<BOOST_DEDUCED_TYPENAME Base::value_type>,
+        remove_whitespace_predicate<
+            BOOST_DEDUCED_TYPENAME boost::iterator_value<Base>::type
+            //BOOST_DEDUCED_TYPENAME Base::value_type
+        >,
         Base
     > super_t;
 public:

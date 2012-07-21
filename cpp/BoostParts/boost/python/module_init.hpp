@@ -76,7 +76,7 @@ extern "C" __declspec(dllexport) _BOOST_PYTHON_MODULE_INIT(name)
 
 #   define BOOST_PYTHON_MODULE_INIT(name)                               \
   void BOOST_PP_CAT(init_module_,name)();                               \
-extern "C" __attribute__ ((visibility("default"))) _BOOST_PYTHON_MODULE_INIT(name)
+extern "C" __attribute__ ((__visibility__("default"))) _BOOST_PYTHON_MODULE_INIT(name)
 
 #  else
 

@@ -19,7 +19,6 @@
 # include <boost/python/detail/copy_ctor_mutates_rhs.hpp>
 # include <boost/python/detail/void_ptr.hpp>
 # include <boost/python/detail/void_return.hpp>
-# include <boost/utility.hpp>
 # include <boost/call_traits.hpp>
 
 #if BOOST_WORKAROUND(BOOST_MSVC, <= 1300) || BOOST_WORKAROUND(BOOST_INTEL_WIN, <= 900)

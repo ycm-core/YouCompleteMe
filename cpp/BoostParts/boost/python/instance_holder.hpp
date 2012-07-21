@@ -7,7 +7,7 @@
 
 # include <boost/python/detail/prefix.hpp>
 
-# include <boost/utility.hpp>
+# include <boost/noncopyable.hpp>
 # include <boost/python/type_id.hpp>
 # include <cstddef>
 

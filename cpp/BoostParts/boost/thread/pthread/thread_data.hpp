@@ -4,6 +4,7 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 // (C) Copyright 2007 Anthony Williams
+// (C) Copyright 2011-2012 Vicente J. Botet Escriba
 
 #include <boost/thread/detail/config.hpp>
 #include <boost/thread/exceptions.hpp>
@@ -15,11 +16,56 @@
 #include <boost/assert.hpp>
 #include <boost/thread/pthread/condition_variable_fwd.hpp>
 #include <map>
-
+#include <unistd.h>
+#ifdef BOOST_THREAD_USES_CHRONO
+#include <boost/chrono/system_clocks.hpp>
+#endif
 #include <boost/config/abi_prefix.hpp>
 
 namespace boost
 {
+    class thread_attributes {
+    public:
+        thread_attributes() BOOST_NOEXCEPT {
+            int res = pthread_attr_init(&val_);
+            BOOST_VERIFY(!res && "pthread_attr_init failed");
+        }
+        ~thread_attributes() {
+          int res = pthread_attr_destroy(&val_);
+          BOOST_VERIFY(!res && "pthread_attr_destroy failed");
+        }
+        // stack
+        void set_stack_size(std::size_t size) BOOST_NOEXCEPT {
+          if (size==0) return;
+          std::size_t page_size = getpagesize();
+#ifdef PTHREAD_STACK_MIN
+          if (size<PTHREAD_STACK_MIN) size=PTHREAD_STACK_MIN;
+#endif
+          size = ((size+page_size-1)/page_size)*page_size;
+          int res = pthread_attr_setstacksize(&val_, size);
+          BOOST_VERIFY(!res && "pthread_attr_setstacksize failed");
+        }
+
+        std::size_t get_stack_size() const BOOST_NOEXCEPT {
+            std::size_t size;
+            int res = pthread_attr_getstacksize(&val_, &size);
+            BOOST_VERIFY(!res && "pthread_attr_getstacksize failed");
+            return size;
+        }
+#define BOOST_THREAD_DEFINES_THREAD_ATTRIBUTES_NATIVE_HANDLE
+
+        typedef pthread_attr_t native_handle_type;
+        native_handle_type* native_handle() BOOST_NOEXCEPT {
+          return &val_;
+        }
+        const native_handle_type* native_handle() const BOOST_NOEXCEPT {
+          return &val_;
+        }
+
+    private:
+        pthread_attr_t val_;
+    };
+
     class thread;
 
     namespace detail
@@ -128,7 +174,10 @@ namespace boost
 
     namespace this_thread
     {
-        void BOOST_THREAD_DECL yield();
+#ifdef BOOST_THREAD_USES_CHRONO
+        void BOOST_SYMBOL_VISIBLE sleep_for(const chrono::nanoseconds& ns);
+#endif
+        void BOOST_THREAD_DECL yield() BOOST_NOEXCEPT;
 
 #ifdef __DECXXX
         /// Workaround of DECCXX issue of incorrect template substitution

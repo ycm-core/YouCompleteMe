@@ -21,10 +21,17 @@
 // Define BOOST_DETAIL_NO_CONTAINER_FWD if you don't want this header to      //
 // forward declare standard containers.                                       //
 //                                                                            //
+// BOOST_DETAIL_CONTAINER_FWD to make it foward declare containers even if it //
+// normally doesn't.                                                          //
+//                                                                            //
+// BOOST_DETAIL_NO_CONTAINER_FWD overrides BOOST_DETAIL_CONTAINER_FWD.        //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(BOOST_DETAIL_NO_CONTAINER_FWD)
-#  if defined(__SGI_STL_PORT) || defined(_STLPORT_VERSION)
+#  if defined(BOOST_DETAIL_CONTAINER_FWD)
+     // Force forward declarations.
+#  elif defined(__SGI_STL_PORT) || defined(_STLPORT_VERSION)
      // STLport
 #    define BOOST_DETAIL_NO_CONTAINER_FWD
 #  elif defined(__LIBCOMO__)
@@ -76,11 +83,6 @@
 #  endif
 #endif
 
-// BOOST_DETAIL_TEST_* macros are for testing only
-// and shouldn't be relied upon. But you can use
-// BOOST_DETAIL_NO_CONTAINER_FWD to prevent forward
-// declaration of containers.
-
 #if !defined(BOOST_DETAIL_TEST_CONFIG_ONLY)
 
 #if defined(BOOST_DETAIL_NO_CONTAINER_FWD) && \
@@ -118,6 +120,7 @@ namespace std
     template <class charT, class traits, class Allocator> class basic_string;
 
 #if BOOST_WORKAROUND(__GNUC__, < 3) && !defined(__SGI_STL_PORT) && !defined(_STLPORT_VERSION)
+
     template <class charT> struct string_char_traits;
 #else
     template <class charT> struct char_traits;

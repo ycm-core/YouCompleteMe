@@ -147,7 +147,7 @@ public:
     }
     virtual void destroy(void const * const p) const{
         boost::serialization::access::destroy(
-            static_cast<T const * const>(p)
+            static_cast<T const *>(p)
         );
         //delete static_cast<T const * const>(p) ;
     }

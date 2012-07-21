@@ -348,12 +348,12 @@ namespace api
   // Macros for forwarding constructors in classes derived from
   // object. Derived classes will usually want these as an
   // implementation detail
-# define BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS_(derived, base)       \
-    inline explicit derived(python::detail::borrowed_reference p)       \
-        : base(p) {}                                                    \
-    inline explicit derived(python::detail::new_reference p)            \
-        : base(p) {}                                                    \
-    inline explicit derived(python::detail::new_non_null_reference p)   \
+# define BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS_(derived, base)              \
+    inline explicit derived(::boost::python::detail::borrowed_reference p)     \
+        : base(p) {}                                                           \
+    inline explicit derived(::boost::python::detail::new_reference p)          \
+        : base(p) {}                                                           \
+    inline explicit derived(::boost::python::detail::new_non_null_reference p) \
         : base(p) {}
 
 # if !defined(BOOST_MSVC) || BOOST_MSVC >= 1300

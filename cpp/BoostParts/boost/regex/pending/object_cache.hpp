@@ -151,7 +151,7 @@ boost::shared_ptr<Object const> object_cache<Key, Object>::do_get(const Key& k, 
             --s;
          }
          else
-            --pos;
+            ++pos;
       }
       BOOST_ASSERT(s_data.index[k]->first.get() == result.get());
       BOOST_ASSERT(&(s_data.index.find(k)->first) == s_data.cont.back().second);

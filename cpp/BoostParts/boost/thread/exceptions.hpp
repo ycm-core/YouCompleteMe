@@ -1,8 +1,9 @@
 // Copyright (C) 2001-2003
 // William E. Kempf
 // Copyright (C) 2007-9 Anthony Williams
+// (C) Copyright 2011-2012 Vicente J. Botet Escriba
 //
-//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef BOOST_THREAD_EXCEPTIONS_PDM070801_H
@@ -18,6 +19,9 @@
 
 #include <string>
 #include <stdexcept>
+#include <boost/system/system_error.hpp>
+#include <boost/system/error_code.hpp>
+
 
 #include <boost/config/abi_prefix.hpp>
 
@@ -28,151 +32,188 @@ namespace boost
     {};
 
     class BOOST_SYMBOL_VISIBLE thread_exception:
-        public std::exception
+        public system::system_error
+        //public std::exception
     {
-    protected:
-        thread_exception():
-            m_sys_err(0)
-        {}
-    
-        thread_exception(int sys_err_code):
-            m_sys_err(sys_err_code)
-        {}
-    
-
+          typedef system::system_error base_type;
     public:
+        thread_exception()
+          : base_type(0,system::system_category())
+        {}
+
+        thread_exception(int sys_error_code)
+          : base_type(sys_error_code, system::system_category())
+        {}
+
+        thread_exception( int ev, const char * what_arg )
+        : base_type(system::error_code(ev, system::system_category()), what_arg)
+        {
+        }
+        thread_exception( int ev, const std::string & what_arg )
+        : base_type(system::error_code(ev, system::system_category()), what_arg)
+        {
+        }
+
         ~thread_exception() throw()
         {}
-    
+
 
         int native_error() const
         {
-            return m_sys_err;
+            return code().value();
         }
-    
 
-    private:
-        int m_sys_err;
     };
 
     class BOOST_SYMBOL_VISIBLE condition_error:
-        public std::exception
+        public system::system_error
+        //public std::exception
     {
+          typedef system::system_error base_type;
     public:
-        const char* what() const throw()
-        {
-            return "Condition error";
-        }
+          condition_error()
+          : base_type(system::error_code(0, system::system_category()), "Condition error")
+          {}
+          condition_error( int ev )
+          : base_type(system::error_code(ev, system::system_category()), "Condition error")
+          {
+          }
+          condition_error( int ev, const char * what_arg )
+          : base_type(system::error_code(ev, system::system_category()), what_arg)
+          {
+          }
+          condition_error( int ev, const std::string & what_arg )
+          : base_type(system::error_code(ev, system::system_category()), what_arg)
+          {
+          }
     };
-    
+
 
     class BOOST_SYMBOL_VISIBLE lock_error:
         public thread_exception
     {
+          typedef thread_exception base_type;
     public:
         lock_error()
+        : base_type(0, "boost::lock_error")
         {}
-    
-        lock_error(int sys_err_code):
-            thread_exception(sys_err_code)
-        {}
-    
+
+        lock_error( int ev )
+        : base_type(ev, "boost::lock_error")
+        {
+        }
+        lock_error( int ev, const char * what_arg )
+        : base_type(ev, what_arg)
+        {
+        }
+        lock_error( int ev, const std::string & what_arg )
+        : base_type(ev, what_arg)
+        {
+        }
+
         ~lock_error() throw()
         {}
-    
 
-        virtual const char* what() const throw()
-        {
-            return "boost::lock_error";
-        }
     };
 
     class BOOST_SYMBOL_VISIBLE thread_resource_error:
         public thread_exception
     {
+          typedef thread_exception base_type;
     public:
-        thread_resource_error()
-        {}
-    
-        thread_resource_error(int sys_err_code):
-            thread_exception(sys_err_code)
-        {}
-    
+          thread_resource_error()
+          : base_type(system::errc::resource_unavailable_try_again, "boost::thread_resource_error")
+          {}
+
+          thread_resource_error( int ev )
+          : base_type(ev, "boost::thread_resource_error")
+          {
+          }
+          thread_resource_error( int ev, const char * what_arg )
+          : base_type(ev, what_arg)
+          {
+          }
+          thread_resource_error( int ev, const std::string & what_arg )
+          : base_type(ev, what_arg)
+          {
+          }
+
+
         ~thread_resource_error() throw()
         {}
-    
 
-        virtual const char* what() const throw()
-        {
-            return "boost::thread_resource_error";
-        }
-    
     };
 
     class BOOST_SYMBOL_VISIBLE unsupported_thread_option:
         public thread_exception
     {
+          typedef thread_exception base_type;
     public:
-        unsupported_thread_option()
-        {}
-    
-        unsupported_thread_option(int sys_err_code):
-            thread_exception(sys_err_code)
-        {}
-    
-        ~unsupported_thread_option() throw()
-        {}
-    
+          unsupported_thread_option()
+          : base_type(system::errc::invalid_argument, "boost::unsupported_thread_option")
+          {}
 
-        virtual const char* what() const throw()
-        {
-            return "boost::unsupported_thread_option";
-        }
-    
+          unsupported_thread_option( int ev )
+          : base_type(ev, "boost::unsupported_thread_option")
+          {
+          }
+          unsupported_thread_option( int ev, const char * what_arg )
+          : base_type(ev, what_arg)
+          {
+          }
+          unsupported_thread_option( int ev, const std::string & what_arg )
+          : base_type(ev, what_arg)
+          {
+          }
+
     };
 
     class BOOST_SYMBOL_VISIBLE invalid_thread_argument:
         public thread_exception
     {
+          typedef thread_exception base_type;
     public:
         invalid_thread_argument()
+        : base_type(system::errc::invalid_argument, "boost::invalid_thread_argument")
         {}
-    
-        invalid_thread_argument(int sys_err_code):
-            thread_exception(sys_err_code)
-        {}
-    
-        ~invalid_thread_argument() throw()
-        {}
-    
 
-        virtual const char* what() const throw()
+        invalid_thread_argument( int ev )
+        : base_type(ev, "boost::invalid_thread_argument")
         {
-            return "boost::invalid_thread_argument";
         }
-    
+        invalid_thread_argument( int ev, const char * what_arg )
+        : base_type(ev, what_arg)
+        {
+        }
+        invalid_thread_argument( int ev, const std::string & what_arg )
+        : base_type(ev, what_arg)
+        {
+        }
+
     };
 
     class BOOST_SYMBOL_VISIBLE thread_permission_error:
         public thread_exception
     {
+          typedef thread_exception base_type;
     public:
-        thread_permission_error()
-        {}
-    
-        thread_permission_error(int sys_err_code):
-            thread_exception(sys_err_code)
-        {}
-    
-        ~thread_permission_error() throw()
-        {}
-    
+          thread_permission_error()
+          : base_type(system::errc::permission_denied, "boost::thread_permission_error")
+          {}
 
-        virtual const char* what() const throw()
-        {
-            return "boost::thread_permission_error";
-        }
-    
+          thread_permission_error( int ev )
+          : base_type(ev, "boost::thread_permission_error")
+          {
+          }
+          thread_permission_error( int ev, const char * what_arg )
+          : base_type(ev, what_arg)
+          {
+          }
+          thread_permission_error( int ev, const std::string & what_arg )
+          : base_type(ev, what_arg)
+          {
+          }
+
     };
 
 } // namespace boost

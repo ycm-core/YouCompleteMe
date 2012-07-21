@@ -14,7 +14,11 @@
 #define BOOST_FUNCTIONAL_HASH_EXTENSIONS_HPP
 
 #include <boost/functional/hash/hash.hpp>
-#include <boost/detail/container_fwd.hpp>
+#include <boost/functional/hash/detail/container_fwd_0x.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/preprocessor/repetition/repeat_from_to.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 # pragma once
@@ -54,51 +58,51 @@ namespace boost
     std::size_t hash_value(std::pair<A, B> const& v)
     {
         std::size_t seed = 0;
-        hash_combine(seed, v.first);
-        hash_combine(seed, v.second);
+        boost::hash_combine(seed, v.first);
+        boost::hash_combine(seed, v.second);
         return seed;
     }
 
     template <class T, class A>
     std::size_t hash_value(std::vector<T, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class T, class A>
     std::size_t hash_value(std::list<T, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class T, class A>
     std::size_t hash_value(std::deque<T, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class K, class C, class A>
     std::size_t hash_value(std::set<K, C, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class K, class C, class A>
     std::size_t hash_value(std::multiset<K, C, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class K, class T, class C, class A>
     std::size_t hash_value(std::map<K, T, C, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class K, class T, class C, class A>
     std::size_t hash_value(std::multimap<K, T, C, A> const& v)
     {
-        return hash_range(v.begin(), v.end());
+        return boost::hash_range(v.begin(), v.end());
     }
 
     template <class T>
@@ -109,6 +113,71 @@ namespace boost
         seed ^= hasher(v.real()) + (seed<<6) + (seed>>2);
         return seed;
     }
+
+#if !defined(BOOST_NO_0X_HDR_ARRAY)
+    template <class T, std::size_t N>
+    std::size_t hash_value(std::array<T, N> const& v)
+    {
+        return boost::hash_range(v.begin(), v.end());
+    }
+#endif
+
+#if !defined(BOOST_NO_0X_HDR_TUPLE)
+    namespace hash_detail {
+        template <std::size_t I, typename T>
+        inline typename boost::enable_if_c<(I == std::tuple_size<T>::value),
+                void>::type
+            hash_combine_tuple(std::size_t&, T const&)
+        {
+        }
+
+        template <std::size_t I, typename T>
+        inline typename boost::enable_if_c<(I < std::tuple_size<T>::value),
+                void>::type
+            hash_combine_tuple(std::size_t& seed, T const& v)
+        {
+            boost::hash_combine(seed, std::get<I>(v));
+            boost::hash_detail::hash_combine_tuple<I + 1>(seed, v);
+        }
+
+        template <typename T>
+        inline std::size_t hash_tuple(T const& v)
+        {
+            std::size_t seed = 0;
+            boost::hash_detail::hash_combine_tuple<0>(seed, v);
+            return seed;
+        }
+    }
+
+#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+    template <typename... T>
+    inline std::size_t hash_value(std::tuple<T...> const& v)
+    {
+        return boost::hash_detail::hash_tuple(v);
+    }
+#else
+
+    inline std::size_t hash_value(std::tuple<> const& v)
+    {
+        return boost::hash_detail::hash_tuple(v);
+    }
+
+#   define BOOST_HASH_TUPLE_F(z, n, _)                                      \
+    template<                                                               \
+        BOOST_PP_ENUM_PARAMS_Z(z, n, typename A)                            \
+    >                                                                       \
+    inline std::size_t hash_value(std::tuple<                               \
+        BOOST_PP_ENUM_PARAMS_Z(z, n, A)                                     \
+    > const& v)                                                             \
+    {                                                                       \
+        return boost::hash_detail::hash_tuple(v);                           \
+    }
+
+    BOOST_PP_REPEAT_FROM_TO(1, 11, BOOST_HASH_TUPLE_F, _)
+#   undef BOOST_HASH_TUPLE_F
+#endif
+
+#endif
 
     //
     // call_hash_impl

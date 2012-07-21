@@ -3,8 +3,9 @@
 
 //  once.hpp
 //
-//  (C) Copyright 2005-7 Anthony Williams 
+//  (C) Copyright 2005-7 Anthony Williams
 //  (C) Copyright 2005 John Maddock
+//  (C) Copyright 2011-2012 Vicente J. Botet Escriba
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -30,6 +31,25 @@ namespace std
 
 namespace boost
 {
+#ifdef BOOST_THREAD_PROVIDES_ONCE_CXX11
+
+  struct once_flag
+  {
+      BOOST_THREAD_NO_COPYABLE(once_flag)
+      BOOST_CONSTEXPR once_flag() BOOST_NOEXCEPT
+        : status(0), count(0)
+      {}
+  private:
+      long status;
+      long count;
+      template<typename Function>
+      friend
+      void call_once(once_flag& flag,Function f);
+  };
+
+#define BOOST_ONCE_INIT once_flag()
+#else // BOOST_THREAD_PROVIDES_ONCE_CXX11
+
     struct once_flag
     {
         long status;
@@ -37,6 +57,7 @@ namespace boost
     };
 
 #define BOOST_ONCE_INIT {0,0}
+#endif  // BOOST_THREAD_PROVIDES_ONCE_CXX11
 
     namespace detail
     {
@@ -71,29 +92,29 @@ namespace boost
 #else
             static const once_char_type fixed_mutex_name[]="Local\\{C15730E2-145C-4c5e-B005-3BC753F42475}-once-flag";
 #endif
-            BOOST_STATIC_ASSERT(sizeof(fixed_mutex_name) == 
+            BOOST_STATIC_ASSERT(sizeof(fixed_mutex_name) ==
                                 (sizeof(once_char_type)*(once_mutex_name_fixed_length+1)));
-            
+
             std::memcpy(mutex_name,fixed_mutex_name,sizeof(fixed_mutex_name));
-            detail::int_to_string(reinterpret_cast<std::ptrdiff_t>(flag_address), 
+            detail::int_to_string(reinterpret_cast<std::ptrdiff_t>(flag_address),
                                   mutex_name + once_mutex_name_fixed_length);
-            detail::int_to_string(win32::GetCurrentProcessId(), 
+            detail::int_to_string(win32::GetCurrentProcessId(),
                                   mutex_name + once_mutex_name_fixed_length + sizeof(void*)*2);
         }
-                        
+
         inline void* open_once_event(once_char_type* mutex_name,void* flag_address)
         {
             if(!*mutex_name)
             {
                 name_once_mutex(mutex_name,flag_address);
             }
-            
-#ifdef BOOST_NO_ANSI_APIS                        
+
+#ifdef BOOST_NO_ANSI_APIS
             return ::boost::detail::win32::OpenEventW(
 #else
             return ::boost::detail::win32::OpenEventA(
 #endif
-                ::boost::detail::win32::synchronize | 
+                ::boost::detail::win32::synchronize |
                 ::boost::detail::win32::event_modify_state,
                 false,
                 mutex_name);
@@ -105,7 +126,7 @@ namespace boost
             {
                 name_once_mutex(mutex_name,flag_address);
             }
-#ifdef BOOST_NO_ANSI_APIS                        
+#ifdef BOOST_NO_ANSI_APIS
             return ::boost::detail::win32::CreateEventW(
 #else
             return ::boost::detail::win32::CreateEventA(
@@ -115,7 +136,7 @@ namespace boost
                 mutex_name);
         }
     }
-    
+
 
     template<typename Function>
     void call_once(once_flag& flag,Function f)
@@ -153,7 +174,7 @@ namespace boost
                         counted=true;
                     }
                     BOOST_INTERLOCKED_EXCHANGE(&flag.status,function_complete_flag_value);
-                    if(!event_handle && 
+                    if(!event_handle &&
                        (::boost::detail::interlocked_read_acquire(&flag.count)>1))
                     {
                         event_handle=detail::create_once_event(mutex_name,&flag);

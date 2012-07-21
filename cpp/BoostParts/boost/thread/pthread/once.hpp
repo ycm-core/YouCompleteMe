@@ -4,28 +4,51 @@
 //  once.hpp
 //
 //  (C) Copyright 2007-8 Anthony Williams
+//  (C) Copyright 2011-2012 Vicente J. Botet Escriba
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/thread/detail/config.hpp>
-#include <boost/config.hpp>
 
 #include <pthread.h>
 #include <boost/assert.hpp>
 #include <boost/thread/pthread/pthread_mutex_scoped_lock.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/thread/detail/delete.hpp>
 
 #include <boost/config/abi_prefix.hpp>
 
 namespace boost
 {
 
+#define BOOST_ONCE_INITIAL_FLAG_VALUE 0
+
+#ifdef BOOST_THREAD_PROVIDES_ONCE_CXX11
+
+  struct once_flag
+  {
+      BOOST_THREAD_NO_COPYABLE(once_flag)
+      BOOST_CONSTEXPR once_flag() BOOST_NOEXCEPT
+        : epoch(BOOST_ONCE_INITIAL_FLAG_VALUE)
+      {}
+  private:
+      boost::uintmax_t epoch;
+      template<typename Function>
+      friend
+      void call_once(once_flag& flag,Function f);
+  };
+
+#else // BOOST_THREAD_PROVIDES_ONCE_CXX11
+
     struct once_flag
     {
         boost::uintmax_t epoch;
     };
+
+#define BOOST_ONCE_INIT {BOOST_ONCE_INITIAL_FLAG_VALUE}
+#endif // BOOST_THREAD_PROVIDES_ONCE_CXX11
 
     namespace detail
     {
@@ -34,10 +57,6 @@ namespace boost
         BOOST_THREAD_DECL extern pthread_mutex_t once_epoch_mutex;
         BOOST_THREAD_DECL extern pthread_cond_t once_epoch_cv;
     }
-
-#define BOOST_ONCE_INITIAL_FLAG_VALUE 0
-#define BOOST_ONCE_INIT {BOOST_ONCE_INITIAL_FLAG_VALUE}
-
 
     // Based on Mike Burrows fast_pthread_once algorithm as described in
     // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2444.html

@@ -74,7 +74,7 @@ namespace boost
 #endif
 
         template< class T >
-        inline long is_char_ptr( T /* r */ )
+        inline long is_char_ptr( const T& /* r */ )
         {
             return 0L;
         }

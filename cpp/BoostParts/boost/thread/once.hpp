@@ -3,7 +3,7 @@
 
 //  once.hpp
 //
-//  (C) Copyright 2006-7 Anthony Williams 
+//  (C) Copyright 2006-7 Anthony Williams
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -22,6 +22,8 @@
 
 namespace boost
 {
+  // template<class Callable, class ...Args> void
+  // call_once(once_flag& flag, Callable&& func, Args&&... args);
     inline void call_once(void (*func)(),once_flag& flag)
     {
         call_once(flag,func);

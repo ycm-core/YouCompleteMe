@@ -10,12 +10,23 @@
 # pragma once
 #endif
 
+#include <boost/config.hpp>
+#include <memory>
+#include <functional>
+#include <boost/functional/hash_fwd.hpp>
 #include <boost/unordered/detail/fwd.hpp>
 
 namespace boost
 {
     namespace unordered
     {
+        template <class K,
+            class T,
+            class H = boost::hash<K>,
+            class P = std::equal_to<K>,
+            class A = std::allocator<std::pair<const K, T> > >
+        class unordered_map;
+
         template <class K, class T, class H, class P, class A>
         inline bool operator==(unordered_map<K, T, H, P, A> const&,
             unordered_map<K, T, H, P, A> const&);
@@ -25,6 +36,13 @@ namespace boost
         template <class K, class T, class H, class P, class A>
         inline void swap(unordered_map<K, T, H, P, A>&,
                 unordered_map<K, T, H, P, A>&);
+
+        template <class K,
+            class T,
+            class H = boost::hash<K>,
+            class P = std::equal_to<K>,
+            class A = std::allocator<std::pair<const K, T> > >
+        class unordered_multimap;
 
         template <class K, class T, class H, class P, class A>
         inline bool operator==(unordered_multimap<K, T, H, P, A> const&,

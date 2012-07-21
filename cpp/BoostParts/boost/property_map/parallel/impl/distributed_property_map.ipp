@@ -296,14 +296,10 @@ PBGL_DISTRIB_PMAP::set_consistency_model(int model)
 {
   data->model = model;
 
-  int stages = 1;
   bool need_on_synchronize = (model != cm_forward);
 
   // Backward consistency is a two-stage process.
   if (model & cm_backward) {
-    if (model & cm_flush) stages = 3;
-    else stages = 2;
-
     // For backward consistency to work, we absolutely cannot throw
     // away any ghost cells.
     data->max_ghost_cells = 0;

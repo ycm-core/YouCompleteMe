@@ -1,13 +1,14 @@
-#ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_AIX_HPP_INCLUDED
-#define BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_AIX_HPP_INCLUDED
+#ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_VACPP_PPC_HPP_INCLUDED
+#define BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_VACPP_PPC_HPP_INCLUDED
 
 //
-//  detail/sp_counted_base_aix.hpp
+//  detail/sp_counted_base_vacpp_ppc.hpp - xlC(vacpp) on POWER
 //   based on: detail/sp_counted_base_w32.hpp
 //
 //  Copyright (c) 2001, 2002, 2003 Peter Dimov and Multi Media Ltd.
 //  Copyright 2004-2005 Peter Dimov
 //  Copyright 2006 Michael van der Westhuizen
+//  Copyright 2012 IBM Corp.
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -21,8 +22,11 @@
 //
 
 #include <boost/detail/sp_typeinfo.hpp>
-#include <builtins.h>
-#include <sys/atomic_op.h>
+
+extern "builtin" void __lwsync(void);
+extern "builtin" void __isync(void);
+extern "builtin" int __fetch_and_add(volatile int* addr, int val);
+extern "builtin" int __compare_and_swap(volatile int*, int*, int);
 
 namespace boost
 {
@@ -30,37 +34,40 @@ namespace boost
 namespace detail
 {
 
-inline void atomic_increment( int32_t* pw )
+inline void atomic_increment( int *pw )
 {
-    // ++*pw;
+   // ++*pw;
+   __lwsync();
+   __fetch_and_add(pw, 1);
+   __isync();
+} 
 
-    fetch_and_add( pw, 1 );
+inline int atomic_decrement( int *pw )
+{
+   // return --*pw;
+   __lwsync();
+   int originalValue = __fetch_and_add(pw, -1);
+   __isync();
+
+   return (originalValue - 1);
 }
 
-inline int32_t atomic_decrement( int32_t * pw )
+inline int atomic_conditional_increment( int *pw )
 {
-    // return --*pw;
+   // if( *pw != 0 ) ++*pw;
+   // return *pw;
 
-    int32_t originalValue;
-
-    __lwsync();
-    originalValue = fetch_and_add( pw, -1 );
-    __isync();
-
-    return (originalValue - 1);
-}
-
-inline int32_t atomic_conditional_increment( int32_t * pw )
-{
-    // if( *pw != 0 ) ++*pw;
-    // return *pw;
-
-    int32_t tmp = fetch_and_add( pw, 0 );
-    for( ;; )
-    {
-        if( tmp == 0 ) return 0;
-        if( compare_and_swap( pw, &tmp, tmp + 1 ) ) return (tmp + 1);
-    }
+   __lwsync();
+   int v = *const_cast<volatile int*>(pw);
+   for (;;)
+   // loop until state is known
+   {
+      if (v == 0) return 0;
+      if (__compare_and_swap(pw, &v, v + 1))
+      {
+         __isync(); return (v + 1);
+      }
+   }
 }
 
 class sp_counted_base
@@ -70,9 +77,10 @@ private:
     sp_counted_base( sp_counted_base const & );
     sp_counted_base & operator= ( sp_counted_base const & );
 
-    int32_t use_count_;        // #shared
-    int32_t weak_count_;       // #weak + (#shared != 0)
-
+    int use_count_;        // #shared
+    int weak_count_;       // #weak + (#shared != 0)
+    char pad[64] __attribute__((__aligned__(64)));
+            // pad to prevent false sharing
 public:
 
     sp_counted_base(): use_count_( 1 ), weak_count_( 1 )
@@ -131,7 +139,7 @@ public:
 
     long use_count() const // nothrow
     {
-        return fetch_and_add( const_cast<int32_t*>(&use_count_), 0 );
+        return *const_cast<volatile int*>(&use_count_); 
     }
 };
 
@@ -139,4 +147,4 @@ public:
 
 } // namespace boost
 
-#endif  // #ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_AIX_HPP_INCLUDED
+#endif  // #ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_VACPP_PPC_HPP_INCLUDED

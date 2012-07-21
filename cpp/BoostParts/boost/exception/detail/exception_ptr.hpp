@@ -25,7 +25,7 @@
 #include <stdexcept>
 #include <new>
 #include <ios>
-#include <cstdlib>
+#include <stdlib.h>
 
 namespace
 boost
@@ -457,7 +457,12 @@ boost
         BOOST_ASSERT(p);
         p.ptr_->rethrow();
         BOOST_ASSERT(0);
-        std::abort();
+        #if defined(UNDER_CE)
+            // some CE platforms don't define ::abort()
+            exit(-1);
+        #else
+            abort();
+        #endif
         }
 
     inline

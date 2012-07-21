@@ -1,4 +1,4 @@
-// $Id: tss_pe.cpp 72431 2011-06-06 08:28:31Z anthonyw $
+// $Id: tss_pe.cpp 78543 2012-05-22 17:03:15Z anthonyw $
 // (C) Copyright Aaron W. LaFramboise, Roland Schwarz, Michael Glassford 2004.
 // (C) Copyright 2007 Roland Schwarz
 // (C) Copyright 2007 Anthony Williams
@@ -25,7 +25,7 @@ namespace boost
 }
 
 namespace {
-    void NTAPI on_tls_callback(void* h, DWORD dwReason, PVOID pv)
+    void NTAPI on_tls_callback(void* , DWORD dwReason, PVOID )
     {
         switch (dwReason)
         {

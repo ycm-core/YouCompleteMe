@@ -502,20 +502,20 @@ namespace boost {
 #define ADJLIST adjacency_list<OEL,VL,D,VP,EP,GP,EL>
 
   template<ADJLIST_PARAMS, typename Tag, typename Value>
-  inline void set_property(ADJLIST& g, Tag, Value const& value) {
-    get_property_value(*g.m_property, Tag()) = value;
+  inline void set_property(ADJLIST& g, Tag tag, Value const& value) {
+    get_property_value(*g.m_property, tag) = value;
   }
 
   template<ADJLIST_PARAMS, typename Tag>
   inline typename graph_property<ADJLIST, Tag>::type&
-  get_property(ADJLIST& g, Tag) {
-    return get_property_value(*g.m_property, Tag());
+  get_property(ADJLIST& g, Tag tag) {
+    return get_property_value(*g.m_property, tag);
   }
 
   template<ADJLIST_PARAMS, typename Tag>
   inline typename graph_property<ADJLIST, Tag>::type const&
-  get_property(ADJLIST const& g, Tag) {
-    return get_property_value(*g.m_property, Tag());
+  get_property(ADJLIST const& g, Tag tag) {
+    return get_property_value(*g.m_property, tag);
   }
 
   // dwa 09/25/00 - needed to be more explicit so reverse_graph would work.

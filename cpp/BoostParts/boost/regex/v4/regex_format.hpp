@@ -180,8 +180,14 @@ private:
    }
    inline int toi(ForwardIter& i, ForwardIter j, int base)
    {
+#if defined(_MSC_VER) && defined(__INTEL_COMPILER) && ((__INTEL_COMPILER == 9999) || (__INTEL_COMPILER == 1210))
+      // Workaround for Intel support issue #656654.
+      // See also https://svn.boost.org/trac/boost/ticket/6359
+      return toi(i, j, base, mpl::false_());
+#else
       typedef typename boost::is_convertible<ForwardIter, const char_type*&>::type tag_type;
       return toi(i, j, base, tag_type());
+#endif
    }
 
    const traits&    m_traits;       // the traits class for localised formatting operations

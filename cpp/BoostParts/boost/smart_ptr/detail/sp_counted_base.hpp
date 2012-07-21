@@ -41,6 +41,9 @@
 #elif defined(__HP_aCC) && defined(__ia64)
 # include <boost/smart_ptr/detail/sp_counted_base_acc_ia64.hpp>
 
+#elif defined( __IBMCPP__ ) && defined( __powerpc )
+# include <boost/smart_ptr/detail/sp_counted_base_vacpp_ppc.hpp>
+
 #elif defined( __MWERKS__ ) && defined( __POWERPC__ )
 # include <boost/smart_ptr/detail/sp_counted_base_cw_ppc.hpp>
 
@@ -58,9 +61,6 @@
 
 #elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined(__CYGWIN__)
 # include <boost/smart_ptr/detail/sp_counted_base_w32.hpp>
-
-#elif defined( _AIX )
-# include <boost/smart_ptr/detail/sp_counted_base_aix.hpp>
 
 #elif !defined( BOOST_HAS_THREADS )
 # include <boost/smart_ptr/detail/sp_counted_base_nt.hpp>

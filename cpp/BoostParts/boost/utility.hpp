@@ -13,6 +13,7 @@
 #include <boost/utility/base_from_member.hpp>
 #include <boost/utility/binary.hpp>
 #include <boost/utility/enable_if.hpp>
+#include <boost/utility/identity_type.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/noncopyable.hpp>

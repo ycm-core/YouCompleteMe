@@ -228,13 +228,13 @@ namespace boost {
         //! Find head algorithm
         /*!
             Get the head of the input. Head is a prefix of the string of the 
-            given size. If the input is shorter then required, whole input if considered 
+            given size. If the input is shorter then required, whole input is considered 
             to be the head.
 
             \param Input An input string
             \param N Length of the head
                 For N>=0, at most N characters are extracted.
-                For N<0, size(Input)-|N| characters are extracted.
+                For N<0, at most size(Input)-|N| characters are extracted.
             \return 
                 An \c iterator_range delimiting the match. 
                 Returned iterator is either \c Range1T::iterator or 
@@ -258,13 +258,13 @@ namespace boost {
         //! Find tail algorithm
         /*!
             Get the tail of the input. Tail is a suffix of the string of the 
-            given size. If the input is shorter then required, whole input if considered 
+            given size. If the input is shorter then required, whole input is considered 
             to be the tail.
 
             \param Input An input string
             \param N Length of the tail. 
                 For N>=0, at most N characters are extracted.
-                For N<0, size(Input)-|N| characters are extracted.
+                For N<0, at most size(Input)-|N| characters are extracted.
             \return 
                 An \c iterator_range delimiting the match. 
                 Returned iterator is either \c RangeT::iterator or 

@@ -12,6 +12,7 @@
 # pragma once
 #endif
 
+#include <boost/unordered/detail/fwd.hpp>
 #include <boost/move/move.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/inc.hpp>
@@ -21,7 +22,10 @@
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/type_traits/is_class.hpp>
+#include <boost/type_traits/add_lvalue_reference.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/detail/select_type.hpp>
 #include <utility>
 
 #if !defined(BOOST_NO_0X_HDR_TUPLE)
@@ -44,6 +48,38 @@
 #endif
 
 namespace boost { namespace unordered { namespace detail {
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Bits and pieces for implementing traits
+
+    template <typename T> typename boost::add_lvalue_reference<T>::type make();
+    struct choice9 { typedef char (&type)[9]; };
+    struct choice8 : choice9 { typedef char (&type)[8]; };
+    struct choice7 : choice8 { typedef char (&type)[7]; };
+    struct choice6 : choice7 { typedef char (&type)[6]; };
+    struct choice5 : choice6 { typedef char (&type)[5]; };
+    struct choice4 : choice5 { typedef char (&type)[4]; };
+    struct choice3 : choice4 { typedef char (&type)[3]; };
+    struct choice2 : choice3 { typedef char (&type)[2]; };
+    struct choice1 : choice2 { typedef char (&type)[1]; };
+    choice1 choose();
+
+    typedef choice1::type yes_type;
+    typedef choice2::type no_type;
+
+    struct private_type
+    {
+       private_type const &operator,(int) const;
+    };
+
+    template <typename T>
+    no_type is_private_type(T const&);
+    yes_type is_private_type(private_type const&);
+
+    struct convert_from_anything {
+        template <typename T>
+        convert_from_anything(T const&);
+    };
 
     ////////////////////////////////////////////////////////////////////////////
     // emplace_args
@@ -75,7 +111,7 @@ namespace boost { namespace unordered { namespace detail {
     {                                                                       \
         BOOST_PP_REPEAT_##z(n, BOOST_UNORDERED_EARGS_MEMBER, _)             \
         BOOST_PP_CAT(emplace_args, n) (                                     \
-            BOOST_PP_ENUM_BINARY_PARAMS_Z(z, n, Arg, a)                     \
+            BOOST_PP_ENUM_BINARY_PARAMS_Z(z, n, Arg, b)                     \
         ) : BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_EARGS_INIT, _)             \
         {}                                                                  \
                                                                             \
@@ -85,12 +121,12 @@ namespace boost { namespace unordered { namespace detail {
     inline BOOST_PP_CAT(emplace_args, n) <                                  \
         BOOST_PP_ENUM_PARAMS_Z(z, n, A)                                     \
     > create_emplace_args(                                                  \
-        BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_FWD_PARAM, a)                  \
+        BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_FWD_PARAM, b)                  \
     )                                                                       \
     {                                                                       \
         BOOST_PP_CAT(emplace_args, n) <                                     \
             BOOST_PP_ENUM_PARAMS_Z(z, n, A)                                 \
-        > e(BOOST_PP_ENUM_PARAMS_Z(z, n, a));                               \
+        > e(BOOST_PP_ENUM_PARAMS_Z(z, n, b));                               \
         return e;                                                           \
     }
 
@@ -102,7 +138,7 @@ namespace boost { namespace unordered { namespace detail {
 
 #define BOOST_UNORDERED_EARGS_INIT(z, n, _)                                 \
     BOOST_PP_CAT(a, n)(                                                     \
-        boost::forward<BOOST_PP_CAT(A,n)>(BOOST_PP_CAT(a, n)))
+        boost::forward<BOOST_PP_CAT(A,n)>(BOOST_PP_CAT(b, n)))
 
 #else
 
@@ -112,7 +148,7 @@ namespace boost { namespace unordered { namespace detail {
     BOOST_PP_CAT(Arg, n) BOOST_PP_CAT(a, n);
 
 #define BOOST_UNORDERED_EARGS_INIT(z, n, _)                                 \
-    BOOST_PP_CAT(a, n)(BOOST_PP_CAT(a, n))
+    BOOST_PP_CAT(a, n)(BOOST_PP_CAT(b, n))
 
 #endif
 
@@ -160,11 +196,11 @@ BOOST_PP_REPEAT_FROM_TO(1, BOOST_UNORDERED_EMPLACE_LIMIT, BOOST_UNORDERED_EARGS,
     //
     // Used for piecewise construction.
 
-#if !BOOST_WORKAROUND(__SUNPRO_CC, <= 0x590)
+#if !defined(__SUNPRO_CC)
 
-#define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(n, namespace_)                 \
+#   define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(n, namespace_)              \
     template<typename T>                                                    \
-    void construct_from_tuple(T* ptr, namespace_::tuple<>)                  \
+    void construct_from_tuple(T* ptr, namespace_ tuple<>)                   \
     {                                                                       \
         new ((void*) ptr) T();                                              \
     }                                                                       \
@@ -172,57 +208,62 @@ BOOST_PP_REPEAT_FROM_TO(1, BOOST_UNORDERED_EMPLACE_LIMIT, BOOST_UNORDERED_EARGS,
     BOOST_PP_REPEAT_FROM_TO(1, n,                                           \
         BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL, namespace_)
 
-#define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL(z, n, namespace_)         \
+#   define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL(z, n, namespace_)      \
     template<typename T, BOOST_PP_ENUM_PARAMS_Z(z, n, typename A)>          \
     void construct_from_tuple(T* ptr,                                       \
-            namespace_::tuple<BOOST_PP_ENUM_PARAMS_Z(z, n, A)> const& x)    \
+            namespace_ tuple<BOOST_PP_ENUM_PARAMS_Z(z, n, A)> const& x)     \
     {                                                                       \
         new ((void*) ptr) T(                                                \
             BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_GET_TUPLE_ARG, namespace_) \
         );                                                                  \
     }
 
-#define BOOST_UNORDERED_GET_TUPLE_ARG(z, n, namespace_)                     \
-    namespace_::get<n>(x)
+#   define BOOST_UNORDERED_GET_TUPLE_ARG(z, n, namespace_)                  \
+    namespace_ get<n>(x)
 
-BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, boost)
+#else
 
-#if !defined(BOOST_NO_0X_HDR_TUPLE)
-BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, std)
+    template <int N> struct length {};
+
+#   define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(n, namespace_)              \
+    template<typename T>                                                    \
+    void construct_from_tuple_impl(                                         \
+            boost::unordered::detail::length<0>, T* ptr,                    \
+            namespace_ tuple<>)                                             \
+    {                                                                       \
+        new ((void*) ptr) T();                                              \
+    }                                                                       \
+                                                                            \
+    BOOST_PP_REPEAT_FROM_TO(1, n,                                           \
+        BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL, namespace_)
+
+#   define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL(z, n, namespace_)      \
+    template<typename T, BOOST_PP_ENUM_PARAMS_Z(z, n, typename A)>          \
+    void construct_from_tuple_impl(                                         \
+            boost::unordered::detail::length<n>, T* ptr,                    \
+            namespace_ tuple<BOOST_PP_ENUM_PARAMS_Z(z, n, A)> const& x)     \
+    {                                                                       \
+        new ((void*) ptr) T(                                                \
+            BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_GET_TUPLE_ARG, namespace_) \
+        );                                                                  \
+    }
+
+#   define BOOST_UNORDERED_GET_TUPLE_ARG(z, n, namespace_)                  \
+    namespace_ get<n>(x)
+
+#endif
+
+BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, boost::)
+
+#if !defined(__SUNPRO_CC) && !defined(BOOST_NO_0X_HDR_TUPLE)
+   BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, std::)
 #endif
 
 #undef BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE
 #undef BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL
 #undef BOOST_UNORDERED_GET_TUPLE_ARG
 
-#else
-
-    template <int N> struct length {};
-
-    template<typename T>
-    void construct_from_tuple_impl(
-            boost::unordered::detail::length<0>, T* ptr,
-            boost::tuple<>)
-    {
-        new ((void*) ptr) T();
-    }
-
-#define BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL(z, n, _)                  \
-    template<typename T, BOOST_PP_ENUM_PARAMS_Z(z, n, typename A)>          \
-    void construct_from_tuple_impl(                                         \
-            boost::unordered::detail::length<n>, T* ptr,                    \
-            namespace_::tuple<BOOST_PP_ENUM_PARAMS_Z(z, n, A)> const& x)    \
-    {                                                                       \
-        new ((void*) ptr) T(                                                \
-            BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_GET_TUPLE_ARG, namespace_) \
-        );                                                                  \
-    }
-
-#define BOOST_UNORDERED_GET_TUPLE_ARG(z, n, _)                              \
-    boost::get<n>(x)
-
-    BOOST_PP_REPEAT_FROM_TO(1, 10,                                          \
-        BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL, _)
+#if defined(__SUNPRO_CC)
 
     template <typename T, typename Tuple>
     void construct_from_tuple(T* ptr, Tuple const& x)
@@ -232,9 +273,6 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, std)
                 boost::tuples::length<Tuple>::value>(),
             ptr, x);
     }
-
-#undef BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE_IMPL
-#undef BOOST_UNORDERED_GET_TUPLE_ARG
 
 #endif
 

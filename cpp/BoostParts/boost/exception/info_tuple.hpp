@@ -19,6 +19,30 @@ namespace
 boost
     {
     template <
+        class E >
+    inline
+    E const &
+    operator<<(
+        E const & x,
+        tuple< > const & v )
+        {
+        return x;
+        }
+
+    template <
+        class E,
+        class Tag1,class T1 >
+    inline
+    E const &
+    operator<<(
+        E const & x,
+        tuple<
+            error_info<Tag1,T1> > const & v )
+        {
+        return x << v.template get<0>();
+        }
+
+    template <
         class E,
         class Tag1,class T1,
         class Tag2,class T2 >

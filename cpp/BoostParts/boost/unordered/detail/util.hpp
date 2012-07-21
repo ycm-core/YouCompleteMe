@@ -56,7 +56,7 @@ namespace boost { namespace unordered { namespace detail {
     // primes
 
 #define BOOST_UNORDERED_PRIMES \
-    (5ul)(11ul)(17ul)(29ul)(37ul)(53ul)(67ul)(79ul) \
+    (17ul)(29ul)(37ul)(53ul)(67ul)(79ul) \
     (97ul)(131ul)(193ul)(257ul)(389ul)(521ul)(769ul) \
     (1031ul)(1543ul)(2053ul)(3079ul)(6151ul)(12289ul)(24593ul) \
     (49157ul)(98317ul)(196613ul)(393241ul)(786433ul) \

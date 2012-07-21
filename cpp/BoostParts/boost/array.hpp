@@ -13,6 +13,7 @@
  * accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
  *
+ * 14 Apr 2012 - (mtc) Added support for boost::hash
  * 28 Dec 2010 - (mtc) Added cbegin and cend (and crbegin and crend) for C++Ox compatibility.
  * 10 Mar 2010 - (mtc) fill method added, matching resolution of the standard library working group.
  *      See <http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#776> or Trac issue #3168
@@ -46,6 +47,7 @@
 // Handles broken standard libraries better than <iterator>
 #include <boost/detail/iterator.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/functional/hash_fwd.hpp>
 #include <algorithm>
 
 // FIXES for broken compilers
@@ -118,13 +120,13 @@ namespace boost {
         // operator[]
         reference operator[](size_type i) 
         { 
-            BOOST_ASSERT( i < N && "out of range" ); 
+            BOOST_ASSERT_MSG( i < N, "out of range" );
             return elems[i];
         }
         
         const_reference operator[](size_type i) const 
         {     
-            BOOST_ASSERT( i < N && "out of range" ); 
+            BOOST_ASSERT_MSG( i < N, "out of range" );
             return elems[i]; 
         }
 
@@ -426,6 +428,13 @@ namespace boost {
         return static_cast<T(&)[N]>(arg);
     }
 #endif
+
+
+    template<class T, std::size_t N>
+    std::size_t hash_value(const array<T,N>& arr)
+    {
+        return boost::hash_range(arr.begin(), arr.end());
+    }
 
 } /* namespace boost */
 

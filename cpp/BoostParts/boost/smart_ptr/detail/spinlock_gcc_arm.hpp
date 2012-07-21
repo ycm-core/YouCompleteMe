@@ -43,12 +43,37 @@ public:
     {
         int r;
 
+#if defined(__ARM_ARCH_6__) \
+    || defined(__ARM_ARCH_6J__) \
+    || defined(__ARM_ARCH_6K__) \
+    || defined(__ARM_ARCH_6Z__) \
+    || defined(__ARM_ARCH_6ZK__) \
+    || defined(__ARM_ARCH_6T2__) \
+    || defined(__ARM_ARCH_7__) \
+    || defined(__ARM_ARCH_7A__) \
+    || defined(__ARM_ARCH_7R__) \
+    || defined(__ARM_ARCH_7M__) \
+    || defined(__ARM_ARCH_7EM__)
+
         __asm__ __volatile__(
-            "swp %0, %1, [%2]\n\t"
-			BOOST_SP_ARM_BARRIER :
+            "ldrex %0, [%2]; \n"
+            "cmp %0, %1; \n"
+            "strexne %0, %1, [%2]; \n"
+            BOOST_SP_ARM_BARRIER :
             "=&r"( r ): // outputs
             "r"( 1 ), "r"( &v_ ): // inputs
             "memory", "cc" );
+
+#else
+
+        __asm__ __volatile__(
+            "swp %0, %1, [%2];\n"
+            BOOST_SP_ARM_BARRIER :
+            "=&r"( r ): // outputs
+            "r"( 1 ), "r"( &v_ ): // inputs
+            "memory", "cc" );
+
+#endif
 
         return r == 0;
     }

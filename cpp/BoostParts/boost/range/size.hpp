@@ -18,7 +18,7 @@
 #include <boost/range/config.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
-#include <boost/range/difference_type.hpp>
+#include <boost/range/size_type.hpp>
 #include <boost/assert.hpp>
 
 namespace boost
@@ -26,7 +26,7 @@ namespace boost
     namespace range_detail
     {
         template<class SinglePassRange>
-        inline BOOST_DEDUCED_TYPENAME range_difference<SinglePassRange>::type
+        inline BOOST_DEDUCED_TYPENAME range_size<const SinglePassRange>::type
         range_calculate_size(const SinglePassRange& rng)
         {
             BOOST_ASSERT( (boost::end(rng) - boost::begin(rng)) >= 0 &&
@@ -36,7 +36,7 @@ namespace boost
     }
 
     template<class SinglePassRange>
-    inline BOOST_DEDUCED_TYPENAME range_difference<SinglePassRange>::type
+    inline BOOST_DEDUCED_TYPENAME range_size<const SinglePassRange>::type
     size(const SinglePassRange& rng)
     {
 #if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564)) && \

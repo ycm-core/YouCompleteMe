@@ -15,9 +15,8 @@
 #include <boost/ref.hpp>
 #include <boost/parameter/name.hpp>
 #include <boost/parameter/binding.hpp>
-#include <boost/type_traits/is_same.hpp>
+#include <boost/type_traits.hpp>
 #include <boost/mpl/not.hpp>
-#include <boost/type_traits/add_reference.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/graph/detail/d_ary_heap.hpp>
 #include <boost/property_map/property_map.hpp>
@@ -608,6 +607,13 @@ BOOST_BGL_DECLARE_NAMED_PARAMS
       KeyT defaultKey;
 
       make_priority_queue_from_arg_pack_gen(KeyT defaultKey_) : defaultKey(defaultKey_) { }
+
+      template <class F>
+      struct result {
+        typedef typename remove_const<typename remove_reference<typename function_traits<F>::arg1_type>::type>::type graph_type;
+        typedef typename remove_const<typename remove_reference<typename function_traits<F>::arg2_type>::type>::type arg_pack_type;
+        typedef typename priority_queue_maker<graph_type, arg_pack_type, KeyT, ValueT, PriorityQueueTag, KeyMapTag, IndexInHeapMapTag, Compare>::priority_queue_type type;
+      };
 
       template <class Graph, class ArgPack>
       typename priority_queue_maker<Graph, ArgPack, KeyT, ValueT, PriorityQueueTag, KeyMapTag, IndexInHeapMapTag, Compare>::priority_queue_type

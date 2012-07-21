@@ -1052,11 +1052,11 @@ namespace boost
         c.swap(c);
       }
 
-      void const_constraints(const C& c) {
-        ci = c.begin();
-        ci = c.end();
-        n = c.size();
-        b = c.empty();
+      void const_constraints(const C& cc) {
+        ci = cc.begin();
+        ci = cc.end();
+        n = cc.size();
+        b = cc.empty();
       }
 
     private:

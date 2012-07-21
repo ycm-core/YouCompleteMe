@@ -2,7 +2,7 @@
 // David Moore, William E. Kempf
 // Copyright (C) 2007-8 Anthony Williams
 //
-//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef BOOST_BARRIER_JDM030602_HPP
@@ -28,14 +28,14 @@ namespace boost
             : m_threshold(count), m_count(count), m_generation(0)
         {
             if (count == 0)
-                boost::throw_exception(std::invalid_argument("count cannot be zero."));
+                boost::throw_exception(thread_exception(system::errc::invalid_argument, "barrier constructor: count cannot be zero."));
         }
-    
+
         bool wait()
         {
             boost::mutex::scoped_lock lock(m_mutex);
             unsigned int gen = m_generation;
-        
+
             if (--m_count == 0)
             {
                 m_generation++;

@@ -29,7 +29,7 @@ namespace boost
 
     // The null_property_map<K,V> only has a put() function.
     template <typename K, typename V>
-    void put(null_property_map<K,V>& pm, const K& key, const V& value)
+    void put(null_property_map<K,V>& /*pm*/, const K& /*key*/, const V& /*value*/)
     { }
 
     // A helper function for intantiating null property maps.

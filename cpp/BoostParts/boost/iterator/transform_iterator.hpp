@@ -46,7 +46,7 @@ namespace boost
         // the function.
         typedef typename ia_dflt_help<
             Reference
-          , result_of<UnaryFunc(typename std::iterator_traits<Iterator>::reference)>
+          , result_of<const UnaryFunc(typename std::iterator_traits<Iterator>::reference)>
         >::type reference;
 
         // To get the default for Value: remove any reference on the

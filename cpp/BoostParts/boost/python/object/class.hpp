@@ -6,7 +6,6 @@
 # define CLASS_DWA20011214_HPP
 
 # include <boost/python/detail/prefix.hpp>
-# include <boost/utility.hpp>
 # include <boost/python/object_core.hpp>
 # include <boost/python/type_id.hpp>
 # include <cstddef>

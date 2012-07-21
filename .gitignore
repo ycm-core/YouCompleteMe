@@ -38,6 +38,11 @@ nosetests.xml
 # custom
 indexer_tests
 
+# When we use the bcp tool to copy over the parts of boost we care about, it
+# also copies some cruft files we don't need; this ignores them
+cpp/BoostParts/libs/*/build
+cpp/BoostParts/libs/*/test
+
 # These folders in cpp/llvm contain lots of upstream cruft we don't care
 # about and would rather not have in our tree...
 cpp/llvm/docs/*
