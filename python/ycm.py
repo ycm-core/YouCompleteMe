@@ -23,7 +23,7 @@ import indexer
 
 MIN_NUM_CHARS = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
-MAX_IDENTIFIER_COMPLETIONS_RETURNED = 20
+MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 
 
 class Completer( object ):
@@ -94,7 +94,14 @@ class IdentifierCompleter( Completer ):
   def CandidatesFromStoredRequest( self ):
     if not self.future:
       return []
-    return self.future.GetResults()[ : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
+    completions = self.future.GetResults()[
+      : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
+
+    # We will never have duplicates in completions so with 'dup':1 we tell Vim
+    # to add this candidate even if it's a duplicate of an existing one (which
+    # will never happen). This saves us some expensive string matching
+    # operations in Vim.
+    return [ { 'word': x, 'dup': 1 } for x in completions ]
 
 
 class ClangCompleter( Completer ):
@@ -162,6 +169,7 @@ def CompletionDataToDict( completion_data ):
     'abbr' : completion_data.original_string_,
     'menu' : completion_data.extra_menu_info_,
     'kind' : completion_data.kind_,
+    'dup'  : 1,
     # TODO: add detailed_info_ as 'info'
   }
 
