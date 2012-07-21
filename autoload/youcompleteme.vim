@@ -102,12 +102,9 @@ endfunction
 
 
 function! s:AddIdentifierIfNeeded()
-  py vim.command( "let should_add_identifier = " +
-        \ str( int( ycm.ShouldAddIdentifier() ) ) )
-  if should_add_identifier != 1
-    return
+  if pyeval( 'ycm.ShouldAddIdentifier()' )
+    py identcomp.AddPreviousIdentifier()
   endif
-  py identcomp.AddPreviousIdentifier()
 endfunction
 
 
@@ -162,29 +159,17 @@ function! s:IdentifierCompletion(query)
     return []
   endif
 
-  py identcomp.CandidatesForQueryAsync( vim.eval('a:query') )
+  py identcomp.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
 
   let l:results_ready = 0
   while !l:results_ready
-      py << EOF
-results_ready = identcomp.AsyncCandidateRequestReady()
-if results_ready:
-  vim.command( 'let l:results_ready = 1' )
-EOF
+    let l:results_ready = pyeval( 'identcomp.AsyncCandidateRequestReady()' )
     if complete_check()
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile
 
-  let l:results = []
-    py << EOF
-results = identcomp.CandidatesFromStoredRequest()
-result_string = ycm.StringVectorToString( results )
-
-if results:
-  vim.command( 'let l:results = ' + result_string )
-EOF
-
+  let l:results = pyeval( 'identcomp.CandidatesFromStoredRequest()' )
   let s:searched_and_no_results_found = len( l:results ) == 0
 
   " We need a very recent version of vim for this to work; otherwise, even
@@ -200,29 +185,17 @@ endfunction
 function! s:ClangCompletion( query )
   " TODO: don't trigger on a dot inside a string constant
 
-  py clangcomp.CandidatesForQueryAsync( vim.eval('a:query') )
+  py clangcomp.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
 
   let l:results_ready = 0
   while !l:results_ready
-      py << EOF
-results_ready = clangcomp.AsyncCandidateRequestReady()
-if results_ready:
-  vim.command( 'let l:results_ready = 1' )
-EOF
+    let l:results_ready = pyeval( 'clangcomp.AsyncCandidateRequestReady()' )
     if complete_check()
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile
 
-  let l:results = []
-    py << EOF
-results = clangcomp.CandidatesFromStoredRequest()
-result_string = ycm.CompletionDataVectorToString( results )
-
-if results:
-  vim.command( 'let l:results = ' + result_string )
-EOF
-
+  let l:results = pyeval( 'clangcomp.CandidatesFromStoredRequest()' )
   let s:searched_and_no_results_found = len( l:results ) == 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction
@@ -231,12 +204,9 @@ endfunction
 " This is our main entry point. This is what vim calls to get completions.
 function! youcompleteme#Complete( findstart, base )
   if a:findstart
-    py << EOF
-start_column = ycm.CompletionStartColumn()
-vim.command( 'let s:completion_start_column = ' + str( start_column ) )
-vim.command( 'let s:should_use_clang = ' +
-              str( int( ycm.ShouldUseClang( start_column ) ) ) )
-EOF
+    let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
+    let s:should_use_clang =
+          \ pyeval( 'ycm.ShouldUseClang(' . s:completion_start_column . ')' )
 
     if ( s:should_use_clang )
       return s:completion_start_column

@@ -134,21 +134,18 @@ class ClangCompleter( Completer ):
       files )
 
 
+  def CandidatesFromStoredRequest( self ):
+    if not self.future:
+      return []
+    return [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
+
+
 def GetUnsavedBuffers():
   def BufferModified( buffer_number ):
     to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )
     return bool( int( vim.eval( to_eval ) ) )
 
   return ( x for x in vim.buffers if BufferModified( x.number ) )
-
-
-# TODO: just implement __str__/__repr__ on StringVec
-def StringVectorToString( stringvec ):
-  result = [ "[" ]
-  for text in stringvec:
-    result.append( '"{0}",'.format( text ) )
-  result.append( "]" )
-  return ''.join( result )
 
 
 def CompletionDataToDict( completion_data ):
@@ -160,10 +157,6 @@ def CompletionDataToDict( completion_data ):
     'kind' : completion_data.kind_,
     # TODO: add detailed_info_ as 'info'
   }
-
-
-def CompletionDataVectorToString( datavec ):
-  return str( [ CompletionDataToDict( x ) for x in datavec ] )
 
 
 def CurrentColumn():
