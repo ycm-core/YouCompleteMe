@@ -19,6 +19,7 @@
 #include "ClangCompleter.h"
 #include "Future.h"
 #include "CompletionData.h"
+#include "UnsavedFile.h"
 
 #include <boost/python.hpp>
 #include <boost/utility.hpp>

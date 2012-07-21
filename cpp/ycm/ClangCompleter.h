@@ -20,6 +20,7 @@
 
 #include "ConcurrentLatestValue.h"
 #include "Future.h"
+#include "UnsavedFile.h"
 
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
@@ -34,28 +35,6 @@ namespace YouCompleteMe
 
 class CandidateRepository;
 struct CompletionData;
-
-// TODO: put this in a separated header file
-struct UnsavedFile
-{
-  UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
-
-  const char *filename_;
-  const char *contents_;
-  unsigned long length_;
-
-  // We need this to be able to export this struct to Python via Boost.Python's
-  // methods. I have no clue why, but it won't compile without it.
-  // TODO: report this problem on the Boost bug tracker, the default equality
-  // operator should be more than adequate here
-  bool operator== ( const UnsavedFile &other ) const
-  {
-    return
-      filename_ == other.filename_ &&
-      contents_ == other.contents_ &&
-      length_   == other.length_;
-  }
-};
 
 typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
 
