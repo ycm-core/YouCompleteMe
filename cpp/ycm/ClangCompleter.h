@@ -38,13 +38,15 @@ struct CompletionData;
 
 typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
 
-typedef boost::unordered_map< std::string, std::vector< std::string > >
-  FlagsForFile;
+typedef boost::unordered_map< std::string,
+          boost::shared_ptr<
+            std::vector< std::string > > > FlagsForFile;
 
 typedef boost::unordered_map< std::string, CXTranslationUnit >
   TranslationUnitForFilename;
 
 
+// TODO: document that all filename parameters must be absolute paths
 class ClangCompleter : boost::noncopyable
 {
 public:
@@ -84,8 +86,7 @@ private:
       const std::string &filename,
       const std::vector< UnsavedFile > &unsaved_files );
 
-  std::vector< const char* > ClangFlagsForFilename(
-      const std::string &filename );
+  std::vector< const char* > FlagsForFilename( const std::string &filename );
 
   CXTranslationUnit GetTranslationUnitForFile(
       const std::string &filename,

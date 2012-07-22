@@ -18,6 +18,10 @@
 #include "Utils.h"
 #include <cmath>
 #include <limits>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace YouCompleteMe
 {
@@ -27,6 +31,28 @@ bool AlmostEqual( double a, double b )
   return std::abs( a - b ) <=
     ( std::numeric_limits< double >::epsilon() *
       std::max( std::abs( a ), std::abs( b ) ) );
+}
+
+
+std::string ReadUtf8File( const fs::path &filepath )
+{
+    fs::ifstream file( filepath, std::ios::in | std::ios::binary );
+    std::vector< char > contents( (std::istreambuf_iterator< char >( file )),
+                                   std::istreambuf_iterator< char >() );
+
+    if ( contents.size() == 0 )
+        return std::string();
+
+    return std::string( contents.begin(), contents.end() );
+}
+
+
+void WriteUtf8File( const fs::path &filepath, const std::string &contents )
+{
+  fs::ofstream file;
+  file.open( filepath );
+  file << contents;
+  file.close();
 }
 
 } // namespace YouCompleteMe

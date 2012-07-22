@@ -18,15 +18,23 @@
 #ifndef UTILS_H_KEPMRPBH
 #define UTILS_H_KEPMRPBH
 
-
 #include <string>
 #include <vector>
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 namespace YouCompleteMe
 {
 
 bool AlmostEqual( double a, double b );
 
+// Reads the entire contents of the specified file. If the file does not exist,
+// an exception is thrown.
+std::string ReadUtf8File( const fs::path &filepath );
+
+// Writes the entire contents of the specified file. If the file does not exist,
+// an exception is thrown.
+void WriteUtf8File( const fs::path &filepath, const std::string &contents );
 
 template <class Container, class Key>
 typename Container::mapped_type &

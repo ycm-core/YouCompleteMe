@@ -121,6 +121,7 @@ class ClangCompleter( Completer ):
     self.contents_holder = []
     self.filename_holder = []
 
+
   def CandidatesForQueryAsync( self, query ):
     # TODO: sanitize query
     files = indexer.UnsavedFileVec()
@@ -162,6 +163,11 @@ class ClangCompleter( Completer ):
     if not self.future:
       return []
     return [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
+
+
+  def OnFileEnter( self ):
+    pass
+
 
 
 def GetUnsavedBuffers():

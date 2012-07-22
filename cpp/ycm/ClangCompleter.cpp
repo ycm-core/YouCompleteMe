@@ -21,10 +21,13 @@
 #include "standard.h"
 #include "CandidateRepository.h"
 #include "ConcurrentLatestValue.h"
+#include "Utils.h"
+#include "ClangUtils.h"
 
 #include <clang-c/Index.h>
 #include <boost/make_shared.hpp>
 
+namespace fs = boost::filesystem;
 using boost::packaged_task;
 using boost::bind;
 using boost::unique_future;
@@ -258,7 +261,8 @@ void ClangCompleter::SetFileCompileFlags(
     const std::string &filename,
     const std::vector< std::string > &flags )
 {
-  flags_for_file_[ filename ] = flags;
+  flags_for_file_[ filename ] =
+    make_shared< std::vector< std::string > >( flags );
 }
 
 
@@ -393,7 +397,14 @@ CXTranslationUnit ClangCompleter::CreateTranslationUnit(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files )
 {
-  std::vector< const char* > flags = ClangFlagsForFilename( filename );
+  std::vector< const char* > flags = FlagsForFilename( filename );
+  flags.reserve( flags.size() + global_flags_.size() );
+
+  foreach ( const std::string &flag, global_flags_ )
+  {
+    flags.push_back( flag.c_str() );
+  }
+
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
 
@@ -408,20 +419,30 @@ CXTranslationUnit ClangCompleter::CreateTranslationUnit(
 }
 
 
-std::vector< const char* > ClangCompleter::ClangFlagsForFilename(
-    const std::string &filename )
+// The implementation of this function is somewhat non-obvious because we need
+// to make sure that the data pointed to by the const char* pointers returned
+// outlives this function. We want to make sure that we are calling c_str on the
+// string objects that are actually stored in flags_for_file_
+std::vector< const char* > ClangCompleter::FlagsForFilename(
+    const std::string &filename)
 {
-  std::vector< const char* > flags;
+  FlagsForFile::iterator it =
+    flags_for_file_.find( filename );
 
-  std::vector< std::string > file_flags = flags_for_file_[ filename ];
-  flags.reserve( file_flags.size() + global_flags_.size() );
-
-  foreach ( const std::string &flag, global_flags_ )
+  if ( it == flags_for_file_.end() )
   {
-    flags.push_back( flag.c_str() );
+    flags_for_file_[ filename ] = make_shared< std::vector< std::string > >(
+        SanitizeClangFlags(
+            SplitFlags(
+                GetNearestClangOptions( filename ) ) ) );
+
+    it = flags_for_file_.find( filename );
   }
 
-  foreach ( const std::string &flag, file_flags )
+  // TODO: assert it != end
+
+  std::vector< const char* > flags;
+  foreach ( const std::string &flag, *it->second )
   {
     flags.push_back( flag.c_str() );
   }
