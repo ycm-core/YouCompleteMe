@@ -60,7 +60,10 @@ function! youcompleteme#Enable()
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
   py identcomp = ycm.IdentifierCompleter()
-  py clangcomp = ycm.ClangCompleter()
+
+  if g:ycm_clang_completion_enabled
+    py clangcomp = ycm.ClangCompleter()
+  endif
 
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
   " the first loaded file. This should be the last command executed in this

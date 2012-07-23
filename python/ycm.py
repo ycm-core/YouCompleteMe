@@ -22,6 +22,7 @@ import vim
 import indexer
 
 MIN_NUM_CHARS = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
+CLANG_COMPLETION_ENABLED = int( vim.eval( "g:ycm_clang_completion_enabled" ) )
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 
@@ -211,6 +212,9 @@ def CurrentLineAndColumn():
 
 
 def ShouldUseClang( start_column ):
+  if not CLANG_COMPLETION_ENABLED:
+    return False
+
   filetype = vim.eval( "&filetype" )
   if filetype not in CLANG_FILETYPES:
     return False
@@ -332,4 +336,3 @@ def RemoveIdentFreeText( text ):
     re.DOTALL | re.MULTILINE )
 
   return re.sub( pattern, replacer, text )
-

@@ -29,6 +29,9 @@ let g:loaded_youcompleteme = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
+let g:ycm_clang_completion_enabled =
+      \ get(g:, 'ycm_clang_completion_enabled', 1)
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart
