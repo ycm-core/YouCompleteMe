@@ -123,9 +123,26 @@ class ClangCompleter( Completer ):
     self.filename_holder = []
 
 
+  def GetUnsavedFilesVector( self ):
+    files = indexer.UnsavedFileVec()
+    self.contents_holder = []
+    self.filename_holder = []
+    for buffer in GetUnsavedBuffers():
+      self.contents_holder.append( '\n'.join( buffer ) )
+      self.filename_holder.append( buffer.name )
+
+      unsaved_file = indexer.UnsavedFile()
+      unsaved_file.contents_ = self.contents_holder[ -1 ]
+      unsaved_file.length_ = len( self.contents_holder[ -1 ] )
+      unsaved_file.filename_ = self.filename_holder[ -1 ]
+
+      files.append( unsaved_file )
+
+    return files
+
+
   def CandidatesForQueryAsync( self, query ):
     # TODO: sanitize query
-    files = indexer.UnsavedFileVec()
 
     # CAREFUL HERE! For UnsavedFile filename and contents we are referring
     # directly to Python-allocated and -managed memory since we are accepting
@@ -135,19 +152,9 @@ class ClangCompleter( Completer ):
     # are still around when we call CandidatesForQueryAndLocationInFile.  We do
     # this to avoid an extra copy of the entire file contents.
 
+    files = indexer.UnsavedFileVec()
     if not query:
-      self.contents_holder = []
-      self.filename_holder = []
-      for buffer in GetUnsavedBuffers():
-        self.contents_holder.append( '\n'.join( buffer ) )
-        self.filename_holder.append( buffer.name )
-
-        unsaved_file = indexer.UnsavedFile()
-        unsaved_file.contents_ = self.contents_holder[ -1 ]
-        unsaved_file.length_ = len( self.contents_holder[ -1 ] )
-        unsaved_file.filename_ = self.filename_holder[ -1 ]
-
-        files.append( unsaved_file )
+      files = self.GetUnsavedFilesVector()
 
     line, _ = vim.current.window.cursor
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
@@ -167,7 +174,9 @@ class ClangCompleter( Completer ):
 
 
   def OnFileEnter( self ):
-    pass
+    self.future = self.completer.UpdateTranslationUnit(
+      vim.current.buffer.name,
+      self.GetUnsavedFilesVector() )
 
 
 
@@ -211,12 +220,13 @@ def CurrentLineAndColumn():
   return line, column
 
 
-def ShouldUseClang( start_column ):
-  if not CLANG_COMPLETION_ENABLED:
-    return False
-
+def ClangAvailableForFile():
   filetype = vim.eval( "&filetype" )
-  if filetype not in CLANG_FILETYPES:
+  return filetype in CLANG_FILETYPES
+
+
+def ShouldUseClang( start_column ):
+  if not CLANG_COMPLETION_ENABLED or not ClangAvailableForFile():
     return False
 
   line = vim.current.line

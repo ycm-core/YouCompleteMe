@@ -75,6 +75,10 @@ endfunction
 function! s:OnBufferVisit()
   call s:SetCompleteFunc()
   py identcomp.OnFileEnter()
+
+  if pyeval('ycm.ClangAvailableForFile()')
+    py clangcomp.OnFileEnter()
+  endif
 endfunction
 
 
