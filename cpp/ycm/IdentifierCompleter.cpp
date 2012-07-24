@@ -20,6 +20,7 @@
 #include "CandidateRepository.h"
 #include "Candidate.h"
 #include "Utils.h"
+#include "IdentifierUtils.h"
 
 #include <boost/unordered_set.hpp>
 #include <boost/bind.hpp>
@@ -51,6 +52,7 @@ void ThreadMain( LatestTask &latest_task )
   }
 }
 
+
 } // unnamed namespace
 
 
@@ -66,7 +68,7 @@ IdentifierCompleter::IdentifierCompleter(
   : candidate_repository_( CandidateRepository::Instance() ),
     threading_enabled_( false )
 {
-  AddCandidatesToDatabase( candidates, "", "", true );
+  AddCandidatesToDatabase( candidates, "", "" );
 }
 
 
@@ -77,7 +79,7 @@ IdentifierCompleter::IdentifierCompleter(
   : candidate_repository_( CandidateRepository::Instance() ),
     threading_enabled_( false )
 {
-  AddCandidatesToDatabase( candidates, filetype, filepath, true );
+  AddCandidatesToDatabase( candidates, filetype, filepath );
 }
 
 
@@ -93,14 +95,10 @@ void IdentifierCompleter::EnableThreading()
 void IdentifierCompleter::AddCandidatesToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
-    const std::string &filepath,
-    bool clear_database )
+    const std::string &filepath )
 {
   std::list< const Candidate *> &candidates =
     GetCandidateList( filetype, filepath );
-
-  if ( clear_database )
-    candidates.clear();
 
   std::vector< const Candidate* > repository_candidates =
     candidate_repository_.GetCandidatesForStrings( new_candidates );
@@ -108,6 +106,28 @@ void IdentifierCompleter::AddCandidatesToDatabase(
   candidates.insert( candidates.end(),
                      repository_candidates.begin(),
                      repository_candidates.end() );
+}
+
+
+void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
+    const std::string &buffer_contents,
+    const std::string &filetype,
+    const std::string &filepath )
+{
+  ClearCandidatesStoredForFile( filetype, filepath );
+
+  AddCandidatesToDatabase(
+      ExtractIdentifiersFromText( RemoveIdentifierFreeText( buffer_contents ) ),
+      filetype,
+      filepath );
+}
+
+
+void IdentifierCompleter::ClearCandidatesStoredForFile(
+    const std::string &filetype,
+    const std::string &filepath )
+{
+  GetCandidateList( filetype, filepath ).clear();
 }
 
 

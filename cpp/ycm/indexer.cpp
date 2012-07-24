@@ -59,6 +59,8 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
     .def( "AddCandidatesToDatabase",
           &IdentifierCompleter::AddCandidatesToDatabase )
+    .def( "AddCandidatesToDatabaseFromBuffer",
+          &IdentifierCompleter::AddCandidatesToDatabaseFromBuffer )
     .def( "CandidatesForQueryAndTypeAsync",
           &IdentifierCompleter::CandidatesForQueryAndTypeAsync );
 

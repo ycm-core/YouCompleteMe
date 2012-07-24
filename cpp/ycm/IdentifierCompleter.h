@@ -70,8 +70,14 @@ public:
   void AddCandidatesToDatabase(
       const std::vector< std::string > &new_candidates,
       const std::string &filetype,
-      const std::string &filepath,
-      bool clear_database );
+      const std::string &filepath );
+
+  void AddCandidatesToDatabaseFromBuffer( const std::string &buffer_contents,
+                                          const std::string &filetype,
+                                          const std::string &filepath );
+
+  void ClearCandidatesStoredForFile( const std::string &filetype,
+                                     const std::string &filepath );
 
   // Only provided for tests!
 	std::vector< std::string > CandidatesForQuery(

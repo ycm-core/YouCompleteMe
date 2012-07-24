@@ -50,7 +50,6 @@ class IdentifierCompleter( Completer ):
   def __init__( self ):
     self.completer = indexer.IdentifierCompleter()
     self.completer.EnableThreading()
-    self.pattern = re.compile( r"[_a-zA-Z]\w*" )
 
 
   def CandidatesForQueryAsync( self, query ):
@@ -71,8 +70,7 @@ class IdentifierCompleter( Completer ):
     vector.append( identifier )
     self.completer.AddCandidatesToDatabase( vector,
                                             filetype,
-                                            filepath,
-                                            False )
+                                            filepath )
 
 
   def AddPreviousIdentifier( self ):
@@ -80,22 +78,16 @@ class IdentifierCompleter( Completer ):
 
 
   def AddBufferIdentifiers( self ):
-    text = "\n".join( vim.current.buffer )
-    text = RemoveIdentFreeText( text )
-
-    idents = re.findall( self.pattern, text )
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
 
     if not filetype or not filepath:
       return
 
-    vector = indexer.StringVec()
-    vector.extend( idents )
-    self.completer.AddCandidatesToDatabase( vector,
-                                            filetype,
-                                            filepath,
-                                            True )
+    text = "\n".join( vim.current.buffer )
+    self.completer.AddCandidatesToDatabaseFromBuffer( text,
+                                                      filetype,
+                                                      filepath )
 
 
   def OnFileEnter( self ):
@@ -328,21 +320,3 @@ def ShouldAddIdentifier():
 
 def SanitizeQuery( query ):
   return query.strip()
-
-
-def RemoveIdentFreeText( text ):
-  """Removes commented-out code and code in quotes."""
-
-  # TODO: do we still need this sub-func?
-  def replacer( match ):
-    s = match.group( 0 )
-    if s.startswith( '/' ):
-      return ""
-    else:
-      return s
-
-  pattern = re.compile(
-    r'//.*?$|#.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
-    re.DOTALL | re.MULTILINE )
-
-  return re.sub( pattern, replacer, text )

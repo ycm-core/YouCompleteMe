@@ -22,7 +22,6 @@
 #include <gmock/gmock.h>
 
 using ::testing::ElementsAre;
-using ::testing::WhenSorted;
 
 namespace YouCompleteMe
 {
