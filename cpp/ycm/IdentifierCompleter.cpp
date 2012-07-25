@@ -44,11 +44,21 @@ extern const unsigned int MIN_ASYNC_THREADS = 2;
 namespace
 {
 
-void ThreadMain( LatestTask &latest_task )
+void QueryThreadMain( LatestQueryTask &latest_query_task )
 {
   while ( true )
   {
-    ( *latest_task.Get() )();
+    ( *latest_query_task.Get() )();
+  }
+
+}
+
+void BufferIdentifiersThreadMain(
+  BufferIdentifiersTaskStack &buffer_identifiers_task_stack )
+{
+  while ( true )
+  {
+    ( *buffer_identifiers_task_stack.Pop() )();
   }
 }
 
@@ -123,11 +133,20 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
 }
 
 
-void IdentifierCompleter::ClearCandidatesStoredForFile(
-    const std::string &filetype,
-    const std::string &filepath )
+void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
+    std::string buffer_contents,
+    std::string filetype,
+    std::string filepath )
 {
-  GetCandidateList( filetype, filepath ).clear();
+  boost::function< void() > functor =
+    bind( &IdentifierCompleter::AddCandidatesToDatabaseFromBuffer,
+          boost::ref( *this ),
+          boost::move( buffer_contents ),
+          boost::move( filetype ),
+          boost::move( filepath ) );
+
+  buffer_identifiers_task_stack_.Push(
+      make_shared< packaged_task< void > >( functor ) );
 }
 
 
@@ -170,15 +189,13 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
           query,
           filetype );
 
-  // Try not to look at this too hard, it may burn your eyes.
-  shared_ptr< packaged_task< AsyncResults > > task =
-    make_shared< packaged_task< AsyncResults > >(
+  QueryTask task = make_shared< packaged_task< AsyncResults > >(
       bind( ReturnValueAsShared< std::vector< std::string > >,
             functor ) );
 
   unique_future< AsyncResults > future = task->get_future();
 
-  latest_task_.Set( task );
+  latest_query_task_.Set( task );
   return Future< AsyncResults >( boost::move( future ) );
 }
 
@@ -220,6 +237,14 @@ void IdentifierCompleter::ResultsForQueryAndType(
 }
 
 
+void IdentifierCompleter::ClearCandidatesStoredForFile(
+    const std::string &filetype,
+    const std::string &filepath )
+{
+  GetCandidateList( filetype, filepath ).clear();
+}
+
+
 std::list< const Candidate* >& IdentifierCompleter::GetCandidateList(
     const std::string &filetype,
     const std::string &filepath )
@@ -242,14 +267,19 @@ std::list< const Candidate* >& IdentifierCompleter::GetCandidateList(
 
 void IdentifierCompleter::InitThreads()
 {
-  int threads_to_create =
+  int query_threads_to_create =
     std::max( MIN_ASYNC_THREADS,
       std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
 
-  for ( int i = 0; i < threads_to_create; ++i )
+  for ( int i = 0; i < query_threads_to_create; ++i )
   {
-    threads_.create_thread( bind( ThreadMain, boost::ref( latest_task_ ) ) );
+    query_threads_.create_thread( bind( QueryThreadMain,
+                                        boost::ref( latest_query_task_ ) ) );
   }
+
+  buffer_identifiers_thread_ = boost::thread(
+      BufferIdentifiersThreadMain,
+      boost::ref( buffer_identifiers_task_stack_ ) );
 }
 
 

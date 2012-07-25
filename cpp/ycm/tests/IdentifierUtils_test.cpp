@@ -81,7 +81,8 @@ TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks )
 TEST( IdentifierUtilsTest, ExtractIdentifiersFromTextWorks )
 {
 	EXPECT_THAT( ExtractIdentifiersFromText(
-	             "foo $_bar &BazGoo FOO= !!! '-' - _ (x) one-two !moo [qqq]" ),
+	             "foo $_bar \n&BazGoo\n FOO= !!! '-' - _ (x) one-two !moo [qqq]"
+	             ),
 	             ElementsAre( "foo",
 	                          "_bar",
 	                          "BazGoo",

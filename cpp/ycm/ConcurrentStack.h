@@ -15,25 +15,52 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef IDENTIFIERUTILS_CPP_WFFUZNET
-#define IDENTIFIERUTILS_CPP_WFFUZNET
+#ifndef CONCURRENTSTACK_H_TGI0GOR6
+#define CONCURRENTSTACK_H_TGI0GOR6
 
-#include <vector>
-#include <string>
+#include <boost/thread.hpp>
+#include <boost/utility.hpp>
+#include <stack>
 
 namespace YouCompleteMe
 {
 
-// NOTE: this function accepts the text param by value on purpose; it internally
-// needs a copy before processing the text so the copy might as well be made on
-// the parameter BUT if this code is compiled in C++11 mode a move constructor
-// can be called on the passed-in value. This is not possible if we accept the
-// param by const ref.
-std::string RemoveIdentifierFreeText( std::string text );
+template <typename T>
+class ConcurrentStack : boost::noncopyable
+{
+public:
 
-std::vector< std::string > ExtractIdentifiersFromText(
-    const std::string &text );
+  void Push( const T& data )
+  {
+    {
+      boost::unique_lock< boost::mutex > lock( mutex_ );
+      stack_.push( data );
+    }
+
+    condition_variable_.notify_one();
+  }
+
+  T Pop()
+  {
+    boost::unique_lock< boost::mutex > lock( mutex_ );
+
+    while ( stack_.empty() )
+    {
+      condition_variable_.wait( lock );
+    }
+
+    T top = stack_.top();
+    stack_.pop();
+    return top;
+  }
+
+private:
+  std::stack< T > stack_;
+  boost::mutex mutex_;
+  boost::condition_variable condition_variable_;
+
+};
 
 } // namespace YouCompleteMe
 
-#endif /* end of include guard: IDENTIFIERUTILS_CPP_WFFUZNET */
+#endif /* end of include guard: CONCURRENTSTACK_H_TGI0GOR6 */

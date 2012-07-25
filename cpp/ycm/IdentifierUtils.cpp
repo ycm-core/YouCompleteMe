@@ -38,11 +38,10 @@ const char* COMMENT_AND_STRING_REGEX =
 const char* IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
 
 
-std::string RemoveIdentifierFreeText( const std::string &text )
+std::string RemoveIdentifierFreeText( std::string text )
 {
-  std::string new_text = text;
-  boost::erase_all_regex( new_text, boost::regex( COMMENT_AND_STRING_REGEX ) );
-  return new_text;
+  boost::erase_all_regex( text, boost::regex( COMMENT_AND_STRING_REGEX ) );
+  return text;
 }
 
 

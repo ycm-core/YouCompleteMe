@@ -85,9 +85,9 @@ class IdentifierCompleter( Completer ):
       return
 
     text = "\n".join( vim.current.buffer )
-    self.completer.AddCandidatesToDatabaseFromBuffer( text,
-                                                      filetype,
-                                                      filepath )
+    self.completer.AddCandidatesToDatabaseFromBufferAsync( text,
+                                                           filetype,
+                                                           filepath )
 
 
   def OnFileEnter( self ):
