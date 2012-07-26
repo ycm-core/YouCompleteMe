@@ -138,6 +138,10 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
     std::string filetype,
     std::string filepath )
 {
+  // TODO: throw exception when threading is not enabled and this is called
+  if ( !threading_enabled_ )
+    return;
+
   boost::function< void() > functor =
     bind( &IdentifierCompleter::AddCandidatesToDatabaseFromBuffer,
           boost::ref( *this ),
