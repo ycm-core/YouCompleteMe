@@ -33,12 +33,12 @@ if !exists( 'g:ycm_filetypes_to_ignore' )
   let g:ycm_filetypes_to_ignore = { 'notes' : 1 }
 endif
 
+let g:ycm_clang_completion_enabled =
+      \ get(g:, 'ycm_clang_completion_enabled', 1)
+
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim
-
-let g:ycm_clang_completion_enabled =
-      \ get(g:, 'ycm_clang_completion_enabled', 1)
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
