@@ -23,12 +23,9 @@ namespace YouCompleteMe
 
 struct CompletionData
 {
-  // What should actually be inserted into the buffer. For functions, this
-  // should be the original string plus "("
+  // What should actually be inserted into the buffer.
   std::string TextToInsertInBuffer()
   {
-    if ( kind_ == 'f' )
-      return original_string_ + "(";
     return original_string_;
   }
 
