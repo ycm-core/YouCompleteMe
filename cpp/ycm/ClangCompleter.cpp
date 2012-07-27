@@ -39,6 +39,7 @@ using boost::bind;
 using boost::thread;
 using boost::lock_guard;
 using boost::mutex;
+using boost::unordered_map;
 
 namespace YouCompleteMe
 {
@@ -206,6 +207,8 @@ std::vector< CompletionData > ToCompletionDataVector(
   std::vector< CompletionData > completions;
   completions.reserve( results->NumResults );
 
+  unordered_map< std::string, uint > seen_data;
+
   for ( uint i = 0; i < results->NumResults; ++i )
   {
     CXCompletionResult completion_result = results->Results[ i ];
@@ -213,8 +216,22 @@ std::vector< CompletionData > ToCompletionDataVector(
     if ( !CompletionStringAvailable( completion_result.CompletionString ) )
       continue;
 
-    completions.push_back(
-        CompletionResultToCompletionData( completion_result ) );
+    CompletionData data = CompletionResultToCompletionData( completion_result );
+    uint index = GetValueElseInsert( seen_data,
+                                     data.original_string_,
+                                     completions.size() );
+
+    if ( index == completions.size() )
+    {
+      completions.push_back( data );
+    }
+
+    else
+    {
+      completions[ index ].detailed_info_
+        .append( "\n" )
+        .append( data.extra_menu_info_ );
+    }
   }
 
   return completions;

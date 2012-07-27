@@ -39,8 +39,8 @@ void WriteUtf8File( const fs::path &filepath, const std::string &contents );
 template <class Container, class Key>
 typename Container::mapped_type &
 GetValueElseInsert( Container &container,
-                    Key const& key,
-                    typename Container::mapped_type const& value )
+                    const Key &key,
+                    const typename Container::mapped_type &value )
 {
   return container.insert( typename Container::value_type( key, value ) )
     .first->second;
@@ -48,9 +48,20 @@ GetValueElseInsert( Container &container,
 
 
 template <class Container, class Key>
-bool ContainsKey( Container &container, Key const& key)
+bool ContainsKey( Container &container, const Key &key )
 {
   return container.find( key ) != container.end();
+}
+
+
+template <class Container, class Key>
+const typename Container::mapped_type &
+FindWithDefault( Container &container,
+                 const Key &key,
+                 const typename Container::mapped_type &value )
+{
+  auto it = container.find( key );
+  return it != container.end() ? *it : value;
 }
 
 } // namespace YouCompleteMe
