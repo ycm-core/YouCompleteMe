@@ -60,11 +60,10 @@ FindWithDefault( Container &container,
                  const Key &key,
                  const typename Container::mapped_type &value )
 {
-  auto it = container.find( key );
+  typename Container::iterator it = container.find( key );
   return it != container.end() ? *it : value;
 }
 
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: UTILS_H_KEPMRPBH */
-
