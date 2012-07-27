@@ -27,6 +27,8 @@
 #include <clang-c/Index.h>
 #include <boost/make_shared.hpp>
 
+// TODO: remove all explicit uses of the boost:: prefix by adding explicit using
+// directives for the stuff we need
 namespace fs = boost::filesystem;
 using boost::packaged_task;
 using boost::bind;
@@ -35,6 +37,8 @@ using boost::make_shared;
 using boost::shared_ptr;
 using boost::bind;
 using boost::thread;
+using boost::lock_guard;
+using boost::mutex;
 
 namespace YouCompleteMe
 {
@@ -266,6 +270,13 @@ void ClangCompleter::SetFileCompileFlags(
 }
 
 
+bool ClangCompleter::UpdatingTranslationUnit()
+{
+  lock_guard< mutex > lock( file_parse_task_mutex_ );
+  return bool( file_parse_task_ );
+}
+
+
 void ClangCompleter::UpdateTranslationUnit(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files )
@@ -289,6 +300,27 @@ void ClangCompleter::UpdateTranslationUnit(
   {
     filename_to_translation_unit_[ filename ] =
       CreateTranslationUnit( filename, unsaved_files );
+  }
+}
+
+
+void ClangCompleter::UpdateTranslationUnitAsync(
+    std::string filename,
+    std::vector< UnsavedFile > unsaved_files )
+{
+  boost::function< void() > functor =
+    bind( &ClangCompleter::UpdateTranslationUnit,
+          boost::ref( *this ),
+          boost::move( filename ),
+          boost::move( unsaved_files ) );
+
+  boost::lock_guard< boost::mutex > lock( file_parse_task_mutex_ );
+
+  // Only ever set the task when it's NULL; if it's not, that means that the
+  // clang thread is working on it
+  if ( !file_parse_task_ ) {
+    file_parse_task_ = make_shared< packaged_task< void > >( functor );
+    file_parse_task_condition_variable_.notify_all();
   }
 }
 
@@ -341,6 +373,10 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 
   if ( query.empty() )
   {
+    // The clang thread is busy, return nothing
+    if ( UpdatingTranslationUnit() )
+      return Future< AsyncCompletions >();
+
     {
       boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
       clang_data_ready_ = false;
@@ -386,7 +422,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
         bind( ReturnValueAsShared< std::vector< CompletionData > >,
               candidates_for_location_in_file_functor ) );
 
-    clang_task_.Set( task );
+    clang_completions_task_.Set( task );
   }
 
   return Future< AsyncCompletions >( boost::move( future ) );
@@ -408,7 +444,7 @@ CXTranslationUnit ClangCompleter::CreateTranslationUnit(
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
 
-  return clang_parseTranslationUnit(
+  CXTranslationUnit unit = clang_parseTranslationUnit(
       clang_index_,
       filename.c_str(),
       &flags[ 0 ],
@@ -416,6 +452,16 @@ CXTranslationUnit ClangCompleter::CreateTranslationUnit(
       &cxunsaved_files[ 0 ],
       cxunsaved_files.size(),
       clang_defaultEditingTranslationUnitOptions() );
+
+  // Only with a reparse is the preable precompiled. I do not know why...
+  // TODO: report this bug on the clang tracker
+  clang_reparseTranslationUnit(
+      unit,
+      cxunsaved_files.size(),
+      &cxunsaved_files[ 0 ],
+      clang_defaultEditingTranslationUnitOptions() );
+
+  return unit;
 }
 
 
@@ -516,21 +562,56 @@ void ClangCompleter::InitThreads()
   {
     sorting_threads_.create_thread(
         bind( &ClangCompleter::SortingThreadMain,
-              boost::ref( *this ),
-              boost::ref( sorting_task_ ) ) );
+              boost::ref( *this ) ) );
   }
 
-  clang_thread_ = boost::thread( &ClangCompleter::ClangThreadMain,
-                                 boost::ref( *this ),
-                                 boost::ref( clang_task_ ) );
+  clang_completions_thread_ = boost::thread(
+      &ClangCompleter::ClangCompletionsThreadMain,
+      boost::ref( *this ) );
+
+  file_parse_thread_ = boost::thread(
+      &ClangCompleter::FileParseThreadMain,
+      boost::ref( *this ) );
 }
 
 
-void ClangCompleter::ClangThreadMain( LatestTask &clang_task )
+void ClangCompleter::FileParseThreadMain()
 {
   while ( true )
   {
-    shared_ptr< packaged_task< AsyncCompletions > > task = clang_task.Get();
+    {
+      boost::unique_lock< boost::mutex > lock( file_parse_task_mutex_ );
+
+      while ( !file_parse_task_ )
+      {
+        file_parse_task_condition_variable_.wait( lock );
+      }
+    }
+
+    ( *file_parse_task_ )();
+
+    lock_guard< mutex > lock( file_parse_task_mutex_ );
+    file_parse_task_ = VoidTask();
+  }
+}
+
+
+void ClangCompleter::ClangCompletionsThreadMain()
+{
+  while ( true )
+  {
+    // TODO: this should be a separate func, much like the file_parse_task_ part
+    shared_ptr< packaged_task< AsyncCompletions > > task =
+      clang_completions_task_.Get();
+
+    // If the file parse thread is accessing clang by parsing a file, then drop
+    // the current completion request
+    {
+      lock_guard< mutex > lock( file_parse_task_mutex_ );
+      if ( file_parse_task_ )
+        continue;
+    }
+
     ( *task )();
     unique_future< AsyncCompletions > future = task->get_future();
 
@@ -550,7 +631,7 @@ void ClangCompleter::ClangThreadMain( LatestTask &clang_task )
 }
 
 
-void ClangCompleter::SortingThreadMain( LatestTask &sorting_task )
+void ClangCompleter::SortingThreadMain()
 {
   while ( true )
   {
@@ -565,7 +646,8 @@ void ClangCompleter::SortingThreadMain( LatestTask &sorting_task )
         }
       }
 
-      shared_ptr< packaged_task< AsyncCompletions > > task = sorting_task.Get();
+      shared_ptr< packaged_task< AsyncCompletions > > task =
+        sorting_task_.Get();
 
       {
         boost::shared_lock< boost::shared_mutex > reader_lock(

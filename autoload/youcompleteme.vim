@@ -83,19 +83,22 @@ endfunction
 
 function! s:OnBufferVisit()
   call s:SetCompleteFunc()
-  py identcomp.OnFileEnter()
-
-  if g:ycm_clang_completion_enabled && pyeval('ycm.ClangAvailableForFile()')
-    py clangcomp.OnFileEnter()
-  endif
+  call s:ParseFile()
 endfunction
 
 
 function! s:OnCursorHold()
-  " TODO: make this async, it's causing lag
-  py identcomp.AddBufferIdentifiers()
+  call s:ParseFile()
 endfunction
 
+
+function! s:ParseFile()
+  py identcomp.OnFileReadyToParse()
+
+  if g:ycm_clang_completion_enabled && pyeval('ycm.ClangAvailableForFile()')
+    py clangcomp.OnFileReadyToParse()
+  endif
+endfunction
 
 function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'

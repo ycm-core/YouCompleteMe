@@ -60,8 +60,14 @@ public:
   void SetFileCompileFlags( const std::string &filename,
                             const std::vector< std::string > &flags );
 
+  bool UpdatingTranslationUnit();
+
   void UpdateTranslationUnit( const std::string &filename,
                               const std::vector< UnsavedFile > &unsaved_files );
+
+  void UpdateTranslationUnitAsync(
+      std::string filename,
+      std::vector< UnsavedFile > unsaved_files );
 
   std::vector< CompletionData > CandidatesForLocationInFile(
       const std::string &filename,
@@ -98,9 +104,11 @@ private:
 
   void InitThreads();
 
-  void ClangThreadMain( LatestTask &clang_task );
+  void FileParseThreadMain();
 
-  void SortingThreadMain( LatestTask &sorting_task );
+  void ClangCompletionsThreadMain();
+
+  void SortingThreadMain();
 
 
   /////////////////////////////
@@ -117,9 +125,18 @@ private:
 
   CandidateRepository &candidate_repository_;
 
-  mutable LatestTask clang_task_;
+  // TODO: move everything thread-related into a separated helper class
+  mutable LatestTask clang_completions_task_;
 
   mutable LatestTask sorting_task_;
+
+  // Only the clang thread can make this NULL and only the GUI thread can make
+  // it non-NULL. The file_parse_task_mutex_ is used before checking the state
+  // of NULL. [ NULL for a shared_ptr naturally means default-constructed
+  // shared_ptr]
+  VoidTask file_parse_task_;
+  boost::mutex file_parse_task_mutex_;
+  boost::condition_variable file_parse_task_condition_variable_;
 
   bool threading_enabled_;
 
@@ -131,10 +148,12 @@ private:
   std::vector< CompletionData > latest_clang_results_;
   boost::shared_mutex latest_clang_results_shared_mutex_;
 
-  // Unfortunately clang is not thread-safe so we can only ever use one thread
-  // to access it. So this one background thread will be the only thread that
-  // can access libclang.
-  boost::thread clang_thread_;
+  // Unfortunately clang is not thread-safe so we need to be careful when we
+  // access it. Only one thread at a time is allowed to access any single
+  // translation unit.
+  boost::thread clang_completions_thread_;
+
+  boost::thread file_parse_thread_;
 
   boost::thread_group sorting_threads_;
 };

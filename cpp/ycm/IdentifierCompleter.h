@@ -58,8 +58,6 @@ typedef boost::shared_ptr<
 
 typedef ConcurrentLatestValue< QueryTask > LatestQueryTask;
 
-typedef boost::shared_ptr< boost::packaged_task< void > > VoidTask;
-
 typedef ConcurrentStack< VoidTask > BufferIdentifiersTaskStack;
 
 

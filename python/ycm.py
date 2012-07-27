@@ -33,6 +33,10 @@ class Completer( object ):
 
 
   def AsyncCandidateRequestReady( self ):
+    if not self.future:
+      # We return True so that the caller can extract the default value from the
+      # future
+      return True
     return self.future.ResultsReady()
 
 
@@ -42,7 +46,7 @@ class Completer( object ):
     return self.future.GetResults()
 
 
-  def OnFileEnter( self ):
+  def OnFileReadyToParse( self ):
     pass
 
 
@@ -90,7 +94,7 @@ class IdentifierCompleter( Completer ):
                                                            filepath )
 
 
-  def OnFileEnter( self ):
+  def OnFileReadyToParse( self ):
     self.AddBufferIdentifiers()
 
 
@@ -134,6 +138,11 @@ class ClangCompleter( Completer ):
 
 
   def CandidatesForQueryAsync( self, query ):
+    if self.completer.UpdatingTranslationUnit():
+      PostVimMessage( 'Still parsing file, no completions yet.' )
+      self.future = None
+      return
+
     # TODO: sanitize query
 
     # CAREFUL HERE! For UnsavedFile filename and contents we are referring
@@ -165,11 +174,16 @@ class ClangCompleter( Completer ):
     return [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
 
 
-  def OnFileEnter( self ):
-    self.future = self.completer.UpdateTranslationUnit(
+  def OnFileReadyToParse( self ):
+    self.future = self.completer.UpdateTranslationUnitAsync(
       vim.current.buffer.name,
       self.GetUnsavedFilesVector() )
 
+
+def PostVimMessage( message ):
+  # TODO: escape the message string before formating it
+  vim.command( 'echohl WarningMsg | echomsg "{0}" | echohl None'
+               .format( message ) )
 
 
 def GetUnsavedBuffers():

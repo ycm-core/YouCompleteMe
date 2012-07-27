@@ -27,7 +27,7 @@ namespace YouCompleteMe
 {
 
 class Result;
-template< typename T > class ConcurrentLatestValue;
+typedef boost::shared_ptr< boost::packaged_task< void > > VoidTask;
 
 template< typename T >
 boost::shared_ptr< T > ReturnValueAsShared(
@@ -47,6 +47,13 @@ public:
 
   bool ResultsReady()
   {
+    // It's OK to return true since GetResults will just return a
+    // default-constructed value if the future_ is uninitialized. If we don't
+    // return true for this case, any loop waiting on ResultsReady will wait
+    // forever.
+    if ( future_.get_state() == boost::future_state::uninitialized )
+      return true;
+
     return future_.is_ready();
   }
 

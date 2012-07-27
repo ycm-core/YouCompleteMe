@@ -86,7 +86,9 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "EnableThreading", &ClangCompleter::EnableThreading )
     .def( "SetGlobalCompileFlags", &ClangCompleter::SetGlobalCompileFlags )
     .def( "SetFileCompileFlags", &ClangCompleter::SetFileCompileFlags )
-    .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
+    .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
+    .def( "UpdateTranslationUnitAsync",
+          &ClangCompleter::UpdateTranslationUnitAsync )
     .def( "CandidatesForQueryAndLocationInFileAsync",
           &ClangCompleter::CandidatesForQueryAndLocationInFileAsync );
 }
