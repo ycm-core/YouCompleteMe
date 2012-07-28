@@ -87,7 +87,7 @@ endif()
 
 # We want warnings if we accidentally use C++11 features
 if ( COMPILER_IS_CLANG )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wc++11-extensions")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wc++98-compat")
 endif()
 
 #############################################################################
