@@ -218,9 +218,7 @@ function! youcompleteme#Complete( findstart, base )
     let s:should_use_clang =
           \ pyeval( 'ycm.ShouldUseClang(' . s:completion_start_column . ')' )
 
-    if ( s:should_use_clang )
-      return s:completion_start_column
-    else
+    if ( !s:should_use_clang )
       let l:current_column = col('.') - 1
       let l:query_length = current_column - s:completion_start_column
 
@@ -229,8 +227,8 @@ function! youcompleteme#Complete( findstart, base )
         " see :h complete-functions
         return -2
       endif
-      return s:completion_start_column
     endif
+    return s:completion_start_column
   else
     if ( s:should_use_clang )
       return s:ClangCompletion( a:base )
