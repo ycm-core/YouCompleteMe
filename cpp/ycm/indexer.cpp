@@ -19,6 +19,7 @@
 #include "ClangCompleter.h"
 #include "Future.h"
 #include "CompletionData.h"
+#include "Diagnostic.h"
 #include "UnsavedFile.h"
 
 #include <boost/python.hpp>
@@ -46,6 +47,16 @@ BOOST_PYTHON_MODULE(indexer)
 	        boost::shared_ptr< std::vector< CompletionData > > >(
 	            "CompletionVec" )
 		.def( vector_indexing_suite< std::vector< CompletionData > >() );
+
+  class_< Diagnostic >( "Diagnostic" )
+    .def_readonly( "line_number_", &Diagnostic::line_number_ )
+    .def_readonly( "column_number_", &Diagnostic::column_number_ )
+    .def_readonly( "kind_", &Diagnostic::kind_ )
+    .def_readonly( "filename_", &Diagnostic::filename_ )
+    .def_readonly( "text_", &Diagnostic::text_ );
+
+	class_< std::vector< Diagnostic > >( "DiagnosticVec" )
+		.def( vector_indexing_suite< std::vector< Diagnostic > >() );
 
   class_< Future< AsyncResults > >( "Future" )
     .def( "ResultsReady", &Future< AsyncResults >::ResultsReady )
@@ -86,6 +97,7 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "EnableThreading", &ClangCompleter::EnableThreading )
     .def( "SetGlobalCompileFlags", &ClangCompleter::SetGlobalCompileFlags )
     .def( "SetFileCompileFlags", &ClangCompleter::SetFileCompileFlags )
+    .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
     .def( "UpdateTranslationUnitAsync",
           &ClangCompleter::UpdateTranslationUnitAsync )

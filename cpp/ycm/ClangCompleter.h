@@ -21,6 +21,7 @@
 #include "ConcurrentLatestValue.h"
 #include "Future.h"
 #include "UnsavedFile.h"
+#include "Diagnostic.h"
 
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
@@ -59,6 +60,8 @@ public:
 
   void SetFileCompileFlags( const std::string &filename,
                             const std::vector< std::string > &flags );
+
+  std::vector< Diagnostic > DiagnosticsForFile( const std::string &filename );
 
   bool UpdatingTranslationUnit();
 

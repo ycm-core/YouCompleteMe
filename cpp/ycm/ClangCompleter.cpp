@@ -168,6 +168,28 @@ char CursorKindToVimKind( CXCursorKind kind )
 }
 
 
+char DiagnosticSeverityToType( CXDiagnosticSeverity severity )
+{
+  switch ( severity )
+  {
+    case CXDiagnostic_Ignored:
+    case CXDiagnostic_Note:
+      return 'I';
+
+    case CXDiagnostic_Warning:
+      return 'W';
+
+    case CXDiagnostic_Error:
+    case CXDiagnostic_Fatal:
+      return 'E';
+
+    default:
+      return 'E';
+  }
+}
+
+
+// TODO: this should be a constructor
 CompletionData CompletionResultToCompletionData(
     const CXCompletionResult &completion_result )
 {
@@ -238,6 +260,34 @@ std::vector< CompletionData > ToCompletionDataVector(
 }
 
 
+Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic )
+{
+  Diagnostic diagnostic;
+  diagnostic.kind_ = DiagnosticSeverityToType(
+      clang_getDiagnosticSeverity( cxdiagnostic ) );
+
+  // If this is an "ignored" diagnostic, there's no point in continuing since we
+  // won't display those to the user
+  if ( diagnostic.kind_ == 'I' )
+    return diagnostic;
+
+  CXSourceLocation location = clang_getDiagnosticLocation( cxdiagnostic );
+  CXFile file;
+  uint unused_offset;
+  clang_getSpellingLocation( location,
+                             &file,
+                             &diagnostic.line_number_,
+                             &diagnostic.column_number_,
+                             &unused_offset );
+  diagnostic.filename_ = CXStringToString( clang_getFileName( file ) );
+  diagnostic.text_ = CXStringToString(
+      clang_getDiagnosticSpelling( cxdiagnostic ) );
+
+  clang_disposeDiagnostic( cxdiagnostic );
+  return diagnostic;
+}
+
+
 } // unnamed namespace
 
 
@@ -284,6 +334,32 @@ void ClangCompleter::SetFileCompileFlags(
 {
   flags_for_file_[ filename ] =
     make_shared< std::vector< std::string > >( flags );
+}
+
+
+std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
+    const std::string &filename )
+{
+  CXTranslationUnit unit = FindWithDefault( filename_to_translation_unit_,
+                                            filename,
+                                            NULL );
+  std::vector< Diagnostic > diagnostics;
+  if ( !unit )
+    return diagnostics;
+
+  uint num_diagnostics = clang_getNumDiagnostics( unit );
+  diagnostics.reserve( num_diagnostics );
+
+  for ( uint i = 0; i < num_diagnostics; ++i )
+  {
+    Diagnostic diagnostic = CXDiagnosticToDiagnostic(
+        clang_getDiagnostic( unit, i ) );
+
+    if ( diagnostic.kind_ != 'I' )
+      diagnostics.push_back( diagnostic );
+  }
+
+  return diagnostics;
 }
 
 

@@ -132,6 +132,7 @@ function! s:OnInsertLeave()
   let s:omnifunc_mode = 0
 endfunction
 
+
 function! s:IdentifierFinishedOperations()
   if !pyeval( 'ycm.CurrentIdentifierFinished()' )
     return
@@ -271,6 +272,14 @@ function! youcompleteme#ClangOmniComplete( findstart, base )
   else
     return s:ClangCompletion( a:base )
   endif
+endfunction
+
+
+function! youcompleteme#CurrentFileDiagnostics()
+  if s:ClangEnabledForCurrentFile()
+    return pyeval( 'clangcomp.GetDiagnosticsForCurrentFile()' )
+  endif
+  return []
 endfunction
 
 " This is basic vim plugin boilerplate

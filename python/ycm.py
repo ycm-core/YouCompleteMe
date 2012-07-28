@@ -184,6 +184,12 @@ class ClangCompleter( Completer ):
       self.GetUnsavedFilesVector() )
 
 
+  def GetDiagnosticsForCurrentFile( self ):
+    return [ DiagnosticToDict( x ) for x in
+             self.completer.DiagnosticsForFile( vim.current.buffer.name ) ]
+
+
+
 def PostVimMessage( message ):
   # TODO: escape the message string before formating it
   vim.command( 'echohl WarningMsg | echomsg "{0}" | echohl None'
@@ -207,6 +213,18 @@ def CompletionDataToDict( completion_data ):
     'kind' : completion_data.kind_,
     'dup'  : 1,
     # TODO: add detailed_info_ as 'info'
+  }
+
+
+def DiagnosticToDict( diagnostic ):
+  # see :h getqflist for a description of the dictionary fields
+  return {
+    'bufnr' : int( vim.eval( "bufnr('" + diagnostic.filename_ + "', 1)" ) ),
+    'lnum'  : diagnostic.line_number_,
+    'col'   : diagnostic.column_number_,
+    'text'  : diagnostic.text_,
+    'type'  : diagnostic.kind_,
+    'valid' : 1
   }
 
 

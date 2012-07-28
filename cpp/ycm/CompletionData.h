@@ -18,6 +18,8 @@
 #ifndef COMPLETIONDATA_H_2JCTF1NU
 #define COMPLETIONDATA_H_2JCTF1NU
 
+#include <string>
+
 namespace YouCompleteMe
 {
 

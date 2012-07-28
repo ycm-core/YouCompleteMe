@@ -15,8 +15,9 @@
 " You should have received a copy of the GNU General Public License
 " along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-if exists("g:loaded_youcompleteme")
+if exists( "g:loaded_youcompleteme" )
   finish
+" TODO: check for python too
 elseif v:version < 703 || !has( 'patch584' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
