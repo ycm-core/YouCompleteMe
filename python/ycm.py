@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import vim
 import indexer
 
@@ -174,7 +173,7 @@ class ClangCompleter( Completer ):
     return [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
 
 
-  def OnFileReadyToParse( self ):
+  def OnFileEnter( self ):
     self.future = self.completer.UpdateTranslationUnitAsync(
       vim.current.buffer.name,
       self.GetUnsavedFilesVector() )
@@ -310,7 +309,7 @@ def PreviousIdentifier():
   return line[ start_column : end_column ]
 
 
-def ShouldAddIdentifier():
+def CurrentIdentifierFinished():
   current_column = CurrentColumn()
   previous_char_index = current_column - 1
   if previous_char_index < 0:

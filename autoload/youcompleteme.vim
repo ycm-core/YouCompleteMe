@@ -24,6 +24,7 @@ let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:searched_and_no_results_found = 0
 let s:should_use_clang = 0
 let s:completion_start_column = 0
+let s:omnifunc_mode = 0
 let g:ycm_min_num_of_chars_for_completion = 2
 
 function! youcompleteme#Enable()
@@ -72,6 +73,9 @@ function! youcompleteme#Enable()
 
   if g:ycm_clang_completion_enabled
     py clangcomp = ycm.ClangCompleter()
+    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
+    " candidate that vim selects by default
+    inoremap <unique> <C-Space> <C-X><C-O><C-P>
   endif
 
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
@@ -92,37 +96,43 @@ function! s:OnCursorHold()
 endfunction
 
 
+function! s:ClangEnabledForCurrentFile()
+  return g:ycm_clang_completion_enabled && pyeval('ycm.ClangAvailableForFile()')
+endfunction
+
+
 function! s:ParseFile()
   py identcomp.OnFileReadyToParse()
 
-  if g:ycm_clang_completion_enabled && pyeval('ycm.ClangAvailableForFile()')
+  if s:ClangEnabledForCurrentFile()
     py clangcomp.OnFileReadyToParse()
   endif
 endfunction
 
+
 function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
+
+  if s:ClangEnabledForCurrentFile()
+    let &omnifunc = 'youcompleteme#ClangOmniComplete'
+    let &l:omnifunc = 'youcompleteme#ClangOmniComplete'
+  endif
 endfunction
 
 
 function! s:OnMovedI()
-  " Technically, what we are doing here is not thread-safe. We are adding a new
-  " identifier to the database while a background thread may be going through
-  " that db, searching for matches for the previous query. BUT, we don't care
-  " what junk that thread may get; those results don't matter anymore since
-  " right after this function is called, we start a new candidate search with a
-  " new query, and the old one is thrown away. The background thread never
-  " modifies the db, only reads it.
-  call s:AddIdentifierIfNeeded()
+  call s:IdentifierFinishedOperations()
   call s:InvokeCompletion()
 endfunction
 
 
-function! s:AddIdentifierIfNeeded()
-  if pyeval( 'ycm.ShouldAddIdentifier()' )
-    py identcomp.AddPreviousIdentifier()
+function! s:IdentifierFinishedOperations()
+  if !pyeval( 'ycm.CurrentIdentifierFinished()' )
+    return
   endif
+  py identcomp.AddPreviousIdentifier()
+  let s:omnifunc_mode = 0
 endfunction
 
 
@@ -213,6 +223,14 @@ endfunction
 
 " This is our main entry point. This is what vim calls to get completions.
 function! youcompleteme#Complete( findstart, base )
+  " Aften the user types one character afte the call to the omnifunc, the
+  " completefunc will be called because of our mapping that calls the
+  " completefunc on every keystroke. Therefore we need to delegate the call we
+  " 'stole' back to the omnifunc
+  if s:omnifunc_mode
+    return youcompleteme#ClangOmniComplete( a:findstart, a:base )
+  endif
+
   if a:findstart
     let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
     let s:should_use_clang =
@@ -221,6 +239,7 @@ function! youcompleteme#Complete( findstart, base )
     if ( !s:should_use_clang )
       let l:current_column = col('.') - 1
       let l:query_length = current_column - s:completion_start_column
+
 
       if ( query_length < g:ycm_min_num_of_chars_for_completion )
         " for vim, -2 means not found but don't trigger an error message
@@ -235,6 +254,17 @@ function! youcompleteme#Complete( findstart, base )
     else
       return s:IdentifierCompletion( a:base )
     endif
+  endif
+endfunction
+
+
+function! youcompleteme#ClangOmniComplete( findstart, base )
+  if a:findstart
+    let s:omnifunc_mode = 1
+    let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
+    return s:completion_start_column
+  else
+    return s:ClangCompletion( a:base )
   endif
 endfunction
 
