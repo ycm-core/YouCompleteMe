@@ -44,6 +44,7 @@ function! youcompleteme#Enable()
     " initial file.
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
+    autocmd InsertLeave * call s:OnInsertLeave()
   augroup END
 
   " We need menuone in completeopt, otherwise when there's only one candidate
@@ -126,6 +127,10 @@ function! s:OnMovedI()
   call s:InvokeCompletion()
 endfunction
 
+
+function! s:OnInsertLeave()
+  let s:omnifunc_mode = 0
+endfunction
 
 function! s:IdentifierFinishedOperations()
   if !pyeval( 'ycm.CurrentIdentifierFinished()' )
