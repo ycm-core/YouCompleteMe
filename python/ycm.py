@@ -173,7 +173,7 @@ class ClangCompleter( Completer ):
     return [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
 
 
-  def OnFileEnter( self ):
+  def OnFileReadyToParse( self ):
     self.future = self.completer.UpdateTranslationUnitAsync(
       vim.current.buffer.name,
       self.GetUnsavedFilesVector() )
