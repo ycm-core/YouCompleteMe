@@ -19,6 +19,7 @@
 
 import vim
 import indexer
+import abc
 
 MIN_NUM_CHARS = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 CLANG_COMPLETION_ENABLED = int( vim.eval( "g:ycm_clang_completion_enabled" ) )
@@ -27,9 +28,10 @@ MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 
 
 class Completer( object ):
+  __metaclass__ = abc.ABCMeta
+
   def __init__( self ):
     self.future = None
-
 
   def AsyncCandidateRequestReady( self ):
     if not self.future:
@@ -44,7 +46,7 @@ class Completer( object ):
       return []
     return self.future.GetResults()
 
-
+  @abc.abstractmethod
   def OnFileReadyToParse( self ):
     pass
 
