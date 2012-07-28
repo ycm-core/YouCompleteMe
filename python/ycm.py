@@ -170,7 +170,10 @@ class ClangCompleter( Completer ):
   def CandidatesFromStoredRequest( self ):
     if not self.future:
       return []
-    return [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
+    results = [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
+    if not results:
+      PostVimMessage( 'No completions found; errors in the file?' )
+    return results
 
 
   def OnFileReadyToParse( self ):
