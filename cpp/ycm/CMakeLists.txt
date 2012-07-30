@@ -50,6 +50,27 @@ endif()
 
 #############################################################################
 
+# One can set an external libclang.so for use with this flag; something like
+# cmake -DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so [...]
+# The final .so we build will then first look in the same dir in which it is
+# located for libclang.so. This is provided by the rpath = $ORIGIN feature.
+# Using an external libclang is an UNDOCUMENTED and UNSUPPORTED feature! I don't
+# want to hear a single bug report about it! :) (I mean it)
+
+if ( EXTERNAL_LIBCLANG_PATH )
+  # Setting this to true makes sure that libraries we build will have our rpath
+  # set even without having to do "make install"
+  set( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
+  set( CMAKE_INSTALL_RPATH "\$ORIGIN" )
+  set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
+  message(
+    "Using external libclang: ${EXTERNAL_LIBCLANG_PATH}" )
+else()
+  set( LIBCLANG_TARGET libclang_static )
+endif()
+
+#############################################################################
+
 add_library( ${PROJECT_NAME} SHARED
              ${SOURCES}
            )
@@ -57,7 +78,7 @@ add_library( ${PROJECT_NAME} SHARED
 target_link_libraries( ${PROJECT_NAME}
                        BoostParts
                        ${PYTHON_LIBRARIES}
-                       libclang_static
+                       ${LIBCLANG_TARGET}
                      )
 
 #############################################################################
