@@ -27,6 +27,11 @@ let s:completion_start_column = 0
 let s:omnifunc_mode = 0
 
 function! youcompleteme#Enable()
+  " When vim is in diff mode, don't run
+  if &diff
+    return
+  endif
+
   " If the user set the current filetype as a filetype that YCM should ignore,
   " then we don't do anything
   if get( g:ycm_filetypes_to_ignore, &filetype, 0 )
