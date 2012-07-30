@@ -25,7 +25,6 @@ let s:searched_and_no_results_found = 0
 let s:should_use_clang = 0
 let s:completion_start_column = 0
 let s:omnifunc_mode = 0
-let g:ycm_min_num_of_chars_for_completion = 2
 
 function! youcompleteme#Enable()
   " If the user set the current filetype as a filetype that YCM should ignore,
@@ -36,7 +35,8 @@ function! youcompleteme#Enable()
 
   augroup youcompleteme
     autocmd!
-    autocmd CursorMovedI * call s:OnMovedI()
+    autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
+    " autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     " Note that these events will NOT trigger for the file vim is started with;
     " so if you do "vim foo.cc", these events will not trigger when that buffer
     " is read. This is because youcompleteme#Enable() is called on VimEnter and
@@ -94,6 +94,7 @@ endfunction
 
 function! s:OnCursorHold()
   call s:ParseFile()
+  call s:UpdateDiagnosticNotifications()
 endfunction
 
 
@@ -122,14 +123,27 @@ function! s:SetCompleteFunc()
 endfunction
 
 
-function! s:OnMovedI()
+function! s:OnCursorMovedInsertMode()
   call s:IdentifierFinishedOperations()
   call s:InvokeCompletion()
 endfunction
 
 
+" function! s:OnCursorMovedNormalMode()
+"   call s:UpdateDiagnosticNotifications()
+" endfunction
+
+
 function! s:OnInsertLeave()
   let s:omnifunc_mode = 0
+  call s:UpdateDiagnosticNotifications()
+endfunction
+
+
+function! s:UpdateDiagnosticNotifications()
+  if g:loaded_syntastic_plugin && s:ClangEnabledForCurrentFile()
+    SyntasticCheck
+  endif
 endfunction
 
 
@@ -275,6 +289,9 @@ function! youcompleteme#ClangOmniComplete( findstart, base )
 endfunction
 
 
+" This is what Syntastic calls indirectly when it decides an auto-check is
+" required (currently that's on buffer save) OR when the SyntasticCheck command
+" is invoked
 function! youcompleteme#CurrentFileDiagnostics()
   if s:ClangEnabledForCurrentFile()
     return pyeval( 'clangcomp.GetDiagnosticsForCurrentFile()' )

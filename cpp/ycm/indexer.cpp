@@ -99,6 +99,7 @@ BOOST_PYTHON_MODULE(indexer)
     .def( "SetFileCompileFlags", &ClangCompleter::SetFileCompileFlags )
     .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
+    .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
     .def( "UpdateTranslationUnitAsync",
           &ClangCompleter::UpdateTranslationUnitAsync )
     .def( "CandidatesForQueryAndLocationInFileAsync",

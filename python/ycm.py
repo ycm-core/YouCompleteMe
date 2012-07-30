@@ -179,12 +179,13 @@ class ClangCompleter( Completer ):
 
 
   def OnFileReadyToParse( self ):
-    self.future = self.completer.UpdateTranslationUnitAsync(
-      vim.current.buffer.name,
-      self.GetUnsavedFilesVector() )
+    self.completer.UpdateTranslationUnitAsync( vim.current.buffer.name,
+                                               self.GetUnsavedFilesVector() )
 
 
   def GetDiagnosticsForCurrentFile( self ):
+    if self.completer.UpdatingTranslationUnit():
+      return []
     return [ DiagnosticToDict( x ) for x in
              self.completer.DiagnosticsForFile( vim.current.buffer.name ) ]
 

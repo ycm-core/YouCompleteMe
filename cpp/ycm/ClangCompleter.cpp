@@ -340,6 +340,8 @@ void ClangCompleter::SetFileCompileFlags(
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
     const std::string &filename )
 {
+  // TODO: make sure that accessing the translation unit is thread safe; what if
+  // a bg thread is parsing the TU when we try to access the diagnostics?
   CXTranslationUnit unit = FindWithDefault( filename_to_translation_unit_,
                                             filename,
                                             NULL );
