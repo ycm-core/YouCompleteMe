@@ -69,6 +69,10 @@ else()
   set( LIBCLANG_TARGET libclang_static )
 endif()
 
+if ( EXTRA_RPATH )
+  set( CMAKE_INSTALL_RPATH "${EXTRA_RPATH}:${CMAKE_INSTALL_RPATH}" )
+endif()
+
 #############################################################################
 
 add_library( ${PROJECT_NAME} SHARED
