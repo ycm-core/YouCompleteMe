@@ -146,7 +146,7 @@ endfunction
 
 
 function! s:UpdateDiagnosticNotifications()
-  if g:loaded_syntastic_plugin && s:ClangEnabledForCurrentFile()
+  if get( g:, 'loaded_syntastic_plugin', 0 ) && s:ClangEnabledForCurrentFile()
     SyntasticCheck
   endif
 endfunction
