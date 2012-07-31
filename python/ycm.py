@@ -118,6 +118,8 @@ class ClangCompleter( Completer ):
     self.completer.EnableThreading()
     self.contents_holder = []
     self.filename_holder = []
+    self.last_diagnostics = []
+    self.possibly_new_diagnostics = False
 
 
   def GetUnsavedFilesVector( self ):
@@ -179,15 +181,23 @@ class ClangCompleter( Completer ):
 
 
   def OnFileReadyToParse( self ):
+    self.possibly_new_diagnostics = True
     self.completer.UpdateTranslationUnitAsync( vim.current.buffer.name,
                                                self.GetUnsavedFilesVector() )
 
 
+  def DiagnosticsForCurrentFileReady( self ):
+    return ( self.possibly_new_diagnostics and not
+             self.completer.UpdatingTranslationUnit() )
+
+
   def GetDiagnosticsForCurrentFile( self ):
-    if self.completer.UpdatingTranslationUnit():
-      return []
-    return [ DiagnosticToDict( x ) for x in
-             self.completer.DiagnosticsForFile( vim.current.buffer.name ) ]
+    if self.DiagnosticsForCurrentFileReady():
+      self.last_diagnostics = [ DiagnosticToDict( x ) for x in
+                                self.completer.DiagnosticsForFile(
+                                  vim.current.buffer.name ) ]
+      self.possibly_new_diagnostics = False
+    return self.last_diagnostics
 
 
 

@@ -413,10 +413,11 @@ void ClangCompleter::UpdateTranslationUnitAsync(
 
   // Only ever set the task when it's NULL; if it's not, that means that the
   // clang thread is working on it
-  if ( !file_parse_task_ ) {
-    file_parse_task_ = make_shared< packaged_task< void > >( functor );
-    file_parse_task_condition_variable_.notify_all();
-  }
+  if ( file_parse_task_ )
+    return;
+
+  file_parse_task_ = make_shared< packaged_task< void > >( functor );
+  file_parse_task_condition_variable_.notify_all();
 }
 
 

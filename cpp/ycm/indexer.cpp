@@ -58,11 +58,11 @@ BOOST_PYTHON_MODULE(indexer)
 	class_< std::vector< Diagnostic > >( "DiagnosticVec" )
 		.def( vector_indexing_suite< std::vector< Diagnostic > >() );
 
-  class_< Future< AsyncResults > >( "Future" )
+  class_< Future< AsyncResults > >( "FutureResults" )
     .def( "ResultsReady", &Future< AsyncResults >::ResultsReady )
     .def( "GetResults", &Future< AsyncResults >::GetResults );
 
-  class_< Future< AsyncCompletions > >( "Future" )
+  class_< Future< AsyncCompletions > >( "FutureCompletions" )
     .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
     .def( "GetResults", &Future< AsyncCompletions >::GetResults );
 

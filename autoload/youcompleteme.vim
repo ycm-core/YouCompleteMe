@@ -41,7 +41,7 @@ function! youcompleteme#Enable()
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
-    " autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     " Note that these events will NOT trigger for the file vim is started with;
     " so if you do "vim foo.cc", these events will not trigger when that buffer
     " is read. This is because youcompleteme#Enable() is called on VimEnter and
@@ -134,9 +134,9 @@ function! s:OnCursorMovedInsertMode()
 endfunction
 
 
-" function! s:OnCursorMovedNormalMode()
-"   call s:UpdateDiagnosticNotifications()
-" endfunction
+function! s:OnCursorMovedNormalMode()
+  call s:UpdateDiagnosticNotifications()
+endfunction
 
 
 function! s:OnInsertLeave()
@@ -147,6 +147,7 @@ endfunction
 
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) && s:ClangEnabledForCurrentFile()
+        \ && pyeval( 'clangcomp.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
 endfunction
