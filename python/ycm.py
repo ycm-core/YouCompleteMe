@@ -127,8 +127,14 @@ class ClangCompleter( Completer ):
     self.contents_holder = []
     self.filename_holder = []
     for buffer in GetUnsavedBuffers():
-      self.contents_holder.append( '\n'.join( buffer ) )
-      self.filename_holder.append( buffer.name )
+      if not ClangAvailableForBuffer( buffer ):
+        continue
+      contents = '\n'.join( buffer )
+      name = buffer.name
+      if not contents or not name:
+        continue
+      self.contents_holder.append( contents )
+      self.filename_holder.append( name )
 
       unsaved_file = indexer.UnsavedFile()
       unsaved_file.contents_ = self.contents_holder[ -1 ]
@@ -181,6 +187,8 @@ class ClangCompleter( Completer ):
 
 
   def OnFileReadyToParse( self ):
+    if NumLinesInBuffer( vim.current.buffer ) < 5:
+      return
     self.possibly_new_diagnostics = True
     self.completer.UpdateTranslationUnitAsync( vim.current.buffer.name,
                                                self.GetUnsavedFilesVector() )
@@ -200,6 +208,9 @@ class ClangCompleter( Completer ):
     return self.last_diagnostics
 
 
+def NumLinesInBuffer( buffer ):
+  # This is actually less than obvious, that's why it's wrapped in a function
+  return len( buffer )
 
 def PostVimMessage( message ):
   # TODO: escape the message string before formating it
@@ -230,7 +241,8 @@ def CompletionDataToDict( completion_data ):
 def DiagnosticToDict( diagnostic ):
   # see :h getqflist for a description of the dictionary fields
   return {
-    'bufnr' : int( vim.eval( "bufnr('" + diagnostic.filename_ + "', 1)" ) ),
+    'bufnr' : int( vim.eval( "bufnr('{0}', 1)".format(
+      diagnostic.filename_ ) ) ),
     'lnum'  : diagnostic.line_number_,
     'col'   : diagnostic.column_number_,
     'text'  : diagnostic.text_,
@@ -257,6 +269,11 @@ def CurrentLineAndColumn():
   line, column = vim.current.window.cursor
   line -= 1
   return line, column
+
+
+def ClangAvailableForBuffer( buffer_object ):
+  filetype = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
+  return filetype in CLANG_FILETYPES
 
 
 def ClangAvailableForFile():
