@@ -20,11 +20,16 @@
 import vim
 import indexer
 import abc
+import imp
+import string
+import random
+import os
 
 MIN_NUM_CHARS = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 CLANG_COMPLETION_ENABLED = int( vim.eval( "g:ycm_clang_completion_enabled" ) )
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
+CLANG_OPTIONS_FILENAME = '.ycm_clang_options'
 
 
 class Completer( object ):
@@ -134,6 +139,7 @@ class ClangCompleter( Completer ):
     self.filename_holder = []
     self.last_diagnostics = []
     self.possibly_new_diagnostics = False
+    self.flags = Flags()
 
 
   def GetUnsavedFilesVector( self ):
@@ -188,7 +194,8 @@ class ClangCompleter( Completer ):
       current_buffer.name,
       line,
       column,
-      files )
+      files,
+      self.flags.FlagsForFile( current_buffer.name ) )
 
 
   def CandidatesFromStoredRequest( self ):
@@ -203,9 +210,14 @@ class ClangCompleter( Completer ):
   def OnFileReadyToParse( self ):
     if NumLinesInBuffer( vim.current.buffer ) < 5:
       return
+
     self.possibly_new_diagnostics = True
-    self.completer.UpdateTranslationUnitAsync( vim.current.buffer.name,
-                                               self.GetUnsavedFilesVector() )
+
+    filename = vim.current.buffer.name
+    self.completer.UpdateTranslationUnitAsync(
+      filename,
+      self.GetUnsavedFilesVector(),
+      self.flags.FlagsForFile( filename ) )
 
 
   def DiagnosticsForCurrentFileReady( self ):
@@ -220,6 +232,92 @@ class ClangCompleter( Completer ):
                                   vim.current.buffer.name ) ]
       self.possibly_new_diagnostics = False
     return self.last_diagnostics
+
+
+class Flags( object ):
+  def __init__( self ):
+    # It's caches all the way down...
+    self.flags_for_file = {}
+    self.flags_module_for_file = {}
+    self.flags_module_for_flags_module_file = {}
+
+
+  def FlagsForFile( self, filename ):
+    try:
+      return self.flags_for_file[ filename ]
+    except KeyError:
+      flags_module = self.FlagsModuleForFile( filename )
+      if not flags_module:
+        return indexer.StringVec()
+
+      results = flags_module.FlagsForFile( filename )
+      sanitized_flags = SanitizeFlags( results[ 'flags' ] )
+
+      if results[ 'do_cache' ]:
+        self.flags_for_file[ filename ] = sanitized_flags
+      return sanitized_flags
+
+
+  def FlagsModuleForFile( self, filename ):
+    try:
+      return self.flags_module_for_file[ filename ]
+    except KeyError:
+      flags_module_file = FlagsModuleSourceFileForFile( filename )
+      if not flags_module_file:
+        return None
+
+      try:
+        flags_module = self.flags_module_for_flags_module_file[
+          flags_module_file ]
+      except KeyError:
+        flags_module = imp.load_source( RandomName(), flags_module_file )
+        self.flags_module_for_flags_module_file[
+          flags_module_file ] = flags_module
+
+      self.flags_module_for_file[ filename ] = flags_module
+      return flags_module
+
+
+def FlagsModuleSourceFileForFile( filename ):
+  parent_folder = os.path.dirname( filename )
+  old_parent_folder = ''
+
+  while True:
+    current_file = os.path.join( parent_folder, CLANG_OPTIONS_FILENAME )
+    if os.path.exists( current_file ):
+      return current_file
+
+    old_parent_folder = parent_folder
+    parent_folder = os.path.dirname( parent_folder )
+
+    if parent_folder == old_parent_folder:
+      return None
+
+
+
+def RandomName():
+  return ''.join( random.choice( string.ascii_lowercase ) for x in range( 15 ) )
+
+
+def SanitizeFlags( flags ):
+  sanitized_flags = []
+  saw_arch = False
+  for i, flag in enumerate( flags ):
+    if flag == '-arch':
+      saw_arch = True
+      continue
+    elif flag.startswith( '-arch' ):
+      continue
+    elif saw_arch:
+      saw_arch = False
+      continue
+
+    sanitized_flags.append( flag )
+
+  vector = indexer.StringVec()
+  for flag in sanitized_flags:
+    vector.append( flag )
+  return vector
 
 
 def NumLinesInBuffer( buffer ):

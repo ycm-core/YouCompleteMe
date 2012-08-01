@@ -82,7 +82,7 @@ public:
                                           const std::string &filepath );
 
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
-  // avoid an expensive move of buffer_contents if the param is taken by value
+  // avoid an expensive copy of buffer_contents if the param is taken by value
   // (move ctors FTW)
   void AddCandidatesToDatabaseFromBufferAsync(
       std::string buffer_contents,

@@ -56,34 +56,37 @@ public:
 
   void EnableThreading();
 
-  void SetGlobalCompileFlags( const std::vector< std::string > &flags );
-
-  void SetFileCompileFlags( const std::string &filename,
-                            const std::vector< std::string > &flags );
-
   std::vector< Diagnostic > DiagnosticsForFile( const std::string &filename );
 
   bool UpdatingTranslationUnit();
 
   void UpdateTranslationUnit( const std::string &filename,
-                              const std::vector< UnsavedFile > &unsaved_files );
+                              const std::vector< UnsavedFile > &unsaved_files,
+                              const std::vector< std::string > &flags );
 
+  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
+  // avoid internal copies if params are taken by value (move ctors FTW)
   void UpdateTranslationUnitAsync(
       std::string filename,
-      std::vector< UnsavedFile > unsaved_files );
+      std::vector< UnsavedFile > unsaved_files,
+      std::vector< std::string > flags );
 
   std::vector< CompletionData > CandidatesForLocationInFile(
       const std::string &filename,
       int line,
       int column,
-      const std::vector< UnsavedFile > &unsaved_files );
+      const std::vector< UnsavedFile > &unsaved_files,
+      const std::vector< std::string > &flags );
 
+  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
+  // avoid internal copies if params are taken by value (move ctors FTW)
   Future< AsyncCompletions > CandidatesForQueryAndLocationInFileAsync(
-      const std::string &query,
-      const std::string &filename,
+      std::string query,
+      std::string filename,
       int line,
       int column,
-      const std::vector< UnsavedFile > &unsaved_files );
+      std::vector< UnsavedFile > unsaved_files,
+      std::vector< std::string > flags );
 
 private:
   typedef ConcurrentLatestValue<
@@ -93,13 +96,13 @@ private:
   // caller takes ownership of translation unit
   CXTranslationUnit CreateTranslationUnit(
       const std::string &filename,
-      const std::vector< UnsavedFile > &unsaved_files );
-
-  std::vector< const char* > FlagsForFilename( const std::string &filename );
+      const std::vector< UnsavedFile > &unsaved_files,
+      const std::vector< std::string > &flags );
 
   CXTranslationUnit GetTranslationUnitForFile(
       const std::string &filename,
-      const std::vector< UnsavedFile > &unsaved_files );
+      const std::vector< UnsavedFile > &unsaved_files,
+      const std::vector< std::string > &flags );
 
   std::vector< CompletionData > SortCandidatesForQuery(
       const std::string &query,
@@ -120,11 +123,7 @@ private:
 
   CXIndex clang_index_;
 
-  FlagsForFile flags_for_file_;
-
   TranslationUnitForFilename filename_to_translation_unit_;
-
-  std::vector< std::string > global_flags_;
 
   CandidateRepository &candidate_repository_;
 

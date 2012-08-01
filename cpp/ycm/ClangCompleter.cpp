@@ -322,22 +322,6 @@ void ClangCompleter::EnableThreading()
 }
 
 
-void ClangCompleter::SetGlobalCompileFlags(
-    const std::vector< std::string > &flags )
-{
-  global_flags_ = flags;
-}
-
-
-void ClangCompleter::SetFileCompileFlags(
-    const std::string &filename,
-    const std::vector< std::string > &flags )
-{
-  flags_for_file_[ filename ] =
-    make_shared< std::vector< std::string > >( flags );
-}
-
-
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
     const std::string &filename )
 {
@@ -377,7 +361,8 @@ bool ClangCompleter::UpdatingTranslationUnit()
 
 void ClangCompleter::UpdateTranslationUnit(
     const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files )
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags )
 {
   TranslationUnitForFilename::iterator it =
     filename_to_translation_unit_.find( filename );
@@ -397,20 +382,22 @@ void ClangCompleter::UpdateTranslationUnit(
   else
   {
     filename_to_translation_unit_[ filename ] =
-      CreateTranslationUnit( filename, unsaved_files );
+      CreateTranslationUnit( filename, unsaved_files, flags );
   }
 }
 
 
 void ClangCompleter::UpdateTranslationUnitAsync(
     std::string filename,
-    std::vector< UnsavedFile > unsaved_files )
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags )
 {
   boost::function< void() > functor =
     bind( &ClangCompleter::UpdateTranslationUnit,
           boost::ref( *this ),
           boost::move( filename ),
-          boost::move( unsaved_files ) );
+          boost::move( unsaved_files ),
+          boost::move( flags ) );
 
   boost::lock_guard< boost::mutex > lock( file_parse_task_mutex_ );
 
@@ -428,7 +415,8 @@ std::vector< CompletionData > ClangCompleter::CandidatesForLocationInFile(
     const std::string &filename,
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files )
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags )
 {
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
@@ -444,7 +432,9 @@ std::vector< CompletionData > ClangCompleter::CandidatesForLocationInFile(
   // call reparse*, but parse* which is even less efficient.
 
   CXCodeCompleteResults *results =
-    clang_codeCompleteAt( GetTranslationUnitForFile( filename, unsaved_files ),
+    clang_codeCompleteAt( GetTranslationUnitForFile( filename,
+                                                     unsaved_files,
+                                                     flags ),
                           filename.c_str(),
                           line,
                           column,
@@ -460,11 +450,12 @@ std::vector< CompletionData > ClangCompleter::CandidatesForLocationInFile(
 
 Future< AsyncCompletions >
 ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
-    const std::string &query,
-    const std::string &filename,
+    std::string query,
+    std::string filename,
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files )
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags )
 {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
@@ -511,10 +502,11 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
       candidates_for_location_in_file_functor =
       bind( &ClangCompleter::CandidatesForLocationInFile,
             boost::ref( *this ),
-            filename,
+            boost::move( filename ),
             line,
             column,
-            unsaved_files );
+            boost::move( unsaved_files ),
+            boost::move( flags ) );
 
     shared_ptr< packaged_task< AsyncCompletions > > task =
       make_shared< packaged_task< AsyncCompletions > >(
@@ -530,14 +522,15 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 
 CXTranslationUnit ClangCompleter::CreateTranslationUnit(
     const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files )
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags )
 {
-  std::vector< const char* > flags = FlagsForFilename( filename );
-  flags.reserve( flags.size() + global_flags_.size() );
+  std::vector< const char* > pointer_flags;
+  pointer_flags.reserve( flags.size() );
 
-  foreach ( const std::string &flag, global_flags_ )
+  foreach ( const std::string &flag, flags )
   {
-    flags.push_back( flag.c_str() );
+    pointer_flags.push_back( flag.c_str() );
   }
 
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
@@ -546,8 +539,8 @@ CXTranslationUnit ClangCompleter::CreateTranslationUnit(
   CXTranslationUnit unit = clang_parseTranslationUnit(
       clang_index_,
       filename.c_str(),
-      &flags[ 0 ],
-      flags.size(),
+      &pointer_flags[ 0 ],
+      pointer_flags.size(),
       &cxunsaved_files[ 0 ],
       cxunsaved_files.size(),
       clang_defaultEditingTranslationUnitOptions() );
@@ -564,41 +557,10 @@ CXTranslationUnit ClangCompleter::CreateTranslationUnit(
 }
 
 
-// The implementation of this function is somewhat non-obvious because we need
-// to make sure that the data pointed to by the const char* pointers returned
-// outlives this function. We want to make sure that we are calling c_str on the
-// string objects that are actually stored in flags_for_file_
-std::vector< const char* > ClangCompleter::FlagsForFilename(
-    const std::string &filename)
-{
-  FlagsForFile::iterator it =
-    flags_for_file_.find( filename );
-
-  if ( it == flags_for_file_.end() )
-  {
-    flags_for_file_[ filename ] = make_shared< std::vector< std::string > >(
-        SanitizeClangFlags(
-            SplitFlags(
-                GetNearestClangOptions( filename ) ) ) );
-
-    it = flags_for_file_.find( filename );
-  }
-
-  // TODO: assert it != end
-
-  std::vector< const char* > flags;
-  foreach ( const std::string &flag, *it->second )
-  {
-    flags.push_back( flag.c_str() );
-  }
-
-  return flags;
-}
-
-
 CXTranslationUnit ClangCompleter::GetTranslationUnitForFile(
     const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files )
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags )
 {
   TranslationUnitForFilename::iterator it =
     filename_to_translation_unit_.find( filename );
@@ -606,7 +568,9 @@ CXTranslationUnit ClangCompleter::GetTranslationUnitForFile(
   if ( it != filename_to_translation_unit_.end() )
     return it->second;
 
-  CXTranslationUnit unit = CreateTranslationUnit( filename, unsaved_files );
+  CXTranslationUnit unit = CreateTranslationUnit( filename,
+                                                  unsaved_files,
+                                                  flags );
   filename_to_translation_unit_[ filename ] = unit;
   return unit;
 }

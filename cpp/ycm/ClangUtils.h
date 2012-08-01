@@ -25,6 +25,7 @@ namespace YouCompleteMe
 {
 
 // TODO: move most of the anon funcs in ClangCompleter.cpp to here
+// TODO: remove these functions
 
 // Removes flags that are either unnecessary or cause clang to crash
 std::vector< std::string > SanitizeClangFlags(

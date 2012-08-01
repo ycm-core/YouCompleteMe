@@ -95,8 +95,6 @@ BOOST_PYTHON_MODULE(indexer)
 
   class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
     .def( "EnableThreading", &ClangCompleter::EnableThreading )
-    .def( "SetGlobalCompileFlags", &ClangCompleter::SetGlobalCompileFlags )
-    .def( "SetFileCompileFlags", &ClangCompleter::SetFileCompileFlags )
     .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
     .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
