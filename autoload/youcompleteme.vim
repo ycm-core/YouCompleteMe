@@ -140,11 +140,9 @@ endfunction
 
 
 function! s:OnInsertLeave()
-  " TODO: Also, look at the current identifier under the cursor on InsertLeave
-  " and add it to the identifier database; this should catch the cases where the
-  " user slightly changes a variable name in-place
   let s:omnifunc_mode = 0
   call s:UpdateDiagnosticNotifications()
+  py identcomp.AddIdentifierUnderCursor()
 endfunction
 
 

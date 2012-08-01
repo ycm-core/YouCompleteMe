@@ -82,6 +82,20 @@ class IdentifierCompleter( Completer ):
     self.AddIdentifier( PreviousIdentifier() )
 
 
+  def AddIdentifierUnderCursor( self ):
+    cursor_identifier = vim.eval( 'expand("<cword>")' )
+    if not cursor_identifier:
+      return
+
+    stripped_cursor_identifier = ''.join( ( x for x in
+                                            cursor_identifier if
+                                            IsIdentifierChar( x ) ) )
+    if not stripped_cursor_identifier:
+      return
+
+    self.AddIdentifier( stripped_cursor_identifier )
+
+
   def AddBufferIdentifiers( self ):
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
