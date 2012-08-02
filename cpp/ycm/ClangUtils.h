@@ -18,22 +18,23 @@
 #ifndef CLANGUTILS_H_9MVHQLJS
 #define CLANGUTILS_H_9MVHQLJS
 
+#include "Diagnostic.h"
+#include "CompletionData.h"
+#include "UnsavedFile.h"
+
 #include <vector>
-#include <string>
+#include <clang-c/Index.h>
 
 namespace YouCompleteMe
 {
 
-// TODO: move most of the anon funcs in ClangCompleter.cpp to here
-// TODO: remove these functions
+std::vector< CompletionData > ToCompletionDataVector(
+    CXCodeCompleteResults *results );
 
-// Removes flags that are either unnecessary or cause clang to crash
-std::vector< std::string > SanitizeClangFlags(
-    const std::vector< std::string > &flags );
+std::vector< CXUnsavedFile > ToCXUnsavedFiles(
+    const std::vector< UnsavedFile > &unsaved_files );
 
-std::vector< std::string > SplitFlags( const std::string &flags_string );
-
-std::string GetNearestClangOptions( const std::string &filename );
+Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic );
 
 } // namespace YouCompleteMe
 
