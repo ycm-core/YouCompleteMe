@@ -132,6 +132,11 @@ private:
 
   mutable LatestTask sorting_task_;
 
+  // TODO: wrap the entire clang API with an internal class that then uses this
+  // mutex... actually a TU class with an internal mutex
+  // Only the thread that is holding this mutex can access clang functions
+  boost::mutex clang_access_mutex_;
+
   // Only the clang thread can make this NULL and only the GUI thread can make
   // it non-NULL. The file_parse_task_mutex_ is used before checking the state
   // of NULL. [ NULL for a shared_ptr naturally means default-constructed

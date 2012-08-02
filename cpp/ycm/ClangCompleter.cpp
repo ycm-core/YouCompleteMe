@@ -41,6 +41,7 @@ using boost::lock_guard;
 using boost::unique_lock;
 using boost::mutex;
 using boost::unordered_map;
+using boost::try_to_lock_t;
 
 namespace YouCompleteMe
 {
@@ -326,7 +327,7 @@ std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
     const std::string &filename )
 {
   std::vector< Diagnostic > diagnostics;
-  unique_lock< mutex > lock( file_parse_task_mutex_, boost::try_to_lock_t );
+  unique_lock< mutex > lock( clang_access_mutex_, try_to_lock_t() );
   if ( !lock.owns_lock() )
     return diagnostics;
 
@@ -354,8 +355,8 @@ std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
 
 bool ClangCompleter::UpdatingTranslationUnit()
 {
-  lock_guard< mutex > lock( file_parse_task_mutex_ );
-  return bool( file_parse_task_ );
+  unique_lock< mutex > lock( clang_access_mutex_, try_to_lock_t() );
+  return !lock.owns_lock();
 }
 
 
@@ -651,7 +652,10 @@ void ClangCompleter::FileParseThreadMain()
       }
     }
 
-    ( *file_parse_task_ )();
+    {
+      unique_lock< mutex > lock( clang_access_mutex_ );
+      ( *file_parse_task_ )();
+    }
 
     lock_guard< mutex > lock( file_parse_task_mutex_ );
     file_parse_task_ = VoidTask();
@@ -675,7 +679,11 @@ void ClangCompleter::ClangCompletionsThreadMain()
         continue;
     }
 
-    ( *task )();
+    {
+      unique_lock< mutex > lock( clang_access_mutex_ );
+      ( *task )();
+    }
+
     unique_future< AsyncCompletions > future = task->get_future();
 
     {
