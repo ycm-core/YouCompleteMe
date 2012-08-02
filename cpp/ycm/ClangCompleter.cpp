@@ -38,6 +38,7 @@ using boost::shared_ptr;
 using boost::bind;
 using boost::thread;
 using boost::lock_guard;
+using boost::unique_lock;
 using boost::mutex;
 using boost::unordered_map;
 
@@ -340,12 +341,14 @@ void ClangCompleter::SetFileCompileFlags(
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
     const std::string &filename )
 {
-  // TODO: make sure that accessing the translation unit is thread safe; what if
-  // a bg thread is parsing the TU when we try to access the diagnostics?
+  std::vector< Diagnostic > diagnostics;
+  unique_lock< mutex > lock( file_parse_task_mutex_, boost::try_to_lock_t );
+  if ( !lock.owns_lock() )
+    return diagnostics;
+
   CXTranslationUnit unit = FindWithDefault( filename_to_translation_unit_,
                                             filename,
                                             NULL );
-  std::vector< Diagnostic > diagnostics;
   if ( !unit )
     return diagnostics;
 
