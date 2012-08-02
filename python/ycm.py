@@ -29,7 +29,7 @@ MIN_NUM_CHARS = int( vim.eval( "g:ycm_min_num_of_chars_for_completion" ) )
 CLANG_COMPLETION_ENABLED = int( vim.eval( "g:ycm_clang_completion_enabled" ) )
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
-CLANG_OPTIONS_FILENAME = '.ycm_clang_options'
+CLANG_OPTIONS_FILENAME = '.ycm_clang_options.py'
 
 
 class Completer( object ):
