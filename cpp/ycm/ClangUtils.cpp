@@ -74,7 +74,7 @@ bool CompletionStringAvailable( CXCompletionString completion_string )
 }
 
 
-bool IsChunkKindForExtraMenuInfo( CXCompletionChunkKind kind )
+bool IsMainCompletionTextInfo( CXCompletionChunkKind kind )
 {
   return
     kind == CXCompletionChunk_Optional     ||
@@ -89,7 +89,6 @@ bool IsChunkKindForExtraMenuInfo( CXCompletionChunkKind kind )
     kind == CXCompletionChunk_RightAngle   ||
     kind == CXCompletionChunk_LeftAngle    ||
     kind == CXCompletionChunk_Comma        ||
-    kind == CXCompletionChunk_ResultType   ||
     kind == CXCompletionChunk_Colon        ||
     kind == CXCompletionChunk_SemiColon    ||
     kind == CXCompletionChunk_Equal        ||
@@ -161,19 +160,40 @@ CompletionData CompletionResultToCompletionData(
   CXCompletionString completion_string = completion_result.CompletionString;
 
   uint num_chunks = clang_getNumCompletionChunks( completion_string );
+  bool saw_left_paren = false;
+  bool saw_function_params = false;
+
   for ( uint j = 0; j < num_chunks; ++j )
   {
     CXCompletionChunkKind kind = clang_getCompletionChunkKind(
         completion_string, j );
 
-    if ( IsChunkKindForExtraMenuInfo( kind ) )
+    if ( IsMainCompletionTextInfo( kind ) )
     {
-      data.extra_menu_info_.append( ChunkToString( completion_string, j ) );
+      if ( kind == CXCompletionChunk_LeftParen )
+      {
+        saw_left_paren = true;
+      }
 
-      // by default, there's no space after the return type
-      if ( kind == CXCompletionChunk_ResultType )
-        data.extra_menu_info_.append( " " );
+      else if ( saw_left_paren &&
+                !saw_function_params &&
+                kind != CXCompletionChunk_RightParen )
+      {
+        saw_function_params = true;
+        data.everything_except_return_type_.append( " " );
+      }
+
+      else if ( saw_function_params && kind == CXCompletionChunk_RightParen )
+      {
+        data.everything_except_return_type_.append( " " );
+      }
+
+      data.everything_except_return_type_.append(
+          ChunkToString( completion_string, j ) );
     }
+
+    if ( kind == CXCompletionChunk_ResultType )
+      data.return_type_ = ChunkToString( completion_string, j );
 
     if ( kind == CXCompletionChunk_TypedText )
       data.original_string_ = ChunkToString( completion_string, j );
@@ -214,9 +234,14 @@ std::vector< CompletionData > ToCompletionDataVector(
 
     else
     {
+      // If we have already seen this completion, then this is an overload of a
+      // function we have seen. We add the signature of the overload to the
+      // detailed information.
       completions[ index ].detailed_info_
         .append( "\n" )
-        .append( data.extra_menu_info_ );
+        .append( data.return_type_ )
+        .append( " " )
+        .append( data.everything_except_return_type_ );
     }
   }
 

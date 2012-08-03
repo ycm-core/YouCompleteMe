@@ -342,8 +342,8 @@ def CompletionDataToDict( completion_data ):
   # see :h complete-items for a description of the dictionary fields
   return {
     'word' : completion_data.TextToInsertInBuffer(),
-    'abbr' : completion_data.original_string_,
-    'menu' : completion_data.extra_menu_info_,
+    'abbr' : completion_data.MainCompletionText(),
+    'menu' : completion_data.ExtraMenuInfo(),
     'kind' : completion_data.kind_,
     'dup'  : 1,
     # TODO: add detailed_info_ as 'info'

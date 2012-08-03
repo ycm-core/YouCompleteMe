@@ -38,10 +38,11 @@ BOOST_PYTHON_MODULE(indexer)
 
   class_< CompletionData >( "CompletionData" )
     .def( "TextToInsertInBuffer", &CompletionData::TextToInsertInBuffer )
-    .def_readonly( "detailed_info_", &CompletionData::detailed_info_ )
-    .def_readonly( "extra_menu_info_", &CompletionData::extra_menu_info_ )
-    .def_readonly( "kind_", &CompletionData::kind_ )
-    .def_readonly( "original_string_", &CompletionData::original_string_ );
+    .def( "MainCompletionText", &CompletionData::MainCompletionText )
+    .def( "ExtraMenuInfo", &CompletionData::ExtraMenuInfo )
+    .def( "DetailedInfoForPreviewWindow ",
+          &CompletionData::DetailedInfoForPreviewWindow )
+    .def_readonly( "kind_", &CompletionData::kind_ );
 
 	class_< std::vector< CompletionData >,
 	        boost::shared_ptr< std::vector< CompletionData > > >(
