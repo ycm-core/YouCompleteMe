@@ -17,13 +17,18 @@
 
 if exists( "g:loaded_youcompleteme" )
   finish
-" TODO: check for python too
 elseif v:version < 703 || !has( 'patch584' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
         \ echohl None
   finish
+elseif !has( 'python' )
+  echohl WarningMsg |
+        \ echomsg "YouCompleteMe unavailable: requires python 2.x" |
+        \ echohl None
+  finish
 endif
+
 let g:loaded_youcompleteme = 1
 
 let g:ycm_min_num_of_chars_for_completion  =
