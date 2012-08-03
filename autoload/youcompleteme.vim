@@ -38,6 +38,10 @@ function! youcompleteme#Enable()
     return
   endif
 
+  if g:ycm_allow_changing_updatetime
+    set ut=2000
+  endif
+
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnCursorMovedInsertMode()

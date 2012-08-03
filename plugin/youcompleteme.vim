@@ -27,13 +27,17 @@ endif
 let g:loaded_youcompleteme = 1
 
 let g:ycm_min_num_of_chars_for_completion  =
-      \ get(g:, 'ycm_min_num_of_chars_for_completion', 2)
+      \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
 
 let g:ycm_filetypes_to_ignore =
-      \ get(g:, 'ycm_filetypes_to_ignore', { 'notes' : 1 } )
+      \ get( g:, 'ycm_filetypes_to_ignore', { 'notes' : 1 } )
 
 let g:ycm_clang_completion_enabled =
-      \ get(g:, 'ycm_clang_completion_enabled', 1)
+      \ get( g:, 'ycm_clang_completion_enabled', 1 )
+
+let g:ycm_allow_changing_updatetime =
+      \ get( g:, 'ycm_clang_completion_enabled', 1 )
+
 
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
