@@ -26,13 +26,11 @@ elseif v:version < 703 || !has( 'patch584' )
 endif
 let g:loaded_youcompleteme = 1
 
-if !exists( 'g:ycm_min_num_of_chars_for_completion' )
-  let g:ycm_min_num_of_chars_for_completion = 2
-endif
+let g:ycm_min_num_of_chars_for_completion  =
+      \ get(g:, 'ycm_min_num_of_chars_for_completion', 2)
 
-if !exists( 'g:ycm_filetypes_to_ignore' )
-  let g:ycm_filetypes_to_ignore = { 'notes' : 1 }
-endif
+let g:ycm_filetypes_to_ignore =
+      \ get(g:, 'ycm_filetypes_to_ignore', { 'notes' : 1 } )
 
 let g:ycm_clang_completion_enabled =
       \ get(g:, 'ycm_clang_completion_enabled', 1)
