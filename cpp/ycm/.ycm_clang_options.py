@@ -43,8 +43,7 @@ def MakeAbsoluteIfRelativePath( path ):
 
 
 def FlagsForFile( filename ):
-  results = {}
-  results[ 'flags' ] = [ MakeAbsoluteIfRelativePath( x ) for x in flags ]
-  results[ 'do_cache' ] = True
-  return results
-
+  return {
+    'flags': [ MakeAbsoluteIfRelativePath( x ) for x in flags ],
+    'do_cache': True
+  }
