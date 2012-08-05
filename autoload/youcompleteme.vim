@@ -205,12 +205,6 @@ endfunction
 
 
 function! s:CompletionsForQuery( query, use_filetype_completer )
-  " TODO: needed?
-  if !a:use_filetype_completer &&
-        \ strlen( a:query ) < g:ycm_min_num_of_chars_for_completion
-    return []
-  endif
-
   if a:use_filetype_completer
     py completer = ycm_state.GetFiletypeCompleterForCurrentFile()
   else
@@ -250,16 +244,12 @@ function! youcompleteme#Complete( findstart, base )
           \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
           \ s:completion_start_column . ')' )
 
-    " TODO: use ShouldUseIdentifierCompleter() which checks query length
-    if ( !s:should_use_filetype_completion )
-      let l:current_column = col('.') - 1
-      let l:query_length = current_column - s:completion_start_column
-
-      if ( query_length < g:ycm_min_num_of_chars_for_completion )
-        " for vim, -2 means not found but don't trigger an error message
-        " see :h complete-functions
-        return -2
-      endif
+    if !s:should_use_filetype_completion &&
+          \ !pyeval( 'ycm_state.ShouldUseIdentifierCompleter(' .
+          \ s:completion_start_column . ')' )
+      " for vim, -2 means not found but don't trigger an error message
+      " see :h complete-functions
+      return -2
     endif
     return s:completion_start_column
   else

@@ -64,3 +64,7 @@ def EscapeForVim( text ):
 
 def CurrentFiletype():
   return vim.eval( "&filetype" )
+
+
+def GetVariableValue( variable ):
+  return vim.eval( variable )
