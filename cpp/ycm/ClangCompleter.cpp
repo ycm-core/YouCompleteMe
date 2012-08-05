@@ -222,7 +222,7 @@ std::vector< CompletionData > ClangCompleter::CandidatesForLocationInFile(
                           column,
                           &cxunsaved_files[ 0 ],
                           cxunsaved_files.size(),
-                          clang_defaultCodeCompleteOptions());
+                          clang_defaultCodeCompleteOptions() );
 
   std::vector< CompletionData > candidates = ToCompletionDataVector( results );
   clang_disposeCodeCompleteResults( results );
