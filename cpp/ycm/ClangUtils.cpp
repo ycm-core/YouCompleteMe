@@ -59,6 +59,8 @@ std::string CXStringToString( CXString text )
 
 std::string ChunkToString( CXCompletionString completion_string, int chunk_num )
 {
+  if ( !completion_string )
+    return std::string();
   return CXStringToString(
       clang_getCompletionChunkText( completion_string, chunk_num ) );
 }
@@ -69,6 +71,8 @@ std::string ChunkToString( CXCompletionString completion_string, int chunk_num )
 // deprecated etc.
 bool CompletionStringAvailable( CXCompletionString completion_string )
 {
+  if ( !completion_string )
+    return false;
   return clang_getCompletionAvailability( completion_string ) ==
     CXAvailability_Available;
 }
@@ -159,6 +163,9 @@ CompletionData CompletionResultToCompletionData(
   CompletionData data;
   CXCompletionString completion_string = completion_result.CompletionString;
 
+  if ( !completion_string )
+    return data;
+
   uint num_chunks = clang_getNumCompletionChunks( completion_string );
   bool saw_left_paren = false;
   bool saw_function_params = false;
@@ -211,8 +218,10 @@ std::vector< CompletionData > ToCompletionDataVector(
     CXCodeCompleteResults *results )
 {
   std::vector< CompletionData > completions;
-  completions.reserve( results->NumResults );
+  if ( !results || !results->Results )
+    return completions;
 
+  completions.reserve( results->NumResults );
   unordered_map< std::string, uint > seen_data;
 
   for ( uint i = 0; i < results->NumResults; ++i )
