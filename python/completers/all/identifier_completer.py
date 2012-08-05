@@ -28,10 +28,6 @@ MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
 
 
-def GetCompleter():
-  return IdentifierCompleter()
-
-
 class IdentifierCompleter( Completer ):
   def __init__( self ):
     self.completer = ycm_core.IdentifierCompleter()

@@ -22,7 +22,8 @@ import imp
 import vim
 import utils
 import os
-from completers.all import IdentifierCompleter
+import sys
+from completers.all.identifier_completer import IdentifierCompleter
 
 
 class YouCompleteMe( object ):
@@ -42,11 +43,15 @@ class YouCompleteMe( object ):
     except KeyError:
       pass
 
-    module_path = _PathToFiletypeCompleterPlugin( filetype )
+    module_path = _PathToFiletypeCompleterPluginLoader( filetype )
 
     completer = None
     if os.path.exists( module_path ):
+
+      sys.path.append( os.path.dirname( module_path ) )
       module = imp.load_source( filetype, module_path )
+      del sys.path[ -1 ]
+
       completer = module.GetCompleter()
       for supported_filetype in completer.SupportedFiletypes():
         self.filetype_completers[ supported_filetype ] = completer
@@ -113,8 +118,8 @@ def _PathToCompletersFolder():
   return os.path.join( dir_of_current_script, 'completers' )
 
 
-def _PathToFiletypeCompleterPlugin( filetype ):
-  return os.path.join( _PathToCompletersFolder(), filetype + '.py' )
+def _PathToFiletypeCompleterPluginLoader( filetype ):
+  return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
 
 
 

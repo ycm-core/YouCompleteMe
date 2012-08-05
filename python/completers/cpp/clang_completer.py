@@ -21,16 +21,9 @@ from completer import Completer
 import vim
 import vimsupport
 import ycm_core
-import random
-import imp
-import os
-import string
+from flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
-CLANG_OPTIONS_FILENAME = '.ycm_clang_options.py'
-
-def GetCompleter():
-  return ClangCompleter()
 
 
 class ClangCompleter( Completer ):
@@ -144,90 +137,6 @@ class ClangCompleter( Completer ):
     return ShouldUseClang( start_column )
 
 
-class Flags( object ):
-  def __init__( self ):
-    # It's caches all the way down...
-    self.flags_for_file = {}
-    self.flags_module_for_file = {}
-    self.flags_module_for_flags_module_file = {}
-
-
-  def FlagsForFile( self, filename ):
-    try:
-      return self.flags_for_file[ filename ]
-    except KeyError:
-      flags_module = self.FlagsModuleForFile( filename )
-      if not flags_module:
-        return ycm_core.StringVec()
-
-      results = flags_module.FlagsForFile( filename )
-      sanitized_flags = SanitizeFlags( results[ 'flags' ] )
-
-      if results[ 'do_cache' ]:
-        self.flags_for_file[ filename ] = sanitized_flags
-      return sanitized_flags
-
-
-  def FlagsModuleForFile( self, filename ):
-    try:
-      return self.flags_module_for_file[ filename ]
-    except KeyError:
-      flags_module_file = FlagsModuleSourceFileForFile( filename )
-      if not flags_module_file:
-        return None
-
-      try:
-        flags_module = self.flags_module_for_flags_module_file[
-          flags_module_file ]
-      except KeyError:
-        flags_module = imp.load_source( RandomName(), flags_module_file )
-        self.flags_module_for_flags_module_file[
-          flags_module_file ] = flags_module
-
-      self.flags_module_for_file[ filename ] = flags_module
-      return flags_module
-
-
-def FlagsModuleSourceFileForFile( filename ):
-  parent_folder = os.path.dirname( filename )
-  old_parent_folder = ''
-
-  while True:
-    current_file = os.path.join( parent_folder, CLANG_OPTIONS_FILENAME )
-    if os.path.exists( current_file ):
-      return current_file
-
-    old_parent_folder = parent_folder
-    parent_folder = os.path.dirname( parent_folder )
-
-    if parent_folder == old_parent_folder:
-      return None
-
-
-
-def RandomName():
-  return ''.join( random.choice( string.ascii_lowercase ) for x in range( 15 ) )
-
-
-def SanitizeFlags( flags ):
-  sanitized_flags = []
-  saw_arch = False
-  for i, flag in enumerate( flags ):
-    if flag == '-arch':
-      saw_arch = True
-      continue
-    elif flag.startswith( '-arch' ):
-      continue
-    elif saw_arch:
-      saw_arch = False
-      continue
-
-    sanitized_flags.append( flag )
-
-  vector = ycm_core.StringVec()
-  for flag in sanitized_flags:
-    vector.append( flag )
-  return vector
 
 
 def CompletionDataToDict( completion_data ):
