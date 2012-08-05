@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-project( indexer_tests )
+project( ycm_core_tests )
 cmake_minimum_required( VERSION 2.8 )
 
 # The gtest library triggers these silly warnings, so we turn them off
@@ -27,7 +27,7 @@ endif()
 add_subdirectory( gmock )
 
 include_directories(
-  ${indexer_SOURCE_DIR}
+  ${ycm_core_SOURCE_DIR}
   )
 
 include_directories(
@@ -50,7 +50,7 @@ add_executable( ${PROJECT_NAME}
               )
 
 target_link_libraries( ${PROJECT_NAME}
-                       indexer
+                       ycm_core
                        gmock_main
                      )
 

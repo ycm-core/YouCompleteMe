@@ -26,7 +26,7 @@
 #include <boost/utility.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-BOOST_PYTHON_MODULE(indexer)
+BOOST_PYTHON_MODULE(ycm_core)
 {
   using namespace boost::python;
   using namespace YouCompleteMe;

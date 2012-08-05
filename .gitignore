@@ -36,7 +36,7 @@ nosetests.xml
 .mr.developer.cfg
 
 # custom
-indexer_tests
+ycm_core_tests
 
 # When we use the bcp tool to copy over the parts of boost we care about, it
 # also copies some cruft files we don't need; this ignores them

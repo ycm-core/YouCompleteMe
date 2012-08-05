@@ -20,7 +20,7 @@
 from completer import Completer
 import vim
 import vimsupport
-import indexer
+import ycm_core
 import utils
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
@@ -33,7 +33,7 @@ def GetCompleter():
 
 class IdentifierCompleter( Completer ):
   def __init__( self ):
-    self.completer = indexer.IdentifierCompleter()
+    self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
 
 
@@ -61,7 +61,7 @@ class IdentifierCompleter( Completer ):
     if not filetype or not filepath or not identifier:
       return
 
-    vector = indexer.StringVec()
+    vector = ycm_core.StringVec()
     vector.append( identifier )
     self.completer.AddCandidatesToDatabase( vector,
                                             filetype,

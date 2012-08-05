@@ -17,7 +17,7 @@
 
 cmake_minimum_required( VERSION 2.8 )
 
-project( indexer )
+project( ycm_core )
 
 find_package( PythonLibs REQUIRED )
 

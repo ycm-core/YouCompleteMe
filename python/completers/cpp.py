@@ -20,7 +20,7 @@
 from completer import Completer
 import vim
 import vimsupport
-import indexer
+import ycm_core
 import random
 import imp
 import os
@@ -35,7 +35,7 @@ def GetCompleter():
 
 class ClangCompleter( Completer ):
   def __init__( self ):
-    self.completer = indexer.ClangCompleter()
+    self.completer = ycm_core.ClangCompleter()
     self.completer.EnableThreading()
     self.contents_holder = []
     self.filename_holder = []
@@ -49,7 +49,7 @@ class ClangCompleter( Completer ):
 
 
   def GetUnsavedFilesVector( self ):
-    files = indexer.UnsavedFileVec()
+    files = ycm_core.UnsavedFileVec()
     self.contents_holder = []
     self.filename_holder = []
     for buffer in vimsupport.GetUnsavedBuffers():
@@ -62,7 +62,7 @@ class ClangCompleter( Completer ):
       self.contents_holder.append( contents )
       self.filename_holder.append( name )
 
-      unsaved_file = indexer.UnsavedFile()
+      unsaved_file = ycm_core.UnsavedFile()
       unsaved_file.contents_ = self.contents_holder[ -1 ]
       unsaved_file.length_ = len( self.contents_holder[ -1 ] )
       unsaved_file.filename_ = self.filename_holder[ -1 ]
@@ -88,7 +88,7 @@ class ClangCompleter( Completer ):
     # are still around when we call CandidatesForQueryAndLocationInFile.  We do
     # this to avoid an extra copy of the entire file contents.
 
-    files = indexer.UnsavedFileVec()
+    files = ycm_core.UnsavedFileVec()
     if not query:
       files = self.GetUnsavedFilesVector()
 
@@ -158,7 +158,7 @@ class Flags( object ):
     except KeyError:
       flags_module = self.FlagsModuleForFile( filename )
       if not flags_module:
-        return indexer.StringVec()
+        return ycm_core.StringVec()
 
       results = flags_module.FlagsForFile( filename )
       sanitized_flags = SanitizeFlags( results[ 'flags' ] )
@@ -224,7 +224,7 @@ def SanitizeFlags( flags ):
 
     sanitized_flags.append( flag )
 
-  vector = indexer.StringVec()
+  vector = ycm_core.StringVec()
   for flag in sanitized_flags:
     vector.append( flag )
   return vector
