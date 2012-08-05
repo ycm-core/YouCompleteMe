@@ -22,7 +22,7 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:searched_and_no_results_found = 0
-let s:should_use_clang = 0
+let s:should_use_filetype_completion = 0
 let s:completion_start_column = 0
 let s:omnifunc_mode = 0
 
@@ -79,10 +79,9 @@ function! youcompleteme#Enable()
   py import vim
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
-  py identcomp = ycm.IdentifierCompleter()
+  py ycm_state = ycm.YouCompleteMe()
 
-  if g:ycm_clang_completion_enabled
-    py clangcomp = ycm.ClangCompleter()
+  if g:ycm_filetype_completion_enabled
     " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
     " candidate that vim selects by default
     inoremap <unique> <C-Space> <C-X><C-O><C-P>
@@ -97,27 +96,18 @@ endfunction
 
 function! s:OnBufferVisit()
   call s:SetCompleteFunc()
-  call s:ParseFile()
+  call s:OnFileReadyToParse()
 endfunction
 
 
 function! s:OnCursorHold()
-  call s:ParseFile()
+  call s:OnFileReadyToParse()
   call s:UpdateDiagnosticNotifications()
 endfunction
 
 
-function! s:ClangEnabledForCurrentFile()
-  return g:ycm_clang_completion_enabled && pyeval('ycm.ClangAvailableForFile()')
-endfunction
-
-
-function! s:ParseFile()
-  py identcomp.OnFileReadyToParse()
-
-  if s:ClangEnabledForCurrentFile()
-    py clangcomp.OnFileReadyToParse()
-  endif
+function! s:OnFileReadyToParse()
+  py ycm_state.OnFileReadyToParse()
 endfunction
 
 
@@ -125,9 +115,9 @@ function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 
-  if s:ClangEnabledForCurrentFile()
-    let &omnifunc = 'youcompleteme#ClangOmniComplete'
-    let &l:omnifunc = 'youcompleteme#ClangOmniComplete'
+  if pyeval( 'ycm_state.FiletypeCompletionEnabledForCurrentFile()' )
+    let &omnifunc = 'youcompleteme#OmniComplete'
+    let &l:omnifunc = 'youcompleteme#OmniComplete'
   endif
 endfunction
 
@@ -146,13 +136,14 @@ endfunction
 function! s:OnInsertLeave()
   let s:omnifunc_mode = 0
   call s:UpdateDiagnosticNotifications()
-  py identcomp.AddIdentifierUnderCursor()
+  py ycm_state.OnInsertLeave()
 endfunction
 
 
 function! s:UpdateDiagnosticNotifications()
-  if get( g:, 'loaded_syntastic_plugin', 0 ) && s:ClangEnabledForCurrentFile()
-        \ && pyeval( 'clangcomp.DiagnosticsForCurrentFileReady()' )
+  if get( g:, 'loaded_syntastic_plugin', 0 ) &&
+        \ pyeval( 'ycm_state.FiletypeCompletionEnabledForCurrentFile()' ) &&
+        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
 endfunction
@@ -162,7 +153,7 @@ function! s:IdentifierFinishedOperations()
   if !pyeval( 'ycm.CurrentIdentifierFinished()' )
     return
   endif
-  py identcomp.AddPreviousIdentifier()
+  py ycm_state.OnCurrentIdentifierFinished()
   let s:omnifunc_mode = 0
 endfunction
 
@@ -213,40 +204,31 @@ function! s:InvokeCompletion()
 endfunction
 
 
-function! s:IdentifierCompletion(query)
-  if strlen( a:query ) < g:ycm_min_num_of_chars_for_completion
+function! s:CompletionsForQuery( query, use_filetype_completer )
+  " TODO: needed?
+  if !a:use_filetype_completer &&
+        \ strlen( a:query ) < g:ycm_min_num_of_chars_for_completion
     return []
   endif
 
-  py identcomp.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
+  if a:use_filetype_completer
+    py completer = ycm_state.GetFiletypeCompleterForCurrentFile()
+  else
+    py completer = ycm_state.GetIdentifierCompleter()
+  endif
 
-  let l:results_ready = 0
-  while !l:results_ready
-    let l:results_ready = pyeval( 'identcomp.AsyncCandidateRequestReady()' )
-    if complete_check()
-      return { 'words' : [], 'refresh' : 'always'}
-    endif
-  endwhile
-
-  let l:results = pyeval( 'identcomp.CandidatesFromStoredRequest()' )
-  let s:searched_and_no_results_found = len( l:results ) == 0
-  return { 'words' : l:results, 'refresh' : 'always' }
-endfunction
-
-
-function! s:ClangCompletion( query )
   " TODO: don't trigger on a dot inside a string constant
-  py clangcomp.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
+  py completer.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
 
   let l:results_ready = 0
   while !l:results_ready
-    let l:results_ready = pyeval( 'clangcomp.AsyncCandidateRequestReady()' )
+    let l:results_ready = pyeval( 'completer.AsyncCandidateRequestReady()' )
     if complete_check()
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile
 
-  let l:results = pyeval( 'clangcomp.CandidatesFromStoredRequest()' )
+  let l:results = pyeval( 'completer.CandidatesFromStoredRequest()' )
   let s:searched_and_no_results_found = len( l:results ) == 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction
@@ -254,23 +236,24 @@ endfunction
 
 " This is our main entry point. This is what vim calls to get completions.
 function! youcompleteme#Complete( findstart, base )
-  " Aften the user types one character afte the call to the omnifunc, the
+  " After the user types one character after the call to the omnifunc, the
   " completefunc will be called because of our mapping that calls the
   " completefunc on every keystroke. Therefore we need to delegate the call we
   " 'stole' back to the omnifunc
   if s:omnifunc_mode
-    return youcompleteme#ClangOmniComplete( a:findstart, a:base )
+    return youcompleteme#OmniComplete( a:findstart, a:base )
   endif
 
   if a:findstart
     let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
-    let s:should_use_clang =
-          \ pyeval( 'ycm.ShouldUseClang(' . s:completion_start_column . ')' )
+    let s:should_use_filetype_completion =
+          \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
+          \ s:completion_start_column . ')' )
 
-    if ( !s:should_use_clang )
+    " TODO: use ShouldUseIdentifierCompleter() which checks query length
+    if ( !s:should_use_filetype_completion )
       let l:current_column = col('.') - 1
       let l:query_length = current_column - s:completion_start_column
-
 
       if ( query_length < g:ycm_min_num_of_chars_for_completion )
         " for vim, -2 means not found but don't trigger an error message
@@ -280,22 +263,18 @@ function! youcompleteme#Complete( findstart, base )
     endif
     return s:completion_start_column
   else
-    if ( s:should_use_clang )
-      return s:ClangCompletion( a:base )
-    else
-      return s:IdentifierCompletion( a:base )
-    endif
+    return s:CompletionsForQuery( a:base, s:should_use_filetype_completion )
   endif
 endfunction
 
 
-function! youcompleteme#ClangOmniComplete( findstart, base )
+function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
     let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
     return s:completion_start_column
   else
-    return s:ClangCompletion( a:base )
+    return s:CompletionsForQuery( a:base, 1 )
   endif
 endfunction
 
@@ -304,10 +283,7 @@ endfunction
 " required (currently that's on buffer save) OR when the SyntasticCheck command
 " is invoked
 function! youcompleteme#CurrentFileDiagnostics()
-  if s:ClangEnabledForCurrentFile()
-    return pyeval( 'clangcomp.GetDiagnosticsForCurrentFile()' )
-  endif
-  return []
+  return pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
 endfunction
 
 " This is basic vim plugin boilerplate
