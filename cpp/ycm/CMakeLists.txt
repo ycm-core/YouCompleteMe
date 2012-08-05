@@ -50,18 +50,25 @@ endif()
 
 #############################################################################
 
-# One can set an external libclang.so for use with this flag; something like
-# cmake -DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so [...]
+# One can use the system libclang.[so|dylib] like so:
+#   cmake -DUSE_SYSTEM_LIBCLANG=1 [...]
+# One can also explicitely pick the external libclang.[so|dylib] for use like so:
+#   cmake -DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so [...]
 # The final .so we build will then first look in the same dir in which it is
 # located for libclang.so. This is provided by the rpath = $ORIGIN feature.
 # Using an external libclang is an UNDOCUMENTED and UNSUPPORTED feature! I don't
 # want to hear a single bug report about it! :) (I mean it)
 
-if ( EXTERNAL_LIBCLANG_PATH )
+if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   # Setting this to true makes sure that libraries we build will have our rpath
   # set even without having to do "make install"
   set( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
   set( CMAKE_INSTALL_RPATH "\$ORIGIN" )
+
+  if ( USE_SYSTEM_LIBCLANG )
+    find_library( EXTERNAL_LIBCLANG_PATH clang )
+  endif()
+
   set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
   message(
     "Using external libclang: ${EXTERNAL_LIBCLANG_PATH}" )

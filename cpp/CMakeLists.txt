@@ -24,7 +24,12 @@ project( YouCompleteMe )
 # On Mac, boost needs to be compiled universal as well, if used instead of the
 # included BoostParts lib. For brew, that's
 # "brew install boost --universal"
-set( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+# If the user chose to use the system libclang.dylib on a mac, then we don't
+# specify universal binary building since the system libclang on macs is not
+# universal (and thus linking would fail with universal).
+if ( NOT USE_SYSTEM_LIBCLANG )
+  set( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+endif()
 
 if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( COMPILER_IS_CLANG true )
