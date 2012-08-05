@@ -70,6 +70,10 @@ class Flags( object ):
 
 
 def _FlagsModuleSourceFileForFile( filename ):
+  """For a given filename, finds its nearest CLANG_OPTIONS_FILENAME file that
+  will compute the flags necessary to compile the file. Returns None if no
+  CLANG_OPTIONS_FILENAME file could be found."""
+
   parent_folder = os.path.dirname( filename )
   old_parent_folder = ''
 
@@ -85,12 +89,15 @@ def _FlagsModuleSourceFileForFile( filename ):
       return None
 
 
-
 def _RandomName():
+  """Generates a random module name."""
   return ''.join( random.choice( string.ascii_lowercase ) for x in range( 15 ) )
 
 
 def _SanitizeFlags( flags ):
+  """Drops unsafe flags. Currently these are only -arch flags; they tend to
+  crash libclang."""
+
   sanitized_flags = []
   saw_arch = False
   for i, flag in enumerate( flags ):
