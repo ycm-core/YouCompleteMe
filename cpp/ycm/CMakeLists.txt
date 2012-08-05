@@ -60,13 +60,13 @@ endif()
 # want to hear a single bug report about it! :) (I mean it)
 
 if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
-  # Setting this to true makes sure that libraries we build will have our rpath
-  # set even without having to do "make install"
-  set( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
-  set( CMAKE_INSTALL_RPATH "\$ORIGIN" )
-
   if ( USE_SYSTEM_LIBCLANG )
     find_library( EXTERNAL_LIBCLANG_PATH clang )
+  else()
+    # Setting this to true makes sure that libraries we build will have our rpath
+    # set even without having to do "make install"
+    set( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
+    set( CMAKE_INSTALL_RPATH "\$ORIGIN" )
   endif()
 
   set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
