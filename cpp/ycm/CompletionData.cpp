@@ -18,6 +18,8 @@
 #include "CompletionData.h"
 #include "standard.h"
 
+#include <boost/algorithm/string/erase.hpp>
+
 namespace
 {
 
@@ -124,6 +126,18 @@ std::string OptionalChunkToString( CXCompletionString completion_string,
   return final_string;
 }
 
+
+// NOTE: this function accepts the text param by value on purpose; it internally
+// needs a copy before processing the text so the copy might as well be made on
+// the parameter BUT if this code is compiled in C++11 mode a move constructor
+// can be called on the passed-in value. This is not possible if we accept the
+// param by const ref.
+std::string RemoveTwoUnderscores( std::string text )
+{
+  boost::erase_all( text, "__" );
+  return text;
+}
+
 } // unnamed namespace
 
 
@@ -200,6 +214,15 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
   }
 
   kind_ = CursorKindToVimKind( completion_result.CursorKind );
+
+  // We remove any two consecutive underscores from the function definition
+  // since identifiers with them are ugly, compiler-reserved names. Functions
+  // from the standard library use parameter names like "__pos" and we want to
+  // show them as just "pos". This will never interfere with client code since
+  // ANY C++ identifier with two consecutive underscores in it is
+  // compiler-reserved.
+  everything_except_return_type_ =
+    RemoveTwoUnderscores( everything_except_return_type_ );
 
   detailed_info_.append( return_type_ )
                 .append( " " )
