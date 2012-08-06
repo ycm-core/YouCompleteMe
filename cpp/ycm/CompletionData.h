@@ -19,9 +19,12 @@
 #define COMPLETIONDATA_H_2JCTF1NU
 
 #include <string>
+#include <clang-c/Index.h>
 
 namespace YouCompleteMe
 {
+
+std::string CXStringToString( CXString text );
 
 // This class holds pieces of information about a single completion coming from
 // clang. These pieces are shown in Vim's UI in different ways.
@@ -37,6 +40,9 @@ namespace YouCompleteMe
 // about a completion at the top of the buffer.
 struct CompletionData
 {
+  CompletionData() {}
+  CompletionData( const CXCompletionResult &completion_result );
+
   // What should actually be inserted into the buffer. For a function like
   // "int foo(int x)", this is just "foo". Same for a data member like "foo_":
   // we insert just "foo_".

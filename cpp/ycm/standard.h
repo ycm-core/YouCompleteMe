@@ -21,10 +21,4 @@
 // it as BOOST_FOREACH.
 #define foreach BOOST_FOREACH
 
-
-namespace YouCompleteMe
-{
-
 typedef unsigned int uint;
-
-} // namespace YouCompleteMe

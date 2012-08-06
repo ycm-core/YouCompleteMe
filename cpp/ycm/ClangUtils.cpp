@@ -45,27 +45,6 @@ std::vector< CXUnsavedFile > ToCXUnsavedFiles(
 }
 
 
-std::string CXStringToString( CXString text )
-{
-  std::string final_string;
-  if ( !text.data )
-    return final_string;
-
-  final_string = std::string( clang_getCString( text ) );
-  clang_disposeString( text );
-  return final_string;
-}
-
-
-std::string ChunkToString( CXCompletionString completion_string, int chunk_num )
-{
-  if ( !completion_string )
-    return std::string();
-  return CXStringToString(
-      clang_getCompletionChunkText( completion_string, chunk_num ) );
-}
-
-
 // Returns true when the provided completion string is available to the user;
 // unavailable completion strings refer to entities that are private/protected,
 // deprecated etc.
@@ -77,63 +56,6 @@ bool CompletionStringAvailable( CXCompletionString completion_string )
     CXAvailability_Available;
 }
 
-
-bool IsMainCompletionTextInfo( CXCompletionChunkKind kind )
-{
-  return
-    kind == CXCompletionChunk_Optional     ||
-    kind == CXCompletionChunk_TypedText    ||
-    kind == CXCompletionChunk_Placeholder  ||
-    kind == CXCompletionChunk_LeftParen    ||
-    kind == CXCompletionChunk_RightParen   ||
-    kind == CXCompletionChunk_RightBracket ||
-    kind == CXCompletionChunk_LeftBracket  ||
-    kind == CXCompletionChunk_LeftBrace    ||
-    kind == CXCompletionChunk_RightBrace   ||
-    kind == CXCompletionChunk_RightAngle   ||
-    kind == CXCompletionChunk_LeftAngle    ||
-    kind == CXCompletionChunk_Comma        ||
-    kind == CXCompletionChunk_Colon        ||
-    kind == CXCompletionChunk_SemiColon    ||
-    kind == CXCompletionChunk_Equal        ||
-    kind == CXCompletionChunk_Informative  ||
-    kind == CXCompletionChunk_HorizontalSpace;
-
-}
-
-
-char CursorKindToVimKind( CXCursorKind kind )
-{
-  // TODO: actually it appears that Vim will show returned kinds even when they
-  // do not match the "approved" list, so let's use that
-  switch ( kind )
-  {
-    case CXCursor_UnexposedDecl:
-    case CXCursor_StructDecl:
-    case CXCursor_UnionDecl:
-    case CXCursor_ClassDecl:
-    case CXCursor_EnumDecl:
-    case CXCursor_TypedefDecl:
-      return 't';
-
-    case CXCursor_FieldDecl:
-      return 'm';
-
-    case CXCursor_FunctionDecl:
-    case CXCursor_CXXMethod:
-    case CXCursor_FunctionTemplate:
-      return 'f';
-
-    case CXCursor_VarDecl:
-      return 'v';
-
-    case CXCursor_MacroDefinition:
-      return 'd';
-
-    default:
-      return 'u'; // for 'unknown', 'unsupported'... whatever you like
-  }
-}
 
 
 char DiagnosticSeverityToType( CXDiagnosticSeverity severity )
@@ -157,61 +79,6 @@ char DiagnosticSeverityToType( CXDiagnosticSeverity severity )
 }
 
 
-// TODO: this should be a constructor
-CompletionData CompletionResultToCompletionData(
-    const CXCompletionResult &completion_result )
-{
-  CompletionData data;
-  CXCompletionString completion_string = completion_result.CompletionString;
-
-  if ( !completion_string )
-    return data;
-
-  uint num_chunks = clang_getNumCompletionChunks( completion_string );
-  bool saw_left_paren = false;
-  bool saw_function_params = false;
-
-  for ( uint j = 0; j < num_chunks; ++j )
-  {
-    CXCompletionChunkKind kind = clang_getCompletionChunkKind(
-        completion_string, j );
-
-    if ( IsMainCompletionTextInfo( kind ) )
-    {
-      if ( kind == CXCompletionChunk_LeftParen )
-      {
-        saw_left_paren = true;
-      }
-
-      else if ( saw_left_paren &&
-                !saw_function_params &&
-                kind != CXCompletionChunk_RightParen )
-      {
-        saw_function_params = true;
-        data.everything_except_return_type_.append( " " );
-      }
-
-      else if ( saw_function_params && kind == CXCompletionChunk_RightParen )
-      {
-        data.everything_except_return_type_.append( " " );
-      }
-
-      data.everything_except_return_type_.append(
-          ChunkToString( completion_string, j ) );
-    }
-
-    if ( kind == CXCompletionChunk_ResultType )
-      data.return_type_ = ChunkToString( completion_string, j );
-
-    if ( kind == CXCompletionChunk_TypedText )
-      data.original_string_ = ChunkToString( completion_string, j );
-  }
-
-  data.kind_ = CursorKindToVimKind( completion_result.CursorKind );
-  return data;
-}
-
-
 std::vector< CompletionData > ToCompletionDataVector(
     CXCodeCompleteResults *results )
 {
@@ -229,14 +96,14 @@ std::vector< CompletionData > ToCompletionDataVector(
     if ( !CompletionStringAvailable( completion_result.CompletionString ) )
       continue;
 
-    CompletionData data = CompletionResultToCompletionData( completion_result );
+    CompletionData data( completion_result );
     uint index = GetValueElseInsert( seen_data,
                                      data.original_string_,
                                      completions.size() );
 
     if ( index == completions.size() )
     {
-      completions.push_back( data );
+      completions.push_back( boost::move( data ) );
     }
 
     else
