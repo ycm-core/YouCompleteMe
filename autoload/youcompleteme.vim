@@ -38,10 +38,6 @@ function! youcompleteme#Enable()
     return
   endif
 
-  if g:ycm_allow_changing_updatetime
-    set ut=2000
-  endif
-
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
@@ -67,6 +63,14 @@ function! youcompleteme#Enable()
   " don't need to insert the prefix; they just type the differentiating chars.
   " Also, having this option set breaks the plugin.
   set completeopt-=longest
+
+  if g:ycm_add_preview_to_completeopt
+    set completeopt+=preview
+  endif
+
+  if g:ycm_allow_changing_updatetime
+    set ut=2000
+  endif
 
   " With this command, when the completion window is visible, the tab key will
   " select the next candidate in the window. In vim, this also changes the
