@@ -200,6 +200,11 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
   }
 
   kind_ = CursorKindToVimKind( completion_result.CursorKind );
+
+  detailed_info_.append( return_type_ )
+                .append( " " )
+                .append( everything_except_return_type_ )
+                .append( "\n" );
 }
 
 } // namespace YouCompleteMe
