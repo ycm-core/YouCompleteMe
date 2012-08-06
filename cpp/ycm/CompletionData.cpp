@@ -16,7 +16,6 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "CompletionData.h"
-#include "standard.h"
 
 #include <boost/algorithm/string/erase.hpp>
 
@@ -81,7 +80,8 @@ bool IsMainCompletionTextInfo( CXCompletionChunkKind kind )
 }
 
 
-std::string ChunkToString( CXCompletionString completion_string, int chunk_num )
+std::string ChunkToString( CXCompletionString completion_string,
+                           uint chunk_num )
 {
   if ( !completion_string )
     return std::string();
@@ -91,7 +91,7 @@ std::string ChunkToString( CXCompletionString completion_string, int chunk_num )
 
 
 std::string OptionalChunkToString( CXCompletionString completion_string,
-                                   int chunk_num )
+                                   uint chunk_num )
 {
   std::string final_string;
   if ( !completion_string )
@@ -169,48 +169,10 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
 
   for ( uint j = 0; j < num_chunks; ++j )
   {
-    CXCompletionChunkKind kind = clang_getCompletionChunkKind(
-        completion_string, j );
-
-    if ( IsMainCompletionTextInfo( kind ) )
-    {
-      if ( kind == CXCompletionChunk_LeftParen )
-      {
-        saw_left_paren = true;
-      }
-
-      else if ( saw_left_paren &&
-                !saw_function_params &&
-                kind != CXCompletionChunk_RightParen &&
-                kind != CXCompletionChunk_Informative )
-      {
-        saw_function_params = true;
-        everything_except_return_type_.append( " " );
-      }
-
-      else if ( saw_function_params && kind == CXCompletionChunk_RightParen )
-      {
-        everything_except_return_type_.append( " " );
-      }
-
-      if ( kind == CXCompletionChunk_Optional )
-      {
-        everything_except_return_type_.append(
-            OptionalChunkToString( completion_string, j ) );
-      }
-
-      else
-      {
-        everything_except_return_type_.append(
-            ChunkToString( completion_string, j ) );
-      }
-    }
-
-    if ( kind == CXCompletionChunk_ResultType )
-      return_type_ = ChunkToString( completion_string, j );
-
-    if ( kind == CXCompletionChunk_TypedText )
-      original_string_ = ChunkToString( completion_string, j );
+    ExtractDataFromChunk( completion_string,
+                          j,
+                          saw_left_paren,
+                          saw_function_params );
   }
 
   kind_ = CursorKindToVimKind( completion_result.CursorKind );
@@ -228,6 +190,56 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
                 .append( " " )
                 .append( everything_except_return_type_ )
                 .append( "\n" );
+}
+
+
+void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
+                                           uint chunk_num,
+                                           bool &saw_left_paren,
+                                           bool &saw_function_params )
+{
+  CXCompletionChunkKind kind = clang_getCompletionChunkKind(
+      completion_string, chunk_num );
+
+  if ( IsMainCompletionTextInfo( kind ) )
+  {
+    if ( kind == CXCompletionChunk_LeftParen )
+    {
+      saw_left_paren = true;
+    }
+
+    else if ( saw_left_paren &&
+              !saw_function_params &&
+              kind != CXCompletionChunk_RightParen &&
+              kind != CXCompletionChunk_Informative )
+    {
+      saw_function_params = true;
+      everything_except_return_type_.append( " " );
+    }
+
+    else if ( saw_function_params && kind == CXCompletionChunk_RightParen )
+    {
+      everything_except_return_type_.append( " " );
+    }
+
+    if ( kind == CXCompletionChunk_Optional )
+    {
+      everything_except_return_type_.append(
+          OptionalChunkToString( completion_string, chunk_num ) );
+    }
+
+    else
+    {
+      everything_except_return_type_.append(
+          ChunkToString( completion_string, chunk_num ) );
+    }
+  }
+
+  if ( kind == CXCompletionChunk_ResultType )
+    return_type_ = ChunkToString( completion_string, chunk_num );
+
+  if ( kind == CXCompletionChunk_TypedText )
+    original_string_ = ChunkToString( completion_string, chunk_num );
 }
 
 } // namespace YouCompleteMe
