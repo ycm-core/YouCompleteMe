@@ -146,14 +146,15 @@ def CompletionDataToDict( completion_data ):
     'abbr' : completion_data.MainCompletionText(),
     'menu' : completion_data.ExtraMenuInfo(),
     'kind' : completion_data.kind_,
+    'info' : completion_data.DetailedInfoForPreviewWindow(),
     'dup'  : 1,
-    # TODO: add detailed_info_ as 'info'
   }
 
 
 def DiagnosticToDict( diagnostic ):
   # see :h getqflist for a description of the dictionary fields
   return {
+    # TODO: wrap the bufnr generation into a function
     'bufnr' : int( vim.eval( "bufnr('{0}', 1)".format(
       diagnostic.filename_ ) ) ),
     'lnum'  : diagnostic.line_number_,

@@ -40,7 +40,7 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( "TextToInsertInBuffer", &CompletionData::TextToInsertInBuffer )
     .def( "MainCompletionText", &CompletionData::MainCompletionText )
     .def( "ExtraMenuInfo", &CompletionData::ExtraMenuInfo )
-    .def( "DetailedInfoForPreviewWindow ",
+    .def( "DetailedInfoForPreviewWindow",
           &CompletionData::DetailedInfoForPreviewWindow )
     .def_readonly( "kind_", &CompletionData::kind_ );
 

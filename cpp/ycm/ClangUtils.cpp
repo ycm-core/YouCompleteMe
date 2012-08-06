@@ -96,6 +96,7 @@ bool IsMainCompletionTextInfo( CXCompletionChunkKind kind )
     kind == CXCompletionChunk_Colon        ||
     kind == CXCompletionChunk_SemiColon    ||
     kind == CXCompletionChunk_Equal        ||
+    kind == CXCompletionChunk_Informative  ||
     kind == CXCompletionChunk_HorizontalSpace;
 
 }
@@ -204,9 +205,6 @@ CompletionData CompletionResultToCompletionData(
 
     if ( kind == CXCompletionChunk_TypedText )
       data.original_string_ = ChunkToString( completion_string, j );
-
-    if ( kind == CXCompletionChunk_Informative )
-      data.detailed_info_ = ChunkToString( completion_string, j );
   }
 
   data.kind_ = CursorKindToVimKind( completion_result.CursorKind );
@@ -243,11 +241,16 @@ std::vector< CompletionData > ToCompletionDataVector(
 
     else
     {
+      std::string possible_newline =
+        completions[ index ].detailed_info_.empty() ?
+        "" :
+        "\n";
+
       // If we have already seen this completion, then this is an overload of a
       // function we have seen. We add the signature of the overload to the
       // detailed information.
       completions[ index ].detailed_info_
-        .append( "\n" )
+        .append( possible_newline )
         .append( data.return_type_ )
         .append( " " )
         .append( data.everything_except_return_type_ );
