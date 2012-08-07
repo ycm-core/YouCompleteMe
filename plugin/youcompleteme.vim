@@ -47,6 +47,8 @@ let g:ycm_allow_changing_updatetime =
 let g:ycm_add_preview_to_completeopt =
       \ get( g:, 'ycm_add_preview_to_completeopt', 1 )
 
+let g:ycm_autoclose_preview_window_after_completion =
+      \ get( g:, 'ycm_autoclose_preview_window_after_completion', 0 )
 
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo

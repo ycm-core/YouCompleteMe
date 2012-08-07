@@ -128,6 +128,7 @@ endfunction
 
 function! s:OnCursorMovedInsertMode()
   call s:IdentifierFinishedOperations()
+  call s:ClosePreviewWindowIfNeeded()
   call s:InvokeCompletion()
 endfunction
 
@@ -141,6 +142,20 @@ function! s:OnInsertLeave()
   let s:omnifunc_mode = 0
   call s:UpdateDiagnosticNotifications()
   py ycm_state.OnInsertLeave()
+  call s:ClosePreviewWindowIfNeeded()
+endfunction
+
+
+function! s:ClosePreviewWindowIfNeeded()
+  if !g:ycm_autoclose_preview_window_after_completion
+    return
+  endif
+
+  if !s:searched_and_no_results_found
+    " This command does the actual closing of the preview window. If no preview
+    " window is shown, nothing happens.
+    pclose
+  endif
 endfunction
 
 
@@ -222,6 +237,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer )
   while !l:results_ready
     let l:results_ready = pyeval( 'completer.AsyncCandidateRequestReady()' )
     if complete_check()
+      let s:searched_and_no_results_found = 0
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile
