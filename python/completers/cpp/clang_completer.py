@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completer import Completer
+from completers.completer import Completer
 import vim
 import vimsupport
 import ycm_core

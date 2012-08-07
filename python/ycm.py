@@ -100,17 +100,17 @@ class YouCompleteMe( object ):
     return False
 
 
+  def GetDiagnosticsForCurrentFile( self ):
+    if self.FiletypeCompletionEnabledForCurrentFile():
+      return self.GetFiletypeCompleterForCurrentFile().GetDiagnosticsForCurrentFile()
+    return []
+
+
   def OnCurrentIdentifierFinished( self ):
     self.identcomp.OnCurrentIdentifierFinished()
 
     if self.FiletypeCompletionEnabledForCurrentFile():
       self.GetFiletypeCompleterForCurrentFile().OnCurrentIdentifierFinished()
-
-
-  def GetDiagnosticsForCurrentFile( self ):
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      return self.GetFiletypeCompleterForCurrentFile().GetDiagnosticsForCurrentFile()
-    return []
 
 
 def _PathToCompletersFolder():
@@ -120,7 +120,6 @@ def _PathToCompletersFolder():
 
 def _PathToFiletypeCompleterPluginLoader( filetype ):
   return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
-
 
 
 def CompletionStartColumn():
