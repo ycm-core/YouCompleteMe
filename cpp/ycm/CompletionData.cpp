@@ -18,6 +18,7 @@
 #include "CompletionData.h"
 
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/move/move.hpp>
 
 namespace
 {
@@ -132,7 +133,7 @@ std::string OptionalChunkToString( CXCompletionString completion_string,
 // the parameter BUT if this code is compiled in C++11 mode a move constructor
 // can be called on the passed-in value. This is not possible if we accept the
 // param by const ref.
-std::string RemoveTwoUnderscores( std::string text )
+std::string RemoveTwoConsecutiveUnderscores( std::string text )
 {
   boost::erase_all( text, "__" );
   return text;
@@ -184,7 +185,8 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
   // ANY C++ identifier with two consecutive underscores in it is
   // compiler-reserved.
   everything_except_return_type_ =
-    RemoveTwoUnderscores( everything_except_return_type_ );
+    RemoveTwoConsecutiveUnderscores(
+        boost::move( everything_except_return_type_ ) );
 
   detailed_info_.append( return_type_ )
                 .append( " " )
