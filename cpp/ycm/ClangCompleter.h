@@ -147,11 +147,12 @@ private:
   boost::condition_variable clang_data_ready_condition_variable_;
 
   std::vector< CompletionData > latest_clang_results_;
-  boost::shared_mutex latest_clang_results_shared_mutex_;
+  boost::shared_mutex latest_clang_results_mutex_;
 
   // Unfortunately clang is not thread-safe so we need to be careful when we
   // access it. Only one thread at a time is allowed to access any single
-  // translation unit.
+  // translation unit. Currently we only use one thread to access clang and that
+  // is the thread represented by clang_thread_.
   boost::thread clang_thread_;
 
   boost::thread_group sorting_threads_;

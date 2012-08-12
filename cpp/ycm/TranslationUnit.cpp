@@ -153,7 +153,6 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 
 
 // Should only be called while holding the clang_access_mutex_
-// TODO: assert that
 void TranslationUnit::UpdateLatestDiagnostics()
 {
   unique_lock< mutex > lock( diagnostics_mutex_ );

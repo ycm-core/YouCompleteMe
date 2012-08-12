@@ -31,25 +31,28 @@
 // TODO: remove all explicit uses of the boost:: prefix by adding explicit using
 // directives for the stuff we need
 namespace fs = boost::filesystem;
-using boost::packaged_task;
 using boost::bind;
-using boost::unique_future;
-using boost::make_shared;
-using boost::shared_ptr;
-using boost::bind;
-using boost::thread;
+using boost::cref;
+using boost::function;
 using boost::lock_guard;
-using boost::unique_lock;
-using boost::shared_lock;
+using boost::make_shared;
 using boost::mutex;
+using boost::packaged_task;
+using boost::ref;
+using boost::shared_lock;
 using boost::shared_mutex;
-using boost::unordered_map;
+using boost::shared_ptr;
+using boost::thread;
+using boost::thread_interrupted;
 using boost::try_to_lock_t;
+using boost::unique_future;
+using boost::unique_lock;
+using boost::unordered_map;
 
 namespace YouCompleteMe
 {
 
-typedef boost::function< std::vector< CompletionData >() >
+typedef function< std::vector< CompletionData >() >
   FunctionReturnsCompletionDataVector;
 
 extern const unsigned int MAX_ASYNC_THREADS;
@@ -108,7 +111,8 @@ ClangCompleter::~ClangCompleter()
 
 
 // We need this mostly so that we can not use it in tests. Apparently the
-// GoogleTest framework goes apeshit on us if we enable threads by default.
+// GoogleTest framework goes apeshit on us (on some platforms, in some
+// occasions) if we enable threads by default.
 void ClangCompleter::EnableThreading()
 {
   threading_enabled_ = true;
@@ -172,26 +176,18 @@ void ClangCompleter::UpdateTranslationUnitAsync(
     std::vector< UnsavedFile > unsaved_files,
     std::vector< std::string > flags )
 {
-  boost::function< void() > functor =
+  function< void() > functor =
     bind( &ClangCompleter::UpdateTranslationUnit,
           boost::ref( *this ),
           boost::move( filename ),
           boost::move( unsaved_files ),
           boost::move( flags ) );
 
-  // boost::lock_guard< boost::mutex > lock( file_parse_task_mutex_ );
-
-  // // Only ever set the task when it's NULL; if it's not, that means that the
-  // // clang thread is working on it
-  // if ( file_parse_task_ )
-  //   return;
-
   shared_ptr< ClangPackagedTask > clang_packaged_task =
     make_shared< ClangPackagedTask >();
+
   clang_packaged_task->parsing_task_ = packaged_task< void >( functor );
   clang_task_.Set( clang_packaged_task );
-  // file_parse_task_ = make_shared< packaged_task< void > >( functor );
-  // file_parse_task_condition_variable_.notify_all();
 }
 
 
@@ -233,7 +229,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
       return Future< AsyncCompletions >();
 
     {
-      boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
+      lock_guard< mutex > lock( clang_data_ready_mutex_ );
       clang_data_ready_ = false;
     }
 
@@ -275,14 +271,10 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 
     shared_ptr< ClangPackagedTask > clang_packaged_task =
         make_shared< ClangPackagedTask >();
+
     clang_packaged_task->completions_task_ = packaged_task< AsyncCompletions >(
         bind( ReturnValueAsShared< std::vector< CompletionData > >,
               candidates_for_location_functor ) );
-
-    // shared_ptr< packaged_task< AsyncCompletions > > task =
-    //   make_shared< packaged_task< AsyncCompletions > >(
-    //     bind( ReturnValueAsShared< std::vector< CompletionData > >,
-    //           candidates_for_location_functor ) );
 
     clang_task_.Set( clang_packaged_task );
   }
@@ -296,7 +288,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 // calls this function so there is no need for a mutex, but if that changes in
 // the future a mutex will be needed to make sure that two threads don't try to
 // create the same translation unit.
-boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
+shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags )
@@ -370,39 +362,13 @@ void ClangCompleter::InitThreads()
 
   for ( int i = 0; i < threads_to_create; ++i )
   {
-    sorting_threads_.create_thread(
-        bind( &ClangCompleter::SortingThreadMain,
-              boost::ref( *this ) ) );
+    sorting_threads_.create_thread( bind( &ClangCompleter::SortingThreadMain,
+                                          boost::ref( *this ) ) );
   }
 
-  clang_thread_ = boost::thread(
-      &ClangCompleter::ClangThreadMain,
-      boost::ref( *this ) );
+  clang_thread_ = thread( &ClangCompleter::ClangThreadMain,
+                          boost::ref( *this ) );
 }
-
-
-// void ClangCompleter::FileParseThreadMain()
-// {
-//   while ( true )
-//   {
-//     {
-//       boost::unique_lock< boost::mutex > lock( file_parse_task_mutex_ );
-//
-//       while ( !file_parse_task_ )
-//       {
-//         file_parse_task_condition_variable_.wait( lock );
-//       }
-//     }
-//
-//     {
-//       unique_lock< mutex > lock( clang_access_mutex_ );
-//       ( *file_parse_task_ )();
-//     }
-//
-//     lock_guard< mutex > lock( file_parse_task_mutex_ );
-//     file_parse_task_ = VoidTask();
-//   }
-// }
 
 
 void ClangCompleter::ClangThreadMain()
@@ -411,16 +377,7 @@ void ClangCompleter::ClangThreadMain()
   {
     try
     {
-      // TODO: this should be a separate func, much like the file_parse_task_ part
       shared_ptr< ClangPackagedTask > task = clang_task_.Get();
-
-      // If the file parse thread is accessing clang by parsing a file, then drop
-      // the current completion request
-      // {
-      //   lock_guard< mutex > lock( file_parse_task_mutex_ );
-      //   if ( file_parse_task_ )
-      //     continue;
-      // }
 
       bool has_completions_task = task->completions_task_.valid();
       if ( has_completions_task )
@@ -435,20 +392,19 @@ void ClangCompleter::ClangThreadMain()
         task->completions_task_.get_future();
 
       {
-        boost::unique_lock< boost::shared_mutex > writer_lock(
-            latest_clang_results_shared_mutex_ );
+        unique_lock< shared_mutex > writer_lock( latest_clang_results_mutex_ );
         latest_clang_results_ = *future.get();
       }
 
       {
-        boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
+        lock_guard< mutex > lock( clang_data_ready_mutex_ );
         clang_data_ready_ = true;
       }
 
       clang_data_ready_condition_variable_.notify_all();
     }
 
-    catch ( boost::thread_interrupted& )
+    catch ( thread_interrupted& )
     {
       shared_lock< shared_mutex > lock( time_to_die_mutex_ );
       if ( time_to_die_ )
@@ -478,14 +434,13 @@ void ClangCompleter::SortingThreadMain()
         sorting_task_.Get();
 
       {
-        boost::shared_lock< boost::shared_mutex > reader_lock(
-            latest_clang_results_shared_mutex_ );
+        shared_lock< shared_mutex > reader_lock( latest_clang_results_mutex_ );
 
         ( *task )();
       }
     }
 
-    catch ( boost::thread_interrupted& )
+    catch ( thread_interrupted& )
     {
       shared_lock< shared_mutex > lock( time_to_die_mutex_ );
       if ( time_to_die_ )
