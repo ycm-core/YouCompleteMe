@@ -208,6 +208,11 @@ function! s:InvokeCompletion()
   " So we solve this with the searched_and_no_results_found script-scope
   " variable that prevents this infinite loop from starting.
   if pumvisible() || s:searched_and_no_results_found
+    " TODO: try a different approach where after we return some completions to
+    " Vim we don't trigger the feedkeys call UNLESS the user has moved in
+    " insert/normal mode; this could help with that insidious and impossible to
+    " reproduce completion-blocking-typing bug; we could implement this by
+    " storing the last line & column
     let s:searched_and_no_results_found = 0
     return
   endif
@@ -237,7 +242,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer )
   while !l:results_ready
     let l:results_ready = pyeval( 'completer.AsyncCandidateRequestReady()' )
     if complete_check()
-      let s:searched_and_no_results_found = 0
+      let s:searched_and_no_results_found = 1
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile

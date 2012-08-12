@@ -48,7 +48,14 @@ void QueryThreadMain( LatestQueryTask &latest_query_task )
 {
   while ( true )
   {
-    ( *latest_query_task.Get() )();
+    try
+    {
+      ( *latest_query_task.Get() )();
+    }
+    catch ( boost::thread_interrupted& )
+    {
+      return;
+    }
   }
 
 }
@@ -58,7 +65,14 @@ void BufferIdentifiersThreadMain(
 {
   while ( true )
   {
-    ( *buffer_identifiers_task_stack.Pop() )();
+    try
+    {
+      ( *buffer_identifiers_task_stack.Pop() )();
+    }
+    catch ( boost::thread_interrupted& )
+    {
+      return;
+    }
   }
 }
 
@@ -90,6 +104,16 @@ IdentifierCompleter::IdentifierCompleter(
     threading_enabled_( false )
 {
   AddCandidatesToDatabase( candidates, filetype, filepath );
+}
+
+
+IdentifierCompleter::~IdentifierCompleter()
+{
+  query_threads_.interrupt_all();
+  query_threads_.join_all();
+
+  buffer_identifiers_thread_.interrupt();
+  buffer_identifiers_thread_.join();
 }
 
 

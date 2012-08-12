@@ -58,6 +58,12 @@ public:
   }
 
 
+  void Wait()
+  {
+    future_.wait();
+  }
+
+
   T GetResults()
   {
     try

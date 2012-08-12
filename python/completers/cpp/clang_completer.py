@@ -66,7 +66,7 @@ class ClangCompleter( Completer ):
 
 
   def CandidatesForQueryAsync( self, query ):
-    if self.completer.UpdatingTranslationUnit():
+    if self.completer.UpdatingTranslationUnit( vim.current.buffer.name ):
       vimsupport.PostVimMessage( 'Still parsing file, no completions yet.' )
       self.future = None
       return
@@ -121,7 +121,7 @@ class ClangCompleter( Completer ):
 
   def DiagnosticsForCurrentFileReady( self ):
     return ( self.possibly_new_diagnostics and not
-             self.completer.UpdatingTranslationUnit() )
+             self.completer.UpdatingTranslationUnit( vim.current.buffer.name ) )
 
 
   def GetDiagnosticsForCurrentFile( self ):
@@ -135,8 +135,6 @@ class ClangCompleter( Completer ):
 
   def ShouldUseNow( self, start_column ):
     return ShouldUseClang( start_column )
-
-
 
 
 def CompletionDataToDict( completion_data ):

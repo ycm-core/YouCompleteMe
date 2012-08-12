@@ -98,7 +98,6 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( "EnableThreading", &ClangCompleter::EnableThreading )
     .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
-    .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
     .def( "UpdateTranslationUnitAsync",
           &ClangCompleter::UpdateTranslationUnitAsync )
     .def( "CandidatesForQueryAndLocationInFileAsync",

@@ -17,6 +17,7 @@
 
 #include "ClangCompleter.h"
 #include "Candidate.h"
+#include "TranslationUnit.h"
 #include "CompletionData.h"
 #include "standard.h"
 #include "CandidateRepository.h"
@@ -39,7 +40,9 @@ using boost::bind;
 using boost::thread;
 using boost::lock_guard;
 using boost::unique_lock;
+using boost::shared_lock;
 using boost::mutex;
+using boost::shared_mutex;
 using boost::unordered_map;
 using boost::try_to_lock_t;
 
@@ -77,6 +80,7 @@ struct CompletionDataAndResult
 ClangCompleter::ClangCompleter()
   : candidate_repository_( CandidateRepository::Instance() ),
     threading_enabled_( false ),
+    time_to_die_( false ),
     clang_data_ready_( false )
 {
   clang_index_ = clang_createIndex( 0, 0 );
@@ -85,13 +89,21 @@ ClangCompleter::ClangCompleter()
 
 ClangCompleter::~ClangCompleter()
 {
-  foreach ( const TranslationUnitForFilename::value_type &filename_unit,
-            filename_to_translation_unit_ )
+  // We need to clear this before calling clang_disposeIndex because the
+  // translation units need to be destroyed before the index is destroyed.
+  filename_to_translation_unit_.clear();
+  clang_disposeIndex( clang_index_ );
+
   {
-    clang_disposeTranslationUnit( filename_unit.second );
+    unique_lock< shared_mutex > lock( time_to_die_mutex_ );
+    time_to_die_ = true;
   }
 
-  clang_disposeIndex( clang_index_ );
+  sorting_threads_.interrupt_all();
+  sorting_threads_.join_all();
+
+  clang_thread_.interrupt();
+  clang_thread_.join();
 }
 
 
@@ -107,37 +119,37 @@ void ClangCompleter::EnableThreading()
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
     const std::string &filename )
 {
-  std::vector< Diagnostic > diagnostics;
-  unique_lock< mutex > lock( clang_access_mutex_, try_to_lock_t() );
-  if ( !lock.owns_lock() )
-    return diagnostics;
-
-  CXTranslationUnit unit = FindWithDefault( filename_to_translation_unit_,
-                                            filename,
-                                            NULL );
-  if ( !unit )
-    return diagnostics;
-
-  uint num_diagnostics = clang_getNumDiagnostics( unit );
-  diagnostics.reserve( num_diagnostics );
-
-  for ( uint i = 0; i < num_diagnostics; ++i )
+  shared_ptr< TranslationUnit > unit;
   {
-    Diagnostic diagnostic = CXDiagnosticToDiagnostic(
-        clang_getDiagnostic( unit, i ) );
-
-    if ( diagnostic.kind_ != 'I' )
-      diagnostics.push_back( diagnostic );
+    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
+    unit = FindWithDefault(
+        filename_to_translation_unit_,
+        filename,
+        shared_ptr< TranslationUnit >() );
   }
 
-  return diagnostics;
+  if ( !unit )
+    return std::vector< Diagnostic >();
+
+  return unit->LatestDiagnostics();
 }
 
 
-bool ClangCompleter::UpdatingTranslationUnit()
+bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename )
 {
-  unique_lock< mutex > lock( clang_access_mutex_, try_to_lock_t() );
-  return !lock.owns_lock();
+  shared_ptr< TranslationUnit > unit;
+  {
+    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
+    unit = FindWithDefault(
+        filename_to_translation_unit_,
+        filename,
+        shared_ptr< TranslationUnit >() );
+  }
+
+  if ( !unit )
+    return false;
+
+  return unit->IsCurrentlyUpdating();
 }
 
 
@@ -146,26 +158,12 @@ void ClangCompleter::UpdateTranslationUnit(
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags )
 {
-  TranslationUnitForFilename::iterator it =
-    filename_to_translation_unit_.find( filename );
-
-  if ( it != filename_to_translation_unit_.end() )
-  {
-    std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
-        unsaved_files );
-
-    clang_reparseTranslationUnit(
-        it->second,
-        cxunsaved_files.size(),
-        &cxunsaved_files[ 0 ],
-        clang_defaultEditingTranslationUnitOptions() );
-  }
-
-  else
-  {
-    filename_to_translation_unit_[ filename ] =
-      CreateTranslationUnit( filename, unsaved_files, flags );
-  }
+  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
+                                                                  unsaved_files,
+                                                                  flags );
+  X_ASSERT( unit );
+  // TODO: only do this if the unit was not just created
+  unit->Reparse( unsaved_files );
 }
 
 
@@ -181,52 +179,37 @@ void ClangCompleter::UpdateTranslationUnitAsync(
           boost::move( unsaved_files ),
           boost::move( flags ) );
 
-  boost::lock_guard< boost::mutex > lock( file_parse_task_mutex_ );
+  // boost::lock_guard< boost::mutex > lock( file_parse_task_mutex_ );
 
-  // Only ever set the task when it's NULL; if it's not, that means that the
-  // clang thread is working on it
-  if ( file_parse_task_ )
-    return;
+  // // Only ever set the task when it's NULL; if it's not, that means that the
+  // // clang thread is working on it
+  // if ( file_parse_task_ )
+  //   return;
 
-  file_parse_task_ = make_shared< packaged_task< void > >( functor );
-  file_parse_task_condition_variable_.notify_all();
+  shared_ptr< ClangPackagedTask > clang_packaged_task =
+    make_shared< ClangPackagedTask >();
+  clang_packaged_task->parsing_task_ = packaged_task< void >( functor );
+  clang_task_.Set( clang_packaged_task );
+  // file_parse_task_ = make_shared< packaged_task< void > >( functor );
+  // file_parse_task_condition_variable_.notify_all();
 }
 
 
-std::vector< CompletionData > ClangCompleter::CandidatesForLocationInFile(
+std::vector< CompletionData >
+ClangCompleter::CandidatesForLocationInFile(
     const std::string &filename,
     int line,
     int column,
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags )
 {
-  std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
-      unsaved_files );
-
-  // codeCompleteAt reparses the TU if the underlying source file has changed on
-  // disk since the last time the TU was updated and there are no unsaved files.
-  // If there are unsaved files, then codeCompleteAt will parse the in-memory
-  // file contents we are giving it. In short, it is NEVER a good idea to call
-  // clang_reparseTranslationUnit right before a call to clang_codeCompleteAt.
-  // This only makes clang reparse the whole file TWICE, which has a huge impact
-  // on latency. At the time of writing, it seems that most users of libclang
-  // in the open-source world don't realize this (I checked). Some don't even
-  // call reparse*, but parse* which is even less efficient.
-
-  CXCodeCompleteResults *results =
-    clang_codeCompleteAt( GetTranslationUnitForFile( filename,
-                                                     unsaved_files,
-                                                     flags ),
-                          filename.c_str(),
-                          line,
-                          column,
-                          &cxunsaved_files[ 0 ],
-                          cxunsaved_files.size(),
-                          clang_defaultCodeCompleteOptions() );
-
-  std::vector< CompletionData > candidates = ToCompletionDataVector( results );
-  clang_disposeCodeCompleteResults( results );
-  return candidates;
+  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
+                                                                  unsaved_files,
+                                                                  flags );
+  X_ASSERT( unit );
+  return unit->CandidatesForLocation( line,
+                                      column,
+                                      unsaved_files );
 }
 
 
@@ -246,7 +229,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   if ( query.empty() )
   {
     // The clang thread is busy, return nothing
-    if ( UpdatingTranslationUnit() )
+    if ( UpdatingTranslationUnit( filename ) )
       return Future< AsyncCompletions >();
 
     {
@@ -281,7 +264,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   if ( query.empty() )
   {
     FunctionReturnsCompletionDataVector
-      candidates_for_location_in_file_functor =
+      candidates_for_location_functor =
       bind( &ClangCompleter::CandidatesForLocationInFile,
             boost::ref( *this ),
             boost::move( filename ),
@@ -290,70 +273,52 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
             boost::move( unsaved_files ),
             boost::move( flags ) );
 
-    shared_ptr< packaged_task< AsyncCompletions > > task =
-      make_shared< packaged_task< AsyncCompletions > >(
+    shared_ptr< ClangPackagedTask > clang_packaged_task =
+        make_shared< ClangPackagedTask >();
+    clang_packaged_task->completions_task_ = packaged_task< AsyncCompletions >(
         bind( ReturnValueAsShared< std::vector< CompletionData > >,
-              candidates_for_location_in_file_functor ) );
+              candidates_for_location_functor ) );
 
-    clang_completions_task_.Set( task );
+    // shared_ptr< packaged_task< AsyncCompletions > > task =
+    //   make_shared< packaged_task< AsyncCompletions > >(
+    //     bind( ReturnValueAsShared< std::vector< CompletionData > >,
+    //           candidates_for_location_functor ) );
+
+    clang_task_.Set( clang_packaged_task );
   }
 
   return Future< AsyncCompletions >( boost::move( future ) );
 }
 
 
-CXTranslationUnit ClangCompleter::CreateTranslationUnit(
+// WARNING: It should not be possible to call this function from two separate
+// threads at the same time. Currently only one thread (the clang thread) ever
+// calls this function so there is no need for a mutex, but if that changes in
+// the future a mutex will be needed to make sure that two threads don't try to
+// create the same translation unit.
+boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags )
 {
-  std::vector< const char* > pointer_flags;
-  pointer_flags.reserve( flags.size() );
-
-  foreach ( const std::string &flag, flags )
   {
-    pointer_flags.push_back( flag.c_str() );
+    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
+    TranslationUnitForFilename::iterator it =
+      filename_to_translation_unit_.find( filename );
+
+    if ( it != filename_to_translation_unit_.end() )
+      return it->second;
   }
 
-  std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
-      unsaved_files );
 
-  CXTranslationUnit unit = clang_parseTranslationUnit(
-      clang_index_,
-      filename.c_str(),
-      &pointer_flags[ 0 ],
-      pointer_flags.size(),
-      &cxunsaved_files[ 0 ],
-      cxunsaved_files.size(),
-      clang_defaultEditingTranslationUnitOptions() );
+  shared_ptr< TranslationUnit > unit = make_shared< TranslationUnit >(
+      filename, unsaved_files, flags, clang_index_ );
 
-  // Only with a reparse is the preable precompiled. I do not know why...
-  // TODO: report this bug on the clang tracker
-  clang_reparseTranslationUnit(
-      unit,
-      cxunsaved_files.size(),
-      &cxunsaved_files[ 0 ],
-      clang_defaultEditingTranslationUnitOptions() );
+  {
+    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
+    filename_to_translation_unit_[ filename ] = unit;
+  }
 
-  return unit;
-}
-
-
-CXTranslationUnit ClangCompleter::GetTranslationUnitForFile(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags )
-{
-  TranslationUnitForFilename::iterator it =
-    filename_to_translation_unit_.find( filename );
-
-  if ( it != filename_to_translation_unit_.end() )
-    return it->second;
-
-  CXTranslationUnit unit = CreateTranslationUnit( filename,
-                                                  unsaved_files,
-                                                  flags );
-  filename_to_translation_unit_[ filename ] = unit;
   return unit;
 }
 
@@ -410,75 +375,86 @@ void ClangCompleter::InitThreads()
               boost::ref( *this ) ) );
   }
 
-  clang_completions_thread_ = boost::thread(
-      &ClangCompleter::ClangCompletionsThreadMain,
-      boost::ref( *this ) );
-
-  file_parse_thread_ = boost::thread(
-      &ClangCompleter::FileParseThreadMain,
+  clang_thread_ = boost::thread(
+      &ClangCompleter::ClangThreadMain,
       boost::ref( *this ) );
 }
 
 
-void ClangCompleter::FileParseThreadMain()
+// void ClangCompleter::FileParseThreadMain()
+// {
+//   while ( true )
+//   {
+//     {
+//       boost::unique_lock< boost::mutex > lock( file_parse_task_mutex_ );
+//
+//       while ( !file_parse_task_ )
+//       {
+//         file_parse_task_condition_variable_.wait( lock );
+//       }
+//     }
+//
+//     {
+//       unique_lock< mutex > lock( clang_access_mutex_ );
+//       ( *file_parse_task_ )();
+//     }
+//
+//     lock_guard< mutex > lock( file_parse_task_mutex_ );
+//     file_parse_task_ = VoidTask();
+//   }
+// }
+
+
+void ClangCompleter::ClangThreadMain()
 {
   while ( true )
   {
+    try
     {
-      boost::unique_lock< boost::mutex > lock( file_parse_task_mutex_ );
+      // TODO: this should be a separate func, much like the file_parse_task_ part
+      shared_ptr< ClangPackagedTask > task = clang_task_.Get();
 
-      while ( !file_parse_task_ )
-      {
-        file_parse_task_condition_variable_.wait( lock );
-      }
-    }
+      // If the file parse thread is accessing clang by parsing a file, then drop
+      // the current completion request
+      // {
+      //   lock_guard< mutex > lock( file_parse_task_mutex_ );
+      //   if ( file_parse_task_ )
+      //     continue;
+      // }
 
-    {
-      unique_lock< mutex > lock( clang_access_mutex_ );
-      ( *file_parse_task_ )();
-    }
+      bool has_completions_task = task->completions_task_.valid();
+      if ( has_completions_task )
+        task->completions_task_();
+      else
+        task->parsing_task_();
 
-    lock_guard< mutex > lock( file_parse_task_mutex_ );
-    file_parse_task_ = VoidTask();
-  }
-}
-
-
-void ClangCompleter::ClangCompletionsThreadMain()
-{
-  while ( true )
-  {
-    // TODO: this should be a separate func, much like the file_parse_task_ part
-    shared_ptr< packaged_task< AsyncCompletions > > task =
-      clang_completions_task_.Get();
-
-    // If the file parse thread is accessing clang by parsing a file, then drop
-    // the current completion request
-    {
-      lock_guard< mutex > lock( file_parse_task_mutex_ );
-      if ( file_parse_task_ )
+      if ( !has_completions_task )
         continue;
+
+      unique_future< AsyncCompletions > future =
+        task->completions_task_.get_future();
+
+      {
+        boost::unique_lock< boost::shared_mutex > writer_lock(
+            latest_clang_results_shared_mutex_ );
+        latest_clang_results_ = *future.get();
+      }
+
+      {
+        boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
+        clang_data_ready_ = true;
+      }
+
+      clang_data_ready_condition_variable_.notify_all();
     }
 
+    catch ( boost::thread_interrupted& )
     {
-      unique_lock< mutex > lock( clang_access_mutex_ );
-      ( *task )();
+      shared_lock< shared_mutex > lock( time_to_die_mutex_ );
+      if ( time_to_die_ )
+        return;
+      // else do nothing and re-enter the loop
     }
-
-    unique_future< AsyncCompletions > future = task->get_future();
-
-    {
-      boost::unique_lock< boost::shared_mutex > writer_lock(
-          latest_clang_results_shared_mutex_ );
-      latest_clang_results_ = *future.get();
-    }
-
-    {
-      boost::lock_guard< boost::mutex > lock( clang_data_ready_mutex_ );
-      clang_data_ready_ = true;
-    }
-
-    clang_data_ready_condition_variable_.notify_all();
   }
 }
 
@@ -490,7 +466,7 @@ void ClangCompleter::SortingThreadMain()
     try
     {
       {
-        boost::unique_lock< boost::mutex > lock( clang_data_ready_mutex_ );
+        unique_lock< mutex > lock( clang_data_ready_mutex_ );
 
         while ( !clang_data_ready_ )
         {
@@ -511,7 +487,10 @@ void ClangCompleter::SortingThreadMain()
 
     catch ( boost::thread_interrupted& )
     {
-      // Do nothing and re-enter the loop
+      shared_lock< shared_mutex > lock( time_to_die_mutex_ );
+      if ( time_to_die_ )
+        return;
+      // else do nothing and re-enter the loop
     }
   }
 }

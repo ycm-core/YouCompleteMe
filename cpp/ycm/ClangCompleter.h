@@ -35,6 +35,7 @@ namespace YouCompleteMe
 {
 
 class CandidateRepository;
+class TranslationUnit;
 struct CompletionData;
 
 typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
@@ -43,8 +44,8 @@ typedef boost::unordered_map< std::string,
           boost::shared_ptr<
             std::vector< std::string > > > FlagsForFile;
 
-typedef boost::unordered_map< std::string, CXTranslationUnit >
-  TranslationUnitForFilename;
+typedef boost::unordered_map< std::string,
+          boost::shared_ptr< TranslationUnit > > TranslationUnitForFilename;
 
 
 // TODO: document that all filename parameters must be absolute paths
@@ -58,11 +59,13 @@ public:
 
   std::vector< Diagnostic > DiagnosticsForFile( const std::string &filename );
 
-  bool UpdatingTranslationUnit();
+  bool UpdatingTranslationUnit( const std::string &filename );
 
-  void UpdateTranslationUnit( const std::string &filename,
-                              const std::vector< UnsavedFile > &unsaved_files,
-                              const std::vector< std::string > &flags );
+  // Public because of unit tests (gtest is not very thread-friendly)
+  void UpdateTranslationUnit(
+      const std::string &filename,
+      const std::vector< UnsavedFile > &unsaved_files,
+      const std::vector< std::string > &flags );
 
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid internal copies if params are taken by value (move ctors FTW)
@@ -71,6 +74,7 @@ public:
       std::vector< UnsavedFile > unsaved_files,
       std::vector< std::string > flags );
 
+  // Public because of unit tests (gtest is not very thread-friendly)
   std::vector< CompletionData > CandidatesForLocationInFile(
       const std::string &filename,
       int line,
@@ -89,17 +93,23 @@ public:
       std::vector< std::string > flags );
 
 private:
+
+  // This is basically a union. Only one of the two tasks is set to something
+  // valid, the other task is invalid. Which one is valid depends on the caller.
+  struct ClangPackagedTask
+  {
+    boost::packaged_task< AsyncCompletions > completions_task_;
+    boost::packaged_task< void > parsing_task_;
+  };
+
   typedef ConcurrentLatestValue<
             boost::shared_ptr<
-              boost::packaged_task< AsyncCompletions > > > LatestTask;
+              boost::packaged_task< AsyncCompletions > > > LatestSortingTask;
 
-  // caller takes ownership of translation unit
-  CXTranslationUnit CreateTranslationUnit(
-      const std::string &filename,
-      const std::vector< UnsavedFile > &unsaved_files,
-      const std::vector< std::string > &flags );
+  typedef ConcurrentLatestValue<
+            boost::shared_ptr< ClangPackagedTask > > LatestClangTask;
 
-  CXTranslationUnit GetTranslationUnitForFile(
+  boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
       const std::string &filename,
       const std::vector< UnsavedFile > &unsaved_files,
       const std::vector< std::string > &flags );
@@ -110,9 +120,7 @@ private:
 
   void InitThreads();
 
-  void FileParseThreadMain();
-
-  void ClangCompletionsThreadMain();
+  void ClangThreadMain();
 
   void SortingThreadMain();
 
@@ -124,28 +132,14 @@ private:
   CXIndex clang_index_;
 
   TranslationUnitForFilename filename_to_translation_unit_;
+  boost::mutex filename_to_translation_unit_mutex_;
 
   CandidateRepository &candidate_repository_;
 
-  // TODO: move everything thread-related into a separated helper class
-  mutable LatestTask clang_completions_task_;
-
-  mutable LatestTask sorting_task_;
-
-  // TODO: wrap the entire clang API with an internal class that then uses this
-  // mutex... actually a TU class with an internal mutex
-  // Only the thread that is holding this mutex can access clang functions
-  boost::mutex clang_access_mutex_;
-
-  // Only the clang thread can make this NULL and only the GUI thread can make
-  // it non-NULL. The file_parse_task_mutex_ is used before checking the state
-  // of NULL. [ NULL for a shared_ptr naturally means default-constructed
-  // shared_ptr]
-  VoidTask file_parse_task_;
-  boost::mutex file_parse_task_mutex_;
-  boost::condition_variable file_parse_task_condition_variable_;
-
   bool threading_enabled_;
+
+  bool time_to_die_;
+  boost::shared_mutex time_to_die_mutex_;
 
   // TODO: use boost.atomic for clang_data_ready_
   bool clang_data_ready_;
@@ -158,11 +152,13 @@ private:
   // Unfortunately clang is not thread-safe so we need to be careful when we
   // access it. Only one thread at a time is allowed to access any single
   // translation unit.
-  boost::thread clang_completions_thread_;
-
-  boost::thread file_parse_thread_;
+  boost::thread clang_thread_;
 
   boost::thread_group sorting_threads_;
+
+  mutable LatestClangTask clang_task_;
+
+  mutable LatestSortingTask sorting_task_;
 };
 
 } // namespace YouCompleteMe

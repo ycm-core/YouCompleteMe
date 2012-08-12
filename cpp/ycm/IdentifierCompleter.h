@@ -70,6 +70,8 @@ public:
              const std::string &filetype,
              const std::string &filepath );
 
+  ~IdentifierCompleter();
+
   void EnableThreading();
 
   void AddCandidatesToDatabase(
@@ -125,15 +127,15 @@ private:
 
   FiletypeMap filetype_map_;
 
-  mutable LatestQueryTask latest_query_task_;
-
-  BufferIdentifiersTaskStack buffer_identifiers_task_stack_;
-
   bool threading_enabled_;
 
   boost::thread_group query_threads_;
 
   boost::thread buffer_identifiers_thread_;
+
+  mutable LatestQueryTask latest_query_task_;
+
+  BufferIdentifiersTaskStack buffer_identifiers_task_stack_;
 };
 
 } // namespace YouCompleteMe
