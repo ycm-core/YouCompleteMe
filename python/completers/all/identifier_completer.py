@@ -141,7 +141,6 @@ def PreviousIdentifier():
     while end_column > 0 and not utils.IsIdentifierChar(
       line[ end_column - 1 ] ):
       end_column -= 1
-    print end_column, line
 
   start_column = end_column
   while start_column > 0 and utils.IsIdentifierChar( line[ start_column - 1 ] ):
