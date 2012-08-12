@@ -67,6 +67,10 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
     .def( "GetResults", &Future< AsyncCompletions >::GetResults );
 
+  class_< Future< void > >( "FutureVoid" )
+    .def( "ResultsReady", &Future< void >::ResultsReady )
+    .def( "GetResults", &Future< void >::GetResults );
+
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
     .def( "AddCandidatesToDatabase",

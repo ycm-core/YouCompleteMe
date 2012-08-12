@@ -171,7 +171,7 @@ void ClangCompleter::UpdateTranslationUnit(
 }
 
 
-void ClangCompleter::UpdateTranslationUnitAsync(
+Future< void > ClangCompleter::UpdateTranslationUnitAsync(
     std::string filename,
     std::vector< UnsavedFile > unsaved_files,
     std::vector< std::string > flags )
@@ -186,8 +186,14 @@ void ClangCompleter::UpdateTranslationUnitAsync(
   shared_ptr< ClangPackagedTask > clang_packaged_task =
     make_shared< ClangPackagedTask >();
 
+  // TODO: vim hangs when we just open it and try to enter insert mode after the
+  // last '_' in ->parsing_task_ here
   clang_packaged_task->parsing_task_ = packaged_task< void >( functor );
+  unique_future< void > future =
+    clang_packaged_task->parsing_task_.get_future();
   clang_task_.Set( clang_packaged_task );
+
+  return Future< void >( boost::move( future ) );
 }
 
 

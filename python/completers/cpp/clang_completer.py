@@ -33,7 +33,7 @@ class ClangCompleter( Completer ):
     self.contents_holder = []
     self.filename_holder = []
     self.last_diagnostics = []
-    self.possibly_new_diagnostics = False
+    self.parse_future = None
     self.flags = Flags()
 
 
@@ -88,6 +88,7 @@ class ClangCompleter( Completer ):
     line, _ = vim.current.window.cursor
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
     current_buffer = vim.current.buffer
+    # TODO: rename future to completions_future
     self.future = self.completer.CandidatesForQueryAndLocationInFileAsync(
       query,
       current_buffer.name,
@@ -110,26 +111,25 @@ class ClangCompleter( Completer ):
     if vimsupport.NumLinesInBuffer( vim.current.buffer ) < 5:
       return
 
-    self.possibly_new_diagnostics = True
-
     filename = vim.current.buffer.name
-    self.completer.UpdateTranslationUnitAsync(
+    self.parse_future = self.completer.UpdateTranslationUnitAsync(
       filename,
       self.GetUnsavedFilesVector(),
       self.flags.FlagsForFile( filename ) )
 
 
   def DiagnosticsForCurrentFileReady( self ):
-    return ( self.possibly_new_diagnostics and not
-             self.completer.UpdatingTranslationUnit( vim.current.buffer.name ) )
+    if not self.parse_future:
+      return False
 
+    return self.parse_future.ResultsReady()
 
   def GetDiagnosticsForCurrentFile( self ):
     if self.DiagnosticsForCurrentFileReady():
       self.last_diagnostics = [ DiagnosticToDict( x ) for x in
                                 self.completer.DiagnosticsForFile(
                                   vim.current.buffer.name ) ]
-      self.possibly_new_diagnostics = False
+      self.parse_future = None
     return self.last_diagnostics
 
 

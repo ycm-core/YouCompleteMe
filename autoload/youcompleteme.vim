@@ -108,8 +108,10 @@ endfunction
 
 
 function! s:OnCursorHold()
-  call s:OnFileReadyToParse()
+  " Order is important here; we need to extract any done diagnostics before
+  " reparsing the file again
   call s:UpdateDiagnosticNotifications()
+  call s:OnFileReadyToParse()
 endfunction
 
 

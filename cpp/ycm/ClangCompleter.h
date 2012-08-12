@@ -69,7 +69,7 @@ public:
 
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid internal copies if params are taken by value (move ctors FTW)
-  void UpdateTranslationUnitAsync(
+  Future< void > UpdateTranslationUnitAsync(
       std::string filename,
       std::vector< UnsavedFile > unsaved_files,
       std::vector< std::string > flags );
