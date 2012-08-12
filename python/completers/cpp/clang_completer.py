@@ -137,6 +137,7 @@ class ClangCompleter( Completer ):
     return ShouldUseClang( start_column )
 
 
+# TODO: make these functions module-local
 def CompletionDataToDict( completion_data ):
   # see :h complete-items for a description of the dictionary fields
   return {

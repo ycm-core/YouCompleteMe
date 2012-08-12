@@ -21,7 +21,7 @@ set cpo&vim
 
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
-let s:searched_and_no_results_found = 0
+let s:searched_and_results_found = 0
 let s:should_use_filetype_completion = 0
 let s:completion_start_column = 0
 let s:omnifunc_mode = 0
@@ -167,7 +167,7 @@ function! s:ClosePreviewWindowIfNeeded()
     return
   endif
 
-  if !s:searched_and_no_results_found
+  if s:searched_and_results_found
     " This command does the actual closing of the preview window. If no preview
     " window is shown, nothing happens.
     pclose
@@ -249,13 +249,13 @@ function! s:CompletionsForQuery( query, use_filetype_completer )
   while !l:results_ready
     let l:results_ready = pyeval( 'completer.AsyncCandidateRequestReady()' )
     if complete_check()
-      let s:searched_and_no_results_found = 1
+      let s:searched_and_results_found = 0
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile
 
   let l:results = pyeval( 'completer.CandidatesFromStoredRequest()' )
-  let s:searched_and_no_results_found = len( l:results ) == 0
+  let s:searched_and_results_found = len( l:results ) != 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction
 
