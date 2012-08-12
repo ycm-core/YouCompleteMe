@@ -16,8 +16,6 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IdentifierUtils.h"
-// #include "Utils.h"
-// #include "TestUtils.h"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
