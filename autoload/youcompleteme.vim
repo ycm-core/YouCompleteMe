@@ -25,6 +25,8 @@ let s:searched_and_no_results_found = 0
 let s:should_use_filetype_completion = 0
 let s:completion_start_column = 0
 let s:omnifunc_mode = 0
+let s:old_cursor_position = []
+let s:cursor_moved = 0
 
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
@@ -50,6 +52,7 @@ function! youcompleteme#Enable()
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
+    autocmd InsertEnter * call s:OnInsertEnter()
   augroup END
 
   " We need menuone in completeopt, otherwise when there's only one candidate
@@ -127,6 +130,7 @@ endfunction
 
 
 function! s:OnCursorMovedInsertMode()
+  call s:UpdateCursorMoved()
   call s:IdentifierFinishedOperations()
   call s:ClosePreviewWindowIfNeeded()
   call s:InvokeCompletion()
@@ -143,6 +147,18 @@ function! s:OnInsertLeave()
   call s:UpdateDiagnosticNotifications()
   py ycm_state.OnInsertLeave()
   call s:ClosePreviewWindowIfNeeded()
+endfunction
+
+
+function! s:OnInsertEnter()
+  let s:old_cursor_position = []
+endfunction
+
+
+function! s:UpdateCursorMoved()
+  let current_position = getpos('.')
+  let s:cursor_moved = current_position != s:old_cursor_position
+  let s:old_cursor_position = current_position
 endfunction
 
 
@@ -199,21 +215,12 @@ function! s:InvokeCompletion()
 
   " This is tricky. First, having 'refresh' set to 'always' in the dictionary
   " that our completion function returns makes sure that our completion function
-  " is called on every keystroke when the completion menu is showing
-  " (pumvisible() == true). So there's no point in invoking the completion menu
-  " with our feedkeys call then.
-  " Secondly, when the sequence of characters the user typed produces no
+  " is called on every keystroke. Secondly, when the sequence of characters the user typed produces no
   " results in our search an infinite loop can occur. The problem is that our
   " feedkeys call triggers the OnCursorMovedI event which we are tied to.
-  " So we solve this with the searched_and_no_results_found script-scope
-  " variable that prevents this infinite loop from starting.
-  if pumvisible() || s:searched_and_no_results_found
-    " TODO: try a different approach where after we return some completions to
-    " Vim we don't trigger the feedkeys call UNLESS the user has moved in
-    " insert/normal mode; this could help with that insidious and impossible to
-    " reproduce completion-blocking-typing bug; we could implement this by
-    " storing the last line & column
-    let s:searched_and_no_results_found = 0
+  " We prevent this infinite loop from starting by making sure that the user has
+  " moved the cursor since the last time we provided completion results.
+  if !s:cursor_moved
     return
   endif
 
@@ -264,6 +271,15 @@ function! youcompleteme#Complete( findstart, base )
   endif
 
   if a:findstart
+    " InvokeCompletion has this check but we also need it here because of random
+    " Vim bugs and unfortunate interactions with the autocommands of other
+    " plugins
+    if !s:cursor_moved
+      " for vim, -2 means not found but don't trigger an error message
+      " see :h complete-functions
+      return -2
+    endif
+
     let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
     let s:should_use_filetype_completion =
           \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
