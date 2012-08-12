@@ -70,6 +70,9 @@ else()
     "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
 endif()
 
-add_subdirectory( llvm )
+if ( NOT EXTERNAL_LIBCLANG_PATH AND NOT USE_SYSTEM_LIBCLANG )
+  add_subdirectory( llvm )
+endif()
+
 add_subdirectory( BoostParts )
 add_subdirectory( ycm )

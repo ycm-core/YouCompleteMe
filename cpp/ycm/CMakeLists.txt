@@ -33,8 +33,10 @@ include_directories(
   SYSTEM
   ${BoostParts_SOURCE_DIR}
   ${PYTHON_INCLUDE_DIRS}
-  "${LLVM_SOURCE_DIR}/include"
-  "${LLVM_SOURCE_DIR}/tools/clang/include"
+  # We need CMAKE_SOURCE_DIR here instead of LLVM_SOURCE_DIR because the llvm
+  # subdir may not have been included in the build
+  "${CMAKE_SOURCE_DIR}/llvm/include"
+  "${CMAKE_SOURCE_DIR}/llvm/tools/clang/include"
   )
 
 file( GLOB_RECURSE SOURCES *.h *.cpp )
