@@ -36,6 +36,10 @@ if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
 endif()
 
+if ( CMAKE_GENERATOR STREQUAL Xcode )
+  set( CMAKE_GENERATOR_IS_XCODE true )
+endif()
+
 # Force release build by default, speed is of the essence
 if ( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
