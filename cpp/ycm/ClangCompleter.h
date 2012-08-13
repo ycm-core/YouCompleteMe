@@ -156,6 +156,7 @@ private:
 
   bool threading_enabled_;
 
+  // TODO: use boost.atomic for time_to_die_
   bool time_to_die_;
   boost::shared_mutex time_to_die_mutex_;
 
