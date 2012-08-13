@@ -124,6 +124,7 @@ class ClangCompleter( Completer ):
 
     return self.parse_future.ResultsReady()
 
+
   def GetDiagnosticsForCurrentFile( self ):
     if self.DiagnosticsForCurrentFileReady():
       self.last_diagnostics = [ DiagnosticToDict( x ) for x in

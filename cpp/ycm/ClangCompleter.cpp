@@ -18,9 +18,9 @@
 #include "ClangCompleter.h"
 #include "Candidate.h"
 #include "TranslationUnit.h"
-#include "CompletionData.h"
 #include "standard.h"
 #include "CandidateRepository.h"
+#include "CompletionData.h"
 #include "ConcurrentLatestValue.h"
 #include "Utils.h"
 #include "ClangUtils.h"
@@ -28,9 +28,6 @@
 #include <clang-c/Index.h>
 #include <boost/make_shared.hpp>
 
-// TODO: remove all explicit uses of the boost:: prefix by adding explicit using
-// directives for the stuff we need
-namespace fs = boost::filesystem;
 using boost::bind;
 using boost::cref;
 using boost::function;
@@ -51,9 +48,6 @@ using boost::unordered_map;
 
 namespace YouCompleteMe
 {
-
-typedef function< std::vector< CompletionData >() >
-  FunctionReturnsCompletionDataVector;
 
 extern const unsigned int MAX_ASYNC_THREADS;
 extern const unsigned int MIN_ASYNC_THREADS;
@@ -186,8 +180,6 @@ Future< void > ClangCompleter::UpdateTranslationUnitAsync(
   shared_ptr< ClangPackagedTask > clang_packaged_task =
     make_shared< ClangPackagedTask >();
 
-  // TODO: vim hangs when we just open it and try to enter insert mode after the
-  // last '_' in ->parsing_task_ here
   clang_packaged_task->parsing_task_ = packaged_task< void >( functor );
   unique_future< void > future =
     clang_packaged_task->parsing_task_.get_future();
@@ -217,18 +209,21 @@ ClangCompleter::CandidatesForLocationInFile(
 
 Future< AsyncCompletions >
 ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
-    std::string query,
-    std::string filename,
+    const std::string &query,
+    const std::string &filename,
     int line,
     int column,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags )
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags )
 {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return Future< AsyncCompletions >();
 
-  if ( query.empty() )
+  bool skip_clang_result_cache = ShouldSkipClangResultCache( query,
+                                                             line,
+                                                             column );
+  if ( skip_clang_result_cache )
   {
     // The clang thread is busy, return nothing
     if ( UpdatingTranslationUnit( filename ) )
@@ -248,25 +243,71 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   // the sorting task needs to be set before the clang task (if any) just in
   // case the clang task finishes (and therefore notifies a sorting thread to
   // consume a sorting task) before the sorting task is set
+  unique_future< AsyncCompletions > future = CreateSortingTask( query );
 
-  FunctionReturnsCompletionDataVector sort_candidates_for_query_functor =
+  if ( skip_clang_result_cache )
+  {
+    CreateClangTask( filename, line, column, unsaved_files, flags );
+  }
+
+  return Future< AsyncCompletions >( boost::move( future ) );
+}
+
+
+bool ClangCompleter::ShouldSkipClangResultCache( const std::string &query,
+                                                 int line,
+                                                 int column )
+{
+  // We need query.empty() in addition to the second check because if we don't
+  // have it, then we have a problem in the following situation:
+  // The user has a variable 'foo' of type 'A' and a variable 'bar' of type 'B'.
+  // He then types in 'foo.' and we store the clang results and also return
+  // them. The user then deletes that code and types in 'bar.'. Without the
+  // query.empty() check we would return the results from the cache here (it's
+  // the same line and column!) which would be incorrect.
+  return query.empty() || latest_clang_results_
+    .NewPositionDifferentFromStoredPosition( line, column );
+}
+
+
+unique_future< AsyncCompletions > ClangCompleter::CreateSortingTask(
+    const std::string &query )
+{
+  // Careful! The code in this function may burn your eyes.
+
+  function< CompletionDatas( const CompletionDatas& ) >
+    sort_candidates_for_query_functor =
     bind( &ClangCompleter::SortCandidatesForQuery,
           boost::ref( *this ),
           query,
-          boost::cref( latest_clang_results_ ) );
+          _1 );
+
+  function< CompletionDatas() > operate_on_completion_data_functor =
+    bind( &ClangResultsCache::OperateOnCompletionDatas< CompletionDatas >,
+          boost::cref( latest_clang_results_ ),
+          boost::move( sort_candidates_for_query_functor ) );
 
   shared_ptr< packaged_task< AsyncCompletions > > task =
     make_shared< packaged_task< AsyncCompletions > >(
       bind( ReturnValueAsShared< std::vector< CompletionData > >,
-            sort_candidates_for_query_functor ) );
+            boost::move( operate_on_completion_data_functor ) ) );
 
   unique_future< AsyncCompletions > future = task->get_future();
   sorting_task_.Set( task );
+  return future;
+}
 
-  if ( query.empty() )
-  {
-    FunctionReturnsCompletionDataVector
-      candidates_for_location_functor =
+
+void ClangCompleter::CreateClangTask(
+    std::string filename,
+    int line,
+    int column,
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags )
+{
+    latest_clang_results_.ResetWithNewLineAndColumn( line, column );
+
+    function< CompletionDatas() > candidates_for_location_functor =
       bind( &ClangCompleter::CandidatesForLocationInFile,
             boost::ref( *this ),
             boost::move( filename ),
@@ -283,9 +324,6 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
               candidates_for_location_functor ) );
 
     clang_task_.Set( clang_packaged_task );
-  }
-
-  return Future< AsyncCompletions >( boost::move( future ) );
 }
 
 
@@ -396,11 +434,7 @@ void ClangCompleter::ClangThreadMain()
 
       unique_future< AsyncCompletions > future =
         task->completions_task_.get_future();
-
-      {
-        unique_lock< shared_mutex > writer_lock( latest_clang_results_mutex_ );
-        latest_clang_results_ = *future.get();
-      }
+      latest_clang_results_.SetCompletionDatas( *future.get() );
 
       {
         lock_guard< mutex > lock( clang_data_ready_mutex_ );
@@ -439,11 +473,7 @@ void ClangCompleter::SortingThreadMain()
       shared_ptr< packaged_task< AsyncCompletions > > task =
         sorting_task_.Get();
 
-      {
-        shared_lock< shared_mutex > reader_lock( latest_clang_results_mutex_ );
-
-        ( *task )();
-      }
+      ( *task )();
     }
 
     catch ( thread_interrupted& )

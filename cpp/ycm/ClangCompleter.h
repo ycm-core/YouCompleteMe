@@ -22,8 +22,10 @@
 #include "Future.h"
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
+#include "ClangResultsCache.h"
 
 #include <boost/utility.hpp>
+#include <boost/thread/future.hpp>
 #include <boost/unordered_map.hpp>
 
 #include <string>
@@ -38,7 +40,9 @@ class CandidateRepository;
 class TranslationUnit;
 struct CompletionData;
 
-typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
+typedef std::vector< CompletionData > CompletionDatas;
+
+typedef boost::shared_ptr< CompletionDatas > AsyncCompletions;
 
 typedef boost::unordered_map< std::string,
           boost::shared_ptr<
@@ -82,15 +86,13 @@ public:
       const std::vector< UnsavedFile > &unsaved_files,
       const std::vector< std::string > &flags );
 
-  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
-  // avoid internal copies if params are taken by value (move ctors FTW)
   Future< AsyncCompletions > CandidatesForQueryAndLocationInFileAsync(
-      std::string query,
-      std::string filename,
+      const std::string &query,
+      const std::string &filename,
       int line,
       int column,
-      std::vector< UnsavedFile > unsaved_files,
-      std::vector< std::string > flags );
+      const std::vector< UnsavedFile > &unsaved_files,
+      const std::vector< std::string > &flags );
 
 private:
 
@@ -108,6 +110,22 @@ private:
 
   typedef ConcurrentLatestValue<
             boost::shared_ptr< ClangPackagedTask > > LatestClangTask;
+
+  bool ShouldSkipClangResultCache( const std::string &query,
+                                   int line,
+                                   int column );
+
+  boost::unique_future< AsyncCompletions > CreateSortingTask(
+      const std::string &query );
+
+  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
+  // avoid internal copies if params are taken by value (move ctors FTW)
+  void CreateClangTask(
+      std::string filename,
+      int line,
+      int column,
+      std::vector< UnsavedFile > unsaved_files,
+      std::vector< std::string > flags );
 
   boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
       const std::string &filename,
@@ -146,8 +164,7 @@ private:
   boost::mutex clang_data_ready_mutex_;
   boost::condition_variable clang_data_ready_condition_variable_;
 
-  std::vector< CompletionData > latest_clang_results_;
-  boost::shared_mutex latest_clang_results_mutex_;
+  ClangResultsCache latest_clang_results_;
 
   // Unfortunately clang is not thread-safe so we need to be careful when we
   // access it. Only one thread at a time is allowed to access any single
