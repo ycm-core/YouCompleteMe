@@ -115,8 +115,8 @@ private:
                                    int line,
                                    int column );
 
-  boost::unique_future< AsyncCompletions > CreateSortingTask(
-      const std::string &query );
+  void CreateSortingTask( const std::string &query,
+                          boost::unique_future< AsyncCompletions > &future );
 
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid internal copies if params are taken by value (move ctors FTW)

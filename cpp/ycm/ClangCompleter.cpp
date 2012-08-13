@@ -243,7 +243,8 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   // the sorting task needs to be set before the clang task (if any) just in
   // case the clang task finishes (and therefore notifies a sorting thread to
   // consume a sorting task) before the sorting task is set
-  unique_future< AsyncCompletions > future = CreateSortingTask( query );
+  unique_future< AsyncCompletions > future;
+  CreateSortingTask( query, future );
 
   if ( skip_clang_result_cache )
   {
@@ -270,8 +271,11 @@ bool ClangCompleter::ShouldSkipClangResultCache( const std::string &query,
 }
 
 
-unique_future< AsyncCompletions > ClangCompleter::CreateSortingTask(
-    const std::string &query )
+// Copy-ctor for unique_future is private in C++03 mode so we need to take it as
+// an out param
+void ClangCompleter::CreateSortingTask(
+    const std::string &query,
+    unique_future< AsyncCompletions > &future )
 {
   // Careful! The code in this function may burn your eyes.
 
@@ -292,9 +296,8 @@ unique_future< AsyncCompletions > ClangCompleter::CreateSortingTask(
       bind( ReturnValueAsShared< std::vector< CompletionData > >,
             boost::move( operate_on_completion_data_functor ) ) );
 
-  unique_future< AsyncCompletions > future = task->get_future();
+  future = task->get_future();
   sorting_task_.Set( task );
-  return future;
 }
 
 
