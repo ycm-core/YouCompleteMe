@@ -48,6 +48,8 @@ TranslationUnit::TranslationUnit(
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
 
+  // TODO: check return value of the parse* and reparse* functions! Throw an
+  // exception on problems.
   clang_translation_unit_ = clang_parseTranslationUnit(
       clang_index,
       filename.c_str(),
