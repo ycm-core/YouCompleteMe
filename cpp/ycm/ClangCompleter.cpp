@@ -157,16 +157,22 @@ void ClangCompleter::UpdateTranslationUnit(
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags )
 {
-  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
-                                                                  unsaved_files,
-                                                                  flags );
+  bool translation_unit_created;
+  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
+      filename,
+      unsaved_files,
+      flags,
+      translation_unit_created );
+
   if ( !unit )
     return;
 
   try
   {
-    // TODO: only do this if the unit was not just created
-    unit->Reparse( unsaved_files );
+    // There's no point in reparsing a TU that was just created, it was just
+    // parsed in the TU constructor
+    if ( !translation_unit_created )
+      unit->Reparse( unsaved_files );
   }
 
   catch ( ClangParseError& )
@@ -348,6 +354,16 @@ void ClangCompleter::CreateClangTask(
 }
 
 
+boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
+    const std::string &filename,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags )
+{
+  bool dont_care;
+  return GetTranslationUnitForFile( filename, unsaved_files, flags, dont_care );
+}
+
+
 // WARNING: It should not be possible to call this function from two separate
 // threads at the same time. Currently only one thread (the clang thread) ever
 // calls this function so there is no need for a mutex, but if that changes in
@@ -356,7 +372,8 @@ void ClangCompleter::CreateClangTask(
 shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags )
+    const std::vector< std::string > &flags,
+    bool &translation_unit_created )
 {
   {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
@@ -364,7 +381,10 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
       filename_to_translation_unit_.find( filename );
 
     if ( it != filename_to_translation_unit_.end() )
+    {
+      translation_unit_created = false;
       return it->second;
+    }
   }
 
   shared_ptr< TranslationUnit > unit;
@@ -385,6 +405,7 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
     filename_to_translation_unit_[ filename ] = unit;
   }
 
+  translation_unit_created = true;
   return unit;
 }
 

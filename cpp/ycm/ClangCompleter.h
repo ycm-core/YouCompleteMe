@@ -132,6 +132,12 @@ private:
       const std::vector< UnsavedFile > &unsaved_files,
       const std::vector< std::string > &flags );
 
+  boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
+      const std::string &filename,
+      const std::vector< UnsavedFile > &unsaved_files,
+      const std::vector< std::string > &flags,
+      bool &translation_unit_created );
+
   std::vector< CompletionData > SortCandidatesForQuery(
       const std::string &query,
       const std::vector< CompletionData > &completion_datas );
