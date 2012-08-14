@@ -49,21 +49,7 @@ function! youcompleteme#Enable()
     autocmd InsertEnter * call s:OnInsertEnter()
   augroup END
 
-  " We need menuone in completeopt, otherwise when there's only one candidate
-  " for completion, the menu doesn't show up.
-  set completeopt-=menu
-  set completeopt+=menuone
-
-  " This is unnecessary with our features. People use this option to insert
-  " the common prefix of all the matches and then add more differentiating chars
-  " so that they can select a more specific match. With our features, they
-  " don't need to insert the prefix; they just type the differentiating chars.
-  " Also, having this option set breaks the plugin.
-  set completeopt-=longest
-
-  if g:ycm_add_preview_to_completeopt
-    set completeopt+=preview
-  endif
+  call s:SetUpCompleteopt()
 
   if g:ycm_allow_changing_updatetime
     set ut=2000
@@ -102,11 +88,36 @@ function! s:AllowedToCompleteInCurrentFile()
 endfunction
 
 
+function! s:SetUpCompleteopt()
+  " Some plugins (I'm looking at you, vim-notes) change completeopt by for
+  " instance adding 'longest'. This breaks YCM. So we force our settings.
+  " There's no two ways about this: if you want to use YCM then you have to
+  " have these completeopt settings, otherwise YCM won't work at all.
+
+  " We need menuone in completeopt, otherwise when there's only one candidate
+  " for completion, the menu doesn't show up.
+  set completeopt-=menu
+  set completeopt+=menuone
+
+  " This is unnecessary with our features. People use this option to insert
+  " the common prefix of all the matches and then add more differentiating chars
+  " so that they can select a more specific match. With our features, they
+  " don't need to insert the prefix; they just type the differentiating chars.
+  " Also, having this option set breaks the plugin.
+  set completeopt-=longest
+
+  if g:ycm_add_preview_to_completeopt
+    set completeopt+=preview
+  endif
+endfunction
+
+
 function! s:OnBufferVisit()
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
 
+  call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   call s:OnFileReadyToParse()
 endfunction
@@ -117,6 +128,7 @@ function! s:OnCursorHold()
     return
   endif
 
+  call s:SetUpCompleteopt()
   " Order is important here; we need to extract any done diagnostics before
   " reparsing the file again
   call s:UpdateDiagnosticNotifications()
