@@ -34,12 +34,6 @@ function! youcompleteme#Enable()
     return
   endif
 
-  " If the user set the current filetype as a filetype that YCM should ignore,
-  " then we don't do anything
-  if get( g:ycm_filetypes_to_ignore, &filetype, 0 )
-    return
-  endif
-
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
@@ -101,13 +95,28 @@ function! youcompleteme#Enable()
 endfunction
 
 
+function! s:AllowedToCompleteInCurrentFile()
+  " If the user set the current filetype as a filetype that YCM should ignore,
+  " then we don't do anything
+  return !get( g:ycm_filetypes_to_ignore, &filetype, 0 )
+endfunction
+
+
 function! s:OnBufferVisit()
+  if !s:AllowedToCompleteInCurrentFile()
+    return
+  endif
+
   call s:SetCompleteFunc()
   call s:OnFileReadyToParse()
 endfunction
 
 
 function! s:OnCursorHold()
+  if !s:AllowedToCompleteInCurrentFile()
+    return
+  endif
+
   " Order is important here; we need to extract any done diagnostics before
   " reparsing the file again
   call s:UpdateDiagnosticNotifications()
@@ -132,6 +141,10 @@ endfunction
 
 
 function! s:OnCursorMovedInsertMode()
+  if !s:AllowedToCompleteInCurrentFile()
+    return
+  endif
+
   call s:UpdateCursorMoved()
   call s:IdentifierFinishedOperations()
   call s:ClosePreviewWindowIfNeeded()
@@ -140,11 +153,19 @@ endfunction
 
 
 function! s:OnCursorMovedNormalMode()
+  if !s:AllowedToCompleteInCurrentFile()
+    return
+  endif
+
   call s:UpdateDiagnosticNotifications()
 endfunction
 
 
 function! s:OnInsertLeave()
+  if !s:AllowedToCompleteInCurrentFile()
+    return
+  endif
+
   let s:omnifunc_mode = 0
   call s:UpdateDiagnosticNotifications()
   py ycm_state.OnInsertLeave()
@@ -153,6 +174,10 @@ endfunction
 
 
 function! s:OnInsertEnter()
+  if !s:AllowedToCompleteInCurrentFile()
+    return
+  endif
+
   let s:old_cursor_position = []
 endfunction
 
@@ -217,11 +242,12 @@ function! s:InvokeCompletion()
 
   " This is tricky. First, having 'refresh' set to 'always' in the dictionary
   " that our completion function returns makes sure that our completion function
-  " is called on every keystroke. Secondly, when the sequence of characters the user typed produces no
-  " results in our search an infinite loop can occur. The problem is that our
-  " feedkeys call triggers the OnCursorMovedI event which we are tied to.
-  " We prevent this infinite loop from starting by making sure that the user has
-  " moved the cursor since the last time we provided completion results.
+  " is called on every keystroke. Secondly, when the sequence of characters the
+  " user typed produces no results in our search an infinite loop can occur. The
+  " problem is that our feedkeys call triggers the OnCursorMovedI event which we
+  " are tied to. We prevent this infinite loop from starting by making sure that
+  " the user has moved the cursor since the last time we provided completion
+  " results.
   if !s:cursor_moved
     return
   endif
