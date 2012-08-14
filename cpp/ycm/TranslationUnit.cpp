@@ -18,6 +18,7 @@
 #include "TranslationUnit.h"
 #include "CompletionData.h"
 #include "standard.h"
+#include "exceptions.h"
 #include "ClangUtils.h"
 
 #include <clang-c/Index.h>
@@ -35,7 +36,8 @@ TranslationUnit::TranslationUnit(
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags,
     CXIndex clang_index )
-  : filename_( filename )
+  : filename_( filename ),
+    clang_translation_unit_( NULL )
 {
   std::vector< const char* > pointer_flags;
   pointer_flags.reserve( flags.size() );
@@ -48,8 +50,6 @@ TranslationUnit::TranslationUnit(
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
 
-  // TODO: check return value of the parse* and reparse* functions! Throw an
-  // exception on problems.
   clang_translation_unit_ = clang_parseTranslationUnit(
       clang_index,
       filename.c_str(),
@@ -59,19 +59,19 @@ TranslationUnit::TranslationUnit(
       cxunsaved_files.size(),
       clang_defaultEditingTranslationUnitOptions() );
 
+  if ( !clang_translation_unit_ )
+    boost_throw( ClangParseError() );
+
   // Only with a reparse is the preable precompiled. I do not know why...
   // TODO: report this bug on the clang tracker
-  clang_reparseTranslationUnit(
-      clang_translation_unit_,
-      cxunsaved_files.size(),
-      &cxunsaved_files[ 0 ],
-      clang_defaultEditingTranslationUnitOptions() );
+  Reparse( cxunsaved_files );
 }
 
 
 TranslationUnit::~TranslationUnit()
 {
-  clang_disposeTranslationUnit( clang_translation_unit_ );
+  if ( clang_translation_unit_ )
+    clang_disposeTranslationUnit( clang_translation_unit_ );
 }
 
 
@@ -104,18 +104,10 @@ bool TranslationUnit::IsCurrentlyUpdating() const
 
 void TranslationUnit::Reparse( const std::vector< UnsavedFile > &unsaved_files )
 {
-  unique_lock< mutex > lock( clang_access_mutex_ );
-
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
 
-  clang_reparseTranslationUnit(
-      clang_translation_unit_,
-      cxunsaved_files.size(),
-      &cxunsaved_files[ 0 ],
-      clang_defaultEditingTranslationUnitOptions() );
-
-  UpdateLatestDiagnostics();
+  Reparse( cxunsaved_files );
 }
 
 
@@ -125,6 +117,9 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
     const std::vector< UnsavedFile > &unsaved_files )
 {
   unique_lock< mutex > lock( clang_access_mutex_ );
+
+  if ( !clang_translation_unit_ )
+    return std::vector< CompletionData >();
 
   std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
       unsaved_files );
@@ -151,6 +146,34 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   std::vector< CompletionData > candidates = ToCompletionDataVector( results );
   clang_disposeCodeCompleteResults( results );
   return candidates;
+}
+
+
+// Argument taken as non-const ref because we need to be able to pass a
+// non-const pointer to clang. This function (and clang too) will not modify the
+// param though.
+void TranslationUnit::Reparse(
+    std::vector< CXUnsavedFile > &unsaved_files )
+{
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
+  if ( !clang_translation_unit_ )
+    return;
+
+  int failure = clang_reparseTranslationUnit(
+      clang_translation_unit_,
+      unsaved_files.size(),
+      &unsaved_files[ 0 ],
+      clang_defaultEditingTranslationUnitOptions() );
+
+  if ( failure )
+  {
+    clang_disposeTranslationUnit( clang_translation_unit_ );
+    clang_translation_unit_ = NULL;
+    boost_throw( ClangParseError() );
+  }
+
+  UpdateLatestDiagnostics();
 }
 
 

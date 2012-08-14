@@ -31,6 +31,7 @@
 
 typedef void *CXIndex;
 typedef struct CXTranslationUnitImpl *CXTranslationUnit;
+struct CXUnsavedFile;
 
 namespace YouCompleteMe
 {
@@ -62,6 +63,8 @@ public:
       const std::vector< UnsavedFile > &unsaved_files );
 
 private:
+
+  void Reparse( std::vector< CXUnsavedFile > &unsaved_files );
 
   void UpdateLatestDiagnostics();
 

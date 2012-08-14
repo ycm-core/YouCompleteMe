@@ -16,6 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ClangCompleter.h"
+#include "exceptions.h"
 #include "Candidate.h"
 #include "TranslationUnit.h"
 #include "standard.h"
@@ -159,9 +160,24 @@ void ClangCompleter::UpdateTranslationUnit(
   shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
                                                                   unsaved_files,
                                                                   flags );
-  X_ASSERT( unit );
-  // TODO: only do this if the unit was not just created
-  unit->Reparse( unsaved_files );
+  if ( !unit )
+    return;
+
+  try
+  {
+    // TODO: only do this if the unit was not just created
+    unit->Reparse( unsaved_files );
+  }
+
+  catch ( ClangParseError& )
+  {
+    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
+
+    // If unit->Reparse fails, then the underlying TranslationUnit object is not
+    // valid anymore and needs to be destroyed and removed from the filename ->
+    // TU map.
+    Erase( filename_to_translation_unit_, filename );
+  }
 }
 
 
@@ -200,7 +216,9 @@ ClangCompleter::CandidatesForLocationInFile(
   shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
                                                                   unsaved_files,
                                                                   flags );
-  X_ASSERT( unit );
+  if ( !unit )
+    return std::vector< CompletionData >();
+
   return unit->CandidatesForLocation( line,
                                       column,
                                       unsaved_files );
@@ -349,9 +367,18 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
       return it->second;
   }
 
+  shared_ptr< TranslationUnit > unit;
 
-  shared_ptr< TranslationUnit > unit = make_shared< TranslationUnit >(
-      filename, unsaved_files, flags, clang_index_ );
+  try
+  {
+    unit = make_shared< TranslationUnit >(
+        filename, unsaved_files, flags, clang_index_ );
+  }
+
+  catch ( ClangParseError& )
+  {
+    return unit;
+  }
 
   {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );

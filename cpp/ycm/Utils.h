@@ -64,6 +64,19 @@ FindWithDefault( Container &container,
   return it != container.end() ? it->second : value;
 }
 
+
+template <class Container, class Key>
+bool Erase( Container &container, const Key &key )
+{
+  typename Container::iterator it = container.find( key );
+  if ( it != container.end() )
+  {
+    container.erase( it );
+    return true;
+  }
+  return false;
+}
+
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: UTILS_H_KEPMRPBH */

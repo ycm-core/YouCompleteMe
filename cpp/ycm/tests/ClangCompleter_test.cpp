@@ -70,5 +70,3 @@ TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync )
 }
 
 } // namespace YouCompleteMe
-
-
