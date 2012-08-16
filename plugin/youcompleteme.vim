@@ -34,12 +34,11 @@ let g:loaded_youcompleteme = 1
 let g:ycm_min_num_of_chars_for_completion  =
       \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
 
-let g:ycm_filetypes_to_ignore =
-      \ get( g:, 'ycm_filetypes_to_ignore', { 'notes' : 1 } )
+let g:ycm_filetypes_to_completely_ignore =
+      \ get( g:, 'ycm_filetypes_to_completely_ignore', { 'notes' : 1 } )
 
-" TODO: make this more granular
-let g:ycm_filetype_completion_enabled =
-      \ get( g:, 'ycm_filetype_completion_enabled', 1 )
+let g:ycm_filetype_specific_completion_to_disable =
+      \ get( g:, 'ycm_filetype_specific_completion_to_disable', {} )
 
 let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )

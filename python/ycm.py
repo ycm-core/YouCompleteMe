@@ -25,6 +25,9 @@ import os
 import sys
 from completers.all.identifier_completer import IdentifierCompleter
 
+FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
+  'g:ycm_filetype_specific_completion_to_disable' )
+
 
 class YouCompleteMe( object ):
   def __init__( self ):
@@ -76,7 +79,8 @@ class YouCompleteMe( object ):
 
 
   def FiletypeCompletionEnabledForCurrentFile( self ):
-    return ( bool( int( vim.eval( 'g:ycm_filetype_completion_enabled' ) ) ) and
+    return ( vimsupport.CurrentFiletype() not in
+                FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE and
              self.FiletypeCompletionAvailableForFile() )
 
 

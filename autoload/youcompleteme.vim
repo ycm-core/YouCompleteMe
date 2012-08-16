@@ -68,11 +68,9 @@ function! youcompleteme#Enable()
   py import ycm
   py ycm_state = ycm.YouCompleteMe()
 
-  if g:ycm_filetype_completion_enabled
-    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
-    " candidate that vim selects by default
-    inoremap <unique> <C-Space> <C-X><C-O><C-P>
-  endif
+  " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
+  " candidate that vim selects by default
+  inoremap <unique> <C-Space> <C-X><C-O><C-P>
 
   " TODO: make this a nicer, customizable map
   nnoremap <unique> <leader>d :call <sid>ShowDetailedDiagnostic()<cr>
@@ -87,7 +85,7 @@ endfunction
 function! s:AllowedToCompleteInCurrentFile()
   " If the user set the current filetype as a filetype that YCM should ignore,
   " then we don't do anything
-  return !get( g:ycm_filetypes_to_ignore, &filetype, 0 )
+  return !get( g:ycm_filetypes_to_completely_ignore, &filetype, 0 )
 endfunction
 
 
