@@ -123,6 +123,38 @@ std::vector< CompletionData > ToCompletionDataVector(
 }
 
 
+// NOTE: The passed in pointer should never be NULL!
+// TODO: move all functions that are not external into an unnamed namespace
+std::string FullDiagnosticText( CXDiagnostic cxdiagnostic )
+{
+  std::string full_text = CXStringToString( clang_formatDiagnostic(
+      cxdiagnostic,
+      clang_defaultDiagnosticDisplayOptions() ) );
+
+  // Note: clang docs say that a CXDiagnosticSet retrieved with
+  // clang_getChildDiagnostics do NOT need to be released with
+  // clang_diposeDiagnosticSet
+  CXDiagnosticSet diag_set = clang_getChildDiagnostics( cxdiagnostic );
+  if ( !diag_set )
+    return full_text;
+
+  uint num_child_diagnostics = clang_getNumDiagnosticsInSet( diag_set );
+  if ( !num_child_diagnostics )
+    return full_text;
+
+  for ( uint i = 0; i < num_child_diagnostics; ++i )
+  {
+    CXDiagnostic diagnostic = clang_getDiagnosticInSet( diag_set, i );
+    if ( !diagnostic )
+      continue;
+
+    full_text.append( FullDiagnosticText( diagnostic ) );
+  }
+
+  return full_text;
+}
+
+
 Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic )
 {
   Diagnostic diagnostic;
@@ -145,9 +177,11 @@ Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic )
                              &diagnostic.line_number_,
                              &diagnostic.column_number_,
                              &unused_offset );
+
   diagnostic.filename_ = CXStringToString( clang_getFileName( file ) );
   diagnostic.text_ = CXStringToString(
       clang_getDiagnosticSpelling( cxdiagnostic ) );
+  diagnostic.long_formatted_text_ = FullDiagnosticText( cxdiagnostic );
 
   clang_disposeDiagnostic( cxdiagnostic );
   return diagnostic;

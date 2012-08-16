@@ -106,6 +106,11 @@ class YouCompleteMe( object ):
     return []
 
 
+  def ShowDetailedDiagnostic( self ):
+    if self.FiletypeCompletionEnabledForCurrentFile():
+      return self.GetFiletypeCompleterForCurrentFile().ShowDetailedDiagnostic()
+
+
   def OnCurrentIdentifierFinished( self ):
     self.identcomp.OnCurrentIdentifierFinished()
 

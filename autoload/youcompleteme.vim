@@ -74,6 +74,9 @@ function! youcompleteme#Enable()
     inoremap <unique> <C-Space> <C-X><C-O><C-P>
   endif
 
+  " TODO: make this a nicer, customizable map
+  nnoremap <unique> <leader>d :call <sid>ShowDetailedDiagnostic()<cr>
+
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
   " the first loaded file. This should be the last command executed in this
   " function!
@@ -350,12 +353,18 @@ function! youcompleteme#OmniComplete( findstart, base )
 endfunction
 
 
+function! s:ShowDetailedDiagnostic()
+  py ycm_state.ShowDetailedDiagnostic()
+endfunction
+
+
 " This is what Syntastic calls indirectly when it decides an auto-check is
 " required (currently that's on buffer save) OR when the SyntasticCheck command
 " is invoked
 function! youcompleteme#CurrentFileDiagnostics()
   return pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
 endfunction
+
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

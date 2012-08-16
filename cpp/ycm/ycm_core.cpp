@@ -54,7 +54,8 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def_readonly( "column_number_", &Diagnostic::column_number_ )
     .def_readonly( "kind_", &Diagnostic::kind_ )
     .def_readonly( "filename_", &Diagnostic::filename_ )
-    .def_readonly( "text_", &Diagnostic::text_ );
+    .def_readonly( "text_", &Diagnostic::text_ )
+    .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ );
 
 	class_< std::vector< Diagnostic > >( "DiagnosticVec" )
 		.def( vector_indexing_suite< std::vector< Diagnostic > >() );

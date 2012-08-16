@@ -47,6 +47,8 @@ struct Diagnostic
   std::string filename_;
 
   std::string text_;
+
+  std::string long_formatted_text_;
 };
 
 } // namespace YouCompleteMe

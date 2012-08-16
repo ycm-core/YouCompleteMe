@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from completers.completer import Completer
+from collections import defaultdict
 import vim
 import vimsupport
 import ycm_core
@@ -32,7 +33,7 @@ class ClangCompleter( Completer ):
     self.completer.EnableThreading()
     self.contents_holder = []
     self.filename_holder = []
-    self.last_diagnostics = []
+    self.last_prepared_diagnostics = []
     self.parse_future = None
     self.flags = Flags()
 
@@ -127,11 +128,38 @@ class ClangCompleter( Completer ):
 
   def GetDiagnosticsForCurrentFile( self ):
     if self.DiagnosticsForCurrentFileReady():
-      self.last_diagnostics = [ DiagnosticToDict( x ) for x in
-                                self.completer.DiagnosticsForFile(
-                                  vim.current.buffer.name ) ]
+      diagnostics = self.completer.DiagnosticsForFile( vim.current.buffer.name )
+      self.diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
+      self.last_prepared_diagnostics = [ DiagnosticToDict( x ) for x in
+                                         diagnostics ]
       self.parse_future = None
-    return self.last_diagnostics
+    return self.last_prepared_diagnostics
+
+
+  def ShowDetailedDiagnostic( self ):
+    current_line, current_column = vimsupport.CurrentLineAndColumn()
+
+    # CurrentLineAndColumn() numbers are 0-based, clang numbers are 1-based
+    current_line += 1
+    current_column += 1
+
+    current_file = vim.current.buffer.name
+    diagnostics = self.diagnostic_store[ current_file ][ current_line ]
+
+    if not diagnostics:
+      vimsupport.PostVimMessage( "No diagnostic for current line!" )
+      return
+
+    closest_diagnostic = None
+    distance_to_closest_diagnostic = 999
+
+    for diagnostic in diagnostics:
+      distance = abs( current_column - diagnostic.column_number_ )
+      if distance < distance_to_closest_diagnostic:
+        distance_to_closest_diagnostic = distance
+        closest_diagnostic = diagnostic
+
+    vimsupport.EchoText( closest_diagnostic.long_formatted_text_ )
 
 
   def ShouldUseNow( self, start_column ):
@@ -163,6 +191,14 @@ def DiagnosticToDict( diagnostic ):
     'type'  : diagnostic.kind_,
     'valid' : 1
   }
+
+
+def DiagnosticsToDiagStructure( diagnostics ):
+  structure = defaultdict(lambda : defaultdict(list))
+  for diagnostic in diagnostics:
+    structure[ diagnostic.filename_ ][ diagnostic.line_number_ ].append(
+        diagnostic )
+  return structure
 
 
 def ClangAvailableForBuffer( buffer_object ):

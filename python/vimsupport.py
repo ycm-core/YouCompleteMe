@@ -20,6 +20,7 @@
 import vim
 
 def CurrentLineAndColumn():
+  """Returns the 0-based current line."""
   # See the comment in CurrentColumn about the calculation for the line and
   # column number
   line, column = vim.current.window.cursor
@@ -28,8 +29,9 @@ def CurrentLineAndColumn():
 
 
 def CurrentColumn():
-  """Do NOT access the CurrentColumn in vim.current.line. It doesn't exist yet.
-  Only the chars before the current column exist in vim.current.line."""
+  """Returns the 0-based current column. Do NOT access the CurrentColumn in
+  vim.current.line. It doesn't exist yet.  Only the chars before the current
+  column exist in vim.current.line."""
 
   # vim's columns are 1-based while vim.current.line columns are 0-based
   # ... but vim.current.window.cursor (which returns a (line, column) tuple)
@@ -56,6 +58,10 @@ def PostVimMessage( message ):
   # TODO: escape the message string before formating it
   vim.command( 'echohl WarningMsg | echomsg "{0}" | echohl None'
                .format( message ) )
+
+
+def EchoText( text ):
+  vim.command( "echom '{0}'".format( text.replace( "'", r"''") ) )
 
 
 def EscapeForVim( text ):
