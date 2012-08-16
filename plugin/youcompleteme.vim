@@ -50,6 +50,9 @@ let g:ycm_add_preview_to_completeopt =
 let g:ycm_autoclose_preview_window_after_completion =
       \ get( g:, 'ycm_autoclose_preview_window_after_completion', 0 )
 
+let g:ycm_max_diagnostics_to_display =
+      \ get( g:, 'ycm_max_diagnostics_to_display', 30 )
+
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim

@@ -25,6 +25,8 @@ import ycm_core
 from flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
+MAX_DIAGNOSTICS_TO_DISPLAY = int( vimsupport.GetVariableValue(
+  "g:ycm_max_diagnostics_to_display" ) )
 
 
 class ClangCompleter( Completer ):
@@ -131,7 +133,7 @@ class ClangCompleter( Completer ):
       diagnostics = self.completer.DiagnosticsForFile( vim.current.buffer.name )
       self.diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
       self.last_prepared_diagnostics = [ DiagnosticToDict( x ) for x in
-                                         diagnostics ]
+          diagnostics[ : MAX_DIAGNOSTICS_TO_DISPLAY ] ]
       self.parse_future = None
     return self.last_prepared_diagnostics
 
