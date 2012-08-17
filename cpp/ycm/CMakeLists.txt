@@ -60,7 +60,9 @@ if ( NO_CLANG_COMPLETER )
 
   add_definitions( -DNO_CLANG_COMPLETER )
 else()
-  include_directories( "${CURRENT_SOURCE_DIR}/ClangCompleter" )
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "${CMAKE_CURRENT_SOURCE_DIR}/ClangCompleter" )
 endif()
 
 #############################################################################
