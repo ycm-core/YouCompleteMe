@@ -92,15 +92,15 @@ public:
       std::string filepath );
 
   // Only provided for tests!
-	std::vector< std::string > CandidatesForQuery(
-	    const std::string &query ) const;
+  std::vector< std::string > CandidatesForQuery(
+      const std::string &query ) const;
 
   std::vector< std::string > CandidatesForQueryAndType(
       const std::string &query,
       const std::string &filetype ) const;
 
-	Future< AsyncResults > CandidatesForQueryAndTypeAsync(
-	    const std::string &query,
+  Future< AsyncResults > CandidatesForQueryAndTypeAsync(
+      const std::string &query,
       const std::string &filetype ) const;
 
 private:

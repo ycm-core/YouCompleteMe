@@ -44,8 +44,10 @@ public:
   std::vector< const Candidate* > GetCandidatesForStrings(
       const std::vector< std::string > &strings );
 
+#ifndef NO_CLANG_COMPLETER
   std::vector< const Candidate* > GetCandidatesForStrings(
       const std::vector< CompletionData > &datas );
+#endif // NO_CLANG_COMPLETER
 
 private:
   CandidateRepository() {};
@@ -63,4 +65,3 @@ private:
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: CANDIDATEREPOSITORY_H_K9OVCMHG */
-

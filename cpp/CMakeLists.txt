@@ -74,7 +74,8 @@ else()
     "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
 endif()
 
-if ( NOT EXTERNAL_LIBCLANG_PATH AND NOT USE_SYSTEM_LIBCLANG )
+if ( NOT NO_CLANG_COMPLETER AND
+     ( NOT EXTERNAL_LIBCLANG_PATH AND NOT USE_SYSTEM_LIBCLANG ) )
   add_subdirectory( llvm )
 endif()
 

@@ -39,6 +39,7 @@ include_directories(
   "${CMAKE_SOURCE_DIR}/llvm/tools/clang/include"
   )
 
+
 file( GLOB_RECURSE SOURCES *.h *.cpp )
 
 # The test sources are a part of a different target, so we remove them
@@ -48,6 +49,18 @@ file( GLOB_RECURSE to_remove tests/*.h tests/*.cpp CMakeFiles/*.cpp )
 
 if( to_remove )
   list( REMOVE_ITEM SOURCES ${to_remove} )
+endif()
+
+if ( NO_CLANG_COMPLETER )
+  file( GLOB_RECURSE to_remove_clang ClangCompleter/*.h ClangCompleter/*.cpp )
+
+  if( to_remove_clang )
+    list( REMOVE_ITEM SOURCES ${to_remove_clang} )
+  endif()
+
+  add_definitions( -DNO_CLANG_COMPLETER )
+else()
+  include_directories( "${CURRENT_SOURCE_DIR}/ClangCompleter" )
 endif()
 
 #############################################################################
@@ -74,8 +87,10 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
   message(
     "Using external libclang: ${EXTERNAL_LIBCLANG_PATH}" )
-else()
+elseif( NOT NO_CLANG_COMPLETER )
   set( LIBCLANG_TARGET libclang_static )
+else()
+  set( LIBCLANG_TARGET )
 endif()
 
 if ( EXTRA_RPATH )
