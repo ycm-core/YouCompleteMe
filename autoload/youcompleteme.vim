@@ -25,8 +25,11 @@ let s:searched_and_results_found = 0
 let s:should_use_filetype_completion = 0
 let s:completion_start_column = 0
 let s:omnifunc_mode = 0
+
 let s:old_cursor_position = []
 let s:cursor_moved = 0
+let s:moved_vertically_in_insert_mode = 0
+let s:previous_num_chars_on_current_line = -1
 
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
@@ -159,6 +162,18 @@ function! s:OnCursorMovedInsertMode()
   endif
 
   call s:UpdateCursorMoved()
+
+  " Basically, we need to only trigger the completion menu when the user has
+  " inserted or deleted a character, NOT just when the user moves in insert mode
+  " (with, say, the arrow keys). If we trigger the menu even on pure moves, then
+  " it's impossible to move in insert mode since the up/down arrows start moving
+  " the selected completion in the completion menu. Yeah, people shouldn't be
+  " moving in insert mode at all (that's what normal mode is for) but explain
+  " that to the users who complain...
+  if !s:BufferTextChangedSinceLastMoveInInsertMode()
+    return
+  endif
+
   call s:IdentifierFinishedOperations()
   call s:ClosePreviewWindowIfNeeded()
   call s:InvokeCompletion()
@@ -198,7 +213,32 @@ endfunction
 function! s:UpdateCursorMoved()
   let current_position = getpos('.')
   let s:cursor_moved = current_position != s:old_cursor_position
+
+  let s:moved_vertically_in_insert_mode = s:old_cursor_position != [] &&
+        \ current_position[ 1 ] != s:old_cursor_position[ 1 ]
+
   let s:old_cursor_position = current_position
+endfunction
+
+
+function! s:BufferTextChangedSinceLastMoveInInsertMode()
+  if s:moved_vertically_in_insert_mode
+    let s:previous_num_chars_on_current_line = -1
+    return 0
+  endif
+
+  let num_chars_in_current_cursor_line = strlen( getline('.') )
+
+  if s:previous_num_chars_on_current_line == -1
+    let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
+    return 0
+  endif
+
+  let changed_text_on_current_line = num_chars_in_current_cursor_line !=
+        \ s:previous_num_chars_on_current_line
+  let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
+
+  return changed_text_on_current_line
 endfunction
 
 
