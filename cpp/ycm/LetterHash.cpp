@@ -35,7 +35,6 @@ bool IsUppercase( char letter )
 int IndexForChar( char letter )
 {
   if ( IsUppercase( letter ) )
-
     return letter + ( 'a' - 'A' );
 
   return letter;
@@ -44,21 +43,21 @@ int IndexForChar( char letter )
 
 LetterHash::LetterHash()
 {
-	letters_.resize( kNumLetters );
+  letters_.resize( kNumLetters );
 
-	for ( uint i = 0; i < letters_.size(); ++i )
-	{
-		letters_[ i ] = NULL;
-	}
+  for ( uint i = 0; i < letters_.size(); ++i )
+  {
+    letters_[ i ] = NULL;
+  }
 }
 
 
 LetterHash::~LetterHash()
 {
-	for ( uint i = 0; i < letters_.size(); ++i )
-	{
-	  delete letters_[ i ];
-	}
+  for ( uint i = 0; i < letters_.size(); ++i )
+  {
+    delete letters_[ i ];
+  }
 }
 
 
