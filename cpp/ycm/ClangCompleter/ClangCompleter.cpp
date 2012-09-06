@@ -17,6 +17,7 @@
 
 #include "ClangCompleter.h"
 #include "exceptions.h"
+#include "Result.h"
 #include "Candidate.h"
 #include "TranslationUnit.h"
 #include "standard.h"

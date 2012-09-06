@@ -17,6 +17,7 @@
 
 #include "standard.h"
 #include "Candidate.h"
+#include "Result.h"
 #include <cctype>
 #include <boost/algorithm/string.hpp>
 

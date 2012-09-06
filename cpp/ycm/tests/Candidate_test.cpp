@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "Candidate.h"
+#include "Result.h"
 
 namespace YouCompleteMe
 {

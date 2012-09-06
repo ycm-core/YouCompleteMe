@@ -18,9 +18,7 @@
 #ifndef CANDIDATE_H_R5LZH6AC
 #define CANDIDATE_H_R5LZH6AC
 
-// TODO can be moved to cpp?
 #include "LetterNode.h"
-#include "Result.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
@@ -30,6 +28,8 @@
 
 namespace YouCompleteMe
 {
+
+class Result;
 
 typedef std::bitset< NUM_LETTERS > Bitset;
 

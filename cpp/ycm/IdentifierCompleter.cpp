@@ -19,6 +19,7 @@
 #include "standard.h"
 #include "CandidateRepository.h"
 #include "Candidate.h"
+#include "Result.h"
 #include "Utils.h"
 #include "IdentifierUtils.h"
 
