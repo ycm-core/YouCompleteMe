@@ -45,6 +45,14 @@ class ClangCompleter( Completer ):
 
 
   def GetUnsavedFilesVector( self ):
+    # CAREFUL HERE! For UnsavedFile filename and contents we are referring
+    # directly to Python-allocated and -managed memory since we are accepting
+    # pointers to data members of python objects. We need to ensure that those
+    # objects outlive our UnsavedFile objects. This is why we need the
+    # contents_holder and filename_holder lists, to make sure the string objects
+    # are still around when we call CandidatesForQueryAndLocationInFile.  We do
+    # this to avoid an extra copy of the entire file contents.
+
     files = ycm_core.UnsavedFileVec()
     self.contents_holder = []
     self.filename_holder = []
@@ -75,14 +83,6 @@ class ClangCompleter( Completer ):
       return
 
     # TODO: sanitize query
-
-    # CAREFUL HERE! For UnsavedFile filename and contents we are referring
-    # directly to Python-allocated and -managed memory since we are accepting
-    # pointers to data members of python objects. We need to ensure that those
-    # objects outlive our UnsavedFile objects. This is why we need the
-    # contents_holder and filename_holder lists, to make sure the string objects
-    # are still around when we call CandidatesForQueryAndLocationInFile.  We do
-    # this to avoid an extra copy of the entire file contents.
 
     files = ycm_core.UnsavedFileVec()
     if not query:
