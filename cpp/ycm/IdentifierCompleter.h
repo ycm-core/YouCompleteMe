@@ -38,28 +38,6 @@ class CandidateRepository;
 
 typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
 
-// TODO: cpp?
-typedef boost::function< std::vector< std::string >() >
-  FunctionReturnsStringVector;
-
-
-// TODO: move to private
-// filepath -> *( *candidate )
-typedef boost::unordered_map< std::string,
-          boost::shared_ptr< std::list< const Candidate* > > >
-            FilepathToCandidates;
-
-// filetype -> *( filepath -> *( *candidate ) )
-typedef boost::unordered_map< std::string,
-          boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
-
-typedef boost::shared_ptr<
-            boost::packaged_task< AsyncResults > > QueryTask;
-
-typedef ConcurrentLatestValue< QueryTask > LatestQueryTask;
-
-typedef ConcurrentStack< VoidTask > BufferIdentifiersTaskStack;
-
 
 class IdentifierCompleter : boost::noncopyable
 {
@@ -103,6 +81,13 @@ public:
       const std::string &query,
       const std::string &filetype ) const;
 
+  typedef boost::shared_ptr<
+              boost::packaged_task< AsyncResults > > QueryTask;
+
+  typedef ConcurrentLatestValue< QueryTask > LatestQueryTask;
+
+  typedef ConcurrentStack< VoidTask > BufferIdentifiersTaskStack;
+
 private:
 
   void ResultsForQueryAndType( const std::string &query,
@@ -117,6 +102,17 @@ private:
       const std::string &filepath );
 
   void InitThreads();
+
+
+  // filepath -> *( *candidate )
+  typedef boost::unordered_map< std::string,
+            boost::shared_ptr< std::list< const Candidate* > > >
+              FilepathToCandidates;
+
+  // filetype -> *( filepath -> *( *candidate ) )
+  typedef boost::unordered_map< std::string,
+            boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
+
 
 
   /////////////////////////////

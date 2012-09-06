@@ -39,13 +39,17 @@ using boost::thread;
 namespace YouCompleteMe
 {
 
+typedef boost::function< std::vector< std::string >() >
+  FunctionReturnsStringVector;
+
+
 extern const unsigned int MAX_ASYNC_THREADS = 4;
 extern const unsigned int MIN_ASYNC_THREADS = 2;
 
 namespace
 {
 
-void QueryThreadMain( LatestQueryTask &latest_query_task )
+void QueryThreadMain( IdentifierCompleter::LatestQueryTask &latest_query_task )
 {
   while ( true )
   {
@@ -62,7 +66,8 @@ void QueryThreadMain( LatestQueryTask &latest_query_task )
 }
 
 void BufferIdentifiersThreadMain(
-  BufferIdentifiersTaskStack &buffer_identifiers_task_stack )
+  IdentifierCompleter::BufferIdentifiersTaskStack
+  &buffer_identifiers_task_stack )
 {
   while ( true )
   {
