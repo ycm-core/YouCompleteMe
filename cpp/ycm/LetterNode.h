@@ -18,7 +18,7 @@
 #ifndef LETTERNODE_H_EIZ6JVWC
 #define LETTERNODE_H_EIZ6JVWC
 
-#include "LetterHash.h"
+#include "LetterNodeListMap.h"
 
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
@@ -63,8 +63,7 @@ public:
 
 private:
 
-  // TODO: rename LetterHash to LetterNodeListHash or LetterNodeListDict/Map?
-  LetterHash letters_;
+  LetterNodeListMap letters_;
   std::vector< boost::shared_ptr< LetterNode > > letternode_per_text_index_;
 	bool is_uppercase_;
 	bool is_root_node_;

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "LetterHash.h"
+#include "LetterNodeListMap.h"
 #include "standard.h"
 
 namespace YouCompleteMe
@@ -41,7 +41,7 @@ int IndexForChar( char letter )
 }
 
 
-LetterHash::LetterHash()
+LetterNodeListMap::LetterNodeListMap()
 {
   letters_.resize( kNumLetters );
 
@@ -52,7 +52,7 @@ LetterHash::LetterHash()
 }
 
 
-LetterHash::~LetterHash()
+LetterNodeListMap::~LetterNodeListMap()
 {
   for ( uint i = 0; i < letters_.size(); ++i )
   {
@@ -61,7 +61,7 @@ LetterHash::~LetterHash()
 }
 
 
-bool LetterHash::HasLetter( char letter )
+bool LetterNodeListMap::HasLetter( char letter )
 {
   int letter_index = IndexForChar( letter );
   std::list< LetterNode* > *list = letters_[ letter_index ];
@@ -69,7 +69,7 @@ bool LetterHash::HasLetter( char letter )
 }
 
 
-std::list< LetterNode* >& LetterHash::operator[] ( char letter )
+std::list< LetterNode* >& LetterNodeListMap::operator[] ( char letter )
 {
   int letter_index = IndexForChar( letter );
   std::list< LetterNode* > *list = letters_[ letter_index ];
@@ -82,13 +82,13 @@ std::list< LetterNode* >& LetterHash::operator[] ( char letter )
 }
 
 
-std::list< LetterNode* >* LetterHash::ListPointerAt( char letter )
+std::list< LetterNode* >* LetterNodeListMap::ListPointerAt( char letter )
 {
   return letters_[ IndexForChar( letter ) ];
 }
 
 
-bool LetterHash::HasLetter( char letter ) const
+bool LetterNodeListMap::HasLetter( char letter ) const
 {
   return letters_[ IndexForChar( letter ) ] != NULL;
 }

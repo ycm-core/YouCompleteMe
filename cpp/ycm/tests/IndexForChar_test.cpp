@@ -16,7 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
-#include "LetterHash.h"
+#include "LetterNodeListMap.h"
 
 namespace YouCompleteMe
 {

@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LETTERHASH_H_BRK2UMC1
-#define LETTERHASH_H_BRK2UMC1
+#ifndef LETTERNODELISTMAP_H_BRK2UMC1
+#define LETTERNODELISTMAP_H_BRK2UMC1
 
 #include <vector>
 #include <list>
@@ -34,11 +34,11 @@ extern const int kNumLetters;
 int IndexForChar( char letter );
 bool IsUppercase( char letter );
 
-class LetterHash : boost::noncopyable
+class LetterNodeListMap : boost::noncopyable
 {
 public:
-  LetterHash();
-  ~LetterHash();
+  LetterNodeListMap();
+  ~LetterNodeListMap();
 
   bool HasLetter( char letter );
 
@@ -55,5 +55,5 @@ private:
 
 } // namespace YouCompleteMe
 
-#endif /* end of include guard: LETTERHASH_H_BRK2UMC1 */
+#endif /* end of include guard: LETTERNODELISTMAP_H_BRK2UMC1 */
 
