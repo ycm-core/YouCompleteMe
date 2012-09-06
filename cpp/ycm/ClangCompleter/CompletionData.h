@@ -25,8 +25,6 @@
 namespace YouCompleteMe
 {
 
-std::string CXStringToString( CXString text );
-
 // This class holds pieces of information about a single completion coming from
 // clang. These pieces are shown in Vim's UI in different ways.
 //
