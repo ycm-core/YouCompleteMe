@@ -18,6 +18,8 @@
 #ifndef UNSAVEDFILE_H_0GIYZQL4
 #define UNSAVEDFILE_H_0GIYZQL4
 
+#include <cstddef>
+
 struct UnsavedFile
 {
   UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
