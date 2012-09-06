@@ -28,6 +28,8 @@
 namespace YouCompleteMe
 {
 
+std::string CXStringToString( CXString text );
+
 std::vector< CompletionData > ToCompletionDataVector(
     CXCodeCompleteResults *results );
 

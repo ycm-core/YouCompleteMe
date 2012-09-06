@@ -16,6 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "CompletionData.h"
+#include "ClangUtils.h"
 
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/move/move.hpp>
@@ -144,18 +145,6 @@ std::string RemoveTwoConsecutiveUnderscores( std::string text )
 
 namespace YouCompleteMe
 {
-
-std::string CXStringToString( CXString text )
-{
-  std::string final_string;
-  if ( !text.data )
-    return final_string;
-
-  final_string = std::string( clang_getCString( text ) );
-  clang_disposeString( text );
-  return final_string;
-}
-
 
 CompletionData::CompletionData( const CXCompletionResult &completion_result )
 {
