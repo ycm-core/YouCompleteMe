@@ -20,7 +20,7 @@
 import vim
 
 def CurrentLineAndColumn():
-  """Returns the 0-based current line."""
+  """Returns the 0-based current line and 0-based current column."""
   # See the comment in CurrentColumn about the calculation for the line and
   # column number
   line, column = vim.current.window.cursor
