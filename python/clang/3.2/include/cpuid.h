@@ -1,4 +1,4 @@
-/*===---- immintrin.h - Intel intrinsics -----------------------------------===
+/*===---- cpuid.h - X86 cpu model detection --------------------------------===
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,55 +21,13 @@
  *===-----------------------------------------------------------------------===
  */
 
-#ifndef __IMMINTRIN_H
-#define __IMMINTRIN_H
-
-#ifdef __MMX__
-#include <mmintrin.h>
+#if !(__x86_64__ || __i386__)
+#error this header is for x86 only
 #endif
 
-#ifdef __SSE__
-#include <xmmintrin.h>
-#endif
-
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
-
-#ifdef __SSE3__
-#include <pmmintrin.h>
-#endif
-
-#ifdef __SSSE3__
-#include <tmmintrin.h>
-#endif
-
-#if defined (__SSE4_2__) || defined (__SSE4_1__)
-#include <smmintrin.h>
-#endif
-
-#if defined (__AES__)
-#include <wmmintrin.h>
-#endif
-
-#ifdef __AVX__
-#include <avxintrin.h>
-#endif
-
-#ifdef __AVX2__
-#include <avx2intrin.h>
-#endif
-
-#ifdef __BMI__
-#include <bmiintrin.h>
-#endif
-
-#ifdef __BMI2__
-#include <bmi2intrin.h>
-#endif
-
-#ifdef __LZCNT__
-#include <lzcntintrin.h>
-#endif
-
-#endif /* __IMMINTRIN_H */
+static inline int __get_cpuid (unsigned int level, unsigned int *eax,
+                               unsigned int *ebx, unsigned int *ecx,
+                               unsigned int *edx) {
+    __asm("cpuid" : "=a"(*eax), "=b" (*ebx), "=c"(*ecx), "=d"(*edx) : "0"(level));
+    return 1;
+}

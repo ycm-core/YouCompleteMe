@@ -1,6 +1,4 @@
-/*===---- stddef.h - Basic type definitions --------------------------------===
- *
- * Copyright (c) 2008 Eli Friedman
+/*===---- wmmintrin.h - AES intrinsics ------------------------------------===
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,42 +21,22 @@
  *===-----------------------------------------------------------------------===
  */
 
-#ifndef __STDDEF_H
-#define __STDDEF_H
+#ifndef _WMMINTRIN_H
+#define _WMMINTRIN_H
 
-#ifndef _PTRDIFF_T
-#define _PTRDIFF_T
-typedef __typeof__(((int*)0)-((int*)0)) ptrdiff_t;
-#endif
-#ifndef _SIZE_T
-#define _SIZE_T
-typedef __typeof__(sizeof(int)) size_t;
-#endif
-#ifndef __cplusplus
-#ifndef _WCHAR_T
-#define _WCHAR_T
-typedef __WCHAR_TYPE__ wchar_t;
-#endif
-#endif
+#include <emmintrin.h>
 
-#undef NULL
-#ifdef __cplusplus
-#undef __null  // VC++ hack.
-#define NULL __null
+#if !defined (__AES__) && !defined (__PCLMUL__)
+# error "AES/PCLMUL instructions not enabled"
 #else
-#define NULL ((void*)0)
-#endif
 
-#define offsetof(t, d) __builtin_offsetof(t, d)
+#ifdef __AES__
+#include <__wmmintrin_aes.h>
+#endif /* __AES__ */
 
-#endif /* __STDDEF_H */
+#ifdef __PCLMUL__
+#include <__wmmintrin_pclmul.h>
+#endif /* __PCLMUL__ */
 
-/* Some C libraries expect to see a wint_t here. Others (notably MinGW) will use
-__WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
-#if defined(__need_wint_t)
-#if !defined(_WINT_T)
-#define _WINT_T
-typedef __WINT_TYPE__ wint_t;
-#endif /* _WINT_T */
-#undef __need_wint_t
-#endif /* __need_wint_t */
+#endif /* __AES__ || __PCLMUL__ */
+#endif /* _WMMINTRIN_H */
