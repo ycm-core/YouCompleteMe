@@ -75,6 +75,7 @@ endif()
 # expression" pops up when trying to compile anything that uses
 # boost/chrono/duration.hpp (namely boost/thread for us). This is a workaround
 # that prevents this from happening. Also present in cpp/ycm/CMakeLists.txt.
+# See here for more details: https://svn.boost.org/trac/boost/ticket/7671
 # TODO: remove this when it's fixed upstream (probably boost 1.53).
 add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
 
