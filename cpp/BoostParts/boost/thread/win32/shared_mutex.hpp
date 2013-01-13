@@ -221,6 +221,7 @@ namespace boost
             }
         }
 
+#ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_lock_shared_for(const chrono::duration<Rep, Period>& rel_time)
         {
@@ -327,6 +328,7 @@ namespace boost
             BOOST_ASSERT(res==0);
           }
         }
+#endif
 
         void unlock_shared()
         {
@@ -490,7 +492,7 @@ namespace boost
             }
         }
 
-
+#ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_lock_for(const chrono::duration<Rep, Period>& rel_time)
         {
@@ -598,6 +600,7 @@ namespace boost
             BOOST_ASSERT(wait_res<2);
           }
         }
+#endif
 
         void unlock()
         {

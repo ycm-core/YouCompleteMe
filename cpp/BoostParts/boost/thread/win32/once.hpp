@@ -157,7 +157,9 @@ namespace boost
             status=BOOST_INTERLOCKED_COMPARE_EXCHANGE(&flag.status,running_value,0);
             if(!status)
             {
-                try
+#ifndef BOOST_NO_EXCEPTIONS
+                try // BOOST_NO_EXCEPTIONS protected
+#endif
                 {
                     if(!event_handle)
                     {
@@ -185,7 +187,8 @@ namespace boost
                     }
                     break;
                 }
-                catch(...)
+#ifndef BOOST_NO_EXCEPTIONS
+                catch(...) // BOOST_NO_EXCEPTIONS protected
                 {
                     BOOST_INTERLOCKED_EXCHANGE(&flag.status,0);
                     if(!event_handle)
@@ -196,8 +199,9 @@ namespace boost
                     {
                         ::boost::detail::win32::SetEvent(event_handle);
                     }
-                    throw;
+                    throw; // BOOST_NO_EXCEPTIONS protected
                 }
+#endif
             }
 
             if(!counted)

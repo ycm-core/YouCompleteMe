@@ -105,7 +105,7 @@ public:
   typedef vertex_name_type argument_type;
   typedef VertexProperty result_type;
 
-  VertexProperty operator()(const vertex_name_type& name)
+  VertexProperty operator()(const vertex_name_type&)
   {
       boost::throw_exception(std::runtime_error("add_vertex: "
                                                 "unable to create a vertex from its name"));
@@ -156,51 +156,6 @@ struct internal_vertex_constructor<property<Tag, T, Base> >
 #endif
 
 /*******************************************************************
- * Named graph-specific metafunctions                              *
- *******************************************************************/
-namespace detail {
-  /** @internal
-   * Extracts the type of a bundled vertex property from a vertex
-   * property. The primary template matches when we have hit the end
-   * of the @c property<> list.
-   */
-  template<typename VertexProperty>
-  struct extract_bundled_vertex
-  {
-    typedef VertexProperty type;
-  };
-
-  /** @internal
-   * Recursively extract the bundled vertex property from a vertex
-   * property.
-   */
-  template<typename Tag, typename T, typename Base>
-  struct extract_bundled_vertex<property<Tag, T, Base> >
-    : extract_bundled_vertex<Base>
-  { };
-
-  /**
-   * We have found the bundled vertex property type, marked with
-   * vertex_bundle_t.
-   */
-  template<typename T, typename Base>
-  struct extract_bundled_vertex<property<vertex_bundle_t, T, Base> >
-  {
-    typedef T type;
-  };
-
-  /**
-   * Translate @c no_property into @c error_property_not_found when we
-   * have failed to extract a bundled vertex property type.
-   */
-  template<>
-  struct extract_bundled_vertex<no_property>
-  {
-    typedef boost::detail::error_property_not_found type;
-  };
-}
-
-/*******************************************************************
  * Named graph mixin                                               *
  *******************************************************************/
 
@@ -228,7 +183,7 @@ public:
   typedef typename internal_vertex_name<VertexProperty>::type extract_name_type;
   /// The type of the "bundled" property, from which the name can be
   /// extracted.
-  typedef typename detail::extract_bundled_vertex<VertexProperty>::type
+  typedef typename lookup_one_property<VertexProperty, vertex_bundle_t>::type
     bundled_vertex_property_type;
 
   /// The type of the function object that generates vertex properties
@@ -477,7 +432,7 @@ struct maybe_named_graph<Graph, Vertex, VertexProperty, void>
 {
   /// The type of the "bundled" property, from which the name can be
   /// extracted.
-  typedef typename detail::extract_bundled_vertex<VertexProperty>::type
+  typedef typename lookup_one_property<VertexProperty, vertex_bundle_t>::type
     bundled_vertex_property_type;
 
   /// Notify the named_graph that we have added the given vertex. This

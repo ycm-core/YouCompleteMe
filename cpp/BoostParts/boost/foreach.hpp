@@ -437,7 +437,6 @@ inline T (*&to_ptr(T (&)[N]))[N]
     static T (*t)[N] = 0;
     return t;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // derefof
@@ -453,6 +452,11 @@ inline T &derefof(T *t)
         )
     );
 }
+
+# define BOOST_FOREACH_DEREFOF(T) boost::foreach_detail_::derefof(*T)
+#else
+# define BOOST_FOREACH_DEREFOF(T) (*T)
+#endif
 
 #if defined(BOOST_FOREACH_COMPILE_TIME_CONST_RVALUE_DETECTION)                                  \
  && !defined(BOOST_NO_RVALUE_REFERENCES)
@@ -667,7 +671,7 @@ begin(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>(
-        iterator(boost::begin(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(boost::begin(BOOST_FOREACH_DEREFOF((auto_any_cast<type *, boost::mpl::false_>(col))))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -707,7 +711,7 @@ end(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>(
-        iterator(boost::end(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(boost::end(BOOST_FOREACH_DEREFOF((auto_any_cast<type *, boost::mpl::false_>(col))))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -786,7 +790,7 @@ rbegin(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>(
-        iterator(boost::rbegin(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(boost::rbegin(BOOST_FOREACH_DEREFOF((auto_any_cast<type *, boost::mpl::false_>(col))))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -829,7 +833,7 @@ rend(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>(
-        iterator(boost::rend(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(boost::rend(BOOST_FOREACH_DEREFOF((auto_any_cast<type *, boost::mpl::false_>(col))))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION

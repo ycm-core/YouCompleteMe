@@ -24,7 +24,7 @@
 #include <boost/preprocessor/facilities/empty.hpp>
 
 namespace std{
-    #if defined(__LIBCOMO__) || defined(__QNXNTO__) 
+    #if defined(__LIBCOMO__)
         using ::va_list;
     #endif
 } // namespace std

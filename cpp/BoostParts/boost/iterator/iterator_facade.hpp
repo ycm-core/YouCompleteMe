@@ -147,7 +147,7 @@ namespace boost
 
         // Returning a mutable reference allows nonsense like
         // (*r++).mutate(), but it imposes fewer assumptions about the
-        // behavior of the value_type.  In particular, recall taht
+        // behavior of the value_type.  In particular, recall that
         // (*r).mutate() is legal if operator* returns by value.
         value_type&
         operator*() const
@@ -294,7 +294,7 @@ namespace boost
 
     // operator->() needs special support for input iterators to strictly meet the
     // standard's requirements. If *i is not a reference type, we must still
-    // produce a lvalue to which a pointer can be formed.  We do that by
+    // produce an lvalue to which a pointer can be formed.  We do that by
     // returning a proxy object containing an instance of the reference object.
     template <class Reference, class Pointer>
     struct operator_arrow_dispatch // proxy references

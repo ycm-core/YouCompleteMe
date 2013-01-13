@@ -1395,9 +1395,20 @@ namespace detail
     else if (prms & remove_perms)
       prms = current_status.permissions() & ~prms;
 
-    // Mac OS X Lion and some other platforms don't support fchmodat()  
+    // Mac OS X Lion and some other platforms don't support fchmodat().
+    // Solaris (SunPro and gcc) only support fchmodat() on Solaris 11 and higher,
+    // and a runtime check is too much trouble.
+    // Linux does not support permissions on symbolic links and has no plans to
+    // support them in the future.  The chmod() code is thus more practical,
+    // rather than always hitting ENOTSUP when sending in AT_SYMLINK_NO_FOLLOW.
+    //  - See the 3rd paragraph of
+    // "Symbolic link ownership, permissions, and timestamps" at:
+    //   "http://man7.org/linux/man-pages/man7/symlink.7.html"
+    //  - See the fchmodat() Linux man page:
+    //   "http://man7.org/linux/man-pages/man2/fchmodat.2.html"
 #   if defined(AT_FDCWD) && defined(AT_SYMLINK_NOFOLLOW) \
-      && (!defined(__SUNPRO_CC) || __SUNPRO_CC > 0x5100)
+      && !(defined(__SUNPRO_CC) || defined(sun)) \
+      && !(defined(linux) || defined(__linux) || defined(__linux__))
       if (::fchmodat(AT_FDCWD, p.c_str(), mode_cast(prms),
            !(prms & symlink_perms) ? 0 : AT_SYMLINK_NOFOLLOW))
 #   else  // fallback if fchmodat() not supported

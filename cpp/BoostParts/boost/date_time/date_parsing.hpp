@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2009-06-04 04:24:49 -0400 (Thu, 04 Jun 2009) $
+ * $Date: 2012-09-30 16:25:22 -0700 (Sun, 30 Sep 2012) $
  */
 
 #include <string>
@@ -148,6 +148,7 @@ namespace date_time {
             day = boost::lexical_cast<unsigned short>(*beg);
             break;
           }
+          default: break;
         } //switch
       }
       return date_type(year, month, day);
@@ -180,6 +181,7 @@ namespace date_time {
         case 0: y = i; break;
         case 1: m = i; break;
         case 2: d = i; break;
+        default:       break;
         }
         pos++;
       }

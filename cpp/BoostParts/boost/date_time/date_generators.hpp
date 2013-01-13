@@ -2,11 +2,11 @@
 #define DATE_TIME_DATE_GENERATORS_HPP__
 
 /* Copyright (c) 2002,2003,2005 CrystalClear Software, Inc.
- * Use, modification and distribution is subject to the 
+ * Use, modification and distribution is subject to the
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
- * Author: Jeff Garland, Bart Garst 
- * $Date: 2008-11-12 14:37:53 -0500 (Wed, 12 Nov 2008) $
+ * Author: Jeff Garland, Bart Garst
+ * $Date: 2012-09-22 15:33:33 -0700 (Sat, 22 Sep 2012) $
  */
 
 /*! @file date_generators.hpp
@@ -34,16 +34,16 @@ namespace date_time {
   public:
     typedef typename date_type::calendar_type calendar_type;
     typedef typename calendar_type::year_type        year_type;
-    year_based_generator() {};
-    virtual ~year_based_generator() {};
+    year_based_generator() {}
+    virtual ~year_based_generator() {}
     virtual date_type get_date(year_type y) const = 0;
     //! Returns a string for use in a POSIX time_zone string
     virtual std::string to_string() const =0;
   };
-  
+
   //! Generates a date by applying the year to the given month and day.
   /*!
-    Example usage: 
+    Example usage:
     @code
     partial_date pd(1, Jan);
     partial_date pd2(70);
@@ -123,9 +123,9 @@ namespace date_time {
      //months are equal
      return (day_ < rhs.day_);
    }
-   
+
    // added for streaming purposes
-   month_type month() const 
+   month_type month() const
    {
      return month_;
    }
@@ -135,15 +135,15 @@ namespace date_time {
    }
 
    //! Returns string suitable for use in POSIX time zone string
-   /*! Returns string formatted with up to 3 digits: 
-    * Jan-01 == "0" 
+   /*! Returns string formatted with up to 3 digits:
+    * Jan-01 == "0"
     * Feb-29 == "58"
     * Dec-31 == "365" */
    virtual std::string to_string() const
    {
      std::ostringstream ss;
      date_type d(2004, month_, day_);
-     unsigned short c = d.day_of_year();     
+     unsigned short c = d.day_of_year();
      c--; // numbered 0-365 while day_of_year is 1 based...
      ss << c;
      return ss.str();
@@ -161,7 +161,7 @@ namespace date_time {
   /*! Based on the idea in Cal. Calc. for finding holidays that are
    *  the 'first Monday of September'. When instantiated with
    *  'fifth' kday of month, the result will be the last kday of month
-   *  which can be the fourth or fifth depending on the structure of 
+   *  which can be the fourth or fifth depending on the structure of
    *  the month.
    *
    *  The algorithm here basically guesses for the first
@@ -169,8 +169,8 @@ namespace date_time {
    *  type.  That is, if the first of the month is a Tuesday
    *  and it needs Wenesday then we simply increment by a day
    *  and then we can add the length of a week until we get
-   *  to the 'nth kday'.  There are probably more efficient 
-   *  algorithms based on using a mod 7, but this one works 
+   *  to the 'nth kday'.  There are probably more efficient
+   *  algorithms based on using a mod 7, but this one works
    *  reasonably well for basic applications.
    *  \ingroup date_alg
    */
@@ -233,7 +233,7 @@ namespace date_time {
     virtual std::string to_string() const
     {
      std::ostringstream ss;
-     ss << 'M' 
+     ss << 'M'
        << static_cast<int>(month_) << '.'
        << static_cast<int>(wn_) << '.'
        << static_cast<int>(dow_);
@@ -244,7 +244,7 @@ namespace date_time {
     week_num wn_;
     day_of_week_type dow_;
   };
-  
+
   //! Useful generator functor for finding holidays and daylight savings
   /*! Similar to nth_kday_of_month, but requires less paramters
    *  \ingroup date_alg
@@ -290,7 +290,7 @@ namespace date_time {
     virtual std::string to_string() const
     {
      std::ostringstream ss;
-     ss << 'M' 
+     ss << 'M'
        << static_cast<int>(month_) << '.'
        << 1 << '.'
        << static_cast<int>(dow_);
@@ -300,9 +300,9 @@ namespace date_time {
     month_type month_;
     day_of_week_type dow_;
   };
-  
-  
-  
+
+
+
   //! Calculate something like Last Sunday of January
   /*! Useful generator functor for finding holidays and daylight savings
    *  Get the last day of the month and then calculate the difference
@@ -351,7 +351,7 @@ namespace date_time {
     virtual std::string to_string() const
     {
       std::ostringstream ss;
-      ss << 'M' 
+      ss << 'M'
          << static_cast<int>(month_) << '.'
          << 5 << '.'
          << static_cast<int>(dow_);
@@ -361,8 +361,8 @@ namespace date_time {
     month_type month_;
     day_of_week_type dow_;
    };
-  
-  
+
+
   //! Calculate something like "First Sunday after Jan 1,2002
   /*! Date generator that takes a date and finds kday after
    *@code
@@ -400,7 +400,7 @@ namespace date_time {
   private:
     day_of_week_type dow_;
   };
-  
+
   //! Calculate something like "First Sunday before Jan 1,2002
   /*! Date generator that takes a date and finds kday after
    *@code
@@ -438,10 +438,10 @@ namespace date_time {
   private:
     day_of_week_type dow_;
   };
-  
+
   //! Calculates the number of days until the next weekday
   /*! Calculates the number of days until the next weekday.
-   * If the date given falls on a Sunday and the given weekday 
+   * If the date given falls on a Sunday and the given weekday
    * is Tuesday the result will be 2 days */
   template<typename date_type, class weekday_type>
   inline
@@ -458,8 +458,8 @@ namespace date_time {
 
   //! Calculates the number of days since the previous weekday
   /*! Calculates the number of days since the previous weekday
-   * If the date given falls on a Sunday and the given weekday 
-   * is Tuesday the result will be 5 days. The answer will be a positive 
+   * If the date given falls on a Sunday and the given weekday
+   * is Tuesday the result will be 5 days. The answer will be a positive
    * number because Tuesday is 5 days before Sunday, not -5 days before. */
   template<typename date_type, class weekday_type>
   inline
@@ -477,9 +477,9 @@ namespace date_time {
   }
 
   //! Generates a date object representing the date of the following weekday from the given date
-  /*! Generates a date object representing the date of the following 
-   * weekday from the given date. If the date given is 2004-May-9 
-   * (a Sunday) and the given weekday is Tuesday then the resulting date 
+  /*! Generates a date object representing the date of the following
+   * weekday from the given date. If the date given is 2004-May-9
+   * (a Sunday) and the given weekday is Tuesday then the resulting date
    * will be 2004-May-11. */
   template<class date_type, class weekday_type>
   inline
@@ -489,9 +489,9 @@ namespace date_time {
   }
 
   //! Generates a date object representing the date of the previous weekday from the given date
-  /*! Generates a date object representing the date of the previous 
-   * weekday from the given date. If the date given is 2004-May-9 
-   * (a Sunday) and the given weekday is Tuesday then the resulting date 
+  /*! Generates a date object representing the date of the previous
+   * weekday from the given date. If the date given is 2004-May-9
+   * (a Sunday) and the given weekday is Tuesday then the resulting date
    * will be 2004-May-4. */
   template<class date_type, class weekday_type>
   inline

@@ -249,12 +249,13 @@ inline int fpclassify BOOST_NO_MACRO_EXPAND(T t)
 {
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
+   typedef typename tools::promote_args<T>::type value_type;
 #ifdef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
    if(std::numeric_limits<T>::is_specialized && detail::is_generic_tag_false(static_cast<method*>(0)))
-      return detail::fpclassify_imp(t, detail::generic_tag<true>());
-   return detail::fpclassify_imp(t, method());
+      return detail::fpclassify_imp(static_cast<value_type>(t), detail::generic_tag<true>());
+   return detail::fpclassify_imp(static_cast<value_type>(t), method());
 #else
-   return detail::fpclassify_imp(t, method());
+   return detail::fpclassify_imp(static_cast<value_type>(t), method());
 #endif
 }
 
@@ -312,7 +313,8 @@ inline bool (isfinite)(T x)
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
    typedef typename boost::is_floating_point<T>::type fp_tag;
-   return detail::isfinite_impl(x, method());
+   typedef typename tools::promote_args<T>::type value_type;
+   return detail::isfinite_impl(static_cast<value_type>(x), method());
 }
 
 //------------------------------------------------------------------------------
@@ -371,7 +373,8 @@ inline bool (isnormal)(T x)
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
    typedef typename boost::is_floating_point<T>::type fp_tag;
-   return detail::isnormal_impl(x, method());
+   typedef typename tools::promote_args<T>::type value_type;
+   return detail::isnormal_impl(static_cast<value_type>(x), method());
 }
 
 //------------------------------------------------------------------------------
@@ -448,7 +451,8 @@ inline bool (isinf)(T x)
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
    typedef typename boost::is_floating_point<T>::type fp_tag;
-   return detail::isinf_impl(x, method());
+   typedef typename tools::promote_args<T>::type value_type;
+   return detail::isinf_impl(static_cast<value_type>(x), method());
 }
 
 //------------------------------------------------------------------------------

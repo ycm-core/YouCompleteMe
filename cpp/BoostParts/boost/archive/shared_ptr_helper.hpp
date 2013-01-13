@@ -127,7 +127,7 @@ public:
     template<class T>
     struct non_polymorphic {
         static const boost::serialization::extended_type_info * 
-        get_object_identifier(T & t){
+        get_object_identifier(T &){
             return & boost::serialization::singleton<
                 BOOST_DEDUCED_TYPENAME 
                 boost::serialization::type_info_implementation< T >::type

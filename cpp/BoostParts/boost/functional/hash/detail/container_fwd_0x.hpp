@@ -10,32 +10,20 @@
 
 // std::array
 
-#if !defined(BOOST_NO_0X_HDR_ARRAY)
-    // Don't forward declare std::array for Dinkumware, as it seems to be
-    // just 'using std::tr1::array'.
-#   if (defined(BOOST_DETAIL_NO_CONTAINER_FWD) && \
-        !defined(BOOST_DETAIL_TEST_FORCE_CONTAINER_FWD)) || \
-        (defined(_YVALS) && !defined(__IBMCPP__)) || defined(_CPPLIB_VER)
-#       include <array>
-#    else
-namespace std {
-    template <class, std::size_t> class array;
-}
-#    endif
+#if !defined(BOOST_NO_CXX11_HDR_ARRAY)
+#   include <array>
 #endif
 
 // std::tuple
 
-#if !defined(BOOST_NO_0X_HDR_TUPLE)
-#   if (defined(BOOST_DETAIL_NO_CONTAINER_FWD) && \
-        !defined(BOOST_DETAIL_TEST_FORCE_CONTAINER_FWD)) || \
-        defined(BOOST_NO_VARIADIC_TEMPLATES)
-#       include <tuple>
-#    else
-namespace std {
-    template <typename...> class tuple;
-}
-#    endif
+#if !defined(BOOST_NO_CXX11_HDR_TUPLE)
+#   include <tuple>
+#endif
+
+// std::shared_ptr/std::unique_ptr
+
+#if !defined(BOOST_NO_CXX11_HDR_MEMORY)
+#   include <memory>
 #endif
 
 #endif

@@ -65,7 +65,7 @@ namespace boost
     }
 }
 
-#if ! defined  BOOST_NO_RVALUE_REFERENCES
+#if ! defined  BOOST_NO_CXX11_RVALUE_REFERENCES
 
 #define BOOST_THREAD_RV_REF(TYPE) BOOST_RV_REF(TYPE)
 #define BOOST_THREAD_RV_REF_BEG BOOST_RV_REF_BEG
@@ -84,7 +84,7 @@ namespace boost
       {}; \
     }
 
-#elif ! defined  BOOST_NO_RVALUE_REFERENCES && defined  BOOST_MSVC
+#elif ! defined  BOOST_NO_CXX11_RVALUE_REFERENCES && defined  BOOST_MSVC
 
 #define BOOST_THREAD_RV_REF(TYPE) BOOST_RV_REF(TYPE)
 #define BOOST_THREAD_RV_REF_BEG BOOST_RV_REF_BEG
@@ -176,7 +176,7 @@ namespace detail
 #endif
 
 
-#if ! defined  BOOST_NO_RVALUE_REFERENCES
+#if ! defined  BOOST_NO_CXX11_RVALUE_REFERENCES
 
 #define BOOST_THREAD_MOVABLE(TYPE)
 
@@ -227,7 +227,7 @@ namespace detail
 
 
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 namespace boost
 {  namespace thread_detail
   {

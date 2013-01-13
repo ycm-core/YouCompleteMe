@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2010-01-10 14:17:23 -0500 (Sun, 10 Jan 2010) $
+ * $Date: 2012-09-22 15:33:33 -0700 (Sat, 22 Sep 2012) $
  */
 
 #include <boost/operators.hpp>
@@ -191,8 +191,8 @@ namespace date_time {
       dates.  It is not exposed to users since that would require class
       users to understand the inner workings of the date class.
     */
-    explicit date(date_int_type days) : days_(days) {};
-    explicit date(date_rep_type days) : days_(days.as_number()) {};
+    explicit date(date_int_type days) : days_(days) {}
+    explicit date(date_rep_type days) : days_(days.as_number()) {}
     date_int_type days_;
 
   };

@@ -53,11 +53,12 @@ namespace boost {
   };
 
 
+  // Multiple-source version
   template <class IncidenceGraph, class Buffer, class BFSVisitor,
-            class ColorMap>
+            class ColorMap, class SourceIterator>
   void breadth_first_visit
     (const IncidenceGraph& g,
-     typename graph_traits<IncidenceGraph>::vertex_descriptor s,
+     SourceIterator sources_begin, SourceIterator sources_end,
      Buffer& Q, BFSVisitor vis, ColorMap color)
   {
     BOOST_CONCEPT_ASSERT(( IncidenceGraphConcept<IncidenceGraph> ));
@@ -70,8 +71,11 @@ namespace boost {
     typedef color_traits<ColorValue> Color;
     typename GTraits::out_edge_iterator ei, ei_end;
 
-    put(color, s, Color::gray());             vis.discover_vertex(s, g);
-    Q.push(s);
+    for (; sources_begin != sources_end; ++sources_begin) {
+      Vertex s = *sources_begin;
+      put(color, s, Color::gray());           vis.discover_vertex(s, g);
+      Q.push(s);
+    }
     while (! Q.empty()) {
       Vertex u = Q.top(); Q.pop();            vis.examine_vertex(u, g);
       for (boost::tie(ei, ei_end) = out_edges(u, g); ei != ei_end; ++ei) {
@@ -89,12 +93,25 @@ namespace boost {
     } // end while
   } // breadth_first_visit
 
+  // Single-source version
+  template <class IncidenceGraph, class Buffer, class BFSVisitor,
+            class ColorMap>
+  void breadth_first_visit
+    (const IncidenceGraph& g,
+     typename graph_traits<IncidenceGraph>::vertex_descriptor s,
+     Buffer& Q, BFSVisitor vis, ColorMap color)
+  {
+    typename graph_traits<IncidenceGraph>::vertex_descriptor sources[1] = {s};
+    breadth_first_visit(g, sources, sources + 1, Q, vis, color);
+  }
 
-  template <class VertexListGraph, class Buffer, class BFSVisitor,
+
+  template <class VertexListGraph, class SourceIterator,
+            class Buffer, class BFSVisitor,
             class ColorMap>
   void breadth_first_search
     (const VertexListGraph& g,
-     typename graph_traits<VertexListGraph>::vertex_descriptor s,
+     SourceIterator sources_begin, SourceIterator sources_end,
      Buffer& Q, BFSVisitor vis, ColorMap color)
   {
     // Initialization
@@ -105,7 +122,18 @@ namespace boost {
       vis.initialize_vertex(*i, g);
       put(color, *i, Color::white());
     }
-    breadth_first_visit(g, s, Q, vis, color);
+    breadth_first_visit(g, sources_begin, sources_end, Q, vis, color);
+  }
+
+  template <class VertexListGraph, class Buffer, class BFSVisitor,
+            class ColorMap>
+  void breadth_first_search
+    (const VertexListGraph& g,
+     typename graph_traits<VertexListGraph>::vertex_descriptor s,
+     Buffer& Q, BFSVisitor vis, ColorMap color)
+  {
+    typename graph_traits<VertexListGraph>::vertex_descriptor sources[1] = {s};
+    breadth_first_search(g, sources, sources + 1, Q, vis, color);
   }
 
   namespace graph { struct bfs_visitor_event_not_overridden {}; }
@@ -270,13 +298,13 @@ namespace boost {
     };
 
     template <>
-    struct bfs_dispatch<detail::error_property_not_found> {
+    struct bfs_dispatch<param_not_found> {
       template <class VertexListGraph, class P, class T, class R>
       static void apply
       (VertexListGraph& g,
        typename graph_traits<VertexListGraph>::vertex_descriptor s,
        const bgl_named_params<P, T, R>& params,
-       detail::error_property_not_found)
+       param_not_found)
       {
         null_visitor null_vis;
 
@@ -294,7 +322,7 @@ namespace boost {
 
   } // namespace detail
 
-
+#if 1
   // Named Parameter Variant
   template <class VertexListGraph, class P, class T, class R>
   void breadth_first_search
@@ -307,11 +335,11 @@ namespace boost {
     // graph is not really const since we may write to property maps
     // of the graph.
     VertexListGraph& ng = const_cast<VertexListGraph&>(g);
-    typedef typename property_value< bgl_named_params<P,T,R>,
-      vertex_color_t>::type C;
+    typedef typename get_param_type< vertex_color_t, bgl_named_params<P,T,R> >::type C;
     detail::bfs_dispatch<C>::apply(ng, s, params,
                                    get_param(params, vertex_color));
   }
+#endif
 
 
   // This version does not initialize colors, user has to.
@@ -342,6 +370,33 @@ namespace boost {
        choose_pmap(get_param(params, vertex_color), ng, vertex_color)
        );
   }
+
+  namespace graph {
+    namespace detail {
+      template <typename Graph, typename Source>
+      struct breadth_first_search_impl {
+        typedef void result_type;
+        template <typename ArgPack>
+        void operator()(const Graph& g, const Source& source, const ArgPack& arg_pack) {
+          using namespace boost::graph::keywords;
+          typename boost::graph_traits<Graph>::vertex_descriptor sources[1] = {source};
+          boost::queue<typename boost::graph_traits<Graph>::vertex_descriptor> Q;
+          boost::breadth_first_search(g,
+                                      &sources[0],
+                                      &sources[1], 
+                                      boost::unwrap_ref(arg_pack[_buffer | boost::ref(Q)]),
+                                      arg_pack[_visitor | make_bfs_visitor(null_visitor())],
+                                      boost::detail::make_color_map_from_arg_pack(g, arg_pack));
+        }
+      };
+    }
+    BOOST_GRAPH_MAKE_FORWARDING_FUNCTION(breadth_first_search, 2, 4)
+  }
+
+#if 0
+  // Named Parameter Variant
+  BOOST_GRAPH_MAKE_OLD_STYLE_PARAMETER_FUNCTION(breadth_first_search, 2)
+#endif
 
 } // namespace boost
 

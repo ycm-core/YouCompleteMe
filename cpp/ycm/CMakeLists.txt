@@ -39,7 +39,6 @@ include_directories(
   "${CMAKE_SOURCE_DIR}/llvm/tools/clang/include"
   )
 
-
 file( GLOB_RECURSE SOURCES *.h *.cpp )
 
 # The test sources are a part of a different target, so we remove them
@@ -100,6 +99,16 @@ endif()
 if ( EXTRA_RPATH )
   set( CMAKE_INSTALL_RPATH "${EXTRA_RPATH}:${CMAKE_INSTALL_RPATH}" )
 endif()
+
+#############################################################################
+
+# Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
+# other much: a compilation error "Constexpr function never produces a constant
+# expression" pops up when trying to compile anything that uses
+# boost/chrono/duration.hpp (namely boost/thread for us). This is a workaround
+# that prevents this from happening. Also present in cpp/BoostParts/CMakeLists.txt.
+# TODO: remove this when it's fixed upstream (probably boost 1.53).
+add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
 
 #############################################################################
 

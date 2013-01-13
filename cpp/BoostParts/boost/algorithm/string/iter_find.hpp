@@ -60,7 +60,7 @@ namespace boost {
                 a match).
             \param Input A container which will be searched.
             \param Finder A Finder object used for searching
-            \return A reference the result
+            \return A reference to the result
 
             \note Prior content of the result will be overwritten.
         */
@@ -122,7 +122,7 @@ namespace boost {
             Each match is used as a separator of segments. These segments are then
             returned in the result.
 
-            \param Result A 'container container' to container the result of search.
+            \param Result A 'container container' to contain the result of search.
                 Both outer and inner container must have constructor taking a pair
                 of iterators as an argument.
                 Typical type of the result is 
@@ -131,7 +131,7 @@ namespace boost {
                 a match).
             \param Input A container which will be searched.
             \param Finder A finder object used for searching
-            \return A reference the result
+            \return A reference to the result
 
             \note Prior content of the result will be overwritten.
         */

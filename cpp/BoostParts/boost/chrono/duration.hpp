@@ -51,13 +51,17 @@ time2_demo contained this comment:
 #include <boost/detail/workaround.hpp>
 #include <boost/integer_traits.hpp>
 
-#if !defined(BOOST_NO_STATIC_ASSERT) || !defined(BOOST_CHRONO_USES_MPL_ASSERT)
+#if !defined(BOOST_NO_CXX11_STATIC_ASSERT) || !defined(BOOST_CHRONO_USES_MPL_ASSERT)
 #define BOOST_CHRONO_A_DURATION_REPRESENTATION_CAN_NOT_BE_A_DURATION        "A duration representation can not be a duration"
 #define BOOST_CHRONO_SECOND_TEMPLATE_PARAMETER_OF_DURATION_MUST_BE_A_STD_RATIO "Second template parameter of duration must be a boost::ratio"
 #define BOOST_CHRONO_DURATION_PERIOD_MUST_BE_POSITIVE "duration period must be positive"
 #define BOOST_CHRONO_SECOND_TEMPLATE_PARAMETER_OF_TIME_POINT_MUST_BE_A_BOOST_CHRONO_DURATION "Second template parameter of time_point must be a boost::chrono::duration"
 #endif
 
+#ifndef BOOST_CHRONO_HEADER_ONLY
+// this must occur after all of the includes and before any code appears:
+#include <boost/config/abi_prefix.hpp> // must be the last #include
+#endif
 
 //----------------------------------------------------------------------------//
 //                                                                            //
@@ -336,17 +340,17 @@ namespace detail
 namespace detail {
     template <class T, bool = is_arithmetic<T>::value>
     struct chrono_numeric_limits {
-        static T lowest() throw() {return (std::numeric_limits<T>::min)  ();}
+        static BOOST_CHRONO_LIB_CONSTEXPR T lowest() BOOST_CHRONO_LIB_NOEXCEPT_OR_THROW {return (std::numeric_limits<T>::min)  ();}
     };
 
     template <class T>
     struct chrono_numeric_limits<T,true> {
-        static T lowest() throw() {return (std::numeric_limits<T>::min)  ();}
+        static BOOST_CHRONO_LIB_CONSTEXPR T lowest() BOOST_CHRONO_LIB_NOEXCEPT_OR_THROW {return (std::numeric_limits<T>::min)  ();}
     };
 
     template <>
     struct chrono_numeric_limits<float,true> {
-        static float lowest() throw()
+        static BOOST_CHRONO_LIB_CONSTEXPR float lowest() BOOST_CHRONO_LIB_NOEXCEPT_OR_THROW
         {
             return -(std::numeric_limits<float>::max) ();
         }
@@ -354,7 +358,7 @@ namespace detail {
 
     template <>
     struct chrono_numeric_limits<double,true> {
-        static double lowest() throw()
+        static BOOST_CHRONO_LIB_CONSTEXPR double lowest() BOOST_CHRONO_LIB_NOEXCEPT_OR_THROW
         {
             return -(std::numeric_limits<double>::max) ();
         }
@@ -362,7 +366,7 @@ namespace detail {
 
     template <>
     struct chrono_numeric_limits<long double,true> {
-        static long double lowest() throw()
+        static BOOST_CHRONO_LIB_CONSTEXPR long double lowest() BOOST_CHRONO_LIB_NOEXCEPT_OR_THROW
         {
             return -(std::numeric_limits<long double>::max)();
         }
@@ -377,12 +381,12 @@ template <class Rep>
 struct duration_values
 {
     static BOOST_CONSTEXPR Rep zero() {return Rep(0);}
-    static BOOST_CONSTEXPR Rep max BOOST_PREVENT_MACRO_SUBSTITUTION ()
+    static BOOST_CHRONO_LIB_CONSTEXPR Rep max BOOST_PREVENT_MACRO_SUBSTITUTION ()
     {
         return (std::numeric_limits<Rep>::max)();
     }
 
-    static BOOST_CONSTEXPR Rep min BOOST_PREVENT_MACRO_SUBSTITUTION ()
+    static BOOST_CHRONO_LIB_CONSTEXPR Rep min BOOST_PREVENT_MACRO_SUBSTITUTION ()
     {
         return detail::numeric_limits<Rep>::lowest();
     }
@@ -447,9 +451,9 @@ namespace chrono {
                     >
                 >::type* = 0
             ) : rep_(r) { }
-        ~duration() {} //= default;
-        BOOST_CONSTEXPR
-        duration(const duration& rhs) : rep_(rhs.rep_) {} // = default;
+        //~duration() {} //= default;
+        //BOOST_CONSTEXPR
+        //duration(const duration& rhs) : rep_(rhs.rep_) {} // = default;
         duration& operator=(const duration& rhs) // = default;
         {
             if (&rhs != this) rep_= rhs.rep_;
@@ -480,7 +484,7 @@ namespace chrono {
         // arithmetic
 
         BOOST_CONSTEXPR
-        duration  operator+() const {return *this;}
+        duration  operator+() const {return duration(rep_);;}
         BOOST_CONSTEXPR
         duration  operator-() const {return duration(-rep_);}
         duration& operator++()      {++rep_; return *this;}
@@ -510,11 +514,11 @@ namespace chrono {
         {
             return duration(duration_values<rep>::zero());
         }
-        static BOOST_CONSTEXPR duration min BOOST_PREVENT_MACRO_SUBSTITUTION ()
+        static BOOST_CHRONO_LIB_CONSTEXPR duration min BOOST_PREVENT_MACRO_SUBSTITUTION ()
         {
             return duration((duration_values<rep>::min)());
         }
-        static BOOST_CONSTEXPR duration max BOOST_PREVENT_MACRO_SUBSTITUTION ()
+        static BOOST_CHRONO_LIB_CONSTEXPR duration max BOOST_PREVENT_MACRO_SUBSTITUTION ()
         {
             return duration((duration_values<rep>::max)());
         }
@@ -660,7 +664,7 @@ namespace detail
     template <class LhsDuration, class RhsDuration>
     struct duration_eq
     {
-        bool operator()(const LhsDuration& lhs, const RhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const RhsDuration& rhs)
         {
             typedef typename common_type<LhsDuration, RhsDuration>::type CD;
             return CD(lhs).count() == CD(rhs).count();
@@ -670,7 +674,7 @@ namespace detail
     template <class LhsDuration>
     struct duration_eq<LhsDuration, LhsDuration>
     {
-        bool operator()(const LhsDuration& lhs, const LhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const LhsDuration& rhs)
         {
             return lhs.count() == rhs.count();
         }
@@ -679,7 +683,7 @@ namespace detail
     template <class LhsDuration, class RhsDuration>
     struct duration_lt
     {
-        bool operator()(const LhsDuration& lhs, const RhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const RhsDuration& rhs)
         {
             typedef typename common_type<LhsDuration, RhsDuration>::type CD;
             return CD(lhs).count() < CD(rhs).count();
@@ -689,7 +693,7 @@ namespace detail
     template <class LhsDuration>
     struct duration_lt<LhsDuration, LhsDuration>
     {
-        bool operator()(const LhsDuration& lhs, const LhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const LhsDuration& rhs)
         {
             return lhs.count() < rhs.count();
         }
@@ -757,7 +761,7 @@ namespace detail
     // Duration >=
 
     template <class Rep1, class Period1, class Rep2, class Period2>
-    inline
+    inline BOOST_CONSTEXPR
     bool
     operator>=(const duration<Rep1, Period1>& lhs,
           const duration<Rep2, Period2>& rhs)
@@ -782,5 +786,10 @@ namespace detail
 
 } // namespace chrono
 } // namespace boost
+
+#ifndef BOOST_CHRONO_HEADER_ONLY
+// the suffix header occurs after all of our code:
+#include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
+#endif
 
 #endif // BOOST_CHRONO_DURATION_HPP

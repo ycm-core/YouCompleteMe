@@ -1,4 +1,4 @@
-// $Id: tss_pe.cpp 78543 2012-05-22 17:03:15Z anthonyw $
+// $Id: tss_pe.cpp 79373 2012-07-09 05:55:01Z viboes $
 // (C) Copyright Aaron W. LaFramboise, Roland Schwarz, Michael Glassford 2004.
 // (C) Copyright 2007 Roland Schwarz
 // (C) Copyright 2007 Anthony Williams
@@ -11,7 +11,7 @@
 
 #if defined(BOOST_HAS_WINTHREADS) && defined(BOOST_THREAD_BUILD_LIB) 
 
-#if (defined(__MINGW32__) && !defined(_WIN64)) || defined(__MINGW64__)
+#if (defined(__MINGW32__) && !defined(_WIN64)) || defined(__MINGW64__) || (__MINGW64_VERSION_MAJOR)
 
 #include <boost/thread/detail/tss_hooks.hpp>
 
@@ -38,7 +38,7 @@ namespace {
     }
 }
 
-#if defined(__MINGW64__) || (__MINGW32_MAJOR_VERSION >3) ||             \
+#if defined(__MINGW64__) || (__MINGW64_VERSION_MAJOR) || (__MINGW32_MAJOR_VERSION >3) ||             \
     ((__MINGW32_MAJOR_VERSION==3) && (__MINGW32_MINOR_VERSION>=18))
 extern "C"
 {

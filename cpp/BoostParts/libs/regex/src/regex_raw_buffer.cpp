@@ -18,6 +18,7 @@
 
 
 #define BOOST_REGEX_SOURCE
+#include <boost/config.hpp>
 #include <memory>
 #include <cstring>
 #include <boost/assert.hpp>
@@ -45,7 +46,8 @@ void BOOST_REGEX_CALL raw_storage::resize(size_type n)
    // allocate and copy data:
    register pointer ptr = static_cast<pointer>(::operator new(newsize));
    BOOST_REGEX_NOEH_ASSERT(ptr)
-   std::memcpy(ptr, start, datasize);
+   if(start)
+      std::memcpy(ptr, start, datasize);
 
    // get rid of old buffer:
    ::operator delete(start);

@@ -68,7 +68,7 @@ public:
       //   flags |= match_prev_avail;
       BidirectionalIterator next_start = what[0].second;
       match_flag_type f(flags);
-      if(!what.length())
+      if(!what.length() || (f & regex_constants::match_posix))
          f |= regex_constants::match_not_initial_null;
       //if(base != next_start)
       //   f |= regex_constants::match_not_bob;

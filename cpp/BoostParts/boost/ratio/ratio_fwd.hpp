@@ -32,12 +32,7 @@ time2_demo contained this comment:
 #ifndef BOOST_RATIO_RATIO_FWD_HPP
 #define BOOST_RATIO_RATIO_FWD_HPP
 
-#include <boost/cstdint.hpp>
-#ifdef INTMAX_C
-#define BOOST_RATIO_INTMAX_C(a) INTMAX_C(a)
-#else
-#define BOOST_RATIO_INTMAX_C(a) a##LL
-#endif
+#include <boost/ratio/config.hpp>
 
 namespace boost
 {
@@ -82,7 +77,7 @@ typedef ratio<         BOOST_RATIO_INTMAX_C(1000000000), BOOST_RATIO_INTMAX_C(1)
 typedef ratio<      BOOST_RATIO_INTMAX_C(1000000000000), BOOST_RATIO_INTMAX_C(1)> tera;
 typedef ratio<   BOOST_RATIO_INTMAX_C(1000000000000000), BOOST_RATIO_INTMAX_C(1)> peta;
 typedef ratio<BOOST_RATIO_INTMAX_C(1000000000000000000), BOOST_RATIO_INTMAX_C(1)> exa;
-    
+
 }  // namespace boost
 
 

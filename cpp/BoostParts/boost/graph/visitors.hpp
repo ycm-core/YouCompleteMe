@@ -269,7 +269,7 @@ namespace boost {
     {}
 
     template <typename VertexOrEdge, typename Graph>
-    void operator() (VertexOrEdge v, const Graph& g)
+    void operator() (VertexOrEdge v, const Graph&)
     {
       put (property_map_, v, value_);
     }
@@ -292,7 +292,7 @@ namespace boost {
     inline property_put <PropertyMap, EventTag>
     put_property (PropertyMap property_map,
                   typename property_traits <PropertyMap>::value_type value,
-                  EventTag tag)
+                  EventTag)
     {
       return property_put <PropertyMap, EventTag> (property_map, value);
     }

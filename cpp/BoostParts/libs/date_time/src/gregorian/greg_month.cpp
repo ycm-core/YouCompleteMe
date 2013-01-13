@@ -3,7 +3,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-11-23 06:13:35 -0500 (Sun, 23 Nov 2008) $
+ * $Date: 2012-09-30 16:25:22 -0700 (Sun, 30 Sep 2012) $
  */
 
 
@@ -108,7 +108,7 @@ namespace gregorian {
    */
   BOOST_DATE_TIME_DECL 
   boost::date_time::all_date_names_put<greg_facet_config, char>* 
-  create_facet_def(char type)
+  create_facet_def(char /*type*/)
   {
     typedef 
       boost::date_time::all_date_names_put<greg_facet_config, char> facet_def;
@@ -121,7 +121,7 @@ namespace gregorian {
   }
   
   //! generates a locale with the set of gregorian name-strings of type char*
-  BOOST_DATE_TIME_DECL std::locale generate_locale(std::locale& loc, char type){
+  BOOST_DATE_TIME_DECL std::locale generate_locale(std::locale& loc, char /*type*/){
     typedef boost::date_time::all_date_names_put<greg_facet_config, char> facet_def;
     return std::locale(loc, new facet_def(short_month_names,
                                           long_month_names,
@@ -139,7 +139,7 @@ namespace gregorian {
    */
   BOOST_DATE_TIME_DECL 
   boost::date_time::all_date_names_put<greg_facet_config, wchar_t>* 
-  create_facet_def(wchar_t type)
+  create_facet_def(wchar_t /*type*/)
   {
     typedef 
       boost::date_time::all_date_names_put<greg_facet_config,wchar_t> facet_def;
@@ -152,7 +152,7 @@ namespace gregorian {
   }
 
   //! generates a locale with the set of gregorian name-strings of type wchar_t*
-  BOOST_DATE_TIME_DECL std::locale generate_locale(std::locale& loc, wchar_t type){
+  BOOST_DATE_TIME_DECL std::locale generate_locale(std::locale& loc, wchar_t /*type*/){
     typedef boost::date_time::all_date_names_put<greg_facet_config, wchar_t> facet_def;
     return std::locale(loc, new facet_def(w_short_month_names,
                                           w_long_month_names,

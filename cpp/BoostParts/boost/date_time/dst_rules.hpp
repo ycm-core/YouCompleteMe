@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date: 2012-09-30 16:25:22 -0700 (Sun, 30 Sep 2012) $
  */
 
 /*! @file dst_rules.hpp
@@ -371,7 +371,7 @@ namespace boost {
         return is_not_in_dst;
       }
 
-      static bool is_dst_boundary_day(date_type d)
+      static bool is_dst_boundary_day(date_type /*d*/)
       {
         return false;
       }

@@ -13,7 +13,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: has_xxx.hpp 64146 2010-07-19 00:46:31Z djwalker $
-// $Date: 2010-07-18 20:46:31 -0400 (Sun, 18 Jul 2010) $
+// $Date: 2010-07-18 17:46:31 -0700 (Sun, 18 Jul 2010) $
 // $Revision: 64146 $
 
 #include <boost/mpl/bool.hpp>

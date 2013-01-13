@@ -150,7 +150,8 @@ private:
     base_type t;
 public:
     object_id_type(): t(0) {};
-    explicit object_id_type(const unsigned int & t_) : t(t_){
+    // note: presumes that size_t >= unsigned int.
+    explicit object_id_type(const std::size_t & t_) : t(t_){
         BOOST_ASSERT(t_ <= boost::integer_traits<base_type>::const_max);
     }
     object_id_type(const object_id_type & t_) : 

@@ -229,7 +229,10 @@ namespace boost
             unique_lock<mutex>& lock,
             struct timespec const &timeout);
     };
+
+    BOOST_THREAD_DECL void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk);
 }
+
 
 #include <boost/config/abi_suffix.hpp>
 

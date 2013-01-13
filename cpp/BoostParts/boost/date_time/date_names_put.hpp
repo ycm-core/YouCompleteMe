@@ -2,11 +2,11 @@
 #define DATE_TIME_DATE_NAMES_PUT_HPP___
 
 /* Copyright (c) 2002-2005 CrystalClear Software, Inc.
- * Use, modification and distribution is subject to the 
+ * Use, modification and distribution is subject to the
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
- * Author: Jeff Garland, Bart Garst 
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * Author: Jeff Garland, Bart Garst
+ * $Date: 2012-09-22 15:33:33 -0700 (Sat, 22 Sep 2012) $
  */
 
 
@@ -27,22 +27,22 @@ namespace date_time {
     //! Output facet base class for gregorian dates.
     /*! This class is a base class for date facets used to localize the
      *  names of months and the names of days in the week.
-     * 
+     *
      * Requirements of Config
-     *  - define an enumeration month_enum that enumerates the months. 
+     *  - define an enumeration month_enum that enumerates the months.
      *    The enumeration should be '1' based eg: Jan==1
      *  - define as_short_string and as_long_string
      *
      * (see langer & kreft p334).
-     * 
+     *
      */
     template<class Config,
-             class charT = char, 
+             class charT = char,
              class OutputIterator = std::ostreambuf_iterator<charT> >
     class date_names_put : public std::locale::facet
     {
     public:
-      date_names_put() {};
+      date_names_put() {}
       typedef OutputIterator iter_type;
       typedef typename Config::month_type month_type;
       typedef typename Config::month_enum month_enum;
@@ -118,7 +118,7 @@ namespace date_time {
         put_string(oitr, gm.as_short_string(c));
       }
       //! Default facet implementation uses month_type defaults
-      virtual void do_put_month_long(iter_type& oitr, 
+      virtual void do_put_month_long(iter_type& oitr,
                                      month_enum moy) const
       {
         month_type gm(moy);
@@ -160,7 +160,7 @@ namespace date_time {
         string_type s(separator); //put in '-'
         put_string(oitr, s);
       }
-      //! Default for date order 
+      //! Default for date order
       virtual ymd_order_spec do_date_order() const
       {
         return ymd_order_iso;
@@ -186,27 +186,27 @@ namespace date_time {
         }
       }
     };
-    
+
     template<class Config, class charT, class OutputIterator>
-    const typename date_names_put<Config, charT, OutputIterator>::char_type 
-    date_names_put<Config, charT, OutputIterator>::default_special_value_names[3][17] = { 
+    const typename date_names_put<Config, charT, OutputIterator>::char_type
+    date_names_put<Config, charT, OutputIterator>::default_special_value_names[3][17] = {
       {'n','o','t','-','a','-','d','a','t','e','-','t','i','m','e'},
       {'-','i','n','f','i','n','i','t','y'},
       {'+','i','n','f','i','n','i','t','y'} };
 
     template<class Config, class charT, class OutputIterator>
-    const typename date_names_put<Config, charT, OutputIterator>::char_type 
-    date_names_put<Config, charT, OutputIterator>::separator[2] = 
+    const typename date_names_put<Config, charT, OutputIterator>::char_type
+    date_names_put<Config, charT, OutputIterator>::separator[2] =
       {'-', '\0'} ;
-    
 
-    //! Generate storage location for a std::locale::id 
+
+    //! Generate storage location for a std::locale::id
     template<class Config, class charT, class OutputIterator>
     std::locale::id date_names_put<Config, charT, OutputIterator>::id;
 
     //! A date name output facet that takes an array of char* to define strings
     template<class Config,
-             class charT = char, 
+             class charT = char,
              class OutputIterator = std::ostreambuf_iterator<charT> >
     class all_date_names_put : public date_names_put<Config, charT, OutputIterator>
     {
@@ -230,29 +230,29 @@ namespace date_time {
         separator_char_[0] = separator_char;
         separator_char_[1] = '\0';
 
-      };
+      }
       typedef OutputIterator iter_type;
       typedef typename Config::month_enum month_enum;
       typedef typename Config::weekday_enum weekday_enum;
       typedef typename Config::special_value_enum special_value_enum;
 
-      const charT* const* get_short_month_names() const 
+      const charT* const* get_short_month_names() const
       {
         return month_short_names_;
       }
-      const charT* const* get_long_month_names() const 
+      const charT* const* get_long_month_names() const
       {
         return month_long_names_;
       }
-      const charT* const* get_special_value_names() const 
+      const charT* const* get_special_value_names() const
       {
         return special_value_names_;
       }
-      const charT* const* get_short_weekday_names()const  
+      const charT* const* get_short_weekday_names()const
       {
         return weekday_short_names_;
       }
-      const charT* const* get_long_weekday_names()const 
+      const charT* const* get_long_weekday_names()const
       {
         return weekday_long_names_;
       }
@@ -263,7 +263,7 @@ namespace date_time {
       {
         this->put_string(oitr, month_short_names_[moy-1]);
       }
-      //! Long month names 
+      //! Long month names
       virtual void do_put_month_long(iter_type& oitr, month_enum moy) const
       {
         this->put_string(oitr, month_long_names_[moy-1]);
@@ -310,7 +310,7 @@ namespace date_time {
       const charT* const* weekday_long_names_;
       charT separator_char_[2];
       ymd_order_spec order_spec_;
-      month_format_spec month_format_spec_;      
+      month_format_spec month_format_spec_;
     };
 
 } } //namespace boost::date_time

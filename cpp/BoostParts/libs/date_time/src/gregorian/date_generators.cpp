@@ -3,7 +3,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst 
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date: 2012-09-24 11:08:16 -0700 (Mon, 24 Sep 2012) $
  */
 
 
@@ -22,7 +22,7 @@ namespace date_time {
   //! Returns nth arg as string. 1 -> "first", 2 -> "second", max is 5.
   BOOST_DATE_TIME_DECL const char* nth_as_str(int ele)
   {
-    if(ele >= 1 || ele <= 5) {
+    if(ele >= 1 && ele <= 5) {
       return _nth_as_str[ele];
     } 
     else {

@@ -6,7 +6,7 @@
  * (See accompanying file LICENSE_1_0.txt or 
  * http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date: 2008-02-27 12:00:24 -0800 (Wed, 27 Feb 2008) $
  */
 
 #include "boost/date_time/gregorian/greg_duration_types.hpp"

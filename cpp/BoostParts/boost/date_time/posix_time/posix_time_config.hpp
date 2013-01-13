@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2009-06-04 07:52:28 -0400 (Thu, 04 Jun 2009) $
+ * $Date: 2012-10-10 12:05:03 -0700 (Wed, 10 Oct 2012) $
  */
 
 #include <cstdlib> //for MCW 7.2 std::abs(long long)
@@ -81,7 +81,7 @@ namespace posix_time {
     {}
     //Give duration access to ticks constructor -- hide from users
     friend class date_time::time_duration<time_duration, time_res_traits>;
-  private:
+  protected:
     explicit time_duration(impl_type tick_count) :
       date_time::time_duration<time_duration, time_res_traits>(tick_count)
     {}

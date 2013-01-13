@@ -11,7 +11,7 @@
 
 #include <boost/chrono/config.hpp>
 
-#ifndef BOOST_NO_STATIC_ASSERT
+#ifndef BOOST_NO_CXX11_STATIC_ASSERT
 #define BOOST_CHRONO_STATIC_ASSERT(CND, MSG, TYPES) static_assert(CND,MSG)
 #elif defined(BOOST_CHRONO_USES_STATIC_ASSERT)
 #include <boost/static_assert.hpp>

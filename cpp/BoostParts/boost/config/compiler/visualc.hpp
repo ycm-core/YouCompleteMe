@@ -99,9 +99,9 @@
 // it appears not to actually work:
 #  define BOOST_NO_SWPRINTF
 // Our extern template tests also fail for this compiler:
-#  define BOOST_NO_EXTERN_TEMPLATE
+#  define BOOST_NO_CXX11_EXTERN_TEMPLATE
 // Variadic macros do not exist for VC7.1 and lower
-#  define BOOST_NO_VARIADIC_MACROS
+#  define BOOST_NO_CXX11_VARIADIC_MACROS
 #endif
 
 #if defined(UNDER_CE)
@@ -191,38 +191,44 @@
 // C++ features supported by VC++ 10 (aka 2010)
 //
 #if _MSC_VER < 1600
-#  define BOOST_NO_AUTO_DECLARATIONS
-#  define BOOST_NO_AUTO_MULTIDECLARATIONS
-#  define BOOST_NO_LAMBDAS
-#  define BOOST_NO_RVALUE_REFERENCES
-#  define BOOST_NO_STATIC_ASSERT
-#  define BOOST_NO_NULLPTR
-#  define BOOST_NO_DECLTYPE
+#  define BOOST_NO_CXX11_AUTO_DECLARATIONS
+#  define BOOST_NO_CXX11_AUTO_MULTIDECLARATIONS
+#  define BOOST_NO_CXX11_LAMBDAS
+#  define BOOST_NO_CXX11_RVALUE_REFERENCES
+#  define BOOST_NO_CXX11_STATIC_ASSERT
+#  define BOOST_NO_CXX11_NULLPTR
+#  define BOOST_NO_CXX11_DECLTYPE
 #endif // _MSC_VER < 1600
 
 #if _MSC_VER >= 1600
 #  define BOOST_HAS_STDINT_H
 #endif
 
+// C++ features supported by VC++ 11 (aka 2012)
+//
+#if _MSC_VER < 1700
+#  define BOOST_NO_CXX11_RANGE_BASED_FOR
+#  define BOOST_NO_CXX11_SCOPED_ENUMS
+#endif // _MSC_VER < 1700
+
 // C++0x features not supported by any versions
-#define BOOST_NO_CHAR16_T
-#define BOOST_NO_CHAR32_T
-#define BOOST_NO_CONSTEXPR
-#define BOOST_NO_DECLTYPE_N3276
-#define BOOST_NO_DEFAULTED_FUNCTIONS
-#define BOOST_NO_DELETED_FUNCTIONS
-#define BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
-#define BOOST_NO_FUNCTION_TEMPLATE_DEFAULT_ARGS
+#define BOOST_NO_CXX11_CHAR16_T
+#define BOOST_NO_CXX11_CHAR32_T
+#define BOOST_NO_CXX11_CONSTEXPR
+#define BOOST_NO_CXX11_DECLTYPE_N3276
+#define BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
+#define BOOST_NO_CXX11_DELETED_FUNCTIONS
+#define BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+#define BOOST_NO_CXX11_FUNCTION_TEMPLATE_DEFAULT_ARGS
 #define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
-#define BOOST_NO_NOEXCEPT
-#define BOOST_NO_RAW_LITERALS
-#define BOOST_NO_SCOPED_ENUMS
-#define BOOST_NO_TEMPLATE_ALIASES
-#define BOOST_NO_UNICODE_LITERALS
-#define BOOST_NO_VARIADIC_TEMPLATES
+#define BOOST_NO_CXX11_NOEXCEPT
+#define BOOST_NO_CXX11_RAW_LITERALS
+#define BOOST_NO_CXX11_TEMPLATE_ALIASES
+#define BOOST_NO_CXX11_UNICODE_LITERALS
+#define BOOST_NO_CXX11_VARIADIC_TEMPLATES
 #define BOOST_NO_SFINAE_EXPR
 #define BOOST_NO_TWO_PHASE_NAME_LOOKUP
-#define BOOST_NO_UNIFIED_INITIALIZATION_SYNTAX
+#define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 //
 // prefix and suffix headers:
 //
@@ -233,6 +239,7 @@
 #  define BOOST_ABI_SUFFIX "boost/config/abi/msvc_suffix.hpp"
 #endif
 
+#ifndef BOOST_COMPILER
 // TODO:
 // these things are mostly bogus. 1200 means version 12.0 of the compiler. The 
 // artificial versions assigned to them only refer to the versions of some IDE
@@ -289,7 +296,8 @@
 #   endif
 # endif
 
-#define BOOST_COMPILER "Microsoft Visual C++ version " BOOST_STRINGIZE(BOOST_COMPILER_VERSION)
+#  define BOOST_COMPILER "Microsoft Visual C++ version " BOOST_STRINGIZE(BOOST_COMPILER_VERSION)
+#endif
 
 //
 // last known and checked version is 1700 (VC11, aka 2011):

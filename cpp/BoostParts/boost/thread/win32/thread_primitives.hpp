@@ -10,7 +10,7 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
-#include <boost/config.hpp>
+#include <boost/thread/detail/config.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/assert.hpp>
 #include <boost/thread/exceptions.hpp>
@@ -341,22 +341,48 @@ namespace boost
         {
             inline bool interlocked_bit_test_and_set(long* x,long bit)
             {
+#ifndef BOOST_INTEL_CXX_VERSION
                 __asm {
                     mov eax,bit;
                     mov edx,x;
                     lock bts [edx],eax;
                     setc al;
                 };
+#else
+                bool ret;
+                __asm {
+                    mov eax,bit
+                    mov edx,x
+                    lock bts [edx],eax
+                    setc al
+                    mov ret, al
+                };
+                return ret;
+
+#endif
             }
 
             inline bool interlocked_bit_test_and_reset(long* x,long bit)
             {
+#ifndef BOOST_INTEL_CXX_VERSION
                 __asm {
                     mov eax,bit;
                     mov edx,x;
                     lock btr [edx],eax;
                     setc al;
                 };
+#else
+                bool ret;
+                __asm {
+                    mov eax,bit
+                    mov edx,x
+                    lock btr [edx],eax
+                    setc al
+                    mov ret, al
+                };
+                return ret;
+
+#endif
             }
 
         }

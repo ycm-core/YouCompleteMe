@@ -6,7 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2011-2011. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2011-2012. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -182,7 +182,11 @@ template <typename Ptr, typename T>
 struct type_has_rebind
 {
    template <typename X>
+   #if !defined (__SUNPRO_CC)
    static char test(int, typename X::template rebind<T>*);
+   #else
+   static char test(int, typename X::rebind<T>*);
+   #endif
 
    template <typename X>
    static int test(boost::intrusive::detail::LowPriorityConversion<int>, void*);
@@ -194,7 +198,11 @@ template <typename Ptr, typename T>
 struct type_has_rebind_other
 {
    template <typename X>
+   #if !defined (__SUNPRO_CC)
    static char test(int, typename X::template rebind<T>::other*);
+   #else
+   static char test(int, typename X::rebind<T>::other*);
+   #endif
 
    template <typename X>
    static int test(boost::intrusive::detail::LowPriorityConversion<int>, void*);
@@ -205,12 +213,6 @@ struct type_has_rebind_other
 template <typename Ptr, typename T>
 struct type_rebind_mode
 {
-   template <typename X>
-   static char test(int, typename X::template rebind<T>::other*);
-
-   template <typename X>
-   static int test(boost::intrusive::detail::LowPriorityConversion<int>, void*);
-
    static const unsigned int rebind =       (unsigned int)type_has_rebind<Ptr, T>::value;
    static const unsigned int rebind_other = (unsigned int)type_has_rebind_other<Ptr, T>::value;
    static const unsigned int mode =         rebind + rebind*rebind_other;

@@ -19,6 +19,7 @@
 
 #define BOOST_REGEX_SOURCE
 
+#include <boost/config.hpp>
 #include <climits>
 #include <stdexcept>
 #include <string>
@@ -876,6 +877,7 @@ _fi_find_handle _fi_FindFirstFile(const char* lpFileName, _fi_find_data* lpFindF
    {
       if(_fi_FindNextFile(dat, lpFindFileData))
          return dat;
+      closedir(h);
    }
    delete dat;
    return 0;

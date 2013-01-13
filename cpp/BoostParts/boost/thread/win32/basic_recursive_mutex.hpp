@@ -42,7 +42,7 @@ namespace boost
                 mutex.destroy();
             }
 
-            bool try_lock()
+            bool try_lock() BOOST_NOEXCEPT
             {
                 long const current_thread_id=win32::GetCurrentThreadId();
                 return try_recursive_lock(current_thread_id) || try_basic_lock(current_thread_id);
@@ -93,7 +93,7 @@ namespace boost
             }
 
         private:
-            bool try_recursive_lock(long current_thread_id)
+            bool try_recursive_lock(long current_thread_id) BOOST_NOEXCEPT
             {
                 if(::boost::detail::interlocked_read_acquire(&locking_thread_id)==current_thread_id)
                 {
@@ -103,7 +103,7 @@ namespace boost
                 return false;
             }
 
-            bool try_basic_lock(long current_thread_id)
+            bool try_basic_lock(long current_thread_id) BOOST_NOEXCEPT
             {
                 if(mutex.try_lock())
                 {

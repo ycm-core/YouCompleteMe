@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga  2006-2009
+// (C) Copyright Ion Gaztanaga  2006-2012
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -156,9 +156,13 @@ template <typename R>
 struct is_unary_or_binary_function_impl<R (__stdcall*)()>
 {  static const bool value = true;  };
 
+#ifndef _MANAGED
+
 template <typename R>
 struct is_unary_or_binary_function_impl<R (__fastcall*)()>
 {  static const bool value = true;  };
+
+#endif
 
 template <typename R>
 struct is_unary_or_binary_function_impl<R (__cdecl*)()>
@@ -188,9 +192,13 @@ template <typename R, class T0>
 struct is_unary_or_binary_function_impl<R (__stdcall*)(T0)>
 {  static const bool value = true;  };
 
+#ifndef _MANAGED
+
 template <typename R, class T0>
 struct is_unary_or_binary_function_impl<R (__fastcall*)(T0)>
 {  static const bool value = true;  };
+
+#endif
 
 template <typename R, class T0>
 struct is_unary_or_binary_function_impl<R (__cdecl*)(T0)>
@@ -220,9 +228,13 @@ template <typename R, class T0, class T1>
 struct is_unary_or_binary_function_impl<R (__stdcall*)(T0, T1)>
 {  static const bool value = true;  };
 
+#ifndef _MANAGED
+
 template <typename R, class T0, class T1>
 struct is_unary_or_binary_function_impl<R (__fastcall*)(T0, T1)>
 {  static const bool value = true;  };
+
+#endif
 
 template <typename R, class T0, class T1>
 struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1)>

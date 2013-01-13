@@ -24,6 +24,7 @@
 #include <cstddef>
 
 #include <boost/type_traits/is_arithmetic.hpp>
+#include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/detail/workaround.hpp>
 
@@ -43,20 +44,26 @@ struct ct_imp2<T, true>
    typedef const T param_type;
 };
 
-template <typename T, bool isp, bool b1>
+template <typename T, bool isp, bool b1, bool b2>
 struct ct_imp
 {
    typedef const T& param_type;
 };
 
-template <typename T, bool isp>
-struct ct_imp<T, isp, true>
+template <typename T, bool isp, bool b2>
+struct ct_imp<T, isp, true, b2>
 {
    typedef typename ct_imp2<T, sizeof(T) <= sizeof(void*)>::param_type param_type;
 };
 
-template <typename T, bool b1>
-struct ct_imp<T, true, b1>
+template <typename T, bool isp, bool b1>
+struct ct_imp<T, isp, b1, true>
+{
+   typedef typename ct_imp2<T, sizeof(T) <= sizeof(void*)>::param_type param_type;
+};
+
+template <typename T, bool b1, bool b2>
+struct ct_imp<T, true, b1, b2>
 {
    typedef const T param_type;
 };
@@ -79,7 +86,8 @@ public:
    typedef typename boost::detail::ct_imp<
       T,
       ::boost::is_pointer<T>::value,
-      ::boost::is_arithmetic<T>::value
+      ::boost::is_arithmetic<T>::value,
+      ::boost::is_enum<T>::value
    >::param_type param_type;
 };
 

@@ -104,13 +104,6 @@
 #endif
 
 //
-// Normalize BOOST_NO_STATIC_ASSERT and (depricated) BOOST_HAS_STATIC_ASSERT:
-//
-#if !defined(BOOST_NO_STATIC_ASSERT) && !defined(BOOST_HAS_STATIC_ASSERT)
-#  define BOOST_HAS_STATIC_ASSERT
-#endif
-
-//
 // if there is no __int64 then there is no specialisation
 // for numeric_limits<__int64> either:
 //
@@ -332,27 +325,6 @@
 //
 #if defined(BOOST_HAS_HASH) && !defined(BOOST_HASH_MAP_HEADER)
 #  define BOOST_HASH_MAP_HEADER <hash_map>
-#endif
-
-//
-// Set BOOST_HAS_RVALUE_REFS when BOOST_NO_RVALUE_REFERENCES is not defined
-//
-#if !defined(BOOST_NO_RVALUE_REFERENCES) && !defined(BOOST_HAS_RVALUE_REFS)
-#define BOOST_HAS_RVALUE_REFS
-#endif
-
-//
-// Set BOOST_HAS_VARIADIC_TMPL when BOOST_NO_VARIADIC_TEMPLATES is not defined
-//
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES) && !defined(BOOST_HAS_VARIADIC_TMPL)
-#define BOOST_HAS_VARIADIC_TMPL
-#endif
-
-//
-// Set BOOST_NO_DECLTYPE_N3276 when BOOST_NO_DECLTYPE is defined
-//
-#if !defined(BOOST_NO_DECLTYPE_N3276) && defined(BOOST_NO_DECLTYPE)
-#define BOOST_NO_DECLTYPE_N3276
 #endif
 
 //  BOOST_HAS_ABI_HEADERS
@@ -625,20 +597,6 @@ namespace std{ using ::type_info; }
 #define BOOST_DO_JOIN2( X, Y ) X##Y
 
 //
-// Helper macros BOOST_NOEXCEPT, BOOST_NOEXCEPT_IF, BOOST_NOEXCEPT_EXPR
-// These aid the transition to C++11 while still supporting C++03 compilers
-//
-#ifdef BOOST_NO_NOEXCEPT
-#  define BOOST_NOEXCEPT
-#  define BOOST_NOEXCEPT_IF(Predicate)
-#  define BOOST_NOEXCEPT_EXPR(Expression) false
-#else
-#  define BOOST_NOEXCEPT noexcept
-#  define BOOST_NOEXCEPT_IF(Predicate) noexcept((Predicate))
-#  define BOOST_NOEXCEPT_EXPR(Expression) noexcept((Expression))
-#endif
-
-//
 // Set some default values for compiler/library/platform names.
 // These are for debugging config setup only:
 //
@@ -664,19 +622,6 @@ namespace std{ using ::type_info; }
 #  define BOOST_GPU_ENABLED 
 #  endif
 
-//
-// constexpr workarounds
-// 
-#if defined(BOOST_NO_CONSTEXPR)
-#define BOOST_CONSTEXPR
-#define BOOST_CONSTEXPR_OR_CONST const
-#else
-#define BOOST_CONSTEXPR constexpr
-#define BOOST_CONSTEXPR_OR_CONST constexpr
-#endif
-
-#define BOOST_STATIC_CONSTEXPR  static BOOST_CONSTEXPR_OR_CONST
-
 // BOOST_FORCEINLINE ---------------------------------------------//
 // Macro to use in place of 'inline' to force a function to be inline
 #if !defined(BOOST_FORCEINLINE)
@@ -689,9 +634,23 @@ namespace std{ using ::type_info; }
 #  endif
 #endif
 
+//
+// Set BOOST_NO_DECLTYPE_N3276 when BOOST_NO_DECLTYPE is defined
+//
+#if defined(BOOST_NO_CXX11_DECLTYPE) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
+#define	BOOST_NO_CXX11_DECLTYPE_N3276 BOOST_NO_CXX11_DECLTYPE
+#endif
 
 //  -------------------- Deprecated macros for 1.50 ---------------------------
 //  These will go away in a future release
+
+//  Use BOOST_NO_CXX11_HDR_UNORDERED_SET or BOOST_NO_CXX11_HDR_UNORDERED_MAP
+//           instead of BOOST_NO_STD_UNORDERED
+#if defined(BOOST_NO_CXX11_HDR_UNORDERED_MAP) || defined (BOOST_NO_CXX11_HDR_UNORDERED_SET)
+# ifndef BOOST_NO_STD_UNORDERED
+#  define BOOST_NO_STD_UNORDERED
+# endif
+#endif
 
 //  Use BOOST_NO_CXX11_HDR_INITIALIZER_LIST instead of BOOST_NO_INITIALIZER_LISTS
 #if defined(BOOST_NO_CXX11_HDR_INITIALIZER_LIST) && !defined(BOOST_NO_INITIALIZER_LISTS)
@@ -780,6 +739,169 @@ namespace std{ using ::type_info; }
 #endif
 
 //  ------------------ End of deprecated macros for 1.50 ---------------------------
+
+//  -------------------- Deprecated macros for 1.51 ---------------------------
+//  These will go away in a future release
+
+//  Use     BOOST_NO_CXX11_AUTO_DECLARATIONS instead of   BOOST_NO_AUTO_DECLARATIONS
+#if defined(BOOST_NO_CXX11_AUTO_DECLARATIONS) && !defined(BOOST_NO_AUTO_DECLARATIONS)
+#  define BOOST_NO_AUTO_DECLARATIONS
+#endif
+//  Use     BOOST_NO_CXX11_AUTO_MULTIDECLARATIONS instead of   BOOST_NO_AUTO_MULTIDECLARATIONS
+#if defined(BOOST_NO_CXX11_AUTO_MULTIDECLARATIONS) && !defined(BOOST_NO_AUTO_MULTIDECLARATIONS)
+#  define BOOST_NO_AUTO_MULTIDECLARATIONS
+#endif
+//  Use     BOOST_NO_CXX11_CHAR16_T instead of   BOOST_NO_CHAR16_T
+#if defined(BOOST_NO_CXX11_CHAR16_T) && !defined(BOOST_NO_CHAR16_T)
+#  define BOOST_NO_CHAR16_T
+#endif
+//  Use     BOOST_NO_CXX11_CHAR32_T instead of   BOOST_NO_CHAR32_T
+#if defined(BOOST_NO_CXX11_CHAR32_T) && !defined(BOOST_NO_CHAR32_T)
+#  define BOOST_NO_CHAR32_T
+#endif
+//  Use     BOOST_NO_CXX11_TEMPLATE_ALIASES instead of   BOOST_NO_TEMPLATE_ALIASES
+#if defined(BOOST_NO_CXX11_TEMPLATE_ALIASES) && !defined(BOOST_NO_TEMPLATE_ALIASES)
+#  define BOOST_NO_TEMPLATE_ALIASES
+#endif
+//  Use     BOOST_NO_CXX11_CONSTEXPR instead of   BOOST_NO_CONSTEXPR
+#if defined(BOOST_NO_CXX11_CONSTEXPR) && !defined(BOOST_NO_CONSTEXPR)
+#  define BOOST_NO_CONSTEXPR
+#endif
+//  Use     BOOST_NO_CXX11_DECLTYPE_N3276 instead of   BOOST_NO_DECLTYPE_N3276
+#if defined(BOOST_NO_CXX11_DECLTYPE_N3276) && !defined(BOOST_NO_DECLTYPE_N3276)
+#  define BOOST_NO_DECLTYPE_N3276
+#endif
+//  Use     BOOST_NO_CXX11_DECLTYPE instead of   BOOST_NO_DECLTYPE
+#if defined(BOOST_NO_CXX11_DECLTYPE) && !defined(BOOST_NO_DECLTYPE)
+#  define BOOST_NO_DECLTYPE
+#endif
+//  Use     BOOST_NO_CXX11_DEFAULTED_FUNCTIONS instead of   BOOST_NO_DEFAULTED_FUNCTIONS
+#if defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) && !defined(BOOST_NO_DEFAULTED_FUNCTIONS)
+#  define BOOST_NO_DEFAULTED_FUNCTIONS
+#endif
+//  Use     BOOST_NO_CXX11_DELETED_FUNCTIONS instead of   BOOST_NO_DELETED_FUNCTIONS
+#if defined(BOOST_NO_CXX11_DELETED_FUNCTIONS) && !defined(BOOST_NO_DELETED_FUNCTIONS)
+#  define BOOST_NO_DELETED_FUNCTIONS
+#endif
+//  Use     BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS instead of   BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
+#if defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS) && !defined(BOOST_NO_EXPLICIT_CONVERSION_OPERATORS)
+#  define BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
+#endif
+//  Use     BOOST_NO_CXX11_EXTERN_TEMPLATE instead of   BOOST_NO_EXTERN_TEMPLATE
+#if defined(BOOST_NO_CXX11_EXTERN_TEMPLATE) && !defined(BOOST_NO_EXTERN_TEMPLATE)
+#  define BOOST_NO_EXTERN_TEMPLATE
+#endif
+//  Use     BOOST_NO_CXX11_FUNCTION_TEMPLATE_DEFAULT_ARGS instead of   BOOST_NO_FUNCTION_TEMPLATE_DEFAULT_ARGS
+#if defined(BOOST_NO_CXX11_FUNCTION_TEMPLATE_DEFAULT_ARGS) && !defined(BOOST_NO_FUNCTION_TEMPLATE_DEFAULT_ARGS)
+#  define BOOST_NO_FUNCTION_TEMPLATE_DEFAULT_ARGS
+#endif
+//  Use     BOOST_NO_CXX11_LAMBDAS instead of   BOOST_NO_LAMBDAS
+#if defined(BOOST_NO_CXX11_LAMBDAS) && !defined(BOOST_NO_LAMBDAS)
+#  define BOOST_NO_LAMBDAS
+#endif
+//  Use     BOOST_NO_CXX11_LOCAL_CLASS_TEMPLATE_PARAMETERS instead of   BOOST_NO_LOCAL_CLASS_TEMPLATE_PARAMETERS
+#if defined(BOOST_NO_CXX11_LOCAL_CLASS_TEMPLATE_PARAMETERS) && !defined(BOOST_NO_LOCAL_CLASS_TEMPLATE_PARAMETERS)
+#  define BOOST_NO_LOCAL_CLASS_TEMPLATE_PARAMETERS
+#endif
+//  Use     BOOST_NO_CXX11_NOEXCEPT instead of   BOOST_NO_NOEXCEPT
+#if defined(BOOST_NO_CXX11_NOEXCEPT) && !defined(BOOST_NO_NOEXCEPT)
+#  define BOOST_NO_NOEXCEPT
+#endif
+//  Use     BOOST_NO_CXX11_NULLPTR instead of   BOOST_NO_NULLPTR
+#if defined(BOOST_NO_CXX11_NULLPTR) && !defined(BOOST_NO_NULLPTR)
+#  define BOOST_NO_NULLPTR
+#endif
+//  Use     BOOST_NO_CXX11_RAW_LITERALS instead of   BOOST_NO_RAW_LITERALS
+#if defined(BOOST_NO_CXX11_RAW_LITERALS) && !defined(BOOST_NO_RAW_LITERALS)
+#  define BOOST_NO_RAW_LITERALS
+#endif
+//  Use     BOOST_NO_CXX11_RVALUE_REFERENCES instead of   BOOST_NO_RVALUE_REFERENCES
+#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_RVALUE_REFERENCES)
+#  define BOOST_NO_RVALUE_REFERENCES
+#endif
+//  Use     BOOST_NO_CXX11_SCOPED_ENUMS instead of   BOOST_NO_SCOPED_ENUMS
+#if defined(BOOST_NO_CXX11_SCOPED_ENUMS) && !defined(BOOST_NO_SCOPED_ENUMS)
+#  define BOOST_NO_SCOPED_ENUMS
+#endif
+//  Use     BOOST_NO_CXX11_STATIC_ASSERT instead of   BOOST_NO_STATIC_ASSERT
+#if defined(BOOST_NO_CXX11_STATIC_ASSERT) && !defined(BOOST_NO_STATIC_ASSERT)
+#  define BOOST_NO_STATIC_ASSERT
+#endif
+//  Use     BOOST_NO_CXX11_STD_UNORDERD instead of   BOOST_NO_STD_UNORDERD
+#if defined(BOOST_NO_CXX11_STD_UNORDERD) && !defined(BOOST_NO_STD_UNORDERD)
+#  define BOOST_NO_STD_UNORDERD
+#endif
+//  Use     BOOST_NO_CXX11_UNICODE_LITERALS instead of   BOOST_NO_UNICODE_LITERALS
+#if defined(BOOST_NO_CXX11_UNICODE_LITERALS) && !defined(BOOST_NO_UNICODE_LITERALS)
+#  define BOOST_NO_UNICODE_LITERALS
+#endif
+//  Use     BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX instead of   BOOST_NO_UNIFIED_INITIALIZATION_SYNTAX
+#if defined(BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX) && !defined(BOOST_NO_UNIFIED_INITIALIZATION_SYNTAX)
+#  define BOOST_NO_UNIFIED_INITIALIZATION_SYNTAX
+#endif
+//  Use     BOOST_NO_CXX11_VARIADIC_TEMPLATES instead of   BOOST_NO_VARIADIC_TEMPLATES
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#  define BOOST_NO_VARIADIC_TEMPLATES
+#endif
+//  Use     BOOST_NO_CXX11_VARIADIC_MACROS instead of   BOOST_NO_VARIADIC_MACROS
+#if defined(BOOST_NO_CXX11_VARIADIC_MACROS) && !defined(BOOST_NO_VARIADIC_MACROS)
+#  define BOOST_NO_VARIADIC_MACROS
+#endif
+//  Use     BOOST_NO_CXX11_NUMERIC_LIMITS instead of   BOOST_NO_NUMERIC_LIMITS_LOWEST
+#if defined(BOOST_NO_CXX11_NUMERIC_LIMITS) && !defined(BOOST_NO_NUMERIC_LIMITS_LOWEST)
+#  define BOOST_NO_NUMERIC_LIMITS_LOWEST
+#endif
+//  ------------------ End of deprecated macros for 1.51 ---------------------------
+
+
+
+//
+// Helper macros BOOST_NOEXCEPT, BOOST_NOEXCEPT_IF, BOOST_NOEXCEPT_EXPR
+// These aid the transition to C++11 while still supporting C++03 compilers
+//
+#ifdef BOOST_NO_NOEXCEPT
+#  define BOOST_NOEXCEPT
+#  define BOOST_NOEXCEPT_IF(Predicate)
+#  define BOOST_NOEXCEPT_EXPR(Expression) false
+#else
+#  define BOOST_NOEXCEPT noexcept
+#  define BOOST_NOEXCEPT_IF(Predicate) noexcept((Predicate))
+#  define BOOST_NOEXCEPT_EXPR(Expression) noexcept((Expression))
+#endif
+
+//
+// Normalize BOOST_NO_STATIC_ASSERT and (depricated) BOOST_HAS_STATIC_ASSERT:
+//
+#if !defined(BOOST_NO_STATIC_ASSERT) && !defined(BOOST_HAS_STATIC_ASSERT)
+#  define BOOST_HAS_STATIC_ASSERT
+#endif
+
+//
+// constexpr workarounds
+// 
+#if defined(BOOST_NO_CONSTEXPR)
+#define BOOST_CONSTEXPR
+#define BOOST_CONSTEXPR_OR_CONST const
+#else
+#define BOOST_CONSTEXPR constexpr
+#define BOOST_CONSTEXPR_OR_CONST constexpr
+#endif
+
+#define BOOST_STATIC_CONSTEXPR  static BOOST_CONSTEXPR_OR_CONST
+
+//
+// Set BOOST_HAS_RVALUE_REFS when BOOST_NO_RVALUE_REFERENCES is not defined
+//
+#if !defined(BOOST_NO_RVALUE_REFERENCES) && !defined(BOOST_HAS_RVALUE_REFS)
+#define BOOST_HAS_RVALUE_REFS
+#endif
+
+//
+// Set BOOST_HAS_VARIADIC_TMPL when BOOST_NO_VARIADIC_TEMPLATES is not defined
+//
+#if !defined(BOOST_NO_VARIADIC_TEMPLATES) && !defined(BOOST_HAS_VARIADIC_TMPL)
+#define BOOST_HAS_VARIADIC_TMPL
+#endif
 
 
 #endif

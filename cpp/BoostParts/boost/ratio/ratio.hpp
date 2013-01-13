@@ -32,7 +32,7 @@ time2_demo contained this comment:
 #ifndef BOOST_RATIO_RATIO_HPP
 #define BOOST_RATIO_RATIO_HPP
 
-#include <boost/config.hpp>
+#include <boost/ratio/config.hpp>
 #include <boost/ratio/detail/mpl/abs.hpp>
 #include <boost/ratio/detail/mpl/sign.hpp>
 #include <boost/ratio/detail/mpl/gcd.hpp>
@@ -46,7 +46,7 @@ time2_demo contained this comment:
 #include <boost/integer_traits.hpp>
 #include <boost/ratio/ratio_fwd.hpp>
 #include <boost/ratio/detail/overflow_helpers.hpp>
-#ifdef BOOST_RATIO_EXTENSIONS    
+#ifdef BOOST_RATIO_EXTENSIONS
 #include <boost/rational.hpp>
 #include <boost/ratio/mpl/rational_c_tag.hpp>
 #endif
@@ -72,7 +72,7 @@ namespace boost
 //                20.6.1 Class template ratio [ratio.ratio]                   //
 //                                                                            //
 //----------------------------------------------------------------------------//
-    
+
 template <boost::intmax_t N, boost::intmax_t D>
 class ratio
 {
@@ -88,12 +88,12 @@ public:
     BOOST_STATIC_CONSTEXPR boost::intmax_t num = SIGN_N * ABS_N / GCD;
     BOOST_STATIC_CONSTEXPR boost::intmax_t den = ABS_D / GCD;
 
-#ifdef BOOST_RATIO_EXTENSIONS    
+#ifdef BOOST_RATIO_EXTENSIONS
     typedef mpl::rational_c_tag tag;
     typedef boost::rational<boost::intmax_t> value_type;
     typedef boost::intmax_t num_type;
     typedef boost::intmax_t den_type;
-    ratio() 
+    ratio()
     {}
     template <boost::intmax_t _N2, boost::intmax_t _D2>
     ratio(const ratio<_N2, _D2>&,
@@ -101,7 +101,7 @@ public:
             <
                 (ratio<_N2, _D2>::num == num &&
                 ratio<_N2, _D2>::den == den)
-            >::type* = 0) 
+            >::type* = 0)
     {}
 
     template <boost::intmax_t _N2, boost::intmax_t _D2>
@@ -112,14 +112,14 @@ public:
             ratio&
         >::type
     operator=(const ratio<_N2, _D2>&) {return *this;}
-    
+
     static value_type value() {return value_type(num,den);}
     value_type operator()() const {return value();}
 #endif
     typedef ratio<num, den> type;
 };
 
-#if defined(BOOST_NO_CONSTEXPR)
+#if defined(BOOST_NO_CXX11_CONSTEXPR)
 template <boost::intmax_t N, boost::intmax_t D>
 const    boost::intmax_t ratio<N, D>::num;
 template <boost::intmax_t N, boost::intmax_t D>
@@ -133,26 +133,26 @@ const    boost::intmax_t ratio<N, D>::den;
 //----------------------------------------------------------------------------//
 
 template <class R1, class R2>
-struct ratio_add 
-: boost::ratio_detail::ratio_add<R1, R2>::type 
+struct ratio_add
+: boost::ratio_detail::ratio_add<R1, R2>::type
 {
 };
 
 template <class R1, class R2>
 struct ratio_subtract
-: boost::ratio_detail::ratio_subtract<R1, R2>::type 
+: boost::ratio_detail::ratio_subtract<R1, R2>::type
 {
 };
 
 template <class R1, class R2>
 struct ratio_multiply
-: boost::ratio_detail::ratio_multiply<R1, R2>::type 
+: boost::ratio_detail::ratio_multiply<R1, R2>::type
 {
 };
 
 template <class R1, class R2>
 struct ratio_divide
-: boost::ratio_detail::ratio_divide<R1, R2>::type 
+: boost::ratio_detail::ratio_divide<R1, R2>::type
 {
 };
 
@@ -167,46 +167,46 @@ struct ratio_divide
 template <class R1, class R2>
 struct ratio_equal
     : public boost::integral_constant<bool,
-                               (R1::num == R2::num && R1::den == R2::den)> 
+                               (R1::num == R2::num && R1::den == R2::den)>
 {};
 
 template <class R1, class R2>
 struct ratio_not_equal
-    : public boost::integral_constant<bool, !ratio_equal<R1, R2>::value> 
+    : public boost::integral_constant<bool, !ratio_equal<R1, R2>::value>
 {};
 
 // ratio_less
 
 template <class R1, class R2>
 struct ratio_less
-    : boost::integral_constant<bool, boost::ratio_detail::ratio_less<R1, R2>::value> 
+    : boost::integral_constant<bool, boost::ratio_detail::ratio_less<R1, R2>::value>
 {};
 
 template <class R1, class R2>
 struct ratio_less_equal
-    : boost::integral_constant<bool, !ratio_less<R2, R1>::value> 
+    : boost::integral_constant<bool, !ratio_less<R2, R1>::value>
 {};
 
 template <class R1, class R2>
 struct ratio_greater
-    : boost::integral_constant<bool, ratio_less<R2, R1>::value> 
+    : boost::integral_constant<bool, ratio_less<R2, R1>::value>
 {};
 
 template <class R1, class R2>
 struct ratio_greater_equal
-    : boost::integral_constant<bool, !ratio_less<R1, R2>::value> 
+    : boost::integral_constant<bool, !ratio_less<R1, R2>::value>
 {};
 
 template <class R1, class R2>
-struct ratio_gcd : 
+struct ratio_gcd :
     ratio<mpl::gcd_c<boost::intmax_t, R1::num, R2::num>::value,
-        mpl::lcm_c<boost::intmax_t, R1::den, R2::den>::value>::type 
+        mpl::lcm_c<boost::intmax_t, R1::den, R2::den>::value>::type
 {
 };
-    
-#ifdef BOOST_RATIO_EXTENSIONS    
+
+#ifdef BOOST_RATIO_EXTENSIONS
 template <class R>
-struct ratio_negate 
+struct ratio_negate
     : ratio<-R::num, R::den>::type
 {
 };
@@ -221,12 +221,12 @@ struct ratio_sign
 {
 };
 template <class R1, class R2>
-struct ratio_lcm : 
+struct ratio_lcm :
     ratio<mpl::lcm_c<boost::intmax_t, R1::num, R2::num>::value,
-        mpl::gcd_c<boost::intmax_t, R1::den, R2::den>::value>::type 
+        mpl::gcd_c<boost::intmax_t, R1::den, R2::den>::value>::type
 {
 };
-#endif    
+#endif
 }  // namespace boost
 
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2011-2011. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2011-2012. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -158,7 +158,7 @@
 
                template <class U>
                static boost_intrusive_has_member_function_callable_with::no_type Test(...);
-              
+
                static const bool value = sizeof(Test< Fun >(0))
                                     == sizeof(boost_intrusive_has_member_function_callable_with::yes_type);
             };
@@ -224,7 +224,7 @@
 
             template <class U>
             static boost_intrusive_has_member_function_callable_with::no_type Test(...);
-           
+
             static const bool value = sizeof(Test< Fun >(0))
                                  == sizeof(boost_intrusive_has_member_function_callable_with::yes_type);
          };

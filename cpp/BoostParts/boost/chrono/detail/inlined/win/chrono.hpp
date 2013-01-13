@@ -42,6 +42,7 @@ namespace chrono_detail
             (!boost::detail::win32::QueryPerformanceCounter( &pcount )) )
     {
       BOOST_ASSERT(0 && "Boost::Chrono - Internal Error");
+      return steady_clock::time_point();
     }
 
     return steady_clock::time_point(steady_clock::duration(

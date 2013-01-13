@@ -890,12 +890,12 @@ bool operator >= ( optional<T> const& x, none_t y )
 
 template<class T>
 inline
-bool operator == ( none_t x, optional<T> const& y )
+bool operator == ( none_t , optional<T> const& y )
 { return equal_pointees(optional<T>() ,y); }
 
 template<class T>
 inline
-bool operator < ( none_t x, optional<T> const& y )
+bool operator < ( none_t , optional<T> const& y )
 { return less_pointees(optional<T>() ,y); }
 
 template<class T>

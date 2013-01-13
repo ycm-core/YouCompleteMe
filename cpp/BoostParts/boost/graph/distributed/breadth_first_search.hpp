@@ -118,7 +118,7 @@ namespace boost {
        typename graph_traits<DistributedGraph>::vertex_descriptor s,
        ColorMap color,
        BFSVisitor vis,
-       error_property_not_found,
+       boost::param_not_found,
        VertexIndexMap vertex_index)
     {
       using boost::graph::parallel::process_group;

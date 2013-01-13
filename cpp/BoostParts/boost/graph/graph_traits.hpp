@@ -15,8 +15,11 @@
 #include <utility> /* Primarily for std::pair */
 #include <boost/tuple/tuple.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/not.hpp>
+#include <boost/mpl/has_xxx.hpp>
+#include <boost/mpl/void.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/iterator/iterator_categories.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
@@ -218,28 +221,31 @@ namespace boost {
     //?? not the right place ?? Lee
     typedef boost::forward_traversal_tag multi_pass_input_iterator_tag;
 
-    // Forward declare graph_bundle_t property name (from
-    // boost/graph/properties.hpp, which includes this file) for
-    // bundled_result.
-    enum graph_bundle_t {graph_bundle};
+    namespace detail {
+      BOOST_MPL_HAS_XXX_TRAIT_DEF(graph_property_type)
+      BOOST_MPL_HAS_XXX_TRAIT_DEF(edge_property_type)
+      BOOST_MPL_HAS_XXX_TRAIT_DEF(vertex_property_type)
+
+      template <typename G> struct get_graph_property_type {typedef typename G::graph_property_type type;};
+      template <typename G> struct get_edge_property_type {typedef typename G::edge_property_type type;};
+      template <typename G> struct get_vertex_property_type {typedef typename G::vertex_property_type type;};
+    }
 
     template <typename G>
-    struct graph_property_type {
-      typedef typename G::graph_property_type type;
-    };
+    struct graph_property_type
+      : boost::mpl::eval_if<detail::has_graph_property_type<G>,
+                            detail::get_graph_property_type<G>,
+                            no_property> {};
     template <typename G>
-    struct edge_property_type {
-      typedef typename G::edge_property_type type;
-    };
+    struct edge_property_type
+      : boost::mpl::eval_if<detail::has_edge_property_type<G>,
+                            detail::get_edge_property_type<G>,
+                            no_property> {};
     template <typename G>
-    struct vertex_property_type {
-      typedef typename G::vertex_property_type type;
-    };
-
-    struct no_bundle { };
-    struct no_graph_bundle : no_bundle { };
-    struct no_vertex_bundle : no_bundle { };
-    struct no_edge_bundle : no_bundle { };
+    struct vertex_property_type
+      : boost::mpl::eval_if<detail::has_vertex_property_type<G>,
+                            detail::get_vertex_property_type<G>,
+                            no_property> {};
 
     template<typename G>
     struct graph_bundle_type {
@@ -281,7 +287,7 @@ namespace boost {
       // A helper metafunction for determining whether or not a type is
       // bundled.
       template <typename T>
-      struct is_no_bundle : mpl::bool_<is_convertible<T, no_bundle>::value>
+      struct is_no_bundle : mpl::bool_<is_same<T, no_property>::value>
       { };
     } // namespace graph_detail
 

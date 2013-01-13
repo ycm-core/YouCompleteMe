@@ -2,15 +2,16 @@
 #define DATE_TIME_TIME_DURATION_HPP___
 
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
- * Use, modification and distribution is subject to the 
+ * Use, modification and distribution is subject to the
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2009-06-04 04:24:49 -0400 (Thu, 04 Jun 2009) $
+ * $Date: 2012-10-10 12:05:03 -0700 (Wed, 10 Oct 2012) $
  */
 
 #include <boost/cstdint.hpp>
 #include <boost/operators.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/date_time/time_defs.hpp>
 #include <boost/date_time/special_defs.hpp>
 #include <boost/date_time/compiler_config.hpp>
@@ -179,7 +180,7 @@ namespace date_time {
       return duration_type(ticks_);
     }
     //! Division operations on a duration with an integer.
-    duration_type operator/=(int divisor) 
+    duration_type operator/=(int divisor)
     {
       ticks_ = ticks_ / divisor;
       return duration_type(ticks_);
@@ -251,7 +252,7 @@ namespace date_time {
     }
 
   protected:
-    explicit time_duration(impl_type in) : ticks_(in) {};
+    explicit time_duration(impl_type in) : ticks_(in) {}
     impl_type ticks_;
   };
 
@@ -265,10 +266,20 @@ namespace date_time {
   class subsecond_duration : public base_duration
   {
   public:
+    typedef typename base_duration::impl_type impl_type;
     typedef typename base_duration::traits_type traits_type;
+
+  private:
+    // To avoid integer overflow we precompute the duration resolution conversion coefficient (ticket #3471)
+    BOOST_STATIC_ASSERT_MSG((traits_type::ticks_per_second >= frac_of_second ? traits_type::ticks_per_second % frac_of_second : frac_of_second % traits_type::ticks_per_second) == 0,\
+      "The base duration resolution must be a multiple of the subsecond duration resolution");
+    BOOST_STATIC_CONSTANT(boost::int64_t, adjustment_ratio = (traits_type::ticks_per_second >= frac_of_second ? traits_type::ticks_per_second / frac_of_second : frac_of_second / traits_type::ticks_per_second));
+
+  public:
     explicit subsecond_duration(boost::int64_t ss) :
-      base_duration(0,0,0,ss*traits_type::res_adjust()/frac_of_second)
-    {}
+      base_duration(impl_type(traits_type::ticks_per_second >= frac_of_second ? ss * adjustment_ratio : ss / adjustment_ratio))
+    {
+    }
   };
 
 

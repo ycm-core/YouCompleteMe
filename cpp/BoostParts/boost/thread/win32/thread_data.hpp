@@ -7,17 +7,26 @@
 // (C) Copyright 2011-2012 Vicente J. Botet Escriba
 
 #include <boost/thread/detail/config.hpp>
-#include <boost/intrusive_ptr.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <boost/thread/win32/thread_primitives.hpp>
 #include <boost/thread/win32/thread_heap_alloc.hpp>
+
+#include <boost/intrusive_ptr.hpp>
 #ifdef BOOST_THREAD_USES_CHRONO
 #include <boost/chrono/system_clocks.hpp>
 #endif
+
+#include <map>
+#include <vector>
+#include <utility>
+
 #include <boost/config/abi_prefix.hpp>
 
 namespace boost
 {
+  class condition_variable;
+  class mutex;
+
   class thread_attributes {
   public:
       thread_attributes() BOOST_NOEXCEPT {
@@ -58,32 +67,47 @@ namespace boost
 
     namespace detail
     {
+        struct tss_cleanup_function;
         struct thread_exit_callback_node;
-        struct tss_data_node;
+        struct tss_data_node
+        {
+            boost::shared_ptr<boost::detail::tss_cleanup_function> func;
+            void* value;
+
+            tss_data_node(boost::shared_ptr<boost::detail::tss_cleanup_function> func_,
+                          void* value_):
+                func(func_),value(value_)
+            {}
+        };
 
         struct thread_data_base;
         void intrusive_ptr_add_ref(thread_data_base * p);
         void intrusive_ptr_release(thread_data_base * p);
 
-        struct BOOST_SYMBOL_VISIBLE thread_data_base
+        struct BOOST_THREAD_DECL thread_data_base
         {
             long count;
             detail::win32::handle_manager thread_handle;
             detail::win32::handle_manager interruption_handle;
             boost::detail::thread_exit_callback_node* thread_exit_callbacks;
-            boost::detail::tss_data_node* tss_data;
+            std::map<void const*,boost::detail::tss_data_node> tss_data;
             bool interruption_enabled;
             unsigned id;
+            typedef std::vector<std::pair<condition_variable*, mutex*>
+            //, hidden_allocator<std::pair<condition_variable*, mutex*> >
+            > notify_list_t;
+            notify_list_t notify;
+
 
             thread_data_base():
                 count(0),thread_handle(detail::win32::invalid_handle_value),
                 interruption_handle(create_anonymous_event(detail::win32::manual_reset_event,detail::win32::event_initially_reset)),
-                thread_exit_callbacks(0),tss_data(0),
+                thread_exit_callbacks(0),tss_data(),
                 interruption_enabled(true),
-                id(0)
+                id(0),
+                notify()
             {}
-            virtual ~thread_data_base()
-            {}
+            virtual ~thread_data_base();
 
             friend void intrusive_ptr_add_ref(thread_data_base * p)
             {
@@ -106,6 +130,12 @@ namespace boost
             typedef detail::win32::handle native_handle_type;
 
             virtual void run()=0;
+
+            void notify_all_at_thread_exit(condition_variable* cv, mutex* m)
+            {
+              notify.push_back(std::pair<condition_variable*, mutex*>(cv, m));
+            }
+
         };
 
         typedef boost::intrusive_ptr<detail::thread_data_base> thread_data_ptr;

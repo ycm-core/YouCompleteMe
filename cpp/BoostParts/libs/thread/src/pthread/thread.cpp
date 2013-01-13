@@ -10,11 +10,12 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/xtime.hpp>
-#include <boost/thread/condition.hpp>
+#include <boost/thread/condition_variable.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/throw_exception.hpp>
+
 #ifdef __GLIBC__
 #include <sys/sysinfo.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__)
@@ -24,14 +25,23 @@
 #include <unistd.h>
 #endif
 
-#include <libs/thread/src/pthread/timeconv.inl>
+#include "./timeconv.inl"
 
 namespace boost
 {
     namespace detail
     {
         thread_data_base::~thread_data_base()
-        {}
+        {
+          {
+            for (notify_list_t::iterator i = notify.begin(), e = notify.end();
+                    i != e; ++i)
+            {
+                i->second->unlock();
+                i->first->notify_all();
+            }
+          }
+        }
 
         struct thread_exit_callback_node
         {
@@ -138,16 +148,17 @@ namespace boost
                 boost::detail::thread_data_ptr thread_info = static_cast<boost::detail::thread_data_base*>(param)->self;
                 thread_info->self.reset();
                 detail::set_current_thread_data(thread_info.get());
-                try
+                BOOST_TRY
                 {
                     thread_info->run();
                 }
-                catch(thread_interrupted const&)
+                BOOST_CATCH (thread_interrupted const&)
                 {
                 }
+                BOOST_CATCH_END
 // Removed as it stops the debugger identifying the cause of the exception
 // Unhandled exceptions still cause the application to terminate
-//                 catch(...)
+//                 BOOST_CATCH(...)
 //                 {
 //                     std::terminate();
 //                 }
@@ -170,6 +181,8 @@ namespace boost
             }
 
             void run()
+            {}
+            void notify_all_at_thread_exit(condition_variable*, mutex*)
             {}
 
         private:
@@ -221,14 +234,14 @@ namespace boost
         if (res != 0)
         {
             thread_info->self.reset();
-            throw thread_resource_error();
+            boost::throw_exception(thread_resource_error());
         }
         int detached_state;
         res = pthread_attr_getdetachstate(h, &detached_state);
         if (res != 0)
         {
             thread_info->self.reset();
-            throw thread_resource_error();
+            boost::throw_exception(thread_resource_error());
         }
         if (PTHREAD_CREATE_DETACHED==detached_state)
         {
@@ -300,6 +313,12 @@ namespace boost
                 thread_info.reset();
             }
         }
+        else
+        {
+#ifdef BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+          boost::throw_exception(thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable"));
+#endif
+        }
     }
 
     bool thread::do_try_join_until(struct timespec const &timeout)
@@ -349,8 +368,14 @@ namespace boost
             {
                 thread_info.reset();
             }
+            return true;
         }
-        return true;
+        else
+        {
+#ifdef BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+          boost::throw_exception(thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable"));
+#endif
+        }
     }
 
     bool thread::joinable() const BOOST_NOEXCEPT
@@ -359,7 +384,7 @@ namespace boost
     }
 
 
-    void thread::detach() BOOST_NOEXCEPT
+    void thread::detach()
     {
         detail::thread_data_ptr local_thread_info;
         thread_info.swap(local_thread_info);
@@ -422,33 +447,6 @@ namespace boost
                 }
             }
         }
-
-#ifdef BOOST_THREAD_USES_CHRONO
-        void
-        sleep_for(const chrono::nanoseconds& ns)
-        {
-            using namespace chrono;
-            if (ns >= nanoseconds::zero())
-            {
-                timespec ts;
-                ts.tv_sec = static_cast<long>(duration_cast<seconds>(ns).count());
-                ts.tv_nsec = static_cast<long>((ns - seconds(ts.tv_sec)).count());
-
-#   if defined(BOOST_HAS_PTHREAD_DELAY_NP)
-                BOOST_VERIFY(!pthread_delay_np(&ts));
-#   elif defined(BOOST_HAS_NANOSLEEP)
-                //  nanosleep takes a timespec that is an offset, not
-                //  an absolute time.
-                nanosleep(&ts, 0);
-#   else
-                mutex mx;
-                mutex::scoped_lock lock(mx);
-                condition_variable cond;
-                cond.wait_for(lock, ns);
-#   endif
-            }
-        }
-#endif
 
         void yield() BOOST_NOEXCEPT
         {
@@ -558,6 +556,7 @@ namespace boost
 
         void interruption_point()
         {
+#ifndef BOOST_NO_EXCEPTIONS
             boost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             if(thread_info && thread_info->interrupt_enabled)
             {
@@ -568,6 +567,7 @@ namespace boost
                     throw thread_interrupted();
                 }
             }
+#endif
         }
 
         bool interruption_enabled() BOOST_NOEXCEPT
@@ -646,7 +646,7 @@ namespace boost
                     return &current_node->second;
                 }
             }
-            return NULL;
+            return 0;
         }
 
         void* get_tss_data(void const* key)
@@ -655,7 +655,7 @@ namespace boost
             {
                 return current_node->value;
             }
-            return NULL;
+            return 0;
         }
 
         void add_new_tss_node(void const* key,
@@ -692,12 +692,21 @@ namespace boost
                     erase_tss_node(key);
                 }
             }
-            else
+            else if(func || (tss_data!=0))
             {
                 add_new_tss_node(key,func,tss_data);
             }
         }
     }
+    BOOST_THREAD_DECL void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk)
+    {
+      detail::thread_data_base* const current_thread_data(detail::get_current_thread_data());
+      if(current_thread_data)
+      {
+        current_thread_data->notify_all_at_thread_exit(&cond, lk.release());
+      }
+    }
+
 
 
 }

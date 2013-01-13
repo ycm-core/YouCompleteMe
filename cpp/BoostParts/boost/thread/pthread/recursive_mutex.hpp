@@ -110,7 +110,7 @@ namespace boost
             BOOST_VERIFY(!pthread_mutex_unlock(&m));
         }
 
-        bool try_lock()
+        bool try_lock() BOOST_NOEXCEPT
         {
             int const res=pthread_mutex_trylock(&m);
             BOOST_ASSERT(!res || res==EBUSY);
@@ -294,7 +294,7 @@ namespace boost
             BOOST_VERIFY(!pthread_cond_signal(&cond));
         }
 
-        bool try_lock()
+        bool try_lock() BOOST_NOEXCEPT
         {
             boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && !pthread_equal(owner,pthread_self()))

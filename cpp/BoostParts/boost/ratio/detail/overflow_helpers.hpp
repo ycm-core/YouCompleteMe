@@ -32,6 +32,7 @@ time2_demo contained this comment:
 #ifndef BOOST_RATIO_DETAIL_RATIO_OPERATIONS_HPP
 #define BOOST_RATIO_DETAIL_RATIO_OPERATIONS_HPP
 
+#include <boost/ratio/config.hpp>
 #include <boost/ratio/detail/mpl/abs.hpp>
 #include <boost/ratio/detail/mpl/sign.hpp>
 #include <cstdlib>
@@ -41,35 +42,6 @@ time2_demo contained this comment:
 #include <boost/type_traits/integral_constant.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/integer_traits.hpp>
-
-#if !defined(BOOST_NO_STATIC_ASSERT) || !defined(BOOST_RATIO_USES_MPL_ASSERT)
-#define BOOST_RATIO_OVERFLOW_IN_ADD "overflow in ratio add"
-#define BOOST_RATIO_OVERFLOW_IN_SUB "overflow in ratio sub"
-#define BOOST_RATIO_OVERFLOW_IN_MUL "overflow in ratio mul"
-#define BOOST_RATIO_OVERFLOW_IN_DIV "overflow in ratio div"
-#define BOOST_RATIO_NUMERATOR_IS_OUT_OF_RANGE "ratio numerator is out of range"
-#define BOOST_RATIO_DIVIDE_BY_0 "ratio divide by 0"
-#define BOOST_RATIO_DENOMINATOR_IS_OUT_OF_RANGE "ratio denominator is out of range"
-#endif
-
-#ifndef BOOST_NO_STATIC_ASSERT
-#define BOOST_RATIO_STATIC_ASSERT(CND, MSG, TYPES) static_assert(CND,MSG)
-#elif defined(BOOST_RATIO_USES_STATIC_ASSERT)
-#include <boost/static_assert.hpp>
-#define BOOST_RATIO_STATIC_ASSERT(CND, MSG, TYPES) BOOST_STATIC_ASSERT(CND)
-#elif defined(BOOST_RATIO_USES_MPL_ASSERT)
-#include <boost/mpl/assert.hpp>
-#include <boost/mpl/bool.hpp>
-#define BOOST_RATIO_STATIC_ASSERT(CND, MSG, TYPES)                                 \
-    BOOST_MPL_ASSERT_MSG(boost::mpl::bool_< (CND) >::type::value, MSG, TYPES)
-#else
-//~ #elif defined(BOOST_RATIO_USES_ARRAY_ASSERT)
-#define BOOST_RATIO_CONCAT(A,B) A##B
-#define BOOST_RATIO_NAME(A,B) BOOST_RATIO_CONCAT(A,B)
-#define BOOST_RATIO_STATIC_ASSERT(CND, MSG, TYPES) static char BOOST_RATIO_NAME(__boost_ratio_test_,__LINE__)[(CND)?1:-1]
-//~ #define BOOST_RATIO_STATIC_ASSERT(CND, MSG, TYPES)
-#endif
-
 
 //
 // We simply cannot include this header on gcc without getting copious warnings of the kind:
@@ -273,7 +245,7 @@ namespace ratio_detail
              >
          >::type type;
   };
-  
+
   template <class R, boost::intmax_t D>
   struct ratio_subtract<R, ratio<0,D> >
   {
@@ -322,7 +294,7 @@ namespace ratio_detail
              ((R2::num / gcd_n1_n2 ==1) && (R1::den / gcd_d1_d2)==1)
       > type;
   };
-  
+
   template <class T>
   struct is_ratio : public boost::false_type
   {};

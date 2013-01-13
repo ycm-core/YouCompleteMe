@@ -170,7 +170,10 @@
 #  define BOOST_REGEX_HAS_OTHER_WCHAR_T
 #  ifdef BOOST_MSVC
 #     pragma warning(push)
-#     pragma warning(disable : 4251 4231 4660)
+#     pragma warning(disable : 4251 4231)
+#     if BOOST_MSVC < 1600
+#        pragma warning(disable : 4660)
+#     endif
 #  endif
 #  if defined(_DLL) && defined(BOOST_MSVC) && (BOOST_MSVC < 1600)
 #     include <string>

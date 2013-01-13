@@ -217,7 +217,7 @@
 #if defined(BOOST_NO_RVALUE_REFERENCES) && !defined(BOOST_MOVE_DOXYGEN_INVOKED)
 
    //Move emulation rv breaks standard aliasing rules so add workarounds for some compilers
-   #ifdef __GNUC__
+   #if defined(__GNUC__) && (__GNUC__ >= 4)
       #define BOOST_MOVE_ATTRIBUTE_MAY_ALIAS __attribute__((__may_alias__))
    #else
       #define BOOST_MOVE_ATTRIBUTE_MAY_ALIAS
@@ -812,12 +812,17 @@ class back_move_insert_iterator
    C* container_m;
 
    public:
-   typedef C container_type;
+   typedef C                        container_type;
+   typedef typename C::value_type   value_type;
+   typedef typename C::reference    reference;
 
    explicit back_move_insert_iterator(C& x) : container_m(&x) { }
 
-   back_move_insert_iterator& operator=(typename C::reference x)
+   back_move_insert_iterator& operator=(reference x)
    { container_m->push_back(boost::move(x)); return *this; }
+
+   back_move_insert_iterator& operator=(BOOST_RV_REF(value_type) x)
+   {  reference rx = x; return this->operator=(rx);  }
 
    back_move_insert_iterator& operator*()     { return *this; }
    back_move_insert_iterator& operator++()    { return *this; }
@@ -847,12 +852,17 @@ class front_move_insert_iterator
    C* container_m;
 
 public:
-   typedef C container_type;
+   typedef C                        container_type;
+   typedef typename C::value_type   value_type;
+   typedef typename C::reference    reference;
 
    explicit front_move_insert_iterator(C& x) : container_m(&x) { }
 
-   front_move_insert_iterator& operator=(typename C::reference x)
+   front_move_insert_iterator& operator=(reference x)
    { container_m->push_front(boost::move(x)); return *this; }
+
+   front_move_insert_iterator& operator=(BOOST_RV_REF(value_type) x)
+   {  reference rx = x; return this->operator=(rx);  }
 
    front_move_insert_iterator& operator*()     { return *this; }
    front_move_insert_iterator& operator++()    { return *this; }
@@ -880,18 +890,23 @@ class move_insert_iterator
    typename C::iterator pos_;
 
    public:
-   typedef C container_type;
+   typedef C                        container_type;
+   typedef typename C::value_type   value_type;
+   typedef typename C::reference    reference;
 
    explicit move_insert_iterator(C& x, typename C::iterator pos)
       : container_m(&x), pos_(pos)
    {}
 
-   move_insert_iterator& operator=(typename C::reference x)
+   move_insert_iterator& operator=(reference x)
    {
       pos_ = container_m->insert(pos_, ::boost::move(x));
       ++pos_;
       return *this;
    }
+
+   move_insert_iterator& operator=(BOOST_RV_REF(value_type) x)
+   {  reference rx = x; return this->operator=(rx);  }
 
    move_insert_iterator& operator*()     { return *this; }
    move_insert_iterator& operator++()    { return *this; }

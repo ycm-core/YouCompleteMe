@@ -609,7 +609,7 @@ namespace boost
             is_locked=false;
         }
 
-#if defined(BOOST_NO_EXPLICIT_CONVERSION_OPERATORS)
+#if defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
         typedef void (unique_lock::*bool_type)();
         operator bool_type() const BOOST_NOEXCEPT
         {
@@ -880,7 +880,7 @@ namespace boost
             is_locked=false;
         }
 
-#if defined(BOOST_NO_EXPLICIT_CONVERSION_OPERATORS)
+#if defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
         typedef void (shared_lock<Mutex>::*bool_type)();
         operator bool_type() const BOOST_NOEXCEPT
         {
@@ -1140,7 +1140,7 @@ namespace boost
           return is_locked;
         }
 #endif
-#if defined(BOOST_NO_EXPLICIT_CONVERSION_OPERATORS)
+#if defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
         typedef void (upgrade_lock::*bool_type)();
         operator bool_type() const BOOST_NOEXCEPT
         {
@@ -1224,7 +1224,7 @@ namespace boost
             exclusive.swap(other.exclusive);
         }
 
-#if defined(BOOST_NO_EXPLICIT_CONVERSION_OPERATORS)
+#if defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
         typedef void (upgrade_to_unique_lock::*bool_type)(upgrade_to_unique_lock&);
         operator bool_type() const BOOST_NOEXCEPT
         {
@@ -1275,7 +1275,7 @@ namespace boost
             try_lock_wrapper(Mutex& m_,try_to_lock_t):
                 base(m_,try_to_lock)
             {}
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
             try_lock_wrapper(BOOST_THREAD_RV_REF(try_lock_wrapper) other):
                 base(::boost::move(other))
             {}
@@ -1325,7 +1325,7 @@ namespace boost
                 return base::release();
             }
 
-#if defined(BOOST_NO_EXPLICIT_CONVERSION_OPERATORS)
+#if defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
             typedef typename base::bool_type bool_type;
             operator bool_type() const
             {

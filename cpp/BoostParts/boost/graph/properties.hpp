@@ -21,7 +21,7 @@
 #include <boost/graph/property_maps/null_property_map.hpp>
 
 #include <boost/graph/graph_traits.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits.hpp>
 #include <boost/limits.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
@@ -68,26 +68,20 @@ namespace boost {
   struct vertex_property_tag { };
   struct edge_property_tag { };
 
-#ifdef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
   // See examples/edge_property.cpp for how to use this.
 #define BOOST_INSTALL_PROPERTY(KIND, NAME) \
   template <> struct property_kind<KIND##_##NAME##_t> { \
     typedef KIND##_property_tag type; \
   }
-#else
-#define BOOST_INSTALL_PROPERTY(KIND, NAME) \
-  template <> struct property_kind<KIND##_##NAME##_t> { \
-    typedef KIND##_property_tag type; \
-  }
-#endif
 
 #define BOOST_DEF_PROPERTY(KIND, NAME) \
   enum KIND##_##NAME##_t { KIND##_##NAME }; \
   BOOST_INSTALL_PROPERTY(KIND, NAME)
 
-  BOOST_DEF_PROPERTY(vertex, all);
-  BOOST_DEF_PROPERTY(edge, all);
-  BOOST_DEF_PROPERTY(graph, all);
+  // These three are defined in boost/pending/property.hpp
+  BOOST_INSTALL_PROPERTY(vertex, all);
+  BOOST_INSTALL_PROPERTY(edge, all);
+  BOOST_INSTALL_PROPERTY(graph, all);
   BOOST_DEF_PROPERTY(vertex, index);
   BOOST_DEF_PROPERTY(vertex, index1);
   BOOST_DEF_PROPERTY(vertex, index2);
@@ -128,10 +122,10 @@ namespace boost {
   BOOST_DEF_PROPERTY(graph, visitor);
 
   // These tags are used for property bundles
-  // BOOST_DEF_PROPERTY(graph, bundle); -- needed in graph_traits.hpp, so enum is defined there
+  // These three are defined in boost/pending/property.hpp
   BOOST_INSTALL_PROPERTY(graph, bundle);
-  BOOST_DEF_PROPERTY(vertex, bundle);
-  BOOST_DEF_PROPERTY(edge, bundle);
+  BOOST_INSTALL_PROPERTY(vertex, bundle);
+  BOOST_INSTALL_PROPERTY(edge, bundle);
 
   // These tags are used to denote the owners and local descriptors
   // for the vertices and edges of a distributed graph.
@@ -147,6 +141,25 @@ namespace boost {
 #undef BOOST_DEF_PROPERTY
 
   namespace detail {
+
+    template <typename G, typename Tag>
+    struct property_kind_from_graph: property_kind<Tag> {};
+
+#ifndef BOOST_GRAPH_NO_BUNDLED_PROPERTIES
+    template <typename G, typename R, typename T>
+    struct property_kind_from_graph<G, R T::*> {
+      typedef typename boost::mpl::if_<
+                boost::is_base_of<T, typename vertex_bundle_type<G>::type>,
+                vertex_property_tag,
+                typename boost::mpl::if_<
+                  boost::is_base_of<T, typename edge_bundle_type<G>::type>,
+                  edge_property_tag,
+                  typename boost::mpl::if_<
+                    boost::is_base_of<T, typename graph_bundle_type<G>::type>,
+                    graph_property_tag,
+                    void>::type>::type>::type type;
+    };
+#endif
 
     struct dummy_edge_property_selector {
       template <class Graph, class Property, class Tag>
@@ -192,70 +205,32 @@ namespace boost {
     };
 
     template <class Graph, class PropertyTag>
-    struct edge_property_map {
-      typedef typename edge_property_type<Graph>::type Property;
-      typedef typename graph_tag_or_void<Graph>::type graph_tag;
-      typedef typename edge_property_selector<graph_tag>::type Selector;
-      typedef typename Selector::template bind_<Graph,Property,PropertyTag>
-        Bind;
-      typedef typename Bind::type type;
-      typedef typename Bind::const_type const_type;
-    };
+    struct edge_property_map
+      : edge_property_selector<
+          typename graph_tag_or_void<Graph>::type
+        >::type::template bind_<
+                            Graph,
+                            typename edge_property_type<Graph>::type,
+                            PropertyTag>
+      {};
     template <class Graph, class PropertyTag>
-    class vertex_property_map {
-    public:
-      typedef typename vertex_property_type<Graph>::type Property;
-      typedef typename graph_tag_or_void<Graph>::type graph_tag;
-      typedef typename vertex_property_selector<graph_tag>::type Selector;
-      typedef typename Selector::template bind_<Graph,Property,PropertyTag>
-        Bind;
-    public:
-      typedef typename Bind::type type;
-      typedef typename Bind::const_type const_type;
-    };
-
-    // This selects the kind of property map, whether is maps from
-    // edges or from vertices.
-    //
-    // It is overly complicated because it's a workaround for
-    // partial specialization.
-    struct choose_vertex_property_map {
-      template <class Graph, class Property>
-      struct bind_ {
-        typedef vertex_property_map<Graph, Property> type;
-      };
-    };
-    struct choose_edge_property_map {
-      template <class Graph, class Property>
-      struct bind_ {
-        typedef edge_property_map<Graph, Property> type;
-      };
-    };
-    template <class Kind>
-    struct property_map_kind_selector {
-      // VC++ gets confused if this isn't defined, even though
-      // this never gets used.
-      typedef choose_vertex_property_map type;
-    };
-    template <> struct property_map_kind_selector<vertex_property_tag> {
-      typedef choose_vertex_property_map type;
-    };
-    template <> struct property_map_kind_selector<edge_property_tag> {
-      typedef choose_edge_property_map type;
-    };
+    struct vertex_property_map
+      : vertex_property_selector<
+          typename graph_tag_or_void<Graph>::type
+        >::type::template bind_<
+                            Graph,
+                            typename vertex_property_type<Graph>::type,
+                            PropertyTag>
+      {};
   } // namespace detail
 
   template <class Graph, class Property>
-  struct property_map {
-  // private:
-    typedef typename property_kind<Property>::type Kind;
-    typedef typename detail::property_map_kind_selector<Kind>::type Selector;
-    typedef typename Selector::template bind_<Graph, Property> Bind;
-    typedef typename Bind::type Map;
-  public:
-    typedef typename Map::type type;
-    typedef typename Map::const_type const_type;
-  };
+  struct property_map:
+    mpl::if_<
+      is_same<typename detail::property_kind_from_graph<Graph, Property>::type, edge_property_tag>,
+      detail::edge_property_map<Graph, Property>,
+      detail::vertex_property_map<Graph, Property> >::type
+  {};
 
   // shortcut for accessing the value type of the property map
   template <class Graph, class Property>
@@ -273,16 +248,8 @@ namespace boost {
     >::type type;
   };
 
-  template <class Graph>
-  class vertex_property {
-  public:
-    typedef typename Graph::vertex_property_type type;
-  };
-  template <class Graph>
-  class edge_property {
-  public:
-    typedef typename Graph::edge_property_type type;
-  };
+  template <class Graph> class vertex_property: vertex_property_type<Graph> {};
+  template <class Graph> class edge_property: edge_property_type<Graph> {};
 
   template <typename Graph>
   class degree_property_map
@@ -383,99 +350,6 @@ namespace boost {
 #  define BOOST_GRAPH_NO_BUNDLED_PROPERTIES
 #endif
 
-#ifndef BOOST_GRAPH_NO_BUNDLED_PROPERTIES
-  template<typename Graph, typename Descriptor, typename Bundle, typename T>
-  struct bundle_property_map
-    : put_get_helper<T&, bundle_property_map<Graph, Descriptor, Bundle, T> >
-  {
-    typedef Descriptor key_type;
-    typedef typename remove_const<T>::type value_type;
-    typedef T& reference;
-    typedef lvalue_property_map_tag category;
-
-    bundle_property_map() { }
-    bundle_property_map(Graph* g_, T Bundle::* pm_) : g(g_), pm(pm_) {}
-
-    reference operator[](key_type k) const { return (*g)[k].*pm; }
-  private:
-    Graph* g;
-    T Bundle::* pm;
-  };
-
-  namespace detail {
-    template<typename VertexBundle, typename EdgeBundle, typename Bundle>
-      struct is_vertex_bundle
-      : mpl::and_<is_convertible<VertexBundle*, Bundle*>,
-                  mpl::and_<mpl::not_<is_void<VertexBundle> >,
-                            mpl::not_<is_same<VertexBundle, no_property> > > >
-      { };
-  }
-
-  // Specialize the property map template to generate bundled property maps.
-  template <typename Graph, typename T, typename Bundle>
-  struct property_map<Graph, T Bundle::*>
-  {
-  private:
-    typedef graph_traits<Graph> traits;
-    typedef typename Graph::vertex_bundled vertex_bundled;
-    typedef typename Graph::edge_bundled edge_bundled;
-    typedef typename mpl::if_c<(detail::is_vertex_bundle<vertex_bundled, edge_bundled, Bundle>::value),
-                       typename traits::vertex_descriptor,
-                       typename traits::edge_descriptor>::type
-      descriptor;
-    typedef typename mpl::if_c<(detail::is_vertex_bundle<vertex_bundled, edge_bundled, Bundle>::value),
-                       vertex_bundled,
-                       edge_bundled>::type
-      actual_bundle;
-
-  public:
-    typedef bundle_property_map<Graph, descriptor, actual_bundle, T> type;
-    typedef bundle_property_map<const Graph, descriptor, actual_bundle, const T>
-      const_type;
-  };
-#endif
-
-// These metafunctions help implement the process of determining the vertex
-// and edge properties of a graph.
-namespace graph_detail {
-    template<typename Retag>
-    struct retagged_property {
-        typedef typename Retag::type type;
-    };
-
-    // Search the normalized PropList (as returned by retagged<>::type) for
-    // the given bundle. Return the type error if no such bundle can be found.
-    template <typename PropList, typename Bundle>
-    struct retagged_bundle {
-      typedef typename property_value<PropList, Bundle>::type Value;
-      typedef typename mpl::if_<
-        is_same<Value, detail::error_property_not_found>, no_bundle, Value
-      >::type type;
-    };
-
-    template<typename Prop, typename Bundle>
-    class normal_property {
-      // Normalize the property into a property list.
-      typedef detail::retag_property_list<Bundle, Prop> List;
-    public:
-      // Extract the normalized property and bundle types.
-      typedef typename retagged_property<List>::type property;
-      typedef typename retagged_bundle<property, Bundle>::type bundle;
-    };
-
-    template<typename Prop>
-    struct graph_prop : normal_property<Prop, graph_bundle_t>
-    { };
-
-    template<typename Prop>
-    struct vertex_prop : normal_property<Prop, vertex_bundle_t>
-    { };
-
-    template<typename Prop>
-    struct edge_prop : normal_property<Prop, edge_bundle_t>
-    { };
-} // namespace graph_detail
-
 // NOTE: These functions are declared, but never defined since they need to
 // be overloaded by graph implementations. However, we need them to be
 // declared for the functions below.
@@ -498,17 +372,11 @@ get_property(Graph& g) {
 
 template<typename Graph>
 inline typename graph_property<Graph, graph_bundle_t>::type const&
-get_property(Graph const& g) {
+get_property(const Graph& g) {
   return get_property(g, graph_bundle);
 }
 #endif
 
 } // namespace boost
 
-#if BOOST_WORKAROUND(BOOST_MSVC, < 1300)
-// Stay out of the way of the concept checking class
-# undef Graph
-# undef RandomAccessIterator
-#endif
-
-#endif /* BOOST_GRAPH_PROPERTIES_HPPA */
+#endif /* BOOST_GRAPH_PROPERTIES_HPP */

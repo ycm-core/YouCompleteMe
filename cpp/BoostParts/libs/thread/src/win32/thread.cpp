@@ -13,22 +13,39 @@
 #endif
 
 #include <boost/thread/thread.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/thread/tss.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/detail/tss_hooks.hpp>
+
+#include <boost/assert.hpp>
+#include <boost/throw_exception.hpp>
+#include <boost/date_time/posix_time/conversion.hpp>
+
+#include <memory>
 #include <algorithm>
 #ifndef UNDER_CE
 #include <process.h>
 #endif
 #include <stdio.h>
-#include <boost/thread/once.hpp>
-#include <boost/thread/tss.hpp>
-#include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
-#include <boost/thread/detail/tss_hooks.hpp>
-#include <boost/date_time/posix_time/conversion.hpp>
 #include <windows.h>
-#include <memory>
 
 namespace boost
 {
+  namespace detail
+  {
+    thread_data_base::~thread_data_base()
+    {
+      {
+        for (notify_list_t::iterator i = notify.begin(), e = notify.end();
+                i != e; ++i)
+        {
+            i->second->unlock();
+            i->first->notify_all();
+        }
+      }
+    }
+  }
     namespace
     {
 #ifdef BOOST_THREAD_PROVIDES_ONCE_CXX11
@@ -36,33 +53,31 @@ namespace boost
 #else
         boost::once_flag current_thread_tls_init_flag=BOOST_ONCE_INIT;
 #endif
-        #if defined(UNDER_CE)
+#if defined(UNDER_CE)
         // Windows CE does not define the TLS_OUT_OF_INDEXES constant.
-        DWORD tls_out_of_index=0xFFFFFFFF;
-        #else
-        DWORD tls_out_of_index=TLS_OUT_OF_INDEXES;
-        #endif
-        DWORD current_thread_tls_key=tls_out_of_index;
+#define TLS_OUT_OF_INDEXES 0xFFFFFFFF
+#endif
+        DWORD current_thread_tls_key=TLS_OUT_OF_INDEXES;
 
         void create_current_thread_tls_key()
         {
             tss_cleanup_implemented(); // if anyone uses TSS, we need the cleanup linked in
             current_thread_tls_key=TlsAlloc();
-            BOOST_ASSERT(current_thread_tls_key!=tls_out_of_index);
+            BOOST_ASSERT(current_thread_tls_key!=TLS_OUT_OF_INDEXES);
         }
 
         void cleanup_tls_key()
         {
-            if(current_thread_tls_key!=tls_out_of_index)
+            if(current_thread_tls_key!=TLS_OUT_OF_INDEXES)
             {
                 TlsFree(current_thread_tls_key);
-                current_thread_tls_key=tls_out_of_index;
+                current_thread_tls_key=TLS_OUT_OF_INDEXES;
             }
         }
 
         detail::thread_data_base* get_current_thread_data()
         {
-            if(current_thread_tls_key==tls_out_of_index)
+            if(current_thread_tls_key==TLS_OUT_OF_INDEXES)
             {
                 return 0;
             }
@@ -72,7 +87,7 @@ namespace boost
         void set_current_thread_data(detail::thread_data_base* new_data)
         {
             boost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
-            if(current_thread_tls_key!=tls_out_of_index)
+            if(current_thread_tls_key!=TLS_OUT_OF_INDEXES)
                 BOOST_VERIFY(TlsSetValue(current_thread_tls_key,new_data));
             else
                 boost::throw_exception(thread_resource_error());
@@ -130,19 +145,6 @@ namespace boost
             {}
         };
 
-        struct tss_data_node
-        {
-            void const* key;
-            boost::shared_ptr<boost::detail::tss_cleanup_function> func;
-            void* value;
-            tss_data_node* next;
-
-            tss_data_node(void const* key_,boost::shared_ptr<boost::detail::tss_cleanup_function> func_,void* value_,
-                          tss_data_node* next_):
-                key(key_),func(func_),value(value_),next(next_)
-            {}
-        };
-
     }
 
     namespace
@@ -152,7 +154,7 @@ namespace boost
             detail::thread_data_ptr current_thread_data(get_current_thread_data(),false);
             if(current_thread_data)
             {
-                while(current_thread_data->tss_data || current_thread_data->thread_exit_callbacks)
+                while(! current_thread_data->tss_data.empty() || current_thread_data->thread_exit_callbacks)
                 {
                     while(current_thread_data->thread_exit_callbacks)
                     {
@@ -165,15 +167,18 @@ namespace boost
                         }
                         boost::detail::heap_delete(current_node);
                     }
-                    while(current_thread_data->tss_data)
+                    for(std::map<void const*,detail::tss_data_node>::iterator next=current_thread_data->tss_data.begin(),
+                            current,
+                            end=current_thread_data->tss_data.end();
+                        next!=end;)
                     {
-                        detail::tss_data_node* const current_node=current_thread_data->tss_data;
-                        current_thread_data->tss_data=current_node->next;
-                        if(current_node->func)
+                        current=next;
+                        ++next;
+                        if(current->second.func && (current->second.value!=0))
                         {
-                            (*current_node->func)(current_node->value);
+                            (*current->second.func)(current->second.value);
                         }
-                        boost::detail::heap_delete(current_node);
+                        current_thread_data->tss_data.erase(current);
                     }
                 }
 
@@ -185,16 +190,20 @@ namespace boost
         {
             detail::thread_data_base* const thread_info(reinterpret_cast<detail::thread_data_base*>(param));
             set_current_thread_data(thread_info);
-            try
+#ifndef BOOST_NO_EXCEPTIONS
+            try // BOOST_NO_EXCEPTIONS protected
+#endif
             {
                 thread_info->run();
             }
-            catch(thread_interrupted const&)
+#ifndef BOOST_NO_EXCEPTIONS
+            catch(thread_interrupted const&) // BOOST_NO_EXCEPTIONS protected
             {
             }
+#endif
 // Removed as it stops the debugger identifying the cause of the exception
 // Unhandled exceptions still cause the application to terminate
-//             catch(...)
+//             catch(...) // BOOST_NO_EXCEPTIONS protected
 //             {
 //                 std::terminate();
 //             }
@@ -221,7 +230,7 @@ namespace boost
     void thread::start_thread(const attributes& attr)
     {
       //uintptr_t const new_thread=_beginthreadex(attr.get_security(),attr.get_stack_size(),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
-      uintptr_t const new_thread=_beginthreadex(0,attr.get_stack_size(),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
+      uintptr_t const new_thread=_beginthreadex(0,static_cast<unsigned int>(attr.get_stack_size()),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
       if(!new_thread)
       {
           boost::throw_exception(thread_resource_error());
@@ -248,6 +257,9 @@ namespace boost
 
             void run()
             {}
+            void notify_all_at_thread_exit(condition_variable*, mutex*)
+            {}
+
         private:
             externally_launched_thread(externally_launched_thread&);
             void operator=(externally_launched_thread&);
@@ -256,15 +268,19 @@ namespace boost
         void make_external_thread_data()
         {
             externally_launched_thread* me=detail::heap_new<externally_launched_thread>();
-            try
+#ifndef BOOST_NO_EXCEPTIONS
+            try // BOOST_NO_EXCEPTIONS protected
+#endif
             {
                 set_current_thread_data(me);
             }
-            catch(...)
+#ifndef BOOST_NO_EXCEPTIONS
+            catch(...) // BOOST_NO_EXCEPTIONS protected
             {
                 detail::heap_delete(me);
-                throw;
+                throw; // BOOST_NO_EXCEPTIONS protected
             }
+#endif
         }
 
         detail::thread_data_base* get_or_make_current_thread_data()
@@ -295,7 +311,6 @@ namespace boost
     {
         return (get_thread_info)();
     }
-
     void thread::join()
     {
         if (this_thread::get_id() == get_id())
@@ -308,50 +323,44 @@ namespace boost
             this_thread::interruptible_wait(local_thread_info->thread_handle,detail::timeout::sentinel());
             release_handle();
         }
+        else
+        {
+#ifdef BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+          boost::throw_exception(thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable"));
+#endif
+        }
     }
 
     bool thread::timed_join(boost::system_time const& wait_until)
     {
-        if (this_thread::get_id() == get_id())
-        {
-            boost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
-        }
-        detail::thread_data_ptr local_thread_info=(get_thread_info)();
-        if(local_thread_info)
-        {
-            if(!this_thread::interruptible_wait(local_thread_info->thread_handle,get_milliseconds_until(wait_until)))
-            {
-                return false;
-            }
-            release_handle();
-        }
-        return true;
+      return do_try_join_until(get_milliseconds_until(wait_until));
     }
 
-#ifdef BOOST_THREAD_USES_CHRONO
-
-    bool thread::try_join_until(const chrono::time_point<chrono::system_clock, chrono::nanoseconds>& tp)
+    bool thread::do_try_join_until(uintmax_t milli)
     {
       if (this_thread::get_id() == get_id())
       {
-        boost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
+          boost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
       }
       detail::thread_data_ptr local_thread_info=(get_thread_info)();
       if(local_thread_info)
       {
-        chrono::milliseconds rel_time= chrono::ceil<chrono::milliseconds>(tp-chrono::system_clock::now());
-        if(!this_thread::interruptible_wait(local_thread_info->thread_handle,rel_time.count()))
-        {
-            return false;
-        }
-        release_handle();
+          if(!this_thread::interruptible_wait(local_thread_info->thread_handle,milli))
+          {
+              return false;
+          }
+          release_handle();
+          return true;
       }
-      return true;
+      else
+      {
+#ifdef BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+        boost::throw_exception(thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable"));
+#endif
+      }
     }
 
-#endif
-
-    void thread::detach() BOOST_NOEXCEPT
+    void thread::detach()
     {
         release_handle();
     }
@@ -630,14 +639,11 @@ namespace boost
             detail::thread_data_base* const current_thread_data(get_current_thread_data());
             if(current_thread_data)
             {
-                detail::tss_data_node* current_node=current_thread_data->tss_data;
-                while(current_node)
+                std::map<void const*,tss_data_node>::iterator current_node=
+                    current_thread_data->tss_data.find(key);
+                if(current_node!=current_thread_data->tss_data.end())
                 {
-                    if(current_node->key==key)
-                    {
-                        return current_node;
-                    }
-                    current_node=current_node->next;
+                    return &current_node->second;
                 }
             }
             return NULL;
@@ -652,23 +658,43 @@ namespace boost
             return NULL;
         }
 
-        void set_tss_data(void const* key,boost::shared_ptr<tss_cleanup_function> func,void* tss_data,bool cleanup_existing)
+        void add_new_tss_node(void const* key,
+                              boost::shared_ptr<tss_cleanup_function> func,
+                              void* tss_data)
+        {
+            detail::thread_data_base* const current_thread_data(get_or_make_current_thread_data());
+            current_thread_data->tss_data.insert(std::make_pair(key,tss_data_node(func,tss_data)));
+        }
+
+        void erase_tss_node(void const* key)
+        {
+            detail::thread_data_base* const current_thread_data(get_or_make_current_thread_data());
+            current_thread_data->tss_data.erase(key);
+        }
+
+        void set_tss_data(void const* key,
+                          boost::shared_ptr<tss_cleanup_function> func,
+                          void* tss_data,bool cleanup_existing)
         {
             if(tss_data_node* const current_node=find_tss_data(key))
             {
-                if(cleanup_existing && current_node->func.get() && current_node->value)
+                if(cleanup_existing && current_node->func && (current_node->value!=0))
                 {
                     (*current_node->func)(current_node->value);
                 }
-                current_node->func=func;
-                current_node->value=tss_data;
+                if(func || (tss_data!=0))
+                {
+                    current_node->func=func;
+                    current_node->value=tss_data;
+                }
+                else
+                {
+                    erase_tss_node(key);
+                }
             }
-            else if(func && tss_data)
+            else if(func || (tss_data!=0))
             {
-                detail::thread_data_base* const current_thread_data(get_or_make_current_thread_data());
-                tss_data_node* const new_node=
-                    heap_new<tss_data_node>(key,func,tss_data,current_thread_data->tss_data);
-                current_thread_data->tss_data=new_node;
+                add_new_tss_node(key,func,tss_data);
             }
         }
     }
@@ -688,6 +714,14 @@ namespace boost
         boost::run_thread_exit_callbacks();
     }
 
+    BOOST_THREAD_DECL void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk)
+    {
+      detail::thread_data_base* const current_thread_data(get_current_thread_data());
+      if(current_thread_data)
+      {
+        current_thread_data->notify_all_at_thread_exit(&cond, lk.release());
+      }
+    }
 }
 
 

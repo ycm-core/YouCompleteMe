@@ -70,41 +70,41 @@ struct allocator_traits
       typedef unspecified pointer;
       //! Alloc::const_pointer if such a type exists ; otherwise, pointer_traits<pointer>::rebind<const
       //!
-      typedef unspecified const_pointer;
+      typedef see_documentation const_pointer;
       //! Non-standard extension
       //! Alloc::reference if such a type exists; otherwise, value_type&
-      typedef unspecified reference;
+      typedef see_documentation reference;
       //! Non-standard extension
       //! Alloc::const_reference if such a type exists ; otherwise, const value_type&
-      typedef unspecified const_reference;
+      typedef see_documentation const_reference;
       //! Alloc::void_pointer if such a type exists ; otherwise, pointer_traits<pointer>::rebind<void>.
       //!
-      typedef unspecified void_pointer;
+      typedef see_documentation void_pointer;
       //! Alloc::const_void_pointer if such a type exists ; otherwis e, pointer_traits<pointer>::rebind<const
       //!
-      typedef unspecified const_void_pointer;
+      typedef see_documentation const_void_pointer;
       //! Alloc::difference_type if such a type exists ; otherwise, pointer_traits<pointer>::difference_type.
       //!
-      typedef unspecified difference_type;
+      typedef see_documentation difference_type;
       //! Alloc::size_type if such a type exists ; otherwise, make_unsigned<difference_type>::type
       //!
-      typedef unspecified size_type;
+      typedef see_documentation size_type;
       //! Alloc::propagate_on_container_copy_assignment if such a type exists, otherwise an integral_constant
       //! type with internal constant static member `value` == false.
-      typedef unspecified propagate_on_container_copy_assignment;
+      typedef see_documentation propagate_on_container_copy_assignment;
       //! Alloc::propagate_on_container_move_assignment if such a type exists, otherwise an integral_constant
       //! type with internal constant static member `value` == false.
-      typedef unspecified propagate_on_container_move_assignment;
+      typedef see_documentation propagate_on_container_move_assignment;
       //! Alloc::propagate_on_container_swap if such a type exists, otherwise an integral_constant
       //! type with internal constant static member `value` == false.
-      typedef unspecified propagate_on_container_swap;
+      typedef see_documentation propagate_on_container_swap;
       //! Defines an allocator: Alloc::rebind<T>::other if such a type exists; otherwise, Alloc<T, Args>
       //! if Alloc is a class template instantiation of the form Alloc<U, Args>, where Args is zero or
       //! more type arguments ; otherwise, the instantiation of rebind_alloc is ill-formed.
       //!
       //! In C++03 compilers `rebind_alloc` is a struct derived from an allocator
       //! deduced by previously detailed rules.
-      template <class T> using rebind_alloc = unspecified;
+      template <class T> using rebind_alloc = see_documentation;
 
       //! In C++03 compilers `rebind_traits` is a struct derived from
       //! `allocator_traits<OtherAlloc>`, where `OtherAlloc` is
@@ -115,7 +115,7 @@ struct allocator_traits
       //! `type` is an allocator related to Alloc deduced deduced by rules explained in `rebind_alloc`.
       template <class T>
       struct portable_rebind_alloc
-      {  typedef unspecified_type type;  };
+      {  typedef see_documentation type;  };
    #else
       //pointer
       typedef BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_DEFAULT(boost::container::container_detail::, Alloc,
@@ -213,8 +213,8 @@ struct allocator_traits
    static void deallocate(Alloc &a, pointer p, size_type n)
    {  return a.deallocate(p, n);  }
 
-   //! <b>Effects</b>: calls `a.construct(p, std::forward<Args>(args)...)` if that call is well-formed;
-   //! otherwise, invokes `::new (static_cast<void*>(p)) T(std::forward<Args>(args)...)`
+   //! <b>Effects</b>: calls `a.allocate(n, p)` if that call is well-formed;
+   //! otherwise, invokes `a.allocate(n)`
    static pointer allocate(Alloc &a, size_type n, const_void_pointer p)
    {
       const bool value = boost::container::container_detail::

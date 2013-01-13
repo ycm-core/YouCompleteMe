@@ -18,6 +18,7 @@
 
 #define BOOST_REGEX_SOURCE
 
+#include <boost/config.hpp>
 #include <cstdio>
 #include <boost/regex.hpp>
 #include <boost/cregex.hpp>

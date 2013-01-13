@@ -31,6 +31,10 @@
    #define BOOST_CONTAINER_UNIMPLEMENTED_PACK_EXPANSION_TO_FIXED_LIST
 #endif
 
+//Macros for documentation purposes. For code, expands to the argument
+#define BOOST_CONTAINER_IMPDEF(TYPE) TYPE
+#define BOOST_CONTAINER_SEEDOC(TYPE) TYPE
+
 #include <boost/container/detail/config_end.hpp>
 
 #endif   //#ifndef BOOST_CONTAINER_DETAIL_WORKAROUND_HPP

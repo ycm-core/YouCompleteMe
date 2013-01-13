@@ -431,7 +431,7 @@ public:
    //
    // Mathematically undefined properties:
    //
-   typedef typename detail::find_arg<arg_list, is_assert_undefined<mpl::_1>, discrete_quantile<> >::type assert_undefined_type;
+   typedef typename detail::find_arg<arg_list, is_assert_undefined<mpl::_1>, assert_undefined<> >::type assert_undefined_type;
    //
    // Max iterations:
    //
@@ -537,12 +537,12 @@ private:
    //
    // Mathematically undefined properties:
    //
-   typedef typename detail::find_arg<arg_list, is_assert_undefined<mpl::_1>, discrete_quantile<> >::type assert_undefined_type;
+   typedef typename detail::find_arg<arg_list, is_assert_undefined<mpl::_1>, typename Policy::assert_undefined_type >::type assert_undefined_type;
    //
    // Max iterations:
    //
-   typedef typename detail::find_arg<arg_list, is_max_series_iterations<mpl::_1>, max_series_iterations<> >::type max_series_iterations_type;
-   typedef typename detail::find_arg<arg_list, is_max_root_iterations<mpl::_1>, max_root_iterations<> >::type max_root_iterations_type;
+   typedef typename detail::find_arg<arg_list, is_max_series_iterations<mpl::_1>, typename Policy::max_series_iterations_type>::type max_series_iterations_type;
+   typedef typename detail::find_arg<arg_list, is_max_root_iterations<mpl::_1>, typename Policy::max_root_iterations_type>::type max_root_iterations_type;
    //
    // Define a typelist of the policies:
    //

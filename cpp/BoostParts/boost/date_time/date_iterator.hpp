@@ -2,11 +2,11 @@
 #define DATE_ITERATOR_HPP___
 
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
- * Use, modification and distribution is subject to the 
+ * Use, modification and distribution is subject to the
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date: 2012-09-22 15:33:33 -0700 (Sat, 22 Sep 2012) $
  */
 
 #include <iterator>
@@ -32,7 +32,7 @@ namespace date_time {
   template<class date_type>
   class date_itr_base {
   // works, but benefit unclear at the moment
-  //   class date_itr_base : public std::iterator<std::input_iterator_tag, 
+  //   class date_itr_base : public std::iterator<std::input_iterator_tag,
   //                                             date_type, void, void, void>{
   public:
     typedef typename date_type::duration_type duration_type;
@@ -40,31 +40,31 @@ namespace date_time {
     typedef std::input_iterator_tag iterator_category;
 
     date_itr_base(date_type d) : current_(d) {}
-    virtual ~date_itr_base() {};
-    date_itr_base& operator++() 
+    virtual ~date_itr_base() {}
+    date_itr_base& operator++()
     {
       current_ = current_ + get_offset(current_);
       return *this;
     }
-    date_itr_base& operator--() 
+    date_itr_base& operator--()
     {
       current_ = current_ + get_neg_offset(current_);
       return *this;
     }
     virtual duration_type get_offset(const date_type& current) const=0;
     virtual duration_type get_neg_offset(const date_type& current) const=0;
-    date_type operator*() {return current_;};
-    date_type* operator->() {return &current_;};
+    date_type operator*() {return current_;}
+    date_type* operator->() {return &current_;}
     bool operator<  (const date_type& d) {return current_ < d;}
     bool operator<= (const date_type& d) {return current_ <= d;}
     bool operator>  (const date_type& d) {return current_ > d;}
     bool operator>= (const date_type& d) {return current_ >= d;}
     bool operator== (const date_type& d) {return current_ == d;}
-    bool operator!= (const date_type& d) {return current_ != d;}    
+    bool operator!= (const date_type& d) {return current_ != d;}
   private:
     date_type current_;
   };
-  
+
   //! Overrides the base date iterator providing hook for functors
   /*
    *  <b>offset_functor</b>
@@ -77,9 +77,9 @@ namespace date_time {
   class date_itr : public date_itr_base<date_type> {
   public:
     typedef typename date_type::duration_type duration_type;
-    date_itr(date_type d, int factor=1) : 
-      date_itr_base<date_type>(d), 
-      of_(factor) 
+    date_itr(date_type d, int factor=1) :
+      date_itr_base<date_type>(d),
+      of_(factor)
     {}
   private:
     virtual duration_type get_offset(const date_type& current) const
@@ -92,9 +92,9 @@ namespace date_time {
     }
     offset_functor of_;
   };
-  
 
-  
+
+
 } } //namespace date_time
 
 

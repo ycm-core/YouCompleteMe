@@ -20,6 +20,11 @@
 #include <boost/shared_array.hpp>
 #include <boost/property_map/property_map.hpp>
 
+// WARNING: it is not safe to copy a d_ary_heap_indirect and then modify one of
+// the copies.  The class is required to be copyable so it can be passed around
+// (without move support from C++11), but it deep-copies the heap contents yet
+// shallow-copies the index_in_heap_map.
+
 namespace boost {
 
   // Swap two elements in a property map without assuming they model

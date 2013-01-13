@@ -16,11 +16,6 @@
 #endif
 
 #include <boost/container/detail/config_begin.hpp>
-
-#ifndef BOOST_NO_RVALUE_REFERENCES
-#include <boost/container/detail/stored_ref.hpp>
-#endif   //#ifndef BOOST_NO_RVALUE_REFERENCES
-
 #include <boost/container/detail/workaround.hpp>
 
 #ifdef BOOST_CONTAINER_PERFECT_FORWARDING
@@ -78,18 +73,9 @@ const BOOST_PP_CAT(Q, n) & BOOST_PP_CAT(q, n) \
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
 
-   #if defined(BOOST_MOVE_MSVC_10_MEMBER_RVALUE_REF_BUG)
-
-   #define BOOST_CONTAINER_PP_PARAM_INIT(z, n, data) \
-   BOOST_PP_CAT(m_p, n) (static_cast<BOOST_PP_CAT(P, n)>( BOOST_PP_CAT(p, n) ))           \
-
-   #else //#if defined(BOOST_MOVE_MSVC_10_MEMBER_RVALUE_REF_BUG)
-
    #define BOOST_CONTAINER_PP_PARAM_INIT(z, n, data) \
    BOOST_PP_CAT(m_p, n) (::boost::forward< BOOST_PP_CAT(P, n) >( BOOST_PP_CAT(p, n) ))           \
    //!
-
-   #endif   //BOOST_MOVE_OLD_RVALUE_REF_BINDING_RULES
 
 #else //BOOST_NO_RVALUE_REFERENCES
 
@@ -102,8 +88,68 @@ const BOOST_PP_CAT(Q, n) & BOOST_PP_CAT(q, n) \
 
    #if defined(BOOST_MOVE_MSVC_10_MEMBER_RVALUE_REF_BUG)
 
+      namespace boost {
+      namespace container {
+      namespace container_detail {
+         template<class T>
+         struct ref_holder;
+
+         template<class T>
+         struct ref_holder<T &>
+         {
+            ref_holder(T &t)
+               : t_(t)
+            {}
+            T &t_;
+            T & get() {  return t_;   }
+         };
+
+         template<class T>
+         struct ref_holder<const T>
+         {
+            ref_holder(const T &t)
+               : t_(t)
+            {}
+            const T &t_;
+            const T & get() {  return t_;   }
+         };
+
+         template<class T>
+         struct ref_holder<const T &&>
+         {
+            ref_holder(const T &t)
+               : t_(t)
+            {}
+            const T &t_;
+            const T & get() {  return t_;   }
+         };
+
+         template<class T>
+         struct ref_holder
+         {
+            ref_holder(T &&t)
+               : t_(t)
+            {}
+            T &t_;
+            T && get() {  return ::boost::move(t_);   }
+         };
+
+         template<class T>
+         struct ref_holder<T &&>
+         {
+            ref_holder(T &&t)
+               : t(t)
+            {}
+            T &t;
+            T && get()  { return ::boost::move(t_); }
+         };
+
+      }  //namespace container_detail {
+      }  //namespace container {
+      }  //namespace boost {
+
       #define BOOST_CONTAINER_PP_PARAM_DEFINE(z, n, data)  \
-      BOOST_PP_CAT(P, n) & BOOST_PP_CAT(m_p, n);            \
+         ::boost::container::container_detail::ref_holder<BOOST_PP_CAT(P, n)> BOOST_PP_CAT(m_p, n);  \
       //!
 
    #else //BOOST_MOVE_MSVC_10_MEMBER_RVALUE_REF_BUG
@@ -123,8 +169,7 @@ const BOOST_PP_CAT(Q, n) & BOOST_PP_CAT(q, n) \
 
 #if !defined(BOOST_NO_RVALUE_REFERENCES) && defined(BOOST_MOVE_MSVC_10_MEMBER_RVALUE_REF_BUG)
 
-   #define BOOST_CONTAINER_PP_MEMBER_FORWARD(z, n, data) \
-   ::boost::container::container_detail::stored_ref< BOOST_PP_CAT(P, n) >::forward( BOOST_PP_CAT(this->m_p, n) ) \
+   #define BOOST_CONTAINER_PP_MEMBER_FORWARD(z, n, data) BOOST_PP_CAT(this->m_p, n).get() \
    //!
 
 #else //!defined(BOOST_NO_RVALUE_REFERENCES) && defined(BOOST_MOVE_MSVC_10_MEMBER_RVALUE_REF_BUG)

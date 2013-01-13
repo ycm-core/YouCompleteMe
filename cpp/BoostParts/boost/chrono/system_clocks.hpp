@@ -31,7 +31,6 @@ time2_demo contained this comment:
 TODO:
 
   * Fully implement error handling, with test cases.
-  * Use boost::throw_exception. (Currently not used because of an issue with Intel 11.0.)
   * Consider issues raised by Michael Marcin:
 
     > In the past I've seen QueryPerformanceCounter give incorrect results,
@@ -62,13 +61,16 @@ TODO:
 #include <boost/chrono/config.hpp>
 #include <boost/chrono/duration.hpp>
 #include <boost/chrono/time_point.hpp>
-#if !defined BOOST_CHRONO_DONT_PROVIDE_HYBRID_ERROR_HANDLING
 #include <boost/chrono/detail/system.hpp>
-#include <boost/system/error_code.hpp>
-#endif
 #include <boost/chrono/clock_string.hpp>
 
 #include <ctime>
+
+# if defined( BOOST_CHRONO_POSIX_API )
+#   if ! defined(CLOCK_REALTIME)
+#     error <time.h> does not supply CLOCK_REALTIME
+#   endif
+# endif
 
 #ifdef BOOST_CHRONO_WINDOWS_API
 // The system_clock tick is 100 nanoseconds
@@ -77,6 +79,7 @@ TODO:
 # define BOOST_SYSTEM_CLOCK_DURATION boost::chrono::nanoseconds
 #endif
 
+// this must occur after all of the includes and before any code appears:
 #ifndef BOOST_CHRONO_HEADER_ONLY
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 #endif
@@ -221,6 +224,7 @@ namespace chrono {
 } // namespace boost
 
 #ifndef BOOST_CHRONO_HEADER_ONLY
+// the suffix header occurs after all of our code:
 #include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
 #else
 #include <boost/chrono/detail/inlined/chrono.hpp>
