@@ -18,16 +18,19 @@
 cmake_minimum_required( VERSION 2.8 )
 project( YouCompleteMe )
 
+option( UNIVERSAL "Build universal mac binary" OFF )
+
 # This is needed so that on macs, the library is built in both 32 bit and 64 bit
 # versions. Without this python might refuse to load the module, depending on
 # how python was built.
 # On Mac, boost needs to be compiled universal as well, if used instead of the
 # included BoostParts lib. For brew, that's
 # "brew install boost --universal"
-# If the user chose to use the system libclang.dylib on a mac, then we don't
-# specify universal binary building since the system libclang on macs is not
-# universal (and thus linking would fail with universal).
-if ( NOT USE_SYSTEM_LIBCLANG )
+# If the user chose to use the system libclang.dylib (or the libclang.dylib
+# binary downloaded from llvm.org) on a mac, then we don't specify universal
+# binary building since the system libclang on macs is not  universal (and thus
+# linking would fail with universal).
+if ( UNIVERSAL AND NOT USE_SYSTEM_LIBCLANG )
   set( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
 endif()
 
@@ -74,7 +77,9 @@ else()
     "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
 endif()
 
-if ( NOT NO_CLANG_COMPLETER AND
+option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
+
+if ( USE_CLANG_COMPLETER AND
      ( NOT EXTERNAL_LIBCLANG_PATH AND NOT USE_SYSTEM_LIBCLANG ) )
   add_subdirectory( llvm )
 endif()

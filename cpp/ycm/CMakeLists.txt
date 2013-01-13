@@ -51,18 +51,17 @@ if( to_remove )
   list( REMOVE_ITEM SOURCES ${to_remove} )
 endif()
 
-if ( NO_CLANG_COMPLETER )
+if ( USE_CLANG_COMPLETER )
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "${CMAKE_CURRENT_SOURCE_DIR}/ClangCompleter" )
+  add_definitions( -DUSE_CLANG_COMPLETER )
+else()
   file( GLOB_RECURSE to_remove_clang ClangCompleter/*.h ClangCompleter/*.cpp )
 
   if( to_remove_clang )
     list( REMOVE_ITEM SOURCES ${to_remove_clang} )
   endif()
-
-  add_definitions( -DNO_CLANG_COMPLETER )
-else()
-  include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    "${CMAKE_CURRENT_SOURCE_DIR}/ClangCompleter" )
 endif()
 
 #############################################################################
@@ -89,7 +88,7 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
   message(
     "Using external libclang: ${EXTERNAL_LIBCLANG_PATH}" )
-elseif( NOT NO_CLANG_COMPLETER )
+elseif( USE_CLANG_COMPLETER )
   set( LIBCLANG_TARGET libclang_static )
 else()
   set( LIBCLANG_TARGET )

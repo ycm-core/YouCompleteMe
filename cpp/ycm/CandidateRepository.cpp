@@ -22,9 +22,9 @@
 
 #include <boost/thread/locks.hpp>
 
-#ifndef NO_CLANG_COMPLETER
+#ifdef USE_CLANG_COMPLETER
 #  include "CompletionData.h"
-#endif // NO_CLANG_COMPLETER
+#endif // USE_CLANG_COMPLETER
 
 namespace YouCompleteMe
 {
@@ -77,7 +77,7 @@ std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
   return candidates;
 }
 
-#ifndef NO_CLANG_COMPLETER
+#ifdef USE_CLANG_COMPLETER
 
 std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
     const std::vector< CompletionData > &datas )
@@ -103,7 +103,7 @@ std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
   return candidates;
 }
 
-#endif // NO_CLANG_COMPLETER
+#endif // USE_CLANG_COMPLETER
 
 CandidateRepository::~CandidateRepository()
 {

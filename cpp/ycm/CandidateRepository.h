@@ -44,10 +44,10 @@ public:
   std::vector< const Candidate* > GetCandidatesForStrings(
       const std::vector< std::string > &strings );
 
-#ifndef NO_CLANG_COMPLETER
+#ifdef USE_CLANG_COMPLETER
   std::vector< const Candidate* > GetCandidatesForStrings(
       const std::vector< CompletionData > &datas );
-#endif // NO_CLANG_COMPLETER
+#endif // USE_CLANG_COMPLETER
 
 private:
   CandidateRepository() {};

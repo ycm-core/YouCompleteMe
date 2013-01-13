@@ -18,12 +18,12 @@
 #include "IdentifierCompleter.h"
 #include "Future.h"
 
-#ifndef NO_CLANG_COMPLETER
+#ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter.h"
 #  include "CompletionData.h"
 #  include "Diagnostic.h"
 #  include "UnsavedFile.h"
-#endif // NO_CLANG_COMPLETER
+#endif // USE_CLANG_COMPLETER
 
 #include <boost/python.hpp>
 #include <boost/utility.hpp>
@@ -56,7 +56,7 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( "ResultsReady", &Future< void >::ResultsReady )
     .def( "GetResults", &Future< void >::GetResults );
 
-#ifndef NO_CLANG_COMPLETER
+#ifdef USE_CLANG_COMPLETER
   class_< Future< AsyncCompletions > >( "FutureCompletions" )
     .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
     .def( "GetResults", &Future< AsyncCompletions >::GetResults );
@@ -112,5 +112,5 @@ BOOST_PYTHON_MODULE(ycm_core)
   class_< std::vector< Diagnostic > >( "DiagnosticVec" )
     .def( vector_indexing_suite< std::vector< Diagnostic > >() );
 
-#endif // NO_CLANG_COMPLETER
+#endif // USE_CLANG_COMPLETER
 }
