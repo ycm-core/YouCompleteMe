@@ -79,10 +79,13 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   if ( USE_SYSTEM_LIBCLANG )
     find_library( EXTERNAL_LIBCLANG_PATH clang )
   else()
-    # Setting this to true makes sure that libraries we build will have our rpath
-    # set even without having to do "make install"
-    set( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
-    set( CMAKE_INSTALL_RPATH "\$ORIGIN" )
+    # For Macs, we do things differently; look further in this file.
+    if ( NOT APPLE )
+      # Setting this to true makes sure that libraries we build will have our rpath
+      # set even without having to do "make install"
+      set( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
+      set( CMAKE_INSTALL_RPATH "\$ORIGIN" )
+    endif()
   endif()
 
   set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
@@ -109,6 +112,27 @@ target_link_libraries( ${PROJECT_NAME}
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                      )
+
+#############################################################################
+
+# Things are a bit different on Macs when using an external libclang.dylib; here
+# we want to make sure we use @loader_path/libclang.dylib instead of
+# @rpath/libclang.dylib in the final ycm_core.so. If we use the @rpath version,
+# then it may load the system libclang which the user explicitely does not want
+# (otherwise the user would specify USE_SYSTEM_LIBCLANG). With @loader_path, we
+# make sure that only the libclang.dylib present in the same directory as our
+# ycm_core.so is used.
+if ( EXTERNAL_LIBCLANG_PATH AND APPLE )
+  add_custom_command( TARGET ${PROJECT_NAME}
+                      POST_BUILD
+                      COMMAND install_name_tool
+                      "-change"
+                      "@rpath/libclang.dylib"
+                      "@loader_path/libclang.dylib"
+                      "$<TARGET_FILE:${PROJECT_NAME}>"
+                      )
+endif()
+
 
 #############################################################################
 
