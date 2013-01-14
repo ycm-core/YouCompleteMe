@@ -45,6 +45,14 @@ link_directories(
 
 file( GLOB SOURCES *.h *.cpp )
 
+if ( NOT USE_CLANG_COMPLETER )
+  file( GLOB_RECURSE to_remove_clang ClangCompleter/*.h ClangCompleter/*.cpp )
+
+  if( to_remove_clang )
+    list( REMOVE_ITEM SOURCES ${to_remove_clang} )
+  endif()
+endif()
+
 add_executable( ${PROJECT_NAME}
                 ${SOURCES}
               )

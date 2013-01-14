@@ -26,8 +26,14 @@ option( PATH_TO_LLVM_ROOT "Path to the root of a LLVM+Clang binary distribution"
 option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
 option( EXTERNAL_LIBCLANG_PATH "Path libclang library to use" )
 
-if ( NOT PATH_TO_LLVM_ROOT AND NOT USE_SYSTEM_LIBCLANG AND NOT
-    EXTERNAL_LIBCLANG_PATH )
+if ( PATH_TO_LLVM_ROOT OR USE_SYSTEM_LIBCLANG OR EXTERNAL_LIBCLANG_PATH )
+  set( USE_CLANG_COMPLETER TRUE )
+endif()
+
+if ( USE_CLANG_COMPLETER AND
+     NOT PATH_TO_LLVM_ROOT AND
+     NOT USE_SYSTEM_LIBCLANG AND
+     NOT EXTERNAL_LIBCLANG_PATH )
   message( FATAL_ERROR
     "You have not specified which libclang to use. You have several options:\n"
     " 1. Set PATH_TO_LLVM_ROOT to a path to the root of a LLVM+Clang binary "
@@ -168,7 +174,7 @@ if ( EXTERNAL_LIBCLANG_PATH AND APPLE )
                       "@rpath/libclang.dylib"
                       "@loader_path/libclang.dylib"
                       "$<TARGET_FILE:${PROJECT_NAME}>"
-                      )
+                    )
 endif()
 
 
