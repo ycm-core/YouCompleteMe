@@ -21,6 +21,39 @@ project( ycm_core )
 
 find_package( PythonLibs REQUIRED )
 
+option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
+option( PATH_TO_LLVM_ROOT "Path to the root of a LLVM+Clang binary distribution" )
+option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
+option( EXTERNAL_LIBCLANG_PATH "Path libclang library to use" )
+
+if ( NOT PATH_TO_LLVM_ROOT AND NOT USE_SYSTEM_LIBCLANG AND NOT
+    EXTERNAL_LIBCLANG_PATH )
+  message( FATAL_ERROR
+    "You have not specified which libclang to use. You have several options:\n"
+    " 1. Set PATH_TO_LLVM_ROOT to a path to the root of a LLVM+Clang binary "
+    "distribution. You can download such a binary distro from llvm.org. This "
+    "is the recommended approach.\n"
+    " 2. Set USE_SYSTEM_LIBCLANG to ON; this makes YCM search for the system "
+    "version of libclang.\n"
+    " 3. Set EXTERNAL_LIBCLANG_PATH to a path to whatever "
+    "libclang.[so|dylib|dll] you wish to use.\n"
+    "You HAVE to pick one option. See the docs for more information.")
+endif()
+
+if ( PATH_TO_LLVM_ROOT )
+  set( CLANG_INCLUDES_DIR "${PATH_TO_LLVM_ROOT}/include" )
+else()
+  set( CLANG_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/llvm/include" )
+endif()
+
+if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
+  # Need TEMP because find_library does not work with an option variable
+  find_library( TEMP clang
+                PATHS ${PATH_TO_LLVM_ROOT}/lib
+                NO_DEFAULT_PATH )
+  set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
+endif()
+
 # This is a workaround for a CMake bug with include_directories(SYSTEM ...)
 # on Mac OS X. Bug report: http://public.kitware.com/Bug/view.php?id=10837
 set( CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem " )
@@ -33,10 +66,7 @@ include_directories(
   SYSTEM
   ${BoostParts_SOURCE_DIR}
   ${PYTHON_INCLUDE_DIRS}
-  # We need CMAKE_SOURCE_DIR here instead of LLVM_SOURCE_DIR because the llvm
-  # subdir may not have been included in the build
-  "${CMAKE_SOURCE_DIR}/llvm/include"
-  "${CMAKE_SOURCE_DIR}/llvm/tools/clang/include"
+  ${CLANG_INCLUDES_DIR}
   )
 
 file( GLOB_RECURSE SOURCES *.h *.cpp )
@@ -71,12 +101,12 @@ endif()
 #   cmake -DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so [...]
 # The final .so we build will then first look in the same dir in which it is
 # located for libclang.so. This is provided by the rpath = $ORIGIN feature.
-# Using an external libclang is an UNDOCUMENTED and UNSUPPORTED feature! I don't
-# want to hear a single bug report about it! :) (I mean it)
 
 if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   if ( USE_SYSTEM_LIBCLANG )
-    find_library( EXTERNAL_LIBCLANG_PATH clang )
+    # Need TEMP because find_library does not work with an option variable
+    find_library( TEMP clang )
+    set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
   else()
     # For Macs, we do things differently; look further in this file.
     if ( NOT APPLE )
