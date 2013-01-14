@@ -46,6 +46,13 @@ if ( USE_CLANG_COMPLETER AND
     "You HAVE to pick one option. See the docs for more information.")
 endif()
 
+if ( USE_CLANG_COMPLETER )
+  message( "Using libclang to provide semantic completion for C/C++/ObjC" )
+else()
+  message( "NOT using libclang, no semantic completion for C/C++/ObjC will be "
+           "available" )
+endif()
+
 if ( PATH_TO_LLVM_ROOT )
   set( CLANG_INCLUDES_DIR "${PATH_TO_LLVM_ROOT}/include" )
 else()

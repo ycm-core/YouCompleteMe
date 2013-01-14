@@ -17,8 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import ycm_core
 from clang_completer import ClangCompleter
 
 def GetCompleter():
-  return ClangCompleter()
+  if ycm_core.HasClangSupport():
+    return ClangCompleter()
+  else:
+    return None
 

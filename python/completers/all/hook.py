@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from identifier_completer import IdentifierCompleter
-
 def GetCompleter():
-  return IdentifierCompleter()
+  return None
 

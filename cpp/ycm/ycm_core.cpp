@@ -29,10 +29,22 @@
 #include <boost/utility.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+bool HasClangSupport()
+{
+#ifdef USE_CLANG_COMPLETER
+  return true;
+#else
+  return false;
+#endif // USE_CLANG_COMPLETER
+}
+
+
 BOOST_PYTHON_MODULE(ycm_core)
 {
   using namespace boost::python;
   using namespace YouCompleteMe;
+
+  def( "HasClangSupport", HasClangSupport );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )

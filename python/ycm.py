@@ -49,6 +49,7 @@ class YouCompleteMe( object ):
     module_path = _PathToFiletypeCompleterPluginLoader( filetype )
 
     completer = None
+    supported_filetypes = [ filetype ]
     if os.path.exists( module_path ):
 
       sys.path.append( os.path.dirname( module_path ) )
@@ -56,10 +57,11 @@ class YouCompleteMe( object ):
       del sys.path[ -1 ]
 
       completer = module.GetCompleter()
-      for supported_filetype in completer.SupportedFiletypes():
-        self.filetype_completers[ supported_filetype ] = completer
-    else:
-      self.filetype_completers[ filetype ] = None
+      if completer:
+        supported_filetypes.extend( completer.SupportedFiletypes() )
+
+    for supported_filetype in supported_filetypes:
+      self.filetype_completers[ supported_filetype ] = completer
     return completer
 
 

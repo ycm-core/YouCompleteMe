@@ -295,7 +295,7 @@ function! s:InvokeCompletion()
 
   " This is tricky. First, having 'refresh' set to 'always' in the dictionary
   " that our completion function returns makes sure that our completion function
-  " is called on every keystroke. Secondly, when the sequence of characters the
+  " is called on every keystroke. Second, when the sequence of characters the
   " user typed produces no results in our search an infinite loop can occur. The
   " problem is that our feedkeys call triggers the OnCursorMovedI event which we
   " are tied to. We prevent this infinite loop from starting by making sure that
