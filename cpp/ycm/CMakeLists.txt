@@ -120,8 +120,6 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   set( LIBCLANG_TARGET ${EXTERNAL_LIBCLANG_PATH} )
   message(
     "Using external libclang: ${EXTERNAL_LIBCLANG_PATH}" )
-elseif( USE_CLANG_COMPLETER )
-  set( LIBCLANG_TARGET libclang_static )
 else()
   set( LIBCLANG_TARGET )
 endif()
