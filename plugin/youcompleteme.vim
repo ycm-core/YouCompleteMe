@@ -48,7 +48,7 @@ let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )
 
 let g:ycm_add_preview_to_completeopt =
-      \ get( g:, 'ycm_add_preview_to_completeopt', 1 )
+      \ get( g:, 'ycm_add_preview_to_completeopt', 0 )
 
 let g:ycm_autoclose_preview_window_after_completion =
       \ get( g:, 'ycm_autoclose_preview_window_after_completion', 0 )
