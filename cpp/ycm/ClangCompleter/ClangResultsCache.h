@@ -48,15 +48,19 @@ public:
   }
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wc++98-compat"
+#  ifdef __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wc++98-compat"
+#  endif   //#ifdef __clang__
 
   void SetCompletionDatas( std::vector< CompletionData >&& new_completions )
   {
     completion_datas_ = new_completions;
   }
 
-#pragma clang diagnostic pop
+#  ifdef __clang__
+#    pragma clang diagnostic pop
+#  endif   //#ifdef __clang__
 #endif   //#ifndef BOOST_NO_RVALUE_REFERENCES
 
   template< typename T >
