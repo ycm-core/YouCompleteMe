@@ -31,6 +31,7 @@ class Flags( object ):
     self.flags_for_file = {}
     self.flags_module_for_file = {}
     self.flags_module_for_flags_module_file = {}
+    self.special_clang_flags = _SpecialClangIncludes()
 
 
   def FlagsForFile( self, filename ):
@@ -42,6 +43,7 @@ class Flags( object ):
         return ycm_core.StringVec()
 
       results = flags_module.FlagsForFile( filename )
+      results[ 'flags' ] += self.special_clang_flags
       sanitized_flags = _SanitizeFlags( results[ 'flags' ] )
 
       if results[ 'do_cache' ]:
@@ -67,6 +69,7 @@ class Flags( object ):
 
       self.flags_module_for_file[ filename ] = flags_module
       return flags_module
+
 
 
 def _FlagsModuleSourceFileForFile( filename ):
@@ -116,3 +119,9 @@ def _SanitizeFlags( flags ):
   for flag in sanitized_flags:
     vector.append( flag )
   return vector
+
+
+def _SpecialClangIncludes():
+  libclang_dir = os.path.dirname( ycm_core.__file__ )
+  path_to_includes = os.path.join( libclang_dir, 'clang_includes' )
+  return [ '-I', path_to_includes ]
