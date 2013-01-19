@@ -23,6 +23,7 @@
 #  include "CompletionData.h"
 #  include "Diagnostic.h"
 #  include "UnsavedFile.h"
+#  include "CompilationDatabase.h"
 #endif // USE_CLANG_COMPLETER
 
 #include <boost/python.hpp>
@@ -88,8 +89,8 @@ BOOST_PYTHON_MODULE(ycm_core)
                    return_value_policy< reference_existing_object >() ) )
     .def_readwrite( "length_", &UnsavedFile::length_ );
 
-        class_< std::vector< UnsavedFile > >( "UnsavedFileVec" )
-                .def( vector_indexing_suite< std::vector< UnsavedFile > >() );
+  class_< std::vector< UnsavedFile > >( "UnsavedFileVec" )
+    .def( vector_indexing_suite< std::vector< UnsavedFile > >() );
 
   class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
     .def( "EnableThreading", &ClangCompleter::EnableThreading )
@@ -123,6 +124,14 @@ BOOST_PYTHON_MODULE(ycm_core)
 
   class_< std::vector< Diagnostic > >( "DiagnosticVec" )
     .def( vector_indexing_suite< std::vector< Diagnostic > >() );
+
+  class_< CompilationDatabase, boost::noncopyable >(
+      "CompilationDatabase", init< std::string >() )
+    .def( "FlagsForFile", &CompilationDatabase::FlagsForFile )
+    .def( "DatabaseSuccessfullyLoaded",
+          &CompilationDatabase::DatabaseSuccessfullyLoaded )
+    .def( "CompileCommandWorkingDirectoryForFile",
+          &CompilationDatabase::CompileCommandWorkingDirectoryForFile );
 
 #endif // USE_CLANG_COMPLETER
 }

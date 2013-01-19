@@ -25,13 +25,14 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/function.hpp>
 #include <boost/config.hpp>
+#include <boost/utility.hpp>
 
 namespace YouCompleteMe
 {
 
 struct CompletionData;
 
-class ClangResultsCache
+class ClangResultsCache : boost::noncopyable
 {
 public:
 
