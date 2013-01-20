@@ -20,8 +20,7 @@
 
 #include <boost/exception/all.hpp>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 #define boost_throw(x) BOOST_THROW_EXCEPTION(x)
 

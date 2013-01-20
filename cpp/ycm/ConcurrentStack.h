@@ -22,16 +22,13 @@
 #include <boost/utility.hpp>
 #include <stack>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 template <typename T>
-class ConcurrentStack : boost::noncopyable
-{
+class ConcurrentStack : boost::noncopyable {
 public:
 
-  void Push( const T& data )
-  {
+  void Push( const T &data ) {
     {
       boost::unique_lock< boost::mutex > lock( mutex_ );
       stack_.push( data );
@@ -40,12 +37,10 @@ public:
     condition_variable_.notify_one();
   }
 
-  T Pop()
-  {
+  T Pop() {
     boost::unique_lock< boost::mutex > lock( mutex_ );
 
-    while ( stack_.empty() )
-    {
+    while ( stack_.empty() ) {
       condition_variable_.wait( lock );
     }
 

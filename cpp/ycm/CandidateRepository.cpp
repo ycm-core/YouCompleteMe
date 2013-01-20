@@ -26,18 +26,15 @@
 #  include "CompletionData.h"
 #endif // USE_CLANG_COMPLETER
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 boost::mutex CandidateRepository::singleton_mutex_;
 CandidateRepository *CandidateRepository::instance_ = NULL;
 
-CandidateRepository& CandidateRepository::Instance()
-{
+CandidateRepository &CandidateRepository::Instance() {
   boost::lock_guard< boost::mutex > locker( singleton_mutex_ );
 
-  if ( !instance_ )
-  {
+  if ( !instance_ ) {
     static CandidateRepository repo;
     instance_ = &repo;
   }
@@ -46,27 +43,25 @@ CandidateRepository& CandidateRepository::Instance()
 }
 
 
-int CandidateRepository::NumStoredCandidates()
-{
+int CandidateRepository::NumStoredCandidates() {
   boost::lock_guard< boost::mutex > locker( holder_mutex_ );
   return candidate_holder_.size();
 }
 
 
-std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
-    const std::vector< std::string > &strings )
-{
-  std::vector< const Candidate* > candidates;
+std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
+  const std::vector< std::string > &strings ) {
+  std::vector< const Candidate * > candidates;
   candidates.reserve( strings.size() );
 
   {
     boost::lock_guard< boost::mutex > locker( holder_mutex_ );
 
-    foreach ( const std::string &candidate_text, strings )
-    {
+    foreach ( const std::string & candidate_text, strings ) {
       const Candidate *&candidate = GetValueElseInsert( candidate_holder_,
                                                         candidate_text,
                                                         NULL );
+
       if ( !candidate )
         candidate = new Candidate( candidate_text );
 
@@ -79,20 +74,19 @@ std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
 
 #ifdef USE_CLANG_COMPLETER
 
-std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
-    const std::vector< CompletionData > &datas )
-{
-  std::vector< const Candidate* > candidates;
+std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
+  const std::vector< CompletionData > &datas ) {
+  std::vector< const Candidate * > candidates;
   candidates.reserve( datas.size() );
 
   {
     boost::lock_guard< boost::mutex > locker( holder_mutex_ );
 
-    foreach ( const CompletionData &data, datas )
-    {
+    foreach ( const CompletionData & data, datas ) {
       const Candidate *&candidate = GetValueElseInsert( candidate_holder_,
                                                         data.original_string_,
                                                         NULL );
+
       if ( !candidate )
         candidate = new Candidate( data.original_string_ );
 
@@ -105,11 +99,9 @@ std::vector< const Candidate* > CandidateRepository::GetCandidatesForStrings(
 
 #endif // USE_CLANG_COMPLETER
 
-CandidateRepository::~CandidateRepository()
-{
-  foreach ( const CandidateHolder::value_type &pair,
-            candidate_holder_ )
-  {
+CandidateRepository::~CandidateRepository() {
+  foreach ( const CandidateHolder::value_type & pair,
+            candidate_holder_ ) {
     delete pair.second;
   }
 }

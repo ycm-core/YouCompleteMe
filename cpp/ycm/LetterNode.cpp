@@ -19,14 +19,12 @@
 #include "standard.h"
 
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 LetterNode::LetterNode( char letter, int index )
   : is_uppercase_( IsUppercase( letter ) ),
     is_root_node_( false ),
-    index_( index )
-{
+    index_( index ) {
 }
 
 
@@ -34,12 +32,10 @@ LetterNode::LetterNode( char letter, int index )
 LetterNode::LetterNode( const std::string &text )
   : is_uppercase_( false ),
     is_root_node_( true ),
-    index_( -1 )
-{
+    index_( -1 ) {
   letternode_per_text_index_.resize( text.size() );
 
-  for ( uint i = 0; i < text.size(); ++i)
-  {
+  for ( uint i = 0; i < text.size(); ++i ) {
     char letter = text[ i ];
     LetterNode *node = new LetterNode( letter, i );
     letters_[ letter ].push_back( node );
@@ -47,12 +43,10 @@ LetterNode::LetterNode( const std::string &text )
   }
 
   for ( int i = static_cast< int >( letternode_per_text_index_.size() ) - 1;
-        i >= 0; --i )
-  {
+        i >= 0; --i ) {
     LetterNode *node_to_add = letternode_per_text_index_[ i ].get();
 
-    for ( int j = i - 1; j >= 0; --j )
-    {
+    for ( int j = i - 1; j >= 0; --j ) {
       letternode_per_text_index_[ j ]->PrependNodeForLetter( text[ i ],
                                                              node_to_add );
     }

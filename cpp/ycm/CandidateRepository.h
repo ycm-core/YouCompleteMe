@@ -25,28 +25,26 @@
 #include <vector>
 #include <string>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 class Candidate;
 struct CompletionData;
 
-typedef boost::unordered_map< std::string, const Candidate* >
-          CandidateHolder;
+typedef boost::unordered_map< std::string, const Candidate * >
+CandidateHolder;
 
-class CandidateRepository : boost::noncopyable
-{
+class CandidateRepository : boost::noncopyable {
 public:
-  static CandidateRepository& Instance();
+  static CandidateRepository &Instance();
 
   int NumStoredCandidates();
 
-  std::vector< const Candidate* > GetCandidatesForStrings(
-      const std::vector< std::string > &strings );
+  std::vector< const Candidate * > GetCandidatesForStrings(
+    const std::vector< std::string > &strings );
 
 #ifdef USE_CLANG_COMPLETER
-  std::vector< const Candidate* > GetCandidatesForStrings(
-      const std::vector< CompletionData > &datas );
+  std::vector< const Candidate * > GetCandidatesForStrings(
+    const std::vector< CompletionData > &datas );
 #endif // USE_CLANG_COMPLETER
 
 private:

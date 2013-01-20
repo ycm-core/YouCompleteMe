@@ -23,30 +23,26 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 class Result;
 typedef boost::shared_ptr< boost::packaged_task< void > > VoidTask;
 
 template< typename T >
 boost::shared_ptr< T > ReturnValueAsShared(
-    boost::function< T() > func )
-{
+  boost::function< T() > func ) {
   return boost::make_shared< T >( func() );
 }
 
 
 template< typename T >
-class Future
-{
+class Future {
 public:
   Future() {};
   Future( boost::shared_future< T > future )
     : future_( boost::move( future ) ) {}
 
-  bool ResultsReady()
-  {
+  bool ResultsReady() {
     // It's OK to return true since GetResults will just return a
     // default-constructed value if the future_ is uninitialized. If we don't
     // return true for this case, any loop waiting on ResultsReady will wait
@@ -58,21 +54,17 @@ public:
   }
 
 
-  void Wait()
-  {
+  void Wait() {
     future_.wait();
   }
 
 
-  T GetResults()
-  {
-    try
-    {
+  T GetResults() {
+    try {
       return future_.get();
     }
 
-    catch ( boost::future_uninitialized & )
-    {
+    catch ( boost::future_uninitialized & ) {
       // Do nothing and return a T()
     }
 

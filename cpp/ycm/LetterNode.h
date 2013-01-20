@@ -28,36 +28,30 @@
 #include <string>
 
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-class LetterNode : boost::noncopyable
-{
+class LetterNode : boost::noncopyable {
 public:
-	explicit LetterNode( char letter, int index );
+  explicit LetterNode( char letter, int index );
 
   // this is for root nodes
-	explicit LetterNode( const std::string &text );
+  explicit LetterNode( const std::string &text );
 
-  inline bool LetterIsUppercase() const
-  {
+  inline bool LetterIsUppercase() const {
     return is_uppercase_;
   }
 
 
-	inline const std::list< LetterNode* >* NodeListForLetter( char letter )
-  {
+  inline const std::list< LetterNode * > *NodeListForLetter( char letter ) {
     return letters_.ListPointerAt( letter );
   }
 
 
-	inline void PrependNodeForLetter( char letter, LetterNode* node )
-  {
+  inline void PrependNodeForLetter( char letter, LetterNode *node ) {
     letters_[ letter ].push_front( node );
   }
 
-  inline int Index()
-  {
+  inline int Index() {
     return index_;
   }
 
@@ -65,9 +59,9 @@ private:
 
   LetterNodeListMap letters_;
   std::vector< boost::shared_ptr< LetterNode > > letternode_per_text_index_;
-	bool is_uppercase_;
-	bool is_root_node_;
-	int index_;
+  bool is_uppercase_;
+  bool is_root_node_;
+  int index_;
 };
 
 } // namespace YouCompleteMe

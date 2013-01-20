@@ -36,29 +36,22 @@ using boost::shared_ptr;
 using boost::bind;
 using boost::thread;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 typedef boost::function< std::vector< std::string >() >
-  FunctionReturnsStringVector;
+FunctionReturnsStringVector;
 
 
 extern const unsigned int MAX_ASYNC_THREADS = 4;
 extern const unsigned int MIN_ASYNC_THREADS = 2;
 
-namespace
-{
+namespace {
 
-void QueryThreadMain( IdentifierCompleter::LatestQueryTask &latest_query_task )
-{
-  while ( true )
-  {
-    try
-    {
+void QueryThreadMain( IdentifierCompleter::LatestQueryTask &latest_query_task ) {
+  while ( true ) {
+    try {
       ( *latest_query_task.Get() )();
-    }
-    catch ( boost::thread_interrupted& )
-    {
+    } catch ( boost::thread_interrupted & ) {
       return;
     }
   }
@@ -67,16 +60,11 @@ void QueryThreadMain( IdentifierCompleter::LatestQueryTask &latest_query_task )
 
 void BufferIdentifiersThreadMain(
   IdentifierCompleter::BufferIdentifiersTaskStack
-  &buffer_identifiers_task_stack )
-{
-  while ( true )
-  {
-    try
-    {
+  &buffer_identifiers_task_stack ) {
+  while ( true ) {
+    try {
       ( *buffer_identifiers_task_stack.Pop() )();
-    }
-    catch ( boost::thread_interrupted& )
-    {
+    } catch ( boost::thread_interrupted & ) {
       return;
     }
   }
@@ -88,33 +76,29 @@ void BufferIdentifiersThreadMain(
 
 IdentifierCompleter::IdentifierCompleter()
   : candidate_repository_( CandidateRepository::Instance() ),
-    threading_enabled_( false )
-{
+    threading_enabled_( false ) {
 }
 
 
 IdentifierCompleter::IdentifierCompleter(
-    const std::vector< std::string > &candidates )
+  const std::vector< std::string > &candidates )
   : candidate_repository_( CandidateRepository::Instance() ),
-    threading_enabled_( false )
-{
+    threading_enabled_( false ) {
   AddCandidatesToDatabase( candidates, "", "" );
 }
 
 
 IdentifierCompleter::IdentifierCompleter(
-    const std::vector< std::string > &candidates,
-    const std::string &filetype,
-    const std::string &filepath )
+  const std::vector< std::string > &candidates,
+  const std::string &filetype,
+  const std::string &filepath )
   : candidate_repository_( CandidateRepository::Instance() ),
-    threading_enabled_( false )
-{
+    threading_enabled_( false ) {
   AddCandidatesToDatabase( candidates, filetype, filepath );
 }
 
 
-IdentifierCompleter::~IdentifierCompleter()
-{
+IdentifierCompleter::~IdentifierCompleter() {
   query_threads_.interrupt_all();
   query_threads_.join_all();
 
@@ -125,22 +109,20 @@ IdentifierCompleter::~IdentifierCompleter()
 
 // We need this mostly so that we can not use it in tests. Apparently the
 // GoogleTest framework goes apeshit on us if we enable threads by default.
-void IdentifierCompleter::EnableThreading()
-{
+void IdentifierCompleter::EnableThreading() {
   threading_enabled_ = true;
   InitThreads();
 }
 
 
 void IdentifierCompleter::AddCandidatesToDatabase(
-    const std::vector< std::string > &new_candidates,
-    const std::string &filetype,
-    const std::string &filepath )
-{
+  const std::vector< std::string > &new_candidates,
+  const std::string &filetype,
+  const std::string &filepath ) {
   std::list< const Candidate *> &candidates =
     GetCandidateList( filetype, filepath );
 
-  std::vector< const Candidate* > repository_candidates =
+  std::vector< const Candidate * > repository_candidates =
     candidate_repository_.GetCandidatesForStrings( new_candidates );
 
   candidates.insert( candidates.end(),
@@ -150,24 +132,22 @@ void IdentifierCompleter::AddCandidatesToDatabase(
 
 
 void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
-    const std::string &buffer_contents,
-    const std::string &filetype,
-    const std::string &filepath )
-{
+  const std::string &buffer_contents,
+  const std::string &filetype,
+  const std::string &filepath ) {
   ClearCandidatesStoredForFile( filetype, filepath );
 
   AddCandidatesToDatabase(
-      ExtractIdentifiersFromText( RemoveIdentifierFreeText( buffer_contents ) ),
-      filetype,
-      filepath );
+    ExtractIdentifiersFromText( RemoveIdentifierFreeText( buffer_contents ) ),
+    filetype,
+    filepath );
 }
 
 
 void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
-    std::string buffer_contents,
-    std::string filetype,
-    std::string filepath )
-{
+  std::string buffer_contents,
+  std::string filetype,
+  std::string filepath ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return;
@@ -180,29 +160,26 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
           boost::move( filepath ) );
 
   buffer_identifiers_task_stack_.Push(
-      make_shared< packaged_task< void > >( functor ) );
+    make_shared< packaged_task< void > >( functor ) );
 }
 
 
 std::vector< std::string > IdentifierCompleter::CandidatesForQuery(
-    const std::string &query ) const
-{
+  const std::string &query ) const {
   return CandidatesForQueryAndType( query, "" );
 }
 
 
 std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
-    const std::string &query,
-    const std::string &filetype ) const
-{
+  const std::string &query,
+  const std::string &filetype ) const {
   std::vector< Result > results;
   ResultsForQueryAndType( query, filetype, results );
 
   std::vector< std::string > candidates;
   candidates.reserve( results.size() );
 
-  foreach ( const Result& result, results )
-  {
+  foreach ( const Result & result, results ) {
     candidates.push_back( *result.Text() );
   }
   return candidates;
@@ -210,9 +187,8 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
 
 
 Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
-    const std::string &query,
-    const std::string &filetype ) const
-{
+  const std::string &query,
+  const std::string &filetype ) const {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return Future< AsyncResults >();
@@ -224,8 +200,8 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
           filetype );
 
   QueryTask task = make_shared< packaged_task< AsyncResults > >(
-      bind( ReturnValueAsShared< std::vector< std::string > >,
-            functor ) );
+                     bind( ReturnValueAsShared< std::vector< std::string > >,
+                           functor ) );
 
   unique_future< AsyncResults > future = task->get_future();
 
@@ -235,24 +211,22 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
 
 
 void IdentifierCompleter::ResultsForQueryAndType(
-    const std::string &query,
-    const std::string &filetype,
-    std::vector< Result > &results ) const
-{
+  const std::string &query,
+  const std::string &filetype,
+  std::vector< Result > &results ) const {
   FiletypeMap::const_iterator it = filetype_map_.find( filetype );
+
   if ( it == filetype_map_.end() || query.empty() )
     return;
 
   Bitset query_bitset = LetterBitsetFromString( query );
 
-  boost::unordered_set< const Candidate* > seen_candidates;
+  boost::unordered_set< const Candidate * > seen_candidates;
   seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
 
-  foreach ( const FilepathToCandidates::value_type &path_and_candidates,
-            *it->second )
-  {
-    foreach ( const Candidate* candidate, *path_and_candidates.second )
-    {
+  foreach ( const FilepathToCandidates::value_type & path_and_candidates,
+            *it->second ) {
+    foreach ( const Candidate * candidate, *path_and_candidates.second ) {
       if ( ContainsKey( seen_candidates, candidate ) )
         continue;
       else
@@ -262,6 +236,7 @@ void IdentifierCompleter::ResultsForQueryAndType(
         continue;
 
       Result result = candidate->QueryMatchResult( query );
+
       if ( result.IsSubsequence() )
         results.push_back( result );
     }
@@ -272,48 +247,44 @@ void IdentifierCompleter::ResultsForQueryAndType(
 
 
 void IdentifierCompleter::ClearCandidatesStoredForFile(
-    const std::string &filetype,
-    const std::string &filepath )
-{
+  const std::string &filetype,
+  const std::string &filepath ) {
   GetCandidateList( filetype, filepath ).clear();
 }
 
 
-std::list< const Candidate* >& IdentifierCompleter::GetCandidateList(
-    const std::string &filetype,
-    const std::string &filepath )
-{
+std::list< const Candidate * > &IdentifierCompleter::GetCandidateList(
+  const std::string &filetype,
+  const std::string &filepath ) {
   boost::shared_ptr< FilepathToCandidates > &path_to_candidates =
     filetype_map_[ filetype ];
 
   if ( !path_to_candidates )
     path_to_candidates.reset( new FilepathToCandidates() );
 
-  boost::shared_ptr< std::list< const Candidate* > > &candidates =
-    (*path_to_candidates)[ filepath ];
+  boost::shared_ptr< std::list< const Candidate * > > &candidates =
+    ( *path_to_candidates )[ filepath ];
 
   if ( !candidates )
-    candidates.reset( new std::list< const Candidate* >() );
+    candidates.reset( new std::list< const Candidate * >() );
 
   return *candidates;
 }
 
 
-void IdentifierCompleter::InitThreads()
-{
+void IdentifierCompleter::InitThreads() {
   int query_threads_to_create =
     std::max( MIN_ASYNC_THREADS,
-      std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
+              std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
 
-  for ( int i = 0; i < query_threads_to_create; ++i )
-  {
+  for ( int i = 0; i < query_threads_to_create; ++i ) {
     query_threads_.create_thread( bind( QueryThreadMain,
                                         boost::ref( latest_query_task_ ) ) );
   }
 
   buffer_identifiers_thread_ = boost::thread(
-      BufferIdentifiersThreadMain,
-      boost::ref( buffer_identifiers_task_stack_ ) );
+                                 BufferIdentifiersThreadMain,
+                                 boost::ref( buffer_identifiers_task_stack_ ) );
 }
 
 

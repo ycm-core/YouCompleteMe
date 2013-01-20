@@ -21,8 +21,7 @@
 #include <vector>
 #include <string>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 // NOTE: this function accepts the text param by value on purpose; it internally
 // needs a copy before processing the text so the copy might as well be made on
@@ -32,7 +31,7 @@ namespace YouCompleteMe
 std::string RemoveIdentifierFreeText( std::string text );
 
 std::vector< std::string > ExtractIdentifiersFromText(
-    const std::string &text );
+  const std::string &text );
 
 } // namespace YouCompleteMe
 

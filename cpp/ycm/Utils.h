@@ -23,8 +23,7 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 bool AlmostEqual( double a, double b );
 
@@ -40,16 +39,14 @@ template <class Container, class Key>
 typename Container::mapped_type &
 GetValueElseInsert( Container &container,
                     const Key &key,
-                    const typename Container::mapped_type &value )
-{
+                    const typename Container::mapped_type &value ) {
   return container.insert( typename Container::value_type( key, value ) )
-    .first->second;
+         .first->second;
 }
 
 
 template <class Container, class Key>
-bool ContainsKey( Container &container, const Key &key )
-{
+bool ContainsKey( Container &container, const Key &key ) {
   return container.find( key ) != container.end();
 }
 
@@ -58,22 +55,21 @@ template <class Container, class Key>
 typename Container::mapped_type
 FindWithDefault( Container &container,
                  const Key &key,
-                 const typename Container::mapped_type &value )
-{
+                 const typename Container::mapped_type &value ) {
   typename Container::iterator it = container.find( key );
   return it != container.end() ? it->second : value;
 }
 
 
 template <class Container, class Key>
-bool Erase( Container &container, const Key &key )
-{
+bool Erase( Container &container, const Key &key ) {
   typename Container::iterator it = container.find( key );
-  if ( it != container.end() )
-  {
+
+  if ( it != container.end() ) {
     container.erase( it );
     return true;
   }
+
   return false;
 }
 

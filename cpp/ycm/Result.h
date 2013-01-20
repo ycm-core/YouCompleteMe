@@ -20,11 +20,9 @@
 
 #include <string>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-class Result
-{
+class Result {
 public:
   Result();
   explicit Result( bool is_subsequence );
@@ -38,20 +36,18 @@ public:
 
   bool operator< ( const Result &other ) const;
 
-  inline bool IsSubsequence() const
-  {
+  inline bool IsSubsequence() const {
     return is_subsequence_;
   }
 
-  inline const std::string* Text() const
-  {
+  inline const std::string *Text() const {
     return text_;
   }
 
 private:
   void SetResultFeaturesFromQuery(
-      const std::string &query,
-      const std::string &word_boundary_chars );
+    const std::string &query,
+    const std::string &word_boundary_chars );
 
   // true when the query for which the result was created was an empty string;
   // in these cases we just use a lexicographic comparison

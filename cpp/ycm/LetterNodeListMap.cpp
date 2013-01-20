@@ -18,22 +18,19 @@
 #include "LetterNodeListMap.h"
 #include "standard.h"
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 const int kNumLetters = NUM_LETTERS;
 static const int kLettersIndexStart = 0;
 static const int kNumbersIndexStart = 26;
 
 
-bool IsUppercase( char letter )
-{
+bool IsUppercase( char letter ) {
   return 'A' <= letter && letter <= 'Z';
 }
 
 
-int IndexForChar( char letter )
-{
+int IndexForChar( char letter ) {
   if ( IsUppercase( letter ) )
     return letter + ( 'a' - 'A' );
 
@@ -41,55 +38,48 @@ int IndexForChar( char letter )
 }
 
 
-LetterNodeListMap::LetterNodeListMap()
-{
+LetterNodeListMap::LetterNodeListMap() {
   letters_.resize( kNumLetters );
 
-  for ( uint i = 0; i < letters_.size(); ++i )
-  {
+  for ( uint i = 0; i < letters_.size(); ++i ) {
     letters_[ i ] = NULL;
   }
 }
 
 
-LetterNodeListMap::~LetterNodeListMap()
-{
-  for ( uint i = 0; i < letters_.size(); ++i )
-  {
+LetterNodeListMap::~LetterNodeListMap() {
+  for ( uint i = 0; i < letters_.size(); ++i ) {
     delete letters_[ i ];
   }
 }
 
 
-bool LetterNodeListMap::HasLetter( char letter )
-{
+bool LetterNodeListMap::HasLetter( char letter ) {
   int letter_index = IndexForChar( letter );
-  std::list< LetterNode* > *list = letters_[ letter_index ];
+  std::list< LetterNode * > *list = letters_[ letter_index ];
   return list;
 }
 
 
-std::list< LetterNode* >& LetterNodeListMap::operator[] ( char letter )
-{
+std::list< LetterNode * > &LetterNodeListMap::operator[] ( char letter ) {
   int letter_index = IndexForChar( letter );
-  std::list< LetterNode* > *list = letters_[ letter_index ];
+  std::list< LetterNode * > *list = letters_[ letter_index ];
+
   if ( list )
 
     return *list;
 
-  letters_[ letter_index ] = new std::list< LetterNode* >();
+  letters_[ letter_index ] = new std::list< LetterNode * >();
   return *letters_[ letter_index ];
 }
 
 
-std::list< LetterNode* >* LetterNodeListMap::ListPointerAt( char letter )
-{
+std::list< LetterNode * > *LetterNodeListMap::ListPointerAt( char letter ) {
   return letters_[ IndexForChar( letter ) ];
 }
 
 
-bool LetterNodeListMap::HasLetter( char letter ) const
-{
+bool LetterNodeListMap::HasLetter( char letter ) const {
   return letters_[ IndexForChar( letter ) ] != NULL;
 }
 

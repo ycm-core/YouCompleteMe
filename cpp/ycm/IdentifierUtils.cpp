@@ -21,10 +21,9 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-const char* COMMENT_AND_STRING_REGEX =
+const char *COMMENT_AND_STRING_REGEX =
   "//.*?$" // Anything following '//'
   "|"
   "#.*?$"  // Anything following '#'
@@ -35,19 +34,17 @@ const char* COMMENT_AND_STRING_REGEX =
   "|"
   "\"[^\"]*\""; // Anything inside double quotes, "..."
 
-const char* IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
+const char *IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
 
 
-std::string RemoveIdentifierFreeText( std::string text )
-{
+std::string RemoveIdentifierFreeText( std::string text ) {
   boost::erase_all_regex( text, boost::regex( COMMENT_AND_STRING_REGEX ) );
   return text;
 }
 
 
 std::vector< std::string > ExtractIdentifiersFromText(
-    const std::string &text )
-{
+  const std::string &text ) {
   std::string::const_iterator start = text.begin();
   std::string::const_iterator end   = text.end();
 
@@ -55,8 +52,8 @@ std::vector< std::string > ExtractIdentifiersFromText(
   boost::regex expression( IDENTIFIER_REGEX );
 
   std::vector< std::string > identifiers;
-  while ( boost::regex_search( start, end, matches, expression ) )
-  {
+
+  while ( boost::regex_search( start, end, matches, expression ) ) {
     identifiers.push_back( matches[ 0 ] );
     start = matches[ 0 ].second;
   }

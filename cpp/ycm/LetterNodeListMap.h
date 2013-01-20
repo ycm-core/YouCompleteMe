@@ -24,8 +24,7 @@
 
 #define NUM_LETTERS 128
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 class LetterNode;
 
@@ -34,23 +33,22 @@ extern const int kNumLetters;
 int IndexForChar( char letter );
 bool IsUppercase( char letter );
 
-class LetterNodeListMap : boost::noncopyable
-{
+class LetterNodeListMap : boost::noncopyable {
 public:
   LetterNodeListMap();
   ~LetterNodeListMap();
 
   bool HasLetter( char letter );
 
-  std::list< LetterNode* >& operator[] ( char letter );
+  std::list< LetterNode * > &operator[] ( char letter );
 
-  std::list< LetterNode* >* ListPointerAt( char letter );
+  std::list< LetterNode * > *ListPointerAt( char letter );
 
   bool HasLetter( char letter ) const;
 
 private:
 
-  std::vector< std::list< LetterNode* >* > letters_;
+  std::vector< std::list< LetterNode * >* > letters_;
 };
 
 } // namespace YouCompleteMe

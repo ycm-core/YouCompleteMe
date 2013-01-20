@@ -26,8 +26,7 @@
 #include <string>
 #include <bitset>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 class Result;
 
@@ -35,21 +34,18 @@ typedef std::bitset< NUM_LETTERS > Bitset;
 
 Bitset LetterBitsetFromString( const std::string &text );
 
-class Candidate : boost::noncopyable
-{
+class Candidate : boost::noncopyable {
 public:
 
   explicit Candidate( const std::string &text );
 
-  inline const std::string& Text() const
-  {
+  inline const std::string &Text() const {
     return text_;
   }
 
   // Returns true if the candidate contains the bits from the query (it may also
   // contain other bits)
-  inline bool MatchesQueryBitset( const Bitset &query_bitset ) const
-  {
+  inline bool MatchesQueryBitset( const Bitset &query_bitset ) const {
     return ( letters_present_ & query_bitset ) == query_bitset;
   }
 

@@ -23,15 +23,12 @@
 
 using boost::algorithm::istarts_with;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-namespace
-{
+namespace {
 
 int LongestCommonSubsequenceLength( const std::string &first,
-                                    const std::string &second )
-{
+                                    const std::string &second ) {
   const std::string &longer  = first.size() > second.size() ? first  : second;
   const std::string &shorter = first.size() > second.size() ? second : first;
 
@@ -41,18 +38,15 @@ int LongestCommonSubsequenceLength( const std::string &first,
   std::vector<int> previous( shorter_len + 1, 0 );
   std::vector<int> current(  shorter_len + 1, 0 );
 
-  for (int i = 0; i < longer_len; ++i )
-  {
-    for (int j = 0; j < shorter_len; ++j )
-    {
+  for ( int i = 0; i < longer_len; ++i ) {
+    for ( int j = 0; j < shorter_len; ++j ) {
       if ( toupper( longer[ i ] ) == toupper( shorter[ j ] ) )
         current[ j + 1 ] = previous[ j ] + 1;
       else
         current[ j + 1 ] = std::max( current[ j ], previous[ j + 1 ] );
     }
 
-    for (int j = 0; j < shorter_len; ++j )
-    {
+    for ( int j = 0; j < shorter_len; ++j ) {
       previous[ j + 1 ] = current[ j + 1 ];
     }
   }
@@ -62,9 +56,8 @@ int LongestCommonSubsequenceLength( const std::string &first,
 
 
 int NumWordBoundaryCharMatches( const std::string &query,
-                                const std::string &word_boundary_chars )
-{
-  return LongestCommonSubsequenceLength(query, word_boundary_chars);
+                                const std::string &word_boundary_chars ) {
+  return LongestCommonSubsequenceLength( query, word_boundary_chars );
 }
 
 } // unnamed namespace
@@ -79,8 +72,7 @@ Result::Result()
   query_is_candidate_prefix_( false ),
   text_is_lowercase_( false ),
   char_match_index_sum_( 0 ),
-  text_( NULL )
-{
+  text_( NULL ) {
 }
 
 
@@ -94,8 +86,7 @@ Result::Result( bool is_subsequence )
   query_is_candidate_prefix_( false ),
   text_is_lowercase_( false ),
   char_match_index_sum_( 0 ),
-  text_( NULL )
-{
+  text_( NULL ) {
 }
 
 
@@ -114,66 +105,57 @@ Result::Result( bool is_subsequence,
   query_is_candidate_prefix_( false ),
   text_is_lowercase_( text_is_lowercase ),
   char_match_index_sum_( char_match_index_sum ),
-  text_( text )
-{
+  text_( text ) {
   if ( is_subsequence )
     SetResultFeaturesFromQuery( word_boundary_chars, query );
 }
 
 
-bool Result::operator< ( const Result &other ) const
-{
+bool Result::operator< ( const Result &other ) const {
   // Yes, this is ugly but it also needs to be fast.  Since this is called a
   // bazillion times, we have to make sure only the required comparisons are
   // made, and no more.
 
-  if ( !query_is_empty_ )
-  {
+  if ( !query_is_empty_ ) {
     if ( first_char_same_in_query_and_text_ !=
-        other.first_char_same_in_query_and_text_ )
-    {
+         other.first_char_same_in_query_and_text_ ) {
       return first_char_same_in_query_and_text_;
     }
 
     bool equal_wb_ratios = AlmostEqual(
-        ratio_of_word_boundary_chars_in_query_,
-        other.ratio_of_word_boundary_chars_in_query_ );
+                             ratio_of_word_boundary_chars_in_query_,
+                             other.ratio_of_word_boundary_chars_in_query_ );
 
     bool equal_wb_utilization = AlmostEqual(
-        word_boundary_char_utilization_,
-        other.word_boundary_char_utilization_ );
+                                  word_boundary_char_utilization_,
+                                  other.word_boundary_char_utilization_ );
 
     if ( AlmostEqual( ratio_of_word_boundary_chars_in_query_, 1.0 ) ||
-        AlmostEqual( other.ratio_of_word_boundary_chars_in_query_, 1.0 ) )
-    {
-      if ( !equal_wb_ratios )
-      {
+         AlmostEqual( other.ratio_of_word_boundary_chars_in_query_, 1.0 ) ) {
+      if ( !equal_wb_ratios ) {
         return ratio_of_word_boundary_chars_in_query_ >
-          other.ratio_of_word_boundary_chars_in_query_;
+               other.ratio_of_word_boundary_chars_in_query_;
       }
 
-      else
-      {
+      else {
         if ( !equal_wb_utilization )
           return word_boundary_char_utilization_ >
-            other.word_boundary_char_utilization_;
+                 other.word_boundary_char_utilization_;
       }
     }
 
     if ( query_is_candidate_prefix_ != other.query_is_candidate_prefix_ )
       return query_is_candidate_prefix_;
 
-    if ( !equal_wb_ratios )
-    {
+    if ( !equal_wb_ratios ) {
       return ratio_of_word_boundary_chars_in_query_ >
-        other.ratio_of_word_boundary_chars_in_query_;
+             other.ratio_of_word_boundary_chars_in_query_;
     }
 
-    else
-    {
+    else {
       if ( !equal_wb_utilization )
         return word_boundary_char_utilization_ >
-          other.word_boundary_char_utilization_;
+               other.word_boundary_char_utilization_;
     }
 
     if ( char_match_index_sum_ != other.char_match_index_sum_ )
@@ -192,16 +174,15 @@ bool Result::operator< ( const Result &other ) const
 
 
 void Result::SetResultFeaturesFromQuery(
-    const std::string &word_boundary_chars,
-    const std::string &query)
-{
+  const std::string &word_boundary_chars,
+  const std::string &query ) {
   query_is_empty_ = query.empty();
 
   if ( query.empty() || text_->empty() )
     return;
 
   first_char_same_in_query_and_text_ =
-    toupper( query[ 0 ] ) == toupper( (*text_)[ 0 ] );
+    toupper( query[ 0 ] ) == toupper( ( *text_ )[ 0 ] );
   int num_wb_matches = NumWordBoundaryCharMatches( query,
                                                    word_boundary_chars );
   ratio_of_word_boundary_chars_in_query_ =

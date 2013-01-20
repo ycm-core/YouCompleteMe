@@ -30,8 +30,7 @@
 #include <string>
 
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 class Candidate;
 class CandidateRepository;
@@ -39,23 +38,22 @@ class CandidateRepository;
 typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
 
 
-class IdentifierCompleter : boost::noncopyable
-{
+class IdentifierCompleter : boost::noncopyable {
 public:
   IdentifierCompleter();
   IdentifierCompleter( const std::vector< std::string > &candidates );
   IdentifierCompleter( const std::vector< std::string > &candidates,
-             const std::string &filetype,
-             const std::string &filepath );
+                       const std::string &filetype,
+                       const std::string &filepath );
 
   ~IdentifierCompleter();
 
   void EnableThreading();
 
   void AddCandidatesToDatabase(
-      const std::vector< std::string > &new_candidates,
-      const std::string &filetype,
-      const std::string &filepath );
+    const std::vector< std::string > &new_candidates,
+    const std::string &filetype,
+    const std::string &filepath );
 
   void AddCandidatesToDatabaseFromBuffer( const std::string &buffer_contents,
                                           const std::string &filetype,
@@ -65,24 +63,24 @@ public:
   // avoid an expensive copy of buffer_contents if the param is taken by value
   // (move ctors FTW)
   void AddCandidatesToDatabaseFromBufferAsync(
-      std::string buffer_contents,
-      std::string filetype,
-      std::string filepath );
+    std::string buffer_contents,
+    std::string filetype,
+    std::string filepath );
 
   // Only provided for tests!
   std::vector< std::string > CandidatesForQuery(
-      const std::string &query ) const;
+    const std::string &query ) const;
 
   std::vector< std::string > CandidatesForQueryAndType(
-      const std::string &query,
-      const std::string &filetype ) const;
+    const std::string &query,
+    const std::string &filetype ) const;
 
   Future< AsyncResults > CandidatesForQueryAndTypeAsync(
-      const std::string &query,
-      const std::string &filetype ) const;
+    const std::string &query,
+    const std::string &filetype ) const;
 
-  typedef boost::shared_ptr<
-              boost::packaged_task< AsyncResults > > QueryTask;
+  typedef boost::shared_ptr <
+  boost::packaged_task< AsyncResults > > QueryTask;
 
   typedef ConcurrentLatestValue< QueryTask > LatestQueryTask;
 
@@ -97,21 +95,21 @@ private:
   void ClearCandidatesStoredForFile( const std::string &filetype,
                                      const std::string &filepath );
 
-  std::list< const Candidate* >& GetCandidateList(
-      const std::string &filetype,
-      const std::string &filepath );
+  std::list< const Candidate * > &GetCandidateList(
+    const std::string &filetype,
+    const std::string &filepath );
 
   void InitThreads();
 
 
   // filepath -> *( *candidate )
-  typedef boost::unordered_map< std::string,
-            boost::shared_ptr< std::list< const Candidate* > > >
-              FilepathToCandidates;
+  typedef boost::unordered_map < std::string,
+          boost::shared_ptr< std::list< const Candidate * > > >
+          FilepathToCandidates;
 
   // filetype -> *( filepath -> *( *candidate ) )
-  typedef boost::unordered_map< std::string,
-            boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
+  typedef boost::unordered_map < std::string,
+          boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
 
 
 

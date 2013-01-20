@@ -24,23 +24,18 @@
 using boost::algorithm::all;
 using boost::algorithm::is_lower;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-namespace
-{
+namespace {
 
-std::string GetWordBoundaryChars( const std::string &text )
-{
+std::string GetWordBoundaryChars( const std::string &text ) {
   std::string result;
 
-  for ( uint i = 0; i < text.size(); ++i )
-  {
+  for ( uint i = 0; i < text.size(); ++i ) {
     if ( i == 0 ||
          IsUppercase( text[ i ] ) ||
          ( i > 0 && text[ i - 1 ] == '_' && isalpha( text[ i ] ) )
-       )
-    {
+       ) {
       result.push_back( tolower( text[ i ] ) );
     }
   }
@@ -51,11 +46,9 @@ std::string GetWordBoundaryChars( const std::string &text )
 } // unnamed namespace
 
 
-Bitset LetterBitsetFromString( const std::string &text )
-{
+Bitset LetterBitsetFromString( const std::string &text ) {
   Bitset letter_bitset;
-  foreach ( char letter, text )
-  {
+  foreach ( char letter, text ) {
     letter_bitset.set( IndexForChar( letter ) );
   }
 
@@ -69,19 +62,17 @@ Candidate::Candidate( const std::string &text )
   word_boundary_chars_( GetWordBoundaryChars( text ) ),
   text_is_lowercase_( all( text, is_lower() ) ),
   letters_present_( LetterBitsetFromString( text ) ),
-  root_node_( new LetterNode( text ) )
-{
+  root_node_( new LetterNode( text ) ) {
 }
 
 
-Result Candidate::QueryMatchResult( const std::string &query ) const
-{
+Result Candidate::QueryMatchResult( const std::string &query ) const {
   LetterNode *node = root_node_.get();
   int index_sum = 0;
 
-  foreach ( char letter, query )
-  {
+  foreach ( char letter, query ) {
     const std::list< LetterNode *> *list = node->NodeListForLetter( letter );
+
     if ( !list )
 
       return Result( false );

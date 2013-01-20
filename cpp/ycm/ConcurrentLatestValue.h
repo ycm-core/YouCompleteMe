@@ -21,8 +21,7 @@
 #include <boost/thread.hpp>
 #include <boost/utility.hpp>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 // This is is basically a multi-consumer single-producer queue, only with the
 // twist that we only care about the latest value set. So the GUI thread is the
@@ -40,14 +39,12 @@ namespace YouCompleteMe
 // nanoseconds it takes to lock a mutex are laughably negligible compared to the
 // VimL/Python overhead.
 template <typename T>
-class ConcurrentLatestValue : boost::noncopyable
-{
+class ConcurrentLatestValue : boost::noncopyable {
 public:
 
   ConcurrentLatestValue() : empty_( true ) {}
 
-  void Set( const T& data )
-  {
+  void Set( const T &data ) {
     {
       boost::unique_lock< boost::mutex > lock( mutex_ );
       latest_ = data;
@@ -57,12 +54,10 @@ public:
     condition_variable_.notify_one();
   }
 
-  T Get()
-  {
+  T Get() {
     boost::unique_lock< boost::mutex > lock( mutex_ );
 
-    while ( empty_ )
-    {
+    while ( empty_ ) {
       condition_variable_.wait( lock );
     }
 
