@@ -20,8 +20,7 @@
 
 #include <cstddef>
 
-struct UnsavedFile
-{
+struct UnsavedFile {
   UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
 
   const char *filename_;
@@ -32,8 +31,7 @@ struct UnsavedFile
   // methods. I have no clue why, but it won't compile without it.
   // TODO: report this problem on the Boost bug tracker, the default equality
   // operator should be more than adequate here
-  bool operator== ( const UnsavedFile &other ) const
-  {
+  bool operator== ( const UnsavedFile &other ) const {
     return
       filename_ == other.filename_ &&
       contents_ == other.contents_ &&

@@ -21,15 +21,12 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/move/move.hpp>
 
-namespace
-{
+namespace {
 
-char CursorKindToVimKind( CXCursorKind kind )
-{
+char CursorKindToVimKind( CXCursorKind kind ) {
   // TODO: actually it appears that Vim will show returned kinds even when they
   // do not match the "approved" list, so let's use that
-  switch ( kind )
-  {
+  switch ( kind ) {
     case CXCursor_UnexposedDecl:
     case CXCursor_StructDecl:
     case CXCursor_UnionDecl:
@@ -58,8 +55,7 @@ char CursorKindToVimKind( CXCursorKind kind )
 }
 
 
-bool IsMainCompletionTextInfo( CXCompletionChunkKind kind )
-{
+bool IsMainCompletionTextInfo( CXCompletionChunkKind kind ) {
   return
     kind == CXCompletionChunk_Optional     ||
     kind == CXCompletionChunk_TypedText    ||
@@ -83,19 +79,19 @@ bool IsMainCompletionTextInfo( CXCompletionChunkKind kind )
 
 
 std::string ChunkToString( CXCompletionString completion_string,
-                           uint chunk_num )
-{
+                           uint chunk_num ) {
   if ( !completion_string )
     return std::string();
+
   return YouCompleteMe::CXStringToString(
-      clang_getCompletionChunkText( completion_string, chunk_num ) );
+           clang_getCompletionChunkText( completion_string, chunk_num ) );
 }
 
 
 std::string OptionalChunkToString( CXCompletionString completion_string,
-                                   uint chunk_num )
-{
+                                   uint chunk_num ) {
   std::string final_string;
+
   if ( !completion_string )
     return final_string;
 
@@ -106,21 +102,18 @@ std::string OptionalChunkToString( CXCompletionString completion_string,
     return final_string;
 
   uint optional_num_chunks = clang_getNumCompletionChunks(
-      optional_completion_string );
+                               optional_completion_string );
 
-  for ( uint j = 0; j < optional_num_chunks; ++j )
-  {
+  for ( uint j = 0; j < optional_num_chunks; ++j ) {
     CXCompletionChunkKind kind = clang_getCompletionChunkKind(
-        optional_completion_string, j );
+                                   optional_completion_string, j );
 
-    if ( kind == CXCompletionChunk_Optional )
-    {
+    if ( kind == CXCompletionChunk_Optional ) {
       final_string.append( OptionalChunkToString( optional_completion_string,
                                                   j ) );
     }
 
-    else
-    {
+    else {
       final_string.append( ChunkToString( optional_completion_string, j ) );
     }
   }
@@ -134,8 +127,7 @@ std::string OptionalChunkToString( CXCompletionString completion_string,
 // the parameter BUT if this code is compiled in C++11 mode a move constructor
 // can be called on the passed-in value. This is not possible if we accept the
 // param by const ref.
-std::string RemoveTwoConsecutiveUnderscores( std::string text )
-{
+std::string RemoveTwoConsecutiveUnderscores( std::string text ) {
   boost::erase_all( text, "__" );
   return text;
 }
@@ -143,11 +135,9 @@ std::string RemoveTwoConsecutiveUnderscores( std::string text )
 } // unnamed namespace
 
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-CompletionData::CompletionData( const CXCompletionResult &completion_result )
-{
+CompletionData::CompletionData( const CXCompletionResult &completion_result ) {
   CXCompletionString completion_string = completion_result.CompletionString;
 
   if ( !completion_string )
@@ -157,8 +147,7 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
   bool saw_left_paren = false;
   bool saw_function_params = false;
 
-  for ( uint j = 0; j < num_chunks; ++j )
-  {
+  for ( uint j = 0; j < num_chunks; ++j ) {
     ExtractDataFromChunk( completion_string,
                           j,
                           saw_left_paren,
@@ -175,54 +164,47 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result )
   // compiler-reserved.
   everything_except_return_type_ =
     RemoveTwoConsecutiveUnderscores(
-        boost::move( everything_except_return_type_ ) );
+      boost::move( everything_except_return_type_ ) );
 
   detailed_info_.append( return_type_ )
-                .append( " " )
-                .append( everything_except_return_type_ )
-                .append( "\n" );
+  .append( " " )
+  .append( everything_except_return_type_ )
+  .append( "\n" );
 }
 
 
 void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
                                            uint chunk_num,
                                            bool &saw_left_paren,
-                                           bool &saw_function_params )
-{
+                                           bool &saw_function_params ) {
   CXCompletionChunkKind kind = clang_getCompletionChunkKind(
-      completion_string, chunk_num );
+                                 completion_string, chunk_num );
 
-  if ( IsMainCompletionTextInfo( kind ) )
-  {
-    if ( kind == CXCompletionChunk_LeftParen )
-    {
+  if ( IsMainCompletionTextInfo( kind ) ) {
+    if ( kind == CXCompletionChunk_LeftParen ) {
       saw_left_paren = true;
     }
 
     else if ( saw_left_paren &&
               !saw_function_params &&
               kind != CXCompletionChunk_RightParen &&
-              kind != CXCompletionChunk_Informative )
-    {
+              kind != CXCompletionChunk_Informative ) {
       saw_function_params = true;
       everything_except_return_type_.append( " " );
     }
 
-    else if ( saw_function_params && kind == CXCompletionChunk_RightParen )
-    {
+    else if ( saw_function_params && kind == CXCompletionChunk_RightParen ) {
       everything_except_return_type_.append( " " );
     }
 
-    if ( kind == CXCompletionChunk_Optional )
-    {
+    if ( kind == CXCompletionChunk_Optional ) {
       everything_except_return_type_.append(
-          OptionalChunkToString( completion_string, chunk_num ) );
+        OptionalChunkToString( completion_string, chunk_num ) );
     }
 
-    else
-    {
+    else {
       everything_except_return_type_.append(
-          ChunkToString( completion_string, chunk_num ) );
+        ChunkToString( completion_string, chunk_num ) );
     }
   }
 

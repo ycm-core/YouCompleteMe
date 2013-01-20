@@ -33,14 +33,12 @@ typedef void *CXIndex;
 typedef struct CXTranslationUnitImpl *CXTranslationUnit;
 struct CXUnsavedFile;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 struct CompletionData;
 typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
 
-class TranslationUnit : boost::noncopyable
-{
+class TranslationUnit : boost::noncopyable {
 public:
 
   TranslationUnit(
@@ -58,9 +56,9 @@ public:
   void Reparse( const std::vector< UnsavedFile > &unsaved_files );
 
   std::vector< CompletionData > CandidatesForLocation(
-      int line,
-      int column,
-      const std::vector< UnsavedFile > &unsaved_files );
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files );
 
 private:
 

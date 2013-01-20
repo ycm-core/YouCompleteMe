@@ -33,8 +33,7 @@
 typedef void *CXIndex;
 typedef struct CXTranslationUnitImpl *CXTranslationUnit;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 class CandidateRepository;
 class TranslationUnit;
@@ -44,17 +43,16 @@ typedef std::vector< CompletionData > CompletionDatas;
 
 typedef boost::shared_ptr< CompletionDatas > AsyncCompletions;
 
-typedef boost::unordered_map< std::string,
-          boost::shared_ptr<
-            std::vector< std::string > > > FlagsForFile;
+typedef boost::unordered_map < std::string,
+        boost::shared_ptr <
+        std::vector< std::string > > > FlagsForFile;
 
-typedef boost::unordered_map< std::string,
-          boost::shared_ptr< TranslationUnit > > TranslationUnitForFilename;
+typedef boost::unordered_map < std::string,
+        boost::shared_ptr< TranslationUnit > > TranslationUnitForFilename;
 
 
 // TODO: document that all filename parameters must be absolute paths
-class ClangCompleter : boost::noncopyable
-{
+class ClangCompleter : boost::noncopyable {
 public:
   ClangCompleter();
   ~ClangCompleter();
@@ -67,49 +65,48 @@ public:
 
   // Public because of unit tests (gtest is not very thread-friendly)
   void UpdateTranslationUnit(
-      const std::string &filename,
-      const std::vector< UnsavedFile > &unsaved_files,
-      const std::vector< std::string > &flags );
+    const std::string &filename,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid internal copies if params are taken by value (move ctors FTW)
   Future< void > UpdateTranslationUnitAsync(
-      std::string filename,
-      std::vector< UnsavedFile > unsaved_files,
-      std::vector< std::string > flags );
+    std::string filename,
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
   // Public because of unit tests (gtest is not very thread-friendly)
   std::vector< CompletionData > CandidatesForLocationInFile(
-      const std::string &filename,
-      int line,
-      int column,
-      const std::vector< UnsavedFile > &unsaved_files,
-      const std::vector< std::string > &flags );
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
   Future< AsyncCompletions > CandidatesForQueryAndLocationInFileAsync(
-      const std::string &query,
-      const std::string &filename,
-      int line,
-      int column,
-      const std::vector< UnsavedFile > &unsaved_files,
-      const std::vector< std::string > &flags );
+    const std::string &query,
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
 private:
 
   // This is basically a union. Only one of the two tasks is set to something
   // valid, the other task is invalid. Which one is valid depends on the caller.
-  struct ClangPackagedTask
-  {
+  struct ClangPackagedTask {
     boost::packaged_task< AsyncCompletions > completions_task_;
     boost::packaged_task< void > parsing_task_;
   };
 
-  typedef ConcurrentLatestValue<
-            boost::shared_ptr<
-              boost::packaged_task< AsyncCompletions > > > LatestSortingTask;
+  typedef ConcurrentLatestValue <
+  boost::shared_ptr <
+  boost::packaged_task< AsyncCompletions > > > LatestSortingTask;
 
-  typedef ConcurrentLatestValue<
-            boost::shared_ptr< ClangPackagedTask > > LatestClangTask;
+  typedef ConcurrentLatestValue <
+  boost::shared_ptr< ClangPackagedTask > > LatestClangTask;
 
   bool ShouldSkipClangResultCache( const std::string &query,
                                    int line,
@@ -121,26 +118,26 @@ private:
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid internal copies if params are taken by value (move ctors FTW)
   void CreateClangTask(
-      std::string filename,
-      int line,
-      int column,
-      std::vector< UnsavedFile > unsaved_files,
-      std::vector< std::string > flags );
+    std::string filename,
+    int line,
+    int column,
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
   boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
-      const std::string &filename,
-      const std::vector< UnsavedFile > &unsaved_files,
-      const std::vector< std::string > &flags );
+    const std::string &filename,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
   boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
-      const std::string &filename,
-      const std::vector< UnsavedFile > &unsaved_files,
-      const std::vector< std::string > &flags,
-      bool &translation_unit_created );
+    const std::string &filename,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags,
+    bool &translation_unit_created );
 
   std::vector< CompletionData > SortCandidatesForQuery(
-      const std::string &query,
-      const std::vector< CompletionData > &completion_datas );
+    const std::string &query,
+    const std::vector< CompletionData > &completion_datas );
 
   void InitThreads();
 

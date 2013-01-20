@@ -22,19 +22,17 @@ using boost::shared_mutex;
 using boost::shared_lock;
 using boost::unique_lock;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 bool ClangResultsCache::NewPositionDifferentFromStoredPosition( int new_line,
                                                                 int new_colum )
-  const
-{
+const {
   shared_lock< shared_mutex > reader_lock( access_mutex_ );
   return line_ != new_line || column_ != new_colum;
 }
 
-void ClangResultsCache::ResetWithNewLineAndColumn( int new_line, int new_colum )
-{
+void ClangResultsCache::ResetWithNewLineAndColumn( int new_line,
+                                                   int new_colum ) {
   unique_lock< shared_mutex > reader_lock( access_mutex_ );
 
   line_ = new_line;

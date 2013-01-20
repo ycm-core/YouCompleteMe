@@ -19,46 +19,43 @@
 #include "ClangUtils.h"
 #include "standard.h"
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 CompilationDatabase::CompilationDatabase(
-    const std::string& path_to_directory )
-    : is_loaded_( false )
-{
+  const std::string &path_to_directory )
+  : is_loaded_( false ) {
   CXCompilationDatabase_Error status;
   compilation_database_ = clang_CompilationDatabase_fromDirectory(
-      path_to_directory.c_str(),
-      &status );
+                            path_to_directory.c_str(),
+                            &status );
   is_loaded_ = status == CXCompilationDatabase_NoError;
 }
 
 
-CompilationDatabase::~CompilationDatabase()
-{
+CompilationDatabase::~CompilationDatabase() {
   clang_CompilationDatabase_dispose( compilation_database_ );
 }
 
 
-bool CompilationDatabase::DatabaseSuccessfullyLoaded()
-{
+bool CompilationDatabase::DatabaseSuccessfullyLoaded() {
   return is_loaded_;
 }
 
 
 std::vector< std::string > CompilationDatabase::FlagsForFile(
-    const std::string &path_to_file )
-{
+  const std::string &path_to_file ) {
   std::vector< std::string > flags;
+
   if ( !is_loaded_ )
     return flags;
 
   CXCompileCommands commands =
-      clang_CompilationDatabase_getCompileCommands(
-          compilation_database_,
-          path_to_file.c_str() );
+    clang_CompilationDatabase_getCompileCommands(
+      compilation_database_,
+      path_to_file.c_str() );
 
   uint num_commands = clang_CompileCommands_getSize( commands );
+
   if ( num_commands < 1 ) {
     clang_CompileCommands_dispose( commands );
     return flags;
@@ -66,15 +63,15 @@ std::vector< std::string > CompilationDatabase::FlagsForFile(
 
   // We always pick the first command offered
   CXCompileCommand command = clang_CompileCommands_getCommand(
-      commands,
-      0);
+                               commands,
+                               0 );
 
   uint num_flags = clang_CompileCommand_getNumArgs( command );
   flags.reserve( num_flags );
-  for ( uint i = 0; i < num_flags; ++i )
-  {
+
+  for ( uint i = 0; i < num_flags; ++i ) {
     flags.push_back( CXStringToString(
-        clang_CompileCommand_getArg( command, i ) ) );
+                       clang_CompileCommand_getArg( command, i ) ) );
   }
 
   clang_CompileCommands_dispose( commands );
@@ -83,18 +80,19 @@ std::vector< std::string > CompilationDatabase::FlagsForFile(
 
 
 std::string CompilationDatabase::CompileCommandWorkingDirectoryForFile(
-    const std::string &path_to_file )
-{
+  const std::string &path_to_file ) {
   std::string path_to_directory;
+
   if ( !is_loaded_ )
     return path_to_directory;
 
   CXCompileCommands commands =
-      clang_CompilationDatabase_getCompileCommands(
-          compilation_database_,
-          path_to_file.c_str() );
+    clang_CompilationDatabase_getCompileCommands(
+      compilation_database_,
+      path_to_file.c_str() );
 
   uint num_commands = clang_CompileCommands_getSize( commands );
+
   if ( num_commands < 1 ) {
     clang_CompileCommands_dispose( commands );
     return path_to_directory;
@@ -102,11 +100,11 @@ std::string CompilationDatabase::CompileCommandWorkingDirectoryForFile(
 
   // We always pick the first command offered
   CXCompileCommand command = clang_CompileCommands_getCommand(
-      commands,
-      0);
+                               commands,
+                               0 );
 
   path_to_directory = CXStringToString( clang_CompileCommand_getDirectory(
-      command ) );
+                                          command ) );
 
   return path_to_directory;
 }

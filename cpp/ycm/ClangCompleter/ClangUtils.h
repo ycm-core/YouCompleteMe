@@ -25,16 +25,15 @@
 #include <vector>
 #include <clang-c/Index.h>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 std::string CXStringToString( CXString text );
 
 std::vector< CompletionData > ToCompletionDataVector(
-    CXCodeCompleteResults *results );
+  CXCodeCompleteResults *results );
 
 std::vector< CXUnsavedFile > ToCXUnsavedFiles(
-    const std::vector< UnsavedFile > &unsaved_files );
+  const std::vector< UnsavedFile > &unsaved_files );
 
 Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic );
 

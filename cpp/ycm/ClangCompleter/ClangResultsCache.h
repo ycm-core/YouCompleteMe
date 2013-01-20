@@ -27,24 +27,22 @@
 #include <boost/config.hpp>
 #include <boost/utility.hpp>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 struct CompletionData;
 
-class ClangResultsCache : boost::noncopyable
-{
+class ClangResultsCache : boost::noncopyable {
 public:
 
   ClangResultsCache() : line_( -1 ), column_( -1 ) {}
 
   bool NewPositionDifferentFromStoredPosition( int new_line, int new_colum )
-    const;
+  const;
 
   void ResetWithNewLineAndColumn( int new_line, int new_colum );
 
-  void SetCompletionDatas( const std::vector< CompletionData > new_completions )
-  {
+  void SetCompletionDatas(
+    const std::vector< CompletionData > new_completions ) {
     completion_datas_ = new_completions;
   }
 
@@ -54,8 +52,7 @@ public:
 #    pragma clang diagnostic ignored "-Wc++98-compat"
 #  endif   //#ifdef __clang__
 
-  void SetCompletionDatas( std::vector< CompletionData >&& new_completions )
-  {
+  void SetCompletionDatas( std::vector< CompletionData > && new_completions ) {
     completion_datas_ = new_completions;
   }
 
@@ -66,9 +63,8 @@ public:
 
   template< typename T >
   T OperateOnCompletionDatas(
-      boost::function< T( const std::vector< CompletionData >& ) > operation )
-    const
-  {
+    boost::function< T( const std::vector< CompletionData >& ) > operation )
+  const {
     boost::shared_lock< boost::shared_mutex > reader_lock( access_mutex_ );
     return operation( completion_datas_ );
   }

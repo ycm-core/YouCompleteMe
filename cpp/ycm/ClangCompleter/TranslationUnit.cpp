@@ -28,36 +28,33 @@ using boost::unique_lock;
 using boost::mutex;
 using boost::try_to_lock_t;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 TranslationUnit::TranslationUnit(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags,
-    CXIndex clang_index )
+  const std::string &filename,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags,
+  CXIndex clang_index )
   : filename_( filename ),
-    clang_translation_unit_( NULL )
-{
-  std::vector< const char* > pointer_flags;
+    clang_translation_unit_( NULL ) {
+  std::vector< const char * > pointer_flags;
   pointer_flags.reserve( flags.size() );
 
-  foreach ( const std::string &flag, flags )
-  {
+  foreach ( const std::string & flag, flags ) {
     pointer_flags.push_back( flag.c_str() );
   }
 
-  std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
-      unsaved_files );
+  std::vector< CXUnsavedFile > cxunsaved_files =
+    ToCXUnsavedFiles( unsaved_files );
 
   clang_translation_unit_ = clang_parseTranslationUnit(
-      clang_index,
-      filename.c_str(),
-      &pointer_flags[ 0 ],
-      pointer_flags.size(),
-      &cxunsaved_files[ 0 ],
-      cxunsaved_files.size(),
-      clang_defaultEditingTranslationUnitOptions() );
+                              clang_index,
+                              filename.c_str(),
+                              &pointer_flags[ 0 ],
+                              pointer_flags.size(),
+                              &cxunsaved_files[ 0 ],
+                              cxunsaved_files.size(),
+                              clang_defaultEditingTranslationUnitOptions() );
 
   if ( !clang_translation_unit_ )
     boost_throw( ClangParseError() );
@@ -68,15 +65,13 @@ TranslationUnit::TranslationUnit(
 }
 
 
-TranslationUnit::~TranslationUnit()
-{
+TranslationUnit::~TranslationUnit() {
   if ( clang_translation_unit_ )
     clang_disposeTranslationUnit( clang_translation_unit_ );
 }
 
 
-std::vector< Diagnostic > TranslationUnit::LatestDiagnostics()
-{
+std::vector< Diagnostic > TranslationUnit::LatestDiagnostics() {
   std::vector< Diagnostic > diagnostics;
   unique_lock< mutex > lock( diagnostics_mutex_ );
 
@@ -95,34 +90,32 @@ std::vector< Diagnostic > TranslationUnit::LatestDiagnostics()
 }
 
 
-bool TranslationUnit::IsCurrentlyUpdating() const
-{
+bool TranslationUnit::IsCurrentlyUpdating() const {
   unique_lock< mutex > lock( clang_access_mutex_, try_to_lock_t() );
   return !lock.owns_lock();
 }
 
 
-void TranslationUnit::Reparse( const std::vector< UnsavedFile > &unsaved_files )
-{
-  std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
-      unsaved_files );
+void TranslationUnit::Reparse(
+  const std::vector< UnsavedFile > &unsaved_files ) {
+  std::vector< CXUnsavedFile > cxunsaved_files =
+    ToCXUnsavedFiles( unsaved_files );
 
   Reparse( cxunsaved_files );
 }
 
 
 std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
-    int line,
-    int column,
-    const std::vector< UnsavedFile > &unsaved_files )
-{
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files ) {
   unique_lock< mutex > lock( clang_access_mutex_ );
 
   if ( !clang_translation_unit_ )
     return std::vector< CompletionData >();
 
-  std::vector< CXUnsavedFile > cxunsaved_files = ToCXUnsavedFiles(
-      unsaved_files );
+  std::vector< CXUnsavedFile > cxunsaved_files =
+    ToCXUnsavedFiles( unsaved_files );
 
   // codeCompleteAt reparses the TU if the underlying source file has changed on
   // disk since the last time the TU was updated and there are no unsaved files.
@@ -153,21 +146,19 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 // non-const pointer to clang. This function (and clang too) will not modify the
 // param though.
 void TranslationUnit::Reparse(
-    std::vector< CXUnsavedFile > &unsaved_files )
-{
+  std::vector< CXUnsavedFile > &unsaved_files ) {
   unique_lock< mutex > lock( clang_access_mutex_ );
 
   if ( !clang_translation_unit_ )
     return;
 
   int failure = clang_reparseTranslationUnit(
-      clang_translation_unit_,
-      unsaved_files.size(),
-      &unsaved_files[ 0 ],
-      clang_defaultEditingTranslationUnitOptions() );
+                  clang_translation_unit_,
+                  unsaved_files.size(),
+                  &unsaved_files[ 0 ],
+                  clang_defaultEditingTranslationUnitOptions() );
 
-  if ( failure )
-  {
+  if ( failure ) {
     clang_disposeTranslationUnit( clang_translation_unit_ );
     clang_translation_unit_ = NULL;
     boost_throw( ClangParseError() );
@@ -178,17 +169,16 @@ void TranslationUnit::Reparse(
 
 
 // Should only be called while holding the clang_access_mutex_
-void TranslationUnit::UpdateLatestDiagnostics()
-{
+void TranslationUnit::UpdateLatestDiagnostics() {
   unique_lock< mutex > lock( diagnostics_mutex_ );
 
   latest_diagnostics_.clear();
   uint num_diagnostics = clang_getNumDiagnostics( clang_translation_unit_ );
   latest_diagnostics_.reserve( num_diagnostics );
 
-  for ( uint i = 0; i < num_diagnostics; ++i )
-  {
-    Diagnostic diagnostic = CXDiagnosticToDiagnostic(
+  for ( uint i = 0; i < num_diagnostics; ++i ) {
+    Diagnostic diagnostic =
+      CXDiagnosticToDiagnostic(
         clang_getDiagnostic( clang_translation_unit_, i ) );
 
     if ( diagnostic.kind_ != 'I' )

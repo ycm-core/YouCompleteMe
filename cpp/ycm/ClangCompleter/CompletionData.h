@@ -22,8 +22,7 @@
 #include <string>
 #include <clang-c/Index.h>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 // This class holds pieces of information about a single completion coming from
 // clang. These pieces are shown in Vim's UI in different ways.
@@ -37,16 +36,14 @@ namespace YouCompleteMe
 //
 // The user can also enable a "preview" window that will show extra information
 // about a completion at the top of the buffer.
-struct CompletionData
-{
+struct CompletionData {
   CompletionData() {}
   CompletionData( const CXCompletionResult &completion_result );
 
   // What should actually be inserted into the buffer. For a function like
   // "int foo(int x)", this is just "foo". Same for a data member like "foo_":
   // we insert just "foo_".
-  std::string TextToInsertInBuffer()
-  {
+  std::string TextToInsertInBuffer() {
     return original_string_;
   }
 
@@ -55,29 +52,25 @@ struct CompletionData
   // the completion is, say, a data member. So for a function like "int foo(int
   // x)", this would be "foo(int x)". For a data member like "count_", it would
   // be just "count_".
-  std::string MainCompletionText()
-  {
+  std::string MainCompletionText() {
     return everything_except_return_type_;
   }
 
   // This is extra info shown in the pop-up completion menu, after the
   // completion text and the kind. Currently we put the return type of the
   // function here, if any.
-  std::string ExtraMenuInfo()
-  {
+  std::string ExtraMenuInfo() {
     return return_type_;
   }
 
   // This is used to show extra information in vim's preview window. This is the
   // window that vim usually shows at the top of the buffer. This should be used
   // for extra information about the completion.
-  std::string DetailedInfoForPreviewWindow()
-  {
+  std::string DetailedInfoForPreviewWindow() {
     return detailed_info_;
   }
 
-  bool operator== ( const CompletionData &other ) const
-  {
+  bool operator== ( const CompletionData &other ) const {
     return
       kind_ == other.kind_ &&
       everything_except_return_type_ == other.everything_except_return_type_ &&

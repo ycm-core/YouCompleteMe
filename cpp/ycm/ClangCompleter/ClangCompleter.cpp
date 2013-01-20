@@ -48,23 +48,19 @@ using boost::unique_future;
 using boost::unique_lock;
 using boost::unordered_map;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 extern const unsigned int MAX_ASYNC_THREADS;
 extern const unsigned int MIN_ASYNC_THREADS;
 
-namespace
-{
+namespace {
 
-struct CompletionDataAndResult
-{
+struct CompletionDataAndResult {
   CompletionDataAndResult( const CompletionData *completion_data,
                            const Result &result )
     : completion_data_( completion_data ), result_( result ) {}
 
-  bool operator< ( const CompletionDataAndResult &other ) const
-  {
+  bool operator< ( const CompletionDataAndResult &other ) const {
     return result_ < other.result_;
   }
 
@@ -80,14 +76,12 @@ ClangCompleter::ClangCompleter()
   : candidate_repository_( CandidateRepository::Instance() ),
     threading_enabled_( false ),
     time_to_die_( false ),
-    clang_data_ready_( false )
-{
+    clang_data_ready_( false ) {
   clang_index_ = clang_createIndex( 0, 0 );
 }
 
 
-ClangCompleter::~ClangCompleter()
-{
+ClangCompleter::~ClangCompleter() {
   // We need to clear this before calling clang_disposeIndex because the
   // translation units need to be destroyed before the index is destroyed.
   filename_to_translation_unit_.clear();
@@ -109,23 +103,21 @@ ClangCompleter::~ClangCompleter()
 // We need this mostly so that we can not use it in tests. Apparently the
 // GoogleTest framework goes apeshit on us (on some platforms, in some
 // occasions) if we enable threads by default.
-void ClangCompleter::EnableThreading()
-{
+void ClangCompleter::EnableThreading() {
   threading_enabled_ = true;
   InitThreads();
 }
 
 
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
-    const std::string &filename )
-{
+  const std::string &filename ) {
   shared_ptr< TranslationUnit > unit;
   {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
     unit = FindWithDefault(
-        filename_to_translation_unit_,
-        filename,
-        shared_ptr< TranslationUnit >() );
+             filename_to_translation_unit_,
+             filename,
+             shared_ptr< TranslationUnit >() );
   }
 
   if ( !unit )
@@ -135,15 +127,14 @@ std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
 }
 
 
-bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename )
-{
+bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
   shared_ptr< TranslationUnit > unit;
   {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
     unit = FindWithDefault(
-        filename_to_translation_unit_,
-        filename,
-        shared_ptr< TranslationUnit >() );
+             filename_to_translation_unit_,
+             filename,
+             shared_ptr< TranslationUnit >() );
   }
 
   if ( !unit )
@@ -154,30 +145,27 @@ bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename )
 
 
 void ClangCompleter::UpdateTranslationUnit(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags )
-{
+  const std::string &filename,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   bool translation_unit_created;
   shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
-      filename,
-      unsaved_files,
-      flags,
-      translation_unit_created );
+                                         filename,
+                                         unsaved_files,
+                                         flags,
+                                         translation_unit_created );
 
   if ( !unit )
     return;
 
-  try
-  {
+  try {
     // There's no point in reparsing a TU that was just created, it was just
     // parsed in the TU constructor
     if ( !translation_unit_created )
       unit->Reparse( unsaved_files );
   }
 
-  catch ( ClangParseError& )
-  {
+  catch ( ClangParseError & ) {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
 
     // If unit->Reparse fails, then the underlying TranslationUnit object is not
@@ -189,10 +177,9 @@ void ClangCompleter::UpdateTranslationUnit(
 
 
 Future< void > ClangCompleter::UpdateTranslationUnitAsync(
-    std::string filename,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags )
-{
+  std::string filename,
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
   function< void() > functor =
     bind( &ClangCompleter::UpdateTranslationUnit,
           boost::ref( *this ),
@@ -214,15 +201,15 @@ Future< void > ClangCompleter::UpdateTranslationUnitAsync(
 
 std::vector< CompletionData >
 ClangCompleter::CandidatesForLocationInFile(
-    const std::string &filename,
-    int line,
-    int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags )
-{
+  const std::string &filename,
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
                                                                   unsaved_files,
                                                                   flags );
+
   if ( !unit )
     return std::vector< CompletionData >();
 
@@ -234,13 +221,12 @@ ClangCompleter::CandidatesForLocationInFile(
 
 Future< AsyncCompletions >
 ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
-    const std::string &query,
-    const std::string &filename,
-    int line,
-    int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags )
-{
+  const std::string &query,
+  const std::string &filename,
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return Future< AsyncCompletions >();
@@ -248,8 +234,8 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   bool skip_clang_result_cache = ShouldSkipClangResultCache( query,
                                                              line,
                                                              column );
-  if ( skip_clang_result_cache )
-  {
+
+  if ( skip_clang_result_cache ) {
     // The clang thread is busy, return nothing
     if ( UpdatingTranslationUnit( filename ) )
       return Future< AsyncCompletions >();
@@ -271,8 +257,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   unique_future< AsyncCompletions > future;
   CreateSortingTask( query, future );
 
-  if ( skip_clang_result_cache )
-  {
+  if ( skip_clang_result_cache ) {
     CreateClangTask( filename, line, column, unsaved_files, flags );
   }
 
@@ -282,8 +267,7 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 
 bool ClangCompleter::ShouldSkipClangResultCache( const std::string &query,
                                                  int line,
-                                                 int column )
-{
+                                                 int column ) {
   // We need query.empty() in addition to the second check because if we don't
   // have it, then we have a problem in the following situation:
   // The user has a variable 'foo' of type 'A' and a variable 'bar' of type 'B'.
@@ -292,20 +276,19 @@ bool ClangCompleter::ShouldSkipClangResultCache( const std::string &query,
   // query.empty() check we would return the results from the cache here (it's
   // the same line and column!) which would be incorrect.
   return query.empty() || latest_clang_results_
-    .NewPositionDifferentFromStoredPosition( line, column );
+         .NewPositionDifferentFromStoredPosition( line, column );
 }
 
 
 // Copy-ctor for unique_future is private in C++03 mode so we need to take it as
 // an out param
 void ClangCompleter::CreateSortingTask(
-    const std::string &query,
-    unique_future< AsyncCompletions > &future )
-{
+  const std::string &query,
+  unique_future< AsyncCompletions > &future ) {
   // Careful! The code in this function may burn your eyes.
 
-  function< CompletionDatas( const CompletionDatas& ) >
-    sort_candidates_for_query_functor =
+  function< CompletionDatas( const CompletionDatas & ) >
+  sort_candidates_for_query_functor =
     bind( &ClangCompleter::SortCandidatesForQuery,
           boost::ref( *this ),
           query,
@@ -327,39 +310,38 @@ void ClangCompleter::CreateSortingTask(
 
 
 void ClangCompleter::CreateClangTask(
-    std::string filename,
-    int line,
-    int column,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags )
-{
-    latest_clang_results_.ResetWithNewLineAndColumn( line, column );
+  std::string filename,
+  int line,
+  int column,
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
+  latest_clang_results_.ResetWithNewLineAndColumn( line, column );
 
-    function< CompletionDatas() > candidates_for_location_functor =
-      bind( &ClangCompleter::CandidatesForLocationInFile,
-            boost::ref( *this ),
-            boost::move( filename ),
-            line,
-            column,
-            boost::move( unsaved_files ),
-            boost::move( flags ) );
+  function< CompletionDatas() > candidates_for_location_functor =
+    bind( &ClangCompleter::CandidatesForLocationInFile,
+          boost::ref( *this ),
+          boost::move( filename ),
+          line,
+          column,
+          boost::move( unsaved_files ),
+          boost::move( flags ) );
 
-    shared_ptr< ClangPackagedTask > clang_packaged_task =
-        make_shared< ClangPackagedTask >();
+  shared_ptr< ClangPackagedTask > clang_packaged_task =
+    make_shared< ClangPackagedTask >();
 
-    clang_packaged_task->completions_task_ = packaged_task< AsyncCompletions >(
-        bind( ReturnValueAsShared< std::vector< CompletionData > >,
-              candidates_for_location_functor ) );
+  clang_packaged_task->completions_task_ =
+    packaged_task< AsyncCompletions >(
+      bind( ReturnValueAsShared< std::vector< CompletionData > >,
+            candidates_for_location_functor ) );
 
-    clang_task_.Set( clang_packaged_task );
+  clang_task_.Set( clang_packaged_task );
 }
 
 
 boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags )
-{
+  const std::string &filename,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   bool dont_care;
   return GetTranslationUnitForFile( filename, unsaved_files, flags, dont_care );
 }
@@ -371,18 +353,16 @@ boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
 // the future a mutex will be needed to make sure that two threads don't try to
 // create the same translation unit.
 shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags,
-    bool &translation_unit_created )
-{
+  const std::string &filename,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags,
+  bool &translation_unit_created ) {
   {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
     TranslationUnitForFilename::iterator it =
       filename_to_translation_unit_.find( filename );
 
-    if ( it != filename_to_translation_unit_.end() )
-    {
+    if ( it != filename_to_translation_unit_.end() ) {
       translation_unit_created = false;
       return it->second;
     }
@@ -390,14 +370,12 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
 
   shared_ptr< TranslationUnit > unit;
 
-  try
-  {
+  try {
     unit = make_shared< TranslationUnit >(
-        filename, unsaved_files, flags, clang_index_ );
+             filename, unsaved_files, flags, clang_index_ );
   }
 
-  catch ( ClangParseError& )
-  {
+  catch ( ClangParseError & ) {
     return unit;
   }
 
@@ -412,25 +390,24 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
 
 
 std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
-    const std::string &query,
-    const std::vector< CompletionData > &completion_datas )
-{
+  const std::string &query,
+  const std::vector< CompletionData > &completion_datas ) {
   Bitset query_bitset = LetterBitsetFromString( query );
 
-  std::vector< const Candidate* > repository_candidates =
+  std::vector< const Candidate * > repository_candidates =
     candidate_repository_.GetCandidatesForStrings( completion_datas );
 
   std::vector< CompletionDataAndResult > data_and_results;
 
-  for ( uint i = 0; i < repository_candidates.size(); ++i )
-  {
-    const Candidate* candidate = repository_candidates[ i ];
+  for ( uint i = 0; i < repository_candidates.size(); ++i ) {
+    const Candidate *candidate = repository_candidates[ i ];
+
     if ( !candidate->MatchesQueryBitset( query_bitset ) )
       continue;
 
     Result result = candidate->QueryMatchResult( query );
-    if ( result.IsSubsequence() )
-    {
+
+    if ( result.IsSubsequence() ) {
       CompletionDataAndResult data_and_result( &completion_datas[ i ], result );
       data_and_results.push_back( data_and_result );
     }
@@ -441,8 +418,7 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   std::vector< CompletionData > sorted_completion_datas;
   sorted_completion_datas.reserve( data_and_results.size() );
 
-  foreach ( const CompletionDataAndResult& data_and_result, data_and_results )
-  {
+  foreach ( const CompletionDataAndResult & data_and_result, data_and_results ) {
     sorted_completion_datas.push_back( *data_and_result.completion_data_ );
   }
 
@@ -450,14 +426,12 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
 }
 
 
-void ClangCompleter::InitThreads()
-{
+void ClangCompleter::InitThreads() {
   int threads_to_create =
     std::max( MIN_ASYNC_THREADS,
-      std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
+              std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
 
-  for ( int i = 0; i < threads_to_create; ++i )
-  {
+  for ( int i = 0; i < threads_to_create; ++i ) {
     sorting_threads_.create_thread( bind( &ClangCompleter::SortingThreadMain,
                                           boost::ref( *this ) ) );
   }
@@ -467,15 +441,13 @@ void ClangCompleter::InitThreads()
 }
 
 
-void ClangCompleter::ClangThreadMain()
-{
-  while ( true )
-  {
-    try
-    {
+void ClangCompleter::ClangThreadMain() {
+  while ( true ) {
+    try {
       shared_ptr< ClangPackagedTask > task = clang_task_.Get();
 
       bool has_completions_task = task->completions_task_.valid();
+
       if ( has_completions_task )
         task->completions_task_();
       else
@@ -496,28 +468,25 @@ void ClangCompleter::ClangThreadMain()
       clang_data_ready_condition_variable_.notify_all();
     }
 
-    catch ( thread_interrupted& )
-    {
+    catch ( thread_interrupted & ) {
       shared_lock< shared_mutex > lock( time_to_die_mutex_ );
+
       if ( time_to_die_ )
         return;
+
       // else do nothing and re-enter the loop
     }
   }
 }
 
 
-void ClangCompleter::SortingThreadMain()
-{
-  while ( true )
-  {
-    try
-    {
+void ClangCompleter::SortingThreadMain() {
+  while ( true ) {
+    try {
       {
         unique_lock< mutex > lock( clang_data_ready_mutex_ );
 
-        while ( !clang_data_ready_ )
-        {
+        while ( !clang_data_ready_ ) {
           clang_data_ready_condition_variable_.wait( lock );
         }
       }
@@ -528,11 +497,12 @@ void ClangCompleter::SortingThreadMain()
       ( *task )();
     }
 
-    catch ( thread_interrupted& )
-    {
+    catch ( thread_interrupted & ) {
       shared_lock< shared_mutex > lock( time_to_die_mutex_ );
+
       if ( time_to_die_ )
         return;
+
       // else do nothing and re-enter the loop
     }
   }

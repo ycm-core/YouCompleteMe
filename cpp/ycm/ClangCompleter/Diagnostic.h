@@ -21,13 +21,10 @@
 #include "standard.h"
 #include <string>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-struct Diagnostic
-{
-  bool operator== ( const Diagnostic &other ) const
-  {
+struct Diagnostic {
+  bool operator== ( const Diagnostic &other ) const {
     return
       line_number_ == other.line_number_ &&
       column_number_ == other.column_number_ &&

@@ -23,13 +23,11 @@
 #include <boost/utility.hpp>
 #include <clang-c/CXCompilationDatabase.h>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-class CompilationDatabase : boost::noncopyable
-{
+class CompilationDatabase : boost::noncopyable {
 public:
-  CompilationDatabase( const std::string& path_to_directory );
+  CompilationDatabase( const std::string &path_to_directory );
   ~CompilationDatabase();
 
   bool DatabaseSuccessfullyLoaded();
@@ -37,7 +35,7 @@ public:
   std::vector< std::string > FlagsForFile( const std::string &path_to_file );
 
   std::string CompileCommandWorkingDirectoryForFile(
-      const std::string &path_to_file );
+    const std::string &path_to_file );
 
 private:
   bool is_loaded_;
