@@ -21,8 +21,7 @@
 #include <vector>
 #include <string>
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 std::vector< std::string > StringVector( const std::string &a,
                                          const std::string &b = std::string(),

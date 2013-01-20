@@ -18,11 +18,9 @@
 #include <gtest/gtest.h>
 #include "LetterNodeListMap.h"
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-TEST( IndexForCharTest, Basic )
-{
+TEST( IndexForCharTest, Basic ) {
   EXPECT_EQ( static_cast<int>( 'a' ), IndexForChar( 'a' ) );
   EXPECT_EQ( static_cast<int>( 'a' ), IndexForChar( 'A' ) );
   EXPECT_EQ( static_cast<int>( 'z' ), IndexForChar( 'z' ) );

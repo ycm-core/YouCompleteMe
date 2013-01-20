@@ -24,176 +24,186 @@
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 
 // This differs from what we expect from the ClangCompleter. That one should
 // return results for an empty query.
-TEST( IdentifierCompleterTest, EmptyQueryNoResults )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar" ) ).CandidatesForQuery( "" ),
-	             ElementsAre() );
+TEST( IdentifierCompleterTest, EmptyQueryNoResults ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar" ) ).CandidatesForQuery( "" ),
+               ElementsAre() );
 }
 
-TEST( IdentifierCompleterTest, NoDuplicatesReturned )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar",
-               "foobar",
-               "foobar" ) ).CandidatesForQuery( "foo" ),
-	             ElementsAre( "foobar" ) );
+TEST( IdentifierCompleterTest, NoDuplicatesReturned ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar",
+                   "foobar",
+                   "foobar" ) ).CandidatesForQuery( "foo" ),
+               ElementsAre( "foobar" ) );
 }
 
 
-TEST( IdentifierCompleterTest, OneCandidate )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar" ) ).CandidatesForQuery( "fbr" ),
-	             ElementsAre( "foobar" ) );
+TEST( IdentifierCompleterTest, OneCandidate ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar" ) ).CandidatesForQuery( "fbr" ),
+               ElementsAre( "foobar" ) );
 }
 
-TEST( IdentifierCompleterTest, ManyCandidateSimple )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar",
-               "foobartest",
-               "Foobartest" ) ).CandidatesForQuery( "fbr" ),
-	             WhenSorted( ElementsAre( "Foobartest",
-	                                      "foobar",
-	                                      "foobartest" ) ) );
+TEST( IdentifierCompleterTest, ManyCandidateSimple ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar",
+                   "foobartest",
+                   "Foobartest" ) ).CandidatesForQuery( "fbr" ),
+               WhenSorted( ElementsAre( "Foobartest",
+                                        "foobar",
+                                        "foobartest" ) ) );
 }
 
-TEST( IdentifierCompleterTest, FirstCharSameAsQueryWins )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar",
-               "afoobar" ) ).CandidatesForQuery( "fbr" ),
-	             ElementsAre( "foobar",
-	                          "afoobar" ) );
+TEST( IdentifierCompleterTest, FirstCharSameAsQueryWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar",
+                   "afoobar" ) ).CandidatesForQuery( "fbr" ),
+               ElementsAre( "foobar",
+                            "afoobar" ) );
 }
 
-TEST( IdentifierCompleterTest, CompleteMatchForWordBoundaryCharsWins )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "FooBarQux",
-               "FBaqux" ) ).CandidatesForQuery( "fbq" ),
-	             ElementsAre( "FooBarQux",
-	                          "FBaqux" ) );
+TEST( IdentifierCompleterTest, CompleteMatchForWordBoundaryCharsWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "FooBarQux",
+                   "FBaqux" ) ).CandidatesForQuery( "fbq" ),
+               ElementsAre( "FooBarQux",
+                            "FBaqux" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "CompleterTest",
-               "CompleteMatchForWordBoundaryCharsWins" ) )
-                  .CandidatesForQuery( "ct" ),
-	             ElementsAre( "CompleterTest",
-	                          "CompleteMatchForWordBoundaryCharsWins" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "CompleterTest",
+                   "CompleteMatchForWordBoundaryCharsWins" ) )
+               .CandidatesForQuery( "ct" ),
+               ElementsAre( "CompleterTest",
+                            "CompleteMatchForWordBoundaryCharsWins" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "FooBar",
-               "FooBarRux" ) ).CandidatesForQuery( "fbr" ),
-	             ElementsAre( "FooBarRux",
-	                          "FooBar" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "FooBar",
+                   "FooBarRux" ) ).CandidatesForQuery( "fbr" ),
+               ElementsAre( "FooBarRux",
+                            "FooBar" ) );
 }
 
-TEST( IdentifierCompleterTest, RatioUtilizationTieBreak )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "aGaaFooBarQux",
-               "aBaafbq" ) ).CandidatesForQuery( "fbq" ),
-	             ElementsAre( "aGaaFooBarQux",
-	                          "aBaafbq" ) );
+TEST( IdentifierCompleterTest, RatioUtilizationTieBreak ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "aGaaFooBarQux",
+                   "aBaafbq" ) ).CandidatesForQuery( "fbq" ),
+               ElementsAre( "aGaaFooBarQux",
+                            "aBaafbq" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "aFooBarQux",
-               "afbq" ) ).CandidatesForQuery( "fbq" ),
-	             ElementsAre( "aFooBarQux",
-	                          "afbq" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "aFooBarQux",
+                   "afbq" ) ).CandidatesForQuery( "fbq" ),
+               ElementsAre( "aFooBarQux",
+                            "afbq" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "acaaCaaFooGxx",
-               "aCaafoog" ) ).CandidatesForQuery( "caafoo" ),
-	             ElementsAre( "acaaCaaFooGxx",
-	                          "aCaafoog" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "acaaCaaFooGxx",
+                   "aCaafoog" ) ).CandidatesForQuery( "caafoo" ),
+               ElementsAre( "acaaCaaFooGxx",
+                            "aCaafoog" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "acaaCaaFooGxx",
-               "aCaafoog" ) ).CandidatesForQuery( "caaFoo" ),
-	             ElementsAre( "acaaCaaFooGxx",
-	                          "aCaafoog" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "acaaCaaFooGxx",
+                   "aCaafoog" ) ).CandidatesForQuery( "caaFoo" ),
+               ElementsAre( "acaaCaaFooGxx",
+                            "aCaafoog" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "FooBarQux",
-               "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq" ),
-	             ElementsAre( "FooBarQux",
-	                          "FooBarQuxZaa" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "FooBarQux",
+                   "FooBarQuxZaa" ) ).CandidatesForQuery( "fbq" ),
+               ElementsAre( "FooBarQux",
+                            "FooBarQuxZaa" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "FooBar",
-               "FooBarRux" ) ).CandidatesForQuery( "fba" ),
-	             ElementsAre( "FooBar",
-	                          "FooBarRux" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "FooBar",
+                   "FooBarRux" ) ).CandidatesForQuery( "fba" ),
+               ElementsAre( "FooBar",
+                            "FooBarRux" ) );
 }
 
-TEST( IdentifierCompleterTest, QueryPrefixOfCandidateWins )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar",
-               "fbaroo" ) ).CandidatesForQuery( "foo" ),
-	             ElementsAre( "foobar",
-	                          "fbaroo" ) );
+TEST( IdentifierCompleterTest, QueryPrefixOfCandidateWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar",
+                   "fbaroo" ) ).CandidatesForQuery( "foo" ),
+               ElementsAre( "foobar",
+                            "fbaroo" ) );
 }
 
-TEST( IdentifierCompleterTest, LowerMatchCharIndexSumWins )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-              "ratio_of_word_boundary_chars_in_query_",
-              "first_char_same_in_query_and_text_") )
-                 .CandidatesForQuery( "charinq" ),
-              ElementsAre( "first_char_same_in_query_and_text_",
-                           "ratio_of_word_boundary_chars_in_query_") );
+TEST( IdentifierCompleterTest, LowerMatchCharIndexSumWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "ratio_of_word_boundary_chars_in_query_",
+                   "first_char_same_in_query_and_text_" ) )
+               .CandidatesForQuery( "charinq" ),
+               ElementsAre( "first_char_same_in_query_and_text_",
+                            "ratio_of_word_boundary_chars_in_query_" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "barfooq",
-               "barquxfoo" ) ).CandidatesForQuery( "foo" ),
-	             ElementsAre( "barfooq",
-                            "barquxfoo") );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "barfooq",
+                   "barquxfoo" ) ).CandidatesForQuery( "foo" ),
+               ElementsAre( "barfooq",
+                            "barquxfoo" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "xxxxxxabc",
-               "xxabcxxxx" ) ).CandidatesForQuery( "abc" ),
-	             ElementsAre( "xxabcxxxx",
-                            "xxxxxxabc") );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "xxxxxxabc",
+                   "xxabcxxxx" ) ).CandidatesForQuery( "abc" ),
+               ElementsAre( "xxabcxxxx",
+                            "xxxxxxabc" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "FooBarQux",
-               "FaBarQux" ) ).CandidatesForQuery( "fbq" ),
-	             ElementsAre( "FaBarQux",
-	                          "FooBarQux" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "FooBarQux",
+                   "FaBarQux" ) ).CandidatesForQuery( "fbq" ),
+               ElementsAre( "FaBarQux",
+                            "FooBarQux" ) );
 }
 
-TEST( IdentifierCompleterTest, ShorterCandidateWins )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "CompleterT",
-               "CompleterTest" ) ).CandidatesForQuery( "co" ),
-	             ElementsAre( "CompleterT",
-	                          "CompleterTest" ) );
+TEST( IdentifierCompleterTest, ShorterCandidateWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "CompleterT",
+                   "CompleterTest" ) ).CandidatesForQuery( "co" ),
+               ElementsAre( "CompleterT",
+                            "CompleterTest" ) );
 
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "CompleterT",
-               "CompleterTest" ) ).CandidatesForQuery( "plet" ),
-	             ElementsAre( "CompleterT",
-	                          "CompleterTest" ) );
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "CompleterT",
+                   "CompleterTest" ) ).CandidatesForQuery( "plet" ),
+               ElementsAre( "CompleterT",
+                            "CompleterTest" ) );
 }
 
-TEST( IdentifierCompleterTest, SameLowercaseCandidateWins )
-{
-	EXPECT_THAT( IdentifierCompleter( StringVector(
-               "foobar",
-               "Foobar" ) ).CandidatesForQuery( "foo" ),
-	             ElementsAre( "foobar",
-	                          "Foobar" ) );
+TEST( IdentifierCompleterTest, SameLowercaseCandidateWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "foobar",
+                   "Foobar" ) ).CandidatesForQuery( "foo" ),
+               ElementsAre( "foobar",
+                            "Foobar" ) );
 }
 
 // TODO: tests for filepath and filetype candidate storing

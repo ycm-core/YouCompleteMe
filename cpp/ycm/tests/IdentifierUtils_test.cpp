@@ -22,75 +22,72 @@
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
 
-TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks )
-{
-	EXPECT_STREQ( RemoveIdentifierFreeText(
-	             "foo \n"
-	             "bar //foo \n"
-	             "qux"
-	             ).c_str(),
-	             "foo \n"
-	             "bar \n"
-	             "qux" );
+TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar //foo \n"
+                  "qux"
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux" );
 
-	EXPECT_STREQ( RemoveIdentifierFreeText(
-	             "foo \n"
-	             "bar #foo \n"
-	             "qux"
-	             ).c_str(),
-	             "foo \n"
-	             "bar \n"
-	             "qux" );
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar #foo \n"
+                  "qux"
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux" );
 
-	EXPECT_STREQ( RemoveIdentifierFreeText(
-	             "foo \n"
-	             "bar /* foo \n"
-	             " foo2 */\n"
-	             "qux"
-	             ).c_str(),
-	             "foo \n"
-	             "bar \n"
-	             "qux" );
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar /* foo \n"
+                  " foo2 */\n"
+                  "qux"
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux" );
 
-	EXPECT_STREQ( RemoveIdentifierFreeText(
-	             "foo \n"
-	             "bar 'foo'\n"
-	             "qux"
-	             ).c_str(),
-	             "foo \n"
-	             "bar \n"
-	             "qux" );
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar 'foo'\n"
+                  "qux"
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux" );
 
-	EXPECT_STREQ( RemoveIdentifierFreeText(
-	             "foo \n"
-	             "bar \"foo\"\n"
-	             "qux"
-	             ).c_str(),
-	             "foo \n"
-	             "bar \n"
-	             "qux" );
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar \"foo\"\n"
+                  "qux"
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux" );
 }
 
 
-TEST( IdentifierUtilsTest, ExtractIdentifiersFromTextWorks )
-{
-	EXPECT_THAT( ExtractIdentifiersFromText(
-	             "foo $_bar \n&BazGoo\n FOO= !!! '-' - _ (x) one-two !moo [qqq]"
-	             ),
-	             ElementsAre( "foo",
-	                          "_bar",
-	                          "BazGoo",
-	                          "FOO",
-	                          "_",
-	                          "x",
-	                          "one",
-	                          "two",
-	                          "moo",
-	                          "qqq" ) );
+TEST( IdentifierUtilsTest, ExtractIdentifiersFromTextWorks ) {
+  EXPECT_THAT( ExtractIdentifiersFromText(
+                 "foo $_bar \n&BazGoo\n FOO= !!! '-' - _ (x) one-two !moo [qqq]"
+               ),
+               ElementsAre( "foo",
+                            "_bar",
+                            "BazGoo",
+                            "FOO",
+                            "_",
+                            "x",
+                            "one",
+                            "two",
+                            "moo",
+                            "qqq" ) );
 
 }
 

@@ -18,11 +18,9 @@
 #include <gtest/gtest.h>
 #include "Candidate.h"
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-TEST( LetterBitsetFromStringTest, Basic )
-{
+TEST( LetterBitsetFromStringTest, Basic ) {
   Bitset expected;
   expected.set( IndexForChar( 'a' ) );
   expected.set( IndexForChar( 'o' ) );

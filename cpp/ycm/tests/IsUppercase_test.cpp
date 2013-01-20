@@ -18,11 +18,9 @@
 #include <gtest/gtest.h>
 #include "LetterNodeListMap.h"
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-TEST( IsUppercaseTest, Basic )
-{
+TEST( IsUppercaseTest, Basic ) {
   EXPECT_TRUE( IsUppercase( 'A' ) );
   EXPECT_TRUE( IsUppercase( 'B' ) );
   EXPECT_TRUE( IsUppercase( 'Z' ) );

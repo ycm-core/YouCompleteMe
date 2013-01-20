@@ -19,41 +19,37 @@
 #include "Candidate.h"
 #include "Result.h"
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-TEST( CandidateTest, TextValid )
-{
+TEST( CandidateTest, TextValid ) {
   std::string text = "foo";
   Candidate candidate( text );
 
   EXPECT_EQ( text, candidate.Text() );
 }
 
-TEST( CandidateTest, MatchesQueryBitsetWhenMatch )
-{
+TEST( CandidateTest, MatchesQueryBitsetWhenMatch ) {
   Candidate candidate( "foobaaar" );
 
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "foobaaar" ) ) );
+                 LetterBitsetFromString( "foobaaar" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "fobar" ) ) );
+                 LetterBitsetFromString( "fobar" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "rabof" ) ) );
+                 LetterBitsetFromString( "rabof" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "bfroa" ) ) );
+                 LetterBitsetFromString( "bfroa" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "fbr" ) ) );
+                 LetterBitsetFromString( "fbr" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "r" ) ) );
+                 LetterBitsetFromString( "r" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "bbb" ) ) );
+                 LetterBitsetFromString( "bbb" ) ) );
   EXPECT_TRUE( candidate.MatchesQueryBitset(
-                LetterBitsetFromString( "" ) ) );
+                 LetterBitsetFromString( "" ) ) );
 }
 
-TEST( CandidateTest, DoesntMatchQueryBitset )
-{
+TEST( CandidateTest, DoesntMatchQueryBitset ) {
   Candidate candidate( "foobar" );
 
   EXPECT_FALSE( candidate.MatchesQueryBitset(
@@ -68,8 +64,7 @@ TEST( CandidateTest, DoesntMatchQueryBitset )
                   LetterBitsetFromString( "fbrmmm" ) ) );
 }
 
-TEST( CandidateTest, QueryMatchResultIsSubsequence )
-{
+TEST( CandidateTest, QueryMatchResultIsSubsequence ) {
   Candidate candidate( "foobaaar" );
 
   EXPECT_TRUE( candidate.QueryMatchResult( "foobaaar" ).IsSubsequence() );
@@ -88,8 +83,7 @@ TEST( CandidateTest, QueryMatchResultIsSubsequence )
   EXPECT_TRUE( candidate.QueryMatchResult( ""         ).IsSubsequence() );
 }
 
-TEST( CandidateTest, QueryMatchResultIsntSubsequence )
-{
+TEST( CandidateTest, QueryMatchResultIsntSubsequence ) {
   Candidate candidate( "foobaaar" );
 
   EXPECT_FALSE( candidate.QueryMatchResult( "foobra"    ).IsSubsequence() );

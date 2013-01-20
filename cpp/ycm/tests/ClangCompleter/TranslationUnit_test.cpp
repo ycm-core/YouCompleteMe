@@ -27,11 +27,9 @@ namespace fs = boost::filesystem;
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-TEST( TranslationUnitTest, ExceptionThrownOnParseFailure )
-{
+TEST( TranslationUnitTest, ExceptionThrownOnParseFailure ) {
   fs::path test_file = fs::temp_directory_path() / fs::unique_path();
   std::string junk = "#&9112(^(^#>@(^@!@(&#@a}}}}{nthoeu\n&&^^&^&!#%%@@!aeu";
   WriteUtf8File( test_file, junk );

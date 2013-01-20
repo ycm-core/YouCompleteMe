@@ -26,29 +26,26 @@ namespace fs = boost::filesystem;
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
 
-namespace YouCompleteMe
-{
+namespace YouCompleteMe {
 
-TEST( ClangCompleterTest, CandidatesForLocationInFile )
-{
+TEST( ClangCompleterTest, CandidatesForLocationInFile ) {
   fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
   fs::path test_file = path_to_testdata / fs::path( "basic.cpp" );
 
   ClangCompleter completer;
   std::vector< CompletionData > completions =
     completer.CandidatesForLocationInFile(
-        test_file.string(),
-        11,
-        7,
-        std::vector< UnsavedFile >(),
-        std::vector< std::string >() );
+      test_file.string(),
+      11,
+      7,
+      std::vector< UnsavedFile >(),
+      std::vector< std::string >() );
 
   EXPECT_TRUE( !completions.empty() );
 }
 
 
-TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync )
-{
+TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync ) {
   fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
   fs::path test_file = path_to_testdata / fs::path( "basic.cpp" );
 
@@ -57,12 +54,12 @@ TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync )
 
   Future< AsyncCompletions > completions_future =
     completer.CandidatesForQueryAndLocationInFileAsync(
-        "",
-        test_file.string(),
-        11,
-        7,
-        std::vector< UnsavedFile >(),
-        std::vector< std::string >() );
+      "",
+      test_file.string(),
+      11,
+      7,
+      std::vector< UnsavedFile >(),
+      std::vector< std::string >() );
 
   completions_future.Wait();
 
