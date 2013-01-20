@@ -22,6 +22,7 @@ import os
 import ycm_core
 import random
 import string
+import sys
 
 CLANG_OPTIONS_FILENAME = '.ycm_clang_options.py'
 
@@ -63,7 +64,10 @@ class Flags( object ):
         flags_module = self.flags_module_for_flags_module_file[
           flags_module_file ]
       except KeyError:
+        sys.path.append( _DirectoryOfThisScript() )
         flags_module = imp.load_source( _RandomName(), flags_module_file )
+        del sys.path[ -1 ]
+
         self.flags_module_for_flags_module_file[
           flags_module_file ] = flags_module
 
@@ -125,3 +129,7 @@ def _SpecialClangIncludes():
   libclang_dir = os.path.dirname( ycm_core.__file__ )
   path_to_includes = os.path.join( libclang_dir, 'clang_includes' )
   return [ '-I', path_to_includes ]
+
+
+def _DirectoryOfThisScript():
+  return os.path.dirname( os.path.abspath( __file__ ) )

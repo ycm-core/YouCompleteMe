@@ -1,5 +1,14 @@
 import os
+import ycm_core
+from clang_helpers import PrepareClangFlags
 
+# Set this to the absolute path to the folder containing the
+# compilation_database.json file to use that instead of 'flags'. See here for
+# more details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
+compilation_database_folder = ''
+
+# These are the compilation flags that will be used in case there's no
+# compilation database set.
 flags = [
 '-Wall',
 '-Wextra',
@@ -41,6 +50,12 @@ flags = [
 './tests/gmock/include'
 ]
 
+if compilation_database_folder:
+  database = ycm_core.CompilationDatabase( compilation_database_folder )
+else:
+  database = None
+
+
 def DirectoryOfThisScript():
   return os.path.dirname( os.path.abspath( __file__ ) )
 
@@ -54,7 +69,22 @@ def MakeAbsoluteIfRelativePath( path ):
 
 
 def FlagsForFile( filename ):
+  if database:
+    # Bear in mind that database.FlagsForFile does NOT return a python list, but
+    # a "list-like" StringVec object
+    final_flags = PrepareClangFlags( database.FlagsForFile( filename ) )
+
+    # NOTE: This is just for YouCompleteMe; it's highly likely that your project
+    # does NOT need to remove the stdlib flag. DO NOT USE THIS IN YOUR
+    # ycm_clang_options IF YOU'RE NOT 100% YOU NEED IT.
+    try:
+      final_flags.remove( '-stdlib=libc++' )
+    except ValueError:
+      pass
+  else:
+    final_flags = [ MakeAbsoluteIfRelativePath( x ) for x in flags ]
+
   return {
-    'flags': [ MakeAbsoluteIfRelativePath( x ) for x in flags ],
+    'flags': final_flags,
     'do_cache': True
   }
