@@ -20,6 +20,11 @@ project( YouCompleteMe )
 
 option( UNIVERSAL "Build universal mac binary" OFF )
 
+# Turning on this flag tells cmake to emit a compile_commands.json file.
+# This file can be used to load compilation flags into YCM. See here for more
+# details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
+set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
+
 # This is needed so that on macs, the library is built in both 32 bit and 64 bit
 # versions. Without this python might refuse to load the module, depending on
 # how python was built.
