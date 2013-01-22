@@ -29,6 +29,26 @@ elseif !has( 'python' )
   finish
 endif
 
+let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
+
+function! s:HasYcmCore()
+  let path_prefix = s:script_folder_path . '/../python/'
+  if filereadable(path_prefix . 'ycm_core.so')
+    return 1
+  elseif filereadable(path_prefix . 'ycm_core.dll')
+    return 1
+  endif
+  return 0
+endfunction
+
+if !s:HasYcmCore()
+  echohl WarningMsg |
+        \ echomsg "ycm_core.[so|dll] not detected; you need to compile YCM " .
+        \ "before using it. Read the docs!" |
+        \ echohl None
+  finish
+endif
+
 let g:loaded_youcompleteme = 1
 
 let g:ycm_min_num_of_chars_for_completion  =
