@@ -66,6 +66,7 @@ function! youcompleteme#Enable()
   " This selects the previous candidate for ctrl-tab
   inoremap <expr><C-TAB>  pumvisible() ? "\<C-p>" : "\<TAB>"
 
+  py import sys
   py import vim
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
