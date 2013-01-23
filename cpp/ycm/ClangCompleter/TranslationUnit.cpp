@@ -22,13 +22,19 @@
 #include "ClangUtils.h"
 
 #include <clang-c/Index.h>
-#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 using boost::unique_lock;
 using boost::mutex;
 using boost::try_to_lock_t;
+using boost::shared_ptr;
+using boost::remove_pointer;
 
 namespace YouCompleteMe {
+
+typedef shared_ptr<
+  remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
 TranslationUnit::TranslationUnit(
   const std::string &filename,
@@ -66,8 +72,14 @@ TranslationUnit::TranslationUnit(
 
 
 TranslationUnit::~TranslationUnit() {
-  if ( clang_translation_unit_ )
+  Destroy();
+}
+
+void TranslationUnit::Destroy() {
+  if ( clang_translation_unit_ ) {
     clang_disposeTranslationUnit( clang_translation_unit_ );
+    clang_translation_unit_ = NULL;
+  }
 }
 
 
@@ -127,17 +139,18 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   // in the open-source world don't realize this (I checked). Some don't even
   // call reparse*, but parse* which is even less efficient.
 
-  CXCodeCompleteResults *results =
+  CodeCompleteResultsWrap results(
     clang_codeCompleteAt( clang_translation_unit_,
                           filename_.c_str(),
                           line,
                           column,
                           &cxunsaved_files[ 0 ],
                           cxunsaved_files.size(),
-                          clang_defaultCodeCompleteOptions() );
+                          clang_defaultCodeCompleteOptions() ),
+    clang_disposeCodeCompleteResults );
 
-  std::vector< CompletionData > candidates = ToCompletionDataVector( results );
-  clang_disposeCodeCompleteResults( results );
+  std::vector< CompletionData > candidates = ToCompletionDataVector(
+      results.get() );
   return candidates;
 }
 
@@ -159,8 +172,7 @@ void TranslationUnit::Reparse(
                   clang_defaultEditingTranslationUnitOptions() );
 
   if ( failure ) {
-    clang_disposeTranslationUnit( clang_translation_unit_ );
-    clang_translation_unit_ = NULL;
+    Destroy();
     boost_throw( ClangParseError() );
   }
 
@@ -178,8 +190,9 @@ void TranslationUnit::UpdateLatestDiagnostics() {
 
   for ( uint i = 0; i < num_diagnostics; ++i ) {
     Diagnostic diagnostic =
-      CXDiagnosticToDiagnostic(
-        clang_getDiagnostic( clang_translation_unit_, i ) );
+      DiagnosticWrapToDiagnostic(
+        DiagnosticWrap( clang_getDiagnostic( clang_translation_unit_, i ),
+                        clang_disposeDiagnostic ) );
 
     if ( diagnostic.kind_ != 'I' )
       latest_diagnostics_.push_back( diagnostic );

@@ -19,7 +19,16 @@
 #include "ClangUtils.h"
 #include "standard.h"
 
+#include <boost/shared_ptr.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
+
+using boost::shared_ptr;
+using boost::shared_ptr;
+using boost::remove_pointer;
+
 namespace YouCompleteMe {
+typedef shared_ptr<
+  remove_pointer< CXCompileCommands >::type > CompileCommandsWrap;
 
 CompilationDatabase::CompilationDatabase(
   const std::string &path_to_directory )
@@ -49,21 +58,20 @@ std::vector< std::string > CompilationDatabase::FlagsForFile(
   if ( !is_loaded_ )
     return flags;
 
-  CXCompileCommands commands =
+  CompileCommandsWrap commands(
     clang_CompilationDatabase_getCompileCommands(
       compilation_database_,
-      path_to_file.c_str() );
+      path_to_file.c_str() ), clang_CompileCommands_dispose );
 
-  uint num_commands = clang_CompileCommands_getSize( commands );
+  uint num_commands = clang_CompileCommands_getSize( commands.get() );
 
   if ( num_commands < 1 ) {
-    clang_CompileCommands_dispose( commands );
     return flags;
   }
 
   // We always pick the first command offered
   CXCompileCommand command = clang_CompileCommands_getCommand(
-                               commands,
+                               commands.get(),
                                0 );
 
   uint num_flags = clang_CompileCommand_getNumArgs( command );
@@ -74,7 +82,6 @@ std::vector< std::string > CompilationDatabase::FlagsForFile(
                        clang_CompileCommand_getArg( command, i ) ) );
   }
 
-  clang_CompileCommands_dispose( commands );
   return flags;
 }
 
@@ -86,27 +93,25 @@ std::string CompilationDatabase::CompileCommandWorkingDirectoryForFile(
   if ( !is_loaded_ )
     return path_to_directory;
 
-  CXCompileCommands commands =
+  CompileCommandsWrap commands(
     clang_CompilationDatabase_getCompileCommands(
       compilation_database_,
-      path_to_file.c_str() );
+      path_to_file.c_str() ), clang_CompileCommands_dispose );
 
-  uint num_commands = clang_CompileCommands_getSize( commands );
+  uint num_commands = clang_CompileCommands_getSize( commands.get() );
 
   if ( num_commands < 1 ) {
-    clang_CompileCommands_dispose( commands );
     return path_to_directory;
   }
 
   // We always pick the first command offered
   CXCompileCommand command = clang_CompileCommands_getCommand(
-                               commands,
+                               commands.get(),
                                0 );
 
   path_to_directory = CXStringToString( clang_CompileCommand_getDirectory(
                                           command ) );
 
-  clang_CompileCommands_dispose( commands );
   return path_to_directory;
 }
 

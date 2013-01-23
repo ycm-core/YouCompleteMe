@@ -234,7 +234,7 @@ TODO, STILL WIP
 
 TODO: compile flags, include paths, ycm_clang_options, CompilationDatabase
 support, how the search system works (subsequence match), extending the semantic
-engine for other langs
+engine for other langs, using ListToggle
 
 Options
 -------

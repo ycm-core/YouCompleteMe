@@ -24,8 +24,13 @@
 
 #include <vector>
 #include <clang-c/Index.h>
+#include <boost/shared_ptr.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 namespace YouCompleteMe {
+
+typedef boost::shared_ptr<
+  boost::remove_pointer< CXDiagnostic >::type > DiagnosticWrap;
 
 std::string CXStringToString( CXString text );
 
@@ -35,7 +40,7 @@ std::vector< CompletionData > ToCompletionDataVector(
 std::vector< CXUnsavedFile > ToCXUnsavedFiles(
   const std::vector< UnsavedFile > &unsaved_files );
 
-Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic );
+Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap );
 
 } // namespace YouCompleteMe
 

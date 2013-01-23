@@ -165,21 +165,21 @@ std::vector< CompletionData > ToCompletionDataVector(
 }
 
 
-Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic ) {
+Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap ) {
   Diagnostic diagnostic;
 
-  if ( !cxdiagnostic )
+  if ( !diagnostic_wrap )
     return diagnostic;
 
   diagnostic.kind_ = DiagnosticSeverityToType(
-                       clang_getDiagnosticSeverity( cxdiagnostic ) );
+                       clang_getDiagnosticSeverity( diagnostic_wrap.get() ) );
 
   // If this is an "ignored" diagnostic, there's no point in continuing since we
   // won't display those to the user
   if ( diagnostic.kind_ == 'I' )
     return diagnostic;
 
-  CXSourceLocation location = clang_getDiagnosticLocation( cxdiagnostic );
+  CXSourceLocation location = clang_getDiagnosticLocation( diagnostic_wrap.get() );
   CXFile file;
   uint unused_offset;
   clang_getSpellingLocation( location,
@@ -190,10 +190,9 @@ Diagnostic CXDiagnosticToDiagnostic( CXDiagnostic cxdiagnostic ) {
 
   diagnostic.filename_ = CXStringToString( clang_getFileName( file ) );
   diagnostic.text_ = CXStringToString(
-                       clang_getDiagnosticSpelling( cxdiagnostic ) );
-  diagnostic.long_formatted_text_ = FullDiagnosticText( cxdiagnostic );
+                       clang_getDiagnosticSpelling( diagnostic_wrap.get() ) );
+  diagnostic.long_formatted_text_ = FullDiagnosticText( diagnostic_wrap.get() );
 
-  clang_disposeDiagnostic( cxdiagnostic );
   return diagnostic;
 }
 

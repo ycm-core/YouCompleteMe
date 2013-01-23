@@ -49,6 +49,8 @@ public:
 
   ~TranslationUnit();
 
+  void Destroy();
+
   std::vector< Diagnostic > LatestDiagnostics();
 
   bool IsCurrentlyUpdating() const;
