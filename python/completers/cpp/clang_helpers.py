@@ -19,7 +19,7 @@
 
 import os
 
-# Given an interable object that produces strings (flags for Clang), removes the
+# Given an iterable object that produces strings (flags for Clang), removes the
 # '-c' and '-o' options that Clang does not like to see when it's producing
 # completions for a file.
 def PrepareClangFlags( flags, filename ):

@@ -23,8 +23,12 @@ import ycm_core
 import random
 import string
 import sys
+import vimsupport
 
 CLANG_OPTIONS_FILENAME = '.ycm_clang_options.py'
+NO_OPTIONS_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
+  'are available. Thus no semantic support for C/C++/ObjC/ObjC++.').format(
+    CLANG_OPTIONS_FILENAME )
 
 class Flags( object ):
   def __init__( self ):
@@ -41,6 +45,7 @@ class Flags( object ):
     except KeyError:
       flags_module = self._FlagsModuleForFile( filename )
       if not flags_module:
+        vimsupport.PostVimMessage( NO_OPTIONS_FILENAME_MESSAGE )
         return ycm_core.StringVec()
 
       results = flags_module.FlagsForFile( filename )
