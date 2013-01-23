@@ -218,19 +218,41 @@ that are conservatively turned off by default that you may want to turn on.
 User Guide
 ----------
 
-TODO, STILL WIP
+TODO, still WIP
+
+### General Usage
 
 - If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Ctrl+TAB to cycle backwards.
-- If you are using the semantic completion engine, you can use Ctrl+Space to
-  trigger the completion suggestions anywhere, even without a string prefix.
-  This is useful to see which top-level functions are available for use.
-- If you are using the semantic completion engine, you _really_ also want to
-  install the latest version of the [Syntastic][] Vim plugin. It has support for
-  YCM and together they will provide you with compile errors/warnings
-  practically instantly and without saving the file.
+
+### Semantic Completion Engine Usage
+
+- You can use Ctrl+Space to trigger the completion suggestions anywhere, even
+  without a string prefix.  This is useful to see which top-level functions are
+  available for use.
+- You _really_ also want to install the latest version of the [Syntastic][] Vim
+  plugin. It has support for YCM and together they will provide you with compile
+  errors/warnings practically instantly and without saving the file.
+
+YCM looks for a `.ycm_clang_options.py` file in the directory of the opened file
+or in any directory above it in the hierarchy (recursively); when the file is
+found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
+method in that module which should provide it with the information necessary to
+compile the current file.
+
+This system was designed this way so that the user can perform any arbitrary
+sequence of operations to produce a list of compilation flags YCM should hand
+to Clang.
+
+[See YCM's own `.ycm_clang_options.py`][flags_example] for details on how this
+works. You should be able to use it as a starting point. Hint: just replace the
+strings in the `flags` variable with compilation flags necessary for your
+project. That should be enough for 99% of projects.
+
+Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again, see the
+above linked example file.
 
 TODO: compile flags, include paths, ycm_clang_options, CompilationDatabase
 support, how the search system works (subsequence match), extending the semantic
@@ -391,3 +413,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [vim]: http://www.vim.org/
 [syntastic]: https://github.com/scrooloose/syntastic
+[flags_example]: https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_clang_options.py
+[compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html

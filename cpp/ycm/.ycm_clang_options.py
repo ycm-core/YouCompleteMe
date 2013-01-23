@@ -2,9 +2,11 @@ import os
 import ycm_core
 from clang_helpers import PrepareClangFlags
 
-# Set this to the absolute path to the folder containing the
+# Set this to the absolute path to the folder (NOT the file!) containing the
 # compilation_database.json file to use that instead of 'flags'. See here for
 # more details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
+# Most projects will NOT need to set this to anything; you can just change the
+# 'flags' list of compilation flags. Notice that YCM itself uses that approach.
 compilation_database_folder = ''
 
 # These are the compilation flags that will be used in case there's no
@@ -21,11 +23,14 @@ flags = [
 # THIS IS IMPORTANT! Without a "-std=<something>" flag, clang won't know which
 # language to use when compiling headers. So it will guess. Badly. So C++
 # headers will be compiled as C headers. You don't want that so ALWAYS specify
-# a "-std=<something>"
+# a "-std=<something>".
+# For a C project, you would set this to something like 'c99' instead of
+# 'c++11'.
 '-std=c++11',
 # ...and the same thing goes for the magic -x option which specifies the
 # language that the files to be compiled are written in. This is mostly
 # relevant for c++ headers.
+# For a C project, you would set this to 'c' instead of 'c++'.
 '-x',
 'c++',
 '-isystem',
@@ -91,10 +96,10 @@ def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
 
 def FlagsForFile( filename ):
   if database:
-    # Bear in mind that database.FlagsForFile does NOT return a python list, but
-    # a "list-like" StringVec object
     working_directory = database.CompileCommandWorkingDirectoryForFile(
         filename )
+    # Bear in mind that database.FlagsForFile does NOT return a python list, but
+    # a "list-like" StringVec object
     raw_flags = database.FlagsForFile( filename )
     final_flags = PrepareClangFlags(
         MakeRelativePathsInFlagsAbsolute( raw_flags,
