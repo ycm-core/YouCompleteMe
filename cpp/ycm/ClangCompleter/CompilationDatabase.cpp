@@ -27,8 +27,8 @@ using boost::shared_ptr;
 using boost::remove_pointer;
 
 namespace YouCompleteMe {
-typedef shared_ptr<
-  remove_pointer< CXCompileCommands >::type > CompileCommandsWrap;
+typedef shared_ptr <
+remove_pointer< CXCompileCommands >::type > CompileCommandsWrap;
 
 CompilationDatabase::CompilationDatabase(
   const std::string &path_to_directory )

@@ -33,8 +33,8 @@ using boost::remove_pointer;
 
 namespace YouCompleteMe {
 
-typedef shared_ptr<
-  remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
+typedef shared_ptr <
+remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
 TranslationUnit::TranslationUnit(
   const std::string &filename,
@@ -150,7 +150,7 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
     clang_disposeCodeCompleteResults );
 
   std::vector< CompletionData > candidates = ToCompletionDataVector(
-      results.get() );
+                                               results.get() );
   return candidates;
 }
 

@@ -29,8 +29,8 @@
 
 namespace YouCompleteMe {
 
-typedef boost::shared_ptr<
-  boost::remove_pointer< CXDiagnostic >::type > DiagnosticWrap;
+typedef boost::shared_ptr <
+boost::remove_pointer< CXDiagnostic >::type > DiagnosticWrap;
 
 std::string CXStringToString( CXString text );
 
