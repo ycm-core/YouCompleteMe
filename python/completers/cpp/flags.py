@@ -39,7 +39,7 @@ class Flags( object ):
     try:
       return self.flags_for_file[ filename ]
     except KeyError:
-      flags_module = self.FlagsModuleForFile( filename )
+      flags_module = self._FlagsModuleForFile( filename )
       if not flags_module:
         return ycm_core.StringVec()
 
@@ -52,7 +52,7 @@ class Flags( object ):
       return sanitized_flags
 
 
-  def FlagsModuleForFile( self, filename ):
+  def _FlagsModuleForFile( self, filename ):
     try:
       return self.flags_module_for_file[ filename ]
     except KeyError:

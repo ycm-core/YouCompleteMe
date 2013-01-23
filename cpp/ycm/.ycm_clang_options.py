@@ -60,19 +60,46 @@ def DirectoryOfThisScript():
   return os.path.dirname( os.path.abspath( __file__ ) )
 
 
-def MakeAbsoluteIfRelativePath( path ):
-  if not path.startswith( '.' ):
-    return path
+def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
+  if not working_directory:
+    return flags
+  new_flags = []
+  make_next_absolute = False
+  path_flags = [ '-isystem', '-I', '-iquote', '--sysroot=' ]
+  for flag in flags:
+    to_append = flag
 
-  full_path = os.path.join( DirectoryOfThisScript(), path )
-  return os.path.normpath( full_path )
+    if make_next_absolute:
+      make_next_absolute = False
+      if not flag.startswith( '/' ):
+        to_append = os.path.join( working_directory, flag )
+
+    for path_flag in path_flags:
+      if flag == path_flag:
+        make_next_absolute = True
+        break
+
+      if flag.startswith( path_flag ):
+        path = flag[ len( path_flag ): ]
+        to_append = path_flag + os.path.join( working_directory, path )
+        break
+
+    if to_append:
+      new_flags.append( to_append )
+  return new_flags
 
 
 def FlagsForFile( filename ):
   if database:
     # Bear in mind that database.FlagsForFile does NOT return a python list, but
     # a "list-like" StringVec object
-    final_flags = PrepareClangFlags( database.FlagsForFile( filename ) )
+    working_directory = database.CompileCommandWorkingDirectoryForFile(
+        filename )
+    raw_flags = database.FlagsForFile( filename )
+    final_flags = PrepareClangFlags(
+        MakeRelativePathsInFlagsAbsolute( raw_flags,
+                                          working_directory ),
+        filename )
 
     # NOTE: This is just for YouCompleteMe; it's highly likely that your project
     # does NOT need to remove the stdlib flag. DO NOT USE THIS IN YOUR
@@ -82,7 +109,8 @@ def FlagsForFile( filename ):
     except ValueError:
       pass
   else:
-    final_flags = [ MakeAbsoluteIfRelativePath( x ) for x in flags ]
+    relative_to = DirectoryOfThisScript()
+    final_flags = MakeRelativePathsInFlagsAbsolute( flags, relative_to )
 
   return {
     'flags': final_flags,

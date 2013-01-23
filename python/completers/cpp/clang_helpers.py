@@ -17,11 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 
 # Given an interable object that produces strings (flags for Clang), removes the
 # '-c' and '-o' options that Clang does not like to see when it's producing
 # completions for a file.
-def PrepareClangFlags( flags ):
+def PrepareClangFlags( flags, filename ):
   new_flags = []
   skip = True
   for flag in flags:
@@ -35,6 +36,9 @@ def PrepareClangFlags( flags ):
 
     if flag == '-o':
       skip = True;
+      continue
+
+    if flag == filename or os.path.realpath(flag) == filename:
       continue
 
     new_flags.append( flag )
