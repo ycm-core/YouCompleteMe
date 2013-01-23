@@ -106,6 +106,7 @@ std::string CompilationDatabase::CompileCommandWorkingDirectoryForFile(
   path_to_directory = CXStringToString( clang_CompileCommand_getDirectory(
                                           command ) );
 
+  clang_CompileCommands_dispose( commands );
   return path_to_directory;
 }
 

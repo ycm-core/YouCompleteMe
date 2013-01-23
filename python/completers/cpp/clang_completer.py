@@ -82,7 +82,7 @@ class ClangCompleter( Completer ):
       self.future = None
       return
 
-    # TODO: sanitize query
+    # TODO: sanitize query, probably in C++ code
 
     files = ycm_core.UnsavedFileVec()
     if not query:
