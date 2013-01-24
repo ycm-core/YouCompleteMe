@@ -373,9 +373,7 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
   try {
     unit = make_shared< TranslationUnit >(
              filename, unsaved_files, flags, clang_index_ );
-  }
-
-  catch ( ClangParseError & ) {
+  } catch ( ClangParseError & ) {
     return unit;
   }
 
@@ -418,7 +416,8 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   std::vector< CompletionData > sorted_completion_datas;
   sorted_completion_datas.reserve( data_and_results.size() );
 
-  foreach ( const CompletionDataAndResult & data_and_result, data_and_results ) {
+  foreach ( const CompletionDataAndResult & data_and_result,
+            data_and_results ) {
     sorted_completion_datas.push_back( *data_and_result.completion_data_ );
   }
 
@@ -466,9 +465,7 @@ void ClangCompleter::ClangThreadMain() {
       }
 
       clang_data_ready_condition_variable_.notify_all();
-    }
-
-    catch ( thread_interrupted & ) {
+    } catch ( thread_interrupted & ) {
       shared_lock< shared_mutex > lock( time_to_die_mutex_ );
 
       if ( time_to_die_ )
@@ -495,9 +492,7 @@ void ClangCompleter::SortingThreadMain() {
         sorting_task_.Get();
 
       ( *task )();
-    }
-
-    catch ( thread_interrupted & ) {
+    } catch ( thread_interrupted & ) {
       shared_lock< shared_mutex > lock( time_to_die_mutex_ );
 
       if ( time_to_die_ )

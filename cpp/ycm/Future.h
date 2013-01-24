@@ -62,9 +62,7 @@ public:
   T GetResults() {
     try {
       return future_.get();
-    }
-
-    catch ( boost::future_uninitialized & ) {
+    } catch ( boost::future_uninitialized & ) {
       // Do nothing and return a T()
     }
 
