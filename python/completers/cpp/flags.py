@@ -25,10 +25,10 @@ import string
 import sys
 import vimsupport
 
-CLANG_OPTIONS_FILENAME = '.ycm_clang_options.py'
+YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 NO_OPTIONS_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++.').format(
-    CLANG_OPTIONS_FILENAME )
+    YCM_EXTRA_CONF_FILENAME )
 
 class Flags( object ):
   def __init__( self ):
@@ -86,15 +86,15 @@ class Flags( object ):
 
 
 def _FlagsModuleSourceFileForFile( filename ):
-  """For a given filename, finds its nearest CLANG_OPTIONS_FILENAME file that
+  """For a given filename, finds its nearest YCM_EXTRA_CONF_FILENAME file that
   will compute the flags necessary to compile the file. Returns None if no
-  CLANG_OPTIONS_FILENAME file could be found."""
+  YCM_EXTRA_CONF_FILENAME file could be found."""
 
   parent_folder = os.path.dirname( filename )
   old_parent_folder = ''
 
   while True:
-    current_file = os.path.join( parent_folder, CLANG_OPTIONS_FILENAME )
+    current_file = os.path.join( parent_folder, YCM_EXTRA_CONF_FILENAME )
     if os.path.exists( current_file ):
       return current_file
 

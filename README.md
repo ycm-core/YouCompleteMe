@@ -236,7 +236,7 @@ TODO, still WIP
   plugin. It has support for YCM and together they will provide you with compile
   errors/warnings practically instantly and without saving the file.
 
-YCM looks for a `.ycm_clang_options.py` file in the directory of the opened file
+YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file
 or in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
 method in that module which should provide it with the information necessary to
@@ -246,7 +246,7 @@ This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
 to Clang.
 
-[See YCM's own `.ycm_clang_options.py`][flags_example] for details on how this
+[See YCM's own `.ycm_extra_conf.py`][flags_example] for details on how this
 works. You should be able to use it as a starting point. Hint: just replace the
 strings in the `flags` variable with compilation flags necessary for your
 project. That should be enough for 99% of projects.
@@ -254,7 +254,7 @@ project. That should be enough for 99% of projects.
 Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again, see the
 above linked example file.
 
-TODO: compile flags, include paths, ycm_clang_options, CompilationDatabase
+TODO: compile flags, include paths, ycm_extra_conf, CompilationDatabase
 support, how the search system works (subsequence match), extending the semantic
 engine for other langs, using ListToggle
 
@@ -413,5 +413,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [vim]: http://www.vim.org/
 [syntastic]: https://github.com/scrooloose/syntastic
-[flags_example]: https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_clang_options.py
+[flags_example]: https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html

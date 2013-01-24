@@ -110,7 +110,7 @@ def FlagsForFile( filename ):
 
     # NOTE: This is just for YouCompleteMe; it's highly likely that your project
     # does NOT need to remove the stdlib flag. DO NOT USE THIS IN YOUR
-    # ycm_clang_options IF YOU'RE NOT 100% YOU NEED IT.
+    # ycm_extra_conf IF YOU'RE NOT 100% YOU NEED IT.
     try:
       final_flags.remove( '-stdlib=libc++' )
     except ValueError:
