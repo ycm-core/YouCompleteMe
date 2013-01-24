@@ -20,19 +20,41 @@
 #include "standard.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
-using boost::shared_ptr;
-using boost::shared_ptr;
+using boost::bind;
+using boost::make_shared;
+using boost::packaged_task;
 using boost::remove_pointer;
+using boost::shared_ptr;
+using boost::thread;
+using boost::unique_future;
+using boost::function;
 
 namespace YouCompleteMe {
+
 typedef shared_ptr <
 remove_pointer< CXCompileCommands >::type > CompileCommandsWrap;
 
+
+void QueryThreadMain( CompilationDatabase::InfoTaskStack &info_task_stack ) {
+  while ( true ) {
+    try {
+      ( *info_task_stack.Pop() )();
+    } catch ( boost::thread_interrupted & ) {
+      return;
+    }
+  }
+
+}
+
+
 CompilationDatabase::CompilationDatabase(
   const std::string &path_to_directory )
-  : is_loaded_( false ) {
+  : threading_enabled_( false ),
+    is_loaded_( false ) {
   CXCompilationDatabase_Error status;
   compilation_database_ = clang_CompilationDatabase_fromDirectory(
                             path_to_directory.c_str(),
@@ -46,17 +68,27 @@ CompilationDatabase::~CompilationDatabase() {
 }
 
 
+// We need this mostly so that we can not use it in tests. Apparently the
+// GoogleTest framework goes apeshit on us if we enable threads by default.
+void CompilationDatabase::EnableThreading() {
+  threading_enabled_ = true;
+  InitThreads();
+}
+
+
 bool CompilationDatabase::DatabaseSuccessfullyLoaded() {
   return is_loaded_;
 }
 
 
-std::vector< std::string > CompilationDatabase::FlagsForFile(
-  const std::string &path_to_file ) {
-  std::vector< std::string > flags;
+CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
+    const std::string &path_to_file ) {
+  CompilationInfoForFile info;
 
   if ( !is_loaded_ )
-    return flags;
+    return info;
+
+  // TODO: mutex protect calls to getCompileCommands and getDirectory
 
   CompileCommandsWrap commands(
     clang_CompilationDatabase_getCompileCommands(
@@ -66,7 +98,7 @@ std::vector< std::string > CompilationDatabase::FlagsForFile(
   uint num_commands = clang_CompileCommands_getSize( commands.get() );
 
   if ( num_commands < 1 ) {
-    return flags;
+    return info;
   }
 
   // We always pick the first command offered
@@ -74,45 +106,47 @@ std::vector< std::string > CompilationDatabase::FlagsForFile(
                                commands.get(),
                                0 );
 
+  info.compiler_working_dir_ = CXStringToString(
+      clang_CompileCommand_getDirectory( command ) );
+
   uint num_flags = clang_CompileCommand_getNumArgs( command );
-  flags.reserve( num_flags );
+  info.compiler_flags_.reserve( num_flags );
 
   for ( uint i = 0; i < num_flags; ++i ) {
-    flags.push_back( CXStringToString(
-                       clang_CompileCommand_getArg( command, i ) ) );
+    info.compiler_flags_.push_back(
+        CXStringToString( clang_CompileCommand_getArg( command, i ) ) );
   }
 
-  return flags;
+  return info;
 }
 
 
-std::string CompilationDatabase::CompileCommandWorkingDirectoryForFile(
-  const std::string &path_to_file ) {
-  std::string path_to_directory;
+Future< AsyncCompilationInfoForFile >
+CompilationDatabase::GetCompilationInfoForFileAsync(
+    const std::string &path_to_file ) {
+  // TODO: throw exception when threading is not enabled and this is called
+  if ( !threading_enabled_ )
+    return Future< AsyncCompilationInfoForFile >();
 
-  if ( !is_loaded_ )
-    return path_to_directory;
+  function< CompilationInfoForFile() > functor =
+    bind( &CompilationDatabase::GetCompilationInfoForFile,
+          boost::ref( *this ),
+          path_to_file );
 
-  CompileCommandsWrap commands(
-    clang_CompilationDatabase_getCompileCommands(
-      compilation_database_,
-      path_to_file.c_str() ), clang_CompileCommands_dispose );
+  InfoTask task =
+      make_shared< packaged_task< AsyncCompilationInfoForFile > >(
+          bind( ReturnValueAsShared< CompilationInfoForFile >,
+                functor ) );
 
-  uint num_commands = clang_CompileCommands_getSize( commands.get() );
+  unique_future< AsyncCompilationInfoForFile > future = task->get_future();
+  info_task_stack_.Push( task );
+  return Future< AsyncCompilationInfoForFile >( boost::move( future ) );
+}
 
-  if ( num_commands < 1 ) {
-    return path_to_directory;
-  }
 
-  // We always pick the first command offered
-  CXCompileCommand command = clang_CompileCommands_getCommand(
-                               commands.get(),
-                               0 );
-
-  path_to_directory = CXStringToString( clang_CompileCommand_getDirectory(
-                                          command ) );
-
-  return path_to_directory;
+void CompilationDatabase::InitThreads() {
+  info_thread_ = boost::thread( QueryThreadMain,
+                                boost::ref( info_task_stack_ ) );
 }
 
 } // namespace YouCompleteMe

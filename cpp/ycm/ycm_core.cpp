@@ -74,6 +74,13 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
     .def( "GetResults", &Future< AsyncCompletions >::GetResults );
 
+  class_< Future< AsyncCompilationInfoForFile > >(
+      "FutureCompilationInfoForFile" )
+    .def( "ResultsReady",
+          &Future< AsyncCompilationInfoForFile >::ResultsReady )
+    .def( "GetResults",
+          &Future< AsyncCompilationInfoForFile >::GetResults );
+
   // CAREFUL HERE! For filename and contents we are referring directly to
   // Python-allocated and -managed memory since we are accepting pointers to
   // data members of python objects. We need to ensure that those objects
@@ -127,11 +134,24 @@ BOOST_PYTHON_MODULE(ycm_core)
 
   class_< CompilationDatabase, boost::noncopyable >(
       "CompilationDatabase", init< std::string >() )
+    .def( "EnableThreading", &CompilationDatabase::EnableThreading )
     .def( "FlagsForFile", &CompilationDatabase::FlagsForFile )
     .def( "DatabaseSuccessfullyLoaded",
           &CompilationDatabase::DatabaseSuccessfullyLoaded )
     .def( "CompileCommandWorkingDirectoryForFile",
-          &CompilationDatabase::CompileCommandWorkingDirectoryForFile );
+          &CompilationDatabase::CompileCommandWorkingDirectoryForFile )
+    .def( "GetCompilationInfoForFile",
+          &CompilationDatabase::GetCompilationInfoForFile )
+    .def( "GetCompilationInfoForFileAsync",
+          &CompilationDatabase::GetCompilationInfoForFileAsync );
+
+  class_< CompilationInfoForFile,
+      boost::shared_ptr< CompilationInfoForFile > >(
+          "CompilationInfoForFile", no_init )
+    .def_readonly( "compiler_working_dir_",
+                   &CompilationInfoForFile::compiler_working_dir_ )
+    .def_readonly( "compiler_flags_",
+                   &CompilationInfoForFile::compiler_flags_ );
 
 #endif // USE_CLANG_COMPLETER
 }

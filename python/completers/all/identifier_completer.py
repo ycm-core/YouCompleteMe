@@ -46,7 +46,7 @@ class IdentifierCompleter( Completer ):
 
   def CandidatesForQueryAsync( self, query ):
     filetype = vim.eval( "&filetype" )
-    self.future = self.completer.CandidatesForQueryAndTypeAsync(
+    self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
       utils.SanitizeQuery( query ),
       filetype )
 
@@ -109,9 +109,9 @@ class IdentifierCompleter( Completer ):
 
 
   def CandidatesFromStoredRequest( self ):
-    if not self.future:
+    if not self.completions_future:
       return []
-    completions = self.future.GetResults()[
+    completions = self.completions_future.GetResults()[
       : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
 
     # We will never have duplicates in completions so with 'dup':1 we tell Vim

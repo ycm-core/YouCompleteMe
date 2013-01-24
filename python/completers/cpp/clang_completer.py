@@ -79,7 +79,14 @@ class ClangCompleter( Completer ):
   def CandidatesForQueryAsync( self, query ):
     if self.completer.UpdatingTranslationUnit( vim.current.buffer.name ):
       vimsupport.PostVimMessage( 'Still parsing file, no completions yet.' )
-      self.future = None
+      self.completions_future = None
+      return
+
+    filename = vim.current.buffer.name
+    flags = self.flags.FlagsForFile( filename )
+    if not flags:
+      vimsupport.PostVimMessage( 'Still no compile flags, no completions yet.' )
+      self.completions_future = None
       return
 
     # TODO: sanitize query, probably in C++ code
@@ -90,21 +97,21 @@ class ClangCompleter( Completer ):
 
     line, _ = vim.current.window.cursor
     column = int( vim.eval( "s:completion_start_column" ) ) + 1
-    current_buffer = vim.current.buffer
-    # TODO: rename future to completions_future
-    self.future = self.completer.CandidatesForQueryAndLocationInFileAsync(
-      query,
-      current_buffer.name,
-      line,
-      column,
-      files,
-      self.flags.FlagsForFile( current_buffer.name ) )
+    self.completions_future = (
+      self.completer.CandidatesForQueryAndLocationInFileAsync(
+        query,
+        filename,
+        line,
+        column,
+        files,
+        flags ) )
 
 
   def CandidatesFromStoredRequest( self ):
-    if not self.future:
+    if not self.completions_future:
       return []
-    results = [ CompletionDataToDict( x ) for x in self.future.GetResults() ]
+    results = [ CompletionDataToDict( x ) for x in
+                self.completions_future.GetResults() ]
     if not results:
       vimsupport.PostVimMessage( 'No completions found; errors in the file?' )
     return results
@@ -112,13 +119,19 @@ class ClangCompleter( Completer ):
 
   def OnFileReadyToParse( self ):
     if vimsupport.NumLinesInBuffer( vim.current.buffer ) < 5:
+      self.parse_future = None
       return
 
     filename = vim.current.buffer.name
+    flags = self.flags.FlagsForFile( filename )
+    if not flags:
+      self.parse_future = None
+      return
+
     self.parse_future = self.completer.UpdateTranslationUnitAsync(
       filename,
       self.GetUnsavedFilesVector(),
-      self.flags.FlagsForFile( filename ) )
+      flags )
 
 
   def DiagnosticsForCurrentFileReady( self ):

@@ -25,21 +25,21 @@ class Completer( object ):
 
 
   def __init__( self ):
-    self.future = None
+    self.completions_future = None
 
 
   def AsyncCandidateRequestReady( self ):
-    if not self.future:
+    if not self.completions_future:
       # We return True so that the caller can extract the default value from the
       # future
       return True
-    return self.future.ResultsReady()
+    return self.completions_future.ResultsReady()
 
 
   def CandidatesFromStoredRequest( self ):
-    if not self.future:
+    if not self.completions_future:
       return []
-    return self.future.GetResults()
+    return self.completions_future.GetResults()
 
 
   def OnFileReadyToParse( self ):

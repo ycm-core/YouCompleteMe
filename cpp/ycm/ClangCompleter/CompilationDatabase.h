@@ -18,12 +18,24 @@
 #ifndef COMPILATIONDATABASE_H_ZT7MQXPG
 #define COMPILATIONDATABASE_H_ZT7MQXPG
 
+#include "Future.h"
+#include "ConcurrentStack.h"
+
 #include <vector>
 #include <string>
 #include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 #include <clang-c/CXCompilationDatabase.h>
 
 namespace YouCompleteMe {
+
+struct CompilationInfoForFile {
+  std::vector< std::string > compiler_flags_;
+  std::string compiler_working_dir_;
+};
+
+typedef boost::shared_ptr< CompilationInfoForFile >
+AsyncCompilationInfoForFile;
 
 class CompilationDatabase : boost::noncopyable {
 public:
@@ -32,14 +44,28 @@ public:
 
   bool DatabaseSuccessfullyLoaded();
 
-  std::vector< std::string > FlagsForFile( const std::string &path_to_file );
+  void EnableThreading();
 
-  std::string CompileCommandWorkingDirectoryForFile(
-    const std::string &path_to_file );
+  CompilationInfoForFile GetCompilationInfoForFile(
+      const std::string &path_to_file );
+
+  Future< AsyncCompilationInfoForFile > GetCompilationInfoForFileAsync(
+      const std::string &path_to_file );
+
+  typedef boost::shared_ptr <
+  boost::packaged_task< AsyncCompilationInfoForFile > > InfoTask;
+
+  typedef ConcurrentStack< InfoTask > InfoTaskStack;
 
 private:
+  void InitThreads();
+
+  bool threading_enabled_;
   bool is_loaded_;
   CXCompilationDatabase compilation_database_;
+
+  boost::thread info_thread_;
+  InfoTaskStack info_task_stack_;
 };
 
 } // namespace YouCompleteMe

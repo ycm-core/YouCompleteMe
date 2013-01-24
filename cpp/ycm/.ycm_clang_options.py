@@ -20,6 +20,7 @@ flags = [
 '-Wno-variadic-macros',
 '-fexceptions',
 '-DNDEBUG',
+'-DUSE_CLANG_COMPLETER',
 # THIS IS IMPORTANT! Without a "-std=<something>" flag, clang won't know which
 # language to use when compiling headers. So it will guess. Badly. So C++
 # headers will be compiled as C headers. You don't want that so ALWAYS specify
@@ -100,10 +101,11 @@ def FlagsForFile( filename ):
         filename )
     # Bear in mind that database.FlagsForFile does NOT return a python list, but
     # a "list-like" StringVec object
-    raw_flags = database.FlagsForFile( filename )
+    compilation_info = database.GetCompilationInfoForFile( filename )
     final_flags = PrepareClangFlags(
-        MakeRelativePathsInFlagsAbsolute( raw_flags,
-                                          working_directory ),
+        MakeRelativePathsInFlagsAbsolute(
+            compilation_info.compiler_flags_,
+            compilation_info.compiler_working_dir_ ),
         filename )
 
     # NOTE: This is just for YouCompleteMe; it's highly likely that your project

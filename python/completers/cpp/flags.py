@@ -46,9 +46,13 @@ class Flags( object ):
       flags_module = self._FlagsModuleForFile( filename )
       if not flags_module:
         vimsupport.PostVimMessage( NO_OPTIONS_FILENAME_MESSAGE )
-        return ycm_core.StringVec()
+        return None
 
       results = flags_module.FlagsForFile( filename )
+
+      if not results.get( 'flags_ready', True ):
+        return None
+
       results[ 'flags' ] += self.special_clang_flags
       sanitized_flags = _SanitizeFlags( results[ 'flags' ] )
 
