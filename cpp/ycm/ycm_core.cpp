@@ -135,11 +135,8 @@ BOOST_PYTHON_MODULE(ycm_core)
   class_< CompilationDatabase, boost::noncopyable >(
       "CompilationDatabase", init< std::string >() )
     .def( "EnableThreading", &CompilationDatabase::EnableThreading )
-    .def( "FlagsForFile", &CompilationDatabase::FlagsForFile )
     .def( "DatabaseSuccessfullyLoaded",
           &CompilationDatabase::DatabaseSuccessfullyLoaded )
-    .def( "CompileCommandWorkingDirectoryForFile",
-          &CompilationDatabase::CompileCommandWorkingDirectoryForFile )
     .def( "GetCompilationInfoForFile",
           &CompilationDatabase::GetCompilationInfoForFile )
     .def( "GetCompilationInfoForFileAsync",
