@@ -97,10 +97,8 @@ def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
 
 def FlagsForFile( filename ):
   if database:
-    working_directory = database.CompileCommandWorkingDirectoryForFile(
-        filename )
-    # Bear in mind that database.FlagsForFile does NOT return a python list, but
-    # a "list-like" StringVec object
+    # Bear in mind that compilation_info.compiler_flags_ does NOT return a
+    # python list, but a "list-like" StringVec object
     compilation_info = database.GetCompilationInfoForFile( filename )
     final_flags = PrepareClangFlags(
         MakeRelativePathsInFlagsAbsolute(
