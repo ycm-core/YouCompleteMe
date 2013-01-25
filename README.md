@@ -384,7 +384,12 @@ Default: `30`
 FAQ
 ---
 
-TODO
+### I get a strange linker warning regarding `libpython` on Mac
+
+If the warning is `ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
+not a directory`, then feel free to ignore it; it's caused by a limitation of
+CMake and is not an issue. Everything should still work fine.
+
 
 Contact
 -------
