@@ -404,9 +404,9 @@ If you would like this window to auto-close after you select a completion
 string, set the `g:ycm_autoclose_preview_window_after_completion` option to `1`
 in your `vimrc` file.
 
-If you don't want this window to ever show up, add the following to your
-`vimrc`: `set completeopt-=preview`. Also make sure that the
-`g:ycm_add_preview_to_completeopt` option is set to `0`.
+If you don't want this window to ever show up, add `set completeopt-=preview` to
+your `vimrc`. Also make sure that the `g:ycm_add_preview_to_completeopt` option
+is set to `0`.
 
 Contact
 -------
