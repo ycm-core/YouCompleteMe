@@ -41,6 +41,11 @@ typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
 class TranslationUnit : boost::noncopyable {
 public:
 
+  // This constructor creates an invalid, sentinel TU. All of it's methods
+  // return empty vectors, and IsCurrentlyUpdating always returns true so that
+  // no callers try to rely on the invalid TU.
+  TranslationUnit();
+
   TranslationUnit(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files,

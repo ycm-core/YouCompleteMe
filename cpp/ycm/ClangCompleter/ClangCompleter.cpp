@@ -140,6 +140,9 @@ bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
   if ( !unit )
     return false;
 
+  // Thankfully, an invalid, sentinel TU always returns true for
+  // IsCurrentlyUpdating, so no caller will try to rely on the TU object, even
+  // if unit is currently pointing to a sentinel.
   return unit->IsCurrentlyUpdating();
 }
 
@@ -366,14 +369,23 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
       translation_unit_created = false;
       return it->second;
     }
+
+    // We create and store an invalid, sentinel TU so that other threads don't
+    // try to create a TU for the same file while we are trying to create this
+    // TU object. When we are done creating the TU, we will overwrite this value
+    // with the valid object.
+    filename_to_translation_unit_[ filename ] =
+      make_shared< TranslationUnit >();
   }
 
   shared_ptr< TranslationUnit > unit;
+
 
   try {
     unit = make_shared< TranslationUnit >(
              filename, unsaved_files, flags, clang_index_ );
   } catch ( ClangParseError & ) {
+    Erase( filename_to_translation_unit_, filename );
     return unit;
   }
 

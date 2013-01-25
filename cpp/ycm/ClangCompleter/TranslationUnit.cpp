@@ -36,6 +36,11 @@ namespace YouCompleteMe {
 typedef shared_ptr <
 remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
+TranslationUnit::TranslationUnit()
+  : filename_(""),
+    clang_translation_unit_( NULL ) {
+}
+
 TranslationUnit::TranslationUnit(
   const std::string &filename,
   const std::vector< UnsavedFile > &unsaved_files,
@@ -85,6 +90,10 @@ void TranslationUnit::Destroy() {
 
 std::vector< Diagnostic > TranslationUnit::LatestDiagnostics() {
   std::vector< Diagnostic > diagnostics;
+
+  if ( !clang_translation_unit_ )
+    return diagnostics;
+
   unique_lock< mutex > lock( diagnostics_mutex_ );
 
   // We don't need the latest diags after we return them once so we swap the
@@ -103,6 +112,11 @@ std::vector< Diagnostic > TranslationUnit::LatestDiagnostics() {
 
 
 bool TranslationUnit::IsCurrentlyUpdating() const {
+  // We return true when the TU is invalid; an invalid TU also acts a sentinel,
+  // preventing other threads from trying to use it.
+  if ( !clang_translation_unit_ )
+    return true;
+
   unique_lock< mutex > lock( clang_access_mutex_, try_to_lock_t() );
   return !lock.owns_lock();
 }
