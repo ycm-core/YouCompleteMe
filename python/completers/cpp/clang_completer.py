@@ -77,12 +77,13 @@ class ClangCompleter( Completer ):
 
 
   def CandidatesForQueryAsync( self, query ):
-    if self.completer.UpdatingTranslationUnit( vim.current.buffer.name ):
+    filename = vim.current.buffer.name
+
+    if self.completer.UpdatingTranslationUnit( filename ):
       vimsupport.PostVimMessage( 'Still parsing file, no completions yet.' )
       self.completions_future = None
       return
 
-    filename = vim.current.buffer.name
     flags = self.flags.FlagsForFile( filename )
     if not flags:
       vimsupport.PostVimMessage( 'Still no compile flags, no completions yet.' )
