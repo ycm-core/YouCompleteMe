@@ -38,7 +38,7 @@ required):
     makedir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/clang+llvm-3.2-x86_64-apple-darwin11 . ~/.vim/bundle/YouCompleteMe/cpp
-    make
+    make ycm_core
 
 Compiling YCM **without** semantic support for C-family languages:
 
@@ -46,7 +46,7 @@ Compiling YCM **without** semantic support for C-family languages:
     makedir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
-    make
+    make ycm_core
 
 That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
 forget that if you want the C-family semantic completion engine to work, you
@@ -88,7 +88,7 @@ required):
     mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/clang+llvm-3.2-x86_64-linux-ubuntu-12.04 . ~/.vim/bundle/YouCompleteMe/cpp
-    make
+    make ycm_core
 
 Compiling YCM **without** semantic support for C-family languages:
 
@@ -96,7 +96,7 @@ Compiling YCM **without** semantic support for C-family languages:
     mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
-    make
+    make ycm_core
 
 That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
 forget that if you want the C-family semantic completion engine to work, you
@@ -147,8 +147,8 @@ Please follow the instructions carefully:
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
 
-4.  **Compile the `ycm_core` plugin plugin** (ha!) that YCM needs. This is C++
-    engine that YCM uses to get fast completions.
+4.  **Compile the `ycm_core` plugin plugin** (ha!) that YCM needs. This is the
+    C++ engine that YCM uses to get fast completions.
 
     You will need to have `cmake` installed in order to generate the required
     makefiles. Linux users can install cmake with their package manager (`sudo
@@ -177,7 +177,7 @@ Please follow the instructions carefully:
     `lib`, `include` etc. folders right inside that folder). With that in mind,
     run the following command in the `ycm_build` directory: `cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp`
 
-    Now that makefiles have been generated, simply run `make`.
+    Now that makefiles have been generated, simply run `make ycm_core`.
 
     For those who want to use the system version of libclang, you would pass
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
