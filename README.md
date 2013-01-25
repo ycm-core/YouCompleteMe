@@ -390,6 +390,23 @@ If the warning is `ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory`, then feel free to ignore it; it's caused by a limitation of
 CMake and is not an issue. Everything should still work fine.
 
+### I get a weird window at the top of my file when I use the semantic engine
+
+This is Vim's `preview` window. Vim uses it to show you extra information about
+something if such information is available. YCM provides Vim with such extra
+information. For instance, when you select a function in the completion list,
+the `preview` window will hold that function's prototype and the prototypes of
+any overloads of the function. It will stay there after you select the
+completion so that you can use the information about the parameters and their
+types to write the function call.
+
+If you would like this window to auto-close after you select a completion
+string, set the `g:ycm_autoclose_preview_window_after_completion` option to `1`
+in your `vimrc` file.
+
+If you don't want this window to ever show up, add the following to your
+`vimrc`: `set completeopt-=preview`. Also make sure that the
+`g:ycm_add_preview_to_completeopt` option is set to `0`.
 
 Contact
 -------
