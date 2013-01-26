@@ -78,6 +78,11 @@ ClangCompleter::ClangCompleter()
     time_to_die_( false ),
     clang_data_ready_( false ) {
   clang_index_ = clang_createIndex( 0, 0 );
+
+  // The libclang docs don't say what is the default value for crash recovery.
+  // I'm pretty sure it's turned on by default, but I'm not going to take any
+  // chances.
+  clang_toggleCrashRecovery( true );
 }
 
 
