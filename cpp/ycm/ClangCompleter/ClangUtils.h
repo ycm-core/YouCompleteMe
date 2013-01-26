@@ -42,6 +42,8 @@ std::vector< CXUnsavedFile > ToCXUnsavedFiles(
 
 Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap );
 
+std::string ClangVersion();
+
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: CLANGUTILS_H_9MVHQLJS */

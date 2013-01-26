@@ -90,3 +90,7 @@ class Completer( object ):
   @abc.abstractmethod
   def ShouldUseNow( self, start_column ):
     pass
+
+
+  def DebugInfo( self ):
+    return ''

@@ -20,6 +20,7 @@
 
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter.h"
+#  include "ClangUtils.h"
 #  include "CompletionData.h"
 #  include "Diagnostic.h"
 #  include "UnsavedFile.h"
@@ -70,6 +71,8 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( "GetResults", &Future< void >::GetResults );
 
 #ifdef USE_CLANG_COMPLETER
+  def( "ClangVersion", ClangVersion );
+
   class_< Future< AsyncCompletions > >( "FutureCompletions" )
     .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
     .def( "GetResults", &Future< AsyncCompletions >::GetResults );

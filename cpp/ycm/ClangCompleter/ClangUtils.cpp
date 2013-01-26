@@ -196,4 +196,8 @@ Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap ) {
   return diagnostic;
 }
 
+std::string ClangVersion() {
+  return CXStringToString( clang_getClangVersion() );
+}
+
 } // namespace YouCompleteMe

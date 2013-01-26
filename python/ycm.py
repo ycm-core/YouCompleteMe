@@ -23,6 +23,7 @@ import vim
 import utils
 import os
 import sys
+import ycm_core
 from completers.all.identifier_completer import IdentifierCompleter
 
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
@@ -122,6 +123,28 @@ class YouCompleteMe( object ):
 
     if self.FiletypeCompletionEnabledForCurrentFile():
       self.GetFiletypeCompleterForCurrentFile().OnCurrentIdentifierFinished()
+
+
+  def DebugInfo( self ):
+    completers = set( self.filetype_completers.values() )
+    completers.add( self.identcomp )
+    output = []
+    for completer in completers:
+      if not completer:
+        continue
+      debug = completer.DebugInfo()
+      if debug:
+        output.append( debug )
+
+    has_clang_support = ycm_core.HasClangSupport()
+    output.append( 'Has Clang support compiled in: {0}'.format(
+      has_clang_support ) )
+
+    if has_clang_support:
+      output.append( ycm_core.ClangVersion() )
+
+    return '\n'.join( output )
+
 
 
 def _PathToCompletersFolder():

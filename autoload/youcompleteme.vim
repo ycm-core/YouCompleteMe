@@ -405,6 +405,17 @@ function! youcompleteme#CurrentFileDiagnostics()
 endfunction
 
 
+function! s:DebugInfo()
+  echom "Printing YouCompleteMe debug information..."
+  let debug_info = pyeval( 'ycm_state.DebugInfo()' )
+  for line in split( debug_info, "\n" )
+    echom '-- ' . line
+  endfor
+endfunction
+
+command! YcmDebugInfo call s:DebugInfo()
+
+
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
 unlet s:save_cpo
