@@ -412,6 +412,12 @@ If you don't want this window to ever show up, add `set completeopt-=preview` to
 your `vimrc`. Also make sure that the `g:ycm_add_preview_to_completeopt` option
 is set to `0`.
 
+### It appears that YCM is not working.
+
+In Vim, run `:messages` and carefully read the output. YCM will echo messages to
+the message log if it encounters problems. It's likely you misconfigured
+something and YCM is complaining about it.
+
 Contact
 -------
 
