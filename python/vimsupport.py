@@ -55,9 +55,8 @@ def NumLinesInBuffer( buffer ):
 
 
 def PostVimMessage( message ):
-  # TODO: escape the message string before formating it
   vim.command( 'echohl WarningMsg | echomsg "{0}" | echohl None'
-               .format( message ) )
+               .format( message.replace( '"', '\\"' ) ) )
 
 
 def EchoText( text ):

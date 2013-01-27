@@ -23,8 +23,18 @@ import vim
 import utils
 import os
 import sys
-import ycm_core
+
+try:
+  import ycm_core
+except ImportError, e:
+  vimsupport.PostVimMessage(
+    'Error importing ycm_core. Are you sure you have placed a version 3.2+ '
+    'libclang.[so|dll|dylib] in folder "{0}"? See the Installation Guide in '
+    'the docs. Full error: {1}'.format(
+      os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
+
 from completers.all.identifier_completer import IdentifierCompleter
+
 
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
   'g:ycm_filetype_specific_completion_to_disable' )
