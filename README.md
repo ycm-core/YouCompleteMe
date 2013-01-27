@@ -389,7 +389,7 @@ Default: `30`
 FAQ
 ---
 
-### I get a strange linker warning regarding `libpython` on Mac
+### I get a linker warning regarding `libpython` on Mac when compiling YCM
 
 If the warning is `ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory`, then feel free to ignore it; it's caused by a limitation of
@@ -413,7 +413,7 @@ If you don't want this window to ever show up, add `set completeopt-=preview` to
 your `vimrc`. Also make sure that the `g:ycm_add_preview_to_completeopt` option
 is set to `0`.
 
-### It appears that YCM is not working.
+### It appears that YCM is not working
 
 In Vim, run `:messages` and carefully read the output. YCM will echo messages to
 the message log if it encounters problems. It's likely you misconfigured
