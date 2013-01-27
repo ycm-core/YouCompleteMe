@@ -206,6 +206,10 @@ Please follow the instructions carefully:
 
     On Mac, run: `cp ~/ycm_temp/llvm_root_dir/lib/libclang.dylib ~/.vim/bundle/YouCompleteMe/python`
 
+    **DO NOT FORGET THIS STEP**. If you forget to copy over `libclang.so`
+    version 3.2 into the `YouCompleteMe/python` folder then YCM _will not work_
+    if you selected C-family support during YCM compilation.
+
 That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
 forget that if you want the C-family semantic completion engine to work, you
 will need to provide the compilation flags for your project to YCM. It's all in
