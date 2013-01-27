@@ -58,27 +58,28 @@ function! youcompleteme#Enable()
     set ut=2000
   endif
 
-  " With this command, when the completion window is visible, the tab key will
-  " select the next candidate in the window. In vim, this also changes the
-  " typed-in text to that of the candidate completion.
-  inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+  " With this command, when the completion window is visible, the tab key
+  " (default) will select the next candidate in the window. In vim, this also
+  " changes the typed-in text to that of the candidate completion.
+  exe 'inoremap <expr>' . g:ycm_key_select_completion .
+        \ ' pumvisible() ? "\<C-n>" : "\' . g:ycm_key_select_completion .'"'
 
-  " This selects the previous candidate for ctrl-tab or shift-tab
-  inoremap <expr><C-TAB>  pumvisible() ? "\<C-p>" : "\<TAB>"
-  inoremap <expr><S-TAB>  pumvisible() ? "\<C-p>" : "\<TAB>"
+  " This selects the previous candidate for shift-tab (default)
+  exe 'inoremap <expr>' . g:ycm_key_previous_completion .
+        \ ' pumvisible() ? "\<C-p>" : "\' . g:ycm_key_previous_completion .'"'
+
+  " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
+  " candidate that vim selects by default
+  exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
+
+  " TODO: make this a nicer, customizable map
+  nnoremap <unique> <leader>d :call <sid>ShowDetailedDiagnostic()<cr>
 
   py import sys
   py import vim
   exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
   py import ycm
   py ycm_state = ycm.YouCompleteMe()
-
-  " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
-  " candidate that vim selects by default
-  inoremap <unique> <C-Space> <C-X><C-O><C-P>
-
-  " TODO: make this a nicer, customizable map
-  nnoremap <unique> <leader>d :call <sid>ShowDetailedDiagnostic()<cr>
 
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
   " the first loaded file. This should be the last command executed in this

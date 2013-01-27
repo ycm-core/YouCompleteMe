@@ -229,7 +229,10 @@ TODO, still WIP
 - If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
-  through the completions. Use Ctrl+TAB (or Shift-TAB) to cycle backwards.
+  through the completions. Use Shift-TAB to cycle backwards. Note that if you're
+  using console Vim (that is, not Gvim or MacVim) then it's likely that the
+  Shift-TAB binding will not work because the console will not pass it to Vim.
+  You can remap the keys; see the options section below.
 
 ### Semantic Completion Engine Usage
 
@@ -384,6 +387,47 @@ Syntastic plugin that supports YCM.
 Default: `30`
 
     let g:ycm_max_diagnostics_to_display = 30
+
+### The `g:ycm_key_select_completion` option
+
+This option controls the key mapping used to select the first completion string.
+Invoking it repeatedly cycles forward through the completion list.
+
+Default: `<TAB>`
+
+    let g:ycm_key_select_completion = '<TAB>'
+
+### The `g:ycm_key_previous_completion` option
+
+This option controls the key mapping used to select the previous completion
+string. Invoking it repeatedly cycles backwards through the completion list.
+
+Note that the default of `<S-TAB>` means Shift-TAB. Also note that the default
+mapping will probably only work in GUI Vim (Gvim or MacVim) and not in plain
+console Vim because the terminal usually does not forward modifier key
+combinations to Vim.
+
+Default: `<S-TAB>`
+
+    let g:ycm_key_previous_completion = '<S-TAB>'
+
+### The `g:ycm_key_invoke_completion` option
+
+This option controls the key mapping used to invoke the completion menu for
+semantic completion. By default, semantic completion is trigged automatically
+after typing `.`, `->` and `::` in insert mode (if semantic completion support
+has been compiled in). This key mapping can be used to trigger semantic
+completion anywhere. Useful for searching for top-level functions and classes.
+
+Note that the default of `<C-Space>` means Ctrl-Space. Also note that the
+default mapping will probably only work in GUI Vim (Gvim or MacVim) and not in
+plain console Vim because the terminal usually does not forward modifier key
+combinations to Vim.
+
+
+Default: `<C-Space>`
+
+    let g:ycm_key_invoke_completion = '<C-Space>'
 
 
 FAQ

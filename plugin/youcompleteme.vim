@@ -76,6 +76,15 @@ let g:ycm_autoclose_preview_window_after_completion =
 let g:ycm_max_diagnostics_to_display =
       \ get( g:, 'ycm_max_diagnostics_to_display', 30 )
 
+let g:ycm_key_select_completion =
+      \ get( g:, 'ycm_key_select_completion', '<TAB>' )
+
+let g:ycm_key_previous_completion =
+      \ get( g:, 'ycm_key_previous_completion', '<S-TAB>' )
+
+let g:ycm_key_invoke_completion =
+      \ get( g:, 'ycm_key_invoke_completion', '<C-Space>' )
+
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim
