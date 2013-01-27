@@ -260,7 +260,8 @@ above linked example file.
 
 TODO: compile flags, include paths, ycm_extra_conf, CompilationDatabase
 support, how the search system works (subsequence match), extending the semantic
-engine for other langs, using ListToggle
+engine for other langs, using ListToggle, when does YCM recompile the file, when
+does YCM update the diagnostics
 
 Options
 -------
