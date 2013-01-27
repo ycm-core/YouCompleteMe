@@ -63,8 +63,9 @@ function! youcompleteme#Enable()
   " typed-in text to that of the candidate completion.
   inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 
-  " This selects the previous candidate for ctrl-tab
+  " This selects the previous candidate for ctrl-tab or shift-tab
   inoremap <expr><C-TAB>  pumvisible() ? "\<C-p>" : "\<TAB>"
+  inoremap <expr><S-TAB>  pumvisible() ? "\<C-p>" : "\<TAB>"
 
   py import sys
   py import vim

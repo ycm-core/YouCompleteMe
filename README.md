@@ -229,7 +229,7 @@ TODO, still WIP
 - If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
-  through the completions. Use Ctrl+TAB to cycle backwards.
+  through the completions. Use Ctrl+TAB (or Shift-TAB) to cycle backwards.
 
 ### Semantic Completion Engine Usage
 
