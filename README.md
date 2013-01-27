@@ -117,7 +117,7 @@ code is platform agnostic, so if everything is configured correctly, YCM
 _should_ work on Windows without issues (but as of writing, it's untested on
 that platform).
 
-Please follow the instructions carefully:
+**Please follow the instructions carefully. Read EVERY WORD.**
 
 1.  **Ensure that your version of Vim is _at least_ 7.3.584 _and_ that it has
     support for python2 scripting**.
