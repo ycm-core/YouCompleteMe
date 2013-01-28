@@ -184,7 +184,7 @@ class ClangCompleter( Completer ):
 
   def DebugInfo( self ):
     filename = vim.current.buffer.name
-    flags = self.flags.FlagsForFile( filename )
+    flags = self.flags.FlagsForFile( filename ) or []
     return 'Flags for {0}:\n{1}'.format( filename, list( flags ) )
 
 
