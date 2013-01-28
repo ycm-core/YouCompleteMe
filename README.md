@@ -463,6 +463,11 @@ In Vim, run `:messages` and carefully read the output. YCM will echo messages to
 the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
+Also, you may want to run the `:YcmDebugInfo` command; it will make YCM spew out
+various debugging information, including the compile flags for the file if the
+file is a C-family language file and you have compiled in Clang support.
+
+
 Contact
 -------
 
