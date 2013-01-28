@@ -182,6 +182,12 @@ class ClangCompleter( Completer ):
     return ShouldUseClang( start_column )
 
 
+  def DebugInfo( self ):
+    filename = vim.current.buffer.name
+    flags = self.flags.FlagsForFile( filename )
+    return 'Flags for {0}:\n{1}'.format( filename, list(flags) )
+
+
 # TODO: make these functions module-local
 def CompletionDataToDict( completion_data ):
   # see :h complete-items for a description of the dictionary fields
