@@ -248,7 +248,9 @@ YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file
 or in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
 method in that module which should provide it with the information necessary to
-compile the current file.
+compile the current file. (You can also provide a path to a global
+`.ycm_extra_conf.py` file and override this searching behavior. See the Options
+section for more details.)
 
 This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
@@ -429,6 +431,20 @@ combinations to Vim.
 Default: `<C-Space>`
 
     let g:ycm_key_invoke_completion = '<C-Space>'
+
+### The `g:ycm_global_ycm_extra_conf` option
+
+Normally, YCM searches for a `.ycm_extra_conf.py` file for compilation flags
+(see the User Guide for more details on how this works). You can use this option
+to override this searching behavior by providing a full, absolute path to a
+global `.ycm_extra_conf.py` file (although you can call the global file whatever
+you want).
+
+You can place such a global file anywhere in your filesystem.
+
+Default: ``
+
+    let g:ycm_global_ycm_extra_conf = ''
 
 
 FAQ

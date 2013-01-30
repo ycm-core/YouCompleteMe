@@ -29,6 +29,8 @@ YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 NO_OPTIONS_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++.').format(
     YCM_EXTRA_CONF_FILENAME )
+GLOBAL_YCM_EXTRA_CONF_FILE = vimsupport.GetVariableValue(
+  "g:ycm_global_ycm_extra_conf" )
 
 class Flags( object ):
   def __init__( self ):
@@ -88,7 +90,12 @@ class Flags( object ):
 def _FlagsModuleSourceFileForFile( filename ):
   """For a given filename, finds its nearest YCM_EXTRA_CONF_FILENAME file that
   will compute the flags necessary to compile the file. Returns None if no
-  YCM_EXTRA_CONF_FILENAME file could be found."""
+  YCM_EXTRA_CONF_FILENAME file could be found. Uses the global ycm_extra_conf
+  file if one is set."""
+
+  if ( GLOBAL_YCM_EXTRA_CONF_FILE and
+       os.path.exists( GLOBAL_YCM_EXTRA_CONF_FILE ) ):
+    return GLOBAL_YCM_EXTRA_CONF_FILE
 
   parent_folder = os.path.dirname( filename )
   old_parent_folder = ''

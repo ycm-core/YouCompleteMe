@@ -85,6 +85,9 @@ let g:ycm_key_previous_completion =
 let g:ycm_key_invoke_completion =
       \ get( g:, 'ycm_key_invoke_completion', '<C-Space>' )
 
+let g:ycm_global_ycm_extra_conf =
+      \ get( g:, 'ycm_global_ycm_extra_conf', '' )
+
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim
