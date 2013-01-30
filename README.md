@@ -7,6 +7,7 @@ with every programing language and a semantic, [Clang][]-based engine that
 provides semantic code completion for C/C++/Objective-C/Objective-C++ (from now
 on referred to as "the C-family languages").
 
+![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
 Mac OS X super-quick installation
 ---------------------------------
