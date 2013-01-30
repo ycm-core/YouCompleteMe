@@ -124,6 +124,9 @@ class ClangCompleter( Completer ):
       return
 
     filename = vim.current.buffer.name
+    if self.completer.UpdatingTranslationUnit( filename ):
+      return
+
     flags = self.flags.FlagsForFile( filename )
     if not flags:
       self.parse_future = None

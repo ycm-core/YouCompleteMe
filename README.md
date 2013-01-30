@@ -264,10 +264,38 @@ project. That should be enough for 99% of projects.
 Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again, see the
 above linked example file.
 
-TODO: compile flags, include paths, ycm_extra_conf, CompilationDatabase
-support, how the search system works (subsequence match), extending the semantic
-engine for other langs, using ListToggle, when does YCM recompile the file, when
-does YCM update the diagnostics
+### Syntastic integration
+
+YCM has explicit support for [Syntastic][] (and vice-versa) if you compiled YCM
+with Clang support; this means that any diagnostics (errors or warnings) that
+Clang encounters while compiling your file will be fed back to Syntastic for
+display.
+
+YCM will recompile your file in the background `updatetime` (see `:h updatetime`
+in Vim) milliseconds after you stop typing (to be specific, on `CursorHold` and
+`CursorHoldI` Vim events). YCM will change your `updatetime` value to be `2000`
+milliseconds (there's an option to tell it not to do this if you wish).
+
+The new diagnostics (if any) will be fed back to Syntastic the next time you
+press any key on the keyboard. So if you stop typing and just wait for the new
+diagnostics to come in, that _will not work_. You need to press some key for the
+GUI to update.
+
+Having to press a key to get the updates is unfortunate, but cannot be changed
+due to the way Vim internals operate; there is no way that a background task can
+update Vim's GUI after it has finished running.  You _have to_ press a key. This
+will make YCM check for any pending diagnostics updates.
+
+You _can_ force a full, blocking compilation cycle with the
+`:YcmForceCompileAndDiagnostics` command (you may want to map that command to a
+key; try putting `nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>` in your
+vimrc). Calling this command will force YCM to immediately recompile your file
+and display any new diagnostics it encounters. Do note that recompilation with
+this command may take a while and during this time the Vim GUI _will_ be
+blocked.
+
+TODO: how the search system works (subsequence match), extending the semantic
+engine for other langs, using ListToggle
 
 Options
 -------
