@@ -19,7 +19,7 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( ycm_core )
 
-find_package( PythonLibs REQUIRED )
+find_package( PythonLibs 2 REQUIRED )
 
 option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
 option( PATH_TO_LLVM_ROOT "Path to the root of a LLVM+Clang binary distribution" )
