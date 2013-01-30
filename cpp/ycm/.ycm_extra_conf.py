@@ -73,12 +73,12 @@ def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
   make_next_absolute = False
   path_flags = [ '-isystem', '-I', '-iquote', '--sysroot=' ]
   for flag in flags:
-    to_append = flag
+    new_flag = flag
 
     if make_next_absolute:
       make_next_absolute = False
       if not flag.startswith( '/' ):
-        to_append = os.path.join( working_directory, flag )
+        new_flag = os.path.join( working_directory, flag )
 
     for path_flag in path_flags:
       if flag == path_flag:
@@ -87,11 +87,11 @@ def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
 
       if flag.startswith( path_flag ):
         path = flag[ len( path_flag ): ]
-        to_append = path_flag + os.path.join( working_directory, path )
+        new_flag = path_flag + os.path.join( working_directory, path )
         break
 
-    if to_append:
-      new_flags.append( to_append )
+    if new_flag:
+      new_flags.append( new_flag )
   return new_flags
 
 
