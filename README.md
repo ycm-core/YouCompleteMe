@@ -512,6 +512,11 @@ Also, you may want to run the `:YcmDebugInfo` command; it will make YCM spew out
 various debugging information, including the compile flags for the file if the
 file is a C-family language file and you have compiled in Clang support.
 
+### I cannot get the Syntastic integration to work
+
+Try to update your version of Syntastic. At the time of writing (Jan 2013), the
+YCM integration is very recent and it's likely that your version of Syntastic
+does not have it.
 
 Contact
 -------
