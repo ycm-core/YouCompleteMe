@@ -72,8 +72,8 @@ function! youcompleteme#Enable()
   " candidate that vim selects by default
   exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
 
-  " TODO: make this a nicer, customizable map
-  nnoremap <unique> <leader>d :call <sid>ShowDetailedDiagnostic()<cr>
+  exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+        \ ' :call <sid>ShowDetailedDiagnostic()<cr>'
 
   py import sys
   py import vim

@@ -350,7 +350,19 @@ and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI _will_ be
 blocked.
 
-TODO: extending the semantic engine for other langs, using ListToggle
+After the errors are displayed by Syntastic, it will display a short diagnostic
+message when you move your cursor to the line with the error. You can get a
+detailed diagnostic message with the `<leader>d` key mapping (can be changed in
+the options) YCM provides when your cursor is on the line with the diagnostic.
+
+You can also see the full diagnostic message for all the diagnostics in the
+current file in Vim's `locationlist`, which can be opened with the `:lopen` and
+`:lclose` commands. A good way to toggle the display of the `locationlist` with
+a single key mapping is provided by another (very small) Vim plugin called
+[ListToggle][] (which also makes it possible to change the height of the
+`locationlist` window), also written by yours truly.
+
+TODO: extending the semantic engine for other langs
 
 Options
 -------
@@ -510,10 +522,18 @@ default mapping will probably only work in GUI Vim (Gvim or MacVim) and not in
 plain console Vim because the terminal usually does not forward modifier key
 combinations to Vim.
 
-
 Default: `<C-Space>`
 
     let g:ycm_key_invoke_completion = '<C-Space>'
+
+### The `g:ycm_key_detailed_diagnostics` option
+
+This option controls the key mapping used to show the full diagnostic text when
+the user's cursor is on the line with the diagnostic.
+
+Default: `<leader>d`
+
+    let g:ycm_key_detailed_diagnostics = '<leader>d'
 
 ### The `g:ycm_global_ycm_extra_conf` option
 
@@ -603,3 +623,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [flags_example]: https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [subsequence]: http://en.wikipedia.org/wiki/Subsequence
+[listtoggle]: https://github.com/Valloric/ListToggle
