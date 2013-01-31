@@ -44,10 +44,11 @@ typing in insert mode, the semantic engine is triggered (it can also be
 triggered with a keyboard shortcut; see the rest of the docs).
 
 The last thing that you can see in the demo is YCM's integration with
-[Syntastic][] if you are editing a file with semantic engine support. As Clang
-compiles your file and detects warnings or errors, they will be piped to
-Syntastic for display. You don't need to save your file or press any keyboard
-shortcut to trigger this, it "just happens" in the background.
+[Syntastic][] (the little red X that shows up in the left gutter) if you are
+editing a file with semantic engine support. As Clang compiles your file and
+detects warnings or errors, they will be piped to Syntastic for display. You
+don't need to save your file or press any keyboard shortcut to trigger this, it
+"just happens" in the background.
 
 In essence, YCM obsoletes the following Vim plugins because it has all of their
 features plus extra:
