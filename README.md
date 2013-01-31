@@ -36,18 +36,18 @@ the menu (so you usually need to press TAB just once).
 **All of the above works with any programming language** because of the
 identifier-based completion engine. It collects all of the identifiers in the
 current file and other files you visit and searches them when you type
-(identifiers are put into per-filetype).
+(identifiers are put into per-filetype groups).
 
 The demo also shows the semantic engine in use. The current semantic engine
 supports only C-family languages. When the user presses `.`, `->` or `::` while
 typing in insert mode, the semantic engine is triggered (it can also be
-triggered with a key shortcut; see the rest of the docs).
+triggered with a keyboard shortcut; see the rest of the docs).
 
 The last thing that you can see in the demo is YCM's integration with
 [Syntastic][] if you are editing a file with semantic engine support. As Clang
-compiles your file and detects warnings or errors, they will piped to Syntastic
-for display. You don't need to save your file or press any keyboard shortcut to
-trigger this, it "just happens" in the background.
+compiles your file and detects warnings or errors, they will be piped to
+Syntastic for display. You don't need to save your file or press any keyboard
+shortcut to trigger this, it "just happens" in the background.
 
 In essence, YCM obsoletes the following Vim plugins because it has all of their
 features plus extra:
