@@ -9,6 +9,54 @@ on referred to as "the C-family languages").
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
+Here's an explanation of what happens in the short GIF demo above.
+
+First, realize that **no keyboard shortcuts had to be pressed** to get the list
+of completion candidates at any point in the demo. The user just types and the
+suggestions pop up by themselves. If the user doesn't find the completion
+suggestions relevant and/or just wants to type, he can do so; the completion
+engine will not interfere.
+
+When the user sees a useful completion string being offered, he presses the TAB
+key to accept it. This inserts the completion string. Repeated presses of the
+TAB key cycle through the offered completions.
+
+If the offered completions are not relevant enough, the user can continue typing
+to further filter out unwanted completions.
+
+A critical thing to notice is that the completion **filtering is NOT based on
+the input being a string prefix of the completion** (but that works too). The
+input needs to be a _[subsequence][] match_ of a completion. This is a fancy way
+of saying that any input characters need to be present in a completion string in
+the order in which they appear in the input. So `abc` is a subsequence of
+`xaybgc`, but not of `xbyxaxxc`. After the filter, a complicated sorting system
+ranks the completion strings so that the most relevant ones rise to the top of
+the menu (so you usually need to press TAB just once).
+
+**All of the above works with any programming language** because of the
+identifier-based completion engine. It collects all of the identifiers in the
+current file and other files you visit and searches them when you type
+(identifiers are put into per-filetype).
+
+The demo also shows the semantic engine in use. The current semantic engine
+supports only C-family languages. When the user presses `.`, `->` or `::` while
+typing in insert mode, the semantic engine is triggered (it can also be
+triggered with a key shortcut; see the rest of the docs).
+
+The last thing that you can see in the demo is YCM's integration with
+[Syntastic][] if you are editing a file with semantic engine support. As Clang
+compiles your file and detects warnings or errors, they will piped to Syntastic
+for display. You don't need to save your file or press any keyboard shortcut to
+trigger this, it "just happens" in the background.
+
+In essence, YCM obsoletes the following Vim plugins because it has all of their
+features plus extra:
+
+- clang_complete
+- AutoComplPop
+- Supertab
+- neocomplcache
+
 Mac OS X super-quick installation
 ---------------------------------
 
@@ -223,8 +271,6 @@ that are conservatively turned off by default that you may want to turn on.
 User Guide
 ----------
 
-TODO, still WIP
-
 ### General Usage
 
 - If the offered completions are too broad, keep typing characters; YCM will
@@ -234,6 +280,15 @@ TODO, still WIP
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
   Shift-TAB binding will not work because the console will not pass it to Vim.
   You can remap the keys; see the options section below.
+
+### Completion string ranking
+
+The subsequence filter removes any completions that do not match the input, but
+then the sorting system kicks in. It's actually very complicated and uses lots
+of factors, but suffice it to say that "word boundary" (WB) subsequence
+character matches are "worth" more than non-WB matches. In effect, this means
+given an input of "gua", the completion "getUserAccount" would be ranked higher
+in the list than the "Fooguxa" completion (both of which are subsequence matches). A word-boundary character are all capital characters, characters preceded by an underscore and the first letter character in the completion string.
 
 ### Semantic Completion Engine Usage
 
@@ -294,8 +349,7 @@ and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI _will_ be
 blocked.
 
-TODO: how the search system works (subsequence match), extending the semantic
-engine for other langs, using ListToggle
+TODO: extending the semantic engine for other langs, using ListToggle
 
 Options
 -------
@@ -547,3 +601,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [syntastic]: https://github.com/scrooloose/syntastic
 [flags_example]: https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
+[subsequence]: http://en.wikipedia.org/wiki/Subsequence
