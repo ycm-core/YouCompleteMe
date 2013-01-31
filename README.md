@@ -3,7 +3,7 @@ YouCompleteMe: a code-completion engine for Vim
 
 YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 [Vim][]. It has two completion engines: an identifier-based engine that works
-with every programing language and a semantic, [Clang][]-based engine that
+with every programming language and a semantic, [Clang][]-based engine that
 provides semantic code completion for C/C++/Objective-C/Objective-C++ (from now
 on referred to as "the C-family languages").
 
