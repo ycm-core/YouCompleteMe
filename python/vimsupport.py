@@ -67,8 +67,9 @@ def EscapeForVim( text ):
   return text.replace( "'", "''" )
 
 
-def CurrentFiletype():
-  return vim.eval( "&filetype" )
+def CurrentFiletypes():
+  ft_string = vim.eval( "&filetype" )
+  return ft_string.split( '.' )
 
 
 def GetVariableValue( variable ):

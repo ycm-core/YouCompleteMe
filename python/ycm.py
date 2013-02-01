@@ -51,7 +51,17 @@ class YouCompleteMe( object ):
 
 
   def GetFiletypeCompleterForCurrentFile( self ):
-    filetype = vimsupport.CurrentFiletype()
+    filetypes = vimsupport.CurrentFiletypes()
+
+    for filetype in filetypes:
+      completer = self.GetFiletypeCompleterForFiletype( filetype )
+      if completer:
+        return completer
+
+    return None
+
+
+  def GetFiletypeCompleterForFiletype( self, filetype ):
     try:
       return self.filetype_completers[ filetype ]
     except KeyError:
@@ -92,8 +102,11 @@ class YouCompleteMe( object ):
 
 
   def FiletypeCompletionEnabledForCurrentFile( self ):
-    return ( vimsupport.CurrentFiletype() not in
-                FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE and
+    filetypes = vimsupport.CurrentFiletypes()
+    filetype_disabled = all([ x in FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE
+                             for x in filetypes ])
+
+    return ( not filetype_disabled and
              self.FiletypeCompletionAvailableForFile() )
 
 
