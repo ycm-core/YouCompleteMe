@@ -289,7 +289,10 @@ then the sorting system kicks in. It's actually very complicated and uses lots
 of factors, but suffice it to say that "word boundary" (WB) subsequence
 character matches are "worth" more than non-WB matches. In effect, this means
 given an input of "gua", the completion "getUserAccount" would be ranked higher
-in the list than the "Fooguxa" completion (both of which are subsequence matches). A word-boundary character are all capital characters, characters preceded by an underscore and the first letter character in the completion string.
+in the list than the "Fooguxa" completion (both of which are subsequence
+matches). A word-boundary character are all capital characters, characters
+preceded by an underscore and the first letter character in the completion
+string.
 
 ### Semantic Completion Engine Usage
 
@@ -319,6 +322,17 @@ project. That should be enough for 99% of projects.
 
 Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again, see the
 above linked example file.
+
+If Clang encounters errors when compiling the header files that your file
+includes, then it's probably going to take a long time to get completions.  When
+the completion menu finally appears, it's going to have a large number of
+unrelated completion strings (type/function names that are not actually
+members). This is because Clang fails to build a precompiled preamble for your
+file if there are any errors in the included headers and that preamble is key to
+getting fast completions.
+
+Call the `:YcmDiags` command to see if any errors or warnings were detected in
+your file. Even better, use Syntastic.
 
 ### Syntastic integration
 
@@ -592,6 +606,14 @@ file is a C-family language file and you have compiled in Clang support.
 Try to update your version of Syntastic. At the time of writing (Jan 2013), the
 YCM integration is very recent and it's likely that your version of Syntastic
 does not have it.
+
+### Sometimes it takes much longer to get semantic completions than normal
+
+This means that libclang (which YCM uses for C-family semantic completion)
+failed to compile your file's preamble. In other words, there was an error
+compiling some of the source code you pulled in through your header files. I
+suggest calling the `:YcmDiags` command to see what they were (even better, have
+Syntastic installed and call `:lopen`).
 
 Contact
 -------

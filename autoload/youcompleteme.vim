@@ -424,7 +424,7 @@ endfunction
 command! YcmDebugInfo call s:DebugInfo()
 
 
-function! s:ForceCompileAndDiagnostics()
+function! s:ForceCompile()
   if !pyeval( 'ycm_state.FiletypeCompletionEnabledForCurrentFile()' )
     echom "Filetype completion not supported for current file, "
           \ . "cannot force recompilation."
@@ -440,12 +440,30 @@ function! s:ForceCompileAndDiagnostics()
     endif
     sleep 100m
   endwhile
+endfunction
 
+
+function! s:ForceCompileAndDiagnostics()
+  call s:ForceCompile()
   call s:UpdateDiagnosticNotifications()
   echom "Diagnostics refreshed."
 endfunction
 
 command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
+
+
+function! s:ShowDiagnostics()
+  call s:ForceCompile()
+  let diags = pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
+  if !empty( diags )
+    call setloclist( 0, diags )
+    lopen
+  else
+    echom "No warnings or errors detected"
+  endif
+endfunction
+
+command! YcmDiags call s:ShowDiagnostics()
 
 
 " This is basic vim plugin boilerplate
