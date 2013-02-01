@@ -75,9 +75,9 @@ class Flags( object ):
         flags_module = self.flags_module_for_flags_module_file[
           flags_module_file ]
       except KeyError:
-        sys.path.append( _DirectoryOfThisScript() )
+        sys.path.insert( 0, _DirectoryOfThisScript() )
         flags_module = imp.load_source( _RandomName(), flags_module_file )
-        del sys.path[ -1 ]
+        del sys.path[ 0 ]
 
         self.flags_module_for_flags_module_file[
           flags_module_file ] = flags_module
