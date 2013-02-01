@@ -58,6 +58,12 @@ function! youcompleteme#Enable()
     set ut=2000
   endif
 
+  " Needed so that YCM is used as the syntastic checker
+  let g:syntastic_cpp_checkers = ['ycm']
+  let g:syntastic_c_checkers = ['ycm']
+  let g:syntastic_objc_checkers = ['ycm']
+  let g:syntastic_objcpp_checkers = ['ycm']
+
   " With this command, when the completion window is visible, the tab key
   " (default) will select the next candidate in the window. In vim, this also
   " changes the typed-in text to that of the candidate completion.
