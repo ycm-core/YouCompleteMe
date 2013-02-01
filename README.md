@@ -119,7 +119,7 @@ source.
 
 Install YouCompleteMe with [Vundle][].
 
-Install CMake. `sudo apt-get instal cmake`
+Install CMake. `sudo apt-get install cmake`
 
 _If_ you care about semantic completion for C-family languages, type in the
 following commands in the console. If you don't, **skip this step**.
