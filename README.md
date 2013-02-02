@@ -381,6 +381,34 @@ a single key mapping is provided by another (very small) Vim plugin called
 
 TODO: extending the semantic engine for other langs
 
+Commands
+--------
+
+### The `YcmForceCompileAndDiagnostics` command
+
+Calling this command will force YCM to immediately recompile your file
+and display any new diagnostics it encounters. Do note that recompilation with
+this command may take a while and during this time the Vim GUI _will_ be
+blocked.
+
+You may want to map this command to a key; try putting `nnoremap <F5>
+:YcmForceCompileAndDiagnostics<CR>` in your vimrc.
+
+### The `YcmDiags` command
+
+Calling this command will fill Vim's `locationlist` with errors or warnings if
+any were detected in your file and then open it.
+
+A better option would be to use Syntastic which will keep your `locationlist`
+up to date automatically and will also show error/warning notifications in Vim's
+gutter.
+
+### The `YcmDebugInfo` command
+
+This will print out various debug information for the current file. Useful to
+see what compile commands will be used for the file if you're using the semantic
+completion engine.
+
 Options
 -------
 
