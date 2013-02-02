@@ -618,7 +618,7 @@ Syntastic installed and call `:lopen`).
 ### YCM auto-inserts completion strings I don't want!
 
 This means you probably have some mappings that interfere with YCM's internal
-ones. Make sure you don't have something mapped to <C-p>, <C-x> or <C-u> (in
+ones. Make sure you don't have something mapped to \<C-p\>, \<C-x\> or \<C-u\> (in
 insert mode).
 
 YCM _never_ selects something for you; it just shows you a menu and the user has
