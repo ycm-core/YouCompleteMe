@@ -628,6 +628,29 @@ YCM _never_ selects something for you; it just shows you a menu and the user has
 to explicitly select something. If something is being selected automatically,
 this means there's a bug or a misconfiguration somewhere.
 
+### Why isn't YCM just written in plain VimScript, FFS?
+
+Because of the identifier completion engine and subsequence-based filtering.
+Let's say you have _many_ dozens of files open in a single Vim instance (I often
+do); the identifier-based engine then needs to store thousands (if not tens of
+thousands) of identifiers in its internal data-structures. When the user types,
+YCM needs to perform subsequence-based filtering on _all_ of those identifiers
+(every single one!) in less than 10 milliseconds.
+
+I'm sorry, but that level of performance is just plain impossible to achieve
+with VimScript. I've tried, and the language is just too slow. No, you can't get
+acceptable performance even if you limit yourself to just the identifiers in the
+current file and simple prefix-based fitering.
+
+### Why does YCM demand such a recent version of Vim?
+
+During YCM's development several show-stopper bugs where encountered in Vim.
+Those needed to be fixed upstream (and were). A few months after those bugs were
+fixed, Vim trunk landed the `pyeval()` function which improved YCM performance
+even more since less time was spent serializing and deserializing data between
+Vim and the embedded Python interpreter. A few critical bugfixes for `pyeval()`
+landed in Vim 7.3.584 (and a few commits before that).
+
 Contact
 -------
 
