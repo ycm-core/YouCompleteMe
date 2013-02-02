@@ -114,8 +114,8 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
 Make sure you have Vim 7.3.584 with python2 support. At the time of writing, the
-version of Vim shipping with Ubuntu is too old. You may need to compile Vim from
-source.
+version of Vim shipping with Ubuntu is too old. You may need to [compile Vim
+from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
@@ -175,6 +175,9 @@ that platform).
     Inside Vim, type `:version`. Look at the first two to three lines of output;
     it should say `Vi IMproved 7.3` and then below that, `Included patches:
     1-X`, where X will be some number. That number needs to be 584 or higher.
+
+    If your version of Vim is not recent enough, you may need to [compile Vim
+    from source][vim-build] (don't worry, it's easy).
 
     After you have made sure that you have Vim 7.3.584+, type the following in
     Vim: `:has('python')`. The output should be 1. If it's 0, then get a version
@@ -656,3 +659,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [subsequence]: http://en.wikipedia.org/wiki/Subsequence
 [listtoggle]: https://github.com/Valloric/ListToggle
+[vim-build]: https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
