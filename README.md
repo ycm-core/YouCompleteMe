@@ -711,3 +711,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [subsequence]: http://en.wikipedia.org/wiki/Subsequence
 [listtoggle]: https://github.com/Valloric/ListToggle
 [vim-build]: https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+[tracker]: https://github.com/Valloric/YouCompleteMe/issues?state=open
