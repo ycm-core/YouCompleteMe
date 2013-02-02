@@ -22,6 +22,12 @@ project( ycm_core )
 set( Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 )
 find_package( PythonLibs 2 REQUIRED )
 
+if ( NOT PYTHONLIBS_VERSION_STRING VERSION_LESS "3.0.0" )
+  message( FATAL_ERROR
+    "CMake found python3 libs instead of python2 libs. YCM works only with "
+    "python2.\n" )
+endif()
+
 option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
 option( PATH_TO_LLVM_ROOT "Path to the root of a LLVM+Clang binary distribution" )
 option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
