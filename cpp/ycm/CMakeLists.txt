@@ -19,6 +19,7 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( ycm_core )
 
+set( Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 )
 find_package( PythonLibs 2 REQUIRED )
 
 option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
