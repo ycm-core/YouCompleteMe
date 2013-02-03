@@ -668,6 +668,13 @@ Look in the options section and see if which of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 
+### I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults
+
+Something (I don't know what) is wrong with the way that Homebrew configures and
+builds Vim. I recommend using [MacVim][]. Even if you don't like the MacVim GUI,
+you can use the Vim binary that is inside the MacVim.app package (it's
+`MacVim.app/Contents/MacOS/Vim`) and get the Vim console experience.
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
