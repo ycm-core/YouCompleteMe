@@ -73,7 +73,7 @@ struct PointeeOf<T*> { typedef T type; };  // NOLINT
 // smart pointer, or returns p itself when p is already a raw pointer.
 // The following default implementation is for the smart pointer case.
 template <typename Pointer>
-inline typename Pointer::element_type* GetRawPointer(const Pointer& p) {
+inline const typename Pointer::element_type* GetRawPointer(const Pointer& p) {
   return p.get();
 }
 // This overloaded version is for the raw pointer case.
@@ -260,7 +260,7 @@ class FailureReporterInterface {
  public:
   // The type of a failure (either non-fatal or fatal).
   enum FailureType {
-    NONFATAL, FATAL
+    kNonfatal, kFatal
   };
 
   virtual ~FailureReporterInterface() {}
@@ -281,7 +281,7 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter();
 inline void Assert(bool condition, const char* file, int line,
                    const string& msg) {
   if (!condition) {
-    GetFailureReporter()->ReportFailure(FailureReporterInterface::FATAL,
+    GetFailureReporter()->ReportFailure(FailureReporterInterface::kFatal,
                                         file, line, msg);
   }
 }
@@ -294,7 +294,7 @@ inline void Assert(bool condition, const char* file, int line) {
 inline void Expect(bool condition, const char* file, int line,
                    const string& msg) {
   if (!condition) {
-    GetFailureReporter()->ReportFailure(FailureReporterInterface::NONFATAL,
+    GetFailureReporter()->ReportFailure(FailureReporterInterface::kNonfatal,
                                         file, line, msg);
   }
 }
@@ -304,8 +304,8 @@ inline void Expect(bool condition, const char* file, int line) {
 
 // Severity level of a log.
 enum LogSeverity {
-  INFO = 0,
-  WARNING = 1
+  kInfo = 0,
+  kWarning = 1
 };
 
 // Valid values for the --gmock_verbose flag.
@@ -347,6 +347,19 @@ template <typename T> struct type_equals<T, T> : public true_type {};
 // remove_reference<T>::type removes the reference from type T, if any.
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT
 template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
+
+// DecayArray<T>::type turns an array type U[N] to const U* and preserves
+// other types.  Useful for saving a copy of a function argument.
+template <typename T> struct DecayArray { typedef T type; };  // NOLINT
+template <typename T, size_t N> struct DecayArray<T[N]> {
+  typedef const T* type;
+};
+// Sometimes people use arrays whose size is not available at the use site
+// (e.g. extern const char kNamePrefix[]).  This specialization covers that
+// case.
+template <typename T> struct DecayArray<T[]> {
+  typedef const T* type;
+};
 
 // Invalid<T>() returns an invalid value of type T.  This is useful
 // when a value of type T is needed for compilation, but the statement

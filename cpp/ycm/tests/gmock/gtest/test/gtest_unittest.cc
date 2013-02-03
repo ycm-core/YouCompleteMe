@@ -33,8 +33,6 @@
 // Google Test work.
 
 #include "gtest/gtest.h"
-#include <vector>
-#include <ostream>
 
 // Verifies that the command line flag variables can be accessed
 // in code once <gtest/gtest.h> has been #included.
@@ -58,6 +56,15 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
+#include <limits.h>  // For INT_MAX.
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include <map>
+#include <vector>
+#include <ostream>
+
 #include "gtest/gtest-spi.h"
 
 // Indicates that this translation unit is part of Google Test's
@@ -68,13 +75,6 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
-
-#include <limits.h>  // For INT_MAX.
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#include <map>
 
 namespace testing {
 namespace internal {
@@ -1141,7 +1141,7 @@ TEST(StringTest, Equals) {
   EXPECT_TRUE(foo == "foo");  // NOLINT
 
   const String bar("x\0y", 3);
-  EXPECT_FALSE(bar == "x");
+  EXPECT_NE(bar, "x");
 }
 
 // Tests String::operator!=().
@@ -1163,7 +1163,7 @@ TEST(StringTest, NotEquals) {
   EXPECT_FALSE(foo != "foo");  // NOLINT
 
   const String bar("x\0y", 3);
-  EXPECT_TRUE(bar != "x");
+  EXPECT_NE(bar, "x");
 }
 
 // Tests String::length().
@@ -1902,6 +1902,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(stream_result_to) = "localhost:1234";
     GTEST_FLAG(throw_on_failure) = true;
   }
+
  private:
   // For saving Google Test flags during this test case.
   static GTestFlagSaver* saver_;
@@ -2641,6 +2642,11 @@ TEST(StringAssertionTest, STREQ_Wide) {
   // Strings containing wide characters.
   EXPECT_NONFATAL_FAILURE(EXPECT_STREQ(L"abc\x8119", L"abc\x8120"),
                           "abc");
+
+  // The streaming variation.
+  EXPECT_NONFATAL_FAILURE({  // NOLINT
+    EXPECT_STREQ(L"abc\x8119", L"abc\x8121") << "Expected failure";
+  }, "Expected failure");
 }
 
 // Tests *_STRNE on wide strings.
@@ -2667,6 +2673,9 @@ TEST(StringAssertionTest, STRNE_Wide) {
   // Strings containing wide characters.
   EXPECT_NONFATAL_FAILURE(EXPECT_STRNE(L"abc\x8119", L"abc\x8119"),
                           "abc");
+
+  // The streaming variation.
+  ASSERT_STRNE(L"abc\x8119", L"abc\x8120") << "This shouldn't happen";
 }
 
 // Tests for ::testing::IsSubstring().
@@ -2797,7 +2806,6 @@ TEST(IsNotSubstringTest, ReturnsCorrectResultForStdWstring) {
 template <typename RawType>
 class FloatingPointTest : public Test {
  protected:
-
   // Pre-calculated numbers to be used by the tests.
   struct TestValues {
     RawType close_to_positive_zero;
@@ -4263,8 +4271,109 @@ TEST(SuccessfulAssertionTest, ASSERT_STR) {
 
 namespace {
 
+// Tests the message streaming variation of assertions.
+
+TEST(AssertionWithMessageTest, EXPECT) {
+  EXPECT_EQ(1, 1) << "This should succeed.";
+  EXPECT_NONFATAL_FAILURE(EXPECT_NE(1, 1) << "Expected failure #1.",
+                          "Expected failure #1");
+  EXPECT_LE(1, 2) << "This should succeed.";
+  EXPECT_NONFATAL_FAILURE(EXPECT_LT(1, 0) << "Expected failure #2.",
+                          "Expected failure #2.");
+  EXPECT_GE(1, 0) << "This should succeed.";
+  EXPECT_NONFATAL_FAILURE(EXPECT_GT(1, 2) << "Expected failure #3.",
+                          "Expected failure #3.");
+
+  EXPECT_STREQ("1", "1") << "This should succeed.";
+  EXPECT_NONFATAL_FAILURE(EXPECT_STRNE("1", "1") << "Expected failure #4.",
+                          "Expected failure #4.");
+  EXPECT_STRCASEEQ("a", "A") << "This should succeed.";
+  EXPECT_NONFATAL_FAILURE(EXPECT_STRCASENE("a", "A") << "Expected failure #5.",
+                          "Expected failure #5.");
+
+  EXPECT_FLOAT_EQ(1, 1) << "This should succeed.";
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1, 1.2) << "Expected failure #6.",
+                          "Expected failure #6.");
+  EXPECT_NEAR(1, 1.1, 0.2) << "This should succeed.";
+}
+
+TEST(AssertionWithMessageTest, ASSERT) {
+  ASSERT_EQ(1, 1) << "This should succeed.";
+  ASSERT_NE(1, 2) << "This should succeed.";
+  ASSERT_LE(1, 2) << "This should succeed.";
+  ASSERT_LT(1, 2) << "This should succeed.";
+  ASSERT_GE(1, 0) << "This should succeed.";
+  EXPECT_FATAL_FAILURE(ASSERT_GT(1, 2) << "Expected failure.",
+                       "Expected failure.");
+}
+
+TEST(AssertionWithMessageTest, ASSERT_STR) {
+  ASSERT_STREQ("1", "1") << "This should succeed.";
+  ASSERT_STRNE("1", "2") << "This should succeed.";
+  ASSERT_STRCASEEQ("a", "A") << "This should succeed.";
+  EXPECT_FATAL_FAILURE(ASSERT_STRCASENE("a", "A") << "Expected failure.",
+                       "Expected failure.");
+}
+
+TEST(AssertionWithMessageTest, ASSERT_FLOATING) {
+  ASSERT_FLOAT_EQ(1, 1) << "This should succeed.";
+  ASSERT_DOUBLE_EQ(1, 1) << "This should succeed.";
+  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1,1.2, 0.1) << "Expect failure.",  // NOLINT
+                       "Expect failure.");
+  // To work around a bug in gcc 2.95.0, there is intentionally no
+  // space after the first comma in the previous statement.
+}
+
+// Tests using ASSERT_FALSE with a streamed message.
+TEST(AssertionWithMessageTest, ASSERT_FALSE) {
+  ASSERT_FALSE(false) << "This shouldn't fail.";
+  EXPECT_FATAL_FAILURE({  // NOLINT
+    ASSERT_FALSE(true) << "Expected failure: " << 2 << " > " << 1
+                       << " evaluates to " << true;
+  }, "Expected failure");
+}
+
+// Tests using FAIL with a streamed message.
+TEST(AssertionWithMessageTest, FAIL) {
+  EXPECT_FATAL_FAILURE(FAIL() << 0,
+                       "0");
+}
+
+// Tests using SUCCEED with a streamed message.
+TEST(AssertionWithMessageTest, SUCCEED) {
+  SUCCEED() << "Success == " << 1;
+}
+
+// Tests using ASSERT_TRUE with a streamed message.
+TEST(AssertionWithMessageTest, ASSERT_TRUE) {
+  ASSERT_TRUE(true) << "This should succeed.";
+  ASSERT_TRUE(true) << true;
+  EXPECT_FATAL_FAILURE({  // NOLINT
+    ASSERT_TRUE(false) << static_cast<const char *>(NULL)
+                       << static_cast<char *>(NULL);
+  }, "(null)(null)");
+}
+
+#if GTEST_OS_WINDOWS
+// Tests using wide strings in assertion messages.
+TEST(AssertionWithMessageTest, WideStringMessage) {
+  EXPECT_NONFATAL_FAILURE({  // NOLINT
+    EXPECT_TRUE(false) << L"This failure is expected.\x8119";
+  }, "This failure is expected.");
+  EXPECT_FATAL_FAILURE({  // NOLINT
+    ASSERT_EQ(1, 2) << "This failure is "
+                    << L"expected too.\x8120";
+  }, "This failure is expected too.");
+}
+#endif  // GTEST_OS_WINDOWS
+
 // Tests EXPECT_TRUE.
 TEST(ExpectTest, EXPECT_TRUE) {
+  EXPECT_TRUE(true) << "Intentional success";
+  EXPECT_NONFATAL_FAILURE(EXPECT_TRUE(false) << "Intentional failure #1.",
+                          "Intentional failure #1.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_TRUE(false) << "Intentional failure #2.",
+                          "Intentional failure #2.");
   EXPECT_TRUE(2 > 1);  // NOLINT
   EXPECT_NONFATAL_FAILURE(EXPECT_TRUE(2 < 1),
                           "Value of: 2 < 1\n"
@@ -4288,9 +4397,14 @@ TEST(ExpectTest, ExpectTrueWithAssertionResult) {
                           "Expected: true");
 }
 
-// Tests EXPECT_FALSE.
+// Tests EXPECT_FALSE with a streamed message.
 TEST(ExpectTest, EXPECT_FALSE) {
   EXPECT_FALSE(2 < 1);  // NOLINT
+  EXPECT_FALSE(false) << "Intentional success";
+  EXPECT_NONFATAL_FAILURE(EXPECT_FALSE(true) << "Intentional failure #1.",
+                          "Intentional failure #1.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_FALSE(true) << "Intentional failure #2.",
+                          "Intentional failure #2.");
   EXPECT_NONFATAL_FAILURE(EXPECT_FALSE(2 > 1),
                           "Value of: 2 > 1\n"
                           "  Actual: true\n"
@@ -4564,7 +4678,7 @@ TEST(StreamableTest, BasicIoManip) {
 
 void AddFailureHelper(bool* aborted) {
   *aborted = true;
-  ADD_FAILURE() << "Failure";
+  ADD_FAILURE() << "Intentional failure.";
   *aborted = false;
 }
 
@@ -4572,7 +4686,7 @@ void AddFailureHelper(bool* aborted) {
 TEST(MacroTest, ADD_FAILURE) {
   bool aborted = true;
   EXPECT_NONFATAL_FAILURE(AddFailureHelper(&aborted),
-                          "Failure");
+                          "Intentional failure.");
   EXPECT_FALSE(aborted);
 }
 
@@ -4604,7 +4718,6 @@ TEST(MacroTest, SUCCEED) {
   SUCCEED();
   SUCCEED() << "Explicit success.";
 }
-
 
 // Tests for EXPECT_EQ() and ASSERT_EQ().
 //
@@ -7278,6 +7391,7 @@ TEST(ArrayEqTest, WorksForDegeneratedArrays) {
 }
 
 TEST(ArrayEqTest, WorksForOneDimensionalArrays) {
+  // Note that a and b are distinct but compatible types.
   const int a[] = { 0, 1 };
   long b[] = { 0, 1 };
   EXPECT_TRUE(ArrayEq(a, b));

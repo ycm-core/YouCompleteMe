@@ -3271,16 +3271,17 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
   for (int i = 0; i < result.total_part_count(); ++i) {
     const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
-      if (++failures == 1)
+      if (++failures == 1) {
         *stream << ">\n";
-      *stream << "      <failure message=\""
-              << EscapeXmlAttribute(part.summary()).c_str()
-              << "\" type=\"\">";
+      }
       const string location = internal::FormatCompilerIndependentFileLocation(
           part.file_name(), part.line_number());
-      const string message = location + "\n" + part.message();
-      OutputXmlCDataSection(stream,
-                            RemoveInvalidXmlCharacters(message).c_str());
+      const string summary = location + "\n" + part.summary();
+      *stream << "      <failure message=\""
+              << EscapeXmlAttribute(summary.c_str())
+              << "\" type=\"\">";
+      const string detail = location + "\n" + part.message();
+      OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</failure>\n";
     }
   }
@@ -3529,7 +3530,7 @@ void StreamingListener::MakeConnection() {
 // Pushes the given source file location and message onto a per-thread
 // trace stack maintained by Google Test.
 ScopedTrace::ScopedTrace(const char* file, int line, const Message& message)
-    GTEST_LOCK_EXCLUDED_(UnitTest::mutex_) {
+    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
   TraceInfo trace;
   trace.file = file;
   trace.line = line;
@@ -3540,7 +3541,7 @@ ScopedTrace::ScopedTrace(const char* file, int line, const Message& message)
 
 // Pops the info pushed by the c'tor.
 ScopedTrace::~ScopedTrace()
-    GTEST_LOCK_EXCLUDED_(UnitTest::mutex_) {
+    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
   UnitTest::GetInstance()->PopGTestTrace();
 }
 
@@ -3864,7 +3865,6 @@ int UnitTest::Run() {
   // process. In either case the user does not want to see pop-up dialogs
   // about crashes - they are expected.
   if (impl()->catch_exceptions() || in_death_test_child_process) {
-
 # if !GTEST_OS_WINDOWS_MOBILE
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
@@ -3895,7 +3895,6 @@ int UnitTest::Run() {
           0x0,                                    // Clear the following flags:
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
 # endif
-
   }
 #endif  // GTEST_HAS_SEH
 

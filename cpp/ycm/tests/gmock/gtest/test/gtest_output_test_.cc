@@ -221,13 +221,13 @@ TEST(SCOPED_TRACETest, CanBeRepeated) {
 
   {
     SCOPED_TRACE("C");
-    ADD_FAILURE() << "This failure is expected, and should contain "
-                  << "trace point A, B, and C.";
+    ADD_FAILURE() << "This failure is expected, and should "
+                  << "contain trace point A, B, and C.";
   }
 
   SCOPED_TRACE("D");
-  ADD_FAILURE() << "This failure is expected, and should contain "
-                << "trace point A, B, and D.";
+  ADD_FAILURE() << "This failure is expected, and should "
+                << "contain trace point A, B, and D.";
 }
 
 #if GTEST_IS_THREADSAFE
@@ -378,6 +378,7 @@ class FatalFailureInFixtureConstructorTest : public testing::Test {
                   << "We should never get here, as the test fixture c'tor "
                   << "had a fatal failure.";
   }
+
  private:
   void Init() {
     FAIL() << "Expected failure #1, in the test fixture c'tor.";

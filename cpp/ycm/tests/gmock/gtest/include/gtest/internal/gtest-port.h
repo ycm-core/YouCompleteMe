@@ -396,6 +396,13 @@
 #   define GTEST_HAS_RTTI 0
 #  endif  // __GXX_RTTI
 
+// Clang defines __GXX_RTTI starting with version 3.0, but its manual recommends
+// using has_feature instead. has_feature(cxx_rtti) is supported since 2.7, the
+// first version with C++ support.
+# elif defined(__clang__)
+
+#  define GTEST_HAS_RTTI __has_feature(cxx_rtti)
+
 // Starting with version 9.0 IBM Visual Age defines __RTTI_ALL__ to 1 if
 // both the typeid and dynamic_cast features are present.
 # elif defined(__IBMCPP__) && (__IBMCPP__ >= 900)
@@ -832,6 +839,7 @@ class scoped_ptr {
       ptr_ = p;
     }
   }
+
  private:
   T* ptr_;
 
@@ -1121,22 +1129,37 @@ inline void SleepMilliseconds(int n) {
 // use it in user tests, either directly or indirectly.
 class Notification {
  public:
-  Notification() : notified_(false) {}
+  Notification() : notified_(false) {
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
+  }
+  ~Notification() {
+    pthread_mutex_destroy(&mutex_);
+  }
 
   // Notifies all threads created with this notification to start. Must
   // be called from the controller thread.
-  void Notify() { notified_ = true; }
+  void Notify() {
+    pthread_mutex_lock(&mutex_);
+    notified_ = true;
+    pthread_mutex_unlock(&mutex_);
+  }
 
   // Blocks until the controller thread notifies. Must be called from a test
   // thread.
   void WaitForNotification() {
-    while(!notified_) {
+    for (;;) {
+      pthread_mutex_lock(&mutex_);
+      const bool notified = notified_;
+      pthread_mutex_unlock(&mutex_);
+      if (notified)
+        break;
       SleepMilliseconds(10);
     }
   }
 
  private:
-  volatile bool notified_;
+  pthread_mutex_t mutex_;
+  bool notified_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
 };
@@ -1244,21 +1267,23 @@ class MutexBase {
   void Lock() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
     owner_ = pthread_self();
+    has_owner_ = true;
   }
 
   // Releases this mutex.
   void Unlock() {
-    // We don't protect writing to owner_ here, as it's the caller's
-    // responsibility to ensure that the current thread holds the
+    // Since the lock is being released the owner_ field should no longer be
+    // considered valid. We don't protect writing to has_owner_ here, as it's
+    // the caller's responsibility to ensure that the current thread holds the
     // mutex when this is called.
-    owner_ = 0;
+    has_owner_ = false;
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
   }
 
   // Does nothing if the current thread holds the mutex. Otherwise, crashes
   // with high probability.
   void AssertHeld() const {
-    GTEST_CHECK_(owner_ == pthread_self())
+    GTEST_CHECK_(has_owner_ && pthread_equal(owner_, pthread_self()))
         << "The current thread is not holding the mutex @" << this;
   }
 
@@ -1269,7 +1294,14 @@ class MutexBase {
   // have to be public.
  public:
   pthread_mutex_t mutex_;  // The underlying pthread mutex.
-  pthread_t owner_;  // The thread holding the mutex; 0 means no one holds it.
+  // has_owner_ indicates whether the owner_ field below contains a valid thread
+  // ID and is therefore safe to inspect (e.g., to use in pthread_equal()). All
+  // accesses to the owner_ field should be protected by a check of this field.
+  // An alternative might be to memset() owner_ to all zeros, but there's no
+  // guarantee that a zero'd pthread_t is necessarily invalid or even different
+  // from pthread_self().
+  bool has_owner_;
+  pthread_t owner_;  // The thread holding the mutex.
 };
 
 // Forward-declares a static mutex.
@@ -1277,8 +1309,13 @@ class MutexBase {
     extern ::testing::internal::MutexBase mutex
 
 // Defines and statically (i.e. at link time) initializes a static mutex.
+// The initialization list here does not explicitly initialize each field,
+// instead relying on default initialization for the unspecified fields. In
+// particular, the owner_ field (a pthread_t) is not explicitly initialized.
+// This allows initialization to work whether pthread_t is a scalar or struct.
+// The flag -Wmissing-field-initializers must not be specified for this to work.
 # define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-    ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, 0 }
+    ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false }
 
 // The Mutex class can only be used for mutexes created at runtime. It
 // shares its API with MutexBase otherwise.
@@ -1286,7 +1323,7 @@ class Mutex : public MutexBase {
  public:
   Mutex() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
-    owner_ = 0;
+    has_owner_ = false;
   }
   ~Mutex() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
@@ -1774,7 +1811,6 @@ class TypeWithSize<4> {
 template <>
 class TypeWithSize<8> {
  public:
-
 #if GTEST_OS_WINDOWS
   typedef __int64 Int;
   typedef unsigned __int64 UInt;

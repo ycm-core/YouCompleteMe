@@ -196,6 +196,7 @@ class GTestFlagSaver {
     GTEST_FLAG(stream_result_to) = stream_result_to_;
     GTEST_FLAG(throw_on_failure) = throw_on_failure_;
   }
+
  private:
   // Fields for saving the original values of flags.
   bool also_run_disabled_tests_;
@@ -442,8 +443,7 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   virtual String CurrentStackTrace(int max_depth, int skip_count)
       GTEST_LOCK_EXCLUDED_(mutex_);
 
-  virtual void UponLeavingGTest();
-      GTEST_LOCK_EXCLUDED_(mutex_);
+  virtual void UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_);
 
   // This string is inserted in place of stack frames that are part of
   // Google Test's implementation.
@@ -620,7 +620,7 @@ class GTEST_API_ UnitTestImpl {
   // For example, if Foo() calls Bar(), which in turn calls
   // CurrentOsStackTraceExceptTop(1), Foo() will be included in the
   // trace but Bar() and CurrentOsStackTraceExceptTop() won't.
-  String CurrentOsStackTraceExceptTop(int skip_count);
+  String CurrentOsStackTraceExceptTop(int skip_count) GTEST_NO_INLINE_;
 
   // Finds and returns a TestCase with the given name.  If one doesn't
   // exist, creates one and returns it.

@@ -18,10 +18,11 @@
 project( ycm_core_tests )
 cmake_minimum_required( VERSION 2.8 )
 
-# The gtest library triggers these silly warnings, so we turn them off
+# The gtest library triggers these warnings, so we turn them off; it's not up to
+# us to fix gtest warnings, it's up to upstream.
 if ( COMPILER_IS_CLANG )
   set( CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -Wno-long-long -Wno-variadic-macros" )
+    "${CMAKE_CXX_FLAGS} -Wno-long-long -Wno-variadic-macros -Wno-missing-field-initializers -Wno-unused-private-field" )
 endif()
 
 add_subdirectory( gmock )
@@ -32,8 +33,8 @@ include_directories(
 
 include_directories(
   SYSTEM
-  ${gtest_ycm_SOURCE_DIR}
-  ${gtest_ycm_SOURCE_DIR}/include
+  ${gtest_SOURCE_DIR}
+  ${gtest_SOURCE_DIR}/include
   ${gmock_SOURCE_DIR}
   ${gmock_SOURCE_DIR}/include
   )

@@ -75,6 +75,7 @@ using testing::internal::DeathTestFactory;
 using testing::internal::FilePath;
 using testing::internal::GetLastErrnoDescription;
 using testing::internal::GetUnitTestImpl;
+using testing::internal::InDeathTestChild;
 using testing::internal::ParseNaturalNumber;
 using testing::internal::String;
 
@@ -617,8 +618,8 @@ TEST_F(TestForDeathTest, ReturnIsFailure) {
                        "illegal return in test statement.");
 }
 
-// Tests that EXPECT_DEBUG_DEATH works as expected,
-// that is, in debug mode, it:
+// Tests that EXPECT_DEBUG_DEATH works as expected, that is, you can stream a
+// message to it, and in debug mode it:
 // 1. Asserts on death.
 // 2. Has no side effect.
 //
@@ -627,8 +628,8 @@ TEST_F(TestForDeathTest, ReturnIsFailure) {
 TEST_F(TestForDeathTest, TestExpectDebugDeath) {
   int sideeffect = 0;
 
-  EXPECT_DEBUG_DEATH(DieInDebugElse12(&sideeffect),
-                     "death.*DieInDebugElse12");
+  EXPECT_DEBUG_DEATH(DieInDebugElse12(&sideeffect), "death.*DieInDebugElse12")
+      << "Must accept a streamed message";
 
 # ifdef NDEBUG
 
@@ -643,22 +644,18 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 # endif
 }
 
-// Tests that ASSERT_DEBUG_DEATH works as expected
-// In debug mode:
-// 1. Asserts on debug death.
+// Tests that ASSERT_DEBUG_DEATH works as expected, that is, you can stream a
+// message to it, and in debug mode it:
+// 1. Asserts on death.
 // 2. Has no side effect.
 //
-// In opt mode:
-// 1. Has side effects and returns the expected value (12).
+// And in opt mode, it:
+// 1.  Has side effects but does not assert.
 TEST_F(TestForDeathTest, TestAssertDebugDeath) {
   int sideeffect = 0;
 
-  ASSERT_DEBUG_DEATH({  // NOLINT
-    // Tests that the return value is 12 in opt mode.
-    EXPECT_EQ(12, DieInDebugElse12(&sideeffect));
-    // Tests that the side effect occurred in opt mode.
-    EXPECT_EQ(12, sideeffect);
-  }, "death.*DieInDebugElse12");
+  ASSERT_DEBUG_DEATH(DieInDebugElse12(&sideeffect), "death.*DieInDebugElse12")
+      << "Must accept a streamed message";
 
 # ifdef NDEBUG
 
@@ -729,7 +726,7 @@ static void TestExitMacros() {
   // Of all signals effects on the process exit code, only those of SIGABRT
   // are documented on Windows.
   // See http://msdn.microsoft.com/en-us/library/dwwzkt4c(VS.71).aspx.
-  EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "");
+  EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "") << "b_ar";
 
 # else
 
@@ -738,14 +735,14 @@ static void TestExitMacros() {
 
   EXPECT_FATAL_FAILURE({  // NOLINT
     ASSERT_EXIT(_exit(0), testing::KilledBySignal(SIGSEGV), "")
-        << "This failure is expected, too.";
+      << "This failure is expected, too.";
   }, "This failure is expected, too.");
 
 # endif  // GTEST_OS_WINDOWS
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_EXIT(raise(SIGSEGV), testing::ExitedWithCode(0), "")
-        << "This failure is expected.";
+      << "This failure is expected.";
   }, "This failure is expected.");
 }
 
@@ -895,6 +892,7 @@ class MockDeathTest : public DeathTest {
   virtual void Abort(AbortReason reason) {
     parent_->abort_args_.push_back(reason);
   }
+
  private:
   MockDeathTestFactory* const parent_;
   const TestRole role_;
@@ -1343,6 +1341,26 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif  // _MSC_VER
+}
+
+TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInFastStyle) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_FALSE(InDeathTestChild());
+  EXPECT_DEATH({
+    fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
+    fflush(stderr);
+    _exit(1);
+  }, "Inside");
+}
+
+TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
+  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  EXPECT_FALSE(InDeathTestChild());
+  EXPECT_DEATH({
+    fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
+    fflush(stderr);
+    _exit(1);
+  }, "Inside");
 }
 
 // Tests that a test case whose name ends with "DeathTest" works fine

@@ -39,7 +39,7 @@ endif()
 # as ${gtest_SOURCE_DIR} and to the root binary directory as
 # ${gtest_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
-project(gtest_ycm CXX C)
+project(gtest CXX C)
 cmake_minimum_required(VERSION 2.6.2)
 
 if (COMMAND set_up_hermetic_build)
@@ -53,11 +53,11 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Where Google Test's .h files can be found.
 include_directories(
-  ${gtest_ycm_SOURCE_DIR}/include
-  ${gtest_ycm_SOURCE_DIR})
+  ${gtest_SOURCE_DIR}/include
+  ${gtest_SOURCE_DIR})
 
 # Where Google Test's libraries can be found.
-link_directories(${gtest_ycm_BINARY_DIR}/src)
+link_directories(${gtest_BINARY_DIR}/src)
 
 ########################################################################
 #
@@ -67,9 +67,9 @@ link_directories(${gtest_ycm_BINARY_DIR}/src)
 # Google Test libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
-cxx_library(gtest_ycm "${cxx_strict}" src/gtest-all.cc)
-cxx_library(gtest_ycm_main "${cxx_strict}" src/gtest_main.cc)
-target_link_libraries(gtest_ycm_main gtest_ycm)
+cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
+cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
+target_link_libraries(gtest_main gtest)
 
 ########################################################################
 #
@@ -80,16 +80,16 @@ target_link_libraries(gtest_ycm_main gtest_ycm)
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
 
 if (gtest_build_samples)
-  cxx_executable(sample1_unittest samples gtest_ycm_main samples/sample1.cc)
-  cxx_executable(sample2_unittest samples gtest_ycm_main samples/sample2.cc)
-  cxx_executable(sample3_unittest samples gtest_ycm_main)
-  cxx_executable(sample4_unittest samples gtest_ycm_main samples/sample4.cc)
-  cxx_executable(sample5_unittest samples gtest_ycm_main samples/sample1.cc)
-  cxx_executable(sample6_unittest samples gtest_ycm_main)
-  cxx_executable(sample7_unittest samples gtest_ycm_main)
-  cxx_executable(sample8_unittest samples gtest_ycm_main)
-  cxx_executable(sample9_unittest samples gtest_ycm)
-  cxx_executable(sample10_unittest samples gtest_ycm)
+  cxx_executable(sample1_unittest samples gtest_main samples/sample1.cc)
+  cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)
+  cxx_executable(sample3_unittest samples gtest_main)
+  cxx_executable(sample4_unittest samples gtest_main samples/sample4.cc)
+  cxx_executable(sample5_unittest samples gtest_main samples/sample1.cc)
+  cxx_executable(sample6_unittest samples gtest_main)
+  cxx_executable(sample7_unittest samples gtest_main)
+  cxx_executable(sample8_unittest samples gtest_main)
+  cxx_executable(sample9_unittest samples gtest)
+  cxx_executable(sample10_unittest samples gtest)
 endif()
 
 ########################################################################
@@ -111,31 +111,31 @@ if (gtest_build_tests)
   ############################################################
   # C++ tests built with standard compiler flags.
 
-  cxx_test(gtest-death-test_test gtest_ycm_main)
-  cxx_test(gtest_environment_test gtest_ycm)
-  cxx_test(gtest-filepath_test gtest_ycm_main)
-  cxx_test(gtest-linked_ptr_test gtest_ycm_main)
-  cxx_test(gtest-listener_test gtest_ycm_main)
-  cxx_test(gtest_main_unittest gtest_ycm_main)
-  cxx_test(gtest-message_test gtest_ycm_main)
-  cxx_test(gtest_no_test_unittest gtest_ycm)
-  cxx_test(gtest-options_test gtest_ycm_main)
-  cxx_test(gtest-param-test_test gtest_ycm
+  cxx_test(gtest-death-test_test gtest_main)
+  cxx_test(gtest_environment_test gtest)
+  cxx_test(gtest-filepath_test gtest_main)
+  cxx_test(gtest-linked_ptr_test gtest_main)
+  cxx_test(gtest-listener_test gtest_main)
+  cxx_test(gtest_main_unittest gtest_main)
+  cxx_test(gtest-message_test gtest_main)
+  cxx_test(gtest_no_test_unittest gtest)
+  cxx_test(gtest-options_test gtest_main)
+  cxx_test(gtest-param-test_test gtest
     test/gtest-param-test2_test.cc)
-  cxx_test(gtest-port_test gtest_ycm_main)
-  cxx_test(gtest_pred_impl_unittest gtest_ycm_main)
-  cxx_test(gtest-printers_test gtest_ycm_main)
-  cxx_test(gtest_prod_test gtest_ycm_main
+  cxx_test(gtest-port_test gtest_main)
+  cxx_test(gtest_pred_impl_unittest gtest_main)
+  cxx_test(gtest-printers_test gtest_main)
+  cxx_test(gtest_prod_test gtest_main
     test/production.cc)
-  cxx_test(gtest_repeat_test gtest_ycm)
-  cxx_test(gtest_sole_header_test gtest_ycm_main)
-  cxx_test(gtest_stress_test gtest_ycm)
-  cxx_test(gtest-test-part_test gtest_ycm_main)
-  cxx_test(gtest_throw_on_failure_ex_test gtest_ycm)
-  cxx_test(gtest-typed-test_test gtest_ycm_main
+  cxx_test(gtest_repeat_test gtest)
+  cxx_test(gtest_sole_header_test gtest_main)
+  cxx_test(gtest_stress_test gtest)
+  cxx_test(gtest-test-part_test gtest_main)
+  cxx_test(gtest_throw_on_failure_ex_test gtest)
+  cxx_test(gtest-typed-test_test gtest_main
     test/gtest-typed-test2_test.cc)
-  cxx_test(gtest_unittest gtest_ycm_main)
-  cxx_test(gtest-unittest-api_test gtest_ycm)
+  cxx_test(gtest_unittest gtest_main)
+  cxx_test(gtest-unittest-api_test gtest)
 
   ############################################################
   # C++ tests built with non-standard compiler flags.
@@ -152,10 +152,10 @@ if (gtest_build_tests)
 
   cxx_test_with_flags(gtest-death-test_ex_nocatch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=0"
-    gtest_ycm test/gtest-death-test_ex_test.cc)
+    gtest test/gtest-death-test_ex_test.cc)
   cxx_test_with_flags(gtest-death-test_ex_catch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"
-    gtest_ycm test/gtest-death-test_ex_test.cc)
+    gtest test/gtest-death-test_ex_test.cc)
 
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
@@ -189,7 +189,7 @@ if (gtest_build_tests)
   ############################################################
   # Python tests.
 
-  cxx_executable(gtest_break_on_failure_unittest_ test gtest_ycm)
+  cxx_executable(gtest_break_on_failure_unittest_ test gtest)
   py_test(gtest_break_on_failure_unittest)
 
   # MSVC 7.1 does not support STL with exceptions disabled.
@@ -204,29 +204,29 @@ if (gtest_build_tests)
   cxx_executable_with_flags(
     gtest_catch_exceptions_ex_test_
     "${cxx_exception}"
-    gtest_ycm_main
+    gtest_main
     test/gtest_catch_exceptions_test_.cc)
   py_test(gtest_catch_exceptions_test)
 
-  cxx_executable(gtest_color_test_ test gtest_ycm)
+  cxx_executable(gtest_color_test_ test gtest)
   py_test(gtest_color_test)
 
-  cxx_executable(gtest_env_var_test_ test gtest_ycm)
+  cxx_executable(gtest_env_var_test_ test gtest)
   py_test(gtest_env_var_test)
 
-  cxx_executable(gtest_filter_unittest_ test gtest_ycm)
+  cxx_executable(gtest_filter_unittest_ test gtest)
   py_test(gtest_filter_unittest)
 
-  cxx_executable(gtest_help_test_ test gtest_ycm_main)
+  cxx_executable(gtest_help_test_ test gtest_main)
   py_test(gtest_help_test)
 
-  cxx_executable(gtest_list_tests_unittest_ test gtest_ycm)
+  cxx_executable(gtest_list_tests_unittest_ test gtest)
   py_test(gtest_list_tests_unittest)
 
-  cxx_executable(gtest_output_test_ test gtest_ycm)
+  cxx_executable(gtest_output_test_ test gtest)
   py_test(gtest_output_test)
 
-  cxx_executable(gtest_shuffle_test_ test gtest_ycm)
+  cxx_executable(gtest_shuffle_test_ test gtest)
   py_test(gtest_shuffle_test)
 
   # MSVC 7.1 does not support STL with exceptions disabled.
@@ -238,13 +238,13 @@ if (gtest_build_tests)
     py_test(gtest_throw_on_failure_test)
   endif()
 
-  cxx_executable(gtest_uninitialized_test_ test gtest_ycm)
+  cxx_executable(gtest_uninitialized_test_ test gtest)
   py_test(gtest_uninitialized_test)
 
-  cxx_executable(gtest_xml_outfile1_test_ test gtest_ycm_main)
-  cxx_executable(gtest_xml_outfile2_test_ test gtest_ycm_main)
+  cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
+  cxx_executable(gtest_xml_outfile2_test_ test gtest_main)
   py_test(gtest_xml_outfiles_test)
 
-  cxx_executable(gtest_xml_output_unittest_ test gtest_ycm)
+  cxx_executable(gtest_xml_output_unittest_ test gtest)
   py_test(gtest_xml_output_unittest)
 endif()
