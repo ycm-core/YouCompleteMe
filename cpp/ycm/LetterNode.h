@@ -60,7 +60,6 @@ private:
   LetterNodeListMap letters_;
   std::vector< boost::shared_ptr< LetterNode > > letternode_per_text_index_;
   bool is_uppercase_;
-  bool is_root_node_;
   int index_;
 };
 

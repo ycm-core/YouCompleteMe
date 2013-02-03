@@ -23,7 +23,6 @@ namespace YouCompleteMe {
 
 LetterNode::LetterNode( char letter, int index )
   : is_uppercase_( IsUppercase( letter ) ),
-    is_root_node_( false ),
     index_( index ) {
 }
 
@@ -31,7 +30,6 @@ LetterNode::LetterNode( char letter, int index )
 // TODO: this class needs tests
 LetterNode::LetterNode( const std::string &text )
   : is_uppercase_( false ),
-    is_root_node_( true ),
     index_( -1 ) {
   letternode_per_text_index_.resize( text.size() );
 
