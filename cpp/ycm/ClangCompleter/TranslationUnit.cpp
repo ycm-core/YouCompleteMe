@@ -37,7 +37,7 @@ typedef shared_ptr <
 remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
 TranslationUnit::TranslationUnit()
-  : filename_(""),
+  : filename_( "" ),
     clang_translation_unit_( NULL ) {
 }
 

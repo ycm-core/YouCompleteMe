@@ -47,10 +47,10 @@ public:
   void EnableThreading();
 
   CompilationInfoForFile GetCompilationInfoForFile(
-      const std::string &path_to_file );
+    const std::string &path_to_file );
 
   Future< AsyncCompilationInfoForFile > GetCompilationInfoForFileAsync(
-      const std::string &path_to_file );
+    const std::string &path_to_file );
 
   typedef boost::shared_ptr <
   boost::packaged_task< AsyncCompilationInfoForFile > > InfoTask;

@@ -48,7 +48,7 @@ extern const unsigned int MIN_ASYNC_THREADS = 2;
 namespace {
 
 void QueryThreadMain(
-    IdentifierCompleter::LatestQueryTask &latest_query_task ) {
+  IdentifierCompleter::LatestQueryTask &latest_query_task ) {
   while ( true ) {
     try {
       ( *latest_query_task.Get() )();

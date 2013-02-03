@@ -82,7 +82,7 @@ bool CompilationDatabase::DatabaseSuccessfullyLoaded() {
 
 
 CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
-    const std::string &path_to_file ) {
+  const std::string &path_to_file ) {
   CompilationInfoForFile info;
 
   if ( !is_loaded_ )
@@ -107,14 +107,14 @@ CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
                                0 );
 
   info.compiler_working_dir_ = CXStringToString(
-      clang_CompileCommand_getDirectory( command ) );
+                                 clang_CompileCommand_getDirectory( command ) );
 
   uint num_flags = clang_CompileCommand_getNumArgs( command );
   info.compiler_flags_.reserve( num_flags );
 
   for ( uint i = 0; i < num_flags; ++i ) {
     info.compiler_flags_.push_back(
-        CXStringToString( clang_CompileCommand_getArg( command, i ) ) );
+      CXStringToString( clang_CompileCommand_getArg( command, i ) ) );
   }
 
   return info;
@@ -123,7 +123,7 @@ CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
 
 Future< AsyncCompilationInfoForFile >
 CompilationDatabase::GetCompilationInfoForFileAsync(
-    const std::string &path_to_file ) {
+  const std::string &path_to_file ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return Future< AsyncCompilationInfoForFile >();
@@ -134,9 +134,9 @@ CompilationDatabase::GetCompilationInfoForFileAsync(
           path_to_file );
 
   InfoTask task =
-      make_shared< packaged_task< AsyncCompilationInfoForFile > >(
-          bind( ReturnValueAsShared< CompilationInfoForFile >,
-                functor ) );
+    make_shared< packaged_task< AsyncCompilationInfoForFile > >(
+      bind( ReturnValueAsShared< CompilationInfoForFile >,
+            functor ) );
 
   unique_future< AsyncCompilationInfoForFile > future = task->get_future();
   info_task_stack_.Push( task );
