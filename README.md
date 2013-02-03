@@ -167,6 +167,8 @@ code is platform agnostic, so if everything is configured correctly, YCM
 _should_ work on Windows without issues (but as of writing, it's untested on
 that platform).
 
+See the FAQ if you have any issues.
+
 **Please follow the instructions carefully. Read EVERY WORD.**
 
 1.  **Ensure that your version of Vim is _at least_ 7.3.584 _and_ that it has
@@ -655,6 +657,16 @@ ones. Make sure you don't have something mapped to `<C-p>`, `<C-x>` or `<C-u>`
 YCM _never_ selects something for you; it just shows you a menu and the user has
 to explicitly select something. If something is being selected automatically,
 this means there's a bug or a misconfiguration somewhere.
+
+### I get a `E227: mapping already exists for <blah>` error when I start Vim
+
+This means that YCM tried to set up a key mapping but failed because you already
+had something mapped to that key combination. The `<blah>` part of the message
+will tell you what was the key combination that failed.
+
+Look in the options section and see if which of the default mappings conflict
+with your own. Then change that option value to something else so that the
+conflict goes away.
 
 ### Why isn't YCM just written in plain VimScript, FFS?
 
