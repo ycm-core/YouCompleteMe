@@ -645,10 +645,14 @@ does not have it.
 ### Sometimes it takes much longer to get semantic completions than normal
 
 This means that libclang (which YCM uses for C-family semantic completion)
-failed to compile your file's preamble. In other words, there was an error
+failed to pre-compile your file's preamble. In other words, there was an error
 compiling some of the source code you pulled in through your header files. I
 suggest calling the `:YcmDiags` command to see what they were (even better, have
 Syntastic installed and call `:lopen`).
+
+Bottom line, if libclang can't pre-compile your file's preamble because there
+were errors in it, you're going to get slow completions because there's no AST
+cache.
 
 ### YCM auto-inserts completion strings I don't want!
 
