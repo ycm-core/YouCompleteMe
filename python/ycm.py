@@ -20,7 +20,7 @@
 import vimsupport
 import imp
 import vim
-import utils
+import ycm_utils as utils
 import os
 import sys
 

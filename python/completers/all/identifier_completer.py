@@ -21,7 +21,7 @@ from completers.completer import Completer
 import vim
 import vimsupport
 import ycm_core
-import utils
+import ycm_utils as utils
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
