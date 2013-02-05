@@ -87,7 +87,7 @@ Compiling YCM **with** semantic support for C-family languages (previous step
 required):
 
     cd ~
-    makedir ycm_build
+    mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/clang+llvm-3.2-x86_64-apple-darwin11 . ~/.vim/bundle/YouCompleteMe/cpp
     make ycm_core
