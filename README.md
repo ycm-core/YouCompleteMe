@@ -66,7 +66,7 @@ provided on a best-effort basis and may not work for you.
 
 Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
 Even if you don't like the MacVim GUI, you can use the Vim binary that is inside
-the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`).
+the MacVim.app package by aliasing `vim` to `mvim -v`.
 
 Install YouCompleteMe with [Vundle][].
 
