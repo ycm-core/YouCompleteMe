@@ -228,8 +228,8 @@ Please follow the instructions carefully. Read EVERY WORD.
    needs to be 584 or higher. If your version of Vim is not recent enough, you
    may need to compile Vim from source [9] (don't worry, it's easy). After you
    have made sure that you have Vim 7.3.584+, type the following in Vim:
-   ':has('python')'. The output should be 1. If it's 0, then get a version of
-   Vim with Python support.
+   ':echo has('python')'. The output should be 1. If it's 0, then get a version
+   of Vim with Python support.
 
  - Install YCM with Vundle [6] (or Pathogen [10], but Vundle is a better idea).
    With Vundle, this would mean adding a 'Bundle 'Valloric/YouCompleteMe' line

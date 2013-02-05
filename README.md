@@ -189,8 +189,8 @@ See the FAQ if you have any issues.
     from source][vim-build] (don't worry, it's easy).
 
     After you have made sure that you have Vim 7.3.584+, type the following in
-    Vim: `:has('python')`. The output should be 1. If it's 0, then get a version
-    of Vim with Python support.
+    Vim: `:echo has('python')`. The output should be 1. If it's 0, then get a
+    version of Vim with Python support.
 
 2.  **Install YCM** with [Vundle][] (or [Pathogen][], but Vundle is a better
     idea). With Vundle, this would mean adding a `Bundle
