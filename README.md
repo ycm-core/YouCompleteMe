@@ -95,7 +95,7 @@ required):
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~
-    makedir ycm_build
+    mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
     make ycm_core
