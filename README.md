@@ -65,8 +65,13 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
 Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
-Even if you don't like the MacVim GUI, you can use the Vim binary that is inside
-the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`).
+
+If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
+inside the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`). To ensure it
+works correctly copy the `mvim` script from the [MacVim][] download to your
+local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
+
+    ln -s /usr/local/bin/mvim vim
 
 Install YouCompleteMe with [Vundle][].
 
