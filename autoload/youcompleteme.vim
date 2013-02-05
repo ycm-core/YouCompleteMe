@@ -83,7 +83,7 @@ function! youcompleteme#Enable()
 
   py import sys
   py import vim
-  exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../python"]'
+  exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
   py import ycm
   py ycm_state = ycm.YouCompleteMe()
 
