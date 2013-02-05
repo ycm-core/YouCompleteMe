@@ -17,12 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import vimsupport
 import imp
-import vim
-import ycm_utils as utils
 import os
 import sys
+import vimsupport
+import vim
+import ycm_utils as utils
 
 try:
   import ycm_core
