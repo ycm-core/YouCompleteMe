@@ -78,6 +78,9 @@ Install YouCompleteMe with [Vundle][].
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
 
+_If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the FAQ
+for details.
+
 _If_ you care about semantic completion for C-family languages, type in the
 following commands in the console. If you don't, **skip this step**.
 
@@ -686,6 +689,13 @@ builds Vim. I recommend using [MacVim][]. Even if you don't like the MacVim GUI,
 you can use the Vim binary that is inside the MacVim.app package (it's
 `MacVim.app/Contents/MacOS/Vim`) and get the Vim console experience.
 
+### I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting
+
+You should probably run `brew rm python; brew install python` to get the latest
+fixes that should make YCM work with such a configuration. Also rebuild Macvim
+then. If you still get problems with this, see [issue #18][issue18] for
+suggestions.
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
@@ -742,3 +752,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [listtoggle]: https://github.com/Valloric/ListToggle
 [vim-build]: https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
 [tracker]: https://github.com/Valloric/YouCompleteMe/issues?state=open
+[issue18]: https://github.com/Valloric/YouCompleteMe/issues/18
