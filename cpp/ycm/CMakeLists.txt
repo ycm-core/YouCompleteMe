@@ -20,7 +20,7 @@ cmake_minimum_required( VERSION 2.8 )
 project( ycm_core )
 
 set( Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 )
-find_package( PythonLibs 2 REQUIRED )
+find_package( PythonLibs 2.5 REQUIRED )
 
 if ( NOT PYTHONLIBS_VERSION_STRING VERSION_LESS "3.0.0" )
   message( FATAL_ERROR
