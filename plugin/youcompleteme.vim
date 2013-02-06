@@ -29,6 +29,10 @@ elseif !has( 'python' )
   finish
 endif
 
+" This is basic vim plugin boilerplate
+let s:save_cpo = &cpo
+set cpo&vim
+
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 
 function! s:HasYcmCore()
@@ -91,9 +95,6 @@ let g:ycm_key_detailed_diagnostics =
 let g:ycm_global_ycm_extra_conf =
       \ get( g:, 'ycm_global_ycm_extra_conf', '' )
 
-" This is basic vim plugin boilerplate
-let s:save_cpo = &cpo
-set cpo&vim
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
