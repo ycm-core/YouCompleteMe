@@ -81,6 +81,9 @@ class Completer( object ):
   def ShowDetailedDiagnostic( self ):
     pass
 
+  def GettingCompletions( self ):
+    return False
+
 
   @abc.abstractmethod
   def SupportedFiletypes( self ):

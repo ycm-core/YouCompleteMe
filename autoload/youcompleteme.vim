@@ -438,13 +438,27 @@ function! s:ForceCompile()
     if diagnostics_ready
       break
     endif
+
+    let getting_completions = pyeval(
+          \ 'ycm_state.GettingCompletions()' )
+
+    if !getting_completions
+      echom "Unable to retrieve diagnostics."
+      return 0
+    endif
+
     sleep 100m
   endwhile
+  return 1
 endfunction
 
 
 function! s:ForceCompileAndDiagnostics()
-  call s:ForceCompile()
+  let compilation_succeeded = s:ForceCompile()
+  if !compilation_succeeded
+    return
+  endif
+
   call s:UpdateDiagnosticNotifications()
   echom "Diagnostics refreshed."
 endfunction

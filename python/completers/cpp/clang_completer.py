@@ -146,6 +146,10 @@ class ClangCompleter( Completer ):
     return self.parse_future.ResultsReady()
 
 
+  def GettingCompletions( self ):
+    return self.completer.UpdatingTranslationUnit( vim.current.buffer.name )
+
+
   def GetDiagnosticsForCurrentFile( self ):
     if self.DiagnosticsForCurrentFileReady():
       diagnostics = self.completer.DiagnosticsForFile( vim.current.buffer.name )
