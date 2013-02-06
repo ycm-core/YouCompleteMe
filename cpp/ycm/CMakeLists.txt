@@ -66,6 +66,11 @@ else()
   set( CLANG_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/llvm/include" )
 endif()
 
+if ( NOT IS_ABSOLUTE "${CLANG_INCLUDES_DIR}" )
+  get_filename_component(CLANG_INCLUDES_DIR
+    "${CMAKE_BINARY_DIR}/${CLANG_INCLUDES_DIR}" ABSOLUTE)
+endif()
+
 if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
   # Need TEMP because find_library does not work with an option variable
   find_library( TEMP clang
