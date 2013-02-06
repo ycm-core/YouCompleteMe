@@ -23,7 +23,7 @@
 #include <boost/thread/locks.hpp>
 
 #ifdef USE_CLANG_COMPLETER
-#  include "CompletionData.h"
+#  include "ClangCompleter/CompletionData.h"
 #endif // USE_CLANG_COMPLETER
 
 namespace YouCompleteMe {
