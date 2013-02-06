@@ -15,6 +15,10 @@
 " You should have received a copy of the GNU General Public License
 " along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+" This is basic vim plugin boilerplate
+let s:save_cpo = &cpo
+set cpo&vim
+
 if exists( "g:loaded_youcompleteme" )
   finish
 elseif v:version < 703 || !has( 'patch584' )
@@ -90,10 +94,6 @@ let g:ycm_key_detailed_diagnostics =
 
 let g:ycm_global_ycm_extra_conf =
       \ get( g:, 'ycm_global_ycm_extra_conf', '' )
-
-" This is basic vim plugin boilerplate
-let s:save_cpo = &cpo
-set cpo&vim
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
