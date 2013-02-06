@@ -24,7 +24,7 @@ function install {
   build_dir=`mktemp -d -t ycm_build`
   pushd $build_dir
   cmake $ycm_dir/cpp
-  make
+  make ycm_core
   popd
 }
 
