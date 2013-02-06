@@ -26,7 +26,7 @@ import sys
 import vimsupport
 
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
-NO_OPTIONS_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
+NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++.').format(
     YCM_EXTRA_CONF_FILENAME )
 GLOBAL_YCM_EXTRA_CONF_FILE = vimsupport.GetVariableValue(
@@ -39,6 +39,7 @@ class Flags( object ):
     self.flags_module_for_file = {}
     self.flags_module_for_flags_module_file = {}
     self.special_clang_flags = _SpecialClangIncludes()
+    self.no_extra_conf_file_warning_posted = False
 
 
   def FlagsForFile( self, filename ):
@@ -47,7 +48,9 @@ class Flags( object ):
     except KeyError:
       flags_module = self._FlagsModuleForFile( filename )
       if not flags_module:
-        vimsupport.PostVimMessage( NO_OPTIONS_FILENAME_MESSAGE )
+        if not self.no_extra_conf_file_warning_posted:
+          vimsupport.PostVimMessage( NO_EXTRA_CONF_FILENAME_MESSAGE )
+          self.no_extra_conf_file_warning_posted = True
         return None
 
       results = flags_module.FlagsForFile( filename )
