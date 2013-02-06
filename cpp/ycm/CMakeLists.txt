@@ -208,6 +208,14 @@ target_link_libraries( ${PROJECT_NAME}
                        ${LIBCLANG_TARGET}
                      )
 
+if ( LIBCLANG_TARGET )
+  add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND cp "${LIBCLANG_TARGET}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+  )
+endif()
+
 #############################################################################
 
 # Things are a bit different on Macs when using an external libclang.dylib; here
