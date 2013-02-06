@@ -38,6 +38,7 @@ class ClangCompleter( Completer ):
     self.last_prepared_diagnostics = []
     self.parse_future = None
     self.flags = Flags()
+    self.diagnostic_store = None
 
 
   def SupportedFiletypes( self ):
@@ -163,8 +164,12 @@ class ClangCompleter( Completer ):
     current_column += 1
 
     current_file = vim.current.buffer.name
-    diagnostics = self.diagnostic_store[ current_file ][ current_line ]
 
+    if not self.diagnostic_store:
+      vimsupport.PostVimMessage( "No diagnostic for current line!" )
+      return
+
+    diagnostics = self.diagnostic_store[ current_file ][ current_line ]
     if not diagnostics:
       vimsupport.PostVimMessage( "No diagnostic for current line!" )
       return
