@@ -298,7 +298,7 @@ endfunction
 
 
 function! s:OnBlankLine()
-  return pyeval('not vim.current.line or vim.current.line.isspace()')
+  return pyeval( 'not vim.current.line or vim.current.line.isspace()' )
 endfunction
 
 
