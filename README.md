@@ -712,16 +712,14 @@ Look at the output of your CMake call. There should be a line in it like the
 following (with `.dylib` in place of `.so` on a Mac):
 
 ```
--- Found PythonLibs: /usr/lib/libpython2.7.so (Required is at least version "2.5
-")
+-- Found PythonLibs: /usr/lib/libpython2.7.so (Required is at least version "2.5")
 ```
 
 That would be the **correct** output. An example of **incorrect** output would
 be the following:
 
 ```
--- Found PythonLibs: /usr/lib/libpython2.7.so (found suitable version
-"2.5.1", minimum required is "2.5")
+-- Found PythonLibs: /usr/lib/libpython2.7.so (found suitable version "2.5.1", minimum required is "2.5")
 ```
 
 Notice how there's an extra bit of output there, the `found suitable version
