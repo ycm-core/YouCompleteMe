@@ -74,12 +74,16 @@ function! youcompleteme#Enable()
   exe 'inoremap <expr>' . g:ycm_key_previous_completion .
         \ ' pumvisible() ? "\<C-p>" : "\' . g:ycm_key_previous_completion .'"'
 
-  " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
-  " candidate that vim selects by default
-  exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
+  if strlen(g:ycm_key_invoke_completion)
+    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
+    " candidate that vim selects by default
+    exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
+  endif
 
-  exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
-        \ ' :call <sid>ShowDetailedDiagnostic()<cr>'
+  if strlen(g:ycm_key_detailed_diagnostics)
+    exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+          \ ' :YcmShowDetailedDiagnostic<cr>'
+  endif
 
   py import sys
   py import vim
@@ -403,6 +407,8 @@ endfunction
 function! s:ShowDetailedDiagnostic()
   py ycm_state.ShowDetailedDiagnostic()
 endfunction
+
+command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
 
 
 " This is what Syntastic calls indirectly when it decides an auto-check is

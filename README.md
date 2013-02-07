@@ -415,6 +415,11 @@ A better option would be to use Syntastic which will keep your `locationlist`
 up to date automatically and will also show error/warning notifications in Vim's
 gutter.
 
+### The `YcmShowDetailedDiagnostic` command
+
+This command shows the full diagnostic text when the user's cursor is on the
+line with the diagnostic.
+
 ### The `YcmDebugInfo` command
 
 This will print out various debug information for the current file. Useful to
@@ -579,6 +584,8 @@ default mapping will probably only work in GUI Vim (Gvim or MacVim) and not in
 plain console Vim because the terminal usually does not forward modifier key
 combinations to Vim.
 
+Setting this option to an empty string will make sure no mapping is created.
+
 Default: `<C-Space>`
 
     let g:ycm_key_invoke_completion = '<C-Space>'
@@ -586,7 +593,10 @@ Default: `<C-Space>`
 ### The `g:ycm_key_detailed_diagnostics` option
 
 This option controls the key mapping used to show the full diagnostic text when
-the user's cursor is on the line with the diagnostic.
+the user's cursor is on the line with the diagnostic. It basically calls
+`:YcmShowDetailedDiagnostic`.
+
+Setting this option to an empty string will make sure no mapping is created.
 
 Default: `<leader>d`
 
