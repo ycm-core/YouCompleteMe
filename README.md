@@ -727,7 +727,7 @@ Notice how there's an extra bit of output there, the `found suitable version
 dynamic library. In the example shown, the library is version 2.7 but the second
 string is version `2.5.1`.
 
-This means that CMake found a one version of Python headers and a different
+This means that CMake found one version of Python headers and a different
 version for the library. This is wrong. It can happen when you have multiple
 versions of Python installed on your machine.
 
