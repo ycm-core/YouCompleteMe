@@ -16,7 +16,8 @@ Contents ~
  6. Commands                                            |youcompleteme-commands|
   1. The |YcmForceCompileAndDiagnostics| command
   2. The |YcmDiags| command
-  3. The |YcmDebugInfo| command
+  3. The |YcmShowDetailedDiagnostic| command
+  4. The |YcmDebugInfo| command
  7. Options                                              |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_filetypes_to_completely_ignore| option
@@ -37,8 +38,11 @@ Contents ~
   4. I cannot get the Syntastic integration to work
   5. Sometimes it takes much longer to get semantic completions than normal
   6. YCM auto-inserts completion strings I don't want!
-  7. Why isn't YCM just written in plain VimScript, FFS?
-  8. Why does YCM demand such a recent version of Vim?
+  7. I get a 'E227: mapping already exists for <blah>' error when I start Vim
+  8. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults
+  9. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting
+  10. Why isn't YCM just written in plain VimScript, FFS?
+  11. Why does YCM demand such a recent version of Vim?
  9. Contact                                              |youcompleteme-contact|
  10. License                                             |youcompleteme-license|
 
@@ -115,10 +119,20 @@ provided on a best-effort basis and may not work for you.
 
 Install the latest version of MacVim [5]. Yes, MacVim. And yes, the latest.
 
+If you don't use the MacVim GUI, it is recommended to use the Vim binary that
+is inside the MacVim.app package ('MacVim.app/Contents/MacOS/Vim'). To ensure
+it works correctly copy the 'mvim' script from the MacVim [5] download to your
+local binary folder (for example '/usr/local/bin/mvim') and then symlink it:
+>
+    ln -s /usr/local/bin/mvim vim
+
 Install YouCompleteMe with Vundle [6].
 
 Install CMake. Preferably with Homebrew [7], but here's the stand-alone CMake
 installer [8].
+
+If you have installed a Homebrew Python and/or Homebrew MacVim, see the FAQ
+for details.
 
 If you care about semantic completion for C-family languages, type in the
 following commands in the console. If you don't, skip this step.
@@ -134,7 +148,7 @@ Compiling YCM with semantic support for C-family languages (previous step
 required):
 >
     cd ~
-    makedir ycm_build
+    mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/clang+llvm-3.2-x86_64-apple-darwin11 . ~/.vim/bundle/YouCompleteMe/cpp
     make ycm_core
@@ -142,7 +156,7 @@ required):
 Compiling YCM without semantic support for C-family languages:
 >
     cd ~
-    makedir ycm_build
+    mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
     make ycm_core
@@ -219,6 +233,8 @@ The code is platform agnostic, so if everything is configured correctly, YCM
 should work on Windows without issues (but as of writing, it's untested on
 that platform).
 
+See the FAQ if you have any issues.
+
 Please follow the instructions carefully. Read EVERY WORD.
 
  - Ensure that your version of Vim is at least 7.3.584 and that it has support
@@ -228,8 +244,8 @@ Please follow the instructions carefully. Read EVERY WORD.
    needs to be 584 or higher. If your version of Vim is not recent enough, you
    may need to compile Vim from source [9] (don't worry, it's easy). After you
    have made sure that you have Vim 7.3.584+, type the following in Vim:
-   ':echo has('python')'. The output should be 1. If it's 0, then get a version
-   of Vim with Python support.
+   ':echo has('python')'. The output should be 1. If it's 0, then get a
+   version of Vim with Python support.
 
  - Install YCM with Vundle [6] (or Pathogen [10], but Vundle is a better idea).
    With Vundle, this would mean adding a 'Bundle 'Valloric/YouCompleteMe' line
@@ -253,9 +269,9 @@ Please follow the instructions carefully. Read EVERY WORD.
    project site. Mac users can also get it through Homebrew [7] with 'brew
    install cmake'. Here we'll assume you installed YCM with Vundle. That means
    that the top-level YCM directory is in '~/.vim/bundle/YouCompleteMe'. We'll
-   create a new folder where build files will be placed. Run the following:
-   'cd ~ mkdir ycm_build cd ycm_build' Now we need to generate the makefiles.
-   If you DON'T care about semantic support for C-family languages, run the
+   create a new folder where build files will be placed. Run the following: cd
+   ~ mkdir ycm_build cd ycm_build Now we need to generate the makefiles. If
+   you DON'T care about semantic support for C-family languages, run the
    following command in the 'ycm_build' directory: 'cmake -G "Unix Makefiles"
    . ~/.vim/bundle/YouCompleteMe/cpp' If you DO care about semantic support
    for C-family languages, then your 'cmake' call will be a bit more
@@ -446,6 +462,12 @@ up to date automatically and will also show error/warning notifications in
 Vim's gutter.
 
 -------------------------------------------------------------------------------
+The *YcmShowDetailedDiagnostic* command
+
+This command shows the full diagnostic text when the user's cursor is on the
+line with the diagnostic.
+
+-------------------------------------------------------------------------------
 The *YcmDebugInfo* command
 
 This will print out various debug information for the current file. Useful to
@@ -621,6 +643,8 @@ default mapping will probably only work in GUI Vim (Gvim or MacVim) and not in
 plain console Vim because the terminal usually does not forward modifier key
 combinations to Vim.
 
+Setting this option to an empty string will make sure no mapping is created.
+
 Default: '<C-Space>'
 >
     let g:ycm_key_invoke_completion = '<C-Space>'
@@ -629,7 +653,10 @@ Default: '<C-Space>'
 The *g:ycm_key_detailed_diagnostics* option
 
 This option controls the key mapping used to show the full diagnostic text
-when the user's cursor is on the line with the diagnostic.
+when the user's cursor is on the line with the diagnostic. It basically calls
+':YcmShowDetailedDiagnostic'.
+
+Setting this option to an empty string will make sure no mapping is created.
 
 Default: '<leader>d'
 >
@@ -702,10 +729,14 @@ Syntastic does not have it.
 Sometimes it takes much longer to get semantic completions than normal ~
 
 This means that libclang (which YCM uses for C-family semantic completion)
-failed to compile your file's preamble. In other words, there was an error
+failed to pre-compile your file's preamble. In other words, there was an error
 compiling some of the source code you pulled in through your header files. I
 suggest calling the ':YcmDiags' command to see what they were (even better,
 have Syntastic installed and call ':lopen').
+
+Bottom line, if libclang can't pre-compile your file's preamble because there
+were errors in it, you're going to get slow completions because there's no AST
+cache.
 
 -------------------------------------------------------------------------------
 YCM auto-inserts completion strings I don't want! ~
@@ -717,6 +748,33 @@ ones. Make sure you don't have something mapped to '<C-p>', '<C-x>' or '<C-u>'
 YCM never selects something for you; it just shows you a menu and the user has
 to explicitly select something. If something is being selected automatically,
 this means there's a bug or a misconfiguration somewhere.
+
+-------------------------------------------------------------------------------
+I get a 'E227: mapping already exists for <blah>' error when I start Vim ~
+
+This means that YCM tried to set up a key mapping but failed because you
+already had something mapped to that key combination. The '<blah>' part of the
+message will tell you what was the key combination that failed.
+
+Look in the options section and see if which of the default mappings conflict
+with your own. Then change that option value to something else so that the
+conflict goes away.
+
+-------------------------------------------------------------------------------
+I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults ~
+
+Something (I don't know what) is wrong with the way that Homebrew configures
+and builds Vim. I recommend using MacVim [5]. Even if you don't like the
+MacVim GUI, you can use the Vim binary that is inside the MacVim.app package
+(it's 'MacVim.app/Contents/MacOS/Vim') and get the Vim console experience.
+
+-------------------------------------------------------------------------------
+I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting ~
+
+You should probably run 'brew rm python; brew install python' to get the
+latest fixes that should make YCM work with such a configuration. Also rebuild
+Macvim then. If you still get problems with this, see issue #18 [16] for
+suggestions.
 
 -------------------------------------------------------------------------------
 Why isn't YCM just written in plain VimScript, FFS? ~
@@ -748,7 +806,7 @@ for 'pyeval()' landed in Vim 7.3.584 (and a few commits before that).
 Contact ~
 
 If you have questions, bug reports, suggestions, etc. please use the issue
-tracker [16]. The latest version is available at http://valloric.github.com/YouCompleteMe/.
+tracker [17]. The latest version is available at http://valloric.github.com/YouCompleteMe/.
 
 The author's homepage is http://val.markovic.io.
 
@@ -756,7 +814,7 @@ The author's homepage is http://val.markovic.io.
                                                          *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [17]. Copyright 2012
+This software is licensed under the GPL v3 license [18]. Copyright 2012
 Strahinja Val Markovic <val@markovic.io>.
 
 ===============================================================================
@@ -778,7 +836,8 @@ References ~
 [13] https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
 [14] http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [15] https://github.com/Valloric/ListToggle
-[16] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[17] http://www.gnu.org/copyleft/gpl.html
+[16] https://github.com/Valloric/YouCompleteMe/issues/18
+[17] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[18] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
