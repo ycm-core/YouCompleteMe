@@ -706,6 +706,45 @@ fixes that should make YCM work with such a configuration. Also rebuild Macvim
 then. If you still get problems with this, see [issue #18][issue18] for
 suggestions.
 
+### I get `LONG_BIT definition appears wrong for platform` when compiling
+
+Look at the output of your CMake call. There should be a line in it like the
+following (with `.dylib` in place of `.so` on a Mac):
+
+```
+-- Found PythonLibs: /usr/lib/libpython2.7.so (Required is at least version "2.5
+")
+```
+
+That would be the **correct** output. An example of **incorrect** output would
+be the following:
+
+```
+-- Found PythonLibs: /usr/lib/libpython2.7.so (found suitable version
+"2.5.1", minimum required is "2.5")
+```
+
+Notice how there's an extra bit of output there, the `found suitable version
+"<version>"` part, where `<version>` is not the same as the version of the
+dynamic library. In the example shown, the library is version 2.7 but the second
+string is version `2.5.1`.
+
+This means that CMake found a one version of Python headers and a different
+version for the library. This is wrong. It can happen when you have multiple
+versions of Python installed on your machine.
+
+You should probably add the following flags to your cmake call (again, `dylib`
+instead of `so` on a Mac):
+
+```
+-DPYTHON_INCLUDE_DIR=/usr/include/python2.7 -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so
+```
+
+This will force the paths to the Python include directory and the Python library
+to use. You may need to set these flags to something else, but you need to make
+sure you use the same version of Python that your Vim binary is built against,
+which is highly likely to be the system's default Python.
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
