@@ -23,7 +23,7 @@ function homebrew_cmake_install {
 
 function install {
   ycm_dir=`pwd`
-  build_dir=`mktemp -d -t ycm_build`
+  build_dir=`mktemp -d -t ycm_build.XXXX`
   pushd $build_dir
   cmake -G "Unix Makefiles" $1 . $ycm_dir/cpp
   make ycm_core
