@@ -14,7 +14,9 @@ function homebrew_cmake_install {
   if [[ `which brew &> /dev/null` ]]; then
     brew install cmake
   else
-    echo "Go get homebrew, lazy! And retry."
+    echo "Homebrew was not found installed in your system."
+    echo "Go to http://mxcl.github.com/homebrew/ and follow the instructions."
+    echo "Or install CMake somehow and retry."
     exit 1
   fi
 }
@@ -23,17 +25,32 @@ function install {
   ycm_dir=`pwd`
   build_dir=`mktemp -d -t ycm_build`
   pushd $build_dir
-  cmake $ycm_dir/cpp
+  cmake $ycm_dir/cpp $1
   make ycm_core
   popd
 }
 
 function linux_cmake_install {
-  echo "Please install 'cmake' using your package manager and retry."
+  echo "Please install CMake using your package manager and retry."
   exit 1
 }
 
+if [[ $# -gt 1 ]]; then
+  echo "Usage: $0 [--clang-completer]"
+  exit 0
+fi
+
+case "$1" in
+  --clang-completer)
+    cmake_args='-DUSE_CLANG_COMPLETER=ON'
+    ;;
+  *)
+    cmake_args=''
+    ;;
+esac
+
 if [[ ! -z `which cmake &> /dev/null` ]]; then
+  echo "CMake is required to build YouCompleteMe."
   cmake_install
 fi
-install
+install $cmake_args
