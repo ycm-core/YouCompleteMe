@@ -48,7 +48,7 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
     message( "System libclang seems good enough, using it." )
   else()
     # If the wrong version, or not found, download
-    message( "Downloading Clang 3.2 (system libclang not present or not good enough" )
+    message( "Downloading Clang 3.2 (system libclang not present or not good enough)" )
 
     set( CLANG_URL "http://llvm.org/releases/3.2" )
 
