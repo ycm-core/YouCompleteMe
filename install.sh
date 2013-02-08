@@ -31,8 +31,15 @@ function install {
 }
 
 function linux_cmake_install {
-  echo "Please install CMake using your package manager and retry."
-  exit 1
+  distro=$(cat /etc/issue | awk '{print $1}')
+  case distro in
+  Arch) sudo pacman -S cmake;;
+  Ubuntu) sudo apt-get install cmake;;
+  *) 
+    echo "Can't detect your distro to install CMake, please install CMake using your package manager and retry."
+    exit 1
+    ;;
+  esac
 }
 
 function usage {
