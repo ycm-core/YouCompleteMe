@@ -33,6 +33,38 @@ option( PATH_TO_LLVM_ROOT "Path to the root of a LLVM+Clang binary distribution"
 option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
 option( EXTERNAL_LIBCLANG_PATH "Path libclang library to use" )
 
+# Checks for clang 3.2 (LLVM 4.2+)
+if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
+  # Figure out Clang version
+  if ( COMPILER_IS_CLANG )
+    set( CLANG_VERSION ${CMAKE_CXX_COMPILER_VERSION} )
+  else()
+    execute_process( COMMAND clang -dumpversion OUTPUT_VARIABLE CLANG_VERSION )
+  endif()
+  if ( CLANG_VERSION VERSION_EQUAL 4.2 OR CLANG_VERSION VERSION_GREATER 4.2 )
+    # Good enough, use it.
+    set( USE_SYSTEM_LIBCLANG ON )
+  else() # If the wrong version, or not found, download
+    message( "Downloading Clang 3.2" )
+    set( CLANG_URL "http://llvm.org/releases/3.2" )
+    if ( APPLE )
+      set( CLANG_DIRNAME "clang+llvm-3.2-x86_64-apple-darwin11" )
+      set( CLANG_MD5 "fbdca3b4e8cdaa2352f2aeb038a16532" )
+    else()
+      set( CLANG_DIRNAME "clang+llvm-3.2-x86_64-linux-ubuntu-12.04" )
+      set( CLANG_MD5 "81821e339d7300afb76aca8edab2cf4f" )
+    endif()
+    set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.gz" )
+    file(
+      DOWNLOAD "${CLANG_URL}/${CLANG_FILENAME}" "./${CLANG_FILENAME}"
+      SHOW_PROGRESS EXPECTED_MD5 "${CLANG_MD5}"
+    )
+    execute_process( COMMAND tar -xzf ${CLANG_FILENAME} )
+    # And set PATH_TO_LLVM_ROOT
+    set( PATH_TO_LLVM_ROOT "${CMAKE_CURRENT_BINARY_DIR}/../${CLANG_DIRNAME}" )
+  endif()
+endif()
+
 if ( PATH_TO_LLVM_ROOT OR USE_SYSTEM_LIBCLANG OR EXTERNAL_LIBCLANG_PATH )
   set( USE_CLANG_COMPLETER TRUE )
 endif()
@@ -175,6 +207,14 @@ target_link_libraries( ${PROJECT_NAME}
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                      )
+
+if ( LIBCLANG_TARGET )
+  add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND cp "${LIBCLANG_TARGET}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+  )
+endif()
 
 #############################################################################
 
