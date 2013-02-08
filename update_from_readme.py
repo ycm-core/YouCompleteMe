@@ -26,6 +26,5 @@ with open('index.html', 'r+') as content_file:
 
   content_file.seek(0)
   content_file.truncate()
-  # content_file.write( soup.prettify().encode( 'utf-8' ) )
   content_file.write( str( soup ) )
 
