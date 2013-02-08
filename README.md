@@ -131,6 +131,8 @@ Install YouCompleteMe with [Vundle][].
 
 Install CMake. `sudo apt-get install cmake`
 
+Make sure you have Python headers installed: `sudo apt-get install python-dev`.
+
 _If_ you care about semantic completion for C-family languages, type in the
 following commands in the console. If you don't, **skip this step**.
 
@@ -220,6 +222,10 @@ See the FAQ if you have any issues.
     apt-get install cmake` for Ubuntu) whereas other users can [download and
     install][cmake-download] cmake from its project site. Mac users can also get
     it through [Homebrew][brew] with `brew install cmake`.
+
+    You also need to make sure you have Python headers installed. On a
+    Debian-like Linux distro, this would be `sudo apt-get install python-dev`.
+    On Mac they should already be present.
 
     Here we'll assume you installed YCM with Vundle. That means that the
     top-level YCM directory is in `~/.vim/bundle/YouCompleteMe`.
