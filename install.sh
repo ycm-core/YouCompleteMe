@@ -35,17 +35,24 @@ function linux_cmake_install {
   exit 1
 }
 
-if [[ $# -gt 1 ]]; then
+function usage {
   echo "Usage: $0 [--clang-completer]"
   exit 0
+}
+
+if [[ $# -gt 1 ]]; then
+  usage
 fi
 
 case "$1" in
   --clang-completer)
     cmake_args='-DUSE_CLANG_COMPLETER=ON'
     ;;
-  *)
+  '')
     cmake_args=''
+    ;;
+  *)
+    usage
     ;;
 esac
 
