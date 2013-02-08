@@ -41,12 +41,17 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
   else()
     execute_process( COMMAND clang -dumpversion OUTPUT_VARIABLE CLANG_VERSION )
   endif()
+
   if ( CLANG_VERSION VERSION_EQUAL 4.2 OR CLANG_VERSION VERSION_GREATER 4.2 )
     # Good enough, use it.
     set( USE_SYSTEM_LIBCLANG ON )
-  else() # If the wrong version, or not found, download
-    message( "Downloading Clang 3.2" )
+    message( "System libclang seems good enough, using it." )
+  else()
+    # If the wrong version, or not found, download
+    message( "Downloading Clang 3.2 (system libclang not present or not good enough" )
+
     set( CLANG_URL "http://llvm.org/releases/3.2" )
+
     if ( APPLE )
       set( CLANG_DIRNAME "clang+llvm-3.2-x86_64-apple-darwin11" )
       set( CLANG_MD5 "fbdca3b4e8cdaa2352f2aeb038a16532" )
@@ -54,12 +59,16 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
       set( CLANG_DIRNAME "clang+llvm-3.2-x86_64-linux-ubuntu-12.04" )
       set( CLANG_MD5 "81821e339d7300afb76aca8edab2cf4f" )
     endif()
+
     set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.gz" )
+
     file(
       DOWNLOAD "${CLANG_URL}/${CLANG_FILENAME}" "./${CLANG_FILENAME}"
       SHOW_PROGRESS EXPECTED_MD5 "${CLANG_MD5}"
     )
+
     execute_process( COMMAND tar -xzf ${CLANG_FILENAME} )
+
     # And set PATH_TO_LLVM_ROOT
     set( PATH_TO_LLVM_ROOT "${CMAKE_CURRENT_BINARY_DIR}/../${CLANG_DIRNAME}" )
   endif()
