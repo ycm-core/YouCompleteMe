@@ -75,38 +75,24 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
 Install YouCompleteMe with [Vundle][].
 
+**Remember:** YCM is a compiled plugin. If you **update** it using
+Vundle, you should rerun the install process again to rebuild it.
+
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
 
 _If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the FAQ
 for details.
 
-_If_ you care about semantic completion for C-family languages, type in the
-following commands in the console. If you don't, **skip this step**.
+Compiling YCM **with** semantic support for C-family languages:
 
-    cd ~
-    mkdir ycm_temp
-    cd ycm_temp
-    curl -O http://llvm.org/releases/3.2/clang+llvm-3.2-x86_64-apple-darwin11.tar.gz
-    tar -zxvf clang+llvm-3.2-x86_64-apple-darwin11.tar.gz
-    cp clang+llvm-3.2-x86_64-apple-darwin11/lib/libclang.dylib ~/.vim/bundle/YouCompleteMe/python
-
-Compiling YCM **with** semantic support for C-family languages (previous step
-required):
-
-    cd ~
-    mkdir ycm_build
-    cd ycm_build
-    cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/clang+llvm-3.2-x86_64-apple-darwin11 . ~/.vim/bundle/YouCompleteMe/cpp
-    make ycm_core
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.sh --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
-    cd ~
-    mkdir ycm_build
-    cd ycm_build
-    cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
-    make ycm_core
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.sh
 
 That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
 forget that if you want the C-family semantic completion engine to work, you
@@ -129,36 +115,22 @@ from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
+**Remember:** YCM is a compiled plugin. If you **update** it using
+Vundle, you should rerun the install process again to rebuild it.
+
 Install CMake. `sudo apt-get install cmake`
 
 Make sure you have Python headers installed: `sudo apt-get install python-dev`.
 
-_If_ you care about semantic completion for C-family languages, type in the
-following commands in the console. If you don't, **skip this step**.
+Compiling YCM **with** semantic support for C-family languages:
 
-    cd ~
-    mkdir ycm_temp
-    cd ycm_temp
-    curl -O http://llvm.org/releases/3.2/clang+llvm-3.2-x86_64-linux-ubuntu-12.04.tar.gz
-    tar -zxvf clang+llvm-3.2-x86_64-linux-ubuntu-12.04.tar.gz
-    cp clang+llvm-3.2-x86_64-linux-ubuntu-12.04/lib/libclang.so ~/.vim/bundle/YouCompleteMe/python
-
-Compiling YCM **with** semantic support for C-family languages (previous step
-required):
-
-    cd ~
-    mkdir ycm_build
-    cd ycm_build
-    cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/clang+llvm-3.2-x86_64-linux-ubuntu-12.04 . ~/.vim/bundle/YouCompleteMe/cpp
-    make ycm_core
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.sh --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
-    cd ~
-    mkdir ycm_build
-    cd ycm_build
-    cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
-    make ycm_core
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.sh
 
 That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
 forget that if you want the C-family semantic completion engine to work, you
