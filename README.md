@@ -752,6 +752,11 @@ how hard I try to silence them.
 
 You'll have to learn to ignore them. It's a shitty "solution", I know.
 
+### Nasty bugs happen if I have the `vim-autoclose` plugin installed
+
+Use the [delimitMate][] plugin instead. It does the same thing without
+conflicting with YCM.
+
 
 Contact
 -------
@@ -787,3 +792,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [vim-build]: https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
 [tracker]: https://github.com/Valloric/YouCompleteMe/issues?state=open
 [issue18]: https://github.com/Valloric/YouCompleteMe/issues/18
+[delimitMate]: https://github.com/Raimondi/delimitMate
