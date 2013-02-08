@@ -772,6 +772,15 @@ even more since less time was spent serializing and deserializing data between
 Vim and the embedded Python interpreter. A few critical bugfixes for `pyeval()`
 landed in Vim 7.3.584 (and a few commits before that).
 
+### I get annoying messages in Vim's status area when I type
+
+If you're referring to the `User defined completion <bla bla> back at original`
+and similar, then sadly there's no fix for those. Vim will emit them no matter
+how hard I try to silence them.
+
+You'll have to learn to ignore them. It's a shitty "solution", I know.
+
+
 Contact
 -------
 
