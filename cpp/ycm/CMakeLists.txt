@@ -170,8 +170,17 @@ endif()
 
 if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   if ( USE_SYSTEM_LIBCLANG )
+    if ( APPLE )
+      set( hints ENV DYLD_LIBRARY_PATH )
+    elseif ( UNIX )
+      set( hints ENV LD_LIBRARY_PATH )
+    elseif ( WIN32 )
+      set( hints ENV PATH )
+    else ()
+      set( hints "" )
+    endif()
     # Need TEMP because find_library does not work with an option variable
-    find_library( TEMP clang )
+    find_library( TEMP clang HINTS ${hints} )
     set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
   else()
     # For Macs, we do things differently; look further in this file.
