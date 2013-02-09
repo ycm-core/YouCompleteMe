@@ -117,7 +117,9 @@ if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
   find_library( TEMP clang
                 PATHS ${PATH_TO_LLVM_ROOT}/lib
                 NO_DEFAULT_PATH )
-  set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
+  if ( TEMP )
+    set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
+  endif()
 endif()
 
 # This is a workaround for a CMake bug with include_directories(SYSTEM ...)
@@ -172,7 +174,9 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   if ( USE_SYSTEM_LIBCLANG )
     # Need TEMP because find_library does not work with an option variable
     find_library( TEMP clang )
-    set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
+    if ( TEMP )
+      set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
+    endif()
   else()
     # For Macs, we do things differently; look further in this file.
     if ( NOT APPLE )
