@@ -346,7 +346,7 @@ void ClangCompleter::CreateClangTask(
 }
 
 
-boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
+shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
   const std::string &filename,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
@@ -355,11 +355,6 @@ boost::shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
 }
 
 
-// WARNING: It should not be possible to call this function from two separate
-// threads at the same time. Currently only one thread (the clang thread) ever
-// calls this function so there is no need for a mutex, but if that changes in
-// the future a mutex will be needed to make sure that two threads don't try to
-// create the same translation unit.
 shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
   const std::string &filename,
   const std::vector< UnsavedFile > &unsaved_files,
