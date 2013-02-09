@@ -53,36 +53,11 @@ function! youcompleteme#Enable()
   augroup END
 
   call s:SetUpCompleteopt()
+  call s:SetUpKeyMappings()
+  call s:ForceSyntasticCFamilyChecker()
 
   if g:ycm_allow_changing_updatetime
     set ut=2000
-  endif
-
-  " Needed so that YCM is used as the syntastic checker
-  let g:syntastic_cpp_checkers = ['ycm']
-  let g:syntastic_c_checkers = ['ycm']
-  let g:syntastic_objc_checkers = ['ycm']
-  let g:syntastic_objcpp_checkers = ['ycm']
-
-  " With this command, when the completion window is visible, the tab key
-  " (default) will select the next candidate in the window. In vim, this also
-  " changes the typed-in text to that of the candidate completion.
-  exe 'inoremap <expr>' . g:ycm_key_select_completion .
-        \ ' pumvisible() ? "\<C-n>" : "\' . g:ycm_key_select_completion .'"'
-
-  " This selects the previous candidate for shift-tab (default)
-  exe 'inoremap <expr>' . g:ycm_key_previous_completion .
-        \ ' pumvisible() ? "\<C-p>" : "\' . g:ycm_key_previous_completion .'"'
-
-  if strlen(g:ycm_key_invoke_completion)
-    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
-    " candidate that vim selects by default
-    exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
-  endif
-
-  if strlen(g:ycm_key_detailed_diagnostics)
-    exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
-          \ ' :YcmShowDetailedDiagnostic<cr>'
   endif
 
   py import sys
@@ -95,6 +70,60 @@ function! youcompleteme#Enable()
   " the first loaded file. This should be the last command executed in this
   " function!
   call s:OnBufferVisit()
+endfunction
+
+
+function! s:SetUpKeyMappings()
+  " The g:ycm_key_select_completion and g:ycm_key_previous_completion used to
+  " exist and are now here purely for the sake of backwards compatibility; we
+  " don't want to break users if we can avoid it.
+
+  if exists('g:ycm_key_select_completion') &&
+        \ index(g:ycm_key_list_select_completion,
+        \       g:ycm_key_select_completion) == -1
+    call add(g:ycm_key_list_select_completion, g:ycm_key_select_completion)
+  endif
+
+  if exists('g:ycm_key_previous_completion') &&
+        \ index(g:ycm_key_list_previous_completion,
+        \       g:ycm_key_previous_completion) == -1
+    call add(g:ycm_key_list_previous_completion, g:ycm_key_previous_completion)
+  endif
+
+  for key in g:ycm_key_list_select_completion
+    " With this command, when the completion window is visible, the tab key
+    " (default) will select the next candidate in the window. In vim, this also
+    " changes the typed-in text to that of the candidate completion.
+    exe 'inoremap <expr>' . key .
+          \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
+  endfor
+
+
+  for key in g:ycm_key_list_previous_completion
+    " This selects the previous candidate for shift-tab (default)
+    exe 'inoremap <expr>' . key .
+          \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
+  endfor
+
+  if strlen(g:ycm_key_invoke_completion)
+    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
+    " candidate that vim selects by default
+    exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
+  endif
+
+  if strlen(g:ycm_key_detailed_diagnostics)
+    exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+          \ ' :YcmShowDetailedDiagnostic<cr>'
+  endif
+endfunction
+
+
+function! s:ForceSyntasticCFamilyChecker()
+  " Needed so that YCM is used as the syntastic checker
+  let g:syntastic_cpp_checkers = ['ycm']
+  let g:syntastic_c_checkers = ['ycm']
+  let g:syntastic_objc_checkers = ['ycm']
+  let g:syntastic_objcpp_checkers = ['ycm']
 endfunction
 
 

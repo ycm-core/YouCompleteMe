@@ -526,28 +526,31 @@ Default: `30`
 
     let g:ycm_max_diagnostics_to_display = 30
 
-### The `g:ycm_key_select_completion` option
+### The `g:ycm_key_list_select_completion` option
 
-This option controls the key mapping used to select the first completion string.
-Invoking it repeatedly cycles forward through the completion list.
+This option controls the key mappings used to select the first completion
+string.  Invoking any of them repeatedly cycles forward through the completion
+list.
 
-Default: `<TAB>`
+Some users like adding `<Enter>` to this list.
 
-    let g:ycm_key_select_completion = '<TAB>'
+Default: `['<TAB>', '<Down>']`
 
-### The `g:ycm_key_previous_completion` option
+    let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
 
-This option controls the key mapping used to select the previous completion
-string. Invoking it repeatedly cycles backwards through the completion list.
+### The `g:ycm_key_list_previous_completion` option
 
-Note that the default of `<S-TAB>` means Shift-TAB. Also note that the default
-mapping will probably only work in GUI Vim (Gvim or MacVim) and not in plain
-console Vim because the terminal usually does not forward modifier key
-combinations to Vim.
+This option controls the key mappings used to select the previous completion
+string. Invoking any of them repeatedly cycles backwards through the completion
+list.
 
-Default: `<S-TAB>`
+Note that one of the defaults is `<S-TAB>` which means Shift-TAB. That mapping
+will probably only work in GUI Vim (Gvim or MacVim) and not in plain console Vim
+because the terminal usually does not forward modifier key combinations to Vim.
 
-    let g:ycm_key_previous_completion = '<S-TAB>'
+Default: `['<S-TAB>', '<Up>']`
+
+    let g:ycm_key_previous_completion = ['<S-TAB>', '<Up>']
 
 ### The `g:ycm_key_invoke_completion` option
 
