@@ -180,7 +180,10 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
       set( hints "" )
     endif()
     # Need TEMP because find_library does not work with an option variable
-    find_library( TEMP clang HINTS ${hints} )
+    find_library( TEMP clang
+                  PATHS /usr/lib /usr/lib/llvm
+                  HINTS ${hints}
+                )
     set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
   else()
     # For Macs, we do things differently; look further in this file.
