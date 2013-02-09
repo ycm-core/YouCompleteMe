@@ -170,8 +170,19 @@ endif()
 
 if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
   if ( USE_SYSTEM_LIBCLANG )
+    if ( APPLE )
+      set( ENV_LIB_PATHS ENV DYLD_LIBRARY_PATH )
+    elseif ( UNIX )
+      set( ENV_LIB_PATHS ENV LD_LIBRARY_PATH )
+    elseif ( WIN32 )
+      set( ENV_LIB_PATHS ENV PATH )
+    else ()
+      set( ENV_LIB_PATHS "" )
+    endif()
     # Need TEMP because find_library does not work with an option variable
-    find_library( TEMP clang PATHS
+    find_library( TEMP clang
+                  PATHS
+                  ${ENV_LIB_PATHS}
                   /usr/lib
                   /usr/lib/llvm )
     set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
