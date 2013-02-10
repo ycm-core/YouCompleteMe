@@ -550,7 +550,7 @@ because the terminal usually does not forward modifier key combinations to Vim.
 
 Default: `['<S-TAB>', '<Up>']`
 
-    let g:ycm_key_previous_completion = ['<S-TAB>', '<Up>']
+    let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>']
 
 ### The `g:ycm_key_invoke_completion` option
 
