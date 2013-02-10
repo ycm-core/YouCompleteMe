@@ -35,7 +35,6 @@ except ImportError, e:
 
 from completers.all.identifier_completer import IdentifierCompleter
 
-
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
   'g:ycm_filetype_specific_completion_to_disable' )
 
@@ -50,7 +49,7 @@ class YouCompleteMe( object ):
     return self.identcomp
 
 
-  def GetFiletypeCompleterForCurrentFile( self ):
+  def GetFiletypeCompleter( self ):
     filetypes = vimsupport.CurrentFiletypes()
 
     for filetype in filetypes:
@@ -91,67 +90,67 @@ class YouCompleteMe( object ):
 
 
   def ShouldUseFiletypeCompleter( self, start_column ):
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      return self.GetFiletypeCompleterForCurrentFile().ShouldUseNow(
+    if self.FiletypeCompletionEnabled():
+      return self.GetFiletypeCompleter().ShouldUseNow(
         start_column )
     return False
 
 
-  def FiletypeCompletionAvailableForFile( self ):
-    return bool( self.GetFiletypeCompleterForCurrentFile() )
+  def FiletypeCompletionAvailable( self ):
+    return bool( self.GetFiletypeCompleter() )
 
 
-  def FiletypeCompletionEnabledForCurrentFile( self ):
+  def FiletypeCompletionEnabled( self ):
     filetypes = vimsupport.CurrentFiletypes()
     filetype_disabled = all([ x in FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE
                              for x in filetypes ])
 
     return ( not filetype_disabled and
-             self.FiletypeCompletionAvailableForFile() )
+             self.FiletypeCompletionAvailable() )
 
 
   def OnFileReadyToParse( self ):
     self.identcomp.OnFileReadyToParse()
 
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      self.GetFiletypeCompleterForCurrentFile().OnFileReadyToParse()
+    if self.FiletypeCompletionEnabled():
+      self.GetFiletypeCompleter().OnFileReadyToParse()
 
 
   def OnInsertLeave( self ):
     self.identcomp.OnInsertLeave()
 
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      self.GetFiletypeCompleterForCurrentFile().OnInsertLeave()
+    if self.FiletypeCompletionEnabled():
+      self.GetFiletypeCompleter().OnInsertLeave()
 
 
   def DiagnosticsForCurrentFileReady( self ):
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      return self.GetFiletypeCompleterForCurrentFile().DiagnosticsForCurrentFileReady()
+    if self.FiletypeCompletionEnabled():
+      return self.GetFiletypeCompleter().DiagnosticsForCurrentFileReady()
     return False
 
 
   def GetDiagnosticsForCurrentFile( self ):
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      return self.GetFiletypeCompleterForCurrentFile().GetDiagnosticsForCurrentFile()
+    if self.FiletypeCompletionEnabled():
+      return self.GetFiletypeCompleter().GetDiagnosticsForCurrentFile()
     return []
 
 
   def ShowDetailedDiagnostic( self ):
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      return self.GetFiletypeCompleterForCurrentFile().ShowDetailedDiagnostic()
+    if self.FiletypeCompletionEnabled():
+      return self.GetFiletypeCompleter().ShowDetailedDiagnostic()
 
 
   def GettingCompletions( self ):
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      return self.GetFiletypeCompleterForCurrentFile().GettingCompletions()
+    if self.FiletypeCompletionEnabled():
+      return self.GetFiletypeCompleter().GettingCompletions()
     return False
 
 
   def OnCurrentIdentifierFinished( self ):
     self.identcomp.OnCurrentIdentifierFinished()
 
-    if self.FiletypeCompletionEnabledForCurrentFile():
-      self.GetFiletypeCompleterForCurrentFile().OnCurrentIdentifierFinished()
+    if self.FiletypeCompletionEnabled():
+      self.GetFiletypeCompleter().OnCurrentIdentifierFinished()
 
 
   def DebugInfo( self ):

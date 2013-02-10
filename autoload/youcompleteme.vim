@@ -191,7 +191,7 @@ function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 
-  if pyeval( 'ycm_state.FiletypeCompletionEnabledForCurrentFile()' )
+  if pyeval( 'ycm_state.FiletypeCompletionEnabled()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
   endif
@@ -299,7 +299,7 @@ endfunction
 
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) &&
-        \ pyeval( 'ycm_state.FiletypeCompletionEnabledForCurrentFile()' ) &&
+        \ pyeval( 'ycm_state.FiletypeCompletionEnabled()' ) &&
         \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
@@ -365,7 +365,7 @@ endfunction
 
 function! s:CompletionsForQuery( query, use_filetype_completer )
   if a:use_filetype_completer
-    py completer = ycm_state.GetFiletypeCompleterForCurrentFile()
+    py completer = ycm_state.GetFiletypeCompleter()
   else
     py completer = ycm_state.GetIdentifierCompleter()
   endif
@@ -465,7 +465,7 @@ command! YcmDebugInfo call s:DebugInfo()
 
 
 function! s:ForceCompile()
-  if !pyeval( 'ycm_state.FiletypeCompletionEnabledForCurrentFile()' )
+  if !pyeval( 'ycm_state.FiletypeCompletionEnabled()' )
     echom "Filetype completion not supported for current file, "
           \ . "cannot force recompilation."
   endif
