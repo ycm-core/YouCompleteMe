@@ -46,6 +46,8 @@ flags = [
 '../llvm/tools/clang/include',
 '-I',
 '.',
+'-I',
+'./ClangCompleter',
 '-isystem',
 './tests/gmock/gtest',
 '-isystem',
