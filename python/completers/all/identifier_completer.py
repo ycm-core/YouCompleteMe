@@ -30,6 +30,7 @@ MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
 
 class IdentifierCompleter( Completer ):
   def __init__( self ):
+    super( IdentifierCompleter, self ).__init__()
     self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
 

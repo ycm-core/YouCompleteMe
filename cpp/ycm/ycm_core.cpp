@@ -16,6 +16,7 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IdentifierCompleter.h"
+#include "PythonSupport.h"
 #include "Future.h"
 
 #ifdef USE_CLANG_COMPLETER
@@ -47,6 +48,7 @@ BOOST_PYTHON_MODULE(ycm_core)
   using namespace YouCompleteMe;
 
   def( "HasClangSupport", HasClangSupport );
+  def( "FilterAndSortCandidates", FilterAndSortCandidates );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )

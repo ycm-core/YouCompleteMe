@@ -86,6 +86,19 @@ private:
 
 };
 
+template< class T >
+struct ResultAnd {
+  ResultAnd( T extra_object, const Result &result )
+    : extra_object_( extra_object ), result_( result ) {}
+
+  bool operator< ( const ResultAnd &other ) const {
+    return result_ < other.result_;
+  }
+
+  T extra_object_;
+  Result result_;
+};
+
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: RESULT_H_CZYD2SGN */

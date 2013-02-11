@@ -55,6 +55,7 @@ extern const unsigned int MIN_ASYNC_THREADS;
 
 namespace {
 
+// TODO: replace this with ResultAnd from Result.h
 struct CompletionDataAndResult {
   CompletionDataAndResult( const CompletionData *completion_data,
                            const Result &result )
@@ -419,7 +420,7 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
 
     if ( result.IsSubsequence() ) {
       CompletionDataAndResult data_and_result( &completion_datas[ i ], result );
-      data_and_results.push_back( data_and_result );
+      data_and_results.push_back( boost::move( data_and_result ) );
     }
   }
 

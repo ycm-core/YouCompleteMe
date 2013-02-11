@@ -191,7 +191,7 @@ function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 
-  if pyeval( 'ycm_state.FiletypeCompletionEnabled()' )
+  if pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
   endif
@@ -299,7 +299,7 @@ endfunction
 
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) &&
-        \ pyeval( 'ycm_state.FiletypeCompletionEnabled()' ) &&
+        \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
         \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
@@ -408,6 +408,8 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
 
+
+    " TODO: make this a function-local variable instead of a script-local one
     let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
     let s:should_use_filetype_completion =
           \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
@@ -465,7 +467,7 @@ command! YcmDebugInfo call s:DebugInfo()
 
 
 function! s:ForceCompile()
-  if !pyeval( 'ycm_state.FiletypeCompletionEnabled()' )
+  if !pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     echom "Filetype completion not supported for current file, "
           \ . "cannot force recompilation."
   endif

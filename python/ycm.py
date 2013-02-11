@@ -34,6 +34,8 @@ except ImportError, e:
       os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
 
 from completers.all.identifier_completer import IdentifierCompleter
+from completers.all.omni_completer import OmniCompleter
+
 
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
   'g:ycm_filetype_specific_completion_to_disable' )
@@ -42,6 +44,7 @@ FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
 class YouCompleteMe( object ):
   def __init__( self ):
     self.identcomp = IdentifierCompleter()
+    self.omnicomp = OmniCompleter()
     self.filetype_completers = {}
 
 
@@ -56,7 +59,6 @@ class YouCompleteMe( object ):
       completer = self.GetFiletypeCompleterForFiletype( filetype )
       if completer:
         return completer
-
     return None
 
 
@@ -79,6 +81,8 @@ class YouCompleteMe( object ):
       completer = module.GetCompleter()
       if completer:
         supported_filetypes.extend( completer.SupportedFiletypes() )
+    else:
+      completer = self.omnicomp
 
     for supported_filetype in supported_filetypes:
       self.filetype_completers[ supported_filetype ] = completer
@@ -90,58 +94,64 @@ class YouCompleteMe( object ):
 
 
   def ShouldUseFiletypeCompleter( self, start_column ):
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().ShouldUseNow(
         start_column )
     return False
+
+
+  def NativeFiletypeCompletionAvailable( self ):
+    completer = self.GetFiletypeCompleter()
+    return bool( completer ) and completer is not self.omnicomp
 
 
   def FiletypeCompletionAvailable( self ):
     return bool( self.GetFiletypeCompleter() )
 
 
-  def FiletypeCompletionEnabled( self ):
-    filetypes = vimsupport.CurrentFiletypes()
-    filetype_disabled = all([ x in FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE
-                             for x in filetypes ])
+  def NativeFiletypeCompletionUsable( self ):
+    return ( _CurrentFiletypeCompletionEnabled() and
+             self.NativeFiletypeCompletionAvailable() )
 
-    return ( not filetype_disabled and
+
+  def FiletypeCompletionUsable( self ):
+    return ( _CurrentFiletypeCompletionEnabled() and
              self.FiletypeCompletionAvailable() )
 
 
   def OnFileReadyToParse( self ):
     self.identcomp.OnFileReadyToParse()
 
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnFileReadyToParse()
 
 
   def OnInsertLeave( self ):
     self.identcomp.OnInsertLeave()
 
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnInsertLeave()
 
 
   def DiagnosticsForCurrentFileReady( self ):
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().DiagnosticsForCurrentFileReady()
     return False
 
 
   def GetDiagnosticsForCurrentFile( self ):
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().GetDiagnosticsForCurrentFile()
     return []
 
 
   def ShowDetailedDiagnostic( self ):
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().ShowDetailedDiagnostic()
 
 
   def GettingCompletions( self ):
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().GettingCompletions()
     return False
 
@@ -149,7 +159,7 @@ class YouCompleteMe( object ):
   def OnCurrentIdentifierFinished( self ):
     self.identcomp.OnCurrentIdentifierFinished()
 
-    if self.FiletypeCompletionEnabled():
+    if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnCurrentIdentifierFinished()
 
 
@@ -173,6 +183,11 @@ class YouCompleteMe( object ):
 
     return '\n'.join( output )
 
+
+def _CurrentFiletypeCompletionEnabled():
+  filetypes = vimsupport.CurrentFiletypes()
+  return not all([ x in FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE
+                   for x in filetypes ])
 
 
 def _PathToCompletersFolder():
