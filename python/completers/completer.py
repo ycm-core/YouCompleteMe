@@ -21,6 +21,7 @@ import abc
 import vim
 import vimsupport
 import ycm_core
+from collections import defaultdict
 
 
 class CompletionsCache( object ):
@@ -42,19 +43,43 @@ class Completer( object ):
 
 
   def __init__( self ):
+    self.triggers_for_filetype = TriggersForFiletype()
     self.completions_future = None
     self.completions_cache = None
 
 
   def ShouldUseNow( self, start_column ):
     inner_says_yes = self.ShouldUseNowInner( start_column )
+    if not inner_says_yes:
+      self.completions_cache = None
+
     previous_results_were_empty = ( self.completions_cache and
+                                    self.completions_cache.CacheValid() and
                                     not self.completions_cache.raw_completions )
     return inner_says_yes and not previous_results_were_empty
 
 
   def ShouldUseNowInner( self, start_column ):
-    pass
+    line = vim.current.line
+    line_length = len( line )
+    if not line_length or start_column - 1 >= line_length:
+      return False
+
+    filetype = vimsupport.CurrentFiletypes()[ 0 ]
+    triggers = self.triggers_for_filetype[ filetype ]
+
+    for trigger in triggers:
+      index = -1
+      trigger_length = len( trigger )
+      while True:
+        line_index = start_column + index
+        if line_index < 0 or line[ line_index ] != trigger[ index ]:
+          break
+
+        if abs( index ) == trigger_length:
+          return True
+        index -= 1
+    return False
 
 
   def CandidatesForQueryAsync( self, query ):
@@ -169,3 +194,16 @@ class Completer( object ):
 
   def DebugInfo( self ):
     return ''
+
+
+def TriggersForFiletype():
+  triggers = vim.eval( 'g:ycm_semantic_triggers' )
+  triggers_for_filetype = defaultdict( list )
+
+  for key, value in triggers.iteritems():
+    filetypes = key.split( ',' )
+    for filetype in filetypes:
+      triggers_for_filetype[ filetype ].extend( value )
+
+  return triggers_for_filetype
+

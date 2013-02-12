@@ -199,7 +199,8 @@ class ClangCompleter( Completer ):
 
 
   def ShouldUseNow( self, start_column ):
-    return ShouldUseClang( start_column )
+    # We don't want to use the Completer API cache, we use one in the C++ code.
+    return self.ShouldUseNowInner( start_column )
 
 
   def DebugInfo( self ):
@@ -246,24 +247,3 @@ def DiagnosticsToDiagStructure( diagnostics ):
 def ClangAvailableForBuffer( buffer_object ):
   filetype = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
   return filetype in CLANG_FILETYPES
-
-
-def ShouldUseClang( start_column ):
-  line = vim.current.line
-  previous_char_index = start_column - 1
-  if ( not len( line ) or
-       previous_char_index < 0 or
-       previous_char_index >= len( line ) ):
-    return False
-
-  if line[ previous_char_index ] == '.':
-    return True
-
-  if previous_char_index - 1 < 0:
-    return False
-
-  two_previous_chars = line[ previous_char_index - 1 : start_column ]
-  if ( two_previous_chars == '->' or two_previous_chars == '::' ):
-    return True
-
-  return False

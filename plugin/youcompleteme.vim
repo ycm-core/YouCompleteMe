@@ -95,6 +95,14 @@ let g:ycm_key_detailed_diagnostics =
 let g:ycm_global_ycm_extra_conf =
       \ get( g:, 'ycm_global_ycm_extra_conf', '' )
 
+let g:ycm_semantic_triggers =
+      \ get( g:, 'ycm_semantic_triggers', {
+      \   'c,cpp,objc,objcpp' : ['->', '.', '::'],
+      \   'perl,php' : ['->'],
+      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb' : ['.'],
+      \   'lua' : ['.', ':'],
+      \ } )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart

@@ -32,19 +32,6 @@ class OmniCompleter( Completer ):
     return []
 
 
-  def ShouldUseNowInner( self, start_column ):
-    line = vim.current.line
-    previous_char_index = start_column - 1
-    if ( not len( line ) or
-        previous_char_index < 0 or
-        previous_char_index >= len( line ) ):
-      return False
-
-    if line[ previous_char_index ] == '.':
-      return True
-    return False
-
-
   def CandidatesForQueryAsyncInner( self, query ):
     if not self.omnifunc:
       self.stored_candidates = None
