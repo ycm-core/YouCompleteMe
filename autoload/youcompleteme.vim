@@ -194,6 +194,13 @@ function! s:SetCompleteFunc()
   if pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
+
+  " If we don't have native filetype support but the omnifunc is set to YCM's
+  " omnifunc because the previous file the user was editing DID have native
+  " support, we remove our omnifunc.
+  elseif &omnifunc == 'youcompleteme#OmniComplete'
+    let &omnifunc = ''
+    let &l:omnifunc = ''
   endif
 endfunction
 
