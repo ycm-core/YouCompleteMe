@@ -97,10 +97,13 @@ let g:ycm_global_ycm_extra_conf =
 
 let g:ycm_semantic_triggers =
       \ get( g:, 'ycm_semantic_triggers', {
-      \   'c,cpp,objc,objcpp' : ['->', '.', '::'],
+      \   'c' : ['->', '.'],
+      \   'objc' : ['->', '.'],
+      \   'cpp,objcpp' : ['->', '.', '::'],
       \   'perl,php' : ['->'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb' : ['.'],
+      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir' : ['.'],
       \   'lua' : ['.', ':'],
+      \   'erlang' : [':'],
       \ } )
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's

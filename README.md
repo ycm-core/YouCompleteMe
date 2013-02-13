@@ -647,11 +647,14 @@ listed as a trigger, the same thing would happen when the user typed `foo->`.
 Default: `[see next line]`
 
     let g:ycm_semantic_triggers =  {
-      \   'c,cpp,objc,objcpp' : ['->', '.', '::'],
+      \   'c' : ['->', '.'],
+      \   'objc' : ['->', '.'],
+      \   'cpp,objcpp' : ['->', '.', '::'],
       \   'perl,php' : ['->'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb' : ['.'],
+      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir' : ['.'],
       \   'lua' : ['.', ':'],
-      }
+      \   'erlang' : [':'],
+    }
 
 FAQ
 ---
