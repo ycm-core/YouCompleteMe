@@ -475,8 +475,9 @@ command! YcmDebugInfo call s:DebugInfo()
 
 function! s:ForceCompile()
   if !pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
-    echom "Filetype completion not supported for current file, "
+    echom "Native filetype completion not supported for current file, "
           \ . "cannot force recompilation."
+    return
   endif
 
   echom "Forcing compilation, this will block Vim until done."
