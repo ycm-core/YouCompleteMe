@@ -37,10 +37,12 @@
           <span class="credits right">Hosted on GitHub Pages — Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
     <div id="markdown-output"><p>YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
-<a href="http://www.vim.org/">Vim</a>. It has two completion engines: an identifier-based engine that works
-with every programming language and a semantic, <a href="http://clang.llvm.org/">Clang</a>-based engine that
-provides semantic code completion for C/C++/Objective-C/Objective-C++ (from now
-on referred to as "the C-family languages").</p><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
+<a href="http://www.vim.org/">Vim</a>. It has several completion engines: an identifier-based engine that
+works with every programming language, a semantic, <a href="http://clang.llvm.org/">Clang</a>-based engine that
+provides native semantic code completion for C/C++/Objective-C/Objective-C++
+(from now on referred to as "the C-family languages") and an omnifunc-based
+completer that uses data from Vim's omnicomplete system to provide semantic
+completions for many other languages (Python, Ruby, PHP etc.).</p><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
 of completion candidates at any point in the demo. The user just types and the
 suggestions pop up by themselves. If the user doesn't find the completion
 suggestions relevant and/or just wants to type, he can do so; the completion
@@ -210,10 +212,11 @@ given an input of "gua", the completion "getUserAccount" would be ranked higher
 in the list than the "Fooguxa" completion (both of which are subsequence
 matches). A word-boundary character are all capital characters, characters
 preceded by an underscore and the first letter character in the completion
-string.</p><h3>Semantic Completion Engine Usage</h3><ul>
+string.</p><h3>General Semantic Completion Engine Usage</h3><ul>
 <li>You can use Ctrl+Space to trigger the completion suggestions anywhere, even
   without a string prefix.  This is useful to see which top-level functions are
   available for use.</li>
+</ul><h3>C-family Semantic Completion Engine Usage</h3><ul>
 <li>You <em>really</em> also want to install the latest version of the <a href="https://github.com/scrooloose/syntastic">Syntastic</a> Vim
   plugin. It has support for YCM and together they will provide you with compile
   errors/warnings practically instantly and without saving the file.</li>
@@ -262,7 +265,22 @@ current file in Vim's <code>locationlist</code>, which can be opened with the <c
 <code>:lclose</code> commands. A good way to toggle the display of the <code>locationlist</code> with
 a single key mapping is provided by another (very small) Vim plugin called
 <a href="https://github.com/Valloric/ListToggle">ListToggle</a> (which also makes it possible to change the height of the
-<code>locationlist</code> window), also written by yours truly.</p><p>TODO: extending the semantic engine for other langs</p><h2>Commands</h2><h3>The <code>YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
+<code>locationlist</code> window), also written by yours truly.</p><h3>Writing New Semantic Completers</h3><p>You have two options here: writing an <code>omnifunc</code> for Vim's omnicomplete system
+that YCM will then use through its omni-completer, or a custom completer for YCM
+using the <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py">Completer API</a>.</p><p>Here are the differences between the two approaches:</p><ul>
+<li>You have to use VimScript to write the omnifunc, but get to use Python to
+  write for the Completer API; this by itself should make you want to use the
+  API.</li>
+<li>The Completer API is a <em>much</em> more powerful way to integrate with YCM and it
+  provides a wider set of features. For instance, you can make your Completer
+  query your semantic back-end in an asynchronous fashion, thus not blocking
+  Vim's GUI thread while your completion system is processing stuff. This is
+  impossible with VimScript. All of YCM's completers use the Completer API.</li>
+<li>Performance with the Completer API is better since Python executes faster than
+  VimScript.</li>
+</ul><p>If you want to use the <code>omnifunc</code> system, see the relevant Vim docs with <code>:h
+complete-functions</code>. For the Completer API, see <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py">the API docs</a>.</p><p>If you want to upstream your completer into YCM's source, you should use the
+Completer API.</p><h2>Commands</h2><h3>The <code>YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
 and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI <em>will</em> be
 blocked.</p><p>You may want to map this command to a key; try putting <code>nnoremap &lt;F5&gt;
@@ -327,13 +345,14 @@ irrelevant. See the <code>g:ycm_add_preview_to_completeopt</code> option for mor
 errors or warnings are detected in the file. This option is only relevant if you
 are using the semantic completion engine and have installed the version of the
 Syntastic plugin that supports YCM.</p><p>Default: <code>30</code></p><pre><code>let g:ycm_max_diagnostics_to_display = 30
-</code></pre><h3>The <code>g:ycm_key_select_completion</code> option</h3><p>This option controls the key mapping used to select the first completion string.
-Invoking it repeatedly cycles forward through the completion list.</p><p>Default: <code>&lt;TAB&gt;</code></p><pre><code>let g:ycm_key_select_completion = '&lt;TAB&gt;'
-</code></pre><h3>The <code>g:ycm_key_previous_completion</code> option</h3><p>This option controls the key mapping used to select the previous completion
-string. Invoking it repeatedly cycles backwards through the completion list.</p><p>Note that the default of <code>&lt;S-TAB&gt;</code> means Shift-TAB. Also note that the default
-mapping will probably only work in GUI Vim (Gvim or MacVim) and not in plain
-console Vim because the terminal usually does not forward modifier key
-combinations to Vim.</p><p>Default: <code>&lt;S-TAB&gt;</code></p><pre><code>let g:ycm_key_previous_completion = '&lt;S-TAB&gt;'
+</code></pre><h3>The <code>g:ycm_key_list_select_completion</code> option</h3><p>This option controls the key mappings used to select the first completion
+string.  Invoking any of them repeatedly cycles forward through the completion
+list.</p><p>Some users like adding <code>&lt;Enter&gt;</code> to this list.</p><p>Default: <code>['&lt;TAB&gt;', '&lt;Down&gt;']</code></p><pre><code>let g:ycm_key_list_select_completion = ['&lt;TAB&gt;', '&lt;Down&gt;']
+</code></pre><h3>The <code>g:ycm_key_list_previous_completion</code> option</h3><p>This option controls the key mappings used to select the previous completion
+string. Invoking any of them repeatedly cycles backwards through the completion
+list.</p><p>Note that one of the defaults is <code>&lt;S-TAB&gt;</code> which means Shift-TAB. That mapping
+will probably only work in GUI Vim (Gvim or MacVim) and not in plain console Vim
+because the terminal usually does not forward modifier key combinations to Vim.</p><p>Default: <code>['&lt;S-TAB&gt;', '&lt;Up&gt;']</code></p><pre><code>let g:ycm_key_list_previous_completion = ['&lt;S-TAB&gt;', '&lt;Up&gt;']
 </code></pre><h3>The <code>g:ycm_key_invoke_completion</code> option</h3><p>This option controls the key mapping used to invoke the completion menu for
 semantic completion. By default, semantic completion is trigged automatically
 after typing <code>.</code>, <code>-&gt;</code> and <code>::</code> in insert mode (if semantic completion support
@@ -349,7 +368,20 @@ the user's cursor is on the line with the diagnostic. It basically calls
 (see the User Guide for more details on how this works). You can use this option
 to override this searching behavior by providing a full, absolute path to a
 global <code>.ycm_extra_conf.py</code> file (although you can call the global file whatever
-you want).</p><p>You can place such a global file anywhere in your filesystem.</p><p>Default: ``</p><pre><code>let g:ycm_global_ycm_extra_conf = ''
+you want).</p><p>You can place such a global file anywhere in your filesystem.</p><p>Default: <code>''</code></p><pre><code>let g:ycm_global_ycm_extra_conf = ''
+</code></pre><h3>The <code>g:ycm_semantic_triggers</code> option</h3><p>This option controls the character-based triggers for the various semantic
+completion engines. The option holds a dictionary of key-values, where the keys
+are Vim's filetype strings delimited by commas and values are lists of strings,
+where the strings are the triggers.</p><p>A "trigger" is a sequence of one or more characters that trigger semantic
+completion when typed. For instance, C++ (<code>cpp</code> filetype) has <code>.</code> listed as a
+trigger. So when the user types <code>foo.</code>, the semantic engine will trigger and
+serve <code>foo</code>'s list of member functions and variables. Since C++ also has <code>-&gt;</code>
+listed as a trigger, the same thing would happen when the user typed <code>foo-&gt;</code>.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_semantic_triggers =  {
+  \   'c,cpp,objc,objcpp' : ['-&gt;', '.', '::'],
+  \   'perl,php' : ['-&gt;'],
+  \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb' : ['.'],
+  \   'lua' : ['.', ':'],
+  }
 </code></pre><h2>FAQ</h2><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory</code>, then feel free to ignore it; it's caused by a limitation of
 CMake and is not an issue. Everything should still work fine.</p><h3>I get a weird window at the top of my file when I use the semantic engine</h3><p>This is Vim's <code>preview</code> window. Vim uses it to show you extra information about
