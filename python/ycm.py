@@ -33,6 +33,7 @@ except ImportError, e:
     'the docs. Full error: {1}'.format(
       os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
 
+
 from completers.all.identifier_completer import IdentifierCompleter
 from completers.all.omni_completer import OmniCompleter
 
@@ -236,4 +237,14 @@ def CurrentIdentifierFinished():
   else:
     return line[ : current_column ].isspace()
 
+
+COMPATIBLE_WITH_CORE_VERSION = 1
+
+def CompatibleWithYcmCore():
+  try:
+    current_core_version = ycm_core.YcmCoreVersion()
+  except AttributeError:
+    return False
+
+  return current_core_version == COMPATIBLE_WITH_CORE_VERSION
 

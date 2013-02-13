@@ -37,6 +37,20 @@ function! youcompleteme#Enable()
     return
   endif
 
+  py import sys
+  py import vim
+  exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+  py import ycm
+
+  if !pyeval( 'ycm.CompatibleWithYcmCore()')
+    echohl WarningMsg |
+      \ echomsg "YouCompleteMe unavailable, ycm_core too old, PLEASE RECOMPILE" |
+      \ echohl None
+    return
+  endif
+
+  py ycm_state = ycm.YouCompleteMe()
+
   augroup youcompleteme
     autocmd!
     autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
@@ -59,12 +73,6 @@ function! youcompleteme#Enable()
   if g:ycm_allow_changing_updatetime
     set ut=2000
   endif
-
-  py import sys
-  py import vim
-  exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
-  py import ycm
-  py ycm_state = ycm.YouCompleteMe()
 
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
   " the first loaded file. This should be the last command executed in this
@@ -477,7 +485,7 @@ function! s:ForceCompile()
   if !pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     echom "Native filetype completion not supported for current file, "
           \ . "cannot force recompilation."
-    return
+    return 0
   endif
 
   echom "Forcing compilation, this will block Vim until done."

@@ -41,6 +41,13 @@ bool HasClangSupport()
 #endif // USE_CLANG_COMPLETER
 }
 
+int YcmCoreVersion()
+{
+  // We increment this every time when we want to force users to recompile
+  // ycm_core.
+  return 1;
+}
+
 
 BOOST_PYTHON_MODULE(ycm_core)
 {
@@ -49,6 +56,7 @@ BOOST_PYTHON_MODULE(ycm_core)
 
   def( "HasClangSupport", HasClangSupport );
   def( "FilterAndSortCandidates", FilterAndSortCandidates );
+  def( "YcmCoreVersion", YcmCoreVersion );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
