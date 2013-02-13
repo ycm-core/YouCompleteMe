@@ -24,23 +24,80 @@ import ycm_core
 from collections import defaultdict
 
 
-class CompletionsCache( object ):
-  def __init__( self ):
-    self.line = -1
-    self.column = -1
-    self.raw_completions = []
-    self.filtered_completions = []
-
-
-  def CacheValid( self ):
-    completion_line, _ = vimsupport.CurrentLineAndColumn()
-    completion_column = int( vim.eval( "s:completion_start_column" ) )
-    return completion_line == self.line and completion_column == self.column
-
-
 class Completer( object ):
-  __metaclass__ = abc.ABCMeta
+  """A base class for all Completers in YCM.
 
+  Here's several important things you need to know if you're writing a custom
+  Completer. First, there are several very important functions that the Vim part
+  of YCM will be calling on your Completer.
+
+  ShouldUseNow() is called with the start column of where a potential completion
+  string should start. For instance, if the user's input is 'foo.bar' and the
+  cursor is on the 'r' in 'bar', start_column will be the 0-based index of 'b'
+  in the line. Your implementation of ShouldUseNow() should return True if your
+  semantic completer should be used and False otherwise.
+
+  This is important to get right. You want to return False if you can't provide
+  completions because then the identifier completer will kick in, and that's
+  better than nothing.
+
+  Note that it's HIGHLY likely that you want to override the ShouldUseNowInner()
+  function instead of ShouldUseNow() directly. ShouldUseNow() will call your
+  *Inner version of the function and will also make sure that the completion
+  cache is taken into account. You'll see this pattern repeated throughout the
+  Completer API; YCM calls the "main" version of the function and that function
+  calls the *Inner version while taking into account the cache.
+
+  The cache is important and is a nice performance boost. When the user types in
+  "foo.", your completer will return a list of all member functions and
+  variables that can be accessed on the "foo" object. The Completer API caches
+  this list. The user will then continue typing, let's say "foo.ba". On every
+  keystroke after the dot, the Completer API will take the cache into account
+  and will NOT re-query your completer but will in fact provide fuzzy-search on
+  the candidate strings that were stored in the cache.
+
+  CandidatesForQueryAsync() is the main entry point when the user types. For
+  "foo.bar", the user query is "bar" and completions matching this string should
+  be shown. The job of CandidatesForQueryAsync() is to merely initiate this
+  request, hopefully in the background with a thread.
+
+  AsyncCandidateRequestReady() is the function that is repeatedly polled until
+  it returns True. If CandidatesForQueryAsync() started a background task of
+  collecting the required completions, AsyncCandidateRequestReady() would check
+  the state of that task and return False until it was completed.
+
+  CandidatesFormStoredRequest() should return the list of candidates. This is
+  what YCM calls after AsyncCandidateRequestReady() returns True. The format of
+  the result can be a list of strings or a more complicated list of
+  dictionaries. See ':h complete-items' for the format, and clang_completer.py
+  to see how its used in practice.
+
+  You also need to implement the SupportedFiletypes() function which should
+  return a list of strings, where the strings are Vim filetypes your completer
+  supports.
+
+  clang_completer.py is a good example of a "complicated" completer that
+  maintains its own internal cache and therefore directly overrides the "main"
+  functions in the API instead of the *Inner versions. A good example of a
+  simple completer that does not do this is omni_completer.py.
+
+  If you're confident your completer doesn't need a background task (think
+  again, you probably do) because you can "certainly" furnish a response in
+  under 10ms, then you can perform your backend processing in a synchronous
+  fashion. You may also need to do this because of technical restrictions (much
+  like omni_completer.py has to do it because accessing Vim internals is not
+  thread-safe). But even if you're certain, still try to do the processing in a
+  background thread. Your completer is unlikely to be merged if it does not,
+  because synchronous processing will block Vim's GUI thread and that's a very,
+  VERY bad thing (so try not to do it!).
+
+  The On* functions are provided for your convenience. They are called when
+  their specific events occur. For instance, the identifier completer collects
+  all the identifiers in the file in OnFileReadyToParse() which gets called when
+  the user stops typing for 2 seconds (Vim's CursorHold and CursorHoldI events).
+  """
+
+  __metaclass__ = abc.ABCMeta
 
   def __init__( self ):
     self.triggers_for_filetype = TriggersForFiletype()
@@ -48,6 +105,8 @@ class Completer( object ):
     self.completions_cache = None
 
 
+  # It's highly likely you DON'T want to override this function but the *Inner
+  # version of it.
   def ShouldUseNow( self, start_column ):
     inner_says_yes = self.ShouldUseNowInner( start_column )
     if not inner_says_yes:
@@ -82,6 +141,8 @@ class Completer( object ):
     return False
 
 
+  # It's highly likely you DON'T want to override this function but the *Inner
+  # version of it.
   def CandidatesForQueryAsync( self, query ):
     if query and self.completions_cache and self.completions_cache.CacheValid():
       self.completions_cache.filtered_completions = (
@@ -111,6 +172,8 @@ class Completer( object ):
     pass
 
 
+  # It's highly likely you DON'T want to override this function but the *Inner
+  # version of it.
   def AsyncCandidateRequestReady( self ):
     if self.completions_cache:
       return True
@@ -126,6 +189,8 @@ class Completer( object ):
     return self.completions_future.ResultsReady()
 
 
+  # It's highly likely you DON'T want to override this function but the *Inner
+  # version of it.
   def CandidatesFromStoredRequest( self ):
     if self.completions_cache:
       return self.completions_cache.filtered_completions
@@ -194,6 +259,20 @@ class Completer( object ):
 
   def DebugInfo( self ):
     return ''
+
+
+class CompletionsCache( object ):
+  def __init__( self ):
+    self.line = -1
+    self.column = -1
+    self.raw_completions = []
+    self.filtered_completions = []
+
+
+  def CacheValid( self ):
+    completion_line, _ = vimsupport.CurrentLineAndColumn()
+    completion_column = int( vim.eval( "s:completion_start_column" ) )
+    return completion_line == self.line and completion_column == self.column
 
 
 def TriggersForFiletype():
