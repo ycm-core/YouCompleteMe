@@ -2,10 +2,12 @@ YouCompleteMe: a code-completion engine for Vim
 ===============================================
 
 YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
-[Vim][]. It has two completion engines: an identifier-based engine that works
-with every programming language and a semantic, [Clang][]-based engine that
-provides semantic code completion for C/C++/Objective-C/Objective-C++ (from now
-on referred to as "the C-family languages").
+[Vim][]. It has several completion engines: an identifier-based engine that
+works with every programming language, a semantic, [Clang][]-based engine that
+provides native semantic code completion for C/C++/Objective-C/Objective-C++
+(from now on referred to as "the C-family languages") and an omnifunc-based
+completer that uses data from Vim's omnicomplete system to provide semantic
+completions for many other languages (Python, Ruby, PHP etc.).
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
@@ -287,11 +289,14 @@ matches). A word-boundary character are all capital characters, characters
 preceded by an underscore and the first letter character in the completion
 string.
 
-### Semantic Completion Engine Usage
+### General Semantic Completion Engine Usage
 
 - You can use Ctrl+Space to trigger the completion suggestions anywhere, even
   without a string prefix.  This is useful to see which top-level functions are
   available for use.
+
+### C-family Semantic Completion Engine Usage
+
 - You _really_ also want to install the latest version of the [Syntastic][] Vim
   plugin. It has support for YCM and together they will provide you with compile
   errors/warnings practically instantly and without saving the file.
@@ -369,7 +374,30 @@ a single key mapping is provided by another (very small) Vim plugin called
 [ListToggle][] (which also makes it possible to change the height of the
 `locationlist` window), also written by yours truly.
 
-TODO: extending the semantic engine for other langs
+### Writing New Semantic Completers
+
+You have two options here: writing an `omnifunc` for Vim's omnicomplete system
+that YCM will then use through its omni-completer, or a custom completer for YCM
+using the [Completer API][completer-api].
+
+Here are the differences between the two approaches:
+
+- You have to use VimScript to write the omnifunc, but get to use Python to
+  write for the Completer API; this by itself should make you want to use the
+  API.
+- The Completer API is a _much_ more powerful way to integrate with YCM and it
+  provides a wider set of features. For instance, you can make your Completer
+  query your semantic back-end in an asynchronous fashion, thus not blocking
+  Vim's GUI thread while your completion system is processing stuff. This is
+  impossible with VimScript. All of YCM's completers use the Completer API.
+- Performance with the Completer API is better since Python executes faster than
+  VimScript.
+
+If you want to use the `omnifunc` system, see the relevant Vim docs with `:h
+complete-functions`. For the Completer API, see [the API docs][completer-api].
+
+If you want to upstream your completer into YCM's source, you should use the
+Completer API.
 
 Commands
 --------
@@ -593,10 +621,31 @@ you want).
 
 You can place such a global file anywhere in your filesystem.
 
-Default: ``
+Default: `''`
 
     let g:ycm_global_ycm_extra_conf = ''
 
+### The `g:ycm_semantic_triggers` option
+
+This option controls the character-based triggers for the various semantic
+completion engines. The option holds a dictionary of key-values, where the keys
+are Vim's filetype strings delimited by commas and values are lists of strings,
+where the strings are the triggers.
+
+A "trigger" is a sequence of one or more characters that trigger semantic
+completion when typed. For instance, C++ (`cpp` filetype) has `.` listed as a
+trigger. So when the user types `foo.`, the semantic engine will trigger and
+serve `foo`'s list of member functions and variables. Since C++ also has `->`
+listed as a trigger, the same thing would happen when the user typed `foo->`.
+
+Default: `[see next line]`
+
+    let g:ycm_semantic_triggers =  {
+      \   'c,cpp,objc,objcpp' : ['->', '.', '::'],
+      \   'perl,php' : ['->'],
+      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb' : ['.'],
+      \   'lua' : ['.', ':'],
+      }
 
 FAQ
 ---
@@ -796,3 +845,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [tracker]: https://github.com/Valloric/YouCompleteMe/issues?state=open
 [issue18]: https://github.com/Valloric/YouCompleteMe/issues/18
 [delimitMate]: https://github.com/Raimondi/delimitMate
+[completer-api]: https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
