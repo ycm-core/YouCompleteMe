@@ -77,8 +77,9 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
 Install YouCompleteMe with [Vundle][].
 
-**Remember:** YCM is a compiled plugin. If you **update** it using
-Vundle, you should rerun the install process again to rebuild it.
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_core library API has changed (happens rarely), YCM will
+notify you to recompile it. You should then rerun the install process.
 
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
@@ -117,8 +118,9 @@ from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
-**Remember:** YCM is a compiled plugin. If you **update** it using
-Vundle, you should rerun the install process again to rebuild it.
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_core library API has changed (happens rarely), YCM will
+notify you to recompile it. You should then rerun the install process.
 
 Install CMake. `sudo apt-get install cmake`
 
@@ -154,6 +156,10 @@ _should_ work on Windows without issues (but as of writing, it's untested on
 that platform).
 
 See the FAQ if you have any issues.
+
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_core library API has changed (happens rarely), YCM will
+notify you to recompile it. You should then rerun the install process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
