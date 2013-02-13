@@ -32,6 +32,12 @@ class OmniCompleter( Completer ):
     return []
 
 
+  def ShouldUseNowInner( self, start_column ):
+    if not self.omnifunc:
+      return False
+    return super( OmniCompleter, self ).ShouldUseNowInner( start_column )
+
+
   def CandidatesForQueryAsyncInner( self, query ):
     if not self.omnifunc:
       self.stored_candidates = None
