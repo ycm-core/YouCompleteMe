@@ -53,3 +53,5 @@ cpp/llvm/tools/clang/www/*
 # explicitely include them
 !LLVMBuild.txt
 
+# Exclude auto generated vim doc tags.
+doc/tags
