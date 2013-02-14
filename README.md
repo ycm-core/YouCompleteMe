@@ -81,6 +81,9 @@ Install YouCompleteMe with [Vundle][].
 using Vundle and the ycm_core library API has changed (happens rarely), YCM will
 notify you to recompile it. You should then rerun the install process.
 
+It's recommended that you have the latest Xcode installed along with the latest
+Command Line Tools (that you install from within Xcode).
+
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
 
