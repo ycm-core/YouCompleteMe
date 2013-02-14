@@ -9,6 +9,7 @@
 #define BOOST_XTIME_WEK070601_HPP
 
 #include <boost/thread/detail/config.hpp>
+#if defined BOOST_THREAD_USES_DATETIME
 
 #include <boost/cstdint.hpp>
 #include <boost/thread/thread_time.hpp>
@@ -88,5 +89,5 @@ inline int xtime_cmp(const xtime& xt1, const xtime& xt2)
 } // namespace boost
 
 #include <boost/config/abi_suffix.hpp>
-
+#endif
 #endif //BOOST_XTIME_WEK070601_HPP

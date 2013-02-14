@@ -19,18 +19,18 @@
 #endif
 
 //----------------------------------------------------------------------------//
-#if defined(BOOST_NO_VARIADIC_TEMPLATES) && !defined(BOOST_COMMON_TYPE_ARITY)
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && !defined(BOOST_COMMON_TYPE_ARITY)
 #define BOOST_COMMON_TYPE_ARITY 3
 #endif
 
 //----------------------------------------------------------------------------//
-#if defined(BOOST_NO_DECLTYPE) && !defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF) && !defined(BOOST_TYPEOF_SILENT)
+#if defined(BOOST_NO_CXX11_DECLTYPE) && !defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF) && !defined(BOOST_TYPEOF_SILENT)
 #define BOOST_TYPEOF_SILENT
 #include <boost/typeof/typeof.hpp>   // boost wonders never cease!
 #endif
 
 //----------------------------------------------------------------------------//
-#ifndef BOOST_NO_STATIC_ASSERT
+#ifndef BOOST_NO_CXX11_STATIC_ASSERT
 #define BOOST_COMMON_TYPE_STATIC_ASSERT(CND, MSG, TYPES) static_assert(CND,MSG)
 #elif defined(BOOST_COMMON_TYPE_USES_MPL_ASSERT)
 #include <boost/mpl/assert.hpp>
@@ -42,11 +42,11 @@
 #define BOOST_COMMON_TYPE_STATIC_ASSERT(CND, MSG, TYPES) BOOST_STATIC_ASSERT(CND)
 #endif
 
-#if !defined(BOOST_NO_STATIC_ASSERT) || !defined(BOOST_COMMON_TYPE_USES_MPL_ASSERT)
+#if !defined(BOOST_NO_CXX11_STATIC_ASSERT) || !defined(BOOST_COMMON_TYPE_USES_MPL_ASSERT)
 #define BOOST_COMMON_TYPE_MUST_BE_A_COMPLE_TYPE "must be complete type"
 #endif
 
-#if defined(BOOST_NO_DECLTYPE) && defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF)
+#if defined(BOOST_NO_CXX11_DECLTYPE) && defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF)
 #include <boost/type_traits/detail/common_type_imp.hpp>
 #include <boost/type_traits/remove_cv.hpp>
 #endif
@@ -57,7 +57,7 @@
 //----------------------------------------------------------------------------//
 //                                                                            //
 //                           C++03 implementation of                          //
-//             20.6.7 Other transformations [meta.trans.other]                //
+//             20.9.7.6 Other transformations [meta.trans.other]              //
 //                          Written by Howard Hinnant                         //
 //      Adapted for Boost by Beman Dawes, Vicente Botet and  Jeffrey Hellrung //
 //                                                                            //
@@ -66,7 +66,7 @@
 namespace boost {
 
 // prototype
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
     template<typename... T>
     struct common_type;
 #else // or no specialization
@@ -81,7 +81,7 @@ namespace boost {
 
 // 1 arg
     template<typename T>
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
     struct common_type<T>
 #else
     struct common_type<T, void, void>
@@ -107,7 +107,7 @@ namespace type_traits_detail {
         static typename add_rvalue_reference<U>::type declval_U();  // workaround gcc bug; not required by std
         static typename add_rvalue_reference<bool>::type declval_b();  
 
-#if !defined(BOOST_NO_DECLTYPE)
+#if !defined(BOOST_NO_CXX11_DECLTYPE)
     public:
         typedef decltype(declval<bool>() ? declval<T>() : declval<U>()) type;
 #elif defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF)
@@ -134,7 +134,7 @@ namespace type_traits_detail {
     };
     }
 
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
     template <class T, class U>
     struct common_type<T, U>
 #else
@@ -146,7 +146,7 @@ namespace type_traits_detail {
 
 
 // 3 or more args
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
     template<typename T, typename U, typename... V>
     struct common_type<T, U, V...> {
     public:

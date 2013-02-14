@@ -113,9 +113,10 @@
 #if (!defined(_HAS_TR1_IMPORTS) || (_HAS_TR1_IMPORTS+0 == 0)) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
 #  define BOOST_NO_CXX11_HDR_TUPLE
 #endif
+
+//  C++0x headers implemented in 540 (as shipped by Microsoft)
 //
-//  C++0x headers not yet (fully) implemented:
-//
+#if !defined(_CPPLIB_VER) || _CPPLIB_VER < 540
 #  define BOOST_NO_CXX11_HDR_TYPE_TRAITS
 #  define BOOST_NO_CXX11_HDR_CHRONO
 #  define BOOST_NO_CXX11_HDR_CONDITION_VARIABLE
@@ -125,6 +126,12 @@
 #  define BOOST_NO_CXX11_HDR_THREAD
 #  define BOOST_NO_CXX11_ALLOCATOR
 #  define BOOST_NO_CXX11_ATOMIC_SMART_PTR
+#endif
+
+//
+//  C++0x headers not yet (fully) implemented:
+//
+#  define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
 
 #ifdef _CPPLIB_VER
 #  define BOOST_DINKUMWARE_STDLIB _CPPLIB_VER

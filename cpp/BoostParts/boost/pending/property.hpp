@@ -244,6 +244,27 @@ namespace boost {
 
 } // namespace detail
 
+namespace detail {
+  // Stuff for directed_graph and undirected_graph to skip over their first
+  // vertex_index and edge_index properties when providing vertex_all and
+  // edge_all; make sure you know the exact structure of your properties if you
+  // use there.
+  struct remove_first_property {
+    template <typename F>
+    struct result {
+      typedef typename boost::function_traits<F>::arg1_type a1;
+      typedef typename boost::remove_reference<a1>::type non_ref;
+      typedef typename non_ref::next_type nx;
+      typedef typename boost::mpl::if_<boost::is_const<non_ref>, boost::add_const<nx>, nx>::type with_const;
+      typedef typename boost::add_reference<with_const>::type type;
+    };
+    template <typename Prop>
+    typename Prop::next_type& operator()(Prop& p) const {return p.m_base;}
+    template <typename Prop>
+    const typename Prop::next_type& operator()(const Prop& p) const {return p.m_base;}
+  };
+}
+
 } // namesapce boost
 
 #endif /* BOOST_PROPERTY_HPP */

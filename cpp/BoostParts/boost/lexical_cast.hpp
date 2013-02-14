@@ -112,7 +112,7 @@ namespace boost
             return *target;
         }
 
-#ifndef BOOST_NO_NOEXCEPT
+#ifndef BOOST_NO_CXX11_NOEXCEPT
         virtual const char *what() const noexcept
 #else
         virtual const char *what() const throw()
@@ -122,7 +122,7 @@ namespace boost
                    "source type value could not be interpreted as target";
         }
 
-#ifndef BOOST_NO_NOEXCEPT
+#ifndef BOOST_NO_CXX11_NOEXCEPT
         virtual ~bad_lexical_cast() BOOST_NOEXCEPT
 #else
         virtual ~bad_lexical_cast() throw()
@@ -151,7 +151,7 @@ namespace boost
 #include <cmath>
 #include <istream>
 
-#if !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
+#ifndef BOOST_NO_CXX11_HDR_ARRAY
 #include <array>
 #endif
 
@@ -162,6 +162,8 @@ namespace boost
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/type_traits/is_arithmetic.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+#include <boost/type_traits/has_left_shift.hpp>
+#include <boost/type_traits/has_right_shift.hpp>
 #include <boost/math/special_functions/sign.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/range/iterator_range_core.hpp>
@@ -171,242 +173,376 @@ namespace boost
 #endif
 
 namespace boost {
-    namespace detail // widest_char<...> (continuation)
-    {
-        struct not_a_character_type{};
 
-        template <typename CharT>
-        struct widest_char<not_a_character_type, CharT >
-        {
-            typedef CharT type;
-        };
-
-        template <typename CharT>
-        struct widest_char< CharT, not_a_character_type >
-        {
-            typedef CharT type;
-        };
-                
-        template <>
-        struct widest_char< not_a_character_type, not_a_character_type >
-        {
-            typedef char type;
-        };
-    } 
-
-    namespace detail // is_char_or_wchar<...> and stream_char<...> templates
+    namespace detail // is_char_or_wchar<...>
     {
         // returns true, if T is one of the character types
-        template <typename T>
+        template < typename T >
         struct is_char_or_wchar
         {
-            typedef ::boost::type_traits::ice_or<
-                    ::boost::is_same< T, char >::value,
+            typedef boost::type_traits::ice_or<
+                    boost::is_same< T, char >::value,
                     #ifndef BOOST_LCAST_NO_WCHAR_T
-                        ::boost::is_same< T, wchar_t >::value,
+                        boost::is_same< T, wchar_t >::value,
                     #endif
-                    #ifndef BOOST_NO_CHAR16_T
-                        ::boost::is_same< T, char16_t >::value,
+                    #ifndef BOOST_NO_CXX11_CHAR16_T
+                        boost::is_same< T, char16_t >::value,
                     #endif
-                    #ifndef BOOST_NO_CHAR32_T
-                        ::boost::is_same< T, char32_t >::value,
+                    #ifndef BOOST_NO_CXX11_CHAR32_T
+                        boost::is_same< T, char32_t >::value,
                     #endif
-                    ::boost::is_same< T, unsigned char >::value,
-                    ::boost::is_same< T, signed char >::value
+                    boost::is_same< T, unsigned char >::value,
+                    boost::is_same< T, signed char >::value
             > result_type;
 
             BOOST_STATIC_CONSTANT(bool, value = (result_type::value) );
         };
+    }
 
-        // selectors for choosing stream character type
-        // returns one of char, wchar_t, char16_t, char32_t or not_a_character_type types
-        template <typename Type>
-        struct stream_char
+    namespace detail // normalize_single_byte_char<Char>
+    {
+        // Converts signed/unsigned char to char
+        template < class Char >
+        struct normalize_single_byte_char 
         {
-            typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
-                is_char_or_wchar<Type >::value,
-                Type,
-                boost::detail::not_a_character_type
-            >::type type;
+            typedef Char type;
         };
 
         template <>
-        struct stream_char<unsigned char>
+        struct normalize_single_byte_char< signed char >
         {
             typedef char type;
         };
 
         template <>
-        struct stream_char<signed char>
+        struct normalize_single_byte_char< unsigned char >
         {
             typedef char type;
         };
+    }
 
-        template <typename CharT>
-        struct stream_char<CharT*>
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT>::type type;
-        };
+    namespace detail // deduce_character_type_later<T>
+    {
+        // Helper type, meaning that stram character for T must be deduced 
+        // at Stage 2 (See deduce_source_char<T> and deduce_target_char<T>)
+        template < class T > struct deduce_character_type_later {};
+    }
 
-        template <typename CharT>
-        struct stream_char<const CharT*>
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT>::type type;
-        };
+    namespace detail // stream_char_common<T>
+    {
+        // Selectors to choose stream character type (common for Source and Target)
+        // Returns one of char, wchar_t, char16_t, char32_t or deduce_character_type_later<T> types
+        // Executed on Stage 1 (See deduce_source_char<T> and deduce_target_char<T>)
+        template < typename Type >
+        struct stream_char_common: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Type >::value,
+            Type,
+            boost::detail::deduce_character_type_later< Type >
+        > {};
 
-        template <typename CharT>
-        struct stream_char<iterator_range<CharT*> >
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT*>::type type;
-        };
+        template < typename Char >
+        struct stream_char_common< Char* >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< Char* >
+        > {};
+
+        template < typename Char >
+        struct stream_char_common< const Char* >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< const Char* >
+        > {};
+
+        template < typename Char >
+        struct stream_char_common< boost::iterator_range< Char* > >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< boost::iterator_range< Char* > >
+        > {};
     
-        template <typename CharT>
-        struct stream_char<iterator_range<const CharT*> >
+        template < typename Char >
+        struct stream_char_common< boost::iterator_range< const Char* > >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< boost::iterator_range< const Char* > >
+        > {};
+
+        template < class Char, class Traits, class Alloc >
+        struct stream_char_common< std::basic_string< Char, Traits, Alloc > >
         {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<const CharT*>::type type;
+            typedef Char type;
         };
 
-        template <class CharT, class Traits, class Alloc>
-        struct stream_char< std::basic_string<CharT, Traits, Alloc> >
+        template < class Char, class Traits, class Alloc >
+        struct stream_char_common< boost::container::basic_string< Char, Traits, Alloc > >
         {
-            typedef CharT type;
+            typedef Char type;
         };
 
-        template <class CharT, class Traits, class Alloc>
-        struct stream_char< ::boost::container::basic_string<CharT, Traits, Alloc> >
-        {
-            typedef CharT type;
-        };
+        template < typename Char, std::size_t N >
+        struct stream_char_common< boost::array< Char, N > >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< boost::array< Char, N > >
+        > {};
 
-        template<typename CharT, std::size_t N>
-        struct stream_char<boost::array<CharT, N> >
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT>::type type;
-        };
+        template < typename Char, std::size_t N >
+        struct stream_char_common< boost::array< const Char, N > >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< boost::array< const Char, N > >
+        > {};
 
-        template<typename CharT, std::size_t N>
-        struct stream_char<boost::array<const CharT, N> >
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT>::type type;
-        };
+#ifndef BOOST_NO_CXX11_HDR_ARRAY
+        template < typename Char, std::size_t N >
+        struct stream_char_common< std::array<Char, N > >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< std::array< Char, N > >
+        > {};
 
-#if !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
-        template <typename CharT, std::size_t N>
-        struct stream_char<std::array<CharT, N> >
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT>::type type;
-        };
-
-        template <typename CharT, std::size_t N>
-        struct stream_char<std::array<const CharT, N> >
-        {
-            typedef BOOST_DEDUCED_TYPENAME stream_char<CharT>::type type;
-        };
-#endif // !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
+        template < typename Char, std::size_t N >
+        struct stream_char_common< std::array< const Char, N > >: public boost::mpl::if_c<
+            boost::detail::is_char_or_wchar< Char >::value,
+            Char,
+            boost::detail::deduce_character_type_later< std::array< const Char, N > >
+        > {};
+#endif
 
 #if !defined(BOOST_LCAST_NO_WCHAR_T) && defined(BOOST_NO_INTRINSIC_WCHAR_T)
-        template<>
-        struct stream_char<wchar_t>
+        template <>
+        struct stream_char_common< wchar_t >
         {
-            typedef boost::detail::not_a_character_type type;
-        };
-
-        template<>
-        struct stream_char<wchar_t*>
-        {
-            typedef wchar_t type;
-        };
-
-        template<>
-        struct stream_char<const wchar_t*>
-        {
-            typedef wchar_t type;
+            typedef char type;
         };
 #endif
     }
 
+    namespace detail // deduce_source_char_impl<T>
+    {
+        // If type T is `deduce_character_type_later` type, then tries to deduce
+        // character type using boost::has_left_shift<T> metafunction.
+        // Otherwise supplied type T is a character type, that must be normalized
+        // using normalize_single_byte_char<Char>.
+        // Executed at Stage 2  (See deduce_source_char<T> and deduce_target_char<T>)
+        template < class Char > 
+        struct deduce_source_char_impl
+        { 
+            typedef BOOST_DEDUCED_TYPENAME boost::detail::normalize_single_byte_char< Char >::type type; 
+        };
+        
+        template < class T > 
+        struct deduce_source_char_impl< deduce_character_type_later< T > > 
+        {
+            typedef boost::has_left_shift< std::basic_ostream< char >, T > result_t;
+
+#if defined(BOOST_LCAST_NO_WCHAR_T)
+            BOOST_STATIC_ASSERT_MSG((result_t::value), 
+                "Source type is not std::ostream`able and std::wostream`s are not supported by your STL implementation");
+            typedef char type;
+#else
+            typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
+                result_t::value, char, wchar_t
+            >::type type;
+
+            BOOST_STATIC_ASSERT_MSG((result_t::value || boost::has_left_shift< std::basic_ostream< type >, T >::value), 
+                "Source type is neither std::ostream`able nor std::wostream`able");
+#endif
+        };
+    }
+
+    namespace detail  // deduce_target_char_impl<T>
+    {
+        // If type T is `deduce_character_type_later` type, then tries to deduce
+        // character type using boost::has_right_shift<T> metafunction.
+        // Otherwise supplied type T is a character type, that must be normalized
+        // using normalize_single_byte_char<Char>.
+        // Executed at Stage 2  (See deduce_source_char<T> and deduce_target_char<T>)
+        template < class Char > 
+        struct deduce_target_char_impl 
+        { 
+            typedef BOOST_DEDUCED_TYPENAME normalize_single_byte_char< Char >::type type; 
+        };
+        
+        template < class T > 
+        struct deduce_target_char_impl< deduce_character_type_later<T> > 
+        { 
+            typedef boost::has_right_shift<std::basic_istream<char>, T > result_t;
+
+#if defined(BOOST_LCAST_NO_WCHAR_T)
+            BOOST_STATIC_ASSERT_MSG((result_t::value), 
+                "Target type is not std::istream`able and std::wistream`s are not supported by your STL implementation");
+            typedef char type;
+#else
+            typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
+                result_t::value, char, wchar_t
+            >::type type;
+            
+            BOOST_STATIC_ASSERT_MSG((result_t::value || boost::has_right_shift<std::basic_istream<wchar_t>, T >::value), 
+                "Target type is neither std::istream`able nor std::wistream`able");
+#endif
+        };
+    } 
+
+    namespace detail  // deduce_target_char<T> and deduce_source_char<T>
+    {
+        // We deduce stream character types in two stages.
+        //
+        // Stage 1 is common for Target and Source. At Stage 1 we get 
+        // non normalized character type (may contain unsigned/signed char)
+        // or deduce_character_type_later<T> where T is the original type.
+        // Stage 1 is executed by stream_char_common<T>
+        //
+        // At Stage 2 we normalize character types or try to deduce character 
+        // type using metafunctions. 
+        // Stage 2 is executed by deduce_target_char_impl<T> and 
+        // deduce_source_char_impl<T>
+        //
+        // deduce_target_char<T> and deduce_source_char<T> functions combine 
+        // both stages
+
+        template < class T >
+        struct deduce_target_char
+        {
+            typedef BOOST_DEDUCED_TYPENAME stream_char_common< T >::type stage1_type;
+            typedef BOOST_DEDUCED_TYPENAME deduce_target_char_impl< stage1_type >::type stage2_type;
+
+            typedef stage2_type type;
+        };
+
+        template < class T >
+        struct deduce_source_char
+        {
+            typedef BOOST_DEDUCED_TYPENAME stream_char_common< T >::type stage1_type;
+            typedef BOOST_DEDUCED_TYPENAME deduce_source_char_impl< stage1_type >::type stage2_type;
+
+            typedef stage2_type type;
+        };
+    }
+
     namespace detail // deduce_char_traits template
     {
-
-        template<class CharT, class Target, class Source>
+        // We are attempting to get char_traits<> from Source or Tagret
+        // template parameter. Otherwise we'll be using std::char_traits<Char>
+        template < class Char, class Target, class Source >
         struct deduce_char_traits
         {
-            typedef std::char_traits<CharT> type;
+            typedef std::char_traits< Char > type;
         };
 
-        template<class CharT, class Traits, class Alloc, class Source>
-        struct deduce_char_traits< CharT
-                                 , std::basic_string<CharT,Traits,Alloc>
+        template < class Char, class Traits, class Alloc, class Source >
+        struct deduce_char_traits< Char
+                                 , std::basic_string< Char, Traits, Alloc >
                                  , Source
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Target, class Traits, class Alloc>
-        struct deduce_char_traits< CharT
+        template < class Char, class Target, class Traits, class Alloc >
+        struct deduce_char_traits< Char
                                  , Target
-                                 , std::basic_string<CharT,Traits,Alloc>
+                                 , std::basic_string< Char, Traits, Alloc >
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Traits, class Alloc, class Source>
-        struct deduce_char_traits< CharT
-                                 , ::boost::container::basic_string<CharT,Traits,Alloc>
+        template < class Char, class Traits, class Alloc, class Source >
+        struct deduce_char_traits< Char
+                                 , boost::container::basic_string< Char, Traits, Alloc >
                                  , Source
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Target, class Traits, class Alloc>
-        struct deduce_char_traits< CharT
+        template < class Char, class Target, class Traits, class Alloc >
+        struct deduce_char_traits< Char
                                  , Target
-                                 , ::boost::container::basic_string<CharT,Traits,Alloc>
+                                 , boost::container::basic_string< Char, Traits, Alloc >
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Traits, class Alloc1, class Alloc2>
-        struct deduce_char_traits< CharT
-                                 , std::basic_string<CharT,Traits,Alloc1>
-                                 , std::basic_string<CharT,Traits,Alloc2>
+        template < class Char, class Traits, class Alloc1, class Alloc2 >
+        struct deduce_char_traits< Char
+                                 , std::basic_string< Char, Traits, Alloc1 >
+                                 , std::basic_string< Char, Traits, Alloc2 >
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Traits, class Alloc1, class Alloc2>
-        struct deduce_char_traits< CharT
-                                 , ::boost::container::basic_string<CharT,Traits,Alloc1>
-                                 , ::boost::container::basic_string<CharT,Traits,Alloc2>
+        template<class Char, class Traits, class Alloc1, class Alloc2>
+        struct deduce_char_traits< Char
+                                 , boost::container::basic_string< Char, Traits, Alloc1 >
+                                 , boost::container::basic_string< Char, Traits, Alloc2 >
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Traits, class Alloc1, class Alloc2>
-        struct deduce_char_traits< CharT
-                                 , ::boost::container::basic_string<CharT,Traits,Alloc1>
-                                 , ::std::basic_string<CharT,Traits,Alloc2>
+        template < class Char, class Traits, class Alloc1, class Alloc2 >
+        struct deduce_char_traits< Char
+                                 , boost::container::basic_string< Char, Traits, Alloc1 >
+                                 , std::basic_string< Char, Traits, Alloc2 >
                                  >
         {
             typedef Traits type;
         };
 
-        template<class CharT, class Traits, class Alloc1, class Alloc2>
-        struct deduce_char_traits< CharT
-                                 , ::std::basic_string<CharT,Traits,Alloc1>
-                                 , ::boost::container::basic_string<CharT,Traits,Alloc2>
+        template < class Char, class Traits, class Alloc1, class Alloc2 >
+        struct deduce_char_traits< Char
+                                 , std::basic_string< Char, Traits, Alloc1 >
+                                 , boost::container::basic_string< Char, Traits, Alloc2 >
                                  >
         {
             typedef Traits type;
         };
     }
 
+    namespace detail // array_to_pointer_decay<T>
+    {
+        template<class T>
+        struct array_to_pointer_decay
+        {
+            typedef T type;
+        };
+
+        template<class T, std::size_t N>
+        struct array_to_pointer_decay<T[N]>
+        {
+            typedef const T * type;
+        };
+    }
+
+    namespace detail // is_this_float_conversion_optimized<Float, Char>
+    {
+        // this metafunction evaluates to true, if we have optimized comnversion 
+        // from Float type to Char array. 
+        // Must be in sync with lexical_stream_limited_src<Char, ...>::shl_real_type(...)
+        template <typename Float, typename Char>
+        struct is_this_float_conversion_optimized 
+        {
+            typedef boost::type_traits::ice_and<
+                boost::is_float<Float>::value,
+#if !defined(BOOST_LCAST_NO_WCHAR_T) && !defined(BOOST_NO_SWPRINTF) && !defined(__MINGW32__)
+                boost::type_traits::ice_or<
+                    boost::type_traits::ice_eq<sizeof(Char), sizeof(char) >::value,
+                    boost::is_same<Char, wchar_t>::value
+                >::value
+#else
+                boost::type_traits::ice_eq<sizeof(Char), sizeof(char) >::value
+#endif
+            > result_type;
+
+            BOOST_STATIC_CONSTANT(bool, value = (result_type::value) );
+        };
+    }
+    
     namespace detail // lcast_src_length
     {
         // Return max. length of string representation of Source;
@@ -516,9 +652,67 @@ namespace boost {
 #endif // #ifndef BOOST_LCAST_NO_COMPILE_TIME_PRECISION
     }
 
+    namespace detail // lexical_cast_stream_traits<Source, Target>
+    {
+        template <class Source, class Target>
+        struct lexical_cast_stream_traits {
+            typedef BOOST_DEDUCED_TYPENAME boost::detail::array_to_pointer_decay<Source>::type src;
+            typedef BOOST_DEDUCED_TYPENAME boost::remove_cv<src>::type            no_cv_src;
+                
+            typedef boost::detail::deduce_source_char<no_cv_src>                           deduce_src_char_metafunc;
+            typedef BOOST_DEDUCED_TYPENAME deduce_src_char_metafunc::type           src_char_t;
+            typedef BOOST_DEDUCED_TYPENAME boost::detail::deduce_target_char<Target>::type target_char_t;
+                
+            typedef BOOST_DEDUCED_TYPENAME boost::detail::widest_char<
+                target_char_t, src_char_t
+            >::type char_type;
+
+#if !defined(BOOST_NO_CXX11_CHAR16_T) && defined(BOOST_NO_CXX11_UNICODE_LITERALS)
+            BOOST_STATIC_ASSERT_MSG(( !boost::is_same<char16_t, src_char_t>::value
+                                        && !boost::is_same<char16_t, target_char_t>::value),
+                "Your compiler does not have full support for char16_t" );
+#endif
+#if !defined(BOOST_NO_CXX11_CHAR32_T) && defined(BOOST_NO_CXX11_UNICODE_LITERALS)
+            BOOST_STATIC_ASSERT_MSG(( !boost::is_same<char32_t, src_char_t>::value
+                                        && !boost::is_same<char32_t, target_char_t>::value),
+                "Your compiler does not have full support for char32_t" );
+#endif
+
+            typedef BOOST_DEDUCED_TYPENAME boost::detail::deduce_char_traits<
+                char_type, Target, no_cv_src
+            >::type traits;
+
+            typedef boost::type_traits::ice_and<
+                boost::is_same<char, src_char_t>::value,                                  // source is not a wide character based type
+                boost::type_traits::ice_ne<sizeof(char), sizeof(target_char_t) >::value,  // target type is based on wide character
+                boost::type_traits::ice_not<
+                    boost::detail::is_char_or_wchar<no_cv_src>::value                     // single character widening is optimized
+                >::value                                                                  // and does not requires stringbuffer
+            >   is_string_widening_required_t;
+
+            typedef boost::type_traits::ice_not< boost::type_traits::ice_or<
+                boost::is_integral<no_cv_src>::value,
+                boost::detail::is_this_float_conversion_optimized<no_cv_src, char_type >::value,
+                boost::detail::is_char_or_wchar<
+                    BOOST_DEDUCED_TYPENAME deduce_src_char_metafunc::stage1_type          // if we did not get character type at stage1
+                >::value                                                                  // then we have no optimization for that type
+            >::value >   is_source_input_not_optimized_t;
+
+            // If we have an optimized conversion for
+            // Source, we do not need to construct stringbuf.
+            BOOST_STATIC_CONSTANT(bool, requires_stringbuf = 
+                (boost::type_traits::ice_or<
+                    is_string_widening_required_t::value, is_source_input_not_optimized_t::value
+                >::value)
+            );
+            
+            typedef boost::detail::lcast_src_length<no_cv_src> len_t;
+        };
+    }
+
     namespace detail // '0', '+' and '-' constants
     {
-        template<typename CharT> struct lcast_char_constants;
+        template < typename Char > struct lcast_char_constants;
 
         template<>
         struct lcast_char_constants<char>
@@ -544,7 +738,7 @@ namespace boost {
         };
 #endif
 
-#if !defined(BOOST_NO_CHAR16_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR16_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
         template<>
         struct lcast_char_constants<char16_t>
         {
@@ -557,7 +751,7 @@ namespace boost {
         };
 #endif
 
-#if !defined(BOOST_NO_CHAR32_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR32_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
         template<>
         struct lcast_char_constants<char32_t>
         {
@@ -573,26 +767,15 @@ namespace boost {
 
     namespace detail // lcast_to_unsigned
     {
-#if (defined _MSC_VER)
-# pragma warning( push )
-// C4146: unary minus operator applied to unsigned type, result still unsigned
-# pragma warning( disable : 4146 )
-#elif defined( __BORLANDC__ )
-# pragma option push -w-8041
-#endif
         template<class T>
         inline
         BOOST_DEDUCED_TYPENAME make_unsigned<T>::type lcast_to_unsigned(T value) BOOST_NOEXCEPT
         {
-            typedef BOOST_DEDUCED_TYPENAME make_unsigned<T>::type result_type;
-            const result_type uvalue = static_cast<result_type>(value);
-            return value < 0 ? -uvalue : uvalue;
+            typedef BOOST_DEDUCED_TYPENAME boost::make_unsigned<T>::type result_type;
+            return static_cast<result_type>(
+                value < 0 ? 0u - static_cast<result_type>(value) : value
+            );
         }
-#if (defined _MSC_VER)
-# pragma warning( pop )
-#elif defined( __BORLANDC__ )
-# pragma option pop
-#endif
     }
 
     namespace detail // lcast_put_unsigned
@@ -907,7 +1090,7 @@ namespace boost {
         }
 
 #endif
-#if !defined(BOOST_NO_CHAR16_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR16_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
         template <class T>
         bool parse_inf_nan(const char16_t* begin, const char16_t* end, T& value) BOOST_NOEXCEPT
         {
@@ -923,7 +1106,7 @@ namespace boost {
             return put_inf_nan_impl(begin, end, value, u"nan", u"infinity");
         }
 #endif
-#if !defined(BOOST_NO_CHAR32_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR32_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
         template <class T>
         bool parse_inf_nan(const char32_t* begin, const char32_t* end, T& value) BOOST_NOEXCEPT
         {
@@ -1247,7 +1430,7 @@ namespace boost {
             typedef std::basic_ostringstream<CharT, Traits>       out_stream_t;
             typedef stl_buf_unlocker<std::basic_stringbuf<CharT, Traits>, CharT> unlocked_but_t;
 #endif
-            typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
+            typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
                 RequiresStringbuffer,
                 out_stream_t,
                 do_not_construct_out_stream_t
@@ -1288,7 +1471,7 @@ namespace boost {
                 std::locale loc;
                 CharT const w = BOOST_USE_FACET(std::ctype<CharT>, loc).widen(ch);
 #else
-                CharT const w = ch;
+                CharT const w = static_cast<CharT>(ch);
 #endif
                 Traits::assign(*start, w);
                 finish = start + 1;
@@ -1439,7 +1622,7 @@ namespace boost {
             }
 
             template<class Alloc>
-            bool operator<<(::boost::container::basic_string<CharT,Traits,Alloc> const& str) BOOST_NOEXCEPT
+            bool operator<<(boost::container::basic_string<CharT,Traits,Alloc> const& str) BOOST_NOEXCEPT
             {
                 start = const_cast<CharT*>(str.data());
                 finish = start + str.length();
@@ -1510,12 +1693,12 @@ namespace boost {
             bool operator<<(wchar_t ch)                 { return shl_char(ch); }
 #endif
 #endif
-#if !defined(BOOST_NO_CHAR16_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR16_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
             bool operator<<(char16_t ch)                { return shl_char(ch); }
             bool operator<<(char16_t * str)             { return shl_char_array(str); }
             bool operator<<(char16_t const * str)       { return shl_char_array(str); }
 #endif
-#if !defined(BOOST_NO_CHAR32_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR32_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
             bool operator<<(char32_t ch)                { return shl_char(ch); }
             bool operator<<(char32_t * str)             { return shl_char_array(str); }
             bool operator<<(char32_t const * str)       { return shl_char_array(str); }
@@ -1574,10 +1757,13 @@ namespace boost {
             bool operator<<(boost::array<const signed char, N> const& input) BOOST_NOEXCEPT
             { return ((*this) << reinterpret_cast<boost::array<const char, N> const& >(input)); }
  
-#if !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
+#ifndef BOOST_NO_CXX11_HDR_ARRAY
             template <std::size_t N>
             bool operator<<(std::array<CharT, N> const& input) BOOST_NOEXCEPT
-            { return shl_char_array_limited(input.begin(), N); }
+            { 
+                if (input.size()) return shl_char_array_limited(&input[0], N);
+                else return true; 
+            }
 
             template <std::size_t N>
             bool operator<<(std::array<unsigned char, N> const& input) BOOST_NOEXCEPT
@@ -1589,7 +1775,10 @@ namespace boost {
 
             template <std::size_t N>
             bool operator<<(std::array<const CharT, N> const& input) BOOST_NOEXCEPT
-            { return shl_char_array_limited(input.begin(), N); }
+            { 
+                if (input.size()) return shl_char_array_limited(&input[0], N);
+                else return true; 
+            }
 
             template <std::size_t N>
             bool operator<<(std::array<const unsigned char, N> const& input) BOOST_NOEXCEPT
@@ -1598,7 +1787,7 @@ namespace boost {
             template <std::size_t N>
             bool operator<<(std::array<const signed char, N> const& input) BOOST_NOEXCEPT
             { return ((*this) << reinterpret_cast<boost::array<const char, N> const& >(input)); }
-#endif // !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
+#endif
             
             template <class InStreamable>
             bool operator<<(const InStreamable& input)  { return shl_input_streamable(input); }
@@ -1625,19 +1814,11 @@ namespace boost {
                 }
 
                 bool const succeed = lcast_ret_unsigned<Traits>(output, start, finish);
-#if (defined _MSC_VER)
-# pragma warning( push )
-// C4146: unary minus operator applied to unsigned type, result still unsigned
-# pragma warning( disable : 4146 )
-#elif defined( __BORLANDC__ )
-# pragma option push -w-8041
-#endif
-                if (has_minus) output = static_cast<Type>(-output);
-#if (defined _MSC_VER)
-# pragma warning( pop )
-#elif defined( __BORLANDC__ )
-# pragma option pop
-#endif
+
+                if (has_minus) {
+                    output = static_cast<Type>(0u - output);
+                }
+
                 return succeed;
             }
 
@@ -1663,21 +1844,9 @@ namespace boost {
 
                 bool succeed = lcast_ret_unsigned<Traits>(out_tmp, start, finish);
                 if (has_minus) {
-#if (defined _MSC_VER)
-# pragma warning( push )
-// C4146: unary minus operator applied to unsigned type, result still unsigned
-# pragma warning( disable : 4146 )
-#elif defined( __BORLANDC__ )
-# pragma option push -w-8041
-#endif
-                    utype const comp_val = static_cast<utype>(-(std::numeric_limits<Type>::min)());
+                    utype const comp_val = (static_cast<utype>(1) << std::numeric_limits<Type>::digits);
                     succeed = succeed && out_tmp<=comp_val;
-                    output = -out_tmp;
-#if (defined _MSC_VER)
-# pragma warning( pop )
-#elif defined( __BORLANDC__ )
-# pragma option pop
-#endif
+                    output = static_cast<Type>(0u - out_tmp);
                 } else {
                     utype const comp_val = static_cast<utype>((std::numeric_limits<Type>::max)());
                     succeed = succeed && out_tmp<=comp_val;
@@ -1767,17 +1936,17 @@ namespace boost {
 #if !defined(BOOST_LCAST_NO_WCHAR_T) && !defined(BOOST_NO_INTRINSIC_WCHAR_T)
             bool operator>>(wchar_t& output)                    { return shr_xchar(output); }
 #endif
-#if !defined(BOOST_NO_CHAR16_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR16_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
             bool operator>>(char16_t& output)                   { return shr_xchar(output); }
 #endif
-#if !defined(BOOST_NO_CHAR32_T) && !defined(BOOST_NO_UNICODE_LITERALS)
+#if !defined(BOOST_NO_CXX11_CHAR32_T) && !defined(BOOST_NO_CXX11_UNICODE_LITERALS)
             bool operator>>(char32_t& output)                   { return shr_xchar(output); }
 #endif
             template<class Alloc>
             bool operator>>(std::basic_string<CharT,Traits,Alloc>& str) { str.assign(start, finish); return true; }
 
             template<class Alloc>
-            bool operator>>(::boost::container::basic_string<CharT,Traits,Alloc>& str) { str.assign(start, finish); return true; }
+            bool operator>>(boost::container::basic_string<CharT,Traits,Alloc>& str) { str.assign(start, finish); return true; }
 
             
     private:
@@ -1790,8 +1959,8 @@ namespace boost {
                     return false;
                 }
 
-                memcpy(output.begin(), start, size * sizeof(CharT));
-                *(output.begin() + size) = Traits::to_char_type(0);
+                memcpy(&output[0], start, size * sizeof(CharT));
+                output[size] = Traits::to_char_type(0);
                 return true;
             }
 
@@ -1815,7 +1984,7 @@ namespace boost {
                 return ((*this) >> reinterpret_cast<boost::array<char, N>& >(output)); 
             }
  
-#if !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
+#ifndef BOOST_NO_CXX11_HDR_ARRAY
             template <std::size_t N>
             bool operator>>(std::array<CharT, N>& output) BOOST_NOEXCEPT
             { 
@@ -1829,11 +1998,11 @@ namespace boost {
             }
 
             template <std::size_t N>
-            bool operator>>(std::array<signed char, N>& in)   
+            bool operator>>(std::array<signed char, N>& output)
             { 
                 return ((*this) >> reinterpret_cast<std::array<char, N>& >(output)); 
             }
-#endif // !defined(BOOST_NO_CXX11_HDR_ARRAY) && defined(BOOST_HAS_TR1_ARRAY)
+#endif
 
 
             /*
@@ -1917,7 +2086,7 @@ namespace boost {
                  * */
                 boost::mpl::if_c<
 #if defined(BOOST_HAS_LONG_LONG) || defined(BOOST_HAS_MS_INT64)
-                    ::boost::type_traits::ice_eq< sizeof(double), sizeof(long double) >::value,
+                    boost::type_traits::ice_eq< sizeof(double), sizeof(long double) >::value,
 #else
                      0
 #endif
@@ -1943,18 +2112,6 @@ namespace boost {
 
     namespace detail
     {
-        template<class T>
-        struct array_to_pointer_decay
-        {
-            typedef T type;
-        };
-
-        template<class T, std::size_t N>
-        struct array_to_pointer_decay<T[N]>
-        {
-            typedef const T * type;
-        };
-
         template<typename T>
         struct is_stdstring
         {
@@ -1968,7 +2125,7 @@ namespace boost {
         };
 
         template<typename CharT, typename Traits, typename Alloc>
-        struct is_stdstring< ::boost::container::basic_string<CharT, Traits, Alloc> >
+        struct is_stdstring< boost::container::basic_string<CharT, Traits, Alloc> >
         {
             BOOST_STATIC_CONSTANT(bool, value = true );
         };
@@ -1978,13 +2135,13 @@ namespace boost {
         {
             BOOST_STATIC_CONSTANT(bool, value =
                (
-                   ::boost::type_traits::ice_and<
-                           ::boost::is_arithmetic<Source>::value,
-                           ::boost::is_arithmetic<Target>::value,
-                           ::boost::type_traits::ice_not<
+                   boost::type_traits::ice_and<
+                           boost::is_arithmetic<Source>::value,
+                           boost::is_arithmetic<Target>::value,
+                           boost::type_traits::ice_not<
                                 detail::is_char_or_wchar<Target>::value
                            >::value,
-                           ::boost::type_traits::ice_not<
+                           boost::type_traits::ice_not<
                                 detail::is_char_or_wchar<Source>::value
                            >::value
                    >::value
@@ -2002,42 +2159,20 @@ namespace boost {
         {
             BOOST_STATIC_CONSTANT(bool, value =
                 (
-                    ::boost::type_traits::ice_or<
-                        ::boost::type_traits::ice_and<
+                    boost::type_traits::ice_or<
+                        boost::type_traits::ice_and<
                              is_same<Source,Target>::value,
                              is_char_or_wchar<Target>::value
                         >::value,
-                        ::boost::type_traits::ice_and<
-                             ::boost::type_traits::ice_eq< sizeof(char),sizeof(Target)>::value,
-                             ::boost::type_traits::ice_eq< sizeof(char),sizeof(Source)>::value,
+                        boost::type_traits::ice_and<
+                             boost::type_traits::ice_eq< sizeof(char),sizeof(Target)>::value,
+                             boost::type_traits::ice_eq< sizeof(char),sizeof(Source)>::value,
                              is_char_or_wchar<Target>::value,
                              is_char_or_wchar<Source>::value
                         >::value
                     >::value
                 )
             );
-        };
-
-
-        // this metafunction evaluates to true, if we have optimized comnversion 
-        // from Float type to Char array. 
-        // Must be in sync with lexical_stream_limited_src<Char, ...>::shl_real_type(...)
-        template <typename Float, typename Char>
-        struct is_this_float_conversion_optimized 
-        {
-            typedef ::boost::type_traits::ice_and<
-                ::boost::is_float<Float>::value,
-#if !defined(BOOST_LCAST_NO_WCHAR_T) && !defined(BOOST_NO_SWPRINTF) && !defined(__MINGW32__)
-                ::boost::type_traits::ice_or<
-                    ::boost::type_traits::ice_eq<sizeof(Char), sizeof(char) >::value,
-                    ::boost::is_same<Char, wchar_t>::value
-                >::value
-#else
-                ::boost::type_traits::ice_eq<sizeof(Char), sizeof(char) >::value
-#endif
-            > result_type;
-
-            BOOST_STATIC_CONSTANT(bool, value = (result_type::value) );
         };
 
         template<typename Target, typename Source>
@@ -2059,13 +2194,13 @@ namespace boost {
         };
 
         template<typename CharT, typename Traits, typename Alloc>
-        struct is_char_array_to_stdstring< ::boost::container::basic_string<CharT, Traits, Alloc>, CharT* >
+        struct is_char_array_to_stdstring< boost::container::basic_string<CharT, Traits, Alloc>, CharT* >
         {
             BOOST_STATIC_CONSTANT(bool, value = true );
         };
 
         template<typename CharT, typename Traits, typename Alloc>
-        struct is_char_array_to_stdstring< ::boost::container::basic_string<CharT, Traits, Alloc>, const CharT* >
+        struct is_char_array_to_stdstring< boost::container::basic_string<CharT, Traits, Alloc>, const CharT* >
         {
             BOOST_STATIC_CONSTANT(bool, value = true );
         };
@@ -2081,60 +2216,21 @@ namespace boost {
         {
             static inline Target lexical_cast_impl(const Source& arg)
             {
-                typedef BOOST_DEDUCED_TYPENAME detail::array_to_pointer_decay<Source>::type src;
-                typedef BOOST_DEDUCED_TYPENAME ::boost::remove_cv<src>::type no_cv_src;
-                typedef BOOST_DEDUCED_TYPENAME detail::stream_char<Target>::type target_char_t;
-                typedef BOOST_DEDUCED_TYPENAME detail::stream_char<no_cv_src>::type src_char_type;
-                typedef BOOST_DEDUCED_TYPENAME detail::widest_char<
-                    target_char_t, src_char_type
-                >::type char_type;
-
-#if !defined(BOOST_NO_CHAR16_T) && defined(BOOST_NO_UNICODE_LITERALS)
-                BOOST_STATIC_ASSERT_MSG(( !::boost::is_same<char16_t, src_char_type>::value
-                                          && !::boost::is_same<char16_t, target_char_t>::value),
-                    "Your compiler does not have full support for char16_t" );
-#endif
-#if !defined(BOOST_NO_CHAR32_T) && defined(BOOST_NO_UNICODE_LITERALS)
-                BOOST_STATIC_ASSERT_MSG(( !::boost::is_same<char32_t, src_char_type>::value
-                                          && !::boost::is_same<char32_t, target_char_t>::value),
-                    "Your compiler does not have full support for char32_t" );
-#endif
-
-                typedef BOOST_DEDUCED_TYPENAME ::boost::detail::deduce_char_traits<
-                    char_type, Target, no_cv_src
-                >::type traits;
-
-                typedef ::boost::type_traits::ice_and<
-                    ::boost::detail::is_char_or_wchar<src_char_type>::value,                    // source is lexical type
-                    ::boost::detail::is_char_or_wchar<target_char_t>::value,                    // target is a lexical type
-                    ::boost::is_same<char, src_char_type>::value,                               // source is not a wide character based type
-                    ::boost::type_traits::ice_ne<sizeof(char), sizeof(target_char_t) >::value   // target type is based on wide character
-                >   is_string_widening_required_t;
-
-                typedef ::boost::type_traits::ice_or<
-                    ::boost::is_integral<no_cv_src>::value,
-                    ::boost::detail::is_this_float_conversion_optimized<no_cv_src, char_type >::value,
-                    ::boost::detail::is_char_or_wchar<src_char_type >::value
-                >   is_source_input_optimized_t;
+                typedef lexical_cast_stream_traits<Source, Target>  stream_trait;
+                
+                typedef detail::lexical_stream_limited_src<
+                    BOOST_DEDUCED_TYPENAME stream_trait::char_type, 
+                    BOOST_DEDUCED_TYPENAME stream_trait::traits, 
+                    stream_trait::requires_stringbuf 
+                > interpreter_type;
 
                 // Target type must be default constructible
-                Target result;
+                Target result;               
 
-                // If we have an optimized conversion for
-                // Source, we do not need to construct stringbuf.
-                const bool requires_stringbuf = ::boost::type_traits::ice_or<
-                        is_string_widening_required_t::value,
-                        ::boost::type_traits::ice_not< is_source_input_optimized_t::value >::value
-                >::value;
-               
-                typedef detail::lexical_stream_limited_src<char_type, traits, requires_stringbuf > interpreter_type;
+                BOOST_DEDUCED_TYPENAME stream_trait::char_type buf[stream_trait::len_t::value + 1];
+                stream_trait::len_t::check_coverage();
 
-                typedef detail::lcast_src_length<no_cv_src> lcast_src_length;
-                std::size_t const src_len = lcast_src_length::value;
-                char_type buf[src_len + 1];
-                lcast_src_length::check_coverage();
-
-                interpreter_type interpreter(buf, buf + src_len);
+                interpreter_type interpreter(buf, buf + stream_trait::len_t::value + 1);
 
                 // Disabling ADL, by directly specifying operators.
                 if(!(interpreter.operator <<(arg) && interpreter.operator >>(result)))
@@ -2163,16 +2259,19 @@ namespace boost {
          typedef Source source_type ;
 
          typedef BOOST_DEDUCED_TYPENAME mpl::if_<
-            ::boost::is_arithmetic<Source>, Source, Source const&
+            boost::is_arithmetic<Source>, Source, Source const&
           >::type argument_type ;
 
          static source_type nearbyint ( argument_type s )
          {
-            const source_type orig_div_round = s / Rounder::nearbyint(s);
-            const source_type eps = std::numeric_limits<source_type>::epsilon();
+            const source_type near_int = Rounder::nearbyint(s);
+            if (near_int) {
+                const source_type orig_div_round = s / near_int;
+                const source_type eps = std::numeric_limits<source_type>::epsilon();
 
-            if ((orig_div_round > 1 ? orig_div_round - 1 : 1 - orig_div_round) > eps)
-                BOOST_LCAST_THROW_BAD_CAST(Source, Target);
+                if ((orig_div_round > 1 ? orig_div_round - 1 : 1 - orig_div_round) > eps)
+                    BOOST_LCAST_THROW_BAD_CAST(Source, Target);
+            }
 
             return s ;
          }
@@ -2210,16 +2309,22 @@ namespace boost {
         {
             static inline Target lexical_cast_impl(const Source &arg)
             {
+                typedef BOOST_DEDUCED_TYPENAME boost::mpl::eval_if_c<
+                        boost::is_float<Source>::value,
+                        boost::mpl::identity<Source>,
+                        boost::make_unsigned<Source>
+                >::type usource_t;
+
                 typedef boost::numeric::converter<
                         Target,
-                        Source,
-                        boost::numeric::conversion_traits<Target,Source>,
-                        nothrow_overflow_handler<Source, Target>,
-                        detect_precision_loss<Source, Target>
+                        usource_t,
+                        boost::numeric::conversion_traits<Target,usource_t>,
+                        nothrow_overflow_handler<usource_t, Target>,
+                        detect_precision_loss<usource_t, Target>
                 > converter_t;
 
                 return (
-                    arg < 0 ? -converter_t::convert(-arg) : converter_t::convert(arg)
+                    arg < 0 ? 0u - converter_t::convert(0u - arg) : converter_t::convert(arg)
                 );
             }
         };
@@ -2247,19 +2352,19 @@ namespace boost {
         {
             static inline Target lexical_cast_impl(const Source &arg)
             {
-                typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
-                    ::boost::type_traits::ice_and<
-                        ::boost::type_traits::ice_or<
-                            ::boost::is_signed<Source>::value,
-                            ::boost::is_float<Source>::value
+                typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
+                    boost::type_traits::ice_and<
+                        boost::type_traits::ice_or<
+                            boost::is_signed<Source>::value,
+                            boost::is_float<Source>::value
                         >::value,
-                        ::boost::type_traits::ice_not<
-                            ::boost::is_same<Source, bool>::value
+                        boost::type_traits::ice_not<
+                            boost::is_same<Source, bool>::value
                         >::value,
-                        ::boost::type_traits::ice_not<
-                            ::boost::is_same<Target, bool>::value
+                        boost::type_traits::ice_not<
+                            boost::is_same<Target, bool>::value
                         >::value,
-                        ::boost::is_unsigned<Target>::value
+                        boost::is_unsigned<Target>::value
                     >::value,
                     lexical_cast_dynamic_num_ignoring_minus<Target, Source>,
                     lexical_cast_dynamic_num_not_ignoring_minus<Target, Source>
@@ -2273,85 +2378,43 @@ namespace boost {
     template <typename Target, typename Source>
     inline Target lexical_cast(const Source &arg)
     {
-        typedef BOOST_DEDUCED_TYPENAME ::boost::detail::array_to_pointer_decay<Source>::type src;
+        typedef BOOST_DEDUCED_TYPENAME boost::detail::array_to_pointer_decay<Source>::type src;
 
-        typedef BOOST_DEDUCED_TYPENAME ::boost::type_traits::ice_or<
-                ::boost::detail::is_xchar_to_xchar<Target, src >::value,
-                ::boost::detail::is_char_array_to_stdstring<Target, src >::value,
-                ::boost::type_traits::ice_and<
-                     ::boost::is_same<Target, src >::value,
-                     ::boost::detail::is_stdstring<Target >::value
+        typedef BOOST_DEDUCED_TYPENAME boost::type_traits::ice_or<
+                boost::detail::is_xchar_to_xchar<Target, src >::value,
+                boost::detail::is_char_array_to_stdstring<Target, src >::value,
+                boost::type_traits::ice_and<
+                     boost::is_same<Target, src >::value,
+                     boost::detail::is_stdstring<Target >::value
                 >::value
         > shall_we_copy_t;
 
         typedef BOOST_DEDUCED_TYPENAME
-                ::boost::detail::is_arithmetic_and_not_xchars<Target, src > shall_we_copy_with_dynamic_check_t;
+                boost::detail::is_arithmetic_and_not_xchars<Target, src > shall_we_copy_with_dynamic_check_t;
 
-        typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
+        typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
             shall_we_copy_t::value,
-            ::boost::detail::lexical_cast_copy<src >,
-            BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
+            boost::detail::lexical_cast_copy<src >,
+            BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
                  shall_we_copy_with_dynamic_check_t::value,
-                 ::boost::detail::lexical_cast_dynamic_num<Target, src >,
-                 ::boost::detail::lexical_cast_do_cast<Target, src >
+                 boost::detail::lexical_cast_dynamic_num<Target, src >,
+                 boost::detail::lexical_cast_do_cast<Target, src >
             >::type
         >::type caster_type;
 
         return caster_type::lexical_cast_impl(arg);
     }
 
-    template <typename Target>
-    inline Target lexical_cast(const char* chars, std::size_t count)
+    template <typename Target, typename CharType>
+    inline Target lexical_cast(const CharType* chars, std::size_t count)
     {
-        return ::boost::lexical_cast<Target>(
-            ::boost::iterator_range<const char*>(chars, chars + count)
-        );
-    }
+        BOOST_STATIC_ASSERT_MSG(boost::detail::is_char_or_wchar<CharType>::value, 
+            "CharType must be a character or wide character type");
 
-
-    template <typename Target>
-    inline Target lexical_cast(const unsigned char* chars, std::size_t count)
-    {
-        return ::boost::lexical_cast<Target>(
-            ::boost::iterator_range<const unsigned char*>(chars, chars + count)
+        return boost::lexical_cast<Target>(
+            boost::iterator_range<const CharType*>(chars, chars + count)
         );
     }
-
-    template <typename Target>
-    inline Target lexical_cast(const signed char* chars, std::size_t count)
-    {
-        return ::boost::lexical_cast<Target>(
-            ::boost::iterator_range<const signed char*>(chars, chars + count)
-        );
-    }
-
-#ifndef BOOST_LCAST_NO_WCHAR_T
-    template <typename Target>
-    inline Target lexical_cast(const wchar_t* chars, std::size_t count)
-    {
-        return ::boost::lexical_cast<Target>(
-            ::boost::iterator_range<const wchar_t*>(chars, chars + count)
-        );
-    }
-#endif
-#ifndef BOOST_NO_CHAR16_T
-    template <typename Target>
-    inline Target lexical_cast(const char16_t* chars, std::size_t count)
-    {
-        return ::boost::lexical_cast<Target>(
-            ::boost::iterator_range<const char16_t*>(chars, chars + count)
-        );
-    }
-#endif
-#ifndef BOOST_NO_CHAR32_T
-    template <typename Target>
-    inline Target lexical_cast(const char32_t* chars, std::size_t count)
-    {
-        return ::boost::lexical_cast<Target>(
-            ::boost::iterator_range<const char32_t*>(chars, chars + count)
-        );
-    }
-#endif
 
 } // namespace boost
 

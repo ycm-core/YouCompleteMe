@@ -99,9 +99,14 @@
 #  define BOOST_MATH_USE_C99
 #endif
 
+#if defined(_LIBCPP_VERSION) && !defined(_MSC_VER)
+#  define BOOST_MATH_USE_C99
+#endif
+
 #if defined(__CYGWIN__) || defined(__HP_aCC) || defined(BOOST_INTEL) \
   || defined(BOOST_NO_NATIVE_LONG_DOUBLE_FP_CLASSIFY) \
-  || (defined(__GNUC__) && !defined(BOOST_MATH_USE_C99))
+  || (defined(__GNUC__) && !defined(BOOST_MATH_USE_C99))\
+  || defined(BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS)
 #  define BOOST_MATH_NO_NATIVE_LONG_DOUBLE_FP_CLASSIFY
 #endif
 

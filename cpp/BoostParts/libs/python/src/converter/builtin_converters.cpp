@@ -377,7 +377,8 @@ namespace
       static unaryfunc* get_slot(PyObject* obj)
       {
 #if PY_VERSION_HEX >= 0x03000000
-          return (PyUnicode_Check(obj)) ? &py_unicode_as_string_unaryfunc : 0;
+          return (PyUnicode_Check(obj)) ? &py_unicode_as_string_unaryfunc : 
+                  PyBytes_Check(obj) ? &py_object_identity : 0;
 #else
           return (PyString_Check(obj)) ? &obj->ob_type->tp_str : 0;
 

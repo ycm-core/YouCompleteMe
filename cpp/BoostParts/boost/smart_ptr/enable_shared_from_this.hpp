@@ -25,20 +25,20 @@ template<class T> class enable_shared_from_this
 {
 protected:
 
-    enable_shared_from_this()
+    enable_shared_from_this() BOOST_NOEXCEPT
     {
     }
 
-    enable_shared_from_this(enable_shared_from_this const &)
+    enable_shared_from_this(enable_shared_from_this const &) BOOST_NOEXCEPT
     {
     }
 
-    enable_shared_from_this & operator=(enable_shared_from_this const &)
+    enable_shared_from_this & operator=(enable_shared_from_this const &) BOOST_NOEXCEPT
     {
         return *this;
     }
 
-    ~enable_shared_from_this()
+    ~enable_shared_from_this() BOOST_NOEXCEPT // ~weak_ptr<T> newer throws, so this call also must not throw
     {
     }
 

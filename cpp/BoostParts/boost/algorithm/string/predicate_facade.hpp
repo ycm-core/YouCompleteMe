@@ -15,7 +15,7 @@
 
 /*
  \file boost/algorith/string/predicate_facade.hpp
- This file containes predicate_facade definition. This template class is used
+ This file contains predicate_facade definition. This template class is used
  to identify classification predicates, so they can be combined using
  composition operators.
 */

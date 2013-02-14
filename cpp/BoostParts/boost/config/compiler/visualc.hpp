@@ -184,6 +184,16 @@
 #endif
 
 //
+// TR1 features:
+//
+#if _MSC_VER >= 1700
+// # define BOOST_HAS_TR1_HASH			// don't know if this is true yet.
+// # define BOOST_HAS_TR1_TYPE_TRAITS	// don't know if this is true yet.
+# define BOOST_HAS_TR1_UNORDERED_MAP
+# define BOOST_HAS_TR1_UNORDERED_SET
+#endif
+
+//
 // C++0x features
 //
 //   See above for BOOST_NO_LONG_LONG

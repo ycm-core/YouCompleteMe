@@ -14,11 +14,23 @@
 #define BOOST_FUNCTIONAL_HASH_EXTENSIONS_HPP
 
 #include <boost/functional/hash/hash.hpp>
-#include <boost/functional/hash/detail/container_fwd_0x.hpp>
+#include <boost/detail/container_fwd.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
+
+#if !defined(BOOST_NO_CXX11_HDR_ARRAY)
+#   include <array>
+#endif
+
+#if !defined(BOOST_NO_CXX11_HDR_TUPLE)
+#   include <tuple>
+#endif
+
+#if !defined(BOOST_NO_CXX11_HDR_MEMORY)
+#   include <memory>
+#endif
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 # pragma once
@@ -149,7 +161,7 @@ namespace boost
         }
     }
 
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
     template <typename... T>
     inline std::size_t hash_value(std::tuple<T...> const& v)
     {

@@ -51,7 +51,7 @@ basic_text_oprimitive<OStream>::save_binary(
                     8
                 >
             > 
-            ,72
+            ,76
             ,const char // cwpro8 needs this
         > 
         base64_text;

@@ -92,7 +92,7 @@ namespace boost {
 
 //  find last functor -----------------------------------------------//
 
-            // find the last match a subseqeunce in the sequence ( functor )
+            // find the last match a subsequence in the sequence ( functor )
             /*
                 Returns a pair <begin,end> marking the subsequence in the sequence.
                 If the find fails, returns <End,End>

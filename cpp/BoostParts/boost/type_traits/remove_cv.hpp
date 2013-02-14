@@ -37,7 +37,7 @@ struct rvalue_ref_filter_rem_cv
    typedef typename boost::detail::cv_traits_imp<T*>::unqualified_type type;
 };
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 //
 // We can't filter out rvalue_references at the same level as
 // references or we get ambiguities from msvc:

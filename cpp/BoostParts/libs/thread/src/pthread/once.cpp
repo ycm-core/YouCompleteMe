@@ -4,6 +4,7 @@
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #define __STDC_CONSTANT_MACROS
+#include <boost/thread/pthread/pthread_mutex_scoped_lock.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/assert.hpp>
 #include <pthread.h>

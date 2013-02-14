@@ -433,7 +433,7 @@ namespace detail {
   {
     return m[k];
   }
-};
+}
 
 template <class E>
 struct property_traits<detail::underlying_edge_desc_map_type<E> > {

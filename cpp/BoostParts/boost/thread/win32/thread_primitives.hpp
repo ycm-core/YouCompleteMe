@@ -232,7 +232,7 @@ namespace boost
                 BOOST_VERIFY(ReleaseSemaphore(semaphore,count,0)!=0);
             }
 
-            class handle_manager
+            class BOOST_THREAD_DECL handle_manager
             {
             private:
                 handle handle_to_manage;

@@ -56,6 +56,8 @@
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/identity.hpp>
 
+#include <boost/serialization/throw_exception.hpp>
+
 namespace boost {
 namespace serialization {
 namespace smart_cast_impl {
@@ -159,7 +161,7 @@ namespace smart_cast_impl {
                 static T cast(U * u){
                     T tmp = dynamic_cast< T >(u);
                     #ifndef NDEBUG
-                        if ( tmp == 0 ) throw std::bad_cast();
+                        if ( tmp == 0 ) throw_exception(std::bad_cast());
                     #endif
                     return tmp;
                 }
@@ -201,7 +203,7 @@ namespace smart_cast_impl {
             static T cast(U * u){
                 T tmp = dynamic_cast< T >(u);
                 #ifndef NDEBUG
-                    if ( tmp == 0 ) throw std::bad_cast();
+                    if ( tmp == 0 ) throw_exception(std::bad_cast());
                 #endif
                 return tmp;
             }

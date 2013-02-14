@@ -23,4 +23,26 @@
 #error "Boost threads unavailable on this platform"
 #endif
 
+#include <boost/thread/lockable_traits.hpp>
+
+namespace boost
+{
+  namespace sync
+  {
+#ifdef BOOST_THREAD_NO_AUTO_DETECT_MUTEX_TYPES
+    template<>
+    struct is_basic_lockable<shared_mutex>
+    {
+      BOOST_STATIC_CONSTANT(bool, value = true);
+    };
+    template<>
+    struct is_lockable<shared_mutex>
+    {
+      BOOST_STATIC_CONSTANT(bool, value = true);
+    };
+#endif
+
+  }
+}
+
 #endif

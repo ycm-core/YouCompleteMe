@@ -17,7 +17,7 @@
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
 
-#ifndef BOOST_NO_STATIC_ASSERT
+#ifndef BOOST_NO_CXX11_STATIC_ASSERT
 #  define BOOST_STATIC_ASSERT_MSG( B, Msg ) static_assert(B, Msg)
 #else
 #  define BOOST_STATIC_ASSERT_MSG( B, Msg ) BOOST_STATIC_ASSERT( B )
@@ -44,7 +44,7 @@
 #  define BOOST_STATIC_ASSERT_BOOL_CAST(x) (bool)(x)
 #endif
 
-#ifndef BOOST_NO_STATIC_ASSERT
+#ifndef BOOST_NO_CXX11_STATIC_ASSERT
 #  define BOOST_STATIC_ASSERT( B ) static_assert(B, #B)
 #else
 
@@ -131,7 +131,7 @@ template<int x> struct static_assert_test{};
    enum { BOOST_JOIN(boost_static_assert_enum_, __LINE__) \
       = sizeof(::boost::STATIC_ASSERTION_FAILURE< (bool)( B ) >) }
 #endif
-#endif // defined(BOOST_NO_STATIC_ASSERT)
+#endif // defined(BOOST_NO_CXX11_STATIC_ASSERT)
 
 #endif // BOOST_STATIC_ASSERT_HPP
 

@@ -49,6 +49,12 @@
 #define BOOST_RATIO_INTMAX_C(a) a##LL
 #endif
 
+#ifdef UINTMAX_C
+#define BOOST_RATIO_UINTMAX_C(a) UINTMAX_C(a)
+#else
+#define BOOST_RATIO_UINTMAX_C(a) a##ULL
+#endif
+
 #define BOOST_RATIO_INTMAX_T_MAX (0x7FFFFFFFFFFFFFFELL)
 
 

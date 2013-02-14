@@ -677,7 +677,7 @@ namespace boost {
 
     vtable_type* get_vtable() const {
       return reinterpret_cast<vtable_type*>(
-               reinterpret_cast<std::size_t>(vtable) & ~static_cast<size_t>(0x01));
+               reinterpret_cast<std::size_t>(vtable) & ~static_cast<std::size_t>(0x01));
     }
 
     struct clear_type {};
@@ -749,7 +749,7 @@ namespace boost {
       this->assign_to_own(f);
     }
     
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     BOOST_FUNCTION_FUNCTION(BOOST_FUNCTION_FUNCTION&& f) : function_base()
     {
       this->move_assign(f);
@@ -838,7 +838,7 @@ namespace boost {
       return *this;
     }
     
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     // Move assignment from another BOOST_FUNCTION_FUNCTION
     BOOST_FUNCTION_FUNCTION& operator=(BOOST_FUNCTION_FUNCTION&& f)
     {
@@ -1090,7 +1090,7 @@ public:
 
   function(const base_type& f) : base_type(static_cast<const base_type&>(f)){}
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
   // Move constructors
   function(self_type&& f): base_type(static_cast<base_type&&>(f)){}
   function(base_type&& f): base_type(static_cast<base_type&&>(f)){}
@@ -1102,7 +1102,7 @@ public:
     return *this;
   }
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
   self_type& operator=(self_type&& f)
   {
     self_type(static_cast<self_type&&>(f)).swap(*this);
@@ -1139,7 +1139,7 @@ public:
     return *this;
   }
   
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
   self_type& operator=(base_type&& f)
   {
     self_type(static_cast<base_type&&>(f)).swap(*this);

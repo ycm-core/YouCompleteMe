@@ -120,14 +120,14 @@ namespace unordered
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
-#elif !defined(BOOST_NO_RVALUE_REFERENCES)
+#elif !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_map(unordered_map&& other)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
 #endif
 
-#if !defined(BOOST_NO_RVALUE_REFERENCES)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_map(unordered_map&&, allocator_type const&);
 #endif
 
@@ -165,7 +165,7 @@ namespace unordered
             return *this;
         }
 
-#if !defined(BOOST_NO_RVALUE_REFERENCES)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_map& operator=(unordered_map&& x)
         {
             table_.move_assign(x.table_);
@@ -231,7 +231,7 @@ namespace unordered
 
         // emplace
 
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
         template <class... Args>
         std::pair<iterator, bool> emplace(BOOST_FWD_REF(Args)... args)
         {
@@ -463,8 +463,7 @@ namespace unordered
 
         size_type bucket(const key_type& k) const
         {
-            return table::to_bucket(table_.bucket_count_,
-                table_.hash(k));
+            return table_.hash_to_bucket(table_.hash(k));
         }
 
         local_iterator begin(size_type n)
@@ -602,14 +601,14 @@ namespace unordered
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
-#elif !defined(BOOST_NO_RVALUE_REFERENCES)
+#elif !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_multimap(unordered_multimap&& other)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
 #endif
 
-#if !defined(BOOST_NO_RVALUE_REFERENCES)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_multimap(unordered_multimap&&, allocator_type const&);
 #endif
 
@@ -648,7 +647,7 @@ namespace unordered
             return *this;
         }
 
-#if !defined(BOOST_NO_RVALUE_REFERENCES)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_multimap& operator=(unordered_multimap&& x)
         {
             table_.move_assign(x.table_);
@@ -714,7 +713,7 @@ namespace unordered
 
         // emplace
 
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
         template <class... Args>
         iterator emplace(BOOST_FWD_REF(Args)... args)
         {
@@ -942,8 +941,7 @@ namespace unordered
 
         size_type bucket(const key_type& k) const
         {
-            return table::to_bucket(table_.bucket_count_,
-                table_.hash(k));
+            return table_.hash_to_bucket(table_.hash(k));
         }
 
         local_iterator begin(size_type n)
@@ -1068,7 +1066,7 @@ namespace unordered
     {
     }
 
-#if !defined(BOOST_NO_RVALUE_REFERENCES)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 
     template <class K, class T, class H, class P, class A>
     unordered_map<K,T,H,P,A>::unordered_map(
@@ -1401,7 +1399,7 @@ namespace unordered
     {
     }
 
-#if !defined(BOOST_NO_RVALUE_REFERENCES)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 
     template <class K, class T, class H, class P, class A>
     unordered_multimap<K,T,H,P,A>::unordered_multimap(

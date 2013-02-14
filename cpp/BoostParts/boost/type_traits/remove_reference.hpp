@@ -34,7 +34,7 @@ struct remove_rvalue_ref
 {
    typedef T type;
 };
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <class T>
 struct remove_rvalue_ref<T&&>
 {

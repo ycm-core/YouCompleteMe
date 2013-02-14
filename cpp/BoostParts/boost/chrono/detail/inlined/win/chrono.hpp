@@ -98,8 +98,12 @@ namespace chrono_detail
   #else
     boost::detail::win32::GetSystemTimeAsFileTime( &ft );  // never fails
   #endif
-    return system_clock::time_point(system_clock::duration(
-      (static_cast<__int64>( ft.dwHighDateTime ) << 32) | ft.dwLowDateTime));
+    return system_clock::time_point(
+      system_clock::duration(
+        ((static_cast<__int64>( ft.dwHighDateTime ) << 32) | ft.dwLowDateTime)
+       -116444736000000000LL
+      )
+    );
   }
 
 #if !defined BOOST_CHRONO_DONT_PROVIDE_HYBRID_ERROR_HANDLING
@@ -129,12 +133,6 @@ namespace chrono_detail
   {
       __int64 temp = t.time_since_epoch().count();
 
-  #   if (!defined( BOOST_MSVC )) || (BOOST_MSVC > 1300) // > VC++ 7.0
-      temp -= 116444736000000000LL;  // delta from epoch in microseconds
-  #   else
-      temp -= 116444736000000000;
-  #   endif
-
       temp /= 10000000;
       return static_cast<std::time_t>( temp );
   }
@@ -144,12 +142,6 @@ namespace chrono_detail
   {
       __int64 temp = t;
       temp *= 10000000;
-
-  #   if (!defined( BOOST_MSVC )) || (BOOST_MSVC > 1300) // > VC++ 7.0
-      temp += 116444736000000000LL;
-  #   else
-      temp += 116444736000000000;
-  #   endif
 
       return time_point(duration(temp));
   }

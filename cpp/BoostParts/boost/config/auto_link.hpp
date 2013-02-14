@@ -60,14 +60,14 @@ BOOST_LIB_THREAD_OPT: "-mt" for multithread builds, otherwise nothing.
 
 BOOST_LIB_RT_OPT:     A suffix that indicates the runtime library used,
                       contains one or more of the following letters after
-                      a hiphen:
+                      a hyphen:
 
                       s      static runtime (dynamic if not present).
                       g      debug/diagnostic runtime (release if not present).
                       y      Python debug/diagnostic runtime (release if not present).
                       d      debug build (release if not present).
-                      g      debug/diagnostic runtime (release if not present).
-                      p      STLPort Build.
+                      p      STLport build.
+                      n      STLport build without its IOStreams.
 
 BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 
@@ -114,68 +114,69 @@ BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 // select toolset if not defined already:
 //
 #ifndef BOOST_LIB_TOOLSET
-// Note: no compilers before 1200 are supported
-#if defined(BOOST_MSVC) && (BOOST_MSVC < 1300)
+#  if defined(BOOST_MSVC) && (BOOST_MSVC < 1200)
+    // Note: no compilers before 1200 are supported
+#  elif defined(BOOST_MSVC) && (BOOST_MSVC < 1300)
 
-#  ifdef UNDER_CE
-     // vc6:
-#    define BOOST_LIB_TOOLSET "evc4"
-#  else
-     // vc6:
-#    define BOOST_LIB_TOOLSET "vc6"
+#    ifdef UNDER_CE
+       // eVC4:
+#      define BOOST_LIB_TOOLSET "evc4"
+#    else
+       // vc6:
+#      define BOOST_LIB_TOOLSET "vc6"
+#    endif
+
+#  elif defined(BOOST_MSVC) && (BOOST_MSVC < 1310)
+
+     // vc7:
+#    define BOOST_LIB_TOOLSET "vc7"
+
+#  elif defined(BOOST_MSVC) && (BOOST_MSVC < 1400)
+
+     // vc71:
+#    define BOOST_LIB_TOOLSET "vc71"
+
+#  elif defined(BOOST_MSVC) && (BOOST_MSVC < 1500)
+
+     // vc80:
+#    define BOOST_LIB_TOOLSET "vc80"
+
+#  elif defined(BOOST_MSVC) && (BOOST_MSVC < 1600)
+
+     // vc90:
+#    define BOOST_LIB_TOOLSET "vc90"
+
+#  elif defined(BOOST_MSVC) && (BOOST_MSVC < 1700)
+
+     // vc10:
+#    define BOOST_LIB_TOOLSET "vc100"
+
+#  elif defined(BOOST_MSVC)
+
+     // vc11:
+#    define BOOST_LIB_TOOLSET "vc110"
+
+#  elif defined(__BORLANDC__)
+
+     // CBuilder 6:
+#    define BOOST_LIB_TOOLSET "bcb"
+
+#  elif defined(__ICL)
+
+     // Intel C++, no version number:
+#    define BOOST_LIB_TOOLSET "iw"
+
+#  elif defined(__MWERKS__) && (__MWERKS__ <= 0x31FF )
+
+     // Metrowerks CodeWarrior 8.x
+#    define BOOST_LIB_TOOLSET "cw8"
+
+#  elif defined(__MWERKS__) && (__MWERKS__ <= 0x32FF )
+
+     // Metrowerks CodeWarrior 9.x
+#    define BOOST_LIB_TOOLSET "cw9"
+
 #  endif
-
-#elif defined(BOOST_MSVC) && (BOOST_MSVC == 1300)
-
-   // vc7:
-#  define BOOST_LIB_TOOLSET "vc7"
-
-#elif defined(BOOST_MSVC) && (BOOST_MSVC == 1310)
-
-   // vc71:
-#  define BOOST_LIB_TOOLSET "vc71"
-
-#elif defined(BOOST_MSVC) && (BOOST_MSVC == 1400)
-
-   // vc80:
-#  define BOOST_LIB_TOOLSET "vc80"
-
-#elif defined(BOOST_MSVC) && (BOOST_MSVC == 1500)
-
-   // vc90:
-#  define BOOST_LIB_TOOLSET "vc90"
-
-#elif defined(BOOST_MSVC) && (BOOST_MSVC == 1600)
-
-   // vc10:
-#  define BOOST_LIB_TOOLSET "vc100"
-
-#elif defined(BOOST_MSVC) && (BOOST_MSVC >= 1700)
-
-   // vc11:
-#  define BOOST_LIB_TOOLSET "vc110"
-
-#elif defined(__BORLANDC__)
-
-   // CBuilder 6:
-#  define BOOST_LIB_TOOLSET "bcb"
-
-#elif defined(__ICL)
-
-   // Intel C++, no version number:
-#  define BOOST_LIB_TOOLSET "iw"
-
-#elif defined(__MWERKS__) && (__MWERKS__ <= 0x31FF )
-
-   // Metrowerks CodeWarrior 8.x
-#  define BOOST_LIB_TOOLSET "cw8"
-
-#elif defined(__MWERKS__) && (__MWERKS__ <= 0x32FF )
-
-   // Metrowerks CodeWarrior 9.x
-#  define BOOST_LIB_TOOLSET "cw9"
-
-#endif
 #endif // BOOST_LIB_TOOLSET
 
 //
@@ -201,11 +202,11 @@ BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 #        elif defined(_DEBUG)\
                && defined(BOOST_DEBUG_PYTHON) && defined(BOOST_LINKING_PYTHON)
 #            define BOOST_LIB_RT_OPT "-gydp"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        elif defined(_DEBUG)
 #            define BOOST_LIB_RT_OPT "-gdp"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        else
 #            define BOOST_LIB_RT_OPT "-p"
@@ -221,11 +222,11 @@ BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 #        elif defined(_DEBUG)\
                && defined(BOOST_DEBUG_PYTHON) && defined(BOOST_LINKING_PYTHON)
 #            define BOOST_LIB_RT_OPT "-gydpn"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        elif defined(_DEBUG)
 #            define BOOST_LIB_RT_OPT "-gdpn"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        else
 #            define BOOST_LIB_RT_OPT "-pn"
@@ -255,11 +256,11 @@ BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 #        elif defined(_DEBUG)\
                && defined(BOOST_DEBUG_PYTHON) && defined(BOOST_LINKING_PYTHON)
 #             define BOOST_LIB_RT_OPT "-sgydp"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        elif defined(_DEBUG)
 #             define BOOST_LIB_RT_OPT "-sgdp"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        else
 #            define BOOST_LIB_RT_OPT "-sp"
@@ -275,11 +276,11 @@ BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 #        elif defined(_DEBUG)\
                && defined(BOOST_DEBUG_PYTHON) && defined(BOOST_LINKING_PYTHON)
 #             define BOOST_LIB_RT_OPT "-sgydpn"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        elif defined(_DEBUG)
 #             define BOOST_LIB_RT_OPT "-sgdpn"
-#            pragma message("warning: STLPort debug versions are built with /D_STLP_DEBUG=1")
+#            pragma message("warning: STLport debug versions are built with /D_STLP_DEBUG=1")
 #            error "Build options aren't compatible with pre-built libraries"
 #        else
 #            define BOOST_LIB_RT_OPT "-spn"
@@ -312,7 +313,7 @@ BOOST_LIB_VERSION:    The Boost version, in the form x_y, for Boost version x.y.
 // sanity check:
 //
 #if defined(__STL_DEBUG) || defined(_STLP_DEBUG)
-#error "Pre-built versions of the Boost libraries are not provided in STLPort-debug form"
+#error "Pre-built versions of the Boost libraries are not provided in STLport-debug form"
 #endif
 
 #  ifdef _RTLDLL

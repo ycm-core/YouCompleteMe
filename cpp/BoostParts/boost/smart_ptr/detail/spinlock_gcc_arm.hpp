@@ -11,13 +11,15 @@
 
 #include <boost/smart_ptr/detail/yield_k.hpp>
 
-#if defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+#if defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7S__)
 
 # define BOOST_SP_ARM_BARRIER "dmb"
+# define BOOST_SP_ARM_HAS_LDREX
 
 #elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_6T2__)
 
 # define BOOST_SP_ARM_BARRIER "mcr p15, 0, r0, c7, c10, 5"
+# define BOOST_SP_ARM_HAS_LDREX
 
 #else
 
@@ -43,17 +45,7 @@ public:
     {
         int r;
 
-#if defined(__ARM_ARCH_6__) \
-    || defined(__ARM_ARCH_6J__) \
-    || defined(__ARM_ARCH_6K__) \
-    || defined(__ARM_ARCH_6Z__) \
-    || defined(__ARM_ARCH_6ZK__) \
-    || defined(__ARM_ARCH_6T2__) \
-    || defined(__ARM_ARCH_7__) \
-    || defined(__ARM_ARCH_7A__) \
-    || defined(__ARM_ARCH_7R__) \
-    || defined(__ARM_ARCH_7M__) \
-    || defined(__ARM_ARCH_7EM__)
+#ifdef BOOST_SP_ARM_HAS_LDREX
 
         __asm__ __volatile__(
             "ldrex %0, [%2]; \n"
@@ -123,5 +115,6 @@ public:
 #define BOOST_DETAIL_SPINLOCK_INIT {0}
 
 #undef BOOST_SP_ARM_BARRIER
+#undef BOOST_SP_ARM_HAS_LDREX
 
 #endif // #ifndef BOOST_SMART_PTR_DETAIL_SPINLOCK_GCC_ARM_HPP_INCLUDED

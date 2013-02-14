@@ -146,6 +146,12 @@
 #  endif
 #endif
 
+//
+// Recent GCC versions have __int128 when in 64-bit mode:
+//
+#if defined(__SIZEOF_INT128__)
+#  define BOOST_HAS_INT128
+#endif
 
 // C++0x features in 4.3.n and later
 //

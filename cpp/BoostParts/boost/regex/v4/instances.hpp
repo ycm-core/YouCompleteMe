@@ -121,7 +121,7 @@ template class BOOST_REGEX_TEMPLATE_DECL ::boost::re_detail::perl_matcher< std::
 
 #undef BOOST_REGEX_TEMPLATE_DECL
 
-#elif (defined(__GNUC__) && (__GNUC__ >= 3)) || !defined(BOOST_NO_EXTERN_TEMPLATE)
+#elif (defined(__GNUC__) && (__GNUC__ >= 3)) || !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 
 #  ifndef BOOST_REGEX_INSTANTIATE
 #     ifdef __GNUC__

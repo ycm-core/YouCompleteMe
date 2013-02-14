@@ -224,7 +224,7 @@ namespace boost {
       {};
   } // namespace detail
 
-  template <class Graph, class Property>
+  template <class Graph, class Property, class Enable = void>
   struct property_map:
     mpl::if_<
       is_same<typename detail::property_kind_from_graph<Graph, Property>::type, edge_property_tag>,
@@ -248,8 +248,8 @@ namespace boost {
     >::type type;
   };
 
-  template <class Graph> class vertex_property: vertex_property_type<Graph> {};
-  template <class Graph> class edge_property: edge_property_type<Graph> {};
+  template <typename Graph> struct vertex_property: vertex_property_type<Graph> {};
+  template <typename Graph> struct edge_property: edge_property_type<Graph> {};
 
   template <typename Graph>
   class degree_property_map

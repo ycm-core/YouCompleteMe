@@ -28,7 +28,7 @@ namespace boost
         return boost::begin( r ) == boost::end( r );
     }
 
-} // namepace 'boost'
+} // namespace 'boost'
 
 
 #endif

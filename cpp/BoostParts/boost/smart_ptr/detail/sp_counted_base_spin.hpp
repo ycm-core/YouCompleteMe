@@ -84,6 +84,7 @@ public:
     }
 
     virtual void * get_deleter( sp_typeinfo const & ti ) = 0;
+    virtual void * get_untyped_deleter() = 0;
 
     void add_ref_copy()
     {

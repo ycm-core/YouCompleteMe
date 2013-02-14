@@ -13,7 +13,7 @@
 #endif
 
 #include <exception>
-#include <boost/assert.hpp>
+//#include <boost/assert.hpp>
 #include <string>
 
 #define BOOST_ARCHIVE_SOURCE
@@ -21,6 +21,18 @@
 
 namespace boost {
 namespace archive {
+
+unsigned int
+archive_exception::append(unsigned int l, const char * a){
+    while(l < (sizeof(m_buffer) - 1)){
+        char c = *a++;
+        if('\0' == c)
+            break;
+        m_buffer[l++] = c;
+    }
+    m_buffer[l] = '\0';
+    return l;
+}
 
 BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY())
 archive_exception::archive_exception(
@@ -30,80 +42,81 @@ archive_exception::archive_exception(
 ) : 
     code(c)
 {
-    m_msg = "programming error";
+    unsigned int length = 0;
     switch(code){
     case no_exception:
-        m_msg = "uninitialized exception";
+        length = append(length, "uninitialized exception");
         break;
     case unregistered_class:
-        m_msg = "unregistered class";
+        length = append(length, "unregistered class");
         if(NULL != e1){
-            m_msg += " - ";
-            m_msg += e1;
+            length = append(length, " - ");
+            length = append(length, e1);
         }    
         break;
     case invalid_signature:
-        m_msg = "invalid signature";
+        length = append(length, "invalid signature");
         break;
     case unsupported_version:
-        m_msg = "unsupported version";
+        length = append(length, "unsupported version");
         break;
     case pointer_conflict:
-        m_msg = "pointer conflict";
+        length = append(length, "pointer conflict");
         break;
     case incompatible_native_format:
-        m_msg = "incompatible native format";
+        length = append(length, "incompatible native format");
         if(NULL != e1){
-            m_msg += " - ";
-            m_msg += e1;
+            length = append(length, " - ");
+            length = append(length, e1);
         }    
         break;
     case array_size_too_short:
-        m_msg = "array size too short";
+        length = append(length, "array size too short");
         break;
     case input_stream_error:
-        m_msg = "input stream error";
+        length = append(length, "input stream error");
         break;
     case invalid_class_name:
-        m_msg = "class name too long";
+        length = append(length, "class name too long");
         break;
     case unregistered_cast:
-        m_msg = "unregistered void cast ";
-        m_msg += (NULL != e1) ? e1 : "?";
-        m_msg += "<-";
-        m_msg += (NULL != e2) ? e2 : "?";
+        length = append(length, "unregistered void cast ");
+        length = append(length, (NULL != e1) ? e1 : "?");
+        length = append(length, "<-");
+        length = append(length, (NULL != e2) ? e2 : "?");
         break;
     case unsupported_class_version:
-        m_msg = "class version ";
-        m_msg += (NULL != e1) ? e1 : "<unknown class>";
+        length = append(length, "class version ");
+        length = append(length, (NULL != e1) ? e1 : "<unknown class>");
         break;
     case other_exception:
         // if get here - it indicates a derived exception 
         // was sliced by passing by value in catch
-        m_msg = "unknown derived exception";
+        length = append(length, "unknown derived exception");
         break;
     case multiple_code_instantiation:
-        m_msg = "code instantiated in more than one module";
+        length = append(length, "code instantiated in more than one module");
         if(NULL != e1){
-            m_msg += " - ";
-            m_msg += e1;
+            length = append(length, " - ");
+            length = append(length, e1);
         }    
         break;
     case output_stream_error:
-        m_msg = "output stream error";
+        length = append(length, "output stream error");
         break;
     default:
         BOOST_ASSERT(false);
+        length = append(length, "programming error");
         break;
     }
 }
 BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY())
-archive_exception::~archive_exception() throw () {}
+archive_exception::~archive_exception() throw() {}
 
 BOOST_ARCHIVE_DECL(const char *)
 archive_exception::what( ) const throw()
 {
-    return m_msg.c_str();
+    return m_buffer;
 }
 BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY())
 archive_exception::archive_exception() : 

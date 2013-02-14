@@ -8,7 +8,10 @@
 
 #include <boost/thread/win32/basic_timed_mutex.hpp>
 #include <boost/thread/exceptions.hpp>
-#include <boost/thread/locks.hpp>
+#if defined BOOST_THREAD_PROVIDES_NESTED_LOCKS
+#include <boost/thread/lock_types.hpp>
+#endif
+#include <boost/thread/detail/delete.hpp>
 
 #include <boost/config/abi_prefix.hpp>
 
@@ -33,8 +36,10 @@ namespace boost
             destroy();
         }
 
+#if defined BOOST_THREAD_PROVIDES_NESTED_LOCKS
         typedef unique_lock<mutex> scoped_lock;
         typedef detail::try_lock_wrapper<mutex> scoped_try_lock;
+#endif
     };
 
     typedef mutex try_mutex;
@@ -54,9 +59,11 @@ namespace boost
             destroy();
         }
 
+#if defined BOOST_THREAD_PROVIDES_NESTED_LOCKS
         typedef unique_lock<timed_mutex> scoped_timed_lock;
         typedef detail::try_lock_wrapper<timed_mutex> scoped_try_lock;
         typedef scoped_timed_lock scoped_lock;
+#endif
     };
 }
 

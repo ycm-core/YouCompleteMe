@@ -417,7 +417,7 @@ struct common_type<chrono::duration<Rep1, Period1>,
 namespace chrono {
 
     template <class Rep, class Period>
-    class duration
+    class BOOST_SYMBOL_VISIBLE duration
     {
     //BOOST_CHRONO_STATIC_ASSERT(boost::is_integral<Rep>::value, BOOST_CHRONO_A_DURATION_REPRESENTATION_MUST_BE_INTEGRAL, ());
     BOOST_CHRONO_STATIC_ASSERT(!boost::chrono::detail::is_duration<Rep>::value,
@@ -436,7 +436,7 @@ namespace chrono {
         BOOST_CONSTEXPR
         duration() : rep_(duration_values<rep>::zero()) { }
         template <class Rep2>
-        BOOST_CONSTEXPR
+        BOOST_SYMBOL_VISIBLE inline  BOOST_CONSTEXPR
         explicit duration(const Rep2& r
         , typename boost::enable_if <
                     mpl::and_ <
@@ -452,8 +452,7 @@ namespace chrono {
                 >::type* = 0
             ) : rep_(r) { }
         //~duration() {} //= default;
-        //BOOST_CONSTEXPR
-        //duration(const duration& rhs) : rep_(rhs.rep_) {} // = default;
+//        BOOST_CONSTEXPR        duration(const duration& rhs) : rep_(rhs.rep_) {} // = default;
         duration& operator=(const duration& rhs) // = default;
         {
             if (&rhs != this) rep_= rhs.rep_;

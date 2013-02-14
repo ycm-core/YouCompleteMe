@@ -520,9 +520,26 @@ public:
    }
    void increment()
    {
+      // We must not start with a continuation character:
+      if((static_cast<boost::uint8_t>(*m_position) & 0xC0) == 0x80)
+         invalid_sequence();
       // skip high surrogate first if there is one:
       unsigned c = detail::utf8_byte_count(*m_position);
-      std::advance(m_position, c);
+      if(m_value == pending_read)
+      {
+         // Since we haven't read in a value, we need to validate the code points:
+         for(unsigned i = 0; i < c; ++i)
+         {
+            ++m_position;
+            // We must have a continuation byte:
+            if((i != c - 1) && ((static_cast<boost::uint8_t>(*m_position) & 0xC0) != 0x80))
+               invalid_sequence();
+         }
+      }
+      else
+      {
+         std::advance(m_position, c);
+      }
       m_value = pending_read;
    }
    void decrement()
@@ -589,7 +606,7 @@ private:
       // we must not have a continuation character:
       if((m_value & 0xC0u) == 0x80u)
          invalid_sequence();
-      // see how many extra byts we have:
+      // see how many extra bytes we have:
       unsigned extra = detail::utf8_trailing_byte_count(*m_position);
       // extract the extra bits, 6 from each extra byte:
       BaseIterator next(m_position);
@@ -597,6 +614,9 @@ private:
       {
          ++next;
          m_value <<= 6;
+         // We must have a continuation byte:
+         if((static_cast<boost::uint8_t>(*next) & 0xC0) != 0x80)
+            invalid_sequence();
          m_value += static_cast<boost::uint8_t>(*next) & 0x3Fu;
       }
       // we now need to remove a few of the leftmost bits, but how many depends

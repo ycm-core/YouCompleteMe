@@ -50,7 +50,7 @@ namespace boost {
 
             \param Output An output iterator to which the result will be copied
             \param Input An input range
-            \param IsSpace An unary predicate identifying spaces
+            \param IsSpace A unary predicate identifying spaces
             \return 
                 An output iterator pointing just after the last inserted character or
                 a copy of the input
@@ -118,7 +118,7 @@ namespace boost {
             The input sequence is modified in-place.
 
             \param Input An input sequence
-            \param IsSpace An unary predicate identifying spaces
+            \param IsSpace A unary predicate identifying spaces
         */
         template<typename SequenceT, typename PredicateT>
         inline void trim_left_if(SequenceT& Input, PredicateT IsSpace)
@@ -158,7 +158,7 @@ namespace boost {
 
             \param Output An output iterator to which the result will be copied
             \param Input An input range
-            \param IsSpace An unary predicate identifying spaces
+            \param IsSpace A unary predicate identifying spaces
             \return 
                 An output iterator pointing just after the last inserted character or
                 a copy of the input
@@ -228,7 +228,7 @@ namespace boost {
             The input sequence is modified in-place.
 
             \param Input An input sequence
-            \param IsSpace An unary predicate identifying spaces
+            \param IsSpace A unary predicate identifying spaces
         */
         template<typename SequenceT, typename PredicateT>
         inline void trim_right_if(SequenceT& Input, PredicateT IsSpace)
@@ -270,7 +270,7 @@ namespace boost {
 
             \param Output An output iterator to which the result will be copied
             \param Input An input range
-            \param IsSpace An unary predicate identifying spaces
+            \param IsSpace A unary predicate identifying spaces
             \return 
                 An output iterator pointing just after the last inserted character or
                 a copy of the input
@@ -352,7 +352,7 @@ namespace boost {
             The input sequence is modified in-place.
 
             \param Input An input sequence
-            \param IsSpace An unary predicate identifying spaces
+            \param IsSpace A unary predicate identifying spaces
         */
         template<typename SequenceT, typename PredicateT>
         inline void trim_if(SequenceT& Input, PredicateT IsSpace)

@@ -24,8 +24,6 @@
 // character and 8 bit bytes. Lowest common multiple is 24 => 4 6 bit characters
 // or 3 8 bit characters
 
-#include <algorithm>
-
 #include <boost/config.hpp> // for BOOST_DEDUCED_TYPENAME & PTFO
 #include <boost/serialization/pfto.hpp>
 
@@ -66,101 +64,105 @@ class transform_width :
     typedef transform_width<Base, BitsOut, BitsIn, CharType> this_t;
     typedef BOOST_DEDUCED_TYPENAME iterator_value<Base>::type base_value_type;
 
-    CharType fill();
-
-    CharType dereference_impl(){
-        if(! m_full){
-            m_current_value = fill();
-            m_full = true;
-        }
-        return m_current_value;
-    }
+    void fill();
 
     CharType dereference() const {
-        return const_cast<this_t *>(this)->dereference_impl();
+        if(!m_buffer_out_full)
+            const_cast<this_t *>(this)->fill();
+        return m_buffer_out;
     }
 
-    // test for iterator equality
+    bool equal_impl(const this_t & rhs){
+        if(BitsIn < BitsOut) // discard any left over bits
+            return this->base_reference() == rhs.base_reference();
+        else{
+            // BitsIn > BitsOut  // zero fill
+            if(this->base_reference() == rhs.base_reference()){
+                m_end_of_sequence = true;
+                return 0 == m_remaining_bits;
+            }
+            return false;
+        }
+    }
+
+    // standard iterator interface
     bool equal(const this_t & rhs) const {
-        return
-            this->base_reference() == rhs.base_reference();
-        ;
+        return const_cast<this_t *>(this)->equal_impl(rhs);
     }
 
     void increment(){
-        m_displacement += BitsOut;
-
-        while(m_displacement >= BitsIn){
-            m_displacement -= BitsIn;
-            if(0 == m_displacement)
-                m_bufferfull = false;
-            if(! m_bufferfull){
-                // note: suspect that this is not invoked for borland
-                ++(this->base_reference());
-            }
-        }
-        m_full = false;
+        m_buffer_out_full = false;
     }
 
-    CharType m_current_value;
-    // number of bits left in current input character buffer
-    unsigned int m_displacement;
-    base_value_type m_buffer;
-    // flag to current output character is ready - just used to save time
-    bool m_full;
-    // flag to indicate that m_buffer has data
-    bool m_bufferfull;
+    bool m_buffer_out_full;
+    CharType m_buffer_out;
+
+    // last read element from input
+    base_value_type m_buffer_in;
+
+    // number of bits to left in the input buffer.
+    unsigned int m_remaining_bits;
+
+    // flag to indicate we've reached end of data.
+    bool m_end_of_sequence;
 
 public:
     // make composible buy using templated constructor
     template<class T>
     transform_width(BOOST_PFTO_WRAPPER(T) start) : 
         super_t(Base(BOOST_MAKE_PFTO_WRAPPER(static_cast< T >(start)))),
-        m_displacement(0),
-        m_full(false),
-        m_bufferfull(false)
+        m_buffer_out_full(false),
+        m_remaining_bits(0),
+        m_end_of_sequence(false)
     {}
     // intel 7.1 doesn't like default copy constructor
     transform_width(const transform_width & rhs) : 
         super_t(rhs.base_reference()),
-        m_current_value(rhs.m_current_value),
-        m_displacement(rhs.m_displacement),
-        m_buffer(rhs.m_buffer),
-        m_full(rhs.m_full),
-        m_bufferfull(rhs.m_bufferfull)
+        m_buffer_out_full(rhs.m_buffer_out_full),
+        m_remaining_bits(rhs.m_remaining_bits),
+        m_buffer_in(rhs.m_buffer_in),
+        m_end_of_sequence(false)
     {}
 };
 
-template<class Base, int BitsOut, int BitsIn, class CharType>
-CharType transform_width<Base, BitsOut, BitsIn, CharType>::fill(){
-    CharType retval = 0;
+template<
+    class Base, 
+    int BitsOut, 
+    int BitsIn, 
+    class CharType
+>
+void transform_width<Base, BitsOut, BitsIn, CharType>::fill() {
     unsigned int missing_bits = BitsOut;
-    for(;;){
-        unsigned int bcount;
-        if(! m_bufferfull){
-            m_buffer = * this->base_reference();
-            m_bufferfull = true;
-            bcount = BitsIn;
+    m_buffer_out = 0;
+    do{
+        if(0 == m_remaining_bits){
+            if(m_end_of_sequence){
+                m_buffer_in = 0;
+                m_remaining_bits = missing_bits;
+            }
+            else{
+                m_buffer_in = * this->base_reference()++;
+                m_remaining_bits = BitsIn;
+            }
         }
-        else
-            bcount = BitsIn - m_displacement;
-        unsigned int i = (std::min)(bcount, missing_bits);
+
+        // append these bits to the next output
+        // up to the size of the output
+        unsigned int i = std::min(missing_bits, m_remaining_bits);
         // shift interesting bits to least significant position
-        unsigned int j = m_buffer >> (bcount - i);
-        // strip off uninteresting bits
-        // (note presumption of two's complement arithmetic)
-        j &= ~(-(1 << i));
+        base_value_type j = m_buffer_in >> (m_remaining_bits - i);
+        // and mask off the un interesting higher bits
+        // note presumption of twos complement notation
+        j &= (1 << i) - 1;
         // append then interesting bits to the output value
-        retval <<= i;
-        retval |= j;
+        m_buffer_out <<= i;
+        m_buffer_out |= j;
+
+        // and update counters
         missing_bits -= i;
-        if(0 == missing_bits)
-            break;
-        // note: suspect that this is not invoked for borland 5.51
-        ++(this->base_reference());
-        m_bufferfull = false;
-    }
-    return retval;
+        m_remaining_bits -= i;
+    }while(0 < missing_bits);
+    m_buffer_out_full = true;
 }
 
 } // namespace iterators

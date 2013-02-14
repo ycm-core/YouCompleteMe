@@ -64,7 +64,7 @@ struct is_const_rvalue_filter
    BOOST_STATIC_CONSTANT(bool, value = ::boost::detail::cv_traits_imp<T*>::is_const);
 #endif
 };
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <class T>
 struct is_const_rvalue_filter<T&&>
 {

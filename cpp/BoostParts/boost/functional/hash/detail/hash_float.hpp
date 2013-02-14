@@ -73,7 +73,9 @@ namespace boost
                 ptr += sizeof(std::size_t);
 
                 while(length >= sizeof(std::size_t)) {
-                    hash_float_combine(seed, *(std::size_t*) ptr);
+                    std::size_t buffer = 0;
+                    std::memcpy(&buffer, ptr, sizeof(std::size_t));
+                    hash_float_combine(seed, buffer);
                     length -= sizeof(std::size_t);
                     ptr += sizeof(std::size_t);
                 }
@@ -210,8 +212,15 @@ namespace boost
         template <class T>
         inline std::size_t float_hash_value(T v)
         {
+#if defined(fpclassify)
+            switch (fpclassify(v))
+#elif BOOST_HASH_CONFORMANT_FLOATS
+            switch (std::fpclassify(v))
+#else
             using namespace std;
-            switch (fpclassify(v)) {
+            switch (fpclassify(v))
+#endif
+            {
             case FP_ZERO:
                 return 0;
             case FP_INFINITE:

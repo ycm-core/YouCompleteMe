@@ -72,7 +72,15 @@ struct make_signed_imp
                      is_same<t_no_cv, unsigned long>,
                      long,
 #if defined(BOOST_HAS_LONG_LONG)
+#ifdef BOOST_HAS_INT128
+                     typename mpl::if_c<
+                        sizeof(t_no_cv) == sizeof(boost::long_long_type), 
+                        boost::long_long_type, 
+                        boost::int128_type
+                     >::type
+#else
                      boost::long_long_type
+#endif
 #elif defined(BOOST_HAS_MS_INT64)
                      __int64
 #else
@@ -96,7 +104,15 @@ struct make_signed_imp
                      sizeof(t_no_cv) == sizeof(unsigned long),
                      long,
 #if defined(BOOST_HAS_LONG_LONG)
+#ifdef BOOST_HAS_INT128
+                     typename mpl::if_c<
+                        sizeof(t_no_cv) == sizeof(boost::long_long_type), 
+                        boost::long_long_type, 
+                        boost::int128_type
+                     >::type
+#else
                      boost::long_long_type
+#endif
 #elif defined(BOOST_HAS_MS_INT64)
                      __int64
 #else

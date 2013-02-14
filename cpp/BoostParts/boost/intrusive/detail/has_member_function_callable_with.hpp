@@ -18,6 +18,7 @@
       #include <boost/intrusive/detail/config_begin.hpp>
       #include <boost/intrusive/detail/workaround.hpp>
       #include <boost/intrusive/detail/preprocessor.hpp>
+      #include <boost/intrusive/detail/mpl.hpp>
       #include <boost/static_assert.hpp>
       #include <boost/move/move.hpp>
 
@@ -85,7 +86,7 @@
             void BOOST_INTRUSIVE_HAS_MEMBER_FUNCTION_CALLABLE_WITH_FUNCNAME();
          };
 
-         struct Base : public Type, public BaseMixin { Base(); };
+         struct Base : public ::boost::intrusive::detail::remove_cv<Type>::type, public BaseMixin { Base(); };
          template <typename T, T t> class Helper{};
 
          template <typename U>

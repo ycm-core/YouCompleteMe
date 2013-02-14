@@ -100,7 +100,7 @@ namespace boost
         // While this design is less performant than some less
         // safe alternatives, the use of ranges and iterators to
         // perform counting will never be optimal anyhow, hence
-        // if optimal performance is desired a handcoded loop
+        // if optimal performance is desired a hand-coded loop
         // is the solution.
         template<typename Integer>
         class integer_iterator_with_step

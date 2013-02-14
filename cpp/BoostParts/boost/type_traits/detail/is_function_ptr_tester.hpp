@@ -26,7 +26,7 @@
 namespace boost {
 namespace type_traits {
 
-// Note it is acceptible to use ellipsis here, since the argument will
+// Note it is acceptable to use ellipsis here, since the argument will
 // always be a pointer type of some sort (JM 2005/06/04):
 no_type BOOST_TT_DECL is_function_ptr_tester(...);
 

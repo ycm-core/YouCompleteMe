@@ -133,7 +133,7 @@ namespace ratio_detail
   class br_mul
   {
       static const boost::intmax_t nan =
-        (BOOST_RATIO_INTMAX_C(1) << (sizeof(boost::intmax_t) * CHAR_BIT - 1));
+          boost::intmax_t(BOOST_RATIO_UINTMAX_C(1) << (sizeof(boost::intmax_t) * CHAR_BIT - 1));
       static const boost::intmax_t min = boost::integer_traits<boost::intmax_t>::const_min;
       static const boost::intmax_t max = boost::integer_traits<boost::intmax_t>::const_max;
 
@@ -172,7 +172,7 @@ namespace ratio_detail
   template <boost::intmax_t X, boost::intmax_t Y>
   class br_div
   {
-      static const boost::intmax_t nan = (1LL << (sizeof(boost::intmax_t) * CHAR_BIT - 1));
+      static const boost::intmax_t nan = boost::intmax_t(BOOST_RATIO_UINTMAX_C(1) << (sizeof(boost::intmax_t) * CHAR_BIT - 1));
       static const boost::intmax_t min = boost::integer_traits<boost::intmax_t>::const_min;
       static const boost::intmax_t max = boost::integer_traits<boost::intmax_t>::const_max;
 

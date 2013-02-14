@@ -18,11 +18,14 @@
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_member_pointer.hpp>
 #include <boost/type_traits/is_class.hpp>
-#include <boost/move/move.hpp>
+#include <boost/move/utility.hpp>
+#include <boost/move/iterator.hpp>
 #include <boost/container/detail/mpl.hpp>
 #include <boost/container/detail/type_traits.hpp>
 #include <boost/container/allocator_traits.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 #include <algorithm>
+#include <iterator>
 
 namespace boost {
 namespace container {
@@ -123,16 +126,6 @@ struct ct_rounded_size
    enum { value = ((OrigSize-1)/RoundTo+1)*RoundTo };
 };
 
-template<class T>
-struct move_const_ref_type
-   : if_c
-//   < ::boost::is_fundamental<T>::value || ::boost::is_pointer<T>::value || ::boost::is_member_pointer<T>::value || ::boost::is_enum<T>::value
-   < !::boost::is_class<T>::value
-   ,const T &
-   ,BOOST_CATCH_CONST_RLVALUE(T)
-   >
-{};
-
 }  //namespace container_detail {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -154,11 +147,93 @@ template
     typename F> // F models ForwardIterator
 F uninitialized_move_alloc(A &a, I f, I l, F r)
 {
-   while (f != l) {
-      allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), boost::move(*f));
-      ++f; ++r;
+   F back = r;
+   BOOST_TRY{
+      while (f != l) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), boost::move(*f));
+         ++f; ++r;
+      }
    }
+   BOOST_CATCH(...){
+	   for (; back != r; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
    return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                               uninitialized_move_alloc_n
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//! <b>Effects</b>:
+//!   \code
+//!   for (; n--; ++result, ++first)
+//!      allocator_traits::construct(a, &*result, boost::move(*first));
+//!   \endcode
+//!
+//! <b>Returns</b>: result
+template
+   <typename A,
+    typename I, // I models InputIterator
+    typename F> // F models ForwardIterator
+F uninitialized_move_alloc_n(A &a, I f, typename std::iterator_traits<I>::difference_type n, F r)
+{
+   F back = r;
+   BOOST_TRY{
+      while (n--) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), boost::move(*f));
+         ++f; ++r;
+      }
+   }
+   BOOST_CATCH(...){
+	   for (; back != r; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
+   return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                               uninitialized_move_alloc_n_source
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//! <b>Effects</b>:
+//!   \code
+//!   for (; n--; ++result, ++first)
+//!      allocator_traits::construct(a, &*result, boost::move(*first));
+//!   \endcode
+//!
+//! <b>Returns</b>: first (after incremented)
+template
+   <typename A,
+    typename I, // I models InputIterator
+    typename F> // F models ForwardIterator
+I uninitialized_move_alloc_n_source(A &a, I f, typename std::iterator_traits<I>::difference_type n, F r)
+{
+   F back = r;
+   BOOST_TRY{
+      while (n--) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), boost::move(*f));
+         ++f; ++r;
+      }
+   }
+   BOOST_CATCH(...){
+	   for (; back != r; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
+   return f;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -180,11 +255,93 @@ template
     typename F> // F models ForwardIterator
 F uninitialized_copy_alloc(A &a, I f, I l, F r)
 {
-   while (f != l) {
-      allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), *f);
-      ++f; ++r;
+   F back = r;
+   BOOST_TRY{
+      while (f != l) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), *f);
+         ++f; ++r;
+      }
    }
+   BOOST_CATCH(...){
+	   for (; back != r; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
    return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                               uninitialized_copy_alloc_n
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//! <b>Effects</b>:
+//!   \code
+//!   for (; n--; ++result, ++first)
+//!      allocator_traits::construct(a, &*result, *first);
+//!   \endcode
+//!
+//! <b>Returns</b>: result
+template
+   <typename A,
+    typename I, // I models InputIterator
+    typename F> // F models ForwardIterator
+F uninitialized_copy_alloc_n(A &a, I f, typename std::iterator_traits<I>::difference_type n, F r)
+{
+   F back = r;
+   BOOST_TRY{
+      while (n--) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), *f);
+         ++f; ++r;
+      }
+   }
+   BOOST_CATCH(...){
+	   for (; back != r; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
+   return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                               uninitialized_copy_alloc_n_source
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//! <b>Effects</b>:
+//!   \code
+//!   for (; n--; ++result, ++first)
+//!      allocator_traits::construct(a, &*result, *first);
+//!   \endcode
+//!
+//! <b>Returns</b>: first (after incremented)
+template
+   <typename A,
+    typename I, // I models InputIterator
+    typename F> // F models ForwardIterator
+I uninitialized_copy_alloc_n_source(A &a, I f, typename std::iterator_traits<I>::difference_type n, F r)
+{
+   F back = r;
+   BOOST_TRY{
+      while (n--) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*r), *f);
+         ++f; ++r;
+      }
+   }
+   BOOST_CATCH(...){
+	   for (; back != r; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
+   return f;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -206,10 +363,20 @@ template
     typename T>
 void uninitialized_fill_alloc(A &a, F f, F l, const T &t)
 {
-   while (f != l) {
-      allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*f), t);
-      ++f;
+   F back = f;
+   BOOST_TRY{
+      while (f != l) {
+         allocator_traits<A>::construct(a, container_detail::to_raw_pointer(&*f), t);
+         ++f;
+      }
    }
+   BOOST_CATCH(...){
+	   for (; back != l; ++back){
+         allocator_traits<A>::destroy(a, container_detail::to_raw_pointer(&*back));
+      }
+	   BOOST_RETHROW;
+   }
+   BOOST_CATCH_END
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -242,6 +409,168 @@ F uninitialized_copy_or_move_alloc
    return ::boost::container::uninitialized_copy_alloc(a, f, l, r);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//
+//                            uninitialized_copy_or_move_alloc_n
+//
+//////////////////////////////////////////////////////////////////////////////
+
+template
+<typename A
+,typename I    // I models InputIterator
+,typename F>   // F models ForwardIterator
+F uninitialized_copy_or_move_alloc_n
+   (A &a, I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::enable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   return ::boost::container::uninitialized_move_alloc_n(a, f, n, r);
+}
+
+template
+<typename A
+,typename I    // I models InputIterator
+,typename F>   // F models ForwardIterator
+F uninitialized_copy_or_move_alloc_n
+   (A &a, I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::disable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   return ::boost::container::uninitialized_copy_alloc_n(a, f, n, r);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                            uninitialized_copy_or_move_alloc_n_source
+//
+//////////////////////////////////////////////////////////////////////////////
+
+template
+<typename A
+,typename I    // I models InputIterator
+,typename F>   // F models ForwardIterator
+I uninitialized_copy_or_move_alloc_n_source
+   (A &a, I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::enable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   return ::boost::container::uninitialized_move_alloc_n_source(a, f, n, r);
+}
+
+template
+<typename A
+,typename I    // I models InputIterator
+,typename F>   // F models ForwardIterator
+I uninitialized_copy_or_move_alloc_n_source
+   (A &a, I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::disable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   return ::boost::container::uninitialized_copy_alloc_n_source(a, f, n, r);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                         copy_or_move
+//
+//////////////////////////////////////////////////////////////////////////////
+
+template
+<typename I,   // I models InputIterator
+typename F>   // F models ForwardIterator
+inline F copy_or_move(I f, I l, F r
+   ,typename boost::container::container_detail::enable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   while (f != l) {
+      *r = ::boost::move(*f);
+      ++f; ++r;
+   }
+   return r;
+}
+
+template
+<typename I,   // I models InputIterator
+typename F>   // F models ForwardIterator
+inline F copy_or_move(I f, I l, F r
+   ,typename boost::container::container_detail::disable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   while (f != l) {
+      *r = *f;
+      ++f; ++r;
+   }
+   return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                         copy_or_move_n
+//
+//////////////////////////////////////////////////////////////////////////////
+
+template
+<typename I,   // I models InputIterator
+typename F>   // F models ForwardIterator
+inline F copy_or_move_n(I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::enable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   while (n--) {
+      *r = ::boost::move(*f);
+      ++f; ++r;
+   }
+   return r;
+}
+
+template
+<typename I,   // I models InputIterator
+typename F>   // F models ForwardIterator
+inline F copy_or_move_n(I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::disable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   while (n--) {
+      *r = *f;
+      ++f; ++r;
+   }
+   return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                         copy_or_move_n_source
+//
+//////////////////////////////////////////////////////////////////////////////
+
+template
+<typename I,   // I models InputIterator
+typename F>   // F models ForwardIterator
+inline I copy_or_move_n_source(I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::enable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   while (n--) {
+      *r = ::boost::move(*f);
+      ++f; ++r;
+   }
+   return f;
+}
+
+template
+<typename I,   // I models InputIterator
+typename F>   // F models ForwardIterator
+inline I copy_or_move_n_source(I f, typename std::iterator_traits<I>::difference_type n, F r
+   ,typename boost::container::container_detail::disable_if
+      < boost::move_detail::is_move_iterator<I> >::type* = 0)
+{
+   while (n--) {
+      *r = *f;
+      ++f; ++r;
+   }
+   return f;
+}
 
 }  //namespace container {
 }  //namespace boost {

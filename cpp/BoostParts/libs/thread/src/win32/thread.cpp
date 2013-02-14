@@ -3,6 +3,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 // (C) Copyright 2007 Anthony Williams
 // (C) Copyright 2007 David Deakins
+// (C) Copyright 2011-2013 Vicente J. Botet Escriba
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x400
@@ -11,17 +12,19 @@
 #ifndef WINVER
 #define WINVER 0x400
 #endif
+//#define BOOST_THREAD_VERSION 3
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/detail/tss_hooks.hpp>
+#include <boost/thread/future.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
+#if defined BOOST_THREAD_USES_DATETIME
 #include <boost/date_time/posix_time/conversion.hpp>
-
+#endif
 #include <memory>
 #include <algorithm>
 #ifndef UNDER_CE
@@ -36,16 +39,20 @@ namespace boost
   {
     thread_data_base::~thread_data_base()
     {
-      {
         for (notify_list_t::iterator i = notify.begin(), e = notify.end();
                 i != e; ++i)
         {
             i->second->unlock();
             i->first->notify_all();
         }
-      }
+        for (async_states_t::iterator i = async_states_.begin(), e = async_states_.end();
+                i != e; ++i)
+        {
+            (*i)->make_ready();
+        }
     }
   }
+
     namespace
     {
 #ifdef BOOST_THREAD_PROVIDES_ONCE_CXX11
@@ -75,24 +82,34 @@ namespace boost
             }
         }
 
-        detail::thread_data_base* get_current_thread_data()
-        {
-            if(current_thread_tls_key==TLS_OUT_OF_INDEXES)
-            {
-                return 0;
-            }
-            return (detail::thread_data_base*)TlsGetValue(current_thread_tls_key);
-        }
-
         void set_current_thread_data(detail::thread_data_base* new_data)
         {
             boost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
-            if(current_thread_tls_key!=TLS_OUT_OF_INDEXES)
+            if (current_thread_tls_key!=TLS_OUT_OF_INDEXES)
+            {
                 BOOST_VERIFY(TlsSetValue(current_thread_tls_key,new_data));
+            }
             else
-                boost::throw_exception(thread_resource_error());
+            {
+                BOOST_VERIFY(false);
+                //boost::throw_exception(thread_resource_error());
+            }
         }
 
+    }
+    namespace detail
+    {
+      thread_data_base* get_current_thread_data()
+      {
+          if(current_thread_tls_key==TLS_OUT_OF_INDEXES)
+          {
+              return 0;
+          }
+          return (detail::thread_data_base*)TlsGetValue(current_thread_tls_key);
+      }
+    }
+    namespace
+    {
 #ifndef BOOST_HAS_THREADEX
 // Windows CE doesn't define _beginthreadex
 
@@ -151,7 +168,7 @@ namespace boost
     {
         void run_thread_exit_callbacks()
         {
-            detail::thread_data_ptr current_thread_data(get_current_thread_data(),false);
+            detail::thread_data_ptr current_thread_data(detail::get_current_thread_data(),false);
             if(current_thread_data)
             {
                 while(! current_thread_data->tss_data.empty() || current_thread_data->thread_exit_callbacks)
@@ -190,23 +207,24 @@ namespace boost
         {
             detail::thread_data_base* const thread_info(reinterpret_cast<detail::thread_data_base*>(param));
             set_current_thread_data(thread_info);
-#ifndef BOOST_NO_EXCEPTIONS
-            try // BOOST_NO_EXCEPTIONS protected
-#endif
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+            BOOST_TRY
             {
+#endif
                 thread_info->run();
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             }
-#ifndef BOOST_NO_EXCEPTIONS
-            catch(thread_interrupted const&) // BOOST_NO_EXCEPTIONS protected
+            BOOST_CATCH(thread_interrupted const&)
             {
             }
-#endif
 // Removed as it stops the debugger identifying the cause of the exception
 // Unhandled exceptions still cause the application to terminate
-//             catch(...) // BOOST_NO_EXCEPTIONS protected
+//             BOOST_CATCH(...)
 //             {
 //                 std::terminate();
 //             }
+            BOOST_CATCH_END
+#endif
             run_thread_exit_callbacks();
             return 0;
         }
@@ -215,29 +233,33 @@ namespace boost
     thread::thread() BOOST_NOEXCEPT
     {}
 
-    void thread::start_thread()
+    bool thread::start_thread_noexcept()
     {
         uintptr_t const new_thread=_beginthreadex(0,0,&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
         if(!new_thread)
         {
-            boost::throw_exception(thread_resource_error());
+            return false;
+//            boost::throw_exception(thread_resource_error());
         }
         intrusive_ptr_add_ref(thread_info.get());
         thread_info->thread_handle=(detail::win32::handle)(new_thread);
         ResumeThread(thread_info->thread_handle);
+        return true;
     }
 
-    void thread::start_thread(const attributes& attr)
+    bool thread::start_thread_noexcept(const attributes& attr)
     {
       //uintptr_t const new_thread=_beginthreadex(attr.get_security(),attr.get_stack_size(),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
       uintptr_t const new_thread=_beginthreadex(0,static_cast<unsigned int>(attr.get_stack_size()),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
       if(!new_thread)
       {
-          boost::throw_exception(thread_resource_error());
+        return false;
+//          boost::throw_exception(thread_resource_error());
       }
       intrusive_ptr_add_ref(thread_info.get());
       thread_info->thread_handle=(detail::win32::handle)(new_thread);
       ResumeThread(thread_info->thread_handle);
+      return true;
     }
 
     thread::thread(detail::thread_data_ptr data):
@@ -252,7 +274,9 @@ namespace boost
             externally_launched_thread()
             {
                 ++count;
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
                 interruption_enabled=false;
+#endif
             }
 
             void run()
@@ -268,28 +292,25 @@ namespace boost
         void make_external_thread_data()
         {
             externally_launched_thread* me=detail::heap_new<externally_launched_thread>();
-#ifndef BOOST_NO_EXCEPTIONS
-            try // BOOST_NO_EXCEPTIONS protected
-#endif
+            BOOST_TRY
             {
                 set_current_thread_data(me);
             }
-#ifndef BOOST_NO_EXCEPTIONS
-            catch(...) // BOOST_NO_EXCEPTIONS protected
+            BOOST_CATCH(...)
             {
                 detail::heap_delete(me);
-                throw; // BOOST_NO_EXCEPTIONS protected
+                BOOST_RETHROW
             }
-#endif
+            BOOST_CATCH_END
         }
 
         detail::thread_data_base* get_or_make_current_thread_data()
         {
-            detail::thread_data_base* current_thread_data(get_current_thread_data());
+            detail::thread_data_base* current_thread_data(detail::get_current_thread_data());
             if(!current_thread_data)
             {
                 make_external_thread_data();
-                current_thread_data=get_current_thread_data();
+                current_thread_data=detail::get_current_thread_data();
             }
             return current_thread_data;
         }
@@ -309,54 +330,47 @@ namespace boost
 
     bool thread::joinable() const BOOST_NOEXCEPT
     {
-        return (get_thread_info)();
+        return (get_thread_info)() ? true : false;
     }
-    void thread::join()
+    bool thread::join_noexcept()
     {
-        if (this_thread::get_id() == get_id())
-        {
-            boost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
-        }
+
         detail::thread_data_ptr local_thread_info=(get_thread_info)();
         if(local_thread_info)
         {
             this_thread::interruptible_wait(local_thread_info->thread_handle,detail::timeout::sentinel());
             release_handle();
+            return true;
         }
         else
         {
-#ifdef BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
-          boost::throw_exception(thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable"));
-#endif
+          return false;
         }
     }
 
+#if defined BOOST_THREAD_USES_DATETIME
     bool thread::timed_join(boost::system_time const& wait_until)
     {
       return do_try_join_until(get_milliseconds_until(wait_until));
     }
-
-    bool thread::do_try_join_until(uintmax_t milli)
+#endif
+    bool thread::do_try_join_until_noexcept(uintmax_t milli, bool& res)
     {
-      if (this_thread::get_id() == get_id())
-      {
-          boost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
-      }
       detail::thread_data_ptr local_thread_info=(get_thread_info)();
       if(local_thread_info)
       {
           if(!this_thread::interruptible_wait(local_thread_info->thread_handle,milli))
           {
-              return false;
+            res=false;
+            return true;
           }
           release_handle();
+          res=true;
           return true;
       }
       else
       {
-#ifdef BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
-        boost::throw_exception(thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable"));
-#endif
+        return false;
       }
     }
 
@@ -370,6 +384,7 @@ namespace boost
         thread_info=0;
     }
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
     void thread::interrupt()
     {
         detail::thread_data_ptr local_thread_info=(get_thread_info)();
@@ -391,6 +406,7 @@ namespace boost
         GetSystemInfo(&info);
         return info.dwNumberOfProcessors;
     }
+#endif
 
     thread::native_handle_type thread::native_handle()
     {
@@ -467,19 +483,22 @@ namespace boost
             detail::win32::handle handles[3]={0};
             unsigned handle_count=0;
             unsigned wait_handle_index=~0U;
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             unsigned interruption_index=~0U;
+#endif
             unsigned timeout_index=~0U;
             if(handle_to_wait_for!=detail::win32::invalid_handle_value)
             {
                 wait_handle_index=handle_count;
                 handles[handle_count++]=handle_to_wait_for;
             }
-            if(get_current_thread_data() && get_current_thread_data()->interruption_enabled)
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+            if(detail::get_current_thread_data() && detail::get_current_thread_data()->interruption_enabled)
             {
                 interruption_index=handle_count;
-                handles[handle_count++]=get_current_thread_data()->interruption_handle;
+                handles[handle_count++]=detail::get_current_thread_data()->interruption_handle;
             }
-
+#endif
             detail::win32::handle_manager timer_handle;
 
 #ifndef UNDER_CE
@@ -531,11 +550,13 @@ namespace boost
                         {
                             return true;
                         }
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
                         else if(notified_index==interruption_index)
                         {
-                            detail::win32::ResetEvent(get_current_thread_data()->interruption_handle);
+                            detail::win32::ResetEvent(detail::get_current_thread_data()->interruption_handle);
                             throw thread_interrupted();
                         }
+#endif
                         else if(notified_index==timeout_index)
                         {
                             return false;
@@ -558,51 +579,53 @@ namespace boost
         thread::id get_id() BOOST_NOEXCEPT
         {
         #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
-          //return detail::win32::GetCurrentThread();
           return detail::win32::GetCurrentThreadId();
         #else
             return thread::id(get_or_make_current_thread_data());
         #endif
         }
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
         void interruption_point()
         {
             if(interruption_enabled() && interruption_requested())
             {
-                detail::win32::ResetEvent(get_current_thread_data()->interruption_handle);
+                detail::win32::ResetEvent(detail::get_current_thread_data()->interruption_handle);
                 throw thread_interrupted();
             }
         }
 
         bool interruption_enabled() BOOST_NOEXCEPT
         {
-            return get_current_thread_data() && get_current_thread_data()->interruption_enabled;
+            return detail::get_current_thread_data() && detail::get_current_thread_data()->interruption_enabled;
         }
 
         bool interruption_requested() BOOST_NOEXCEPT
         {
-            return get_current_thread_data() && (detail::win32::WaitForSingleObject(get_current_thread_data()->interruption_handle,0)==0);
+            return detail::get_current_thread_data() && (detail::win32::WaitForSingleObject(detail::get_current_thread_data()->interruption_handle,0)==0);
         }
+#endif
 
         void yield() BOOST_NOEXCEPT
         {
             detail::win32::Sleep(0);
         }
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
         disable_interruption::disable_interruption() BOOST_NOEXCEPT:
             interruption_was_enabled(interruption_enabled())
         {
             if(interruption_was_enabled)
             {
-                get_current_thread_data()->interruption_enabled=false;
+                detail::get_current_thread_data()->interruption_enabled=false;
             }
         }
 
         disable_interruption::~disable_interruption() BOOST_NOEXCEPT
         {
-            if(get_current_thread_data())
+            if(detail::get_current_thread_data())
             {
-                get_current_thread_data()->interruption_enabled=interruption_was_enabled;
+                detail::get_current_thread_data()->interruption_enabled=interruption_was_enabled;
             }
         }
 
@@ -610,17 +633,18 @@ namespace boost
         {
             if(d.interruption_was_enabled)
             {
-                get_current_thread_data()->interruption_enabled=true;
+                detail::get_current_thread_data()->interruption_enabled=true;
             }
         }
 
         restore_interruption::~restore_interruption() BOOST_NOEXCEPT
         {
-            if(get_current_thread_data())
+            if(detail::get_current_thread_data())
             {
-                get_current_thread_data()->interruption_enabled=false;
+                detail::get_current_thread_data()->interruption_enabled=false;
             }
         }
+#endif
     }
 
     namespace detail
@@ -716,7 +740,7 @@ namespace boost
 
     BOOST_THREAD_DECL void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk)
     {
-      detail::thread_data_base* const current_thread_data(get_current_thread_data());
+      detail::thread_data_base* const current_thread_data(detail::get_current_thread_data());
       if(current_thread_data)
       {
         current_thread_data->notify_all_at_thread_exit(&cond, lk.release());

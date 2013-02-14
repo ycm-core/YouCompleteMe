@@ -16,7 +16,7 @@
 #include <boost/detail/workaround.hpp>
 
 //
-// whenever we have a conversion function with elipses
+// whenever we have a conversion function with ellipses
 // it needs to be declared __cdecl to suppress compiler
 // warnings from MS and Borland compilers (this *must*
 // appear before we include is_same.hpp below):

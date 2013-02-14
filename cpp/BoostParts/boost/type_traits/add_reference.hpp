@@ -62,7 +62,7 @@ struct add_reference_rvalue_layer
     typedef T& type;
 };
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <typename T>
 struct add_reference_rvalue_layer<T&&>
 {

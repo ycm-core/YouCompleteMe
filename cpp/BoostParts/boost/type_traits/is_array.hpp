@@ -8,7 +8,7 @@
 //  See http://www.boost.org/libs/type_traits for most recent version including documentation.
 
 
-// Some fixes for is_array are based on a newgroup posting by Jonathan Lundquist.
+// Some fixes for is_array are based on a newsgroup posting by Jonathan Lundquist.
 
 
 #ifndef BOOST_TT_IS_ARRAY_HPP_INCLUDED

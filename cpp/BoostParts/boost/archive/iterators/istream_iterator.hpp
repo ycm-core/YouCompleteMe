@@ -49,14 +49,15 @@ class istream_iterator :
     > super_t;
     typedef BOOST_DEDUCED_TYPENAME std::basic_istream<Elem> istream_type;
  
-    //Access the value referred to 
-    Elem dereference() const {
-        return m_current_value;
-    }
-
     bool equal(const this_t & rhs) const {
         // note: only  works for comparison against end of stream
         return m_istream == rhs.m_istream;
+    }
+
+/*
+    //Access the value referred to 
+    Elem dereference() const {
+        return m_current_value;
     }
 
     void increment(){
@@ -67,6 +68,17 @@ class istream_iterator :
             }
         }
     }
+*/
+    //Access the value referred to 
+    Elem dereference() const {
+        return m_istream->peek();
+    }
+
+    void increment(){
+        if(NULL != m_istream){
+            m_istream->ignore(1);
+        }
+    }
 
     istream_type *m_istream;
     Elem m_current_value;
@@ -74,7 +86,7 @@ public:
     istream_iterator(istream_type & is) :
         m_istream(& is)
     {
-        increment();
+        //increment();
     }
 
     istream_iterator() :

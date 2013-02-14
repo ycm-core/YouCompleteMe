@@ -46,7 +46,7 @@
 
 #ifndef BOOST_RESULT_OF_USE_TR1
 #  ifndef BOOST_RESULT_OF_USE_DECLTYPE
-#    ifndef BOOST_NO_DECLTYPE_N3276 // this implies !defined(BOOST_NO_DECLTYPE)
+#    ifndef BOOST_NO_CXX11_DECLTYPE_N3276 // this implies !defined(BOOST_NO_CXX11_DECLTYPE)
 #      define BOOST_RESULT_OF_USE_DECLTYPE
 #    else
 #      define BOOST_RESULT_OF_USE_TR1

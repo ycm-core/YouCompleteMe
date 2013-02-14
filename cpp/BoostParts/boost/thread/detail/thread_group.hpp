@@ -8,6 +8,7 @@
 #include <list>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 #include <boost/config/abi_prefix.hpp>
 
@@ -22,7 +23,7 @@ namespace boost
     {
     private:
         thread_group(thread_group const&);
-        thread_group& operator=(thread_group const&);        
+        thread_group& operator=(thread_group const&);
     public:
         thread_group() {}
         ~thread_group()
@@ -35,6 +36,41 @@ namespace boost
             }
         }
 
+        bool is_this_thread_in()
+        {
+            thread::id id = this_thread::get_id();
+            boost::shared_lock<shared_mutex> guard(m);
+            for(std::list<thread*>::iterator it=threads.begin(),end=threads.end();
+                it!=end;
+                ++it)
+            {
+              if ((*it)->get_id() == id)
+                return true;
+            }
+            return false;
+        }
+
+        bool is_thread_in(thread* thrd)
+        {
+          if(thrd)
+          {
+            thread::id id = thrd->get_id();
+            boost::shared_lock<shared_mutex> guard(m);
+            for(std::list<thread*>::iterator it=threads.begin(),end=threads.end();
+                it!=end;
+                ++it)
+            {
+              if ((*it)->get_id() == id)
+                return true;
+            }
+            return false;
+          }
+          else
+          {
+            return false;
+          }
+        }
+
         template<typename F>
         thread* create_thread(F threadfunc)
         {
@@ -43,16 +79,20 @@ namespace boost
             threads.push_back(new_thread.get());
             return new_thread.release();
         }
-        
+
         void add_thread(thread* thrd)
         {
             if(thrd)
             {
+                BOOST_THREAD_ASSERT_PRECONDITION( ! is_thread_in(thrd) ,
+                    thread_resource_error(system::errc::resource_deadlock_would_occur, "boost::thread_group: trying to add a duplicated thread")
+                );
+
                 boost::lock_guard<shared_mutex> guard(m);
                 threads.push_back(thrd);
             }
         }
-            
+
         void remove_thread(thread* thrd)
         {
             boost::lock_guard<shared_mutex> guard(m);
@@ -62,23 +102,28 @@ namespace boost
                 threads.erase(it);
             }
         }
-        
+
         void join_all()
         {
+            BOOST_THREAD_ASSERT_PRECONDITION( ! is_this_thread_in() ,
+                thread_resource_error(system::errc::resource_deadlock_would_occur, "boost::thread_group: trying joining itself")
+            );
             boost::shared_lock<shared_mutex> guard(m);
-            
+
             for(std::list<thread*>::iterator it=threads.begin(),end=threads.end();
                 it!=end;
                 ++it)
             {
+              if ((*it)->joinable())
                 (*it)->join();
             }
         }
-        
+
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
         void interrupt_all()
         {
             boost::shared_lock<shared_mutex> guard(m);
-            
+
             for(std::list<thread*>::iterator it=threads.begin(),end=threads.end();
                 it!=end;
                 ++it)
@@ -86,13 +131,14 @@ namespace boost
                 (*it)->interrupt();
             }
         }
-        
+#endif
+
         size_t size() const
         {
             boost::shared_lock<shared_mutex> guard(m);
             return threads.size();
         }
-        
+
     private:
         std::list<thread*> threads;
         mutable shared_mutex m;

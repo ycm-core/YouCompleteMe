@@ -309,14 +309,16 @@ namespace boost {
     public:
       typedef Property property_type;
       inline stored_ra_edge_iter() { }
-      inline stored_ra_edge_iter(Vertex v, Iter i = Iter(),
-                                 EdgeVec* edge_vec = 0)
+      inline explicit stored_ra_edge_iter(Vertex v) // Only used for comparisons
+        : stored_edge<Vertex>(v), m_i(0), m_vec(0){ }
+      inline stored_ra_edge_iter(Vertex v, Iter i, EdgeVec* edge_vec)
         : stored_edge<Vertex>(v), m_i(i - edge_vec->begin()), m_vec(edge_vec){ }
-      inline Property& get_property() { return (*m_vec)[m_i].get_property(); }
+      inline Property& get_property() { BOOST_ASSERT ((m_vec != 0)); return (*m_vec)[m_i].get_property(); }
       inline const Property& get_property() const {
+        BOOST_ASSERT ((m_vec != 0));
         return (*m_vec)[m_i].get_property();
       }
-      inline Iter get_iter() const { return m_vec->begin() + m_i; }
+      inline Iter get_iter() const { BOOST_ASSERT ((m_vec != 0)); return m_vec->begin() + m_i; }
     protected:
       std::size_t m_i;
       EdgeVec* m_vec;

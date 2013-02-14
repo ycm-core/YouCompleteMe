@@ -13,6 +13,94 @@
 # pragma once
 #endif
 
+// Set BOOST_HASH_CONFORMANT_FLOATS to 1 for libraries known to have
+// sufficiently good floating point support to not require any
+// workarounds.
+//
+// When set to 0, the library tries to automatically
+// use the best available implementation. This normally works well, but
+// breaks when ambiguities are created by odd namespacing of the functions.
+//
+// Note that if this is set to 0, the library should still take full
+// advantage of the platform's floating point support.
+
+#if defined(__SGI_STL_PORT) || defined(_STLPORT_VERSION)
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#elif defined(__LIBCOMO__)
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#elif defined(__STD_RWCOMPILER_H__) || defined(_RWSTD_VER)
+// Rogue Wave library:
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#elif defined(_LIBCPP_VERSION)
+// libc++
+#   define BOOST_HASH_CONFORMANT_FLOATS 1
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+// GNU libstdc++ 3
+#   if defined(__GNUC__) && __GNUC__ >= 4
+#       define BOOST_HASH_CONFORMANT_FLOATS 1
+#   else
+#       define BOOST_HASH_CONFORMANT_FLOATS 0
+#   endif
+#elif defined(__STL_CONFIG_H)
+// generic SGI STL
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#elif defined(__MSL_CPP__)
+// MSL standard lib:
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#elif defined(__IBMCPP__)
+// VACPP std lib (probably conformant for much earlier version).
+#   if __IBMCPP__ >= 1210
+#       define BOOST_HASH_CONFORMANT_FLOATS 1
+#   else
+#       define BOOST_HASH_CONFORMANT_FLOATS 0
+#   endif
+#elif defined(MSIPL_COMPILE_H)
+// Modena C++ standard library
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#elif (defined(_YVALS) && !defined(__IBMCPP__)) || defined(_CPPLIB_VER)
+// Dinkumware Library (this has to appear after any possible replacement libraries):
+#   if _CPPLIB_VER >= 405
+#       define BOOST_HASH_CONFORMANT_FLOATS 1
+#   else
+#       define BOOST_HASH_CONFORMANT_FLOATS 0
+#   endif
+#else
+#   define BOOST_HASH_CONFORMANT_FLOATS 0
+#endif
+
+#if BOOST_HASH_CONFORMANT_FLOATS
+
+// The standard library is known to be compliant, so don't use the
+// configuration mechanism.
+
+namespace boost {
+    namespace hash_detail {
+        template <typename Float>
+        struct call_ldexp {
+            typedef Float float_type;
+            inline Float operator()(Float x, int y) const {
+                return std::ldexp(x, y);
+            }
+        };
+
+        template <typename Float>
+        struct call_frexp {
+            typedef Float float_type;
+            inline Float operator()(Float x, int* y) const {
+                return std::frexp(x, y);
+            }
+        };
+
+        template <typename Float>
+        struct select_hash_type
+        {
+            typedef Float type;
+        };
+    }
+}
+
+#else // BOOST_HASH_CONFORMANT_FLOATS == 0
+
 // The C++ standard requires that the C float functions are overloarded
 // for float, double and long double in the std namespace, but some of the older
 // library implementations don't support this. On some that don't, the C99
@@ -242,5 +330,7 @@ namespace boost
             > {};            
     }
 }
+
+#endif // BOOST_HASH_CONFORMANT_FLOATS
 
 #endif

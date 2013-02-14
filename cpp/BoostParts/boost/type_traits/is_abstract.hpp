@@ -39,7 +39,7 @@
 //    At this time supported by EDG (Intel C++ 7, Comeau 4.3.2) and VC7.1.
 //  - Adapted and added into Boost.Serialization library by Robert Ramey 
 //    (starting with submission #10).
-//  - Jan 2004: GCC 3.4 fixed to suport DR337 (Giovanni Bajo).
+//  - Jan 2004: GCC 3.4 fixed to support DR337 (Giovanni Bajo).
 //  - Jan 2004: modified to be part of Boost.TypeTraits (Pavel Vozenilek).
 //  - Nov 2004: Christoph Ludwig found that the implementation did not work with
 //              template types and gcc-3.4 or VC7.1, fix due to Christoph Ludwig

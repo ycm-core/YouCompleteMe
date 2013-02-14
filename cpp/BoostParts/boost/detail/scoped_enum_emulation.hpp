@@ -11,7 +11,7 @@
 [section:scoped_enums Scoped Enums]
 
 Generates C++0x scoped enums if the feature is present, otherwise emulates C++0x
-scoped enums with C++03 namespaces and enums. The Boost.Config BOOST_NO_SCOPED_ENUMS
+scoped enums with C++03 namespaces and enums. The Boost.Config BOOST_NO_CXX11_SCOPED_ENUMS
 macro is used to detect feature support.
 
 See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2347.pdf for a
@@ -71,14 +71,14 @@ use
 
 And instead of
 
-    #ifdef BOOST_NO_SCOPED_ENUMS
+    #ifdef BOOST_NO_CXX11_SCOPED_ENUMS
     template <>
     struct BOOST_SYMBOL_VISIBLE is_error_code_enum<future_errc> : public true_type { };
     #endif
 
 use
 
-    #ifdef BOOST_NO_SCOPED_ENUMS
+    #ifdef BOOST_NO_CXX11_SCOPED_ENUMS
     template <>
     struct BOOST_SYMBOL_VISIBLE is_error_code_enum<future_errc::enum_type > : public true_type { };
     #endif
@@ -130,7 +130,7 @@ Sample usage:
 namespace boost
 {
 
-#ifdef BOOST_NO_SCOPED_ENUMS
+#ifdef BOOST_NO_CXX11_SCOPED_ENUMS
   /**
    * Meta-function to get the underlying type of a scoped enum.
    *
@@ -193,7 +193,7 @@ namespace boost
     return e.native_value_();
   }
 
-#else  // BOOST_NO_SCOPED_ENUMS
+#else  // BOOST_NO_CXX11_SCOPED_ENUMS
 
   template <typename EnumType>
   struct underlying_type
@@ -224,9 +224,9 @@ namespace boost
 }
 
 
-#ifdef BOOST_NO_SCOPED_ENUMS
+#ifdef BOOST_NO_CXX11_SCOPED_ENUMS
 
-#ifndef BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
 
 #define BOOST_SCOPED_ENUM_UT_DECLARE_CONVERSION_OPERATOR \
      explicit operator underlying_type() const { return get_underlying_value_(); }
@@ -305,7 +305,7 @@ namespace boost
  */
 #define BOOST_SCOPED_ENUM_FORWARD_DECLARE(EnumType) struct EnumType
 
-#else  // BOOST_NO_SCOPED_ENUMS
+#else  // BOOST_NO_CXX11_SCOPED_ENUMS
 
 #define BOOST_SCOPED_ENUM_UT_DECLARE_BEGIN(EnumType,UnderlyingType) enum class EnumType:UnderlyingType
 #define BOOST_SCOPED_ENUM_DECLARE_BEGIN(EnumType) enum class EnumType
@@ -315,13 +315,13 @@ namespace boost
 #define BOOST_SCOPED_ENUM_NATIVE(EnumType) EnumType
 #define BOOST_SCOPED_ENUM_FORWARD_DECLARE(EnumType) enum class EnumType
 
-#endif  // BOOST_NO_SCOPED_ENUMS
+#endif  // BOOST_NO_CXX11_SCOPED_ENUMS
 
 #define BOOST_SCOPED_ENUM_START(name) BOOST_SCOPED_ENUM_DECLARE_BEGIN(name)
 #define BOOST_SCOPED_ENUM_END BOOST_SCOPED_ENUM_DECLARE_END2()
 #define BOOST_SCOPED_ENUM(name) BOOST_SCOPED_ENUM_NATIVE(name)
 
-//#ifdef BOOST_NO_SCOPED_ENUMS
+//#ifdef BOOST_NO_CXX11_SCOPED_ENUMS
 //
 //# define BOOST_SCOPED_ENUM_START(name) struct name { enum enum_type
 //# define BOOST_SCOPED_ENUM_END };

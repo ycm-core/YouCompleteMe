@@ -8,7 +8,8 @@
 
 #include <boost/thread/detail/config.hpp>
 #include <boost/thread/exceptions.hpp>
-#include <boost/thread/locks.hpp>
+#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/lock_types.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/pthread/condition_variable_fwd.hpp>
 
@@ -23,6 +24,10 @@
 #include <map>
 #include <vector>
 #include <utility>
+
+#if defined(__ANDROID__)
+#include <asm/page.h> // http://code.google.com/p/android/issues/detail?id=39983
+#endif
 
 #include <pthread.h>
 #include <unistd.h>
@@ -77,6 +82,7 @@ namespace boost
 
     namespace detail
     {
+        struct future_object_base;
         struct tss_cleanup_function;
         struct thread_exit_callback_node;
         struct tss_data_node
@@ -107,8 +113,7 @@ namespace boost
             bool joined;
             boost::detail::thread_exit_callback_node* thread_exit_callbacks;
             std::map<void const*,boost::detail::tss_data_node> tss_data;
-            bool interrupt_enabled;
-            bool interrupt_requested;
+
             pthread_mutex_t* cond_mutex;
             pthread_cond_t* current_cond;
             typedef std::vector<std::pair<condition_variable*, mutex*>
@@ -116,27 +121,47 @@ namespace boost
             > notify_list_t;
             notify_list_t notify;
 
+            typedef std::vector<shared_ptr<future_object_base> > async_states_t;
+            async_states_t async_states_;
+
+//#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+            // These data must be at the end so that the access to the other fields doesn't change
+            // when BOOST_THREAD_PROVIDES_INTERRUPTIONS is defined.
+            // Another option is to have them always
+            bool interrupt_enabled;
+            bool interrupt_requested;
+//#endif
             thread_data_base():
                 done(false),join_started(false),joined(false),
                 thread_exit_callbacks(0),
-                interrupt_enabled(true),
-                interrupt_requested(false),
                 current_cond(0),
-                notify()
+                notify(),
+                async_states_()
+//#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+                , interrupt_enabled(true)
+                , interrupt_requested(false)
+//#endif
             {}
             virtual ~thread_data_base();
 
             typedef pthread_t native_handle_type;
 
             virtual void run()=0;
-            void notify_all_at_thread_exit(condition_variable* cv, mutex* m)
+            virtual void notify_all_at_thread_exit(condition_variable* cv, mutex* m)
             {
               notify.push_back(std::pair<condition_variable*, mutex*>(cv, m));
             }
+
+            void make_ready_at_thread_exit(shared_ptr<future_object_base> as)
+            {
+              async_states_.push_back(as);
+            }
+
         };
 
         BOOST_THREAD_DECL thread_data_base* get_current_thread_data();
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
         class interruption_checker
         {
             thread_data_base* const thread_info;
@@ -188,71 +213,47 @@ namespace boost
                 }
             }
         };
+#endif
     }
 
     namespace this_thread
     {
+      namespace hiden
+      {
+        void BOOST_THREAD_DECL sleep_for(const timespec& ts);
+        void BOOST_THREAD_DECL sleep_until(const timespec& ts);
+      }
+
 #ifdef BOOST_THREAD_USES_CHRONO
+#ifdef BOOST_THREAD_SLEEP_FOR_IS_STEADY
+
         inline
         void BOOST_SYMBOL_VISIBLE sleep_for(const chrono::nanoseconds& ns)
         {
-            using namespace chrono;
-            boost::detail::thread_data_base* const thread_info=boost::detail::get_current_thread_data();
-
-            if(thread_info)
-            {
-              unique_lock<mutex> lk(thread_info->sleep_mutex);
-              while(cv_status::no_timeout==thread_info->sleep_condition.wait_for(lk,ns)) {}
-            }
-            else
-            {
-              if (ns >= nanoseconds::zero())
-              {
-
-  #   if defined(BOOST_HAS_PTHREAD_DELAY_NP)
-                timespec ts;
-                ts.tv_sec = static_cast<long>(duration_cast<seconds>(ns).count());
-                ts.tv_nsec = static_cast<long>((ns - seconds(ts.tv_sec)).count());
-                BOOST_VERIFY(!pthread_delay_np(&ts));
-  #   elif defined(BOOST_HAS_NANOSLEEP)
-                timespec ts;
-                ts.tv_sec = static_cast<long>(duration_cast<seconds>(ns).count());
-                ts.tv_nsec = static_cast<long>((ns - seconds(ts.tv_sec)).count());
-                //  nanosleep takes a timespec that is an offset, not
-                //  an absolute time.
-                nanosleep(&ts, 0);
-  #   else
-                mutex mx;
-                mutex::scoped_lock lock(mx);
-                condition_variable cond;
-                cond.wait_for(lock, ns);
-  #   endif
-              }
-            }
+            return boost::this_thread::hiden::sleep_for(boost::detail::to_timespec(ns));
         }
 #endif
+#endif // BOOST_THREAD_USES_CHRONO
+
         void BOOST_THREAD_DECL yield() BOOST_NOEXCEPT;
 
+#if defined BOOST_THREAD_USES_DATETIME
 #ifdef __DECXXX
         /// Workaround of DECCXX issue of incorrect template substitution
-        template<typename TimeDuration>
-        inline void sleep(TimeDuration const& rel_time)
-        {
-            this_thread::sleep(get_system_time()+rel_time);
-        }
-
         template<>
-        void BOOST_THREAD_DECL sleep(system_time const& abs_time);
-#else
-        void BOOST_THREAD_DECL sleep(system_time const& abs_time);
+#endif
+        inline void sleep(system_time const& abs_time)
+        {
+          return boost::this_thread::hiden::sleep_until(boost::detail::to_timespec(abs_time));
+        }
 
         template<typename TimeDuration>
         inline BOOST_SYMBOL_VISIBLE void sleep(TimeDuration const& rel_time)
         {
             this_thread::sleep(get_system_time()+rel_time);
         }
-#endif
-    }
+#endif // BOOST_THREAD_USES_DATETIME
+    } // this_thread
 }
 
 #include <boost/config/abi_suffix.hpp>

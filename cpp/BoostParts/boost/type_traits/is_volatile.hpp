@@ -51,7 +51,7 @@ struct is_volatile_rval_filter
    BOOST_STATIC_CONSTANT(bool, value = ::boost::detail::cv_traits_imp<T*>::is_volatile);
 #endif
 };
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 //
 // We can't filter out rvalue_references at the same level as
 // references or we get ambiguities from msvc:

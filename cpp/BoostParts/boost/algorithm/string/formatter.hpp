@@ -39,7 +39,7 @@ namespace boost {
             Constructs a \c const_formatter. Const formatter always returns
             the same value, regardless of the parameter.
 
-            \param Format A predefined value used as a result for formating
+            \param Format A predefined value used as a result for formatting
             \return An instance of the \c const_formatter object.
         */
         template<typename RangeT>
@@ -95,7 +95,7 @@ namespace boost {
             to extract a portion of the formatted sequence. The first finder's match is returned 
             as a result
 
-            \param Finder a finder used to select a portion of the formated sequence
+            \param Finder a finder used to select a portion of the formatted sequence
             \return An instance of the \c dissect_formatter object.
         */
         template<typename FinderT>

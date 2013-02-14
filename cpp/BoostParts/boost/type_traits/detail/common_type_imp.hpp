@@ -92,7 +92,7 @@ struct is_integral_or_enum< bool >
  * struct make_signed_soft<T>
  *
  * These metafunction are identical to make_unsigned and make_signed,
- * respetively, except for special-casing bool.
+ * respectively, except for special-casing bool.
  ******************************************************************************/
 
 template< class T >

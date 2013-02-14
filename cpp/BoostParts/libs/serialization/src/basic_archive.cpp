@@ -70,10 +70,11 @@ BOOST_ARCHIVE_SIGNATURE(){
 // 8 - Boost 1.44
 //     separated version_type into library_version_type and class_version_type
 //     changed version_type to be stored as 8 bits.
+// 10- fixed base64 output/input. 
 
 BOOST_ARCHIVE_DECL(library_version_type)
 BOOST_ARCHIVE_VERSION(){
-    return library_version_type(9);
+    return library_version_type(10);
 }
 
 } // namespace archive

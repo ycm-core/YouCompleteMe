@@ -18,7 +18,7 @@
 #include <boost/container/detail/config_begin.hpp>
 #include <boost/container/detail/workaround.hpp>
 
-#if defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 #include <boost/container/detail/preprocessor.hpp>
 #include <boost/container/detail/type_traits.hpp>
 #endif
@@ -27,7 +27,7 @@ namespace boost { namespace container {
 
 ///@cond
 
-#if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
    #if !defined(BOOST_CONTAINER_UNIMPLEMENTED_PACK_EXPANSION_TO_FIXED_LIST)
 
@@ -45,7 +45,7 @@ namespace boost { namespace container {
    #endif   // #if !defined(BOOST_CONTAINER_UNIMPLEMENTED_PACK_EXPANSION_TO_FIXED_LIST)
 
 
-#else    // #if !defined(BOOST_NO_VARIADIC_TEMPLATES)
+#else    // #if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
 template <typename OuterAlloc
 BOOST_PP_ENUM_TRAILING( BOOST_CONTAINER_MAX_CONSTRUCTOR_PARAMETERS

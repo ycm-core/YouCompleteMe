@@ -57,7 +57,7 @@ struct remove_volatile_impl
 // We can't filter out rvalue_references at the same level as
 // references or we get ambiguities from msvc:
 //
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <typename T>
 struct remove_volatile_impl<T&&>
 {

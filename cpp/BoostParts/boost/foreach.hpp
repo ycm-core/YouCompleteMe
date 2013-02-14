@@ -31,7 +31,7 @@
 #include <boost/detail/workaround.hpp>
 
 // Some compilers let us detect even const-qualified rvalues at compile-time
-#if !defined(BOOST_NO_RVALUE_REFERENCES)                                                         \
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)                                                   \
  || BOOST_WORKAROUND(BOOST_MSVC, >= 1310) && !defined(_PREFAST_)                                 \
  || (BOOST_WORKAROUND(__GNUC__, == 4) && (__GNUC_MINOR__ <= 5) && !defined(BOOST_INTEL) &&       \
                                                                   !defined(BOOST_CLANG))         \
@@ -228,7 +228,7 @@ template<typename T>
 inline boost::mpl::true_ *is_const_(T const &) { return 0; }
 #endif
 
-#ifdef BOOST_NO_RVALUE_REFERENCES
+#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 template<typename T>
 inline boost::mpl::false_ *is_rvalue_(T &, int) { return 0; }
 
@@ -459,7 +459,7 @@ inline T &derefof(T *t)
 #endif
 
 #if defined(BOOST_FOREACH_COMPILE_TIME_CONST_RVALUE_DETECTION)                                  \
- && !defined(BOOST_NO_RVALUE_REFERENCES)
+ && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 ///////////////////////////////////////////////////////////////////////////////
 // Rvalue references makes it drop-dead simple to detect at compile time
 // whether an expression is an rvalue.
@@ -469,7 +469,7 @@ inline T &derefof(T *t)
     boost::foreach_detail_::is_rvalue_((COL), 0)
 
 #elif defined(BOOST_FOREACH_COMPILE_TIME_CONST_RVALUE_DETECTION)                                \
- && defined(BOOST_NO_RVALUE_REFERENCES)
+ && defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 ///////////////////////////////////////////////////////////////////////////////
 // Detect at compile-time whether an expression yields an rvalue or
 // an lvalue. This is rather non-standard, but some popular compilers
@@ -959,7 +959,7 @@ rderef(auto_any_t cur, type2type<T, C> *)
     (true ? boost::foreach_detail_::make_probe((COL), BOOST_FOREACH_ID(_foreach_is_rvalue)) : (COL))
 
 // The rvalue/lvalue-ness of the collection expression is determined dynamically, unless
-// type type is an array or is noncopyable or is non-const, in which case we know it's an lvalue.
+// the type is an array or is noncopyable or is non-const, in which case we know it's an lvalue.
 // If the type happens to be a lightweight proxy, always make a copy.
 # define BOOST_FOREACH_SHOULD_COPY(COL)                                                         \
     (boost::foreach_detail_::should_copy_impl(                                                  \

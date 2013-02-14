@@ -20,6 +20,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/mpl/void.hpp>
+#include <boost/mpl/identity.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/iterator/iterator_categories.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
@@ -28,23 +29,47 @@
 
 namespace boost {
 
+    namespace detail {
+#define BOOST_GRAPH_MEMBER_OR_VOID(name) \
+      BOOST_MPL_HAS_XXX_TRAIT_DEF(name) \
+      template <typename T> struct BOOST_JOIN(get_member_, name) {typedef typename T::name type;}; \
+      template <typename T> struct BOOST_JOIN(get_opt_member_, name): \
+        boost::mpl::eval_if_c< \
+          BOOST_JOIN(has_, name)<T>::value, \
+          BOOST_JOIN(get_member_, name)<T>, \
+          boost::mpl::identity<void> > \
+        {};
+      BOOST_GRAPH_MEMBER_OR_VOID(adjacency_iterator)
+      BOOST_GRAPH_MEMBER_OR_VOID(out_edge_iterator)
+      BOOST_GRAPH_MEMBER_OR_VOID(in_edge_iterator)
+      BOOST_GRAPH_MEMBER_OR_VOID(vertex_iterator)
+      BOOST_GRAPH_MEMBER_OR_VOID(edge_iterator)
+      BOOST_GRAPH_MEMBER_OR_VOID(vertices_size_type)
+      BOOST_GRAPH_MEMBER_OR_VOID(edges_size_type)
+      BOOST_GRAPH_MEMBER_OR_VOID(degree_size_type)
+    }
+
     template <typename G>
     struct graph_traits {
+#define BOOST_GRAPH_PULL_OPT_MEMBER(name) \
+        typedef typename detail::BOOST_JOIN(get_opt_member_, name)<G>::type name;
+
         typedef typename G::vertex_descriptor      vertex_descriptor;
         typedef typename G::edge_descriptor        edge_descriptor;
-        typedef typename G::adjacency_iterator     adjacency_iterator;
-        typedef typename G::out_edge_iterator      out_edge_iterator;
-        typedef typename G::in_edge_iterator       in_edge_iterator;
-        typedef typename G::vertex_iterator        vertex_iterator;
-        typedef typename G::edge_iterator          edge_iterator;
+        BOOST_GRAPH_PULL_OPT_MEMBER(adjacency_iterator)
+        BOOST_GRAPH_PULL_OPT_MEMBER(out_edge_iterator)
+        BOOST_GRAPH_PULL_OPT_MEMBER(in_edge_iterator)
+        BOOST_GRAPH_PULL_OPT_MEMBER(vertex_iterator)
+        BOOST_GRAPH_PULL_OPT_MEMBER(edge_iterator)
 
         typedef typename G::directed_category      directed_category;
         typedef typename G::edge_parallel_category edge_parallel_category;
         typedef typename G::traversal_category     traversal_category;
 
-        typedef typename G::vertices_size_type     vertices_size_type;
-        typedef typename G::edges_size_type        edges_size_type;
-        typedef typename G::degree_size_type       degree_size_type;
+        BOOST_GRAPH_PULL_OPT_MEMBER(vertices_size_type)
+        BOOST_GRAPH_PULL_OPT_MEMBER(edges_size_type)
+        BOOST_GRAPH_PULL_OPT_MEMBER(degree_size_type)
+#undef BOOST_GRAPH_PULL_OPT_MEMBER
 
         static inline vertex_descriptor null_vertex();
     };

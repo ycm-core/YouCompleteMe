@@ -48,7 +48,7 @@ namespace boost
 
         //! iterator_range output operator
         /*!
-            Output the range to an ostream. Elements are outputed
+            Output the range to an ostream. Elements are outputted
             in a sequence without separators.
         */
         template< typename IteratorT, typename Elem, typename Traits >
@@ -67,7 +67,7 @@ namespace boost
 
         //! iterator_range output operator
         /*!
-            Output the range to an ostream. Elements are outputed
+            Output the range to an ostream. Elements are outputted
             in a sequence without separators.
         */
         template< typename IteratorT >

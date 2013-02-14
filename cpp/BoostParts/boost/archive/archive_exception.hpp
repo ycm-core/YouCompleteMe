@@ -43,6 +43,8 @@ namespace archive {
 class BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY()) archive_exception : 
     public virtual std::exception
 {
+protected:
+    char m_buffer[128];
 public:
     typedef enum {
         no_exception,       // initialized without code
@@ -74,8 +76,6 @@ public:
                             // type has been instantiated in more than one module.
         output_stream_error // error on input stream
     } exception_code;
-protected:
-    std::string m_msg;
 public:
     exception_code code;
     archive_exception(
@@ -83,9 +83,11 @@ public:
         const char * e1 = NULL,
         const char * e2 = NULL
     );
-    ~archive_exception() throw ();
-    virtual const char *what( ) const throw();
+    virtual ~archive_exception() throw();
+    virtual const char *what() const throw();
 protected:
+    unsigned int
+    append(unsigned int l, const char * a);
     archive_exception();
 };
 

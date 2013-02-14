@@ -32,7 +32,7 @@ namespace boost {
             Construct the \c regex_finder. Finder uses the regex engine to search
             for a match.
             Result is given in \c regex_search_result. This is an extension
-            of the iterator_range. In addition it containes match results 
+            of the iterator_range. In addition it contains match results 
             from the \c regex_search algorithm.
 
             \param Rx A regular expression

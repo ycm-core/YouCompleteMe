@@ -54,7 +54,7 @@ struct remove_const_impl
         >::type type;
 };
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 //
 // We can't filter out rvalue_references at the same level as
 // references or we get ambiguities from msvc:
