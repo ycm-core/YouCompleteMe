@@ -66,7 +66,7 @@ class Completer( object ):
   collecting the required completions, AsyncCandidateRequestReady() would check
   the state of that task and return False until it was completed.
 
-  CandidatesFormStoredRequest() should return the list of candidates. This is
+  CandidatesFromStoredRequest() should return the list of candidates. This is
   what YCM calls after AsyncCandidateRequestReady() returns True. The format of
   the result can be a list of strings or a more complicated list of
   dictionaries. See ':h complete-items' for the format, and clang_completer.py
