@@ -1,4 +1,6 @@
 import os
+import shlex
+import subprocess
 import ycm_core
 from clang_helpers import PrepareClangFlags
 
@@ -57,6 +59,16 @@ flags = [
 '-isystem',
 './tests/gmock/include'
 ]
+
+# This function makes it easy to pull in additional flags from pkg-config
+def PkgConfig(args):
+  cmd = ['pkg-config'] + shlex.split(args)
+  out = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE).stdout
+  line = out.readline()[:-1].split(" ")
+  return filter(lambda a: a != ' ', line)
+
+#flags += PkgConfig("--cflags freetype2")
+#flags += PkgConfig("--cflags libpng")
 
 if compilation_database_folder:
   database = ycm_core.CompilationDatabase( compilation_database_folder )
