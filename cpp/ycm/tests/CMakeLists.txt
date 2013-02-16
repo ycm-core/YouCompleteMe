@@ -44,7 +44,15 @@ link_directories(
   ${PYTHON_LIBRARIES}
   )
 
-file( GLOB SOURCES *.h *.cpp )
+file( GLOB_RECURSE SOURCES *.h *.cpp )
+
+# We don't want gmock sources in this target
+file( GLOB_RECURSE to_remove gmock/*.h gmock/*.cpp CMakeFiles/*.cpp
+  testdata/*.cpp testdata/*.h )
+
+if( to_remove )
+  list( REMOVE_ITEM SOURCES ${to_remove} )
+endif()
 
 if ( NOT USE_CLANG_COMPLETER )
   file( GLOB_RECURSE to_remove_clang ClangCompleter/*.h ClangCompleter/*.cpp )
