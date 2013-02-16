@@ -25,6 +25,7 @@
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <vector>
 #include <string>
@@ -125,7 +126,7 @@ private:
 
   boost::thread_group query_threads_;
 
-  boost::thread buffer_identifiers_thread_;
+  boost::scoped_ptr< boost::thread > buffer_identifiers_thread_;
 
   mutable LatestQueryTask latest_query_task_;
 

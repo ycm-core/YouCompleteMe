@@ -101,8 +101,8 @@ ClangCompleter::~ClangCompleter() {
   sorting_threads_.interrupt_all();
   sorting_threads_.join_all();
 
-  clang_thread_.interrupt();
-  clang_thread_.join();
+  clang_thread_->interrupt();
+  clang_thread_->join();
 }
 
 
@@ -449,8 +449,8 @@ void ClangCompleter::InitThreads() {
                                           boost::ref( *this ) ) );
   }
 
-  clang_thread_ = thread( &ClangCompleter::ClangThreadMain,
-                          boost::ref( *this ) );
+  clang_thread_.reset( new thread( &ClangCompleter::ClangThreadMain,
+                                   boost::ref( *this ) ) );
 }
 
 

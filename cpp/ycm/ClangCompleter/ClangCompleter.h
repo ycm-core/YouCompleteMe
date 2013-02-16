@@ -25,6 +25,7 @@
 #include "ClangResultsCache.h"
 
 #include <boost/utility.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/unordered_map.hpp>
 
@@ -174,7 +175,7 @@ private:
   // access it. Only one thread at a time is allowed to access any single
   // translation unit. Currently we only use one thread to access clang and that
   // is the thread represented by clang_thread_.
-  boost::thread clang_thread_;
+  boost::scoped_ptr< boost::thread > clang_thread_;
 
   boost::thread_group sorting_threads_;
 

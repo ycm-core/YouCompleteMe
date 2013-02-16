@@ -103,8 +103,8 @@ IdentifierCompleter::~IdentifierCompleter() {
   query_threads_.interrupt_all();
   query_threads_.join_all();
 
-  buffer_identifiers_thread_.interrupt();
-  buffer_identifiers_thread_.join();
+  buffer_identifiers_thread_->interrupt();
+  buffer_identifiers_thread_->join();
 }
 
 
@@ -283,9 +283,9 @@ void IdentifierCompleter::InitThreads() {
                                         boost::ref( latest_query_task_ ) ) );
   }
 
-  buffer_identifiers_thread_ = boost::thread(
-                                 BufferIdentifiersThreadMain,
-                                 boost::ref( buffer_identifiers_task_stack_ ) );
+  buffer_identifiers_thread_.reset(
+      new boost::thread( BufferIdentifiersThreadMain,
+                         boost::ref( buffer_identifiers_task_stack_ ) ) );
 }
 
 
