@@ -331,6 +331,10 @@ endfunction
 
 
 function! s:InsideCommentOrString()
+  if g:ycm_complete_in_comments_and_strings
+    return 0
+  endif
+
   " Has to be col('.') -1 because col('.') doesn't exist at this point. We are
   " in insert mode when this func is called.
   let syntax_group = synIDattr( synIDtrans( synID( line( '.' ), col( '.' ) - 1, 1 ) ), 'name')

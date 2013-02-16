@@ -523,6 +523,15 @@ Default: `1`
 
     let g:ycm_allow_changing_updatetime = 1
 
+### The `g:ycm_complete_in_comments_and_strings` option
+
+When this option is set to `1`, YCM will show the completion menu even when
+typing inside strings and comments.
+
+Default: `0`
+
+    let g:ycm_complete_in_comments_and_strings = 0
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's
