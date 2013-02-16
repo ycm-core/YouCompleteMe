@@ -42,11 +42,12 @@ class Completer( object ):
   better than nothing.
 
   Note that it's HIGHLY likely that you want to override the ShouldUseNowInner()
-  function instead of ShouldUseNow() directly. ShouldUseNow() will call your
-  *Inner version of the function and will also make sure that the completion
-  cache is taken into account. You'll see this pattern repeated throughout the
-  Completer API; YCM calls the "main" version of the function and that function
-  calls the *Inner version while taking into account the cache.
+  function instead of ShouldUseNow() directly (although chances are that you
+  probably won't have any need to override either). ShouldUseNow() will call
+  your *Inner version of the function and will also make sure that the
+  completion cache is taken into account. You'll see this pattern repeated
+  throughout the Completer API; YCM calls the "main" version of the function and
+  that function calls the *Inner version while taking into account the cache.
 
   The cache is important and is a nice performance boost. When the user types in
   "foo.", your completer will return a list of all member functions and
