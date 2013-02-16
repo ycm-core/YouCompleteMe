@@ -103,8 +103,10 @@ IdentifierCompleter::~IdentifierCompleter() {
   query_threads_.interrupt_all();
   query_threads_.join_all();
 
-  buffer_identifiers_thread_->interrupt();
-  buffer_identifiers_thread_->join();
+  if ( buffer_identifiers_thread_ ) {
+    buffer_identifiers_thread_->interrupt();
+    buffer_identifiers_thread_->join();
+  }
 }
 
 

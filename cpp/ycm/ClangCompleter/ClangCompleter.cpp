@@ -101,8 +101,10 @@ ClangCompleter::~ClangCompleter() {
   sorting_threads_.interrupt_all();
   sorting_threads_.join_all();
 
-  clang_thread_->interrupt();
-  clang_thread_->join();
+  if ( clang_thread_ ) {
+    clang_thread_->interrupt();
+    clang_thread_->join();
+  }
 }
 
 
