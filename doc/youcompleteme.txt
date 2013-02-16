@@ -25,15 +25,17 @@ Contents ~
   2. The |g:ycm_filetypes_to_completely_ignore| option
   3. The |g:ycm_filetype_specific_completion_to_disable| option
   4. The |g:ycm_allow_changing_updatetime| option
-  5. The |g:ycm_add_preview_to_completeopt| option
-  6. The |g:ycm_autoclose_preview_window_after_completion| option
-  7. The |g:ycm_max_diagnostics_to_display| option
-  8. The |g:ycm_key_list_select_completion| option
-  9. The |g:ycm_key_list_previous_completion| option
-  10. The |g:ycm_key_invoke_completion| option
-  11. The |g:ycm_key_detailed_diagnostics| option
-  12. The |g:ycm_global_ycm_extra_conf| option
-  13. The |g:ycm_semantic_triggers| option
+  5. The |g:ycm_complete_in_comments_and_strings| option
+  6. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  7. The |g:ycm_add_preview_to_completeopt| option
+  8. The |g:ycm_autoclose_preview_window_after_completion| option
+  9. The |g:ycm_max_diagnostics_to_display| option
+  10. The |g:ycm_key_list_select_completion| option
+  11. The |g:ycm_key_list_previous_completion| option
+  12. The |g:ycm_key_invoke_completion| option
+  13. The |g:ycm_key_detailed_diagnostics| option
+  14. The |g:ycm_global_ycm_extra_conf| option
+  15. The |g:ycm_semantic_triggers| option
  8. FAQ                                                      |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine
@@ -139,6 +141,9 @@ Install YouCompleteMe with Vundle [6].
 Remember: YCM is a plugin with a compiled component. If you update YCM using
 Vundle and the ycm_core library API has changed (happens rarely), YCM will
 notify you to recompile it. You should then rerun the install process.
+
+It's recommended that you have the latest Xcode installed along with the
+latest Command Line Tools (that you install from within Xcode).
 
 Install CMake. Preferably with Homebrew [7], but here's the stand-alone CMake
 installer [8].
@@ -583,6 +588,27 @@ Default: '1'
     let g:ycm_allow_changing_updatetime = 1
 
 -------------------------------------------------------------------------------
+The *g:ycm_complete_in_comments_and_strings* option
+
+When this option is set to '1', YCM will show the completion menu even when
+typing inside strings and comments.
+
+Default: '0'
+>
+    let g:ycm_complete_in_comments_and_strings = 0
+
+-------------------------------------------------------------------------------
+The *g:ycm_collect_identifiers_from_comments_and_strings* option
+
+When this option is set to '1', YCM's identifier completer will also collect
+identifiers from strings and comments. Otherwise, the text in comments and
+strings will be ignored.
+
+Default: '0'
+>
+    let g:ycm_collect_identifiers_from_comments_and_strings = 0
+
+-------------------------------------------------------------------------------
 The *g:ycm_add_preview_to_completeopt* option
 
 When this option is set to '1', YCM will add the 'preview' string to Vim's
@@ -720,11 +746,14 @@ listed as a trigger, the same thing would happen when the user typed 'foo->'.
 Default: '[see next line]'
 >
     let g:ycm_semantic_triggers =  {
-      \   'c,cpp,objc,objcpp' : ['->', '.', '::'],
+      \   'c' : ['->', '.'],
+      \   'objc' : ['->', '.'],
+      \   'cpp,objcpp' : ['->', '.', '::'],
       \   'perl,php' : ['->'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb' : ['.'],
+      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir' : ['.'],
       \   'lua' : ['.', ':'],
-      }
+      \   'erlang' : [':'],
+    }
 
 ===============================================================================
                                                              *youcompleteme-faq*
