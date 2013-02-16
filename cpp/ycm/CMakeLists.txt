@@ -218,6 +218,11 @@ endif()
 # TODO: remove this when it's fixed upstream (probably boost 1.53).
 add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
 
+if( MSVC OR CYGWIN )
+  # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
+  # BOOST_ALL_NO_LIB turns off MSVC library autolinking
+  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
+endif()
 #############################################################################
 
 add_library( ${PROJECT_NAME} SHARED
@@ -268,7 +273,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES PREFIX "")
 # Even on macs, we want a .so extension instead of a .dylib which is what cmake
 # would give us by default. Python won't recognize a .dylib as a module, but it
 # will recognize a .so
-if ( NOT WIN32 )
+if ( NOT WIN32 AND NOT CYGWIN )
   set_target_properties( ${PROJECT_NAME} PROPERTIES SUFFIX ".so")
 endif()
 

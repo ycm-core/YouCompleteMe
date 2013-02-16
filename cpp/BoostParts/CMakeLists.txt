@@ -86,7 +86,7 @@ endif()
 # TODO: remove this when it's fixed upstream (probably boost 1.53).
 add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
 
-if( MSVC )
+if( MSVC OR CYGWIN )
   # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
   # BOOST_ALL_NO_LIB turns off MSVC library autolinking
   add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
