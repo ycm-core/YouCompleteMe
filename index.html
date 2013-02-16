@@ -59,15 +59,14 @@ ranks the completion strings so that the most relevant ones rise to the top of
 the menu (so you usually need to press TAB just once).</p><p><strong>All of the above works with any programming language</strong> because of the
 identifier-based completion engine. It collects all of the identifiers in the
 current file and other files you visit and searches them when you type
-(identifiers are put into per-filetype groups).</p><p>The demo also shows the semantic engine in use. The current semantic engine
-supports only C-family languages. When the user presses <code>.</code>, <code>-&gt;</code> or <code>::</code> while
-typing in insert mode, the semantic engine is triggered (it can also be
-triggered with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's integration with
+(identifiers are put into per-filetype groups).</p><p>The demo also shows the semantic engine in use. When the user presses <code>.</code>, <code>-&gt;</code>
+or <code>::</code> while typing in insert mode, the semantic engine is triggered (it can
+also be triggered with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's integration with
 <a href="https://github.com/scrooloose/syntastic">Syntastic</a> (the little red X that shows up in the left gutter) if you are
-editing a file with semantic engine support. As Clang compiles your file and
-detects warnings or errors, they will be piped to Syntastic for display. You
-don't need to save your file or press any keyboard shortcut to trigger this, it
-"just happens" in the background.</p><p>In essence, YCM obsoletes the following Vim plugins because it has all of their
+editing a C-family file. As Clang compiles your file and detects warnings or
+errors, they will be piped to Syntastic for display. You don't need to save your
+file or press any keyboard shortcut to trigger this, it "just happens" in the
+background.</p><p>In essence, YCM obsoletes the following Vim plugins because it has all of their
 features plus extra:</p><ul>
 <li>clang_complete</li>
 <li>AutoComplPop</li>
