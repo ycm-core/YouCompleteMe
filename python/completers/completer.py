@@ -28,8 +28,8 @@ class Completer( object ):
   """A base class for all Completers in YCM.
 
   Here's several important things you need to know if you're writing a custom
-  Completer. First, there are several very important functions that the Vim part
-  of YCM will be calling on your Completer.
+  Completer. The following are functions that the Vim part of YCM will be
+  calling on your Completer:
 
   ShouldUseNow() is called with the start column of where a potential completion
   string should start. For instance, if the user's input is 'foo.bar' and the
@@ -60,7 +60,7 @@ class Completer( object ):
   CandidatesForQueryAsync() is the main entry point when the user types. For
   "foo.bar", the user query is "bar" and completions matching this string should
   be shown. The job of CandidatesForQueryAsync() is to merely initiate this
-  request, hopefully in the background with a thread.
+  request, which will hopefully be processed in a background thread.
 
   AsyncCandidateRequestReady() is the function that is repeatedly polled until
   it returns True. If CandidatesForQueryAsync() started a background task of
