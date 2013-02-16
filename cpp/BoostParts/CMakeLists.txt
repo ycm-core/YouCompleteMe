@@ -77,15 +77,6 @@ endif()
 
 #############################################################################
 
-# Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
-# other much: a compilation error "Constexpr function never produces a constant
-# expression" pops up when trying to compile anything that uses
-# boost/chrono/duration.hpp (namely boost/thread for us). This is a workaround
-# that prevents this from happening. Also present in cpp/ycm/CMakeLists.txt.
-# See here for more details: https://svn.boost.org/trac/boost/ticket/7671
-# TODO: remove this when it's fixed upstream (probably boost 1.53).
-#add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
-
 if( MSVC )
   # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
   # BOOST_ALL_NO_LIB turns off MSVC library autolinking

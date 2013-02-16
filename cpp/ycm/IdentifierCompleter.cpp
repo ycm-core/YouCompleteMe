@@ -161,7 +161,7 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
           boost::move( filepath ) );
 
   buffer_identifiers_task_stack_.Push(
-    make_shared< packaged_task< void > >( functor ) );
+    make_shared< packaged_task< void > >( boost::move( functor ) ) );
 }
 
 
@@ -202,7 +202,7 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
 
   QueryTask task = make_shared< packaged_task< AsyncResults > >(
                      bind( ReturnValueAsShared< std::vector< std::string > >,
-                           functor ) );
+                           boost::move( functor ) ) );
 
   unique_future< AsyncResults > future = task->get_future();
 

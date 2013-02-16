@@ -199,7 +199,8 @@ Future< void > ClangCompleter::UpdateTranslationUnitAsync(
   shared_ptr< ClangPackagedTask > clang_packaged_task =
     make_shared< ClangPackagedTask >();
 
-  clang_packaged_task->parsing_task_ = packaged_task< void >( functor );
+  clang_packaged_task->parsing_task_ = packaged_task< void >(
+      boost::move( functor ) );
   unique_future< void > future =
     clang_packaged_task->parsing_task_.get_future();
   clang_task_.Set( clang_packaged_task );
@@ -341,7 +342,7 @@ void ClangCompleter::CreateClangTask(
   clang_packaged_task->completions_task_ =
     packaged_task< AsyncCompletions >(
       bind( ReturnValueAsShared< std::vector< CompletionData > >,
-            candidates_for_location_functor ) );
+            boost::move( candidates_for_location_functor ) ) );
 
   clang_task_.Set( clang_packaged_task );
 }
