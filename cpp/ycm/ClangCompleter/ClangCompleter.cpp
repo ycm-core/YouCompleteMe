@@ -88,11 +88,6 @@ ClangCompleter::ClangCompleter()
 
 
 ClangCompleter::~ClangCompleter() {
-  // We need to clear this before calling clang_disposeIndex because the
-  // translation units need to be destroyed before the index is destroyed.
-  filename_to_translation_unit_.clear();
-  clang_disposeIndex( clang_index_ );
-
   {
     unique_lock< shared_mutex > lock( time_to_die_mutex_ );
     time_to_die_ = true;
@@ -105,6 +100,11 @@ ClangCompleter::~ClangCompleter() {
     clang_thread_->interrupt();
     clang_thread_->join();
   }
+
+  // We need to clear this before calling clang_disposeIndex because the
+  // translation units need to be destroyed before the index is destroyed.
+  filename_to_translation_unit_.clear();
+  clang_disposeIndex( clang_index_ );
 }
 
 
