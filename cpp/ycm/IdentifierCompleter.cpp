@@ -137,20 +137,26 @@ void IdentifierCompleter::AddCandidatesToDatabase(
 void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
   const std::string &buffer_contents,
   const std::string &filetype,
-  const std::string &filepath ) {
+  const std::string &filepath,
+  bool collect_from_comments_and_strings) {
   ClearCandidatesStoredForFile( filetype, filepath );
 
-  AddCandidatesToDatabase(
-    ExtractIdentifiersFromText( RemoveIdentifierFreeText( buffer_contents ) ),
-    filetype,
-    filepath );
+  std::string new_contents =
+    collect_from_comments_and_strings ?
+    buffer_contents :
+    RemoveIdentifierFreeText( buffer_contents );
+
+  AddCandidatesToDatabase( ExtractIdentifiersFromText( new_contents ),
+                           filetype,
+                           filepath );
 }
 
 
 void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
   std::string buffer_contents,
   std::string filetype,
-  std::string filepath ) {
+  std::string filepath,
+  bool collect_from_comments_and_strings ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return;
@@ -160,7 +166,8 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
           boost::ref( *this ),
           boost::move( buffer_contents ),
           boost::move( filetype ),
-          boost::move( filepath ) );
+          boost::move( filepath ),
+          collect_from_comments_and_strings );
 
   buffer_identifiers_task_stack_.Push(
     make_shared< packaged_task< void > >( boost::move( functor ) ) );

@@ -532,6 +532,16 @@ Default: `0`
 
     let g:ycm_complete_in_comments_and_strings = 0
 
+### The `g:ycm_collect_identifiers_from_comments_and_strings` option
+
+When this option is set to `1`, YCM's identifier completer will also collect
+identifiers from strings and comments. Otherwise, the text in comments and
+strings will be ignored.
+
+Default: `0`
+
+    let g:ycm_collect_identifiers_from_comments_and_strings = 0
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's
