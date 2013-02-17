@@ -34,7 +34,7 @@ function python_finder {
   else
     which_python=$(python -c 'import sys;print(sys.version)' | sed 's/^[ \t]*//')
     which_python="python${which_python:0:3}"
-    lib_python="${python_prefix}/lib/libpython${which_python}"
+    lib_python="${python_prefix}/lib/lib${which_python}"
     if [ -f "${lib_python}.a" ]; then
       python_library+="${lib_python}.a"
     else
