@@ -57,7 +57,7 @@ function install {
     cmake -G "Unix  Makefiles" $1 . $ycm_dir/cpp
   fi
 
-  #make ycm_core
+  make ycm_core
   popd
 }
 
