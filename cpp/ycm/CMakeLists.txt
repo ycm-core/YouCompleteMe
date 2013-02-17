@@ -207,6 +207,10 @@ if ( EXTRA_RPATH )
   set( CMAKE_INSTALL_RPATH "${EXTRA_RPATH}:${CMAKE_INSTALL_RPATH}" )
 endif()
 
+if ( UNIX )
+  set( EXTRA_LIBS rt )
+endif()
+
 #############################################################################
 
 # Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
@@ -228,6 +232,7 @@ target_link_libraries( ${PROJECT_NAME}
                        BoostParts
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
+                       ${EXTRA_LIBS}
                      )
 
 if ( LIBCLANG_TARGET )
