@@ -92,27 +92,31 @@ class Flags( object ):
 
 def _FlagsModuleSourceFileForFile( filename ):
   """For a given filename, finds its nearest YCM_EXTRA_CONF_FILENAME file that
-  will compute the flags necessary to compile the file. Returns None if no
-  YCM_EXTRA_CONF_FILENAME file could be found. Uses the global ycm_extra_conf
-  file if one is set."""
+  will compute the flags necessary to compile the file. If no
+  YCM_EXTRA_CONF_FILENAME file could be found, try to use
+  GLOBAL_YCM_EXTRA_CONF_FILE instead. If that also fails, return None.
+  Uses the global ycm_extra_conf file if one is set."""
 
-  if ( GLOBAL_YCM_EXTRA_CONF_FILE and
-       os.path.exists( GLOBAL_YCM_EXTRA_CONF_FILE ) ):
-    return GLOBAL_YCM_EXTRA_CONF_FILE
-
+  ycm_conf_file = None
   parent_folder = os.path.dirname( filename )
   old_parent_folder = ''
 
   while True:
     current_file = os.path.join( parent_folder, YCM_EXTRA_CONF_FILENAME )
     if os.path.exists( current_file ):
-      return current_file
+      ycm_conf_file = current_file
+      break
 
     old_parent_folder = parent_folder
     parent_folder = os.path.dirname( parent_folder )
+    if parent_folder is old_parent_folder:
+      break
 
-    if parent_folder == old_parent_folder:
-      return None
+  if ( not ycm_conf_file and GLOBAL_YCM_EXTRA_CONF_FILE and
+       os.path.exists( GLOBAL_YCM_EXTRA_CONF_FILE ) ):
+    ycm_conf_file = GLOBAL_YCM_EXTRA_CONF_FILE
+
+  return ycm_conf_file
 
 
 def _RandomName():

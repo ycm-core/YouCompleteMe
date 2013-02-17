@@ -314,7 +314,7 @@ or in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
 method in that module which should provide it with the information necessary to
 compile the current file. (You can also provide a path to a global
-`.ycm_extra_conf.py` file and override this searching behavior. See the Options
+`.ycm_extra_conf.py` file, which will be used as a fallback. See the Options
 section for more details.)
 
 This system was designed this way so that the user can perform any arbitrary
@@ -640,11 +640,10 @@ Default: `<leader>d`
 
 ### The `g:ycm_global_ycm_extra_conf` option
 
-Normally, YCM searches for a `.ycm_extra_conf.py` file for compilation flags
-(see the User Guide for more details on how this works). You can use this option
-to override this searching behavior by providing a full, absolute path to a
-global `.ycm_extra_conf.py` file (although you can call the global file whatever
-you want).
+Normally, YCM searches for a '.ycm_extra_conf.py' file for compilation flags
+(see the User Guide for more details on how this works). This option specifies
+a fallback path to a config file which is used if no '.ycm_extra_conf.py' is
+found.
 
 You can place such a global file anywhere in your filesystem.
 

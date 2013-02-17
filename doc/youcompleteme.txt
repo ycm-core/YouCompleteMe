@@ -717,10 +717,9 @@ Default: '<leader>d'
 The *g:ycm_global_ycm_extra_conf* option
 
 Normally, YCM searches for a '.ycm_extra_conf.py' file for compilation flags
-(see the User Guide for more details on how this works). You can use this
-option to override this searching behavior by providing a full, absolute path
-to a global '.ycm_extra_conf.py' file (although you can call the global file
-whatever you want).
+(see the User Guide for more details on how this works). This option specifies
+a fallback path to a config file which is used if no '.ycm_extra_conf.py' is
+found.
 
 You can place such a global file anywhere in your filesystem.
 
