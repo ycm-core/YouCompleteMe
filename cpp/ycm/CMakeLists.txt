@@ -207,7 +207,8 @@ if ( EXTRA_RPATH )
   set( CMAKE_INSTALL_RPATH "${EXTRA_RPATH}:${CMAKE_INSTALL_RPATH}" )
 endif()
 
-if ( UNIX )
+# Needed on Linux machines, but not on Macs
+if ( UNIX AND NOT APPLE )
   set( EXTRA_LIBS rt )
 endif()
 
