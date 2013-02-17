@@ -32,7 +32,8 @@ function python_finder {
     python_library+="${python_prefix}/Python"
     python_include+="${python_prefix}/Headers"
   else
-    which_python=$(python -c 'import platform;print(platform.python_version())' | sed 's/^[ \t]*//')
+    which_python=$(python -c 'import sys;print(sys.version)' | sed 's/^[ \t]*//')
+    which_python="python${which_python:0:3}"
     lib_python="${python_prefix}/lib/libpython${which_python}"
     if [ -f "${lib_python}.a" ]; then
       python_library+="${lib_python}.a"
