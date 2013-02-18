@@ -54,7 +54,7 @@ function install {
   if [[ `uname -s` == "Darwin" ]]; then
     cmake -G "Unix Makefiles" $(python_finder) $1 . $ycm_dir/cpp
   else
-    cmake -G "Unix  Makefiles" $1 . $ycm_dir/cpp
+    cmake -G "Unix Makefiles" $1 . $ycm_dir/cpp
   fi
 
   make ycm_core
