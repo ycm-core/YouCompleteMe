@@ -802,6 +802,25 @@ to use. You may need to set these flags to something else, but you need to make
 sure you use the same version of Python that your Vim binary is built against,
 which is highly likely to be the system's default Python.
 
+### I get `Vim: Caught deadly signal SEGV` on Vim startup
+
+This can happen on some Linux distros. If you encounter this situation, run Vim
+under `gdb`. You'll probably see something like this in the output when Vim
+crashes:
+
+```
+undefined symbol: clang_CompileCommands_dispose
+```
+
+This means that Vim is trying to load a `libclang.so` that is too old. You need
+at least a 3.2 libclang. Some distros ship with a system `libclang.so` that
+identifies itself as 3.2 but is not; it was cut from the upstream sources before
+the official 3.2 release and some API changes (like the addition of the
+CompileCommands API) were added after their cut.
+
+So just go through the installation guide and make sure you are using a correct
+`libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
