@@ -674,7 +674,7 @@ Default: `[see next line]`
       \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir' : ['.'],
       \   'lua' : ['.', ':'],
       \   'erlang' : [':'],
-    }
+      \ }
 
 FAQ
 ---
