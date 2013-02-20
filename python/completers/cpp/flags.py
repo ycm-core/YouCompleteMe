@@ -27,9 +27,9 @@ import vimsupport
 
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
-  'are available. Thus no semantic support for C/C++/ObjC/ObjC++.').format(
-    YCM_EXTRA_CONF_FILENAME )
-GLOBAL_YCM_EXTRA_CONF_FILE = os.path.expanduser( 
+  'are available. Thus no semantic support for C/C++/ObjC/ObjC++. See the '
+  'docs for details.').format( YCM_EXTRA_CONF_FILENAME )
+GLOBAL_YCM_EXTRA_CONF_FILE = os.path.expanduser(
     vimsupport.GetVariableValue( "g:ycm_global_ycm_extra_conf" )
 )
 
