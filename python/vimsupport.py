@@ -60,7 +60,11 @@ def PostVimMessage( message ):
 
 
 def EchoText( text ):
-  vim.command( "echom '{0}'".format( EscapeForVim( text ) ) )
+  def EchoLine( text ):
+    vim.command( "echom '{0}'".format( EscapeForVim( text ) ) )
+
+  for line in text.split( '\n' ):
+    EchoLine( line )
 
 
 def EscapeForVim( text ):
