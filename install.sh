@@ -59,6 +59,7 @@ function install {
 
   make ycm_core
   popd
+  rm -rf $build_dir
 }
 
 function linux_cmake_install {
