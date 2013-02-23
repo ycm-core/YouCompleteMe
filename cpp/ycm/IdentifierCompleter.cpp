@@ -29,11 +29,8 @@
 #include <algorithm>
 
 using boost::packaged_task;
-using boost::bind;
 using boost::unique_future;
-using boost::make_shared;
 using boost::shared_ptr;
-using boost::bind;
 using boost::thread;
 
 namespace YouCompleteMe {
@@ -162,15 +159,15 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
     return;
 
   boost::function< void() > functor =
-    bind( &IdentifierCompleter::AddCandidatesToDatabaseFromBuffer,
-          boost::ref( *this ),
-          boost::move( buffer_contents ),
-          boost::move( filetype ),
-          boost::move( filepath ),
-          collect_from_comments_and_strings );
+    boost::bind( &IdentifierCompleter::AddCandidatesToDatabaseFromBuffer,
+                 boost::ref( *this ),
+                 boost::move( buffer_contents ),
+                 boost::move( filetype ),
+                 boost::move( filepath ),
+                 collect_from_comments_and_strings );
 
   buffer_identifiers_task_stack_.Push(
-    make_shared< packaged_task< void > >( boost::move( functor ) ) );
+    boost::make_shared< packaged_task< void > >( boost::move( functor ) ) );
 }
 
 
@@ -204,14 +201,15 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
     return Future< AsyncResults >();
 
   FunctionReturnsStringVector functor =
-    bind( &IdentifierCompleter::CandidatesForQueryAndType,
-          boost::cref( *this ),
-          query,
-          filetype );
+    boost::bind( &IdentifierCompleter::CandidatesForQueryAndType,
+                 boost::cref( *this ),
+                 query,
+                 filetype );
 
-  QueryTask task = make_shared< packaged_task< AsyncResults > >(
-                     bind( ReturnValueAsShared< std::vector< std::string > >,
-                           boost::move( functor ) ) );
+  QueryTask task = 
+	boost::make_shared< packaged_task< AsyncResults > >(
+      boost::bind( ReturnValueAsShared< std::vector< std::string > >,
+                   boost::move( functor ) ) );
 
   unique_future< AsyncResults > future = task->get_future();
 
@@ -288,8 +286,9 @@ void IdentifierCompleter::InitThreads() {
               std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
 
   for ( int i = 0; i < query_threads_to_create; ++i ) {
-    query_threads_.create_thread( bind( QueryThreadMain,
-                                        boost::ref( latest_query_task_ ) ) );
+    query_threads_.create_thread( 
+		boost::bind( QueryThreadMain,
+                     boost::ref( latest_query_task_ ) ) );
   }
 
   buffer_identifiers_thread_.reset(
