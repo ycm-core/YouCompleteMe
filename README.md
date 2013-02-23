@@ -124,7 +124,7 @@ Install YouCompleteMe with [Vundle][].
 using Vundle and the ycm_core library API has changed (happens rarely), YCM will
 notify you to recompile it. You should then rerun the install process.
 
-Install CMake. `sudo apt-get install cmake`
+Install development tools and CMake: `sudo apt-get install build-essential cmake`
 
 Make sure you have Python headers installed: `sudo apt-get install python-dev`.
 
