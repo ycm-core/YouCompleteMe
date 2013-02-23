@@ -55,7 +55,7 @@ class OmniCompleter( Completer ):
 
     items = vim.eval( ''.join( omnifunc_call ) )
     if hasattr( items, 'words' ):
-      items = item.words
+      items = items.words
     self.stored_candidates = filter( bool, items )
 
 
