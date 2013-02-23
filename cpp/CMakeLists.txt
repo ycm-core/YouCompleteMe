@@ -82,5 +82,14 @@ else()
     "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
 endif()
 
+# Check if platform is 64 bit
+if( NOT APPLE )
+   if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+     set( 64_BIT_PLATFORM 0 )
+   else()
+     set( 64_BIT_PLATFORM 1 )
+   endif()
+endif()
+
 add_subdirectory( BoostParts )
 add_subdirectory( ycm )
