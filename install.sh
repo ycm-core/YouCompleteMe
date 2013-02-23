@@ -46,6 +46,17 @@ function python_finder {
   echo "${python_library} ${python_include}"
 }
 
+function num_cores {
+  num_cpus=1
+  if [[ `uname -s` == "Linux" ]]; then
+    num_cpus=$(grep -c ^processor /proc/cpuinfo)
+  else
+    # Works on Mac and FreeBSD
+    num_cpus=$(sysctl -n hw.ncpu)
+  fi
+  echo $num_cpus
+}
+
 function install {
   ycm_dir=`pwd`
   build_dir=`mktemp -d -t ycm_build.XXXX`
@@ -57,7 +68,7 @@ function install {
     cmake -G "Unix Makefiles" $1 . $ycm_dir/cpp
   fi
 
-  make ycm_core
+  make -j $(num_cores) ycm_core
   popd
   rm -rf $build_dir
 }
