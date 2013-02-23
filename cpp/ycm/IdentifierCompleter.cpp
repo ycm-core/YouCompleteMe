@@ -206,8 +206,8 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
                  query,
                  filetype );
 
-  QueryTask task = 
-	boost::make_shared< packaged_task< AsyncResults > >(
+  QueryTask task =
+    boost::make_shared< packaged_task< AsyncResults > >(
       boost::bind( ReturnValueAsShared< std::vector< std::string > >,
                    boost::move( functor ) ) );
 
@@ -286,9 +286,9 @@ void IdentifierCompleter::InitThreads() {
               std::min( MAX_ASYNC_THREADS, thread::hardware_concurrency() ) );
 
   for ( int i = 0; i < query_threads_to_create; ++i ) {
-    query_threads_.create_thread( 
-		boost::bind( QueryThreadMain,
-                     boost::ref( latest_query_task_ ) ) );
+    query_threads_.create_thread(
+      boost::bind( QueryThreadMain,
+                   boost::ref( latest_query_task_ ) ) );
   }
 
   buffer_identifiers_thread_.reset(
