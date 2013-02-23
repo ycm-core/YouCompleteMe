@@ -53,7 +53,8 @@ class OmniCompleter( Completer ):
                       vimsupport.EscapeForVim( query ),
                       "')" ]
 
-    self.stored_candidates = vim.eval( ''.join( omnifunc_call ) )
+    items = vim.eval( ''.join( omnifunc_call ) )
+    self.stored_candidates = items.words if hasattr( items, 'words' ) else items
 
 
   def AsyncCandidateRequestReadyInner( self ):
