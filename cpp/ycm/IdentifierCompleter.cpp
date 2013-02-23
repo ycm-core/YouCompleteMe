@@ -138,7 +138,7 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
   const std::string &buffer_contents,
   const std::string &filetype,
   const std::string &filepath,
-  bool collect_from_comments_and_strings) {
+  bool collect_from_comments_and_strings ) {
   ClearCandidatesStoredForFile( filetype, filepath );
 
   std::string new_contents =
@@ -293,8 +293,8 @@ void IdentifierCompleter::InitThreads() {
   }
 
   buffer_identifiers_thread_.reset(
-      new boost::thread( BufferIdentifiersThreadMain,
-                         boost::ref( buffer_identifiers_task_stack_ ) ) );
+    new boost::thread( BufferIdentifiersThreadMain,
+                       boost::ref( buffer_identifiers_task_stack_ ) ) );
 }
 
 

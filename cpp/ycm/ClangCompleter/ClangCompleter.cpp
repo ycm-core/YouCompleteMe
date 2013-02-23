@@ -202,7 +202,7 @@ Future< void > ClangCompleter::UpdateTranslationUnitAsync(
     make_shared< ClangPackagedTask >();
 
   clang_packaged_task->parsing_task_ = packaged_task< void >(
-      boost::move( functor ) );
+                                         boost::move( functor ) );
   unique_future< void > future =
     clang_packaged_task->parsing_task_.get_future();
   clang_task_.Set( clang_packaged_task );

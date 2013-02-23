@@ -32,8 +32,8 @@ namespace YouCompleteMe {
 namespace {
 
 std::vector< const Candidate * > CandidatesFromObjectList(
-    const pylist &candidates,
-    const std::string &candidate_property ) {
+  const pylist &candidates,
+  const std::string &candidate_property ) {
   int num_candidates = len( candidates );
   std::vector< std::string > candidate_strings;
   candidate_strings.reserve( num_candidates );
@@ -44,21 +44,22 @@ std::vector< const Candidate * > CandidatesFromObjectList(
     } else {
       object holder = extract< object >( candidates[ i ] );
       candidate_strings.push_back( extract< std::string >(
-              holder[ candidate_property.c_str() ] ) );
+                                     holder[ candidate_property.c_str() ] ) );
     }
   }
 
   return CandidateRepository::Instance().GetCandidatesForStrings(
-      candidate_strings );
+           candidate_strings );
 }
 
 } // unnamed namespace
 
 boost::python::list FilterAndSortCandidates(
-    const boost::python::list &candidates,
-    const std::string &candidate_property,
-    const std::string &query ) {
+  const boost::python::list &candidates,
+  const std::string &candidate_property,
+  const std::string &query ) {
   pylist filtered_candidates;
+
   if ( query.empty() )
     return filtered_candidates;
 

@@ -57,10 +57,10 @@ public:
     const std::string &filepath );
 
   void AddCandidatesToDatabaseFromBuffer(
-      const std::string &buffer_contents,
-      const std::string &filetype,
-      const std::string &filepath,
-      bool collect_from_comments_and_strings );
+    const std::string &buffer_contents,
+    const std::string &filetype,
+    const std::string &filepath,
+    bool collect_from_comments_and_strings );
 
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid an expensive copy of buffer_contents if the param is taken by value

@@ -27,9 +27,9 @@ namespace YouCompleteMe {
 // the candidates and a user query, returns a new sorted python list with the
 // original objects that survived the filtering.
 boost::python::list FilterAndSortCandidates(
-    const boost::python::list &candidates,
-    const std::string &candidate_property,
-    const std::string &query );
+  const boost::python::list &candidates,
+  const std::string &candidate_property,
+  const std::string &query );
 
 } // namespace YouCompleteMe
 
