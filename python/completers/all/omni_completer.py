@@ -54,7 +54,9 @@ class OmniCompleter( Completer ):
                       "')" ]
 
     items = vim.eval( ''.join( omnifunc_call ) )
-    self.stored_candidates = items.words if hasattr( items, 'words' ) else items
+    if hasattr( items, 'words' ):
+      items = item.words
+    self.stored_candidates = filter( bool, items )
 
 
   def AsyncCandidateRequestReadyInner( self ):
