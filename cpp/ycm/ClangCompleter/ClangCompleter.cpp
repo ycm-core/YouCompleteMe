@@ -53,26 +53,6 @@ namespace YouCompleteMe {
 extern const unsigned int MAX_ASYNC_THREADS;
 extern const unsigned int MIN_ASYNC_THREADS;
 
-namespace {
-
-// TODO: replace this with ResultAnd from Result.h
-struct CompletionDataAndResult {
-  CompletionDataAndResult( const CompletionData *completion_data,
-                           const Result &result )
-    : completion_data_( completion_data ), result_( result ) {}
-
-  bool operator< ( const CompletionDataAndResult &other ) const {
-    return result_ < other.result_;
-  }
-
-  const CompletionData *completion_data_;
-  Result result_;
-};
-
-
-} // unnamed namespace
-
-
 ClangCompleter::ClangCompleter()
   : candidate_repository_( CandidateRepository::Instance() ),
     threading_enabled_( false ),
@@ -411,7 +391,7 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   std::vector< const Candidate * > repository_candidates =
     candidate_repository_.GetCandidatesForStrings( completion_datas );
 
-  std::vector< CompletionDataAndResult > data_and_results;
+  std::vector< ResultAnd< CompletionData* > > data_and_results;
 
   for ( uint i = 0; i < repository_candidates.size(); ++i ) {
     const Candidate *candidate = repository_candidates[ i ];
@@ -422,7 +402,8 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
     Result result = candidate->QueryMatchResult( query );
 
     if ( result.IsSubsequence() ) {
-      CompletionDataAndResult data_and_result( &completion_datas[ i ], result );
+      ResultAnd< CompletionData* > data_and_result( &completion_datas[ i ],
+                                                    result );
       data_and_results.push_back( boost::move( data_and_result ) );
     }
   }
@@ -432,9 +413,9 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   std::vector< CompletionData > sorted_completion_datas;
   sorted_completion_datas.reserve( data_and_results.size() );
 
-  foreach ( const CompletionDataAndResult & data_and_result,
+  foreach ( const ResultAnd< CompletionData* > & data_and_result,
             data_and_results ) {
-    sorted_completion_datas.push_back( *data_and_result.completion_data_ );
+    sorted_completion_datas.push_back( *data_and_result.extra_object_ );
   }
 
   return sorted_completion_datas;
