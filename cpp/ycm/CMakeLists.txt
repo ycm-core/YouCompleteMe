@@ -281,10 +281,13 @@ endif()
 # for our module
 set_target_properties( ${PROJECT_NAME} PROPERTIES PREFIX "")
 
-# Even on macs, we want a .so extension instead of a .dylib which is what cmake
-# would give us by default. Python won't recognize a .dylib as a module, but it
-# will recognize a .so
-if ( NOT WIN32 AND NOT CYGWIN )
+if ( WIN32 OR CYGWIN )
+  # This is the extension for compiled Python modules on Windows
+  set_target_properties( ${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
+else()
+  # Even on macs, we want a .so extension instead of a .dylib which is what
+  # cmake would give us by default. Python won't recognize a .dylib as a module,
+  # but it will recognize a .so
   set_target_properties( ${PROJECT_NAME} PROPERTIES SUFFIX ".so")
 endif()
 
