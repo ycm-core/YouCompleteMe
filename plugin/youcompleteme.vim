@@ -39,8 +39,6 @@ function! s:HasYcmCore()
   let path_prefix = s:script_folder_path . '/../python/'
   if filereadable(path_prefix . 'ycm_core.so')
     return 1
-  elseif filereadable(path_prefix . 'ycm_core.dll')
-    return 1
   elseif filereadable(path_prefix . 'ycm_core.pyd')
     return 1
   endif
