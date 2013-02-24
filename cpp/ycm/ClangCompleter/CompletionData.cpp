@@ -24,14 +24,19 @@
 namespace {
 
 char CursorKindToVimKind( CXCursorKind kind ) {
-  // TODO: actually it appears that Vim will show returned kinds even when they
-  // do not match the "approved" list, so let's use that
   switch ( kind ) {
-    case CXCursor_UnexposedDecl:
     case CXCursor_StructDecl:
-    case CXCursor_UnionDecl:
+      return 's';
+
     case CXCursor_ClassDecl:
+    case CXCursor_ClassTemplate:
+      return 'c';
+
     case CXCursor_EnumDecl:
+      return 'e';
+
+    case CXCursor_UnexposedDecl:
+    case CXCursor_UnionDecl:
     case CXCursor_TypedefDecl:
       return 't';
 
@@ -41,6 +46,9 @@ char CursorKindToVimKind( CXCursorKind kind ) {
     case CXCursor_FunctionDecl:
     case CXCursor_CXXMethod:
     case CXCursor_FunctionTemplate:
+    case CXCursor_ConversionFunction:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
       return 'f';
 
     case CXCursor_VarDecl:
@@ -48,6 +56,13 @@ char CursorKindToVimKind( CXCursorKind kind ) {
 
     case CXCursor_MacroDefinition:
       return 'd';
+
+    case CXCursor_ParmDecl:
+      return 'p';
+
+    case CXCursor_Namespace:
+    case CXCursor_NamespaceAlias:
+      return 'n';
 
     default:
       return 'u'; // for 'unknown', 'unsupported'... whatever you like
