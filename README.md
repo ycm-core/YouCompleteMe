@@ -147,6 +147,12 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
+Windows Installation
+--------------------
+
+YCM has **no official support for Windows**, but that doesn't mean you can't get
+it to work there. See the [Windows Installation Guide][win-wiki] wiki page. Feel
+free to add to it.
 
 Full Installation Guide
 -----------------------
@@ -894,3 +900,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [issue18]: https://github.com/Valloric/YouCompleteMe/issues/18
 [delimitMate]: https://github.com/Raimondi/delimitMate
 [completer-api]: https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
+[win-wiki]: https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide
