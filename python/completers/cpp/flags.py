@@ -24,12 +24,14 @@ import random
 import string
 import sys
 import vimsupport
+from fnmatch import fnmatch
 
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. See the '
   'docs for details.').format( YCM_EXTRA_CONF_FILENAME )
 CONFIRM_CONF_FILE_MESSAGE = 'Found {0}. Load?'
+GLOBLIST_WRONG_TYPE_FOR_VARIABLE = '{0} needs to be a list of strings.'
 GLOBAL_YCM_EXTRA_CONF_FILE = os.path.expanduser(
     vimsupport.GetVariableValue( "g:ycm_global_ycm_extra_conf" )
 )
@@ -112,9 +114,15 @@ class FlagsModules( object ):
     By default this will ask the user for confirmation."""
     if module_file == GLOBAL_YCM_EXTRA_CONF_FILE:
       return True
-    if ( vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) and
-         not vimsupport.Confirm(
-           CONFIRM_CONF_FILE_MESSAGE.format( module_file ) ) ):
+
+    glob = CheckGlobList( 'g:ycm_extra_conf_globlist', module_file )
+    if glob < 0:
+      return False
+    elif glob > 0:
+      return True
+    elif ( vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) and
+           not vimsupport.Confirm(
+             CONFIRM_CONF_FILE_MESSAGE.format( module_file ) ) ):
       return False
     return True
 
@@ -211,3 +219,21 @@ def _SpecialClangIncludes():
 
 def _DirectoryOfThisScript():
   return os.path.dirname( os.path.abspath( __file__ ) )
+
+
+def CheckGlobList( variable, filename ):
+  abspath = os.path.abspath( filename )
+  if vimsupport.GetVariableType( variable ) != 'List':
+    if getattr(CheckGlobList, "no_type_warning_posted", True):
+      vimsupport.PostVimMessage(
+        GLOBLIST_WRONG_TYPE_FOR_VARIABLE.format( variable ) )
+      CheckGlobList.no_type_warning_posted = False
+    return 0
+
+  globlist = vimsupport.GetVariableValue( variable )
+  for glob in globlist:
+    blacklist = glob[0] == '!'
+    glob = glob.lstrip('!')
+    if fnmatch( abspath, os.path.abspath( os.path.expanduser( glob ) ) ):
+      return -1 if blacklist else 1
+  return 0
