@@ -44,7 +44,7 @@ def CurrentColumn():
 def GetUnsavedBuffers():
   def BufferModified( buffer_number ):
     to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )
-    return bool( int( vim.eval( to_eval ) ) )
+    return GetBoolValue( to_eval )
 
   return ( x for x in vim.buffers if BufferModified( x.number ) )
 
@@ -78,3 +78,7 @@ def CurrentFiletypes():
 
 def GetVariableValue( variable ):
   return vim.eval( variable )
+
+
+def GetBoolValue( variable ):
+  return bool( int( vim.eval( variable ) ) )
