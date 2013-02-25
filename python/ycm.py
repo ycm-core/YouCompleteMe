@@ -53,6 +53,10 @@ class YouCompleteMe( object ):
     return self.identcomp
 
 
+  def GetOmniCompleter( self ):
+    return self.omnicomp
+
+
   def GetFiletypeCompleter( self ):
     filetypes = vimsupport.CurrentFiletypes()
 

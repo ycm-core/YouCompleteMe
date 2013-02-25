@@ -484,6 +484,40 @@ endfunction
 
 command! YcmDebugInfo call s:DebugInfo()
 
+function! s:CompleterCommand(...)
+  " CompleterCommand will call the OnUserCommand function of a completer.
+  " If the first arguments is of the form "ft=..." it can be used to specify the
+  " completer to use (for example "ft=cpp").  Else the native filetype completer
+  " of the current buffer is used.  If no native filetype completer is found and
+  " no completer was specified this throws an error.  You can use "ft=ycm:omni"
+  " to select the omni completer or "ft=ycm:ident" to select the identifier
+  " completer.  The remaining arguments will passed to the completer.
+  let arguments = copy(a:000)
+
+  if a:0 > 0 && strpart(a:1, 0, 3) == 'ft='
+    if a:1 == 'ft=ycm:omni'
+      py completer = ycm_state.GetOmniCompleter()
+    elseif a:1 == 'ft=ycm:ident'
+      py completer = ycm_state.GetIdentifierCompleter()
+    else
+      py completer = ycm_state.GetFiletypeCompleterForFiletype(
+                   \ vim.eval('a:1').lstrip('ft=') )
+    endif
+    let arguments = arguments[1:]
+  elseif pyeval( 'ycm_state.NativeFiletypeCompletionAvailable()' )
+    py completer = ycm_state.GetFiletypeCompleter()
+  else
+    echohl WarningMsg |
+      \ echomsg "No native completer found for current buffer." |
+      \ echomsg  "Use ft=... as the first argument to specify a completer." |
+      \ echohl None
+    return
+  endif
+
+  py completer.OnUserCommand( vim.eval( 'l:arguments' ) )
+endfunction
+
+command! -nargs=* YcmCompleter call s:CompleterCommand(<f-args>)
 
 function! s:ForceCompile()
   if !pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
