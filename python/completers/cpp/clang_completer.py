@@ -206,7 +206,8 @@ class ClangCompleter( Completer ):
   def DebugInfo( self ):
     filename = vim.current.buffer.name
     flags = self.flags.FlagsForFile( filename ) or []
-    return 'Flags for {0}:\n{1}'.format( filename, list( flags ) )
+    source = self.flags.ModuleForFile( filename )
+    return 'Flags for {0} loaded from {1}:\n{2}'.format( filename, source, list( flags ) )
 
 
 # TODO: make these functions module-local
