@@ -87,8 +87,8 @@ class IdentifierCompleter( Completer ):
   def AddBufferIdentifiers( self ):
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
-    collect_from_comments_and_strings = bool( int( vimsupport.GetVariableValue(
-      "g:ycm_collect_identifiers_from_comments_and_strings" ) ) )
+    collect_from_comments_and_strings = vimsupport.GetBoolValue(
+      "g:ycm_collect_identifiers_from_comments_and_strings" )
 
     if not filetype or not filepath:
       return

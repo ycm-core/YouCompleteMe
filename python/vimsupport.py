@@ -44,7 +44,7 @@ def CurrentColumn():
 def GetUnsavedBuffers():
   def BufferModified( buffer_number ):
     to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )
-    return bool( int( vim.eval( to_eval ) ) )
+    return GetBoolValue( to_eval )
 
   return ( x for x in vim.buffers if BufferModified( x.number ) )
 
@@ -57,6 +57,34 @@ def NumLinesInBuffer( buffer ):
 def PostVimMessage( message ):
   vim.command( "echohl WarningMsg | echomsg '{0}' | echohl None"
                .format( EscapeForVim( message ) ) )
+
+
+def PresentDialog( message, choices, default_choice_index = 0 ):
+  """Presents the user with a dialog where a choice can be made.
+  This will be a dialog for gvim users or a question in the message buffer
+  for vim users or if `set guioptions+=c` was used.
+
+  choices is list of alternatives.
+  default_choice_index is the 0-based index of the default element
+  that will get choosen if the user hits <CR>. Use -1 for no default.
+
+  PresentDialog will return a 0-based index into the list
+  or -1 if the dialog was dismissed by using <Esc>, Ctrl-C, etc.
+
+  See also:
+    :help confirm() in vim (Note that vim uses 1-based indexes)
+
+  Example call:
+    PresentDialog("Is this a nice example?", ["Yes", "No", "May&be"])
+      Is this a nice example?
+      [Y]es, (N)o, May(b)e:"""
+  to_eval = "confirm('{0}', '{1}', {2})".format( EscapeForVim( message ),
+    EscapeForVim( "\n" .join( choices ) ), default_choice_index + 1 )
+  return int( vim.eval( to_eval ) ) - 1
+
+
+def Confirm( message ):
+  return bool( PresentDialog( message, [ "Ok", "Cancel" ] ) == 0 )
 
 
 def EchoText( text ):
@@ -78,3 +106,7 @@ def CurrentFiletypes():
 
 def GetVariableValue( variable ):
   return vim.eval( variable )
+
+
+def GetBoolValue( variable ):
+  return bool( int( vim.eval( variable ) ) )
