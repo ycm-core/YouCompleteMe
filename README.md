@@ -324,7 +324,7 @@ compile the current file. (You can also provide a path to a global
 section for more details.)
 To prevent the execution of malicious code from a file you didn't write
 YCM will ask once per module if it is safe to be loaded.
-(This can be disabled. See the Options section.)
+This can be disabled and you can white-/blacklist files.
 
 
 This system was designed this way so that the user can perform any arbitrary
@@ -670,6 +670,34 @@ from a `.ycm_extra_conf.py` file you didn't write.
 Default: `1`
 
     let g:ycm_confirm_extra_conf = 1
+
+### The `g:ycm_extra_conf_globlist` option
+
+This option is a list that may contain several globbing patterns.  If a pattern
+starts with a '!' all '.ycm_extra_conf.py' files matching that pattern will be
+blacklisted, that is they won't be loaded and no confirmation dialog will be
+shown.  If a pattern does not start with a '!' all files matching that patter
+will be whitelisted.  Note that items earlier in the list will take precedence
+over those later in the list.
+
+Rules:
+    *       matches everything
+    ?       matches any single character
+    [seq]   matches any character in seq
+    [!seq]  matches any char not in seq
+
+Example:
+    let g:ycm_extra_conf_globlist = ['~/dev/*','!~/*']
+    The first rule will match everything contained in the ~/dev directory so
+    '.ycm_extra_conf.py' files from there will be loaded.
+    The second rule will match everything in the home directory so
+    '.ycm_extra_conf.py' from there won't be loaded.
+    As the first rule takes precedence everything in the home directory
+    excluding the '~/dev' directory will be blacklisted.
+
+Default: `[]`
+
+    let g:ycm_extra_conf_globlist = []
 
 ### The `g:ycm_semantic_triggers` option
 

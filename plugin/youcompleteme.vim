@@ -104,6 +104,9 @@ let g:ycm_global_ycm_extra_conf =
 let g:ycm_confirm_extra_conf =
       \ get( g:, 'ycm_confirm_extra_conf', 1 )
 
+let g:ycm_extra_conf_globlist =
+      \ get( g:, 'ycm_extra_conf_globlist', [] )
+
 let g:ycm_semantic_triggers =
       \ get( g:, 'ycm_semantic_triggers', {
       \   'c' : ['->', '.'],

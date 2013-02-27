@@ -108,5 +108,15 @@ def GetVariableValue( variable ):
   return vim.eval( variable )
 
 
+def GetVariableType( variable ):
+  types = { 0: 'Number',
+            1: 'String',
+            2: 'Funcref',
+            3: 'List',
+            4: 'Dictionary',
+            5: 'Float' }
+  return types.get( int( vim.eval( 'type({0})'.format( variable ) ) ) )
+
+
 def GetBoolValue( variable ):
   return bool( int( vim.eval( variable ) ) )
