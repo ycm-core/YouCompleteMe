@@ -36,9 +36,9 @@ GLOBAL_YCM_EXTRA_CONF_FILE = os.path.expanduser(
 
 class Flags( object ):
   """Keeps track of the flags necessary to compile a file.
-  The flags are loaded from user-created python files
-  (hereafter referred to as 'modules') that contain
-  a method FlagsForFile( filename )."""
+  The flags are loaded from user-created python files (hereafter referred to as
+  'modules') that contain a method FlagsForFile( filename )."""
+
   def __init__( self ):
     # It's caches all the way down...
     self.flags_for_file = {}
@@ -87,6 +87,7 @@ class Flags( object ):
     """Reloads a module file cleaning the flags cache for all files
     associated with that module. Returns False if reloading failed
     (for example due to the model not being loaded in the first place)."""
+
     module_file = os.path.abspath(module_file)
     if self.modules.Reload( module_file ):
       for filename, module in self.module_for_file.iteritems():
@@ -99,6 +100,7 @@ class Flags( object ):
 class FlagsModules( object ):
   """Keeps track of modules.
   Modules are loaded on-demand and cached in self.modules for quick access."""
+
   def __init__( self ):
     self.modules = {}
 
@@ -110,6 +112,7 @@ class FlagsModules( object ):
   def ShouldLoad( module_file ):
     """Checks if a module is safe to be loaded.
     By default this will ask the user for confirmation."""
+
     if module_file == GLOBAL_YCM_EXTRA_CONF_FILE:
       return True
     if ( vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) and
@@ -123,6 +126,7 @@ class FlagsModules( object ):
     Using force = True the module will be loaded regardless
     of the criteria in ShouldLoad.
     This will return None if the module was not allowed to be loaded."""
+
     if not force:
       if self.modules.has_key( module_file ):
         return self.modules[ module_file ]
@@ -140,6 +144,7 @@ class FlagsModules( object ):
   def Reload( self, module_file ):
     """Reloads the given module. If it has not been loaded yet does nothing.
     Note that the module will not be subject to the loading criteria again."""
+
     if self.modules.get( module_file ):
       return self.Load( module_file, force = True )
 
@@ -151,6 +156,7 @@ def _FlagsModuleSourceFilesForFile( filename ):
   """For a given filename, search all parent folders for YCM_EXTRA_CONF_FILENAME
   files that will compute the flags necessary to compile the file.
   If GLOBAL_YCM_EXTRA_CONF_FILE exists it is returned as a fallback."""
+
   for folder in _PathsToAllParentFolders( filename ):
     candidate = os.path.join( folder, YCM_EXTRA_CONF_FILENAME )
     if os.path.exists( candidate ):
@@ -165,6 +171,7 @@ def _PathsToAllParentFolders( filename ):
   The neares files will be returned first.
   Example: _PathsToAllParentFolders( '/home/user/projects/test.c' )
     [ '/home/user/projects', '/home/user', '/home', '/' ]"""
+
   parent_folders = os.path.abspath(
     os.path.dirname( filename ) ).split( os.path.sep )
   if not parent_folders[0]:

@@ -663,9 +663,9 @@ Default: `''`
 
 ### The `g:ycm_confirm_extra_conf` option
 
-When this option is set to `1` YCM will ask once per '.ycm_extra_conf.py' file
+When this option is set to `1` YCM will ask once per `.ycm_extra_conf.py` file
 if it is safe to be loaded. This is to prevent execution of malicious code
-from a '.ycm_extra_conf.py' file you didn't write.
+from a `.ycm_extra_conf.py` file you didn't write.
 
 Default: `1`
 
