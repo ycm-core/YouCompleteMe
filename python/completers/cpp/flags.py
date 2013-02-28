@@ -24,6 +24,7 @@ import random
 import string
 import sys
 import vimsupport
+from fnmatch import fnmatch
 
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
@@ -110,16 +111,24 @@ class FlagsModules( object ):
 
   @staticmethod
   def ShouldLoad( module_file ):
-    """Checks if a module is safe to be loaded.
-    By default this will ask the user for confirmation."""
+    """Checks if a module is safe to be loaded. By default this will try to
+    decide using a white-/blacklist and ask the user for confirmation as a
+    fallback."""
 
-    if module_file == GLOBAL_YCM_EXTRA_CONF_FILE:
+    if ( module_file == GLOBAL_YCM_EXTRA_CONF_FILE or
+         not vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) ):
       return True
-    if ( vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) and
-         not vimsupport.Confirm(
-           CONFIRM_CONF_FILE_MESSAGE.format( module_file ) ) ):
+
+    globlist = vimsupport.GetVariableValue( 'g:ycm_extra_conf_globlist' )
+    for glob in globlist:
+      is_blacklisted = glob[0] == '!'
+      if MatchesGlobPattern( module_file, glob.lstrip('!') ):
+        return not is_blacklisted
+
+    if vimsupport.Confirm( CONFIRM_CONF_FILE_MESSAGE.format( module_file ) ):
+      return True
+    else:
       return False
-    return True
 
   def Load( self, module_file, force = False ):
     """Load and return the module contained in a file.
@@ -218,3 +227,12 @@ def _SpecialClangIncludes():
 
 def _DirectoryOfThisScript():
   return os.path.dirname( os.path.abspath( __file__ ) )
+
+
+def MatchesGlobPattern( filename, glob ):
+  """Returns true if a filename matches a given pattern. A '~' in glob will be
+  expanded to the home directory and checking will be performed using absolute
+  paths. See the documentation of fnmatch for the supported patterns."""
+
+  abspath = os.path.abspath( filename )
+  return fnmatch( abspath, os.path.abspath( os.path.expanduser( glob ) ) )
