@@ -450,6 +450,15 @@ This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the semantic
 completion engine.
 
+### The `YcmCompleter` command
+
+This command can be used to invoke completer-specific commands.  If the first
+argument is of the form `ft=...` the completer for that file type will be used
+(for example `ft=cpp`), else the native completer of the current buffer will be
+used.
+Call `YcmCompleter` without further arguments for information about the
+commands you can call for the selected completer.
+
 Options
 -------
 

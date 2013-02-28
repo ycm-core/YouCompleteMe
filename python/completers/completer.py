@@ -23,6 +23,7 @@ import vimsupport
 import ycm_core
 from collections import defaultdict
 
+NO_USER_COMMANDS = 'This completer does not define any commands.'
 
 class Completer( object ):
   """A base class for all Completers in YCM.
@@ -96,7 +97,15 @@ class Completer( object ):
   their specific events occur. For instance, the identifier completer collects
   all the identifiers in the file in OnFileReadyToParse() which gets called when
   the user stops typing for 2 seconds (Vim's CursorHold and CursorHoldI events).
-  """
+
+  One special function is OnUserCommand. It is called when the user uses the
+  command :YcmCompleter and is passed all extra arguments used on command
+  invocation (e.g. OnUserCommand(['first argument', 'second'])).  This can be
+  used for completer-specific commands such as reloading external
+  configuration.
+  When the command is called with no arguments you should print a short summary
+  of the supported commands or point the user to the help section where this
+  information can be found."""
 
   __metaclass__ = abc.ABCMeta
 
@@ -232,6 +241,10 @@ class Completer( object ):
 
   def OnInsertLeave( self ):
     pass
+
+
+  def OnUserCommand( self, arguments ):
+    vimsupport.PostVimMessage( NO_USER_COMMANDS )
 
 
   def OnCurrentIdentifierFinished( self ):
