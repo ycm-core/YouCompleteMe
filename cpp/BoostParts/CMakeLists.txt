@@ -107,7 +107,7 @@ endif()
 #############################################################################
 
 # Linking fails without this
-if( NOT WIN32 AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+if( NOT WIN32 AND 64_BIT_PLATFORM )
   set_target_properties( BoostParts PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 

@@ -83,12 +83,10 @@ else()
 endif()
 
 # Check if platform is 64 bit
-if( NOT APPLE )
-   if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
-     set( 64_BIT_PLATFORM 0 )
-   else()
-     set( 64_BIT_PLATFORM 1 )
-   endif()
+if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+  set( 64_BIT_PLATFORM 0 )
+else()
+  set( 64_BIT_PLATFORM 1 )
 endif()
 
 add_subdirectory( BoostParts )
