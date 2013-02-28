@@ -125,10 +125,7 @@ class FlagsModules( object ):
       if MatchesGlobPattern( module_file, glob.lstrip('!') ):
         return not is_blacklisted
 
-    if vimsupport.Confirm( CONFIRM_CONF_FILE_MESSAGE.format( module_file ) ):
-      return True
-    else:
-      return False
+    return vimsupport.Confirm( CONFIRM_CONF_FILE_MESSAGE.format( module_file ) )
 
   def Load( self, module_file, force = False ):
     """Load and return the module contained in a file.
