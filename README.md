@@ -315,16 +315,15 @@ string.
   plugin. It has support for YCM and together they will provide you with compile
   errors/warnings practically instantly and without saving the file.
 
-YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file
-or in any directory above it in the hierarchy (recursively); when the file is
+YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file or
+in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
 method in that module which should provide it with the information necessary to
-compile the current file. (You can also provide a path to a global
-`.ycm_extra_conf.py` file, which will be used as a fallback.)
-To prevent the execution of malicious code from a file you didn't write YCM
-will ask once per module if it is safe to be loaded. This can be disabled and
-you can white-/blacklist files. See the Options section for more details.
-
+compile the current file. You can also provide a path to a global
+`.ycm_extra_conf.py` file, which will be used as a fallback. To prevent the
+execution of malicious code from a file you didn't write YCM will ask you once
+per `.ycm_extra_conf.py` if it is safe to load. This can be disabled and you can
+white-/blacklist files. See the Options section for more details.
 
 This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
