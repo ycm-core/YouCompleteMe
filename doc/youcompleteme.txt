@@ -149,8 +149,12 @@ notify you to recompile it. You should then rerun the install process.
 It's recommended that you have the latest Xcode installed along with the
 latest Command Line Tools (that you install from within Xcode).
 
-Install CMake. Preferably with Homebrew [7], but here's the stand-alone CMake
-installer [8].
+Install CMake and Boost. Preferably with Homebrew [7], but here's the
+stand-alone CMake installer [8]. It's also always smart to upgrade your
+packages while you're at it.
+>
+    brew install cmake boost
+    brew upgrade
 
 If you have installed a Homebrew Python and/or Homebrew MacVim, see the FAQ
 for details.
@@ -192,11 +196,13 @@ Remember: YCM is a plugin with a compiled component. If you update YCM using
 Vundle and the ycm_core library API has changed (happens rarely), YCM will
 notify you to recompile it. You should then rerun the install process.
 
-Install development tools and CMake: 'sudo apt-get install build-essential
-cmake'
+Install development tools and CMake:
+>
+    sudo apt-get install build-essential cmake
 
-Make sure you have Python headers installed: 'sudo apt-get install
-python-dev'.
+Make sure you have Python headers installed:
+>
+    sudo apt-get install python-dev libboost-python-dev
 
 Compiling YCM with semantic support for C-family languages:
 >
