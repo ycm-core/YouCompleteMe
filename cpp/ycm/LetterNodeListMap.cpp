@@ -40,7 +40,9 @@ int IndexForChar( char letter ) {
 
 
 LetterNodeListMap::LetterNodeListMap() {
-  std::fill( letters_.begin(), letters_.end(), NULL );
+  std::fill( letters_.begin(),
+             letters_.end(),
+             static_cast< std::list< LetterNode * >* >( NULL ) );
 }
 
 
