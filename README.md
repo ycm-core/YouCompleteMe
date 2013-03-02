@@ -285,6 +285,10 @@ User Guide
 
 - If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.
+- Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
+  then it's case-insensitive. If your input involves uppercase letters, then
+  it's case-sensitive. So "foo" matches "Foo" and "foo", but "Foo" matches "Foo"
+  but not "foo".
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Shift-TAB to cycle backwards. Note that if you're
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
@@ -306,7 +310,7 @@ string.
 ### General Semantic Completion Engine Usage
 
 - You can use Ctrl+Space to trigger the completion suggestions anywhere, even
-  without a string prefix.  This is useful to see which top-level functions are
+  without a string prefix. This is useful to see which top-level functions are
   available for use.
 
 ### C-family Semantic Completion Engine Usage

@@ -43,6 +43,28 @@ std::string GetWordBoundaryChars( const std::string &text ) {
   return result;
 }
 
+LetterNode* FirstUppercaseNode( const std::list< LetterNode *> &list ) {
+  LetterNode *node = NULL;
+  foreach( LetterNode *current_node, list ) {
+    if ( current_node->LetterIsUppercase() ) {
+      node = current_node;
+      break;
+    }
+  }
+  return node;
+}
+
+LetterNode* FirstLowercaseNode( const std::list< LetterNode *> &list ) {
+  LetterNode *node = NULL;
+  foreach( LetterNode *current_node, list ) {
+    if ( !current_node->LetterIsUppercase() ) {
+      node = current_node;
+      break;
+    }
+  }
+  return node;
+}
+
 } // unnamed namespace
 
 
@@ -66,7 +88,8 @@ Candidate::Candidate( const std::string &text )
 }
 
 
-Result Candidate::QueryMatchResult( const std::string &query ) const {
+Result Candidate::QueryMatchResult( const std::string &query,
+                                    bool case_sensitive ) const {
   LetterNode *node = root_node_.get();
   int index_sum = 0;
 
@@ -76,7 +99,17 @@ Result Candidate::QueryMatchResult( const std::string &query ) const {
     if ( !list )
       return Result( false );
 
-    node = list->front();
+    if ( case_sensitive ) {
+      node = IsUppercase( letter ) ?
+             FirstUppercaseNode( *list ) :
+             FirstLowercaseNode( *list );
+
+      if ( !node )
+        return Result( false );
+    } else {
+      node = list->front();
+    }
+
     index_sum += node->Index();
   }
 

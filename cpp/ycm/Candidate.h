@@ -49,7 +49,8 @@ public:
     return ( letters_present_ & query_bitset ) == query_bitset;
   }
 
-  Result QueryMatchResult( const std::string &query ) const;
+  Result QueryMatchResult( const std::string &query,
+                           bool case_sensitive ) const;
 
 private:
 

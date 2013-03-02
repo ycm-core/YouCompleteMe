@@ -64,6 +64,14 @@ TEST( IdentifierCompleterTest, ManyCandidateSimple ) {
                                         "foobartest" ) ) );
 }
 
+TEST( IdentifierCompleterTest, SmartCaseFiltering ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "fooBar",
+                   "fooBaR" ) ).CandidatesForQuery( "fBr" ),
+               ElementsAre( "fooBar" ) );
+}
+
 TEST( IdentifierCompleterTest, FirstCharSameAsQueryWins ) {
   EXPECT_THAT( IdentifierCompleter(
                  StringVector(
@@ -116,13 +124,6 @@ TEST( IdentifierCompleterTest, RatioUtilizationTieBreak ) {
                  StringVector(
                    "acaaCaaFooGxx",
                    "aCaafoog" ) ).CandidatesForQuery( "caafoo" ),
-               ElementsAre( "acaaCaaFooGxx",
-                            "aCaafoog" ) );
-
-  EXPECT_THAT( IdentifierCompleter(
-                 StringVector(
-                   "acaaCaaFooGxx",
-                   "aCaafoog" ) ).CandidatesForQuery( "caaFoo" ),
                ElementsAre( "acaaCaaFooGxx",
                             "aCaafoog" ) );
 

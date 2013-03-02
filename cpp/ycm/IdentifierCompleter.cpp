@@ -26,7 +26,12 @@
 #include <boost/unordered_set.hpp>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 #include <algorithm>
+
+using boost::algorithm::any_of;
+using boost::algorithm::is_upper;
 
 using boost::packaged_task;
 using boost::unique_future;
@@ -228,6 +233,7 @@ void IdentifierCompleter::ResultsForQueryAndType(
     return;
 
   Bitset query_bitset = LetterBitsetFromString( query );
+  bool query_has_uppercase_letters = any_of( query, is_upper() );
 
   boost::unordered_set< const Candidate * > seen_candidates;
   seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
@@ -243,7 +249,8 @@ void IdentifierCompleter::ResultsForQueryAndType(
       if ( !candidate->MatchesQueryBitset( query_bitset ) )
         continue;
 
-      Result result = candidate->QueryMatchResult( query );
+      Result result = candidate->QueryMatchResult(
+          query, query_has_uppercase_letters );
 
       if ( result.IsSubsequence() )
         results.push_back( result );

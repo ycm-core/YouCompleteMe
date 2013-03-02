@@ -64,45 +64,87 @@ TEST( CandidateTest, DoesntMatchQueryBitset ) {
                   LetterBitsetFromString( "fbrmmm" ) ) );
 }
 
-TEST( CandidateTest, QueryMatchResultIsSubsequence ) {
+TEST( CandidateTest, QueryMatchResultCaseInsensitiveIsSubsequence ) {
   Candidate candidate( "foobaaar" );
 
-  EXPECT_TRUE( candidate.QueryMatchResult( "foobaaar" ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "fobar"    ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "fbr"      ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "f"        ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "o"        ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "a"        ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "r"        ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "b"        ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "bar"      ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "oa"       ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "obr"      ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "oo"       ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( "aaa"      ).IsSubsequence() );
-  EXPECT_TRUE( candidate.QueryMatchResult( ""         ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "foobaaar", false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "foOBAaar", false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "FOOBAAAR", false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "fobar"   , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "fbr"     , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "f"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "F"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "o"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "O"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "a"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "r"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "b"       , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "bar"     , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "oa"      , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "obr"     , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "oar"     , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "oo"      , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "aaa"     , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "AAA"     , false ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( ""        , false ).IsSubsequence() );
 }
 
-TEST( CandidateTest, QueryMatchResultIsntSubsequence ) {
+TEST( CandidateTest, QueryMatchResultCaseInsensitiveIsntSubsequence ) {
   Candidate candidate( "foobaaar" );
 
-  EXPECT_FALSE( candidate.QueryMatchResult( "foobra"    ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "frb"       ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "brf"       ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "x"         ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "9"         ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "-"         ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "~"         ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( " "         ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "rabof"     ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "oabfr"     ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "ooo"       ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "baaara"    ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "ffoobaaar" ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "xfoobaaar" ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( " foobaaar" ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "foobaaar " ).IsSubsequence() );
-  EXPECT_FALSE( candidate.QueryMatchResult( "ff"        ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "foobra"   , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "frb"      , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "brf"      , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "x"        , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "9"        , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "-"        , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "~"        , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( " "        , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "rabof"    , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "oabfr"    , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "ooo"      , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "baaara"   , false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "ffoobaaar", false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "xfoobaaar", false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( " foobaaar", false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "foobaaar ", false ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "ff"       , false ).IsSubsequence() );
+}
+
+TEST( CandidateTest, QueryMatchResultCaseSensitiveIsSubsequence ) {
+  Candidate candidate( "FooBaAAr" );
+
+  EXPECT_TRUE( candidate.QueryMatchResult( "FooBaAAr", true ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "FBAA"    , true ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "F"       , true ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "AA"      , true ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "A"       , true ).IsSubsequence() );
+  EXPECT_TRUE( candidate.QueryMatchResult( "B"       , true ).IsSubsequence() );
+}
+
+TEST( CandidateTest, QueryMatchResultCaseSensitiveIsntSubsequence ) {
+  Candidate candidate( "FooBaAAr" );
+
+  EXPECT_FALSE( candidate.QueryMatchResult( "foobaaar", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "foobaAAr", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "fbAA"    , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "fbaa"    , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "R"       , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "b"       , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "f"       , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "O"       , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "OO"      , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "OBA"     , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "FBAR"    , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "fbar"    , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "FBAAR"   , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "Oar"     , true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "FooBaAAR", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "FooBAAAr", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "FOoBaAAr", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "FOobaaar", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "fOobaaar", true ).IsSubsequence() );
+  EXPECT_FALSE( candidate.QueryMatchResult( "foobaaaR", true ).IsSubsequence() );
 }
 
 } // namespace YouCompleteMe

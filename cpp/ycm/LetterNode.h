@@ -51,7 +51,7 @@ public:
     letters_[ letter ].push_front( node );
   }
 
-  inline int Index() {
+  inline int Index() const {
     return index_;
   }
 

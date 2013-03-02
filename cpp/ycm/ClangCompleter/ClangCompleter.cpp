@@ -29,6 +29,11 @@
 
 #include <clang-c/Index.h>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
+
+using boost::algorithm::any_of;
+using boost::algorithm::is_upper;
 
 using boost::bind;
 using boost::cref;
@@ -387,6 +392,7 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   const std::string &query,
   const std::vector< CompletionData > &completion_datas ) {
   Bitset query_bitset = LetterBitsetFromString( query );
+  bool query_has_uppercase_letters = any_of( query, is_upper() );
 
   std::vector< const Candidate * > repository_candidates =
     candidate_repository_.GetCandidatesForStrings( completion_datas );
@@ -399,7 +405,8 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
     if ( !candidate->MatchesQueryBitset( query_bitset ) )
       continue;
 
-    Result result = candidate->QueryMatchResult( query );
+    Result result = candidate->QueryMatchResult( query,
+                                                 query_has_uppercase_letters );
 
     if ( result.IsSubsequence() ) {
       ResultAnd< CompletionData* > data_and_result( &completion_datas[ i ],

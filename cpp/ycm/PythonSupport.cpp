@@ -20,8 +20,12 @@
 #include "Result.h"
 #include "Candidate.h"
 #include "CandidateRepository.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 #include <vector>
 
+using boost::algorithm::any_of;
+using boost::algorithm::is_upper;
 using boost::python::len;
 using boost::python::extract;
 using boost::python::object;
@@ -67,6 +71,8 @@ boost::python::list FilterAndSortCandidates(
     CandidatesFromObjectList( candidates, candidate_property );
 
   Bitset query_bitset = LetterBitsetFromString( query );
+  bool query_has_uppercase_letters = any_of( query, is_upper() );
+
   int num_candidates = len( candidates );
   std::vector< ResultAnd< int > > object_and_results;
 
@@ -76,7 +82,8 @@ boost::python::list FilterAndSortCandidates(
     if ( !candidate->MatchesQueryBitset( query_bitset ) )
       continue;
 
-    Result result = candidate->QueryMatchResult( query );
+    Result result = candidate->QueryMatchResult( query,
+                                                 query_has_uppercase_letters );
 
     if ( result.IsSubsequence() ) {
       ResultAnd< int > object_and_result( i, result );
