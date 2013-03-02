@@ -96,7 +96,7 @@ provided on a best-effort basis and may not work for you.</p><p>Make sure you ha
 version of Vim shipping with Ubuntu is too old. You may need to <a href="https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source">compile Vim
 from source</a> (don't worry, it's easy).</p><p>Install YouCompleteMe with <a href="https://github.com/gmarik/vundle#about">Vundle</a>.</p><p><strong>Remember:</strong> YCM is a plugin with a compiled component. If you <strong>update</strong> YCM
 using Vundle and the ycm_core library API has changed (happens rarely), YCM will
-notify you to recompile it. You should then rerun the install process.</p><p>Install CMake. <code>sudo apt-get install cmake</code></p><p>Make sure you have Python headers installed: <code>sudo apt-get install python-dev</code>.</p><p>Compiling YCM <strong>with</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
+notify you to recompile it. You should then rerun the install process.</p><p>Install development tools and CMake: <code>sudo apt-get install build-essential cmake</code></p><p>Make sure you have Python headers installed: <code>sudo apt-get install python-dev</code>.</p><p>Compiling YCM <strong>with</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
 ./install.sh --clang-completer
 </code></pre><p>Compiling YCM <strong>without</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
 ./install.sh
@@ -105,7 +105,9 @@ forget that if you want the C-family semantic completion engine to work, you
 will need to provide the compilation flags for your project to YCM. It's all in
 the User Guide.</p><p>YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.</p><h2>Full Installation Guide</h2><p>These are the steps necessary to get YCM working on a Unix OS like Linux or
+that are conservatively turned off by default that you may want to turn on.</p><h2>Windows Installation</h2><p>YCM has <strong>no official support for Windows</strong>, but that doesn't mean you can't get
+it to work there. See the <a href="https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide">Windows Installation Guide</a> wiki page. Feel
+free to add to it.</p><h2>Full Installation Guide</h2><p>These are the steps necessary to get YCM working on a Unix OS like Linux or
 Mac OS X. My apologies to Windows users, but I don't have a guide for them. The
 code is platform agnostic, so if everything is configured correctly, YCM
 <em>should</em> work on Windows without issues (but as of writing, it's untested on
@@ -224,13 +226,15 @@ string.</p><h3>General Semantic Completion Engine Usage</h3><ul>
 <li>You <em>really</em> also want to install the latest version of the <a href="https://github.com/scrooloose/syntastic">Syntastic</a> Vim
   plugin. It has support for YCM and together they will provide you with compile
   errors/warnings practically instantly and without saving the file.</li>
-</ul><p>YCM looks for a <code>.ycm_extra_conf.py</code> file in the directory of the opened file
-or in any directory above it in the hierarchy (recursively); when the file is
+</ul><p>YCM looks for a <code>.ycm_extra_conf.py</code> file in the directory of the opened file or
+in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a <code>FlagsForFile</code>
 method in that module which should provide it with the information necessary to
-compile the current file. (You can also provide a path to a global
-<code>.ycm_extra_conf.py</code> file and override this searching behavior. See the Options
-section for more details.)</p><p>This system was designed this way so that the user can perform any arbitrary
+compile the current file. You can also provide a path to a global
+<code>.ycm_extra_conf.py</code> file, which will be used as a fallback. To prevent the
+execution of malicious code from a file you didn't write YCM will ask you once
+per <code>.ycm_extra_conf.py</code> if it is safe to load. This can be disabled and you can
+white-/blacklist files. See the Options section for more details.</p><p>This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
 to Clang.</p><p><a href="https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py">See YCM's own <code>.ycm_extra_conf.py</code></a> for details on how this
 works. You should be able to use it as a starting point. Hint: just replace the
@@ -294,7 +298,12 @@ up to date automatically and will also show error/warning notifications in Vim's
 gutter.</p><h3>The <code>YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.</p><h3>The <code>YcmDebugInfo</code> command</h3><p>This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the semantic
-completion engine.</p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
+completion engine.</p><h3>The <code>YcmCompleter</code> command</h3><p>This command can be used to invoke completer-specific commands.  If the first
+argument is of the form <code>ft=...</code> the completer for that file type will be used
+(for example <code>ft=cpp</code>), else the native completer of the current buffer will be
+used.
+Call <code>YcmCompleter</code> without further arguments for information about the
+commands you can call for the selected completer.</p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
 you don't need to change any options. These options can be configured in your
 <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> by including a line like this:</p><pre><code>let g:ycm_min_num_of_chars_for_completion = 1
 </code></pre><p>Note that after changing an option in your <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> you have to
@@ -373,11 +382,33 @@ combinations to Vim.</p><p>Setting this option to an empty string will make sure
 </code></pre><h3>The <code>g:ycm_key_detailed_diagnostics</code> option</h3><p>This option controls the key mapping used to show the full diagnostic text when
 the user's cursor is on the line with the diagnostic. It basically calls
 <code>:YcmShowDetailedDiagnostic</code>.</p><p>Setting this option to an empty string will make sure no mapping is created.</p><p>Default: <code>&lt;leader&gt;d</code></p><pre><code>let g:ycm_key_detailed_diagnostics = '&lt;leader&gt;d'
-</code></pre><h3>The <code>g:ycm_global_ycm_extra_conf</code> option</h3><p>Normally, YCM searches for a <code>.ycm_extra_conf.py</code> file for compilation flags
-(see the User Guide for more details on how this works). You can use this option
-to override this searching behavior by providing a full, absolute path to a
-global <code>.ycm_extra_conf.py</code> file (although you can call the global file whatever
-you want).</p><p>You can place such a global file anywhere in your filesystem.</p><p>Default: <code>''</code></p><pre><code>let g:ycm_global_ycm_extra_conf = ''
+</code></pre><h3>The <code>g:ycm_global_ycm_extra_conf</code> option</h3><p>Normally, YCM searches for a '.ycm_extra_conf.py' file for compilation flags
+(see the User Guide for more details on how this works). This option specifies
+a fallback path to a config file which is used if no '.ycm_extra_conf.py' is
+found.</p><p>You can place such a global file anywhere in your filesystem.</p><p>Default: <code>''</code></p><pre><code>let g:ycm_global_ycm_extra_conf = ''
+</code></pre><h3>The <code>g:ycm_confirm_extra_conf</code> option</h3><p>When this option is set to <code>1</code> YCM will ask once per <code>.ycm_extra_conf.py</code> file
+if it is safe to be loaded. This is to prevent execution of malicious code
+from a <code>.ycm_extra_conf.py</code> file you didn't write.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_confirm_extra_conf = 1
+</code></pre><h3>The <code>g:ycm_extra_conf_globlist</code> option</h3><p>This option is a list that may contain several globbing patterns. If a pattern
+starts with a <code>!</code> all <code>.ycm_extra_conf.py</code> files matching that pattern will be
+blacklisted, that is they won't be loaded and no confirmation dialog will be
+shown. If a pattern does not start with a <code>!</code> all files matching that pattern
+will be whitelisted. Note that this option is not used when confirmation is
+disabled using <code>g:ycm_confirm_extra_conf</code> and that items earlier in the list
+will take precedence over the later ones.</p><p>Rules:</p><ul>
+<li><code>*</code>       matches everything</li>
+<li><code>?</code>       matches any single character</li>
+<li><code>[seq]</code>   matches any character in seq</li>
+<li><code>[!seq]</code>  matches any char not in seq</li>
+</ul><p>Example:</p><pre><code>let g:ycm_extra_conf_globlist = ['~/dev/*','!~/*']
+</code></pre><ul>
+<li>The first rule will match everything contained in the <code>~/dev</code> directory so
+  <code>.ycm_extra_conf.py</code> files from there will be loaded.</li>
+<li>The second rule will match everything in the home directory so a
+  <code>.ycm_extra_conf.py</code> file from there won't be loaded.</li>
+<li>As the first rule takes precedence everything in the home directory excluding
+  the <code>~/dev</code> directory will be blacklisted.</li>
+</ul><p>Default: <code>[]</code></p><pre><code>let g:ycm_extra_conf_globlist = []
 </code></pre><h3>The <code>g:ycm_semantic_triggers</code> option</h3><p>This option controls the character-based triggers for the various semantic
 completion engines. The option holds a dictionary of key-values, where the keys
 are Vim's filetype strings delimited by commas and values are lists of strings,
@@ -389,11 +420,12 @@ listed as a trigger, the same thing would happen when the user typed <code>foo-&
   \   'c' : ['-&gt;', '.'],
   \   'objc' : ['-&gt;', '.'],
   \   'cpp,objcpp' : ['-&gt;', '.', '::'],
-  \   'perl,php' : ['-&gt;'],
-  \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir' : ['.'],
+  \   'perl' : ['-&gt;'],
+  \   'php' : ['-&gt;', '::'],
+  \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
   \   'lua' : ['.', ':'],
   \   'erlang' : [':'],
-}
+  \ }
 </code></pre><h2>FAQ</h2><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory</code>, then feel free to ignore it; it's caused by a limitation of
 CMake and is not an issue. Everything should still work fine.</p><h3>I get a weird window at the top of my file when I use the semantic engine</h3><p>This is Vim's <code>preview</code> window. Vim uses it to show you extra information about
@@ -446,7 +478,15 @@ instead of <code>so</code> on a Mac):</p><pre><code>-DPYTHON_INCLUDE_DIR=/usr/in
 </code></pre><p>This will force the paths to the Python include directory and the Python library
 to use. You may need to set these flags to something else, but you need to make
 sure you use the same version of Python that your Vim binary is built against,
-which is highly likely to be the system's default Python.</p><h3>Why isn't YCM just written in plain VimScript, FFS?</h3><p>Because of the identifier completion engine and subsequence-based filtering.
+which is highly likely to be the system's default Python.</p><h3>I get <code>Vim: Caught deadly signal SEGV</code> on Vim startup</h3><p>This can happen on some Linux distros. If you encounter this situation, run Vim
+under <code>gdb</code>. You'll probably see something like this in the output when Vim
+crashes:</p><pre><code>undefined symbol: clang_CompileCommands_dispose
+</code></pre><p>This means that Vim is trying to load a <code>libclang.so</code> that is too old. You need
+at least a 3.2 libclang. Some distros ship with a system <code>libclang.so</code> that
+identifies itself as 3.2 but is not; it was cut from the upstream sources before
+the official 3.2 release and some API changes (like the addition of the
+CompileCommands API) were added after their cut.</p><p>So just go through the installation guide and make sure you are using a correct
+<code>libclang.so</code>. I recommend downloading prebuilt binaries from llvm.org.</p><h3>Why isn't YCM just written in plain VimScript, FFS?</h3><p>Because of the identifier completion engine and subsequence-based filtering.
 Let's say you have <em>many</em> dozens of files open in a single Vim instance (I often
 do); the identifier-based engine then needs to store thousands (if not tens of
 thousands) of identifiers in its internal data-structures. When the user types,
