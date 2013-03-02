@@ -14,12 +14,13 @@ markdown_source = ''.join( markdown_lines )
 
 with open('index.html', 'r+') as content_file:
   content = content_file.read()
-  soup = BeautifulSoup( content, "html5lib" )
-  elem = soup.find( id="markdown-output" )
 
   new_contents = markdown( unicode( markdown_source, 'utf-8' ),
                            extensions=['fenced_code'] )
   new_tags = BeautifulSoup( new_contents, 'html5lib' )
+
+  soup = BeautifulSoup( content, "html5lib" )
+  elem = soup.find( id="markdown-output" )
   elem.clear()
   for new_elem in new_tags.body.contents:
     elem.append( new_elem )
