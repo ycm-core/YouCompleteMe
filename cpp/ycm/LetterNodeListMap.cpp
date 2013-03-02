@@ -17,6 +17,7 @@
 
 #include "LetterNodeListMap.h"
 #include "standard.h"
+#include <algorithm>
 
 namespace YouCompleteMe {
 
@@ -39,9 +40,7 @@ int IndexForChar( char letter ) {
 
 
 LetterNodeListMap::LetterNodeListMap() {
-  for ( uint i = 0; i < letters_.size(); ++i ) {
-    letters_[ i ] = NULL;
-  }
+  std::fill( letters_.begin(), letters_.end(), NULL );
 }
 
 
