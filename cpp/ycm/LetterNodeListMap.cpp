@@ -39,8 +39,6 @@ int IndexForChar( char letter ) {
 
 
 LetterNodeListMap::LetterNodeListMap() {
-  letters_.resize( kNumLetters );
-
   for ( uint i = 0; i < letters_.size(); ++i ) {
     letters_[ i ] = NULL;
   }

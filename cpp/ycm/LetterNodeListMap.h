@@ -18,9 +18,9 @@
 #ifndef LETTERNODELISTMAP_H_BRK2UMC1
 #define LETTERNODELISTMAP_H_BRK2UMC1
 
-#include <vector>
 #include <list>
 #include <boost/utility.hpp>
+#include <boost/array.hpp>
 
 #define NUM_LETTERS 128
 
@@ -47,8 +47,7 @@ public:
   bool HasLetter( char letter ) const;
 
 private:
-
-  std::vector< std::list< LetterNode * >* > letters_;
+  boost::array< std::list< LetterNode * >*, NUM_LETTERS > letters_;
 };
 
 } // namespace YouCompleteMe
