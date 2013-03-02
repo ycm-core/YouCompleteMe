@@ -59,7 +59,7 @@ function num_cores {
 
 function install {
   ycm_dir=`pwd`
-  build_dir=`mktemp -d -t ycm_build.XXXX`
+  build_dir=`mktemp -d -t ycm_build.XXXXXX`
   pushd $build_dir
 
   if [[ `uname -s` == "Darwin" ]]; then
