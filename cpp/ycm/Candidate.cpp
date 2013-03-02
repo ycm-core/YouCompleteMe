@@ -74,7 +74,6 @@ Result Candidate::QueryMatchResult( const std::string &query ) const {
     const std::list< LetterNode *> *list = node->NodeListForLetter( letter );
 
     if ( !list )
-
       return Result( false );
 
     node = list->front();

@@ -32,7 +32,7 @@ namespace YouCompleteMe {
 
 class LetterNode : boost::noncopyable {
 public:
-  explicit LetterNode( char letter, int index );
+  LetterNode( char letter, int index );
 
   // this is for root nodes
   explicit LetterNode( const std::string &text );

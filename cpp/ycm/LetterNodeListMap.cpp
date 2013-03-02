@@ -66,7 +66,6 @@ std::list< LetterNode * > &LetterNodeListMap::operator[] ( char letter ) {
   std::list< LetterNode * > *list = letters_[ letter_index ];
 
   if ( list )
-
     return *list;
 
   letters_[ letter_index ] = new std::list< LetterNode * >();
