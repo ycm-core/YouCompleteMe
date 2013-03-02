@@ -7,20 +7,22 @@ Contents ~
  1. Introduction                                    |youcompleteme-introduction|
  2. Mac OS X super-quick installation |youcompleteme-mac-os-x-super-quick-installation|
  3. Ubuntu Linux x64 super-quick installation |youcompleteme-ubuntu-linux-x64-super-quick-installation|
- 4. Full Installation Guide              |youcompleteme-full-installation-guide|
- 5. User Guide                                        |youcompleteme-user-guide|
+ 4. Windows Installation                    |youcompleteme-windows-installation|
+ 5. Full Installation Guide              |youcompleteme-full-installation-guide|
+ 6. User Guide                                        |youcompleteme-user-guide|
   1. General Usage                                 |youcompleteme-general-usage|
   2. Completion string ranking         |youcompleteme-completion-string-ranking|
   3. General Semantic Completion Engine Usage |youcompleteme-general-semantic-completion-engine-usage|
   4. C-family Semantic Completion Engine Usage |youcompleteme-c-family-semantic-completion-engine-usage|
   5. Syntastic integration                 |youcompleteme-syntastic-integration|
   6. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
- 6. Commands                                            |youcompleteme-commands|
+ 7. Commands                                            |youcompleteme-commands|
   1. The |YcmForceCompileAndDiagnostics| command
   2. The |YcmDiags| command
   3. The |YcmShowDetailedDiagnostic| command
   4. The |YcmDebugInfo| command
- 7. Options                                              |youcompleteme-options|
+  5. The |YcmCompleter| command
+ 8. Options                                              |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_filetypes_to_completely_ignore| option
   3. The |g:ycm_filetype_specific_completion_to_disable| option
@@ -35,8 +37,10 @@ Contents ~
   12. The |g:ycm_key_invoke_completion| option
   13. The |g:ycm_key_detailed_diagnostics| option
   14. The |g:ycm_global_ycm_extra_conf| option
-  15. The |g:ycm_semantic_triggers| option
- 8. FAQ                                                      |youcompleteme-faq|
+  15. The |g:ycm_confirm_extra_conf| option
+  16. The |g:ycm_extra_conf_globlist| option
+  17. The |g:ycm_semantic_triggers| option
+ 9. FAQ                                                      |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine
   3. It appears that YCM is not working
@@ -47,12 +51,13 @@ Contents ~
   8. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults
   9. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting
   10. I get 'LONG_BIT definition appears wrong for platform' when compiling
-  11. Why isn't YCM just written in plain VimScript, FFS?
-  12. Why does YCM demand such a recent version of Vim?
-  13. I get annoying messages in Vim's status area when I type
-  14. Nasty bugs happen if I have the |vim-autoclose| plugin installed
- 9. Contact                                              |youcompleteme-contact|
- 10. License                                             |youcompleteme-license|
+  11. I get 'Vim: Caught deadly signal SEGV' on Vim startup
+  12. Why isn't YCM just written in plain VimScript, FFS?
+  13. Why does YCM demand such a recent version of Vim?
+  14. I get annoying messages in Vim's status area when I type
+  15. Nasty bugs happen if I have the |vim-autoclose| plugin installed
+ 10. Contact                                             |youcompleteme-contact|
+ 11. License                                             |youcompleteme-license|
 
 ===============================================================================
                                                     *youcompleteme-introduction*
@@ -187,7 +192,8 @@ Remember: YCM is a plugin with a compiled component. If you update YCM using
 Vundle and the ycm_core library API has changed (happens rarely), YCM will
 notify you to recompile it. You should then rerun the install process.
 
-Install CMake. 'sudo apt-get install cmake'
+Install development tools and CMake: 'sudo apt-get install build-essential
+cmake'
 
 Make sure you have Python headers installed: 'sudo apt-get install
 python-dev'.
@@ -211,6 +217,14 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting
 options that are conservatively turned off by default that you may want to
 turn on.
+
+===============================================================================
+                                            *youcompleteme-windows-installation*
+Windows Installation ~
+
+YCM has no official support for Windows, but that doesn't mean you can't get
+it to work there. See the Windows Installation Guide [10] wiki page. Feel free
+to add to it.
 
 ===============================================================================
                                          *youcompleteme-full-installation-guide*
@@ -240,9 +254,9 @@ Please follow the instructions carefully. Read EVERY WORD.
    ':echo has('python')'. The output should be 1. If it's 0, then get a
    version of Vim with Python support.
 
- - Install YCM with Vundle [6] (or Pathogen [10], but Vundle is a better idea).
+ - Install YCM with Vundle [6] (or Pathogen [11], but Vundle is a better idea).
    With Vundle, this would mean adding a 'Bundle 'Valloric/YouCompleteMe' line
-   to your vimrc [11].
+   to your vimrc [12].
 
  - [Complete this step ONLY if you care about semantic completion support for
    C-family languages. Otherwise it's not neccessary.] Download the latest
@@ -251,7 +265,7 @@ Please follow the instructions carefully. Read EVERY WORD.
    to power the YCM semantic completion engine for those languages. YCM needs
    libclang version 3.2 or higher. You can use the system libclang only if you
    are sure it is version 3.2 or higher, otherwise don't. Even if it is, I
-   recommend using the official binaries from llvm.org [12] if at all
+   recommend using the official binaries from llvm.org [13] if at all
    possible. Make sure you download the correct archive file for your OS.
 
  - Compile the 'ycm_core' plugin plugin (ha!) that YCM needs. This is the C++
@@ -361,20 +375,23 @@ YCM looks for a '.ycm_extra_conf.py' file in the directory of the opened file
 or in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a
 'FlagsForFile' method in that module which should provide it with the
-information necessary to compile the current file. (You can also provide a
-path to a global '.ycm_extra_conf.py' file and override this searching
-behavior. See the Options section for more details.)
+information necessary to compile the current file. You can also provide a path
+to a global '.ycm_extra_conf.py' file, which will be used as a fallback. To
+prevent the execution of malicious code from a file you didn't write YCM will
+ask you once per '.ycm_extra_conf.py' if it is safe to load. This can be
+disabled and you can white-/blacklist files. See the Options section for more
+details.
 
 This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
 to Clang.
 
-See YCM's own '.ycm_extra_conf.py' [13] for details on how this works. You
+See YCM's own '.ycm_extra_conf.py' [14] for details on how this works. You
 should be able to use it as a starting point. Hint: just replace the strings
 in the 'flags' variable with compilation flags necessary for your project.
 That should be enough for 99% of projects.
 
-Yes, Clang's 'CompilationDatabase' system [14] is also supported. Again, see
+Yes, Clang's 'CompilationDatabase' system [15] is also supported. Again, see
 the above linked example file.
 
 If Clang encounters errors when compiling the header files that your file
@@ -430,7 +447,7 @@ You can also see the full diagnostic message for all the diagnostics in the
 current file in Vim's 'locationlist', which can be opened with the ':lopen'
 and ':lclose' commands. A good way to toggle the display of the 'locationlist'
 with a single key mapping is provided by another (very small) Vim plugin
-called ListToggle [15] (which also makes it possible to change the height of
+called ListToggle [16] (which also makes it possible to change the height of
 the 'locationlist' window), also written by yours truly.
 
 -------------------------------------------------------------------------------
@@ -439,7 +456,7 @@ Writing New Semantic Completers ~
 
 You have two options here: writing an 'omnifunc' for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for
-YCM using the Completer API [16].
+YCM using the Completer API [17].
 
 Here are the differences between the two approaches:
 
@@ -457,7 +474,7 @@ Here are the differences between the two approaches:
    than VimScript.
 
 If you want to use the 'omnifunc' system, see the relevant Vim docs with ':h
-complete-functions'. For the Completer API, see the API docs [16].
+complete-functions'. For the Completer API, see the API docs [17].
 
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
@@ -500,17 +517,26 @@ This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the
 semantic completion engine.
 
+-------------------------------------------------------------------------------
+The *YcmCompleter* command
+
+This command can be used to invoke completer-specific commands. If the first
+argument is of the form 'ft=...' the completer for that file type will be used
+(for example 'ft=cpp'), else the native completer of the current buffer will
+be used. Call |YcmCompleter| without further arguments for information about
+the commands you can call for the selected completer.
+
 ===============================================================================
                                                          *youcompleteme-options*
 Options ~
 
 All options have reasonable defaults so if the plug-in works after
 installation you don't need to change any options. These options can be
-configured in your vimrc script [11] by including a line like this:
+configured in your vimrc script [12] by including a line like this:
 >
     let g:ycm_min_num_of_chars_for_completion = 1
 
-Note that after changing an option in your vimrc script [11] you have to
+Note that after changing an option in your vimrc script [12] you have to
 restart Vim for the changes to take effect.
 
 -------------------------------------------------------------------------------
@@ -728,6 +754,55 @@ Default: ''
     let g:ycm_global_ycm_extra_conf = ''
 
 -------------------------------------------------------------------------------
+The *g:ycm_confirm_extra_conf* option
+
+When this option is set to '1' YCM will ask once per '.ycm_extra_conf.py' file
+if it is safe to be loaded. This is to prevent execution of malicious code
+from a '.ycm_extra_conf.py' file you didn't write.
+
+Default: '1'
+>
+    let g:ycm_confirm_extra_conf = 1
+
+-------------------------------------------------------------------------------
+The *g:ycm_extra_conf_globlist* option
+
+This option is a list that may contain several globbing patterns. If a pattern
+starts with a '!' all '.ycm_extra_conf.py' files matching that pattern will be
+blacklisted, that is they won't be loaded and no confirmation dialog will be
+shown. If a pattern does not start with a '!' all files matching that pattern
+will be whitelisted. Note that this option is not used when confirmation is
+disabled using |g:ycm_confirm_extra_conf| and that items earlier in the list
+will take precedence over the later ones.
+
+Rules:
+
+ - '*' matches everything
+
+ - '?' matches any single character
+
+ - '[seq]' matches any character in seq
+
+ - '[!seq]' matches any char not in seq
+
+Example:
+>
+    let g:ycm_extra_conf_globlist = ['~/dev/*','!~/*']
+
+ - The first rule will match everything contained in the '~/dev' directory so
+   '.ycm_extra_conf.py' files from there will be loaded.
+
+ - The second rule will match everything in the home directory so a
+   '.ycm_extra_conf.py' file from there won't be loaded.
+
+ - As the first rule takes precedence everything in the home directory
+   excluding the '~/dev' directory will be blacklisted.
+
+Default: '[]'
+>
+    let g:ycm_extra_conf_globlist = []
+
+-------------------------------------------------------------------------------
 The *g:ycm_semantic_triggers* option
 
 This option controls the character-based triggers for the various semantic
@@ -747,11 +822,12 @@ Default: '[see next line]'
       \   'c' : ['->', '.'],
       \   'objc' : ['->', '.'],
       \   'cpp,objcpp' : ['->', '.', '::'],
-      \   'perl,php' : ['->'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir' : ['.'],
+      \   'perl' : ['->'],
+      \   'php' : ['->', '::'],
+      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
       \   'lua' : ['.', ':'],
       \   'erlang' : [':'],
-    }
+      \ }
 
 ===============================================================================
                                                              *youcompleteme-faq*
@@ -849,7 +925,7 @@ I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting ~
 
 You should probably run 'brew rm python; brew install python' to get the
 latest fixes that should make YCM work with such a configuration. Also rebuild
-Macvim then. If you still get problems with this, see issue #18 [17] for
+Macvim then. If you still get problems with this, see issue #18 [18] for
 suggestions.
 
 -------------------------------------------------------------------------------
@@ -885,6 +961,25 @@ This will force the paths to the Python include directory and the Python
 library to use. You may need to set these flags to something else, but you
 need to make sure you use the same version of Python that your Vim binary is
 built against, which is highly likely to be the system's default Python.
+
+-------------------------------------------------------------------------------
+I get 'Vim: Caught deadly signal SEGV' on Vim startup ~
+
+This can happen on some Linux distros. If you encounter this situation, run
+Vim under 'gdb'. You'll probably see something like this in the output when
+Vim crashes:
+
+'undefined symbol: clang_CompileCommands_dispose'
+
+This means that Vim is trying to load a 'libclang.so' that is too old. You
+need at least a 3.2 libclang. Some distros ship with a system 'libclang.so'
+that identifies itself as 3.2 but is not; it was cut from the upstream sources
+before the official 3.2 release and some API changes (like the addition of the
+CompileCommands API) were added after their cut.
+
+So just go through the installation guide and make sure you are using a
+correct 'libclang.so'. I recommend downloading prebuilt binaries from
+llvm.org.
 
 -------------------------------------------------------------------------------
 Why isn't YCM just written in plain VimScript, FFS? ~
@@ -923,7 +1018,7 @@ You'll have to learn to ignore them. It's a shitty "solution", I know.
 -------------------------------------------------------------------------------
 Nasty bugs happen if I have the *vim-autoclose* plugin installed
 
-Use the delimitMate [18] plugin instead. It does the same thing without
+Use the delimitMate [19] plugin instead. It does the same thing without
 conflicting with YCM.
 
 ===============================================================================
@@ -931,7 +1026,7 @@ conflicting with YCM.
 Contact ~
 
 If you have questions, bug reports, suggestions, etc. please use the issue
-tracker [19]. The latest version is available at http://valloric.github.com/YouCompleteMe/.
+tracker [20]. The latest version is available at http://valloric.github.com/YouCompleteMe/.
 
 The author's homepage is http://val.markovic.io.
 
@@ -939,7 +1034,7 @@ The author's homepage is http://val.markovic.io.
                                                          *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [20]. Copyright 2012
+This software is licensed under the GPL v3 license [21]. Copyright 2012
 Strahinja Val Markovic <val@markovic.io>.
 
 ===============================================================================
@@ -955,16 +1050,17 @@ References ~
 [7] http://mxcl.github.com/homebrew/
 [8] http://www.cmake.org/cmake/resources/software.html
 [9] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-[10] https://github.com/tpope/vim-pathogen#pathogenvim
-[11] http://vimhelp.appspot.com/starting.txt.html#vimrc
-[12] http://llvm.org/releases/download.html#3.2
-[13] https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
-[14] http://clang.llvm.org/docs/JSONCompilationDatabase.html
-[15] https://github.com/Valloric/ListToggle
-[16] https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
-[17] https://github.com/Valloric/YouCompleteMe/issues/18
-[18] https://github.com/Raimondi/delimitMate
-[19] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[20] http://www.gnu.org/copyleft/gpl.html
+[10] https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide
+[11] https://github.com/tpope/vim-pathogen#pathogenvim
+[12] http://vimhelp.appspot.com/starting.txt.html#vimrc
+[13] http://llvm.org/releases/download.html#3.2
+[14] https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
+[15] http://clang.llvm.org/docs/JSONCompilationDatabase.html
+[16] https://github.com/Valloric/ListToggle
+[17] https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
+[18] https://github.com/Valloric/YouCompleteMe/issues/18
+[19] https://github.com/Raimondi/delimitMate
+[20] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[21] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
