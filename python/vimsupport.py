@@ -104,6 +104,13 @@ def CurrentFiletypes():
   return ft_string.split( '.' )
 
 
+def FiletypesForBuffer( buffer_object ):
+  # NOTE: Getting &ft for other buffers only works when the buffer has been
+  # visited by the user at least once, which is true for modified buffers
+  ft_string = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
+  return ft_string.split( '.' )
+
+
 def GetVariableValue( variable ):
   return vim.eval( variable )
 
