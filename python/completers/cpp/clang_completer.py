@@ -246,5 +246,9 @@ def DiagnosticsToDiagStructure( diagnostics ):
 
 
 def ClangAvailableForBuffer( buffer_object ):
-  filetype = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
-  return filetype in CLANG_FILETYPES
+  filetypes = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
+  supported_fts = [ft for ft in filetypes.split('.') if ft in CLANG_FILETYPES]
+  if supported_fts:
+    return True
+  else:
+    return False
