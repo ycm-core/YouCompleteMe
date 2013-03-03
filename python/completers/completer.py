@@ -134,7 +134,7 @@ class Completer( object ):
     if not line_length or start_column - 1 >= line_length:
       return False
 
-    filetype = vimsupport.CurrentFiletypes()[ 0 ]
+    filetype = self._CurrentFiletype()
     triggers = self.triggers_for_filetype[ filetype ]
 
     for trigger in triggers:
@@ -264,6 +264,17 @@ class Completer( object ):
 
   def GettingCompletions( self ):
     return False
+
+
+  def _CurrentFiletype( self ):
+    filetypes = vimsupport.CurrentFiletypes()
+    supported = self.SupportedFiletypes()
+
+    for filetype in filetypes:
+      if filetype in supported:
+        return filetype
+
+    return filetypes[0]
 
 
   @abc.abstractmethod

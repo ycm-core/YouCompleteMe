@@ -60,11 +60,19 @@ class YouCompleteMe( object ):
   def GetFiletypeCompleter( self ):
     filetypes = vimsupport.CurrentFiletypes()
 
-    for filetype in filetypes:
-      completer = self.GetFiletypeCompleterForFiletype( filetype )
-      if completer:
+    completers = [self.GetFiletypeCompleterForFiletype( filetype )
+        for filetype in filetypes ]
+
+    if not completers:
+      return None
+
+    # Try to find a native completer first
+    for completer in completers:
+      if completer and completer is not self.omnicomp:
         return completer
-    return None
+
+    # Return the omni completer for the first filetype
+    return completers[0]
 
 
   def GetFiletypeCompleterForFiletype( self, filetype ):
