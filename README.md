@@ -516,8 +516,7 @@ in files of those filetypes.
 
 Note that even if semantic completion is not turned off for a specific filetype,
 you will not get semantic completion if the semantic engine does not support
-that filetype. Currently, the semantic engine only supports the `c`, `cpp`,
-`objc` and `objcpp` filetypes.
+that filetype.
 
 You can get the filetype of the current file in Vim with `:set ft?`.
 
