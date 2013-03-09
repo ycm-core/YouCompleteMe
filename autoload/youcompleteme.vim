@@ -136,12 +136,10 @@ endfunction
 
 
 function! s:AllowedToCompleteInCurrentFile()
-  let current_filetype = &filetype
-  if !current_filetype
-    return 0
   " If the user set the current filetype as a filetype that YCM should ignore,
   " then we don't do anything
-  return !get( g:ycm_filetypes_to_completely_ignore, current_filetype, 0 )
+  return !empty( &filetype ) &&
+        \ !get( g:ycm_filetypes_to_completely_ignore, &filetype, 0 )
 endfunction
 
 
