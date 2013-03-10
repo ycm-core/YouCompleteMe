@@ -58,12 +58,20 @@ let g:loaded_youcompleteme = 1
 let g:ycm_min_num_of_chars_for_completion  =
       \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
 
-let g:ycm_filetypes_to_completely_ignore =
-      \ get( g:, 'ycm_filetypes_to_completely_ignore', {
-      \ 'notes' : 1,
-      \ 'markdown' : 1,
-      \ 'text' : 1,
-      \} )
+let g:ycm_filetype_whitelist =
+      \ get( g:, 'ycm_filetype_whitelist', {
+      \   '*' : 1,
+      \ } )
+
+" The fallback to g:ycm_filetypes_to_completely_ignore is here because of
+" backwards compatibility with previous versions of YCM.
+let g:ycm_filetype_blacklist =
+      \ get( g:, 'ycm_filetype_blacklist',
+      \   get( g:, 'ycm_filetypes_to_completely_ignore', {
+      \     'notes' : 1,
+      \     'markdown' : 1,
+      \     'text' : 1,
+      \ } ) )
 
 let g:ycm_filetype_specific_completion_to_disable =
       \ get( g:, 'ycm_filetype_specific_completion_to_disable', {} )

@@ -136,10 +136,15 @@ endfunction
 
 
 function! s:AllowedToCompleteInCurrentFile()
-  " If the user set the current filetype as a filetype that YCM should ignore,
-  " then we don't do anything
-  return !empty( &filetype ) &&
-        \ !get( g:ycm_filetypes_to_completely_ignore, &filetype, 0 )
+  if empty( &filetype )
+    return 0
+  endif
+
+  let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' ) ||
+        \ has_key( g:ycm_filetype_whitelist, &filetype )
+  let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
+
+  return whitelist_allows && blacklist_allows
 endfunction
 
 

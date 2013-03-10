@@ -484,21 +484,48 @@ Default: `2`
 
     let g:ycm_min_num_of_chars_for_completion = 2
 
-### The `g:ycm_filetypes_to_completely_ignore` option
+### The `g:ycm_filetype_whitelist` option
+
+This option controls for which Vim filetypes (see `:h filetype`) should YCM be
+turned on. The option value should be a Vim dictionary with keys being filetype
+strings (like `python`, `cpp` etc) and values being unimportant (the dictionary
+is used like a hash set, meaning that only the keys matter).
+
+The `*` key is special and matches all filetypes. By default, the whitelist
+contains only this `*` key.
+
+YCM also has a `g:ycm_filetype_blacklist` option that lists filetypes for which
+YCM shouldn't be turned on. YCM will work only in filetypes that both the
+whitelist and the blacklist allow (the blacklist "allows" a filetype by _not_
+having it as a key).
+
+For example, let's assume you want YCM to work in files with the `cpp` filetype.
+The filetype should then be present in the whitelist either directly (`cpp` key
+in the whitelist) or indirectly through the special `*` key. It should _not_ be
+present in the blacklist.
+
+Filetypes that are blocked by the either of the lists will be completely ignored
+by YCM, meaning that neither the identifier-based completion engine nor the
+semantic engine will operate in them.
+
+You can get the filetype of the current file in Vim with `:set ft?`.
+
+Default: `{'*' : 1}`
+
+    let g:ycm_filetype_whitelist = { '*': 1 }
+
+### The `g:ycm_filetype_blacklist` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
 turned off. The option value should be a Vim dictionary with keys being filetype
 strings (like `python`, `cpp` etc) and values being unimportant (the dictionary
-is used like a hash set, meaning that only the keys matter). The listed
-filetypes will be completely ignored by YCM, meaning that neither the
-identifier-based completion engine nor the semantic engine will operate in files
-of those filetypes.
+is used like a hash set, meaning that only the keys matter).
 
-You can get the filetype of the current file in Vim with `:set ft?`.
+See the `g:ycm_filetype_whitelist` option for more details on how this works.
 
-Default: `{notes: 1, markdown: 1, text: 1}`
+Default: `{'notes': 1, 'markdown': 1, 'text': 1}`
 
-    let g:ycm_filetypes_to_completely_ignore = {
+    let g:ycm_filetype_blacklist = {
           \ 'notes' : 1,
           \ 'markdown' : 1,
           \ 'text' : 1,
