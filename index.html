@@ -205,6 +205,10 @@ look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.</p><h2>User Guide</h2><h3>General Usage</h3><ul>
 <li>If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.</li>
+<li>Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
+  then it's case-insensitive. If your input involves uppercase letters, then
+  it's case-sensitive. So "foo" matches "Foo" and "foo", but "Foo" matches "Foo"
+  but not "foo".</li>
 <li>Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Shift-TAB to cycle backwards. Note that if you're
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
@@ -220,7 +224,7 @@ matches). A word-boundary character are all capital characters, characters
 preceded by an underscore and the first letter character in the completion
 string.</p><h3>General Semantic Completion Engine Usage</h3><ul>
 <li>You can use Ctrl+Space to trigger the completion suggestions anywhere, even
-  without a string prefix.  This is useful to see which top-level functions are
+  without a string prefix. This is useful to see which top-level functions are
   available for use.</li>
 </ul><h3>C-family Semantic Completion Engine Usage</h3><ul>
 <li>You <em>really</em> also want to install the latest version of the <a href="https://github.com/scrooloose/syntastic">Syntastic</a> Vim
@@ -311,13 +315,23 @@ restart Vim for the changes to take effect.</p><h3>The <code>g:ycm_min_num_of_ch
 completion suggestions are triggered. For example, if the option is set to <code>2</code>,
 then when the user types a second alphanumeric character after a whitespace
 character, completion suggestions will be triggered.</p><p>Default: <code>2</code></p><pre><code>let g:ycm_min_num_of_chars_for_completion = 2
-</code></pre><h3>The <code>g:ycm_filetypes_to_completely_ignore</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
+</code></pre><h3>The <code>g:ycm_filetype_whitelist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
+turned on. The option value should be a Vim dictionary with keys being filetype
+strings (like <code>python</code>, <code>cpp</code> etc) and values being unimportant (the dictionary
+is used like a hash set, meaning that only the keys matter).</p><p>The <code>*</code> key is special and matches all filetypes. By default, the whitelist
+contains only this <code>*</code> key.</p><p>YCM also has a <code>g:ycm_filetype_blacklist</code> option that lists filetypes for which
+YCM shouldn't be turned on. YCM will work only in filetypes that both the
+whitelist and the blacklist allow (the blacklist "allows" a filetype by <em>not</em>
+having it as a key).</p><p>For example, let's assume you want YCM to work in files with the <code>cpp</code> filetype.
+The filetype should then be present in the whitelist either directly (<code>cpp</code> key
+in the whitelist) or indirectly through the special <code>*</code> key. It should <em>not</em> be
+present in the blacklist.</p><p>Filetypes that are blocked by the either of the lists will be completely ignored
+by YCM, meaning that neither the identifier-based completion engine nor the
+semantic engine will operate in them.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>{'*' : 1}</code></p><pre><code>let g:ycm_filetype_whitelist = { '*': 1 }
+</code></pre><h3>The <code>g:ycm_filetype_blacklist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
 turned off. The option value should be a Vim dictionary with keys being filetype
 strings (like <code>python</code>, <code>cpp</code> etc) and values being unimportant (the dictionary
-is used like a hash set, meaning that only the keys matter). The listed
-filetypes will be completely ignored by YCM, meaning that neither the
-identifier-based completion engine nor the semantic engine will operate in files
-of those filetypes.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>{notes: 1, markdown: 1, text: 1}</code></p><pre><code>let g:ycm_filetypes_to_completely_ignore = {
+is used like a hash set, meaning that only the keys matter).</p><p>See the <code>g:ycm_filetype_whitelist</code> option for more details on how this works.</p><p>Default: <code>{'notes': 1, 'markdown': 1, 'text': 1}</code></p><pre><code>let g:ycm_filetype_blacklist = {
       \ 'notes' : 1,
       \ 'markdown' : 1,
       \ 'text' : 1,
@@ -330,8 +344,7 @@ only the keys matter). The listed filetypes will be ignored by the YCM semantic
 completion engine, but the identifier-based completion engine will still trigger
 in files of those filetypes.</p><p>Note that even if semantic completion is not turned off for a specific filetype,
 you will not get semantic completion if the semantic engine does not support
-that filetype. Currently, the semantic engine only supports the <code>c</code>, <code>cpp</code>,
-<code>objc</code> and <code>objcpp</code> filetypes.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>{}</code></p><pre><code>let g:ycm_filetype_specific_completion_to_disable = {}
+that filetype.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>{}</code></p><pre><code>let g:ycm_filetype_specific_completion_to_disable = {}
 </code></pre><h3>The <code>g:ycm_allow_changing_updatetime</code> option</h3><p>When this option is set to <code>1</code>, YCM will change the <code>updatetime</code> Vim option to
 <code>2000</code> (see <code>:h updatetime</code>). This may conflict with some other plugins you have
 (but it's unlikely). The <code>updatetime</code> option is the number of milliseconds that
