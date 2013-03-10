@@ -117,6 +117,9 @@ function! s:SetUpKeyMappings()
     " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
     " candidate that vim selects by default
     exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
+    if g:ycm_key_invoke_completion ==? '<C-Space>' && !has("gui_running")
+        exe 'inoremap <unique> <Nul> <C-X><C-O><C-P>'
+    endif
   endif
 
   if strlen(g:ycm_key_detailed_diagnostics)
