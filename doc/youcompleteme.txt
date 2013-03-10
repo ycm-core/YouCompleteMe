@@ -24,22 +24,23 @@ Contents ~
   5. The |YcmCompleter| command
  8. Options                                              |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
-  2. The |g:ycm_filetypes_to_completely_ignore| option
-  3. The |g:ycm_filetype_specific_completion_to_disable| option
-  4. The |g:ycm_allow_changing_updatetime| option
-  5. The |g:ycm_complete_in_comments_and_strings| option
-  6. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  7. The |g:ycm_add_preview_to_completeopt| option
-  8. The |g:ycm_autoclose_preview_window_after_completion| option
-  9. The |g:ycm_max_diagnostics_to_display| option
-  10. The |g:ycm_key_list_select_completion| option
-  11. The |g:ycm_key_list_previous_completion| option
-  12. The |g:ycm_key_invoke_completion| option
-  13. The |g:ycm_key_detailed_diagnostics| option
-  14. The |g:ycm_global_ycm_extra_conf| option
-  15. The |g:ycm_confirm_extra_conf| option
-  16. The |g:ycm_extra_conf_globlist| option
-  17. The |g:ycm_semantic_triggers| option
+  2. The |g:ycm_filetype_whitelist| option
+  3. The |g:ycm_filetype_blacklist| option
+  4. The |g:ycm_filetype_specific_completion_to_disable| option
+  5. The |g:ycm_allow_changing_updatetime| option
+  6. The |g:ycm_complete_in_comments_and_strings| option
+  7. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  8. The |g:ycm_add_preview_to_completeopt| option
+  9. The |g:ycm_autoclose_preview_window_after_completion| option
+  10. The |g:ycm_max_diagnostics_to_display| option
+  11. The |g:ycm_key_list_select_completion| option
+  12. The |g:ycm_key_list_previous_completion| option
+  13. The |g:ycm_key_invoke_completion| option
+  14. The |g:ycm_key_detailed_diagnostics| option
+  15. The |g:ycm_global_ycm_extra_conf| option
+  16. The |g:ycm_confirm_extra_conf| option
+  17. The |g:ycm_extra_conf_globlist| option
+  18. The |g:ycm_semantic_triggers| option
  9. FAQ                                                      |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine
@@ -335,6 +336,11 @@ General Usage ~
  - If the offered completions are too broad, keep typing characters; YCM will
    continue refining the offered completions based on your input.
 
+ - Filtering is "smart-case" sensitive; if you are typing only lowercase
+   letters, then it's case-insensitive. If your input involves uppercase
+   letters, then it's case-sensitive. So "foo" matches "Foo" and "foo", but
+   "Foo" matches "Foo" but not "foo".
+
  - Use the TAB key to accept a completion and continue pressing TAB to cycle
    through the completions. Use Shift-TAB to cycle backwards. Note that if
    you're using console Vim (that is, not Gvim or MacVim) then it's likely
@@ -552,21 +558,49 @@ Default: '2'
     let g:ycm_min_num_of_chars_for_completion = 2
 
 -------------------------------------------------------------------------------
-The *g:ycm_filetypes_to_completely_ignore* option
+The *g:ycm_filetype_whitelist* option
+
+This option controls for which Vim filetypes (see ':h filetype') should YCM be
+turned on. The option value should be a Vim dictionary with keys being
+filetype strings (like 'python', 'cpp' etc) and values being unimportant (the
+dictionary is used like a hash set, meaning that only the keys matter).
+
+The '*' key is special and matches all filetypes. By default, the whitelist
+contains only this '*' key.
+
+YCM also has a |g:ycm_filetype_blacklist| option that lists filetypes for
+which YCM shouldn't be turned on. YCM will work only in filetypes that both
+the whitelist and the blacklist allow (the blacklist "allows" a filetype by
+not having it as a key).
+
+For example, let's assume you want YCM to work in files with the 'cpp'
+filetype. The filetype should then be present in the whitelist either directly
+('cpp' key in the whitelist) or indirectly through the special '*' key. It
+should not be present in the blacklist.
+
+Filetypes that are blocked by the either of the lists will be completely
+ignored by YCM, meaning that neither the identifier-based completion engine
+nor the semantic engine will operate in them.
+
+You can get the filetype of the current file in Vim with ':set ft?'.
+
+Default: '{'*' : 1}'
+>
+    let g:ycm_filetype_whitelist = { '*': 1 }
+
+-------------------------------------------------------------------------------
+The *g:ycm_filetype_blacklist* option
 
 This option controls for which Vim filetypes (see ':h filetype') should YCM be
 turned off. The option value should be a Vim dictionary with keys being
 filetype strings (like 'python', 'cpp' etc) and values being unimportant (the
-dictionary is used like a hash set, meaning that only the keys matter). The
-listed filetypes will be completely ignored by YCM, meaning that neither the
-identifier-based completion engine nor the semantic engine will operate in
-files of those filetypes.
+dictionary is used like a hash set, meaning that only the keys matter).
 
-You can get the filetype of the current file in Vim with ':set ft?'.
+See the |g:ycm_filetype_whitelist| option for more details on how this works.
 
-Default: '{notes: 1, markdown: 1, text: 1}'
+Default: '{'notes': 1, 'markdown': 1, 'text': 1}'
 >
-    let g:ycm_filetypes_to_completely_ignore = {
+    let g:ycm_filetype_blacklist = {
           \ 'notes' : 1,
           \ 'markdown' : 1,
           \ 'text' : 1,
@@ -585,8 +619,7 @@ still trigger in files of those filetypes.
 
 Note that even if semantic completion is not turned off for a specific
 filetype, you will not get semantic completion if the semantic engine does not
-support that filetype. Currently, the semantic engine only supports the 'c',
-'cpp', 'objc' and 'objcpp' filetypes.
+support that filetype.
 
 You can get the filetype of the current file in Vim with ':set ft?'.
 
