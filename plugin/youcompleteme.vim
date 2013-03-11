@@ -47,7 +47,7 @@ endfunction
 
 if !s:HasYcmCore()
   echohl WarningMsg |
-        \ echomsg "ycm_core.[so|dll] not detected; you need to compile YCM " .
+        \ echomsg "ycm_core.[so|pyd] not detected; you need to compile YCM " .
         \ "before using it. Read the docs!" |
         \ echohl None
   finish
