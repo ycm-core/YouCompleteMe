@@ -31,10 +31,10 @@ const char *COMMENT_AND_STRING_REGEX =
   "/\\*.*?\\*/"  // C-style comments, '/* ... */'
   "|"
   // Anything inside single quotes, '...', but mind the escaped quote
-  "'(?:\\\\'|.)*?'"
+  "'(?:\\\\\\\\|\\\\'|.)*?'"
   "|"
   // Anything inside double quotes, "...", but mind the escaped double quote
-  "\"(?:\\\\\"|.)*?\"";
+  "\"(?:\\\\\\\\|\\\\\"|.)*?\"";
 
 const char *IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
 
