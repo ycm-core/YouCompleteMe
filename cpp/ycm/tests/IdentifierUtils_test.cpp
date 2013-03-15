@@ -89,6 +89,14 @@ TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
                 "foo \n"
                 "bar \n"
                 "qux" );
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar \"foo\\\\\\\"ooo\"\n"
+                  "qux \"baz\\\\\\\\\""
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux " );
 }
 
 
