@@ -238,7 +238,9 @@ function! s:OnCursorMovedInsertMode()
   endif
 
   call s:IdentifierFinishedOperations()
-  call s:ClosePreviewWindowIfNeeded()
+  if g:ycm_autoclose_preview_window_after_completion
+    call s:ClosePreviewWindowIfNeeded()
+  endif
   call s:InvokeCompletion()
 endfunction
 
@@ -260,7 +262,10 @@ function! s:OnInsertLeave()
   let s:omnifunc_mode = 0
   call s:UpdateDiagnosticNotifications()
   py ycm_state.OnInsertLeave()
-  call s:ClosePreviewWindowIfNeeded()
+  if g:ycm_autoclose_preview_window_after_completion ||
+        \ g:ycm_autoclose_preview_window_after_insertion
+    call s:ClosePreviewWindowIfNeeded()
+  endif
 endfunction
 
 
@@ -306,10 +311,6 @@ endfunction
 
 
 function! s:ClosePreviewWindowIfNeeded()
-  if !g:ycm_autoclose_preview_window_after_completion
-    return
-  endif
-
   if s:searched_and_results_found
     " This command does the actual closing of the preview window. If no preview
     " window is shown, nothing happens.
