@@ -235,6 +235,10 @@ class Completer( object ):
     pass
 
 
+  def OnBufferDelete( self, deleted_buffer_file ):
+    pass
+
+
   def OnCursorHold( self ):
     pass
 

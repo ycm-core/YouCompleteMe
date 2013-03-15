@@ -139,6 +139,13 @@ class YouCompleteMe( object ):
       self.GetFiletypeCompleter().OnFileReadyToParse()
 
 
+  def OnBufferDelete( self, deleted_buffer_file ):
+    self.identcomp.OnBufferDelete( deleted_buffer_file )
+
+    if self.FiletypeCompletionUsable():
+      self.GetFiletypeCompleter().OnBufferDelete( deleted_buffer_file )
+
+
   def OnInsertLeave( self ):
     self.identcomp.OnInsertLeave()
 

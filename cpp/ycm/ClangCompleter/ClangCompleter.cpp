@@ -262,6 +262,16 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 }
 
 
+void ClangCompleter::DeleteCachesForFile( const std::string &filename ) {
+  // If the clang thread is currently parsing the file when the user deletes the
+  // buffer and thus we try to delete the caches, Vim's GUI thread would block
+  // until the clang thread releases the mutex. Move this operation to the clang
+  // thread.
+  lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
+  filename_to_translation_unit_.erase( filename );
+}
+
+
 bool ClangCompleter::ShouldSkipClangResultCache( const std::string &query,
                                                  int line,
                                                  int column ) {

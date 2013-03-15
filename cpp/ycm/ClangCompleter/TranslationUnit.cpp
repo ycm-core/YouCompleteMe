@@ -81,6 +81,8 @@ TranslationUnit::~TranslationUnit() {
 }
 
 void TranslationUnit::Destroy() {
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
   if ( clang_translation_unit_ ) {
     clang_disposeTranslationUnit( clang_translation_unit_ );
     clang_translation_unit_ = NULL;

@@ -61,6 +61,7 @@ function! youcompleteme#Enable()
     " that happens *after" BufRead/BufEnter has already triggered for the
     " initial file.
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
+    autocmd BufDelete * call s:OnBufferDelete( expand( '<afile>:p' ) )
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
@@ -180,6 +181,15 @@ function! s:OnBufferVisit()
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   call s:OnFileReadyToParse()
+endfunction
+
+
+function! s:OnBufferDelete( deleted_buffer_file )
+  if !s:AllowedToCompleteInCurrentFile() || empty( a:deleted_buffer_file )
+    return
+  endif
+
+  py ycm_state.OnBufferDelete( vim.eval( 'a:deleted_buffer_file' ) )
 endfunction
 
 

@@ -93,6 +93,8 @@ public:
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags );
 
+  void DeleteCachesForFile( const std::string &filename );
+
 private:
 
   // This is basically a union. Only one of the two tasks is set to something

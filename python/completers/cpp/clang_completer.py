@@ -147,6 +147,10 @@ class ClangCompleter( Completer ):
       flags )
 
 
+  def OnBufferDelete( self, deleted_buffer_file ):
+    self.completer.DeleteCachesForFile( deleted_buffer_file )
+
+
   def DiagnosticsForCurrentFileReady( self ):
     if not self.parse_future:
       return False
