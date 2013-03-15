@@ -821,6 +821,13 @@ Bottom line, if libclang can't pre-compile your file's preamble because there
 were errors in it, you're going to get slow completions because there's no AST
 cache.
 
+### Vim flickers every time I move the cursor or moving the cursor is slow
+
+You probably have an old version of Syntastic installed. If you are using
+Vundle, make sure that your bundle command is `Bundle 'scrooloose/syntastic'`
+and **not** `Bundle 'Syntastic'`. The first command pulls in the latest version of
+Syntastic from GitHub while the second one pulls in an old version from vim.org.
+
 ### YCM auto-inserts completion strings I don't want!
 
 This means you probably have some mappings that interfere with YCM's internal
