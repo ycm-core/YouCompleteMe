@@ -91,6 +91,9 @@ let g:ycm_collect_identifiers_from_comments_and_strings =
 let g:ycm_autoclose_preview_window_after_completion =
       \ get( g:, 'ycm_autoclose_preview_window_after_completion', 0 )
 
+let g:ycm_autoclose_preview_window_after_insertion =
+      \ get( g:, 'ycm_autoclose_preview_window_after_insertion', 0 )
+
 let g:ycm_max_diagnostics_to_display =
       \ get( g:, 'ycm_max_diagnostics_to_display', 30 )
 

@@ -617,6 +617,18 @@ Default: `0`
 
     let g:ycm_autoclose_preview_window_after_completion = 0
 
+### The `g:ycm_autoclose_preview_window_after_insertion` option
+
+When this option is set to `1`, YCM will auto-close the `preview` window after
+the user leaves insert mode. This option is irrelevant if
+`g:ycm_autoclose_preview_window_after_completion` is set or if no `preview`
+window is triggered. See the `g:ycm_add_preview_to_completeopt` option for more
+details.
+
+Default: `0`
+
+    let g:ycm_autoclose_preview_window_after_insertion = 0
+
 ### The `g:ycm_max_diagnostics_to_display` option
 
 This option controls the maximum number of diagnostics shown to the user when
@@ -787,7 +799,8 @@ types to write the function call.
 
 If you would like this window to auto-close after you select a completion
 string, set the `g:ycm_autoclose_preview_window_after_completion` option to `1`
-in your `vimrc` file.
+in your `vimrc` file. Similarly, the `g:ycm_autoclose_preview_window_after_insertion`
+option can be set to close the `preview` window after leaving insert mode.
 
 If you don't want this window to ever show up, add `set completeopt-=preview` to
 your `vimrc`. Also make sure that the `g:ycm_add_preview_to_completeopt` option
