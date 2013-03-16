@@ -115,7 +115,8 @@ BOOST_PYTHON_MODULE(ycm_core)
   class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
     .def( "EnableThreading", &ClangCompleter::EnableThreading )
     .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
-    .def( "DeleteCachesForFile", &ClangCompleter::DeleteCachesForFile )
+    .def( "DeleteCachesForFileAsync",
+          &ClangCompleter::DeleteCachesForFileAsync )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
     .def( "UpdateTranslationUnitAsync",
           &ClangCompleter::UpdateTranslationUnitAsync )

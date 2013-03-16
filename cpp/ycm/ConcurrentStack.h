@@ -37,6 +37,7 @@ public:
     condition_variable_.notify_one();
   }
 
+
   T Pop() {
     boost::unique_lock< boost::mutex > lock( mutex_ );
 
@@ -47,6 +48,33 @@ public:
     T top = stack_.top();
     stack_.pop();
     return top;
+  }
+
+
+  // Gets all the items from the stack and appends them to the input vector.
+  // Does not wait for the stack to get items; if the stack is empty, returns
+  // false and does not touch the input vector.
+  bool PopAllNoWait( std::vector< T > &items ) {
+    boost::unique_lock< boost::mutex > lock( mutex_ );
+
+    if ( stack_.empty() )
+      return false;
+
+    int num_items = stack_.size();
+    items.reserve( num_items + items.size() );
+
+    for ( int i = 0; i < num_items; ++i ) {
+      items.push_back( stack_.top() );
+      stack_.pop();
+    }
+
+    return true;
+  }
+
+
+  bool Empty() {
+    boost::unique_lock< boost::mutex > lock( mutex_ );
+    return stack_.empty();
   }
 
 private:

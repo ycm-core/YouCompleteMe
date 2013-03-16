@@ -148,7 +148,7 @@ class ClangCompleter( Completer ):
 
 
   def OnBufferDelete( self, deleted_buffer_file ):
-    self.completer.DeleteCachesForFile( deleted_buffer_file )
+    self.completer.DeleteCachesForFileAsync( deleted_buffer_file )
 
 
   def DiagnosticsForCurrentFileReady( self ):
