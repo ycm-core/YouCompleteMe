@@ -117,11 +117,12 @@ function! s:SetUpKeyMappings()
   if !empty( g:ycm_key_invoke_completion )
     " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
     " candidate that vim selects by default
-    exe 'inoremap <unique> ' . g:ycm_key_invoke_completion . ' <C-X><C-O><C-P>'
+    silent! exe 'inoremap <unique> ' . g:ycm_key_invoke_completion .
+          \ ' <C-X><C-O><C-P>'
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
-    exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+    silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<cr>'
   endif
 endfunction
