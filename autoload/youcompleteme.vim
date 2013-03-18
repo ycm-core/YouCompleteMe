@@ -581,7 +581,11 @@ command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
 
 
 function! s:ShowDiagnostics()
-  call s:ForceCompile()
+  let compilation_succeeded = s:ForceCompile()
+  if !compilation_succeeded
+    return
+  endif
+
   let diags = pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
   if !empty( diags )
     call setloclist( 0, diags )
