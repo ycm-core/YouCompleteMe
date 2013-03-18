@@ -557,7 +557,7 @@ function! s:ForceCompile()
           \ 'ycm_state.GettingCompletions()' )
 
     if !getting_completions
-      echom "Unable to retrieve diagnostics, see output of `:mes` for details."
+      echom "Unable to retrieve diagnostics, see output of `:mes` for possible details."
       return 0
     endif
 
