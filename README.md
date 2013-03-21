@@ -334,9 +334,11 @@ sequence of operations to produce a list of compilation flags YCM should hand
 to Clang.
 
 [See YCM's own `.ycm_extra_conf.py`][flags_example] for details on how this
-works. You should be able to use it as a starting point. Hint: just replace the
-strings in the `flags` variable with compilation flags necessary for your
-project. That should be enough for 99% of projects.
+works. You should be able to use it _as a starting point_. **Don't** just
+copy/paste that file somewhere and expect things to magically work; **your project
+needs different flags**. Hint: just replace the strings in the `flags` variable
+with compilation flags necessary for your project. That should be enough for 99%
+of projects.
 
 Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again, see the
 above linked example file.
