@@ -877,6 +877,11 @@ fixes that should make YCM work with such a configuration. Also rebuild Macvim
 then. If you still get problems with this, see [issue #18][issue18] for
 suggestions.
 
+### Vim segfaults when I use the semantic completer in Ruby files
+
+This was caused by a Vim bug. Update your version of Vim (Vim 7.3.874 is known
+to work, earlier versions may also fix this issue).
+
 ### I get `LONG_BIT definition appears wrong for platform` when compiling
 
 Look at the output of your CMake call. There should be a line in it like the
