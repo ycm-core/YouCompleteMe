@@ -322,6 +322,15 @@ endfunction
 
 
 function! s:ClosePreviewWindowIfNeeded()
+  let current_buffer_name = bufname('')
+
+  " We don't want to try to close the preview window in special buffers like
+  " "[Command Line]"; if we do, Vim goes bonkers. Special buffers always start
+  " with '['.
+  if current_buffer_name[ 0 ] == '['
+    return
+  endif
+
   if s:searched_and_results_found
     " This command does the actual closing of the preview window. If no preview
     " window is shown, nothing happens.
