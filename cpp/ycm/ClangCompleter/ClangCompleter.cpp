@@ -269,12 +269,13 @@ void ClangCompleter::DeleteCachesForFileAsync( const std::string &filename ) {
 
 void ClangCompleter::DeleteCaches() {
   std::vector< std::string > filenames;
+
   if ( !file_cache_delete_stack_.PopAllNoWait( filenames ) )
     return;
 
   lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
 
-  foreach( const std::string &filename, filenames ) {
+  foreach( const std::string & filename, filenames ) {
     filename_to_translation_unit_.erase( filename );
   }
 }
@@ -415,7 +416,7 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   std::vector< const Candidate * > repository_candidates =
     candidate_repository_.GetCandidatesForStrings( completion_datas );
 
-  std::vector< ResultAnd< CompletionData* > > data_and_results;
+  std::vector< ResultAnd< CompletionData * > > data_and_results;
 
   for ( uint i = 0; i < repository_candidates.size(); ++i ) {
     const Candidate *candidate = repository_candidates[ i ];
@@ -427,8 +428,8 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
                                                  query_has_uppercase_letters );
 
     if ( result.IsSubsequence() ) {
-      ResultAnd< CompletionData* > data_and_result( &completion_datas[ i ],
-                                                    result );
+      ResultAnd< CompletionData * > data_and_result( &completion_datas[ i ],
+                                                     result );
       data_and_results.push_back( boost::move( data_and_result ) );
     }
   }
@@ -438,7 +439,7 @@ std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
   std::vector< CompletionData > sorted_completion_datas;
   sorted_completion_datas.reserve( data_and_results.size() );
 
-  foreach ( const ResultAnd< CompletionData* > & data_and_result,
+  foreach ( const ResultAnd< CompletionData * > &data_and_result,
             data_and_results ) {
     sorted_completion_datas.push_back( *data_and_result.extra_object_ );
   }

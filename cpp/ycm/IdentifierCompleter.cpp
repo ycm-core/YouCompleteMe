@@ -250,7 +250,7 @@ void IdentifierCompleter::ResultsForQueryAndType(
         continue;
 
       Result result = candidate->QueryMatchResult(
-          query, query_has_uppercase_letters );
+                        query, query_has_uppercase_letters );
 
       if ( result.IsSubsequence() )
         results.push_back( result );

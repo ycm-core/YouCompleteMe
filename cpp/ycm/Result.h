@@ -100,15 +100,15 @@ struct ResultAnd {
 };
 
 template< class T >
-struct ResultAnd<T* > {
-  ResultAnd( const T* extra_object, const Result &result )
+struct ResultAnd<T * > {
+  ResultAnd( const T *extra_object, const Result &result )
     : extra_object_( extra_object ), result_( result ) {}
 
   bool operator< ( const ResultAnd &other ) const {
     return result_ < other.result_;
   }
 
-  const T* extra_object_;
+  const T *extra_object_;
   Result result_;
 };
 

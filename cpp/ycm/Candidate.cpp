@@ -43,9 +43,9 @@ std::string GetWordBoundaryChars( const std::string &text ) {
   return result;
 }
 
-LetterNode* FirstUppercaseNode( const std::list< LetterNode *> &list ) {
+LetterNode *FirstUppercaseNode( const std::list< LetterNode *> &list ) {
   LetterNode *node = NULL;
-  foreach( LetterNode *current_node, list ) {
+  foreach( LetterNode * current_node, list ) {
     if ( current_node->LetterIsUppercase() ) {
       node = current_node;
       break;
@@ -54,9 +54,9 @@ LetterNode* FirstUppercaseNode( const std::list< LetterNode *> &list ) {
   return node;
 }
 
-LetterNode* FirstLowercaseNode( const std::list< LetterNode *> &list ) {
+LetterNode *FirstLowercaseNode( const std::list< LetterNode *> &list ) {
   LetterNode *node = NULL;
-  foreach( LetterNode *current_node, list ) {
+  foreach( LetterNode * current_node, list ) {
     if ( !current_node->LetterIsUppercase() ) {
       node = current_node;
       break;
