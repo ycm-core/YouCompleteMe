@@ -354,6 +354,45 @@ getting fast completions.
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file. Even better, use Syntastic.
 
+### Semantic completion for other languages
+
+YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
+completions if it does not have a native semantic completion engine for your
+file's filetype. Vim comes with okayish omnifuncs for various languages like
+Python, Ruby, PHP etc. It depends on the language.
+
+You can get stellar omnifuncs for Java, Ruby and Python with [Eclim][]. Just
+make sure you have the _latest_ Eclim installed and configured and don't forget to
+have `let g:EclimCompletionMethod = 'omnifunc'` in your vimrc. This will make
+YCM and Eclim play nice; YCM will use Eclim's omnifuncs as the data source for
+semantic completions and provide the auto-triggering and subsequence-based
+matching (and other YCM features) on top of it.
+
+### Writing New Semantic Completers
+
+You have two options here: writing an `omnifunc` for Vim's omnicomplete system
+that YCM will then use through its omni-completer, or a custom completer for YCM
+using the [Completer API][completer-api].
+
+Here are the differences between the two approaches:
+
+- You have to use VimScript to write the omnifunc, but get to use Python to
+  write for the Completer API; this by itself should make you want to use the
+  API.
+- The Completer API is a _much_ more powerful way to integrate with YCM and it
+  provides a wider set of features. For instance, you can make your Completer
+  query your semantic back-end in an asynchronous fashion, thus not blocking
+  Vim's GUI thread while your completion system is processing stuff. This is
+  impossible with VimScript. All of YCM's completers use the Completer API.
+- Performance with the Completer API is better since Python executes faster than
+  VimScript.
+
+If you want to use the `omnifunc` system, see the relevant Vim docs with `:h
+complete-functions`. For the Completer API, see [the API docs][completer-api].
+
+If you want to upstream your completer into YCM's source, you should use the
+Completer API.
+
 ### Syntastic integration
 
 YCM has explicit support for [Syntastic][] (and vice-versa) if you compiled YCM
@@ -395,31 +434,6 @@ current file in Vim's `locationlist`, which can be opened with the `:lopen` and
 a single key mapping is provided by another (very small) Vim plugin called
 [ListToggle][] (which also makes it possible to change the height of the
 `locationlist` window), also written by yours truly.
-
-### Writing New Semantic Completers
-
-You have two options here: writing an `omnifunc` for Vim's omnicomplete system
-that YCM will then use through its omni-completer, or a custom completer for YCM
-using the [Completer API][completer-api].
-
-Here are the differences between the two approaches:
-
-- You have to use VimScript to write the omnifunc, but get to use Python to
-  write for the Completer API; this by itself should make you want to use the
-  API.
-- The Completer API is a _much_ more powerful way to integrate with YCM and it
-  provides a wider set of features. For instance, you can make your Completer
-  query your semantic back-end in an asynchronous fashion, thus not blocking
-  Vim's GUI thread while your completion system is processing stuff. This is
-  impossible with VimScript. All of YCM's completers use the Completer API.
-- Performance with the Completer API is better since Python executes faster than
-  VimScript.
-
-If you want to use the `omnifunc` system, see the relevant Vim docs with `:h
-complete-functions`. For the Completer API, see [the API docs][completer-api].
-
-If you want to upstream your completer into YCM's source, you should use the
-Completer API.
 
 Commands
 --------
@@ -1012,3 +1026,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [delimitMate]: https://github.com/Raimondi/delimitMate
 [completer-api]: https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
 [win-wiki]: https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide
+[eclim]: http://eclim.org/
