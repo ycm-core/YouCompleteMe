@@ -952,6 +952,12 @@ CompileCommands API) were added after their cut.
 So just go through the installation guide and make sure you are using a correct
 `libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
 
+### `CTRL-U` in insert mode does not work
+
+YCM keeps you in a `completefunc` completion mode when you're typing in insert
+mode and Vim disables `<C-U>` in completion mode as a "feature." Sadly there's
+nothing I can do about this.
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
