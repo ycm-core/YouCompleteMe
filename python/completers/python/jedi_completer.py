@@ -57,6 +57,7 @@ class JediCompleter( Completer ):
 
   def _start_completion_thread( self ):
     self._completion_thread = Thread( target=self.SetCandidates )
+    self._completion_thread.daemon = True
     self._completion_thread.start()
 
 
