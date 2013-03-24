@@ -1,0 +1,3 @@
+[submodule "python/completers/python/jedi"]
+	path = python/completers/python/jedi
+	url = https://github.com/davidhalter/jedi.git
