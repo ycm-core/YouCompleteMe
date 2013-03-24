@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+#
 # Copyright (C) 2011, 2012  Stephen Sugden <me@stephensugden.com>
+#                           Strahinja Val Markovic <val@markovic.io>
 #
 # This file is part of YouCompleteMe.
 #
@@ -54,16 +57,9 @@ class JediCompleter(Completer):
         """ Just python """
         return ['python']
 
-    def ShouldUseNowInner(self, start_column):
-        """
-        Use Jedi if we are completing an identifier immediately after a dot.
-        """
-        line = str(vim.current.line)
-        result = line[start_column - 1] == '.'
-        return result
-
     def CandidatesForQueryAsyncInner(self, query):
         self._query = query
+        self._candidates = None
         self._candidates_ready.clear()
         self._query_ready.set()
 
@@ -72,7 +68,7 @@ class JediCompleter(Completer):
             return WaitAndClear(self._candidates_ready, timeout=0.005)
         else:
             self._start_completion_thread()
-            return True
+            return False
 
     def CandidatesFromStoredRequestInner(self):
         return self._candidates or []
@@ -94,7 +90,6 @@ class JediCompleter(Completer):
                 column = len(before) + 1
 
             source = "\n".join(lines)
-
             script = Script(source, line + 1, column, filename)
 
             self._candidates = [{'word': str(completion.word),
@@ -103,12 +98,6 @@ class JediCompleter(Completer):
                                 for completion in script.complete()]
 
             self._candidates_ready.set()
-
-    def OnInsertLeave(self):
-        """ Tell the worker thread to exit """
-        self._exit = True
-        self._query_ready.set()
-        self._candidates = None
 
 
 def WaitAndClear(event, timeout=None):
