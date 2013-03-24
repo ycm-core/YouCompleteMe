@@ -30,7 +30,12 @@ from os.path import join, abspath, dirname
 # up after ourselves, because ycm.YouCompletMe.GetFiletypeCompleterForFiletype
 # removes sys.path[0] after importing completers.python.hook
 sys.path.insert(0, join(abspath(dirname(__file__)), 'jedi'))
-from jedi import Script
+try:
+  from jedi import Script
+except ImportError, e:
+  vimsupport.PostVimMessage(
+    'Error importing jedi. Make sure the jedi submodule has been checked out. '
+    'In the YouCompleteMe folder, run "git submodule update --init --recursive"')
 sys.path.pop(0)
 
 
