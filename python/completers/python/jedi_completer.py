@@ -29,24 +29,24 @@ from os.path import join, abspath, dirname
 # We need to add the jedi package to sys.path, but it's important that we clean
 # up after ourselves, because ycm.YouCompletMe.GetFiletypeCompleterForFiletype
 # removes sys.path[0] after importing completers.python.hook
-sys.path.insert(0, join(abspath(dirname(__file__)), 'jedi'))
+sys.path.insert( 0, join( abspath( dirname( __file__ ) ), 'jedi' ) )
 try:
   from jedi import Script
 except ImportError, e:
   vimsupport.PostVimMessage(
     'Error importing jedi. Make sure the jedi submodule has been checked out. '
     'In the YouCompleteMe folder, run "git submodule update --init --recursive"')
-sys.path.pop(0)
+sys.path.pop( 0 )
 
 
-class JediCompleter(Completer):
+class JediCompleter( Completer ):
   """
   A Completer that uses the Jedi completion engine.
   https://jedi.readthedocs.org/en/latest/
   """
 
-  def __init__(self):
-    super(JediCompleter, self).__init__()
+  def __init__( self ):
+    super( JediCompleter, self ).__init__()
     self._query_ready = Event()
     self._candidates_ready = Event()
     self._query = None
@@ -55,38 +55,38 @@ class JediCompleter(Completer):
     self._start_completion_thread()
 
 
-  def _start_completion_thread(self):
-    self._completion_thread = Thread(target=self.SetCandidates)
+  def _start_completion_thread( self ):
+    self._completion_thread = Thread( target=self.SetCandidates )
     self._completion_thread.start()
 
 
-  def SupportedFiletypes(self):
+  def SupportedFiletypes( self ):
     """ Just python """
-    return ['python']
+    return [ 'python' ]
 
 
-  def CandidatesForQueryAsyncInner(self, query):
+  def CandidatesForQueryAsyncInner( self, query ):
     self._query = query
     self._candidates = None
     self._candidates_ready.clear()
     self._query_ready.set()
 
 
-  def AsyncCandidateRequestReadyInner(self):
+  def AsyncCandidateRequestReadyInner( self ):
     if self._completion_thread.is_alive():
-      return WaitAndClear(self._candidates_ready, timeout=0.005)
+      return WaitAndClear( self._candidates_ready, timeout=0.005 )
     else:
       self._start_completion_thread()
       return False
 
 
-  def CandidatesFromStoredRequestInner(self):
+  def CandidatesFromStoredRequestInner( self ):
     return self._candidates or []
 
 
-  def SetCandidates(self):
+  def SetCandidates( self ):
     while True:
-      WaitAndClear(self._query_ready)
+      WaitAndClear( self._query_ready )
 
       if self._exit:
         return
@@ -94,25 +94,25 @@ class JediCompleter(Completer):
       filename = vim.current.buffer.name
       query = self._query
       line, column = CurrentLineAndColumn()
-      lines = map(str, vim.current.buffer)
-      if query is not None and lines[line]:
-        before, after = lines[line].rsplit('.', 1)
-        lines[line] = before + '.'
-        column = len(before) + 1
+      lines = map( str, vim.current.buffer )
+      if query is not None and lines[ line ]:
+        before, after = lines[ line ].rsplit( '.', 1 )
+        lines[ line ] = before + '.'
+        column = len( before ) + 1
 
-      source = "\n".join(lines)
-      script = Script(source, line + 1, column, filename)
+      source = '\n'.join( lines )
+      script = Script( source, line + 1, column, filename )
 
-      self._candidates = [{'word': str(completion.word),
-                            'menu': str(completion.description),
-                            'info': str(completion.doc)}
-                          for completion in script.complete()]
+      self._candidates = [ { 'word': str( completion.word ),
+                             'menu': str( completion.description ),
+                             'info': str( completion.doc ) }
+                          for completion in script.complete() ]
 
       self._candidates_ready.set()
 
 
-def WaitAndClear(event, timeout=None):
-    ret = event.wait(timeout)
+def WaitAndClear( event, timeout=None ):
+    ret = event.wait( timeout )
     if ret:
         event.clear()
     return ret
