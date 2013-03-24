@@ -35,69 +35,75 @@ sys.path.pop(0)
 
 
 class JediCompleter(Completer):
-    """
-    A Completer that uses the Jedi completion engine.
-    https://jedi.readthedocs.org/en/latest/
-    """
+  """
+  A Completer that uses the Jedi completion engine.
+  https://jedi.readthedocs.org/en/latest/
+  """
 
-    def __init__(self):
-        super(JediCompleter, self).__init__()
-        self._query_ready = Event()
-        self._candidates_ready = Event()
-        self._query = None
-        self._candidates = None
-        self._exit = False
-        self._start_completion_thread()
+  def __init__(self):
+    super(JediCompleter, self).__init__()
+    self._query_ready = Event()
+    self._candidates_ready = Event()
+    self._query = None
+    self._candidates = None
+    self._exit = False
+    self._start_completion_thread()
 
-    def _start_completion_thread(self):
-        self._completion_thread = Thread(target=self.SetCandidates)
-        self._completion_thread.start()
 
-    def SupportedFiletypes(self):
-        """ Just python """
-        return ['python']
+  def _start_completion_thread(self):
+    self._completion_thread = Thread(target=self.SetCandidates)
+    self._completion_thread.start()
 
-    def CandidatesForQueryAsyncInner(self, query):
-        self._query = query
-        self._candidates = None
-        self._candidates_ready.clear()
-        self._query_ready.set()
 
-    def AsyncCandidateRequestReadyInner(self):
-        if self._completion_thread.is_alive():
-            return WaitAndClear(self._candidates_ready, timeout=0.005)
-        else:
-            self._start_completion_thread()
-            return False
+  def SupportedFiletypes(self):
+    """ Just python """
+    return ['python']
 
-    def CandidatesFromStoredRequestInner(self):
-        return self._candidates or []
 
-    def SetCandidates(self):
-        while True:
-            WaitAndClear(self._query_ready)
+  def CandidatesForQueryAsyncInner(self, query):
+    self._query = query
+    self._candidates = None
+    self._candidates_ready.clear()
+    self._query_ready.set()
 
-            if self._exit:
-                return
 
-            filename = vim.current.buffer.name
-            query = self._query
-            line, column = CurrentLineAndColumn()
-            lines = map(str, vim.current.buffer)
-            if query is not None and lines[line]:
-                before, after = lines[line].rsplit('.', 1)
-                lines[line] = before + '.'
-                column = len(before) + 1
+  def AsyncCandidateRequestReadyInner(self):
+    if self._completion_thread.is_alive():
+      return WaitAndClear(self._candidates_ready, timeout=0.005)
+    else:
+      self._start_completion_thread()
+      return False
 
-            source = "\n".join(lines)
-            script = Script(source, line + 1, column, filename)
 
-            self._candidates = [{'word': str(completion.word),
-                                 'menu': str(completion.description),
-                                 'info': str(completion.doc)}
-                                for completion in script.complete()]
+  def CandidatesFromStoredRequestInner(self):
+    return self._candidates or []
 
-            self._candidates_ready.set()
+
+  def SetCandidates(self):
+    while True:
+      WaitAndClear(self._query_ready)
+
+      if self._exit:
+        return
+
+      filename = vim.current.buffer.name
+      query = self._query
+      line, column = CurrentLineAndColumn()
+      lines = map(str, vim.current.buffer)
+      if query is not None and lines[line]:
+        before, after = lines[line].rsplit('.', 1)
+        lines[line] = before + '.'
+        column = len(before) + 1
+
+      source = "\n".join(lines)
+      script = Script(source, line + 1, column, filename)
+
+      self._candidates = [{'word': str(completion.word),
+                            'menu': str(completion.description),
+                            'info': str(completion.doc)}
+                          for completion in script.complete()]
+
+      self._candidates_ready.set()
 
 
 def WaitAndClear(event, timeout=None):
