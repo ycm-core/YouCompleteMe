@@ -32,7 +32,7 @@ from os.path import join, abspath, dirname
 sys.path.insert( 0, join( abspath( dirname( __file__ ) ), 'jedi' ) )
 try:
   from jedi import Script
-except ImportError, e:
+except ImportError:
   vimsupport.PostVimMessage(
     'Error importing jedi. Make sure the jedi submodule has been checked out. '
     'In the YouCompleteMe folder, run "git submodule update --init --recursive"')

@@ -26,7 +26,7 @@ import ycm_utils as utils
 
 try:
   import ycm_core
-except ImportError, e:
+except ImportError as e:
   vimsupport.PostVimMessage(
     'Error importing ycm_core. Are you sure you have placed a version 3.2+ '
     'libclang.[so|dll|dylib] in folder "{0}"? See the Installation Guide in '
