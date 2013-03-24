@@ -5,9 +5,10 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 [Vim][]. It has several completion engines: an identifier-based engine that
 works with every programming language, a semantic, [Clang][]-based engine that
 provides native semantic code completion for C/C++/Objective-C/Objective-C++
-(from now on referred to as "the C-family languages") and an omnifunc-based
-completer that uses data from Vim's omnicomplete system to provide semantic
-completions for many other languages (Python, Ruby, PHP etc.).
+(from now on referred to as "the C-family languages"), a [Jedi][]-based completion
+engine for Python and an omnifunc-based completer that uses data from Vim's
+omnicomplete system to provide semantic completions for many other languages
+(Ruby, PHP etc.).
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
@@ -354,19 +355,26 @@ getting fast completions.
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file. Even better, use Syntastic.
 
+### Python semantic completion
+
+YCM uses [Jedi][] to power its semantic completion for Python. This should "just
+work" without any configuration from the user.
+
+In the future expect to see features like go-to-definition for Python as well.
+
 ### Semantic completion for other languages
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
 file's filetype. Vim comes with okayish omnifuncs for various languages like
-Python, Ruby, PHP etc. It depends on the language.
+Ruby, PHP etc. It depends on the language.
 
-You can get stellar omnifuncs for Java, Ruby and Python with [Eclim][]. Just
-make sure you have the _latest_ Eclim installed and configured and don't forget to
-have `let g:EclimCompletionMethod = 'omnifunc'` in your vimrc. This will make
-YCM and Eclim play nice; YCM will use Eclim's omnifuncs as the data source for
-semantic completions and provide the auto-triggering and subsequence-based
-matching (and other YCM features) on top of it.
+You can get stellar omnifuncs for Java and Ruby with [Eclim][]. Just make sure
+you have the _latest_ Eclim installed and configured and don't forget to have
+`let g:EclimCompletionMethod = 'omnifunc'` in your vimrc. This will make YCM and
+Eclim play nice; YCM will use Eclim's omnifuncs as the data source for semantic
+completions and provide the auto-triggering and subsequence-based matching (and
+other YCM features) on top of it.
 
 ### Writing New Semantic Completers
 
@@ -1033,3 +1041,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [completer-api]: https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
 [win-wiki]: https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide
 [eclim]: http://eclim.org/
+[jedi]: https://github.com/davidhalter/jedi
