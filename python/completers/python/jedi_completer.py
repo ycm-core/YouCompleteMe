@@ -84,20 +84,23 @@ class JediCompleter( Completer ):
 
   def SetCandidates( self ):
     while True:
-      WaitAndClear( self._query_ready )
+      try:
+        WaitAndClear( self._query_ready )
 
-      filename = vim.current.buffer.name
-      line, column = vimsupport.CurrentLineAndColumn()
-      # Jedi expects lines to start at 1, not 0
-      line += 1
-      contents = '\n'.join( vim.current.buffer )
-      script = Script( contents, line, column, filename )
+        filename = vim.current.buffer.name
+        line, column = vimsupport.CurrentLineAndColumn()
+        # Jedi expects lines to start at 1, not 0
+        line += 1
+        contents = '\n'.join( vim.current.buffer )
+        script = Script( contents, line, column, filename )
 
-      self._candidates = [ { 'word': str( completion.word ),
-                             'menu': str( completion.description ),
-                             'info': str( completion.doc ) }
-                          for completion in script.complete() ]
-
+        self._candidates = [ { 'word': str( completion.word ),
+                               'menu': str( completion.description ),
+                               'info': str( completion.doc ) }
+                            for completion in script.complete() ]
+      except:
+        self._query_ready.clear()
+        self._candidates = []
       self._candidates_ready.set()
 
 
