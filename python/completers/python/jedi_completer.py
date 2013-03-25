@@ -21,7 +21,7 @@
 import vim
 from threading import Thread, Event
 from completers.completer import Completer
-from vimsupport import CurrentLineAndColumn
+import vimsupport
 
 import sys
 from os.path import join, abspath, dirname
@@ -49,9 +49,7 @@ class JediCompleter( Completer ):
     super( JediCompleter, self ).__init__()
     self._query_ready = Event()
     self._candidates_ready = Event()
-    self._query = None
     self._candidates = None
-    self._exit = False
     self._start_completion_thread()
 
 
@@ -66,8 +64,7 @@ class JediCompleter( Completer ):
     return [ 'python' ]
 
 
-  def CandidatesForQueryAsyncInner( self, query ):
-    self._query = query
+  def CandidatesForQueryAsyncInner( self, unused_query ):
     self._candidates = None
     self._candidates_ready.clear()
     self._query_ready.set()
@@ -89,20 +86,12 @@ class JediCompleter( Completer ):
     while True:
       WaitAndClear( self._query_ready )
 
-      if self._exit:
-        return
-
       filename = vim.current.buffer.name
-      query = self._query
-      line, column = CurrentLineAndColumn()
-      lines = map( str, vim.current.buffer )
-      if query is not None and lines[ line ]:
-        before, after = lines[ line ].rsplit( '.', 1 )
-        lines[ line ] = before + '.'
-        column = len( before ) + 1
-
-      source = '\n'.join( lines )
-      script = Script( source, line + 1, column, filename )
+      line, column = vimsupport.CurrentLineAndColumn()
+      # Jedi expects lines to start at 1, not 0
+      line += 1
+      contents = '\n'.join( vim.current.buffer )
+      script = Script( contents, line, column, filename )
 
       self._candidates = [ { 'word': str( completion.word ),
                              'menu': str( completion.description ),
@@ -113,7 +102,7 @@ class JediCompleter( Completer ):
 
 
 def WaitAndClear( event, timeout=None ):
-    ret = event.wait( timeout )
-    if ret:
+    flag_is_set = event.wait( timeout )
+    if flag_is_set:
         event.clear()
-    return ret
+    return flag_is_set
