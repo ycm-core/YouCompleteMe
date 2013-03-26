@@ -575,6 +575,22 @@ Default: `{}`
 
     let g:ycm_filetype_specific_completion_to_disable = {}
 
+### The `g:ycm_register_as_syntastic_checker` option
+
+When set, this option makes YCM register itself as the Syntastic checker for the
+`c`, `cpp`, `objc` and `objcpp` filetypes. This enables the YCM-Syntastic
+integration.
+
+If you're using YCM's identifier completer in C-family languages but cannot use
+the clang-based semantic completer for those languages _and_ want to use the GCC
+Syntastic checkers, unset this option.
+
+Don't unset this option unless you're sure you know what you're doing.
+
+Default: `1`
+
+    let g:ycm_register_as_syntastic_checker = 1
+
 ### The `g:ycm_allow_changing_updatetime` option
 
 When this option is set to `1`, YCM will change the `updatetime` Vim option to
