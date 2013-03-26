@@ -251,6 +251,8 @@ function! s:OnCursorMovedInsertMode()
     return
   endif
 
+  py ycm_state.GetFiletypeCompleter().OnCursorMovedInsertMode()
+
   call s:IdentifierFinishedOperations()
   if g:ycm_autoclose_preview_window_after_completion
     call s:ClosePreviewWindowIfNeeded()
