@@ -358,7 +358,14 @@ your file. Even better, use Syntastic.
 ### Python semantic completion
 
 YCM uses [Jedi][] to power its semantic completion for Python. This should "just
-work" without any configuration from the user.
+work" without any configuration from the user. You do NOT need to install Jedi
+yourself; YCM uses it as a git subrepo. If you're installing YCM with Vundle
+(which is the recommended way) then Vundle will make sure that the subrepo is
+checked out when you do `:BundleInstall`. If you're installing YCM by hand, then
+you need to run `git submodule update --init --recursive` when you're checking
+out the YCM repository. That's it.
+
+But again, installing YCM with Vundle takes care of all of this for you.
 
 In the future expect to see features like go-to-definition for Python as well.
 
