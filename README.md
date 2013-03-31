@@ -60,6 +60,18 @@ features plus extra:
 - Supertab
 - neocomplcache
 
+Table of Contents:
+- [Mac OS X super-quick installation](#mac-os-x-super-quick-installation)
+- [Ubuntu Linux x64 super-quick installation](#ubuntu-linux-x64-super-quick-installation)
+- [Windows Installation](#windows-installation)
+- [Full Installation Guide](#full-installation-guide)
+- [User Guide](#user-guide)
+- [Commands](#commands)
+- [Options](#options)
+- [FAQ](#faq)
+- [Contact](#contact)
+- [License](#license)
+
 Mac OS X super-quick installation
 ---------------------------------
 
