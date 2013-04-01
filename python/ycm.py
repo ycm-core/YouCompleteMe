@@ -34,8 +34,8 @@ except ImportError as e:
       os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
 
 
-from completers.all.identifier_completer import IdentifierCompleter
 from completers.all.omni_completer import OmniCompleter
+from completers.general.general_completer import GeneralCompleterStore
 
 
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
@@ -44,13 +44,13 @@ FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
 
 class YouCompleteMe( object ):
   def __init__( self ):
-    self.identcomp = IdentifierCompleter()
+    self.gencomp = GeneralCompleterStore()
     self.omnicomp = OmniCompleter()
     self.filetype_completers = {}
 
 
-  def GetIdentifierCompleter( self ):
-    return self.identcomp
+  def GetGeneralCompleter( self ):
+    return self.gencomp
 
 
   def GetOmniCompleter( self ):
@@ -102,8 +102,8 @@ class YouCompleteMe( object ):
     return completer
 
 
-  def ShouldUseIdentifierCompleter( self, start_column ):
-    return self.identcomp.ShouldUseNow( start_column )
+  def ShouldUseGeneralCompleter( self, start_column ):
+    return self.gencomp.ShouldUseNow( start_column )
 
 
   def ShouldUseFiletypeCompleter( self, start_column ):
@@ -133,21 +133,21 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
-    self.identcomp.OnFileReadyToParse()
+    self.gencomp.OnFileReadyToParse()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnFileReadyToParse()
 
 
   def OnBufferDelete( self, deleted_buffer_file ):
-    self.identcomp.OnBufferDelete( deleted_buffer_file )
+    self.gencomp.OnBufferDelete( deleted_buffer_file )
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnBufferDelete( deleted_buffer_file )
 
 
   def OnInsertLeave( self ):
-    self.identcomp.OnInsertLeave()
+    self.gencomp.OnInsertLeave()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnInsertLeave()
@@ -177,7 +177,7 @@ class YouCompleteMe( object ):
 
 
   def OnCurrentIdentifierFinished( self ):
-    self.identcomp.OnCurrentIdentifierFinished()
+    self.gencomp.OnCurrentIdentifierFinished()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnCurrentIdentifierFinished()
@@ -185,7 +185,7 @@ class YouCompleteMe( object ):
 
   def DebugInfo( self ):
     completers = set( self.filetype_completers.values() )
-    completers.add( self.identcomp )
+    completers.add( self.gencomp )
     output = []
     for completer in completers:
       if not completer:
