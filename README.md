@@ -505,13 +505,13 @@ YcmCompleter subcommands
 [See the docs for the `YcmCompleter` command before tackling this section.]
 
 The invoked subcommand is automatically routed to the currently active semantic
-completer, so `:YcmCommand GoToDefinition` will invoke the `GoToDefinition`
+completer, so `:YcmCompleter GoToDefinition` will invoke the `GoToDefinition`
 subcommand on the Python semantic completer if the currently active file is a
 Python one and on the Clang completer if the currently active file is a
 C/C++/Objective-C one.
 
 You may also want to map the subcommands to something less verbose; for
-instance, `nnoremap <leader>jd :YcmCommand GoToDefinitionElseDeclaration<CR>`
+instance, `nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>`
 maps the `<leader>jd` sequence to the longer subcommand invocation.
 
 The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
