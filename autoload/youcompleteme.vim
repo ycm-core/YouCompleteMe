@@ -49,7 +49,11 @@ function! youcompleteme#Enable()
     return
   endif
 
-  py ycm_state = ycm.YouCompleteMe()
+  if exists('g:ycm_general_completers')
+    call extend(g:ycm_general_completers_list, g:ycm_general_completers, 0)
+  endif
+
+  py ycm_state = ycm.YouCompleteMe( vim.eval('g:ycm_general_completers_list') )
 
   augroup youcompleteme
     autocmd!
@@ -413,7 +417,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer )
   if a:use_filetype_completer
     py completer = ycm_state.GetFiletypeCompleter()
   else
-    py completer = ycm_state.GetIdentifierCompleter()
+    py completer = ycm_state.GetGeneralCompleter()
   endif
 
   " TODO: don't trigger on a dot inside a string constant
@@ -462,7 +466,7 @@ function! youcompleteme#Complete( findstart, base )
           \ s:completion_start_column . ')' )
 
     if !s:should_use_filetype_completion &&
-          \ !pyeval( 'ycm_state.ShouldUseIdentifierCompleter(' .
+          \ !pyeval( 'ycm_state.ShouldUseGeneralCompleter(' .
           \ s:completion_start_column . ')' )
       " for vim, -2 means not found but don't trigger an error message
       " see :h complete-functions
@@ -525,7 +529,7 @@ function! s:CompleterCommand(...)
     if a:1 == 'ft=ycm:omni'
       py completer = ycm_state.GetOmniCompleter()
     elseif a:1 == 'ft=ycm:ident'
-      py completer = ycm_state.GetIdentifierCompleter()
+      py completer = ycm_state.GetGeneralCompleter()
     else
       py completer = ycm_state.GetFiletypeCompleterForFiletype(
                    \ vim.eval('a:1').lstrip('ft=') )

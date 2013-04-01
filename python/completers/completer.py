@@ -21,6 +21,7 @@ import abc
 import vim
 import vimsupport
 import ycm_core
+import ycm
 from collections import defaultdict
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
@@ -208,8 +209,7 @@ class Completer( object ):
       self.completions_cache = CompletionsCache()
       self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
       self.completions_cache.line, _ = vimsupport.CurrentLineAndColumn()
-      self.completions_cache.column = int(
-        vim.eval( "s:completion_start_column" ) )
+      self.completions_cache.column = int( ycm.CompletionStartColumn() )
       return self.completions_cache.raw_completions
 
 
@@ -300,7 +300,7 @@ class CompletionsCache( object ):
 
   def CacheValid( self ):
     completion_line, _ = vimsupport.CurrentLineAndColumn()
-    completion_column = int( vim.eval( "s:completion_start_column" ) )
+    completion_column = int( ycm.CompletionStartColumn() )
     return completion_line == self.line and completion_column == self.column
 
 

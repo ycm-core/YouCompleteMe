@@ -130,6 +130,8 @@ let g:ycm_semantic_triggers =
       \   'erlang' : [':'],
       \ } )
 
+let g:ycm_general_completers_list = ['identifier_completer']
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart
