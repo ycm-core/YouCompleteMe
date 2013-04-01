@@ -60,6 +60,10 @@ features plus extra:
 - Supertab
 - neocomplcache
 
+YCM also provides semantic go-to-definition/declaration commands for C-family
+languages. Expect more IDE features powered by the various YCM semantic engines
+in the future.
+
 Mac OS X super-quick installation
 ---------------------------------
 
