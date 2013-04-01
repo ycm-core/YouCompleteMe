@@ -37,13 +37,13 @@ class GeneralCompleter( Completer ):
     self.threads = []
     self.StartThreads()
 
-  def _start_completion_thread( self, completer):
+  def _start_completion_thread( self, completer ):
     thread = Thread( target=self.SetCandidates, args=(completer,) )
     thread.daemon = True
     thread.start()
     self.threads.append( thread )
 
-  def InitCompleters(self, completers):
+  def InitCompleters( self, completers ):
     # This method creates objects of main completers class.
     complList = []
     for compl in completers:
@@ -55,8 +55,8 @@ class GeneralCompleter( Completer ):
 
       for _, ClassObject in inspect.getmembers( module, inspect.isclass ):
         # Iterate over all classes in a module and select main class
-        if hasattr(ClassObject,'CandidatesForQueryAsyncInner'):
-            classInstance = ClassObject
+        if hasattr( ClassObject,'CandidatesForQueryAsyncInner' ):
+          classInstance = ClassObject
 
       # Init selected class and store class object
       complList.append( classInstance() )
@@ -73,8 +73,8 @@ class GeneralCompleter( Completer ):
     # True.
     flag = False
     for compl in self.complList:
-        if compl.ShouldUseNow(start_column):
-            flag = True
+      if compl.ShouldUseNow( start_column ):
+        flag = True
     return flag
 
   def CandidatesForQueryAsyncInner( self, query ):
@@ -91,12 +91,12 @@ class GeneralCompleter( Completer ):
   def OnFileReadyToParse( self ):
     # Process all parsing methods of completers. Needed by identifier completer
     for completer in self.complList:
-        completer.OnFileReadyToParse()
+      completer.OnFileReadyToParse()
 
 
   def CandidatesForQueryAsync( self, query ):
-    # We need to override this because we are using Deque as a completions
-    # container and sorting need a List.
+    # We need to override this method because we are using collections.Deque
+    # as a completions container while sorting need a List.
     # TODO actually this can be done in a CandidatesFromStoredRequestInner
     # method but for some reason it will only show identifier completer results
     # and ignore all other completers.
@@ -114,32 +114,32 @@ class GeneralCompleter( Completer ):
     return self._candidates
 
 
-  def SetCandidates(self, completer):
+  def SetCandidates( self, completer ):
     while True:
-        WaitAndClear( self._query_ready )
+      WaitAndClear( self._query_ready )
 
-        completer.CandidatesForQueryAsync(self.query)
+      completer.CandidatesForQueryAsync( self.query )
 
-        while not completer.AsyncCandidateRequestReady():
-          continue
+      while not completer.AsyncCandidateRequestReady():
+        continue
 
-        # We are using collections.deque as a container because it allows
-        # easy and efficient prepending to a list. We need this because we
-        # want identifier completions at the end of the list because if it will
-        # be on top sort method will remove all possible duplicates of matches
-        # and there can be similar mathes in other completers
-        self._candidates.extendleft(completer.CandidatesFromStoredRequest())
+      # We are using collections.deque as a container because it allows
+      # easy and efficient prepending to a list. We need this because we
+      # want identifier completions at the end of the list because if it will
+      # be on top sort method will remove all possible duplicates of matches
+      # and there can be similar mathes in other completers
+      self._candidates.extendleft( completer.CandidatesFromStoredRequest() )
 
-        self.flag = True
+      self.flag = True
 
 
   def StartThreads( self ):
     for compl in self.complList:
-      self._start_completion_thread(compl)
+      self._start_completion_thread( compl )
 
 
 def WaitAndClear( event, timeout=None ):
     flag_is_set = event.wait( timeout )
     if flag_is_set:
-        event.clear()
+      event.clear()
     return flag_is_set
