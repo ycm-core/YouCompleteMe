@@ -52,7 +52,7 @@ def GetUnsavedBuffers():
 # Both |line| and |column| need to be 1-based
 def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
-  vim.command( "normal m'" )
+  vim.command( "normal! m'" )
 
   if filename != vim.current.buffer.name:
     # We prefix the command with 'keepjumps' so that opening the file is not
