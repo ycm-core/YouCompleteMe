@@ -40,6 +40,7 @@ namespace YouCompleteMe {
 class CandidateRepository;
 class TranslationUnit;
 struct CompletionData;
+struct Location;
 
 typedef std::vector< CompletionData > CompletionDatas;
 
@@ -88,6 +89,20 @@ public:
 
   Future< AsyncCompletions > CandidatesForQueryAndLocationInFileAsync(
     const std::string &query,
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
+
+  Location GetDeclarationLocation(
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
+
+  Location GetDefinitionLocation(
     const std::string &filename,
     int line,
     int column,

@@ -21,6 +21,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <clang-c/Index.h>
+
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
@@ -29,7 +31,21 @@ using ::testing::WhenSorted;
 
 namespace YouCompleteMe {
 
-TEST( TranslationUnitTest, ExceptionThrownOnParseFailure ) {
+class TranslationUnitTest : public ::testing::Test {
+protected:
+  virtual void SetUp() {
+    clang_index_ = clang_createIndex( 0, 0 );
+  }
+
+  virtual void TearDown() {
+    clang_disposeIndex( clang_index_ );
+  }
+
+  CXIndex clang_index_;
+};
+
+
+TEST_F( TranslationUnitTest, ExceptionThrownOnParseFailure ) {
   fs::path test_file = fs::temp_directory_path() / fs::unique_path();
   std::string junk = "#&9112(^(^#>@(^@!@(&#@a}}}}{nthoeu\n&&^^&^&!#%%@@!aeu";
   WriteUtf8File( test_file, junk );
@@ -44,5 +60,59 @@ TEST( TranslationUnitTest, ExceptionThrownOnParseFailure ) {
                 ClangParseError );
 }
 
+TEST_F( TranslationUnitTest, GoToDefinitionWorks ) {
+  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
+  fs::path test_file = path_to_testdata / fs::path( "goto.cpp" );
+
+  TranslationUnit unit( test_file.string(),
+                        std::vector< UnsavedFile >(),
+                        std::vector< std::string >(),
+                        clang_index_ );
+
+  Location location = unit.GetDefinitionLocation(
+      15,
+      3,
+      std::vector< UnsavedFile >() );
+
+  EXPECT_EQ( 1, location.line_number_ );
+  EXPECT_EQ( 8, location.column_number_ );
+  EXPECT_TRUE( !location.filename_.empty() );
+}
+
+TEST_F( TranslationUnitTest, GoToDefinitionFails ) {
+  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
+  fs::path test_file = path_to_testdata / fs::path( "goto.cpp" );
+
+  TranslationUnit unit( test_file.string(),
+                        std::vector< UnsavedFile >(),
+                        std::vector< std::string >(),
+                        clang_index_ );
+
+  Location location = unit.GetDefinitionLocation(
+      17,
+      3,
+      std::vector< UnsavedFile >() );
+
+  EXPECT_FALSE( location.IsValid() );
+}
+
+TEST_F( TranslationUnitTest, GoToDeclarationWorks ) {
+  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
+  fs::path test_file = path_to_testdata / fs::path( "goto.cpp" );
+
+  TranslationUnit unit( test_file.string(),
+                        std::vector< UnsavedFile >(),
+                        std::vector< std::string >(),
+                        clang_index_ );
+
+  Location location = unit.GetDeclarationLocation(
+      17,
+      3,
+      std::vector< UnsavedFile >() );
+
+  EXPECT_EQ( 12, location.line_number_ );
+  EXPECT_EQ( 8, location.column_number_ );
+  EXPECT_TRUE( !location.filename_.empty() );
+}
 
 } // namespace YouCompleteMe

@@ -188,12 +188,29 @@ Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap ) {
                              &diagnostic.column_number_,
                              &unused_offset );
 
-  diagnostic.filename_ = CXStringToString( clang_getFileName( file ) );
+  diagnostic.filename_ = CXFileToFilepath( file );
   diagnostic.text_ = CXStringToString(
                        clang_getDiagnosticSpelling( diagnostic_wrap.get() ) );
   diagnostic.long_formatted_text_ = FullDiagnosticText( diagnostic_wrap.get() );
 
   return diagnostic;
+}
+
+bool CursorIsValid( CXCursor cursor ) {
+  return !clang_Cursor_isNull( cursor ) &&
+         !clang_isInvalid( clang_getCursorKind( cursor ) );
+}
+
+bool CursorIsReference( CXCursor cursor ) {
+  return clang_isReference( clang_getCursorKind( cursor ) );
+}
+
+bool CursorIsDeclaration( CXCursor cursor ) {
+  return clang_isDeclaration( clang_getCursorKind( cursor ) );
+}
+
+std::string CXFileToFilepath( CXFile file ) {
+  return CXStringToString( clang_getFileName( file ) );
 }
 
 std::string ClangVersion() {

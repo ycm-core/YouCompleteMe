@@ -42,6 +42,14 @@ std::vector< CXUnsavedFile > ToCXUnsavedFiles(
 
 Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap );
 
+bool CursorIsValid( CXCursor cursor );
+
+bool CursorIsReference( CXCursor cursor );
+
+bool CursorIsDeclaration( CXCursor cursor );
+
+std::string CXFileToFilepath( CXFile file );
+
 std::string ClangVersion();
 
 } // namespace YouCompleteMe

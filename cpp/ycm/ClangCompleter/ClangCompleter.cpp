@@ -262,6 +262,34 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 }
 
 
+Location ClangCompleter::GetDeclarationLocation(
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags ) {
+  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
+                                         filename,
+                                         unsaved_files,
+                                         flags );
+  return unit->GetDeclarationLocation( line, column, unsaved_files );
+}
+
+
+Location ClangCompleter::GetDefinitionLocation(
+    const std::string &filename,
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags ) {
+  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
+                                         filename,
+                                         unsaved_files,
+                                         flags );
+  return unit->GetDefinitionLocation( line, column, unsaved_files );
+}
+
+
 void ClangCompleter::DeleteCachesForFileAsync( const std::string &filename ) {
   file_cache_delete_stack_.Push( filename );
 }
