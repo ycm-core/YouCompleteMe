@@ -21,7 +21,6 @@
 #include "exceptions.h"
 #include "ClangUtils.h"
 
-#include <clang-c/Index.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
@@ -133,6 +132,17 @@ void TranslationUnit::Reparse(
 }
 
 
+void TranslationUnit::ReparseForIndexing(
+  const std::vector< UnsavedFile > &unsaved_files ) {
+  std::vector< CXUnsavedFile > cxunsaved_files =
+      ToCXUnsavedFiles( unsaved_files );
+
+  Reparse( cxunsaved_files,
+           CXTranslationUnit_PrecompiledPreamble |
+           CXTranslationUnit_SkipFunctionBodies );
+}
+
+
 std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   int line,
   int column,
@@ -170,22 +180,74 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   return candidates;
 }
 
+Location TranslationUnit::GetDeclarationLocation(
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files ) {
+  ReparseForIndexing( unsaved_files );
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
+  if ( !clang_translation_unit_ )
+    return Location();
+
+  CXCursor cursor = GetCursor( line, column );
+  if ( !CursorIsValid( cursor ) )
+    return Location();
+
+  CXCursor referenced_cursor = clang_getCursorReferenced( cursor );
+  if ( !CursorIsValid( referenced_cursor ) )
+    return Location();
+
+  return LocationFromSourceLocation(
+      clang_getCursorLocation( referenced_cursor ) );
+}
+
+Location TranslationUnit::GetDefinitionLocation(
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files ) {
+  ReparseForIndexing( unsaved_files );
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
+  if ( !clang_translation_unit_ )
+    return Location();
+
+  CXCursor cursor = GetCursor( line, column );
+  if ( !CursorIsValid( cursor ) )
+    return Location();
+
+  CXCursor definition_cursor = clang_getCursorDefinition( cursor );
+  if ( !CursorIsValid( definition_cursor ) )
+    return Location();
+
+  return LocationFromSourceLocation(
+      clang_getCursorLocation( definition_cursor ) );
+}
+
 
 // Argument taken as non-const ref because we need to be able to pass a
 // non-const pointer to clang. This function (and clang too) will not modify the
 // param though.
 void TranslationUnit::Reparse(
   std::vector< CXUnsavedFile > &unsaved_files ) {
+  Reparse( unsaved_files, clang_defaultEditingTranslationUnitOptions() );
+}
+
+
+// Argument taken as non-const ref because we need to be able to pass a
+// non-const pointer to clang. This function (and clang too) will not modify the
+// param though.
+void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
+                               uint parse_options ) {
   unique_lock< mutex > lock( clang_access_mutex_ );
 
   if ( !clang_translation_unit_ )
     return;
 
-  int failure = clang_reparseTranslationUnit(
-                  clang_translation_unit_,
-                  unsaved_files.size(),
-                  &unsaved_files[ 0 ],
-                  clang_defaultEditingTranslationUnitOptions() );
+  int failure = clang_reparseTranslationUnit( clang_translation_unit_,
+                                              unsaved_files.size(),
+                                              &unsaved_files[ 0 ],
+                                              parse_options );
 
   if ( failure ) {
     Destroy();
@@ -213,6 +275,35 @@ void TranslationUnit::UpdateLatestDiagnostics() {
     if ( diagnostic.kind_ != 'I' )
       latest_diagnostics_.push_back( diagnostic );
   }
+}
+
+CXCursor TranslationUnit::GetCursor( int line, int column ) {
+  // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_!
+  if ( !clang_translation_unit_ )
+    return clang_getNullCursor();
+
+  CXFile file = clang_getFile( clang_translation_unit_, filename_.c_str() );
+  CXSourceLocation source_location = clang_getLocation(
+      clang_translation_unit_,
+      file,
+      line,
+      column );
+
+  return clang_getCursor( clang_translation_unit_, source_location );
+}
+
+Location TranslationUnit::LocationFromSourceLocation(
+    CXSourceLocation source_location ) {
+  // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_!
+  if ( !clang_translation_unit_ )
+    return Location();
+
+  CXFile file;
+  uint line;
+  uint column;
+  uint offset;
+  clang_getExpansionLocation( source_location, &file, &line, &column, &offset );
+  return Location( CXFileToFilepath( file ), line, column );
 }
 
 } // namespace YouCompleteMe

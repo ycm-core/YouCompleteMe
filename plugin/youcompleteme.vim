@@ -76,6 +76,9 @@ let g:ycm_filetype_blacklist =
 let g:ycm_filetype_specific_completion_to_disable =
       \ get( g:, 'ycm_filetype_specific_completion_to_disable', {} )
 
+let g:ycm_register_as_syntastic_checker =
+      \ get( g:, 'ycm_register_as_syntastic_checker', 1 )
+
 let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )
 

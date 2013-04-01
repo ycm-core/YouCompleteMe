@@ -60,6 +60,10 @@ features plus extra:
 - Supertab
 - neocomplcache
 
+YCM also provides semantic go-to-definition/declaration commands for C-family
+languages. Expect more IDE features powered by the various YCM semantic engines
+in the future.
+
 Mac OS X super-quick installation
 ---------------------------------
 
@@ -87,7 +91,7 @@ Command Line Tools (that you install from within Xcode).
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
 
-_If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the FAQ
+_If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
 for details.
 
 Compiling YCM **with** semantic support for C-family languages:
@@ -100,10 +104,10 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.sh
 
-That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
-forget that if you want the C-family semantic completion engine to work, you
-will need to provide the compilation flags for your project to YCM. It's all in
-the User Guide.
+That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
+Don't forget that if you want the C-family semantic completion engine to work,
+you will need to provide the compilation flags for your project to YCM. It's all
+in the User Guide.
 
 YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
@@ -139,10 +143,10 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.sh
 
-That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
-forget that if you want the C-family semantic completion engine to work, you
-will need to provide the compilation flags for your project to YCM. It's all in
-the User Guide.
+That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
+Don't forget that if you want the C-family semantic completion engine to work,
+you will need to provide the compilation flags for your project to YCM. It's all
+in the User Guide.
 
 YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
@@ -164,7 +168,7 @@ code is platform agnostic, so if everything is configured correctly, YCM
 _should_ work on Windows without issues (but as of writing, it's untested on
 that platform).
 
-See the FAQ if you have any issues.
+See the _FAQ_ if you have any issues.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library API has changed (happens rarely), YCM will
@@ -270,10 +274,10 @@ notify you to recompile it. You should then rerun the install process.
     version 3.2 into the `YouCompleteMe/python` folder then YCM _will not work_
     if you selected C-family support during YCM compilation.
 
-That's it. You're done. Refer to the User Guide section on how to use YCM. Don't
-forget that if you want the C-family semantic completion engine to work, you
-will need to provide the compilation flags for your project to YCM. It's all in
-the User Guide.
+That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
+Don't forget that if you want the C-family semantic completion engine to work,
+you will need to provide the compilation flags for your project to YCM. It's all
+in the User Guide.
 
 YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
@@ -294,7 +298,7 @@ User Guide
   through the completions. Use Shift-TAB to cycle backwards. Note that if you're
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
   Shift-TAB binding will not work because the console will not pass it to Vim.
-  You can remap the keys; see the options section below.
+  You can remap the keys; see the _Options_ section below.
 
 ### Completion string ranking
 
@@ -328,7 +332,7 @@ compile the current file. You can also provide a path to a global
 `.ycm_extra_conf.py` file, which will be used as a fallback. To prevent the
 execution of malicious code from a file you didn't write YCM will ask you once
 per `.ycm_extra_conf.py` if it is safe to load. This can be disabled and you can
-white-/blacklist files. See the Options section for more details.
+white-/blacklist files. See the _Options_ section for more details.
 
 This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
@@ -358,7 +362,14 @@ your file. Even better, use Syntastic.
 ### Python semantic completion
 
 YCM uses [Jedi][] to power its semantic completion for Python. This should "just
-work" without any configuration from the user.
+work" without any configuration from the user. You do NOT need to install Jedi
+yourself; YCM uses it as a git subrepo. If you're installing YCM with Vundle
+(which is the recommended way) then Vundle will make sure that the subrepo is
+checked out when you do `:BundleInstall`. If you're installing YCM by hand, then
+you need to run `git submodule update --init --recursive` when you're checking
+out the YCM repository. That's it.
+
+But again, installing YCM with Vundle takes care of all of this for you.
 
 In the future expect to see features like go-to-definition for Python as well.
 
@@ -485,6 +496,50 @@ used.
 Call `YcmCompleter` without further arguments for information about the
 commands you can call for the selected completer.
 
+See the _YcmCompleter subcommands_ section for more information on the available
+subcommands.
+
+YcmCompleter subcommands
+------------------------
+
+[See the docs for the `YcmCompleter` command before tackling this section.]
+
+The invoked subcommand is automatically routed to the currently active semantic
+completer, so `:YcmCommand GoToDefinition` will invoke the `GoToDefinition`
+subcommand on the Python semantic completer if the currently active file is a
+Python one and on the Clang completer if the currently active file is a
+C/C++/Objective-C one.
+
+You may also want to map the subcommands to something less verbose; for
+instance, `nnoremap <leader>jd :YcmCommand GoToDefinitionElseDeclaration<CR>`
+maps the `<leader>jd` sequence to the longer subcommand invocation.
+
+### The `GoToDeclaration` subcommand
+
+Looks up the symbol under the cursor and jumps to its declaration.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
+### The `GoToDefinition` subcommand
+
+Looks up the symbol under the cursor and jumps to its definition.
+
+NOTE: For C-family languages **this only works in certain situations**, namely when
+the definition of the symbol is in the current translation unit. A translation
+unit consists of the file you are editing and all the files you are including
+with `#include` directives (directly or indirectly) in that file.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
+### The `GoToDefinitionElseDeclaration` subcommand
+
+Looks up the symbol under the cursor and jumps to its definition if possible; if
+the definition is not accessible from the current translation unit, jumps to the
+symbol's declaration.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
+
 Options
 -------
 
@@ -574,6 +629,22 @@ You can get the filetype of the current file in Vim with `:set ft?`.
 Default: `{}`
 
     let g:ycm_filetype_specific_completion_to_disable = {}
+
+### The `g:ycm_register_as_syntastic_checker` option
+
+When set, this option makes YCM register itself as the Syntastic checker for the
+`c`, `cpp`, `objc` and `objcpp` filetypes. This enables the YCM-Syntastic
+integration.
+
+If you're using YCM's identifier completer in C-family languages but cannot use
+the clang-based semantic completer for those languages _and_ want to use the GCC
+Syntastic checkers, unset this option.
+
+Don't unset this option unless you're sure you know what you're doing.
+
+Default: `1`
+
+    let g:ycm_register_as_syntastic_checker = 1
 
 ### The `g:ycm_allow_changing_updatetime` option
 
@@ -881,7 +952,7 @@ This means that YCM tried to set up a key mapping but failed because you already
 had something mapped to that key combination. The `<blah>` part of the message
 will tell you what was the key combination that failed.
 
-Look in the options section and see if which of the default mappings conflict
+Look in the _Options_ section and see if which of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 

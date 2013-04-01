@@ -49,6 +49,25 @@ def GetUnsavedBuffers():
   return ( x for x in vim.buffers if BufferModified( x.number ) )
 
 
+# Both |line| and |column| need to be 1-based
+def JumpToLocation( filename, line, column ):
+  # Add an entry to the jumplist
+  vim.command( "normal! m'" )
+
+  if filename != vim.current.buffer.name:
+    # We prefix the command with 'keepjumps' so that opening the file is not
+    # recorded in the jumplist. So when we open the file and move the cursor to
+    # a location in it, the user can use CTRL-O to jump back to the original
+    # location, not to the start of the newly opened file.
+    # Sadly this fails on random occasions and the undesired jump remains in the
+    # jumplist.
+    vim.command( 'keepjumps edit {0}'.format( filename ) )
+  vim.current.window.cursor = ( line, column - 1 )
+
+  # Center the screen on the jumped-to location
+  vim.command( 'normal! zz' )
+
+
 def NumLinesInBuffer( buffer ):
   # This is actually less than obvious, that's why it's wrapped in a function
   return len( buffer )

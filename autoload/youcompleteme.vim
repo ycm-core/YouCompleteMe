@@ -73,7 +73,10 @@ function! youcompleteme#Enable()
 
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
-  call s:ForceSyntasticCFamilyChecker()
+
+  if g:ycm_register_as_syntastic_checker
+    call s:ForceSyntasticCFamilyChecker()
+  endif
 
   if g:ycm_allow_changing_updatetime
     set ut=2000
