@@ -38,7 +38,7 @@ class GeneralCompleter( Completer ):
     self.StartThreads()
 
   def _start_completion_thread( self, completer ):
-    thread = Thread( target=self.SetCandidates, args=(completer,) )
+    thread = Thread( target=self.SetCandidates, args=(completer.completer, completer.event) )
     thread.daemon = True
     thread.start()
     self.threads.append( thread )
@@ -59,7 +59,7 @@ class GeneralCompleter( Completer ):
           classInstance = ClassObject
 
       # Init selected class and store class object
-      complList.append( classInstance() )
+      complList.append( CompleterInstance( classInstance() ) )
     return complList
 
   def SupportedFiletypes( self ):
@@ -70,11 +70,17 @@ class GeneralCompleter( Completer ):
 
   def ShouldUseNowInner( self, start_column ):
     # Query all completers and set flag to True if any of completers returns
-    # True.
+    # True. Also update flags in completers classes and make a list with a flags
+    # This list is needed to know whether update cache or not
     flag = False
-    for compl in self.complList:
-      if compl.ShouldUseNow( start_column ):
+    self.flags = []
+    for completer in self.complList:
+      ShouldUse = completer.completer.ShouldUseNow( start_column )
+      completer.ShouldUse = ShouldUse
+      self.flags.append( ShouldUse )
+      if ShouldUse:
         flag = True
+
     return flag
 
   def CandidatesForQueryAsyncInner( self, query ):
@@ -82,6 +88,16 @@ class GeneralCompleter( Completer ):
     self.query = query
     self._candidates = collections.deque()
     self._query_ready.set()
+
+    # Store a flags list copy. We need this to know when we should
+    # run this method again because another returned True from ShouldUseNow
+    # method
+    self.flags_backup = list( self.flags )
+
+    # if completer should be used start thread by setting Event flag
+    for completer in self.complList:
+      if completer.ShouldUse and not completer.event.is_set():
+        completer.event.set()
 
 
   def AsyncCandidateRequestReadyInner( self ):
@@ -91,7 +107,7 @@ class GeneralCompleter( Completer ):
   def OnFileReadyToParse( self ):
     # Process all parsing methods of completers. Needed by identifier completer
     for completer in self.complList:
-      completer.OnFileReadyToParse()
+      completer.completer.OnFileReadyToParse()
 
 
   def CandidatesForQueryAsync( self, query ):
@@ -100,7 +116,11 @@ class GeneralCompleter( Completer ):
     # TODO actually this can be done in a CandidatesFromStoredRequestInner
     # method but for some reason it will only show identifier completer results
     # and ignore all other completers.
-    if query and self.completions_cache and self.completions_cache.CacheValid():
+    # Also we need to compare ShouldUseNow with a previous version to know
+    # when we need to update cache because another completer returned True
+    if (query and self.completions_cache and self.completions_cache.CacheValid()
+        and self.flags == self.flags_backup):
+
       self.completions_cache.filtered_completions = (
         self.FilterAndSortCandidates(
           list(self.completions_cache.raw_completions),
@@ -114,9 +134,12 @@ class GeneralCompleter( Completer ):
     return self._candidates
 
 
-  def SetCandidates( self, completer ):
+  def SetCandidates( self, completer, event ):
     while True:
       WaitAndClear( self._query_ready )
+
+      # sleep until ShouldUseNow returns True
+      WaitAndClear( event )
 
       completer.CandidatesForQueryAsync( self.query )
 
@@ -125,17 +148,24 @@ class GeneralCompleter( Completer ):
 
       # We are using collections.deque as a container because it allows
       # easy and efficient prepending to a list. We need this because we
-      # want identifier completions at the end of the list because if it will
-      # be on top sort method will remove all possible duplicates of matches
-      # and there can be similar mathes in other completers
+      # want identifier completions at the end of the list because if there are
+      # multiple matches with the same name sort method will keep only match
+      # that is closer to the beginning of the list and remove other matches.
       self._candidates.extendleft( completer.CandidatesFromStoredRequest() )
 
       self.flag = True
 
 
   def StartThreads( self ):
-    for compl in self.complList:
-      self._start_completion_thread( compl )
+    for completer in self.complList:
+      self._start_completion_thread( completer )
+
+
+class CompleterInstance(object):
+  def __init__( self, completer):
+    self.completer = completer
+    self.event = Event()
+    self.ShouldUse = False
 
 
 def WaitAndClear( event, timeout=None ):
