@@ -514,6 +514,10 @@ You may also want to map the subcommands to something less verbose; for
 instance, `nnoremap <leader>jd :YcmCommand GoToDefinitionElseDeclaration<CR>`
 maps the `<leader>jd` sequence to the longer subcommand invocation.
 
+The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
+`CTRL-O` to jump back to where you where before invoking the command (and
+`CTRL-I` to jump forward; see `:h jumplist` for details).
+
 ### The `GoToDeclaration` subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
