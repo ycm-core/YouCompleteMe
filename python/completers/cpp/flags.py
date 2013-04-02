@@ -54,7 +54,7 @@ class Flags( object ):
     order and return the filename of the first module that was allowed to load.
     If no module was found or allowed to load, None is returned."""
 
-    if not self.module_for_file.has_key( filename ):
+    if not filename in self.module_for_file:
       for flags_module_file in _FlagsModuleSourceFilesForFile( filename ):
         if self.modules.Load( flags_module_file ):
           self.module_for_file[ filename ] = flags_module_file
@@ -92,7 +92,7 @@ class Flags( object ):
 
     module_file = os.path.abspath(module_file)
     if self.modules.Reload( module_file ):
-      for filename, module in self.module_for_file.iteritems():
+      for filename, module in self.module_for_file.items():
         if module == module_file:
           del self.flags_for_file[ filename ]
       return True
@@ -135,7 +135,7 @@ class FlagsModules( object ):
     This will return None if the module was not allowed to be loaded."""
 
     if not force:
-      if self.modules.has_key( module_file ):
+      if module_file in self.modules:
         return self.modules[ module_file ]
 
       if not self.ShouldLoad( module_file ):
@@ -184,7 +184,7 @@ def _PathsToAllParentFolders( filename ):
   if not parent_folders[0]:
     parent_folders[0] = os.path.sep
   parent_folders = [ os.path.join( *parent_folders[:i + 1] )
-                     for i in xrange( len( parent_folders ) ) ]
+                     for i in range( len( parent_folders ) ) ]
   return reversed( parent_folders )
 
 

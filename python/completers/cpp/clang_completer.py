@@ -22,7 +22,7 @@ from collections import defaultdict
 import vim
 import vimsupport
 import ycm_core
-from flags import Flags
+from completers.cpp.flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MAX_DIAGNOSTICS_TO_DISPLAY = int( vimsupport.GetVariableValue(
