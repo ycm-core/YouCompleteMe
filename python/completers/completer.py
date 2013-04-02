@@ -308,7 +308,7 @@ def TriggersForFiletype():
   triggers = vim.eval( 'g:ycm_semantic_triggers' )
   triggers_for_filetype = defaultdict( list )
 
-  for key, value in triggers.iteritems():
+  for key, value in triggers.items():
     filetypes = key.split( ',' )
     for filetype in filetypes:
       triggers_for_filetype[ filetype ].extend( value )
