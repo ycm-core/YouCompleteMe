@@ -70,9 +70,9 @@ TEST_F( TranslationUnitTest, GoToDefinitionWorks ) {
                         clang_index_ );
 
   Location location = unit.GetDefinitionLocation(
-      15,
-      3,
-      std::vector< UnsavedFile >() );
+                        15,
+                        3,
+                        std::vector< UnsavedFile >() );
 
   EXPECT_EQ( 1, location.line_number_ );
   EXPECT_EQ( 8, location.column_number_ );
@@ -89,9 +89,9 @@ TEST_F( TranslationUnitTest, GoToDefinitionFails ) {
                         clang_index_ );
 
   Location location = unit.GetDefinitionLocation(
-      17,
-      3,
-      std::vector< UnsavedFile >() );
+                        17,
+                        3,
+                        std::vector< UnsavedFile >() );
 
   EXPECT_FALSE( location.IsValid() );
 }
@@ -106,9 +106,9 @@ TEST_F( TranslationUnitTest, GoToDeclarationWorks ) {
                         clang_index_ );
 
   Location location = unit.GetDeclarationLocation(
-      17,
-      3,
-      std::vector< UnsavedFile >() );
+                        17,
+                        3,
+                        std::vector< UnsavedFile >() );
 
   EXPECT_EQ( 12, location.line_number_ );
   EXPECT_EQ( 8, location.column_number_ );

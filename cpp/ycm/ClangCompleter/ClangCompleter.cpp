@@ -263,11 +263,11 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 
 
 Location ClangCompleter::GetDeclarationLocation(
-    const std::string &filename,
-    int line,
-    int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags ) {
+  const std::string &filename,
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
                                          filename,
                                          unsaved_files,
@@ -277,11 +277,11 @@ Location ClangCompleter::GetDeclarationLocation(
 
 
 Location ClangCompleter::GetDefinitionLocation(
-    const std::string &filename,
-    int line,
-    int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags ) {
+  const std::string &filename,
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
                                          filename,
                                          unsaved_files,
