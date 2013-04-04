@@ -272,6 +272,9 @@ Location ClangCompleter::GetDeclarationLocation(
                                          filename,
                                          unsaved_files,
                                          flags );
+  if (!unit) {
+    return Location();
+  }
   return unit->GetDeclarationLocation( line, column, unsaved_files );
 }
 
@@ -286,6 +289,9 @@ Location ClangCompleter::GetDefinitionLocation(
                                          filename,
                                          unsaved_files,
                                          flags );
+  if (!unit) {
+    return Location();
+  }
   return unit->GetDefinitionLocation( line, column, unsaved_files );
 }
 
