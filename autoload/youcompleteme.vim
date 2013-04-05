@@ -67,6 +67,7 @@ function! youcompleteme#Enable()
     autocmd InsertEnter * call s:OnInsertEnter()
   augroup END
 
+  call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
 
@@ -150,6 +151,13 @@ function! s:AllowedToCompleteInCurrentFile()
   let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
 
   return whitelist_allows && blacklist_allows
+endfunction
+
+
+function! s:SetUpCpoptions()
+  " Without this flag in cpoptions, critical YCM mappings do not work. There's
+  " no way to not have this and have YCM working, so force the flag.
+  set cpoptions+=B
 endfunction
 
 
