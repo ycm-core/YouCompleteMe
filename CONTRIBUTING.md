@@ -25,9 +25,9 @@ Lastly, **make sure you are running the latest version of YCM**. The issue you
 have encountered may have already been fixed.
 
 OK, so we've reached this far. You need to create an issue. First realize that
-the time it takes to fix your issue is inversely proportional to how long it
-takes the developer to reproduce it. The easier it is to reproduce, the quicker
-it'll be fixed.
+the time it takes to fix your issue is a multiple of how long it takes the
+developer to reproduce it. The easier it is to reproduce, the quicker it'll be
+fixed.
 
 Here are the things you should do when creating an issue:
 
