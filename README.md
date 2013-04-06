@@ -1083,7 +1083,7 @@ Contact
 
 If you have questions, bug reports, suggestions, etc. please use the [issue
 tracker][tracker]. The latest version is available at
-<http://valloric.github.com/YouCompleteMe/>.
+<http://valloric.github.io/YouCompleteMe/>.
 
 The author's homepage is <http://val.markovic.io>.
 
