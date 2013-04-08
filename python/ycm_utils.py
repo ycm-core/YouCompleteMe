@@ -16,9 +16,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
+from vimsupport import GetVariableValue
 
 def IsIdentifierChar( char ):
-  return char.isalnum() or char == '_'
+  return char.isalnum() or char in GetVariableValue( "g:ycm_identifier_chars" )
 
 
 def SanitizeQuery( query ):

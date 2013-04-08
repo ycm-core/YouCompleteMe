@@ -133,6 +133,9 @@ let g:ycm_semantic_triggers =
       \   'erlang' : [':'],
       \ } )
 
+let g:ycm_identifier_chars =
+      \ get( g:, 'ycm_identifier_chars', '_' )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart
