@@ -169,7 +169,7 @@ class ClangCompleter( Completer ):
 
   def _GoToDefinition( self ):
     location = self._LocationForGoTo( 'GetDefinitionLocation' )
-    if not location.IsValid():
+    if not location or not location.IsValid():
       vimsupport.PostVimMessage( 'Can\'t jump to definition.' )
       return
 
@@ -180,7 +180,7 @@ class ClangCompleter( Completer ):
 
   def _GoToDeclaration( self ):
     location = self._LocationForGoTo( 'GetDeclarationLocation' )
-    if not location.IsValid():
+    if not location or not location.IsValid():
       vimsupport.PostVimMessage( 'Can\'t jump to declaration.' )
       return
 
@@ -191,9 +191,9 @@ class ClangCompleter( Completer ):
 
   def _GoToDefinitionElseDeclaration( self ):
     location = self._LocationForGoTo( 'GetDefinitionLocation' )
-    if not location.IsValid():
+    if not location or not location.IsValid():
       location = self._LocationForGoTo( 'GetDeclarationLocation' )
-    if not location.IsValid():
+    if not location or not location.IsValid():
       vimsupport.PostVimMessage( 'Can\'t jump to definition or declaration.' )
       return
 
