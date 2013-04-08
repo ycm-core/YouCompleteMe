@@ -133,6 +133,8 @@ let g:ycm_semantic_triggers =
       \   'erlang' : [':'],
       \ } )
 
+let g:ycm_cache_omnifunc = 1
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart
