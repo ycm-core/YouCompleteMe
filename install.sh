@@ -47,15 +47,20 @@ function python_finder {
 }
 
 function num_cores {
-  num_cpus=1
-  if [[ `uname -s` == "Linux" ]]; then
-    num_cpus=$(grep -c ^processor /proc/cpuinfo)
+  if [[ -e /bin/nproc ]]; then
+   num_cpus=$(nproc)
   else
-    # Works on Mac and FreeBSD
-    num_cpus=$(sysctl -n hw.ncpu)
+    num_cpus=1
+    if [[ `uname -s` == "Linux" ]]; then
+      num_cpus=$(grep -c ^processor /proc/cpuinfo)
+    else
+      # Works on Mac and FreeBSD
+      num_cpus=$(sysctl -n hw.ncpu)
+    fi
   fi
   echo $num_cpus
 }
+
 
 function install {
   ycm_dir=`pwd`
