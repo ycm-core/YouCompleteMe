@@ -71,11 +71,7 @@ class JediCompleter( Completer ):
 
 
   def AsyncCandidateRequestReadyInner( self ):
-    if self._completion_thread.is_alive():
-      return WaitAndClear( self._candidates_ready, timeout=0.005 )
-    else:
-      self._start_completion_thread()
-      return False
+    return WaitAndClear( self._candidates_ready, timeout=0.005 )
 
 
   def CandidatesFromStoredRequestInner( self ):
