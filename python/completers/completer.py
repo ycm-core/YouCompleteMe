@@ -113,6 +113,7 @@ class Completer( object ):
     self.triggers_for_filetype = TriggersForFiletype()
     self.completions_future = None
     self.completions_cache = None
+    self.completion_start_column = None
 
 
   # It's highly likely you DON'T want to override this function but the *Inner
@@ -123,7 +124,8 @@ class Completer( object ):
       self.completions_cache = None
 
     previous_results_were_empty = ( self.completions_cache and
-                                    self.completions_cache.CacheValid() and
+                                    self.completions_cache.CacheValid(
+                                      start_column ) and
                                     not self.completions_cache.raw_completions )
     return inner_says_yes and not previous_results_were_empty
 
@@ -153,15 +155,18 @@ class Completer( object ):
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
-  def CandidatesForQueryAsync( self, query ):
-    if query and self.completions_cache and self.completions_cache.CacheValid():
+  def CandidatesForQueryAsync( self, query, start_column ):
+    self.completion_start_column = start_column
+
+    if query and self.completions_cache and self.completions_cache.CacheValid(
+      start_column ):
       self.completions_cache.filtered_completions = (
         self.FilterAndSortCandidates(
           self.completions_cache.raw_completions,
           query ) )
     else:
       self.completions_cache = None
-      self.CandidatesForQueryAsyncInner( query )
+      self.CandidatesForQueryAsyncInner( query, start_column )
 
 
   def FilterAndSortCandidates( self, candidates, query ):
@@ -178,7 +183,7 @@ class Completer( object ):
       query )
 
 
-  def CandidatesForQueryAsyncInner( self, query ):
+  def CandidatesForQueryAsyncInner( self, query, start_column ):
     pass
 
 
@@ -208,8 +213,7 @@ class Completer( object ):
       self.completions_cache = CompletionsCache()
       self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
       self.completions_cache.line, _ = vimsupport.CurrentLineAndColumn()
-      self.completions_cache.column = int(
-        vim.eval( "s:completion_start_column" ) )
+      self.completions_cache.column = self.completion_start_column
       return self.completions_cache.raw_completions
 
 
@@ -298,9 +302,9 @@ class CompletionsCache( object ):
     self.filtered_completions = []
 
 
-  def CacheValid( self ):
+  def CacheValid( self, start_column ):
     completion_line, _ = vimsupport.CurrentLineAndColumn()
-    completion_column = int( vim.eval( "s:completion_start_column" ) )
+    completion_column = start_column
     return completion_line == self.line and completion_column == self.column
 
 

@@ -84,7 +84,7 @@ class ClangCompleter( Completer ):
     return files
 
 
-  def CandidatesForQueryAsync( self, query ):
+  def CandidatesForQueryAsync( self, query, start_column ):
     filename = vim.current.buffer.name
 
     if not filename:
@@ -108,8 +108,7 @@ class ClangCompleter( Completer ):
       files = self.GetUnsavedFilesVector()
 
     line, _ = vim.current.window.cursor
-    # TODO: this should be a function parameter
-    column = int( vim.eval( "s:completion_start_column" ) ) + 1
+    column = start_column + 1
     self.completions_future = (
       self.completer.CandidatesForQueryAndLocationInFileAsync(
         query,

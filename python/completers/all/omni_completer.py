@@ -42,7 +42,7 @@ class OmniCompleter( Completer ):
     return super( OmniCompleter, self ).ShouldUseNowInner( start_column )
 
 
-  def CandidatesForQueryAsyncInner( self, query ):
+  def CandidatesForQueryAsyncInner( self, query, unused_start_column ):
     if not self.omnifunc:
       self.stored_candidates = None
       return

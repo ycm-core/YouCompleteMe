@@ -420,15 +420,16 @@ function! s:InvokeCompletion()
 endfunction
 
 
-function! s:CompletionsForQuery( query, use_filetype_completer )
+function! s:CompletionsForQuery( query, use_filetype_completer,
+      \ completion_start_column )
   if a:use_filetype_completer
     py completer = ycm_state.GetFiletypeCompleter()
   else
     py completer = ycm_state.GetIdentifierCompleter()
   endif
 
-  " TODO: don't trigger on a dot inside a string constant
-  py completer.CandidatesForQueryAsync( vim.eval( 'a:query' ) )
+  py completer.CandidatesForQueryAsync( vim.eval( 'a:query' ),
+        \ int( vim.eval( 'a:completion_start_column' ) ) )
 
   let l:results_ready = 0
   while !l:results_ready
@@ -481,7 +482,8 @@ function! youcompleteme#Complete( findstart, base )
     endif
     return s:completion_start_column
   else
-    return s:CompletionsForQuery( a:base, s:should_use_filetype_completion )
+    return s:CompletionsForQuery( a:base, s:should_use_filetype_completion,
+          \ s:completion_start_column )
   endif
 endfunction
 

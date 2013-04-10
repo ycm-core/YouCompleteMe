@@ -45,7 +45,7 @@ class IdentifierCompleter( Completer ):
     return query_length >= MIN_NUM_CHARS
 
 
-  def CandidatesForQueryAsync( self, query ):
+  def CandidatesForQueryAsync( self, query, unused_start_column ):
     filetype = vim.eval( "&filetype" )
     self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
       utils.SanitizeQuery( query ),

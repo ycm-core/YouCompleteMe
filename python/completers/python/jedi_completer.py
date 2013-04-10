@@ -64,7 +64,7 @@ class JediCompleter( Completer ):
     return [ 'python' ]
 
 
-  def CandidatesForQueryAsyncInner( self, unused_query ):
+  def CandidatesForQueryAsyncInner( self, unused_query, unused_start_column ):
     self._candidates = None
     self._candidates_ready.clear()
     self._query_ready.set()
