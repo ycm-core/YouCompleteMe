@@ -2,6 +2,10 @@
 
 set -e
 
+function command_exists {
+  hash "$1" 2>/dev/null ;
+}
+
 function cmake_install {
   if [[ `uname -s` == "Darwin" ]]; then
     homebrew_cmake_install
@@ -47,7 +51,7 @@ function python_finder {
 }
 
 function num_cores {
-  if [[ -e /bin/nproc ]]; then
+  if ! command_exists nproc; then
    num_cpus=$(nproc)
   else
     num_cpus=1
@@ -104,7 +108,7 @@ case "$1" in
     ;;
 esac
 
-if [[ ! -z `which cmake &> /dev/null` ]]; then
+if ! command_exists cmake; then
   echo "CMake is required to build YouCompleteMe."
   cmake_install
 fi
