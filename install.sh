@@ -51,7 +51,7 @@ function python_finder {
 }
 
 function num_cores {
-  if ! command_exists nproc; then
+  if command_exists nproc; then
    num_cpus=$(nproc)
   else
     num_cpus=1
