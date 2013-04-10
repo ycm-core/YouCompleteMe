@@ -877,6 +877,22 @@ Default: `[see next line]`
       \   'erlang' : [':'],
       \ }
 
+### The `g:ycm_identifier_chars` option
+
+This option controls which non-alphanumeric characters are allowed in
+identifiers for the various completion engines. YouCompleteMe will use
+everything from the last disallowed char to your cursor position as the input
+to completion engines.
+
+For example, given `object.method_|` (| being the cursor position), and the
+default `g:ycm_identifier_chars = '_'`, `method_` will be used as the search
+string. Or, given `namespace/a-clojure-me|` and `g:ycm_identifier_chars = '-_'`
+`a-clojure-me` will be the search string.
+
+Default: `'_'`
+
+    let g:ycm_identifier_chars = '_'
+
 FAQ
 ---
 
