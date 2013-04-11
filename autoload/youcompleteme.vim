@@ -494,7 +494,7 @@ function! youcompleteme#OmniComplete( findstart, base )
     let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
     return s:completion_start_column
   else
-    return s:CompletionsForQuery( a:base, 1 )
+    return s:CompletionsForQuery( a:base, 1, s:completion_start_column )
   endif
 endfunction
 
