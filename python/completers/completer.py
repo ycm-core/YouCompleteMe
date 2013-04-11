@@ -21,10 +21,13 @@ import abc
 import vim
 import vimsupport
 import ycm_core
-import ycm
 from collections import defaultdict
+from threading import Event
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
+
+MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
+  "g:ycm_min_num_of_chars_for_completion" ) )
 
 class Completer( object ):
   """A base class for all Completers in YCM.
@@ -154,6 +157,11 @@ class Completer( object ):
     return False
 
 
+  def QueryLengthAboveMinThreshold( self, start_column ):
+    query_length = vimsupport.CurrentColumn() - start_column
+    return query_length >= MIN_NUM_CHARS
+
+
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
   def CandidatesForQueryAsync( self, query, start_column ):
@@ -178,10 +186,15 @@ class Completer( object ):
       candidates = candidates.words
     items_are_objects = 'word' in candidates[ 0 ]
 
-    return ycm_core.FilterAndSortCandidates(
-      candidates,
-      'word' if items_are_objects else '',
-      query )
+    try:
+      matches = ycm_core.FilterAndSortCandidates(
+        candidates,
+        'word' if items_are_objects else '',
+        query )
+    except:
+      matches = []
+
+    return matches
 
 
   def CandidatesForQueryAsyncInner( self, query, start_column ):
@@ -293,6 +306,31 @@ class Completer( object ):
 
   def DebugInfo( self ):
     return ''
+
+
+class GeneralCompleter( Completer ):
+  """
+  A base class for General completers in YCM.
+
+  Because this is a subclass of Completer class, you should refer to the
+  dpcumentation of Completer API.
+
+  Only exception is that GeneralCompleterStore class that collects and controls
+  all general completers already adds threading for completers, so there
+  is no need to add a threading to new general completers.
+
+  added __init__ fields are for GeneralCompleterStore internal use only.
+  """
+  def __init__( self ):
+    super( GeneralCompleter, self ).__init__()
+    self._should_start = Event()
+    self._should_use = False
+    self._finished = Event()
+    self._results = []
+
+
+  def SupportedFiletypes( self ):
+    return set()
 
 
 class CompletionsCache( object ):

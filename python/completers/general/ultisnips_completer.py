@@ -17,14 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import Completer, CompletionsCache
+from completers.completer import GeneralCompleter, CompletionsCache
 from UltiSnips import UltiSnips_Manager
 import vimsupport
 
-MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_of_chars_for_completion" ) )
 
-class UltiSnipsCompleter( Completer ):
+class UltiSnipsCompleter( GeneralCompleter ):
   """
   General completer that provides UltiSnips snippet names in completions.
 
@@ -47,15 +45,11 @@ class UltiSnipsCompleter( Completer ):
 
 
   def ShouldUseNowInner( self, start_column ):
-    query_length = vimsupport.CurrentColumn() - start_column
-    return query_length >= MIN_NUM_CHARS
+    return self.QueryLengthAboveMinThreshold( start_column )
 
 
-  def SupportedFiletypes( self ):
-    # magic token meaning all filetypes
-    return set( [ 'ycm_all' ] )
-
-
+  # We need to override this because Completer version invalidates cache on
+  # empty query and we want to invalidate cache only on buffer switch.
   def CandidatesForQueryAsync( self, query, start_column ):
     self.completion_start_column = start_column
 
@@ -77,27 +71,17 @@ class UltiSnipsCompleter( Completer ):
     return self.flag
 
 
-  # We need to override this because we need to store all snippets but return
-  # filtered results on first call.
-  def CandidatesFromStoredRequest( self ):
-    if self.completions_cache:
-      return self.completions_cache.filtered_completions
-    else:
-      self.completions_cache = CompletionsCache()
-      self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
-      self.completions_cache.line, _ = vimsupport.CurrentLineAndColumn()
-      self.completions_cache.column = self.completion_start_column
-      return self.FilterAndSortCandidates( self._candidates, self._query )
-
-
   def CandidatesFromStoredRequestInner( self ):
     return self._candidates
 
 
   def SetCandidates( self ):
     try:
-      # get all snippets for filetype
       rawsnips = UltiSnips_Manager._snips( '', 1 )
+
+      # UltiSnips_Manager._snips() returns a class instance where:
+      # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
+      # class.description - description of the snippet
       self._candidates = [ { 'word': str( snip.trigger ),
                               'menu': str( '<snip> ' + snip.description ) }
                           for snip in rawsnips ]
@@ -108,5 +92,6 @@ class UltiSnipsCompleter( Completer ):
 
   def OnFileReadyToParse( self ):
     # Invalidate cache on buffer switch
-    self.completions_cache = None
+    self.completions_cache = CompletionsCache()
     self.SetCandidates()
+    self.completions_cache.raw_completions = self._candidates
