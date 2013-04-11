@@ -243,15 +243,18 @@ void TranslationUnit::Reparse(
 // param though.
 void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
                                uint parse_options ) {
-  unique_lock< mutex > lock( clang_access_mutex_ );
+  int failure = 0;
+  {
+    unique_lock< mutex > lock( clang_access_mutex_ );
 
-  if ( !clang_translation_unit_ )
-    return;
+    if ( !clang_translation_unit_ )
+      return;
 
-  int failure = clang_reparseTranslationUnit( clang_translation_unit_,
-                                              unsaved_files.size(),
-                                              &unsaved_files[ 0 ],
-                                              parse_options );
+    failure = clang_reparseTranslationUnit( clang_translation_unit_,
+                                            unsaved_files.size(),
+                                            &unsaved_files[ 0 ],
+                                            parse_options );
+  }
 
   if ( failure ) {
     Destroy();
@@ -262,9 +265,9 @@ void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
 }
 
 
-// Should only be called while holding the clang_access_mutex_
 void TranslationUnit::UpdateLatestDiagnostics() {
-  unique_lock< mutex > lock( diagnostics_mutex_ );
+  unique_lock< mutex > lock1( clang_access_mutex_ );
+  unique_lock< mutex > lock2( diagnostics_mutex_ );
 
   latest_diagnostics_.clear();
   uint num_diagnostics = clang_getNumDiagnostics( clang_translation_unit_ );
