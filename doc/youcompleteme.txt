@@ -24,7 +24,11 @@ Contents ~
   3. The |YcmShowDetailedDiagnostic| command
   4. The |YcmDebugInfo| command
   5. The |YcmCompleter| command
- 8. Options                                              |youcompleteme-options|
+ 8. YcmCompleter subcommands            |youcompleteme-ycmcompleter-subcommands|
+  1. The |GoToDeclaration| subcommand
+  2. The |GoToDefinition| subcommand
+  3. The |GoToDefinitionElseDeclaration| subcommand
+ 9. Options                                              |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_filetype_whitelist| option
   3. The |g:ycm_filetype_blacklist| option
@@ -45,7 +49,7 @@ Contents ~
   18. The |g:ycm_confirm_extra_conf| option
   19. The |g:ycm_extra_conf_globlist| option
   20. The |g:ycm_semantic_triggers| option
- 9. FAQ                                                      |youcompleteme-faq|
+ 10. FAQ                                                     |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine
   3. It appears that YCM is not working
@@ -64,8 +68,8 @@ Contents ~
   16. Why does YCM demand such a recent version of Vim?
   17. I get annoying messages in Vim's status area when I type
   18. Nasty bugs happen if I have the |vim-autoclose| plugin installed
- 10. Contact                                             |youcompleteme-contact|
- 11. License                                             |youcompleteme-license|
+ 11. Contact                                             |youcompleteme-contact|
+ 12. License                                             |youcompleteme-license|
 
 ===============================================================================
                                                     *youcompleteme-introduction*
@@ -132,6 +136,10 @@ their features plus extra:
  - Supertab
 
  - neocomplcache
+
+YCM also provides semantic go-to-definition/declaration commands for C-family
+languages. Expect more IDE features powered by the various YCM semantic
+engines in the future.
 
 ===============================================================================
                                *youcompleteme-mac-os-x-super-quick-installation*
@@ -353,7 +361,7 @@ General Usage ~
    through the completions. Use Shift-TAB to cycle backwards. Note that if
    you're using console Vim (that is, not Gvim or MacVim) then it's likely
    that the Shift-TAB binding will not work because the console will not pass
-   it to Vim. You can remap the keys; see the options section below.
+   it to Vim. You can remap the keys; see the Options section below.
 
 -------------------------------------------------------------------------------
                                        *youcompleteme-completion-string-ranking*
@@ -425,7 +433,14 @@ your file. Even better, use Syntastic.
 Python semantic completion ~
 
 YCM uses Jedi [2] to power its semantic completion for Python. This should
-"just work" without any configuration from the user.
+"just work" without any configuration from the user. You do NOT need to
+install Jedi yourself; YCM uses it as a git subrepo. If you're installing YCM
+with Vundle (which is the recommended way) then Vundle will make sure that the
+subrepo is checked out when you do ':BundleInstall'. If you're installing YCM
+by hand, then you need to run 'git submodule update --init --recursive' when
+you're checking out the YCM repository. That's it.
+
+But again, installing YCM with Vundle takes care of all of this for you.
 
 In the future expect to see features like go-to-definition for Python as well.
 
@@ -565,6 +580,58 @@ argument is of the form 'ft=...' the completer for that file type will be used
 (for example 'ft=cpp'), else the native completer of the current buffer will
 be used. Call |YcmCompleter| without further arguments for information about
 the commands you can call for the selected completer.
+
+See the YcmCompleter subcommands section for more information on the available
+subcommands.
+
+===============================================================================
+                                        *youcompleteme-ycmcompleter-subcommands*
+YcmCompleter subcommands ~
+
+[See the docs for the |YcmCompleter| command before tackling this section.]
+
+The invoked subcommand is automatically routed to the currently active
+semantic completer, so ':YcmCompleter GoToDefinition' will invoke the
+|GoToDefinition| subcommand on the Python semantic completer if the currently
+active file is a Python one and on the Clang completer if the currently active
+file is a C/C++/Objective-C one.
+
+You may also want to map the subcommands to something less verbose; for
+instance, 'nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>'
+maps the '<leader>jd' sequence to the longer subcommand invocation.
+
+The various 'GoTo*' subcommands add entries to Vim's 'jumplist' so you can use
+'CTRL-O' to jump back to where you where before invoking the command (and
+'CTRL-I' to jump forward; see ':h jumplist' for details).
+
+-------------------------------------------------------------------------------
+The *GoToDeclaration* subcommand
+
+Looks up the symbol under the cursor and jumps to its declaration.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
+
+-------------------------------------------------------------------------------
+The *GoToDefinition* subcommand
+
+Looks up the symbol under the cursor and jumps to its definition.
+
+NOTE: For C-family languages this only works in certain situations, namely
+when the definition of the symbol is in the current translation unit. A
+translation unit consists of the file you are editing and all the files you
+are including with '#include' directives (directly or indirectly) in that
+file.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
+
+-------------------------------------------------------------------------------
+The *GoToDefinitionElseDeclaration* subcommand
+
+Looks up the symbol under the cursor and jumps to its definition if possible;
+if the definition is not accessible from the current translation unit, jumps
+to the symbol's declaration.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
 
 ===============================================================================
                                                          *youcompleteme-options*
@@ -1015,7 +1082,7 @@ This means that YCM tried to set up a key mapping but failed because you
 already had something mapped to that key combination. The '<blah>' part of the
 message will tell you what was the key combination that failed.
 
-Look in the options section and see if which of the default mappings conflict
+Look in the Options section and see if which of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 
@@ -1146,7 +1213,7 @@ conflicting with YCM.
 Contact ~
 
 If you have questions, bug reports, suggestions, etc. please use the issue
-tracker [22]. The latest version is available at http://valloric.github.com/YouCompleteMe/.
+tracker [22]. The latest version is available at http://valloric.github.io/YouCompleteMe/.
 
 The author's homepage is http://val.markovic.io.
 
