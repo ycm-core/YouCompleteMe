@@ -45,7 +45,10 @@ function! s:HasYcmCore()
   return 0
 endfunction
 
-if !s:HasYcmCore()
+let g:ycm_check_if_ycm_core_present =
+      \ get( g:, 'ycm_check_if_ycm_core_present', 1 )
+
+if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
   echohl WarningMsg |
         \ echomsg "ycm_core.[so|pyd] not detected; you need to compile YCM " .
         \ "before using it. Read the docs!" |

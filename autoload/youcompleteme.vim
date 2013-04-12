@@ -40,6 +40,8 @@ function! youcompleteme#Enable()
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+  py import extra_conf_store
+  py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
   py import ycm
 
   if !pyeval( 'ycm.CompatibleWithYcmCore()')
@@ -65,6 +67,7 @@ function! youcompleteme#Enable()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
+    autocmd VimLeave * call s:OnVimLeave()
   augroup END
 
   call s:SetUpCpoptions()
@@ -188,6 +191,10 @@ function! s:SetUpCompleteopt()
   if g:ycm_add_preview_to_completeopt
     set completeopt+=preview
   endif
+endfunction
+
+function! s:OnVimLeave()
+  py extra_conf_store.CallExtraConfVimCloseIfExists()
 endfunction
 
 

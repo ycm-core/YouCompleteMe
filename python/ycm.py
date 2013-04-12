@@ -33,7 +33,6 @@ except ImportError as e:
     'the docs. Full error: {1}'.format(
       os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
 
-
 from completers.all.identifier_completer import IdentifierCompleter
 from completers.all.omni_completer import OmniCompleter
 

@@ -25,6 +25,7 @@ import random
 import string
 import sys
 import vimsupport
+import vim
 from fnmatch import fnmatch
 
 # Constants
@@ -56,6 +57,23 @@ def ModuleFileForSourceFile( filename ):
         break
 
   return _module_file_for_source_file.setdefault( filename )
+
+
+def CallExtraConfYcmCorePreloadIfExists():
+  _CallExtraConfMethod( 'YcmCorePreload' )
+
+
+def CallExtraConfVimCloseIfExists():
+  _CallExtraConfMethod( 'VimClose' )
+
+
+def _CallExtraConfMethod( function_name ):
+  vim_current_working_directory = vim.eval( 'getcwd()' )
+  path_to_dummy = os.path.join( vim_current_working_directory, 'DUMMY_FILE' )
+  module = ModuleForSourceFile( path_to_dummy )
+  if not module or not hasattr( module, function_name ):
+    return
+  getattr( module, function_name )()
 
 
 def _Disable( module_file ):
