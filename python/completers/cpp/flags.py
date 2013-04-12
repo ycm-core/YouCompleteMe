@@ -17,24 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import imp
-import os
 import ycm_core
-import random
-import string
-import sys
+import os
 import vimsupport
-from fnmatch import fnmatch
+import extra_conf_store
 
-YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. See the '
-  'docs for details.').format( YCM_EXTRA_CONF_FILENAME )
-CONFIRM_CONF_FILE_MESSAGE = ('Found {0}. Load? \n\n(Question can be turned '
-                             'off with options, see YCM docs)')
-GLOBAL_YCM_EXTRA_CONF_FILE = os.path.expanduser(
-    vimsupport.GetVariableValue( "g:ycm_global_ycm_extra_conf" )
-)
+  'docs for details.').format( extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
 class Flags( object ):
   """Keeps track of the flags necessary to compile a file.
@@ -44,36 +34,22 @@ class Flags( object ):
   def __init__( self ):
     # It's caches all the way down...
     self.flags_for_file = {}
-    self.module_for_file = {}
-    self.modules = FlagsModules()
     self.special_clang_flags = _SpecialClangIncludes()
     self.no_extra_conf_file_warning_posted = False
 
-  def ModuleForFile( self, filename ):
-    """This will try all files returned by _FlagsModuleSourceFilesForFile in
-    order and return the filename of the first module that was allowed to load.
-    If no module was found or allowed to load, None is returned."""
-
-    if not self.module_for_file.has_key( filename ):
-      for flags_module_file in _FlagsModuleSourceFilesForFile( filename ):
-        if self.modules.Load( flags_module_file ):
-          self.module_for_file[ filename ] = flags_module_file
-          break
-
-    return self.module_for_file.setdefault( filename )
 
   def FlagsForFile( self, filename ):
     try:
       return self.flags_for_file[ filename ]
     except KeyError:
-      module_file = self.ModuleForFile( filename )
-      if not module_file:
+      module = extra_conf_store.ModuleForSourceFile( filename )
+      if not module:
         if not self.no_extra_conf_file_warning_posted:
           vimsupport.PostVimMessage( NO_EXTRA_CONF_FILENAME_MESSAGE )
           self.no_extra_conf_file_warning_posted = True
         return None
 
-      results = self.modules[ module_file ].FlagsForFile( filename )
+      results = module.FlagsForFile( filename )
 
       if not results.get( 'flags_ready', True ):
         return None
@@ -84,113 +60,6 @@ class Flags( object ):
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
       return sanitized_flags
-
-  def ReloadModule( self, module_file ):
-    """Reloads a module file cleaning the flags cache for all files
-    associated with that module. Returns False if reloading failed
-    (for example due to the model not being loaded in the first place)."""
-
-    module_file = os.path.abspath(module_file)
-    if self.modules.Reload( module_file ):
-      for filename, module in self.module_for_file.iteritems():
-        if module == module_file:
-          del self.flags_for_file[ filename ]
-      return True
-    return False
-
-
-class FlagsModules( object ):
-  """Keeps track of modules.
-  Modules are loaded on-demand and cached in self.modules for quick access."""
-
-  def __init__( self ):
-    self.modules = {}
-
-  def Disable( self, module_file ):
-    """Disables the loading of a module for the current session."""
-    self.modules[ module_file ] = None
-
-  @staticmethod
-  def ShouldLoad( module_file ):
-    """Checks if a module is safe to be loaded. By default this will try to
-    decide using a white-/blacklist and ask the user for confirmation as a
-    fallback."""
-
-    if ( module_file == GLOBAL_YCM_EXTRA_CONF_FILE or
-         not vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) ):
-      return True
-
-    globlist = vimsupport.GetVariableValue( 'g:ycm_extra_conf_globlist' )
-    for glob in globlist:
-      is_blacklisted = glob[0] == '!'
-      if MatchesGlobPattern( module_file, glob.lstrip('!') ):
-        return not is_blacklisted
-
-    return vimsupport.Confirm( CONFIRM_CONF_FILE_MESSAGE.format( module_file ) )
-
-  def Load( self, module_file, force = False ):
-    """Load and return the module contained in a file.
-    Using force = True the module will be loaded regardless
-    of the criteria in ShouldLoad.
-    This will return None if the module was not allowed to be loaded."""
-
-    if not force:
-      if self.modules.has_key( module_file ):
-        return self.modules[ module_file ]
-
-      if not self.ShouldLoad( module_file ):
-        return self.Disable( module_file )
-
-    sys.path.insert( 0, _DirectoryOfThisScript() )
-    module = imp.load_source( _RandomName(), module_file )
-    del sys.path[ 0 ]
-
-    self.modules[ module_file ] = module
-    return module
-
-  def Reload( self, module_file ):
-    """Reloads the given module. If it has not been loaded yet does nothing.
-    Note that the module will not be subject to the loading criteria again."""
-
-    if self.modules.get( module_file ):
-      return self.Load( module_file, force = True )
-
-  def __getitem__( self, key ):
-    return self.Load( key )
-
-
-def _FlagsModuleSourceFilesForFile( filename ):
-  """For a given filename, search all parent folders for YCM_EXTRA_CONF_FILENAME
-  files that will compute the flags necessary to compile the file.
-  If GLOBAL_YCM_EXTRA_CONF_FILE exists it is returned as a fallback."""
-
-  for folder in _PathsToAllParentFolders( filename ):
-    candidate = os.path.join( folder, YCM_EXTRA_CONF_FILENAME )
-    if os.path.exists( candidate ):
-      yield candidate
-  if ( GLOBAL_YCM_EXTRA_CONF_FILE
-       and os.path.exists( GLOBAL_YCM_EXTRA_CONF_FILE ) ):
-    yield GLOBAL_YCM_EXTRA_CONF_FILE
-
-
-def _PathsToAllParentFolders( filename ):
-  """Build a list of all parent folders of a file.
-  The neares files will be returned first.
-  Example: _PathsToAllParentFolders( '/home/user/projects/test.c' )
-    [ '/home/user/projects', '/home/user', '/home', '/' ]"""
-
-  parent_folders = os.path.abspath(
-    os.path.dirname( filename ) ).split( os.path.sep )
-  if not parent_folders[0]:
-    parent_folders[0] = os.path.sep
-  parent_folders = [ os.path.join( *parent_folders[:i + 1] )
-                     for i in xrange( len( parent_folders ) ) ]
-  return reversed( parent_folders )
-
-
-def _RandomName():
-  """Generates a random module name."""
-  return ''.join( random.choice( string.ascii_lowercase ) for x in range( 15 ) )
 
 
 def _SanitizeFlags( flags ):
@@ -223,14 +92,3 @@ def _SpecialClangIncludes():
   return [ '-I', path_to_includes ]
 
 
-def _DirectoryOfThisScript():
-  return os.path.dirname( os.path.abspath( __file__ ) )
-
-
-def MatchesGlobPattern( filename, glob ):
-  """Returns true if a filename matches a given pattern. A '~' in glob will be
-  expanded to the home directory and checking will be performed using absolute
-  paths. See the documentation of fnmatch for the supported patterns."""
-
-  abspath = os.path.abspath( filename )
-  return fnmatch( abspath, os.path.abspath( os.path.expanduser( glob ) ) )

@@ -22,6 +22,7 @@ from collections import defaultdict
 import vim
 import vimsupport
 import ycm_core
+import extra_conf_store
 from flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
@@ -287,7 +288,7 @@ class ClangCompleter( Completer ):
   def DebugInfo( self ):
     filename = vim.current.buffer.name
     flags = self.flags.FlagsForFile( filename ) or []
-    source = self.flags.ModuleForFile( filename )
+    source = extra_conf_store.ModuleFileForSourceFile( filename )
     return 'Flags for {0} loaded from {1}:\n{2}'.format( filename, source, list( flags ) )
 
 
