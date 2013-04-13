@@ -125,6 +125,7 @@ let g:ycm_semantic_triggers =
       \ get( g:, 'ycm_semantic_triggers', {
       \   'c' : ['->', '.'],
       \   'objc' : ['->', '.'],
+      \   'ocaml' : ['.', '#'],
       \   'cpp,objcpp' : ['->', '.', '::'],
       \   'perl' : ['->'],
       \   'php' : ['->', '::'],
