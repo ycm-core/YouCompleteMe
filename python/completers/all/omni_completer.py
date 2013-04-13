@@ -75,8 +75,9 @@ class OmniCompleter( Completer ):
                         "')" ]
 
       items = vim.eval( ''.join( omnifunc_call ) )
-      if hasattr( items, 'words' ):
-        items = items.words
+
+      if 'words' in items:
+        items = items['words']
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
