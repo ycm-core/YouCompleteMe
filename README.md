@@ -42,8 +42,9 @@ current file and other files you visit and searches them when you type
 (identifiers are put into per-filetype groups).
 
 The demo also shows the semantic engine in use. When the user presses `.`, `->`
-or `::` while typing in insert mode, the semantic engine is triggered (it can
-also be triggered with a keyboard shortcut; see the rest of the docs).
+or `::` while typing in insert mode (for C++; different triggers are used for
+other languages), the semantic engine is triggered (it can also be triggered
+with a keyboard shortcut; see the rest of the docs).
 
 The last thing that you can see in the demo is YCM's integration with
 [Syntastic][] (the little red X that shows up in the left gutter) if you are
