@@ -20,6 +20,7 @@
 #include "Result.h"
 #include "Candidate.h"
 #include "CandidateRepository.h"
+#include "MatchingUtils.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/cxx11/any_of.hpp>
 #include <vector>
@@ -96,6 +97,47 @@ boost::python::list FilterAndSortCandidates(
   foreach ( const ResultAnd< int > &object_and_result,
             object_and_results ) {
     filtered_candidates.append( candidates[ object_and_result.extra_object_ ] );
+  }
+
+  return filtered_candidates;
+}
+
+boost::python::list FilterAndSortMultiEncodedCandidates(
+  const boost::python::list &candidates,
+  const std::string &query ) {
+
+  boost::python::list filtered_candidates;
+  int num_candidates = len( candidates );
+  std::vector< Match > matches;
+
+  if ( query.empty() )
+    return candidates;
+
+  for ( int i = 0; i < num_candidates; i++ )
+  {
+    Match match;
+    match.str = extract< std::string > ( candidates[ i ] );
+
+    MatchObject m;
+    m.str                = match.str;
+    m.str_len            = match.str.length();
+    m.query              = query;
+    m.query_len          = query.length();
+    m.max_score_per_char = ( 1.0 / m.str_len + 1.0 / m.query_len ) / 2;
+    m.is_dot_file        = 0;
+
+    match.score = CalculateMatchScore( &m, 0, 0, 0, 0.0 );
+
+    if ( match.score > 0 )
+      matches.push_back( match );
+  }
+
+  typedef bool ( *comparer_t )( Match, Match );
+  comparer_t cmp = &CompareMatchScore;
+  std::sort( matches.begin(), matches.end(), cmp );
+
+  foreach ( const Match &match, matches ) {
+    filtered_candidates.append( match.str );
   }
 
   return filtered_candidates;
