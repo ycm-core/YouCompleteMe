@@ -31,6 +31,10 @@ boost::python::list FilterAndSortCandidates(
   const std::string &candidate_property,
   const std::string &query );
 
+boost::python::list FilterAndSortMultiEncodedCandidates(
+  const boost::python::list &candidates,
+  const std::string &query );
+
 } // namespace YouCompleteMe
 
 #endif /* end of include guard: PYTHONSUPPORT_H_KWGFEX0V */
