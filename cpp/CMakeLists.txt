@@ -41,7 +41,11 @@ endif()
 
 if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( COMPILER_IS_CLANG true )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+
+  # The Travis CI build machines don't have libc++ installed
+  if ( NOT DEFINED ENV{TRAVIS} )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  endif()
 endif()
 
 if ( CMAKE_GENERATOR STREQUAL Xcode )

@@ -1,0 +1,8 @@
+language: cpp
+compiler:
+  - gcc
+  - clang
+script: ./install.sh
+env:
+  - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS=""
+  - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS="-DUSE_CLANG_COMPLETER=ON"

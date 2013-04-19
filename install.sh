@@ -82,6 +82,20 @@ function install {
   rm -rf $build_dir
 }
 
+function testrun {
+  ycm_dir=`pwd`
+  build_dir=`mktemp -d -t ycm_build.XXXXXX`
+  pushd $build_dir
+
+  cmake -G "Unix Makefiles" $1 . $ycm_dir/cpp
+  make -j $(num_cores) ycm_core_tests
+  cd ycm/tests
+  LD_LIBRARY_PATH=$ycm_dir/python ./ycm_core_tests
+
+  popd
+  rm -rf $build_dir
+}
+
 function linux_cmake_install {
   echo "Please install CMake using your package manager and retry."
   exit 1
@@ -112,4 +126,10 @@ if ! command_exists cmake; then
   echo "CMake is required to build YouCompleteMe."
   cmake_install
 fi
-install $cmake_args
+
+if [ -z "$YCM_TESTRUN" ]; then
+  install $cmake_args $EXTRA_CMAKE_ARGS
+else
+  testrun $cmake_args $EXTRA_CMAKE_ARGS
+fi
+
