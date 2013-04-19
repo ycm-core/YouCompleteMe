@@ -31,7 +31,6 @@ def PrepareClangFlags( flags, filename ):
       continue
 
     if flag == '-c':
-      skip = True;
       continue
 
     if flag == '-o':
