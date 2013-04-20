@@ -119,12 +119,7 @@ class FilenameCompleter( Completer ):
     try:
       matches = ycm_core.FilterAndSortCandidates( completions, '', query ) \
               if query else completions
-    except IndexError, error:
-      # Vim python is not thread safe, so this sometimes causes vim crashes.
-      # Disabling for now.
-      #vimsupport.PostVimMessage( 'Filtering failed, probably non-ASCII symbols. '
-                                 #'Returning empty list. '
-                                 #'Full error: {0}'.format( str(error) ) )
+    except IndexError as error:
       matches = []
 
     return [ {'word': path,
