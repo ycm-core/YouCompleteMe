@@ -782,10 +782,11 @@ after typing `.`, `->` and `::` in insert mode (if semantic completion support
 has been compiled in). This key mapping can be used to trigger semantic
 completion anywhere. Useful for searching for top-level functions and classes.
 
-Note that the default of `<C-Space>` means Ctrl-Space. Also note that the
-default mapping will probably only work in GUI Vim (Gvim or MacVim) and not in
-plain console Vim because the terminal usually does not forward modifier key
-combinations to Vim.
+Console Vim (not Gvim or MacVim) passes `<Nul>` to Vim when the user types
+`<C-Space>` so YCM will make sure that `<Nul>` is used in the map command when
+you're editing in console Vim, and `<C-Space>` in GUI Vim. This means that you
+can just press `<C-Space>` in both console and GUI Vim and YCM will do the right
+thing.
 
 Setting this option to an empty string will make sure no mapping is created.
 

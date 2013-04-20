@@ -119,10 +119,16 @@ function! s:SetUpKeyMappings()
   endfor
 
   if !empty( g:ycm_key_invoke_completion )
+    let invoke_key = g:ycm_key_invoke_completion
+
+    " Inside the console, <C-Space> is passed as <Nul> to Vim
+    if invoke_key ==# '<C-Space>' && !has('gui_running')
+      let invoke_key = '<Nul>'
+    endif
+
     " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
     " candidate that vim selects by default
-    silent! exe 'inoremap <unique> ' . g:ycm_key_invoke_completion .
-          \ ' <C-X><C-O><C-P>'
+    silent! exe 'inoremap <unique> ' . invoke_key .  ' <C-X><C-O><C-P>'
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
