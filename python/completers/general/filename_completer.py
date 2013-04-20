@@ -117,8 +117,7 @@ class FilenameCompleter( Completer ):
 
   def _generate_results( self, completions, query ):
     try:
-      matches = ycm_core.FilterAndSortCandidates( completions, '', query ) \
-              if query else completions
+      matches = ycm_core.FilterAndSortCandidates( completions, '', query )
     except IndexError as error:
       matches = []
 
