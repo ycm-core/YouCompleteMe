@@ -58,7 +58,7 @@ class GeneralCompleterStore( Completer ):
   def InitCompleters( self ):
     # This method creates objects of main completers class.
     completers = []
-    modules = [ module for module in os.listdir( '.' )
+    modules = [ module for module in os.listdir( os.path.dirname(__file__) )
                 if fnmatch.fnmatch(module, '*.py')
                 and not 'general_completer' in module
                 and not '__init__' in module
