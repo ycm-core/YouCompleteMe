@@ -33,11 +33,11 @@ class FilenameCompleter( Completer ):
   def __init__(self):
     super( FilenameCompleter, self ).__init__()
     self._candidates = []
-    self.query = None
-    self.ShouldUse = False
+    self._query = None
+    self._should_use = False
 
     # TODO look into vim-style path globbing, NCC has a nice implementation
-    self.pat = re.compile( """(?:[A-z]+:/|[/~]|\./|\.+/)+ # 1 or more 'D:/'-like token or '/' or '~' or './' or '../'
+    self._path_regex = re.compile( """(?:[A-z]+:/|[/~]|\./|\.+/)+ # 1 or more 'D:/'-like token or '/' or '~' or './' or '../'
                              (?:[ /a-zA-Z0-9()$+_~.\x80-\xff-\[\]]| # any alphanumeric symbal and space literal
                              [^\x20-\x7E]| # skip any special symbols
                              \\.)* # backslash and 1 char after it. + matches 1 or more of whole group
@@ -51,8 +51,8 @@ class FilenameCompleter( Completer ):
 
   def ShouldUseNowInner( self, start_column ):
     token = vim.current.line[ start_column - 1 ]
-    if token  == '/' or self.ShouldUse:
-      self.ShouldUse = True
+    if token  == '/' or self._should_use:
+      self._should_use = True
       return True
     else:
       return False
@@ -72,21 +72,21 @@ class FilenameCompleter( Completer ):
 
   def CandidatesForQueryAsyncInner( self, query, start_column ):
     self._candidates = []
-    self.query = query
-    self.finished = False
+    self._query = query
+    self._finished = False
     self.line = str( vim.current.line.strip() )
     self.SetCandidates()
 
 
   def AsyncCandidateRequestReadyInner( self ):
-    return self.finished
+    return self._finished
 
 
   def OnInsertLeave( self ):
     # TODO this a hackish way to keep results when typing 2-3rd char after slash
     # because identifier completer will kick in and replace results for 1 char.
     # Need to do something better
-    self.ShouldUse = False
+    self._should_use = False
 
 
   def CandidatesFromStoredRequest( self ):
@@ -97,22 +97,22 @@ class FilenameCompleter( Completer ):
       self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
       self.completions_cache.line, _ = vimsupport.CurrentLineAndColumn()
       self.completions_cache.column = self.completion_start_column
-      return self._generate_results( self.completions_cache.raw_completions, self.query )
+      return self._generate_results( self.completions_cache.raw_completions, self._query )
 
   def CandidatesFromStoredRequestInner( self ):
     return self._candidates
 
 
   def SetCandidates( self ):
-    path = self.pat.search( self.line )
-    self.working_dir = os.path.expanduser( path.group() ) if path else ''
+    path = self._path_regex.search( self.line )
+    self._working_dir = os.path.expanduser( path.group() ) if path else ''
 
     try:
-      self._candidates = os.listdir( self.working_dir )
+      self._candidates = os.listdir( self._working_dir )
     except:
       self._candidates = []
 
-    self.finished = True
+    self._finished = True
 
 
   def _generate_results( self, completions, query ):
@@ -124,5 +124,5 @@ class FilenameCompleter( Completer ):
 
     return [ {'word': path,
             'dup': 1,
-            'menu': '[Dir]' if os.path.isdir( self.working_dir + '/' + path ) else '[File]'
+            'menu': '[Dir]' if os.path.isdir( self._working_dir + '/' + path ) else '[File]'
              } for path in matches ]
