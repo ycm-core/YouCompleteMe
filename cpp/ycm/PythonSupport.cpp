@@ -64,8 +64,18 @@ boost::python::list FilterAndSortCandidates(
   const std::string &query ) {
   pylist filtered_candidates;
 
-  if ( query.empty() )
+  if ( query.empty() ) {
+    if ( candidate_property.empty() )
+      return candidates;
+
+    int num_candidates = len( candidates );
+
+    for ( int i = 0; i < num_candidates; ++i ) {
+      filtered_candidates.append( candidates[ i ][ candidate_property ] );
+    }
+
     return filtered_candidates;
+  }
 
   std::vector< const Candidate * > repository_candidates =
     CandidatesFromObjectList( candidates, candidate_property );
