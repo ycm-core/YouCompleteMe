@@ -85,7 +85,7 @@ class GeneralCompleterStore( Completer ):
 
       # Init selected class and store class object
       completers.append( classInstance() )
-    
+
     completers.append( IdentifierCompleter() )
 
     return completers
@@ -130,7 +130,7 @@ class GeneralCompleterStore( Completer ):
   def CandidatesFromStoredRequest( self ):
     for completer in self.completers:
       if completer._should_use and completer._finished.is_set():
-          self._candidates += completer._results.pop()
+          self._candidates += completer.CandidatesFromStoredRequest()
 
     return self._candidates
 
@@ -142,12 +142,10 @@ class GeneralCompleterStore( Completer ):
       WaitAndClear( completer._should_start )
 
       completer.CandidatesForQueryAsync( self.query,
-                                                   self.completion_start_column )
+                                         self.completion_start_column )
 
       while not completer.AsyncCandidateRequestReady():
           continue
-
-      completer._results.append( completer.CandidatesFromStoredRequest() )
 
       completer._finished.set()
 
@@ -160,8 +158,6 @@ class GeneralCompleterStore( Completer ):
   def OnFileReadyToParse( self ):
     # Process all parsing methods of completers. Needed by identifier completer
     for completer in self.completers:
-      # clear all stored completion results
-      completer._results = []
       completer.OnFileReadyToParse()
 
 

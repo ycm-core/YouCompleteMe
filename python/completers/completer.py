@@ -326,7 +326,6 @@ class GeneralCompleter( Completer ):
     self._should_start = Event()
     self._should_use = False
     self._finished = Event()
-    self._results = []
 
 
   def SupportedFiletypes( self ):
