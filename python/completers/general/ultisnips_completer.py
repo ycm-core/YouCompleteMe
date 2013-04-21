@@ -21,8 +21,6 @@ from completers.completer import GeneralCompleter, CompletionsCache
 from UltiSnips import UltiSnips_Manager
 import vimsupport
 
-MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_of_chars_for_completion" ) )
 
 class UltiSnipsCompleter( GeneralCompleter ):
   """
@@ -47,8 +45,7 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
 
   def ShouldUseNowInner( self, start_column ):
-    query_length = vimsupport.CurrentColumn() - start_column
-    return query_length >= MIN_NUM_CHARS
+    return self.QueryLengthAboveMinThreshold( start_column )
 
 
   def CandidatesForQueryAsync( self, query, start_column ):

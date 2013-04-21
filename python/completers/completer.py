@@ -26,6 +26,9 @@ from threading import Event
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
+MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
+  "g:ycm_min_num_of_chars_for_completion" ) )
+
 class Completer( object ):
   """A base class for all Completers in YCM.
 
@@ -152,6 +155,11 @@ class Completer( object ):
           return True
         index -= 1
     return False
+
+
+  def QueryLengthAboveMinThreshold( self, start_column ):
+    query_length = vimsupport.CurrentColumn() - start_column
+    return query_length >= MIN_NUM_CHARS
 
 
   # It's highly likely you DON'T want to override this function but the *Inner

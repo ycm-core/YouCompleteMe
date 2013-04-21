@@ -24,8 +24,6 @@ import ycm_core
 import ycm_utils as utils
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
-MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_of_chars_for_completion" ) )
 
 
 class IdentifierCompleter( GeneralCompleter ):
@@ -36,8 +34,7 @@ class IdentifierCompleter( GeneralCompleter ):
 
 
   def ShouldUseNow( self, start_column ):
-    query_length = vimsupport.CurrentColumn() - start_column
-    return query_length >= MIN_NUM_CHARS
+      return self.QueryLengthAboveMinThreshold( start_column )
 
 
   def CandidatesForQueryAsync( self, query, unused_start_column ):
