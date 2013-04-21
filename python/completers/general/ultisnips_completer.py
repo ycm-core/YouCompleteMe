@@ -91,8 +91,11 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
   def SetCandidates( self ):
     try:
-      # get all snippets for filetype
       rawsnips = UltiSnips_Manager._snips( '', 1 )
+
+      # UltiSnips_Manager._snips() returns a class instance where:
+      # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
+      # class.description - description of the snippet
       self._candidates = [ { 'word': str( snip.trigger ),
                               'menu': str( '<snip> ' + snip.description ) }
                           for snip in rawsnips ]
