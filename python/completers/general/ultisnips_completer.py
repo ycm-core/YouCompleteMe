@@ -48,6 +48,8 @@ class UltiSnipsCompleter( GeneralCompleter ):
     return self.QueryLengthAboveMinThreshold( start_column )
 
 
+  # We need to override this because Completer version invalidates cache on
+  # empty query and we want to invalidate cache only on buffer switch.
   def CandidatesForQueryAsync( self, query, start_column ):
     self.completion_start_column = start_column
 
@@ -67,19 +69,6 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
   def AsyncCandidateRequestReadyInner( self ):
     return self.flag
-
-
-  # We need to override this because we need to store all snippets but return
-  # filtered results on first call.
-  def CandidatesFromStoredRequest( self ):
-    if self.completions_cache:
-      return self.completions_cache.filtered_completions
-    else:
-      self.completions_cache = CompletionsCache()
-      self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
-      self.completions_cache.line, _ = vimsupport.CurrentLineAndColumn()
-      self.completions_cache.column = self.completion_start_column
-      return self.FilterAndSortCandidates( self._candidates, self._query )
 
 
   def CandidatesFromStoredRequestInner( self ):
@@ -103,5 +92,6 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
   def OnFileReadyToParse( self ):
     # Invalidate cache on buffer switch
-    self.completions_cache = None
+    self.completions_cache = CompletionsCache()
     self.SetCandidates()
+    self.completions_cache.raw_completions = self._candidates
