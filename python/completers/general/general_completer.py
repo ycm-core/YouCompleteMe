@@ -114,23 +114,23 @@ class GeneralCompleterStore( Completer ):
 
     # if completer should be used start thread by setting Event flag
     for completer in self.completers:
-      completer.finished.clear()
-      if completer._should_use and not completer.should_start.is_set():
-        completer.should_start.set()
+      completer._finished.clear()
+      if completer._should_use and not completer._should_start.is_set():
+        completer._should_start.set()
 
 
   def AsyncCandidateRequestReady( self ):
     # Return True when all completers that should be used are finished their work.
     for completer in self.completers:
-        if not completer.finished.is_set() and completer._should_use:
+        if not completer._finished.is_set() and completer._should_use:
             return False
     return True
 
 
   def CandidatesFromStoredRequest( self ):
     for completer in self.completers:
-      if completer._should_use and completer.finished.is_set():
-          self._candidates += completer.results.pop()
+      if completer._should_use and completer._finished.is_set():
+          self._candidates += completer._results.pop()
 
     return self._candidates
 
@@ -139,7 +139,7 @@ class GeneralCompleterStore( Completer ):
     while True:
 
       # sleep until ShouldUseNow returns True
-      WaitAndClear( completer.should_start )
+      WaitAndClear( completer._should_start )
 
       completer.CandidatesForQueryAsync( self.query,
                                                    self.completion_start_column )
@@ -147,9 +147,9 @@ class GeneralCompleterStore( Completer ):
       while not completer.AsyncCandidateRequestReady():
           continue
 
-      completer.results.append( completer.CandidatesFromStoredRequest() )
+      completer._results.append( completer.CandidatesFromStoredRequest() )
 
-      completer.finished.set()
+      completer._finished.set()
 
 
   def StartThreads( self ):
@@ -161,7 +161,7 @@ class GeneralCompleterStore( Completer ):
     # Process all parsing methods of completers. Needed by identifier completer
     for completer in self.completers:
       # clear all stored completion results
-      completer.results = []
+      completer._results = []
       completer.OnFileReadyToParse()
 
 

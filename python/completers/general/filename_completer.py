@@ -68,13 +68,13 @@ class FilenameCompleter( GeneralCompleter ):
   def CandidatesForQueryAsyncInner( self, query, start_column ):
     self._candidates = []
     self._query = query
-    self._finished = False
+    self._completions_ready = False
     self.line = str( vim.current.line.strip() )
     self.SetCandidates()
 
 
   def AsyncCandidateRequestReadyInner( self ):
-    return self._finished
+    return self._completions_ready
 
 
   def OnInsertLeave( self ):
@@ -107,7 +107,7 @@ class FilenameCompleter( GeneralCompleter ):
     except:
       self._candidates = []
 
-    self._finished = True
+    self._completions_ready = True
 
 
   def _generate_results( self, completions, query ):
