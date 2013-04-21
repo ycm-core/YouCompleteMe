@@ -17,14 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import Completer, CompletionsCache
+from completers.completer import GeneralCompleter, CompletionsCache
 from UltiSnips import UltiSnips_Manager
 import vimsupport
 
 MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
 
-class UltiSnipsCompleter( Completer ):
+class UltiSnipsCompleter( GeneralCompleter ):
   """
   General completer that provides UltiSnips snippet names in completions.
 
@@ -49,11 +49,6 @@ class UltiSnipsCompleter( Completer ):
   def ShouldUseNowInner( self, start_column ):
     query_length = vimsupport.CurrentColumn() - start_column
     return query_length >= MIN_NUM_CHARS
-
-
-  def SupportedFiletypes( self ):
-    # magic token meaning all filetypes
-    return set( [ 'ycm_all' ] )
 
 
   def CandidatesForQueryAsync( self, query, start_column ):

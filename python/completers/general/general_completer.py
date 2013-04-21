@@ -19,7 +19,7 @@
 
 from completers.completer import Completer
 from completers.all.identifier_completer import IdentifierCompleter
-from threading import Thread, Event
+from threading import Thread
 import vimsupport
 import inspect
 import fnmatch
@@ -61,8 +61,7 @@ class GeneralCompleterStore( Completer ):
     modules = [ module for module in os.listdir( os.path.dirname(__file__) )
                 if fnmatch.fnmatch(module, '*.py')
                 and not 'general_completer' in module
-                and not '__init__' in module
-                and not 'hook' in module ]
+                and not '__init__' in module ]
 
     for module in modules:
 
@@ -79,20 +78,21 @@ class GeneralCompleterStore( Completer ):
 
       for _, ClassObject in inspect.getmembers( module, inspect.isclass ):
         # Iterate over all classes in a module and select main class
-        if hasattr( ClassObject, 'CandidatesForQueryAsyncInner' ):
+        if not __name__ in str(ClassObject) and 'general' in str(ClassObject):
+
           classInstance = ClassObject
 
-      # Init selected class and store class object
-      completers.append( GeneralCompleterInstance( classInstance() ) )
 
-    # append IdentifierCompleter
-    completers.append( GeneralCompleterInstance( IdentifierCompleter() ) )
+      # Init selected class and store class object
+      completers.append( classInstance() )
+    
+    completers.append( IdentifierCompleter() )
+
     return completers
 
 
   def SupportedFiletypes( self ):
-    # magic token meaning all filetypes
-    return set( [ 'ycm_all' ] )
+    return set()
 
 
   def ShouldUseNow( self, start_column ):
@@ -100,9 +100,9 @@ class GeneralCompleterStore( Completer ):
     # True. Also update flags in completers classes
     flag = False
     for completer in self.completers:
-      ShouldUse = completer.completer.ShouldUseNow( start_column )
-      completer.ShouldUse = ShouldUse
-      if ShouldUse:
+      _should_use = completer.ShouldUseNow( start_column )
+      completer._should_use = _should_use
+      if _should_use:
         flag = True
 
     return flag
@@ -115,21 +115,21 @@ class GeneralCompleterStore( Completer ):
     # if completer should be used start thread by setting Event flag
     for completer in self.completers:
       completer.finished.clear()
-      if completer.ShouldUse and not completer.should_start.is_set():
+      if completer._should_use and not completer.should_start.is_set():
         completer.should_start.set()
 
 
   def AsyncCandidateRequestReady( self ):
     # Return True when all completers that should be used are finished their work.
     for completer in self.completers:
-        if not completer.finished.is_set() and completer.ShouldUse:
+        if not completer.finished.is_set() and completer._should_use:
             return False
     return True
 
 
   def CandidatesFromStoredRequest( self ):
     for completer in self.completers:
-      if completer.ShouldUse and completer.finished.is_set():
+      if completer._should_use and completer.finished.is_set():
           self._candidates += completer.results.pop()
 
     return self._candidates
@@ -141,13 +141,13 @@ class GeneralCompleterStore( Completer ):
       # sleep until ShouldUseNow returns True
       WaitAndClear( completer.should_start )
 
-      completer.completer.CandidatesForQueryAsync( self.query,
+      completer.CandidatesForQueryAsync( self.query,
                                                    self.completion_start_column )
 
-      while not completer.completer.AsyncCandidateRequestReady():
+      while not completer.AsyncCandidateRequestReady():
           continue
 
-      completer.results.append( completer.completer.CandidatesFromStoredRequest() )
+      completer.results.append( completer.CandidatesFromStoredRequest() )
 
       completer.finished.set()
 
@@ -162,49 +162,37 @@ class GeneralCompleterStore( Completer ):
     for completer in self.completers:
       # clear all stored completion results
       completer.results = []
-      completer.completer.OnFileReadyToParse()
+      completer.OnFileReadyToParse()
 
 
   def OnCursorMovedInsertMode( self ):
     for completer in self.completers:
-      completer.completer.OnCursorMovedInsertMode()
+      completer.OnCursorMovedInsertMode()
 
 
   def OnCursorMovedNormalMode( self ):
     for completer in self.completers:
-      completer.completer.OnCursorMovedNormalMode()
+      completer.OnCursorMovedNormalMode()
 
 
   def OnBufferVisit( self ):
     for completer in self.completers:
-      completer.completer.OnBufferVisit()
+      completer.OnBufferVisit()
 
 
   def OnBufferDelete( self, deleted_buffer_file ):
     for completer in self.completers:
-      completer.completer.OnBufferDelete( deleted_buffer_file )
+      completer.OnBufferDelete( deleted_buffer_file )
 
 
   def OnCursorHold( self ):
     for completer in self.completers:
-      completer.completer.OnCursorHold()
+      completer.OnCursorHold()
 
 
   def OnInsertLeave( self ):
     for completer in self.completers:
-      completer.completer.OnInsertLeave()
-
-
-class GeneralCompleterInstance( object ):
-  """
-  Class that holds all meta information about specific general completer
-  """
-  def __init__( self, completer ):
-    self.completer = completer
-    self.should_start = Event()
-    self.ShouldUse = False
-    self.finished = Event()
-    self.results = []
+      completer.OnInsertLeave()
 
 
 def WaitAndClear( event, timeout=None ):

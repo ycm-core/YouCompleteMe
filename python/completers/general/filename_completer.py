@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import Completer, CompletionsCache
+from completers.completer import GeneralCompleter, CompletionsCache
 import vimsupport
 import ycm_core
 import vim
@@ -24,7 +24,7 @@ import os
 import re
 
 
-class FilenameCompleter( Completer ):
+class FilenameCompleter( GeneralCompleter ):
   """
   General completer that provides filename and filepath completions.
 
@@ -42,11 +42,6 @@ class FilenameCompleter( Completer ):
                              [^\x20-\x7E]| # skip any special symbols
                              \\.)* # backslash and 1 char after it. + matches 1 or more of whole group
                            """, re.X )
-
-
-  def SupportedFiletypes( self ):
-    # magic token meaning all filetypes
-    return set( [ 'ycm_all' ] )
 
 
   def ShouldUseNowInner( self, start_column ):
