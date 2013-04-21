@@ -53,18 +53,6 @@ class FilenameCompleter( GeneralCompleter ):
       return False
 
 
-  def CandidatesForQueryAsync( self, query, start_column ):
-    self.completion_start_column = start_column
-
-    if query and self.completions_cache and self.completions_cache.CacheValid(
-      start_column ):
-      self.completions_cache.filtered_completions = self._generate_results(
-          self.completions_cache.raw_completions, query )
-    else:
-      self.completions_cache = None
-      self.CandidatesForQueryAsyncInner( query, start_column )
-
-
   def CandidatesForQueryAsyncInner( self, query, start_column ):
     self._candidates = []
     self._query = query
@@ -84,16 +72,6 @@ class FilenameCompleter( GeneralCompleter ):
     self._should_use = False
 
 
-  def CandidatesFromStoredRequest( self ):
-    if self.completions_cache:
-      return self.completions_cache.filtered_completions
-    else:
-      self.completions_cache = CompletionsCache()
-      self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
-      self.completions_cache.line, _ = vimsupport.CurrentLineAndColumn()
-      self.completions_cache.column = self.completion_start_column
-      return self._generate_results( self.completions_cache.raw_completions, self._query )
-
   def CandidatesFromStoredRequestInner( self ):
     return self._candidates
 
@@ -103,20 +81,14 @@ class FilenameCompleter( GeneralCompleter ):
     self._working_dir = os.path.expanduser( path.group() ) if path else ''
 
     try:
-      self._candidates = os.listdir( self._working_dir )
+      paths = os.listdir( self._working_dir )
     except:
-      self._candidates = []
+      paths = []
+
+    self._candidates = [ {'word': path,
+                        'dup': 1,
+                        'menu': '[Dir]' if os.path.isdir( self._working_dir + \
+                                                         '/' + path ) else '[File]'
+                        } for path in paths ]
 
     self._completions_ready = True
-
-
-  def _generate_results( self, completions, query ):
-    try:
-      matches = ycm_core.FilterAndSortCandidates( completions, '', query )
-    except IndexError as error:
-      matches = []
-
-    return [ {'word': path,
-            'dup': 1,
-            'menu': '[Dir]' if os.path.isdir( self._working_dir + '/' + path ) else '[File]'
-             } for path in matches ]
