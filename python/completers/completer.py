@@ -186,10 +186,15 @@ class Completer( object ):
       candidates = candidates.words
     items_are_objects = 'word' in candidates[ 0 ]
 
-    return ycm_core.FilterAndSortCandidates(
-      candidates,
-      'word' if items_are_objects else '',
-      query )
+    try:
+      matches = ycm_core.FilterAndSortCandidates(
+        candidates,
+        'word' if items_are_objects else '',
+        query )
+    except:
+      matches = []
+
+    return matches
 
 
   def CandidatesForQueryAsyncInner( self, query, start_column ):
