@@ -431,7 +431,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer,
   if a:use_filetype_completer
     py completer = ycm_state.GetFiletypeCompleter()
   else
-    py completer = ycm_state.GetIdentifierCompleter()
+    py completer = ycm_state.GetGeneralCompleter()
   endif
 
   py completer.CandidatesForQueryAsync( vim.eval( 'a:query' ),
@@ -480,7 +480,7 @@ function! youcompleteme#Complete( findstart, base )
           \ s:completion_start_column . ')' )
 
     if !s:should_use_filetype_completion &&
-          \ !pyeval( 'ycm_state.ShouldUseIdentifierCompleter(' .
+          \ !pyeval( 'ycm_state.ShouldUseGeneralCompleter(' .
           \ s:completion_start_column . ')' )
       " for vim, -2 means not found but don't trigger an error message
       " see :h complete-functions
@@ -544,7 +544,7 @@ function! s:CompleterCommand(...)
     if a:1 == 'ft=ycm:omni'
       py completer = ycm_state.GetOmniCompleter()
     elseif a:1 == 'ft=ycm:ident'
-      py completer = ycm_state.GetIdentifierCompleter()
+      py completer = ycm_state.GetGeneralCompleter()
     else
       py completer = ycm_state.GetFiletypeCompleterForFiletype(
                    \ vim.eval('a:1').lstrip('ft=') )
