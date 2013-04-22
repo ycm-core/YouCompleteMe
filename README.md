@@ -983,7 +983,7 @@ Look in the _Options_ section and see if which of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 
-### I get `'GLIBC_2.14' not found (required by libclang.so)` when starting Vim
+### I get `'GLIBC_2.XX' not found (required by libclang.so)` when starting Vim
 
 Your system is too old for the precompiled binaries from llvm.org. Compile
 Clang on your machine and then link against the `libclang.so` you just produced.
