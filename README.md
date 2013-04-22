@@ -983,6 +983,12 @@ Look in the _Options_ section and see if which of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 
+### I get `'GLIBC_2.14' not found (required by libclang.so)` when starting Vim
+
+Your system is too old for the precompiled binaries from llvm.org. Compile
+Clang on your machine and then link against the `libclang.so` you just produced.
+See the full installation guide for help.
+
 ### I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults
 
 Something (I don't know what) is wrong with the way that Homebrew configures and
