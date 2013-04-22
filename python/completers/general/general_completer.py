@@ -155,40 +155,39 @@ class GeneralCompleterStore( Completer ):
       self._start_completion_thread( completer )
 
 
+  def CallGeneralCompletersFunction( self, function, *args ):
+    for completer in self.completers:
+      _function = getattr( completer, function )
+      _function( *args )
+
+
   def OnFileReadyToParse( self ):
     # Process all parsing methods of completers. Needed by identifier completer
-    for completer in self.completers:
-      completer.OnFileReadyToParse()
+    self.CallGeneralCompletersFunction( 'OnFileReadyToParse' )
 
 
   def OnCursorMovedInsertMode( self ):
-    for completer in self.completers:
-      completer.OnCursorMovedInsertMode()
+    self.CallGeneralCompletersFunction( 'OnCursorMovedInsertMode' )
 
 
   def OnCursorMovedNormalMode( self ):
-    for completer in self.completers:
-      completer.OnCursorMovedNormalMode()
+    self.CallGeneralCompletersFunction( 'OnCursorMovedNormalMode' )
 
 
   def OnBufferVisit( self ):
-    for completer in self.completers:
-      completer.OnBufferVisit()
+    self.CallGeneralCompletersFunction( 'OnBufferVisit' )
 
 
   def OnBufferDelete( self, deleted_buffer_file ):
-    for completer in self.completers:
-      completer.OnBufferDelete( deleted_buffer_file )
+    self.CallGeneralCompletersFunction( 'OnBufferDelete', deleted_buffer_file )
 
 
   def OnCursorHold( self ):
-    for completer in self.completers:
-      completer.OnCursorHold()
+    self.CallGeneralCompletersFunction( 'OnCursorHold' )
 
 
   def OnInsertLeave( self ):
-    for completer in self.completers:
-      completer.OnInsertLeave()
+    self.CallGeneralCompletersFunction( 'OnInsertLeave' )
 
 
 def WaitAndClear( event, timeout=None ):
