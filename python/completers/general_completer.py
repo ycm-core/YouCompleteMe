@@ -17,10 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-def IsIdentifierChar( char ):
-  return char.isalnum() or char == '_'
+from completer import Completer
+
+class GeneralCompleter( Completer ):
+  """
+  A base class for General completers in YCM. A general completer is used in all
+  filetypes.
+
+  Because this is a subclass of Completer class, you should refer to the
+  Completer class documentation. Do NOT use this class for semantic completers!
+  Subclass Completer directly.
+
+  """
+  def __init__( self ):
+    super( GeneralCompleter, self ).__init__()
 
 
-def SanitizeQuery( query ):
-  return query.strip()
-
+  def SupportedFiletypes( self ):
+    return set()

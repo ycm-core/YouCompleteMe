@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import GeneralCompleter
+from completers.threaded_completer import ThreadedCompleter
 import vim
 import vimsupport
 import os
@@ -25,14 +25,13 @@ import re
 USE_WORKING_DIR = vimsupport.GetBoolValue(
   'g:ycm_filepath_completion_use_working_dir' )
 
-class FilenameCompleter( GeneralCompleter ):
+class FilenameCompleter( ThreadedCompleter ):
   """
   General completer that provides filename and filepath completions.
   """
 
   def __init__(self):
     super( FilenameCompleter, self ).__init__()
-    self._candidates = []
 
     self._path_regex = re.compile("""
       # 1 or more 'D:/'-like token or '/' or '~' or './' or '../'
@@ -53,20 +52,11 @@ class FilenameCompleter( GeneralCompleter ):
     return vim.current.line[ start_column - 1 ] == '/'
 
 
-  def CandidatesForQueryAsyncInner( self, query, start_column ):
-    self._candidates = []
-    self.ComputePaths( start_column )
+  def SupportedFiletypes( self ):
+    return []
 
 
-  def AsyncCandidateRequestReadyInner( self ):
-    return True
-
-
-  def CandidatesFromStoredRequestInner( self ):
-    return self._candidates
-
-
-  def ComputePaths( self, start_column ):
+  def ComputeCandidates( self, unused_query, start_column ):
     def GenerateCandidateForPath( path, path_dir ):
       is_dir = os.path.isdir( os.path.join( path_dir, path ) )
       return { 'word': path,
@@ -86,6 +76,4 @@ class FilenameCompleter( GeneralCompleter ):
     except:
       paths = []
 
-    self._candidates = [ GenerateCandidateForPath( path, path_dir ) for path
-                         in paths ]
-    self._completions_ready = True
+    return [ GenerateCandidateForPath( path, path_dir ) for path in paths ]

@@ -35,7 +35,7 @@ except ImportError as e:
 
 
 from completers.all.omni_completer import OmniCompleter
-from completers.general.general_completer import GeneralCompleterStore
+from completers.general.general_completer_store import GeneralCompleterStore
 
 
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(

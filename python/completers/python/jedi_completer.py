@@ -19,8 +19,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
-from threading import Thread, Event
-from completers.completer import Completer
+from completers.threaded_completer import ThreadedCompleter
 import vimsupport
 
 import sys
@@ -39,7 +38,7 @@ except ImportError:
 sys.path.pop( 0 )
 
 
-class JediCompleter( Completer ):
+class JediCompleter( ThreadedCompleter ):
   """
   A Completer that uses the Jedi completion engine.
   https://jedi.readthedocs.org/en/latest/
@@ -47,16 +46,6 @@ class JediCompleter( Completer ):
 
   def __init__( self ):
     super( JediCompleter, self ).__init__()
-    self._query_ready = Event()
-    self._candidates_ready = Event()
-    self._candidates = None
-    self._start_completion_thread()
-
-
-  def _start_completion_thread( self ):
-    self._completion_thread = Thread( target=self.SetCandidates )
-    self._completion_thread.daemon = True
-    self._completion_thread.start()
 
 
   def SupportedFiletypes( self ):
@@ -64,47 +53,17 @@ class JediCompleter( Completer ):
     return [ 'python' ]
 
 
-  def CandidatesForQueryAsyncInner( self, unused_query, unused_start_column ):
-    self._candidates = None
-    self._candidates_ready.clear()
-    self._query_ready.set()
+  def ComputeCandidates( self, unused_query, unused_start_column ):
+    filename = vim.current.buffer.name
+    line, column = vimsupport.CurrentLineAndColumn()
+    # Jedi expects lines to start at 1, not 0
+    line += 1
+    contents = '\n'.join( vim.current.buffer )
+    script = Script( contents, line, column, filename )
+
+    return [ { 'word': str( completion.word ),
+               'menu': str( completion.description ),
+               'info': str( completion.doc ) }
+             for completion in script.complete() ]
 
 
-  def AsyncCandidateRequestReadyInner( self ):
-    return WaitAndClear( self._candidates_ready, timeout=0.005 )
-
-
-  def CandidatesFromStoredRequestInner( self ):
-    return self._candidates or []
-
-
-  def SetCandidates( self ):
-    while True:
-      try:
-        WaitAndClear( self._query_ready )
-
-        filename = vim.current.buffer.name
-        line, column = vimsupport.CurrentLineAndColumn()
-        # Jedi expects lines to start at 1, not 0
-        line += 1
-        contents = '\n'.join( vim.current.buffer )
-        script = Script( contents, line, column, filename )
-
-        self._candidates = [ { 'word': str( completion.word ),
-                               'menu': str( completion.description ),
-                               'info': str( completion.doc ) }
-                            for completion in script.complete() ]
-      except:
-        self._query_ready.clear()
-        self._candidates = []
-      self._candidates_ready.set()
-
-
-def WaitAndClear( event, timeout=None ):
-  # We can't just do flag_is_set = event.wait( timeout ) because that breaks on
-  # Python 2.6
-  event.wait( timeout )
-  flag_is_set = event.is_set()
-  if flag_is_set:
-      event.clear()
-  return flag_is_set
