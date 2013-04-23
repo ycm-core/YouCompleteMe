@@ -260,8 +260,8 @@ notify you to recompile it. You should then rerun the install process.
     other flags.
 
     Running the `make` command will also place the `libclang.[so|dylib]` in the
-    `YouCompleteMe/python` folder for you (it needs to be there for YCM to
-    work).
+    `YouCompleteMe/python` folder for you if you compiled with clang support (it
+    needs to be there for YCM to work).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
