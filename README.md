@@ -67,6 +67,10 @@ YCM also provides semantic go-to-definition/declaration commands for C-family
 languages. Expect more IDE features powered by the various YCM semantic engines
 in the future.
 
+You'll also find that YCM has filepath completers (try typing `./` in a file)
+and a completer that integrates with [UltiSnips][].
+
+
 Mac OS X super-quick installation
 ---------------------------------
 
@@ -861,6 +865,17 @@ Default: `[]`
 
     let g:ycm_extra_conf_globlist = []
 
+### The `g:ycm_filepath_completion_use_working_dir` option
+
+By default, YCM's filepath completion will interpret relative paths like `../`
+as being relative to the folder of the file of the currently active buffer.
+Setting this option will force YCM to always interpret relative paths as being
+relative to Vim's current working directory.
+
+Default: `0`
+
+    let g:ycm_filepath_completion_use_working_dir = 0
+
 ### The `g:ycm_semantic_triggers` option
 
 This option controls the character-based triggers for the various semantic
@@ -1140,3 +1155,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [win-wiki]: https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide
 [eclim]: http://eclim.org/
 [jedi]: https://github.com/davidhalter/jedi
+[ultisnips]: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt

@@ -18,9 +18,12 @@
 
 from completers.completer import GeneralCompleter
 import vim
+import vimsupport
 import os
 import re
 
+USE_WORKING_DIR = vimsupport.GetBoolValue(
+  'g:ycm_filepath_completion_use_working_dir' )
 
 class FilenameCompleter( GeneralCompleter ):
   """
@@ -73,6 +76,10 @@ class FilenameCompleter( GeneralCompleter ):
     line = vim.current.line[ :start_column ]
     match = self._path_regex.search( line )
     path_dir = os.path.expanduser( match.group() ) if match else ''
+
+    if not USE_WORKING_DIR and not path_dir.startswith( '/' ):
+      path_dir = os.path.join( os.path.dirname( vim.current.buffer.name ),
+                               path_dir )
 
     try:
       paths = os.listdir( path_dir )
