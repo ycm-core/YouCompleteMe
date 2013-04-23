@@ -25,6 +25,9 @@ from collections import defaultdict
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
+MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
+  "g:ycm_min_num_of_chars_for_completion" ) )
+
 class Completer( object ):
   """A base class for all Completers in YCM.
 
@@ -153,6 +156,10 @@ class Completer( object ):
     return False
 
 
+  def QueryLengthAboveMinThreshold( self, start_column ):
+    query_length = vimsupport.CurrentColumn() - start_column
+    return query_length >= MIN_NUM_CHARS
+
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
   def CandidatesForQueryAsync( self, query, start_column ):
@@ -177,10 +184,12 @@ class Completer( object ):
       candidates = candidates.words
     items_are_objects = 'word' in candidates[ 0 ]
 
-    return ycm_core.FilterAndSortCandidates(
+    matches = ycm_core.FilterAndSortCandidates(
       candidates,
       'word' if items_are_objects else '',
       query )
+
+    return matches
 
 
   def CandidatesForQueryAsyncInner( self, query, start_column ):

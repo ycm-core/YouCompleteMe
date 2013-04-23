@@ -124,6 +124,9 @@ let g:ycm_confirm_extra_conf =
 let g:ycm_extra_conf_globlist =
       \ get( g:, 'ycm_extra_conf_globlist', [] )
 
+let g:ycm_filepath_completion_use_working_dir =
+      \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
+
 let g:ycm_semantic_triggers =
       \ get( g:, 'ycm_semantic_triggers', {
       \   'c' : ['->', '.'],

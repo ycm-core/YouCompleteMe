@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import Completer
+from completers.general_completer import GeneralCompleter
 import vim
 import vimsupport
 import ycm_core
@@ -28,21 +28,15 @@ MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
 
 
-class IdentifierCompleter( Completer ):
+class IdentifierCompleter( GeneralCompleter ):
   def __init__( self ):
     super( IdentifierCompleter, self ).__init__()
     self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
 
 
-  def SupportedFiletypes( self ):
-    # magic token meaning all filetypes
-    return set( [ 'ycm_all' ] )
-
-
   def ShouldUseNow( self, start_column ):
-    query_length = vimsupport.CurrentColumn() - start_column
-    return query_length >= MIN_NUM_CHARS
+      return self.QueryLengthAboveMinThreshold( start_column )
 
 
   def CandidatesForQueryAsync( self, query, unused_start_column ):
