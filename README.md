@@ -259,27 +259,9 @@ notify you to recompile it. You should then rerun the install process.
     with `.dylib` on a Mac). Again, this flag would be used _instead of_ the
     other flags.
 
-5.  [Complete this step ONLY if you care about semantic completion support for
-    C-family languages. Otherwise it's not neccessary.]
-
-    **Copy the libclang library file into the `YouCompleteMe/python` folder.**
-    The library file is `libclang.so` on Linux and `libclang.dylib` on Mac.
-
-    We'll assume you downloaded a binary distribution of LLVM+Clang from
-    llvm.org in step 3 and that you extracted the archive file to folder
-    `~/ycm_temp/llvm_root_dir` (with `bin`, `lib`, `include` etc. folders right
-    inside that folder).
-
-    We'll also assume you installed YCM with Vundle. That means that the
-    top-level YCM directory is in `~/.vim/bundle/YouCompleteMe`.
-
-    On Linux, run: `cp ~/ycm_temp/llvm_root_dir/lib/libclang.so ~/.vim/bundle/YouCompleteMe/python`
-
-    On Mac, run: `cp ~/ycm_temp/llvm_root_dir/lib/libclang.dylib ~/.vim/bundle/YouCompleteMe/python`
-
-    **DO NOT FORGET THIS STEP**. If you forget to copy over `libclang.so`
-    version 3.2 into the `YouCompleteMe/python` folder then YCM _will not work_
-    if you selected C-family support during YCM compilation.
+    Running the `make` command will also place the `libclang.[so|dylib]` in the
+    `YouCompleteMe/python` folder for you (it needs to be there for YCM to
+    work).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
