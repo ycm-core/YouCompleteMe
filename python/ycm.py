@@ -145,6 +145,13 @@ class YouCompleteMe( object ):
       self.GetFiletypeCompleter().OnBufferDelete( deleted_buffer_file )
 
 
+  def OnBufferVisit( self ):
+    self.gencomp.OnBufferVisit()
+
+    if self.FiletypeCompletionUsable():
+      self.GetFiletypeCompleter().OnBufferVisit()
+
+
   def OnInsertLeave( self ):
     self.gencomp.OnInsertLeave()
 

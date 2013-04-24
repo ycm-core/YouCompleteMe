@@ -205,6 +205,7 @@ function! s:OnBufferVisit()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+  py ycm_state.OnBufferVisit()
   call s:OnFileReadyToParse()
 endfunction
 

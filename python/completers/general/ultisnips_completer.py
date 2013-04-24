@@ -50,7 +50,7 @@ class UltiSnipsCompleter( GeneralCompleter ):
     return self._filtered_candidates if self._filtered_candidates else []
 
 
-  def OnFileReadyToParse( self ):
+  def OnBufferVisit( self ):
     self._candidates = _GetCandidates()
 
 
