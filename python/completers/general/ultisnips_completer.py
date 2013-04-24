@@ -43,11 +43,11 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
 
   def AsyncCandidateRequestReady( self ):
-    return bool( self._candidates )
+    return True
 
 
   def CandidatesFromStoredRequest( self ):
-    return self._filtered_candidates
+    return self._filtered_candidates if self._filtered_candidates else []
 
 
   def OnFileReadyToParse( self ):
