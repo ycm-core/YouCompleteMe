@@ -147,6 +147,7 @@ function! s:ForceSyntasticCFamilyChecker()
   let g:syntastic_c_checkers = ['ycm']
   let g:syntastic_objc_checkers = ['ycm']
   let g:syntastic_objcpp_checkers = ['ycm']
+  let g:syntastic_python_checkers = ['ycm']
 endfunction
 
 
@@ -285,7 +286,7 @@ function! s:OnCursorMovedNormalMode()
     return
   endif
 
-  call s:UpdateDiagnosticNotifications()
+  "call s:UpdateDiagnosticNotifications()
 endfunction
 
 

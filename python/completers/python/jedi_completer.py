@@ -20,6 +20,7 @@
 
 import vim
 from completers.threaded_completer import ThreadedCompleter
+from completers.python.python_syntax_checker import SyntaxChecker
 import vimsupport
 
 import sys
@@ -38,7 +39,7 @@ except ImportError:
 sys.path.pop( 0 )
 
 
-class JediCompleter( ThreadedCompleter ):
+class JediCompleter( ThreadedCompleter, SyntaxChecker ):
   """
   A Completer that uses the Jedi completion engine.
   https://jedi.readthedocs.org/en/latest/
@@ -46,6 +47,7 @@ class JediCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( JediCompleter, self ).__init__()
+    SyntaxChecker.__init__(self)
 
 
   def SupportedFiletypes( self ):
@@ -67,3 +69,20 @@ class JediCompleter( ThreadedCompleter ):
              for completion in script.complete() ]
 
 
+  def DiagnosticsForCurrentFileReady( self ):
+    return self.SyntaxCheckingReady()
+
+
+  def GetDiagnosticsForCurrentFile( self ):
+    while not self.DiagnosticsForCurrentFileReady():
+      continue
+    return self.ReturnSyntaxCheckingResults()
+
+
+  def OnInsertLeave( self ):
+    if self._should_check_syntax.is_set() and \
+       not self._checking_finished.is_set():
+      return
+
+    self._checking_finished.clear()
+    self._should_check_syntax.set()
