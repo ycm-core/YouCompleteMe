@@ -289,7 +289,9 @@ class ClangCompleter( Completer ):
     filename = vim.current.buffer.name
     flags = self.flags.FlagsForFile( filename ) or []
     source = extra_conf_store.ModuleFileForSourceFile( filename )
-    return 'Flags for {0} loaded from {1}:\n{2}'.format( filename, source, list( flags ) )
+    return 'Flags for {0} loaded from {1}:\n{2}'.format( filename,
+                                                         source,
+                                                         list( flags ) )
 
 
 # TODO: make these functions module-local

@@ -18,6 +18,7 @@
 
 from completers.threaded_completer import ThreadedCompleter
 from completers.cpp.clang_completer import InCFamilyFile
+from completers.cpp.flags import Flags
 import vim
 import vimsupport
 import os
@@ -26,6 +27,7 @@ import re
 USE_WORKING_DIR = vimsupport.GetBoolValue(
   'g:ycm_filepath_completion_use_working_dir' )
 
+
 class FilenameCompleter( ThreadedCompleter ):
   """
   General completer that provides filename and filepath completions.
@@ -33,6 +35,7 @@ class FilenameCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( FilenameCompleter, self ).__init__()
+    self._flags = Flags()
 
     self._path_regex = re.compile( """
       # 1 or more 'D:/'-like token or '/' or '~' or './' or '../'
@@ -48,17 +51,20 @@ class FilenameCompleter( ThreadedCompleter ):
       \\.)*$
       """, re.X )
 
-    self._include_regex = re.compile( '^\s*#(?:include|import)\s*(?:"|<)$' )
+    include_regex_common = '^\s*#(?:include|import)\s*(?:"|<)'
+    self._include_start_regex = re.compile( include_regex_common + '$' )
+    self._include_regex = re.compile( include_regex_common )
 
 
-  def AtIncludeStatmentStart( self, start_column ):
+  def AtIncludeStatementStart( self, start_column ):
     return ( InCFamilyFile() and
-             self._include_regex.match( vim.current.line[ :start_column ] ) )
+             self._include_start_regex.match(
+               vim.current.line[ :start_column ] ) )
 
 
   def ShouldUseNowInner( self, start_column ):
     return ( vim.current.line[ start_column - 1 ] == '/' or
-             self.AtIncludeStatmentStart( start_column ) )
+             self.AtIncludeStatementStart( start_column ) )
 
 
   def SupportedFiletypes( self ):
@@ -66,23 +72,56 @@ class FilenameCompleter( ThreadedCompleter ):
 
 
   def ComputeCandidates( self, unused_query, start_column ):
-    def GenerateCandidateForPath( path, path_dir ):
-      is_dir = os.path.isdir( os.path.join( path_dir, path ) )
-      return { 'word': path,
-               'dup': 1,
-               'menu': '[Dir]' if is_dir else '[File]' }
-
     line = vim.current.line[ :start_column ]
-    match = self._path_regex.search( line )
-    path_dir = os.path.expanduser( match.group() ) if match else ''
 
-    if not USE_WORKING_DIR and not path_dir.startswith( '/' ):
-      path_dir = os.path.join( os.path.dirname( vim.current.buffer.name ),
-                               path_dir )
+    if InCFamilyFile():
+      include_match = self._include_regex.search( line )
+      if include_match:
+        path_dir = line[ include_match.end(): ]
+        return GenerateCandidatesForPaths(
+          self.GetPathsIncludeCase( path_dir ) )
 
-    try:
-      paths = os.listdir( path_dir )
-    except:
-      paths = []
+    path_match = self._path_regex.search( line )
+    path_dir = os.path.expanduser( path_match.group() ) if path_match else ''
 
-    return [ GenerateCandidateForPath( path, path_dir ) for path in paths ]
+    return GenerateCandidatesForPaths( GetPathsStandardCase( path_dir ) )
+
+
+  def GetPathsIncludeCase( self, path_dir ):
+    paths = []
+    include_paths = self._flags.UserIncludePaths( vim.current.buffer.name )
+
+    for include_path in include_paths:
+      try:
+        relative_paths = os.listdir( os.path.join( include_path, path_dir ) )
+      except:
+        relative_paths = []
+
+      paths.extend( os.path.join( include_path, relative_path ) for
+                    relative_path in relative_paths  )
+
+    return sorted( set( paths ) )
+
+
+def GetPathsStandardCase( path_dir ):
+  if not USE_WORKING_DIR and not path_dir.startswith( '/' ):
+    path_dir = os.path.join( os.path.dirname( vim.current.buffer.name ),
+                             path_dir )
+
+  try:
+    relative_paths = os.listdir( path_dir )
+  except:
+    relative_paths = []
+
+  return ( os.path.join( path_dir, relative_path )
+           for relative_path in relative_paths )
+
+
+def GenerateCandidatesForPaths( absolute_paths ):
+  def GenerateCandidateForPath( absolute_path ):
+    is_dir = os.path.isdir( absolute_path )
+    return { 'word': os.path.basename( absolute_path ),
+              'dup': 1,
+              'menu': '[Dir]' if is_dir else '[File]' }
+
+  return [ GenerateCandidateForPath( path ) for path in absolute_paths ]

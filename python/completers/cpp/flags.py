@@ -38,7 +38,7 @@ class Flags( object ):
     self.no_extra_conf_file_warning_posted = False
 
 
-  def FlagsForFile( self, filename ):
+  def FlagsForFile( self, filename, add_special_clang_flags = True ):
     try:
       return self.flags_for_file[ filename ]
     except KeyError:
@@ -54,12 +54,41 @@ class Flags( object ):
       if not results.get( 'flags_ready', True ):
         return None
 
-      results[ 'flags' ] += self.special_clang_flags
+      if add_special_clang_flags:
+        results[ 'flags' ] += self.special_clang_flags
       sanitized_flags = _SanitizeFlags( results[ 'flags' ] )
 
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
       return sanitized_flags
+
+
+  def UserIncludePaths( self, filename ):
+    flags = self.FlagsForFile( filename, False )
+    if not flags:
+      return []
+
+    include_paths = []
+    path_flags = [ '-isystem', '-I', '-iquote' ]
+
+    next_flag_is_include_path = False
+    for flag in flags:
+      if next_flag_is_include_path:
+        next_flag_is_include_path = False
+        if flag:
+          include_paths.append( flag )
+
+      for path_flag in path_flags:
+        if flag == path_flag:
+          next_flag_is_include_path = True
+          break
+
+        if flag.startswith( path_flag ):
+          path = flag[ len( path_flag ): ]
+          if path:
+            include_paths.append( path )
+    return include_paths
+
 
 
 def _SanitizeFlags( flags ):
