@@ -78,8 +78,11 @@ class FilenameCompleter( ThreadedCompleter ):
       include_match = self._include_regex.search( line )
       if include_match:
         path_dir = line[ include_match.end(): ]
+        # We do what GCC does for <> versus "":
+        # http://gcc.gnu.org/onlinedocs/cpp/Include-Syntax.html
+        include_current_file_dir = '<' not in include_match.group()
         return GenerateCandidatesForPaths(
-          self.GetPathsIncludeCase( path_dir ) )
+          self.GetPathsIncludeCase( path_dir, include_current_file_dir ) )
 
     path_match = self._path_regex.search( line )
     path_dir = os.path.expanduser( path_match.group() ) if path_match else ''
@@ -87,9 +90,12 @@ class FilenameCompleter( ThreadedCompleter ):
     return GenerateCandidatesForPaths( GetPathsStandardCase( path_dir ) )
 
 
-  def GetPathsIncludeCase( self, path_dir ):
+  def GetPathsIncludeCase( self, path_dir, include_current_file_dir ):
     paths = []
     include_paths = self._flags.UserIncludePaths( vim.current.buffer.name )
+
+    if include_current_file_dir:
+      include_paths.append( os.path.dirname( vim.current.buffer.name ) )
 
     for include_path in include_paths:
       try:
