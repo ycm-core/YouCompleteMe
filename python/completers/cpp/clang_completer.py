@@ -331,3 +331,8 @@ def ClangAvailableForBuffer( buffer_object ):
   filetypes = vimsupport.FiletypesForBuffer( buffer_object )
   return any( [ filetype in CLANG_FILETYPES for filetype in filetypes ] )
 
+
+def InCFamilyFile():
+  return any( [ filetype in CLANG_FILETYPES for filetype in
+                vimsupport.CurrentFiletypes() ] )
+

@@ -17,6 +17,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from completers.threaded_completer import ThreadedCompleter
+from completers.cpp.clang_completer import InCFamilyFile
 import vim
 import vimsupport
 import os
@@ -30,10 +31,10 @@ class FilenameCompleter( ThreadedCompleter ):
   General completer that provides filename and filepath completions.
   """
 
-  def __init__(self):
+  def __init__( self ):
     super( FilenameCompleter, self ).__init__()
 
-    self._path_regex = re.compile("""
+    self._path_regex = re.compile( """
       # 1 or more 'D:/'-like token or '/' or '~' or './' or '../'
       (?:[A-z]+:/|[/~]|\./|\.+/)+
 
@@ -47,9 +48,17 @@ class FilenameCompleter( ThreadedCompleter ):
       \\.)*$
       """, re.X )
 
+    self._include_regex = re.compile( '^\s*#(?:include|import)\s*(?:"|<)$' )
+
+
+  def AtIncludeStatmentStart( self, start_column ):
+    return ( InCFamilyFile() and
+             self._include_regex.match( vim.current.line[ :start_column ] ) )
+
 
   def ShouldUseNowInner( self, start_column ):
-    return vim.current.line[ start_column - 1 ] == '/'
+    return ( vim.current.line[ start_column - 1 ] == '/' or
+             self.AtIncludeStatmentStart( start_column ) )
 
 
   def SupportedFiletypes( self ):

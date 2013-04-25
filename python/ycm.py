@@ -59,8 +59,8 @@ class YouCompleteMe( object ):
   def GetFiletypeCompleter( self ):
     filetypes = vimsupport.CurrentFiletypes()
 
-    completers = [self.GetFiletypeCompleterForFiletype( filetype )
-        for filetype in filetypes ]
+    completers = [ self.GetFiletypeCompleterForFiletype( filetype )
+                   for filetype in filetypes ]
 
     if not completers:
       return None
