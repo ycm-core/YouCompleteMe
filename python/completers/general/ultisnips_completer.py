@@ -62,7 +62,7 @@ def _GetCandidates():
     # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
     # class.description - description of the snippet
     return  [ { 'word': str( snip.trigger ),
-                'menu': str( '<snip> ' + snip.description ) }
+                'menu': str( '<snip> ' + snip.description.encode('utf-8') ) }
               for snip in rawsnips ]
   except:
     return []
