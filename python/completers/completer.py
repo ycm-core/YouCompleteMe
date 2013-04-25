@@ -279,6 +279,7 @@ class Completer( object ):
   def ShowDetailedDiagnostic( self ):
     pass
 
+
   def GettingCompletions( self ):
     return False
 

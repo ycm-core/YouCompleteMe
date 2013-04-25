@@ -129,3 +129,12 @@ class GeneralCompleterStore( Completer ):
     for completer in self._all_completers:
       completer.OnInsertLeave()
 
+
+  def OnCurrentIdentifierFinished( self ):
+    for completer in self._all_completers:
+      completer.OnCurrentIdentifierFinished()
+
+
+  def GettingCompletions( self ):
+    for completer in self._all_completers:
+      completer.GettingCompletions()
