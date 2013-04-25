@@ -663,14 +663,29 @@ Default: `1`
 
     let g:ycm_allow_changing_updatetime = 1
 
-### The `g:ycm_complete_in_comments_and_strings` option
+### The `g:ycm_complete_in_comments` option
 
 When this option is set to `1`, YCM will show the completion menu even when
-typing inside strings and comments.
+typing inside comments.
 
 Default: `0`
 
-    let g:ycm_complete_in_comments_and_strings = 0
+    let g:ycm_complete_in_comments = 0
+
+### The `g:ycm_complete_in_strings` option
+
+When this option is set to `1`, YCM will show the completion menu even when
+typing inside strings.
+
+Note that this is turned on by default so that you can use the filename
+completion inside strings. This is very useful for instance in C-family files
+where typing `#include "` will trigger the start of filename completion. If you
+turn off this option, you will turn off filename completion in such situations
+as well.
+
+Default: `1`
+
+    let g:ycm_complete_in_strings = 1
 
 ### The `g:ycm_collect_identifiers_from_comments_and_strings` option
 

@@ -88,8 +88,11 @@ let g:ycm_allow_changing_updatetime =
 let g:ycm_add_preview_to_completeopt =
       \ get( g:, 'ycm_add_preview_to_completeopt', 0 )
 
-let g:ycm_complete_in_comments_and_strings =
-      \ get( g:, 'ycm_complete_in_comments_and_strings', 1 )
+let g:ycm_complete_in_comments =
+      \ get( g:, 'ycm_complete_in_comments', 0 )
+
+let g:ycm_complete_in_strings =
+      \ get( g:, 'ycm_complete_in_strings', 1 )
 
 let g:ycm_collect_identifiers_from_comments_and_strings =
       \ get( g:, 'ycm_collect_identifiers_from_comments_and_strings', 0 )

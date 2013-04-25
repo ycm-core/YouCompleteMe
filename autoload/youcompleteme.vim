@@ -73,6 +73,7 @@ function! youcompleteme#Enable()
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
+  call s:SetUpBackwardsCompatibility()
 
   if g:ycm_register_as_syntastic_checker
     call s:ForceSyntasticCFamilyChecker()
@@ -137,6 +138,17 @@ function! s:SetUpKeyMappings()
   if !empty( g:ycm_key_detailed_diagnostics )
     silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<cr>'
+  endif
+endfunction
+
+
+function! s:SetUpBackwardsCompatibility()
+  let complete_in_comments_and_strings =
+        \ get( g:, 'ycm_complete_in_comments_and_strings', 0 )
+
+  if complete_in_comments_and_strings
+    let g:ycm_complete_in_strings = 1
+    let g:ycm_complete_in_comments = 1
   endif
 endfunction
 
@@ -382,18 +394,35 @@ function! s:IdentifierFinishedOperations()
 endfunction
 
 
+" Returns 1 when inside comment and 2 when inside string
 function! s:InsideCommentOrString()
-  if g:ycm_complete_in_comments_and_strings
-    return 0
-  endif
-
   " Has to be col('.') -1 because col('.') doesn't exist at this point. We are
   " in insert mode when this func is called.
   let syntax_group = synIDattr( synIDtrans( synID( line( '.' ), col( '.' ) - 1, 1 ) ), 'name')
-  if stridx(syntax_group, 'Comment') > -1 || stridx(syntax_group, 'String') > -1
+
+  if stridx(syntax_group, 'Comment') > -1
     return 1
   endif
+
+  if stridx(syntax_group, 'String') > -1
+    return 2
+  endif
+
   return 0
+endfunction
+
+
+function! s:InsideCommentOrStringAndShouldStop()
+  let retval = s:InsideCommentOrString()
+  let inside_comment = retval == 1
+  let inside_string = retval == 2
+
+  if inside_comment && g:ycm_complete_in_comments ||
+        \ inside_string && g:ycm_complete_in_strings
+    return 0
+  endif
+
+  return retval
 endfunction
 
 
@@ -407,7 +436,7 @@ function! s:InvokeCompletion()
     return
   endif
 
-  if s:InsideCommentOrString() || s:OnBlankLine()
+  if s:InsideCommentOrStringAndShouldStop() || s:OnBlankLine()
     return
   endif
 
