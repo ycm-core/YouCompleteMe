@@ -103,7 +103,7 @@ class FilenameCompleter( ThreadedCompleter ):
       except:
         relative_paths = []
 
-      paths.extend( os.path.join( include_path, relative_path ) for
+      paths.extend( os.path.join( include_path, path_dir, relative_path ) for
                     relative_path in relative_paths  )
 
     return sorted( set( paths ) )
