@@ -75,8 +75,7 @@ class Flags( object ):
     for flag in flags:
       if next_flag_is_include_path:
         next_flag_is_include_path = False
-        if flag:
-          include_paths.append( flag )
+        include_paths.append( flag )
 
       for path_flag in path_flags:
         if flag == path_flag:
@@ -85,9 +84,8 @@ class Flags( object ):
 
         if flag.startswith( path_flag ):
           path = flag[ len( path_flag ): ]
-          if path:
-            include_paths.append( path )
-    return include_paths
+          include_paths.append( path )
+    return [ x for x in include_paths if x ]
 
 
 
