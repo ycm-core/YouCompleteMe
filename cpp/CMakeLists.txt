@@ -52,6 +52,10 @@ if ( CMAKE_GENERATOR STREQUAL Xcode )
   set( CMAKE_GENERATOR_IS_XCODE true )
 endif()
 
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
+  set( SYSTEM_IS_FREEBSD true )
+endif()
+
 # Force release build by default, speed is of the essence
 if ( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )

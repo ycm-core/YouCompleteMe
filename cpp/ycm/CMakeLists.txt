@@ -289,7 +289,10 @@ endif()
 #############################################################################
 
 # We want warnings if we accidentally use C++11 features
-if ( COMPILER_IS_CLANG AND NOT CMAKE_GENERATOR_IS_XCODE )
+# We can't use this warning on FreeBSD because std headers on that OS are dumb.
+# See here: https://github.com/Valloric/YouCompleteMe/issues/260
+if ( COMPILER_IS_CLANG AND NOT CMAKE_GENERATOR_IS_XCODE AND NOT
+     SYSTEM_IS_FREEBSD )
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wc++98-compat" )
 endif()
 
