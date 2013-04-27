@@ -56,6 +56,8 @@ private:
   static boost::mutex singleton_mutex_;
   static CandidateRepository *instance_;
 
+  const std::string empty_;
+
   // This data structure owns all the Candidate pointers
   CandidateHolder candidate_holder_;
 };

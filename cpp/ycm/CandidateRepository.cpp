@@ -21,12 +21,17 @@
 #include "Utils.h"
 
 #include <boost/thread/locks.hpp>
+#include <boost/algorithm/string.hpp>
+#include <locale>
 
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter/CompletionData.h"
 #endif // USE_CLANG_COMPLETER
 
 namespace YouCompleteMe {
+
+using boost::all;
+using boost::is_print;
 
 boost::mutex CandidateRepository::singleton_mutex_;
 CandidateRepository *CandidateRepository::instance_ = NULL;
@@ -58,12 +63,18 @@ std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
     boost::lock_guard< boost::mutex > locker( holder_mutex_ );
 
     foreach ( const std::string & candidate_text, strings ) {
-      const Candidate *&candidate = GetValueElseInsert( candidate_holder_,
-                                                        candidate_text,
-                                                        NULL );
+      const std::string &validated_candidate_text =
+        all( candidate_text, is_print( std::locale::classic() ) ) ?
+        candidate_text :
+        empty_;
+
+      const Candidate *&candidate = GetValueElseInsert(
+          candidate_holder_,
+          validated_candidate_text,
+          NULL );
 
       if ( !candidate )
-        candidate = new Candidate( candidate_text );
+        candidate = new Candidate( validated_candidate_text );
 
       candidates.push_back( candidate );
     }
