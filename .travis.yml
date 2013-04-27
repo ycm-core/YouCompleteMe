@@ -1,8 +1,13 @@
-language: cpp
+language: python
+python:
+  - "2.6"
+  - "2.7"
+install:
+  - pip install flake8
 compiler:
   - gcc
   - clang
-script: ./install.sh
+script: flake8 --exclude=jedi --select=F,C9 python && ./install.sh
 env:
   - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS=""
   - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS="-DUSE_CLANG_COMPLETER=ON"
