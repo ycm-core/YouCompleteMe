@@ -21,6 +21,78 @@
 
 namespace YouCompleteMe {
 
+TEST( GetWordBoundaryCharsTest, SimpleOneWord ) {
+  EXPECT_EQ( "s", GetWordBoundaryChars( "simple" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UnderscoreInMiddle ) {
+  EXPECT_EQ( "sf", GetWordBoundaryChars( "simple_foo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UnderscoreStart ) {
+  EXPECT_EQ( "s", GetWordBoundaryChars( "_simple" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, ManyUnderscoreStart ) {
+  EXPECT_EQ( "s", GetWordBoundaryChars( "___simple" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UnderscoreStartAndInMiddle ) {
+  EXPECT_EQ( "sf", GetWordBoundaryChars( "_simple_foo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, ManyUnderscoreStartAndInMiddle ) {
+  EXPECT_EQ( "sf", GetWordBoundaryChars( "___simple__foo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, SimpleCapitalStart ) {
+  EXPECT_EQ( "s", GetWordBoundaryChars( "Simple" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, SimpleCapitalTwoWord ) {
+  EXPECT_EQ( "ss", GetWordBoundaryChars( "SimpleStuff" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, SimpleCapitalTwoWordUnderscoreMiddle ) {
+  EXPECT_EQ( "ss", GetWordBoundaryChars( "Simple_Stuff" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, JavaCase ) {
+  EXPECT_EQ( "ssf", GetWordBoundaryChars( "simpleStuffFoo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UppercaseSequence ) {
+  EXPECT_EQ( "ss", GetWordBoundaryChars( "simpleSTUFF" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UppercaseSequenceInMiddle ) {
+  EXPECT_EQ( "ss", GetWordBoundaryChars( "simpleSTUFFfoo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UppercaseSequenceInMiddleUnderscore ) {
+  EXPECT_EQ( "ssf", GetWordBoundaryChars( "simpleSTUFF_Foo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, UppercaseSequenceInMiddleUnderscoreLowercase ) {
+  EXPECT_EQ( "ssf", GetWordBoundaryChars( "simpleSTUFF_foo" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, AllCapsSimple ) {
+  EXPECT_EQ( "s", GetWordBoundaryChars( "SIMPLE" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, AllCapsUnderscoreStart ) {
+  EXPECT_EQ( "s", GetWordBoundaryChars( "_SIMPLE" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, AllCapsUnderscoreMiddle ) {
+  EXPECT_EQ( "ss", GetWordBoundaryChars( "SIMPLE_STUFF" ) );
+}
+
+TEST( GetWordBoundaryCharsTest, AllCapsUnderscoreMiddleAndStart ) {
+  EXPECT_EQ( "ss", GetWordBoundaryChars( "_SIMPLE_STUFF" ) );
+}
+
 TEST( CandidateTest, TextValid ) {
   std::string text = "foo";
   Candidate candidate( text );

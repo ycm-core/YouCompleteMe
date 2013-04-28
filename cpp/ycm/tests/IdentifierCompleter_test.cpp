@@ -207,6 +207,15 @@ TEST( IdentifierCompleterTest, SameLowercaseCandidateWins ) {
                             "Foobar" ) );
 }
 
+TEST( IdentifierCompleterTest, ShorterAndLowercaseWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "STDIN_FILENO",
+                   "stdin" ) ).CandidatesForQuery( "std" ),
+               ElementsAre( "stdin",
+                            "STDIN_FILENO" ) );
+}
+
 // TODO: tests for filepath and filetype candidate storing
 
 } // namespace YouCompleteMe

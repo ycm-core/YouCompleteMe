@@ -34,6 +34,9 @@ typedef std::bitset< NUM_LETTERS > Bitset;
 
 Bitset LetterBitsetFromString( const std::string &text );
 
+// Public for tests
+std::string GetWordBoundaryChars( const std::string &text );
+
 class Candidate : boost::noncopyable {
 public:
 
