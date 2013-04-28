@@ -287,6 +287,8 @@ class ClangCompleter( Completer ):
 
   def DebugInfo( self ):
     filename = vim.current.buffer.name
+    if not filename:
+      return ''
     flags = self.flags.FlagsForFile( filename ) or []
     source = extra_conf_store.ModuleFileForSourceFile( filename )
     return 'Flags for {0} loaded from {1}:\n{2}'.format( filename,
