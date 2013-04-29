@@ -177,7 +177,7 @@ Future< void > ClangCompleter::UpdateTranslationUnitAsync(
   std::vector< UnsavedFile > unsaved_files,
   std::vector< std::string > flags ) {
   function< void() > functor =
-    bind( &ClangCompleter::UpdateTranslationUnit,
+    boost::bind( &ClangCompleter::UpdateTranslationUnit,
           boost::ref( *this ),
           boost::move( filename ),
           boost::move( unsaved_files ),
@@ -339,19 +339,19 @@ void ClangCompleter::CreateSortingTask(
 
   function< CompletionDatas( const CompletionDatas & ) >
   sort_candidates_for_query_functor =
-    bind( &ClangCompleter::SortCandidatesForQuery,
+    boost::bind( &ClangCompleter::SortCandidatesForQuery,
           boost::ref( *this ),
           query,
           _1 );
 
   function< CompletionDatas() > operate_on_completion_data_functor =
-    bind( &ClangResultsCache::OperateOnCompletionDatas< CompletionDatas >,
+    boost::bind( &ClangResultsCache::OperateOnCompletionDatas< CompletionDatas >,
           boost::cref( latest_clang_results_ ),
           boost::move( sort_candidates_for_query_functor ) );
 
   shared_ptr< packaged_task< AsyncCompletions > > task =
-    make_shared< packaged_task< AsyncCompletions > >(
-      bind( ReturnValueAsShared< std::vector< CompletionData > >,
+    boost::make_shared< packaged_task< AsyncCompletions > >(
+      boost::bind( ReturnValueAsShared< std::vector< CompletionData > >,
             boost::move( operate_on_completion_data_functor ) ) );
 
   future = task->get_future();
@@ -368,7 +368,7 @@ void ClangCompleter::CreateClangTask(
   latest_clang_results_.ResetWithNewLineAndColumn( line, column );
 
   function< CompletionDatas() > candidates_for_location_functor =
-    bind( &ClangCompleter::CandidatesForLocationInFile,
+    boost::bind( &ClangCompleter::CandidatesForLocationInFile,
           boost::ref( *this ),
           boost::move( filename ),
           line,
@@ -381,7 +381,7 @@ void ClangCompleter::CreateClangTask(
 
   clang_packaged_task->completions_task_ =
     packaged_task< AsyncCompletions >(
-      bind( ReturnValueAsShared< std::vector< CompletionData > >,
+      boost::bind( ReturnValueAsShared< std::vector< CompletionData > >,
             boost::move( candidates_for_location_functor ) ) );
 
   clang_task_.Set( clang_packaged_task );
@@ -424,7 +424,7 @@ shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
 
 
   try {
-    unit = make_shared< TranslationUnit >(
+    unit = boost::make_shared< TranslationUnit >(
              filename, unsaved_files, flags, clang_index_ );
   } catch ( ClangParseError & ) {
     Erase( filename_to_translation_unit_, filename );
