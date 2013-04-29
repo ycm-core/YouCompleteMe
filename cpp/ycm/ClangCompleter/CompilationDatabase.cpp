@@ -129,7 +129,7 @@ CompilationDatabase::GetCompilationInfoForFileAsync(
     return Future< AsyncCompilationInfoForFile >();
 
   function< CompilationInfoForFile() > functor =
-    bind( &CompilationDatabase::GetCompilationInfoForFile,
+    boost::bind( &CompilationDatabase::GetCompilationInfoForFile,
           boost::ref( *this ),
           path_to_file );
 
