@@ -130,8 +130,8 @@ CompilationDatabase::GetCompilationInfoForFileAsync(
 
   function< CompilationInfoForFile() > functor =
     boost::bind( &CompilationDatabase::GetCompilationInfoForFile,
-          boost::ref( *this ),
-          path_to_file );
+                 boost::ref( *this ),
+                 path_to_file );
 
   InfoTask task =
     make_shared< packaged_task< AsyncCompilationInfoForFile > >(

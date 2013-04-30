@@ -69,9 +69,9 @@ std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
         empty_;
 
       const Candidate *&candidate = GetValueElseInsert(
-          candidate_holder_,
-          validated_candidate_text,
-          NULL );
+                                      candidate_holder_,
+                                      validated_candidate_text,
+                                      NULL );
 
       if ( !candidate )
         candidate = new Candidate( validated_candidate_text );

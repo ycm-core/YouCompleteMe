@@ -27,8 +27,8 @@ TEST( CandidateRepositoryTest, EmptyCandidatesForUnicode ) {
   inputs.push_back( "fooδιακριτικός" );
   inputs.push_back( "fooδιακός" );
 
-  CandidateRepository& repo = CandidateRepository::Instance();
-  std::vector< const Candidate* > candidates =
+  CandidateRepository &repo = CandidateRepository::Instance();
+  std::vector< const Candidate * > candidates =
     repo.GetCandidatesForStrings( inputs );
 
   EXPECT_EQ( "", candidates[ 0 ]->Text() );
@@ -40,8 +40,8 @@ TEST( CandidateRepositoryTest, EmptyCandidatesForNonPrintable ) {
   std::vector< std::string > inputs;
   inputs.push_back( "\x01\x05\x0a\x15" );
 
-  CandidateRepository& repo = CandidateRepository::Instance();
-  std::vector< const Candidate* > candidates =
+  CandidateRepository &repo = CandidateRepository::Instance();
+  std::vector< const Candidate * > candidates =
     repo.GetCandidatesForStrings( inputs );
 
   EXPECT_EQ( "", candidates[ 0 ]->Text() );
