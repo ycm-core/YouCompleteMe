@@ -550,10 +550,10 @@ restart Vim for the changes to take effect.
 ### The `g:ycm_min_num_of_chars_for_completion` option
 
 This option controls the number of characters the user needs to type before
-identifier-base completion suggestions are triggered. For example, if the option
-is set to `2`, then when the user types a second alphanumeric character after a
-whitespace character, completion suggestions will be triggered. This option is
-NOT used for semantic completion.
+identifier-based completion suggestions are triggered. For example, if the
+option is set to `2`, then when the user types a second alphanumeric character
+after a whitespace character, completion suggestions will be triggered. This
+option is NOT used for semantic completion.
 
 Setting this option to a high number like `99` effectively turns off the
 identifier completion engine and just leaves the semantic engine.
