@@ -18,7 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 def IsIdentifierChar( char ):
-  return char.isalnum() or char == '_'
+  return char.isalnum() or char == '_' or char == '-'
 
 
 def SanitizeQuery( query ):
