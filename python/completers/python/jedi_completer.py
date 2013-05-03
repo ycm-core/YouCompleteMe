@@ -30,12 +30,18 @@ from os.path import join, abspath, dirname
 # removes sys.path[0] after importing completers.python.hook
 sys.path.insert( 0, join( abspath( dirname( __file__ ) ), 'jedi' ) )
 try:
-  from jedi import Script
+  import jedi
 except ImportError:
   vimsupport.PostVimMessage(
     'Error importing jedi. Make sure the jedi submodule has been checked out. '
     'In the YouCompleteMe folder, run "git submodule update --init --recursive"')
 sys.path.pop( 0 )
+
+USER_COMMANDS_HELP_MESSAGE = """
+Supported commands are:
+  GoToDefinition
+  GoToDeclaration
+See the docs for information on what they do."""
 
 
 class JediCompleter( ThreadedCompleter ):
@@ -53,13 +59,18 @@ class JediCompleter( ThreadedCompleter ):
     return [ 'python' ]
 
 
+  def _GetJediScript( self ):
+      contents = '\n'.join(vim.current.buffer)
+      line, column = vimsupport.CurrentLineAndColumn()
+      # Jedi expects lines to start at 1, not 0
+      line += 1
+      filename = vim.current.buffer.name
+
+      return jedi.Script(contents, line, column, filename)
+
+
   def ComputeCandidates( self, unused_query, unused_start_column ):
-    filename = vim.current.buffer.name
-    line, column = vimsupport.CurrentLineAndColumn()
-    # Jedi expects lines to start at 1, not 0
-    line += 1
-    contents = '\n'.join( vim.current.buffer )
-    script = Script( contents, line, column, filename )
+    script = self._GetJediScript()
 
     return [ { 'word': str( completion.word ),
                'menu': str( completion.description ),
@@ -67,3 +78,77 @@ class JediCompleter( ThreadedCompleter ):
              for completion in script.complete() ]
 
 
+  def OnUserCommand( self, arguments ):
+    if not arguments:
+      vimsupport.EchoText( USER_COMMANDS_HELP_MESSAGE )
+      return
+
+    command = arguments[ 0 ]
+    if command == 'GoToDefinition':
+      self._GoToDefinition()
+    elif command == 'GoToDeclaration':
+      self._GoToDeclaration()
+
+
+  def _GoToDefinition( self ):
+    definitions = self._GetDefinitionsList()
+    if definitions:
+      self._JumpToLocation(definitions)
+    else:
+      vimsupport.PostVimMessage( 'Can\'t jump to definition.' )
+
+
+  def _GoToDeclaration( self ):
+    definitions = self._GetDefinitionsList( declaration = True )
+    if definitions:
+      self._JumpToLocation(definitions)
+    else:
+      vimsupport.PostVimMessage( 'Can\'t jump to declaration.' )
+
+
+  def _GetDefinitionsList( self, declaration = False ):
+    definitions = []
+    script = self._GetJediScript()
+    try:
+      if declaration:
+        definitions = script.get_definition()
+      else:
+        definitions = script.goto()
+    except jedi.NotFoundError:
+      vimsupport.PostVimMessage(
+                  "Cannot follow nothing. Put your cursor on a valid name." )
+    except Exception as e:
+      vimsupport.PostVimMessage(
+                  "Caught exception, aborting. Full error: " + str( e ) )
+
+    return definitions
+
+
+  def _JumpToLocation( self, definition_list ):
+    if len( definition_list ) == 1:
+      definition = list( definition_list )[0]
+      if definition.in_builtin_module():
+        if isinstance( definition.definition, jedi.keywords.Keyword ):
+          vimsupport.PostVimMessage(
+                  "Cannot get the definition of Python keywords." )
+        else:
+          vimsupport.PostVimMessage( "Builtin modules cannot be displayed." )
+      else:
+        vimsupport.JumpToLocation( definition.module_path,
+                                   definition.line_nr,
+                                   definition.column + 1 )
+    else:
+      # multiple definitions
+      defs = []
+      for definition in definition_list:
+        if definition.in_builtin_module():
+          defs.append( {'text': 'Builtin ' + \
+                       definition.description.encode( 'utf-8' ) } )
+        else:
+          defs.append( {'filename': definition.module_path.encode( 'utf-8' ),
+                        'lnum': definition.line_nr,
+                        'col': definition.column + 1,
+                        'text': definition.description.encode( 'utf-8' ) } )
+
+      vim.eval( 'setqflist( %s )' % repr( defs ) )
+      vim.eval( 'youcompleteme#OpenGoToList()' )
