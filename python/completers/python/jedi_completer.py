@@ -88,6 +88,8 @@ class JediCompleter( ThreadedCompleter ):
       self._GoToDefinition()
     elif command == 'GoToDeclaration':
       self._GoToDeclaration()
+    elif command == 'GoToDefinitionElseDeclaration':
+      self._GoToDefinitionElseDeclaration()
 
 
   def _GoToDefinition( self ):
@@ -104,6 +106,15 @@ class JediCompleter( ThreadedCompleter ):
       self._JumpToLocation(definitions)
     else:
       vimsupport.PostVimMessage( 'Can\'t jump to declaration.' )
+
+
+  def _GoToDefinitionElseDeclaration( self ):
+    definitions = self._GetDefinitionsList() or \
+        self._GetDefinitionsList( declaration = True )
+    if definitions:
+      self._JumpToLocation(definitions)
+    else:
+      vimsupport.PostVimMessage( 'Can\'t jump to definition or declaration.' )
 
 
   def _GetDefinitionsList( self, declaration = False ):
