@@ -126,7 +126,7 @@ class JediCompleter( ThreadedCompleter ):
 
   def _JumpToLocation( self, definition_list ):
     if len( definition_list ) == 1:
-      definition = list( definition_list )[0]
+      definition = definition_list[0]
       if definition.in_builtin_module():
         if isinstance( definition.definition, jedi.keywords.Keyword ):
           vimsupport.PostVimMessage(
