@@ -106,8 +106,8 @@ endif()
 
 #############################################################################
 
-# Linking fails without this
-if( NOT WIN32 AND 64_BIT_PLATFORM )
+if( NOT WIN32 )
+  # Linking fails without this on some platforms, notably anything x64.
   set_target_properties( BoostParts PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
