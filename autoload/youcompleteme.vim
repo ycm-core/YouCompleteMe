@@ -600,6 +600,15 @@ function! s:CompleterCommand(...)
   py completer.OnUserCommand( vim.eval( 'l:arguments' ) )
 endfunction
 
+function! youcompleteme#OpenGoToList()
+  set lazyredraw
+  cclose
+  execute 'belowright copen 3'
+  set nolazyredraw
+  au WinLeave <buffer> q  " automatically leave, if an option is chosen
+  redraw!
+endfunction
+
 command! -nargs=* YcmCompleter call s:CompleterCommand(<f-args>)
 
 function! s:ForceCompile()
