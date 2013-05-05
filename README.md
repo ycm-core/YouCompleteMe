@@ -64,8 +64,8 @@ features plus extra:
 - neocomplcache
 
 YCM also provides semantic go-to-definition/declaration commands for C-family
-languages. Expect more IDE features powered by the various YCM semantic engines
-in the future.
+languages & Python. Expect more IDE features powered by the various YCM semantic
+engines in the future.
 
 You'll also find that YCM has filepath completers (try typing `./` in a file)
 and a completer that integrates with [UltiSnips][].
@@ -513,7 +513,7 @@ The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, python`
 
 ### The `GoToDefinition` subcommand
 
@@ -524,7 +524,7 @@ the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
 with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, python`
 
 ### The `GoToDefinitionElseDeclaration` subcommand
 
@@ -532,7 +532,7 @@ Looks up the symbol under the cursor and jumps to its definition if possible; if
 the definition is not accessible from the current translation unit, jumps to the
 symbol's declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, python`
 
 
 Options
