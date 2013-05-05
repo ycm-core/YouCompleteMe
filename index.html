@@ -36,7 +36,7 @@
           <span class="credits left">Project maintained by <a href="https://github.com/Valloric">Valloric</a></span>
           <span class="credits right">Hosted on GitHub Pages — Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
-    <div id="markdown-output"><p>YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
+    <div id="markdown-output"><p><a href="https://travis-ci.org/Valloric/YouCompleteMe"><img alt="Build Status" src="https://travis-ci.org/Valloric/YouCompleteMe.png?branch=travis"/></a></p><p>YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 <a href="http://www.vim.org/">Vim</a>. It has several completion engines: an identifier-based engine that
 works with every programming language, a semantic, <a href="http://clang.llvm.org/">Clang</a>-based engine that
 provides native semantic code completion for C/C++/Objective-C/Objective-C++
@@ -61,8 +61,9 @@ the menu (so you usually need to press TAB just once).</p><p><strong>All of the 
 identifier-based completion engine. It collects all of the identifiers in the
 current file and other files you visit and searches them when you type
 (identifiers are put into per-filetype groups).</p><p>The demo also shows the semantic engine in use. When the user presses <code>.</code>, <code>-&gt;</code>
-or <code>::</code> while typing in insert mode, the semantic engine is triggered (it can
-also be triggered with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's integration with
+or <code>::</code> while typing in insert mode (for C++; different triggers are used for
+other languages), the semantic engine is triggered (it can also be triggered
+with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's integration with
 <a href="https://github.com/scrooloose/syntastic">Syntastic</a> (the little red X that shows up in the left gutter) if you are
 editing a C-family file. As Clang compiles your file and detects warnings or
 errors, they will be piped to Syntastic for display. You don't need to save your
@@ -74,8 +75,9 @@ features plus extra:</p><ul>
 <li>Supertab</li>
 <li>neocomplcache</li>
 </ul><p>YCM also provides semantic go-to-definition/declaration commands for C-family
-languages. Expect more IDE features powered by the various YCM semantic engines
-in the future.</p><h2>Mac OS X super-quick installation</h2><p>Please refer to the full Installation Guide below; the following commands are
+languages &amp; Python. Expect more IDE features powered by the various YCM semantic
+engines in the future.</p><p>You'll also find that YCM has filepath completers (try typing <code>./</code> in a file)
+and a completer that integrates with <a href="https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt">UltiSnips</a>.</p><h2>Mac OS X super-quick installation</h2><p>Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.</p><p>Install the latest version of <a href="http://code.google.com/p/macvim/#Download">MacVim</a>. Yes, MacVim. And yes, the <em>latest</em>.</p><p>If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
 inside the MacVim.app package (<code>MacVim.app/Contents/MacOS/Vim</code>). To ensure it
 works correctly copy the <code>mvim</code> script from the <a href="http://code.google.com/p/macvim/#Download">MacVim</a> download to your
@@ -182,23 +184,9 @@ run the following command in the <code>ycm_build</code> directory: <code>cmake -
 <code>-DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so</code> flag (the library would end
 with <code>.dylib</code> on a Mac). Again, this flag would be used <em>instead of</em> the
 other flags.</p>
-</li>
-<li>
-<p>[Complete this step ONLY if you care about semantic completion support for
-    C-family languages. Otherwise it's not neccessary.]</p>
-<p><strong>Copy the libclang library file into the <code>YouCompleteMe/python</code> folder.</strong>
-The library file is <code>libclang.so</code> on Linux and <code>libclang.dylib</code> on Mac.</p>
-<p>We'll assume you downloaded a binary distribution of LLVM+Clang from
-llvm.org in step 3 and that you extracted the archive file to folder
-<code>~/ycm_temp/llvm_root_dir</code> (with <code>bin</code>, <code>lib</code>, <code>include</code> etc. folders right
-inside that folder).</p>
-<p>We'll also assume you installed YCM with Vundle. That means that the
-top-level YCM directory is in <code>~/.vim/bundle/YouCompleteMe</code>.</p>
-<p>On Linux, run: <code>cp ~/ycm_temp/llvm_root_dir/lib/libclang.so ~/.vim/bundle/YouCompleteMe/python</code></p>
-<p>On Mac, run: <code>cp ~/ycm_temp/llvm_root_dir/lib/libclang.dylib ~/.vim/bundle/YouCompleteMe/python</code></p>
-<p><strong>DO NOT FORGET THIS STEP</strong>. If you forget to copy over <code>libclang.so</code>
-version 3.2 into the <code>YouCompleteMe/python</code> folder then YCM <em>will not work</em>
-if you selected C-family support during YCM compilation.</p>
+<p>Running the <code>make</code> command will also place the <code>libclang.[so|dylib]</code> in the
+<code>YouCompleteMe/python</code> folder for you if you compiled with clang support (it
+needs to be there for YCM to work).</p>
 </li>
 </ol><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -308,10 +296,12 @@ message when you move your cursor to the line with the error. You can get a
 detailed diagnostic message with the <code>&lt;leader&gt;d</code> key mapping (can be changed in
 the options) YCM provides when your cursor is on the line with the diagnostic.</p><p>You can also see the full diagnostic message for all the diagnostics in the
 current file in Vim's <code>locationlist</code>, which can be opened with the <code>:lopen</code> and
-<code>:lclose</code> commands. A good way to toggle the display of the <code>locationlist</code> with
-a single key mapping is provided by another (very small) Vim plugin called
-<a href="https://github.com/Valloric/ListToggle">ListToggle</a> (which also makes it possible to change the height of the
-<code>locationlist</code> window), also written by yours truly.</p><h2>Commands</h2><h3>The <code>YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
+<code>:lclose</code> commands (make sure you have set <code>let
+g:syntastic_always_populate_loc_list = 1</code> in your vimrc). A good way to toggle
+the display of the <code>locationlist</code> with a single key mapping is provided by
+another (very small) Vim plugin called <a href="https://github.com/Valloric/ListToggle">ListToggle</a> (which also makes it
+possible to change the height of the <code>locationlist</code> window), also written by
+yours truly.</p><h2>Commands</h2><h3>The <code>YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
 and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI <em>will</em> be
 blocked.</p><p>You may want to map this command to a key; try putting <code>nnoremap &lt;F5&gt;
@@ -335,19 +325,21 @@ C/C++/Objective-C one.</p><p>You may also want to map the subcommands to somethi
 instance, <code>nnoremap &lt;leader&gt;jd :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;</code>
 maps the <code>&lt;leader&gt;jd</code> sequence to the longer subcommand invocation.</p><p>The various <code>GoTo*</code> subcommands add entries to Vim's <code>jumplist</code> so you can use
 <code>CTRL-O</code> to jump back to where you where before invoking the command (and
-<code>CTRL-I</code> to jump forward; see <code>:h jumplist</code> for details).</p><h3>The <code>GoToDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h3>The <code>GoToDefinition</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition.</p><p>NOTE: For C-family languages <strong>this only works in certain situations</strong>, namely when
+<code>CTRL-I</code> to jump forward; see <code>:h jumplist</code> for details).</p><h3>The <code>GoToDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python</code></p><h3>The <code>GoToDefinition</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition.</p><p>NOTE: For C-family languages <strong>this only works in certain situations</strong>, namely when
 the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
-with <code>#include</code> directives (directly or indirectly) in that file.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h3>The <code>GoToDefinitionElseDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition if possible; if
+with <code>#include</code> directives (directly or indirectly) in that file.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python</code></p><h3>The <code>GoToDefinitionElseDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition if possible; if
 the definition is not accessible from the current translation unit, jumps to the
-symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
+symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python</code></p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
 you don't need to change any options. These options can be configured in your
 <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> by including a line like this:</p><pre><code>let g:ycm_min_num_of_chars_for_completion = 1
 </code></pre><p>Note that after changing an option in your <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> you have to
 restart Vim for the changes to take effect.</p><h3>The <code>g:ycm_min_num_of_chars_for_completion</code> option</h3><p>This option controls the number of characters the user needs to type before
-completion suggestions are triggered. For example, if the option is set to <code>2</code>,
-then when the user types a second alphanumeric character after a whitespace
-character, completion suggestions will be triggered.</p><p>Default: <code>2</code></p><pre><code>let g:ycm_min_num_of_chars_for_completion = 2
+identifier-based completion suggestions are triggered. For example, if the
+option is set to <code>2</code>, then when the user types a second alphanumeric character
+after a whitespace character, completion suggestions will be triggered. This
+option is NOT used for semantic completion.</p><p>Setting this option to a high number like <code>99</code> effectively turns off the
+identifier completion engine and just leaves the semantic engine.</p><p>Default: <code>2</code></p><pre><code>let g:ycm_min_num_of_chars_for_completion = 2
 </code></pre><h3>The <code>g:ycm_filetype_whitelist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
 turned on. The option value should be a Vim dictionary with keys being filetype
 strings (like <code>python</code>, <code>cpp</code> etc) and values being unimportant (the dictionary
@@ -392,8 +384,14 @@ every such event; the identifier-based engine collects the identifiers whereas
 the semantic engine compiles the file to build an AST.</p><p>The Vim default of <code>4000</code> for <code>updatetime</code> is a bit long, so YCM reduces
 this. Set this option to <code>0</code> to force YCM to leave your <code>updatetime</code> setting
 alone.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_allow_changing_updatetime = 1
-</code></pre><h3>The <code>g:ycm_complete_in_comments_and_strings</code> option</h3><p>When this option is set to <code>1</code>, YCM will show the completion menu even when
-typing inside strings and comments.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_complete_in_comments_and_strings = 0
+</code></pre><h3>The <code>g:ycm_complete_in_comments</code> option</h3><p>When this option is set to <code>1</code>, YCM will show the completion menu even when
+typing inside comments.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_complete_in_comments = 0
+</code></pre><h3>The <code>g:ycm_complete_in_strings</code> option</h3><p>When this option is set to <code>1</code>, YCM will show the completion menu even when
+typing inside strings.</p><p>Note that this is turned on by default so that you can use the filename
+completion inside strings. This is very useful for instance in C-family files
+where typing <code>#include "</code> will trigger the start of filename completion. If you
+turn off this option, you will turn off filename completion in such situations
+as well.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_complete_in_strings = 1
 </code></pre><h3>The <code>g:ycm_collect_identifiers_from_comments_and_strings</code> option</h3><p>When this option is set to <code>1</code>, YCM's identifier completer will also collect
 identifiers from strings and comments. Otherwise, the text in comments and
 strings will be ignored.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_collect_identifiers_from_comments_and_strings = 0
@@ -431,16 +429,17 @@ because the terminal usually does not forward modifier key combinations to Vim.<
 semantic completion. By default, semantic completion is trigged automatically
 after typing <code>.</code>, <code>-&gt;</code> and <code>::</code> in insert mode (if semantic completion support
 has been compiled in). This key mapping can be used to trigger semantic
-completion anywhere. Useful for searching for top-level functions and classes.</p><p>Note that the default of <code>&lt;C-Space&gt;</code> means Ctrl-Space. Also note that the
-default mapping will probably only work in GUI Vim (Gvim or MacVim) and not in
-plain console Vim because the terminal usually does not forward modifier key
-combinations to Vim.</p><p>Setting this option to an empty string will make sure no mapping is created.</p><p>Default: <code>&lt;C-Space&gt;</code></p><pre><code>let g:ycm_key_invoke_completion = '&lt;C-Space&gt;'
+completion anywhere. Useful for searching for top-level functions and classes.</p><p>Console Vim (not Gvim or MacVim) passes <code>&lt;Nul&gt;</code> to Vim when the user types
+<code>&lt;C-Space&gt;</code> so YCM will make sure that <code>&lt;Nul&gt;</code> is used in the map command when
+you're editing in console Vim, and <code>&lt;C-Space&gt;</code> in GUI Vim. This means that you
+can just press <code>&lt;C-Space&gt;</code> in both console and GUI Vim and YCM will do the right
+thing.</p><p>Setting this option to an empty string will make sure no mapping is created.</p><p>Default: <code>&lt;C-Space&gt;</code></p><pre><code>let g:ycm_key_invoke_completion = '&lt;C-Space&gt;'
 </code></pre><h3>The <code>g:ycm_key_detailed_diagnostics</code> option</h3><p>This option controls the key mapping used to show the full diagnostic text when
 the user's cursor is on the line with the diagnostic. It basically calls
 <code>:YcmShowDetailedDiagnostic</code>.</p><p>Setting this option to an empty string will make sure no mapping is created.</p><p>Default: <code>&lt;leader&gt;d</code></p><pre><code>let g:ycm_key_detailed_diagnostics = '&lt;leader&gt;d'
-</code></pre><h3>The <code>g:ycm_global_ycm_extra_conf</code> option</h3><p>Normally, YCM searches for a '.ycm_extra_conf.py' file for compilation flags
+</code></pre><h3>The <code>g:ycm_global_ycm_extra_conf</code> option</h3><p>Normally, YCM searches for a <code>.ycm_extra_conf.py</code> file for compilation flags
 (see the User Guide for more details on how this works). This option specifies
-a fallback path to a config file which is used if no '.ycm_extra_conf.py' is
+a fallback path to a config file which is used if no <code>.ycm_extra_conf.py</code> is
 found.</p><p>You can place such a global file anywhere in your filesystem.</p><p>Default: <code>''</code></p><pre><code>let g:ycm_global_ycm_extra_conf = ''
 </code></pre><h3>The <code>g:ycm_confirm_extra_conf</code> option</h3><p>When this option is set to <code>1</code> YCM will ask once per <code>.ycm_extra_conf.py</code> file
 if it is safe to be loaded. This is to prevent execution of malicious code
@@ -465,6 +464,10 @@ will take precedence over the later ones.</p><p>Rules:</p><ul>
 <li>As the first rule takes precedence everything in the home directory excluding
   the <code>~/dev</code> directory will be blacklisted.</li>
 </ul><p>Default: <code>[]</code></p><pre><code>let g:ycm_extra_conf_globlist = []
+</code></pre><h3>The <code>g:ycm_filepath_completion_use_working_dir</code> option</h3><p>By default, YCM's filepath completion will interpret relative paths like <code>../</code>
+as being relative to the folder of the file of the currently active buffer.
+Setting this option will force YCM to always interpret relative paths as being
+relative to Vim's current working directory.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_filepath_completion_use_working_dir = 0
 </code></pre><h3>The <code>g:ycm_semantic_triggers</code> option</h3><p>This option controls the character-based triggers for the various semantic
 completion engines. The option holds a dictionary of key-values, where the keys
 are Vim's filetype strings delimited by commas and values are lists of strings,
@@ -475,6 +478,7 @@ serve <code>foo</code>'s list of member functions and variables. Since C++ also 
 listed as a trigger, the same thing would happen when the user typed <code>foo-&gt;</code>.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_semantic_triggers =  {
   \   'c' : ['-&gt;', '.'],
   \   'objc' : ['-&gt;', '.'],
+  \   'ocaml' : ['.', '#'],
   \   'cpp,objcpp' : ['-&gt;', '.', '::'],
   \   'perl' : ['-&gt;'],
   \   'php' : ['-&gt;', '::'],
@@ -482,6 +486,11 @@ listed as a trigger, the same thing would happen when the user typed <code>foo-&
   \   'lua' : ['.', ':'],
   \   'erlang' : [':'],
   \ }
+</code></pre><h3>The <code>g:ycm_cache_omnifunc</code> option</h3><p>Some omnicompletion engines do not work well with the YCM cache—in particular,
+they might not produce all possible results for a given prefix. By unsetting
+this option you can ensure that the omnicompletion engine is requeried on every
+keypress. That will ensure all completions will be presented, but might cause
+stuttering and lagginess if the omnifunc is slow.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_cache_omnifunc = 1
 </code></pre><h2>FAQ</h2><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory</code>, then feel free to ignore it; it's caused by a limitation of
 CMake and is not an issue. Everything should still work fine.</p><h3>I get a weird window at the top of my file when I use the semantic engine</h3><p>This is Vim's <code>preview</code> window. Vim uses it to show you extra information about
@@ -518,7 +527,9 @@ this means there's a bug or a misconfiguration somewhere.</p><h3>I get a <code>E
 had something mapped to that key combination. The <code>&lt;blah&gt;</code> part of the message
 will tell you what was the key combination that failed.</p><p>Look in the <em>Options</em> section and see if which of the default mappings conflict
 with your own. Then change that option value to something else so that the
-conflict goes away.</p><h3>I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults</h3><p>Something (I don't know what) is wrong with the way that Homebrew configures and
+conflict goes away.</p><h3>I get <code>'GLIBC_2.XX' not found (required by libclang.so)</code> when starting Vim</h3><p>Your system is too old for the precompiled binaries from llvm.org. Compile
+Clang on your machine and then link against the <code>libclang.so</code> you just produced.
+See the full installation guide for help.</p><h3>I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults</h3><p>Something (I don't know what) is wrong with the way that Homebrew configures and
 builds Vim. I recommend using <a href="http://code.google.com/p/macvim/#Download">MacVim</a>. Even if you don't like the MacVim GUI,
 you can use the Vim binary that is inside the MacVim.app package (it's
 <code>MacVim.app/Contents/MacOS/Vim</code>) and get the Vim console experience.</p><h3>I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting</h3><p>You should probably run <code>brew rm python; brew install python</code> to get the latest
@@ -583,6 +594,7 @@ tracker</a>. The latest version is available at
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
+
 
 
 
