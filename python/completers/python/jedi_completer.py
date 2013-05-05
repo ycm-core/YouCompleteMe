@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2011, 2012  Stephen Sugden <me@stephensugden.com>
 #                           Strahinja Val Markovic <val@markovic.io>
+#                           Stanislav Golovanov <stgolovanov@gmail.com>
 #
 # This file is part of YouCompleteMe.
 #
@@ -41,6 +42,7 @@ USER_COMMANDS_HELP_MESSAGE = """
 Supported commands are:
   GoToDefinition
   GoToDeclaration
+  GoToDefinitionElseDeclaration
 See the docs for information on what they do."""
 
 
@@ -60,13 +62,13 @@ class JediCompleter( ThreadedCompleter ):
 
 
   def _GetJediScript( self ):
-      contents = '\n'.join(vim.current.buffer)
+      contents = '\n'.join( vim.current.buffer )
       line, column = vimsupport.CurrentLineAndColumn()
       # Jedi expects lines to start at 1, not 0
       line += 1
       filename = vim.current.buffer.name
 
-      return jedi.Script(contents, line, column, filename)
+      return jedi.Script( contents, line, column, filename )
 
 
   def ComputeCandidates( self, unused_query, unused_start_column ):
@@ -95,7 +97,7 @@ class JediCompleter( ThreadedCompleter ):
   def _GoToDefinition( self ):
     definitions = self._GetDefinitionsList()
     if definitions:
-      self._JumpToLocation(definitions)
+      self._JumpToLocation( definitions )
     else:
       vimsupport.PostVimMessage( 'Can\'t jump to definition.' )
 
@@ -103,7 +105,7 @@ class JediCompleter( ThreadedCompleter ):
   def _GoToDeclaration( self ):
     definitions = self._GetDefinitionsList( declaration = True )
     if definitions:
-      self._JumpToLocation(definitions)
+      self._JumpToLocation( definitions )
     else:
       vimsupport.PostVimMessage( 'Can\'t jump to declaration.' )
 
@@ -112,7 +114,7 @@ class JediCompleter( ThreadedCompleter ):
     definitions = self._GetDefinitionsList() or \
         self._GetDefinitionsList( declaration = True )
     if definitions:
-      self._JumpToLocation(definitions)
+      self._JumpToLocation( definitions )
     else:
       vimsupport.PostVimMessage( 'Can\'t jump to definition or declaration.' )
 
@@ -137,7 +139,7 @@ class JediCompleter( ThreadedCompleter ):
 
   def _JumpToLocation( self, definition_list ):
     if len( definition_list ) == 1:
-      definition = definition_list[0]
+      definition = definition_list[ 0 ]
       if definition.in_builtin_module():
         if isinstance( definition.definition, jedi.keywords.Keyword ):
           vimsupport.PostVimMessage(
