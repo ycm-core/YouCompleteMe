@@ -145,8 +145,8 @@ their features plus extra:
  - neocomplcache
 
 YCM also provides semantic go-to-definition/declaration commands for C-family
-languages. Expect more IDE features powered by the various YCM semantic
-engines in the future.
+languages & Python. Expect more IDE features powered by the various YCM
+semantic engines in the future.
 
 You'll also find that YCM has filepath completers (try typing './' in a file)
 and a completer that integrates with UltiSnips [8].
@@ -606,7 +606,7 @@ The *GoToDeclaration* subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: 'c, cpp, objc, objcpp'
+Supported in filetypes: 'c, cpp, objc, objcpp, python'
 
 -------------------------------------------------------------------------------
 The *GoToDefinition* subcommand
@@ -619,7 +619,7 @@ translation unit consists of the file you are editing and all the files you
 are including with '#include' directives (directly or indirectly) in that
 file.
 
-Supported in filetypes: 'c, cpp, objc, objcpp'
+Supported in filetypes: 'c, cpp, objc, objcpp, python'
 
 -------------------------------------------------------------------------------
 The *GoToDefinitionElseDeclaration* subcommand
@@ -628,7 +628,7 @@ Looks up the symbol under the cursor and jumps to its definition if possible;
 if the definition is not accessible from the current translation unit, jumps
 to the symbol's declaration.
 
-Supported in filetypes: 'c, cpp, objc, objcpp'
+Supported in filetypes: 'c, cpp, objc, objcpp, python'
 
 ===============================================================================
                                                          *youcompleteme-options*
@@ -1027,11 +1027,11 @@ Default: '[see next line]'
 -------------------------------------------------------------------------------
 The *g:ycm_cache_omnifunc* option
 
-Some omnicompletion engines do not work well with the YCM cacheâ€”in
-particular, they might not produce all possible results for a given prefix. By
-unsetting this option you can ensure that the omnicompletion engine is
-requeried on every keypress. That will ensure all completions will be
-presented, but might cause stuttering and lagginess if the omnifunc is slow.
+Some omnicompletion engines do not work well with the YCM cache—in particular,
+they might not produce all possible results for a given prefix. By unsetting
+this option you can ensure that the omnicompletion engine is requeried on
+every keypress. That will ensure all completions will be presented, but might
+cause stuttering and lagginess if the omnifunc is slow.
 
 Default: '1'
 >
@@ -1272,8 +1272,8 @@ The author's homepage is http://val.markovic.io.
                                                          *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [26]. ÂŠ 2012 Strahinja Val
-Markovic <val@markovic.io>.
+This software is licensed under the GPL v3 license [26]. Copyright 2012
+Strahinja Val Markovic <val@markovic.io>.
 
 ===============================================================================
                                                       *youcompleteme-references*
