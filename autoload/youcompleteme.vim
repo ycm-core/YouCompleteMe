@@ -609,7 +609,13 @@ function! youcompleteme#OpenGoToList()
   redraw!
 endfunction
 
-command! -nargs=* YcmCompleter call s:CompleterCommand(<f-args>)
+command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
+  \ YcmCompleter call s:CompleterCommand(<f-args>)
+
+function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
+  return join( pyeval( 'ycm_state.GetFiletypeCompleter().DefinedSubcommands()' ),
+    \ "\n")
+endfunction
 
 function! s:ForceCompile()
   if !pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )

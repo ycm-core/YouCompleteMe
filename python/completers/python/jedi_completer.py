@@ -38,13 +38,6 @@ except ImportError:
     'In the YouCompleteMe folder, run "git submodule update --init --recursive"')
 sys.path.pop( 0 )
 
-USER_COMMANDS_HELP_MESSAGE = """
-Supported commands are:
-  GoToDefinition
-  GoToDeclaration
-  GoToDefinitionElseDeclaration
-See the docs for information on what they do."""
-
 
 class JediCompleter( ThreadedCompleter ):
   """
@@ -80,10 +73,15 @@ class JediCompleter( ThreadedCompleter ):
              for completion in script.complete() ]
 
 
+  def DefinedSubcommands( self ):
+    return [ "GoToDefinition",
+             "GoToDeclaration",
+             "GoToDefinitionElseDeclaration" ]
+
+
   def OnUserCommand( self, arguments ):
     if not arguments:
-      vimsupport.EchoText( USER_COMMANDS_HELP_MESSAGE )
-      return
+      return self.UserCommandsHelpMessage()
 
     command = arguments[ 0 ]
     if command == 'GoToDefinition':
