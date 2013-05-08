@@ -72,9 +72,9 @@ function install {
   pushd $build_dir
 
   if [[ `uname -s` == "Darwin" ]]; then
-    cmake -G "Unix Makefiles" $(python_finder) $1 . $ycm_dir/cpp
+    cmake -G "Unix Makefiles" $(python_finder) "$@" . $ycm_dir/cpp
   else
-    cmake -G "Unix Makefiles" $1 . $ycm_dir/cpp
+    cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
   fi
 
   make -j $(num_cores) ycm_core
@@ -87,7 +87,7 @@ function testrun {
   build_dir=`mktemp -d -t ycm_build.XXXXXX`
   pushd $build_dir
 
-  cmake -G "Unix Makefiles" $1 . $ycm_dir/cpp
+  cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
   make -j $(num_cores) ycm_core_tests
   cd ycm/tests
   LD_LIBRARY_PATH=$ycm_dir/python ./ycm_core_tests
