@@ -28,12 +28,6 @@ from flags import Flags
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MAX_DIAGNOSTICS_TO_DISPLAY = int( vimsupport.GetVariableValue(
   "g:ycm_max_diagnostics_to_display" ) )
-USER_COMMANDS_HELP_MESSAGE = """
-Supported commands are:
-  GoToDefinition
-  GoToDeclaration
-  GoToDefinitionElseDeclaration
-See the docs for information on what they do."""
 
 
 class ClangCompleter( Completer ):
@@ -130,10 +124,15 @@ class ClangCompleter( Completer ):
     return results
 
 
+  def DefinedSubcommands( self ):
+    return [ "GoToDefinition",
+             "GoToDeclaration",
+             "GoToDefinitionElseDeclaration" ]
+
+
   def OnUserCommand( self, arguments ):
     if not arguments:
-      vimsupport.EchoText( USER_COMMANDS_HELP_MESSAGE )
-      return
+      return self.UserCommandsHelpMessage()
 
     command = arguments[ 0 ]
     if command == 'GoToDefinition':
