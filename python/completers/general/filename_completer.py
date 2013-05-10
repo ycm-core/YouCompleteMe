@@ -63,8 +63,8 @@ class FilenameCompleter( ThreadedCompleter ):
 
 
   def ShouldUseNowInner( self, start_column ):
-    return ( vim.current.line[ start_column - 1 ] == '/' or
-             self.AtIncludeStatementStart( start_column ) )
+    return ( start_column and ( vim.current.line[ start_column - 1 ] == '/' or
+             self.AtIncludeStatementStart( start_column ) ) )
 
 
   def SupportedFiletypes( self ):
