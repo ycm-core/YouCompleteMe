@@ -81,7 +81,8 @@ class JediCompleter( ThreadedCompleter ):
 
   def OnUserCommand( self, arguments ):
     if not arguments:
-      return self.UserCommandsHelpMessage()
+      self.EchoUserCommandsHelpMessage()
+      return
 
     command = arguments[ 0 ]
     if command == 'GoToDefinition':

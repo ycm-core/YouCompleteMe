@@ -180,13 +180,15 @@ class Completer( object ):
     return []
 
 
-  def UserCommandsHelpMessage( self ):
-    if self.DefinedSubcommands():
-      vimsupport.EchoText( "Supported commands are:\n" +
-                           '\n'.join( self.DefinedSubcommands() )+
-                           "\nSee the docs for information on what they do." )
+  def EchoUserCommandsHelpMessage( self ):
+    subcommands = self.DefinedSubcommands()
+    if subcommands:
+      vimsupport.EchoText( 'Supported commands are:\n' +
+                           '\n'.join( subcommands ) +
+                           '\nSee the docs for information on what they do.' )
     else:
-      vimsupport.EchoText( "No supported subcommands" )
+      vimsupport.EchoText( 'No supported subcommands' )
+
 
   def FilterAndSortCandidates( self, candidates, query ):
     if not candidates:
