@@ -991,7 +991,7 @@ This means that YCM tried to set up a key mapping but failed because you already
 had something mapped to that key combination. The `<blah>` part of the message
 will tell you what was the key combination that failed.
 
-Look in the _Options_ section and see if which of the default mappings conflict
+Look in the _Options_ section and see if any of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 
