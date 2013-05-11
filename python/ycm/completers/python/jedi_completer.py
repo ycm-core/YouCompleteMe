@@ -55,13 +55,13 @@ class JediCompleter( ThreadedCompleter ):
 
 
   def _GetJediScript( self ):
-      contents = '\n'.join( vim.current.buffer )
-      line, column = vimsupport.CurrentLineAndColumn()
-      # Jedi expects lines to start at 1, not 0
-      line += 1
-      filename = vim.current.buffer.name
+    contents = '\n'.join( vim.current.buffer )
+    line, column = vimsupport.CurrentLineAndColumn()
+    # Jedi expects lines to start at 1, not 0
+    line += 1
+    filename = vim.current.buffer.name
 
-      return jedi.Script( contents, line, column, filename )
+    return jedi.Script( contents, line, column, filename )
 
 
   def ComputeCandidates( self, unused_query, unused_start_column ):
