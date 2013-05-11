@@ -126,8 +126,7 @@ def GetPathsStandardCase( path_dir ):
 def GenerateCandidatesForPaths( absolute_paths ):
   def GenerateCandidateForPath( absolute_path ):
     is_dir = os.path.isdir( absolute_path )
-    basename = os.path.basename( absolute_path )
-    return { 'word': basename + '/' if is_dir else basename ,
+    return { 'word': os.path.basename( absolute_path ),
               'dup': 1,
               'menu': '[Dir]' if is_dir else '[File]' }
 
