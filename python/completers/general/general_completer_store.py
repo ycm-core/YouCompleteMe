@@ -21,6 +21,7 @@
 from completers.completer import Completer
 from completers.all.identifier_completer import IdentifierCompleter
 from filename_completer import FilenameCompleter
+from spell_completer import SpellCompleter
 
 try:
   from ultisnips_completer import UltiSnipsCompleter
@@ -42,14 +43,17 @@ class GeneralCompleterStore( Completer ):
     super( GeneralCompleterStore, self ).__init__()
     self._identifier_completer = IdentifierCompleter()
     self._filename_completer = FilenameCompleter()
+    self._spell_completer = SpellCompleter()
     self._ultisnips_completer = ( UltiSnipsCompleter()
                                   if USE_ULTISNIPS_COMPLETER else None )
     self._non_filename_completers = filter( lambda x: x,
                                             [ self._ultisnips_completer,
+                                              self._spell_completer,
                                               self._identifier_completer ] )
     self._all_completers = filter( lambda x: x,
                                    [ self._identifier_completer,
                                      self._filename_completer,
+                                     self._spell_completer,
                                      self._ultisnips_completer ] )
     self._current_query_completers = []
 
