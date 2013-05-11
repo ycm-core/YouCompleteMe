@@ -115,9 +115,9 @@ class GeneralCompleterStore( Completer ):
       completer.OnBufferVisit()
 
 
-  def OnBufferDelete( self, deleted_buffer_file ):
+  def OnBufferUnload( self, deleted_buffer_file ):
     for completer in self._all_completers:
-      completer.OnBufferDelete( deleted_buffer_file )
+      completer.OnBufferUnload( deleted_buffer_file )
 
 
   def OnCursorHold( self ):

@@ -262,7 +262,7 @@ class Completer( object ):
     pass
 
 
-  def OnBufferDelete( self, deleted_buffer_file ):
+  def OnBufferUnload( self, deleted_buffer_file ):
     pass
 
 

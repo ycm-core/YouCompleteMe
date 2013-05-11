@@ -225,7 +225,7 @@ class ClangCompleter( Completer ):
       flags )
 
 
-  def OnBufferDelete( self, deleted_buffer_file ):
+  def OnBufferUnload( self, deleted_buffer_file ):
     self.completer.DeleteCachesForFileAsync( deleted_buffer_file )
 
 

@@ -138,11 +138,11 @@ class YouCompleteMe( object ):
       self.GetFiletypeCompleter().OnFileReadyToParse()
 
 
-  def OnBufferDelete( self, deleted_buffer_file ):
-    self.gencomp.OnBufferDelete( deleted_buffer_file )
+  def OnBufferUnload( self, deleted_buffer_file ):
+    self.gencomp.OnBufferUnload( deleted_buffer_file )
 
     if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnBufferDelete( deleted_buffer_file )
+      self.GetFiletypeCompleter().OnBufferUnload( deleted_buffer_file )
 
 
   def OnBufferVisit( self ):
