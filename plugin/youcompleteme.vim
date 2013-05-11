@@ -130,6 +130,12 @@ let g:ycm_extra_conf_globlist =
 let g:ycm_filepath_completion_use_working_dir =
       \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
 
+let g:ycm_spellsuggest_enable =
+      \ get( g:, 'g:ycm_spellsuggest_enable', 1 )
+
+let g:ycm_spellsuggest_max_candidates =
+      \ get( g:, 'g:ycm_spellsuggest_max_candidates', 5 )
+
 let g:ycm_semantic_triggers =
       \ get( g:, 'ycm_semantic_triggers', {
       \   'c' : ['->', '.'],
