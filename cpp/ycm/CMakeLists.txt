@@ -104,9 +104,20 @@ endif()
 
 if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
   # Need TEMP because find_library does not work with an option variable
-  find_library( TEMP clang
-                PATHS ${PATH_TO_LLVM_ROOT}/lib
-                NO_DEFAULT_PATH )
+  if ( MINGW )
+    # 1. It copies the right file (not libclang.dll.a) to python directory.
+    # 2. Clang compilation on MinGW-64 has the problem of clang library
+    #    prefix, the library name is `liblibclang.dll`, as a result
+    #    it is necessary to rename libclang.dll.a and libclang.dll, but
+    #    still the compilation would be against liblibclang.dll.
+    find_library( TEMP clang
+      PATHS ${PATH_TO_LLVM_ROOT}/bin
+      NO_DEFAULT_PATH )
+  else()
+    find_library( TEMP clang
+      PATHS ${PATH_TO_LLVM_ROOT}/lib
+      NO_DEFAULT_PATH )
+  endif()
   set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
 endif()
 
@@ -202,23 +213,9 @@ if ( UNIX AND NOT APPLE )
   set( EXTRA_LIBS rt )
 endif()
 
-#############################################################################
+add_definitions(${BoostParts_DEFINITIONS})
 
-# Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
-# other much: a compilation error "Constexpr function never produces a constant
-# expression" pops up when trying to compile anything that uses
-# boost/chrono/duration.hpp (namely boost/thread for us). This is a workaround
-# that prevents this from happening. Also present in cpp/BoostParts/CMakeLists.txt.
-# See here for more details: https://svn.boost.org/trac/boost/ticket/7671
-# TODO: remove this when it's fixed upstream (probably boost 1.53).
-add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
-
-if( MSVC OR CYGWIN )
-  # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
-  # BOOST_ALL_NO_LIB turns off MSVC library autolinking
-  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
-endif()
-#############################################################################
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BoostParts_CXX_FLAGS}")
 
 add_library( ${PROJECT_NAME} SHARED
              ${SOURCES}
@@ -281,7 +278,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 
 #############################################################################
 
-if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
+if( ( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG ) AND NOT MINGW )
   # We want all warnings, and warnings should be treated as errors
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror" )
 endif()

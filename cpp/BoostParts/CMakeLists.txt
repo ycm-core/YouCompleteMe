@@ -21,7 +21,7 @@
 #
 # bcp call: bcp boost/utility.hpp boost/python.hpp boost/bind.hpp boost/lambda/lambda.hpp boost/exception/all.hpp boost/tuple/tuple_io.hpp boost/tuple/tuple_comparison.hpp boost/regex.hpp boost/foreach.hpp boost/smart_ptr.hpp boost/algorithm/string_regex.hpp boost/thread.hpp boost/unordered_map.hpp boost/unordered_set.hpp boost/format.hpp boost/ptr_container/ptr_container.hpp boost/filesystem.hpp boost/filesystem/fstream.hpp boost/utility.hpp boost/algorithm/cxx11/any_of.hpp atomic lockfree ../BoostParts
 
-cmake_minimum_required( VERSION 2.8 )
+cmake_minimum_required( VERSION 2.8.0 )
 
 project( BoostParts )
 
@@ -69,6 +69,7 @@ else()
     list( APPEND SOURCES ${UNIX_SOURCES} )
 endif()
 
+
 #############################################################################
 
 # Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
@@ -78,12 +79,27 @@ endif()
 # that prevents this from happening. Also present in cpp/ycm/CMakeLists.txt.
 # See here for more details: https://svn.boost.org/trac/boost/ticket/7671
 # TODO: remove this when it's fixed upstream (probably boost 1.53).
-add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
+
+set(BoostParts_DEFINITIONS -DBOOST_THREAD_DONT_USE_CHRONO)
 
 if( MSVC OR CYGWIN )
-  # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
   # BOOST_ALL_NO_LIB turns off MSVC library autolinking
-  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
+  set(BoostParts_DEFINITIONS ${BoostParts_DEFINITIONS} -DBOOST_ALL_NO_LIB)
+endif()
+
+if( WIN32 )
+  # Makes boost use the correct __declspec
+  set(BoostParts_DEFINITIONS ${BoostParts_DEFINITIONS} -DBOOST_PYTHON_SOURCE
+    -DBOOST_THREAD_USE_LIB)
+  if ( 64_BIT_PLATFORM )
+    # Enables the python compilation for 64-bit Windows platform
+    set(BoostParts_DEFINITIONS ${BoostParts_DEFINITIONS} -DMS_WIN64)
+  endif()
+endif()
+
+# Solves the conflict in names of hypot between python sources and boost::python
+if( MINGW )
+  set(BoostParts_CXX_FLAGS "${BoostParts_CXX_FLAGS} -include cmath")
 endif()
 
 #############################################################################
@@ -94,7 +110,7 @@ include_directories(
   ${PYTHON_INCLUDE_DIRS}
   )
 
-add_library( BoostParts ${SOURCES} )
+add_library( ${PROJECT_NAME} ${SOURCES} )
 
 #############################################################################
 
@@ -108,6 +124,9 @@ endif()
 
 # Linking fails without this
 if( NOT WIN32 AND 64_BIT_PLATFORM )
+  # since the version 2.8.9 the following commands could be used instead
+  # set_target_properties(${PROJECT_NAME}
+  #   PROPERTIES POSITION_INDEPENDENT_CODE ON)
   set_target_properties( BoostParts PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
@@ -115,8 +134,18 @@ endif()
 
 # Special compiler and linker flags for MSVC
 if( MSVC )
-    add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
-    set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL" )
-    set_target_properties( ${PROJECT_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG" )
+  set(BoostParts_DEFINITIONS "${BoostParts_DEFINITIONS} /DUNICODE /D_UNICODE /Zc:wchar_t-")
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
+  set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL" )
+  set_target_properties( ${PROJECT_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG" )
 endif()
+
+add_definitions(${BoostParts_DEFINITIONS})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BoostParts_CXX_FLAGS}")
+
+set(BoostParts_CXX_FLAGS ${BoostParts_CXX_FLAGS} CACHE INTERNAL
+  "Boost cxx flags" FORCE)
+
+set(BoostParts_DEFINITIONS ${BoostParts_DEFINITIONS} CACHE INTERNAL
+  "Boost definitions" FORCE)
