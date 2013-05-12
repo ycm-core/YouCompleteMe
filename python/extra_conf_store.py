@@ -152,14 +152,20 @@ def _PathsToAllParentFolders( filename ):
   Example: _PathsToAllParentFolders( '/home/user/projects/test.c' )
     [ '/home/user/projects', '/home/user', '/home', '/' ]"""
 
-  parent_folders = os.path.abspath(
-    os.path.dirname( filename ) ).split( os.path.sep )
-  if not parent_folders[0]:
-    parent_folders[0] = os.path.sep
-  parent_folders = [ os.path.join( *parent_folders[:i + 1] )
-                     for i in xrange( len( parent_folders ) ) ]
-  return reversed( parent_folders )
-
+  path = os.path.dirname(filename)
+  folders=[]
+  while 1:
+    path, folder = os.path.split(path)
+    if folder != "":
+      folders.append(folder)
+    else:
+      if path != "":
+        folders.append(path)
+      break
+  folders.reverse()
+  folders = [ os.path.join( *folders[:i + 1] )
+      for i in xrange( len( folders ) ) ]
+  return reversed( folders )
 
 def _PathToCppCompleterFolder():
   """Returns the path to the 'cpp' completer folder. This is necessary
