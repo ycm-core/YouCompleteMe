@@ -22,6 +22,22 @@ from threading import Thread, Event
 from ycm.completers.completer import Completer
 
 class ThreadedCompleter( Completer ):
+  """A subclass of Completer that abstracts away the use of a background thread.
+
+  This is a great class to subclass for your custom completer. It will provide
+  you with async computation of candidates when you implement the
+  ComputeCandidates() method; no need to worry about threads, locks, events or
+  similar.
+
+  If you use this class as the base class for your Completer, you DON'T need to
+  provide implementations for the CandidatesForQueryAsync(),
+  AsyncCandidateRequestReady() and CandidatesFromStoredRequest() functions. Just
+  implement ComputeCandidates().
+
+  For examples of subclasses of this class, see the following files:
+  python/completers/general/filename_completer.py
+  """
+
   def __init__( self ):
     super( ThreadedCompleter, self ).__init__()
     self._query_ready = Event()
@@ -54,6 +70,9 @@ class ThreadedCompleter( Completer ):
 
   @abc.abstractmethod
   def ComputeCandidates( self, query, start_column ):
+    """This function should compute the candidates to show to the user.
+    The return value should be of the same type as that for
+    CandidatesFromStoredRequest()."""
     pass
 
 

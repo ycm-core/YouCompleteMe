@@ -64,7 +64,8 @@ class Completer( object ):
   CandidatesForQueryAsync() is the main entry point when the user types. For
   "foo.bar", the user query is "bar" and completions matching this string should
   be shown. The job of CandidatesForQueryAsync() is to merely initiate this
-  request, which will hopefully be processed in a background thread.
+  request, which will hopefully be processed in a background thread. You may
+  want to subclass ThreadedCompleter instead of Completer directly.
 
   AsyncCandidateRequestReady() is the function that is repeatedly polled until
   it returns True. If CandidatesForQueryAsync() started a background task of
@@ -94,7 +95,10 @@ class Completer( object ):
   thread-safe). But even if you're certain, still try to do the processing in a
   background thread. Your completer is unlikely to be merged if it does not,
   because synchronous processing will block Vim's GUI thread and that's a very,
-  VERY bad thing (so try not to do it!).
+  VERY bad thing (so try not to do it!). Again, you may want to subclass
+  ThreadedCompleter instead of Completer directly; ThreadedCompleter will
+  abstract away the use of a background thread for you. See
+  threaded_completer.py.
 
   The On* functions are provided for your convenience. They are called when
   their specific events occur. For instance, the identifier completer collects
