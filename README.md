@@ -370,11 +370,15 @@ file's filetype. Vim comes with okayish omnifuncs for various languages like
 Ruby, PHP etc. It depends on the language.
 
 You can get stellar omnifuncs for Java and Ruby with [Eclim][]. Just make sure
-you have the _latest_ Eclim installed and configured and don't forget to have
-`let g:EclimCompletionMethod = 'omnifunc'` in your vimrc. This will make YCM and
-Eclim play nice; YCM will use Eclim's omnifuncs as the data source for semantic
-completions and provide the auto-triggering and subsequence-based matching (and
-other YCM features) on top of it.
+you have the _latest_ Eclim installed and configured (this means Eclim `>= 2.2.*`
+and Eclipse `>= 4.2.*`).
+
+After installing Eclim remember to create a new Eclipse project within your
+application by typing `:ProjectCreate <path-to-your-project> -n ruby` (or `-n java`)
+inside vim and don't forget to have `let g:EclimCompletionMethod = 'omnifunc'`
+in your vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs
+as the data source for semantic completions and provide the auto-triggering
+and subsequence-based matching (and other YCM features) on top of it.
 
 ### Writing New Semantic Completers
 
