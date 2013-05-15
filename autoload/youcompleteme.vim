@@ -73,7 +73,7 @@ function! youcompleteme#Enable()
 
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
-  call s:SetUpKeyMappings()
+  call s:SetUpKeyMappings() " should be called after s:SetUpCompleteopt()
   call s:SetUpBackwardsCompatibility()
 
   if g:ycm_register_as_syntastic_checker
@@ -140,6 +140,33 @@ function! s:SetUpKeyMappings()
     silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<cr>'
   endif
+
+
+  " <c-x><c-u> invokes the user's completion function (which we have set to
+  " youcompleteme#Complete), and <c-p> tells Vim to select the previous
+  " completion candidate. This is necessary because by default, Vim selects the
+  " first candidate when completion is invoked, and selecting a candidate
+  " automatically replaces the current text with it. Calling <c-p> forces Vim to
+  " deselect the first candidate and in turn preserve the user's current text
+  " until he explicitly chooses to replace it with a completion.
+  "
+  " complete select patch (https://gist.github.com/5654189) provides options in
+  " |completeopt| to control the select or insert behavior.
+  if s:is_complete_select
+    inoremap <silent> <Plug>(youcompleteme_start_auto_complete)
+        \ <C-x><C-u>
+  else
+    inoremap <silent> <Plug>(youcompleteme_start_auto_complete)
+        \ <C-x><C-u><C-r>=youcompleteme#PopupPost()<CR>
+  endif
+
+endfunction
+
+
+function! youcompleteme#PopupPost()
+  return  !pumvisible() ? "" :
+        \ g:ycm_complete_auto_select ? "\<C-p>\<Down>" :
+        \ "\<C-p>"
 endfunction
 
 
@@ -204,6 +231,18 @@ function! s:SetUpCompleteopt()
   if g:ycm_add_preview_to_completeopt
     set completeopt+=preview
   endif
+
+  try
+    if g:ycm_complete_auto_select
+      set completeopt-=noselect
+      set completeopt+=noinsert
+    else
+      set completeopt+=noinsert,noselect
+    endif
+    let s:is_complete_select = 1
+  catch /^Vim\%((\a\+)\)\=:E474/
+    let s:is_complete_select = 0
+  endtry
 endfunction
 
 function! s:OnVimLeave()
@@ -453,14 +492,7 @@ function! s:InvokeCompletion()
     return
   endif
 
-  " <c-x><c-u> invokes the user's completion function (which we have set to
-  " youcompleteme#Complete), and <c-p> tells Vim to select the previous
-  " completion candidate. This is necessary because by default, Vim selects the
-  " first candidate when completion is invoked, and selecting a candidate
-  " automatically replaces the current text with it. Calling <c-p> forces Vim to
-  " deselect the first candidate and in turn preserve the user's current text
-  " until he explicitly chooses to replace it with a completion.
-  call feedkeys( "\<C-X>\<C-U>\<C-P>", 'n' )
+  call feedkeys("\<Plug>(youcompleteme_start_auto_complete)")
 endfunction
 
 
