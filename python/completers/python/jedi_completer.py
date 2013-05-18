@@ -123,9 +123,9 @@ class JediCompleter( ThreadedCompleter ):
     script = self._GetJediScript()
     try:
       if declaration:
-        definitions = script.get_definition()
+        definitions = script.goto_definitions()
       else:
-        definitions = script.goto()
+        definitions = script.goto_assignments()
     except jedi.NotFoundError:
       vimsupport.PostVimMessage(
                   "Cannot follow nothing. Put your cursor on a valid name." )
@@ -140,7 +140,7 @@ class JediCompleter( ThreadedCompleter ):
     if len( definition_list ) == 1:
       definition = definition_list[ 0 ]
       if definition.in_builtin_module():
-        if isinstance( definition.definition, jedi.keywords.Keyword ):
+        if isinstance( definition.name, jedi.keywords.Keyword ):
           vimsupport.PostVimMessage(
                   "Cannot get the definition of Python keywords." )
         else:
