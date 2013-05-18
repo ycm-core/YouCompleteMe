@@ -140,7 +140,7 @@ class JediCompleter( ThreadedCompleter ):
     if len( definition_list ) == 1:
       definition = definition_list[ 0 ]
       if definition.in_builtin_module():
-        if isinstance( definition.name, jedi.keywords.Keyword ):
+        if definition.is_keyword:
           vimsupport.PostVimMessage(
                   "Cannot get the definition of Python keywords." )
         else:
