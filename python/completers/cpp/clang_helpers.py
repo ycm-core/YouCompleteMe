@@ -17,28 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 
-# Given an iterable object that produces strings (flags for Clang), removes the
-# '-c' and '-o' options that Clang does not like to see when it's producing
-# completions for a file.
+# This function doesn't do anything; it used to do something useful, but not
+# anymore. It MUST NOT be removed because of backwards compatibility with old
+# ycm_extra_conf.py files.
 def PrepareClangFlags( flags, filename ):
-  new_flags = []
-  skip = True
-  for flag in flags:
-    if skip:
-      skip = False
-      continue
-
-    if flag == '-c':
-      continue
-
-    if flag == '-o':
-      skip = True;
-      continue
-
-    if flag == filename or os.path.realpath(flag) == filename:
-      continue
-
-    new_flags.append( flag )
-  return new_flags
+  return flags

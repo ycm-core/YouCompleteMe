@@ -115,6 +115,10 @@ def _Load( module_file, force = False ):
     if not _ShouldLoad( module_file ):
       return _Disable( module_file )
 
+  # This has to be here because a long time ago, the ycm_extra_conf.py files
+  # used to import clang_helpers.py from the cpp folder. This is not needed
+  # anymore, but there are a lot of old ycm_extra_conf.py files that we don't
+  # want to break.
   sys.path.insert( 0, _PathToCppCompleterFolder() )
   module = imp.load_source( _RandomName(), module_file )
   del sys.path[ 0 ]

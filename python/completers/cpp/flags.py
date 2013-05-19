@@ -56,7 +56,7 @@ class Flags( object ):
 
       if add_special_clang_flags:
         results[ 'flags' ] += self.special_clang_flags
-      sanitized_flags = _SanitizeFlags( results[ 'flags' ] )
+      sanitized_flags = _PrepareFlagsForClang( results[ 'flags' ], filename )
 
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
@@ -88,6 +88,11 @@ class Flags( object ):
     return [ x for x in include_paths if x ]
 
 
+def _PrepareFlagsForClang( flags, filename ):
+  flags = _RemoveUnusedFlags( flags, filename )
+  flags = _SanitizeFlags( flags )
+  return flags
+
 
 def _SanitizeFlags( flags ):
   """Drops unsafe flags. Currently these are only -arch flags; they tend to
@@ -111,6 +116,32 @@ def _SanitizeFlags( flags ):
   for flag in sanitized_flags:
     vector.append( flag )
   return vector
+
+
+def _RemoveUnusedFlags( flags, filename ):
+  """Given an iterable object that produces strings (flags for Clang), removes
+  the '-c' and '-o' options that Clang does not like to see when it's producing
+  completions for a file."""
+
+  new_flags = []
+  skip = True
+  for flag in flags:
+    if skip:
+      skip = False
+      continue
+
+    if flag == '-c':
+      continue
+
+    if flag == '-o':
+      skip = True;
+      continue
+
+    if flag == filename or os.path.realpath(flag) == filename:
+      continue
+
+    new_flags.append( flag )
+  return new_flags
 
 
 def _SpecialClangIncludes():
