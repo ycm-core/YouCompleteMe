@@ -19,7 +19,6 @@
 
 import imp
 import os
-import sys
 import vimsupport
 import vim
 import ycm_utils as utils
@@ -85,11 +84,7 @@ class YouCompleteMe( object ):
     completer = None
     supported_filetypes = [ filetype ]
     if os.path.exists( module_path ):
-
-      sys.path.insert( 0, os.path.dirname( module_path ) )
       module = imp.load_source( filetype, module_path )
-      del sys.path[ 0 ]
-
       completer = module.GetCompleter()
       if completer:
         supported_filetypes.extend( completer.SupportedFiletypes() )

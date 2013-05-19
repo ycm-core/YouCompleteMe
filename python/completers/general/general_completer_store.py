@@ -20,10 +20,10 @@
 
 from completers.completer import Completer
 from completers.all.identifier_completer import IdentifierCompleter
-from filename_completer import FilenameCompleter
+from completers.general.filename_completer import FilenameCompleter
 
 try:
-  from ultisnips_completer import UltiSnipsCompleter
+  from completers.general.ultisnips_completer import UltiSnipsCompleter
   USE_ULTISNIPS_COMPLETER = True
 except ImportError:
   USE_ULTISNIPS_COMPLETER = False
