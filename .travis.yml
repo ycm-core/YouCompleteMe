@@ -7,7 +7,7 @@ install:
 compiler:
   - gcc
   - clang
-script: flake8 --exclude=jedi --select=F,C9 --max-complexity=10 python && nosetests python && ./install.sh
+script: flake8 --exclude=jedi --select=F,C9 --max-complexity=10 python && ./install.sh && nosetests python
 env:
   - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS=""
   - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS="-DUSE_CLANG_COMPLETER=ON"
