@@ -26,6 +26,7 @@ NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. See the '
   'docs for details.').format( extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
+
 class Flags( object ):
   """Keeps track of the flags necessary to compile a file.
   The flags are loaded from user-created python files (hereafter referred to as
@@ -121,10 +122,18 @@ def _SanitizeFlags( flags ):
 def _RemoveUnusedFlags( flags, filename ):
   """Given an iterable object that produces strings (flags for Clang), removes
   the '-c' and '-o' options that Clang does not like to see when it's producing
-  completions for a file."""
+  completions for a file. Also removes the first flag in the list if it does not
+  start with a '-' (it's highly likely to be the compiler name/path)."""
 
   new_flags = []
-  skip = True
+
+  # When flags come from the compile_commands.json file, the first flag is
+  # usually the path to the compiler that should be invoked. We want to strip
+  # that.
+  if not flags[ 0 ].startswith( '-' ):
+    flags = flags[ 1: ]
+
+  skip = False
   for flag in flags:
     if skip:
       skip = False
@@ -137,7 +146,7 @@ def _RemoveUnusedFlags( flags, filename ):
       skip = True;
       continue
 
-    if flag == filename or os.path.realpath(flag) == filename:
+    if flag == filename or os.path.realpath( flag ) == filename:
       continue
 
     new_flags.append( flag )
