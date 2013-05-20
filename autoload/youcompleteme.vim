@@ -42,16 +42,17 @@ function! youcompleteme#Enable()
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
   py from ycm import extra_conf_store
   py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
-  py import ycm
+  py from ycm import base
 
-  if !pyeval( 'ycm.CompatibleWithYcmCore()')
+  if !pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
       \ echomsg "YouCompleteMe unavailable: ycm_core too old, PLEASE RECOMPILE ycm_core" |
       \ echohl None
     return
   endif
 
-  py ycm_state = ycm.YouCompleteMe()
+  py from ycm.youcompleteme import YouCompleteMe
+  py ycm_state = YouCompleteMe()
 
   augroup youcompleteme
     autocmd!
@@ -386,7 +387,7 @@ endfunction
 
 
 function! s:IdentifierFinishedOperations()
-  if !pyeval( 'ycm.CurrentIdentifierFinished()' )
+  if !pyeval( 'base.CurrentIdentifierFinished()' )
     return
   endif
   py ycm_state.OnCurrentIdentifierFinished()
@@ -511,7 +512,7 @@ function! youcompleteme#Complete( findstart, base )
 
 
     " TODO: make this a function-local variable instead of a script-local one
-    let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
+    let s:completion_start_column = pyeval( 'base.CompletionStartColumn()' )
     let s:should_use_filetype_completion =
           \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
           \ s:completion_start_column . ')' )
@@ -534,7 +535,7 @@ endfunction
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
-    let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
+    let s:completion_start_column = pyeval( 'base.CompletionStartColumn()' )
     return s:completion_start_column
   else
     return s:CompletionsForQuery( a:base, 1, s:completion_start_column )

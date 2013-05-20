@@ -18,7 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from nose.tools import eq_
-from ycm_test_utils import MockVimModule
+from ycm.test_utils import MockVimModule
 vim_mock = MockVimModule()
 from .. import flags
 
