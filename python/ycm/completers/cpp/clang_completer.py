@@ -17,13 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import Completer
 from collections import defaultdict
 import vim
-import vimsupport
 import ycm_core
-import extra_conf_store
-from flags import Flags
+from ycm import vimsupport
+from ycm import extra_conf_store
+from ycm.completers.completer import Completer
+from ycm.completers.cpp.flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MAX_DIAGNOSTICS_TO_DISPLAY = int( vimsupport.GetVariableValue(

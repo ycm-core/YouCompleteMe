@@ -19,8 +19,8 @@
 
 import abc
 import vim
-import vimsupport
 import ycm_core
+from ycm import vimsupport
 from collections import defaultdict
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'

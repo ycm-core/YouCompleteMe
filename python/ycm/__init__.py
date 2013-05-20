@@ -17,11 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import ycm_core
-from completers.cpp.clang_completer import ClangCompleter
+from youcompleteme import (
+  YouCompleteMe, CompatibleWithYcmCore, CurrentIdentifierFinished,
+  CompletionStartColumn )
 
-def GetCompleter():
-  if ycm_core.HasClangSupport():
-    return ClangCompleter()
-  else:
-    return None
+# We don't really need to do this, but if we don't, pyflakes complains that we
+# have unused imports. Pyflakes should ignore unused imports in __init__.py
+# files, but doesn't. See this bug report:
+# https://bugs.launchpad.net/pyflakes/+bug/1178905
+__all__ = [
+  YouCompleteMe.__name__,
+  CompatibleWithYcmCore.__name__,
+  CurrentIdentifierFinished.__name__,
+  CompletionStartColumn.__name__
+]

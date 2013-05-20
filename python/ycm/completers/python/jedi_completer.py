@@ -20,8 +20,8 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
-from completers.threaded_completer import ThreadedCompleter
-import vimsupport
+from ycm.completers.threaded_completer import ThreadedCompleter
+from ycm import vimsupport
 
 import sys
 from os.path import join, abspath, dirname

@@ -19,9 +19,9 @@
 
 import imp
 import os
-import vimsupport
 import vim
-import ycm_utils as utils
+from ycm import vimsupport
+from ycm import utils
 
 try:
   import ycm_core
@@ -33,8 +33,8 @@ except ImportError as e:
       os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
 
 
-from completers.all.omni_completer import OmniCompleter
-from completers.general.general_completer_store import GeneralCompleterStore
+from ycm.completers.all.omni_completer import OmniCompleter
+from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
 FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
   'g:ycm_filetype_specific_completion_to_disable' )

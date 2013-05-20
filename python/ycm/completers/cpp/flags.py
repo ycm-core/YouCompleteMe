@@ -19,8 +19,8 @@
 
 import ycm_core
 import os
-import vimsupport
-import extra_conf_store
+from ycm import vimsupport
+from ycm import extra_conf_store
 
 NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. See the '

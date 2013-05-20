@@ -18,7 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import ycm_core
-from completers.cpp.clang_completer import ClangCompleter
+from ycm.completers.cpp.clang_completer import ClangCompleter
 
 def GetCompleter():
   if ycm_core.HasClangSupport():

@@ -16,13 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.threaded_completer import ThreadedCompleter
-from completers.cpp.clang_completer import InCFamilyFile
-from completers.cpp.flags import Flags
 import vim
-import vimsupport
 import os
 import re
+
+from ycm import vimsupport
+from ycm.completers.threaded_completer import ThreadedCompleter
+from ycm.completers.cpp.clang_completer import InCFamilyFile
+from ycm.completers.cpp.flags import Flags
 
 USE_WORKING_DIR = vimsupport.GetBoolValue(
   'g:ycm_filepath_completion_use_working_dir' )

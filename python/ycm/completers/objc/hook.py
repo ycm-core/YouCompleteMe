@@ -17,21 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completer import Completer
+import ycm_core
+from ycm.completers.cpp.clang_completer import ClangCompleter
 
-class GeneralCompleter( Completer ):
-  """
-  A base class for General completers in YCM. A general completer is used in all
-  filetypes.
-
-  Because this is a subclass of Completer class, you should refer to the
-  Completer class documentation. Do NOT use this class for semantic completers!
-  Subclass Completer directly.
-
-  """
-  def __init__( self ):
-    super( GeneralCompleter, self ).__init__()
-
-
-  def SupportedFiletypes( self ):
-    return set()
+def GetCompleter():
+  if ycm_core.HasClangSupport():
+    return ClangCompleter()
+  else:
+    return None

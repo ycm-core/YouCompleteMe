@@ -18,8 +18,8 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
-import vimsupport
-from completers.completer import Completer
+from ycm import vimsupport
+from ycm.completers.completer import Completer
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
 OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '

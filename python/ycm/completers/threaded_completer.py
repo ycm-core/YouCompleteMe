@@ -19,7 +19,7 @@
 
 import abc
 from threading import Thread, Event
-from completer import Completer
+from ycm.completers.completer import Completer
 
 class ThreadedCompleter( Completer ):
   def __init__( self ):

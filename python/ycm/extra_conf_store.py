@@ -24,8 +24,8 @@ import imp
 import random
 import string
 import sys
-import vimsupport
 import vim
+from ycm import vimsupport
 from fnmatch import fnmatch
 
 # Constants

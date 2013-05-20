@@ -40,7 +40,7 @@ function! youcompleteme#Enable()
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
-  py import extra_conf_store
+  py from ycm import extra_conf_store
   py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
   py import ycm
 

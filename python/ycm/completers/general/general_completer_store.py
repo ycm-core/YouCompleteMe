@@ -18,12 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from completers.completer import Completer
-from completers.all.identifier_completer import IdentifierCompleter
-from completers.general.filename_completer import FilenameCompleter
+from ycm.completers.completer import Completer
+from ycm.completers.all.identifier_completer import IdentifierCompleter
+from ycm.completers.general.filename_completer import FilenameCompleter
 
 try:
-  from completers.general.ultisnips_completer import UltiSnipsCompleter
+  from ycm.completers.general.ultisnips_completer import UltiSnipsCompleter
   USE_ULTISNIPS_COMPLETER = True
 except ImportError:
   USE_ULTISNIPS_COMPLETER = False
