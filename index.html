@@ -254,11 +254,13 @@ out the YCM repository. That's it.</p><p>But again, installing YCM with Vundle t
 completions if it does not have a native semantic completion engine for your
 file's filetype. Vim comes with okayish omnifuncs for various languages like
 Ruby, PHP etc. It depends on the language.</p><p>You can get stellar omnifuncs for Java and Ruby with <a href="http://eclim.org/">Eclim</a>. Just make sure
-you have the <em>latest</em> Eclim installed and configured and don't forget to have
-<code>let g:EclimCompletionMethod = 'omnifunc'</code> in your vimrc. This will make YCM and
-Eclim play nice; YCM will use Eclim's omnifuncs as the data source for semantic
-completions and provide the auto-triggering and subsequence-based matching (and
-other YCM features) on top of it.</p><h3>Writing New Semantic Completers</h3><p>You have two options here: writing an <code>omnifunc</code> for Vim's omnicomplete system
+you have the <em>latest</em> Eclim installed and configured (this means Eclim <code>&gt;= 2.2.*</code>
+and Eclipse <code>&gt;= 4.2.*</code>).</p><p>After installing Eclim remember to create a new Eclipse project within your
+application by typing <code>:ProjectCreate &lt;path-to-your-project&gt; -n ruby</code> (or <code>-n java</code>)
+inside vim and don't forget to have <code>let g:EclimCompletionMethod = 'omnifunc'</code>
+in your vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs
+as the data source for semantic completions and provide the auto-triggering
+and subsequence-based matching (and other YCM features) on top of it.</p><h3>Writing New Semantic Completers</h3><p>You have two options here: writing an <code>omnifunc</code> for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for YCM
 using the <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py">Completer API</a>.</p><p>Here are the differences between the two approaches:</p><ul>
 <li>You have to use VimScript to write the omnifunc, but get to use Python to
@@ -301,17 +303,17 @@ g:syntastic_always_populate_loc_list = 1</code> in your vimrc). A good way to to
 the display of the <code>locationlist</code> with a single key mapping is provided by
 another (very small) Vim plugin called <a href="https://github.com/Valloric/ListToggle">ListToggle</a> (which also makes it
 possible to change the height of the <code>locationlist</code> window), also written by
-yours truly.</p><h2>Commands</h2><h3>The <code>YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
+yours truly.</p><h2>Commands</h2><h3>The <code>:YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
 and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI <em>will</em> be
 blocked.</p><p>You may want to map this command to a key; try putting <code>nnoremap &lt;F5&gt;
-:YcmForceCompileAndDiagnostics&lt;CR&gt;</code> in your vimrc.</p><h3>The <code>YcmDiags</code> command</h3><p>Calling this command will fill Vim's <code>locationlist</code> with errors or warnings if
+:YcmForceCompileAndDiagnostics&lt;CR&gt;</code> in your vimrc.</p><h3>The <code>:YcmDiags</code> command</h3><p>Calling this command will fill Vim's <code>locationlist</code> with errors or warnings if
 any were detected in your file and then open it.</p><p>A better option would be to use Syntastic which will keep your <code>locationlist</code>
 up to date automatically and will also show error/warning notifications in Vim's
-gutter.</p><h3>The <code>YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
-line with the diagnostic.</p><h3>The <code>YcmDebugInfo</code> command</h3><p>This will print out various debug information for the current file. Useful to
+gutter.</p><h3>The <code>:YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
+line with the diagnostic.</p><h3>The <code>:YcmDebugInfo</code> command</h3><p>This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the semantic
-completion engine.</p><h3>The <code>YcmCompleter</code> command</h3><p>This command can be used to invoke completer-specific commands.  If the first
+completion engine.</p><h3>The <code>:YcmCompleter</code> command</h3><p>This command can be used to invoke completer-specific commands.  If the first
 argument is of the form <code>ft=...</code> the completer for that file type will be used
 (for example <code>ft=cpp</code>), else the native completer of the current buffer will be
 used.
@@ -525,7 +527,7 @@ ones. Make sure you don't have something mapped to <code>&lt;C-p&gt;</code>, <co
 to explicitly select something. If something is being selected automatically,
 this means there's a bug or a misconfiguration somewhere.</p><h3>I get a <code>E227: mapping already exists for &lt;blah&gt;</code> error when I start Vim</h3><p>This means that YCM tried to set up a key mapping but failed because you already
 had something mapped to that key combination. The <code>&lt;blah&gt;</code> part of the message
-will tell you what was the key combination that failed.</p><p>Look in the <em>Options</em> section and see if which of the default mappings conflict
+will tell you what was the key combination that failed.</p><p>Look in the <em>Options</em> section and see if any of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.</p><h3>I get <code>'GLIBC_2.XX' not found (required by libclang.so)</code> when starting Vim</h3><p>Your system is too old for the precompiled binaries from llvm.org. Compile
 Clang on your machine and then link against the <code>libclang.so</code> you just produced.
