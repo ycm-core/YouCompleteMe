@@ -1,4 +1,4 @@
-*youcompleteme.txt*  YouCompleteMe: a code-completion engine for Vim
+*youcompleteme*  YouCompleteMe: a code-completion engine for Vim
 
 ===============================================================================
                                                         *youcompleteme-contents*
@@ -19,11 +19,11 @@ Contents ~
   7. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
   8. Syntastic integration                 |youcompleteme-syntastic-integration|
  7. Commands                                            |youcompleteme-commands|
-  1. The |YcmForceCompileAndDiagnostics| command
-  2. The |YcmDiags| command
-  3. The |YcmShowDetailedDiagnostic| command
-  4. The |YcmDebugInfo| command
-  5. The |YcmCompleter| command
+  1. The |:YcmForceCompileAndDiagnostics| command
+  2. The |:YcmDiags| command
+  3. The |:YcmShowDetailedDiagnostic| command
+  4. The |:YcmDebugInfo| command
+  5. The |:YcmCompleter| command
  8. YcmCompleter subcommands            |youcompleteme-ycmcompleter-subcommands|
   1. The |GoToDeclaration| subcommand
   2. The |GoToDefinition| subcommand
@@ -421,7 +421,7 @@ members). This is because Clang fails to build a precompiled preamble for your
 file if there are any errors in the included headers and that preamble is key
 to getting fast completions.
 
-Call the ':YcmDiags' command to see if any errors or warnings were detected in
+Call the |:YcmDiags| command to see if any errors or warnings were detected in
 your file. Even better, use Syntastic.
 
 -------------------------------------------------------------------------------
@@ -450,11 +450,16 @@ for your file's filetype. Vim comes with okayish omnifuncs for various
 languages like Ruby, PHP etc. It depends on the language.
 
 You can get stellar omnifuncs for Java and Ruby with Eclim [20]. Just make
-sure you have the latest Eclim installed and configured and don't forget to
-have 'let g:EclimCompletionMethod = 'omnifunc' in your vimrc. This will make
-YCM and Eclim play nice; YCM will use Eclim's omnifuncs as the data source for
-semantic completions and provide the auto-triggering and subsequence-based
-matching (and other YCM features) on top of it.
+sure you have the latest Eclim installed and configured (this means Eclim '>=
+2.2.*' and Eclipse '>= 4.2.*').
+
+After installing Eclim remember to create a new Eclipse project within your
+application by typing ':ProjectCreate <path-to-your-project> -n ruby' (or '-n
+java') inside vim and don't forget to have 'let g:EclimCompletionMethod =
+'omnifunc' in your vimrc. This will make YCM and Eclim play nice; YCM will use
+Eclim's omnifuncs as the data source for semantic completions and provide the
+auto-triggering and subsequence-based matching (and other YCM features) on top
+of it.
 
 -------------------------------------------------------------------------------
                                  *youcompleteme-writing-new-semantic-completers*
@@ -510,7 +515,7 @@ due to the way Vim internals operate; there is no way that a background task
 can update Vim's GUI after it has finished running. You have to press a key.
 This will make YCM check for any pending diagnostics updates.
 
-You can force a full, blocking compilation cycle with the ':YcmForceCompileAndDiagnostics'
+You can force a full, blocking compilation cycle with the |:YcmForceCompileAndDiagnostics|
 command (you may want to map that command to a key; try putting 'nnoremap <F5>
 :YcmForceCompileAndDiagnostics<CR>' in your vimrc). Calling this command will
 force YCM to immediately recompile your file and display any new diagnostics
@@ -536,7 +541,7 @@ the 'locationlist' window), also written by yours truly.
 Commands ~
 
 -------------------------------------------------------------------------------
-The *YcmForceCompileAndDiagnostics* command
+The *:YcmForceCompileAndDiagnostics* command
 
 Calling this command will force YCM to immediately recompile your file and
 display any new diagnostics it encounters. Do note that recompilation with
@@ -547,7 +552,7 @@ You may want to map this command to a key; try putting 'nnoremap <F5>
 :YcmForceCompileAndDiagnostics<CR>' in your vimrc.
 
 -------------------------------------------------------------------------------
-The *YcmDiags* command
+The *:YcmDiags* command
 
 Calling this command will fill Vim's 'locationlist' with errors or warnings if
 any were detected in your file and then open it.
@@ -557,25 +562,25 @@ up to date automatically and will also show error/warning notifications in
 Vim's gutter.
 
 -------------------------------------------------------------------------------
-The *YcmShowDetailedDiagnostic* command
+The *:YcmShowDetailedDiagnostic* command
 
 This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.
 
 -------------------------------------------------------------------------------
-The *YcmDebugInfo* command
+The *:YcmDebugInfo* command
 
 This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the
 semantic completion engine.
 
 -------------------------------------------------------------------------------
-The *YcmCompleter* command
+The *:YcmCompleter* command
 
 This command can be used to invoke completer-specific commands. If the first
 argument is of the form 'ft=...' the completer for that file type will be used
 (for example 'ft=cpp'), else the native completer of the current buffer will
-be used. Call |YcmCompleter| without further arguments for information about
+be used. Call 'YcmCompleter' without further arguments for information about
 the commands you can call for the selected completer.
 
 See the YcmCompleter subcommands section for more information on the available
@@ -585,7 +590,7 @@ subcommands.
                                         *youcompleteme-ycmcompleter-subcommands*
 YcmCompleter subcommands ~
 
-[See the docs for the |YcmCompleter| command before tackling this section.]
+[See the docs for the 'YcmCompleter' command before tackling this section.]
 
 The invoked subcommand is automatically routed to the currently active
 semantic completer, so ':YcmCompleter GoToDefinition' will invoke the
@@ -913,7 +918,7 @@ The *g:ycm_key_detailed_diagnostics* option
 
 This option controls the key mapping used to show the full diagnostic text
 when the user's cursor is on the line with the diagnostic. It basically calls
-':YcmShowDetailedDiagnostic'.
+|:YcmShowDetailedDiagnostic|.
 
 Setting this option to an empty string will make sure no mapping is created.
 
@@ -1075,7 +1080,7 @@ In Vim, run ':messages' and carefully read the output. YCM will echo messages
 to the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
-Also, you may want to run the ':YcmDebugInfo' command; it will make YCM spew
+Also, you may want to run the |:YcmDebugInfo| command; it will make YCM spew
 out various debugging information, including the compile flags for the file if
 the file is a C-family language file and you have compiled in Clang support.
 
@@ -1092,7 +1097,7 @@ Sometimes it takes much longer to get semantic completions than normal ~
 This means that libclang (which YCM uses for C-family semantic completion)
 failed to pre-compile your file's preamble. In other words, there was an error
 compiling some of the source code you pulled in through your header files. I
-suggest calling the ':YcmDiags' command to see what they were (even better,
+suggest calling the |:YcmDiags| command to see what they were (even better,
 have Syntastic installed and call ':lopen').
 
 Bottom line, if libclang can't pre-compile your file's preamble because there
@@ -1126,7 +1131,7 @@ This means that YCM tried to set up a key mapping but failed because you
 already had something mapped to that key combination. The '<blah>' part of the
 message will tell you what was the key combination that failed.
 
-Look in the Options section and see if which of the default mappings conflict
+Look in the Options section and see if any of the default mappings conflict
 with your own. Then change that option value to something else so that the
 conflict goes away.
 
