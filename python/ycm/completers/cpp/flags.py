@@ -55,9 +55,10 @@ class Flags( object ):
       if not results.get( 'flags_ready', True ):
         return None
 
+      flags = list( results[ 'flags' ] )
       if add_special_clang_flags:
-        results[ 'flags' ] += self.special_clang_flags
-      sanitized_flags = _PrepareFlagsForClang( results[ 'flags' ], filename )
+        flags += self.special_clang_flags
+      sanitized_flags = _PrepareFlagsForClang( flags, filename )
 
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
