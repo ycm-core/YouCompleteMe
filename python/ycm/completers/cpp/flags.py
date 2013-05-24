@@ -90,6 +90,10 @@ class Flags( object ):
     return [ x for x in include_paths if x ]
 
 
+  def Clear( self ):
+    self.flags_for_file.clear()
+
+
 def _PrepareFlagsForClang( flags, filename ):
   flags = _RemoveUnusedFlags( flags, filename )
   flags = _SanitizeFlags( flags )

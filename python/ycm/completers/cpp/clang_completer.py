@@ -125,9 +125,10 @@ class ClangCompleter( Completer ):
 
 
   def DefinedSubcommands( self ):
-    return [ "GoToDefinition",
-             "GoToDeclaration",
-             "GoToDefinitionElseDeclaration" ]
+    return [ 'GoToDefinition',
+             'GoToDeclaration',
+             'GoToDefinitionElseDeclaration',
+             'ClearCompilationFlagCache']
 
 
   def OnUserCommand( self, arguments ):
@@ -142,6 +143,8 @@ class ClangCompleter( Completer ):
       self._GoToDeclaration()
     elif command == 'GoToDefinitionElseDeclaration':
       self._GoToDefinitionElseDeclaration()
+    elif command == 'ClearCompilationFlagCache':
+      self._ClearCompilationFlagCache()
 
 
   def _LocationForGoTo( self, goto_function ):
@@ -200,6 +203,11 @@ class ClangCompleter( Completer ):
     vimsupport.JumpToLocation( location.filename_,
                                location.line_number_,
                                location.column_number_ )
+
+
+  def _ClearCompilationFlagCache( self ):
+    self.flags.Clear()
+
 
 
   def OnFileReadyToParse( self ):
