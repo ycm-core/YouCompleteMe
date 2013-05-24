@@ -540,9 +540,10 @@ Supported in filetypes: `c, cpp, objc, objcpp, python`
 
 ### The `ClearCompilationFlagCache` subcommand
 
-YCM caches the flags it gets from the `FlagsForFile` function if you return them
-with the `do_cache` parameter set to `True`. The cache is in memory and is never
-invalidated (unless you restart Vim of course).
+YCM caches the flags it gets from the `FlagsForFile` function in your
+`ycm_extra_conf.py` file if you return them with the `do_cache` parameter set to
+`True`. The cache is in memory and is never invalidated (unless you restart Vim
+of course).
 
 This command clears that cache entirely. YCM will then re-query your
 `FlagsForFile` function as needed in the future.
