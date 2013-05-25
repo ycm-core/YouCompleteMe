@@ -17,21 +17,15 @@
 
 #include "IdentifierCompleter.h"
 #include "standard.h"
-#include "CandidateRepository.h"
+
 #include "Candidate.h"
+#include "IdentifierUtils.h"
 #include "Result.h"
 #include "Utils.h"
-#include "IdentifierUtils.h"
 
-#include <boost/unordered_set.hpp>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/cxx11/any_of.hpp>
 #include <algorithm>
-
-using boost::algorithm::any_of;
-using boost::algorithm::is_upper;
 
 using boost::packaged_task;
 using boost::unique_future;
@@ -78,16 +72,14 @@ void BufferIdentifiersThreadMain(
 
 
 IdentifierCompleter::IdentifierCompleter()
-  : candidate_repository_( CandidateRepository::Instance() ),
-    threading_enabled_( false ) {
+  : threading_enabled_( false ) {
 }
 
 
 IdentifierCompleter::IdentifierCompleter(
   const std::vector< std::string > &candidates )
-  : candidate_repository_( CandidateRepository::Instance() ),
-    threading_enabled_( false ) {
-  AddCandidatesToDatabase( candidates, "", "" );
+  : threading_enabled_( false ) {
+  identifier_database_.AddCandidates( candidates, "", "" );
 }
 
 
@@ -95,9 +87,8 @@ IdentifierCompleter::IdentifierCompleter(
   const std::vector< std::string > &candidates,
   const std::string &filetype,
   const std::string &filepath )
-  : candidate_repository_( CandidateRepository::Instance() ),
-    threading_enabled_( false ) {
-  AddCandidatesToDatabase( candidates, filetype, filepath );
+  : threading_enabled_( false ) {
+  identifier_database_.AddCandidates( candidates, filetype, filepath );
 }
 
 
@@ -121,18 +112,12 @@ void IdentifierCompleter::EnableThreading() {
 
 
 void IdentifierCompleter::AddCandidatesToDatabase(
-  const std::vector< std::string > &new_candidates,
-  const std::string &filetype,
-  const std::string &filepath ) {
-  std::list< const Candidate *> &candidates =
-    GetCandidateList( filetype, filepath );
-
-  std::vector< const Candidate * > repository_candidates =
-    candidate_repository_.GetCandidatesForStrings( new_candidates );
-
-  candidates.insert( candidates.end(),
-                     repository_candidates.begin(),
-                     repository_candidates.end() );
+    const std::vector< std::string > &new_candidates,
+    const std::string &filetype,
+    const std::string &filepath ) {
+  identifier_database_.AddCandidates( new_candidates,
+                                      filetype,
+                                      filepath );
 }
 
 
@@ -141,16 +126,17 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
   const std::string &filetype,
   const std::string &filepath,
   bool collect_from_comments_and_strings ) {
-  ClearCandidatesStoredForFile( filetype, filepath );
+  identifier_database_.ClearCandidatesStoredForFile( filetype, filepath );
 
   std::string new_contents =
     collect_from_comments_and_strings ?
     buffer_contents :
     RemoveIdentifierFreeText( buffer_contents );
 
-  AddCandidatesToDatabase( ExtractIdentifiersFromText( new_contents ),
-                           filetype,
-                           filepath );
+  identifier_database_.AddCandidates(
+      ExtractIdentifiersFromText( new_contents ),
+      filetype,
+      filepath );
 }
 
 
@@ -186,7 +172,7 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
   const std::string &query,
   const std::string &filetype ) const {
   std::vector< Result > results;
-  ResultsForQueryAndType( query, filetype, results );
+  identifier_database_.ResultsForQueryAndType( query, filetype, results );
 
   std::vector< std::string > candidates;
   candidates.reserve( results.size() );
@@ -220,70 +206,6 @@ Future< AsyncResults > IdentifierCompleter::CandidatesForQueryAndTypeAsync(
 
   latest_query_task_.Set( task );
   return Future< AsyncResults >( boost::move( future ) );
-}
-
-
-void IdentifierCompleter::ResultsForQueryAndType(
-  const std::string &query,
-  const std::string &filetype,
-  std::vector< Result > &results ) const {
-  FiletypeMap::const_iterator it = filetype_map_.find( filetype );
-
-  if ( it == filetype_map_.end() || query.empty() )
-    return;
-
-  Bitset query_bitset = LetterBitsetFromString( query );
-  bool query_has_uppercase_letters = any_of( query, is_upper() );
-
-  boost::unordered_set< const Candidate * > seen_candidates;
-  seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
-
-  foreach ( const FilepathToCandidates::value_type & path_and_candidates,
-            *it->second ) {
-    foreach ( const Candidate * candidate, *path_and_candidates.second ) {
-      if ( ContainsKey( seen_candidates, candidate ) )
-        continue;
-      else
-        seen_candidates.insert( candidate );
-
-      if ( !candidate->MatchesQueryBitset( query_bitset ) )
-        continue;
-
-      Result result = candidate->QueryMatchResult(
-                        query, query_has_uppercase_letters );
-
-      if ( result.IsSubsequence() )
-        results.push_back( result );
-    }
-  }
-
-  std::sort( results.begin(), results.end() );
-}
-
-
-void IdentifierCompleter::ClearCandidatesStoredForFile(
-  const std::string &filetype,
-  const std::string &filepath ) {
-  GetCandidateList( filetype, filepath ).clear();
-}
-
-
-std::list< const Candidate * > &IdentifierCompleter::GetCandidateList(
-  const std::string &filetype,
-  const std::string &filepath ) {
-  boost::shared_ptr< FilepathToCandidates > &path_to_candidates =
-    filetype_map_[ filetype ];
-
-  if ( !path_to_candidates )
-    path_to_candidates.reset( new FilepathToCandidates() );
-
-  boost::shared_ptr< std::list< const Candidate * > > &candidates =
-    ( *path_to_candidates )[ filepath ];
-
-  if ( !candidates )
-    candidates.reset( new std::list< const Candidate * >() );
-
-  return *candidates;
 }
 
 

@@ -20,6 +20,7 @@
 
 #include "ConcurrentLatestValue.h"
 #include "ConcurrentStack.h"
+#include "IdentifierDatabase.h"
 #include "Future.h"
 
 #include <boost/utility.hpp>
@@ -34,7 +35,6 @@
 namespace YouCompleteMe {
 
 class Candidate;
-class CandidateRepository;
 
 typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
 
@@ -92,38 +92,14 @@ public:
 
 private:
 
-  void ResultsForQueryAndType( const std::string &query,
-                               const std::string &filetype,
-                               std::vector< Result > &results ) const;
-
-  void ClearCandidatesStoredForFile( const std::string &filetype,
-                                     const std::string &filepath );
-
-  std::list< const Candidate * > &GetCandidateList(
-    const std::string &filetype,
-    const std::string &filepath );
-
   void InitThreads();
-
-
-  // filepath -> *( *candidate )
-  typedef boost::unordered_map < std::string,
-          boost::shared_ptr< std::list< const Candidate * > > >
-          FilepathToCandidates;
-
-  // filetype -> *( filepath -> *( *candidate ) )
-  typedef boost::unordered_map < std::string,
-          boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
-
 
 
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES
   /////////////////////////////
 
-  CandidateRepository &candidate_repository_;
-
-  FiletypeMap filetype_map_;
+  IdentifierDatabase identifier_database_;
 
   bool threading_enabled_;
 
