@@ -281,7 +281,11 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 
 #############################################################################
 
-if( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG )
+
+# For some reason, Xcode is too dumb to understand the -isystem flag and thus
+# borks on warnings in Boost.
+if ( ( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG ) AND
+     NOT CMAKE_GENERATOR_IS_XCODE )
   # We want all warnings, and warnings should be treated as errors
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror" )
 endif()
