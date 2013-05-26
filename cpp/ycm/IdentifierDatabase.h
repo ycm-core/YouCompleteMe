@@ -23,6 +23,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <list>
 #include <vector>
 #include <string>
 
