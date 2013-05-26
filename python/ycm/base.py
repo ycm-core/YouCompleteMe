@@ -70,7 +70,7 @@ def CurrentIdentifierFinished():
     return line[ : current_column ].isspace()
 
 
-COMPATIBLE_WITH_CORE_VERSION = 3
+COMPATIBLE_WITH_CORE_VERSION = 4
 
 def CompatibleWithYcmCore():
   try:

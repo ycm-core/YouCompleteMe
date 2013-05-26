@@ -40,8 +40,8 @@ the menu (so you usually need to press TAB just once).
 
 **All of the above works with any programming language** because of the
 identifier-based completion engine. It collects all of the identifiers in the
-current file and other files you visit and searches them when you type
-(identifiers are put into per-filetype groups).
+current file and other files you visit (and your tags files) and searches them
+when you type (identifiers are put into per-filetype groups).
 
 The demo also shows the semantic engine in use. When the user presses `.`, `->`
 or `::` while typing in insert mode (for C++; different triggers are used for
@@ -288,6 +288,26 @@ User Guide
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
   Shift-TAB binding will not work because the console will not pass it to Vim.
   You can remap the keys; see the _Options_ section below.
+
+Knowing a little bit about how YCM works internally will prevent confusion. YCM
+has several completion engines: an identifier-based completer that collects all
+of the identifiers in the current file and other files you visit (and your tags
+files) and searches them when you type (identifiers are put into per-filetype
+groups).
+
+There are also several semantic engines in YCM. There's a libclang-based
+completer that provides semantic completion for C-family languages.  There's a
+Jedi-based completer for semantic completion for Python. There's also an
+omnifunc-based completer that uses data from Vim's omnicomplete system to
+provide semantic completions when no native completer exists for that language
+in YCM.
+
+There are also other completion engines, like the UltiSnips completer and the
+filepath completer.
+
+YCM automatically detects which completion engine would be the best in any
+situation. On occasion, it queries several of them at once, merges the
+outputs and presents the results to you.
 
 ### Completion string ranking
 
@@ -712,6 +732,23 @@ Default: `0`
 
     let g:ycm_collect_identifiers_from_comments_and_strings = 0
 
+### The `g:ycm_collect_identifiers_from_tags_files` option
+
+When this option is set to `1`, YCM's identifier completer will also collect
+identifiers from tags files. The list of tags files to examine is retrieved from
+the `tagfiles()` Vim function which examines the `tags` Vim option. See `:h
+'tags'` for details.
+
+YCM will re-index your tags files if it detects that they have been modified.
+
+The only supported tag format is the [Exuberant Ctags format][ctags-format]. The
+format from "plain" ctags is NOT supported. See the _FAQ_ for pointers if YCM
+does not appear to read your tag files.
+
+Default: `1`
+
+    let g:ycm_collect_identifiers_from_tags_files = 1
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's
@@ -1091,6 +1128,21 @@ CompileCommands API) were added after their cut.
 So just go through the installation guide and make sure you are using a correct
 `libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
 
+### YCM does not read identifiers from my tags files
+
+Make sure you are using [Exuberant Ctags][exuberant-ctags] to produce your tags
+files since the only supported tag format is the [Exuberant Ctags
+format][ctags-format]. The format from "plain" ctags is NOT supported. The
+output of `ctags --version` should list "Exuberant Ctags".
+
+NOTE: Mac OS X comes with "plain" ctags installed by default. `brew install
+ctags` will get you the Exuberant Ctags version.
+
+Also make sure that your Vim `tags` option is set correctly. See `:h 'tags'` for
+details. If you want to see which tag files YCM will read for a given buffer,
+run `:echo tagfiles()` with the relevant buffer active. Note that that function
+will only list tag files that already exist.
+
 ### `CTRL-U` in insert mode does not work
 
 YCM keeps you in a `completefunc` completion mode when you're typing in insert
@@ -1174,3 +1226,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [eclim]: http://eclim.org/
 [jedi]: https://github.com/davidhalter/jedi
 [ultisnips]: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
+[exuberant-ctags]: http://ctags.sourceforge.net/
+[ctags-format]: http://ctags.sourceforge.net/FORMAT

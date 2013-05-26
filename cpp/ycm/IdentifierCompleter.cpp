@@ -79,7 +79,7 @@ IdentifierCompleter::IdentifierCompleter()
 IdentifierCompleter::IdentifierCompleter(
   const std::vector< std::string > &candidates )
   : threading_enabled_( false ) {
-  identifier_database_.AddCandidates( candidates, "", "" );
+  identifier_database_.AddIdentifiers( candidates, "", "" );
 }
 
 
@@ -88,7 +88,7 @@ IdentifierCompleter::IdentifierCompleter(
   const std::string &filetype,
   const std::string &filepath )
   : threading_enabled_( false ) {
-  identifier_database_.AddCandidates( candidates, filetype, filepath );
+  identifier_database_.AddIdentifiers( candidates, filetype, filepath );
 }
 
 
@@ -111,17 +111,42 @@ void IdentifierCompleter::EnableThreading() {
 }
 
 
-void IdentifierCompleter::AddCandidatesToDatabase(
+void IdentifierCompleter::AddIdentifiersToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
     const std::string &filepath ) {
-  identifier_database_.AddCandidates( new_candidates,
+  identifier_database_.AddIdentifiers( new_candidates,
                                       filetype,
                                       filepath );
 }
 
 
-void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
+void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles(
+    const std::vector< std::string > &absolute_paths_to_tag_files ) {
+  foreach( const std::string &path, absolute_paths_to_tag_files ) {
+    identifier_database_.AddIdentifiers(
+        ExtractIdentifiersFromTagsFile( path ) );
+  }
+}
+
+
+void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFilesAsync(
+    std::vector< std::string > absolute_paths_to_tag_files ) {
+  // TODO: throw exception when threading is not enabled and this is called
+  if ( !threading_enabled_ )
+    return;
+
+  boost::function< void() > functor =
+    boost::bind( &IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles,
+                 boost::ref( *this ),
+                 boost::move( absolute_paths_to_tag_files ) );
+
+  buffer_identifiers_task_stack_.Push(
+    boost::make_shared< packaged_task< void > >( boost::move( functor ) ) );
+}
+
+
+void IdentifierCompleter::AddIdentifiersToDatabaseFromBuffer(
   const std::string &buffer_contents,
   const std::string &filetype,
   const std::string &filepath,
@@ -133,14 +158,14 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBuffer(
     buffer_contents :
     RemoveIdentifierFreeText( buffer_contents );
 
-  identifier_database_.AddCandidates(
+  identifier_database_.AddIdentifiers(
       ExtractIdentifiersFromText( new_contents ),
       filetype,
       filepath );
 }
 
 
-void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
+void IdentifierCompleter::AddIdentifiersToDatabaseFromBufferAsync(
   std::string buffer_contents,
   std::string filetype,
   std::string filepath,
@@ -150,7 +175,7 @@ void IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync(
     return;
 
   boost::function< void() > functor =
-    boost::bind( &IdentifierCompleter::AddCandidatesToDatabaseFromBuffer,
+    boost::bind( &IdentifierCompleter::AddIdentifiersToDatabaseFromBuffer,
                  boost::ref( *this ),
                  boost::move( buffer_contents ),
                  boost::move( filetype ),

@@ -21,6 +21,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 namespace YouCompleteMe {
 
 std::vector< std::string > StringVector( const std::string &a,
@@ -32,6 +34,8 @@ std::vector< std::string > StringVector( const std::string &a,
                                          const std::string &g = std::string(),
                                          const std::string &h = std::string(),
                                          const std::string &i = std::string() );
+
+boost::filesystem::path PathToTestFile( const std::string &filepath );
 
 } // namespace YouCompleteMe
 

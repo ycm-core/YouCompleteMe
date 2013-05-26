@@ -17,8 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import vim
 import ycm_core
+from collections import defaultdict
 from ycm.completers.general_completer import GeneralCompleter
 from ycm import vimsupport
 from ycm import utils
@@ -33,6 +35,7 @@ class IdentifierCompleter( GeneralCompleter ):
     super( IdentifierCompleter, self ).__init__()
     self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
+    self.tags_file_last_mtime = defaultdict( int )
 
 
   def ShouldUseNow( self, start_column ):
@@ -55,9 +58,9 @@ class IdentifierCompleter( GeneralCompleter ):
 
     vector = ycm_core.StringVec()
     vector.append( identifier )
-    self.completer.AddCandidatesToDatabase( vector,
-                                            filetype,
-                                            filepath )
+    self.completer.AddIdentifiersToDatabase( vector,
+                                             filetype,
+                                             filepath )
 
 
   def AddPreviousIdentifier( self ):
@@ -88,15 +91,46 @@ class IdentifierCompleter( GeneralCompleter ):
       return
 
     text = "\n".join( vim.current.buffer )
-    self.completer.AddCandidatesToDatabaseFromBufferAsync(
+    self.completer.AddIdentifiersToDatabaseFromBufferAsync(
       text,
       filetype,
       filepath,
       collect_from_comments_and_strings )
 
 
+  def AddIdentifiersFromTagFiles( self ):
+    tag_files = vim.eval( 'tagfiles()' )
+    current_working_directory = os.getcwd()
+    absolute_paths_to_tag_files = ycm_core.StringVec()
+    for tag_file in tag_files:
+      absolute_tag_file = os.path.join( current_working_directory,
+                                        tag_file )
+      try:
+        current_mtime = os.path.getmtime( absolute_tag_file )
+      except:
+        continue
+      last_mtime = self.tags_file_last_mtime[ absolute_tag_file ]
+
+      # We don't want to repeatedly process the same file over and over; we only
+      # process if it's changed since the last time we looked at it
+      if current_mtime <= last_mtime:
+        continue
+
+      self.tags_file_last_mtime[ absolute_tag_file ] = current_mtime
+      absolute_paths_to_tag_files.append( absolute_tag_file )
+
+    if not absolute_paths_to_tag_files:
+      return
+
+    self.completer.AddIdentifiersToDatabaseFromTagFilesAsync(
+      absolute_paths_to_tag_files )
+
+
   def OnFileReadyToParse( self ):
     self.AddBufferIdentifiers()
+
+    if vimsupport.GetBoolValue( 'g:ycm_collect_identifiers_from_tags_files' ):
+      self.AddIdentifiersFromTagFiles()
 
 
   def OnInsertLeave( self ):

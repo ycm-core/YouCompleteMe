@@ -23,15 +23,25 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <list>
 #include <vector>
 #include <string>
+#include <map>
+#include <set>
 
 namespace YouCompleteMe {
 
 class Candidate;
 class Result;
 class CandidateRepository;
+
+
+// filepath -> identifiers
+typedef std::map< std::string, std::vector< std::string > >
+  FilepathToIdentifiers;
+
+// filetype -> (filepath -> identifiers)
+typedef std::map< std::string, FilepathToIdentifiers >
+  FiletypeIdentifierMap;
 
 
 // This class stores the database of identifiers the identifier completer has
@@ -47,7 +57,9 @@ class IdentifierDatabase : boost::noncopyable {
 public:
   IdentifierDatabase();
 
-  void AddCandidates(
+  void AddIdentifiers( const FiletypeIdentifierMap &filetype_identifier_map );
+
+  void AddIdentifiers(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
     const std::string &filepath );
@@ -60,24 +72,30 @@ public:
                                std::vector< Result > &results ) const;
 
 private:
-  std::list< const Candidate * > &GetCandidateList(
+  std::set< const Candidate * > &GetCandidateSet(
     const std::string &filetype,
     const std::string &filepath );
 
+  void AddIdentifiersNoLock(
+    const std::vector< std::string > &new_candidates,
+    const std::string &filetype,
+    const std::string &filepath );
+
+
   // filepath -> *( *candidate )
   typedef boost::unordered_map < std::string,
-          boost::shared_ptr< std::list< const Candidate * > > >
+          boost::shared_ptr< std::set< const Candidate * > > >
           FilepathToCandidates;
 
   // filetype -> *( filepath -> *( *candidate ) )
   typedef boost::unordered_map < std::string,
-          boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
+          boost::shared_ptr< FilepathToCandidates > > FiletypeCandidateMap;
 
 
   CandidateRepository &candidate_repository_;
 
-  FiletypeMap filetype_map_;
-  mutable boost::mutex filetype_map_mutex_;
+  FiletypeCandidateMap filetype_candidate_map_;
+  mutable boost::mutex filetype_candidate_map_mutex_;
 };
 
 } // namespace YouCompleteMe

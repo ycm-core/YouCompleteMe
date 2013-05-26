@@ -216,6 +216,19 @@ TEST( IdentifierCompleterTest, ShorterAndLowercaseWins ) {
                             "STDIN_FILENO" ) );
 }
 
+TEST( IdentifierCompleterTest, TagsEndToEndWorks ) {
+  IdentifierCompleter completer;
+  std::vector< std::string > tag_files;
+  tag_files.push_back( PathToTestFile( "basic.tags" ).string() );
+
+  completer.AddIdentifiersToDatabaseFromTagFiles( tag_files );
+
+  EXPECT_THAT( completer.CandidatesForQueryAndType( "fo", "cpp" ),
+               ElementsAre( "foosy",
+                            "fooaaa" ) );
+
+}
+
 // TODO: tests for filepath and filetype candidate storing
 
 } // namespace YouCompleteMe

@@ -51,12 +51,19 @@ public:
 
   void EnableThreading();
 
-  void AddCandidatesToDatabase(
+  void AddIdentifiersToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
     const std::string &filepath );
 
-  void AddCandidatesToDatabaseFromBuffer(
+  void AddIdentifiersToDatabaseFromTagFiles(
+    const std::vector< std::string > &absolute_paths_to_tag_files );
+
+  // NOTE: params are taken by value on purpose!
+  void AddIdentifiersToDatabaseFromTagFilesAsync(
+    std::vector< std::string > absolute_paths_to_tag_files );
+
+  void AddIdentifiersToDatabaseFromBuffer(
     const std::string &buffer_contents,
     const std::string &filetype,
     const std::string &filepath,
@@ -65,7 +72,7 @@ public:
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid an expensive copy of buffer_contents if the param is taken by value
   // (move ctors FTW)
-  void AddCandidatesToDatabaseFromBufferAsync(
+  void AddIdentifiersToDatabaseFromBufferAsync(
     std::string buffer_contents,
     std::string filetype,
     std::string filepath,

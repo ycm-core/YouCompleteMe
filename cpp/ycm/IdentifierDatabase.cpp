@@ -40,28 +40,36 @@ IdentifierDatabase::IdentifierDatabase()
 }
 
 
-void IdentifierDatabase::AddCandidates(
+void IdentifierDatabase::AddIdentifiers(
+    const FiletypeIdentifierMap &filetype_identifier_map ) {
+  boost::lock_guard< boost::mutex > locker( filetype_candidate_map_mutex_ );
+
+  foreach ( const FiletypeIdentifierMap::value_type & filetype_and_map,
+            filetype_identifier_map ) {
+    foreach( const FilepathToIdentifiers::value_type & filepath_and_identifiers,
+             filetype_and_map.second ) {
+      AddIdentifiersNoLock( filepath_and_identifiers.second,
+                            filetype_and_map.first,
+                            filepath_and_identifiers.first );
+    }
+  }
+}
+
+
+void IdentifierDatabase::AddIdentifiers(
   const std::vector< std::string > &new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
-  boost::lock_guard< boost::mutex > locker( filetype_map_mutex_ );
-  std::list< const Candidate *> &candidates =
-    GetCandidateList( filetype, filepath );
-
-  std::vector< const Candidate * > repository_candidates =
-    candidate_repository_.GetCandidatesForStrings( new_candidates );
-
-  candidates.insert( candidates.end(),
-                     repository_candidates.begin(),
-                     repository_candidates.end() );
+  boost::lock_guard< boost::mutex > locker( filetype_candidate_map_mutex_ );
+  AddIdentifiersNoLock( new_candidates, filetype, filepath );
 }
 
 
 void IdentifierDatabase::ClearCandidatesStoredForFile(
   const std::string &filetype,
   const std::string &filepath ) {
-  boost::lock_guard< boost::mutex > locker( filetype_map_mutex_ );
-  GetCandidateList( filetype, filepath ).clear();
+  boost::lock_guard< boost::mutex > locker( filetype_candidate_map_mutex_ );
+  GetCandidateSet( filetype, filepath ).clear();
 }
 
 
@@ -69,12 +77,12 @@ void IdentifierDatabase::ResultsForQueryAndType(
   const std::string &query,
   const std::string &filetype,
   std::vector< Result > &results ) const {
-  FiletypeMap::const_iterator it;
+  FiletypeCandidateMap::const_iterator it;
   {
-    boost::lock_guard< boost::mutex > locker( filetype_map_mutex_ );
-    it = filetype_map_.find( filetype );
+    boost::lock_guard< boost::mutex > locker( filetype_candidate_map_mutex_ );
+    it = filetype_candidate_map_.find( filetype );
 
-    if ( it == filetype_map_.end() || query.empty() )
+    if ( it == filetype_candidate_map_.end() || query.empty() )
       return;
   }
   Bitset query_bitset = LetterBitsetFromString( query );
@@ -84,7 +92,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
   seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
 
   {
-    boost::lock_guard< boost::mutex > locker( filetype_map_mutex_ );
+    boost::lock_guard< boost::mutex > locker( filetype_candidate_map_mutex_ );
     foreach ( const FilepathToCandidates::value_type & path_and_candidates,
               *it->second ) {
       foreach ( const Candidate * candidate, *path_and_candidates.second ) {
@@ -109,24 +117,40 @@ void IdentifierDatabase::ResultsForQueryAndType(
 }
 
 
-// WARNING: You need to hold the filetype_map_mutex_ before calling this
-// function and while using the returned list.
-std::list< const Candidate * > &IdentifierDatabase::GetCandidateList(
+// WARNING: You need to hold the filetype_candidate_map_mutex_ before calling
+// this function and while using the returned set.
+std::set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
   const std::string &filetype,
   const std::string &filepath ) {
   boost::shared_ptr< FilepathToCandidates > &path_to_candidates =
-    filetype_map_[ filetype ];
+    filetype_candidate_map_[ filetype ];
 
   if ( !path_to_candidates )
     path_to_candidates.reset( new FilepathToCandidates() );
 
-  boost::shared_ptr< std::list< const Candidate * > > &candidates =
+  boost::shared_ptr< std::set< const Candidate * > > &candidates =
     ( *path_to_candidates )[ filepath ];
 
   if ( !candidates )
-    candidates.reset( new std::list< const Candidate * >() );
+    candidates.reset( new std::set< const Candidate * >() );
 
   return *candidates;
+}
+
+// WARNING: You need to hold the filetype_candidate_map_mutex_ before calling
+// this function and while using the returned set.
+void IdentifierDatabase::AddIdentifiersNoLock(
+  const std::vector< std::string > &new_candidates,
+  const std::string &filetype,
+  const std::string &filepath ) {
+  std::set< const Candidate *> &candidates =
+    GetCandidateSet( filetype, filepath );
+
+  std::vector< const Candidate * > repository_candidates =
+    candidate_repository_.GetCandidatesForStrings( new_candidates );
+
+  candidates.insert( repository_candidates.begin(),
+                     repository_candidates.end() );
 }
 
 
