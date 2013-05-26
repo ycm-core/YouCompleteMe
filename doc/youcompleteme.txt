@@ -28,6 +28,7 @@ Contents ~
   1. The |GoToDeclaration| subcommand
   2. The |GoToDefinition| subcommand
   3. The |GoToDefinitionElseDeclaration| subcommand
+  4. The |ClearCompilationFlagCache| subcommand
  9. Options                                              |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_filetype_whitelist| option
@@ -38,20 +39,21 @@ Contents ~
   7. The |g:ycm_complete_in_comments| option
   8. The |g:ycm_complete_in_strings| option
   9. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  10. The |g:ycm_add_preview_to_completeopt| option
-  11. The |g:ycm_autoclose_preview_window_after_completion| option
-  12. The |g:ycm_autoclose_preview_window_after_insertion| option
-  13. The |g:ycm_max_diagnostics_to_display| option
-  14. The |g:ycm_key_list_select_completion| option
-  15. The |g:ycm_key_list_previous_completion| option
-  16. The |g:ycm_key_invoke_completion| option
-  17. The |g:ycm_key_detailed_diagnostics| option
-  18. The |g:ycm_global_ycm_extra_conf| option
-  19. The |g:ycm_confirm_extra_conf| option
-  20. The |g:ycm_extra_conf_globlist| option
-  21. The |g:ycm_filepath_completion_use_working_dir| option
-  22. The |g:ycm_semantic_triggers| option
-  23. The |g:ycm_cache_omnifunc| option
+  10. The |g:ycm_collect_identifiers_from_tags_files| option
+  11. The |g:ycm_add_preview_to_completeopt| option
+  12. The |g:ycm_autoclose_preview_window_after_completion| option
+  13. The |g:ycm_autoclose_preview_window_after_insertion| option
+  14. The |g:ycm_max_diagnostics_to_display| option
+  15. The |g:ycm_key_list_select_completion| option
+  16. The |g:ycm_key_list_previous_completion| option
+  17. The |g:ycm_key_invoke_completion| option
+  18. The |g:ycm_key_detailed_diagnostics| option
+  19. The |g:ycm_global_ycm_extra_conf| option
+  20. The |g:ycm_confirm_extra_conf| option
+  21. The |g:ycm_extra_conf_globlist| option
+  22. The |g:ycm_filepath_completion_use_working_dir| option
+  23. The |g:ycm_semantic_triggers| option
+  24. The |g:ycm_cache_omnifunc| option
  10. FAQ                                                     |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine
@@ -67,11 +69,12 @@ Contents ~
   12. Vim segfaults when I use the semantic completer in Ruby files
   13. I get 'LONG_BIT definition appears wrong for platform' when compiling
   14. I get 'Vim: Caught deadly signal SEGV' on Vim startup
-  15. |CTRL-U| in insert mode does not work
-  16. Why isn't YCM just written in plain VimScript, FFS?
-  17. Why does YCM demand such a recent version of Vim?
-  18. I get annoying messages in Vim's status area when I type
-  19. Nasty bugs happen if I have the |vim-autoclose| plugin installed
+  15. YCM does not read identifiers from my tags files
+  16. |CTRL-U| in insert mode does not work
+  17. Why isn't YCM just written in plain VimScript, FFS?
+  18. Why does YCM demand such a recent version of Vim?
+  19. I get annoying messages in Vim's status area when I type
+  20. Nasty bugs happen if I have the |vim-autoclose| plugin installed
  11. Contact                                             |youcompleteme-contact|
  12. License                                             |youcompleteme-license|
 
@@ -118,8 +121,8 @@ top of the menu (so you usually need to press TAB just once).
 
 All of the above works with any programming language because of the
 identifier-based completion engine. It collects all of the identifiers in the
-current file and other files you visit and searches them when you type
-(identifiers are put into per-filetype groups).
+current file and other files you visit (and your tags files) and searches them
+when you type (identifiers are put into per-filetype groups).
 
 The demo also shows the semantic engine in use. When the user presses '.',
 '->' or '::' while typing in insert mode (for C++; different triggers are used
@@ -358,6 +361,26 @@ General Usage ~
    you're using console Vim (that is, not Gvim or MacVim) then it's likely
    that the Shift-TAB binding will not work because the console will not pass
    it to Vim. You can remap the keys; see the Options section below.
+
+Knowing a little bit about how YCM works internally will prevent confusion.
+YCM has several completion engines: an identifier-based completer that
+collects all of the identifiers in the current file and other files you visit
+(and your tags files) and searches them when you type (identifiers are put
+into per-filetype groups).
+
+There are also several semantic engines in YCM. There's a libclang-based
+completer that provides semantic completion for C-family languages. There's a
+Jedi-based completer for semantic completion for Python. There's also an
+omnifunc-based completer that uses data from Vim's omnicomplete system to
+provide semantic completions when no native completer exists for that language
+in YCM.
+
+There are also other completion engines, like the UltiSnips completer and the
+filepath completer.
+
+YCM automatically detects which completion engine would be the best in any
+situation. On occasion, it queries several of them at once, merges the outputs
+and presents the results to you.
 
 -------------------------------------------------------------------------------
                                        *youcompleteme-completion-string-ranking*
@@ -635,6 +658,19 @@ to the symbol's declaration.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, python'
 
+-------------------------------------------------------------------------------
+The *ClearCompilationFlagCache* subcommand
+
+YCM caches the flags it gets from the 'FlagsForFile' function in your
+'ycm_extra_conf.py' file if you return them with the 'do_cache' parameter set
+to 'True'. The cache is in memory and is never invalidated (unless you restart
+Vim of course).
+
+This command clears that cache entirely. YCM will then re-query your
+'FlagsForFile' function as needed in the future.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
+
 ===============================================================================
                                                          *youcompleteme-options*
 Options ~
@@ -805,6 +841,24 @@ strings will be ignored.
 Default: '0'
 >
     let g:ycm_collect_identifiers_from_comments_and_strings = 0
+
+-------------------------------------------------------------------------------
+The *g:ycm_collect_identifiers_from_tags_files* option
+
+When this option is set to '1', YCM's identifier completer will also collect
+identifiers from tags files. The list of tags files to examine is retrieved
+from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
+':h 'tags' for details.
+
+YCM will re-index your tags files if it detects that they have been modified.
+
+The only supported tag format is the Exuberant Ctags format [23]. The format
+from "plain" ctags is NOT supported. See the FAQ for pointers if YCM does not
+appear to read your tag files.
+
+Default: '1'
+>
+    let g:ycm_collect_identifiers_from_tags_files = 1
 
 -------------------------------------------------------------------------------
 The *g:ycm_add_preview_to_completeopt* option
@@ -1155,7 +1209,7 @@ I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting ~
 
 You should probably run 'brew rm python; brew install python' to get the
 latest fixes that should make YCM work with such a configuration. Also rebuild
-Macvim then. If you still get problems with this, see issue #18 [23] for
+Macvim then. If you still get problems with this, see issue #18 [24] for
 suggestions.
 
 -------------------------------------------------------------------------------
@@ -1218,6 +1272,22 @@ correct 'libclang.so'. I recommend downloading prebuilt binaries from
 llvm.org.
 
 -------------------------------------------------------------------------------
+YCM does not read identifiers from my tags files ~
+
+Make sure you are using Exuberant Ctags [25] to produce your tags files since
+the only supported tag format is the Exuberant Ctags format [23]. The format
+from "plain" ctags is NOT supported. The output of 'ctags --version' should
+list "Exuberant Ctags".
+
+NOTE: Mac OS X comes with "plain" ctags installed by default. 'brew install
+ctags' will get you the Exuberant Ctags version.
+
+Also make sure that your Vim 'tags' option is set correctly. See ':h 'tags'
+for details. If you want to see which tag files YCM will read for a given
+buffer, run ':echo tagfiles()' with the relevant buffer active. Note that that
+function will only list tag files that already exist.
+
+-------------------------------------------------------------------------------
 *CTRL-U* in insert mode does not work
 
 YCM keeps you in a 'completefunc' completion mode when you're typing in insert
@@ -1261,7 +1331,7 @@ You'll have to learn to ignore them. It's a shitty "solution", I know.
 -------------------------------------------------------------------------------
 Nasty bugs happen if I have the *vim-autoclose* plugin installed
 
-Use the delimitMate [24] plugin instead. It does the same thing without
+Use the delimitMate [26] plugin instead. It does the same thing without
 conflicting with YCM.
 
 ===============================================================================
@@ -1269,7 +1339,7 @@ conflicting with YCM.
 Contact ~
 
 If you have questions, bug reports, suggestions, etc. please use the issue
-tracker [25]. The latest version is available at http://valloric.github.io/YouCompleteMe/.
+tracker [27]. The latest version is available at http://valloric.github.io/YouCompleteMe/.
 
 The author's homepage is http://val.markovic.io.
 
@@ -1277,7 +1347,7 @@ The author's homepage is http://val.markovic.io.
                                                          *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [26]. Copyright 2012
+This software is licensed under the GPL v3 license [28]. Copyright 2012
 Strahinja Val Markovic <val@markovic.io>.
 
 ===============================================================================
@@ -1304,11 +1374,13 @@ References ~
 [18] https://github.com/Valloric/YouCompleteMe/blob/master/cpp/ycm/.ycm_extra_conf.py
 [19] http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [20] http://eclim.org/
-[21] https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py
+[21] https://github.com/Valloric/YouCompleteMe/blob/master/python/ycm/completers/completer.py
 [22] https://github.com/Valloric/ListToggle
-[23] https://github.com/Valloric/YouCompleteMe/issues/18
-[24] https://github.com/Raimondi/delimitMate
-[25] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[26] http://www.gnu.org/copyleft/gpl.html
+[23] http://ctags.sourceforge.net/FORMAT
+[24] https://github.com/Valloric/YouCompleteMe/issues/18
+[25] http://ctags.sourceforge.net/
+[26] https://github.com/Raimondi/delimitMate
+[27] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[28] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
