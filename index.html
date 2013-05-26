@@ -59,8 +59,8 @@ the order in which they appear in the input. So <code>abc</code> is a subsequenc
 ranks the completion strings so that the most relevant ones rise to the top of
 the menu (so you usually need to press TAB just once).</p><p><strong>All of the above works with any programming language</strong> because of the
 identifier-based completion engine. It collects all of the identifiers in the
-current file and other files you visit and searches them when you type
-(identifiers are put into per-filetype groups).</p><p>The demo also shows the semantic engine in use. When the user presses <code>.</code>, <code>-&gt;</code>
+current file and other files you visit (and your tags files) and searches them
+when you type (identifiers are put into per-filetype groups).</p><p>The demo also shows the semantic engine in use. When the user presses <code>.</code>, <code>-&gt;</code>
 or <code>::</code> while typing in insert mode (for C++; different triggers are used for
 other languages), the semantic engine is triggered (it can also be triggered
 with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's integration with
@@ -205,7 +205,19 @@ that are conservatively turned off by default that you may want to turn on.</p><
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
   Shift-TAB binding will not work because the console will not pass it to Vim.
   You can remap the keys; see the <em>Options</em> section below.</li>
-</ul><h3>Completion string ranking</h3><p>The subsequence filter removes any completions that do not match the input, but
+</ul><p>Knowing a little bit about how YCM works internally will prevent confusion. YCM
+has several completion engines: an identifier-based completer that collects all
+of the identifiers in the current file and other files you visit (and your tags
+files) and searches them when you type (identifiers are put into per-filetype
+groups).</p><p>There are also several semantic engines in YCM. There's a libclang-based
+completer that provides semantic completion for C-family languages.  There's a
+Jedi-based completer for semantic completion for Python. There's also an
+omnifunc-based completer that uses data from Vim's omnicomplete system to
+provide semantic completions when no native completer exists for that language
+in YCM.</p><p>There are also other completion engines, like the UltiSnips completer and the
+filepath completer.</p><p>YCM automatically detects which completion engine would be the best in any
+situation. On occasion, it queries several of them at once, merges the
+outputs and presents the results to you.</p><h3>Completion string ranking</h3><p>The subsequence filter removes any completions that do not match the input, but
 then the sorting system kicks in. It's actually very complicated and uses lots
 of factors, but suffice it to say that "word boundary" (WB) subsequence
 character matches are "worth" more than non-WB matches. In effect, this means
@@ -262,7 +274,7 @@ in your vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omni
 as the data source for semantic completions and provide the auto-triggering
 and subsequence-based matching (and other YCM features) on top of it.</p><h3>Writing New Semantic Completers</h3><p>You have two options here: writing an <code>omnifunc</code> for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for YCM
-using the <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py">Completer API</a>.</p><p>Here are the differences between the two approaches:</p><ul>
+using the <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/ycm/completers/completer.py">Completer API</a>.</p><p>Here are the differences between the two approaches:</p><ul>
 <li>You have to use VimScript to write the omnifunc, but get to use Python to
   write for the Completer API; this by itself should make you want to use the
   API.</li>
@@ -274,7 +286,7 @@ using the <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/
 <li>Performance with the Completer API is better since Python executes faster than
   VimScript.</li>
 </ul><p>If you want to use the <code>omnifunc</code> system, see the relevant Vim docs with <code>:h
-complete-functions</code>. For the Completer API, see <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/completers/completer.py">the API docs</a>.</p><p>If you want to upstream your completer into YCM's source, you should use the
+complete-functions</code>. For the Completer API, see <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/ycm/completers/completer.py">the API docs</a>.</p><p>If you want to upstream your completer into YCM's source, you should use the
 Completer API.</p><h3>Syntastic integration</h3><p>YCM has explicit support for <a href="https://github.com/scrooloose/syntastic">Syntastic</a> (and vice-versa) if you compiled YCM
 with Clang support; this means that any diagnostics (errors or warnings) that
 Clang encounters while compiling your file will be fed back to Syntastic for
@@ -332,7 +344,11 @@ the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
 with <code>#include</code> directives (directly or indirectly) in that file.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python</code></p><h3>The <code>GoToDefinitionElseDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition if possible; if
 the definition is not accessible from the current translation unit, jumps to the
-symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python</code></p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
+symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python</code></p><h3>The <code>ClearCompilationFlagCache</code> subcommand</h3><p>YCM caches the flags it gets from the <code>FlagsForFile</code> function in your
+<code>ycm_extra_conf.py</code> file if you return them with the <code>do_cache</code> parameter set to
+<code>True</code>. The cache is in memory and is never invalidated (unless you restart Vim
+of course).</p><p>This command clears that cache entirely. YCM will then re-query your
+<code>FlagsForFile</code> function as needed in the future.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
 you don't need to change any options. These options can be configured in your
 <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> by including a line like this:</p><pre><code>let g:ycm_min_num_of_chars_for_completion = 1
 </code></pre><p>Note that after changing an option in your <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> you have to
@@ -397,6 +413,12 @@ as well.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_complete_in_strin
 </code></pre><h3>The <code>g:ycm_collect_identifiers_from_comments_and_strings</code> option</h3><p>When this option is set to <code>1</code>, YCM's identifier completer will also collect
 identifiers from strings and comments. Otherwise, the text in comments and
 strings will be ignored.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_collect_identifiers_from_comments_and_strings = 0
+</code></pre><h3>The <code>g:ycm_collect_identifiers_from_tags_files</code> option</h3><p>When this option is set to <code>1</code>, YCM's identifier completer will also collect
+identifiers from tags files. The list of tags files to examine is retrieved from
+the <code>tagfiles()</code> Vim function which examines the <code>tags</code> Vim option. See <code>:h
+'tags'</code> for details.</p><p>YCM will re-index your tags files if it detects that they have been modified.</p><p>The only supported tag format is the <a href="http://ctags.sourceforge.net/FORMAT">Exuberant Ctags format</a>. The
+format from "plain" ctags is NOT supported. See the <em>FAQ</em> for pointers if YCM
+does not appear to read your tag files.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_collect_identifiers_from_tags_files = 1
 </code></pre><h3>The <code>g:ycm_add_preview_to_completeopt</code> option</h3><p>When this option is set to <code>1</code>, YCM will add the <code>preview</code> string to Vim's
 <code>completeopt</code> option (see <code>:h completeopt</code>). If your <code>completeopt</code> option
 already has <code>preview</code> set, there will be no effect. You can see the current
@@ -560,7 +582,14 @@ at least a 3.2 libclang. Some distros ship with a system <code>libclang.so</code
 identifies itself as 3.2 but is not; it was cut from the upstream sources before
 the official 3.2 release and some API changes (like the addition of the
 CompileCommands API) were added after their cut.</p><p>So just go through the installation guide and make sure you are using a correct
-<code>libclang.so</code>. I recommend downloading prebuilt binaries from llvm.org.</p><h3><code>CTRL-U</code> in insert mode does not work</h3><p>YCM keeps you in a <code>completefunc</code> completion mode when you're typing in insert
+<code>libclang.so</code>. I recommend downloading prebuilt binaries from llvm.org.</p><h3>YCM does not read identifiers from my tags files</h3><p>Make sure you are using <a href="http://ctags.sourceforge.net/">Exuberant Ctags</a> to produce your tags
+files since the only supported tag format is the <a href="http://ctags.sourceforge.net/FORMAT">Exuberant Ctags
+format</a>. The format from "plain" ctags is NOT supported. The
+output of <code>ctags --version</code> should list "Exuberant Ctags".</p><p>NOTE: Mac OS X comes with "plain" ctags installed by default. <code>brew install
+ctags</code> will get you the Exuberant Ctags version.</p><p>Also make sure that your Vim <code>tags</code> option is set correctly. See <code>:h 'tags'</code> for
+details. If you want to see which tag files YCM will read for a given buffer,
+run <code>:echo tagfiles()</code> with the relevant buffer active. Note that that function
+will only list tag files that already exist.</p><h3><code>CTRL-U</code> in insert mode does not work</h3><p>YCM keeps you in a <code>completefunc</code> completion mode when you're typing in insert
 mode and Vim disables <code>&lt;C-U&gt;</code> in completion mode as a "feature." Sadly there's
 nothing I can do about this.</p><h3>Why isn't YCM just written in plain VimScript, FFS?</h3><p>Because of the identifier completion engine and subsequence-based filtering.
 Let's say you have <em>many</em> dozens of files open in a single Vim instance (I often
