@@ -59,13 +59,15 @@ public:
                                std::vector< Result > &results ) const;
 
 private:
-  std::list< const Candidate * > &GetCandidateList(
+  std::list< const Candidate *,
+    std::allocator < const Candidate * > > &GetCandidateList(
     const std::string &filetype,
     const std::string &filepath );
 
   // filepath -> *( *candidate )
   typedef boost::unordered_map < std::string,
-          boost::shared_ptr< std::list< const Candidate * > > >
+          boost::shared_ptr< std::list< const Candidate *,
+          std::allocator < const Candidate * > > > >
           FilepathToCandidates;
 
   // filetype -> *( filepath -> *( *candidate ) )
