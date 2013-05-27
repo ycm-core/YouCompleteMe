@@ -742,8 +742,11 @@ the `tagfiles()` Vim function which examines the `tags` Vim option. See `:h
 YCM will re-index your tags files if it detects that they have been modified.
 
 The only supported tag format is the [Exuberant Ctags format][ctags-format]. The
-format from "plain" ctags is NOT supported. See the _FAQ_ for pointers if YCM
-does not appear to read your tag files.
+format from "plain" ctags is NOT supported. Ctags needs to be called with the
+`--fields=+l` option (that's a lowercase `L`, not a one) because YCM needs the
+`language:<lang>` field in the tags output.
+
+See the _FAQ_ for pointers if YCM does not appear to read your tag files.
 
 Default: `1`
 
@@ -1148,6 +1151,9 @@ Make sure you are using [Exuberant Ctags][exuberant-ctags] to produce your tags
 files since the only supported tag format is the [Exuberant Ctags
 format][ctags-format]. The format from "plain" ctags is NOT supported. The
 output of `ctags --version` should list "Exuberant Ctags".
+
+Ctags needs to be called with the `--fields=+l` (that's a lowercase `L`, not a
+one) option because YCM needs the `language:<lang>` field in the tags output.
 
 NOTE: Mac OS X comes with "plain" ctags installed by default. `brew install
 ctags` will get you the Exuberant Ctags version.
