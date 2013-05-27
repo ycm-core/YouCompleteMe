@@ -15,7 +15,7 @@ function cmake_install {
 }
 
 function homebrew_cmake_install {
-  if [[ `which brew &> /dev/null` ]]; then
+  if command_exists brew; then
     brew install cmake
   else
     echo "Homebrew was not found installed in your system."
