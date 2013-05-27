@@ -40,20 +40,21 @@ Contents ~
   8. The |g:ycm_complete_in_strings| option
   9. The |g:ycm_collect_identifiers_from_comments_and_strings| option
   10. The |g:ycm_collect_identifiers_from_tags_files| option
-  11. The |g:ycm_add_preview_to_completeopt| option
-  12. The |g:ycm_autoclose_preview_window_after_completion| option
-  13. The |g:ycm_autoclose_preview_window_after_insertion| option
-  14. The |g:ycm_max_diagnostics_to_display| option
-  15. The |g:ycm_key_list_select_completion| option
-  16. The |g:ycm_key_list_previous_completion| option
-  17. The |g:ycm_key_invoke_completion| option
-  18. The |g:ycm_key_detailed_diagnostics| option
-  19. The |g:ycm_global_ycm_extra_conf| option
-  20. The |g:ycm_confirm_extra_conf| option
-  21. The |g:ycm_extra_conf_globlist| option
-  22. The |g:ycm_filepath_completion_use_working_dir| option
-  23. The |g:ycm_semantic_triggers| option
-  24. The |g:ycm_cache_omnifunc| option
+  11. The |g:ycm_seed_identifiers_with_syntax| option
+  12. The |g:ycm_add_preview_to_completeopt| option
+  13. The |g:ycm_autoclose_preview_window_after_completion| option
+  14. The |g:ycm_autoclose_preview_window_after_insertion| option
+  15. The |g:ycm_max_diagnostics_to_display| option
+  16. The |g:ycm_key_list_select_completion| option
+  17. The |g:ycm_key_list_previous_completion| option
+  18. The |g:ycm_key_invoke_completion| option
+  19. The |g:ycm_key_detailed_diagnostics| option
+  20. The |g:ycm_global_ycm_extra_conf| option
+  21. The |g:ycm_confirm_extra_conf| option
+  22. The |g:ycm_extra_conf_globlist| option
+  23. The |g:ycm_filepath_completion_use_working_dir| option
+  24. The |g:ycm_semantic_triggers| option
+  25. The |g:ycm_cache_omnifunc| option
  10. FAQ                                                     |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine
@@ -859,6 +860,21 @@ appear to read your tag files.
 Default: '1'
 >
     let g:ycm_collect_identifiers_from_tags_files = 1
+
+-------------------------------------------------------------------------------
+The *g:ycm_seed_identifiers_with_syntax* option
+
+When this option is set to '1', YCM's identifier completer will seed its
+identifier database with the keywords of the programming language you're
+writing.
+
+Since the keywords are extracted from the Vim syntax file for the filetype,
+all keywords may not be collected, depending on how the syntax file was
+written. Usually at least 95% of the keywords are successfully extracted.
+
+Default: '0'
+>
+    let g:ycm_seed_identifiers_with_syntax = 0
 
 -------------------------------------------------------------------------------
 The *g:ycm_add_preview_to_completeopt* option
