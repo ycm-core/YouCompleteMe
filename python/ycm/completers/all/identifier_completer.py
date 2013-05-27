@@ -22,12 +22,14 @@ import vim
 import ycm_core
 from collections import defaultdict
 from ycm.completers.general_completer import GeneralCompleter
+from ycm.completers.general import syntax_parse
 from ycm import vimsupport
 from ycm import utils
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
+SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 
 
 class IdentifierCompleter( GeneralCompleter ):
@@ -36,6 +38,7 @@ class IdentifierCompleter( GeneralCompleter ):
     self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
     self.tags_file_last_mtime = defaultdict( int )
+    self.filetypes_with_keywords_loaded = set()
 
 
   def ShouldUseNow( self, start_column ):
@@ -82,6 +85,7 @@ class IdentifierCompleter( GeneralCompleter ):
 
 
   def AddBufferIdentifiers( self ):
+    # TODO: use vimsupport.GetFiletypes; also elsewhere in file
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
     collect_from_comments_and_strings = vimsupport.GetBoolValue(
@@ -126,11 +130,32 @@ class IdentifierCompleter( GeneralCompleter ):
       absolute_paths_to_tag_files )
 
 
+  def AddIdentifiersFromSyntax( self ):
+    filetype = vim.eval( "&filetype" )
+    if filetype in self.filetypes_with_keywords_loaded:
+      return
+
+    self.filetypes_with_keywords_loaded.add( filetype )
+
+    keyword_set = syntax_parse.SyntaxKeywordsForCurrentBuffer()
+    keywords = ycm_core.StringVec()
+    for keyword in keyword_set:
+      keywords.append( keyword )
+
+    filepath = SYNTAX_FILENAME + filetype
+    self.completer.AddIdentifiersToDatabase( keywords,
+                                             filetype,
+                                             filepath )
+
+
   def OnFileReadyToParse( self ):
     self.AddBufferIdentifiers()
 
     if vimsupport.GetBoolValue( 'g:ycm_collect_identifiers_from_tags_files' ):
       self.AddIdentifiersFromTagFiles()
+
+    if vimsupport.GetBoolValue( 'g:ycm_seed_identifiers_with_syntax' ):
+      self.AddIdentifiersFromSyntax()
 
 
   def OnInsertLeave( self ):

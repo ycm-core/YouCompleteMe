@@ -749,6 +749,20 @@ Default: `1`
 
     let g:ycm_collect_identifiers_from_tags_files = 1
 
+### The `g:ycm_seed_identifiers_with_syntax` option
+
+When this option is set to `1`, YCM's identifier completer will seed its
+identifier database with the keywords of the programming language you're
+writing.
+
+Since the keywords are extracted from the Vim syntax file for the filetype, all
+keywords may not be collected, depending on how the syntax file was written.
+Usually at least 95% of the keywords are successfully extracted.
+
+Default: `0`
+
+    let g:ycm_seed_identifiers_with_syntax = 0
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's

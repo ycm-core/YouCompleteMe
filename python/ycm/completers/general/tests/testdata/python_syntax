@@ -1,0 +1,63 @@
+--- Syntax items ---
+cCustomFunc    xxx match /\w\+\s*\((\)\@=/
+                   links to Function
+cCustomClass   xxx match /\w\+\s*\(::\)\@=/
+                   links to Function
+pythonStatement xxx return True lambda
+                   nextgroup=pythonFunction  skipwhite def
+                   del
+                   nextgroup=pythonFunction  skipwhite class
+                   global nonlocal as None, False, yield with print continue break pass assert exec
+                   links to Statement
+pythonFunction xxx match /\%(\%(def\s\|class\s\|@\)\s*\)\@<=\h\%(\w\|\.\)*/  contained
+                   links to Function
+pythonConditional xxx if else elif
+                   links to Conditional
+pythonRepeat   xxx for while
+                   links to Repeat
+pythonOperator xxx or is and in not
+                   links to Operator
+pythonException xxx finally raise except try
+                   links to Exception
+pythonInclude  xxx from import
+                   links to Include
+pythonDecorator xxx match /@/  display nextgroup=pythonFunction skipwhite
+                   links to Define
+pythonTodo     xxx contained NOTE XXX TODO NOTES FIXME
+                   links to Todo
+pythonComment  xxx match /#.*$/  contains=pythonTodo,@Spell
+                   links to Comment
+pythonEscape   xxx match /\\[abfnrtv'"\\]/  contained
+                   match /\\\o\{1,3}/  contained
+                   match /\\x\x\{2}/  contained
+                   match /\%(\\u\x\{4}\|\\U\x\{8}\)/  contained
+                   match /\\N{\a\+\%(\s\a\+\)*}/  contained
+                   match /\\$/
+                   links to Special
+pythonString   xxx start=/[uU]\=\z(['"]\)/ skip=/\\\\\|\\\z1/ end=/\z1/  contains=pythonEscape,@Spell
+                   start=/[uU]\=\z('''\|"""\)/ end=/\z1/  keepend contains=pythonEscape,pythonSpaceError,pythonDoctest,@Spell
+                   links to String
+pythonDoctest  xxx start=/^\s*>>>\s/ end=/^\s*$/  contained contains=ALLBUT,pythonDoctest,@Spell
+                   links to Special
+pythonRawString xxx start=/[uU]\=[rR]\z(['"]\)/ skip=/\\\\\|\\\z1/ end=/\z1/  contains=@Spell
+                   start=/[uU]\=[rR]\z('''\|"""\)/ end=/\z1/  keepend contains=pythonSpaceError,pythonDoctest,@Spell
+                   links to String
+pythonNumber   xxx match /\<0[oO]\=\o\+[Ll]\=\>/
+                   match /\<0[xX]\x\+[Ll]\=\>/
+                   match /\<0[bB][01]\+[Ll]\=\>/
+                   match /\<\%([1-9]\d*\|0\)[Ll]\=\>/
+                   match /\<\d\+[jJ]\>/
+                   match /\<\d\+[eE][+-]\=\d\+[jJ]\=\>/
+                   match /\<\d\+\.\%([eE][+-]\=\d\+\)\=[jJ]\=\%(\W\|$\)\@=/
+                   match /\%(^\|\W\)\@<=\d*\.\d\+\%([eE][+-]\=\d\+\)\=[jJ]\=\>/
+                   links to Number
+pythonBuiltin  xxx list locals all classmethod None abs cmp reduce ord hex object memoryview enumerate __debug__ compile str False True issubclass input hasattr frozenset slice callable sum filter range any long execfile min type sorted reload super complex xrange file ascii setattr unicode staticmethod basestring unichr float iter map globals max isinstance dict chr reversed buffer delattr __import__ oct dir eval raw_input hash getattr tuple id bin vars apply bytes repr pow print zip open NotImplemented intern round format bool help property coerce Ellipsis len int next exec set bytearray divmod
+                   links to Function
+pythonExceptions xxx OSError EnvironmentError UserWarning NameError ArithmeticError NotImplementedError ReferenceError BaseException LookupError ImportWarning OverflowError SystemExit IndentationError GeneratorExit Warning RuntimeError MemoryError WindowsError AssertionError UnicodeWarning KeyError TypeError TabError ImportError SyntaxWarning SyntaxError UnboundLocalError KeyboardInterrupt UnicodeDecodeError IOError Exception FutureWarning AttributeError UnicodeTranslateError VMSError EOFError FloatingPointError ValueError IndexError RuntimeWarning DeprecationWarning PendingDeprecationWarning UnicodeEncodeError StopIteration UnicodeError BytesWarning StandardError SystemError ZeroDivisionError BufferError
+                   links to Structure
+pythonDoctestValue xxx start=/^\s*\%(>>>\s\|\.\.\.\s\|"""\|'''\)\@!\S\+/ end=/$/  contained
+                   links to Define
+OperatorChars  xxx match #?\|+\|-\|\*\|;\|:\|,\|<\|>\|&\||\|!\|\~\|%\|=\|)\|(\|{\|}\|\.\|\[\|\]\|/\(/\|*\)\@!#
+Spell          cluster=NONE
+NoSpell        cluster=NONE
+
