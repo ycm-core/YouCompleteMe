@@ -19,10 +19,10 @@ Here's an explanation of what happens in the short GIF demo above.
 First, realize that **no keyboard shortcuts had to be pressed** to get the list
 of completion candidates at any point in the demo. The user just types and the
 suggestions pop up by themselves. If the user doesn't find the completion
-suggestions relevant and/or just wants to type, he can do so; the completion
+suggestions relevant and/or just wants to type, they can do so; the completion
 engine will not interfere.
 
-When the user sees a useful completion string being offered, he presses the TAB
+When the user sees a useful completion string being offered, they press the TAB
 key to accept it. This inserts the completion string. Repeated presses of the
 TAB key cycle through the offered completions.
 
