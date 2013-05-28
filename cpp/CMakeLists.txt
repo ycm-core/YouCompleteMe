@@ -58,7 +58,8 @@ if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( COMPILER_IS_CLANG true )
 
   # The Travis CI build machines don't have libc++ installed
-  if ( NOT DEFINED ENV{TRAVIS} )
+  # Also, FreeBSD complains about this too. See issue #349.
+  if ( NOT DEFINED ENV{TRAVIS} AND NOT SYSTEM_IS_FREEBSD )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
   endif()
 endif()
