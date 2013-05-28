@@ -748,9 +748,12 @@ format from "plain" ctags is NOT supported. Ctags needs to be called with the
 
 See the _FAQ_ for pointers if YCM does not appear to read your tag files.
 
-Default: `1`
+This option is off by default because it makes Vim slower if your tags are on a
+network directory.
 
-    let g:ycm_collect_identifiers_from_tags_files = 1
+Default: `0`
+
+    let g:ycm_collect_identifiers_from_tags_files = 0
 
 ### The `g:ycm_seed_identifiers_with_syntax` option
 
@@ -1146,6 +1149,8 @@ So just go through the installation guide and make sure you are using a correct
 `libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
 
 ### YCM does not read identifiers from my tags files
+
+First, put `let g:ycm_collect_identifiers_from_tags_files = 1` in your vimrc.
 
 Make sure you are using [Exuberant Ctags][exuberant-ctags] to produce your tags
 files since the only supported tag format is the [Exuberant Ctags
