@@ -101,10 +101,10 @@ Here's an explanation of what happens in the short GIF demo above.
 First, realize that no keyboard shortcuts had to be pressed to get the list of
 completion candidates at any point in the demo. The user just types and the
 suggestions pop up by themselves. If the user doesn't find the completion
-suggestions relevant and/or just wants to type, he can do so; the completion
+suggestions relevant and/or just wants to type, they can do so; the completion
 engine will not interfere.
 
-When the user sees a useful completion string being offered, he presses the
+When the user sees a useful completion string being offered, they press the
 TAB key to accept it. This inserts the completion string. Repeated presses of
 the TAB key cycle through the offered completions.
 
@@ -854,12 +854,18 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 YCM will re-index your tags files if it detects that they have been modified.
 
 The only supported tag format is the Exuberant Ctags format [23]. The format
-from "plain" ctags is NOT supported. See the FAQ for pointers if YCM does not
-appear to read your tag files.
+from "plain" ctags is NOT supported. Ctags needs to be called with the
+'--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
+'language:<lang>' field in the tags output.
 
-Default: '1'
+See the FAQ for pointers if YCM does not appear to read your tag files.
+
+This option is off by default because it makes Vim slower if your tags are on
+a network directory.
+
+Default: '0'
 >
-    let g:ycm_collect_identifiers_from_tags_files = 1
+    let g:ycm_collect_identifiers_from_tags_files = 0
 
 -------------------------------------------------------------------------------
 The *g:ycm_seed_identifiers_with_syntax* option
@@ -1290,10 +1296,15 @@ llvm.org.
 -------------------------------------------------------------------------------
 YCM does not read identifiers from my tags files ~
 
+First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
+
 Make sure you are using Exuberant Ctags [25] to produce your tags files since
 the only supported tag format is the Exuberant Ctags format [23]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
 list "Exuberant Ctags".
+
+Ctags needs to be called with the '--fields=+l' (that's a lowercase 'L', not a
+one) option because YCM needs the 'language:<lang>' field in the tags output.
 
 NOTE: Mac OS X comes with "plain" ctags installed by default. 'brew install
 ctags' will get you the Exuberant Ctags version.
