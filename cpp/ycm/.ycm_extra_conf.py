@@ -101,7 +101,7 @@ def DirectoryOfThisScript():
 
 def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
   if not working_directory:
-    return flags
+    return list( flags )
   new_flags = []
   make_next_absolute = False
   path_flags = [ '-isystem', '-I', '-iquote', '--sysroot=' ]
