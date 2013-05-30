@@ -112,26 +112,26 @@ void IdentifierCompleter::EnableThreading() {
 
 
 void IdentifierCompleter::AddIdentifiersToDatabase(
-    const std::vector< std::string > &new_candidates,
-    const std::string &filetype,
-    const std::string &filepath ) {
+  const std::vector< std::string > &new_candidates,
+  const std::string &filetype,
+  const std::string &filepath ) {
   identifier_database_.AddIdentifiers( new_candidates,
-                                      filetype,
-                                      filepath );
+                                       filetype,
+                                       filepath );
 }
 
 
 void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles(
-    const std::vector< std::string > &absolute_paths_to_tag_files ) {
-  foreach( const std::string &path, absolute_paths_to_tag_files ) {
+  const std::vector< std::string > &absolute_paths_to_tag_files ) {
+  foreach( const std::string & path, absolute_paths_to_tag_files ) {
     identifier_database_.AddIdentifiers(
-        ExtractIdentifiersFromTagsFile( path ) );
+      ExtractIdentifiersFromTagsFile( path ) );
   }
 }
 
 
 void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFilesAsync(
-    std::vector< std::string > absolute_paths_to_tag_files ) {
+  std::vector< std::string > absolute_paths_to_tag_files ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return;
@@ -159,9 +159,9 @@ void IdentifierCompleter::AddIdentifiersToDatabaseFromBuffer(
     RemoveIdentifierFreeText( buffer_contents );
 
   identifier_database_.AddIdentifiers(
-      ExtractIdentifiersFromText( new_contents ),
-      filetype,
-      filepath );
+    ExtractIdentifiersFromText( new_contents ),
+    filetype,
+    filepath );
 }
 
 

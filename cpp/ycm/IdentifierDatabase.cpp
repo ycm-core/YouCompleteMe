@@ -41,7 +41,7 @@ IdentifierDatabase::IdentifierDatabase()
 
 
 void IdentifierDatabase::AddIdentifiers(
-    const FiletypeIdentifierMap &filetype_identifier_map ) {
+  const FiletypeIdentifierMap &filetype_identifier_map ) {
   boost::lock_guard< boost::mutex > locker( filetype_candidate_map_mutex_ );
 
   foreach ( const FiletypeIdentifierMap::value_type & filetype_and_map,

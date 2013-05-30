@@ -38,7 +38,7 @@ std::vector< std::string > ExtractIdentifiersFromText(
   const std::string &text );
 
 FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
-    const boost::filesystem::path &path_to_tag_file );
+  const boost::filesystem::path &path_to_tag_file );
 
 } // namespace YouCompleteMe
 

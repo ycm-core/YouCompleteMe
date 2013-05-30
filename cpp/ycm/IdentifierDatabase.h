@@ -37,11 +37,11 @@ class CandidateRepository;
 
 // filepath -> identifiers
 typedef std::map< std::string, std::vector< std::string > >
-  FilepathToIdentifiers;
+FilepathToIdentifiers;
 
 // filetype -> (filepath -> identifiers)
 typedef std::map< std::string, FilepathToIdentifiers >
-  FiletypeIdentifierMap;
+FiletypeIdentifierMap;
 
 
 // This class stores the database of identifiers the identifier completer has

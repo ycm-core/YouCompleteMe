@@ -67,44 +67,44 @@ const char *TAG_REGEX =
 //   :e $VIMRUNTIME/filetype.vim
 const boost::unordered_map< std::string, std::string > LANG_TO_FILETYPE =
   boost::assign::map_list_of
-      ( std::string( "Ant"        ), std::string( "ant"        ) )
-      ( std::string( "Asm"        ), std::string( "asm"        ) )
-      ( std::string( "Awk"        ), std::string( "awk"        ) )
-      ( std::string( "Basic"      ), std::string( "basic"      ) )
-      ( std::string( "C++"        ), std::string( "cpp"        ) )
-      ( std::string( "C#"         ), std::string( "cs"         ) )
-      ( std::string( "C"          ), std::string( "c"          ) )
-      ( std::string( "COBOL"      ), std::string( "cobol"      ) )
-      ( std::string( "DosBatch"   ), std::string( "dosbatch"   ) )
-      ( std::string( "Eiffel"     ), std::string( "eiffel"     ) )
-      ( std::string( "Erlang"     ), std::string( "erlang"     ) )
-      ( std::string( "Fortran"    ), std::string( "fortran"    ) )
-      ( std::string( "HTML"       ), std::string( "html"       ) )
-      ( std::string( "Java"       ), std::string( "java"       ) )
-      ( std::string( "JavaScript" ), std::string( "javascript" ) )
-      ( std::string( "Lisp"       ), std::string( "lisp"       ) )
-      ( std::string( "Lua"        ), std::string( "lua"        ) )
-      ( std::string( "Make"       ), std::string( "make"       ) )
-      ( std::string( "MatLab"     ), std::string( "matlab"     ) )
-      ( std::string( "OCaml"      ), std::string( "ocaml"      ) )
-      ( std::string( "Pascal"     ), std::string( "pascal"     ) )
-      ( std::string( "Perl"       ), std::string( "perl"       ) )
-      ( std::string( "PHP"        ), std::string( "php"        ) )
-      ( std::string( "Python"     ), std::string( "python"     ) )
-      ( std::string( "REXX"       ), std::string( "rexx"       ) )
-      ( std::string( "Ruby"       ), std::string( "ruby"       ) )
-      ( std::string( "Scheme"     ), std::string( "scheme"     ) )
-      ( std::string( "Sh"         ), std::string( "sh"         ) )
-      ( std::string( "SLang"      ), std::string( "slang"      ) )
-      ( std::string( "SML"        ), std::string( "sml"        ) )
-      ( std::string( "SQL"        ), std::string( "sql"        ) )
-      ( std::string( "Tcl"        ), std::string( "tcl"        ) )
-      ( std::string( "Tex"        ), std::string( "tex"        ) )
-      ( std::string( "Vera"       ), std::string( "vera"       ) )
-      ( std::string( "Verilog"    ), std::string( "verilog"    ) )
-      ( std::string( "VHDL"       ), std::string( "vhdl"       ) )
-      ( std::string( "Vim"        ), std::string( "vim"        ) )
-      ( std::string( "YACC"       ), std::string( "yacc"       ) );
+  ( std::string( "Ant"        ), std::string( "ant"        ) )
+  ( std::string( "Asm"        ), std::string( "asm"        ) )
+  ( std::string( "Awk"        ), std::string( "awk"        ) )
+  ( std::string( "Basic"      ), std::string( "basic"      ) )
+  ( std::string( "C++"        ), std::string( "cpp"        ) )
+  ( std::string( "C#"         ), std::string( "cs"         ) )
+  ( std::string( "C"          ), std::string( "c"          ) )
+  ( std::string( "COBOL"      ), std::string( "cobol"      ) )
+  ( std::string( "DosBatch"   ), std::string( "dosbatch"   ) )
+  ( std::string( "Eiffel"     ), std::string( "eiffel"     ) )
+  ( std::string( "Erlang"     ), std::string( "erlang"     ) )
+  ( std::string( "Fortran"    ), std::string( "fortran"    ) )
+  ( std::string( "HTML"       ), std::string( "html"       ) )
+  ( std::string( "Java"       ), std::string( "java"       ) )
+  ( std::string( "JavaScript" ), std::string( "javascript" ) )
+  ( std::string( "Lisp"       ), std::string( "lisp"       ) )
+  ( std::string( "Lua"        ), std::string( "lua"        ) )
+  ( std::string( "Make"       ), std::string( "make"       ) )
+  ( std::string( "MatLab"     ), std::string( "matlab"     ) )
+  ( std::string( "OCaml"      ), std::string( "ocaml"      ) )
+  ( std::string( "Pascal"     ), std::string( "pascal"     ) )
+  ( std::string( "Perl"       ), std::string( "perl"       ) )
+  ( std::string( "PHP"        ), std::string( "php"        ) )
+  ( std::string( "Python"     ), std::string( "python"     ) )
+  ( std::string( "REXX"       ), std::string( "rexx"       ) )
+  ( std::string( "Ruby"       ), std::string( "ruby"       ) )
+  ( std::string( "Scheme"     ), std::string( "scheme"     ) )
+  ( std::string( "Sh"         ), std::string( "sh"         ) )
+  ( std::string( "SLang"      ), std::string( "slang"      ) )
+  ( std::string( "SML"        ), std::string( "sml"        ) )
+  ( std::string( "SQL"        ), std::string( "sql"        ) )
+  ( std::string( "Tcl"        ), std::string( "tcl"        ) )
+  ( std::string( "Tex"        ), std::string( "tex"        ) )
+  ( std::string( "Vera"       ), std::string( "vera"       ) )
+  ( std::string( "Verilog"    ), std::string( "verilog"    ) )
+  ( std::string( "VHDL"       ), std::string( "vhdl"       ) )
+  ( std::string( "Vim"        ), std::string( "vim"        ) )
+  ( std::string( "YACC"       ), std::string( "yacc"       ) );
 
 const std::string NOT_FOUND = "YCMFOOBAR_NOT_FOUND";
 
@@ -137,13 +137,13 @@ std::vector< std::string > ExtractIdentifiersFromText(
 
 
 FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
-    const fs::path &path_to_tag_file ) {
+  const fs::path &path_to_tag_file ) {
   FiletypeIdentifierMap filetype_identifier_map;
   std::string tags_file_contents;
 
   try {
     tags_file_contents = ReadUtf8File( path_to_tag_file );
-  } catch (...) {
+  } catch ( ... ) {
     return filetype_identifier_map;
   }
 

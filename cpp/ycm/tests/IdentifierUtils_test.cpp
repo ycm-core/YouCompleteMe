@@ -134,18 +134,18 @@ TEST( IdentifierUtilsTest, ExtractIdentifiersFromTextWorks ) {
 
 
 TEST( IdentifierUtilsTest, ExtractIdentifiersFromTagsFileWorks ) {
-  fs::path testfile = PathToTestFile( "basic.tags");
+  fs::path testfile = PathToTestFile( "basic.tags" );
   fs::path testfile_parent = testfile.parent_path();
 
   FiletypeIdentifierMap expected;
   expected[ "cpp" ][ ( testfile_parent / "foo" ).string() ]
-    .push_back( "i1" );
+  .push_back( "i1" );
   expected[ "cpp" ][ ( testfile_parent / "bar" ).string() ]
-    .push_back( "i1" );
+  .push_back( "i1" );
   expected[ "cpp" ][ ( testfile_parent / "foo" ).string() ]
-    .push_back( "foosy" );
+  .push_back( "foosy" );
   expected[ "cpp" ][ ( testfile_parent / "bar" ).string() ]
-    .push_back( "fooaaa" );
+  .push_back( "fooaaa" );
 
   expected[ "c" ][ "/foo/zoo" ].push_back( "Floo::goo" );
   expected[ "c" ][ "/foo/goo maa" ].push_back( "!goo" );
