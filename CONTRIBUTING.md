@@ -7,6 +7,10 @@ YCM to work on my machine" and the reason why is obviously related to your
 machine configuration and the problem would not be resolved with _reasonable_
 changes to the YCM codebase, then the issue is likely to be closed.
 
+YCM compiles just fine; [the build bots say so][build-bots]. If the bots are
+green and YCM doesn't compile on your machine, then _your machine is the root
+cause_. Now read the previous paragraph again.
+
 Realize that quite literally _thousands_ of people have gotten YCM to work
 successfully so if you can't, it's probably because you have a peculiar
 system/Vim configuration or you didn't go through the docs carefully enough.
@@ -73,3 +77,5 @@ Creating good pull requests
     why is important - it's not always clear why a feature is really useful. And
     sometimes what you want can be done in a different way if the reason for the
     change is known. _What goal are you trying to accomplish?_
+
+[build-bots]: https://travis-ci.org/Valloric/YouCompleteMe
