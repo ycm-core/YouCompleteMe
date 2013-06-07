@@ -43,8 +43,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def ComputeCandidates( self, unused_query, unused_start_column ):
     return [ { 'word': str( completion['CompletionText'] ),
-               'menu': str( completion['Description'] ),
-               'info': str( completion['DisplayText'] ) }
+               'menu': str( completion['DisplayText'] ),
+               'info': str( completion['Description'] ) }
              for completion in self.getCompletions() ]
 
   def getCompletions( self ):
