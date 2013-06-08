@@ -58,8 +58,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
     js = self.getResponse( '/autocomplete', parameters )
     if(js != ''):
-      completions = json.loads( js )
-      return completions
+      return json.loads( js )
     return []
 
   def getResponse( self, endPoint, parameters={} ):
@@ -70,5 +69,5 @@ class CsharpCompleter( ThreadedCompleter ):
       response = urllib2.urlopen( target, parameters )
       return response.read()
     except:
-      vim.command( "echoerr 'Could not connect to " + target + "'" )
+      vimsupport.PostVimMessage( "Could not connect to " + target )
       return ''
