@@ -19,6 +19,7 @@
 
 import os
 import vim
+import re
 import ycm_core
 from collections import defaultdict
 from ycm.completers.general_completer import GeneralCompleter
@@ -30,7 +31,7 @@ MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
-
+DISTANCE_RANGE = 10000
 
 class IdentifierCompleter( GeneralCompleter ):
   def __init__( self ):
@@ -39,6 +40,7 @@ class IdentifierCompleter( GeneralCompleter ):
     self.completer.EnableThreading()
     self.tags_file_last_mtime = defaultdict( int )
     self.filetypes_with_keywords_loaded = set()
+    self.identifier_regex = re.compile( "[_a-zA-Z]\\w*" )
 
 
   def ShouldUseNow( self, start_column ):
@@ -165,18 +167,60 @@ class IdentifierCompleter( GeneralCompleter ):
   def OnCurrentIdentifierFinished( self ):
     self.AddPreviousIdentifier()
 
-
   def CandidatesFromStoredRequest( self ):
     if not self.completions_future:
       return []
-    completions = self.completions_future.GetResults()[
-      : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
+
+    lines = vim.current.buffer
+    line_num, cursor = vimsupport.CurrentLineAndColumn()
+
+    for i in range( 0, line_num - 1 ):
+      cursor += len( lines[ i ] ) + 1 # that +1 is for the "\n" char
+
+    count = 0
+    positions = {}
+    text = "\n".join( lines )
+
+    if cursor > DISTANCE_RANGE:
+      text = text[ cursor - DISTANCE_RANGE : ]
+      cursor = DISTANCE_RANGE
+
+    if len(text) > cursor + DISTANCE_RANGE:
+      text = text[ : cursor + DISTANCE_RANGE ]
+
+    for match in self.identifier_regex.finditer( text ):
+      count += 1
+      identifier = match.group()
+      position = match.start() + ( len( identifier ) / 2 )
+      if identifier in positions:
+        positions[ identifier ].append( position )
+      else:
+        positions[ identifier ] = [ position ]
+
+    completions = self.completions_future.GetResults() # all
+
+    completions_with_distance = []
+    rest = []
+
+    for word in completions:
+      if word in positions:
+        distance = min( [ abs( cursor - pos ) for pos in positions[ word ] ] )
+        count_factor = ( len( positions[ word ] ) ) / float( count )
+        distance -= distance * count_factor
+        completions_with_distance.append( ( word, distance ) )
+      else:
+        rest.append( word )
+
+    sorted_completions = sorted( completions_with_distance,
+                                 key=lambda pair: pair[ 1 ] )
+    completions = [ pair[ 0 ] for pair in sorted_completions ] + rest
 
     # We will never have duplicates in completions so with 'dup':1 we tell Vim
     # to add this candidate even if it's a duplicate of an existing one (which
     # will never happen). This saves us some expensive string matching
     # operations in Vim.
-    return [ { 'word': x, 'dup': 1 } for x in completions ]
+    return [ { 'word': x, 'dup': 1 } for x in completions[
+        : MAX_IDENTIFIER_COMPLETIONS_RETURNED ] ]
 
 
 def PreviousIdentifier():
