@@ -36,6 +36,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
+    self.OmniSharp_host = vim.eval( 'g:OmniSharp_host' )
 
   def SupportedFiletypes( self ):
     """ Just csharp """
@@ -63,7 +64,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def getResponse( self, endPoint, parameters={} ):
     """Handle communication with server"""
-    target = urlparse.urljoin( vim.eval( 'g:OmniSharp_host' ), endPoint )
+    target = urlparse.urljoin( self.OmniSharp_host , endPoint )
     parameters = urllib.urlencode( parameters )
     try:
       response = urllib2.urlopen( target, parameters )
