@@ -1129,6 +1129,24 @@ to use. You may need to set these flags to something else, but you need to make
 sure you use the same version of Python that your Vim binary is built against,
 which is highly likely to be the system's default Python.
 
+### I get `libpython2.7.a [...] relocation R_X86_64_32` when compiling
+
+The error is usually encountered when compiling YCM on Centos or RHEL. The full
+error looks something like the following:
+
+```
+/usr/bin/ld: /usr/local/lib/libpython2.7.a(abstract.o): relocation R_X86_64_32 against `a local symbol' can not be used when making a shared object; recompile with -fPIC
+```
+
+It's possible to get a slightly different error that's similar to the one above.
+Here's the problem and how you solve it:
+
+Your `libpython2.7.a` was not compiled with `-fPIC` so it can't be linked into
+`ycm_core.so`.  Use the `-DPYTHON_LIBRARY=` CMake flag to point it to a `.so`
+version of libpython on your machine (for instance,
+`-DPYTHON_LIBRARY=/usr/lib/libpython2.7.so`). Naturally, this means you'll have
+to go through the full installation guide by hand.
+
 ### I get `Vim: Caught deadly signal SEGV` on Vim startup
 
 This can happen on some Linux distros. If you encounter this situation, run Vim
