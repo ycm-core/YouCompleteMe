@@ -137,7 +137,8 @@ std::vector< std::string > ExtractIdentifiersFromText(
 
 
 FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
-  const fs::path &path_to_tag_file ) {
+  const fs::path &path_to_tag_file,
+  const std::string &common_filetype) {
   FiletypeIdentifierMap filetype_identifier_map;
   std::string tags_file_contents;
 
@@ -158,9 +159,10 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
     start = matches[ 0 ].second;
 
     std::string language( matches[ 3 ] );
-    std::string filetype = FindWithDefault( LANG_TO_FILETYPE,
-                                            language,
-                                            NOT_FOUND );
+    std::string filetype = common_filetype.size() != 0
+        ? common_filetype : FindWithDefault( LANG_TO_FILETYPE,
+                                             language,
+                                             NOT_FOUND );
 
     if ( filetype == NOT_FOUND )
       continue;

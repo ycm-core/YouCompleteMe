@@ -32,6 +32,7 @@ MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 DISTANCE_RANGE = 10000
+COMMON_FILETYPE = "YCM_COMMON_FILETYPE_GROUP"
 
 class IdentifierCompleter( GeneralCompleter ):
   def __init__( self ):
@@ -42,20 +43,25 @@ class IdentifierCompleter( GeneralCompleter ):
     self.filetypes_with_keywords_loaded = set()
     self.identifier_regex = re.compile( "[_a-zA-Z]\\w*" )
 
+  def GetFiletypeOrCommonGroup( self ):
+    if vimsupport.GetBoolValue( "g:ycm_filetype_identifier_grouping" ):
+      return vim.eval( "&filetype" )
+    else:
+      return COMMON_FILETYPE
 
   def ShouldUseNow( self, start_column ):
       return self.QueryLengthAboveMinThreshold( start_column )
 
 
   def CandidatesForQueryAsync( self, query, unused_start_column ):
-    filetype = vim.eval( "&filetype" )
+    filetype = self.GetFiletypeOrCommonGroup()
     self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
       utils.SanitizeQuery( query ),
       filetype )
 
 
   def AddIdentifier( self, identifier ):
-    filetype = vim.eval( "&filetype" )
+    filetype = self.GetFiletypeOrCommonGroup()
     filepath = vim.eval( "expand('%:p')" )
 
     if not filetype or not filepath or not identifier:
@@ -88,7 +94,7 @@ class IdentifierCompleter( GeneralCompleter ):
 
   def AddBufferIdentifiers( self ):
     # TODO: use vimsupport.GetFiletypes; also elsewhere in file
-    filetype = vim.eval( "&filetype" )
+    filetype = self.GetFiletypeOrCommonGroup()
     filepath = vim.eval( "expand('%:p')" )
     collect_from_comments_and_strings = vimsupport.GetBoolValue(
       "g:ycm_collect_identifiers_from_comments_and_strings" )
@@ -128,8 +134,14 @@ class IdentifierCompleter( GeneralCompleter ):
     if not absolute_paths_to_tag_files:
       return
 
+    common_filetype = self.GetFiletypeOrCommonGroup()
+
+    if common_filetype != COMMON_FILETYPE:
+      common_filetype = ""
+
     self.completer.AddIdentifiersToDatabaseFromTagFilesAsync(
-      absolute_paths_to_tag_files )
+      absolute_paths_to_tag_files,
+      common_filetype )
 
 
   def AddIdentifiersFromSyntax( self ):
