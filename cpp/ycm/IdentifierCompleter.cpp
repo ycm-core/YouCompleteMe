@@ -122,16 +122,18 @@ void IdentifierCompleter::AddIdentifiersToDatabase(
 
 
 void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles(
-  const std::vector< std::string > &absolute_paths_to_tag_files ) {
+  const std::vector< std::string > &absolute_paths_to_tag_files,
+  const std::string common_filetype ) {
   foreach( const std::string & path, absolute_paths_to_tag_files ) {
     identifier_database_.AddIdentifiers(
-      ExtractIdentifiersFromTagsFile( path ) );
+      ExtractIdentifiersFromTagsFile( path, common_filetype ) );
   }
 }
 
 
 void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFilesAsync(
-  std::vector< std::string > absolute_paths_to_tag_files ) {
+  std::vector< std::string > absolute_paths_to_tag_files,
+  std::string common_filetype ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return;
@@ -139,7 +141,8 @@ void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFilesAsync(
   boost::function< void() > functor =
     boost::bind( &IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles,
                  boost::ref( *this ),
-                 boost::move( absolute_paths_to_tag_files ) );
+                 boost::move( absolute_paths_to_tag_files ),
+                 common_filetype );
 
   buffer_identifiers_task_stack_.Push(
     boost::make_shared< packaged_task< void > >( boost::move( functor ) ) );

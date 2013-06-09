@@ -57,11 +57,13 @@ public:
     const std::string &filepath );
 
   void AddIdentifiersToDatabaseFromTagFiles(
-    const std::vector< std::string > &absolute_paths_to_tag_files );
+    const std::vector< std::string > &absolute_paths_to_tag_files,
+    const std::string common_filetype = "" );
 
   // NOTE: params are taken by value on purpose!
   void AddIdentifiersToDatabaseFromTagFilesAsync(
-    std::vector< std::string > absolute_paths_to_tag_files );
+    std::vector< std::string > absolute_paths_to_tag_files,
+    std::string common_filetype = "" );
 
   void AddIdentifiersToDatabaseFromBuffer(
     const std::string &buffer_contents,

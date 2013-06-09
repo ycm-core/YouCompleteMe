@@ -76,6 +76,9 @@ let g:ycm_filetype_blacklist =
       \     'text' : 1,
       \ } ) )
 
+let g:ycm_filetype_identifier_grouping =
+      \ get( g:, 'ycm_filetype_identifier_grouping', 1 )
+
 let g:ycm_filetype_specific_completion_to_disable =
       \ get( g:, 'ycm_filetype_specific_completion_to_disable', {} )
 
