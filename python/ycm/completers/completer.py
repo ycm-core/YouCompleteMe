@@ -19,6 +19,7 @@
 
 import abc
 import vim
+import re
 import ycm_core
 from ycm import vimsupport
 from collections import defaultdict
@@ -248,6 +249,25 @@ class Completer( object ):
     if not self.completions_future:
       return []
     return self.completions_future.GetResults()
+
+
+  def CandidatesFromStoredRequestPost( self ):
+    candidates = self.CandidatesFromStoredRequest()
+    after = vimsupport.TextAfterCursor()
+
+    match = re.search(r'^([\w-]+)', after)
+    if match:
+      pattern = re.compile(re.escape(match.group(1)) + '$')
+      for candidate in candidates:
+        if type(candidate) is dict:
+          if not 'abbr' in candidate:
+            candidate['abbr'] = candidate['word']
+          candidate['word'] = pattern.sub(r'', candidate['word'])
+        elif type(candidate) is str:
+          candidate = {'abbr': candidate, 'word': pattern.sub(r'', candidate)}
+
+    return candidates
+
 
 
   def OnFileReadyToParse( self ):
