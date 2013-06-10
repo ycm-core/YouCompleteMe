@@ -30,8 +30,8 @@ def CurrentLineAndColumn():
 
 def CurrentColumn():
   """Returns the 0-based current column. Do NOT access the CurrentColumn in
-  vim.current.line. It doesn't exist yet.  Only the chars before the current
-  column exist in vim.current.line."""
+  vim.current.line. It doesn't exist yet when the cursor is at the end of the
+  line. Only the chars before the current column exist in vim.current.line."""
 
   # vim's columns are 1-based while vim.current.line columns are 0-based
   # ... but vim.current.window.cursor (which returns a (line, column) tuple)
