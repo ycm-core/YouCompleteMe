@@ -22,7 +22,6 @@ import vim
 from ycm.completers.threaded_completer import ThreadedCompleter
 from ycm import vimsupport
 
-# Import stuff for Omnisharp
 import urllib2
 import urllib
 import urlparse
@@ -57,9 +56,9 @@ class CsharpCompleter( ThreadedCompleter ):
     parameters['buffer'] = '\n'.join( vim.current.buffer )
     parameters['filename'] = vim.current.buffer.name
 
-    js = self.getResponse( '/autocomplete', parameters )
-    if(js != ''):
-      return json.loads( js )
+    resp = self.getResponse( '/autocomplete', parameters )
+    if(json != ''):
+      return json.loads( resp )
     return []
 
   def getResponse( self, endPoint, parameters={} ):
@@ -70,5 +69,4 @@ class CsharpCompleter( ThreadedCompleter ):
       response = urllib2.urlopen( target, parameters )
       return response.read()
     except:
-      vimsupport.PostVimMessage( "Could not connect to " + target )
       return ''
