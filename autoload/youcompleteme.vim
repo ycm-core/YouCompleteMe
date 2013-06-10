@@ -484,7 +484,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer,
     endif
   endwhile
 
-  let l:results = pyeval( 'completer.CandidatesFromStoredRequest()' )
+  let l:results = pyeval( 'base.AdjustCandidateInsertionText( completer.CandidatesFromStoredRequest() )' )
   let s:searched_and_results_found = len( l:results ) != 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction

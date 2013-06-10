@@ -45,6 +45,7 @@ class OmniCompleter( Completer ):
       return super( OmniCompleter, self ).ShouldUseNow( start_column )
     return self.ShouldUseNowInner( start_column )
 
+
   def ShouldUseNowInner( self, start_column ):
     if not self.omnifunc:
       return False
@@ -57,6 +58,7 @@ class OmniCompleter( Completer ):
           query, unused_start_column )
     else:
       return self.CandidatesForQueryAsyncInner( query, unused_start_column )
+
 
   def CandidatesForQueryAsyncInner( self, query, unused_start_column ):
     if not self.omnifunc:
@@ -103,6 +105,7 @@ class OmniCompleter( Completer ):
       return super( OmniCompleter, self ).CandidatesFromStoredRequest()
     else:
       return self.CandidatesFromStoredRequestInner()
+
 
   def CandidatesFromStoredRequestInner( self ):
     return self.stored_candidates if self.stored_candidates else []

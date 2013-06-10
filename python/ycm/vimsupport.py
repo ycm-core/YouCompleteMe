@@ -41,6 +41,11 @@ def CurrentColumn():
   return vim.current.window.cursor[ 1 ]
 
 
+def TextAfterCursor():
+  """Returns the text after CurrentColumn."""
+  return vim.current.line[ CurrentColumn(): ]
+
+
 def GetUnsavedBuffers():
   def BufferModified( buffer_number ):
     to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )

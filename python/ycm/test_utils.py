@@ -24,7 +24,13 @@ def MockVimModule():
   """The 'vim' module is something that is only present when running inside the
   Vim Python interpreter, so we replace it with a MagicMock for tests. """
 
+  def VimEval( value ):
+    if value == "g:ycm_min_num_of_chars_for_completion":
+      return 0
+    return ''
+
   vim_mock = MagicMock()
-  vim_mock.eval = MagicMock( return_value = '' )
+  vim_mock.eval = MagicMock( side_effect = VimEval )
   sys.modules[ 'vim' ] = vim_mock
   return vim_mock
+
