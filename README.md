@@ -1048,6 +1048,10 @@ Vundle, make sure that your bundle command is `Bundle 'scrooloose/syntastic'`
 and **not** `Bundle 'Syntastic'`. The first command pulls in the latest version of
 Syntastic from GitHub while the second one pulls in an old version from vim.org.
 
+Because of [a Vundle bug][vundle-bug], make sure you have completely removed
+everything in your Vundle bundle directory (`~/.vim/bundle` by default) before
+switching from one Syntastic bundle command to the other.
+
 ### YCM auto-inserts completion strings I don't want!
 
 This means you probably have some mappings that interfere with YCM's internal
@@ -1272,3 +1276,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [ultisnips]: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 [exuberant-ctags]: http://ctags.sourceforge.net/
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
+[vundle-bug]: https://github.com/gmarik/vundle/issues/48
