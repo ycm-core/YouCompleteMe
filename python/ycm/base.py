@@ -30,7 +30,8 @@ except ImportError as e:
     'Error importing ycm_core. Are you sure you have placed a version 3.2+ '
     'libclang.[so|dll|dylib] in folder "{0}"? See the Installation Guide in '
     'the docs. Full error: {1}'.format(
-      os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
+      os.path.dirname( os.path.dirname( os.path.abspath( __file__ ) ) ),
+      str( e ) ) )
 
 
 def CompletionStartColumn():
