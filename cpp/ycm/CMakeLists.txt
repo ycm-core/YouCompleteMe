@@ -29,9 +29,9 @@ if ( NOT PYTHONLIBS_VERSION_STRING VERSION_LESS "3.0.0" )
 endif()
 
 option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
-option( PATH_TO_LLVM_ROOT "Path to the root of a LLVM+Clang binary distribution" )
 option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
-option( EXTERNAL_LIBCLANG_PATH "Path libclang library to use" )
+set( PATH_TO_LLVM_ROOT "" CACHE PATH "Path to the root of a LLVM+Clang binary distribution" )
+set( EXTERNAL_LIBCLANG_PATH "" CACHE PATH  "Path libclang library to use" )
 
 if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
   message( "Downloading Clang 3.2" )
@@ -104,7 +104,7 @@ endif()
 
 if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
   # Need TEMP because find_library does not work with an option variable
-  find_library( TEMP clang
+  find_library( TEMP NAMES clang libclang
                 PATHS ${PATH_TO_LLVM_ROOT}/lib
                 NO_DEFAULT_PATH )
   set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
@@ -231,12 +231,19 @@ target_link_libraries( ${PROJECT_NAME}
                        ${EXTRA_LIBS}
                      )
 
-if ( LIBCLANG_TARGET )
-  add_custom_command(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND cp "${LIBCLANG_TARGET}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-  )
+if( LIBCLANG_TARGET )
+  if( NOT WIN32 )
+    add_custom_command(
+      TARGET ${PROJECT_NAME}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy "${LIBCLANG_TARGET}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+    )
+  else()
+    add_custom_command(
+      TARGET ${PROJECT_NAME}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy "${PATH_TO_LLVM_ROOT}/bin/libclang.dll" "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+  endif()
 endif()
 
 #############################################################################
