@@ -36,7 +36,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self.OmniSharp_host = vim.eval( 'g:OmniSharp_host' )
+    self.OmniSharp_host = 2000
+    self._StartServer()
 
   def SupportedFiletypes( self ):
     """ Just csharp """
@@ -46,10 +47,41 @@ class CsharpCompleter( ThreadedCompleter ):
     return [ { 'word': str( completion['CompletionText'] ),
                'menu': str( completion['DisplayText'] ),
                'info': str( completion['Description'] ) }
-             for completion in self.getCompletions() ]
+             for completion in self._GetCompletions() ]
 
-  def getCompletions( self ):
-    """Ask server for completions"""
+  def DefinedSubcommands( self ):
+    return [ "StartServer",
+             "StopServer" ]
+
+  def OnUserCommand( self, arguments ):
+    if not arguments:
+      self.EchoUserCommandsHelpMessage()
+      return
+
+    command = arguments[ 0 ]
+    if command == 'StartServer':
+      self._StartServer()
+    elif command == 'StopServer':
+      self._StopServer()
+
+  def _StartServer( self ):
+    """ Start the OmniSharp server """
+    if ( not self._ServerIsRunning() ):
+      # Find the solution file
+      folder = vim.eval( "expand(%:p:h)" )
+      pass
+
+  def _StopServer( self ):
+    """ Stop the OmniSharp server """
+    if ( self._ServerIsRunning() ):
+      self._GetResponse( "/stopserver" )
+
+  def _ServerIsRunning( self ):
+    """ Check if the OmniSharp server is running """
+    return True
+
+  def _GetCompletions( self ):
+    """ Ask server for completions """
     line, column = vimsupport.CurrentLineAndColumn()
 
     parameters = {}
@@ -57,18 +89,14 @@ class CsharpCompleter( ThreadedCompleter ):
     parameters['buffer'] = '\n'.join( vim.current.buffer )
     parameters['filename'] = vim.current.buffer.name
 
-    js = self.getResponse( '/autocomplete', parameters )
-    if(js != ''):
-      return json.loads( js )
-    return []
+    return self._GetResponse( '/autocomplete', parameters ) | []
 
-  def getResponse( self, endPoint, parameters={} ):
-    """Handle communication with server"""
+  def _GetResponse( self, endPoint, parameters={} ):
+    """ Handle communication with server """
     target = urlparse.urljoin( self.OmniSharp_host , endPoint )
     parameters = urllib.urlencode( parameters )
     try:
       response = urllib2.urlopen( target, parameters )
-      return response.read()
+      return json.loads( response.read() )
     except:
-      vimsupport.PostVimMessage( "Could not connect to " + target )
-      return ''
+      return None
