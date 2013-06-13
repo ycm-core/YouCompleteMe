@@ -166,7 +166,7 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
       continue;
 
     std::string identifier( matches[ 1 ] );
-    fs::path path( matches[ 2 ] );
+    fs::path path( matches[ 2 ].str() );
 
     if ( path.is_relative() )
       path = path_to_tag_file.parent_path() / path;
