@@ -82,6 +82,12 @@ elseif( COMPILER_IS_CLANG )
   set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
 endif()
 
+# For MSVC enable UNICODE and compilation on multiple processors
+if( MSVC )
+  add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
+endif()
+
 # When used with Clang, adding the -std=c++0x flag to CMAKE_CXX_FLAGS will cause
 # the compiler to output a warning during linking:
 #  clang: warning: argument unused during compilation: '-std=c++0x'
