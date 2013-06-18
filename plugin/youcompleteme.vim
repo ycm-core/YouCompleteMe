@@ -41,6 +41,8 @@ function! s:HasYcmCore()
     return 1
   elseif filereadable(path_prefix . 'ycm_core.pyd')
     return 1
+  elseif filereadable(path_prefix . 'ycm_core.dll')
+    return 1
   endif
   return 0
 endfunction
@@ -50,8 +52,8 @@ let g:ycm_check_if_ycm_core_present =
 
 if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
   echohl WarningMsg |
-        \ echomsg "ycm_core.[so|pyd] not detected; you need to compile YCM " .
-        \ "before using it. Read the docs!" |
+        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+        \ "YCM before using it. Read the docs!" |
         \ echohl None
   finish
 endif
