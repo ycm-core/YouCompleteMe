@@ -34,31 +34,35 @@ set( PATH_TO_LLVM_ROOT "" CACHE PATH "Path to the root of a LLVM+Clang binary di
 set( EXTERNAL_LIBCLANG_PATH "" CACHE PATH  "Path libclang library to use" )
 
 if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
-  message( "Downloading Clang 3.2" )
+  message( "Downloading Clang 3.3" )
 
-  set( CLANG_URL "http://llvm.org/releases/3.2" )
+  set( CLANG_URL "http://llvm.org/releases/3.3" )
 
   if ( APPLE )
-    set( CLANG_DIRNAME "clang+llvm-3.2-x86_64-apple-darwin11" )
-    set( CLANG_MD5 "fbdca3b4e8cdaa2352f2aeb038a16532" )
+    set( CLANG_DIRNAME "clang+llvm-3.3-x86_64-apple-darwin12" )
+    set( CLANG_MD5 "3c9984ca05f68ca5dc7e06dad92a96ab" )
+    set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.gz" )
   else()
     if ( 64_BIT_PLATFORM )
-      set( CLANG_DIRNAME "clang+llvm-3.2-x86_64-linux-ubuntu-12.04" )
-      set( CLANG_MD5 "81821e339d7300afb76aca8edab2cf4f" )
+      set( CLANG_DIRNAME "clang+llvm-3.3-Ubuntu-13.04-x86-linux-gnu" )
+      set( CLANG_MD5 "1478157ffdf583461fe9c377398cccf3" )
     else()
-      set( CLANG_DIRNAME "clang+llvm-3.2-x86-linux-ubuntu-12.04" )
-      set( CLANG_MD5 "cea2d01b3206e92a8df7b079935c070b" )
+      set( CLANG_DIRNAME "clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu" )
+      set( CLANG_MD5 "c0cbbe86c5836e03fe6eb96e95d059fa" )
     endif()
+    set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.bz2" )
   endif()
-
-  set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.gz" )
 
   file(
     DOWNLOAD "${CLANG_URL}/${CLANG_FILENAME}" "./${CLANG_FILENAME}"
     SHOW_PROGRESS EXPECTED_MD5 "${CLANG_MD5}"
   )
 
-  execute_process( COMMAND tar -xzf ${CLANG_FILENAME} )
+  if ( CLANG_FILENAME MATCHES ".+bz2" )
+    execute_process( COMMAND tar -xyf ${CLANG_FILENAME} )
+  else()
+    execute_process( COMMAND tar -xzf ${CLANG_FILENAME} )
+  endif()
 
   # And set PATH_TO_LLVM_ROOT
   set( PATH_TO_LLVM_ROOT "${CMAKE_CURRENT_BINARY_DIR}/../${CLANG_DIRNAME}" )
