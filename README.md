@@ -207,9 +207,10 @@ notify you to recompile it. You should then rerun the install process.
     **Download the latest version of `libclang`**. Clang is an open-source
     compiler that can compile C/C++/Objective-C/Objective-C++. The `libclang`
     library it provides is used to power the YCM semantic completion engine for
-    those languages. YCM needs libclang version 3.2 or higher.
+    those languages. YCM is designed to work with libclang version 3.3 or
+    higher, but can in theory work with 3.2 as well.
 
-    You can use the system libclang _only if you are sure it is version 3.2 or
+    You can use the system libclang _only if you are sure it is version 3.3 or
     higher_, otherwise don't. Even if it is, I recommend using the [official
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
@@ -1253,7 +1254,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/gmarik/vundle#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
-[clang-download]: http://llvm.org/releases/download.html#3.2
+[clang-download]: http://llvm.org/releases/download.html#3.3
 [brew]: http://mxcl.github.com/homebrew/
 [cmake-download]: http://www.cmake.org/cmake/resources/software.html
 [macvim]: http://code.google.com/p/macvim/#Download
