@@ -1,4 +1,4 @@
-/*===---- stdalign.h - Standard header for alignment ------------------------===
+/*===---- rdseedintrin.h - RDSEED intrinsics -------------------------------===
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,28 @@
  *===-----------------------------------------------------------------------===
  */
 
-#ifndef __STDALIGN_H
-#define __STDALIGN_H
-
-#ifndef __cplusplus
-#define alignas _Alignas
-#define alignof _Alignof
+#ifndef __X86INTRIN_H
+#error "Never use <rdseedintrin.h> directly; include <x86intrin.h> instead."
 #endif
 
-#define __alignas_is_defined 1
-#define __alignof_is_defined 1
+#ifdef __RDSEED__
+static __inline__ int __attribute__((__always_inline__, __nodebug__))
+_rdseed16_step(unsigned short *__p)
+{
+  return __builtin_ia32_rdseed16_step(__p);
+}
 
-#endif /* __STDALIGN_H */
+static __inline__ int __attribute__((__always_inline__, __nodebug__))
+_rdseed32_step(unsigned int *__p)
+{
+  return __builtin_ia32_rdseed32_step(__p);
+}
+
+#ifdef __x86_64__
+static __inline__ int __attribute__((__always_inline__, __nodebug__))
+_rdseed64_step(unsigned long long *__p)
+{
+  return __builtin_ia32_rdseed64_step(__p);
+}
+#endif
+#endif /* __RDSEED__ */
