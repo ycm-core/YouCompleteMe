@@ -59,7 +59,7 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
   )
 
   if ( CLANG_FILENAME MATCHES ".+bz2" )
-    execute_process( COMMAND tar -xyf ${CLANG_FILENAME} )
+    execute_process( COMMAND tar -xjf ${CLANG_FILENAME} )
   else()
     execute_process( COMMAND tar -xzf ${CLANG_FILENAME} )
   endif()
