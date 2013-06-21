@@ -19,10 +19,10 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
+import os
+import glob
 from ycm.completers.threaded_completer import ThreadedCompleter
 from ycm import vimsupport
-
-# Import stuff for Omnisharp
 import urllib2
 import urllib
 import urlparse
@@ -68,8 +68,20 @@ class CsharpCompleter( ThreadedCompleter ):
     """ Start the OmniSharp server """
     if ( not self._ServerIsRunning() ):
       # Find the solution file
-      folder = vim.eval( "expand(%:p:h)" )
-      pass
+      folder = os.path.dirname( vim.current.buffer.name )
+      solutionfiles = glob.glob1( folder, "*.sln" )
+      while not solutionfiles:
+        lastfolder = folder
+        # Traverse up a level
+        folder = os.path.dirname( folder )
+        if folder == lastfolder:
+          break
+        solutionfiles = glob.glob1( folder, "*.sln" )
+
+      if len( solutionfiles ) == 1:
+        pass # start server here
+      else:
+        pass # some other stuff, like notifying
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
@@ -78,7 +90,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
-    return True
+    return False
 
   def _GetCompletions( self ):
     """ Ask server for completions """
