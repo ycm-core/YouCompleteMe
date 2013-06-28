@@ -27,6 +27,7 @@ import urllib2
 import urllib
 import urlparse
 import json
+import subprocess
 
 
 class CsharpCompleter( ThreadedCompleter ):
@@ -36,12 +37,13 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self.OmniSharp_host = 2000
-    self._StartServer()
+    self.OmniSharpPort = 2000
+    self.OmniSharpHost = 'http://localhost:' + str( self.OmniSharpPort )
+    #self._StartServer()
 
   def SupportedFiletypes( self ):
     """ Just csharp """
-    return ['cs']
+    return [ 'cs' ]
 
   def ComputeCandidates( self, unused_query, unused_start_column ):
     return [ { 'word': str( completion['CompletionText'] ),
@@ -50,8 +52,8 @@ class CsharpCompleter( ThreadedCompleter ):
              for completion in self._GetCompletions() ]
 
   def DefinedSubcommands( self ):
-    return [ "StartServer",
-             "StopServer" ]
+    return [ 'StartServer',
+             'StopServer' ]
 
   def OnUserCommand( self, arguments ):
     if not arguments:
@@ -69,27 +71,33 @@ class CsharpCompleter( ThreadedCompleter ):
     if ( not self._ServerIsRunning() ):
       # Find the solution file
       folder = os.path.dirname( vim.current.buffer.name )
-      solutionfiles = glob.glob1( folder, "*.sln" )
+      solutionfiles = glob.glob1( folder, '*.sln' )
       while not solutionfiles:
         lastfolder = folder
         # Traverse up a level
         folder = os.path.dirname( folder )
         if folder == lastfolder:
           break
-        solutionfiles = glob.glob1( folder, "*.sln" )
+        solutionfiles = glob.glob1( folder, '*.sln' )
 
       if len( solutionfiles ) == 1:
-        pass # start server here
+        omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ), './OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
+        solutionfile = os.path.abspath ( solutionfiles[0] )
+        command = [ omnisharp, '-p ' + str( self.OmniSharpPort ), '-s ' + solutionfile ]
+        # Why doesn't this work properly?
+        # When starting manually in seperate console, everything works
+        # Maybe due to bothering stdin/stdout redirecting?
+        subprocess.Popen( command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
       else:
-        pass # some other stuff, like notifying
+        vimsupport.PostVimMessage( 'Error starting OmniSharp server: none or multiple solutionfiles are found' )
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
-    if ( self._ServerIsRunning() ):
-      self._GetResponse( "/stopserver" )
+    self._GetResponse( '/stopserver' )
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
+    self._StopServer() # temporal fix
     return False
 
   def _GetCompletions( self ):
@@ -101,14 +109,16 @@ class CsharpCompleter( ThreadedCompleter ):
     parameters['buffer'] = '\n'.join( vim.current.buffer )
     parameters['filename'] = vim.current.buffer.name
 
-    return self._GetResponse( '/autocomplete', parameters ) | []
+    completions = self._GetResponse( '/autocomplete', parameters ) 
+    return completions if completions != None else []
 
   def _GetResponse( self, endPoint, parameters={} ):
     """ Handle communication with server """
-    target = urlparse.urljoin( self.OmniSharp_host , endPoint )
+    target = urlparse.urljoin( self.OmniSharpHost, endPoint )
     parameters = urllib.urlencode( parameters )
     try:
       response = urllib2.urlopen( target, parameters )
       return json.loads( response.read() )
-    except:
+    except Exception as e:
+      #vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target + ': ' + str(e))
       return None
