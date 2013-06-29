@@ -63,6 +63,9 @@ let g:loaded_youcompleteme = 1
 let g:ycm_min_num_of_chars_for_completion  =
       \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
 
+let g:ycm_min_num_identifier_candidate_chars =
+      \ get( g:, 'ycm_min_num_identifier_candidate_chars', 0 )
+
 let g:ycm_filetype_whitelist =
       \ get( g:, 'ycm_filetype_whitelist', {
       \   '*' : 1,

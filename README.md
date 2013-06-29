@@ -598,6 +598,21 @@ Default: `2`
 
     let g:ycm_min_num_of_chars_for_completion = 2
 
+### The `g:ycm_min_num_identifier_candidate_chars` option
+
+This option controls the minimum number of characters that a completion
+candidate coming from the identifier completer must have to be shown in the
+popup menu.
+
+A special value of `0` means there is no limit.
+
+NOTE: This option only applies to the identifier completer; it has no effect on
+the various semantic completers.
+
+Default: `0`
+
+    let g:ycm_min_num_identifier_candidate_chars = 0
+
 ### The `g:ycm_filetype_whitelist` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
