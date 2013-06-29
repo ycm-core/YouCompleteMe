@@ -138,19 +138,10 @@ let g:ycm_extra_conf_globlist =
 let g:ycm_filepath_completion_use_working_dir =
       \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
 
+" Default semantic triggers are in python/ycm/completers/completer.py, these
+" just append new triggers to the default dict.
 let g:ycm_semantic_triggers =
-      \ get( g:, 'ycm_semantic_triggers', {
-      \   'c' : ['->', '.'],
-      \   'objc' : ['->', '.'],
-      \   'ocaml' : ['.', '#'],
-      \   'cpp,objcpp' : ['->', '.', '::'],
-      \   'perl' : ['->'],
-      \   'php' : ['->', '::'],
-      \   'cs,java,javascript,d,vim,python,perl6,scala,vb,elixir,go' : ['.'],
-      \   'ruby' : ['.', '::'],
-      \   'lua' : ['.', ':'],
-      \   'erlang' : [':'],
-      \ } )
+      \ get( g:, 'ycm_semantic_triggers', {} )
 
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )

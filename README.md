@@ -953,6 +953,10 @@ completion engines. The option holds a dictionary of key-values, where the keys
 are Vim's filetype strings delimited by commas and values are lists of strings,
 where the strings are the triggers.
 
+Setting key-value pairs on the dictionary _adds_ semantic triggers to the
+internal default set (listed below). You cannot remove the default triggers,
+only add new ones.
+
 A "trigger" is a sequence of one or more characters that trigger semantic
 completion when typed. For instance, C++ (`cpp` filetype) has `.` listed as a
 trigger. So when the user types `foo.`, the semantic engine will trigger and
