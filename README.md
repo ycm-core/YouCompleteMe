@@ -1202,6 +1202,17 @@ YCM keeps you in a `completefunc` completion mode when you're typing in insert
 mode and Vim disables `<C-U>` in completion mode as a "feature." Sadly there's
 nothing I can do about this.
 
+### YCM conflicts with UltiSnips TAB key usage
+
+YCM comes with support for UltiSnips (snippet suggestions in the popup menu),
+but you'll have to change the UltiSnips mappings. See `:h UltiSnips-triggers` in
+Vim for details. You'll probably want to change some/all of the following
+options:
+
+    g:UltiSnipsExpandTrigger
+    g:UltiSnipsJumpForwardTrigger
+    g:UltiSnipsJumpBackwardTrigger
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
