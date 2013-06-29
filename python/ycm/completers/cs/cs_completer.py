@@ -69,27 +69,31 @@ class CsharpCompleter( ThreadedCompleter ):
   def _StartServer( self ):
     """ Start the OmniSharp server """
     if ( not self._ServerIsRunning() ):
-      # Find the solution file
       folder = os.path.dirname( vim.current.buffer.name )
       solutionfiles = glob.glob1( folder, '*.sln' )
       while not solutionfiles:
         lastfolder = folder
-        # Traverse up a level
         folder = os.path.dirname( folder )
         if folder == lastfolder:
           break
         solutionfiles = glob.glob1( folder, '*.sln' )
 
-      if len( solutionfiles ) == 1:
-        omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ), './OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
-        solutionfile = os.path.abspath ( solutionfiles[0] )
+      if len( solutionfiles ) == 0:
+        vimsupport.PostVimMessage( 'Error starting OmniSharp server: no solutionfile found' )
+      elif len( solutionfiles ) == 1:
+        omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ),
+                'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
+        solutionfile = os.path.join ( folder, solutionfiles[0] )
         command = [ omnisharp, '-p ' + str( self.OmniSharpPort ), '-s ' + solutionfile ]
+
+        vimsupport.PostVimMessage( 'starting server... ' + ' '.join( command ) )
+
         # Why doesn't this work properly?
         # When starting manually in seperate console, everything works
         # Maybe due to bothering stdin/stdout redirecting?
         subprocess.Popen( command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
       else:
-        vimsupport.PostVimMessage( 'Error starting OmniSharp server: none or multiple solutionfiles are found' )
+        vimsupport.PostVimMessage( 'Error starting OmniSharp server: multiple solutionfiles found' )
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
@@ -120,5 +124,5 @@ class CsharpCompleter( ThreadedCompleter ):
       response = urllib2.urlopen( target, parameters )
       return json.loads( response.read() )
     except Exception as e:
-      #vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target + ': ' + str(e))
+      vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target + ': ' + str(e))
       return None
