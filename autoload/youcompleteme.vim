@@ -380,7 +380,8 @@ endfunction
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) &&
         \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
-        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
+        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' ) &&
+        \ g:ycm_register_as_syntastic_checker
     SyntasticCheck
   endif
 endfunction
