@@ -7,7 +7,7 @@ YCM to work on my machine" and the reason why is obviously related to your
 machine configuration and the problem would not be resolved with _reasonable_
 changes to the YCM codebase, then the issue is likely to be closed.
 
-YCM compiles just fine; [the build bots say so][build-bots]. If the bots are
+**YCM compiles just fine**; [the build bots say so][build-bots]. If the bots are
 green and YCM doesn't compile on your machine, then _your machine is the root
 cause_. Now read the previous paragraph again.
 
