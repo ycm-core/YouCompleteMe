@@ -67,10 +67,10 @@ class JediCompleter( ThreadedCompleter ):
   def ComputeCandidates( self, unused_query, unused_start_column ):
     script = self._GetJediScript()
 
-    return [ { 'word': str( completion.word ),
+    return [ { 'word': str( completion.name ),
                'menu': str( completion.description ),
                'info': str( completion.doc ) }
-             for completion in script.complete() ]
+             for completion in script.completions() ]
 
 
   def DefinedSubcommands( self ):
@@ -147,7 +147,7 @@ class JediCompleter( ThreadedCompleter ):
           vimsupport.PostVimMessage( "Builtin modules cannot be displayed." )
       else:
         vimsupport.JumpToLocation( definition.module_path,
-                                   definition.line_nr,
+                                   definition.line,
                                    definition.column + 1 )
     else:
       # multiple definitions
@@ -158,7 +158,7 @@ class JediCompleter( ThreadedCompleter ):
                        definition.description.encode( 'utf-8' ) } )
         else:
           defs.append( {'filename': definition.module_path.encode( 'utf-8' ),
-                        'lnum': definition.line_nr,
+                        'lnum': definition.line,
                         'col': definition.column + 1,
                         'text': definition.description.encode( 'utf-8' ) } )
 
