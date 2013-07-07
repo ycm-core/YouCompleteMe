@@ -21,11 +21,13 @@ set cpo&vim
 
 if exists( "g:loaded_youcompleteme" )
   finish
-elseif v:version < 703 || !has( 'patch584' )
-  echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
-        \ echohl None
-  finish
+elseif v:version < 704
+  if v:version < 703 || !has( 'patch584' )
+    echohl WarningMsg |
+          \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
+          \ echohl None
+    finish
+  endif
 elseif !has( 'python' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires python 2.x" |
@@ -41,6 +43,8 @@ function! s:HasYcmCore()
     return 1
   elseif filereadable(path_prefix . 'ycm_core.pyd')
     return 1
+  elseif filereadable(path_prefix . 'ycm_core.dll')
+    return 1
   endif
   return 0
 endfunction
@@ -50,8 +54,8 @@ let g:ycm_check_if_ycm_core_present =
 
 if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
   echohl WarningMsg |
-        \ echomsg "ycm_core.[so|pyd] not detected; you need to compile YCM " .
-        \ "before using it. Read the docs!" |
+        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+        \ "YCM before using it. Read the docs!" |
         \ echohl None
   finish
 endif
@@ -60,6 +64,9 @@ let g:loaded_youcompleteme = 1
 
 let g:ycm_min_num_of_chars_for_completion  =
       \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
+
+let g:ycm_min_num_identifier_candidate_chars =
+      \ get( g:, 'ycm_min_num_identifier_candidate_chars', 0 )
 
 let g:ycm_filetype_whitelist =
       \ get( g:, 'ycm_filetype_whitelist', {
@@ -136,18 +143,10 @@ let g:ycm_extra_conf_globlist =
 let g:ycm_filepath_completion_use_working_dir =
       \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
 
+" Default semantic triggers are in python/ycm/completers/completer.py, these
+" just append new triggers to the default dict.
 let g:ycm_semantic_triggers =
-      \ get( g:, 'ycm_semantic_triggers', {
-      \   'c' : ['->', '.'],
-      \   'objc' : ['->', '.'],
-      \   'ocaml' : ['.', '#'],
-      \   'cpp,objcpp' : ['->', '.', '::'],
-      \   'perl' : ['->'],
-      \   'php' : ['->', '::'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
-      \   'lua' : ['.', ':'],
-      \   'erlang' : [':'],
-      \ } )
+      \ get( g:, 'ycm_semantic_triggers', {} )
 
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )

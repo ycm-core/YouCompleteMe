@@ -207,9 +207,10 @@ notify you to recompile it. You should then rerun the install process.
     **Download the latest version of `libclang`**. Clang is an open-source
     compiler that can compile C/C++/Objective-C/Objective-C++. The `libclang`
     library it provides is used to power the YCM semantic completion engine for
-    those languages. YCM needs libclang version 3.2 or higher.
+    those languages. YCM is designed to work with libclang version 3.3 or
+    higher, but can in theory work with 3.2 as well.
 
-    You can use the system libclang _only if you are sure it is version 3.2 or
+    You can use the system libclang _only if you are sure it is version 3.3 or
     higher_, otherwise don't. Even if it is, I recommend using the [official
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
@@ -597,6 +598,21 @@ Default: `2`
 
     let g:ycm_min_num_of_chars_for_completion = 2
 
+### The `g:ycm_min_num_identifier_candidate_chars` option
+
+This option controls the minimum number of characters that a completion
+candidate coming from the identifier completer must have to be shown in the
+popup menu.
+
+A special value of `0` means there is no limit.
+
+NOTE: This option only applies to the identifier completer; it has no effect on
+the various semantic completers.
+
+Default: `0`
+
+    let g:ycm_min_num_identifier_candidate_chars = 0
+
 ### The `g:ycm_filetype_whitelist` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
@@ -952,6 +968,10 @@ completion engines. The option holds a dictionary of key-values, where the keys
 are Vim's filetype strings delimited by commas and values are lists of strings,
 where the strings are the triggers.
 
+Setting key-value pairs on the dictionary _adds_ semantic triggers to the
+internal default set (listed below). You cannot remove the default triggers,
+only add new ones.
+
 A "trigger" is a sequence of one or more characters that trigger semantic
 completion when typed. For instance, C++ (`cpp` filetype) has `.` listed as a
 trigger. So when the user types `foo.`, the semantic engine will trigger and
@@ -967,7 +987,8 @@ Default: `[see next line]`
       \   'cpp,objcpp' : ['->', '.', '::'],
       \   'perl' : ['->'],
       \   'php' : ['->', '::'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
+      \   'cs,java,javascript,d,vim,python,perl6,scala,vb,elixir,go' : ['.'],
+      \   'ruby' : ['.', '::'],
       \   'lua' : ['.', ':'],
       \   'erlang' : [':'],
       \ }
@@ -1046,6 +1067,10 @@ You probably have an old version of Syntastic installed. If you are using
 Vundle, make sure that your bundle command is `Bundle 'scrooloose/syntastic'`
 and **not** `Bundle 'Syntastic'`. The first command pulls in the latest version of
 Syntastic from GitHub while the second one pulls in an old version from vim.org.
+
+Because of [a Vundle bug][vundle-bug], make sure you have completely removed
+everything in your Vundle bundle directory (`~/.vim/bundle` by default) before
+switching from one Syntastic bundle command to the other.
 
 ### YCM auto-inserts completion strings I don't want!
 
@@ -1129,6 +1154,24 @@ to use. You may need to set these flags to something else, but you need to make
 sure you use the same version of Python that your Vim binary is built against,
 which is highly likely to be the system's default Python.
 
+### I get `libpython2.7.a [...] relocation R_X86_64_32` when compiling
+
+The error is usually encountered when compiling YCM on Centos or RHEL. The full
+error looks something like the following:
+
+```
+/usr/bin/ld: /usr/local/lib/libpython2.7.a(abstract.o): relocation R_X86_64_32 against `a local symbol' can not be used when making a shared object; recompile with -fPIC
+```
+
+It's possible to get a slightly different error that's similar to the one above.
+Here's the problem and how you solve it:
+
+Your `libpython2.7.a` was not compiled with `-fPIC` so it can't be linked into
+`ycm_core.so`.  Use the `-DPYTHON_LIBRARY=` CMake flag to point it to a `.so`
+version of libpython on your machine (for instance,
+`-DPYTHON_LIBRARY=/usr/lib/libpython2.7.so`). Naturally, this means you'll have
+to go through the full installation guide by hand.
+
 ### I get `Vim: Caught deadly signal SEGV` on Vim startup
 
 This can happen on some Linux distros. If you encounter this situation, run Vim
@@ -1173,6 +1216,17 @@ will only list tag files that already exist.
 YCM keeps you in a `completefunc` completion mode when you're typing in insert
 mode and Vim disables `<C-U>` in completion mode as a "feature." Sadly there's
 nothing I can do about this.
+
+### YCM conflicts with UltiSnips TAB key usage
+
+YCM comes with support for UltiSnips (snippet suggestions in the popup menu),
+but you'll have to change the UltiSnips mappings. See `:h UltiSnips-triggers` in
+Vim for details. You'll probably want to change some/all of the following
+options:
+
+    g:UltiSnipsExpandTrigger
+    g:UltiSnipsJumpForwardTrigger
+    g:UltiSnipsJumpBackwardTrigger
 
 ### Why isn't YCM just written in plain VimScript, FFS?
 
@@ -1230,7 +1284,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/gmarik/vundle#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
-[clang-download]: http://llvm.org/releases/download.html#3.2
+[clang-download]: http://llvm.org/releases/download.html#3.3
 [brew]: http://mxcl.github.com/homebrew/
 [cmake-download]: http://www.cmake.org/cmake/resources/software.html
 [macvim]: http://code.google.com/p/macvim/#Download
@@ -1253,3 +1307,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [ultisnips]: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 [exuberant-ctags]: http://ctags.sourceforge.net/
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
+[vundle-bug]: https://github.com/gmarik/vundle/issues/48

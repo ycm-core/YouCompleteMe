@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 import vim
 from ycm import vimsupport
 from ycm import utils
@@ -29,7 +30,8 @@ except ImportError as e:
     'Error importing ycm_core. Are you sure you have placed a version 3.2+ '
     'libclang.[so|dll|dylib] in folder "{0}"? See the Installation Guide in '
     'the docs. Full error: {1}'.format(
-      os.path.dirname( os.path.abspath( __file__ ) ), str( e ) ) )
+      os.path.dirname( os.path.dirname( os.path.abspath( __file__ ) ) ),
+      str( e ) ) )
 
 
 def CompletionStartColumn():
@@ -68,6 +70,55 @@ def CurrentIdentifierFinished():
     return True
   else:
     return line[ : current_column ].isspace()
+
+
+def AdjustCandidateInsertionText( candidates ):
+  """This function adjusts the candidate insertion text to take into account the
+  text that's currently in front of the cursor.
+
+  For instance ('|' represents the cursor):
+    1. Buffer state: 'foo.|bar'
+    2. A completion candidate of 'zoobar' is shown and the user selects it.
+    3. Buffer state: 'foo.zoobar|bar' instead of 'foo.zoo|bar' which is what the
+    user wanted.
+
+  This function changes candidates to resolve that issue.
+
+  It could be argued that the user actually wants the final buffer state to be
+  'foo.zoobar|' (the cursor at the end), but that would be much more difficult
+  to implement and is probably not worth doing.
+  """
+
+  def NewCandidateInsertionText( to_insert, word_after_cursor ):
+    if to_insert.endswith( word_after_cursor ):
+      return to_insert[ : - len( word_after_cursor ) ]
+    return to_insert
+
+  match = re.search( r'^(\w+)', vimsupport.TextAfterCursor() )
+  if not match:
+    return candidates
+
+  new_candidates = []
+
+  word_after_cursor = match.group( 1 )
+  for candidate in candidates:
+    if type( candidate ) is dict:
+      new_candidate = candidate.copy()
+
+      if not 'abbr' in new_candidate:
+        new_candidate[ 'abbr' ] = new_candidate[ 'word' ]
+
+      new_candidate[ 'word' ] = NewCandidateInsertionText(
+        new_candidate[ 'word' ],
+        word_after_cursor )
+
+      new_candidates.append( new_candidate )
+
+    elif type( candidate ) is str:
+      new_candidates.append(
+        { 'abbr': candidate,
+          'word': NewCandidateInsertionText( candidate, word_after_cursor ) } )
+  return new_candidates
 
 
 COMPATIBLE_WITH_CORE_VERSION = 4

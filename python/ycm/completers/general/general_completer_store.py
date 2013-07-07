@@ -130,6 +130,11 @@ class GeneralCompleterStore( Completer ):
       completer.OnInsertLeave()
 
 
+  def OnVimLeave( self ):
+    for completer in self._all_completers:
+      completer.OnVimLeave()
+
+
   def OnCurrentIdentifierFinished( self ):
     for completer in self._all_completers:
       completer.OnCurrentIdentifierFinished()

@@ -207,6 +207,7 @@ function! s:SetUpCompleteopt()
 endfunction
 
 function! s:OnVimLeave()
+  py ycm_state.OnVimLeave()
   py extra_conf_store.CallExtraConfVimCloseIfExists()
 endfunction
 
@@ -380,7 +381,8 @@ endfunction
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) &&
         \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
-        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
+        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' ) &&
+        \ g:ycm_register_as_syntastic_checker
     SyntasticCheck
   endif
 endfunction
@@ -484,7 +486,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer,
     endif
   endwhile
 
-  let l:results = pyeval( 'completer.CandidatesFromStoredRequest()' )
+  let l:results = pyeval( 'base.AdjustCandidateInsertionText( completer.CandidatesFromStoredRequest() )' )
   let s:searched_and_results_found = len( l:results ) != 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction

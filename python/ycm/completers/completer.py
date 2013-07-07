@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2011, 2012  Strahinja Val Markovic  <val@markovic.io>
+# Copyright (C) 2011, 2012, 2013  Strahinja Val Markovic  <val@markovic.io>
 #
 # This file is part of YouCompleteMe.
 #
@@ -21,7 +21,7 @@ import abc
 import vim
 import ycm_core
 from ycm import vimsupport
-from collections import defaultdict
+from ycm.completers.completer_utils import TriggersForFiletype
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
@@ -278,6 +278,10 @@ class Completer( object ):
     pass
 
 
+  def OnVimLeave( self ):
+    pass
+
+
   def OnUserCommand( self, arguments ):
     vimsupport.PostVimMessage( NO_USER_COMMANDS )
 
@@ -335,15 +339,4 @@ class CompletionsCache( object ):
     completion_column = start_column
     return completion_line == self.line and completion_column == self.column
 
-
-def TriggersForFiletype():
-  triggers = vim.eval( 'g:ycm_semantic_triggers' )
-  triggers_for_filetype = defaultdict( list )
-
-  for key, value in triggers.iteritems():
-    filetypes = key.split( ',' )
-    for filetype in filetypes:
-      triggers_for_filetype[ filetype ].extend( value )
-
-  return triggers_for_filetype
 

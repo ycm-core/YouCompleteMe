@@ -27,8 +27,10 @@ from ycm import vimsupport
 from ycm import utils
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
-MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
+MIN_NUM_COMPLETION_START_CHARS = int( vimsupport.GetVariableValue(
   "g:ycm_min_num_of_chars_for_completion" ) )
+MIN_NUM_CANDIDATE_SIZE_CHARS = int( vimsupport.GetVariableValue(
+  "g:ycm_min_num_identifier_candidate_chars" ) )
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 
 
@@ -172,6 +174,8 @@ class IdentifierCompleter( GeneralCompleter ):
     completions = self.completions_future.GetResults()[
       : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
 
+    completions = _RemoveSmallCandidates( completions )
+
     # We will never have duplicates in completions so with 'dup':1 we tell Vim
     # to add this candidate even if it's a duplicate of an existing one (which
     # will never happen). This saves us some expensive string matching
@@ -204,8 +208,15 @@ def PreviousIdentifier():
   while start_column > 0 and utils.IsIdentifierChar( line[ start_column - 1 ] ):
     start_column -= 1
 
-  if end_column - start_column < MIN_NUM_CHARS:
+  if end_column - start_column < MIN_NUM_COMPLETION_START_CHARS:
     return ""
 
   return line[ start_column : end_column ]
+
+
+def _RemoveSmallCandidates( candidates ):
+  if MIN_NUM_CANDIDATE_SIZE_CHARS == 0:
+    return candidates
+
+  return [ x for x in candidates if len( x ) >= MIN_NUM_CANDIDATE_SIZE_CHARS ]
 

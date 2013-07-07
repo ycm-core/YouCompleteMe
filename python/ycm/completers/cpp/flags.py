@@ -23,8 +23,9 @@ from ycm import vimsupport
 from ycm import extra_conf_store
 
 NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
-  'are available. Thus no semantic support for C/C++/ObjC/ObjC++. See the '
-  'docs for details.').format( extra_conf_store.YCM_EXTRA_CONF_FILENAME )
+  'are available. Thus no semantic support for C/C++/ObjC/ObjC++. Go READ THE '
+  'DOCS *NOW*, DON\'T file a bug report.').format(
+    extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
 
 class Flags( object ):

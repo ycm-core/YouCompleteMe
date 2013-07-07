@@ -30,8 +30,8 @@ def CurrentLineAndColumn():
 
 def CurrentColumn():
   """Returns the 0-based current column. Do NOT access the CurrentColumn in
-  vim.current.line. It doesn't exist yet.  Only the chars before the current
-  column exist in vim.current.line."""
+  vim.current.line. It doesn't exist yet when the cursor is at the end of the
+  line. Only the chars before the current column exist in vim.current.line."""
 
   # vim's columns are 1-based while vim.current.line columns are 0-based
   # ... but vim.current.window.cursor (which returns a (line, column) tuple)
@@ -39,6 +39,11 @@ def CurrentColumn():
   # vim.buffers buffer objects OTOH have 0-based lines and columns.
   # Pigs have wings and I'm a loopy purple duck. Everything makes sense now.
   return vim.current.window.cursor[ 1 ]
+
+
+def TextAfterCursor():
+  """Returns the text after CurrentColumn."""
+  return vim.current.line[ CurrentColumn(): ]
 
 
 def GetUnsavedBuffers():

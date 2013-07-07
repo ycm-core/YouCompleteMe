@@ -144,6 +144,13 @@ class YouCompleteMe( object ):
       self.GetFiletypeCompleter().OnInsertLeave()
 
 
+  def OnVimLeave( self ):
+    self.gencomp.OnVimLeave()
+
+    if self.FiletypeCompletionUsable():
+      self.GetFiletypeCompleter().OnVimLeave()
+
+
   def DiagnosticsForCurrentFileReady( self ):
     if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().DiagnosticsForCurrentFileReady()

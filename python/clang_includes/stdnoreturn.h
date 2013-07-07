@@ -1,4 +1,4 @@
-/*===---- stdalign.h - Standard header for alignment ------------------------===
+/*===---- stdnoreturn.h - Standard header for noreturn macro ---------------===
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,10 @@
  *===-----------------------------------------------------------------------===
  */
 
-#ifndef __STDALIGN_H
-#define __STDALIGN_H
+#ifndef __STDNORETURN_H
+#define __STDNORETURN_H
 
-#ifndef __cplusplus
-#define alignas _Alignas
-#define alignof _Alignof
-#endif
+#define noreturn _Noreturn
+#define __noreturn_is_defined 1
 
-#define __alignas_is_defined 1
-#define __alignof_is_defined 1
-
-#endif /* __STDALIGN_H */
+#endif /* __STDNORETURN_H */
