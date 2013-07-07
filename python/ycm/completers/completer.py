@@ -278,6 +278,10 @@ class Completer( object ):
     pass
 
 
+  def OnVimLeave( self ):
+    pass
+
+
   def OnUserCommand( self, arguments ):
     vimsupport.PostVimMessage( NO_USER_COMMANDS )
 
