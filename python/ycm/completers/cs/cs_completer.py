@@ -84,20 +84,22 @@ class CsharpCompleter( ThreadedCompleter ):
       elif len( solutionfiles ) == 1:
         solutionfile = solutionfiles[0]
       else:
-        # This still has to be caught by giving the user a choice
-        vimsupport.PostVimMessage( 'Error starting OmniSharp server: multiple solutionfiles found' )
-        return
+        choice = vimsupport.PresentDialog( "Which solutionfile should be loaded?", 
+            [ str(i) + " " + s for i, s in enumerate( solutionfiles ) ] )
+        if choice == -1:
+          vimsupport.PostVimMessage( 'OmniSharp not started' )
+          return
+        else:
+          solutionfile = solutionfiles[ choice ]
 
       omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ),
               'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
       solutionfile = os.path.join ( folder, solutionfile )
-      # command has to be provided as one string
+      # command has to be provided as one string for some reason
       command = [ omnisharp + ' -p ' + str( self.OmniSharpPort ) + ' -s ' + solutionfile ]
 
-      vimsupport.PostVimMessage( 'starting server...\n' + ' '.join( command ) )
-
-      with open(os.devnull, "w") as fnull:
-        result = subprocess.Popen(command, stdout = fnull, stderr = fnull, shell=True)
+      with open( os.devnull, "w" ) as fnull:
+        subprocess.Popen( command, stdout = fnull, stderr = fnull, shell=True )
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
