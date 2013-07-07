@@ -80,20 +80,24 @@ class CsharpCompleter( ThreadedCompleter ):
 
       if len( solutionfiles ) == 0:
         vimsupport.PostVimMessage( 'Error starting OmniSharp server: no solutionfile found' )
+        return
       elif len( solutionfiles ) == 1:
-        omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ),
-                'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
-        solutionfile = os.path.join ( folder, solutionfiles[0] )
-        command = [ omnisharp, '-p ' + str( self.OmniSharpPort ), '-s ' + solutionfile ]
-
-        vimsupport.PostVimMessage( 'starting server... ' + ' '.join( command ) )
-
-        # Why doesn't this work properly?
-        # When starting manually in seperate console, everything works
-        # Maybe due to bothering stdin/stdout redirecting?
-        subprocess.Popen( command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        solutionfile = solutionfiles[0]
       else:
+        # This still has to be caught by giving the user a choice
         vimsupport.PostVimMessage( 'Error starting OmniSharp server: multiple solutionfiles found' )
+        return
+
+      omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ),
+              'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
+      solutionfile = os.path.join ( folder, solutionfile )
+      # command has to be provided as one string
+      command = [ omnisharp + ' -p ' + str( self.OmniSharpPort ) + ' -s ' + solutionfile ]
+
+      vimsupport.PostVimMessage( 'starting server...\n' + ' '.join( command ) )
+
+      with open(os.devnull, "w") as fnull:
+        result = subprocess.Popen(command, stdout = fnull, stderr = fnull, shell=True)
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
