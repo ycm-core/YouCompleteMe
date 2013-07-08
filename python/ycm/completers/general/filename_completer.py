@@ -82,13 +82,13 @@ class FilenameCompleter( ThreadedCompleter ):
         # We do what GCC does for <> versus "":
         # http://gcc.gnu.org/onlinedocs/cpp/Include-Syntax.html
         include_current_file_dir = '<' not in include_match.group()
-        return GenerateCandidatesForPaths(
+        return _GenerateCandidatesForPaths(
           self.GetPathsIncludeCase( path_dir, include_current_file_dir ) )
 
     path_match = self._path_regex.search( line )
     path_dir = os.path.expanduser( path_match.group() ) if path_match else ''
 
-    return GenerateCandidatesForPaths( GetPathsStandardCase( path_dir ) )
+    return _GenerateCandidatesForPaths( _GetPathsStandardCase( path_dir ) )
 
 
   def GetPathsIncludeCase( self, path_dir, include_current_file_dir ):
@@ -110,7 +110,7 @@ class FilenameCompleter( ThreadedCompleter ):
     return sorted( set( paths ) )
 
 
-def GetPathsStandardCase( path_dir ):
+def _GetPathsStandardCase( path_dir ):
   if not USE_WORKING_DIR and not path_dir.startswith( '/' ):
     path_dir = os.path.join( os.path.dirname( vim.current.buffer.name ),
                              path_dir )
@@ -124,7 +124,7 @@ def GetPathsStandardCase( path_dir ):
            for relative_path in relative_paths )
 
 
-def GenerateCandidatesForPaths( absolute_paths ):
+def _GenerateCandidatesForPaths( absolute_paths ):
   seen_basenames = set()
   completion_dicts = []
 
