@@ -102,25 +102,31 @@ function linux_cmake_install {
 }
 
 function usage {
-  echo "Usage: $0 [--clang-completer]"
+  echo "Usage: $0 [--clang-completer [--system-libclang]]"
   exit 0
 }
 
-if [[ $# -gt 1 ]]; then
+cmake_args=''
+while [ -n "$1" ]; do
+  case "$1" in
+    --clang-completer)
+      cmake_args="$cmake_args -DUSE_CLANG_COMPLETER=ON"
+      shift
+      ;;
+    --system-libclang)
+      cmake_args="$cmake_args -DUSE_SYSTEM_LIBCLANG=ON"
+      shift
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+if [[ $cmake_args == *-DUSE_SYSTEM_LIBCLANG=ON* ]] && \
+   [[ $cmake_args != *-DUSE_CLANG_COMPLETER=ON* ]]; then
   usage
 fi
-
-case "$1" in
-  --clang-completer)
-    cmake_args='-DUSE_CLANG_COMPLETER=ON'
-    ;;
-  '')
-    cmake_args=''
-    ;;
-  *)
-    usage
-    ;;
-esac
 
 if ! command_exists cmake; then
   echo "CMake is required to build YouCompleteMe."
