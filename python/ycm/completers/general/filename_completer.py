@@ -125,10 +125,18 @@ def GetPathsStandardCase( path_dir ):
 
 
 def GenerateCandidatesForPaths( absolute_paths ):
-  def GenerateCandidateForPath( absolute_path ):
-    is_dir = os.path.isdir( absolute_path )
-    return { 'word': os.path.basename( absolute_path ),
-              'dup': 1,
-              'menu': '[Dir]' if is_dir else '[File]' }
+  seen_basenames = set()
+  completion_dicts = []
 
-  return [ GenerateCandidateForPath( path ) for path in absolute_paths ]
+  for absolute_path in absolute_paths:
+    basename = os.path.basename( absolute_path )
+    if basename in seen_basenames:
+      continue
+    seen_basenames.add( basename )
+
+    is_dir = os.path.isdir( absolute_path )
+    completion_dicts.append( { 'word': basename,
+                               'dup': 1,
+                               'menu': '[Dir]' if is_dir else '[File]' } )
+
+  return completion_dicts
