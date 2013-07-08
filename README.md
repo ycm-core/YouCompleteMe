@@ -1244,7 +1244,7 @@ current file and simple prefix-based fitering.
 
 ### Why does YCM demand such a recent version of Vim?
 
-During YCM's development several show-stopper bugs where encountered in Vim.
+During YCM's development several show-stopper bugs were encountered in Vim.
 Those needed to be fixed upstream (and were). A few months after those bugs were
 fixed, Vim trunk landed the `pyeval()` function which improved YCM performance
 even more since less time was spent serializing and deserializing data between
