@@ -43,7 +43,8 @@ class CsharpCompleter( ThreadedCompleter ):
       self._StartServer()
 
   def OnVimLeave( self ):
-    self._StopServer()
+    if self._ServerIsRunning():
+      self._StopServer()
 
   def SupportedFiletypes( self ):
     """ Just csharp """
@@ -116,7 +117,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
-    return self._GetResponse( '/poke', silent=True ) != None
+    return self._GetResponse( '/checkalivestatus', silent=True ) != None
 
   def _GetCompletions( self ):
     """ Ask server for completions """
