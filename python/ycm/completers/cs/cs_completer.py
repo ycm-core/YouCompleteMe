@@ -71,12 +71,13 @@ class CsharpCompleter( ThreadedCompleter ):
     elif command == 'StopServer':
       self._StopServer()
     elif command == 'RestartServer':
-      self._StopServer()
+      if self._ServerIsRunning():
+        self._StopServer()
       self._StartServer()
 
   def _StartServer( self ):
     """ Start the OmniSharp server """
-    if ( not self._ServerIsRunning() ):
+    if not self._ServerIsRunning():
       folder = os.path.dirname( vim.current.buffer.name )
       solutionfiles = glob.glob1( folder, '*.sln' )
       while not solutionfiles:
