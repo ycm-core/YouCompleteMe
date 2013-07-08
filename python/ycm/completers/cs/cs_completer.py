@@ -37,13 +37,13 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self.OmniSharpPort = 2000
+    self.OmniSharpPort = int( vimsupport.GetVariableValue( "g:ycm_csharp_server_port" ) ) 
     self.OmniSharpHost = 'http://localhost:' + str( self.OmniSharpPort )
     if vimsupport.GetBoolValue( "g:ycm_auto_start_csharp_server" ):
       self._StartServer()
 
-  #def OnVimLeave( self ):
-    #self._StopServer()
+  def OnVimLeave( self ):
+    self._StopServer()
 
   def SupportedFiletypes( self ):
     """ Just csharp """
@@ -111,7 +111,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
-    self._GetResponse( '/stopserver' ) # Should only stop when server running
+    self._GetResponse( '/stopserver' )
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
