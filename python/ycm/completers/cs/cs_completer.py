@@ -42,8 +42,8 @@ class CsharpCompleter( ThreadedCompleter ):
     if vimsupport.GetBoolValue( "g:ycm_auto_start_csharp_server" ):
       self._StartServer()
 
-  def OnVimLeave( self ):
-    self._StopServer()
+  #def OnVimLeave( self ):
+    #self._StopServer()
 
   def SupportedFiletypes( self ):
     """ Just csharp """
@@ -115,8 +115,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
-    self._StopServer() # temporal fix
-    return False
+    return self._GetResponse( '/poke', silent=True ) != None
 
   def _GetCompletions( self ):
     """ Ask server for completions """
@@ -130,7 +129,7 @@ class CsharpCompleter( ThreadedCompleter ):
     completions = self._GetResponse( '/autocomplete', parameters ) 
     return completions if completions != None else []
 
-  def _GetResponse( self, endPoint, parameters={} ):
+  def _GetResponse( self, endPoint, parameters={}, silent = False ):
     """ Handle communication with server """
     target = urlparse.urljoin( self.OmniSharpHost, endPoint )
     parameters = urllib.urlencode( parameters )
@@ -138,5 +137,6 @@ class CsharpCompleter( ThreadedCompleter ):
       response = urllib2.urlopen( target, parameters )
       return json.loads( response.read() )
     except Exception as e:
-      vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target + ': ' + str(e))
+      if not silent:
+        vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target + ': ' + str(e))
       return None

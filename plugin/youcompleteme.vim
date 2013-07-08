@@ -151,6 +151,9 @@ let g:ycm_semantic_triggers =
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
 
+let g:ycm_auto_start_csharp_server =
+      \ get( g:, 'ycm_auto_start_csharp_server', 0 )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart
