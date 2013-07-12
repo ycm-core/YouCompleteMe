@@ -108,8 +108,21 @@ class CsharpCompleter( ThreadedCompleter ):
       # command has to be provided as one string for some reason
       command = [ omnisharp + ' -p ' + str( self.OmniSharpPort ) + ' -s ' + solutionfile ]
 
-      with open( os.devnull, "w" ) as fnull:
-        subprocess.Popen( command, stdout = fnull, stderr = fnull, shell=True )
+      stderrLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stderr_logfile_format" )
+      if stderrLogFormat:
+        fstderr = open( os.path.expanduser( stderrLogFormat.format( port=self.OmniSharpPort ) ), "w" )
+      else:
+        fstderr = open( os.devnull, "w" )
+
+      stdoutLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stdout_logfile_format" )
+      if stdoutLogFormat:
+        fstdout = open( os.path.expanduser( stdoutLogFormat.format( port=self.OmniSharpPort ) ), "w" )
+      else:
+        fstdout = open( os.devnull, "w" )
+
+      with fstderr as fstderr:
+        with fstdout as fstdout:
+          subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
