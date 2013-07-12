@@ -240,16 +240,22 @@ notify you to recompile it. You should then rerun the install process.
 
     Now we need to generate the makefiles. If you DON'T care about semantic
     support for C-family languages, run the following command in the `ycm_build`
-    directory: `cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp`
+    directory: 
+    
+        cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
 
     If you DO care about semantic support for C-family languages, then your
     `cmake` call will be a bit more complicated.  We'll assume you downloaded a
     binary distribution of LLVM+Clang from llvm.org in step 3 and that you
     extracted the archive file to folder `~/ycm_temp/llvm_root_dir` (with `bin`,
     `lib`, `include` etc. folders right inside that folder). With that in mind,
-    run the following command in the `ycm_build` directory: `cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp`
+    run the following command in the `ycm_build` directory:
+    
+        cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp
 
-    Now that makefiles have been generated, simply run `make ycm_core`.
+    Now that makefiles have been generated, simply run:
+    
+        make ycm_core
 
     For those who want to use the system version of libclang, you would pass
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
