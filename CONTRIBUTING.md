@@ -12,7 +12,7 @@ thumb: if you're not sure whether your problem is a real bug, ask on the group.
 
 **YCM compiles just fine**; [the build bots say so][build-bots]. If the bots are
 green and YCM doesn't compile on your machine, then _your machine is the root
-cause_. Now read the previous paragraph again.
+cause_. Now read the first paragraph again.
 
 Realize that quite literally _thousands_ of people have gotten YCM to work
 successfully so if you can't, it's probably because you have a peculiar
