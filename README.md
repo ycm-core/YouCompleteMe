@@ -1270,12 +1270,22 @@ You'll have to learn to ignore them. It's a shitty "solution", I know.
 Use the [delimitMate][] plugin instead. It does the same thing without
 conflicting with YCM.
 
+### Is there some sort of YCM mailing list? I have questions
+
+If you have questions about the plugin or need help, please use the
+[ycm-users][] mailing list, _don't_ create issues on the tracker. The tracker is
+for bug reports and feature requests.
 
 Contact
 -------
 
-If you have questions, bug reports, suggestions, etc. please use the [issue
-tracker][tracker]. The latest version is available at
+If you have questions about the plugin or need help, please use the
+[ycm-users][] mailing list.
+
+If you have bug reports or feature suggestions, please use the [issue
+tracker][tracker].
+
+The latest version of the plugin is available at
 <http://valloric.github.io/YouCompleteMe/>.
 
 The author's homepage is <http://val.markovic.io>.
@@ -1314,3 +1324,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [exuberant-ctags]: http://ctags.sourceforge.net/
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
 [vundle-bug]: https://github.com/gmarik/vundle/issues/48
+[ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
