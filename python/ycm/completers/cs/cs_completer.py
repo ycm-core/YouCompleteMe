@@ -110,18 +110,18 @@ class CsharpCompleter( ThreadedCompleter ):
 
       stderrLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stderr_logfile_format" )
       if stderrLogFormat:
-        fstderr = open( os.path.expanduser( stderrLogFormat.format( port=self.OmniSharpPort ) ), "w" )
+        filename_stderr = os.path.expanduser( stderrLogFormat.format( port=self.OmniSharpPort ) )
       else:
-        fstderr = open( os.devnull, "w" )
+        filename_stderr = os.devnull
 
       stdoutLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stdout_logfile_format" )
       if stdoutLogFormat:
-        fstdout = open( os.path.expanduser( stdoutLogFormat.format( port=self.OmniSharpPort ) ), "w" )
+        filename_stdout = os.path.expanduser( stdoutLogFormat.format( port=self.OmniSharpPort ) )
       else:
-        fstdout = open( os.devnull, "w" )
+        filename_stdout = os.devnull
 
-      with fstderr as fstderr:
-        with fstdout as fstdout:
+      with open( filename_stderr, "w" ) as fstderr:
+        with open( filename_stdout, "w" ) as fstdout:
           subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
 
   def _StopServer( self ):
