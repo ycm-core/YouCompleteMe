@@ -38,7 +38,13 @@ class CsharpCompleter( ThreadedCompleter ):
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
     self.OmniSharpPort = int( vimsupport.GetVariableValue( "g:ycm_csharp_server_port" ) ) 
-    self.OmniSharpHost = 'http://localhost:' + str( self.OmniSharpPort )
+    self.OmniSharpHost = ''
+
+    if vimsupport.GetBoolValue( "g:ycm_find_free_port_for_csharp_server" ):
+      self._FindFreePort();
+
+    self._RefreshOmniSharpHost()
+
     if vimsupport.GetBoolValue( "g:ycm_auto_start_csharp_server" ):
       self._StartServer()
 
@@ -131,6 +137,14 @@ class CsharpCompleter( ThreadedCompleter ):
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
     return self._GetResponse( '/checkalivestatus', silent=True ) != None
+
+  def _FindFreePort( self ):
+    while self._ServerIsRunning():
+      self.OmniSharpPort = self.OmniSharpPort + 1
+      self._RefreshOmniSharpHost()
+
+  def _RefreshOmniSharpHost ( self ):
+    self.OmniSharpHost = 'http://localhost:' + str( self.OmniSharpPort )
 
   def _GetCompletions( self ):
     """ Ask server for completions """
