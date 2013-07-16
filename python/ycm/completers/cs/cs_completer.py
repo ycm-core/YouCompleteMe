@@ -80,7 +80,7 @@ class CsharpCompleter( ThreadedCompleter ):
   def _StartServer( self ):
     """ Start the OmniSharp server """
     if not self._ServerIsRunning():
-      solutionfiles = self._FindSolutionFiles()
+      solutionfiles, folder = self._FindSolutionFiles()
 
       if len( solutionfiles ) == 0:
         vimsupport.PostVimMessage(
@@ -125,7 +125,7 @@ class CsharpCompleter( ThreadedCompleter ):
       if folder == lastfolder:
         break
       solutionfiles = glob.glob1( folder, '*.sln' )
-    return solutionfiles
+    return solutionfiles, folder
 
   def _GetCompletions( self ):
     """ Ask server for completions """
