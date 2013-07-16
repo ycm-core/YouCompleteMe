@@ -102,20 +102,22 @@ function linux_cmake_install {
 }
 
 function usage {
-  echo "Usage: $0 [--clang-completer [--system-libclang]]"
+  echo "Usage: $0 [--clang-completer [--system-libclang]] [--omnisharp-completer]"
   exit 0
 }
 
-cmake_args=''
-while [ -n "$1" ]; do
-  case "$1" in
+cmake_args=""
+omnisharp_completer=false
+for flag in $@; do
+  case "$flag" in
     --clang-completer)
-      cmake_args="$cmake_args -DUSE_CLANG_COMPLETER=ON"
-      shift
+      cmake_args="-DUSE_CLANG_COMPLETER=ON"
       ;;
     --system-libclang)
       cmake_args="$cmake_args -DUSE_SYSTEM_LIBCLANG=ON"
-      shift
+      ;;
+    --omnisharp-completer)
+      omnisharp_completer=true
       ;;
     *)
       usage
@@ -139,3 +141,20 @@ else
   testrun $cmake_args $EXTRA_CMAKE_ARGS
 fi
 
+if $omnisharp_completer; then
+  buildcommand="msbuild"
+  if ! command_exists msbuild; then
+    buildcommand="xbuild"
+    if ! command_exists xbuild; then
+      echo "msbuild or xbuild is required to build Omnisharp"
+      exit 1
+    fi
+  fi
+
+  ycm_dir=`pwd`
+  build_dir=$ycm_dir"/python/ycm/completers/cs/OmniSharpServer"
+  
+  cd $build_dir
+  $buildcommand
+  cd $ycm_dir
+fi
