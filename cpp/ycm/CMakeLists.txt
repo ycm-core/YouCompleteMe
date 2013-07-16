@@ -313,4 +313,9 @@ endif()
 
 #############################################################################
 
+if( SYSTEM_IS_SUNOS )
+  # SunOS needs this setting for thread support
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads" )
+endif()
+
 add_subdirectory( tests )

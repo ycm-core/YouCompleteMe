@@ -240,16 +240,22 @@ notify you to recompile it. You should then rerun the install process.
 
     Now we need to generate the makefiles. If you DON'T care about semantic
     support for C-family languages, run the following command in the `ycm_build`
-    directory: `cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp`
+    directory: 
+    
+        cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
 
     If you DO care about semantic support for C-family languages, then your
     `cmake` call will be a bit more complicated.  We'll assume you downloaded a
     binary distribution of LLVM+Clang from llvm.org in step 3 and that you
     extracted the archive file to folder `~/ycm_temp/llvm_root_dir` (with `bin`,
     `lib`, `include` etc. folders right inside that folder). With that in mind,
-    run the following command in the `ycm_build` directory: `cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp`
+    run the following command in the `ycm_build` directory:
+    
+        cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp
 
-    Now that makefiles have been generated, simply run `make ycm_core`.
+    Now that makefiles have been generated, simply run:
+    
+        make ycm_core
 
     For those who want to use the system version of libclang, you would pass
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
@@ -1244,7 +1250,7 @@ current file and simple prefix-based fitering.
 
 ### Why does YCM demand such a recent version of Vim?
 
-During YCM's development several show-stopper bugs where encountered in Vim.
+During YCM's development several show-stopper bugs were encountered in Vim.
 Those needed to be fixed upstream (and were). A few months after those bugs were
 fixed, Vim trunk landed the `pyeval()` function which improved YCM performance
 even more since less time was spent serializing and deserializing data between
@@ -1264,12 +1270,22 @@ You'll have to learn to ignore them. It's a shitty "solution", I know.
 Use the [delimitMate][] plugin instead. It does the same thing without
 conflicting with YCM.
 
+### Is there some sort of YCM mailing list? I have questions
+
+If you have questions about the plugin or need help, please use the
+[ycm-users][] mailing list, _don't_ create issues on the tracker. The tracker is
+for bug reports and feature requests.
 
 Contact
 -------
 
-If you have questions, bug reports, suggestions, etc. please use the [issue
-tracker][tracker]. The latest version is available at
+If you have questions about the plugin or need help, please use the
+[ycm-users][] mailing list.
+
+If you have bug reports or feature suggestions, please use the [issue
+tracker][tracker].
+
+The latest version of the plugin is available at
 <http://valloric.github.io/YouCompleteMe/>.
 
 The author's homepage is <http://val.markovic.io>.
@@ -1308,3 +1324,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [exuberant-ctags]: http://ctags.sourceforge.net/
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
 [vundle-bug]: https://github.com/gmarik/vundle/issues/48
+[ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users

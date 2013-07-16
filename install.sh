@@ -102,20 +102,19 @@ function linux_cmake_install {
 }
 
 function usage {
-  echo "Usage: $0 [--clang-completer] [--cs-completer]"
+  echo "Usage: $0 [--clang-completer [--system-libclang]] [--omnisharp-completer]"
   exit 0
 }
 
-if [[ $# -gt 2 ]]; then
-  usage
-fi
-
-cmake_args=''
+cmake_args=""
 omnisharp_completer=false
 for flag in $@; do
   case "$flag" in
     --clang-completer)
-      cmake_args='-DUSE_CLANG_COMPLETER=ON'
+      cmake_args="-DUSE_CLANG_COMPLETER=ON"
+      ;;
+    --system-libclang)
+      cmake_args="$cmake_args -DUSE_SYSTEM_LIBCLANG=ON"
       ;;
     --omnisharp-completer)
       omnisharp_completer=true
@@ -125,6 +124,11 @@ for flag in $@; do
       ;;
   esac
 done
+
+if [[ $cmake_args == *-DUSE_SYSTEM_LIBCLANG=ON* ]] && \
+   [[ $cmake_args != *-DUSE_CLANG_COMPLETER=ON* ]]; then
+  usage
+fi
 
 if ! command_exists cmake; then
   echo "CMake is required to build YouCompleteMe."
