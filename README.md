@@ -383,6 +383,18 @@ But again, installing YCM with Vundle takes care of all of this for you.
 
 In the future expect to see features like go-to-definition for Python as well.
 
+### C# semantic completion
+
+YCM uses [omnisharp][] to provide semantic completion for C#. 
+YCM uses it as a git subrepo. If you're installing YCM with Vundle
+(which is the recommended way) then Vundle will make sure that the subrepo is
+checked out when you do `:BundleInstall`. If you're installing YCM by hand, then
+you need to run `git submodule update --init --recursive` when you're checking
+out the YCM repository.
+
+OmniSharp is written in C# and has to be compiled. The install script takes care of this 
+if you pass `--omnisharp-completer` as an argument.
+
 ### Semantic completion for other languages
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
@@ -1308,3 +1320,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [exuberant-ctags]: http://ctags.sourceforge.net/
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
 [vundle-bug]: https://github.com/gmarik/vundle/issues/48
+[omnisharp]: https://github.com/nosami/OmniSharpServer
