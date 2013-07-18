@@ -40,14 +40,14 @@
 <a href="http://www.vim.org/">Vim</a>. It has several completion engines: an identifier-based engine that
 works with every programming language, a semantic, <a href="http://clang.llvm.org/">Clang</a>-based engine that
 provides native semantic code completion for C/C++/Objective-C/Objective-C++
-(from now on referred to as "the C-family languages"), a <a href="https://github.com/davidhalter/jedi">Jedi</a>-based completion
-engine for Python and an omnifunc-based completer that uses data from Vim's
-omnicomplete system to provide semantic completions for many other languages
-(Ruby, PHP etc.).</p><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
+(from now on referred to as "the C-family languages"), a <a href="https://github.com/davidhalter/jedi">Jedi</a>-based
+completion engine for Python, an <a href="https://github.com/nosami/OmniSharpServer">OmniSharp</a>-based completion engine for C#
+and an omnifunc-based completer that uses data from Vim's omnicomplete system to
+provide semantic completions for many other languages (Ruby, PHP etc.).</p><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
 of completion candidates at any point in the demo. The user just types and the
 suggestions pop up by themselves. If the user doesn't find the completion
-suggestions relevant and/or just wants to type, he can do so; the completion
-engine will not interfere.</p><p>When the user sees a useful completion string being offered, he presses the TAB
+suggestions relevant and/or just wants to type, they can do so; the completion
+engine will not interfere.</p><p>When the user sees a useful completion string being offered, they press the TAB
 key to accept it. This inserts the completion string. Repeated presses of the
 TAB key cycle through the offered completions.</p><p>If the offered completions are not relevant enough, the user can continue typing
 to further filter out unwanted completions.</p><p>A critical thing to notice is that the completion <strong>filtering is NOT based on
@@ -91,7 +91,8 @@ for details.</p><p>Compiling YCM <strong>with</strong> semantic support for C-fa
 ./install.sh --clang-completer
 </code></pre><p>Compiling YCM <strong>without</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
 ./install.sh
-</code></pre><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
+</code></pre><p>If you want semantic C# support, you should add <code>--omnisharp-completer</code> to the
+install script as well.</p><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
 in the User Guide.</p><p>YCM comes with sane defaults for its options, but you still may want to take a
@@ -105,7 +106,8 @@ notify you to recompile it. You should then rerun the install process.</p><p>Ins
 ./install.sh --clang-completer
 </code></pre><p>Compiling YCM <strong>without</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
 ./install.sh
-</code></pre><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
+</code></pre><p>If you want semantic C# support, you should add <code>--omnisharp-completer</code> to the
+install script as well.</p><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
 in the User Guide.</p><p>YCM comes with sane defaults for its options, but you still may want to take a
@@ -142,9 +144,10 @@ version of Vim with Python support.</p>
 <p><strong>Download the latest version of <code>libclang</code></strong>. Clang is an open-source
 compiler that can compile C/C++/Objective-C/Objective-C++. The <code>libclang</code>
 library it provides is used to power the YCM semantic completion engine for
-those languages. YCM needs libclang version 3.2 or higher.</p>
-<p>You can use the system libclang <em>only if you are sure it is version 3.2 or
-higher</em>, otherwise don't. Even if it is, I recommend using the <a href="http://llvm.org/releases/download.html#3.2">official
+those languages. YCM is designed to work with libclang version 3.3 or
+higher, but can in theory work with 3.2 as well.</p>
+<p>You can use the system libclang <em>only if you are sure it is version 3.3 or
+higher</em>, otherwise don't. Even if it is, I recommend using the <a href="http://llvm.org/releases/download.html#3.3">official
 binaries from llvm.org</a> if at all possible. Make sure you
 download the correct archive file for your OS.</p>
 </li>
@@ -169,14 +172,20 @@ cd ycm_build
 </code></pre>
 <p>Now we need to generate the makefiles. If you DON'T care about semantic
 support for C-family languages, run the following command in the <code>ycm_build</code>
-directory: <code>cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp</code></p>
+directory:</p>
+<pre><code>cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
+</code></pre>
 <p>If you DO care about semantic support for C-family languages, then your
 <code>cmake</code> call will be a bit more complicated.  We'll assume you downloaded a
 binary distribution of LLVM+Clang from llvm.org in step 3 and that you
 extracted the archive file to folder <code>~/ycm_temp/llvm_root_dir</code> (with <code>bin</code>,
 <code>lib</code>, <code>include</code> etc. folders right inside that folder). With that in mind,
-run the following command in the <code>ycm_build</code> directory: <code>cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp</code></p>
-<p>Now that makefiles have been generated, simply run <code>make ycm_core</code>.</p>
+run the following command in the <code>ycm_build</code> directory:</p>
+<pre><code>cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp
+</code></pre>
+<p>Now that makefiles have been generated, simply run:</p>
+<pre><code>make ycm_core
+</code></pre>
 <p>For those who want to use the system version of libclang, you would pass
 <code>-DUSE_SYSTEM_LIBCLANG=ON</code> to cmake <em>instead of</em> the
 <code>-DPATH_TO_LLVM_ROOT=...</code> flag.</p>
@@ -262,7 +271,13 @@ yourself; YCM uses it as a git subrepo. If you're installing YCM with Vundle
 (which is the recommended way) then Vundle will make sure that the subrepo is
 checked out when you do <code>:BundleInstall</code>. If you're installing YCM by hand, then
 you need to run <code>git submodule update --init --recursive</code> when you're checking
-out the YCM repository. That's it.</p><p>But again, installing YCM with Vundle takes care of all of this for you.</p><p>In the future expect to see features like go-to-definition for Python as well.</p><h3>Semantic completion for other languages</h3><p>YCM will use your <code>omnifunc</code> (see <code>:h omnifunc</code> in Vim) as a source for semantic
+out the YCM repository. That's it.</p><p>But again, installing YCM with Vundle takes care of all of this for you.</p><p>In the future expect to see features like go-to-definition for Python as well.</p><h3>C# semantic completion</h3><p>YCM uses <a href="https://github.com/nosami/OmniSharpServer">OmniSharp</a> to provide semantic completion for C#. It's used as a git
+subrepo. If you're installing YCM with Vundle (which is the recommended way)
+then Vundle will make sure that the subrepo is checked out when you do
+<code>:BundleInstall</code>. If you're installing YCM by hand, then you need to run <code>git
+submodule update --init --recursive</code> when you're checking out the YCM
+repository.</p><p>OmniSharp is written in C# and has to be compiled. The <code>install.sh</code> script takes
+care of this if you pass <code>--omnisharp-completer</code> as an argument.</p><h3>Semantic completion for other languages</h3><p>YCM will use your <code>omnifunc</code> (see <code>:h omnifunc</code> in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
 file's filetype. Vim comes with okayish omnifuncs for various languages like
 Ruby, PHP etc. It depends on the language.</p><p>You can get stellar omnifuncs for Java and Ruby with <a href="http://eclim.org/">Eclim</a>. Just make sure
@@ -358,6 +373,10 @@ option is set to <code>2</code>, then when the user types a second alphanumeric 
 after a whitespace character, completion suggestions will be triggered. This
 option is NOT used for semantic completion.</p><p>Setting this option to a high number like <code>99</code> effectively turns off the
 identifier completion engine and just leaves the semantic engine.</p><p>Default: <code>2</code></p><pre><code>let g:ycm_min_num_of_chars_for_completion = 2
+</code></pre><h3>The <code>g:ycm_min_num_identifier_candidate_chars</code> option</h3><p>This option controls the minimum number of characters that a completion
+candidate coming from the identifier completer must have to be shown in the
+popup menu.</p><p>A special value of <code>0</code> means there is no limit.</p><p>NOTE: This option only applies to the identifier completer; it has no effect on
+the various semantic completers.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_min_num_identifier_candidate_chars = 0
 </code></pre><h3>The <code>g:ycm_filetype_whitelist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
 turned on. The option value should be a Vim dictionary with keys being filetype
 strings (like <code>python</code>, <code>cpp</code> etc) and values being unimportant (the dictionary
@@ -417,8 +436,15 @@ strings will be ignored.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_c
 identifiers from tags files. The list of tags files to examine is retrieved from
 the <code>tagfiles()</code> Vim function which examines the <code>tags</code> Vim option. See <code>:h
 'tags'</code> for details.</p><p>YCM will re-index your tags files if it detects that they have been modified.</p><p>The only supported tag format is the <a href="http://ctags.sourceforge.net/FORMAT">Exuberant Ctags format</a>. The
-format from "plain" ctags is NOT supported. See the <em>FAQ</em> for pointers if YCM
-does not appear to read your tag files.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_collect_identifiers_from_tags_files = 1
+format from "plain" ctags is NOT supported. Ctags needs to be called with the
+<code>--fields=+l</code> option (that's a lowercase <code>L</code>, not a one) because YCM needs the
+<code>language:&lt;lang&gt;</code> field in the tags output.</p><p>See the <em>FAQ</em> for pointers if YCM does not appear to read your tag files.</p><p>This option is off by default because it makes Vim slower if your tags are on a
+network directory.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_collect_identifiers_from_tags_files = 0
+</code></pre><h3>The <code>g:ycm_seed_identifiers_with_syntax</code> option</h3><p>When this option is set to <code>1</code>, YCM's identifier completer will seed its
+identifier database with the keywords of the programming language you're
+writing.</p><p>Since the keywords are extracted from the Vim syntax file for the filetype, all
+keywords may not be collected, depending on how the syntax file was written.
+Usually at least 95% of the keywords are successfully extracted.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_seed_identifiers_with_syntax = 0
 </code></pre><h3>The <code>g:ycm_add_preview_to_completeopt</code> option</h3><p>When this option is set to <code>1</code>, YCM will add the <code>preview</code> string to Vim's
 <code>completeopt</code> option (see <code>:h completeopt</code>). If your <code>completeopt</code> option
 already has <code>preview</code> set, there will be no effect. You can see the current
@@ -495,7 +521,9 @@ relative to Vim's current working directory.</p><p>Default: <code>0</code></p><p
 </code></pre><h3>The <code>g:ycm_semantic_triggers</code> option</h3><p>This option controls the character-based triggers for the various semantic
 completion engines. The option holds a dictionary of key-values, where the keys
 are Vim's filetype strings delimited by commas and values are lists of strings,
-where the strings are the triggers.</p><p>A "trigger" is a sequence of one or more characters that trigger semantic
+where the strings are the triggers.</p><p>Setting key-value pairs on the dictionary <em>adds</em> semantic triggers to the
+internal default set (listed below). You cannot remove the default triggers,
+only add new ones.</p><p>A "trigger" is a sequence of one or more characters that trigger semantic
 completion when typed. For instance, C++ (<code>cpp</code> filetype) has <code>.</code> listed as a
 trigger. So when the user types <code>foo.</code>, the semantic engine will trigger and
 serve <code>foo</code>'s list of member functions and variables. Since C++ also has <code>-&gt;</code>
@@ -506,7 +534,8 @@ listed as a trigger, the same thing would happen when the user typed <code>foo-&
   \   'cpp,objcpp' : ['-&gt;', '.', '::'],
   \   'perl' : ['-&gt;'],
   \   'php' : ['-&gt;', '::'],
-  \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'cs,java,javascript,d,vim,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'ruby' : ['.', '::'],
   \   'lua' : ['.', ':'],
   \   'erlang' : [':'],
   \ }
@@ -543,7 +572,9 @@ were errors in it, you're going to get slow completions because there's no AST
 cache.</p><h3>Vim flickers every time I move the cursor or moving the cursor is slow</h3><p>You probably have an old version of Syntastic installed. If you are using
 Vundle, make sure that your bundle command is <code>Bundle 'scrooloose/syntastic'</code>
 and <strong>not</strong> <code>Bundle 'Syntastic'</code>. The first command pulls in the latest version of
-Syntastic from GitHub while the second one pulls in an old version from vim.org.</p><h3>YCM auto-inserts completion strings I don't want!</h3><p>This means you probably have some mappings that interfere with YCM's internal
+Syntastic from GitHub while the second one pulls in an old version from vim.org.</p><p>Because of <a href="https://github.com/gmarik/vundle/issues/48">a Vundle bug</a>, make sure you have completely removed
+everything in your Vundle bundle directory (<code>~/.vim/bundle</code> by default) before
+switching from one Syntastic bundle command to the other.</p><h3>YCM auto-inserts completion strings I don't want!</h3><p>This means you probably have some mappings that interfere with YCM's internal
 ones. Make sure you don't have something mapped to <code>&lt;C-p&gt;</code>, <code>&lt;C-x&gt;</code> or <code>&lt;C-u&gt;</code>
 (in insert mode).</p><p>YCM <em>never</em> selects something for you; it just shows you a menu and the user has
 to explicitly select something. If something is being selected automatically,
@@ -574,7 +605,14 @@ instead of <code>so</code> on a Mac):</p><pre><code>-DPYTHON_INCLUDE_DIR=/usr/in
 </code></pre><p>This will force the paths to the Python include directory and the Python library
 to use. You may need to set these flags to something else, but you need to make
 sure you use the same version of Python that your Vim binary is built against,
-which is highly likely to be the system's default Python.</p><h3>I get <code>Vim: Caught deadly signal SEGV</code> on Vim startup</h3><p>This can happen on some Linux distros. If you encounter this situation, run Vim
+which is highly likely to be the system's default Python.</p><h3>I get <code>libpython2.7.a [...] relocation R_X86_64_32</code> when compiling</h3><p>The error is usually encountered when compiling YCM on Centos or RHEL. The full
+error looks something like the following:</p><pre><code>/usr/bin/ld: /usr/local/lib/libpython2.7.a(abstract.o): relocation R_X86_64_32 against `a local symbol' can not be used when making a shared object; recompile with -fPIC
+</code></pre><p>It's possible to get a slightly different error that's similar to the one above.
+Here's the problem and how you solve it:</p><p>Your <code>libpython2.7.a</code> was not compiled with <code>-fPIC</code> so it can't be linked into
+<code>ycm_core.so</code>.  Use the <code>-DPYTHON_LIBRARY=</code> CMake flag to point it to a <code>.so</code>
+version of libpython on your machine (for instance,
+<code>-DPYTHON_LIBRARY=/usr/lib/libpython2.7.so</code>). Naturally, this means you'll have
+to go through the full installation guide by hand.</p><h3>I get <code>Vim: Caught deadly signal SEGV</code> on Vim startup</h3><p>This can happen on some Linux distros. If you encounter this situation, run Vim
 under <code>gdb</code>. You'll probably see something like this in the output when Vim
 crashes:</p><pre><code>undefined symbol: clang_CompileCommands_dispose
 </code></pre><p>This means that Vim is trying to load a <code>libclang.so</code> that is too old. You need
@@ -582,16 +620,23 @@ at least a 3.2 libclang. Some distros ship with a system <code>libclang.so</code
 identifies itself as 3.2 but is not; it was cut from the upstream sources before
 the official 3.2 release and some API changes (like the addition of the
 CompileCommands API) were added after their cut.</p><p>So just go through the installation guide and make sure you are using a correct
-<code>libclang.so</code>. I recommend downloading prebuilt binaries from llvm.org.</p><h3>YCM does not read identifiers from my tags files</h3><p>Make sure you are using <a href="http://ctags.sourceforge.net/">Exuberant Ctags</a> to produce your tags
+<code>libclang.so</code>. I recommend downloading prebuilt binaries from llvm.org.</p><h3>YCM does not read identifiers from my tags files</h3><p>First, put <code>let g:ycm_collect_identifiers_from_tags_files = 1</code> in your vimrc.</p><p>Make sure you are using <a href="http://ctags.sourceforge.net/">Exuberant Ctags</a> to produce your tags
 files since the only supported tag format is the <a href="http://ctags.sourceforge.net/FORMAT">Exuberant Ctags
 format</a>. The format from "plain" ctags is NOT supported. The
-output of <code>ctags --version</code> should list "Exuberant Ctags".</p><p>NOTE: Mac OS X comes with "plain" ctags installed by default. <code>brew install
+output of <code>ctags --version</code> should list "Exuberant Ctags".</p><p>Ctags needs to be called with the <code>--fields=+l</code> (that's a lowercase <code>L</code>, not a
+one) option because YCM needs the <code>language:&lt;lang&gt;</code> field in the tags output.</p><p>NOTE: Mac OS X comes with "plain" ctags installed by default. <code>brew install
 ctags</code> will get you the Exuberant Ctags version.</p><p>Also make sure that your Vim <code>tags</code> option is set correctly. See <code>:h 'tags'</code> for
 details. If you want to see which tag files YCM will read for a given buffer,
 run <code>:echo tagfiles()</code> with the relevant buffer active. Note that that function
 will only list tag files that already exist.</p><h3><code>CTRL-U</code> in insert mode does not work</h3><p>YCM keeps you in a <code>completefunc</code> completion mode when you're typing in insert
 mode and Vim disables <code>&lt;C-U&gt;</code> in completion mode as a "feature." Sadly there's
-nothing I can do about this.</p><h3>Why isn't YCM just written in plain VimScript, FFS?</h3><p>Because of the identifier completion engine and subsequence-based filtering.
+nothing I can do about this.</p><h3>YCM conflicts with UltiSnips TAB key usage</h3><p>YCM comes with support for UltiSnips (snippet suggestions in the popup menu),
+but you'll have to change the UltiSnips mappings. See <code>:h UltiSnips-triggers</code> in
+Vim for details. You'll probably want to change some/all of the following
+options:</p><pre><code>g:UltiSnipsExpandTrigger
+g:UltiSnipsJumpForwardTrigger
+g:UltiSnipsJumpBackwardTrigger
+</code></pre><h3>Why isn't YCM just written in plain VimScript, FFS?</h3><p>Because of the identifier completion engine and subsequence-based filtering.
 Let's say you have <em>many</em> dozens of files open in a single Vim instance (I often
 do); the identifier-based engine then needs to store thousands (if not tens of
 thousands) of identifiers in its internal data-structures. When the user types,
@@ -599,7 +644,7 @@ YCM needs to perform subsequence-based filtering on <em>all</em> of those identi
 (every single one!) in less than 10 milliseconds.</p><p>I'm sorry, but that level of performance is just plain impossible to achieve
 with VimScript. I've tried, and the language is just too slow. No, you can't get
 acceptable performance even if you limit yourself to just the identifiers in the
-current file and simple prefix-based fitering.</p><h3>Why does YCM demand such a recent version of Vim?</h3><p>During YCM's development several show-stopper bugs where encountered in Vim.
+current file and simple prefix-based fitering.</p><h3>Why does YCM demand such a recent version of Vim?</h3><p>During YCM's development several show-stopper bugs were encountered in Vim.
 Those needed to be fixed upstream (and were). A few months after those bugs were
 fixed, Vim trunk landed the <code>pyeval()</code> function which improved YCM performance
 even more since less time was spent serializing and deserializing data between
@@ -607,8 +652,11 @@ Vim and the embedded Python interpreter. A few critical bugfixes for <code>pyeva
 landed in Vim 7.3.584 (and a few commits before that).</p><h3>I get annoying messages in Vim's status area when I type</h3><p>If you're referring to the <code>User defined completion &lt;bla bla&gt; back at original</code>
 and similar, then sadly there's no fix for those. Vim will emit them no matter
 how hard I try to silence them.</p><p>You'll have to learn to ignore them. It's a shitty "solution", I know.</p><h3>Nasty bugs happen if I have the <code>vim-autoclose</code> plugin installed</h3><p>Use the <a href="https://github.com/Raimondi/delimitMate">delimitMate</a> plugin instead. It does the same thing without
-conflicting with YCM.</p><h2>Contact</h2><p>If you have questions, bug reports, suggestions, etc. please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
-tracker</a>. The latest version is available at
+conflicting with YCM.</p><h3>Is there some sort of YCM mailing list? I have questions</h3><p>If you have questions about the plugin or need help, please use the
+<a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list, <em>don't</em> create issues on the tracker. The tracker is
+for bug reports and feature requests.</p><h2>Contact</h2><p>If you have questions about the plugin or need help, please use the
+<a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list.</p><p>If you have bug reports or feature suggestions, please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
+tracker</a>.</p><p>The latest version of the plugin is available at
 <a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2>License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
 © 2012 Strahinja Val Markovic &lt;<a href="mailto:val@markovic.io">val@markovic.io</a>&gt;.</p></div>
       </section>
