@@ -20,6 +20,7 @@
 
 import vim
 import os
+from sys import platform
 import glob
 from ycm.completers.threaded_completer import ThreadedCompleter
 from ycm import vimsupport
@@ -120,6 +121,9 @@ class CsharpCompleter( ThreadedCompleter ):
     if not os.path.isfile( omnisharp ):
       vimsupport.PostVimMessage( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
       return
+
+    if not platform.startswith('win'):
+      omnisharp = "mono " + omnisharp
 
     solutionfile = os.path.join( folder, solutionfile )
     # command has to be provided as one string for some reason
