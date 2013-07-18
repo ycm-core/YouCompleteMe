@@ -7,10 +7,10 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 [Vim][]. It has several completion engines: an identifier-based engine that
 works with every programming language, a semantic, [Clang][]-based engine that
 provides native semantic code completion for C/C++/Objective-C/Objective-C++
-(from now on referred to as "the C-family languages"), a [Jedi][]-based completion
-engine for Python and an omnifunc-based completer that uses data from Vim's
-omnicomplete system to provide semantic completions for many other languages
-(Ruby, PHP etc.).
+(from now on referred to as "the C-family languages"), a [Jedi][]-based
+completion engine for Python, an [OmniSharp][]-based completion engine for C#
+and an omnifunc-based completer that uses data from Vim's omnicomplete system to
+provide semantic completions for many other languages (Ruby, PHP etc.).
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
@@ -111,6 +111,9 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.sh
 
+If you want semantic C# support, you should add `--omnisharp-completer` to the
+install script as well.
+
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
@@ -149,6 +152,9 @@ Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.sh
+
+If you want semantic C# support, you should add `--omnisharp-completer` to the
+install script as well.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -240,8 +246,8 @@ notify you to recompile it. You should then rerun the install process.
 
     Now we need to generate the makefiles. If you DON'T care about semantic
     support for C-family languages, run the following command in the `ycm_build`
-    directory: 
-    
+    directory:
+
         cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
 
     If you DO care about semantic support for C-family languages, then your
@@ -250,11 +256,11 @@ notify you to recompile it. You should then rerun the install process.
     extracted the archive file to folder `~/ycm_temp/llvm_root_dir` (with `bin`,
     `lib`, `include` etc. folders right inside that folder). With that in mind,
     run the following command in the `ycm_build` directory:
-    
+
         cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp
 
     Now that makefiles have been generated, simply run:
-    
+
         make ycm_core
 
     For those who want to use the system version of libclang, you would pass
@@ -391,15 +397,15 @@ In the future expect to see features like go-to-definition for Python as well.
 
 ### C# semantic completion
 
-YCM uses [omnisharp][] to provide semantic completion for C#. 
-YCM uses it as a git subrepo. If you're installing YCM with Vundle
-(which is the recommended way) then Vundle will make sure that the subrepo is
-checked out when you do `:BundleInstall`. If you're installing YCM by hand, then
-you need to run `git submodule update --init --recursive` when you're checking
-out the YCM repository.
+YCM uses [OmniSharp][] to provide semantic completion for C#. It's used as a git
+subrepo. If you're installing YCM with Vundle (which is the recommended way)
+then Vundle will make sure that the subrepo is checked out when you do
+`:BundleInstall`. If you're installing YCM by hand, then you need to run `git
+submodule update --init --recursive` when you're checking out the YCM
+repository.
 
-OmniSharp is written in C# and has to be compiled. The install script takes care of this 
-if you pass `--omnisharp-completer` as an argument.
+OmniSharp is written in C# and has to be compiled. The `install.sh` script takes
+care of this if you pass `--omnisharp-completer` as an argument.
 
 ### Semantic completion for other languages
 
