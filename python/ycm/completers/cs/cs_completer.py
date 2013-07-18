@@ -30,6 +30,10 @@ import json
 import subprocess
 
 
+SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
+'Did you compile it? You can do so by running ' +
+'"./install.sh --omnisharp_completer".' )
+
 class CsharpCompleter( ThreadedCompleter ):
   """
   A Completer that uses the Omnisharp server as completion engine.
@@ -38,9 +42,9 @@ class CsharpCompleter( ThreadedCompleter ):
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
     self._omnisharp_port = int( vimsupport.GetVariableValue(
-        "g:ycm_csharp_server_port" ) )
+        'g:ycm_csharp_server_port' ) )
     self._omnisharp_host = 'http://localhost:' + str( self._omnisharp_port )
-    if vimsupport.GetBoolValue( "g:ycm_auto_start_csharp_server" ):
+    if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
       self._StartServer()
 
 
@@ -85,41 +89,53 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _StartServer( self ):
     """ Start the OmniSharp server """
-    if not self._ServerIsRunning():
-      solutionfiles, folder = _FindSolutionFiles()
+    if self._ServerIsRunning():
+      vimsupport.PostVimMessage(
+              'Server already running, not starting it again.' )
+      return
 
-      if len( solutionfiles ) == 0:
-        vimsupport.PostVimMessage(
-                'Error starting OmniSharp server: no solutionfile found' )
+    solutionfiles, folder = _FindSolutionFiles()
+
+    if len( solutionfiles ) == 0:
+      vimsupport.PostVimMessage(
+              'Error starting OmniSharp server: no solutionfile found' )
+      return
+    elif len( solutionfiles ) == 1:
+      solutionfile = solutionfiles[ 0 ]
+    else:
+      choice = vimsupport.PresentDialog(
+              "Which solutionfile should be loaded?",
+              [ str( i ) + " " + solution for i, solution in
+                enumerate( solutionfiles ) ] )
+      if choice == -1:
+        vimsupport.PostVimMessage( 'OmniSharp not started' )
         return
-      elif len( solutionfiles ) == 1:
-        solutionfile = solutionfiles[ 0 ]
       else:
-        choice = vimsupport.PresentDialog(
-                "Which solutionfile should be loaded?",
-                [ str( i ) + " " + solution for i, solution in
-                  enumerate( solutionfiles ) ] )
-        if choice == -1:
-          vimsupport.PostVimMessage( 'OmniSharp not started' )
-          return
-        else:
-          solutionfile = solutionfiles[ choice ]
+        solutionfile = solutionfiles[ choice ]
 
-      omnisharp = os.path.join(
-        os.path.abspath( os.path.dirname( __file__ ) ),
-        'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
-      solutionfile = os.path.join ( folder, solutionfile )
-      # command has to be provided as one string for some reason
-      command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
-                  solutionfile ]
+    omnisharp = os.path.join(
+      os.path.abspath( os.path.dirname( __file__ ) ),
+      'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
 
-      with open( os.devnull, "w" ) as fnull:
-        subprocess.Popen( command, stdout = fnull, stderr = fnull, shell=True )
+    if not os.path.isfile( omnisharp ):
+      vimsupport.PostVimMessage( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
+      return
+
+    solutionfile = os.path.join( folder, solutionfile )
+    # command has to be provided as one string for some reason
+    command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
+                solutionfile ]
+
+    with open( os.devnull, 'w' ) as fnull:
+      subprocess.Popen( command, stdout = fnull, stderr = fnull, shell=True )
+
+    vimsupport.PostVimMessage( 'Starting OmniSharp server')
 
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
+    vimsupport.PostVimMessage( 'Stopping OmniSharp server')
 
 
   def _ServerIsRunning( self ):
@@ -149,8 +165,8 @@ class CsharpCompleter( ThreadedCompleter ):
       return json.loads( response.read() )
     except Exception as e:
       if not silent:
-        vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target +
-                                  ': ' + str(e))
+        vimsupport.PostVimMessage(
+          'OmniSharp : Could not connect to ' + target + ': ' + str( e ) )
       return None
 
 
