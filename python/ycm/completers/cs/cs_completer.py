@@ -122,7 +122,7 @@ class CsharpCompleter( ThreadedCompleter ):
       vimsupport.PostVimMessage( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
       return
 
-    if not platform.startswith('win'):
+    if not platform.startswith( 'win' ):
       omnisharp = "mono " + omnisharp
 
     solutionfile = os.path.join( folder, solutionfile )
