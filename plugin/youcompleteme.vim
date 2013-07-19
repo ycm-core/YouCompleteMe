@@ -150,7 +150,7 @@ let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
 
 let g:ycm_auto_start_csharp_server =
-      \ get( g:, 'ycm_auto_start_csharp_server', 0 )
+      \ get( g:, 'ycm_auto_start_csharp_server', 1 )
 
 let g:ycm_csharp_server_port =
       \ get( g:, 'ycm_csharp_server_port', 2000 )

@@ -20,6 +20,7 @@
 
 import vim
 import os
+from sys import platform
 import glob
 from ycm.completers.threaded_completer import ThreadedCompleter
 from ycm import vimsupport
@@ -30,6 +31,10 @@ import json
 import subprocess
 
 
+SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
+'Did you compile it? You can do so by running ' +
+'"./install.sh --omnisharp_completer".' )
+
 class CsharpCompleter( ThreadedCompleter ):
   """
   A Completer that uses the Omnisharp server as completion engine.
@@ -37,30 +42,35 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self.OmniSharpPort = int( vimsupport.GetVariableValue(
-        "g:ycm_csharp_server_port" ) )
-    self.OmniSharpHost = 'http://localhost:' + str( self.OmniSharpPort )
-    if vimsupport.GetBoolValue( "g:ycm_auto_start_csharp_server" ):
+    self._omnisharp_port = int( vimsupport.GetVariableValue(
+        'g:ycm_csharp_server_port' ) )
+    self._omnisharp_host = 'http://localhost:' + str( self._omnisharp_port )
+    if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
       self._StartServer()
+
 
   def OnVimLeave( self ):
     if self._ServerIsRunning():
       self._StopServer()
 
+
   def SupportedFiletypes( self ):
     """ Just csharp """
     return [ 'cs' ]
 
+
   def ComputeCandidates( self, unused_query, unused_start_column ):
-    return [ { 'word': str( completion['CompletionText'] ),
-               'menu': str( completion['DisplayText'] ),
-               'info': str( completion['Description'] ) }
+    return [ { 'word': str( completion[ 'CompletionText' ] ),
+               'menu': str( completion[ 'DisplayText' ] ),
+               'info': str( completion[ 'Description' ] ) }
              for completion in self._GetCompletions() ]
+
 
   def DefinedSubcommands( self ):
     return [ 'StartServer',
              'StopServer',
              'RestartServer' ]
+
 
   def OnUserCommand( self, arguments ):
     if not arguments:
@@ -77,68 +87,78 @@ class CsharpCompleter( ThreadedCompleter ):
         self._StopServer()
       self._StartServer()
 
+
   def _StartServer( self ):
     """ Start the OmniSharp server """
-    if not self._ServerIsRunning():
-      solutionfiles, folder = self._FindSolutionFiles()
+    if self._ServerIsRunning():
+      vimsupport.PostVimMessage(
+              'Server already running, not starting it again.' )
+      return
 
-      if len( solutionfiles ) == 0:
-        vimsupport.PostVimMessage(
-                'Error starting OmniSharp server: no solutionfile found' )
+    solutionfiles, folder = _FindSolutionFiles()
+
+    if len( solutionfiles ) == 0:
+      vimsupport.PostVimMessage(
+              'Error starting OmniSharp server: no solutionfile found' )
+      return
+    elif len( solutionfiles ) == 1:
+      solutionfile = solutionfiles[ 0 ]
+    else:
+      choice = vimsupport.PresentDialog(
+              "Which solutionfile should be loaded?",
+              [ str( i ) + " " + solution for i, solution in
+                enumerate( solutionfiles ) ] )
+      if choice == -1:
+        vimsupport.PostVimMessage( 'OmniSharp not started' )
         return
-      elif len( solutionfiles ) == 1:
-        solutionfile = solutionfiles[0]
       else:
-        choice = vimsupport.PresentDialog(
-                "Which solutionfile should be loaded?",
-                [ str(i) + " " + s for i, s in enumerate( solutionfiles ) ] )
-        if choice == -1:
-          vimsupport.PostVimMessage( 'OmniSharp not started' )
-          return
-        else:
-          solutionfile = solutionfiles[ choice ]
+#>>>MERGED
+        solutionfile = solutionfiles[ choice ]
 
-      omnisharp = os.path.join( os.path.abspath( os.path.dirname( __file__ ) ),
-              'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
-      solutionfile = os.path.join ( folder, solutionfile )
-      # command has to be provided as one string for some reason
-      command = [ omnisharp + ' -p ' + str( self.OmniSharpPort )
-              + ' -s ' + solutionfile ]
+    omnisharp = os.path.join(
+      os.path.abspath( os.path.dirname( __file__ ) ),
+      'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
 
-      stderrLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stderr_logfile_format" )
-      if stderrLogFormat:
-        filename_stderr = os.path.expanduser( stderrLogFormat.format( port=self.OmniSharpPort ) )
-      else:
-        filename_stderr = os.devnull
+    if not os.path.isfile( omnisharp ):
+      vimsupport.PostVimMessage( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
+      return
 
-      stdoutLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stdout_logfile_format" )
-      if stdoutLogFormat:
-        filename_stdout = os.path.expanduser( stdoutLogFormat.format( port=self.OmniSharpPort ) )
-      else:
-        filename_stdout = os.devnull
+    if not platform.startswith( 'win' ):
+      omnisharp = "mono " + omnisharp
 
-      with open( filename_stderr, "w" ) as fstderr:
-        with open( filename_stdout, "w" ) as fstdout:
-          subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
+    solutionfile = os.path.join( folder, solutionfile )
+    # command has to be provided as one string for some reason
+    command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
+                solutionfile ]
+
+    stderrLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stderr_logfile_format" )
+    if stderrLogFormat:
+      filename_stderr = os.path.expanduser( stderrLogFormat.format( port=self._omnisharp_port ) )
+    else:
+      filename_stderr = os.devnull
+
+    stdoutLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stdout_logfile_format" )
+    if stdoutLogFormat:
+      filename_stdout = os.path.expanduser( stdoutLogFormat.format( port=self._omnisharp_port ) )
+    else:
+      filename_stdout = os.devnull
+
+    with open( filename_stderr, "w" ) as fstderr:
+      with open( filename_stdout, "w" ) as fstdout:
+        subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
+
+    vimsupport.PostVimMessage( 'Starting OmniSharp server')
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
+    vimsupport.PostVimMessage( 'Stopping OmniSharp server')
+
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
     return self._GetResponse( '/checkalivestatus', silent=True ) != None
 
-  def _FindSolutionFiles( self ):
-    folder = os.path.dirname( vim.current.buffer.name )
-    solutionfiles = glob.glob1( folder, '*.sln' )
-    while not solutionfiles:
-      lastfolder = folder
-      folder = os.path.dirname( folder )
-      if folder == lastfolder:
-        break
-      solutionfiles = glob.glob1( folder, '*.sln' )
-    return solutionfiles, folder
 
   def _GetCompletions( self ):
     """ Ask server for completions """
@@ -152,15 +172,29 @@ class CsharpCompleter( ThreadedCompleter ):
     completions = self._GetResponse( '/autocomplete', parameters )
     return completions if completions != None else []
 
+
   def _GetResponse( self, endPoint, parameters={}, silent = False ):
     """ Handle communication with server """
-    target = urlparse.urljoin( self.OmniSharpHost, endPoint )
+    target = urlparse.urljoin( self._omnisharp_host, endPoint )
     parameters = urllib.urlencode( parameters )
     try:
       response = urllib2.urlopen( target, parameters )
       return json.loads( response.read() )
     except Exception as e:
       if not silent:
-        vimsupport.PostVimMessage('OmniSharp : Could not connect to '
-                + target + ': ' + str(e))
+        vimsupport.PostVimMessage(
+          'OmniSharp : Could not connect to ' + target + ': ' + str( e ) )
       return None
+
+
+def _FindSolutionFiles():
+  folder = os.path.dirname( vim.current.buffer.name )
+  solutionfiles = glob.glob1( folder, '*.sln' )
+  while not solutionfiles:
+    lastfolder = folder
+    folder = os.path.dirname( folder )
+    if folder == lastfolder:
+      break
+    solutionfiles = glob.glob1( folder, '*.sln' )
+  return solutionfiles, folder
+
