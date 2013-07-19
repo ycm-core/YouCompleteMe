@@ -109,7 +109,7 @@ class CsharpCompleter( ThreadedCompleter ):
       solutionfile = solutionfiles[ 0 ]
     else:
       choice = vimsupport.PresentDialog(
-              "Which solutionfile should be loaded?",
+              'Which solutionfile should be loaded?',
               [ str( i ) + " " + solution for i, solution in
                 enumerate( solutionfiles ) ] )
       if choice == -1:
@@ -127,41 +127,46 @@ class CsharpCompleter( ThreadedCompleter ):
       return
 
     if not platform.startswith( 'win' ):
-      omnisharp = "mono " + omnisharp
+      omnisharp = 'mono ' + omnisharp
 
     solutionfile = os.path.join( folder, solutionfile )
     # command has to be provided as one string for some reason
     command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
                 solutionfile ]
 
-    stderrLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stderr_logfile_format" )
+    stderrLogFormat = vimsupport.GetVariableValue(
+            'g:ycm_csharp_server_stderr_logfile_format' )
     if stderrLogFormat:
-      filename_stderr = os.path.expanduser( stderrLogFormat.format( port=self._omnisharp_port ) )
+      filename_stderr = os.path.expanduser(
+              stderrLogFormat.format( port=self._omnisharp_port ) )
     else:
       filename_stderr = os.devnull
 
-    stdoutLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stdout_logfile_format" )
+    stdoutLogFormat = vimsupport.GetVariableValue(
+            'g:ycm_csharp_server_stdout_logfile_format' )
     if stdoutLogFormat:
-      filename_stdout = os.path.expanduser( stdoutLogFormat.format( port=self._omnisharp_port ) )
+      filename_stdout = os.path.expanduser(
+              stdoutLogFormat.format( port=self._omnisharp_port ) )
     else:
       filename_stdout = os.devnull
 
-    with open( filename_stderr, "w" ) as fstderr:
-      with open( filename_stdout, "w" ) as fstdout:
+    with open( filename_stderr, 'w' ) as fstderr:
+      with open( filename_stdout, 'w' ) as fstdout:
         subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
 
-    vimsupport.PostVimMessage( 'Starting OmniSharp server')
+    vimsupport.PostVimMessage( 'Starting OmniSharp server' )
 
 
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
-    vimsupport.PostVimMessage( 'Stopping OmniSharp server')
+    vimsupport.PostVimMessage( 'Stopping OmniSharp server' )
 
 
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
     return self._GetResponse( '/checkalivestatus', silent=True ) != None
+
 
   def _FindFreePort( self ):
     while self._ServerIsRunning():
