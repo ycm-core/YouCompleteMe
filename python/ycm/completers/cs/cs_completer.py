@@ -37,7 +37,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self.OmniSharpPort = int( vimsupport.GetVariableValue( "g:ycm_csharp_server_port" ) ) 
+    self.OmniSharpPort = int( vimsupport.GetVariableValue(
+        "g:ycm_csharp_server_port" ) )
     self.OmniSharpHost = 'http://localhost:' + str( self.OmniSharpPort )
     if vimsupport.GetBoolValue( "g:ycm_auto_start_csharp_server" ):
       self._StartServer()
@@ -79,23 +80,18 @@ class CsharpCompleter( ThreadedCompleter ):
   def _StartServer( self ):
     """ Start the OmniSharp server """
     if not self._ServerIsRunning():
-      folder = os.path.dirname( vim.current.buffer.name )
-      solutionfiles = glob.glob1( folder, '*.sln' )
-      while not solutionfiles:
-        lastfolder = folder
-        folder = os.path.dirname( folder )
-        if folder == lastfolder:
-          break
-        solutionfiles = glob.glob1( folder, '*.sln' )
+      solutionfiles, folder = self._FindSolutionFiles()
 
       if len( solutionfiles ) == 0:
-        vimsupport.PostVimMessage( 'Error starting OmniSharp server: no solutionfile found' )
+        vimsupport.PostVimMessage(
+                'Error starting OmniSharp server: no solutionfile found' )
         return
       elif len( solutionfiles ) == 1:
         solutionfile = solutionfiles[0]
       else:
-        choice = vimsupport.PresentDialog( "Which solutionfile should be loaded?", 
-            [ str(i) + " " + s for i, s in enumerate( solutionfiles ) ] )
+        choice = vimsupport.PresentDialog(
+                "Which solutionfile should be loaded?",
+                [ str(i) + " " + s for i, s in enumerate( solutionfiles ) ] )
         if choice == -1:
           vimsupport.PostVimMessage( 'OmniSharp not started' )
           return
@@ -106,7 +102,8 @@ class CsharpCompleter( ThreadedCompleter ):
               'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
       solutionfile = os.path.join ( folder, solutionfile )
       # command has to be provided as one string for some reason
-      command = [ omnisharp + ' -p ' + str( self.OmniSharpPort ) + ' -s ' + solutionfile ]
+      command = [ omnisharp + ' -p ' + str( self.OmniSharpPort )
+              + ' -s ' + solutionfile ]
 
       stderrLogFormat = vimsupport.GetVariableValue( "g:ycm_csharp_server_stderr_logfile_format" )
       if stderrLogFormat:
@@ -132,6 +129,17 @@ class CsharpCompleter( ThreadedCompleter ):
     """ Check if the OmniSharp server is running """
     return self._GetResponse( '/checkalivestatus', silent=True ) != None
 
+  def _FindSolutionFiles( self ):
+    folder = os.path.dirname( vim.current.buffer.name )
+    solutionfiles = glob.glob1( folder, '*.sln' )
+    while not solutionfiles:
+      lastfolder = folder
+      folder = os.path.dirname( folder )
+      if folder == lastfolder:
+        break
+      solutionfiles = glob.glob1( folder, '*.sln' )
+    return solutionfiles, folder
+
   def _GetCompletions( self ):
     """ Ask server for completions """
     line, column = vimsupport.CurrentLineAndColumn()
@@ -141,7 +149,7 @@ class CsharpCompleter( ThreadedCompleter ):
     parameters['buffer'] = '\n'.join( vim.current.buffer )
     parameters['filename'] = vim.current.buffer.name
 
-    completions = self._GetResponse( '/autocomplete', parameters ) 
+    completions = self._GetResponse( '/autocomplete', parameters )
     return completions if completions != None else []
 
   def _GetResponse( self, endPoint, parameters={}, silent = False ):
@@ -153,5 +161,6 @@ class CsharpCompleter( ThreadedCompleter ):
       return json.loads( response.read() )
     except Exception as e:
       if not silent:
-        vimsupport.PostVimMessage('OmniSharp : Could not connect to ' + target + ': ' + str(e))
+        vimsupport.PostVimMessage('OmniSharp : Could not connect to '
+                + target + ': ' + str(e))
       return None

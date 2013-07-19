@@ -21,13 +21,11 @@ set cpo&vim
 
 if exists( "g:loaded_youcompleteme" )
   finish
-elseif v:version < 704
-  if v:version < 703 || !has( 'patch584' )
-    echohl WarningMsg |
-          \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
-          \ echohl None
-    finish
-  endif
+elseif v:version < 703 || (v:version == 703 && !has('patch584'))
+  echohl WarningMsg |
+        \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
+        \ echohl None
+  finish
 elseif !has( 'python' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires python 2.x" |

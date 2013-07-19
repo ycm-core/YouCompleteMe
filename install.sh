@@ -102,25 +102,33 @@ function linux_cmake_install {
 }
 
 function usage {
-  echo "Usage: $0 [--clang-completer]"
+  echo "Usage: $0 [--clang-completer [--system-libclang]] [--omnisharp-completer]"
   exit 0
 }
 
-if [[ $# -gt 1 ]]; then
+cmake_args=""
+omnisharp_completer=false
+for flag in $@; do
+  case "$flag" in
+    --clang-completer)
+      cmake_args="-DUSE_CLANG_COMPLETER=ON"
+      ;;
+    --system-libclang)
+      cmake_args="$cmake_args -DUSE_SYSTEM_LIBCLANG=ON"
+      ;;
+    --omnisharp-completer)
+      omnisharp_completer=true
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+if [[ $cmake_args == *-DUSE_SYSTEM_LIBCLANG=ON* ]] && \
+   [[ $cmake_args != *-DUSE_CLANG_COMPLETER=ON* ]]; then
   usage
 fi
-
-case "$1" in
-  --clang-completer)
-    cmake_args='-DUSE_CLANG_COMPLETER=ON'
-    ;;
-  '')
-    cmake_args=''
-    ;;
-  *)
-    usage
-    ;;
-esac
 
 if ! command_exists cmake; then
   echo "CMake is required to build YouCompleteMe."
@@ -133,3 +141,20 @@ else
   testrun $cmake_args $EXTRA_CMAKE_ARGS
 fi
 
+if $omnisharp_completer; then
+  buildcommand="msbuild"
+  if ! command_exists msbuild; then
+    buildcommand="xbuild"
+    if ! command_exists xbuild; then
+      echo "msbuild or xbuild is required to build Omnisharp"
+      exit 1
+    fi
+  fi
+
+  ycm_dir=`pwd`
+  build_dir=$ycm_dir"/python/ycm/completers/cs/OmniSharpServer"
+  
+  cd $build_dir
+  $buildcommand
+  cd $ycm_dir
+fi

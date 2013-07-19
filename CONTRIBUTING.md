@@ -7,9 +7,12 @@ YCM to work on my machine" and the reason why is obviously related to your
 machine configuration and the problem would not be resolved with _reasonable_
 changes to the YCM codebase, then the issue is likely to be closed.
 
+**A good place to ask questions is the [ycm-users][] Google group**. Rule of
+thumb: if you're not sure whether your problem is a real bug, ask on the group.
+
 **YCM compiles just fine**; [the build bots say so][build-bots]. If the bots are
 green and YCM doesn't compile on your machine, then _your machine is the root
-cause_. Now read the previous paragraph again.
+cause_. Now read the first paragraph again.
 
 Realize that quite literally _thousands_ of people have gotten YCM to work
 successfully so if you can't, it's probably because you have a peculiar
@@ -24,6 +27,8 @@ also an FAQ at the bottom that quite possibly addresses your problem.
 Further, **search the issue tracker for similar issues** before creating a new
 one. There's no point in duplication; if an existing issue addresses your
 problem, please comment there instead of creating a duplicate.
+
+You should also **search the archives of the [ycm-users][] mailing list**.
 
 Lastly, **make sure you are running the latest version of YCM**. The issue you
 have encountered may have already been fixed. **Don't forget to recompile
@@ -80,3 +85,4 @@ Creating good pull requests
     change is known. _What goal are you trying to accomplish?_
 
 [build-bots]: https://travis-ci.org/Valloric/YouCompleteMe
+[ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users

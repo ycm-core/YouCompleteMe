@@ -28,6 +28,10 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
   set( SYSTEM_IS_FREEBSD true )
 endif()
 
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "SunOS" )
+  set( SYSTEM_IS_SUNOS true )
+endif()
+
 # Check if platform is 64 bit
 if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
   set( 64_BIT_PLATFORM 0 )
