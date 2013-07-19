@@ -44,7 +44,11 @@ class CsharpCompleter( ThreadedCompleter ):
     super( CsharpCompleter, self ).__init__()
     self._omnisharp_port = int( vimsupport.GetVariableValue(
         'g:ycm_csharp_server_port' ) )
-    self._omnisharp_host = 'http://localhost:' + str( self._omnisharp_port )
+    self._RefreshOmniSharpHost()
+
+    if vimsupport.GetBoolValue( 'g:ycm_find_free_port_for_csharp_server' ):
+      self._FindFreePort()
+
     if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
       self._StartServer()
 
@@ -112,7 +116,6 @@ class CsharpCompleter( ThreadedCompleter ):
         vimsupport.PostVimMessage( 'OmniSharp not started' )
         return
       else:
-#>>>MERGED
         solutionfile = solutionfiles[ choice ]
 
     omnisharp = os.path.join(
@@ -149,6 +152,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
     vimsupport.PostVimMessage( 'Starting OmniSharp server')
 
+
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
@@ -158,6 +162,15 @@ class CsharpCompleter( ThreadedCompleter ):
   def _ServerIsRunning( self ):
     """ Check if the OmniSharp server is running """
     return self._GetResponse( '/checkalivestatus', silent=True ) != None
+
+  def _FindFreePort( self ):
+    while self._ServerIsRunning():
+      self._omnisharp_port += 1
+      self._RefreshOmniSharpHost()
+
+
+  def _RefreshOmniSharpHost ( self ):
+    self._omnisharp_host = 'http://localhost:' + str( self._omnisharp_port )
 
 
   def _GetCompletions( self ):

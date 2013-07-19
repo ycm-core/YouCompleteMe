@@ -161,6 +161,8 @@ let g:ycm_csharp_server_stderr_logfile_format =
 let g:ycm_csharp_server_stdout_logfile_format =
       \ get( g:, 'ycm_csharp_server_stdout_logfile_format',  '' )
 
+let g:ycm_find_free_port_for_csharp_server =
+      \ get( g:, 'ycm_find_free_port_for_csharp_server', 1 )
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
