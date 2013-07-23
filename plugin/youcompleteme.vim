@@ -79,6 +79,7 @@ let g:ycm_filetype_blacklist =
       \     'notes' : 1,
       \     'markdown' : 1,
       \     'text' : 1,
+      \     'unite' : 1,
       \ } ) )
 
 let g:ycm_filetype_specific_completion_to_disable =
