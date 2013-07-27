@@ -682,6 +682,7 @@ Default: `{'notes': 1, 'markdown': 1, 'text': 1}`
           \ 'notes' : 1,
           \ 'markdown' : 1,
           \ 'text' : 1,
+          \ 'unite' : 1,
           \}
 
 ### The `g:ycm_filetype_specific_completion_to_disable` option
