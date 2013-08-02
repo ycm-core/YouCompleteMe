@@ -939,6 +939,9 @@ When this option is set to `1` YCM will ask once per `.ycm_extra_conf.py` file
 if it is safe to be loaded. This is to prevent execution of malicious code
 from a `.ycm_extra_conf.py` file you didn't write.
 
+To selectively get YCM to ask/not ask about loading certain `.ycm_extra_conf.py`
+files, see the `g:ycm_extra_conf_globlist` option.
+
 Default: `1`
 
     let g:ycm_confirm_extra_conf = 1
