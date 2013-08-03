@@ -28,8 +28,6 @@ let s:omnifunc_mode = 0
 
 let s:old_cursor_position = []
 let s:cursor_moved = 0
-let s:moved_vertically_in_insert_mode = 0
-let s:previous_num_chars_on_current_line = -1
 
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
@@ -206,6 +204,20 @@ function! s:SetUpCompleteopt()
   endif
 endfunction
 
+
+" For various functions/use-cases, we want to keep track of whether the buffer
+" has changed since the last time they were invoked. We keep the state of
+" b:changedtick of the last time the specific function was called in
+" b:ycm_changedtick.
+function! s:SetUpYcmChangedTick()
+  let b:ycm_changedtick  =
+        \ get( b:, 'ycm_changedtick', {
+        \   'insert_mode_move' : -1,
+        \   'file_ready_to_parse' : -1,
+        \ } )
+endfunction
+
+
 function! s:OnVimLeave()
   py ycm_state.OnVimLeave()
   py extra_conf_store.CallExtraConfVimCloseIfExists()
@@ -217,6 +229,7 @@ function! s:OnBufferVisit()
     return
   endif
 
+  call s:SetUpYcmChangedTick()
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   py ycm_state.OnBufferVisit()
@@ -340,23 +353,9 @@ endfunction
 
 
 function! s:BufferTextChangedSinceLastMoveInInsertMode()
-  if s:moved_vertically_in_insert_mode
-    let s:previous_num_chars_on_current_line = -1
-    return 0
-  endif
-
-  let num_chars_in_current_cursor_line = strlen( getline('.') )
-
-  if s:previous_num_chars_on_current_line == -1
-    let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
-    return 0
-  endif
-
-  let changed_text_on_current_line = num_chars_in_current_cursor_line !=
-        \ s:previous_num_chars_on_current_line
-  let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
-
-  return changed_text_on_current_line
+  let buffer_changed = b:changedtick != b:ycm_changedtick.insert_mode_move
+  let b:ycm_changedtick.insert_mode_move = b:changedtick
+  return buffer_changed
 endfunction
 
 
