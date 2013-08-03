@@ -260,7 +260,11 @@ endfunction
 
 
 function! s:OnFileReadyToParse()
-  py ycm_state.OnFileReadyToParse()
+  let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
+  if buffer_changed
+    py ycm_state.OnFileReadyToParse()
+  endif
+  let b:ycm_changedtick.file_ready_to_parse = b:changedtick
 endfunction
 
 
