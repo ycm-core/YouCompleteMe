@@ -28,6 +28,8 @@ let s:omnifunc_mode = 0
 
 let s:old_cursor_position = []
 let s:cursor_moved = 0
+let s:moved_vertically_in_insert_mode = 0
+let s:previous_num_chars_on_current_line = -1
 
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
@@ -357,9 +359,23 @@ endfunction
 
 
 function! s:BufferTextChangedSinceLastMoveInInsertMode()
-  let buffer_changed = b:changedtick != b:ycm_changedtick.insert_mode_move
-  let b:ycm_changedtick.insert_mode_move = b:changedtick
-  return buffer_changed
+  if s:moved_vertically_in_insert_mode
+    let s:previous_num_chars_on_current_line = -1
+    return 0
+  endif
+
+  let num_chars_in_current_cursor_line = strlen( getline('.') )
+
+  if s:previous_num_chars_on_current_line == -1
+    let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
+    return 0
+  endif
+
+  let changed_text_on_current_line = num_chars_in_current_cursor_line !=
+        \ s:previous_num_chars_on_current_line
+  let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
+
+  return changed_text_on_current_line
 endfunction
 
 
