@@ -214,7 +214,6 @@ endfunction
 function! s:SetUpYcmChangedTick()
   let b:ycm_changedtick  =
         \ get( b:, 'ycm_changedtick', {
-        \   'insert_mode_move' : -1,
         \   'file_ready_to_parse' : -1,
         \ } )
 endfunction
