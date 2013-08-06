@@ -46,7 +46,7 @@ int YcmCoreVersion()
 {
   // We increment this every time when we want to force users to recompile
   // ycm_core.
-  return 3;
+  return 4;
 }
 
 
@@ -61,10 +61,12 @@ BOOST_PYTHON_MODULE(ycm_core)
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
     .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
-    .def( "AddCandidatesToDatabase",
-          &IdentifierCompleter::AddCandidatesToDatabase )
-    .def( "AddCandidatesToDatabaseFromBufferAsync",
-          &IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync )
+    .def( "AddIdentifiersToDatabase",
+          &IdentifierCompleter::AddIdentifiersToDatabase )
+    .def( "AddIdentifiersToDatabaseFromTagFilesAsync",
+          &IdentifierCompleter::AddIdentifiersToDatabaseFromTagFilesAsync )
+    .def( "AddIdentifiersToDatabaseFromBufferAsync",
+          &IdentifierCompleter::AddIdentifiersToDatabaseFromBufferAsync )
     .def( "CandidatesForQueryAndTypeAsync",
           &IdentifierCompleter::CandidatesForQueryAndTypeAsync );
 

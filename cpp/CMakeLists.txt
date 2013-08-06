@@ -20,6 +20,25 @@ project( YouCompleteMe )
 
 option( UNIVERSAL "Build universal mac binary" OFF )
 
+if ( CMAKE_GENERATOR STREQUAL Xcode )
+  set( CMAKE_GENERATOR_IS_XCODE true )
+endif()
+
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
+  set( SYSTEM_IS_FREEBSD true )
+endif()
+
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "SunOS" )
+  set( SYSTEM_IS_SUNOS true )
+endif()
+
+# Check if platform is 64 bit
+if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+  set( 64_BIT_PLATFORM 0 )
+else()
+  set( 64_BIT_PLATFORM 1 )
+endif()
+
 # Turning on this flag tells cmake to emit a compile_commands.json file.
 # This file can be used to load compilation flags into YCM. See here for more
 # details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
@@ -48,14 +67,6 @@ if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   endif()
 endif()
 
-if ( CMAKE_GENERATOR STREQUAL Xcode )
-  set( CMAKE_GENERATOR_IS_XCODE true )
-endif()
-
-if ( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
-  set( SYSTEM_IS_FREEBSD true )
-endif()
-
 # Force release build by default, speed is of the essence
 if ( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
@@ -71,6 +82,14 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
   endif()
 elseif( COMPILER_IS_CLANG )
   set( CPP11_AVAILABLE true )
+  set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
+  set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+endif()
+
+# For MSVC enable UNICODE and compilation on multiple processors
+if( MSVC )
+  add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
 endif()
 
 # When used with Clang, adding the -std=c++0x flag to CMAKE_CXX_FLAGS will cause
@@ -84,17 +103,16 @@ endif()
 # too. Sadly there's no way around the warning.
 if ( CPP11_AVAILABLE )
   message( "Your C++ compiler supports C++11, compiling in that mode." )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x" )
+
+  # Cygwin needs its hand held a bit; see issue #473
+  if ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x" )
+  else()
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x" )
+  endif()
 else()
   message(
     "Your C++ compiler does NOT support C++11, compiling in C++03 mode." )
-endif()
-
-# Check if platform is 64 bit
-if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
-  set( 64_BIT_PLATFORM 0 )
-else()
-  set( 64_BIT_PLATFORM 1 )
 endif()
 
 add_subdirectory( BoostParts )

@@ -40,18 +40,19 @@ function! youcompleteme#Enable()
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
-  py import extra_conf_store
+  py from ycm import extra_conf_store
   py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
-  py import ycm
+  py from ycm import base
 
-  if !pyeval( 'ycm.CompatibleWithYcmCore()')
+  if !pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
       \ echomsg "YouCompleteMe unavailable: ycm_core too old, PLEASE RECOMPILE ycm_core" |
       \ echohl None
     return
   endif
 
-  py ycm_state = ycm.YouCompleteMe()
+  py from ycm.youcompleteme import YouCompleteMe
+  py ycm_state = YouCompleteMe()
 
   augroup youcompleteme
     autocmd!
@@ -63,7 +64,7 @@ function! youcompleteme#Enable()
     " that happens *after" BufRead/BufEnter has already triggered for the
     " initial file.
     autocmd BufRead,BufEnter * call s:OnBufferVisit()
-    autocmd BufDelete * call s:OnBufferDelete( expand( '<afile>:p' ) )
+    autocmd BufUnload * call s:OnBufferUnload( expand( '<afile>:p' ) )
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
@@ -206,6 +207,7 @@ function! s:SetUpCompleteopt()
 endfunction
 
 function! s:OnVimLeave()
+  py ycm_state.OnVimLeave()
   py extra_conf_store.CallExtraConfVimCloseIfExists()
 endfunction
 
@@ -222,12 +224,12 @@ function! s:OnBufferVisit()
 endfunction
 
 
-function! s:OnBufferDelete( deleted_buffer_file )
+function! s:OnBufferUnload( deleted_buffer_file )
   if !s:AllowedToCompleteInCurrentFile() || empty( a:deleted_buffer_file )
     return
   endif
 
-  py ycm_state.OnBufferDelete( vim.eval( 'a:deleted_buffer_file' ) )
+  py ycm_state.OnBufferUnload( vim.eval( 'a:deleted_buffer_file' ) )
 endfunction
 
 
@@ -379,14 +381,15 @@ endfunction
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) &&
         \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
-        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
+        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' ) &&
+        \ g:ycm_register_as_syntastic_checker
     SyntasticCheck
   endif
 endfunction
 
 
 function! s:IdentifierFinishedOperations()
-  if !pyeval( 'ycm.CurrentIdentifierFinished()' )
+  if !pyeval( 'base.CurrentIdentifierFinished()' )
     return
   endif
   py ycm_state.OnCurrentIdentifierFinished()
@@ -483,7 +486,7 @@ function! s:CompletionsForQuery( query, use_filetype_completer,
     endif
   endwhile
 
-  let l:results = pyeval( 'completer.CandidatesFromStoredRequest()' )
+  let l:results = pyeval( 'base.AdjustCandidateInsertionText( completer.CandidatesFromStoredRequest() )' )
   let s:searched_and_results_found = len( l:results ) != 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction
@@ -511,7 +514,7 @@ function! youcompleteme#Complete( findstart, base )
 
 
     " TODO: make this a function-local variable instead of a script-local one
-    let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
+    let s:completion_start_column = pyeval( 'base.CompletionStartColumn()' )
     let s:should_use_filetype_completion =
           \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
           \ s:completion_start_column . ')' )
@@ -534,7 +537,7 @@ endfunction
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
-    let s:completion_start_column = pyeval( 'ycm.CompletionStartColumn()' )
+    let s:completion_start_column = pyeval( 'base.CompletionStartColumn()' )
     return s:completion_start_column
   else
     return s:CompletionsForQuery( a:base, 1, s:completion_start_column )

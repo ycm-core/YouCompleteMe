@@ -52,7 +52,7 @@ public:
 #    pragma clang diagnostic ignored "-Wc++98-compat"
 #  endif   //#ifdef __clang__
 
-  void SetCompletionDatas( std::vector< CompletionData > && new_completions ) {
+  void SetCompletionDatas( std::vector< CompletionData >  &&new_completions ) {
     completion_datas_ = new_completions;
   }
 

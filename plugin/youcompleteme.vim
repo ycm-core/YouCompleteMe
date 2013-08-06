@@ -21,7 +21,7 @@ set cpo&vim
 
 if exists( "g:loaded_youcompleteme" )
   finish
-elseif v:version < 703 || !has( 'patch584' )
+elseif v:version < 703 || (v:version == 703 && !has('patch584'))
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
         \ echohl None
@@ -41,6 +41,8 @@ function! s:HasYcmCore()
     return 1
   elseif filereadable(path_prefix . 'ycm_core.pyd')
     return 1
+  elseif filereadable(path_prefix . 'ycm_core.dll')
+    return 1
   endif
   return 0
 endfunction
@@ -50,8 +52,8 @@ let g:ycm_check_if_ycm_core_present =
 
 if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
   echohl WarningMsg |
-        \ echomsg "ycm_core.[so|pyd] not detected; you need to compile YCM " .
-        \ "before using it. Read the docs!" |
+        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+        \ "YCM before using it. Read the docs!" |
         \ echohl None
   finish
 endif
@@ -60,6 +62,9 @@ let g:loaded_youcompleteme = 1
 
 let g:ycm_min_num_of_chars_for_completion  =
       \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
+
+let g:ycm_min_num_identifier_candidate_chars =
+      \ get( g:, 'ycm_min_num_identifier_candidate_chars', 0 )
 
 let g:ycm_filetype_whitelist =
       \ get( g:, 'ycm_filetype_whitelist', {
@@ -74,6 +79,7 @@ let g:ycm_filetype_blacklist =
       \     'notes' : 1,
       \     'markdown' : 1,
       \     'text' : 1,
+      \     'unite' : 1,
       \ } ) )
 
 let g:ycm_filetype_specific_completion_to_disable =
@@ -96,6 +102,12 @@ let g:ycm_complete_in_strings =
 
 let g:ycm_collect_identifiers_from_comments_and_strings =
       \ get( g:, 'ycm_collect_identifiers_from_comments_and_strings', 0 )
+
+let g:ycm_collect_identifiers_from_tags_files =
+      \ get( g:, 'ycm_collect_identifiers_from_tags_files', 0 )
+
+let g:ycm_seed_identifiers_with_syntax =
+      \ get( g:, 'ycm_seed_identifiers_with_syntax', 0 )
 
 let g:ycm_autoclose_preview_window_after_completion =
       \ get( g:, 'ycm_autoclose_preview_window_after_completion', 0 )
@@ -130,21 +142,19 @@ let g:ycm_extra_conf_globlist =
 let g:ycm_filepath_completion_use_working_dir =
       \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
 
+" Default semantic triggers are in python/ycm/completers/completer.py, these
+" just append new triggers to the default dict.
 let g:ycm_semantic_triggers =
-      \ get( g:, 'ycm_semantic_triggers', {
-      \   'c' : ['->', '.'],
-      \   'objc' : ['->', '.'],
-      \   'ocaml' : ['.', '#'],
-      \   'cpp,objcpp' : ['->', '.', '::'],
-      \   'perl' : ['->'],
-      \   'php' : ['->', '::'],
-      \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
-      \   'lua' : ['.', ':'],
-      \   'erlang' : [':'],
-      \ } )
+      \ get( g:, 'ycm_semantic_triggers', {} )
 
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
+
+let g:ycm_auto_start_csharp_server =
+      \ get( g:, 'ycm_auto_start_csharp_server', 1 )
+
+let g:ycm_csharp_server_port =
+      \ get( g:, 'ycm_csharp_server_port', 2000 )
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.

@@ -19,6 +19,8 @@
 
 namespace YouCompleteMe {
 
+namespace fs = boost::filesystem;
+
 std::vector< std::string > StringVector( const std::string &a,
                                          const std::string &b,
                                          const std::string &c,
@@ -56,6 +58,11 @@ std::vector< std::string > StringVector( const std::string &a,
     string_vector.push_back( i );
 
   return string_vector;
+}
+
+boost::filesystem::path PathToTestFile( const std::string &filepath ) {
+  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
+  return path_to_testdata / fs::path( filepath );
 }
 
 } // namespace YouCompleteMe

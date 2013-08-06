@@ -19,7 +19,7 @@
 # the BCP tool:
 #   http://www.boost.org/doc/libs/1_52_0/tools/bcp/doc/html/index.html
 #
-# bcp call: bcp boost/utility.hpp boost/python.hpp boost/bind.hpp boost/lambda/lambda.hpp boost/exception/all.hpp boost/tuple/tuple_io.hpp boost/tuple/tuple_comparison.hpp boost/regex.hpp boost/foreach.hpp boost/smart_ptr.hpp boost/algorithm/string_regex.hpp boost/thread.hpp boost/unordered_map.hpp boost/unordered_set.hpp boost/format.hpp boost/ptr_container/ptr_container.hpp boost/filesystem.hpp boost/filesystem/fstream.hpp boost/utility.hpp boost/algorithm/cxx11/any_of.hpp atomic lockfree ../BoostParts
+# bcp call: bcp boost/utility.hpp boost/python.hpp boost/bind.hpp boost/lambda/lambda.hpp boost/exception/all.hpp boost/tuple/tuple_io.hpp boost/tuple/tuple_comparison.hpp boost/regex.hpp boost/foreach.hpp boost/smart_ptr.hpp boost/algorithm/string_regex.hpp boost/thread.hpp boost/unordered_map.hpp boost/unordered_set.hpp boost/format.hpp boost/ptr_container/ptr_container.hpp boost/filesystem.hpp boost/filesystem/fstream.hpp boost/utility.hpp boost/algorithm/cxx11/any_of.hpp atomic lockfree assign ../BoostParts
 
 cmake_minimum_required( VERSION 2.8 )
 
@@ -115,8 +115,11 @@ endif()
 
 # Special compiler and linker flags for MSVC
 if( MSVC )
-    add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
     set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL" )
     set_target_properties( ${PROJECT_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG" )
+endif()
+
+if( SYSTEM_IS_SUNOS )
+  # SunOS needs this setting for thread support
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads" )
 endif()

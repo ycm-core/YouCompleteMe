@@ -17,25 +17,23 @@
 
 #include "ClangCompleter.h"
 #include "CompletionData.h"
+#include "../TestUtils.h"
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 #include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+
+namespace YouCompleteMe {
 
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
 
-namespace YouCompleteMe {
-
 TEST( ClangCompleterTest, CandidatesForLocationInFile ) {
-  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
-  fs::path test_file = path_to_testdata / fs::path( "basic.cpp" );
-
   ClangCompleter completer;
   std::vector< CompletionData > completions =
     completer.CandidatesForLocationInFile(
-      test_file.string(),
+      PathToTestFile( "basic.cpp" ).string(),
       11,
       7,
       std::vector< UnsavedFile >(),
@@ -46,16 +44,13 @@ TEST( ClangCompleterTest, CandidatesForLocationInFile ) {
 
 
 TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync ) {
-  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
-  fs::path test_file = path_to_testdata / fs::path( "basic.cpp" );
-
   ClangCompleter completer;
   completer.EnableThreading();
 
   Future< AsyncCompletions > completions_future =
     completer.CandidatesForQueryAndLocationInFileAsync(
       "",
-      test_file.string(),
+      PathToTestFile( "basic.cpp" ).string(),
       11,
       7,
       std::vector< UnsavedFile >(),

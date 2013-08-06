@@ -16,14 +16,19 @@
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IdentifierUtils.h"
+#include "TestUtils.h"
+#include "IdentifierDatabase.h"
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
-using ::testing::ElementsAre;
-using ::testing::WhenSorted;
+#include <boost/filesystem.hpp>
 
 namespace YouCompleteMe {
 
+namespace fs = boost::filesystem;
+using ::testing::ElementsAre;
+using ::testing::ContainerEq;
+using ::testing::WhenSorted;
 
 TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
   EXPECT_STREQ( RemoveIdentifierFreeText(
@@ -125,6 +130,30 @@ TEST( IdentifierUtilsTest, ExtractIdentifiersFromTextWorks ) {
                             "moo",
                             "qqq" ) );
 
+}
+
+
+TEST( IdentifierUtilsTest, ExtractIdentifiersFromTagsFileWorks ) {
+  fs::path testfile = PathToTestFile( "basic.tags" );
+  fs::path testfile_parent = testfile.parent_path();
+
+  FiletypeIdentifierMap expected;
+  expected[ "cpp" ][ ( testfile_parent / "foo" ).string() ]
+  .push_back( "i1" );
+  expected[ "cpp" ][ ( testfile_parent / "bar" ).string() ]
+  .push_back( "i1" );
+  expected[ "cpp" ][ ( testfile_parent / "foo" ).string() ]
+  .push_back( "foosy" );
+  expected[ "cpp" ][ ( testfile_parent / "bar" ).string() ]
+  .push_back( "fooaaa" );
+
+  expected[ "c" ][ "/foo/zoo" ].push_back( "Floo::goo" );
+  expected[ "c" ][ "/foo/goo maa" ].push_back( "!goo" );
+
+  expected[ "cs" ][ "/m_oo" ].push_back( "#bleh" );
+
+  EXPECT_THAT( ExtractIdentifiersFromTagsFile( testfile ),
+               ContainerEq( expected ) );
 }
 
 } // namespace YouCompleteMe

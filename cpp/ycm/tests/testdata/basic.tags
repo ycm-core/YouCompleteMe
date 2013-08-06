@@ -1,0 +1,15 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+i1	foo	junky;'junklanguage:C++
+i1	bar	junky;'junklanguage:C++
+foosy	foo	junky;"'junk	language:C++	zanzibar
+fooaaa	bar	junky;"'junk	language:C++	zanzibar
+bloa	foo	junky
+Floo::goo	/foo/zoo	language:C
+!goo	/foo/goo maa	language:C
+zoro	/foo	language:fakelang
+#bleh	/m_oo	123ntoh;;;\"eu	language:C#	;\"

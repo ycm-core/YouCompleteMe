@@ -23,6 +23,9 @@
 
 /* See "Data Definitions for libgcc_s" in the Linux Standard Base.*/
 
+#ifndef __CLANG_UNWIND_H
+#define __CLANG_UNWIND_H
+
 #if __has_include_next(<unwind.h>)
 /* Darwin and libunwind provide an unwind.h. If that's available, use
  * it. libunwind wraps some of its definitions in #ifdef _GNU_SOURCE,
@@ -59,7 +62,9 @@ extern "C" {
 /* It is a bit strange for a header to play with the visibility of the
    symbols it declares, but this matches gcc's behavior and some programs
    depend on it */
+#ifndef HIDE_EXPORTS
 #pragma GCC visibility push(default)
+#endif
 
 struct _Unwind_Context;
 typedef enum {
@@ -79,46 +84,50 @@ typedef enum {
 
 #ifdef __arm__
 
-typedef enum { 
-  _UVRSC_CORE = 0,        /* integer register */ 
-  _UVRSC_VFP = 1,         /* vfp */ 
-  _UVRSC_WMMXD = 3,       /* Intel WMMX data register */ 
-  _UVRSC_WMMXC = 4        /* Intel WMMX control register */ 
-} _Unwind_VRS_RegClass; 
+typedef enum {
+  _UVRSC_CORE = 0,        /* integer register */
+  _UVRSC_VFP = 1,         /* vfp */
+  _UVRSC_WMMXD = 3,       /* Intel WMMX data register */
+  _UVRSC_WMMXC = 4        /* Intel WMMX control register */
+} _Unwind_VRS_RegClass;
 
-typedef enum { 
-  _UVRSD_UINT32 = 0,  
-  _UVRSD_VFPX = 1,  
-  _UVRSD_UINT64 = 3,  
-  _UVRSD_FLOAT = 4,  
-  _UVRSD_DOUBLE = 5 
-} _Unwind_VRS_DataRepresentation; 
+typedef enum {
+  _UVRSD_UINT32 = 0,
+  _UVRSD_VFPX = 1,
+  _UVRSD_UINT64 = 3,
+  _UVRSD_FLOAT = 4,
+  _UVRSD_DOUBLE = 5
+} _Unwind_VRS_DataRepresentation;
 
-typedef enum { 
-  _UVRSR_OK = 0,  
-  _UVRSR_NOT_IMPLEMENTED = 1,  
-  _UVRSR_FAILED = 2  
-} _Unwind_VRS_Result; 
+typedef enum {
+  _UVRSR_OK = 0,
+  _UVRSR_NOT_IMPLEMENTED = 1,
+  _UVRSR_FAILED = 2
+} _Unwind_VRS_Result;
 
-_Unwind_VRS_Result _Unwind_VRS_Get(struct _Unwind_Context *context,
-  _Unwind_VRS_RegClass regclass,
-  uint32_t regno,
-  _Unwind_VRS_DataRepresentation representation,
-  void *valuep);
+_Unwind_VRS_Result _Unwind_VRS_Get(struct _Unwind_Context *__context,
+  _Unwind_VRS_RegClass __regclass,
+  uint32_t __regno,
+  _Unwind_VRS_DataRepresentation __representation,
+  void *__valuep);
 
 #else
 
-uintptr_t _Unwind_GetIP(struct _Unwind_Context* context);
+uintptr_t _Unwind_GetIP(struct _Unwind_Context* __context);
 
 #endif
 
 typedef _Unwind_Reason_Code (*_Unwind_Trace_Fn)(struct _Unwind_Context*, void*);
 _Unwind_Reason_Code _Unwind_Backtrace(_Unwind_Trace_Fn, void*);
 
+#ifndef HIDE_EXPORTS
 #pragma GCC visibility pop
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
+#endif /* __CLANG_UNWIND_H */

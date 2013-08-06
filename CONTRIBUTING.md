@@ -7,6 +7,13 @@ YCM to work on my machine" and the reason why is obviously related to your
 machine configuration and the problem would not be resolved with _reasonable_
 changes to the YCM codebase, then the issue is likely to be closed.
 
+**A good place to ask questions is the [ycm-users][] Google group**. Rule of
+thumb: if you're not sure whether your problem is a real bug, ask on the group.
+
+**YCM compiles just fine**; [the build bots say so][build-bots]. If the bots are
+green and YCM doesn't compile on your machine, then _your machine is the root
+cause_. Now read the first paragraph again.
+
 Realize that quite literally _thousands_ of people have gotten YCM to work
 successfully so if you can't, it's probably because you have a peculiar
 system/Vim configuration or you didn't go through the docs carefully enough.
@@ -21,8 +28,11 @@ Further, **search the issue tracker for similar issues** before creating a new
 one. There's no point in duplication; if an existing issue addresses your
 problem, please comment there instead of creating a duplicate.
 
+You should also **search the archives of the [ycm-users][] mailing list**.
+
 Lastly, **make sure you are running the latest version of YCM**. The issue you
-have encountered may have already been fixed.
+have encountered may have already been fixed. **Don't forget to recompile
+ycm_core.so too** (usually by just running `install.sh` again).
 
 OK, so we've reached this far. You need to create an issue. First realize that
 the time it takes to fix your issue is a multiple of how long it takes the
@@ -31,9 +41,9 @@ fixed.
 
 Here are the things you should do when creating an issue:
 
-1. **Write a step-by-step sequence of steps that repeatedly reproduce your
-   issue.** If we can't reproduce the issue, then we can't fix it. It's that
-   simple.
+1. **Write a step-by-step procedure that when performed repeatedly reproduces
+   your issue.** If we can't reproduce the issue, then we can't fix it. It's
+   that simple.
 2. **Create a test case for your issue**. This is critical. Don't talk about how
    "when I have X in my file" or similar, _create a file with X in it_ and put
    the contents inside code blocks in your issue description. Try to make this
@@ -73,3 +83,6 @@ Creating good pull requests
     why is important - it's not always clear why a feature is really useful. And
     sometimes what you want can be done in a different way if the reason for the
     change is known. _What goal are you trying to accomplish?_
+
+[build-bots]: https://travis-ci.org/Valloric/YouCompleteMe
+[ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users

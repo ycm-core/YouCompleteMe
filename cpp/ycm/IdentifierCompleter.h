@@ -20,6 +20,7 @@
 
 #include "ConcurrentLatestValue.h"
 #include "ConcurrentStack.h"
+#include "IdentifierDatabase.h"
 #include "Future.h"
 
 #include <boost/utility.hpp>
@@ -34,7 +35,6 @@
 namespace YouCompleteMe {
 
 class Candidate;
-class CandidateRepository;
 
 typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
 
@@ -51,12 +51,19 @@ public:
 
   void EnableThreading();
 
-  void AddCandidatesToDatabase(
+  void AddIdentifiersToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
     const std::string &filepath );
 
-  void AddCandidatesToDatabaseFromBuffer(
+  void AddIdentifiersToDatabaseFromTagFiles(
+    const std::vector< std::string > &absolute_paths_to_tag_files );
+
+  // NOTE: params are taken by value on purpose!
+  void AddIdentifiersToDatabaseFromTagFilesAsync(
+    std::vector< std::string > absolute_paths_to_tag_files );
+
+  void AddIdentifiersToDatabaseFromBuffer(
     const std::string &buffer_contents,
     const std::string &filetype,
     const std::string &filepath,
@@ -65,7 +72,7 @@ public:
   // NOTE: params are taken by value on purpose! With a C++11 compiler we can
   // avoid an expensive copy of buffer_contents if the param is taken by value
   // (move ctors FTW)
-  void AddCandidatesToDatabaseFromBufferAsync(
+  void AddIdentifiersToDatabaseFromBufferAsync(
     std::string buffer_contents,
     std::string filetype,
     std::string filepath,
@@ -92,38 +99,14 @@ public:
 
 private:
 
-  void ResultsForQueryAndType( const std::string &query,
-                               const std::string &filetype,
-                               std::vector< Result > &results ) const;
-
-  void ClearCandidatesStoredForFile( const std::string &filetype,
-                                     const std::string &filepath );
-
-  std::list< const Candidate * > &GetCandidateList(
-    const std::string &filetype,
-    const std::string &filepath );
-
   void InitThreads();
-
-
-  // filepath -> *( *candidate )
-  typedef boost::unordered_map < std::string,
-          boost::shared_ptr< std::list< const Candidate * > > >
-          FilepathToCandidates;
-
-  // filetype -> *( filepath -> *( *candidate ) )
-  typedef boost::unordered_map < std::string,
-          boost::shared_ptr< FilepathToCandidates > > FiletypeMap;
-
 
 
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES
   /////////////////////////////
 
-  CandidateRepository &candidate_repository_;
-
-  FiletypeMap filetype_map_;
+  IdentifierDatabase identifier_database_;
 
   bool threading_enabled_;
 
