@@ -83,10 +83,24 @@ add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
 if( MSVC OR CYGWIN )
   # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
   # BOOST_ALL_NO_LIB turns off MSVC library autolinking
-  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
+  add_definitions( -DBOOST_ALL_NO_LIB )
 endif()
 
 #############################################################################
+
+if( WIN32 )
+  # Makes boost use the correct __declspec
+  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_THREAD_USE_LIB )
+  if ( 64_BIT_PLATFORM )
+    # Enables the python compilation for 64-bit Windows platform
+    add_definitions( -DMS_WIN64 )
+  endif()
+endif()
+
+# Solves the conflict in names of hypot in python sources and boost::python
+if( MINGW )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cmath")
+endif()
 
 include_directories(
   SYSTEM
