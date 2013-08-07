@@ -226,11 +226,15 @@ endfunction
 
 
 function! s:OnBufferVisit()
+  " We need to do this even when we are not allowed to complete in the current
+  " file because we might be allowed to complete in the future! The canonical
+  " example is creating a new buffer with :enew and then setting a filetype.
+  call s:SetUpYcmChangedTick()
+
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
 
-  call s:SetUpYcmChangedTick()
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   py ycm_state.OnBufferVisit()
