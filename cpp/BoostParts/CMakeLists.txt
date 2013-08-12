@@ -96,18 +96,23 @@ endif()
 
 # Solves the conflict in names of hypot in python sources and boost::python
 if( MINGW )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cmath")
+  set(CXX_FLAGS "${CXX_FLAGS} -include cmath")
 endif()
 
-include_directories(
-  SYSTEM
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${PYTHON_INCLUDE_DIRS}
-  )
+if( SYSTEM_IS_SUNOS )
+  # SunOS needs this setting for thread support
+  set(CXX_FLAGS "${CXX_FLAGS} -pthreads")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
+
+include_directories(SYSTEM
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${PYTHON_INCLUDE_DIRS})
 
 add_definitions(${DEFENITIONS})
 
-add_library( BoostParts ${SOURCES} )
+add_library(BoostParts ${SOURCES})
 
 #############################################################################
 
@@ -132,9 +137,7 @@ if( MSVC )
     set_target_properties( ${PROJECT_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG" )
 endif()
 
-if( SYSTEM_IS_SUNOS )
-  # SunOS needs this setting for thread support
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads" )
-endif()
 
+# Export the module configurations
+set(BoostParts_CXX_FLAGS   "${CXX_FLAGS}"   CACHE INTERNAL "BoostParts cxx falgs")
 set(BoostParts_DEFENITIONS "${DEFENITIONS}" CACHE INTERNAL "BoostParts defenitions")

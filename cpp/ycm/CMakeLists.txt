@@ -217,17 +217,14 @@ if ( UNIX AND NOT APPLE )
   set( EXTRA_LIBS rt )
 endif()
 
-# Solves the conflict in names of hypot in python sources and boost::python
-if( MINGW )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cmath")
-endif()
+# Import cxx flags from BoostParts module
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BoostParts_CXX_FLAGS}")
 
 # Import defenitions from BoostParts module
 add_definitions(${BoostParts_DEFENITIONS})
 
-add_library( ${PROJECT_NAME} SHARED
-             ${SOURCES}
-           )
+add_library(${PROJECT_NAME} SHARED
+             ${SOURCES})
 
 target_link_libraries( ${PROJECT_NAME}
                        BoostParts
@@ -313,11 +310,6 @@ if ( COMPILER_IS_CLANG AND NOT CMAKE_GENERATOR_IS_XCODE AND NOT
 endif()
 
 #############################################################################
-
-if( SYSTEM_IS_SUNOS )
-  # SunOS needs this setting for thread support
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads" )
-endif()
 
 if (NOT MINGW)
   # Tests does not works properly for MinGW yet.
