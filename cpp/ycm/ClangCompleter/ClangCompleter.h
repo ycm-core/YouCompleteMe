@@ -24,15 +24,15 @@
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
 #include "ClangResultsCache.h"
+#include "TranslationUnitStore.h"
 
 #include <boost/utility.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread/future.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/unordered_map.hpp>
 
 #include <string>
 
-typedef void *CXIndex;
 typedef struct CXTranslationUnitImpl *CXTranslationUnit;
 
 namespace YouCompleteMe {
@@ -49,9 +49,6 @@ typedef boost::shared_ptr< CompletionDatas > AsyncCompletions;
 typedef boost::unordered_map < std::string,
         boost::shared_ptr <
         std::vector< std::string > > > FlagsForFile;
-
-typedef boost::unordered_map < std::string,
-        boost::shared_ptr< TranslationUnit > > TranslationUnitForFilename;
 
 
 // TODO: document that all filename parameters must be absolute paths
@@ -147,17 +144,6 @@ private:
     std::vector< UnsavedFile > unsaved_files,
     std::vector< std::string > flags );
 
-  boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
-
-  boost::shared_ptr< TranslationUnit > GetTranslationUnitForFile(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags,
-    bool &translation_unit_created );
-
   std::vector< CompletionData > SortCandidatesForQuery(
     const std::string &query,
     const std::vector< CompletionData > &completion_datas );
@@ -175,8 +161,7 @@ private:
 
   CXIndex clang_index_;
 
-  TranslationUnitForFilename filename_to_translation_unit_;
-  boost::mutex filename_to_translation_unit_mutex_;
+  TranslationUnitStore translation_unit_store_;
 
   CandidateRepository &candidate_repository_;
 
