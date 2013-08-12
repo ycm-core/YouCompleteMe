@@ -59,12 +59,12 @@ extern const unsigned int MAX_ASYNC_THREADS;
 extern const unsigned int MIN_ASYNC_THREADS;
 
 ClangCompleter::ClangCompleter()
-  : candidate_repository_( CandidateRepository::Instance() ),
+  : clang_index_( clang_createIndex( 0, 0 ) ),
+    translation_unit_store_( clang_index_ ),
+    candidate_repository_( CandidateRepository::Instance() ),
     threading_enabled_( false ),
     time_to_die_( false ),
     clang_data_ready_( false ) {
-  clang_index_ = clang_createIndex( 0, 0 );
-
   // The libclang docs don't say what is the default value for crash recovery.
   // I'm pretty sure it's turned on by default, but I'm not going to take any
   // chances.
@@ -86,9 +86,9 @@ ClangCompleter::~ClangCompleter() {
     clang_thread_->join();
   }
 
-  // We need to clear this before calling clang_disposeIndex because the
-  // translation units need to be destroyed before the index is destroyed.
-  filename_to_translation_unit_.clear();
+  // We need to destroy all TUs before calling clang_disposeIndex because
+  // the translation units need to be destroyed before the index is destroyed.
+  translation_unit_store_.RemoveAll();
   clang_disposeIndex( clang_index_ );
 }
 
@@ -104,14 +104,7 @@ void ClangCompleter::EnableThreading() {
 
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
   const std::string &filename ) {
-  shared_ptr< TranslationUnit > unit;
-  {
-    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-    unit = FindWithDefault(
-             filename_to_translation_unit_,
-             filename,
-             shared_ptr< TranslationUnit >() );
-  }
+  shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
 
   if ( !unit )
     return std::vector< Diagnostic >();
@@ -121,14 +114,7 @@ std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
 
 
 bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
-  shared_ptr< TranslationUnit > unit;
-  {
-    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-    unit = FindWithDefault(
-             filename_to_translation_unit_,
-             filename,
-             shared_ptr< TranslationUnit >() );
-  }
+  shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
 
   if ( !unit )
     return false;
@@ -145,11 +131,11 @@ void ClangCompleter::UpdateTranslationUnit(
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
   bool translation_unit_created;
-  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
-                                         filename,
-                                         unsaved_files,
-                                         flags,
-                                         translation_unit_created );
+  shared_ptr< TranslationUnit > unit = translation_unit_store_.GetOrCreate(
+      filename,
+      unsaved_files,
+      flags,
+      translation_unit_created );
 
   if ( !unit )
     return;
@@ -162,12 +148,10 @@ void ClangCompleter::UpdateTranslationUnit(
   }
 
   catch ( ClangParseError & ) {
-    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-
     // If unit->Reparse fails, then the underlying TranslationUnit object is not
     // valid anymore and needs to be destroyed and removed from the filename ->
     // TU map.
-    Erase( filename_to_translation_unit_, filename );
+    translation_unit_store_.Remove( filename );
   }
 }
 
@@ -203,9 +187,8 @@ ClangCompleter::CandidatesForLocationInFile(
   int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
-  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile( filename,
-                                                                  unsaved_files,
-                                                                  flags );
+  shared_ptr< TranslationUnit > unit =
+      translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
   if ( !unit )
     return std::vector< CompletionData >();
@@ -268,10 +251,8 @@ Location ClangCompleter::GetDeclarationLocation(
   int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
-  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
-                                         filename,
-                                         unsaved_files,
-                                         flags );
+  shared_ptr< TranslationUnit > unit =
+      translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
   if ( !unit ) {
     return Location();
@@ -287,10 +268,8 @@ Location ClangCompleter::GetDefinitionLocation(
   int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
-  shared_ptr< TranslationUnit > unit = GetTranslationUnitForFile(
-                                         filename,
-                                         unsaved_files,
-                                         flags );
+  shared_ptr< TranslationUnit > unit =
+      translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
   if ( !unit ) {
     return Location();
@@ -311,10 +290,8 @@ void ClangCompleter::DeleteCaches() {
   if ( !file_cache_delete_stack_.PopAllNoWait( filenames ) )
     return;
 
-  lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-
   foreach( const std::string & filename, filenames ) {
-    filename_to_translation_unit_.erase( filename );
+    translation_unit_store_.Remove( filename );
   }
 }
 
@@ -391,58 +368,6 @@ void ClangCompleter::CreateClangTask(
   clang_task_.Set( clang_packaged_task );
 }
 
-
-shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
-  const std::string &filename,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags ) {
-  bool dont_care;
-  return GetTranslationUnitForFile( filename, unsaved_files, flags, dont_care );
-}
-
-
-shared_ptr< TranslationUnit > ClangCompleter::GetTranslationUnitForFile(
-  const std::string &filename,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags,
-  bool &translation_unit_created ) {
-  {
-    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-    TranslationUnitForFilename::iterator it =
-      filename_to_translation_unit_.find( filename );
-
-    if ( it != filename_to_translation_unit_.end() ) {
-      translation_unit_created = false;
-      return it->second;
-    }
-
-    // We create and store an invalid, sentinel TU so that other threads don't
-    // try to create a TU for the same file while we are trying to create this
-    // TU object. When we are done creating the TU, we will overwrite this value
-    // with the valid object.
-    filename_to_translation_unit_[ filename ] =
-      make_shared< TranslationUnit >();
-  }
-
-  shared_ptr< TranslationUnit > unit;
-
-
-  try {
-    unit = boost::make_shared< TranslationUnit >(
-             filename, unsaved_files, flags, clang_index_ );
-  } catch ( ClangParseError & ) {
-    Erase( filename_to_translation_unit_, filename );
-    return unit;
-  }
-
-  {
-    lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-    filename_to_translation_unit_[ filename ] = unit;
-  }
-
-  translation_unit_created = true;
-  return unit;
-}
 
 
 std::vector< CompletionData > ClangCompleter::SortCandidatesForQuery(
