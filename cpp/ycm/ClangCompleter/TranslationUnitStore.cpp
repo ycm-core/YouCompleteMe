@@ -54,12 +54,10 @@ shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
   translation_unit_created = false;
   {
     lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-    TranslationUnitForFilename::iterator it =
-      filename_to_translation_unit_.find( filename );
+    shared_ptr< TranslationUnit > current_unit = GetNoLock( filename );
 
-    if ( it != filename_to_translation_unit_.end() ) {
-      return it->second;
-    }
+    if ( current_unit )
+      return current_unit;
 
     // We create and store an invalid, sentinel TU so that other threads don't
     // try to create a TU for the same file while we are trying to create this
@@ -93,9 +91,7 @@ shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
 shared_ptr< TranslationUnit > TranslationUnitStore::Get(
     const std::string &filename ) {
   lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
-  return FindWithDefault( filename_to_translation_unit_,
-                          filename,
-                          shared_ptr< TranslationUnit >() );
+  return GetNoLock( filename );
 }
 
 bool TranslationUnitStore::Remove( const std::string &filename ) {
@@ -106,6 +102,13 @@ bool TranslationUnitStore::Remove( const std::string &filename ) {
 void TranslationUnitStore::RemoveAll() {
   lock_guard< mutex > lock( filename_to_translation_unit_mutex_ );
   filename_to_translation_unit_.clear();
+}
+
+shared_ptr< TranslationUnit > TranslationUnitStore::GetNoLock(
+    const std::string &filename ) {
+  return FindWithDefault( filename_to_translation_unit_,
+                          filename,
+                          shared_ptr< TranslationUnit >() );
 }
 
 } // namespace YouCompleteMe
