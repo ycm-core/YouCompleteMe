@@ -70,7 +70,6 @@ else()
 endif()
 
 #############################################################################
-
 # Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
 # other much: a compilation error "Constexpr function never produces a constant
 # expression" pops up when trying to compile anything that uses
@@ -78,23 +77,42 @@ endif()
 # that prevents this from happening. Also present in cpp/ycm/CMakeLists.txt.
 # See here for more details: https://svn.boost.org/trac/boost/ticket/7671
 # TODO: remove this when it's fixed upstream (probably boost 1.53).
-add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
+list(APPEND DEFENITIONS -DBOOST_THREAD_DONT_USE_CHRONO)
 
 if( MSVC OR CYGWIN )
-  # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
   # BOOST_ALL_NO_LIB turns off MSVC library autolinking
-  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
+  list(APPEND DEFENITIONS -DBOOST_ALL_NO_LIB)
 endif()
-
 #############################################################################
 
-include_directories(
-  SYSTEM
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${PYTHON_INCLUDE_DIRS}
-  )
+if( WIN32 )
+  # Makes boost use the correct __declspec
+  list(APPEND DEFENITIONS -DBOOST_PYTHON_SOURCE -DBOOST_THREAD_USE_LIB )
+  if ( 64_BIT_PLATFORM )
+    # Enables the python compilation for 64-bit Windows platform
+    list(APPEND DEFENITIONS -DMS_WIN64 )
+  endif()
+endif()
 
-add_library( BoostParts ${SOURCES} )
+# Solves the conflict in names of hypot in python sources and boost::python
+if( MINGW )
+  set(CXX_FLAGS "${CXX_FLAGS} -include cmath")
+endif()
+
+if( SYSTEM_IS_SUNOS )
+  # SunOS needs this setting for thread support
+  set(CXX_FLAGS "${CXX_FLAGS} -pthreads")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
+
+include_directories(SYSTEM
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${PYTHON_INCLUDE_DIRS})
+
+add_definitions(${DEFENITIONS})
+
+add_library(BoostParts ${SOURCES})
 
 #############################################################################
 
@@ -119,7 +137,7 @@ if( MSVC )
     set_target_properties( ${PROJECT_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG" )
 endif()
 
-if( SYSTEM_IS_SUNOS )
-  # SunOS needs this setting for thread support
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads" )
-endif()
+
+# Export the module configurations
+set(BoostParts_CXX_FLAGS   "${CXX_FLAGS}"   CACHE INTERNAL "BoostParts cxx falgs")
+set(BoostParts_DEFENITIONS "${DEFENITIONS}" CACHE INTERNAL "BoostParts defenitions")
