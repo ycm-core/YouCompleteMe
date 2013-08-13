@@ -50,7 +50,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
   def OnVimLeave( self ):
-    if self._ServerIsRunning():
+    if vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' ) and self._ServerIsRunning():
       self._StopServer()
 
 
