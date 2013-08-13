@@ -327,6 +327,7 @@ function! s:OnCursorMovedNormalMode()
   endif
 
   call s:UpdateDiagnosticNotifications()
+  call s:OnFileReadyToParse()
 endfunction
 
 
