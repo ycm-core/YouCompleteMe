@@ -82,13 +82,13 @@ shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
     filename_to_flags_hash_[ filename ] = HashForFlags( flags );
   }
 
-  shared_ptr< TranslationUnit > unit;
+  boost::shared_ptr< TranslationUnit > unit;
 
   try {
-    unit = make_shared< TranslationUnit >( filename,
-                                           unsaved_files,
-                                           flags,
-                                           clang_index_ );
+    unit = boost::make_shared< TranslationUnit >( filename,
+                                                  unsaved_files,
+                                                  flags,
+                                                  clang_index_ );
   } catch ( ClangParseError & ) {
     Remove( filename );
     return unit;
