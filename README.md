@@ -595,6 +595,27 @@ This command clears that cache entirely. YCM will then re-query your
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
+### The `StartServer` subcommand
+
+Starts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
+### The `StopServer` subcommand
+
+Stops the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
+### The `RestartServer` subcommand
+
+Restarts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
 Options
 -------
 
@@ -809,6 +830,24 @@ Usually at least 95% of the keywords are successfully extracted.
 Default: `0`
 
     let g:ycm_seed_identifiers_with_syntax = 0
+
+### The `g:ycm_csharp_server_port` option
+
+The port number (on `localhost`) on which the OmniSharp server should be
+started.
+
+Default: `2000`
+
+    let g:ycm_csharp_server_port = 2000
+
+### The `g:ycm_auto_start_csharp_server` option
+
+When set to `1`, the OmniSharp server will be automatically started (once per
+Vim session) when you open a C# file.
+
+Default: `1`
+
+    let g:ycm_auto_start_csharp_server = 1
 
 ### The `g:ycm_add_preview_to_completeopt` option
 
