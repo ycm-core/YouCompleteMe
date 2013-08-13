@@ -333,6 +333,7 @@ function! s:OnInsertLeave()
 
   let s:omnifunc_mode = 0
   call s:UpdateDiagnosticNotifications()
+  call s:OnFileReadyToParse()
   py ycm_state.OnInsertLeave()
   if g:ycm_autoclose_preview_window_after_completion ||
         \ g:ycm_autoclose_preview_window_after_insertion
