@@ -138,7 +138,7 @@ fi
 if [ -z "$YCM_TESTRUN" ]; then
   install $cmake_args $EXTRA_CMAKE_ARGS
 else
-  testrun $cmake_args $EXTRA_CMAKE_ARGS
+  testrun $cmake_args -DDEV_FLAGS=ON $EXTRA_CMAKE_ARGS
 fi
 
 if $omnisharp_completer; then
@@ -153,7 +153,7 @@ if $omnisharp_completer; then
 
   ycm_dir=`pwd`
   build_dir=$ycm_dir"/python/ycm/completers/cs/OmniSharpServer"
-  
+
   cd $build_dir
   $buildcommand
   cd $ycm_dir
