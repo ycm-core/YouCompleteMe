@@ -138,7 +138,7 @@ fi
 if [ -z "$YCM_TESTRUN" ]; then
   install $cmake_args $EXTRA_CMAKE_ARGS
 else
-  testrun $cmake_args -DDEV_FLAGS=ON $EXTRA_CMAKE_ARGS
+  testrun $cmake_args -DUSE_DEV_FLAGS=ON $EXTRA_CMAKE_ARGS
 fi
 
 if $omnisharp_completer; then
