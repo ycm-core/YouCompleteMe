@@ -849,6 +849,15 @@ Default: `1`
 
     let g:ycm_auto_start_csharp_server = 1
 
+### The `g:ycm_auto_stop_csharp_server` option
+
+When set to `1`, the OmniSharp server will be automatically stopped upon 
+closing vim.
+
+Default: `1`
+
+    let g:ycm_auto_stop_csharp_server = 1
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's
