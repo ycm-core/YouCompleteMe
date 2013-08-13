@@ -56,6 +56,11 @@ public:
   void RemoveAll();
 
 private:
+
+  // WARNING: This does accesses filename_to_translation_unit_ without a lock!
+  boost::shared_ptr< TranslationUnit > GetNoLock( const std::string &filename );
+
+
   typedef boost::unordered_map< std::string,
           boost::shared_ptr< TranslationUnit > > TranslationUnitForFilename;
 
