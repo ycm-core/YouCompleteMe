@@ -42,6 +42,12 @@ class ClangCompleter( Completer ):
     self.flags = Flags()
     self.diagnostic_store = None
 
+    # We set this flag when a compilation request comes in while one is already
+    # in progress. We use this to trigger the pending request after the previous
+    # one completes (from GetDiagnosticsForCurrentFile because that's the only
+    # method that knows when the compilation has finished).
+    self.extra_parse_desired = False
+
 
   def SupportedFiletypes( self ):
     return CLANG_FILETYPES
@@ -220,6 +226,7 @@ class ClangCompleter( Completer ):
       return
 
     if self.completer.UpdatingTranslationUnit( filename ):
+      self.extra_parse_desired = True
       return
 
     flags = self.flags.FlagsForFile( filename )
@@ -231,6 +238,8 @@ class ClangCompleter( Completer ):
       filename,
       self.GetUnsavedFilesVector(),
       flags )
+
+    self.extra_parse_desired = False
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -255,6 +264,10 @@ class ClangCompleter( Completer ):
       self.last_prepared_diagnostics = [ DiagnosticToDict( x ) for x in
           diagnostics[ : MAX_DIAGNOSTICS_TO_DISPLAY ] ]
       self.parse_future = None
+
+      if self.extra_parse_desired:
+        self.OnFileReadyToParse()
+
     return self.last_prepared_diagnostics
 
 
