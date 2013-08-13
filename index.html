@@ -206,9 +206,10 @@ that are conservatively turned off by default that you may want to turn on.</p><
 <li>If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.</li>
 <li>Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
-  then it's case-insensitive. If your input involves uppercase letters, then
-  it's case-sensitive. So "foo" matches "Foo" and "foo", but "Foo" matches "Foo"
-  but not "foo".</li>
+  then it's case-insensitive. If your input contains uppercase letters, then the
+  uppercase letters in your query must match uppercase letters in the completion
+  strings (the lowercase letters still match both). So, "foo" matches "Foo" and
+  "foo", "Foo" matches "Foo" and "FOO" but not "foo".</li>
 <li>Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Shift-TAB to cycle backwards. Note that if you're
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
@@ -363,7 +364,10 @@ symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, 
 <code>ycm_extra_conf.py</code> file if you return them with the <code>do_cache</code> parameter set to
 <code>True</code>. The cache is in memory and is never invalidated (unless you restart Vim
 of course).</p><p>This command clears that cache entirely. YCM will then re-query your
-<code>FlagsForFile</code> function as needed in the future.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
+<code>FlagsForFile</code> function as needed in the future.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h3>The <code>StartServer</code> subcommand</h3><p>Starts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>StopServer</code> subcommand</h3><p>Stops the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>RestartServer</code> subcommand</h3><p>Restarts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h2>Options</h2><p>All options have reasonable defaults so if the plug-in works after installation
 you don't need to change any options. These options can be configured in your
 <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> by including a line like this:</p><pre><code>let g:ycm_min_num_of_chars_for_completion = 1
 </code></pre><p>Note that after changing an option in your <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc script</a> you have to
@@ -397,6 +401,7 @@ is used like a hash set, meaning that only the keys matter).</p><p>See the <code
       \ 'notes' : 1,
       \ 'markdown' : 1,
       \ 'text' : 1,
+      \ 'unite' : 1,
       \}
 </code></pre><h3>The <code>g:ycm_filetype_specific_completion_to_disable</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should the YCM
 semantic completion engine be turned off. The option value should be a Vim
@@ -445,6 +450,12 @@ identifier database with the keywords of the programming language you're
 writing.</p><p>Since the keywords are extracted from the Vim syntax file for the filetype, all
 keywords may not be collected, depending on how the syntax file was written.
 Usually at least 95% of the keywords are successfully extracted.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_seed_identifiers_with_syntax = 0
+</code></pre><h3>The <code>g:ycm_csharp_server_port</code> option</h3><p>The port number (on <code>localhost</code>) on which the OmniSharp server should be
+started.</p><p>Default: <code>2000</code></p><pre><code>let g:ycm_csharp_server_port = 2000
+</code></pre><h3>The <code>g:ycm_auto_start_csharp_server</code> option</h3><p>When set to <code>1</code>, the OmniSharp server will be automatically started (once per
+Vim session) when you open a C# file.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_auto_start_csharp_server = 1
+</code></pre><h3>The <code>g:ycm_auto_stop_csharp_server</code> option</h3><p>When set to <code>1</code>, the OmniSharp server will be automatically stopped upon
+closing Vim.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_auto_stop_csharp_server = 1
 </code></pre><h3>The <code>g:ycm_add_preview_to_completeopt</code> option</h3><p>When this option is set to <code>1</code>, YCM will add the <code>preview</code> string to Vim's
 <code>completeopt</code> option (see <code>:h completeopt</code>). If your <code>completeopt</code> option
 already has <code>preview</code> set, there will be no effect. You can see the current
@@ -493,7 +504,8 @@ a fallback path to a config file which is used if no <code>.ycm_extra_conf.py</c
 found.</p><p>You can place such a global file anywhere in your filesystem.</p><p>Default: <code>''</code></p><pre><code>let g:ycm_global_ycm_extra_conf = ''
 </code></pre><h3>The <code>g:ycm_confirm_extra_conf</code> option</h3><p>When this option is set to <code>1</code> YCM will ask once per <code>.ycm_extra_conf.py</code> file
 if it is safe to be loaded. This is to prevent execution of malicious code
-from a <code>.ycm_extra_conf.py</code> file you didn't write.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_confirm_extra_conf = 1
+from a <code>.ycm_extra_conf.py</code> file you didn't write.</p><p>To selectively get YCM to ask/not ask about loading certain <code>.ycm_extra_conf.py</code>
+files, see the <code>g:ycm_extra_conf_globlist</code> option.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_confirm_extra_conf = 1
 </code></pre><h3>The <code>g:ycm_extra_conf_globlist</code> option</h3><p>This option is a list that may contain several globbing patterns. If a pattern
 starts with a <code>!</code> all <code>.ycm_extra_conf.py</code> files matching that pattern will be
 blacklisted, that is they won't be loaded and no confirmation dialog will be
