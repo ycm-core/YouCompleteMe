@@ -265,6 +265,10 @@ endfunction
 
 
 function! s:OnFileReadyToParse()
+  " We need to call this just in case there is no b:ycm_changetick; this can
+  " happen for special buffers.
+  call s:SetUpYcmChangedTick()
+
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
     py ycm_state.OnFileReadyToParse()
