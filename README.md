@@ -852,8 +852,8 @@ Default: `1`
 
 ### The `g:ycm_auto_stop_csharp_server` option
 
-When set to `1`, the OmniSharp server will be automatically stopped upon 
-closing vim.
+When set to `1`, the OmniSharp server will be automatically stopped upon
+closing Vim.
 
 Default: `1`
 
