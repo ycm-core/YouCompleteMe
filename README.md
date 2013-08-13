@@ -293,9 +293,10 @@ User Guide
 - If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.
 - Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
-  then it's case-insensitive. If your input involves uppercase letters, then
-  it's case-sensitive. So "foo" matches "Foo" and "foo", but "Foo" matches "Foo"
-  but not "foo".
+  then it's case-insensitive. If your input contains uppercase letters, then the
+  uppercase letters in your query must match uppercase letters in the completion
+  strings (the lowercase letters still match both). So, "foo" matches "Foo" and
+  "foo", "Foo" matches "Foo" and "FOO" but not "foo".
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Shift-TAB to cycle backwards. Note that if you're
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
