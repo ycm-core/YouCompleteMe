@@ -51,7 +51,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
   def OnVimLeave( self ):
-    if vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' ) and self._ServerIsRunning():
+    if (vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' )
+        and self._ServerIsRunning()):
       self._StopServer()
 
 
@@ -91,9 +92,10 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def DebugInfo( self ):
     if self._ServerIsRunning():
-      return "Logfiles:\n{}\n{}".format(self._filename_stdout, self._filename_stderr)
+      return 'Logfiles:\n{}\n{}'.format(
+          self._filename_stdout, self._filename_stderr )
     else:
-      return "Server is not running"
+      return 'Server is not running'
 
 
   def _StartServer( self ):
@@ -134,11 +136,12 @@ class CsharpCompleter( ThreadedCompleter ):
     command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
                 path_to_solutionfile ]
 
-    filename_format = tempfile.gettempdir() + '/omnisharp_{port}_{sln}_{std}.log'
+    filename_format = ( tempfile.gettempdir()
+        + '/omnisharp_{port}_{sln}_{std}.log' )
     self._filename_stdout = filename_format.format(
-        port=self._omnisharp_port, sln=solutionfile, std='stdout')
+        port=self._omnisharp_port, sln=solutionfile, std='stdout' )
     self._filename_stderr = filename_format.format(
-        port=self._omnisharp_port, sln=solutionfile, std='stderr')
+        port=self._omnisharp_port, sln=solutionfile, std='stderr' )
 
     with open( self._filename_stderr, 'w' ) as fstderr:
       with open( self._filename_stdout, 'w' ) as fstdout:
@@ -157,13 +160,14 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _ServerIsRunning( self, port=None ):
     """ Check if the OmniSharp server is running """
-    return self._GetResponse( '/checkalivestatus', silent=True, port=port) != None
+    return self._GetResponse( '/checkalivestatus',
+        silent=True, port=port ) != None
 
 
   def _FindFreePort( self ):
     """ Find port without an omnisharp instance running on it """
     port = self._omnisharp_port
-    while self._ServerIsRunning(port):
+    while self._ServerIsRunning( port ):
       port += 1
     return port
 
@@ -179,17 +183,17 @@ class CsharpCompleter( ThreadedCompleter ):
     line, column = vimsupport.CurrentLineAndColumn()
 
     parameters = {}
-    parameters['line'], parameters['column'] = line + 1, column + 1
-    parameters['buffer'] = '\n'.join( vim.current.buffer )
-    parameters['filename'] = vim.current.buffer.name
+    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
+    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
+    parameters[ 'filename' ] = vim.current.buffer.name
 
     completions = self._GetResponse( '/autocomplete', parameters )
     return completions if completions != None else []
 
 
-  def _GetResponse( self, endPoint, parameters={}, silent=False, port=None):
+  def _GetResponse( self, endPoint, parameters={}, silent=False, port=None ):
     """ Handle communication with server """
-    target = urlparse.urljoin( self._PortToHost(port), endPoint )
+    target = urlparse.urljoin( self._PortToHost( port ), endPoint )
     parameters = urllib.urlencode( parameters )
     try:
       response = urllib2.urlopen( target, parameters )
@@ -210,4 +214,3 @@ def _FindSolutionFiles():
       break
     solutionfiles = glob.glob1( folder, '*.sln' )
   return solutionfiles, folder
-
