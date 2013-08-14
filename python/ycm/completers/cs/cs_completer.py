@@ -29,6 +29,7 @@ import urllib
 import urlparse
 import json
 import subprocess
+import tempfile
 
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
@@ -44,10 +45,6 @@ class CsharpCompleter( ThreadedCompleter ):
     super( CsharpCompleter, self ).__init__()
     self._omnisharp_port = int( vimsupport.GetVariableValue(
         'g:ycm_csharp_server_port' ) )
-    self._RefreshOmniSharpHost()
-
-    if vimsupport.GetBoolValue( 'g:ycm_find_free_port_for_csharp_server' ):
-      self._FindFreePort()
 
     if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
       self._StartServer()
@@ -94,11 +91,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _StartServer( self ):
     """ Start the OmniSharp server """
-    if self._ServerIsRunning():
-      vimsupport.PostVimMessage(
-              'Server already running, not starting it again.' )
-      return
-
+    self._omnisharp_port = self._FindFreePort()
     solutionfiles, folder = _FindSolutionFiles()
 
     if len( solutionfiles ) == 0:
@@ -129,26 +122,16 @@ class CsharpCompleter( ThreadedCompleter ):
     if not platform.startswith( 'win' ):
       omnisharp = 'mono ' + omnisharp
 
-    solutionfile = os.path.join( folder, solutionfile )
+    path_to_solutionfile = os.path.join( folder, solutionfile )
     # command has to be provided as one string for some reason
     command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
-                solutionfile ]
+                path_to_solutionfile ]
 
-    stderrLogFormat = vimsupport.GetVariableValue(
-            'g:ycm_csharp_server_stderr_logfile_format' )
-    if stderrLogFormat:
-      filename_stderr = os.path.expanduser(
-              stderrLogFormat.format( port=self._omnisharp_port ) )
-    else:
-      filename_stderr = os.devnull
-
-    stdoutLogFormat = vimsupport.GetVariableValue(
-            'g:ycm_csharp_server_stdout_logfile_format' )
-    if stdoutLogFormat:
-      filename_stdout = os.path.expanduser(
-              stdoutLogFormat.format( port=self._omnisharp_port ) )
-    else:
-      filename_stdout = os.devnull
+    filename_format = tempfile.gettempdir() + '/omnisharp_{port}_{sln}_{std}.log'
+    filename_stdout = filename_format.format(
+        port=self._omnisharp_port, sln=solutionfile, std='stdout')
+    filename_stderr = filename_format.format(
+        port=self._omnisharp_port, sln=solutionfile, std='stderr')
 
     with open( filename_stderr, 'w' ) as fstderr:
       with open( filename_stdout, 'w' ) as fstdout:
@@ -160,22 +143,28 @@ class CsharpCompleter( ThreadedCompleter ):
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
+    self._omnisharp_port = int( vimsupport.GetVariableValue(
+        'g:ycm_csharp_server_port' ) )
     vimsupport.PostVimMessage( 'Stopping OmniSharp server' )
 
 
-  def _ServerIsRunning( self ):
+  def _ServerIsRunning( self, port=None ):
     """ Check if the OmniSharp server is running """
-    return self._GetResponse( '/checkalivestatus', silent=True ) != None
+    return self._GetResponse( '/checkalivestatus', silent=True, port=port) != None
 
 
   def _FindFreePort( self ):
-    while self._ServerIsRunning():
-      self._omnisharp_port += 1
-      self._RefreshOmniSharpHost()
+    """ Find port without an omnisharp instance running on it """
+    port = self._omnisharp_port
+    while self._ServerIsRunning(port):
+      port += 1
+    return port
 
 
-  def _RefreshOmniSharpHost ( self ):
-    self._omnisharp_host = 'http://localhost:' + str( self._omnisharp_port )
+  def _PortToHost( self, port=None ):
+    if port == None:
+      port = self._omnisharp_port
+    return 'http://localhost:' + str( port )
 
 
   def _GetCompletions( self ):
@@ -191,9 +180,9 @@ class CsharpCompleter( ThreadedCompleter ):
     return completions if completions != None else []
 
 
-  def _GetResponse( self, endPoint, parameters={}, silent = False ):
+  def _GetResponse( self, endPoint, parameters={}, silent=False, port=None):
     """ Handle communication with server """
-    target = urlparse.urljoin( self._omnisharp_host, endPoint )
+    target = urlparse.urljoin( self._PortToHost(port), endPoint )
     parameters = urllib.urlencode( parameters )
     try:
       response = urllib2.urlopen( target, parameters )
