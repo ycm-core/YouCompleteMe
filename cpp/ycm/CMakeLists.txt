@@ -28,6 +28,7 @@ if ( NOT PYTHONLIBS_VERSION_STRING VERSION_LESS "3.0.0" )
     "python2.\n" )
 endif()
 
+option( USE_DEV_FLAGS "Use compilation flags meant for YCM developers" OFF )
 option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
 option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
 set( PATH_TO_LLVM_ROOT "" CACHE PATH "Path to the root of a LLVM+Clang binary distribution" )
@@ -47,8 +48,8 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
       set( CLANG_DIRNAME "clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu" )
       set( CLANG_MD5 "c0cbbe86c5836e03fe6eb96e95d059fa" )
     else()
-      set( CLANG_DIRNAME "clang+llvm-3.3-Ubuntu-13.04-x86-linux-gnu" )
-      set( CLANG_MD5 "1478157ffdf583461fe9c377398cccf3" )
+      set( CLANG_DIRNAME "clang+llvm-3.3-i386-debian6" )
+      set( CLANG_MD5 "415d033b60659433d4631df894673802" )
     endif()
     set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.bz2" )
   endif()
@@ -295,7 +296,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 
 # For some reason, Xcode is too dumb to understand the -isystem flag and thus
 # borks on warnings in Boost.
-if ( ( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG ) AND
+if ( USE_DEV_FLAGS AND ( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG ) AND
      NOT CMAKE_GENERATOR_IS_XCODE )
   # We want all warnings, and warnings should be treated as errors
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror" )
@@ -306,8 +307,8 @@ endif()
 # We want warnings if we accidentally use C++11 features
 # We can't use this warning on FreeBSD because std headers on that OS are dumb.
 # See here: https://github.com/Valloric/YouCompleteMe/issues/260
-if ( COMPILER_IS_CLANG AND NOT CMAKE_GENERATOR_IS_XCODE AND NOT
-     SYSTEM_IS_FREEBSD )
+if ( USE_DEV_FLAGS AND COMPILER_IS_CLANG AND NOT CMAKE_GENERATOR_IS_XCODE AND
+     NOT SYSTEM_IS_FREEBSD )
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wc++98-compat" )
 endif()
 

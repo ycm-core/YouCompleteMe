@@ -79,6 +79,8 @@ let g:ycm_filetype_blacklist =
       \     'notes' : 1,
       \     'markdown' : 1,
       \     'text' : 1,
+      \     'unite' : 1,
+      \     'tagbar' : 1,
       \ } ) )
 
 let g:ycm_filetype_specific_completion_to_disable =
@@ -151,6 +153,9 @@ let g:ycm_cache_omnifunc =
 
 let g:ycm_auto_start_csharp_server =
       \ get( g:, 'ycm_auto_start_csharp_server', 1 )
+
+let g:ycm_auto_stop_csharp_server =
+            \ get( g:, 'ycm_auto_stop_csharp_server', 1 )
 
 let g:ycm_csharp_server_port =
       \ get( g:, 'ycm_csharp_server_port', 2000 )

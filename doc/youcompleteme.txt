@@ -29,6 +29,9 @@ Contents ~
   2. The |GoToDefinition| subcommand
   3. The |GoToDefinitionElseDeclaration| subcommand
   4. The |ClearCompilationFlagCache| subcommand
+  5. The |StartServer| subcommand
+  6. The |StopServer| subcommand
+  7. The |RestartServer| subcommand
  9. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
@@ -42,20 +45,23 @@ Contents ~
   10. The |g:ycm_collect_identifiers_from_comments_and_strings| option
   11. The |g:ycm_collect_identifiers_from_tags_files| option
   12. The |g:ycm_seed_identifiers_with_syntax| option
-  13. The |g:ycm_add_preview_to_completeopt| option
-  14. The |g:ycm_autoclose_preview_window_after_completion| option
-  15. The |g:ycm_autoclose_preview_window_after_insertion| option
-  16. The |g:ycm_max_diagnostics_to_display| option
-  17. The |g:ycm_key_list_select_completion| option
-  18. The |g:ycm_key_list_previous_completion| option
-  19. The |g:ycm_key_invoke_completion| option
-  20. The |g:ycm_key_detailed_diagnostics| option
-  21. The |g:ycm_global_ycm_extra_conf| option
-  22. The |g:ycm_confirm_extra_conf| option
-  23. The |g:ycm_extra_conf_globlist| option
-  24. The |g:ycm_filepath_completion_use_working_dir| option
-  25. The |g:ycm_semantic_triggers| option
-  26. The |g:ycm_cache_omnifunc| option
+  13. The |g:ycm_csharp_server_port| option
+  14. The |g:ycm_auto_start_csharp_server| option
+  15. The |g:ycm_auto_stop_csharp_server| option
+  16. The |g:ycm_add_preview_to_completeopt| option
+  17. The |g:ycm_autoclose_preview_window_after_completion| option
+  18. The |g:ycm_autoclose_preview_window_after_insertion| option
+  19. The |g:ycm_max_diagnostics_to_display| option
+  20. The |g:ycm_key_list_select_completion| option
+  21. The |g:ycm_key_list_previous_completion| option
+  22. The |g:ycm_key_invoke_completion| option
+  23. The |g:ycm_key_detailed_diagnostics| option
+  24. The |g:ycm_global_ycm_extra_conf| option
+  25. The |g:ycm_confirm_extra_conf| option
+  26. The |g:ycm_extra_conf_globlist| option
+  27. The |g:ycm_filepath_completion_use_working_dir| option
+  28. The |g:ycm_semantic_triggers| option
+  29. The |g:ycm_cache_omnifunc| option
  10. FAQ                                                    |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
@@ -389,9 +395,11 @@ General Usage ~
   continue refining the offered completions based on your input.
 
 - Filtering is "smart-case" sensitive; if you are typing only lowercase
-  letters, then it's case-insensitive. If your input involves uppercase
-  letters, then it's case-sensitive. So "foo" matches "Foo" and "foo", but
-  "Foo" matches "Foo" but not "foo".
+  letters, then it's case-insensitive. If your input contains uppercase
+  letters, then the uppercase letters in your query must match uppercase
+  letters in the completion strings (the lowercase letters still match both).
+  So, "foo" matches "Foo" and "foo", "Foo" matches "Foo" and "FOO" but not
+  "foo".
 
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Shift-TAB to cycle backwards. Note that if
@@ -722,6 +730,30 @@ This command clears that cache entirely. YCM will then re-query your
 
 Supported in filetypes: 'c, cpp, objc, objcpp'
 
+-------------------------------------------------------------------------------
+The *StartServer* subcommand
+
+Starts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: 'cs'
+
+-------------------------------------------------------------------------------
+The *StopServer* subcommand
+
+Stops the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: 'cs'
+
+-------------------------------------------------------------------------------
+The *RestartServer* subcommand
+
+Restarts the semantic-engine-as-localhost-server for those semantic engines
+that work as separate servers that YCM talks to.
+
+Supported in filetypes: 'cs'
+
 ===============================================================================
                                                         *youcompleteme-options*
 Options ~
@@ -814,6 +846,7 @@ Default: "{'notes': 1, 'markdown': 1, 'text': 1}"
         \ 'notes' : 1,
         \ 'markdown' : 1,
         \ 'text' : 1,
+        \ 'unite' : 1,
         \}
 <
 -------------------------------------------------------------------------------
@@ -947,6 +980,36 @@ Usually at least 95% of the keywords are successfully extracted.
 Default: '0'
 >
   let g:ycm_seed_identifiers_with_syntax = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_csharp_server_port* option
+
+The port number (on 'localhost') on which the OmniSharp server should be
+started.
+
+Default: '2000'
+>
+  let g:ycm_csharp_server_port = 2000
+<
+-------------------------------------------------------------------------------
+The *g:ycm_auto_start_csharp_server* option
+
+When set to '1', the OmniSharp server will be automatically started (once per
+Vim session) when you open a C# file.
+
+Default: '1'
+>
+  let g:ycm_auto_start_csharp_server = 1
+<
+-------------------------------------------------------------------------------
+The *g:ycm_auto_stop_csharp_server* option
+
+When set to '1', the OmniSharp server will be automatically stopped upon
+closing Vim.
+
+Default: '1'
+>
+  let g:ycm_auto_stop_csharp_server = 1
 <
 -------------------------------------------------------------------------------
 The *g:ycm_add_preview_to_completeopt* option
@@ -1088,6 +1151,9 @@ When this option is set to '1' YCM will ask once per '.ycm_extra_conf.py' file
 if it is safe to be loaded. This is to prevent execution of malicious code from
 a '.ycm_extra_conf.py' file you didn't write.
 
+To selectively get YCM to ask/not ask about loading certain
+'.ycm_extra_conf.py' files, see the |g:ycm_extra_conf_globlist| option.
+
 Default: '1'
 >
   let g:ycm_confirm_extra_conf = 1
@@ -1175,11 +1241,11 @@ Default: '[see next line]'
 -------------------------------------------------------------------------------
 The *g:ycm_cache_omnifunc* option
 
-Some omnicompletion engines do not work well with the YCM cacheâ€”in
-particular, they might not produce all possible results for a given prefix. By
-unsetting this option you can ensure that the omnicompletion engine is
-requeried on every keypress. That will ensure all completions will be
-presented, but might cause stuttering and lagginess if the omnifunc is slow.
+Some omnicompletion engines do not work well with the YCM cache—in particular,
+they might not produce all possible results for a given prefix. By unsetting
+this option you can ensure that the omnicompletion engine is requeried on every
+keypress. That will ensure all completions will be presented, but might cause
+stuttering and lagginess if the omnifunc is slow.
 
 Default: '1'
 >
@@ -1506,7 +1572,7 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [31]. ÂŠ 2012 Strahinja Val
+This software is licensed under the GPL v3 license [31]. © 2012 Strahinja Val
 Markovic <val@markovic.io>.
 
 ===============================================================================

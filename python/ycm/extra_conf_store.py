@@ -50,7 +50,7 @@ def ModuleFileForSourceFile( filename ):
   order and return the filename of the first module that was allowed to load.
   If no module was found or allowed to load, None is returned."""
 
-  if not _module_file_for_source_file.has_key( filename ):
+  if not filename in _module_file_for_source_file:
     for module_file in _ExtraConfModuleSourceFilesForFile( filename ):
       if _Load( module_file ):
         _module_file_for_source_file[ filename ] = module_file
@@ -109,7 +109,7 @@ def _Load( module_file, force = False ):
     return None
 
   if not force:
-    if _module_for_module_file.has_key( module_file ):
+    if module_file in _module_for_module_file:
       return _module_for_module_file[ module_file ]
 
     if not _ShouldLoad( module_file ):

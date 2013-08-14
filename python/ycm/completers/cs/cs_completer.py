@@ -51,7 +51,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
   def OnVimLeave( self ):
-    if self._ServerIsRunning():
+    if vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' ) and self._ServerIsRunning():
       self._StopServer()
 
 
@@ -194,10 +194,9 @@ class CsharpCompleter( ThreadedCompleter ):
     try:
       response = urllib2.urlopen( target, parameters )
       return json.loads( response.read() )
-    except Exception as e:
-      if not silent:
-        vimsupport.PostVimMessage(
-          'OmniSharp : Could not connect to ' + target + ': ' + str( e ) )
+    except Exception:
+      # TODO: Add logging for this case. We can't post a Vim message because Vim
+      # crashes when that's done from a no-GUI thread.
       return None
 
 

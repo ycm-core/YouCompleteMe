@@ -69,7 +69,8 @@ TEST( IdentifierCompleterTest, SmartCaseFiltering ) {
                  StringVector(
                    "fooBar",
                    "fooBaR" ) ).CandidatesForQuery( "fBr" ),
-               ElementsAre( "fooBar" ) );
+               ElementsAre( "fooBaR",
+                            "fooBar" ) );
 }
 
 TEST( IdentifierCompleterTest, FirstCharSameAsQueryWins ) {

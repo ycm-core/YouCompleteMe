@@ -293,9 +293,10 @@ User Guide
 - If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.
 - Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
-  then it's case-insensitive. If your input involves uppercase letters, then
-  it's case-sensitive. So "foo" matches "Foo" and "foo", but "Foo" matches "Foo"
-  but not "foo".
+  then it's case-insensitive. If your input contains uppercase letters, then the
+  uppercase letters in your query must match uppercase letters in the completion
+  strings (the lowercase letters still match both). So, "foo" matches "Foo" and
+  "foo", "Foo" matches "Foo" and "FOO" but not "foo".
 - Use the TAB key to accept a completion and continue pressing TAB to cycle
   through the completions. Use Shift-TAB to cycle backwards. Note that if you're
   using console Vim (that is, not Gvim or MacVim) then it's likely that the
@@ -595,6 +596,27 @@ This command clears that cache entirely. YCM will then re-query your
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
+### The `StartServer` subcommand
+
+Starts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
+### The `StopServer` subcommand
+
+Stops the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
+### The `RestartServer` subcommand
+
+Restarts the semantic-engine-as-localhost-server for those semantic engines that
+work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
 Options
 -------
 
@@ -682,6 +704,7 @@ Default: `{'notes': 1, 'markdown': 1, 'text': 1}`
           \ 'notes' : 1,
           \ 'markdown' : 1,
           \ 'text' : 1,
+          \ 'unite' : 1,
           \}
 
 ### The `g:ycm_filetype_specific_completion_to_disable` option
@@ -808,6 +831,33 @@ Usually at least 95% of the keywords are successfully extracted.
 Default: `0`
 
     let g:ycm_seed_identifiers_with_syntax = 0
+
+### The `g:ycm_csharp_server_port` option
+
+The port number (on `localhost`) on which the OmniSharp server should be
+started.
+
+Default: `2000`
+
+    let g:ycm_csharp_server_port = 2000
+
+### The `g:ycm_auto_start_csharp_server` option
+
+When set to `1`, the OmniSharp server will be automatically started (once per
+Vim session) when you open a C# file.
+
+Default: `1`
+
+    let g:ycm_auto_start_csharp_server = 1
+
+### The `g:ycm_auto_stop_csharp_server` option
+
+When set to `1`, the OmniSharp server will be automatically stopped upon
+closing Vim.
+
+Default: `1`
+
+    let g:ycm_auto_stop_csharp_server = 1
 
 ### The `g:ycm_add_preview_to_completeopt` option
 
@@ -937,6 +987,9 @@ Default: `''`
 When this option is set to `1` YCM will ask once per `.ycm_extra_conf.py` file
 if it is safe to be loaded. This is to prevent execution of malicious code
 from a `.ycm_extra_conf.py` file you didn't write.
+
+To selectively get YCM to ask/not ask about loading certain `.ycm_extra_conf.py`
+files, see the `g:ycm_extra_conf_globlist` option.
 
 Default: `1`
 

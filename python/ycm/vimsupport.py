@@ -79,6 +79,10 @@ def NumLinesInBuffer( buffer ):
 
 
 def PostVimMessage( message ):
+  # TODO: Check are we on the main thread or not, and if not, force a crash
+  # here. This should make it impossible to accidentally call this from a
+  # non-GUI thread which *sometimes* crashes Vim because Vim is not thread-safe.
+  # A consistent crash should force us to notice the error.
   vim.command( "echohl WarningMsg | echomsg '{0}' | echohl None"
                .format( EscapeForVim( message ) ) )
 
