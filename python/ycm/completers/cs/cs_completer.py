@@ -89,6 +89,13 @@ class CsharpCompleter( ThreadedCompleter ):
       self._StartServer()
 
 
+  def DebugInfo( self ):
+    if self._ServerIsRunning():
+      return "Logfiles:\n{}\n{}".format(self._filename_stdout, self._filename_stderr)
+    else:
+      return "Server is not running"
+
+
   def _StartServer( self ):
     """ Start the OmniSharp server """
     self._omnisharp_port = self._FindFreePort()
@@ -128,13 +135,13 @@ class CsharpCompleter( ThreadedCompleter ):
                 path_to_solutionfile ]
 
     filename_format = tempfile.gettempdir() + '/omnisharp_{port}_{sln}_{std}.log'
-    filename_stdout = filename_format.format(
+    self._filename_stdout = filename_format.format(
         port=self._omnisharp_port, sln=solutionfile, std='stdout')
-    filename_stderr = filename_format.format(
+    self._filename_stderr = filename_format.format(
         port=self._omnisharp_port, sln=solutionfile, std='stderr')
 
-    with open( filename_stderr, 'w' ) as fstderr:
-      with open( filename_stdout, 'w' ) as fstdout:
+    with open( self._filename_stderr, 'w' ) as fstderr:
+      with open( self._filename_stdout, 'w' ) as fstdout:
         subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
 
     vimsupport.PostVimMessage( 'Starting OmniSharp server' )
