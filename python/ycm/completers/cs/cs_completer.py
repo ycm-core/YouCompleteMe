@@ -70,7 +70,10 @@ class CsharpCompleter( ThreadedCompleter ):
   def DefinedSubcommands( self ):
     return [ 'StartServer',
              'StopServer',
-             'RestartServer' ]
+             'RestartServer',
+             'GoToDefinition',
+             'GoToDeclaration',
+             'GoToDefinitionElseDeclaration' ]
 
 
   def OnUserCommand( self, arguments ):
@@ -87,6 +90,12 @@ class CsharpCompleter( ThreadedCompleter ):
       if self._ServerIsRunning():
         self._StopServer()
       self._StartServer()
+    elif command == 'GoToDefinition':
+      self._GoToDefinition()
+    elif command == 'GoToDeclaration':
+      self._GoToDefinition()
+    elif command == 'GoToDefinitionElseDeclaration':
+      self._GoToDefinition()
 
 
   def DebugInfo( self ):
@@ -157,6 +166,36 @@ class CsharpCompleter( ThreadedCompleter ):
     vimsupport.PostVimMessage( 'Stopping OmniSharp server' )
 
 
+  def _GetCompletions( self ):
+    """ Ask server for completions """
+    line, column = vimsupport.CurrentLineAndColumn()
+
+    parameters = {}
+    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
+    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
+    parameters[ 'filename' ] = vim.current.buffer.name
+
+    completions = self._GetResponse( '/autocomplete', parameters )
+    return completions if completions != None else []
+
+
+  def _GoToDefinition( self ):
+    line, column = vimsupport.CurrentLineAndColumn()
+
+    parameters = {}
+    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
+    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
+    parameters[ 'filename' ] = vim.current.buffer.name
+
+    definition = self._GetResponse( '/gotodefinition', parameters )
+    if definition[ 'FileName' ] != None:
+      vimsupport.JumpToLocation( definition[ 'FileName' ],
+                                  definition[ 'Line' ],
+                                  definition[ 'Column' ] )
+    else:
+      vimsupport.PostVimMessage( 'Can\'t jump to definition' )
+
+
   def _ServerIsRunning( self ):
     """ Check if our OmniSharp server is running """
     return  ( self._omnisharp_port != None and
@@ -178,19 +217,6 @@ class CsharpCompleter( ThreadedCompleter ):
     if port == None:
       port = self._omnisharp_port
     return 'http://localhost:' + str( port )
-
-
-  def _GetCompletions( self ):
-    """ Ask server for completions """
-    line, column = vimsupport.CurrentLineAndColumn()
-
-    parameters = {}
-    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
-    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
-    parameters[ 'filename' ] = vim.current.buffer.name
-
-    completions = self._GetResponse( '/autocomplete', parameters )
-    return completions if completions != None else []
 
 
   def _GetResponse( self, endPoint, parameters={}, silent=False, port=None ):
