@@ -43,8 +43,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self._omnisharp_port = int( vimsupport.GetVariableValue(
-        'g:ycm_csharp_server_port' ) )
+    self._omnisharp_port = None
 
     if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
       self._StartServer()
@@ -154,22 +153,23 @@ class CsharpCompleter( ThreadedCompleter ):
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
-    self._omnisharp_port = int( vimsupport.GetVariableValue(
-        'g:ycm_csharp_server_port' ) )
+    self._omnisharp_port = None
     vimsupport.PostVimMessage( 'Stopping OmniSharp server' )
 
 
-  def _ServerIsRunning( self, port=None ):
-    """ Check if the OmniSharp server is running """
-    return self._GetResponse( '/checkalivestatus',
-                              silent=True,
-                              port=port ) != None
+  def _ServerIsRunning( self ):
+    """ Check if our OmniSharp server is running """
+    return  ( self._omnisharp_port != None and
+        self._GetResponse( '/checkalivestatus', silent=True ) != None )
 
 
   def _FindFreePort( self ):
-    """ Find port without an omnisharp instance running on it """
-    port = self._omnisharp_port
-    while self._ServerIsRunning( port ):
+    """ Find port without an OmniSharp server running on it """
+    port = int( vimsupport.GetVariableValue(
+        'g:ycm_csharp_server_port' ) )
+    while self._GetResponse( '/checkalivestatus',
+        silent=True,
+        port=port ) != None:
       port += 1
     return port
 
