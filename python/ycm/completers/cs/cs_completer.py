@@ -51,8 +51,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
   def OnVimLeave( self ):
-    if (vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' )
-        and self._ServerIsRunning()):
+    if ( vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' ) and
+         self._ServerIsRunning() ):
       self._StopServer()
 
 
@@ -92,8 +92,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def DebugInfo( self ):
     if self._ServerIsRunning():
-      return 'Logfiles:\n{}\n{}'.format(
-          self._filename_stdout, self._filename_stderr )
+      return 'Logfiles:\n{}\n{}'.format( self._filename_stdout,
+                                         self._filename_stderr )
     else:
       return 'Server is not running'
 
@@ -136,8 +136,9 @@ class CsharpCompleter( ThreadedCompleter ):
     command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
                 path_to_solutionfile ]
 
-    filename_format = ( tempfile.gettempdir()
-        + '/omnisharp_{port}_{sln}_{std}.log' )
+    filename_format = ( tempfile.gettempdir() +
+                        '/omnisharp_{port}_{sln}_{std}.log' )
+
     self._filename_stdout = filename_format.format(
         port=self._omnisharp_port, sln=solutionfile, std='stdout' )
     self._filename_stderr = filename_format.format(
@@ -161,7 +162,8 @@ class CsharpCompleter( ThreadedCompleter ):
   def _ServerIsRunning( self, port=None ):
     """ Check if the OmniSharp server is running """
     return self._GetResponse( '/checkalivestatus',
-        silent=True, port=port ) != None
+                              silent=True,
+                              port=port ) != None
 
 
   def _FindFreePort( self ):
