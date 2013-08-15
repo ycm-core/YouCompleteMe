@@ -164,7 +164,7 @@ endfunction
 
 
 function! s:AllowedToCompleteInCurrentFile()
-  if empty( &filetype )
+  if empty( &filetype ) || getbufvar(winbufnr(winnr()), "&buftype") ==# 'nofile'
     return 0
   endif
 
