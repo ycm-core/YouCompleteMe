@@ -92,8 +92,8 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def DebugInfo( self ):
     if self._ServerIsRunning():
-      return 'Logfiles:\n{}\n{}'.format( self._filename_stdout,
-                                         self._filename_stderr )
+      return 'Server running at: {}\nLogfiles:\n{}\n{}'.format(
+        self._PortToHost(), self._filename_stdout, self._filename_stderr )
     else:
       return 'Server is not running'
 
