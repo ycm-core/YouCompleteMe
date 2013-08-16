@@ -43,8 +43,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def __init__( self ):
     super( CsharpCompleter, self ).__init__()
-    self._omnisharp_port = int( vimsupport.GetVariableValue(
-        'g:ycm_csharp_server_port' ) )
+    self._omnisharp_port = None
 
     if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
       self._StartServer()
@@ -71,7 +70,10 @@ class CsharpCompleter( ThreadedCompleter ):
   def DefinedSubcommands( self ):
     return [ 'StartServer',
              'StopServer',
-             'RestartServer' ]
+             'RestartServer',
+             'GoToDefinition',
+             'GoToDeclaration',
+             'GoToDefinitionElseDeclaration' ]
 
 
   def OnUserCommand( self, arguments ):
@@ -88,6 +90,10 @@ class CsharpCompleter( ThreadedCompleter ):
       if self._ServerIsRunning():
         self._StopServer()
       self._StartServer()
+    elif command in [ 'GoToDefinition',
+                      'GoToDeclaration',
+                      'GoToDefinitionElseDeclaration' ]:
+      self._GoToDefinition()
 
 
   def DebugInfo( self ):
@@ -154,22 +160,50 @@ class CsharpCompleter( ThreadedCompleter ):
   def _StopServer( self ):
     """ Stop the OmniSharp server """
     self._GetResponse( '/stopserver' )
-    self._omnisharp_port = int( vimsupport.GetVariableValue(
-        'g:ycm_csharp_server_port' ) )
+    self._omnisharp_port = None
     vimsupport.PostVimMessage( 'Stopping OmniSharp server' )
 
 
-  def _ServerIsRunning( self, port=None ):
-    """ Check if the OmniSharp server is running """
-    return self._GetResponse( '/checkalivestatus',
-                              silent=True,
-                              port=port ) != None
+  def _GetCompletions( self ):
+    """ Ask server for completions """
+    completions = self._GetResponse( '/autocomplete', self._DefaultParameters() )
+    return completions if completions != None else []
+
+
+  def _GoToDefinition( self ):
+    """ Jump to definition of identifier under cursor """
+    definition = self._GetResponse( '/gotodefinition', self._DefaultParameters() )
+    if definition[ 'FileName' ] != None:
+      vimsupport.JumpToLocation( definition[ 'FileName' ],
+                                 definition[ 'Line' ],
+                                 definition[ 'Column' ] )
+    else:
+      vimsupport.PostVimMessage( 'Can\'t jump to definition' )
+
+
+  def _DefaultParameters( self ):
+    """ Some very common request parameters """
+    line, column = vimsupport.CurrentLineAndColumn()
+    parameters = {}
+    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
+    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
+    parameters[ 'filename' ] = vim.current.buffer.name
+    return parameters
+
+
+  def _ServerIsRunning( self ):
+    """ Check if our OmniSharp server is running """
+    return  ( self._omnisharp_port != None and
+        self._GetResponse( '/checkalivestatus', silent=True ) != None )
 
 
   def _FindFreePort( self ):
-    """ Find port without an omnisharp instance running on it """
-    port = self._omnisharp_port
-    while self._ServerIsRunning( port ):
+    """ Find port without an OmniSharp server running on it """
+    port = int( vimsupport.GetVariableValue(
+        'g:ycm_csharp_server_port' ) )
+    while self._GetResponse( '/checkalivestatus',
+        silent=True,
+        port=port ) != None:
       port += 1
     return port
 
@@ -178,19 +212,6 @@ class CsharpCompleter( ThreadedCompleter ):
     if port == None:
       port = self._omnisharp_port
     return 'http://localhost:' + str( port )
-
-
-  def _GetCompletions( self ):
-    """ Ask server for completions """
-    line, column = vimsupport.CurrentLineAndColumn()
-
-    parameters = {}
-    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
-    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
-    parameters[ 'filename' ] = vim.current.buffer.name
-
-    completions = self._GetResponse( '/autocomplete', parameters )
-    return completions if completions != None else []
 
 
   def _GetResponse( self, endPoint, parameters={}, silent=False, port=None ):
@@ -207,6 +228,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
 def _FindSolutionFiles():
+  """ Find solution files by searching upwards in the file tree """
   folder = os.path.dirname( vim.current.buffer.name )
   solutionfiles = glob.glob1( folder, '*.sln' )
   while not solutionfiles:
