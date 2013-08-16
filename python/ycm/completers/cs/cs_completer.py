@@ -90,11 +90,9 @@ class CsharpCompleter( ThreadedCompleter ):
       if self._ServerIsRunning():
         self._StopServer()
       self._StartServer()
-    elif command == 'GoToDefinition':
-      self._GoToDefinition()
-    elif command == 'GoToDeclaration':
-      self._GoToDefinition()
-    elif command == 'GoToDefinitionElseDeclaration':
+    elif command in [ 'GoToDefinition',
+                      'GoToDeclaration',
+                      'GoToDefinitionElseDeclaration' ]:
       self._GoToDefinition()
 
 

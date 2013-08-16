@@ -563,7 +563,7 @@ The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
 ### The `GoToDefinition` subcommand
 
@@ -574,7 +574,7 @@ the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
 with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
 ### The `GoToDefinitionElseDeclaration` subcommand
 
@@ -582,7 +582,7 @@ Looks up the symbol under the cursor and jumps to its definition if possible; if
 the definition is not accessible from the current translation unit, jumps to the
 symbol's declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
 ### The `ClearCompilationFlagCache` subcommand
 
