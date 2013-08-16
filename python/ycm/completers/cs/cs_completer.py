@@ -34,7 +34,7 @@ import tempfile
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
-'"./install.sh --omnisharp_completer".' )
+'"./install.sh --omnisharp-completer".' )
 
 class CsharpCompleter( ThreadedCompleter ):
   """
