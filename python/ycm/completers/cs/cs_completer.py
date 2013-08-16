@@ -166,32 +166,29 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _GetCompletions( self ):
     """ Ask server for completions """
-    line, column = vimsupport.CurrentLineAndColumn()
-
-    parameters = {}
-    parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
-    parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
-    parameters[ 'filename' ] = vim.current.buffer.name
-
-    completions = self._GetResponse( '/autocomplete', parameters )
+    completions = self._GetResponse( '/autocomplete', self._DefaultParameters() )
     return completions if completions != None else []
 
 
   def _GoToDefinition( self ):
-    line, column = vimsupport.CurrentLineAndColumn()
+    """ Jump to definition of identifier under cursor """
+    definition = self._GetResponse( '/gotodefinition', self._DefaultParameters() )
+    if definition[ 'FileName' ] != None:
+      vimsupport.JumpToLocation( definition[ 'FileName' ],
+                                 definition[ 'Line' ],
+                                 definition[ 'Column' ] )
+    else:
+      vimsupport.PostVimMessage( 'Can\'t jump to definition' )
 
+
+  def _DefaultParameters( self ):
+    """ Some very common request parameters """
+    line, column = vimsupport.CurrentLineAndColumn()
     parameters = {}
     parameters[ 'line' ], parameters[ 'column' ] = line + 1, column + 1
     parameters[ 'buffer' ] = '\n'.join( vim.current.buffer )
     parameters[ 'filename' ] = vim.current.buffer.name
-
-    definition = self._GetResponse( '/gotodefinition', parameters )
-    if definition[ 'FileName' ] != None:
-      vimsupport.JumpToLocation( definition[ 'FileName' ],
-                                  definition[ 'Line' ],
-                                  definition[ 'Column' ] )
-    else:
-      vimsupport.PostVimMessage( 'Can\'t jump to definition' )
+    return parameters
 
 
   def _ServerIsRunning( self ):
@@ -231,6 +228,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
 def _FindSolutionFiles():
+  """ Find solution files by searching upwards in the file tree """
   folder = os.path.dirname( vim.current.buffer.name )
   solutionfiles = glob.glob1( folder, '*.sln' )
   while not solutionfiles:
