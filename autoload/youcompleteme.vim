@@ -116,6 +116,12 @@ function! s:SetUpKeyMappings()
           \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
   endfor
 
+  " By default, Vim chooses to perform its own filtering of the items in the
+  " completion menu when the user presses backspace or C-H if the menu is
+  " already shown. We need to disabuse Vim of the notion that it knows what it's
+  " doing and to let us handle it.
+  inoremap <expr><C-h> pumvisible() ? "\<C-y>\<C-h>" : "\<C-h>"
+  inoremap <expr><BS> pumvisible() ? "\<C-y>\<BS>" : "\<BS>"
 
   for key in g:ycm_key_list_previous_completion
     " This selects the previous candidate for shift-tab (default)
