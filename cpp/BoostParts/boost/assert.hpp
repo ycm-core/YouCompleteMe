@@ -101,7 +101,12 @@ namespace boost
               << "***** Internal Program Error - assertion (" << expr << ") failed in "
               << function << ":\n"
               << file << '(' << line << "): " << msg << std::endl;
-            std::abort();
+			#ifdef UNDER_CE
+				// The Windows CE CRT library does not have abort() so use exit(-1) instead.
+				std::exit(-1);
+			#else
+				std::abort();
+			#endif
           }
         } // detail
       } // assertion

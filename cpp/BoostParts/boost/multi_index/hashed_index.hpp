@@ -1,4 +1,4 @@
-/* Copyright 2003-2011 Joaquin M Lopez Munoz.
+/* Copyright 2003-2013 Joaquin M Lopez Munoz.
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
@@ -288,15 +288,15 @@ public:
     BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT;
 
     size_type         s=0;
-    std::size_t       buc=buckets.position(hash(k));
+    std::size_t       buc=buckets.position(hash_(k));
     node_impl_pointer x=buckets.at(buc);
     node_impl_pointer y=x->next();
     while(y!=x){
-      if(eq(k,key(node_type::from_impl(y)->value()))){
+      if(eq_(k,key(node_type::from_impl(y)->value()))){
         bool b;
         do{
           node_impl_pointer z=y->next();
-          b=z!=x&&eq(
+          b=z!=x&&eq_(
             key(node_type::from_impl(y)->value()),
             key(node_type::from_impl(z)->value()));
           this->final_erase_(
@@ -416,8 +416,8 @@ public:
   /* observers */
 
   key_from_value key_extractor()const{return key;}
-  hasher         hash_function()const{return hash;}
-  key_equal      key_eq()const{return eq;}
+  hasher         hash_function()const{return hash_;}
+  key_equal      key_eq()const{return eq_;}
   
   /* lookup */
 
@@ -428,7 +428,7 @@ public:
   template<typename CompatibleKey>
   iterator find(const CompatibleKey& k)const
   {
-    return find(k,hash,eq);
+    return find(k,hash_,eq_);
   }
 
   template<
@@ -453,7 +453,7 @@ public:
   template<typename CompatibleKey>
   size_type count(const CompatibleKey& k)const
   {
-    return count(k,hash,eq);
+    return count(k,hash_,eq_);
   }
 
   template<
@@ -483,7 +483,7 @@ public:
   template<typename CompatibleKey>
   std::pair<iterator,iterator> equal_range(const CompatibleKey& k)const
   {
-    return equal_range(k,hash,eq);
+    return equal_range(k,hash_,eq_);
   }
 
   template<
@@ -536,7 +536,7 @@ public:
 
   size_type bucket(key_param_type k)const
   {
-    return buckets.position(hash(k));
+    return buckets.position(hash_(k));
   }
 
   local_iterator begin(size_type n)
@@ -604,8 +604,8 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
   hashed_index(const ctor_args_list& args_list,const allocator_type& al):
     super(args_list.get_tail(),al),
     key(tuples::get<1>(args_list.get_head())),
-    hash(tuples::get<2>(args_list.get_head())),
-    eq(tuples::get<3>(args_list.get_head())),
+    hash_(tuples::get<2>(args_list.get_head())),
+    eq_(tuples::get<3>(args_list.get_head())),
     buckets(al,header()->impl(),tuples::get<0>(args_list.get_head())),
     mlf(1.0f),
     first_bucket(buckets.size())
@@ -622,8 +622,8 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
 #endif
 
     key(x.key),
-    hash(x.hash),
-    eq(x.eq),
+    hash_(x.hash_),
+    eq_(x.eq_),
     buckets(x.get_allocator(),header()->impl(),x.buckets.size()),
     mlf(x.mlf),
     max_load(x.max_load),
@@ -762,8 +762,8 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     hashed_index<KeyFromValue,Hash,Pred,SuperMeta,TagList,Category>& x)
   {
     std::swap(key,x.key);
-    std::swap(hash,x.hash);
-    std::swap(eq,x.eq);
+    std::swap(hash_,x.hash_);
+    std::swap(eq_,x.eq_);
     buckets.swap(x.buckets);
     std::swap(mlf,x.mlf);
     std::swap(max_load,x.max_load);
@@ -778,7 +778,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
 
   bool replace_(value_param_type v,node_type* x)
   {
-    if(eq(key(v),key(x->value()))){
+    if(eq_(key(v),key(x->value()))){
       return super::replace_(v,x);
     }
 
@@ -981,7 +981,7 @@ private:
   {
     node_impl_pointer x=pos->next();
     while(x!=pos){
-      if(eq(key(v),key(node_type::from_impl(x)->value()))){
+      if(eq_(key(v),key(node_type::from_impl(x)->value()))){
         pos=x;
         return false;
       }
@@ -996,7 +996,7 @@ private:
     node_impl_pointer prev=pos;
     node_impl_pointer x=pos->next();
     while(x!=pos){
-      if(eq(key(v),key(node_type::from_impl(x)->value()))){
+      if(eq_(key(v),key(node_type::from_impl(x)->value()))){
         pos=prev;
         return true;
       }
@@ -1047,7 +1047,7 @@ private:
   {
     if(n>max_load){
       size_type bc =(std::numeric_limits<size_type>::max)();
-      float     fbc=static_cast<float>(1+n/mlf);
+      float     fbc=static_cast<float>(1+static_cast<double>(n)/mlf);
       if(bc>fbc)bc =static_cast<size_type>(fbc);
       unchecked_rehash(bc);
     }
@@ -1064,7 +1064,7 @@ private:
     for(;x!=x_end;++x){
       node_impl_pointer y=x->next();
       while(y!=x){
-        hashes.data()[i++]=hash(key(node_type::from_impl(y)->value()));
+        hashes.data()[i++]=hash_(key(node_type::from_impl(y)->value()));
         y=y->next();
       }
     }
@@ -1103,7 +1103,7 @@ private:
     while(y->next()!=x){
       y=y->next();
       if(y==pbuc)continue;
-      if(eq(k,key(node_type::from_impl(y)->value())))return false;
+      if(eq_(k,key(node_type::from_impl(y)->value())))return false;
     }
     return true;
   }
@@ -1122,24 +1122,24 @@ private:
 
     node_impl_pointer y=x->next();
     if(y!=pbuc){
-      if(eq(k,key(node_type::from_impl(y)->value()))){
+      if(eq_(k,key(node_type::from_impl(y)->value()))){
         /* adjacent to equivalent element -> in place */
         return true;
       }
       else{
         y=y->next();
         while(y!=pbuc){
-          if(eq(k,key(node_type::from_impl(y)->value())))return false;
+          if(eq_(k,key(node_type::from_impl(y)->value())))return false;
           y=y->next();
         }
       }
     }
     while(y->next()!=x){
       y=y->next();
-      if(eq(k,key(node_type::from_impl(y)->value()))){
+      if(eq_(k,key(node_type::from_impl(y)->value()))){
         while(y->next()!=x){
           y=y->next();
-          if(!eq(k,key(node_type::from_impl(y)->value())))return false;
+          if(!eq_(k,key(node_type::from_impl(y)->value())))return false;
         }
         /* after a group of equivalent elements --> in place */
         return true;
@@ -1158,8 +1158,8 @@ private:
 #endif
 
   key_from_value               key;
-  hasher                       hash;
-  key_equal                    eq;
+  hasher                       hash_;
+  key_equal                    eq_;
   bucket_array_type            buckets;
   float                        mlf;
   size_type                    max_load;

@@ -118,7 +118,8 @@ namespace detail {
 
 #ifdef BOOST_ATOMIC_HAVE_CAS32
 template<typename T>
-class atomic_generic_cas32 {
+class atomic_generic_cas32
+{
 private:
     typedef atomic_generic_cas32 this_type;
 public:
@@ -168,7 +169,9 @@ private:
 };
 
 template<typename T>
-class platform_atomic_integral<T, 4> : public build_atomic_from_exchange<atomic_generic_cas32<T> > {
+class platform_atomic_integral<T, 4> :
+    public build_atomic_from_exchange<atomic_generic_cas32<T> >
+{
 public:
     typedef build_atomic_from_exchange<atomic_generic_cas32<T> > super;
     explicit platform_atomic_integral(T v) : super(v) {}
@@ -176,7 +179,9 @@ public:
 };
 
 template<typename T>
-class platform_atomic_integral<T, 1>: public build_atomic_from_larger_type<atomic_generic_cas32<int32_t>, T> {
+class platform_atomic_integral<T, 1> :
+   public build_atomic_from_larger_type<atomic_generic_cas32<int32_t>, T>
+{
 public:
     typedef build_atomic_from_larger_type<atomic_generic_cas32<int32_t>, T> super;
 
@@ -185,7 +190,9 @@ public:
 };
 
 template<typename T>
-class platform_atomic_integral<T, 2>: public build_atomic_from_larger_type<atomic_generic_cas32<int32_t>, T> {
+class platform_atomic_integral<T, 2> :
+    public build_atomic_from_larger_type<atomic_generic_cas32<int32_t>, T>
+{
 public:
     typedef build_atomic_from_larger_type<atomic_generic_cas32<int32_t>, T> super;
 

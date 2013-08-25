@@ -1,4 +1,4 @@
-/* Copyright 2003-2008 Joaquin M Lopez Munoz.
+/* Copyright 2003-2013 Joaquin M Lopez Munoz.
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
@@ -106,14 +106,14 @@ class algorithm_base:private noncopyable
 {
 protected:
   algorithm_base(const Allocator& al,std::size_t size):
-    spc(al,size),size_(size),n(0),sorted(false)
+    spc(al,size),size_(size),n_(0),sorted(false)
   {
   }
 
   void add(void* node)
   {
-    entries()[n]=entry(node,n);
-    ++n;
+    entries()[n_]=entry(node,n_);
+    ++n_;
   }
 
   void begin_algorithm()const
@@ -183,7 +183,7 @@ private:
 
   auto_space<entry,Allocator> spc;
   std::size_t                 size_;
-  std::size_t                 n;
+  std::size_t                 n_;
   mutable bool                sorted;
   mutable std::size_t         num_piles;
 };

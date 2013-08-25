@@ -132,8 +132,10 @@ namespace boost
             bool interrupt_requested;
 //#endif
             thread_data_base():
+                thread_handle(0),
                 done(false),join_started(false),joined(false),
                 thread_exit_callbacks(0),
+                cond_mutex(0),
                 current_cond(0),
                 notify(),
                 async_states_()

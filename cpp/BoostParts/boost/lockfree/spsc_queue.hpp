@@ -14,7 +14,9 @@
 
 #include <boost/array.hpp>
 #include <boost/assert.hpp>
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
 #include <boost/noncopyable.hpp>
+#endif
 #include <boost/static_assert.hpp>
 
 #include <boost/lockfree/detail/atomic.hpp>
@@ -32,8 +34,10 @@ typedef parameter::parameters<boost::parameter::optional<tag::capacity>,
                              > ringbuffer_signature;
 
 template <typename T>
-class ringbuffer_base:
-    boost::noncopyable
+class ringbuffer_base
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
+        : boost::noncopyable
+#endif
 {
 #ifndef BOOST_DOXYGEN_INVOKED
     typedef std::size_t size_t;
@@ -41,6 +45,12 @@ class ringbuffer_base:
     atomic<size_t> write_index_;
     char padding1[padding_size]; /* force read_index and write_index to different cache lines */
     atomic<size_t> read_index_;
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    ringbuffer_base(ringbuffer_base const &) = delete;
+    ringbuffer_base(ringbuffer_base &&)      = delete;
+    const ringbuffer_base& operator=( const ringbuffer_base& ) = delete;
+#endif
 
 protected:
     ringbuffer_base(void):
@@ -221,7 +231,7 @@ protected:
             size_t count0 = max_size - read_index;
             size_t count1 = avail - count0;
 
-            std::copy(internal_buffer + read_index, internal_buffer + max_size, it);
+            it = std::copy(internal_buffer + read_index, internal_buffer + max_size, it);
             std::copy(internal_buffer, internal_buffer + count1, it);
 
             new_read_index -= max_size;
@@ -274,11 +284,12 @@ private:
     }
 };
 
-template <typename T, std::size_t max_size>
+template <typename T, std::size_t MaxSize>
 class compile_time_sized_ringbuffer:
     public ringbuffer_base<T>
 {
     typedef std::size_t size_t;
+    static const std::size_t max_size = MaxSize + 1;
     boost::array<T, max_size> array_;
 
 public:
@@ -339,30 +350,30 @@ class runtime_sized_ringbuffer:
 
 public:
     explicit runtime_sized_ringbuffer(size_t max_elements):
-        max_elements_(max_elements)
+        max_elements_(max_elements + 1)
     {
         // TODO: we don't necessarily need to construct all elements
-        array_ = Alloc::allocate(max_elements);
-        for (size_t i = 0; i != max_elements; ++i)
+        array_ = Alloc::allocate(max_elements_);
+        for (size_t i = 0; i != max_elements_; ++i)
             Alloc::construct(array_ + i, T());
     }
 
     template <typename U>
     runtime_sized_ringbuffer(typename Alloc::template rebind<U>::other const & alloc, size_t max_elements):
-        Alloc(alloc), max_elements_(max_elements)
+        Alloc(alloc), max_elements_(max_elements + 1)
     {
         // TODO: we don't necessarily need to construct all elements
-        array_ = Alloc::allocate(max_elements);
-        for (size_t i = 0; i != max_elements; ++i)
+        array_ = Alloc::allocate(max_elements_);
+        for (size_t i = 0; i != max_elements_; ++i)
             Alloc::construct(array_ + i, T());
     }
 
     runtime_sized_ringbuffer(Alloc const & alloc, size_t max_elements):
-        Alloc(alloc), max_elements_(max_elements)
+        Alloc(alloc), max_elements_(max_elements + 1)
     {
         // TODO: we don't necessarily need to construct all elements
-        array_ = Alloc::allocate(max_elements);
-        for (size_t i = 0; i != max_elements; ++i)
+        array_ = Alloc::allocate(max_elements_);
+        for (size_t i = 0; i != max_elements_; ++i)
             Alloc::construct(array_ + i, T());
     }
 
@@ -640,6 +651,66 @@ public:
     size_type pop(OutputIterator it)
     {
         return base_type::pop(it);
+    }
+
+    /** consumes one element via a functor
+     *
+     *  pops one element from the queue and applies the functor on this object
+     *
+     * \returns true, if one element was consumed
+     *
+     * \note Thread-safe and non-blocking, if functor is thread-safe and non-blocking
+     * */
+    template <typename Functor>
+    bool consume_one(Functor & f)
+    {
+        T element;
+        bool success = pop(element);
+        if (success)
+            f(element);
+
+        return success;
+    }
+
+    /// \copydoc boost::lockfree::spsc_queue::consume_one(Functor & rhs)
+    template <typename Functor>
+    bool consume_one(Functor const & f)
+    {
+        T element;
+        bool success = pop(element);
+        if (success)
+            f(element);
+
+        return success;
+    }
+
+    /** consumes all elements via a functor
+     *
+     * sequentially pops all elements from the queue and applies the functor on each object
+     *
+     * \returns number of elements that are consumed
+     *
+     * \note Thread-safe and non-blocking, if functor is thread-safe and non-blocking
+     * */
+    template <typename Functor>
+    size_type consume_all(Functor & f)
+    {
+        size_type element_count = 0;
+        while (consume_one(f))
+            element_count += 1;
+
+        return element_count;
+    }
+
+    /// \copydoc boost::lockfree::spsc_queue::consume_all(Functor & rhs)
+    template <typename Functor>
+    size_type consume_all(Functor const & f)
+    {
+        size_type element_count = 0;
+        while (consume_one(f))
+            element_count += 1;
+
+        return element_count;
     }
 };
 

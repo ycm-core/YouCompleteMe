@@ -5,7 +5,7 @@
 
 #ifndef UUID_7E48761AD92811DC9011477D56D89593
 #define UUID_7E48761AD92811DC9011477D56D89593
-#if defined(__GNUC__) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
+#if (__GNUC__*100+__GNUC_MINOR__>301) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
 #pragma GCC system_header
 #endif
 #if defined(_MSC_VER) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
@@ -19,11 +19,16 @@
 namespace
 boost
     {
+    template <class T,class U>
+    std::string to_string( std::pair<T,U> const & );
+    std::string to_string( std::exception const & );
+
     namespace
     to_string_detail
         {
         template <class T>
         typename disable_if<is_output_streamable<T>,char>::type to_string( T const & );
+        using boost::to_string;
 
         template <class,bool IsOutputStreamable>
         struct has_to_string_impl;

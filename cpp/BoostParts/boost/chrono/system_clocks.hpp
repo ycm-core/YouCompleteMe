@@ -67,7 +67,7 @@ TODO:
 #include <ctime>
 
 # if defined( BOOST_CHRONO_POSIX_API )
-#   if ! defined(CLOCK_REALTIME)
+#   if ! defined(CLOCK_REALTIME) && ! defined (__hpux__)
 #     error <time.h> does not supply CLOCK_REALTIME
 #   endif
 # endif

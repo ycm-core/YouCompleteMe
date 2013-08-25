@@ -90,11 +90,11 @@ namespace ipcdetail {
             return 0;
          }
          else{
-            caster_t caster((void*)this_ptr);
+            const caster_t caster((void*)this_ptr);
             return caster_t(caster.size() + offset).pointer();
          }
       #else
-         caster_t caster((void*)this_ptr);
+         const caster_t caster((void*)this_ptr);
          return caster_t((caster.size() + offset) & -std::size_t(offset != 1)).pointer();
       #endif
    }
@@ -113,7 +113,7 @@ namespace ipcdetail {
    ////////////////////////////////////////////////////////////////////////
    #define BOOST_INTERPROCESS_OFFSET_PTR_INLINE_TO_OFF
    //Branchless seems slower in x86
-   //#define BOOST_INTERPROCESS_OFFSET_PTR_BRANCHLESS_TO_OFF
+   #define BOOST_INTERPROCESS_OFFSET_PTR_BRANCHLESS_TO_OFF
 
    template<int Dummy>
    #ifndef BOOST_INTERPROCESS_OFFSET_PTR_INLINE_TO_OFF
@@ -130,18 +130,21 @@ namespace ipcdetail {
             return 1;
          }
          else{
-            caster_t this_caster((void*)this_ptr);
-            caster_t ptr_caster((void*)ptr);
+            const caster_t this_caster((void*)this_ptr);
+            const caster_t ptr_caster((void*)ptr);
             std::size_t offset = ptr_caster.size() - this_caster.size();
             BOOST_ASSERT(offset != 1);
             return offset;
          }
       #else
-         caster_t this_caster((void*)this_ptr);
-         caster_t ptr_caster((void*)ptr);
+         const caster_t this_caster((void*)this_ptr);
+         const caster_t ptr_caster((void*)ptr);
+         //std::size_t other = -std::size_t(ptr != 0);
+         //std::size_t offset = (ptr_caster.size() - this_caster.size()) & other;
+         //return offset + !other;
+         //
          std::size_t offset = (ptr_caster.size() - this_caster.size() - 1) & -std::size_t(ptr != 0);
-         ++offset;
-         return offset;
+         return ++offset;
       #endif
    }
 
@@ -159,7 +162,7 @@ namespace ipcdetail {
    ////////////////////////////////////////////////////////////////////////
    #define BOOST_INTERPROCESS_OFFSET_PTR_INLINE_TO_OFF_FROM_OTHER
    //Branchless seems slower in x86
-   //#define BOOST_INTERPROCESS_OFFSET_PTR_BRANCHLESS_TO_OFF_FROM_OTHER
+   #define BOOST_INTERPROCESS_OFFSET_PTR_BRANCHLESS_TO_OFF_FROM_OTHER
 
    template<int Dummy>
    #ifndef BOOST_INTERPROCESS_OFFSET_PTR_INLINE_TO_OFF_FROM_OTHER
@@ -176,18 +179,16 @@ namespace ipcdetail {
          return 1;
       }
       else{
-         caster_t this_caster((void*)this_ptr);
-         caster_t other_caster((void*)other_ptr);
+         const caster_t this_caster((void*)this_ptr);
+         const caster_t other_caster((void*)other_ptr);
          std::size_t offset = other_caster.size() - this_caster.size() + other_offset;
          BOOST_ASSERT(offset != 1);
          return offset;
       }
       #else
-      caster_t this_caster((void*)this_ptr);
-      caster_t other_caster((void*)other_ptr);
-      std::size_t offset = (other_caster.size() - this_caster.size()) & -std::size_t(other_offset != 1);
-      offset += other_offset;
-      return offset;
+      const caster_t this_caster((void*)this_ptr);
+      const caster_t other_caster((void*)other_ptr);
+      return ((other_caster.size() - this_caster.size()) & -std::size_t(other_offset != 1)) + other_offset;
       #endif
    }
 

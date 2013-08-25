@@ -18,6 +18,7 @@
 
 #include <boost/thread/detail/delete.hpp>
 #include <boost/move/utility.hpp>
+#include <boost/move/traits.hpp>
 #include <boost/config/abi_prefix.hpp>
 
 namespace boost

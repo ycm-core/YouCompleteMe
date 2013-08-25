@@ -1,6 +1,6 @@
 // Boost token_functions.hpp  ------------------------------------------------//
 
-// Copyright John R. Bandela 2001. 
+// Copyright John R. Bandela 2001.
 
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -77,12 +77,12 @@ namespace std{
 namespace boost{
   //===========================================================================
   // The escaped_list_separator class. Which is a model of TokenizerFunction
-  // An escaped list is a super-set of what is commonly known as a comma 
-  // separated value (csv) list.It is separated into fields by a comma or 
+  // An escaped list is a super-set of what is commonly known as a comma
+  // separated value (csv) list.It is separated into fields by a comma or
   // other character. If the delimiting character is inside quotes, then it is
   // counted as a regular character.To allow for embedded quotes in a field,
-  // there can be escape sequences using the \ much like C. 
-  // The role of the comma, the quotation mark, and the escape 
+  // there can be escape sequences using the \ much like C.
+  // The role of the comma, the quotation mark, and the escape
   // character (backslash \), can be assigned to other characters.
 
   struct escaped_list_error : public std::runtime_error{
@@ -181,7 +181,7 @@ namespace boost{
             ++next;
             // The last character was a c, that means there is
             // 1 more blank field
-            last_ = true; 
+            last_ = true;
             return true;
           }
           else tok+=*next;
@@ -209,7 +209,7 @@ namespace boost{
   // Assuming that the conditional will always get optimized out in the function
   // implementations, argument types are not a problem since both forms of character classifiers
   // expect an int.
-   
+
 #if !defined(BOOST_NO_CWCTYPE)
   template<typename traits, int N>
   struct traits_extension_details : public traits {
@@ -238,7 +238,7 @@ namespace boost{
   };
 #endif
 
-    
+
   // In case there is no cwctype header, we implement the checks manually.
   // We make use of the fact that the tested categories should fit in ASCII.
   template<typename traits>
@@ -309,8 +309,8 @@ namespace boost{
   template <>
   struct assign_or_plus_equal<std::input_iterator_tag> {
     template<class Iterator, class Token>
-    static void assign(Iterator b, Iterator e, Token &t) { }
-    template<class Token, class Value> 
+    static void assign(Iterator , Iterator , Token &) { }
+    template<class Token, class Value>
     static void plus_equal(Token &t, const Value &v) {
       t += v;
     }
@@ -444,7 +444,7 @@ namespace boost{
     typedef tokenizer_detail::traits_extension<Tr> Traits;
     typedef std::basic_string<Char,Tr> string_type;
   public:
-    explicit 
+    explicit
     char_separator(const Char* dropped_delims,
                    const Char* kept_delims = 0,
                    empty_token_policy empty_tokens = drop_empty_tokens)
@@ -511,7 +511,7 @@ namespace boost{
             m_output_done = true;
             assigner::assign(start,next,tok);
             return true;
-          } 
+          }
           else
             return false;
         }
@@ -524,10 +524,10 @@ namespace boost{
             ++next;
             m_output_done = false;
           }
-        } 
+        }
         else if (m_output_done == false && is_dropped(*next)) {
           m_output_done = true;
-        } 
+        }
         else {
           if (is_dropped(*next))
             start=++next;
@@ -618,7 +618,7 @@ namespace boost{
     }
 
   public:
-    explicit char_delimiters_separator(bool return_delims = false, 
+    explicit char_delimiters_separator(bool return_delims = false,
                                        const Char* returnable = 0,
                                        const Char* nonreturnable = 0)
       : returnable_(returnable ? returnable : string_type().c_str()),
@@ -636,7 +636,7 @@ namespace boost{
 
      // skip past all nonreturnable delims
      // skip past the returnable only if we are not returning delims
-     for (;next!=end && ( is_nonret(*next) || (is_ret(*next) 
+     for (;next!=end && ( is_nonret(*next) || (is_ret(*next)
        && !return_delims_ ) );++next) { }
 
      if (next == end) {

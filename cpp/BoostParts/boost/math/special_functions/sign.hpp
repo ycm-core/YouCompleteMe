@@ -110,8 +110,9 @@ template<class T> int (signbit)(T x)
 { 
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
-   return detail::signbit_impl(x, method());
+   // typedef typename boost::is_floating_point<T>::type fp_tag;
+   typedef typename tools::promote_args<T>::type result_type;
+   return detail::signbit_impl(static_cast<result_type>(x), method());
 }
 
 template <class T>
@@ -120,20 +121,24 @@ inline int sign BOOST_NO_MACRO_EXPAND(const T& z)
    return (z == 0) ? 0 : (boost::math::signbit)(z) ? -1 : 1;
 }
 
-template<class T> T (changesign)(const T& x)
+template <class T> typename tools::promote_args<T>::type (changesign)(const T& x)
 { //!< \brief return unchanged binary pattern of x, except for change of sign bit. 
    typedef typename detail::fp_traits<T>::sign_change_type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   // typedef typename boost::is_floating_point<T>::type fp_tag;
+   typedef typename tools::promote_args<T>::type result_type;
 
-   return detail::changesign_impl(x, method());
+   return detail::changesign_impl(static_cast<result_type>(x), method());
 }
 
-template <class T>
-inline T copysign BOOST_NO_MACRO_EXPAND(const T& x, const T& y)
+template <class T, class U>
+inline typename tools::promote_args<T, U>::type 
+   copysign BOOST_NO_MACRO_EXPAND(const T& x, const U& y)
 {
    BOOST_MATH_STD_USING
-   return (boost::math::signbit)(x) != (boost::math::signbit)(y) ? (boost::math::changesign)(x) : x;
+   typedef typename tools::promote_args<T, U>::type result_type;
+   return (boost::math::signbit)(static_cast<result_type>(x)) != (boost::math::signbit)(static_cast<result_type>(y)) 
+      ? (boost::math::changesign)(static_cast<result_type>(x)) : static_cast<result_type>(x);
 }
 
 } // namespace math

@@ -107,7 +107,7 @@ std::size_t regex_split(OutputIterator out,
                    std::size_t max_split)
 {
    typedef typename std::basic_string<charT, Traits1, Alloc1>::const_iterator  ci_t;
-   typedef typename match_results<ci_t>::allocator_type                        match_allocator;
+   //typedef typename match_results<ci_t>::allocator_type                        match_allocator;
    ci_t last = s.begin();
    std::size_t init_size = max_split;
    re_detail::split_pred<OutputIterator, charT, Traits1, Alloc1> pred(&last, &out, &max_split);

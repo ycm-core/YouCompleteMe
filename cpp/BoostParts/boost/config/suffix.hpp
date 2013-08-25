@@ -641,7 +641,8 @@ namespace std{ using ::type_info; }
 #  if defined(_MSC_VER)
 #    define BOOST_FORCEINLINE __forceinline
 #  elif defined(__GNUC__) && __GNUC__ > 3
-#    define BOOST_FORCEINLINE inline __attribute__ ((always_inline))
+     // Clang also defines __GNUC__ (as 4)
+#    define BOOST_FORCEINLINE inline __attribute__ ((__always_inline__))
 #  else
 #    define BOOST_FORCEINLINE inline
 #  endif
@@ -671,7 +672,7 @@ namespace std{ using ::type_info; }
 #endif
 
 //  Use BOOST_NO_CXX11_HDR_ARRAY instead of BOOST_NO_0X_HDR_ARRAY
-#if defined(BOOST_NO_CXX11_HDR_ARRAY) && !defined(BOOST_NO_BOOST_NO_0X_HDR_ARRAY)
+#if defined(BOOST_NO_CXX11_HDR_ARRAY) && !defined(BOOST_NO_0X_HDR_ARRAY)
 #  define BOOST_NO_0X_HDR_ARRAY
 #endif
 //  Use BOOST_NO_CXX11_HDR_CHRONO instead of BOOST_NO_0X_HDR_CHRONO
@@ -874,13 +875,25 @@ namespace std{ using ::type_info; }
 //
 #ifdef BOOST_NO_CXX11_NOEXCEPT
 #  define BOOST_NOEXCEPT
+#  define BOOST_NOEXCEPT_OR_NOTHROW throw()
 #  define BOOST_NOEXCEPT_IF(Predicate)
 #  define BOOST_NOEXCEPT_EXPR(Expression) false
 #else
 #  define BOOST_NOEXCEPT noexcept
+#  define BOOST_NOEXCEPT_OR_NOTHROW noexcept
 #  define BOOST_NOEXCEPT_IF(Predicate) noexcept((Predicate))
 #  define BOOST_NOEXCEPT_EXPR(Expression) noexcept((Expression))
 #endif
+//
+// Helper macro BOOST_FALLTHROUGH 
+// Fallback definition of BOOST_FALLTHROUGH macro used to mark intended 
+// fall-through between case labels in a switch statement. We use a definition 
+// that requires a semicolon after it to avoid at least one type of misuse even 
+// on unsupported compilers. 
+// 
+#ifndef BOOST_FALLTHROUGH 
+#  define BOOST_FALLTHROUGH ((void)0) 
+#endif 
 
 //
 // constexpr workarounds

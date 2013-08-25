@@ -87,7 +87,7 @@
 #endif
 
 #include <typeinfo>
-#if ( (!_HAS_EXCEPTIONS && !defined(__ghs__)) || (!_HAS_NAMESPACE && defined(__ghs__)) ) 
+#if ( (!_HAS_EXCEPTIONS && !defined(__ghs__)) || (!_HAS_NAMESPACE && defined(__ghs__)) ) && !defined(__TI_COMPILER_VERSION__)
 #  define BOOST_NO_STD_TYPEINFO    
 #endif  
 

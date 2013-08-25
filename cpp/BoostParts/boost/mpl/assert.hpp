@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Id: assert.hpp 49267 2008-10-11 06:19:02Z agurtovoy $
-// $Date: 2008-10-10 23:19:02 -0700 (Fri, 10 Oct 2008) $
-// $Revision: 49267 $
+// $Id: assert.hpp 84442 2013-05-23 14:38:22Z steven_watanabe $
+// $Date: 2013-05-23 07:38:22 -0700 (Thu, 23 May 2013) $
+// $Revision: 84442 $
 
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/aux_/value_wknd.hpp>
@@ -34,6 +34,9 @@
 #include <boost/config.hpp> // make sure 'size_t' is placed into 'std'
 #include <cstddef>
 
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+#include <boost/mpl/if.hpp>
+#endif
 
 #if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x610)) \
     || (BOOST_MPL_CFG_GCC != 0) \
@@ -131,8 +134,38 @@ template< assert_::relations r, long x, long y > struct assert_relation {};
 
 #endif 
 
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1700)
 
-#if !defined(BOOST_MPL_CFG_ASSERT_BROKEN_POINTER_TO_POINTER_TO_MEMBER)
+template<class Pred>
+struct extract_assert_pred;
+
+template<class Pred>
+struct extract_assert_pred<void(Pred)> { typedef Pred type; };
+
+template<class Pred>
+struct eval_assert {
+    typedef typename extract_assert_pred<Pred>::type P;
+    typedef typename P::type p_type;
+    typedef typename ::boost::mpl::if_c<p_type::value,
+        AUX778076_ASSERT_ARG(assert<false>),
+        failed ************ P::************
+    >::type type;
+};
+
+template<class Pred>
+struct eval_assert_not {
+    typedef typename extract_assert_pred<Pred>::type P;
+    typedef typename P::type p_type;
+    typedef typename ::boost::mpl::if_c<!p_type::value,
+        AUX778076_ASSERT_ARG(assert<false>),
+        failed ************ ::boost::mpl::not_<P>::************
+    >::type type;
+};
+
+template< typename T >
+T make_assert_arg();
+
+#elif !defined(BOOST_MPL_CFG_ASSERT_BROKEN_POINTER_TO_POINTER_TO_MEMBER)
 
 template< bool > struct assert_arg_pred_impl { typedef int type; };
 template<> struct assert_arg_pred_impl<true> { typedef void* type; };
@@ -211,6 +244,39 @@ assert_rel_arg( assert_relation<r,x,y> );
 
 BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_CLOSE
 
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+
+// BOOST_MPL_ASSERT((pred<x,...>))
+
+#define BOOST_MPL_ASSERT(pred) \
+BOOST_MPL_AUX_ASSERT_CONSTANT( \
+      std::size_t \
+    , BOOST_PP_CAT(mpl_assertion_in_line_,BOOST_MPL_AUX_PP_COUNTER()) = sizeof( \
+          boost::mpl::assertion_failed<false>( \
+              boost::mpl::make_assert_arg< \
+                  typename boost::mpl::eval_assert<void pred>::type \
+                >() \
+            ) \
+        ) \
+    ) \
+/**/
+
+// BOOST_MPL_ASSERT_NOT((pred<x,...>))
+
+#define BOOST_MPL_ASSERT_NOT(pred) \
+BOOST_MPL_AUX_ASSERT_CONSTANT( \
+      std::size_t \
+    , BOOST_PP_CAT(mpl_assertion_in_line_,BOOST_MPL_AUX_PP_COUNTER()) = sizeof( \
+          boost::mpl::assertion_failed<false>( \
+              boost::mpl::make_assert_arg< \
+                  typename boost::mpl::eval_assert_not<void pred>::type \
+                >() \
+            ) \
+        ) \
+    ) \
+/**/
+
+#else
 
 // BOOST_MPL_ASSERT((pred<x,...>))
 
@@ -248,6 +314,8 @@ BOOST_MPL_AUX_ASSERT_CONSTANT( \
         ) \
    ) \
 /**/
+#endif
+
 #endif
 
 // BOOST_MPL_ASSERT_RELATION(x, ==|!=|<=|<|>=|>, y)

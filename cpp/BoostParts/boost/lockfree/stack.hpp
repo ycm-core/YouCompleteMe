@@ -1,4 +1,4 @@
-//  Copyright (C) 2008, 2009, 2010, 2011 Tim Blechmann
+//  Copyright (C) 2008-2013 Tim Blechmann
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -10,7 +10,9 @@
 #include <boost/assert.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/integer_traits.hpp>
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
 #include <boost/noncopyable.hpp>
+#endif
 #include <boost/static_assert.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits/has_trivial_assign.hpp>
@@ -63,8 +65,10 @@ template <typename T,
 #else
 template <typename T, ...Options>
 #endif
-class stack:
-    boost::noncopyable
+class stack
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    : boost::noncopyable
+#endif
 {
 private:
 #ifndef BOOST_DOXYGEN_INVOKED
@@ -106,6 +110,12 @@ private:
         typedef std::size_t size_type;
     };
 
+#endif
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    stack(stack const &) = delete;
+    stack(stack &&)      = delete;
+    const stack& operator=( const stack& ) = delete;
 #endif
 
 public:
@@ -179,7 +189,7 @@ public:
     void reserve(size_type n)
     {
         BOOST_STATIC_ASSERT(!has_capacity);
-        pool.reserve(n);
+        pool.template reserve<true>(n);
     }
 
     /** Allocate n nodes for freelist
@@ -191,7 +201,7 @@ public:
     void reserve_unsafe(size_type n)
     {
         BOOST_STATIC_ASSERT(!has_capacity);
-        pool.reserve_unsafe(n);
+        pool.template reserve<false>(n);
     }
 
     /** Destroys stack, free all nodes from freelist.
@@ -432,7 +442,7 @@ public:
             if (!old_tos_pointer)
                 return false;
 
-            tagged_node_handle new_tos(old_tos_pointer->next, old_tos.get_tag() + 1);
+            tagged_node_handle new_tos(old_tos_pointer->next, old_tos.get_next_tag());
 
             if (tos.compare_exchange_weak(old_tos, new_tos)) {
                 detail::copy_payload(old_tos_pointer->v, ret);
@@ -476,12 +486,72 @@ public:
             return false;
 
         node * new_tos_ptr = pool.get_pointer(old_tos_pointer->next);
-        tagged_node_handle new_tos(pool.get_handle(new_tos_ptr), old_tos.get_tag() + 1);
+        tagged_node_handle new_tos(pool.get_handle(new_tos_ptr), old_tos.get_next_tag());
 
         tos.store(new_tos, memory_order_relaxed);
         detail::copy_payload(old_tos_pointer->v, ret);
         pool.template destruct<false>(old_tos);
         return true;
+    }
+
+    /** consumes one element via a functor
+     *
+     *  pops one element from the stack and applies the functor on this object
+     *
+     * \returns true, if one element was consumed
+     *
+     * \note Thread-safe and non-blocking, if functor is thread-safe and non-blocking
+     * */
+    template <typename Functor>
+    bool consume_one(Functor & f)
+    {
+        T element;
+        bool success = pop(element);
+        if (success)
+            f(element);
+
+        return success;
+    }
+
+    /// \copydoc boost::lockfree::stack::consume_one(Functor & rhs)
+    template <typename Functor>
+    bool consume_one(Functor const & f)
+    {
+        T element;
+        bool success = pop(element);
+        if (success)
+            f(element);
+
+        return success;
+    }
+
+    /** consumes all elements via a functor
+     *
+     * sequentially pops all elements from the stack and applies the functor on each object
+     *
+     * \returns number of elements that are consumed
+     *
+     * \note Thread-safe and non-blocking, if functor is thread-safe and non-blocking
+     * */
+    template <typename Functor>
+    size_t consume_all(Functor & f)
+    {
+        size_t element_count = 0;
+        while (consume_one(f))
+            element_count += 1;
+
+        return element_count;
+    }
+
+    /// \copydoc boost::lockfree::stack::consume_all(Functor & rhs)
+    template <typename Functor>
+    size_t consume_all(Functor const & f)
+    {
+        size_t element_count = 0;
+        while (consume_one(f))
+            element_count += 1;
+
+        return element_count;
     }
 
     /**

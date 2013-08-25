@@ -2316,7 +2316,7 @@ private:
     }
 
     //! Specialized method for swapping the allocator.
-    void swap_allocator(circular_buffer<T, Alloc>& cb, const true_type&) {
+    void swap_allocator(circular_buffer<T, Alloc>&, const true_type&) {
         // Swap is not needed because allocators have no state.
     }
 

@@ -848,7 +848,7 @@ void* rbtree_best_fit<MutexFamily, VoidPointer, MemAlignment>::
             if(!priv_expand(reuse_ptr, received_size, received_size, received_size2)){
                BOOST_ASSERT(0);
             }
-            BOOST_ASSERT(received_size = received_size2);
+            BOOST_ASSERT(received_size == received_size2);
          }
          //We need a minimum size to split the previous one
          if(prev_block->m_size >= (needs_backwards_aligned/Alignment + BlockCtrlUnits)){

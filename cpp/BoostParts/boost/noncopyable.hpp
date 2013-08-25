@@ -9,6 +9,8 @@
 #ifndef BOOST_NONCOPYABLE_HPP_INCLUDED
 #define BOOST_NONCOPYABLE_HPP_INCLUDED
 
+#include <boost/config.hpp>
+
 namespace boost {
 
 //  Private copy constructor and copy assignment ensure classes derived from
@@ -21,11 +23,21 @@ namespace noncopyable_  // protection from unintended ADL
   class noncopyable
   {
    protected:
-      noncopyable() {}
+#ifndef BOOST_NO_DEFAULTED_FUNCTIONS
+    BOOST_CONSTEXPR noncopyable() = default;
+    ~noncopyable() = default;
+#else
+    noncopyable() {}
       ~noncopyable() {}
-   private:  // emphasize the following members are private
+#endif
+#ifndef BOOST_NO_DELETED_FUNCTIONS
+        noncopyable( const noncopyable& ) = delete;
+        noncopyable& operator=( const noncopyable& ) = delete;
+#else
+    private:  // emphasize the following members are private
       noncopyable( const noncopyable& );
-      const noncopyable& operator=( const noncopyable& );
+      noncopyable& operator=( const noncopyable& );
+#endif
   };
 }
 

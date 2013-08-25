@@ -17,6 +17,7 @@
 #include <boost/detail/workaround.hpp>
 #include <boost/operators.hpp>
 #include <boost/property_map/property_map.hpp>
+#include <boost/pending/container_traits.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <memory>
@@ -634,7 +635,6 @@ namespace boost {
                     directed_graph_helper<Config>& g_)
     {
       typedef typename Config::graph_type graph_type;
-      typedef typename Config::edge_parallel_category Cat;
       graph_type& g = static_cast<graph_type&>(g_);
       g.out_edge_list(u).clear();
       // clear() should be a req of Sequence and AssociativeContainer,
@@ -781,7 +781,6 @@ namespace boost {
         typedef typename Graph::global_edgelist_selector EdgeListS;
         BOOST_STATIC_ASSERT((!is_same<EdgeListS, vecS>::value));
 
-        typedef typename EdgeList::value_type StoredEdge;
         typename EdgeList::iterator i = el.begin(), end = el.end();
         for (; i != end; ++i) {
           if ((*i).get_target() == v) {
@@ -986,7 +985,6 @@ namespace boost {
       BOOST_STATIC_ASSERT((!is_same<EdgeListS, vecS>::value));
 
       typedef typename Config::graph_type graph_type;
-      typedef typename Config::edge_parallel_category Cat;
       graph_type& g = static_cast<graph_type&>(g_);
       while (true) {
         typename Config::out_edge_iterator ei, ei_end;
@@ -1588,7 +1586,6 @@ namespace boost {
       typedef typename Config::graph_type Graph;
       typedef typename Config::StoredEdge StoredEdge;
       const Graph& cg = static_cast<const Graph&>(g_);
-      typedef typename Config::out_edge_iterator out_edge_iterator;
       const typename Config::OutEdgeList& el = cg.out_edge_list(u);
       typename Config::OutEdgeList::const_iterator it = graph_detail::
         find(el, StoredEdge(v));
@@ -1903,7 +1900,7 @@ namespace boost {
     {
       typedef typename Config::stored_vertex stored_vertex;
       Derived& g = static_cast<Derived&>(g_);
-      g.removing_vertex(u);
+      g.removing_vertex(u, boost::graph_detail::iterator_stability(g_.m_vertices));
       stored_vertex* su = (stored_vertex*)u;
       g.m_vertices.erase(su->m_position);
       delete su;
@@ -2203,7 +2200,7 @@ namespace boost {
     {
       typedef typename Config::directed_category Cat;
       Graph& g = static_cast<Graph&>(g_);
-      g.removing_vertex(v);
+      g.removing_vertex(v, boost::graph_detail::iterator_stability(g_.m_vertices));
       detail::remove_vertex_dispatch(g, v, Cat());
     }
     // O(1)

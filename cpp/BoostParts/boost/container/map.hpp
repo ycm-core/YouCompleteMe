@@ -22,7 +22,6 @@
 #include <utility>
 #include <functional>
 #include <memory>
-#include <stdexcept>
 #include <boost/container/detail/tree.hpp>
 #include <boost/container/detail/value_init.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
@@ -30,10 +29,12 @@
 #include <boost/container/detail/utilities.hpp>
 #include <boost/container/detail/pair.hpp>
 #include <boost/container/detail/type_traits.hpp>
+#include <boost/container/throw_exception.hpp>
 #include <boost/move/utility.hpp>
 #include <boost/move/detail/move_helpers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/container/detail/value_init.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 
 namespace boost {
 namespace container {
@@ -423,7 +424,7 @@ class map
    {
       iterator i = this->find(k);
       if(i == this->end()){
-         throw std::out_of_range("key not found");
+         throw_out_of_range("map::at key not found");
       }
       return i->second;
    }
@@ -435,7 +436,7 @@ class map
    {
       const_iterator i = this->find(k);
       if(i == this->end()){
-         throw std::out_of_range("key not found");
+         throw_out_of_range("map::at key not found");
       }
       return i->second;
    }

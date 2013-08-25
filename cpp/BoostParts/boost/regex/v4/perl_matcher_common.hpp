@@ -65,6 +65,8 @@ void perl_matcher<BidiIterator, Allocator, traits>::construct_init(const basic_r
          m_match_flags |= match_perl;
       else if((re_f & (regbase::main_option_type|regbase::emacs_ex)) == (regbase::basic_syntax_group|regbase::emacs_ex))
          m_match_flags |= match_perl;
+      else if((re_f & (regbase::main_option_type|regbase::literal)) == (regbase::literal))
+         m_match_flags |= match_perl;
       else
          m_match_flags |= match_posix;
    }
@@ -326,6 +328,10 @@ bool perl_matcher<BidiIterator, Allocator, traits>::match_prefix()
       m_has_found_match = true;
       m_presult->set_second(last, 0, false);
       position = last;
+      if((m_match_flags & match_posix) == match_posix)
+      {
+         m_result.maybe_assign(*m_presult);
+      }
    }
 #ifdef BOOST_REGEX_MATCH_EXTRA
    if(m_has_found_match && (match_extra & m_match_flags))

@@ -21,7 +21,9 @@
 #include <boost/assert.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/mpl/or.hpp>
 #include <boost/type_traits/is_abstract.hpp>
+#include <boost/type_traits/is_array.hpp>
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/range/functions.hpp>
 #include <boost/range/iterator.hpp>
@@ -167,7 +169,8 @@ namespace boost
 
         private: // for return value of operator()()
             typedef BOOST_DEDUCED_TYPENAME
-                boost::mpl::if_< boost::is_abstract<value_type>,
+                boost::mpl::if_< boost::mpl::or_< boost::is_abstract< value_type >, 
+                                                  boost::is_array< value_type > >,
                                  reference, value_type >::type abstract_value_type;
 
         public:

@@ -9,11 +9,12 @@
 #ifndef BOOST_LOCKFREE_TAGGED_PTR_PTRCOMPRESSION_HPP_INCLUDED
 #define BOOST_LOCKFREE_TAGGED_PTR_PTRCOMPRESSION_HPP_INCLUDED
 
-#include <boost/lockfree/detail/branch_hints.hpp>
-
 #include <cstddef>              /* for std::size_t */
+#include <limits>
 
 #include <boost/cstdint.hpp>
+
+#include <boost/lockfree/detail/branch_hints.hpp>
 
 namespace boost {
 namespace lockfree {
@@ -110,12 +111,12 @@ public:
 
     /** pointer access */
     /* @{ */
-    T * get_ptr() const volatile
+    T * get_ptr() const
     {
         return extract_ptr(ptr);
     }
 
-    void set_ptr(T * p) volatile
+    void set_ptr(T * p)
     {
         tag_t tag = get_tag();
         ptr = pack_ptr(p, tag);
@@ -124,12 +125,18 @@ public:
 
     /** tag access */
     /* @{ */
-    tag_t get_tag() const volatile
+    tag_t get_tag() const
     {
         return extract_tag(ptr);
     }
 
-    void set_tag(tag_t t) volatile
+    tag_t get_next_tag() const
+    {
+        tag_t next = (get_tag() + 1) & (std::numeric_limits<tag_t>::max)();
+        return next;
+    }
+
+    void set_tag(tag_t t)
     {
         T * p = get_ptr();
         ptr = pack_ptr(p, t);

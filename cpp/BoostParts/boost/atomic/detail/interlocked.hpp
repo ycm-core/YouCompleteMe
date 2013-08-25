@@ -2,7 +2,7 @@
 #define BOOST_ATOMIC_DETAIL_INTERLOCKED_HPP
 
 //  Copyright (c) 2009 Helge Bahmann
-//  Copyright (c) 2012 Andrey Semashev
+//  Copyright (c) 2012, 2013 Andrey Semashev
 //
 //  Distributed under the Boost Software License, Version 1.0.
 //  See accompanying file LICENSE_1_0.txt or copy at
@@ -14,7 +14,7 @@
 #pragma once
 #endif
 
-#if defined(_WIN32_WCE)
+#if defined(_WIN32_WCE) || (defined(_MSC_VER) && _MSC_VER < 1400)
 
 #include <boost/detail/interlocked.hpp>
 
@@ -25,29 +25,23 @@
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_POINTER(dest, newval) BOOST_INTERLOCKED_EXCHANGE_POINTER(dest, newval)
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD_POINTER(dest, byte_offset) ((void*)BOOST_INTERLOCKED_EXCHANGE_ADD((long*)(dest), byte_offset))
 
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && _MSC_VER >= 1400
 
 #include <intrin.h>
 
 #pragma intrinsic(_InterlockedCompareExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedExchange)
-
-#define BOOST_ATOMIC_INTERLOCKED_COMPARE_EXCHANGE(dest, exchange, compare) _InterlockedCompareExchange((long*)(dest), (long)(exchange), (long)(compare))
-#define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD(dest, addend) _InterlockedExchangeAdd((long*)(dest), (long)(addend))
-#define BOOST_ATOMIC_INTERLOCKED_EXCHANGE(dest, newval) _InterlockedExchange((long*)(dest), (long)(newval))
-
-#if _MSC_VER >= 1400
-
 #pragma intrinsic(_InterlockedAnd)
 #pragma intrinsic(_InterlockedOr)
 #pragma intrinsic(_InterlockedXor)
 
+#define BOOST_ATOMIC_INTERLOCKED_COMPARE_EXCHANGE(dest, exchange, compare) _InterlockedCompareExchange((long*)(dest), (long)(exchange), (long)(compare))
+#define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD(dest, addend) _InterlockedExchangeAdd((long*)(dest), (long)(addend))
+#define BOOST_ATOMIC_INTERLOCKED_EXCHANGE(dest, newval) _InterlockedExchange((long*)(dest), (long)(newval))
 #define BOOST_ATOMIC_INTERLOCKED_AND(dest, arg) _InterlockedAnd((long*)(dest), (long)(arg))
 #define BOOST_ATOMIC_INTERLOCKED_OR(dest, arg) _InterlockedOr((long*)(dest), (long)(arg))
 #define BOOST_ATOMIC_INTERLOCKED_XOR(dest, arg) _InterlockedXor((long*)(dest), (long)(arg))
-
-#endif // _MSC_VER >= 1400
 
 #if _MSC_VER >= 1600
 
@@ -108,15 +102,15 @@
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_POINTER(dest, newval) _InterlockedExchangePointer((void**)(dest), (void*)(newval))
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD_POINTER(dest, byte_offset) ((void*)BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD64((long*)(dest), byte_offset))
 
-#else // defined(_M_AMD64)
+#else // defined(_M_AMD64) || defined(_M_IA64)
 
 #define BOOST_ATOMIC_INTERLOCKED_COMPARE_EXCHANGE_POINTER(dest, exchange, compare) ((void*)_InterlockedCompareExchange((long*)(dest), (long)(exchange), (long)(compare)))
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_POINTER(dest, newval) ((void*)_InterlockedExchange((long*)(dest), (long)(newval)))
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD_POINTER(dest, byte_offset) ((void*)BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD((long*)(dest), byte_offset))
 
-#endif // defined(_M_AMD64)
+#endif // defined(_M_AMD64) || defined(_M_IA64)
 
-#else // defined(_MSC_VER)
+#else // defined(_MSC_VER) && _MSC_VER >= 1400
 
 #if defined(BOOST_USE_WINDOWS_H)
 

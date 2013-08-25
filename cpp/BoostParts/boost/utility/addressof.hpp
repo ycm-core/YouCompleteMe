@@ -1,4 +1,4 @@
-// Copyright (C) 2002 Brad King (brad.king@kitware.com) 
+// Copyright (C) 2002 Brad King (brad.king@kitware.com)
 //                    Douglas Gregor (gregod@cs.rpi.edu)
 //
 // Copyright (C) 2002, 2008 Peter Dimov
@@ -50,7 +50,7 @@ template<class T> struct addressof_impl
 
 template<class T> T * addressof( T & v )
 {
-#if defined( __BORLANDC__ ) && BOOST_WORKAROUND( __BORLANDC__, BOOST_TESTED_AT( 0x610 ) )
+#if (defined( __BORLANDC__ ) && BOOST_WORKAROUND( __BORLANDC__, BOOST_TESTED_AT( 0x610 ) ) ) || defined( __SUNPRO_CC )
 
     return boost::detail::addressof_impl<T>::f( v, 0 );
 

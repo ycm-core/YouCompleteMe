@@ -35,11 +35,11 @@ namespace
   {
   public:
     codecvt_error_cat(){}
-    const char*   name() const;
+    const char*   name() const BOOST_SYSTEM_NOEXCEPT;
     std::string    message(int ev) const;
   };
 
-  const char* codecvt_error_cat::name() const
+  const char* codecvt_error_cat::name() const BOOST_SYSTEM_NOEXCEPT
   {
     return "codecvt";
   }

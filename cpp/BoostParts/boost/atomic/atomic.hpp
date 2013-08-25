@@ -2,6 +2,7 @@
 #define BOOST_ATOMIC_ATOMIC_HPP
 
 //  Copyright (c) 2011 Helge Bahmann
+//  Copyright (c) 2013 Tim Blechmann
 //
 //  Distributed under the Boost Software License, Version 1.0.
 //  See accompanying file LICENSE_1_0.txt or copy at
@@ -16,6 +17,10 @@
 #include <boost/atomic/detail/platform.hpp>
 #include <boost/atomic/detail/type-classification.hpp>
 #include <boost/type_traits/is_signed.hpp>
+#if defined(BOOST_MSVC) && BOOST_MSVC < 1400
+#include <boost/type_traits/is_integral.hpp>
+#include <boost/mpl/and.hpp>
+#endif
 
 #ifdef BOOST_ATOMIC_HAS_PRAGMA_ONCE
 #pragma once
@@ -82,23 +87,54 @@ inline void atomic_signal_fence(memory_order order)
 
 template<typename T>
 class atomic :
-    public atomics::detail::base_atomic<T, typename atomics::detail::classify<T>::type, atomics::detail::storage_size_of<T>::value, boost::is_signed<T>::value >
+    public atomics::detail::base_atomic<
+        T,
+        typename atomics::detail::classify<T>::type,
+        atomics::detail::storage_size_of<T>::value,
+#if !defined(BOOST_MSVC) || BOOST_MSVC >= 1400
+        boost::is_signed<T>::value
+#else
+        // MSVC 2003 has problems instantiating is_signed on non-integral types
+        mpl::and_< boost::is_integral<T>, boost::is_signed<T> >::value
+#endif
+    >
 {
 private:
     typedef T value_type;
-    typedef atomics::detail::base_atomic<T, typename atomics::detail::classify<T>::type, atomics::detail::storage_size_of<T>::value, boost::is_signed<T>::value > super;
+    typedef atomics::detail::base_atomic<
+        T,
+        typename atomics::detail::classify<T>::type,
+        atomics::detail::storage_size_of<T>::value,
+#if !defined(BOOST_MSVC) || BOOST_MSVC >= 1400
+        boost::is_signed<T>::value
+#else
+        // MSVC 2003 has problems instantiating is_signed on non-itegral types
+        mpl::and_< boost::is_integral<T>, boost::is_signed<T> >::value
+#endif
+    > super;
 public:
-    atomic(void) : super() {}
-    explicit atomic(const value_type & v) : super(v) {}
+    atomic(void) BOOST_NOEXCEPT : super() {}
+    BOOST_CONSTEXPR atomic(value_type v) BOOST_NOEXCEPT : super(v) {}
 
-    atomic & operator=(value_type v) volatile
+    value_type operator=(value_type v) volatile BOOST_NOEXCEPT
     {
-        super::operator=(v);
-        return *const_cast<atomic *>(this);
+        this->store(v);
+        return v;
     }
+
+    operator value_type(void) volatile const BOOST_NOEXCEPT
+    {
+        return this->load();
+    }
+
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
 private:
     atomic(const atomic &) /* =delete */ ;
-    atomic & operator=(const atomic &) /* =delete */ ;
+    atomic & operator=(const atomic &) volatile /* =delete */ ;
+#else
+    atomic(const atomic &) = delete;
+    atomic & operator=(const atomic &) volatile = delete;
+#endif
 };
 
 typedef atomic<char> atomic_char;
@@ -158,7 +194,7 @@ typedef atomic<std::ptrdiff_t> atomic_ptrdiff_t;
 #if !defined(__PGIC__)
 
 #if (defined(BOOST_WINDOWS) && !defined(_WIN32_WCE)) \
-    || (defined(_XOPEN_UNIX) && (_XOPEN_UNIX+0 > 0)) \
+    || (defined(_XOPEN_UNIX) && (_XOPEN_UNIX+0 > 0) && !defined(__UCLIBC__)) \
     || defined(__CYGWIN__) \
     || defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__) \
     || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
@@ -180,16 +216,16 @@ typedef atomic< __UINTPTR_TYPE__ > atomic_uintptr_t;
 class atomic_flag
 {
 public:
-    atomic_flag(void) : v_(false) {}
+    BOOST_CONSTEXPR atomic_flag(void) BOOST_NOEXCEPT : v_(false) {}
 
     bool
-    test_and_set(memory_order order = memory_order_seq_cst)
+    test_and_set(memory_order order = memory_order_seq_cst) BOOST_NOEXCEPT
     {
         return v_.exchange(true, order);
     }
 
     void
-    clear(memory_order order = memory_order_seq_cst) volatile
+    clear(memory_order order = memory_order_seq_cst) volatile BOOST_NOEXCEPT
     {
         v_.store(false, order);
     }

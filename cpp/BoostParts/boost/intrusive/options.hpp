@@ -33,6 +33,8 @@ namespace detail{
 
 struct default_hook_tag{};
 
+#ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+
 #define BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER_DEFINITION(BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER) \
 struct BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER : public default_hook_tag\
 {\
@@ -50,6 +52,8 @@ BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER_DEFINITION(default_splay_set_hook);
 BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER_DEFINITION(default_bs_set_hook);
 
 #undef BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER_DEFINITION
+
+#endif   //BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 template <class ValueTraits>
 struct eval_value_traits

@@ -476,8 +476,13 @@ namespace boost
         {
           using namespace chrono;
           system_clock::time_point     s_now = system_clock::now();
-          typename Clock::time_point  c_now = Clock::now();
-          return try_join_until(s_now + ceil<nanoseconds>(t - c_now));
+          bool joined= false;
+          do {
+            typename Clock::duration   d = ceil<nanoseconds>(t-Clock::now());
+            if (d <= Clock::duration::zero()) return false; // in case the Clock::time_point t is already reached
+            joined = try_join_until(s_now + d);
+          } while (! joined);
+          return true;
         }
         template <class Duration>
         bool try_join_until(const chrono::time_point<chrono::system_clock, Duration>& t)

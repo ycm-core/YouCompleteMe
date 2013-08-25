@@ -2,7 +2,7 @@
 //  Michael, M. M. and Scott, M. L.,
 //  "simple, fast and practical non-blocking and blocking concurrent queue algorithms"
 //
-//  Copyright (C) 2008, 2009, 2010, 2011 Tim Blechmann
+//  Copyright (C) 2008-2013 Tim Blechmann
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -11,10 +11,10 @@
 #ifndef BOOST_LOCKFREE_FIFO_HPP_INCLUDED
 #define BOOST_LOCKFREE_FIFO_HPP_INCLUDED
 
-#include <memory>               /* std::auto_ptr */
-
 #include <boost/assert.hpp>
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
 #include <boost/noncopyable.hpp>
+#endif
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/has_trivial_assign.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
@@ -69,8 +69,10 @@ template <typename T,
 #else
 template <typename T, ...Options>
 #endif
-class queue:
-    boost::noncopyable
+class queue
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    : boost::noncopyable
+#endif
 {
 private:
 #ifndef BOOST_DOXYGEN_INVOKED
@@ -86,7 +88,7 @@ private:
     typedef typename detail::queue_signature::bind<A0, A1, A2>::type bound_args;
 
     static const bool has_capacity = detail::extract_capacity<bound_args>::has_capacity;
-    static const size_t capacity = detail::extract_capacity<bound_args>::capacity;
+    static const size_t capacity = detail::extract_capacity<bound_args>::capacity + 1; // the queue uses one dummy node
     static const bool fixed_sized = detail::extract_fixed_sized<bound_args>::value;
     static const bool node_based = !(has_capacity || fixed_sized);
     static const bool compile_time_sized = has_capacity;
@@ -101,7 +103,7 @@ private:
         {
             /* increment tag to avoid ABA problem */
             tagged_node_handle old_next = next.load(memory_order_relaxed);
-            tagged_node_handle new_next (null_handle, old_next.get_tag()+1);
+            tagged_node_handle new_next (null_handle, old_next.get_next_tag());
             next.store(new_next, memory_order_release);
         }
 
@@ -135,6 +137,12 @@ private:
         typedef std::size_t size_type;
     };
 
+#endif
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    queue(queue const &) = delete;
+    queue(queue &&)      = delete;
+    const queue& operator=( const queue& ) = delete;
 #endif
 
 public:
@@ -293,15 +301,15 @@ private:
             tagged_node_handle tail2 = tail_.load(memory_order_acquire);
             if (likely(tail == tail2)) {
                 if (next_ptr == 0) {
-                    tagged_node_handle new_tail_next(node_handle, next.get_tag() + 1);
+                    tagged_node_handle new_tail_next(node_handle, next.get_next_tag());
                     if ( tail_node->next.compare_exchange_weak(next, new_tail_next) ) {
-                        tagged_node_handle new_tail(node_handle, tail.get_tag() + 1);
+                        tagged_node_handle new_tail(node_handle, tail.get_next_tag());
                         tail_.compare_exchange_strong(tail, new_tail);
                         return true;
                     }
                 }
                 else {
-                    tagged_node_handle new_tail(pool.get_handle(next_ptr), tail.get_tag() + 1);
+                    tagged_node_handle new_tail(pool.get_handle(next_ptr), tail.get_next_tag());
                     tail_.compare_exchange_strong(tail, new_tail);
                 }
             }
@@ -333,12 +341,12 @@ public:
             node * next_ptr = next.get_ptr();
 
             if (next_ptr == 0) {
-                tail->next.store(tagged_node_handle(n, next.get_tag() + 1), memory_order_relaxed);
-                tail_.store(tagged_node_handle(n, tail.get_tag() + 1), memory_order_relaxed);
+                tail->next.store(tagged_node_handle(n, next.get_next_tag()), memory_order_relaxed);
+                tail_.store(tagged_node_handle(n, tail.get_next_tag()), memory_order_relaxed);
                 return true;
             }
             else
-                tail_.store(tagged_node_handle(next_ptr, tail.get_tag() + 1), memory_order_relaxed);
+                tail_.store(tagged_node_handle(next_ptr, tail.get_next_tag()), memory_order_relaxed);
         }
     }
 
@@ -380,7 +388,7 @@ public:
                     if (next_ptr == 0)
                         return false;
 
-                    tagged_node_handle new_tail(pool.get_handle(next), tail.get_tag() + 1);
+                    tagged_node_handle new_tail(pool.get_handle(next), tail.get_next_tag());
                     tail_.compare_exchange_strong(tail, new_tail);
 
                 } else {
@@ -393,7 +401,7 @@ public:
                         continue;
                     detail::copy_payload(next_ptr->data, ret);
 
-                    tagged_node_handle new_head(pool.get_handle(next), head.get_tag() + 1);
+                    tagged_node_handle new_head(pool.get_handle(next), head.get_next_tag());
                     if (head_.compare_exchange_weak(head, new_head)) {
                         pool.template destruct<true>(head);
                         return true;
@@ -439,7 +447,7 @@ public:
                 if (next_ptr == 0)
                     return false;
 
-                tagged_node_handle new_tail(pool.get_handle(next), tail.get_tag() + 1);
+                tagged_node_handle new_tail(pool.get_handle(next), tail.get_next_tag());
                 tail_.store(new_tail);
             } else {
                 if (next_ptr == 0)
@@ -450,12 +458,72 @@ public:
                      * */
                     continue;
                 detail::copy_payload(next_ptr->data, ret);
-                tagged_node_handle new_head(pool.get_handle(next), head.get_tag() + 1);
+                tagged_node_handle new_head(pool.get_handle(next), head.get_next_tag());
                 head_.store(new_head);
                 pool.template destruct<false>(head);
                 return true;
             }
         }
+    }
+
+    /** consumes one element via a functor
+     *
+     *  pops one element from the queue and applies the functor on this object
+     *
+     * \returns true, if one element was consumed
+     *
+     * \note Thread-safe and non-blocking, if functor is thread-safe and non-blocking
+     * */
+    template <typename Functor>
+    bool consume_one(Functor & f)
+    {
+        T element;
+        bool success = pop(element);
+        if (success)
+            f(element);
+
+        return success;
+    }
+
+    /// \copydoc boost::lockfree::queue::consume_one(Functor & rhs)
+    template <typename Functor>
+    bool consume_one(Functor const & f)
+    {
+        T element;
+        bool success = pop(element);
+        if (success)
+            f(element);
+
+        return success;
+    }
+
+    /** consumes all elements via a functor
+     *
+     * sequentially pops all elements from the queue and applies the functor on each object
+     *
+     * \returns number of elements that are consumed
+     *
+     * \note Thread-safe and non-blocking, if functor is thread-safe and non-blocking
+     * */
+    template <typename Functor>
+    size_t consume_all(Functor & f)
+    {
+        size_t element_count = 0;
+        while (consume_one(f))
+            element_count += 1;
+
+        return element_count;
+    }
+
+    /// \copydoc boost::lockfree::queue::consume_all(Functor & rhs)
+    template <typename Functor>
+    size_t consume_all(Functor const & f)
+    {
+        size_t element_count = 0;
+        while (consume_one(f))
+            element_count += 1;
+
+        return element_count;
     }
 
 private:

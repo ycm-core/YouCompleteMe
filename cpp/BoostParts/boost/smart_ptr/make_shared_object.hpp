@@ -87,6 +87,10 @@ public:
         destroy();
     }
 
+    static void operator_fn( T* ) // operator() can't be static
+    {
+    }
+
     void * address() BOOST_NOEXCEPT
     {
         return storage_.data_;

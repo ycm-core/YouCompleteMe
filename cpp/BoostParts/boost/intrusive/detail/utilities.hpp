@@ -28,6 +28,7 @@
 #include <iterator>
 #include <boost/cstdint.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -131,6 +132,12 @@ struct size_holder
    void increment()
    {  ++size_; }
 
+   void increase(SizeType n)
+   {  size_ += n; }
+
+   void decrease(SizeType n)
+   {  size_ -= n; }
+
    SizeType size_;
 };
 
@@ -150,6 +157,12 @@ struct size_holder<false, SizeType>
    {}
 
    void increment()
+   {}
+
+   void increase(SizeType)
+   {}
+
+   void decrease(SizeType)
    {}
 };
 
@@ -692,19 +705,20 @@ class array_initializer
    {
       char *init_buf = (char*)rawbuf;
       std::size_t i = 0;
-      try{
+      BOOST_TRY{
          for(; i != N; ++i){
             new(init_buf)T(init);
             init_buf += sizeof(T);
          }
       }
-      catch(...){
+      BOOST_CATCH(...){
          while(i--){
             init_buf -= sizeof(T);
             ((T*)init_buf)->~T();
          }
-         throw;
+         BOOST_RETHROW;
       }
+      BOOST_CATCH_END
    }
 
    operator T* ()

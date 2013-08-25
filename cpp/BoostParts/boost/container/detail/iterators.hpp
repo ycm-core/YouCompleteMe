@@ -114,7 +114,7 @@ class constant_iterator
    const T& operator*() const
    { return dereference(); }
 
-   const T& operator[] (Difference n) const
+   const T& operator[] (Difference ) const
    { return dereference(); }
 
    const T* operator->() const
@@ -335,7 +335,7 @@ class repeat_iterator
    T& operator*() const
    { return dereference(); }
 
-   T& operator[] (Difference n) const
+   T& operator[] (Difference ) const
    { return dereference(); }
 
    T *operator->() const

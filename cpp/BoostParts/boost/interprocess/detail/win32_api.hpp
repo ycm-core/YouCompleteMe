@@ -16,14 +16,18 @@
 #include <boost/date_time/filetime_functions.hpp>
 #include <cstddef>
 #include <cstring>
-#include <cassert>
+#include <cstdlib>
+#include <cstdio>
+
+#include <boost/assert.hpp>
 #include <string>
 #include <vector>
 #include <memory>
 
+
 #if defined (_MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
-#  pragma comment( lib, "advapi32.lib" )
+#  pragma comment( lib, "Advapi32.lib" )
 #  pragma comment( lib, "oleaut32.lib" )
 #  pragma comment( lib, "Ole32.lib" )
 #  pragma comment( lib, "Psapi.lib" )
@@ -52,10 +56,11 @@ static const unsigned long error_file_not_found = 2u;
 static const unsigned long error_no_more_files  = 18u;
 static const unsigned long error_not_locked     = 158L;
 //Retries in CreateFile, see http://support.microsoft.com/kb/316609
-static const unsigned int  error_sharing_violation_tries = 3u;
-static const unsigned int  error_sharing_violation_sleep_ms = 250u;
-static const unsigned int  error_file_too_large = 223u;
-
+static const unsigned long error_sharing_violation_tries = 3L;
+static const unsigned long error_sharing_violation_sleep_ms = 250L;
+static const unsigned long error_file_too_large = 223L;
+static const unsigned long error_insufficient_buffer = 122L;
+static const unsigned long error_handle_eof = 38L;
 static const unsigned long semaphore_all_access = (0x000F0000L)|(0x00100000L)|0x3;
 static const unsigned long mutex_all_access     = (0x000F0000L)|(0x00100000L)|0x0001;
 
@@ -90,6 +95,7 @@ static const unsigned long file_open_for_backup_intent = 0x00004000;
 static const int file_share_valid_flags = 0x00000007;
 static const long file_delete_on_close = 0x00001000L;
 static const long obj_case_insensitive = 0x00000040L;
+static const long delete_flag = 0x00010000L;
 
 static const unsigned long movefile_copy_allowed            = 0x02;
 static const unsigned long movefile_delay_until_reboot      = 0x04;
@@ -162,6 +168,8 @@ static const unsigned long lockfile_fail_immediately  = 1;
 static const unsigned long lockfile_exclusive_lock    = 2;
 static const unsigned long error_lock_violation       = 33;
 static const unsigned long security_descriptor_revision = 1;
+
+const unsigned long max_record_buffer_size = 0x10000L;   // 64K
 
 //Own defines
 static const long SystemTimeOfDayInfoLength  = 48;
@@ -834,6 +842,39 @@ struct object_name_information_t
    wchar_t NameBuffer[1];
 };
 
+struct interprocess_eventlogrecord
+{
+    unsigned long  Length;        // Length of full record
+    unsigned long  Reserved;      // Used by the service
+    unsigned long  RecordNumber;  // Absolute record number
+    unsigned long  TimeGenerated; // Seconds since 1-1-1970
+    unsigned long  TimeWritten;   // Seconds since 1-1-1970
+    unsigned long  EventID;
+    unsigned short EventType;
+    unsigned short NumStrings;
+    unsigned short EventCategory;
+    unsigned short ReservedFlags; // For use with paired events (auditing)
+    unsigned long  ClosingRecordNumber; // For use with paired events (auditing)
+    unsigned long  StringOffset;  // Offset from beginning of record
+    unsigned long  UserSidLength;
+    unsigned long  UserSidOffset;
+    unsigned long  DataLength;
+    unsigned long  DataOffset;    // Offset from beginning of record
+    //
+    // Then follow:
+    //
+    // wchar_t SourceName[]
+    // wchar_t Computername[]
+    // SID   UserSid
+    // wchar_t Strings[]
+    // BYTE  Data[]
+    // CHAR  Pad[]
+    // unsigned long Length;
+    //
+};
+
+//Kernel32.dll
+
 //Some windows API declarations
 extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
 extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentThreadId();
@@ -870,8 +911,6 @@ extern "C" __declspec(dllimport) void * __stdcall CreateFileMappingA (void *, in
 extern "C" __declspec(dllimport) void * __stdcall MapViewOfFileEx (void *, unsigned long, unsigned long, unsigned long, std::size_t, void*);
 extern "C" __declspec(dllimport) void * __stdcall OpenFileMappingA (unsigned long, int, const char *);
 extern "C" __declspec(dllimport) void * __stdcall CreateFileA (const char *, unsigned long, unsigned long, struct interprocess_security_attributes*, unsigned long, unsigned long, void *);
-extern "C" __declspec(dllimport) int __stdcall    DeleteFileA (const char *);
-extern "C" __declspec(dllimport) int __stdcall    MoveFileExA (const char *, const char *, unsigned long);
 extern "C" __declspec(dllimport) void __stdcall GetSystemInfo (struct system_info *);
 extern "C" __declspec(dllimport) int __stdcall FlushViewOfFile (void *, std::size_t);
 extern "C" __declspec(dllimport) int __stdcall VirtualUnlock (void *, std::size_t);
@@ -904,13 +943,14 @@ extern "C" __declspec(dllimport) int   __stdcall FreeLibrary(void *);
 extern "C" __declspec(dllimport) void *__stdcall GetProcAddress(void *, const char*);
 extern "C" __declspec(dllimport) void *__stdcall GetModuleHandleA(const char*);
 extern "C" __declspec(dllimport) void *__stdcall GetFileInformationByHandle(void *, interprocess_by_handle_file_information*);
-extern "C" __declspec(dllimport) unsigned long __stdcall GetMappedFileNameW(void *, void *, wchar_t *, unsigned long);
+extern "C" __declspec(dllimport) int  __stdcall QueryPerformanceCounter(__int64 *lpPerformanceCount);
+
+//Advapi32.dll
 extern "C" __declspec(dllimport) long __stdcall RegOpenKeyExA(void *, const char *, unsigned long, unsigned long, void **);
 extern "C" __declspec(dllimport) long __stdcall RegQueryValueExA(void *, const char *, unsigned long*, unsigned long*, unsigned char *, unsigned long*);
 extern "C" __declspec(dllimport) long __stdcall RegCloseKey(void *);
-extern "C" __declspec(dllimport) int  __stdcall QueryPerformanceCounter(__int64 *lpPerformanceCount);
 
-//COM API
+//Ole32.dll
 extern "C" __declspec(dllimport) long __stdcall CoInitializeEx(void *pvReserved, unsigned long dwCoInit);
 extern "C" __declspec(dllimport) long __stdcall CoInitializeSecurity(
                     void*          pSecDesc,
@@ -932,18 +972,40 @@ extern "C" __declspec(dllimport) long __stdcall CoInitializeSecurity(
                      unsigned long dwImpLevel,
                      void *pAuthInfo,
                      unsigned long dwCapabilities);
-
-extern "C" __declspec(dllimport) long __stdcall VariantClear(wchar_variant * pvarg);
 extern "C" __declspec(dllimport) long __stdcall CoCreateInstance(const GUID_BIPC & rclsid, IUnknown_BIPC *pUnkOuter,
                     unsigned long dwClsContext, const GUID_BIPC & riid, void** ppv);
 extern "C" __declspec(dllimport) void __stdcall CoUninitialize(void);
 
+//OleAut32.dll
+extern "C" __declspec(dllimport) long __stdcall VariantClear(wchar_variant * pvarg);
 
 
-//API function typedefs
-//Pointer to functions
+//EventLog access functions
+
+static const unsigned long eventlog_sequential_read = 0x0001;
+static const unsigned long eventlog_backwards_read  = 0x0008;
+
+extern "C" __declspec(dllimport) void* __stdcall OpenEventLogA
+   (const char* lpUNCServerName, const char* lpSourceName);
+
+extern "C" __declspec(dllimport) int __stdcall CloseEventLog(void *hEventLog);
+
+extern "C" __declspec(dllimport) int __stdcall ReadEventLogA
+   (void *hEventLog,
+    unsigned long dwReadFlags,
+    unsigned long dwRecordOffset,
+    void *lpBuffer,
+    unsigned long nNumberOfBytesToRead,
+    unsigned long *pnBytesRead,
+    unsigned long *pnMinNumberOfBytesNeeded
+   );
+
+
+//ntdll.dll
 typedef long (__stdcall *NtDeleteFile_t)(object_attributes_t *ObjectAttributes);
 typedef long (__stdcall *NtSetInformationFile_t)(void *FileHandle, io_status_block_t *IoStatusBlock, void *FileInformation, unsigned long Length, int FileInformationClass );
+typedef long (__stdcall *NtOpenFile)(void **FileHandle, unsigned long DesiredAccess, object_attributes_t *ObjectAttributes
+                                    , io_status_block_t *IoStatusBlock, unsigned long ShareAccess, unsigned long Length, unsigned long OpenOptions);
 typedef long (__stdcall *NtQuerySystemInformation_t)(int, void*, unsigned long, unsigned long *);
 typedef long (__stdcall *NtQueryObject_t)(void*, object_information_class, void *, unsigned long, unsigned long *);
 typedef long (__stdcall *NtQuerySemaphore_t)(void*, unsigned int info_class, interprocess_semaphore_basic_information *pinfo, unsigned int info_size, unsigned int *ret_len);
@@ -951,14 +1013,6 @@ typedef long (__stdcall *NtQuerySection_t)(void*, section_information_class, int
 typedef long (__stdcall *NtQueryInformationFile_t)(void *,io_status_block_t *,void *, long, int);
 typedef long (__stdcall *NtOpenFile_t)(void*,unsigned long ,object_attributes_t*,io_status_block_t*,unsigned long,unsigned long);
 typedef long (__stdcall *NtClose_t) (void*);
-typedef long (__stdcall *RtlCreateUnicodeStringFromAsciiz_t)(unicode_string_t *, const char *);
-typedef void (__stdcall *RtlFreeUnicodeString_t)(unicode_string_t *);
-typedef void (__stdcall *RtlInitUnicodeString_t)( unicode_string_t *, const wchar_t * );
-typedef long (__stdcall *RtlAppendUnicodeToString_t)(unicode_string_t *Destination, const wchar_t *Source);
-typedef unsigned long (__stdcall * GetMappedFileName_t)(void *, void *, wchar_t *, unsigned long);
-typedef long          (__stdcall * RegOpenKeyEx_t)(void *, const char *, unsigned long, unsigned long, void **);
-typedef long          (__stdcall * RegQueryValueEx_t)(void *, const char *, unsigned long*, unsigned long*, unsigned char *, unsigned long*);
-typedef long          (__stdcall * RegCloseKey_t)(void *);
 
 }  //namespace winapi {
 }  //namespace interprocess  {
@@ -1125,12 +1179,6 @@ inline void *create_file(const char *name, unsigned long access, unsigned long c
    return invalid_handle_value;
 }
 
-inline bool delete_file(const char *name)
-{  return 0 != DeleteFileA(name);  }
-
-inline bool move_file_ex(const char *source_filename, const char *destination_filename, unsigned long flags)
-{  return 0 != MoveFileExA(source_filename, destination_filename, flags);  }
-
 inline void get_system_info(system_info *info)
 {  GetSystemInfo(info); }
 
@@ -1213,9 +1261,6 @@ inline void *get_current_process()
 inline void *get_module_handle(const char *name)
 {  return GetModuleHandleA(name); }
 
-inline unsigned long get_mapped_file_name(void *process, void *lpv, wchar_t *lpfilename, unsigned long nSize)
-{  return GetMappedFileNameW(process, lpv, lpfilename, nSize); }
-
 inline long reg_open_key_ex(void *hKey, const char *lpSubKey, unsigned long ulOptions, unsigned long samDesired, void **phkResult)
 {  return RegOpenKeyExA(hKey, lpSubKey, ulOptions, samDesired, phkResult); }
 
@@ -1254,27 +1299,27 @@ inline void rtl_init_empty_unicode_string(unicode_string_t *ucStr, wchar_t *buf,
 template<int Dummy>
 struct function_address_holder
 {
-   enum { NtSetInformationFile, NtQuerySystemInformation, NtQueryObject, NtQuerySemaphore, NtQuerySection, NumFunction };
+   enum { NtSetInformationFile, NtQuerySystemInformation, NtQueryObject, NtQuerySemaphore, NtQuerySection, NtOpenFile, NtClose, NumFunction };
    enum { NtDll_dll, NumModule };
 
    private:
+   static const char *FunctionNames[NumFunction];
+   static const char *ModuleNames[NumModule];
    static void *FunctionAddresses[NumFunction];
+   static unsigned int FunctionModules[NumFunction];
    static volatile long FunctionStates[NumFunction];
    static void *ModuleAddresses[NumModule];
    static volatile long ModuleStates[NumModule];
 
    static void *get_module_from_id(unsigned int id)
    {
-      assert(id < (unsigned int)NumModule);
-      const char *module[] = { "ntdll.dll" };
-      bool compile_check[sizeof(module)/sizeof(module[0]) == NumModule];
-      (void)compile_check;
-      return get_module_handle(module[id]);
+      BOOST_ASSERT(id < (unsigned int)NumModule);
+      return get_module_handle(ModuleNames[id]);
    }
 
    static void *get_module(const unsigned int id)
    {
-      assert(id < (unsigned int)NumModule);
+      BOOST_ASSERT(id < (unsigned int)NumModule);
       while(ModuleStates[id] < 2){
          if(interlocked_compare_exchange(&ModuleStates[id], 1, 0) == 0){
             ModuleAddresses[id] = get_module_from_id(id);
@@ -1290,17 +1335,14 @@ struct function_address_holder
 
    static void *get_address_from_dll(const unsigned int id)
    {
-      assert(id < (unsigned int)NumFunction);
-      const char *function[] = { "NtSetInformationFile", "NtQuerySystemInformation", "NtQueryObject", "NtQuerySemaphore", "NtQuerySection" };
-      bool compile_check[sizeof(function)/sizeof(function[0]) == NumFunction];
-      (void)compile_check;
-      return get_proc_address(get_module(NtDll_dll), function[id]);
+      BOOST_ASSERT(id < (unsigned int)NumFunction);
+      return get_proc_address(get_module(FunctionModules[id]), FunctionNames[id]);
    }
 
    public:
    static void *get(const unsigned int id)
    {
-      assert(id < (unsigned int)NumFunction);
+      BOOST_ASSERT(id < (unsigned int)NumFunction);
       while(FunctionStates[id] < 2){
          if(interlocked_compare_exchange(&FunctionStates[id], 1, 0) == 0){
             FunctionAddresses[id] = get_address_from_dll(id);
@@ -1314,6 +1356,37 @@ struct function_address_holder
       return FunctionAddresses[id];
    }
 };
+
+template<int Dummy>
+const char *function_address_holder<Dummy>::FunctionNames[function_address_holder<Dummy>::NumFunction] =
+{
+   "NtSetInformationFile",
+   "NtQuerySystemInformation",
+   "NtQueryObject",
+   "NtQuerySemaphore",
+   "NtQuerySection",
+   "NtOpenFile",
+   "NtClose"
+};
+
+template<int Dummy>
+unsigned int function_address_holder<Dummy>::FunctionModules[function_address_holder<Dummy>::NumFunction] = 
+{
+   NtDll_dll,
+   NtDll_dll,
+   NtDll_dll,
+   NtDll_dll,
+   NtDll_dll,
+   NtDll_dll,
+   NtDll_dll
+};
+
+template<int Dummy>
+const char *function_address_holder<Dummy>::ModuleNames[function_address_holder<Dummy>::NumModule] = 
+{
+   "ntdll.dll"
+};
+
 
 template<int Dummy>
 void *function_address_holder<Dummy>::FunctionAddresses[function_address_holder<Dummy>::NumFunction];
@@ -1340,47 +1413,6 @@ struct library_unloader
    ~library_unloader(){ free_library(lib_);  }
 };
 
-//pszFilename must have room for at least MaxPath+1 characters
-inline bool get_file_name_from_handle_function
-   (void * hFile, wchar_t *pszFilename, std::size_t length, std::size_t &out_length)
-{
-   if(length <= MaxPath){
-      return false;
-   }
-
-//   void *hiPSAPI = load_library("PSAPI.DLL");
-//   if (0 == hiPSAPI)
-//      return 0;
-//   library_unloader unloader(hiPSAPI);
-
-//  Pointer to function getMappedFileName() in PSAPI.DLL
-//   GetMappedFileName_t pfGMFN =
-//      (GetMappedFileName_t)get_proc_address(hiPSAPI, "GetMappedFileNameW");
-//   if (! pfGMFN){
-//      return 0;      //  Failed: unexpected error
-//   }
-
-   bool bSuccess = false;
-
-   // Create a file mapping object.
-   void * hFileMap = create_file_mapping(hFile, page_readonly, 1, 0, 0);
-   if(hFileMap){
-      // Create a file mapping to get the file name.
-      void* pMem = map_view_of_file_ex(hFileMap, file_map_read, 0, 1, 0);
-
-      if (pMem){
-         //out_length = pfGMFN(get_current_process(), pMem, pszFilename, MaxPath);
-         out_length = get_mapped_file_name(get_current_process(), pMem, pszFilename, MaxPath);
-         if(out_length){
-            bSuccess = true;
-         }
-         unmap_view_of_file(pMem);
-      }
-      close_handle(hFileMap);
-   }
-
-   return(bSuccess);
-}
 
 inline bool get_system_time_of_day_information(system_timeofday_information &info)
 {
@@ -1437,6 +1469,21 @@ inline bool get_boot_time_str(char *bootstamp_str, std::size_t &s) //will write 
    return true;
 }
 
+//Writes the hexadecimal value of the buffer, in the wide character string.
+//str must be twice length
+inline void buffer_to_wide_str(const void *buf, std::size_t length, wchar_t *str)
+{
+   const wchar_t Characters [] =
+      { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7'
+      , L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F' };
+   std::size_t char_counter = 0;
+   const char *chbuf = static_cast<const char *>(buf);
+   for(std::size_t i = 0; i != length; ++i){
+      str[char_counter++] = Characters[(chbuf[i]&0xF0)>>4];
+      str[char_counter++] = Characters[(chbuf[i]&0x0F)];
+   }
+}
+
 inline bool get_boot_and_system_time_wstr(wchar_t *bootsystemstamp, std::size_t &s)  //will write BootAndSystemstampLength chars
 {
    if(s < (BootAndSystemstampLength*2))
@@ -1446,14 +1493,8 @@ inline bool get_boot_and_system_time_wstr(wchar_t *bootsystemstamp, std::size_t 
    if(!ret){
       return false;
    }
-   const wchar_t Characters [] =
-      { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7'
-      , L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F' };
-   std::size_t char_counter = 0;
-   for(std::size_t i = 0; i != static_cast<std::size_t>(BootAndSystemstampLength); ++i){
-      bootsystemstamp[char_counter++] = Characters[(info.Reserved1[i]&0xF0)>>4];
-      bootsystemstamp[char_counter++] = Characters[(info.Reserved1[i]&0x0F)];
-   }
+
+   buffer_to_wide_str(&info.Reserved1[0], BootAndSystemstampLength, bootsystemstamp);
    s = BootAndSystemstampLength*2;
    return true;
 }
@@ -1469,14 +1510,94 @@ class handle_closer
    {  close_handle(handle_);  }
 };
 
+class eventlog_handle_closer
+{
+   void *handle_;
+   eventlog_handle_closer(const handle_closer &);
+   eventlog_handle_closer& operator=(const eventlog_handle_closer &);
+   public:
+   explicit eventlog_handle_closer(void *handle) : handle_(handle){}
+   ~eventlog_handle_closer()
+   {  CloseEventLog(handle_);  }
+};
+
 union ntquery_mem_t
 {
    object_name_information_t name;
    struct ren_t
    {
       file_rename_information_t info;
-      wchar_t buf[32767];
+      wchar_t buf[1];
    } ren;
+};
+
+class nt_query_mem_deleter
+{
+   static const std::size_t rename_offset = offsetof(ntquery_mem_t, ren.info.FileName) -
+      offsetof(ntquery_mem_t, name.Name.Buffer);
+   //                                           Timestamp                      process id              atomic count
+   static const std::size_t rename_suffix = (SystemTimeOfDayInfoLength + sizeof(unsigned long) + sizeof(boost::uint32_t))*2;
+
+   public:
+   nt_query_mem_deleter(std::size_t object_name_information_size)
+      : m_size(object_name_information_size + rename_offset + rename_suffix)
+      , m_buf(new char [m_size])
+   {}
+
+   ~nt_query_mem_deleter()
+   {
+      delete[]m_buf;
+   }
+
+   void realloc(std::size_t num_bytes)
+   {
+      num_bytes += rename_suffix + rename_offset;
+      char *buf = m_buf;
+      m_buf = new char[num_bytes];
+      delete[]buf;
+      m_size = num_bytes;
+   }
+
+   ntquery_mem_t *query_mem() const
+   {  return static_cast<ntquery_mem_t *>(static_cast<void*>(m_buf));  }  
+
+   unsigned long object_name_information_size() const
+   {  return static_cast<unsigned long>(m_size - rename_offset - SystemTimeOfDayInfoLength*2);  }
+
+   std::size_t file_rename_information_size() const
+   {  return static_cast<unsigned long>(m_size);  }
+
+   private:
+   std::size_t m_size;
+   char *m_buf;
+};
+
+class c_heap_deleter
+{
+   public:
+   c_heap_deleter(std::size_t size)
+      : m_buf(::malloc(size))
+   {}
+
+   ~c_heap_deleter()
+   {
+      if(m_buf) ::free(m_buf);
+   }
+
+   void realloc(std::size_t num_bytes)
+   {
+      void *buf = ::realloc(m_buf, num_bytes);
+      if(!buf){
+         free(m_buf);
+         m_buf = 0;
+      }
+   }
+
+   void *get() const
+   {  return m_buf;  }
+
+   private:
+   void *m_buf;
 };
 
 inline bool unlink_file(const char *filename)
@@ -1499,71 +1620,96 @@ inline bool unlink_file(const char *filename)
    try{
       NtSetInformationFile_t pNtSetInformationFile =
          (NtSetInformationFile_t)dll_func::get(dll_func::NtSetInformationFile);
-      if(!pNtSetInformationFile){
-         return false;
-      }
 
-      NtQueryObject_t pNtQueryObject =
-         (NtQueryObject_t)dll_func::get(dll_func::NtQueryObject);
+      NtQueryObject_t pNtQueryObject = (NtQueryObject_t)dll_func::get(dll_func::NtQueryObject);
 
       //First step: Obtain a handle to the file using Win32 rules. This resolves relative paths
-      void *fh = create_file(filename, generic_read | delete_access, open_existing,
-         file_flag_backup_semantics | file_flag_delete_on_close, 0);
+      void *fh = create_file(filename, generic_read | delete_access, open_existing, 0, 0);
       if(fh == invalid_handle_value){
          return false;
       }
 
       handle_closer h_closer(fh);
+      {
+         //Obtain name length
+         unsigned long size;
+         const std::size_t initial_string_mem = 512u;
 
-      std::auto_ptr<ntquery_mem_t> pmem(new ntquery_mem_t);
-      file_rename_information_t *pfri = &pmem->ren.info;
-      const std::size_t RenMaxNumChars =
-         ((char*)pmem.get() - (char*)&pmem->ren.info.FileName[0])/sizeof(wchar_t);
+         nt_query_mem_deleter nt_query_mem(sizeof(ntquery_mem_t)+initial_string_mem);
+         //Obtain file name with guessed length
+         if(pNtQueryObject(fh, object_name_information, nt_query_mem.query_mem(), nt_query_mem.object_name_information_size(), &size)){
+            //Obtain file name with exact length buffer
+            nt_query_mem.realloc(size);
+            if(pNtQueryObject(fh, object_name_information, nt_query_mem.query_mem(), nt_query_mem.object_name_information_size(), &size)){
+               return false;
+            }
+         }
+         ntquery_mem_t *pmem = nt_query_mem.query_mem();
+         file_rename_information_t *pfri = &pmem->ren.info;
+         const std::size_t RenMaxNumChars =
+            (((char*)(pmem) + nt_query_mem.file_rename_information_size()) - (char*)&pmem->ren.info.FileName[0])/sizeof(wchar_t);
 
-      //Obtain file name
-      unsigned long size;
-      if(pNtQueryObject(fh, object_name_information, pmem.get(), sizeof(ntquery_mem_t), &size)){
-         return false;
+         //Copy filename to the rename member
+         std::memmove(pmem->ren.info.FileName, pmem->name.Name.Buffer, pmem->name.Name.Length);
+         std::size_t filename_string_length = pmem->name.Name.Length/sizeof(wchar_t);
+
+         //Search '\\' character to replace from it
+         for(std::size_t i = filename_string_length; i != 0; --filename_string_length){
+            if(pmem->ren.info.FileName[--i] == L'\\')
+               break;
+         }
+
+         //Add random number
+         std::size_t s = RenMaxNumChars - filename_string_length;
+         if(!get_boot_and_system_time_wstr(&pfri->FileName[filename_string_length], s)){
+            return false;
+         }
+         filename_string_length += s;
+
+         //Sometimes the precission of the timestamp is not enough and we need to add another random number.
+         //The process id (to exclude concurrent processes) and an atomic count (to exclude concurrent threads).
+         //should be enough
+         const unsigned long pid = get_current_process_id();
+         buffer_to_wide_str(&pid, sizeof(pid), &pfri->FileName[filename_string_length]);
+         filename_string_length += sizeof(pid)*2;
+
+         static volatile boost::uint32_t u32_count = 0;
+         interlocked_decrement(reinterpret_cast<volatile long*>(&u32_count));
+         buffer_to_wide_str(const_cast<const boost::uint32_t *>(&u32_count), sizeof(boost::uint32_t), &pfri->FileName[filename_string_length]);
+         filename_string_length += sizeof(boost::uint32_t)*2;
+
+         //Fill rename information (FileNameLength is in bytes)
+         pfri->FileNameLength = static_cast<unsigned long>(sizeof(wchar_t)*(filename_string_length));
+         pfri->Replace = 1;
+         pfri->RootDir = 0;
+
+         //Cange the name of the in-use file...
+         io_status_block_t io;
+         if(0 != pNtSetInformationFile(fh, &io, pfri, nt_query_mem.file_rename_information_size(), file_rename_information)){
+            return false;
+         }
       }
-
-      //Copy filename to the rename member
-      std::memmove(pmem->ren.info.FileName, pmem->name.Name.Buffer, pmem->name.Name.Length);
-      std::size_t filename_string_length = pmem->name.Name.Length/sizeof(wchar_t);
-
-      //Second step: obtain the complete native-nt filename
-      //if(!get_file_name_from_handle_function(fh, pfri->FileName, RenMaxNumChars, filename_string_length)){
-      //return 0;
-      //}
-
-      //Add trailing mark
-      if((RenMaxNumChars-filename_string_length) < (SystemTimeOfDayInfoLength*2)){
-         return false;
+      //...and mark it as delete-on-close
+      {
+         //Don't use pNtSetInformationFile with file_disposition_information as it can return STATUS_CANNOT_DELETE
+         //if the file is still mapped. Reopen it with NtOpenFile and file_delete_on_close
+         NtOpenFile_t pNtOpenFile = (NtOpenFile_t)dll_func::get(dll_func::NtOpenFile);
+         NtClose_t pNtClose = (NtClose_t)dll_func::get(dll_func::NtClose);
+         const wchar_t empty_str [] = L"";
+         unicode_string_t ustring = { sizeof(empty_str) - sizeof (wchar_t)   //length in bytes without null
+                                    , sizeof(empty_str)   //total size in bytes of memory allocated for Buffer.
+                                    , const_cast<wchar_t*>(empty_str)
+                                    };
+         object_attributes_t object_attr;
+	      initialize_object_attributes(&object_attr, &ustring, 0, fh, 0);
+         void* fh2 = 0;
+         io_status_block_t io;
+         pNtOpenFile( &fh2, delete_flag, &object_attr, &io
+                    , file_share_read | file_share_write | file_share_delete, file_delete_on_close);
+         pNtClose(fh2);
+         //Even if NtOpenFile fails, the file was renamed and the original no longer exists, so return a success status
+         return true;
       }
-
-      //Search '\\' character to replace it
-      for(std::size_t i = filename_string_length; i != 0; --filename_string_length){
-         if(pmem->ren.info.FileName[--i] == L'\\')
-            break;
-      }
-
-      //Add random number
-      std::size_t s = RenMaxNumChars - filename_string_length;
-      if(!get_boot_and_system_time_wstr(&pfri->FileName[filename_string_length], s)){
-         return false;
-      }
-      filename_string_length += s;
-
-      //Fill rename information (FileNameLength is in bytes)
-      pfri->FileNameLength = static_cast<unsigned long>(sizeof(wchar_t)*(filename_string_length));
-      pfri->Replace = 1;
-      pfri->RootDir = 0;
-
-      //Final step: change the name of the in-use file:
-      io_status_block_t io;
-      if(0 != pNtSetInformationFile(fh, &io, pfri, sizeof(ntquery_mem_t::ren_t), file_rename_information)){
-         return false;
-      }
-      return true;
    }
    catch(...){
       return false;
@@ -1573,9 +1719,6 @@ inline bool unlink_file(const char *filename)
 
 struct reg_closer
 {
-   //reg_closer(RegCloseKey_t func, void *key) : func_(func), key_(key){}
-   //~reg_closer(){ (*func_)(key_);  }
-   //RegCloseKey_t func_;
    void *key_;
    reg_closer(void *key) : key_(key){}
    ~reg_closer(){ reg_close_key(key_);  }
@@ -1779,6 +1922,10 @@ inline bool get_wmi_class_attribute( std::wstring& strValue, const wchar_t *wmi_
    return bRet;
 }
 
+#ifdef BOOST_INTERPROCESS_BOOTSTAMP_IS_LASTBOOTUPTIME
+
+//Obtains the bootup time from WMI LastBootUpTime.
+//This time seems to change with hibernation and clock synchronization so avoid it.
 inline bool get_last_bootup_time( std::wstring& strValue )
 {
    bool ret = get_wmi_class_attribute(strValue, L"Win32_OperatingSystem", L"LastBootUpTime");
@@ -1803,6 +1950,104 @@ inline bool get_last_bootup_time( std::string& str )
    }
    return ret;
 }
+
+#else
+
+// Loop through the buffer and obtain the contents of the
+// requested record in the buffer.
+inline bool find_record_in_buffer( const void* pBuffer, unsigned long dwBytesRead, const char *provider_name
+                                 , unsigned int id_to_find, interprocess_eventlogrecord *&pevent_log_record)
+{
+   const unsigned char * pRecord = static_cast<const unsigned char*>(pBuffer);
+   const unsigned char * pEndOfRecords = pRecord + dwBytesRead;
+
+   while (pRecord < pEndOfRecords){
+      interprocess_eventlogrecord *pTypedRecord = (interprocess_eventlogrecord*)pRecord;
+      // Check provider, written at the end of the fixed-part of the record
+      if (0 == std::strcmp(provider_name, (char*)(pRecord + sizeof(interprocess_eventlogrecord))))
+      {
+         // Check event id
+         if(id_to_find == (pTypedRecord->EventID & 0xFFFF)){
+            pevent_log_record = pTypedRecord;
+            return true;
+         }
+      }
+
+      pRecord += pTypedRecord->Length;
+   }
+   pevent_log_record = 0;
+   return false;
+}
+
+//Obtains the bootup time from the System Event Log,
+//event ID == 6005 (event log started).
+//Adapted from http://msdn.microsoft.com/en-us/library/windows/desktop/bb427356.aspx
+inline bool get_last_bootup_time(std::string &stamp)
+{
+   const char *source_name = "System";
+   const char *provider_name = "EventLog";
+   const unsigned short event_id = 6005u;
+
+   unsigned long status = 0;
+   unsigned long dwBytesToRead = 0;
+   unsigned long dwBytesRead = 0;
+   unsigned long dwMinimumBytesToRead = 0;
+
+   // The source name (provider) must exist as a subkey of Application.
+   void *hEventLog = OpenEventLogA(0, source_name);
+   if (hEventLog){
+      eventlog_handle_closer hnd_closer(hEventLog); (void)hnd_closer;
+      // Allocate an initial block of memory used to read event records. The number 
+      // of records read into the buffer will vary depending on the size of each event.
+      // The size of each event will vary based on the size of the user-defined
+      // data included with each event, the number and length of insertion 
+      // strings, and other data appended to the end of the event record.
+      dwBytesToRead = max_record_buffer_size;
+      c_heap_deleter heap_deleter(dwBytesToRead);
+
+      // Read blocks of records until you reach the end of the log or an 
+      // error occurs. The records are read from newest to oldest. If the buffer
+      // is not big enough to hold a complete event record, reallocate the buffer.
+      if (heap_deleter.get() != 0){
+         while (0 == status){
+            if (!ReadEventLogA(hEventLog, 
+                  eventlog_sequential_read | eventlog_backwards_read,
+                  0, 
+                  heap_deleter.get(),
+                  dwBytesToRead,
+                  &dwBytesRead,
+                  &dwMinimumBytesToRead)) {
+               status = get_last_error();
+               if (error_insufficient_buffer == status) {
+                  status = 0;
+                  dwBytesToRead = dwMinimumBytesToRead;
+                  heap_deleter.realloc(dwMinimumBytesToRead);
+                  if (!heap_deleter.get()){
+                     return false;
+                  }
+               }
+               else{  //Not found or EOF
+                  return false;
+               }
+            }
+            else
+            {
+               interprocess_eventlogrecord *pTypedRecord;
+               // Print the contents of each record in the buffer.
+               if(find_record_in_buffer(heap_deleter.get(), dwBytesRead, provider_name, event_id, pTypedRecord)){
+                  char stamp_str[sizeof(unsigned long)*3+1];
+                  std::sprintf(&stamp_str[0], "%u", ((unsigned int)pTypedRecord->TimeGenerated));
+                  stamp = stamp_str;
+                  break;
+               }
+            }
+         }
+      }
+   }
+   return true;
+}
+
+#endif
 
 inline bool is_directory(const char *path)
 {

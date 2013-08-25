@@ -229,48 +229,50 @@ struct node_alloc_holder
    void allocate_many_and_construct
       (FwdIterator beg, difference_type n, Inserter inserter)
    {
-      /*
-      NodePtr p = this->allocate_one();
-      Deallocator node_deallocator(p, this->node_alloc());
-      ::boost::container::construct_in_place(this->node_alloc(), container_detail::addressof(p->m_data), it);
-      node_deallocator.release();
-      //This does not throw
-      typedef typename Node::hook_type hook_type;
-      ::new(static_cast<hook_type*>(container_detail::to_raw_pointer(p))) hook_type;
-      return (p);
-      */
-      typedef typename NodeAlloc::multiallocation_chain multiallocation_chain;
+      if(n){
+         /*
+         NodePtr p = this->allocate_one();
+         Deallocator node_deallocator(p, this->node_alloc());
+         ::boost::container::construct_in_place(this->node_alloc(), container_detail::addressof(p->m_data), it);
+         node_deallocator.release();
+         //This does not throw
+         typedef typename Node::hook_type hook_type;
+         ::new(static_cast<hook_type*>(container_detail::to_raw_pointer(p))) hook_type;
+         return (p);
+         */
+         typedef typename NodeAlloc::multiallocation_chain multiallocation_chain;
 
-      //Try to allocate memory in a single block
-      typedef typename multiallocation_chain::iterator multialloc_iterator;
-      multiallocation_chain mem;
-      this->node_alloc().allocate_individual(n, mem);
-      multialloc_iterator itbeg(mem.begin()), itlast(mem.last());
-      mem.clear();
-      Node *p = 0;
-      NodeAlloc &nalloc = this->node_alloc();
-      BOOST_TRY{
-         while(n--){
-            p = container_detail::to_raw_pointer(&*itbeg);
-            ++itbeg;
-            //This can throw
-            Deallocator node_deallocator(p, nalloc);
-            boost::container::construct_in_place(nalloc, container_detail::addressof(p->m_data), beg);
-            ++beg;
-            node_deallocator.release();
-            //This does not throw
-            typedef typename Node::hook_type hook_type;
-            ::new(static_cast<hook_type*>(p)) hook_type;
-            //This can throw in some containers (predicate might throw)
-            inserter(*p);
+         //Try to allocate memory in a single block
+         typedef typename multiallocation_chain::iterator multialloc_iterator;
+         multiallocation_chain mem;
+         this->node_alloc().allocate_individual(n, mem);
+         multialloc_iterator itbeg(mem.begin()), itlast(mem.last());
+         mem.clear();
+         Node *p = 0;
+         NodeAlloc &nalloc = this->node_alloc();
+         BOOST_TRY{
+            while(n--){
+               p = container_detail::to_raw_pointer(&*itbeg);
+               ++itbeg;
+               //This can throw
+               Deallocator node_deallocator(p, nalloc);
+               boost::container::construct_in_place(nalloc, container_detail::addressof(p->m_data), beg);
+               ++beg;
+               node_deallocator.release();
+               //This does not throw
+               typedef typename Node::hook_type hook_type;
+               ::new(static_cast<hook_type*>(p)) hook_type;
+               //This can throw in some containers (predicate might throw)
+               inserter(*p);
+            }
          }
+         BOOST_CATCH(...){
+            mem.incorporate_after(mem.last(), &*itbeg, &*itlast, n);
+            this->node_alloc().deallocate_individual(mem);
+            BOOST_RETHROW
+         }
+         BOOST_CATCH_END
       }
-      BOOST_CATCH(...){
-         mem.incorporate_after(mem.last(), &*itbeg, &*itlast, n);
-         this->node_alloc().deallocate_individual(mem);
-         BOOST_RETHROW
-      }
-      BOOST_CATCH_END
    }
 
    void clear(allocator_v1)

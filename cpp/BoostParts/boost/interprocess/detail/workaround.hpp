@@ -17,6 +17,8 @@
    #define BOOST_INTERPROCESS_WINDOWS
    #define BOOST_INTERPROCESS_FORCE_GENERIC_EMULATION
    #define BOOST_INTERPROCESS_HAS_KERNEL_BOOTTIME
+   //Define this to connect with shared memory created with versions < 1.54
+   //#define BOOST_INTERPROCESS_BOOTSTAMP_IS_LASTBOOTUPTIME
 #else
    #include <unistd.h>
 
@@ -110,6 +112,10 @@
 
    #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
       #define BOOST_INTERPROCESS_BSD_DERIVATIVE
+      //Some *BSD systems (OpenBSD & NetBSD) need sys/param.h before sys/sysctl.h, whereas
+      //others (FreeBSD & Darwin) need sys/types.h
+      #include <sys/types.h>
+      #include <sys/param.h>
       #include <sys/sysctl.h>
       #if defined(CTL_KERN) && defined (KERN_BOOTTIME)
          //#define BOOST_INTERPROCESS_HAS_KERNEL_BOOTTIME

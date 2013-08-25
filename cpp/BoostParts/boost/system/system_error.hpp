@@ -21,7 +21,7 @@ namespace boost
 
     class BOOST_SYMBOL_VISIBLE system_error : public std::runtime_error
     // BOOST_SYMBOL_VISIBLE is needed by GCC to ensure system_error thrown from a shared
-    // library can be caught. See svn.boost.org/trac/boost/ticket/3697 
+    // library can be caught. See svn.boost.org/trac/boost/ticket/3697
     {
     public:
       system_error( error_code ec )
@@ -61,13 +61,17 @@ namespace boost
     {
       if ( m_what.empty() )
       {
+#ifndef BOOST_NO_EXCEPTIONS
         try
+#endif
         {
           m_what = this->std::runtime_error::what();
           if ( !m_what.empty() ) m_what += ": ";
           m_what += m_error_code.message();
         }
+#ifndef BOOST_NO_EXCEPTIONS
         catch (...) { return std::runtime_error::what(); }
+#endif
       }
       return m_what.c_str();
     }

@@ -53,8 +53,8 @@
 #error "Compiler not supported or configured - please reconfigure"
 #endif
 //
-// last known and checked version is 1110:
-#if (__IBMCPP__ > 1110)
+// last known and checked version is 1210:
+#if (__IBMCPP__ > 1210)
 #  if defined(BOOST_ASSERT_CONFIG)
 #     error "Unknown compiler version - please run the configure tests and report the results"
 #  endif
@@ -106,6 +106,7 @@
 #define BOOST_NO_CXX11_NULLPTR
 #define BOOST_NO_CXX11_RANGE_BASED_FOR
 #define BOOST_NO_CXX11_RAW_LITERALS
+#define BOOST_NO_CXX11_USER_DEFINED_LITERALS
 #if ! __IBMCPP_RVALUE_REFERENCES
 #  define BOOST_NO_CXX11_RVALUE_REFERENCES
 #endif

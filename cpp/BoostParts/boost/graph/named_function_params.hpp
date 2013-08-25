@@ -12,6 +12,7 @@
 
 #include <functional>
 #include <vector>
+#include <boost/limits.hpp>
 #include <boost/ref.hpp>
 #include <boost/utility/result_of.hpp>
 #include <boost/preprocessor.hpp>
@@ -716,6 +717,15 @@ BOOST_BGL_DECLARE_NAMED_PARAMS
       const G& g;
       get_default_starting_vertex_t(const G& g): g(g) {}
       result_type operator()() const {return get_default_starting_vertex(g);}
+    };
+
+    // Wrapper to avoid instantiating numeric_limits when users provide distance_inf value manually
+    template <typename T>
+    struct get_max {
+      T operator()() const {
+        return (std::numeric_limits<T>::max)();
+      }
+      typedef T result_type;
     };
 
   } // namespace detail

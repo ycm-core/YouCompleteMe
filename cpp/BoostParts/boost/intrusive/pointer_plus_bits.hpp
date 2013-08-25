@@ -47,7 +47,11 @@ struct max_pointer_plus_bits<void*, Alignment>
 //!has_pointer_plus_bits<>::value is non-zero can make use of these
 //!operations to embed the bits in the pointer.
 template<class Pointer, std::size_t NumBits>
-struct pointer_plus_bits;
+struct pointer_plus_bits
+   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+   {}
+   #endif
+;
 
 //!This is the specialization to embed extra bits of information
 //!in a raw pointer. The extra bits are stored in the lower bits of the pointer.

@@ -20,20 +20,20 @@
 // GCC supports atomic<> from version 4.8 onwards.
 #if defined(__GNUC__)
 # if defined(__GNUC_PATCHLEVEL__)
-#  define __GNUC_VERSION__ (__GNUC__ * 10000 \
-                            + __GNUC_MINOR__ * 100 \
-                            + __GNUC_PATCHLEVEL__)
+#  define BOOST_ATOMIC_GNUC_VERSION (__GNUC__ * 10000           \
+                                     + __GNUC_MINOR__ * 100     \
+                                     + __GNUC_PATCHLEVEL__)
 # else
-#  define __GNUC_VERSION__ (__GNUC__ * 10000 \
-                            + __GNUC_MINOR__ * 100)
+#  define BOOST_LOCKFREE_GNUC_VERSION (__GNUC__ * 10000         \
+                                     + __GNUC_MINOR__ * 100)
 # endif
 #endif
 
-#if (__GNUC_VERSION__ >= 40800) && (__cplusplus >= 201103L)
+#if (BOOST_LOCKFREE_GNUC_VERSION >= 40800) && (__cplusplus >= 201103L)
 #undef BOOST_LOCKFREE_NO_HDR_ATOMIC
 #endif
 
-#undef __GNUC_VERSION__
+#undef BOOST_LOCKFREE_GNUC_VERSION
 
 #if defined(BOOST_LOCKFREE_NO_HDR_ATOMIC)
 #include <boost/atomic.hpp>

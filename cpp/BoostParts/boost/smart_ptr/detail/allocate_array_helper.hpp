@@ -33,10 +33,10 @@ namespace boost {
             struct rebind {
                 typedef allocate_array_helper<A, T[], U> other;
             };
-            allocate_array_helper(const A& allocator, std::size_t size, T** data)
-                : allocator(allocator),
-                  size(sizeof(T) * size),
-                  data(data) {
+            allocate_array_helper(const A& allocator_, std::size_t size_, T** data_)
+                : allocator(allocator_),
+                  size(sizeof(T) * size_),
+                  data(data_) {
             }
             template<class U>
             allocate_array_helper(const allocate_array_helper<A, T[], U>& other) 
@@ -107,9 +107,9 @@ namespace boost {
             struct rebind {
                 typedef allocate_array_helper<A, T[N], U> other;
             };
-            allocate_array_helper(const A& allocator, T** data)
-                : allocator(allocator),
-                  data(data) {
+            allocate_array_helper(const A& allocator_, T** data_)
+                : allocator(allocator_),
+                  data(data_) {
             }
             template<class U>
             allocate_array_helper(const allocate_array_helper<A, T[N], U>& other) 

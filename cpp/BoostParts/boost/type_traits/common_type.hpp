@@ -24,8 +24,7 @@
 #endif
 
 //----------------------------------------------------------------------------//
-#if defined(BOOST_NO_CXX11_DECLTYPE) && !defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF) && !defined(BOOST_TYPEOF_SILENT)
-#define BOOST_TYPEOF_SILENT
+#if defined(BOOST_NO_CXX11_DECLTYPE) && !defined(BOOST_COMMON_TYPE_DONT_USE_TYPEOF)
 #include <boost/typeof/typeof.hpp>   // boost wonders never cease!
 #endif
 

@@ -284,7 +284,7 @@ inline const
 lambda_functor<
   lambda_functor_base<do_nothing_action, null_type> 
 > 
-make_void(const Arg1& a1) { 
+make_void(const Arg1&) { 
 return 
     lambda_functor_base<do_nothing_action, null_type>();
 }

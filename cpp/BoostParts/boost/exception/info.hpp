@@ -5,7 +5,7 @@
 
 #ifndef UUID_8D22C4CA9CC811DCAA9133D256D89593
 #define UUID_8D22C4CA9CC811DCAA9133D256D89593
-#if defined(__GNUC__) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
+#if (__GNUC__*100+__GNUC_MINOR__>301) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
 #pragma GCC system_header
 #endif
 #if defined(_MSC_VER) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
@@ -24,10 +24,18 @@ boost
     {
     template <class Tag,class T>
     inline
-    typename enable_if<has_to_string<T>,std::string>::type
+    std::string
+    error_info_name( error_info<Tag,T> const & x )
+        {
+        return tag_type_name<Tag>();
+        }
+
+    template <class Tag,class T>
+    inline
+    std::string
     to_string( error_info<Tag,T> const & x )
         {
-        return to_string(x.value());
+        return '[' + error_info_name(x) + "] = " + to_string_stub(x.value()) + '\n';
         }
 
     template <class Tag,class T>
@@ -49,16 +57,7 @@ boost
     inline
     std::string
     error_info<Tag,T>::
-    tag_typeid_name() const
-        {
-        return tag_type_name<Tag>();
-        }
-
-    template <class Tag,class T>
-    inline
-    std::string
-    error_info<Tag,T>::
-    value_as_string() const
+    name_value_string() const
         {
         return to_string_stub(*this);
         }
@@ -114,7 +113,7 @@ boost
                     for( error_info_map::const_iterator i=info_.begin(),end=info_.end(); i!=end; ++i )
                         {
                         error_info_base const & x = *i->second;
-                        tmp << '[' << x.tag_typeid_name() << "] = " << x.value_as_string() << '\n';
+                        tmp << x.name_value_string();
                         }
                     tmp.str().swap(diagnostic_info_str_);
                     }

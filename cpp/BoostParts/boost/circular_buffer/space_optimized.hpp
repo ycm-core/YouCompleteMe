@@ -1300,7 +1300,7 @@ private:
 
     //! Specialized method for determining the initial capacity.
     template <class IntegralType>
-    static size_type init_capacity(const capacity_type& capacity_ctrl, IntegralType n, IntegralType item,
+    static size_type init_capacity(const capacity_type& capacity_ctrl, IntegralType n, IntegralType,
         const true_type&) {
         return init_capacity(capacity_ctrl, static_cast<size_type>(n));
     }
@@ -1320,7 +1320,7 @@ private:
 
     //! Specialized method for determining the initial capacity.
     template <class InputIterator>
-    static size_type init_capacity(const capacity_type& capacity_ctrl, InputIterator first, InputIterator last,
+    static size_type init_capacity(const capacity_type& capacity_ctrl, InputIterator, InputIterator,
         const std::input_iterator_tag&) {
         return capacity_ctrl.capacity();
     }

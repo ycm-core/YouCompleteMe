@@ -217,7 +217,7 @@ namespace boost
         const std::ptrdiff_t sz = static_cast<std::ptrdiff_t>(step_size >= 0 ? step_size : -step_size);
         const Integer l = step_size >= 0 ? last : first;
         const Integer f = step_size >= 0 ? first : last;
-        const std::ptrdiff_t num_steps = (l + ((l-f) % sz) - f) / sz;
+        const std::ptrdiff_t num_steps = (l - f) / sz + ((l - f) % sz ? 1 : 0);
         BOOST_ASSERT(num_steps >= 0);
        
         return strided_integer_range<Integer>(

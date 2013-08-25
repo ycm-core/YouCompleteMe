@@ -26,15 +26,68 @@
 #include <boost/thread/detail/delete.hpp>
 
 #ifdef _POSIX_TIMEOUTS
-#if _POSIX_TIMEOUTS >= 0 && _POSIX_C_SOURCE>=200112L
+#if _POSIX_TIMEOUTS >= 0 && _POSIX_TIMEOUTS>=200112L
+#ifndef BOOST_PTHREAD_HAS_TIMEDLOCK
 #define BOOST_PTHREAD_HAS_TIMEDLOCK
 #endif
 #endif
+#endif
+
 
 #include <boost/config/abi_prefix.hpp>
 
+#ifndef BOOST_THREAD_HAS_NO_EINTR_BUG
+#define BOOST_THREAD_HAS_EINTR_BUG
+#endif
+
 namespace boost
 {
+  namespace posix {
+#ifdef BOOST_THREAD_HAS_EINTR_BUG
+    BOOST_FORCEINLINE int pthread_mutex_destroy(pthread_mutex_t* m)
+    {
+      int ret;
+      do
+      {
+          ret = ::pthread_mutex_destroy(m);
+      } while (ret == EINTR);
+      return ret;
+    }
+    BOOST_FORCEINLINE int pthread_mutex_lock(pthread_mutex_t* m)
+    {
+      int ret;
+      do
+      {
+          ret = ::pthread_mutex_lock(m);
+      } while (ret == EINTR);
+      return ret;
+    }
+    BOOST_FORCEINLINE int pthread_mutex_unlock(pthread_mutex_t* m)
+    {
+      int ret;
+      do
+      {
+          ret = ::pthread_mutex_unlock(m);
+      } while (ret == EINTR);
+      return ret;
+    }
+#else
+    BOOST_FORCEINLINE int pthread_mutex_destroy(pthread_mutex_t* m)
+    {
+      return ::pthread_mutex_destroy(m);
+    }
+    BOOST_FORCEINLINE int pthread_mutex_lock(pthread_mutex_t* m)
+    {
+      return ::pthread_mutex_lock(m);
+    }
+    BOOST_FORCEINLINE int pthread_mutex_unlock(pthread_mutex_t* m)
+    {
+      return ::pthread_mutex_unlock(m);
+    }
+
+#endif
+
+  }
     class mutex
     {
     private:
@@ -52,20 +105,12 @@ namespace boost
         }
         ~mutex()
         {
-            int ret;
-            do
-            {
-                ret = pthread_mutex_destroy(&m);
-            } while (ret == EINTR);
+          BOOST_VERIFY(!posix::pthread_mutex_destroy(&m));
         }
 
         void lock()
         {
-            int res;
-            do
-            {
-                res = pthread_mutex_lock(&m);
-            } while (res == EINTR);
+            int res = posix::pthread_mutex_lock(&m);
             if (res)
             {
                 boost::throw_exception(lock_error(res,"boost: mutex lock failed in pthread_mutex_lock"));
@@ -74,14 +119,10 @@ namespace boost
 
         void unlock()
         {
-            int res;
-            do
-            {
-              res = pthread_mutex_unlock(&m);
-            } while (res == EINTR);
+            int res = posix::pthread_mutex_unlock(&m);
             if (res)
             {
-                boost::throw_exception(lock_error(res,"boost: mutex unlock failed in pthread_mutex_lock"));
+                boost::throw_exception(lock_error(res,"boost: mutex unlock failed in pthread_mutex_unlock"));
             }
         }
 
@@ -136,7 +177,8 @@ namespace boost
             int const res2=pthread_cond_init(&cond,NULL);
             if(res2)
             {
-                BOOST_VERIFY(!pthread_mutex_destroy(&m));
+                BOOST_VERIFY(!posix::pthread_mutex_destroy(&m));
+                //BOOST_VERIFY(!pthread_mutex_destroy(&m));
                 boost::throw_exception(thread_resource_error(res2, "boost:: timed_mutex constructor failed in pthread_cond_init"));
             }
             is_locked=false;
@@ -144,7 +186,7 @@ namespace boost
         }
         ~timed_mutex()
         {
-            BOOST_VERIFY(!pthread_mutex_destroy(&m));
+            BOOST_VERIFY(!posix::pthread_mutex_destroy(&m));
 #ifndef BOOST_PTHREAD_HAS_TIMEDLOCK
             BOOST_VERIFY(!pthread_cond_destroy(&cond));
 #endif
@@ -164,11 +206,7 @@ namespace boost
 #ifdef BOOST_PTHREAD_HAS_TIMEDLOCK
         void lock()
         {
-            int res;
-            do
-            {
-                res = pthread_mutex_lock(&m);
-            } while (res == EINTR);
+            int res = posix::pthread_mutex_lock(&m);
             if (res)
             {
                 boost::throw_exception(lock_error(res,"boost: mutex lock failed in pthread_mutex_lock"));
@@ -177,14 +215,10 @@ namespace boost
 
         void unlock()
         {
-            int res;
-            do
-            {
-              res = pthread_mutex_unlock(&m);
-            } while (res == EINTR);
+            int res = posix::pthread_mutex_unlock(&m);
             if (res)
             {
-                boost::throw_exception(lock_error(res,"boost: mutex unlock failed in pthread_mutex_lock"));
+                boost::throw_exception(lock_error(res,"boost: mutex unlock failed in pthread_mutex_unlock"));
             }
         }
 

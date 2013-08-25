@@ -24,7 +24,9 @@
 // BOOST_IS_EMPTY(T) should evaluate to true if T is an empty class type (and not a union)
 // BOOST_HAS_TRIVIAL_CONSTRUCTOR(T) should evaluate to true if "T x;" has no effect
 // BOOST_HAS_TRIVIAL_COPY(T) should evaluate to true if T(t) <==> memcpy
+// BOOST_HAS_TRIVIAL_MOVE_CONSTRUCTOR(T) should evaluate to true if T(boost::move(t)) <==> memcpy
 // BOOST_HAS_TRIVIAL_ASSIGN(T) should evaluate to true if t = u <==> memcpy
+// BOOST_HAS_TRIVIAL_MOVE_ASSIGN(T) should evaluate to true if t = boost::move(u) <==> memcpy
 // BOOST_HAS_TRIVIAL_DESTRUCTOR(T) should evaluate to true if ~T() has no effect
 // BOOST_HAS_NOTHROW_CONSTRUCTOR(T) should evaluate to true if "T x;" can not throw
 // BOOST_HAS_NOTHROW_COPY(T) should evaluate to true if T(t) can not throw
@@ -106,6 +108,11 @@
 //  This one fails if the default alignment has been changed with /Zp:
 //  #   define BOOST_ALIGNMENT_OF(T) __alignof(T)
 
+#   if defined(_MSC_VER) && (_MSC_VER >= 1700)
+#       define BOOST_HAS_TRIVIAL_MOVE_CONSTRUCTOR(T) ((__has_trivial_move_constructor(T) || ::boost::is_pod<T>::value) && !::boost::is_volatile<T>::value)
+#       define BOOST_HAS_TRIVIAL_MOVE_ASSIGN(T) ((__has_trivial_move_assign(T) || ::boost::is_pod<T>::value) && ! ::boost::is_const<T>::value && !::boost::is_volatile<T>::value)
+#   endif
+
 #   define BOOST_HAS_TYPE_TRAITS_INTRINSICS
 #endif
 
@@ -182,6 +189,12 @@
 #   endif
 #   if __has_feature(is_polymorphic)
 #     define BOOST_IS_POLYMORPHIC(T) __is_polymorphic(T)
+#   endif
+#   if __has_feature(has_trivial_move_constructor)
+#     define BOOST_HAS_TRIVIAL_MOVE_CONSTRUCTOR(T) __has_trivial_move_constructor(T)
+#   endif
+#   if __has_feature(has_trivial_move_assign)
+#     define BOOST_HAS_TRIVIAL_MOVE_ASSIGN(T) __has_trivial_move_assign(T)
 #   endif
 #   define BOOST_ALIGNMENT_OF(T) __alignof(T)
 

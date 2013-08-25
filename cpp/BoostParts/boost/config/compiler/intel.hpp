@@ -181,7 +181,7 @@ template<> struct assert_intrinsic_wchar_t<unsigned short> {};
 // (Niels Dekker, LKEB, May 2010)
 // Apparently Intel 12.1 (compiler version number 9999 !!) has the same issue (compiler regression).
 #if defined(__INTEL_COMPILER)
-#  if (__INTEL_COMPILER <= 1110) || (__INTEL_COMPILER == 9999)
+#  if (__INTEL_COMPILER <= 1110) || (__INTEL_COMPILER == 9999) || (defined(_WIN32) && (__INTEL_COMPILER < 1500))
 #    define BOOST_NO_COMPLETE_VALUE_INITIALIZATION
 #  endif
 #endif

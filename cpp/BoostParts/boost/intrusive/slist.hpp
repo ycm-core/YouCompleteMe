@@ -819,8 +819,23 @@ class slist_impl
    template<class Iterator>
    void insert_after(const_iterator prev_p, Iterator f, Iterator l)
    {
-      for (; f != l; ++f)
-         prev_p = this->insert_after(prev_p, *f);
+      //Insert first nodes avoiding cache and size checks
+      size_type count = 0;
+      node_ptr prev_n(prev_p.pointed_node());
+      for (; f != l; ++f, ++count){
+         const node_ptr n = get_real_value_traits().to_node_ptr(*f);
+         if(safemode_or_autounlink)
+            BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(n));
+         node_algorithms::link_after(prev_n, n);
+         prev_n = n;
+      }
+      //Now fix special cases if needed
+      if(cache_last && (this->get_last_node() == prev_p.pointed_node())){
+         this->set_last_node(prev_n);
+      }
+      if(constant_time_size){
+         this->priv_size_traits().increase(count);
+      }
    }
 
    //! <b>Requires</b>: value must be an lvalue and p must point to an element
@@ -932,7 +947,7 @@ class slist_impl
          }
          node_algorithms::unlink_after(bfp, lp);
          if(constant_time_size){
-            this->priv_size_traits().set_size(this->priv_size_traits().get_size() - n);
+            this->priv_size_traits().decrease(n);
          }
          return l.unconst();
       }
@@ -1209,7 +1224,7 @@ class slist_impl
             }
          }
          node_algorithms::transfer_after( prev_n, x.before_begin().pointed_node(), last_x_n);
-         this->priv_size_traits().set_size(this->priv_size_traits().get_size() + x.priv_size_traits().get_size());
+         this->priv_size_traits().increase(x.priv_size_traits().get_size());
          x.priv_size_traits().set_size(size_type(0));
          if(l) *l = last_x;
       }
@@ -1278,8 +1293,8 @@ class slist_impl
       this->priv_splice_after
          (prev_pos.pointed_node(), x, before_f.pointed_node(), before_l.pointed_node());
       if(constant_time_size){
-         this->priv_size_traits().set_size(this->priv_size_traits().get_size() + n);
-         x.priv_size_traits().set_size(x.priv_size_traits().get_size() - n);
+         this->priv_size_traits().increase(n);
+         x.priv_size_traits().decrease(n);
       }
    }
 
@@ -1834,7 +1849,7 @@ class slist_impl
          BOOST_INTRUSIVE_INVARIANT_ASSERT(size_type(std::distance(iterator(f, this), iterator(before_l, this)))+1 == n);
          this->priv_incorporate_after(prev_pos.pointed_node(), f, before_l);
          if(constant_time_size){
-            this->priv_size_traits().set_size(this->priv_size_traits().get_size() + n);
+            this->priv_size_traits().increase(n);
          }
       }
    }

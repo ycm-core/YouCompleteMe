@@ -1,4 +1,4 @@
-// $Id: tss_pe.cpp 79373 2012-07-09 05:55:01Z viboes $
+// $Id: tss_pe.cpp 84717 2013-06-09 17:18:15Z viboes $
 // (C) Copyright Aaron W. LaFramboise, Roland Schwarz, Michael Glassford 2004.
 // (C) Copyright 2007 Roland Schwarz
 // (C) Copyright 2007 Anthony Williams
@@ -79,6 +79,36 @@ extern "C" const IMAGE_TLS_DIRECTORY32 _tls_used __attribute__ ((section(".rdata
 
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
+
+
+// _pRawDllMainOrig can be defined by including boost/thread/win32/mfc_thread_init.hpp
+// into your dll; it ensures that MFC-Dll-initialization will be done properly
+// The following code is adapted from the MFC-Dll-init code
+/*
+ * _pRawDllMainOrig MUST be an extern const variable, which will be aliased to
+ * _pDefaultRawDllMainOrig if no real user definition is present, thanks to the
+ * alternatename directive.
+ */
+
+// work at least with _MSC_VER 1500 (MSVC++ 9.0, VS 2008)
+#if (_MSC_VER >= 1500)
+
+extern "C" {
+extern BOOL (WINAPI * const _pRawDllMainOrig)(HANDLE, DWORD, LPVOID);
+extern BOOL (WINAPI * const _pDefaultRawDllMainOrig)(HANDLE, DWORD, LPVOID) = NULL;
+#if defined (_M_IX86)
+#pragma comment(linker, "/alternatename:__pRawDllMainOrig=__pDefaultRawDllMainOrig")
+#elif defined (_M_X64) || defined (_M_ARM)
+#pragma comment(linker, "/alternatename:_pRawDllMainOrig=_pDefaultRawDllMainOrig")
+#else  /* defined (_M_X64) || defined (_M_ARM) */
+#error Unsupported platform
+#endif  /* defined (_M_X64) || defined (_M_ARM) */
+}
+
+#endif
+
+
+
 
     //Definitions required by implementation
 
@@ -240,7 +270,11 @@ extern "C" const IMAGE_TLS_DIRECTORY32 _tls_used __attribute__ ((section(".rdata
             }
         }
 
+#if (_MSC_VER >= 1500)
+        BOOL WINAPI dll_callback(HANDLE hInstance, DWORD dwReason, LPVOID lpReserved)
+#else
         BOOL WINAPI dll_callback(HANDLE, DWORD dwReason, LPVOID)
+#endif
         {
             switch (dwReason)
             {
@@ -251,6 +285,13 @@ extern "C" const IMAGE_TLS_DIRECTORY32 _tls_used __attribute__ ((section(".rdata
                 boost::on_process_exit();
                 break;
             }
+
+#if (_MSC_VER >= 1500)
+			if( _pRawDllMainOrig )
+			{
+				return _pRawDllMainOrig(hInstance, dwReason, lpReserved);
+			}
+#endif
             return true;
         }
     } //namespace

@@ -485,7 +485,7 @@ public:
 
 #endif // BOOST_NO_AUTO_PTR
 
-#if !defined( BOOST_NO_CXX11_SMART_PTR )
+#if !defined( BOOST_NO_CXX11_SMART_PTR ) && !defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
 
     template< class Y, class D >
     shared_ptr( std::unique_ptr< Y, D > && r ): px( r.get() ), pn()
@@ -550,7 +550,7 @@ public:
 
 #endif // BOOST_NO_AUTO_PTR
 
-#if !defined( BOOST_NO_CXX11_SMART_PTR )
+#if !defined( BOOST_NO_CXX11_SMART_PTR ) && !defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
 
     template<class Y, class D>
     shared_ptr & operator=( std::unique_ptr<Y, D> && r )

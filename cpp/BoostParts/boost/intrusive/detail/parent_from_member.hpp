@@ -16,9 +16,9 @@
 #include <cstddef>
 
 #if defined(BOOST_MSVC) || ((defined(_WIN32) || defined(__WIN32__) || defined(WIN32)) && defined(BOOST_INTEL))
-
-#define BOOST_INTRUSIVE_MSVC_COMPLIANT_PTR_TO_MEMBER
-#include <boost/cstdint.hpp>
+   #define BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+   #include <boost/cstdint.hpp>
+   #include <boost/static_assert.hpp>
 #endif
 
 namespace boost {
@@ -29,7 +29,7 @@ template<class Parent, class Member>
 inline std::ptrdiff_t offset_from_pointer_to_member(const Member Parent::* ptr_to_member)
 {
    //The implementation of a pointer to member is compiler dependent.
-   #if defined(BOOST_INTRUSIVE_MSVC_COMPLIANT_PTR_TO_MEMBER)
+   #if defined(BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER)
    //msvc compliant compilers use their the first 32 bits as offset (even in 64 bit mode)
    union caster_union
    {
@@ -37,6 +37,10 @@ inline std::ptrdiff_t offset_from_pointer_to_member(const Member Parent::* ptr_t
       boost::int32_t offset;
    } caster;
    caster.ptr_to_member = ptr_to_member;
+   //MSVC ABI can use up to 3 int32 to represent pointer to member data
+   //with virtual base classes, in those cases there is no simple to
+   //obtain the address of parent. So static assert to avoid runtime errors
+   BOOST_STATIC_ASSERT( sizeof(caster) == sizeof(boost::int32_t) );
    return std::ptrdiff_t(caster.offset);
    //This works with gcc, msvc, ac++, ibmcpp
    #elif defined(__GNUC__)   || defined(__HP_aCC) || defined(BOOST_INTEL) || \
@@ -84,8 +88,8 @@ inline const Parent *parent_from_member(const Member *member, const Member Paren
 }  //namespace intrusive {
 }  //namespace boost {
 
-#ifdef BOOST_INTRUSIVE_MSVC_COMPLIANT_PTR_TO_MEMBER
-#undef BOOST_INTRUSIVE_MSVC_COMPLIANT_PTR_TO_MEMBER
+#ifdef BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+#undef BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
 #endif
 
 #include <boost/intrusive/detail/config_end.hpp>

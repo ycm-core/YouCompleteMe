@@ -9,8 +9,9 @@
 #define BOOST_BARRIER_JDM030602_HPP
 
 #include <boost/thread/detail/config.hpp>
-#include <boost/throw_exception.hpp>
+#include <boost/thread/detail/delete.hpp>
 
+#include <boost/throw_exception.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/lock_types.hpp>
 #include <boost/thread/condition_variable.hpp>
@@ -25,6 +26,8 @@ namespace boost
     class barrier
     {
     public:
+        BOOST_THREAD_NO_COPYABLE( barrier )
+
         barrier(unsigned int count)
             : m_threshold(count), m_count(count), m_generation(0)
         {

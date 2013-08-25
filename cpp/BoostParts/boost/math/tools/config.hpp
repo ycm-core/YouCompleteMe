@@ -22,7 +22,6 @@
 #endif
 
 #include <boost/math/tools/user.hpp>
-#include <boost/math/special_functions/detail/round_fwd.hpp>
 
 #if (defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__NetBSD__) \
    || (defined(__hppa) && !defined(__OpenBSD__)) || (defined(__NO_LONG_DOUBLE_MATH) && (DBL_MANT_DIG != LDBL_MANT_DIG))) \
@@ -208,6 +207,22 @@
 #ifndef BOOST_MATH_INT_VALUE_SUFFIX
 #  define BOOST_MATH_INT_VALUE_SUFFIX(RV, SUF) RV##SUF
 #endif
+//
+// Test whether to support __float128:
+//
+#if defined(_GLIBCXX_USE_FLOAT128) && defined(BOOST_GCC) && !defined(__STRICT_ANSI__)
+//
+// Only enable this when the compiler really is GCC as clang and probably 
+// intel too don't support __float128 yet :-(
+//
+#  define BOOST_MATH_USE_FLOAT128
+#endif
+//
+// Check for WinCE with no iostream support:
+//
+#if defined(_WIN32_WCE) && !defined(__SGI_STL_PORT)
+#  define BOOST_MATH_NO_LEXICAL_CAST
+#endif
 
 //
 // Helper macro for controlling the FP behaviour:
@@ -218,7 +233,7 @@
 //
 // Helper macro for using statements:
 //
-#define BOOST_MATH_STD_USING \
+#define BOOST_MATH_STD_USING_CORE \
    using std::abs;\
    using std::acos;\
    using std::cos;\
@@ -241,15 +256,9 @@
    using std::ceil;\
    using std::floor;\
    using std::log10;\
-   using std::sqrt;\
-   using boost::math::round;\
-   using boost::math::iround;\
-   using boost::math::lround;\
-   using boost::math::trunc;\
-   using boost::math::itrunc;\
-   using boost::math::ltrunc;\
-   using boost::math::modf;
+   using std::sqrt;
 
+#define BOOST_MATH_STD_USING BOOST_MATH_STD_USING_CORE
 
 namespace boost{ namespace math{
 namespace tools
@@ -319,12 +328,20 @@ namespace boost{ namespace math{
 #endif
 
 #ifdef BOOST_MATH_INSTRUMENT
-#define BOOST_MATH_INSTRUMENT_CODE(x) \
-   std::cout << std::setprecision(35) << __FILE__ << ":" << __LINE__ << " " << x << std::endl;
-#define BOOST_MATH_INSTRUMENT_VARIABLE(name) BOOST_MATH_INSTRUMENT_CODE(BOOST_STRINGIZE(name) << " = " << name)
+
+#  include <iostream>
+#  include <iomanip>
+#  include <typeinfo>
+
+#  define BOOST_MATH_INSTRUMENT_CODE(x) \
+      std::cout << std::setprecision(35) << __FILE__ << ":" << __LINE__ << " " << x << std::endl;
+#  define BOOST_MATH_INSTRUMENT_VARIABLE(name) BOOST_MATH_INSTRUMENT_CODE(BOOST_STRINGIZE(name) << " = " << name)
+
 #else
-#define BOOST_MATH_INSTRUMENT_CODE(x)
-#define BOOST_MATH_INSTRUMENT_VARIABLE(name)
+
+#  define BOOST_MATH_INSTRUMENT_CODE(x)
+#  define BOOST_MATH_INSTRUMENT_VARIABLE(name)
+
 #endif
 
 #endif // BOOST_MATH_TOOLS_CONFIG_HPP

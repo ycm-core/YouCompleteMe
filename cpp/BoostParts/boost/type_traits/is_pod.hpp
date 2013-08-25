@@ -131,8 +131,10 @@ BOOST_TT_AUX_BOOL_TRAIT_IMPL_SPEC1(is_pod,void const volatile,true)
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_POD,T,::boost::detail::is_pod_impl<T>::value)
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_pod,T,::boost::detail::is_pod_impl<T>::value)
+// is_POD is the old depricated name for this trait, do not use this as it may
+// be removed in future without warning!!
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_POD,T,::boost::is_pod<T>::value)
 
 } // namespace boost
 

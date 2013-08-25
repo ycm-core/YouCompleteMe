@@ -423,7 +423,7 @@ bool do_regex_match(BidiIterator first, BidiIterator last,
 {
    typedef u16_to_u32_iterator<BidiIterator, UChar32> conv_type;
    typedef match_results<conv_type>                   match_type;
-   typedef typename match_type::allocator_type        alloc_type;
+   //typedef typename match_type::allocator_type        alloc_type;
    match_type what;
    bool result = ::boost::regex_match(conv_type(first, first, last), conv_type(last, first, last), what, e, flags);
    // copy results across to m:
@@ -439,7 +439,7 @@ bool do_regex_match(BidiIterator first, BidiIterator last,
 {
    typedef u8_to_u32_iterator<BidiIterator, UChar32>  conv_type;
    typedef match_results<conv_type>                   match_type;
-   typedef typename match_type::allocator_type        alloc_type;
+   //typedef typename match_type::allocator_type        alloc_type;
    match_type what;
    bool result = ::boost::regex_match(conv_type(first, first, last), conv_type(last, first, last), what, e, flags);
    // copy results across to m:
@@ -598,7 +598,7 @@ bool do_regex_search(BidiIterator first, BidiIterator last,
 {
    typedef u16_to_u32_iterator<BidiIterator, UChar32> conv_type;
    typedef match_results<conv_type>                   match_type;
-   typedef typename match_type::allocator_type        alloc_type;
+   //typedef typename match_type::allocator_type        alloc_type;
    match_type what;
    bool result = ::boost::regex_search(conv_type(first, first, last), conv_type(last, first, last), what, e, flags, conv_type(base));
    // copy results across to m:
@@ -615,7 +615,7 @@ bool do_regex_search(BidiIterator first, BidiIterator last,
 {
    typedef u8_to_u32_iterator<BidiIterator, UChar32>  conv_type;
    typedef match_results<conv_type>                   match_type;
-   typedef typename match_type::allocator_type        alloc_type;
+   //typedef typename match_type::allocator_type        alloc_type;
    match_type what;
    bool result = ::boost::regex_search(conv_type(first, first, last), conv_type(last, first, last), what, e, flags, conv_type(base));
    // copy results across to m:

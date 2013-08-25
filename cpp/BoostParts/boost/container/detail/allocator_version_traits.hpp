@@ -18,13 +18,13 @@
 #include <boost/container/detail/config_begin.hpp>
 #include <boost/container/detail/workaround.hpp>
 #include <boost/container/allocator_traits.hpp>             //allocator_traits
+#include <boost/container/throw_exception.hpp>
 #include <boost/container/detail/multiallocation_chain.hpp> //multiallocation_chain
 #include <boost/container/detail/version_type.hpp>          //version_type
 #include <boost/container/detail/allocation_type.hpp>       //allocation_type
 #include <boost/container/detail/mpl.hpp>                   //integral_constant
 #include <boost/intrusive/pointer_traits.hpp>               //pointer_traits
 #include <utility>                                          //pair
-#include <stdexcept>                                        //runtime_error
 #include <boost/detail/no_exceptions_support.hpp>           //BOOST_TRY
 
 namespace boost {
@@ -135,7 +135,7 @@ struct allocator_version_traits<Allocator, 1>
       std::pair<pointer, bool> ret(pointer(), false);
       if(!(command & allocate_new)){
          if(!(command & nothrow_allocation)){
-            throw std::runtime_error("version 1 allocator without allocate_new flag");
+            throw_logic_error("version 1 allocator without allocate_new flag");
          }
       }
       else{

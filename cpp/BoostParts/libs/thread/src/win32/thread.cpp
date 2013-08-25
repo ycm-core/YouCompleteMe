@@ -14,7 +14,7 @@
 #endif
 //#define BOOST_THREAD_VERSION 3
 
-#include <boost/thread/thread.hpp>
+#include <boost/thread/thread_only.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/thread/condition_variable.hpp>
@@ -402,7 +402,8 @@ namespace boost
 
     unsigned thread::hardware_concurrency() BOOST_NOEXCEPT
     {
-        SYSTEM_INFO info={{0}};
+        //SYSTEM_INFO info={{0}};
+        SYSTEM_INFO info;
         GetSystemInfo(&info);
         return info.dwNumberOfProcessors;
     }
@@ -425,7 +426,7 @@ namespace boost
         {
             LARGE_INTEGER get_due_time(detail::timeout const&  target_time)
             {
-                LARGE_INTEGER due_time={{0}};
+                LARGE_INTEGER due_time={{0,0}};
                 if(target_time.relative)
                 {
                     unsigned long const elapsed_milliseconds=GetTickCount()-target_time.start;
@@ -439,7 +440,7 @@ namespace boost
                 }
                 else
                 {
-                    SYSTEMTIME target_system_time={0};
+                    SYSTEMTIME target_system_time={0,0,0,0,0,0,0,0};
                     target_system_time.wYear=target_time.abs_time.date().year();
                     target_system_time.wMonth=target_time.abs_time.date().month();
                     target_system_time.wDay=target_time.abs_time.date().day();
@@ -747,5 +748,4 @@ namespace boost
       }
     }
 }
-
 

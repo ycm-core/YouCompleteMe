@@ -174,7 +174,8 @@ namespace boost
     BOOST_THREAD_EXPLICIT_LOCK_CONVERSION unique_lock(BOOST_THREAD_RV_REF_BEG upgrade_lock<Mutex> BOOST_THREAD_RV_REF_END other);
 
 #ifndef BOOST_THREAD_PROVIDES_EXPLICIT_LOCK_CONVERSION
-    unique_lock& operator=(BOOST_THREAD_RV_REF_BEG upgrade_lock<Mutex> BOOST_THREAD_RV_REF_END other) BOOST_NOEXCEPT
+    //std-2104 unique_lock move-assignment should not be noexcept
+    unique_lock& operator=(BOOST_THREAD_RV_REF_BEG upgrade_lock<Mutex> BOOST_THREAD_RV_REF_END other) //BOOST_NOEXCEPT
     {
       unique_lock temp(::boost::move(other));
       swap(temp);
@@ -182,7 +183,8 @@ namespace boost
     }
 #endif
 
-    unique_lock& operator=(BOOST_THREAD_RV_REF(unique_lock) other) BOOST_NOEXCEPT
+    //std-2104 unique_lock move-assignment should not be noexcept
+    unique_lock& operator=(BOOST_THREAD_RV_REF(unique_lock) other) //BOOST_NOEXCEPT
     {
       unique_lock temp(::boost::move(other));
       swap(temp);
@@ -581,7 +583,8 @@ namespace boost
       BOOST_THREAD_RV(other).m=0;
     }
 
-    shared_lock& operator=(BOOST_THREAD_RV_REF_BEG shared_lock<Mutex> BOOST_THREAD_RV_REF_END other) BOOST_NOEXCEPT
+    //std-2104 unique_lock move-assignment should not be noexcept
+    shared_lock& operator=(BOOST_THREAD_RV_REF_BEG shared_lock<Mutex> BOOST_THREAD_RV_REF_END other) //BOOST_NOEXCEPT
     {
       shared_lock temp(::boost::move(other));
       swap(temp);
@@ -826,7 +829,8 @@ namespace boost
       BOOST_THREAD_RV(other).m=0;
     }
 
-    upgrade_lock& operator=(BOOST_THREAD_RV_REF_BEG upgrade_lock<Mutex> BOOST_THREAD_RV_REF_END other) BOOST_NOEXCEPT
+    //std-2104 unique_lock move-assignment should not be noexcept
+    upgrade_lock& operator=(BOOST_THREAD_RV_REF_BEG upgrade_lock<Mutex> BOOST_THREAD_RV_REF_END other) //BOOST_NOEXCEPT
     {
       upgrade_lock temp(::boost::move(other));
       swap(temp);
@@ -1073,7 +1077,8 @@ namespace boost
       BOOST_THREAD_RV(other).source=0;
     }
 
-    upgrade_to_unique_lock& operator=(BOOST_THREAD_RV_REF_BEG upgrade_to_unique_lock<Mutex> BOOST_THREAD_RV_REF_END other) BOOST_NOEXCEPT
+    //std-2104 unique_lock move-assignment should not be noexcept
+    upgrade_to_unique_lock& operator=(BOOST_THREAD_RV_REF_BEG upgrade_to_unique_lock<Mutex> BOOST_THREAD_RV_REF_END other) //BOOST_NOEXCEPT
     {
       upgrade_to_unique_lock temp(other);
       swap(temp);

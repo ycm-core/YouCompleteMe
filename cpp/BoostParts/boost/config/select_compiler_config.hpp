@@ -33,6 +33,10 @@
 // PathScale EKOPath compiler (has to come before clang and gcc)
 #   define BOOST_COMPILER_CONFIG "boost/config/compiler/pathscale.hpp"
 
+#elif defined(__INTEL_COMPILER) || defined(__ICL) || defined(__ICC) || defined(__ECC)
+//  Intel
+#   define BOOST_COMPILER_CONFIG "boost/config/compiler/intel.hpp"
+
 #elif defined __clang__
 //  Clang C++ emulates GCC, so it has to appear early.
 #   define BOOST_COMPILER_CONFIG "boost/config/compiler/clang.hpp"
@@ -40,10 +44,6 @@
 #elif defined __DMC__
 //  Digital Mars C++
 #   define BOOST_COMPILER_CONFIG "boost/config/compiler/digitalmars.hpp"
-
-#elif defined(__INTEL_COMPILER) || defined(__ICL) || defined(__ICC) || defined(__ECC)
-//  Intel
-#   define BOOST_COMPILER_CONFIG "boost/config/compiler/intel.hpp"
 
 # elif defined __GNUC__
 //  GNU C++:

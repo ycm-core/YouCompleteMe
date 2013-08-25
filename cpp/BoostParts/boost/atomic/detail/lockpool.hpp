@@ -61,6 +61,7 @@ public:
     {
     private:
         atomic_flag& flag_;
+        uint8_t padding[128 - sizeof(atomic_flag)];
 
         scoped_lock(const scoped_lock &) /* = delete */;
         scoped_lock& operator=(const scoped_lock &) /* = delete */;

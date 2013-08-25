@@ -81,9 +81,18 @@ class basic_iarchive_impl {
 
     //////////////////////////////////////////////////////////////////////
     // used to implement the reset_object_address operation.
-    object_id_type moveable_objects_start;
-    object_id_type moveable_objects_end;
-    object_id_type moveable_objects_recent;
+    struct moveable_objects {
+        object_id_type start;
+        object_id_type end;
+        object_id_type recent;
+        bool is_pointer;
+        moveable_objects() :
+            start(0),
+            end(0),
+            recent(0),
+            is_pointer(false)
+        {}
+    } m_moveable_objects;
 
     void reset_object_address(
         const void * new_address, 
@@ -159,19 +168,20 @@ class basic_iarchive_impl {
     //////////////////////////////////////////////////////////////////////
     // address of the most recent object serialized as a poiner
     // whose data itself is now pending serialization
-    void * pending_object;
-    const basic_iserializer * pending_bis;
-    version_type pending_version;
+    struct pending {
+        void * object;
+        const basic_iserializer * bis;
+        version_type version;
+        pending() :
+            object(NULL),
+            bis(NULL),
+            version(0)
+        {}
+    } m_pending;
 
     basic_iarchive_impl(unsigned int flags) :
         m_archive_library_version(BOOST_ARCHIVE_VERSION()),
-        m_flags(flags),
-        moveable_objects_start(0),
-        moveable_objects_end(0),
-        moveable_objects_recent(0),
-        pending_object(NULL),
-        pending_bis(NULL),
-        pending_version(0)
+        m_flags(flags)
     {}
     ~basic_iarchive_impl(){}
     void set_library_version(library_version_type archive_library_version){
@@ -200,7 +210,7 @@ class basic_iarchive_impl {
 //public:
     void
     next_object_pointer(void * t){
-        pending_object = t;
+        m_pending.object = t;
     }
     void delete_created_pointers();
     class_id_type register_type(
@@ -224,9 +234,12 @@ class basic_iarchive_impl {
 
 inline void 
 basic_iarchive_impl::reset_object_address(
-    const void * new_address, 
-    const void *old_address
+    void const * const new_address, 
+    void const * const old_address
 ){
+    if(m_moveable_objects.is_pointer)
+        return;
+
     // this code handles a couple of situations.
     // a) where reset_object_address is applied to an untracked object.
     //    In such a case the call is really superfluous and its really an
@@ -240,18 +253,18 @@ basic_iarchive_impl::reset_object_address(
     //    of the programmer but we can't detect it - as above.  So maybe we
     //    can save a few more people from themselves as above.
     object_id_type i;
-    for(i = moveable_objects_recent; i < moveable_objects_end; ++i){
+    for(i = m_moveable_objects.recent; i < m_moveable_objects.end; ++i){
         if(old_address == object_id_vector[i].address)
             break;
     }
-    for(; i < moveable_objects_end; ++i){
-
+    for(; i < m_moveable_objects.end; ++i){
+        void const * const this_address = object_id_vector[i].address;
         // calculate displacement from this level
         // warning - pointer arithmetic on void * is in herently non-portable
         // but expected to work on all platforms in current usage
-        if(object_id_vector[i].address > old_address){
+        if(this_address > old_address){
             std::size_t member_displacement
-                = reinterpret_cast<std::size_t>(object_id_vector[i].address) 
+                = reinterpret_cast<std::size_t>(this_address) 
                 - reinterpret_cast<std::size_t>(old_address);
             object_id_vector[i].address = reinterpret_cast<void *>(
                 reinterpret_cast<std::size_t>(new_address) + member_displacement
@@ -260,7 +273,7 @@ basic_iarchive_impl::reset_object_address(
         else{
             std::size_t member_displacement
                 = reinterpret_cast<std::size_t>(old_address)
-                - reinterpret_cast<std::size_t>(object_id_vector[i].address); 
+                - reinterpret_cast<std::size_t>(this_address); 
             object_id_vector[i].address = reinterpret_cast<void *>(
                 reinterpret_cast<std::size_t>(new_address) - member_displacement
             );
@@ -356,10 +369,12 @@ basic_iarchive_impl::load_object(
     void * t,
     const basic_iserializer & bis
 ){
+    m_moveable_objects.is_pointer = false;
+    serialization::state_saver<bool> ss_is_pointer(m_moveable_objects.is_pointer);
     // if its been serialized through a pointer and the preamble's been done
-    if(t == pending_object && & bis == pending_bis){
+    if(t == m_pending.object && & bis == m_pending.bis){
         // read data
-        (bis.load_object_data)(ar, t, pending_version);
+        (bis.load_object_data)(ar, t, m_pending.version);
         return;
     }
 
@@ -370,13 +385,13 @@ basic_iarchive_impl::load_object(
     load_preamble(ar, co);
 
     // save the current move stack position in case we want to truncate it
-    boost::serialization::state_saver<object_id_type> w(moveable_objects_start);
+    boost::serialization::state_saver<object_id_type> ss_start(m_moveable_objects.start);
 
     // note: extra line used to evade borland issue
     const bool tracking = co.tracking_level;
 
     object_id_type this_id;
-    moveable_objects_start =
+    m_moveable_objects.start =
     this_id = object_id_type(object_id_vector.size());
 
     // if we tracked this object when the archive was saved
@@ -388,11 +403,11 @@ basic_iarchive_impl::load_object(
         // add a new enty into the tracking list
         object_id_vector.push_back(aobject(t, cid));
         // and add an entry for this object
-        moveable_objects_end = object_id_type(object_id_vector.size());
+        m_moveable_objects.end = object_id_type(object_id_vector.size());
     }
     // read data
     (bis.load_object_data)(ar, t, co.file_version);
-    moveable_objects_recent = this_id;
+    m_moveable_objects.recent = this_id;
 }
 
 inline const basic_pointer_iserializer *
@@ -405,6 +420,9 @@ basic_iarchive_impl::load_pointer(
     )
 
 ){
+    m_moveable_objects.is_pointer = true;
+    serialization::state_saver<bool> w(m_moveable_objects.is_pointer);
+
     class_id_type cid;
     load(ar, cid);
 
@@ -453,23 +471,23 @@ basic_iarchive_impl::load_pointer(
         return bpis_ptr;
 
     // save state
-    serialization::state_saver<object_id_type> w_start(moveable_objects_start);
+    serialization::state_saver<object_id_type> w_start(m_moveable_objects.start);
 
     if(! tracking){
         bpis_ptr->load_object_ptr(ar, t, co.file_version);
     }
     else{
-        serialization::state_saver<void *> x(pending_object);
-        serialization::state_saver<const basic_iserializer *> y(pending_bis);
-        serialization::state_saver<version_type> z(pending_version);
+        serialization::state_saver<void *> x(m_pending.object);
+        serialization::state_saver<const basic_iserializer *> y(m_pending.bis);
+        serialization::state_saver<version_type> z(m_pending.version);
 
-        pending_bis = & bpis_ptr->get_basic_serializer();
-        pending_version = co.file_version;
+        m_pending.bis = & bpis_ptr->get_basic_serializer();
+        m_pending.version = co.file_version;
 
         // predict next object id to be created
         const unsigned int ui = object_id_vector.size();
 
-        serialization::state_saver<object_id_type> w_end(moveable_objects_end);
+        serialization::state_saver<object_id_type> w_end(m_moveable_objects.end);
 
         // because the following operation could move the items
         // don't use co after this

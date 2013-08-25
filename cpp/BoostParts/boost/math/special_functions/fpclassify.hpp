@@ -37,13 +37,13 @@ the template is never instantiated.
 a floating point type (float, double or long double) can be determined
 at compile time, then the following algorithm is used:
 
-        If all exponent bits, the flag bit (if there is one), 
+        If all exponent bits, the flag bit (if there is one),
         and all significand bits are 0, then the number is zero.
 
-        If all exponent bits and the flag bit (if there is one) are 0, 
+        If all exponent bits and the flag bit (if there is one) are 0,
         and at least one significand bit is 1, then the number is subnormal.
 
-        If all exponent bits are 1 and all significand bits are 0, 
+        If all exponent bits are 1 and all significand bits are 0,
         then the number is infinity.
 
         If all exponent bits are 1 and at least one significand bit is 1,
@@ -56,7 +56,7 @@ at compile time, then the following algorithm is used:
 
     Most formats have the structure
         sign bit + exponent bits + significand bits.
-    
+
     A few have the structure
         sign bit + exponent bits + flag bit + significand bits.
     The flag bit is 0 for zero and subnormal numbers,
@@ -85,7 +85,7 @@ is used.
   namespace std{ using ::abs; using ::fabs; }
 #endif
 
-namespace boost{ 
+namespace boost{
 
 //
 // This must not be located in any namespace under boost::math
@@ -94,17 +94,27 @@ namespace boost{
 //
 namespace math_detail{
 
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable:4800)
+#endif
+
 template <class T>
 inline bool is_nan_helper(T t, const boost::true_type&)
 {
 #ifdef isnan
    return isnan(t);
 #elif defined(BOOST_MATH_DISABLE_STD_FPCLASSIFY) || !defined(BOOST_HAS_FPCLASSIFY)
+   (void)t;
    return false;
 #else // BOOST_HAS_FPCLASSIFY
    return (BOOST_FPCLASSIFY_PREFIX fpclassify(t) == (int)FP_NAN);
 #endif
 }
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
 template <class T>
 inline bool is_nan_helper(T, const boost::false_type&)
@@ -169,7 +179,7 @@ inline int fpclassify_imp BOOST_NO_MACRO_EXPAND(T t, const generic_tag<false>&)
    if(std::numeric_limits<T>::is_specialized)
       return fpclassify_imp(t, generic_tag<true>());
 #endif
-   // 
+   //
    // An unknown type with no numeric_limits support,
    // so what are we supposed to do we do here?
    //
@@ -178,7 +188,7 @@ inline int fpclassify_imp BOOST_NO_MACRO_EXPAND(T t, const generic_tag<false>&)
    return t == 0 ? FP_ZERO : FP_NORMAL;
 }
 
-template<class T> 
+template<class T>
 int fpclassify_imp BOOST_NO_MACRO_EXPAND(T x, ieee_copy_all_bits_tag)
 {
    typedef BOOST_DEDUCED_TYPENAME fp_traits<T>::type traits;
@@ -207,7 +217,7 @@ int fpclassify_imp BOOST_NO_MACRO_EXPAND(T x, ieee_copy_all_bits_tag)
    return FP_NAN;
 }
 
-template<class T> 
+template<class T>
 int fpclassify_imp BOOST_NO_MACRO_EXPAND(T x, ieee_copy_leading_bits_tag)
 {
    typedef BOOST_DEDUCED_TYPENAME fp_traits<T>::type traits;
@@ -215,7 +225,7 @@ int fpclassify_imp BOOST_NO_MACRO_EXPAND(T x, ieee_copy_leading_bits_tag)
    BOOST_MATH_INSTRUMENT_VARIABLE(x);
 
    BOOST_DEDUCED_TYPENAME traits::bits a;
-   traits::get_bits(x,a); 
+   traits::get_bits(x,a);
    a &= traits::exponent | traits::flag | traits::significand;
 
    if(a <= traits::significand) {
@@ -278,21 +288,21 @@ inline int fpclassify<long double> BOOST_NO_MACRO_EXPAND(long double t)
 namespace detail {
 
 #ifdef BOOST_MATH_USE_STD_FPCLASSIFY
-    template<class T> 
+    template<class T>
     inline bool isfinite_impl(T x, native_tag const&)
     {
         return (std::isfinite)(x);
     }
 #endif
 
-    template<class T> 
+    template<class T>
     inline bool isfinite_impl(T x, generic_tag<true> const&)
     {
         return x >= -(std::numeric_limits<T>::max)()
             && x <= (std::numeric_limits<T>::max)();
     }
 
-    template<class T> 
+    template<class T>
     inline bool isfinite_impl(T x, generic_tag<false> const&)
     {
 #ifdef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
@@ -303,7 +313,7 @@ namespace detail {
        return true;
     }
 
-    template<class T> 
+    template<class T>
     inline bool isfinite_impl(T x, ieee_tag const&)
     {
         typedef BOOST_DEDUCED_TYPENAME detail::fp_traits<T>::type traits;
@@ -322,18 +332,18 @@ inline bool isfinite_impl BOOST_NO_MACRO_EXPAND(long double t, const native_tag&
 
 }
 
-template<class T> 
+template<class T>
 inline bool (isfinite)(T x)
 { //!< \brief return true if floating-point type t is finite.
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   // typedef typename boost::is_floating_point<T>::type fp_tag;
    typedef typename tools::promote_args<T>::type value_type;
    return detail::isfinite_impl(static_cast<value_type>(x), method());
 }
 
 #ifdef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-template<> 
+template<>
 inline bool (isfinite)(long double x)
 { //!< \brief return true if floating-point type t is finite.
    typedef detail::fp_traits<long double>::type traits;
@@ -349,14 +359,14 @@ inline bool (isfinite)(long double x)
 namespace detail {
 
 #ifdef BOOST_MATH_USE_STD_FPCLASSIFY
-    template<class T> 
+    template<class T>
     inline bool isnormal_impl(T x, native_tag const&)
     {
         return (std::isnormal)(x);
     }
 #endif
 
-    template<class T> 
+    template<class T>
     inline bool isnormal_impl(T x, generic_tag<true> const&)
     {
         if(x < 0) x = -x;
@@ -364,7 +374,7 @@ namespace detail {
             && x <= (std::numeric_limits<T>::max)();
     }
 
-    template<class T> 
+    template<class T>
     inline bool isnormal_impl(T x, generic_tag<false> const&)
     {
 #ifdef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
@@ -374,7 +384,7 @@ namespace detail {
        return !(x == 0);
     }
 
-    template<class T> 
+    template<class T>
     inline bool isnormal_impl(T x, ieee_tag const&)
     {
         typedef BOOST_DEDUCED_TYPENAME detail::fp_traits<T>::type traits;
@@ -393,18 +403,18 @@ inline bool isnormal_impl BOOST_NO_MACRO_EXPAND(long double t, const native_tag&
 
 }
 
-template<class T> 
+template<class T>
 inline bool (isnormal)(T x)
 {
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   //typedef typename boost::is_floating_point<T>::type fp_tag;
    typedef typename tools::promote_args<T>::type value_type;
    return detail::isnormal_impl(static_cast<value_type>(x), method());
 }
 
 #ifdef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-template<> 
+template<>
 inline bool (isnormal)(long double x)
 {
    typedef detail::fp_traits<long double>::type traits;
@@ -420,23 +430,23 @@ inline bool (isnormal)(long double x)
 namespace detail {
 
 #ifdef BOOST_MATH_USE_STD_FPCLASSIFY
-    template<class T> 
+    template<class T>
     inline bool isinf_impl(T x, native_tag const&)
     {
         return (std::isinf)(x);
     }
 #endif
 
-    template<class T> 
+    template<class T>
     inline bool isinf_impl(T x, generic_tag<true> const&)
     {
         (void)x; // in case the compiler thinks that x is unused because std::numeric_limits<T>::has_infinity is false
-        return std::numeric_limits<T>::has_infinity 
+        return std::numeric_limits<T>::has_infinity
             && ( x == std::numeric_limits<T>::infinity()
                  || x == -std::numeric_limits<T>::infinity());
     }
 
-    template<class T> 
+    template<class T>
     inline bool isinf_impl(T x, generic_tag<false> const&)
     {
 #ifdef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
@@ -447,7 +457,7 @@ namespace detail {
         return false;
     }
 
-    template<class T> 
+    template<class T>
     inline bool isinf_impl(T x, ieee_copy_all_bits_tag const&)
     {
         typedef BOOST_DEDUCED_TYPENAME fp_traits<T>::type traits;
@@ -458,7 +468,7 @@ namespace detail {
         return a == traits::exponent;
     }
 
-    template<class T> 
+    template<class T>
     inline bool isinf_impl(T x, ieee_copy_leading_bits_tag const&)
     {
         typedef BOOST_DEDUCED_TYPENAME fp_traits<T>::type traits;
@@ -482,18 +492,18 @@ inline bool isinf_impl BOOST_NO_MACRO_EXPAND(long double t, const native_tag&)
 
 }   // namespace detail
 
-template<class T> 
+template<class T>
 inline bool (isinf)(T x)
 {
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   // typedef typename boost::is_floating_point<T>::type fp_tag;
    typedef typename tools::promote_args<T>::type value_type;
    return detail::isinf_impl(static_cast<value_type>(x), method());
 }
 
 #ifdef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-template<> 
+template<>
 inline bool (isinf)(long double x)
 {
    typedef detail::fp_traits<long double>::type traits;
@@ -509,14 +519,14 @@ inline bool (isinf)(long double x)
 namespace detail {
 
 #ifdef BOOST_MATH_USE_STD_FPCLASSIFY
-    template<class T> 
+    template<class T>
     inline bool isnan_impl(T x, native_tag const&)
     {
         return (std::isnan)(x);
     }
 #endif
 
-    template<class T> 
+    template<class T>
     inline bool isnan_impl(T x, generic_tag<true> const&)
     {
         return std::numeric_limits<T>::has_infinity
@@ -524,7 +534,7 @@ namespace detail {
             : x != x;
     }
 
-    template<class T> 
+    template<class T>
     inline bool isnan_impl(T x, generic_tag<false> const&)
     {
 #ifdef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
@@ -535,7 +545,7 @@ namespace detail {
         return false;
     }
 
-    template<class T> 
+    template<class T>
     inline bool isnan_impl(T x, ieee_copy_all_bits_tag const&)
     {
         typedef BOOST_DEDUCED_TYPENAME fp_traits<T>::type traits;
@@ -546,7 +556,7 @@ namespace detail {
         return a > traits::exponent;
     }
 
-    template<class T> 
+    template<class T>
     inline bool isnan_impl(T x, ieee_copy_leading_bits_tag const&)
     {
         typedef BOOST_DEDUCED_TYPENAME fp_traits<T>::type traits;
@@ -565,12 +575,12 @@ namespace detail {
 
 }   // namespace detail
 
-template<class T> 
+template<class T>
 inline bool (isnan)(T x)
 { //!< \brief return true if floating-point type t is NaN (Not A Number).
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   // typedef typename boost::is_floating_point<T>::type fp_tag;
    return detail::isnan_impl(x, method());
 }
 
@@ -579,7 +589,7 @@ template <> inline bool isnan BOOST_NO_MACRO_EXPAND<float>(float t){ return ::bo
 template <> inline bool isnan BOOST_NO_MACRO_EXPAND<double>(double t){ return ::boost::math_detail::is_nan_helper(t, boost::true_type()); }
 template <> inline bool isnan BOOST_NO_MACRO_EXPAND<long double>(long double t){ return ::boost::math_detail::is_nan_helper(t, boost::true_type()); }
 #elif defined(BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS)
-template<> 
+template<>
 inline bool (isnan)(long double x)
 { //!< \brief return true if floating-point type t is NaN (Not A Number).
    typedef detail::fp_traits<long double>::type traits;

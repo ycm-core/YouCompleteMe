@@ -173,10 +173,15 @@ namespace boost
 #endif
 
     template<typename T>
-    struct is_recursive_mutex_sur_parolle
+    struct is_recursive_mutex_sur_parole
     {
       BOOST_STATIC_CONSTANT(bool, value = false);
     };
+    template<typename T>
+    struct is_recursive_mutex_sur_parolle : is_recursive_mutex_sur_parole<T>
+    {
+    };
+
     template<typename T>
     struct is_recursive_basic_lockable
     {

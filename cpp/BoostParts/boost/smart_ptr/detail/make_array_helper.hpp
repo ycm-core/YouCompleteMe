@@ -31,9 +31,9 @@ namespace boost {
             struct rebind {
                 typedef make_array_helper<T[], U> other;
             };
-            make_array_helper(std::size_t size, T** data)
-                : size(sizeof(T) * size),
-                  data(data) {
+            make_array_helper(std::size_t size_, T** data_)
+                : size(sizeof(T) * size_),
+                  data(data_) {
             }
             template<class U>
             make_array_helper(const make_array_helper<T[], U>& other) 
@@ -72,7 +72,7 @@ namespace boost {
                 memory->~Y();
             }
             template<typename U>
-            bool operator==(const make_array_helper<T[], U>& other) const {
+            bool operator==(const make_array_helper<T[], U>&) const {
                 return true;
             }
             template<typename U>
@@ -99,8 +99,8 @@ namespace boost {
             struct rebind {
                 typedef make_array_helper<T[N], U> other;
             };
-            make_array_helper(T** data)
-                : data(data) {
+            make_array_helper(T** data_)
+                : data(data_) {
             }
             template<class U>
             make_array_helper(const make_array_helper<T[N], U>& other) 
@@ -138,7 +138,7 @@ namespace boost {
                 memory->~Y();
             }
             template<typename U>
-            bool operator==(const make_array_helper<T[N], U>& other) const {
+            bool operator==(const make_array_helper<T[N], U>&) const {
                 return true;
             }
             template<typename U>

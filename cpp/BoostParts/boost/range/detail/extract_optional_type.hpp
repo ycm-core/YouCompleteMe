@@ -16,7 +16,7 @@
 
 #include <boost/config.hpp>
 
-#ifdef BOOST_NO_PARTIAL_TEMPLATE_SPECIALIZATION
+#ifdef BOOST_NO_PARTIAL_SPECIALIZATION_IMPLICIT_DEFAULT_ARGS
 
 #define BOOST_RANGE_EXTRACT_OPTIONAL_TYPE( a_typedef )                         \
     template< typename C >                                                     \
