@@ -39,10 +39,14 @@ else()
   set( 64_BIT_PLATFORM 1 )
 endif()
 
+#############################################################################
+
 # Turning on this flag tells cmake to emit a compile_commands.json file.
 # This file can be used to load compilation flags into YCM. See here for more
 # details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
 set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
+
+#############################################################################
 
 # This is needed so that on macs, the library is built in both 32 bit and 64 bit
 # versions. Without this python might refuse to load the module, depending on
@@ -58,6 +62,8 @@ if ( UNIVERSAL AND NOT USE_SYSTEM_LIBCLANG )
   set( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
 endif()
 
+#############################################################################
+
 if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( COMPILER_IS_CLANG true )
 
@@ -67,10 +73,14 @@ if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   endif()
 endif()
 
+#############################################################################
+
 # Force release build by default, speed is of the essence
 if ( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
 endif()
+
+#############################################################################
 
 # Determining the presence of C++11 support in the compiler
 set( CPP11_AVAILABLE false )
@@ -86,11 +96,43 @@ elseif( COMPILER_IS_CLANG )
   set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
 endif()
 
+#############################################################################
+
 # For MSVC enable UNICODE and compilation on multiple processors
-if( MSVC )
+if ( MSVC )
   add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t-  )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
 endif()
+
+# Solves the conflict in names of hypot in python sources and boost::python
+if ( MINGW )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cmath")
+endif()
+
+# Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
+# other much: a compilation error "Constexpr function never produces a constant
+# expression" pops up when trying to compile anything that uses
+# boost/chrono/duration.hpp (namely boost/thread for us). This is a workaround
+# that prevents this from happening. Also present in cpp/BoostParts/CMakeLists.txt.
+# See here for more details: https://svn.boost.org/trac/boost/ticket/7671
+# TODO: remove this when it's fixed upstream (probably boost 1.53).
+add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
+
+if( MSVC OR CYGWIN )
+  # BOOST_ALL_NO_LIB turns off MSVC library autolinking
+  add_definitions( -DBOOST_ALL_NO_LIB )
+endif()
+
+if( WIN32 )
+  # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
+  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_THREAD_USE_LIB )
+  if ( 64_BIT_PLATFORM )
+    # Enables python compilation for 64-bit Windows
+    add_definitions( -DMS_WIN64 )
+  endif()
+endif()
+
+#############################################################################
 
 # When used with Clang, adding the -std=c++0x flag to CMAKE_CXX_FLAGS will cause
 # the compiler to output a warning during linking:

@@ -108,9 +108,15 @@ if ( NOT IS_ABSOLUTE "${CLANG_INCLUDES_DIR}" )
 endif()
 
 if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
+  if ( MINGW )
+    set( LIBCLANG_SEARCH_PATH "${PATH_TO_LLVM_ROOT}/bin" )
+  else()
+    set( LIBCLANG_SEARCH_PATH "${PATH_TO_LLVM_ROOT}/lib" )
+  endif()
+
   # Need TEMP because find_library does not work with an option variable
   find_library( TEMP NAMES clang libclang
-                PATHS ${PATH_TO_LLVM_ROOT}/lib
+                PATHS ${LIBCLANG_SEARCH_PATH}
                 NO_DEFAULT_PATH )
   set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
 endif()
@@ -207,22 +213,6 @@ if ( UNIX AND NOT APPLE )
   set( EXTRA_LIBS rt )
 endif()
 
-#############################################################################
-
-# Due to a bug/misconfiguration/stupidity, boost 1.52 and libc++ don't like each
-# other much: a compilation error "Constexpr function never produces a constant
-# expression" pops up when trying to compile anything that uses
-# boost/chrono/duration.hpp (namely boost/thread for us). This is a workaround
-# that prevents this from happening. Also present in cpp/BoostParts/CMakeLists.txt.
-# See here for more details: https://svn.boost.org/trac/boost/ticket/7671
-# TODO: remove this when it's fixed upstream (probably boost 1.53).
-add_definitions( -DBOOST_THREAD_DONT_USE_CHRONO )
-
-if( MSVC OR CYGWIN )
-  # BOOST_PYTHON_SOURCE makes boost use the correct __declspec and
-  # BOOST_ALL_NO_LIB turns off MSVC library autolinking
-  add_definitions( -DBOOST_PYTHON_SOURCE -DBOOST_ALL_NO_LIB )
-endif()
 #############################################################################
 
 add_library( ${PROJECT_NAME} SHARED
