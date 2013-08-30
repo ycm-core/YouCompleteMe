@@ -37,13 +37,18 @@ const char *COMMENT_AND_STRING_REGEX =
   "|"
   "/\\*.*?\\*/"  // C-style comments, '/* ... */'
   "|"
-  // Anything inside single quotes, '...', but mind the escaped quote and the
-  // escaped slash (\\)
-  "'(?:\\\\\\\\|\\\\'|.)*?'"
+  // Anything inside single quotes, '...', but mind:
+  //  1. that the starting single quote is not escaped
+  //  2. the escaped slash (\\)
+  //  3. the escaped single quote inside the string
+  // "(?<!\\\\)'(?:\\\\\\\\|\\\\'|.)*?'"
+  "(?<!\\\\)'(?:\\\\\\\\|\\\\'|.)*?'"
   "|"
-  // Anything inside double quotes, "...", but mind the escaped double quote and
-  // the escaped slash (\\)
-  "\"(?:\\\\\\\\|\\\\\"|.)*?\"";
+  // Anything inside double quotes, "...", but mind:
+  //  1. that the starting double quote is not escaped
+  //  2. the escaped slash (\\)
+  //  3. the escaped double quote inside the string
+  "(?<!\\\\)\"(?:\\\\\\\\|\\\\\"|.)*?\"";
 
 const char *IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
 
