@@ -30,7 +30,7 @@ using ::testing::ElementsAre;
 using ::testing::ContainerEq;
 using ::testing::WhenSorted;
 
-TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
+TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextComments ) {
   EXPECT_STREQ( RemoveIdentifierFreeText(
                   "foo \n"
                   "bar //foo \n"
@@ -58,19 +58,13 @@ TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
                 "foo \n"
                 "bar \n"
                 "qux" );
+}
 
+
+TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextSimpleStrings ) {
   EXPECT_STREQ( RemoveIdentifierFreeText(
                   "foo \n"
                   "bar 'foo'\n"
-                  "qux"
-                ).c_str(),
-                "foo \n"
-                "bar \n"
-                "qux" );
-
-  EXPECT_STREQ( RemoveIdentifierFreeText(
-                  "foo \n"
-                  "bar 'fo\\'oz\\nfoo'\n"
                   "qux"
                 ).c_str(),
                 "foo \n"
@@ -85,6 +79,19 @@ TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
                 "foo \n"
                 "bar \n"
                 "qux" );
+}
+
+
+TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextEscapedQuotesInStrings ) {
+  EXPECT_STREQ( RemoveIdentifierFreeText(
+                  "foo \n"
+                  "bar 'fo\\'oz\\nfoo'\n"
+                  "qux"
+                ).c_str(),
+                "foo \n"
+                "bar \n"
+                "qux" );
+
 
   EXPECT_STREQ( RemoveIdentifierFreeText(
                   "foo \n"
@@ -94,7 +101,10 @@ TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
                 "foo \n"
                 "bar \n"
                 "qux" );
+}
 
+
+TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextEscapedSlashesInStrings ) {
   EXPECT_STREQ( RemoveIdentifierFreeText(
                   "foo \n"
                   "bar \"fo\\\\\"baz\n"
@@ -112,7 +122,10 @@ TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextWorks ) {
                 "foo \n"
                 "bar \n"
                 "qux " );
+}
 
+
+TEST( IdentifierUtilsTest, RemoveIdentifierFreeTextEscapedQuotesStartStrings ) {
   EXPECT_STREQ( RemoveIdentifierFreeText(
                   "\\\"foo\\\""
                   "'\"'"
