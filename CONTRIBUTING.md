@@ -82,7 +82,7 @@ Creating good pull requests
     Please include details on exactly what you would like to see, and why. The
     why is important - it's not always clear why a feature is really useful. And
     sometimes what you want can be done in a different way if the reason for the
-    change is known. _What goal are you trying to accomplish?_
+    change is known. _What goal is your change trying to accomplish?_
 
 [build-bots]: https://travis-ci.org/Valloric/YouCompleteMe
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
