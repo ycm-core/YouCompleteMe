@@ -32,17 +32,17 @@ FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
 
 class YouCompleteMe( object ):
   def __init__( self ):
-    self.gencomp = GeneralCompleterStore()
-    self.omnicomp = OmniCompleter()
-    self.filetype_completers = {}
+    self._gencomp = GeneralCompleterStore()
+    self._omnicomp = OmniCompleter()
+    self._filetype_completers = {}
 
 
   def GetGeneralCompleter( self ):
-    return self.gencomp
+    return self._gencomp
 
 
   def GetOmniCompleter( self ):
-    return self.omnicomp
+    return self._omnicomp
 
 
   def GetFiletypeCompleter( self ):
@@ -56,7 +56,7 @@ class YouCompleteMe( object ):
 
     # Try to find a native completer first
     for completer in completers:
-      if completer and completer is not self.omnicomp:
+      if completer and completer is not self._omnicomp:
         return completer
 
     # Return the omni completer for the first filetype
@@ -65,7 +65,7 @@ class YouCompleteMe( object ):
 
   def GetFiletypeCompleterForFiletype( self, filetype ):
     try:
-      return self.filetype_completers[ filetype ]
+      return self._filetype_completers[ filetype ]
     except KeyError:
       pass
 
@@ -79,15 +79,15 @@ class YouCompleteMe( object ):
       if completer:
         supported_filetypes.extend( completer.SupportedFiletypes() )
     else:
-      completer = self.omnicomp
+      completer = self._omnicomp
 
     for supported_filetype in supported_filetypes:
-      self.filetype_completers[ supported_filetype ] = completer
+      self._filetype_completers[ supported_filetype ] = completer
     return completer
 
 
   def ShouldUseGeneralCompleter( self, start_column ):
-    return self.gencomp.ShouldUseNow( start_column, vim.current.line )
+    return self._gencomp.ShouldUseNow( start_column, vim.current.line )
 
 
   def ShouldUseFiletypeCompleter( self, start_column ):
@@ -99,7 +99,7 @@ class YouCompleteMe( object ):
 
   def NativeFiletypeCompletionAvailable( self ):
     completer = self.GetFiletypeCompleter()
-    return bool( completer ) and completer is not self.omnicomp
+    return bool( completer ) and completer is not self._omnicomp
 
 
   def FiletypeCompletionAvailable( self ):
@@ -117,35 +117,35 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
-    self.gencomp.OnFileReadyToParse()
+    self._gencomp.OnFileReadyToParse()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnFileReadyToParse()
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
-    self.gencomp.OnBufferUnload( deleted_buffer_file )
+    self._gencomp.OnBufferUnload( deleted_buffer_file )
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnBufferUnload( deleted_buffer_file )
 
 
   def OnBufferVisit( self ):
-    self.gencomp.OnBufferVisit()
+    self._gencomp.OnBufferVisit()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnBufferVisit()
 
 
   def OnInsertLeave( self ):
-    self.gencomp.OnInsertLeave()
+    self._gencomp.OnInsertLeave()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnInsertLeave()
 
 
   def OnVimLeave( self ):
-    self.gencomp.OnVimLeave()
+    self._gencomp.OnVimLeave()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnVimLeave()
@@ -175,15 +175,15 @@ class YouCompleteMe( object ):
 
 
   def OnCurrentIdentifierFinished( self ):
-    self.gencomp.OnCurrentIdentifierFinished()
+    self._gencomp.OnCurrentIdentifierFinished()
 
     if self.FiletypeCompletionUsable():
       self.GetFiletypeCompleter().OnCurrentIdentifierFinished()
 
 
   def DebugInfo( self ):
-    completers = set( self.filetype_completers.values() )
-    completers.add( self.gencomp )
+    completers = set( self._filetype_completers.values() )
+    completers.add( self._gencomp )
     output = []
     for completer in completers:
       if not completer:
