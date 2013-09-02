@@ -40,16 +40,18 @@ class OmniCompleter( Completer ):
     return vimsupport.GetBoolValue( "g:ycm_cache_omnifunc" )
 
 
-  def ShouldUseNow( self, start_column ):
+  def ShouldUseNow( self, start_column, current_line ):
     if self.ShouldUseCache():
-      return super( OmniCompleter, self ).ShouldUseNow( start_column )
-    return self.ShouldUseNowInner( start_column )
+      return super( OmniCompleter, self ).ShouldUseNow( start_column,
+                                                        current_line )
+    return self.ShouldUseNowInner( start_column, current_line )
 
 
-  def ShouldUseNowInner( self, start_column ):
+  def ShouldUseNowInner( self, start_column, current_line ):
     if not self.omnifunc:
       return False
-    return super( OmniCompleter, self ).ShouldUseNowInner( start_column )
+    return super( OmniCompleter, self ).ShouldUseNowInner( start_column,
+                                                           current_line )
 
 
   def CandidatesForQueryAsync( self, query, unused_start_column ):

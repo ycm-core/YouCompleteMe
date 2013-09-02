@@ -63,8 +63,8 @@ class FilenameCompleter( ThreadedCompleter ):
                vim.current.line[ :start_column ] ) )
 
 
-  def ShouldUseNowInner( self, start_column ):
-    return ( start_column and ( vim.current.line[ start_column - 1 ] == '/' or
+  def ShouldUseNowInner( self, start_column, current_line ):
+    return ( start_column and ( current_line[ start_column - 1 ] == '/' or
              self.AtIncludeStatementStart( start_column ) ) )
 
 

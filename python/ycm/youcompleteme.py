@@ -87,13 +87,13 @@ class YouCompleteMe( object ):
 
 
   def ShouldUseGeneralCompleter( self, start_column ):
-    return self.gencomp.ShouldUseNow( start_column )
+    return self.gencomp.ShouldUseNow( start_column, vim.current.line )
 
 
   def ShouldUseFiletypeCompleter( self, start_column ):
     if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().ShouldUseNow(
-        start_column )
+        start_column, vim.current.line )
     return False
 
 

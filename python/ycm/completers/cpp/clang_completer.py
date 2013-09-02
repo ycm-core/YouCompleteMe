@@ -301,9 +301,9 @@ class ClangCompleter( Completer ):
     vimsupport.EchoText( closest_diagnostic.long_formatted_text_ )
 
 
-  def ShouldUseNow( self, start_column ):
+  def ShouldUseNow( self, start_column, current_line ):
     # We don't want to use the Completer API cache, we use one in the C++ code.
-    return self.ShouldUseNowInner( start_column )
+    return self.ShouldUseNowInner( start_column, current_line )
 
 
   def DebugInfo( self ):

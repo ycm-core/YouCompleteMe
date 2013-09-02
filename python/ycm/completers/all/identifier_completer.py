@@ -43,7 +43,7 @@ class IdentifierCompleter( GeneralCompleter ):
     self.filetypes_with_keywords_loaded = set()
 
 
-  def ShouldUseNow( self, start_column ):
+  def ShouldUseNow( self, start_column, unused_current_line ):
       return self.QueryLengthAboveMinThreshold( start_column )
 
 

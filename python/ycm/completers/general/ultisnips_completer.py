@@ -33,7 +33,7 @@ class UltiSnipsCompleter( GeneralCompleter ):
     self._filtered_candidates = None
 
 
-  def ShouldUseNowInner( self, start_column ):
+  def ShouldUseNowInner( self, start_column, unused_current_line ):
     return self.QueryLengthAboveMinThreshold( start_column )
 
 

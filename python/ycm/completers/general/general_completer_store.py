@@ -58,17 +58,18 @@ class GeneralCompleterStore( Completer ):
     return set()
 
 
-  def ShouldUseNow( self, start_column ):
+  def ShouldUseNow( self, start_column, current_line ):
     self._current_query_completers = []
 
-    if self._filename_completer.ShouldUseNow( start_column ):
+    if self._filename_completer.ShouldUseNow( start_column, current_line ):
       self._current_query_completers = [ self._filename_completer ]
       return True
 
     should_use_now = False
 
     for completer in self._non_filename_completers:
-      should_use_this_completer = completer.ShouldUseNow( start_column )
+      should_use_this_completer = completer.ShouldUseNow( start_column,
+                                                          current_line )
       should_use_now = should_use_now or should_use_this_completer
 
       if should_use_this_completer:

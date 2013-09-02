@@ -18,7 +18,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import abc
-import vim
 import ycm_core
 from ycm import vimsupport
 from ycm.completers.completer_utils import TriggersForFiletype
@@ -36,10 +35,11 @@ class Completer( object ):
   calling on your Completer:
 
   ShouldUseNow() is called with the start column of where a potential completion
-  string should start. For instance, if the user's input is 'foo.bar' and the
-  cursor is on the 'r' in 'bar', start_column will be the 0-based index of 'b'
-  in the line. Your implementation of ShouldUseNow() should return True if your
-  semantic completer should be used and False otherwise.
+  string should start and the current line (string) the cursor is on. For
+  instance, if the user's input is 'foo.bar' and the cursor is on the 'r' in
+  'bar', start_column will be the 0-based index of 'b' in the line. Your
+  implementation of ShouldUseNow() should return True if your semantic completer
+  should be used and False otherwise.
 
   This is important to get right. You want to return False if you can't provide
   completions because then the identifier completer will kick in, and that's
@@ -125,8 +125,8 @@ class Completer( object ):
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
-  def ShouldUseNow( self, start_column ):
-    inner_says_yes = self.ShouldUseNowInner( start_column )
+  def ShouldUseNow( self, start_column, current_line ):
+    inner_says_yes = self.ShouldUseNowInner( start_column, current_line )
     if not inner_says_yes:
       self.completions_cache = None
 
@@ -137,9 +137,8 @@ class Completer( object ):
     return inner_says_yes and not previous_results_were_empty
 
 
-  def ShouldUseNowInner( self, start_column ):
-    line = vim.current.line
-    line_length = len( line )
+  def ShouldUseNowInner( self, start_column, current_line ):
+    line_length = len( current_line )
     if not line_length or start_column - 1 >= line_length:
       return False
 
@@ -151,7 +150,7 @@ class Completer( object ):
       trigger_length = len( trigger )
       while True:
         line_index = start_column + index
-        if line_index < 0 or line[ line_index ] != trigger[ index ]:
+        if line_index < 0 or current_line[ line_index ] != trigger[ index ]:
           break
 
         if abs( index ) == trigger_length:
@@ -163,6 +162,7 @@ class Completer( object ):
   def QueryLengthAboveMinThreshold( self, start_column ):
     query_length = vimsupport.CurrentColumn() - start_column
     return query_length >= MIN_NUM_CHARS
+
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
