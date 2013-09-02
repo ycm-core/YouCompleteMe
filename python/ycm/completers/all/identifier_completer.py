@@ -44,7 +44,7 @@ class IdentifierCompleter( GeneralCompleter ):
 
 
   def ShouldUseNow( self, start_column, unused_current_line ):
-      return self.QueryLengthAboveMinThreshold( start_column )
+    return self.QueryLengthAboveMinThreshold( start_column )
 
 
   def CandidatesForQueryAsync( self, query, unused_start_column ):
