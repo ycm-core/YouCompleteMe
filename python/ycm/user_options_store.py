@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from frozendict import frozendict
+from ycm.frozendict import frozendict
 
 _USER_OPTIONS = {}
 
