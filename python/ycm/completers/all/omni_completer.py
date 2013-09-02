@@ -26,8 +26,8 @@ OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
                      ' list when expected.' )
 
 class OmniCompleter( Completer ):
-  def __init__( self ):
-    super( OmniCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( OmniCompleter, self ).__init__( user_options )
     self.omnifunc = None
     self.stored_candidates = None
 
@@ -37,7 +37,7 @@ class OmniCompleter( Completer ):
 
 
   def ShouldUseCache( self ):
-    return vimsupport.GetBoolValue( "g:ycm_cache_omnifunc" )
+    return bool( self.user_options[ 'cache_omnifunc' ] )
 
 
   def ShouldUseNow( self, start_column, current_line ):

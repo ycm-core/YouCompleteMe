@@ -45,8 +45,8 @@ class JediCompleter( ThreadedCompleter ):
   https://jedi.readthedocs.org/en/latest/
   """
 
-  def __init__( self ):
-    super( JediCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( JediCompleter, self ).__init__( user_options )
 
 
   def SupportedFiletypes( self ):

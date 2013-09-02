@@ -37,12 +37,16 @@ function! youcompleteme#Enable()
     return
   endif
 
+  call s:SetUpBackwardsCompatibility()
+
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+  py from ycm import base
+  py from ycm import user_options_store
+  py user_options_store.SetAll( base.BuildServerConf() )
   py from ycm import extra_conf_store
   py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
-  py from ycm import base
 
   if !pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
@@ -51,10 +55,12 @@ function! youcompleteme#Enable()
     return
   endif
 
+  py from ycm.youcompleteme import YouCompleteMe
+  py ycm_state = YouCompleteMe( user_options_store.GetAll() )
+
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
-  call s:SetUpBackwardsCompatibility()
 
   if g:ycm_register_as_syntastic_checker
     call s:ForceSyntasticCFamilyChecker()
@@ -63,9 +69,6 @@ function! youcompleteme#Enable()
   if g:ycm_allow_changing_updatetime
     set ut=2000
   endif
-
-  py from ycm.youcompleteme import YouCompleteMe
-  py ycm_state = YouCompleteMe()
 
   augroup youcompleteme
     autocmd!

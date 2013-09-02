@@ -26,13 +26,13 @@ from ycm.completers.completer import Completer
 from ycm.completers.cpp.flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
-MAX_DIAGNOSTICS_TO_DISPLAY = int( vimsupport.GetVariableValue(
-  "g:ycm_max_diagnostics_to_display" ) )
 
 
 class ClangCompleter( Completer ):
-  def __init__( self ):
-    super( ClangCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( ClangCompleter, self ).__init__( user_options )
+    self.max_diagnostics_to_display = user_options[
+      'max_diagnostics_to_display' ]
     self.completer = ycm_core.ClangCompleter()
     self.completer.EnableThreading()
     self.contents_holder = []
@@ -262,7 +262,7 @@ class ClangCompleter( Completer ):
       diagnostics = self.completer.DiagnosticsForFile( vim.current.buffer.name )
       self.diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
       self.last_prepared_diagnostics = [ DiagnosticToDict( x ) for x in
-          diagnostics[ : MAX_DIAGNOSTICS_TO_DISPLAY ] ]
+          diagnostics[ : self.max_diagnostics_to_display ] ]
       self.parse_future = None
 
       if self.extra_parse_desired:

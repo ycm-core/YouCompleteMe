@@ -38,8 +38,8 @@ class ThreadedCompleter( Completer ):
   python/completers/general/filename_completer.py
   """
 
-  def __init__( self ):
-    super( ThreadedCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( ThreadedCompleter, self ).__init__( user_options )
     self._query_ready = Event()
     self._candidates_ready = Event()
     self._candidates = None

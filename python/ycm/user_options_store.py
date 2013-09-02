@@ -1,4 +1,6 @@
-# Copyright (C) 2011, 2012  Stephen Sugden <me@stephensugden.com>
+#!/usr/bin/env python
+#
+# Copyright (C) 2013  Strahinja Val Markovic  <val@markovic.io>
 #
 # This file is part of YouCompleteMe.
 #
@@ -15,7 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.python.jedi_completer import JediCompleter
+from frozendict import frozendict
 
-def GetCompleter( user_options ):
-  return JediCompleter( user_options )
+_USER_OPTIONS = {}
+
+def SetAll( new_options ):
+  global _USER_OPTIONS
+  _USER_OPTIONS = frozendict( new_options )
+
+
+def GetAll():
+  return _USER_OPTIONS
+
+
+def Value( key ):
+  return _USER_OPTIONS[ key ]

@@ -23,6 +23,8 @@ import vim
 from ycm import vimsupport
 from ycm import utils
 
+YCM_VAR_PREFIX = 'ycm_'
+
 try:
   import ycm_core
 except ImportError as e:
@@ -32,6 +34,30 @@ except ImportError as e:
     'the docs. Full error: {1}'.format(
       os.path.dirname( os.path.dirname( os.path.abspath( __file__ ) ) ),
       str( e ) ) )
+
+
+def BuildServerConf():
+  """Builds a dictionary mapping YCM Vim user options to values. Option names
+  don't have the 'ycm_' prefix."""
+
+  try:
+    # vim.vars is fairly new so it might not exist
+    vim_globals = vim.vars
+  except:
+    vim_globals = vim.eval( 'g:' )
+
+  server_conf = {}
+  for key, value in vim_globals.items():
+    if not key.startswith( YCM_VAR_PREFIX ):
+      continue
+    try:
+      new_value = int( value )
+    except:
+      new_value = value
+    new_key = key[ len( YCM_VAR_PREFIX ): ]
+    server_conf[ new_key ] = new_value
+
+  return server_conf
 
 
 def CompletionStartColumn():

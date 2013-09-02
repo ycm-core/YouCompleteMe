@@ -41,16 +41,16 @@ class CsharpCompleter( ThreadedCompleter ):
   A Completer that uses the Omnisharp server as completion engine.
   """
 
-  def __init__( self ):
-    super( CsharpCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( CsharpCompleter, self ).__init__( user_options )
     self._omnisharp_port = None
 
-    if vimsupport.GetBoolValue( 'g:ycm_auto_start_csharp_server' ):
+    if self.user_options[ 'auto_start_csharp_server' ]:
       self._StartServer()
 
 
   def OnVimLeave( self ):
-    if ( vimsupport.GetBoolValue( 'g:ycm_auto_stop_csharp_server' ) and
+    if ( self.user_options[ 'auto_start_csharp_server' ] and
          self._ServerIsRunning() ):
       self._StopServer()
 
@@ -199,8 +199,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
   def _FindFreePort( self ):
     """ Find port without an OmniSharp server running on it """
-    port = int( vimsupport.GetVariableValue(
-        'g:ycm_csharp_server_port' ) )
+    port = self.user_options[ 'csharp_server_port' ]
     while self._GetResponse( '/checkalivestatus',
         silent=True,
         port=port ) != None:

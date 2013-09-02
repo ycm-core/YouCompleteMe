@@ -27,8 +27,8 @@ class UltiSnipsCompleter( GeneralCompleter ):
   General completer that provides UltiSnips snippet names in completions.
   """
 
-  def __init__( self ):
-    super( UltiSnipsCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( UltiSnipsCompleter, self ).__init__( user_options )
     self._candidates = None
     self._filtered_candidates = None
 

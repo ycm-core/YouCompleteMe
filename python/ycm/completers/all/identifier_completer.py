@@ -27,16 +27,12 @@ from ycm import vimsupport
 from ycm import utils
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
-MIN_NUM_COMPLETION_START_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_of_chars_for_completion" ) )
-MIN_NUM_CANDIDATE_SIZE_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_identifier_candidate_chars" ) )
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 
 
 class IdentifierCompleter( GeneralCompleter ):
-  def __init__( self ):
-    super( IdentifierCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( IdentifierCompleter, self ).__init__( user_options )
     self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
     self.tags_file_last_mtime = defaultdict( int )
@@ -69,7 +65,8 @@ class IdentifierCompleter( GeneralCompleter ):
 
 
   def AddPreviousIdentifier( self ):
-    self.AddIdentifier( PreviousIdentifier() )
+    self.AddIdentifier( _PreviousIdentifier( self.user_options[
+      'min_num_of_chars_for_completion' ] ) )
 
 
   def AddIdentifierUnderCursor( self ):
@@ -90,8 +87,8 @@ class IdentifierCompleter( GeneralCompleter ):
     # TODO: use vimsupport.GetFiletypes; also elsewhere in file
     filetype = vim.eval( "&filetype" )
     filepath = vim.eval( "expand('%:p')" )
-    collect_from_comments_and_strings = vimsupport.GetBoolValue(
-      "g:ycm_collect_identifiers_from_comments_and_strings" )
+    collect_from_comments_and_strings = bool( self.user_options[
+      'collect_identifiers_from_comments_and_strings' ] )
 
     if not filetype or not filepath:
       return
@@ -153,10 +150,10 @@ class IdentifierCompleter( GeneralCompleter ):
   def OnFileReadyToParse( self ):
     self.AddBufferIdentifiers()
 
-    if vimsupport.GetBoolValue( 'g:ycm_collect_identifiers_from_tags_files' ):
+    if self.user_options[ 'collect_identifiers_from_tags_files' ]:
       self.AddIdentifiersFromTagFiles()
 
-    if vimsupport.GetBoolValue( 'g:ycm_seed_identifiers_with_syntax' ):
+    if self.user_options[ 'seed_identifiers_with_syntax' ]:
       self.AddIdentifiersFromSyntax()
 
 
@@ -174,7 +171,8 @@ class IdentifierCompleter( GeneralCompleter ):
     completions = self.completions_future.GetResults()[
       : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
 
-    completions = _RemoveSmallCandidates( completions )
+    completions = _RemoveSmallCandidates(
+      completions, self.user_options[ 'min_num_identifier_candidate_chars' ] )
 
     # We will never have duplicates in completions so with 'dup':1 we tell Vim
     # to add this candidate even if it's a duplicate of an existing one (which
@@ -183,7 +181,7 @@ class IdentifierCompleter( GeneralCompleter ):
     return [ { 'word': x, 'dup': 1 } for x in completions ]
 
 
-def PreviousIdentifier():
+def _PreviousIdentifier( min_num_completion_start_chars ):
   line_num, column_num = vimsupport.CurrentLineAndColumn()
   buffer = vim.current.buffer
   line = buffer[ line_num ]
@@ -208,15 +206,15 @@ def PreviousIdentifier():
   while start_column > 0 and utils.IsIdentifierChar( line[ start_column - 1 ] ):
     start_column -= 1
 
-  if end_column - start_column < MIN_NUM_COMPLETION_START_CHARS:
+  if end_column - start_column < min_num_completion_start_chars:
     return ""
 
   return line[ start_column : end_column ]
 
 
-def _RemoveSmallCandidates( candidates ):
-  if MIN_NUM_CANDIDATE_SIZE_CHARS == 0:
+def _RemoveSmallCandidates( candidates, min_num_candidate_size_chars ):
+  if min_num_candidate_size_chars == 0:
     return candidates
 
-  return [ x for x in candidates if len( x ) >= MIN_NUM_CANDIDATE_SIZE_CHARS ]
+  return [ x for x in candidates if len( x ) >= min_num_candidate_size_chars ]
 

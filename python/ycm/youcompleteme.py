@@ -26,14 +26,11 @@ from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
 
-FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
-  'g:ycm_filetype_specific_completion_to_disable' )
-
-
 class YouCompleteMe( object ):
-  def __init__( self ):
-    self._gencomp = GeneralCompleterStore()
-    self._omnicomp = OmniCompleter()
+  def __init__( self, user_options ):
+    self._user_options = user_options
+    self._gencomp = GeneralCompleterStore( user_options )
+    self._omnicomp = OmniCompleter( user_options )
     self._filetype_completers = {}
 
 
@@ -60,7 +57,7 @@ class YouCompleteMe( object ):
         return completer
 
     # Return the omni completer for the first filetype
-    return completers[0]
+    return completers[ 0 ]
 
 
   def GetFiletypeCompleterForFiletype( self, filetype ):
@@ -75,7 +72,7 @@ class YouCompleteMe( object ):
     supported_filetypes = [ filetype ]
     if os.path.exists( module_path ):
       module = imp.load_source( filetype, module_path )
-      completer = module.GetCompleter()
+      completer = module.GetCompleter( self._user_options )
       if completer:
         supported_filetypes.extend( completer.SupportedFiletypes() )
     else:
@@ -107,12 +104,12 @@ class YouCompleteMe( object ):
 
 
   def NativeFiletypeCompletionUsable( self ):
-    return ( _CurrentFiletypeCompletionEnabled() and
+    return ( self.CurrentFiletypeCompletionEnabled() and
              self.NativeFiletypeCompletionAvailable() )
 
 
   def FiletypeCompletionUsable( self ):
-    return ( _CurrentFiletypeCompletionEnabled() and
+    return ( self.CurrentFiletypeCompletionEnabled() and
              self.FiletypeCompletionAvailable() )
 
 
@@ -202,10 +199,11 @@ class YouCompleteMe( object ):
     return '\n'.join( output )
 
 
-def _CurrentFiletypeCompletionEnabled():
-  filetypes = vimsupport.CurrentFiletypes()
-  return not all([ x in FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE
-                   for x in filetypes ])
+  def CurrentFiletypeCompletionEnabled( self ):
+    filetypes = vimsupport.CurrentFiletypes()
+    filetype_to_disable = self._user_options[
+      'filetype_specific_completion_to_disable' ]
+    return not all([ x in filetype_to_disable for x in filetypes ])
 
 
 def _PathToCompletersFolder():

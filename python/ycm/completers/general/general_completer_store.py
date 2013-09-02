@@ -38,11 +38,11 @@ class GeneralCompleterStore( Completer ):
   GeneralCompleterStore are passed to all general completers.
   """
 
-  def __init__( self ):
-    super( GeneralCompleterStore, self ).__init__()
-    self._identifier_completer = IdentifierCompleter()
-    self._filename_completer = FilenameCompleter()
-    self._ultisnips_completer = ( UltiSnipsCompleter()
+  def __init__( self, user_options ):
+    super( GeneralCompleterStore, self ).__init__( user_options )
+    self._identifier_completer = IdentifierCompleter( user_options )
+    self._filename_completer = FilenameCompleter( user_options )
+    self._ultisnips_completer = ( UltiSnipsCompleter( user_options )
                                   if USE_ULTISNIPS_COMPLETER else None )
     self._non_filename_completers = filter( lambda x: x,
                                             [ self._ultisnips_completer,

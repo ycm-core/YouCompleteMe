@@ -24,9 +24,6 @@ from ycm.completers.completer_utils import TriggersForFiletype
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
-MIN_NUM_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_of_chars_for_completion" ) )
-
 class Completer( object ):
   """A base class for all Completers in YCM.
 
@@ -116,7 +113,9 @@ class Completer( object ):
 
   __metaclass__ = abc.ABCMeta
 
-  def __init__( self ):
+  def __init__( self, user_options ):
+    self.user_options = user_options
+    self.min_num_chars = user_options[ 'min_num_of_chars_for_completion' ]
     self.triggers_for_filetype = TriggersForFiletype()
     self.completions_future = None
     self.completions_cache = None
@@ -161,7 +160,7 @@ class Completer( object ):
 
   def QueryLengthAboveMinThreshold( self, start_column ):
     query_length = vimsupport.CurrentColumn() - start_column
-    return query_length >= MIN_NUM_CHARS
+    return query_length >= self.min_num_chars
 
 
   # It's highly likely you DON'T want to override this function but the *Inner

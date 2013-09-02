@@ -20,8 +20,8 @@
 import ycm_core
 from ycm.completers.cpp.clang_completer import ClangCompleter
 
-def GetCompleter():
+def GetCompleter( user_options ):
   if ycm_core.HasClangSupport():
-    return ClangCompleter()
+    return ClangCompleter( user_options )
   else:
     return None

@@ -20,22 +20,17 @@ import vim
 import os
 import re
 
-from ycm import vimsupport
 from ycm.completers.threaded_completer import ThreadedCompleter
 from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
-
-USE_WORKING_DIR = vimsupport.GetBoolValue(
-  'g:ycm_filepath_completion_use_working_dir' )
-
 
 class FilenameCompleter( ThreadedCompleter ):
   """
   General completer that provides filename and filepath completions.
   """
 
-  def __init__( self ):
-    super( FilenameCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( FilenameCompleter, self ).__init__( user_options )
     self._flags = Flags()
 
     self._path_regex = re.compile( """
@@ -88,7 +83,9 @@ class FilenameCompleter( ThreadedCompleter ):
     path_match = self._path_regex.search( line )
     path_dir = os.path.expanduser( path_match.group() ) if path_match else ''
 
-    return _GenerateCandidatesForPaths( _GetPathsStandardCase( path_dir ) )
+    return _GenerateCandidatesForPaths(
+      _GetPathsStandardCase( path_dir, self.user_options[
+        'filepath_completion_use_working_dir' ] ) )
 
 
   def GetPathsIncludeCase( self, path_dir, include_current_file_dir ):
@@ -110,8 +107,8 @@ class FilenameCompleter( ThreadedCompleter ):
     return sorted( set( paths ) )
 
 
-def _GetPathsStandardCase( path_dir ):
-  if not USE_WORKING_DIR and not path_dir.startswith( '/' ):
+def _GetPathsStandardCase( path_dir, use_working_dir ):
+  if not use_working_dir and not path_dir.startswith( '/' ):
     path_dir = os.path.join( os.path.dirname( vim.current.buffer.name ),
                              path_dir )
 

@@ -145,3 +145,7 @@ def GetVariableValue( variable ):
 
 def GetBoolValue( variable ):
   return bool( int( vim.eval( variable ) ) )
+
+
+def GetIntValue( variable ):
+  return int( vim.eval( variable ) )

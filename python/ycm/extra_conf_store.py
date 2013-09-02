@@ -26,15 +26,13 @@ import string
 import sys
 import vim
 from ycm import vimsupport
+from ycm import user_options_store
 from fnmatch import fnmatch
 
 # Constants
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 CONFIRM_CONF_FILE_MESSAGE = ('Found {0}. Load? \n\n(Question can be turned '
                              'off with options, see YCM docs)')
-GLOBAL_YCM_EXTRA_CONF_FILE = os.path.expanduser(
-    vimsupport.GetVariableValue( "g:ycm_global_ycm_extra_conf" )
-)
 
 # Singleton variables
 _module_for_module_file = {}
@@ -86,11 +84,11 @@ def _ShouldLoad( module_file ):
   decide using a white-/blacklist and ask the user for confirmation as a
   fallback."""
 
-  if ( module_file == GLOBAL_YCM_EXTRA_CONF_FILE or
-        not vimsupport.GetBoolValue( 'g:ycm_confirm_extra_conf' ) ):
+  if ( module_file == _GlobalYcmExtraConfFileLocation() or
+       not user_options_store.Value( 'confirm_extra_conf' ) ):
     return True
 
-  globlist = vimsupport.GetVariableValue( 'g:ycm_extra_conf_globlist' )
+  globlist = user_options_store.Value( 'extra_conf_globlist' )
   for glob in globlist:
     is_blacklisted = glob[0] == '!'
     if _MatchesGlobPattern( module_file, glob.lstrip('!') ):
@@ -139,15 +137,16 @@ def _MatchesGlobPattern( filename, glob ):
 def _ExtraConfModuleSourceFilesForFile( filename ):
   """For a given filename, search all parent folders for YCM_EXTRA_CONF_FILENAME
   files that will compute the flags necessary to compile the file.
-  If GLOBAL_YCM_EXTRA_CONF_FILE exists it is returned as a fallback."""
+  If _GlobalYcmExtraConfFileLocation() exists it is returned as a fallback."""
 
   for folder in _PathsToAllParentFolders( filename ):
     candidate = os.path.join( folder, YCM_EXTRA_CONF_FILENAME )
     if os.path.exists( candidate ):
       yield candidate
-  if ( GLOBAL_YCM_EXTRA_CONF_FILE
-       and os.path.exists( GLOBAL_YCM_EXTRA_CONF_FILE ) ):
-    yield GLOBAL_YCM_EXTRA_CONF_FILE
+  global_ycm_extra_conf = _GlobalYcmExtraConfFileLocation()
+  if ( global_ycm_extra_conf
+       and os.path.exists( global_ycm_extra_conf ) ):
+    yield global_ycm_extra_conf
 
 
 def _PathsToAllParentFolders( filename ):
@@ -188,3 +187,8 @@ def _DirectoryOfThisScript():
 def _RandomName():
   """Generates a random module name."""
   return ''.join( random.choice( string.ascii_lowercase ) for x in range( 15 ) )
+
+
+def _GlobalYcmExtraConfFileLocation():
+  return os.path.expanduser(
+    user_options_store.Value( 'global_ycm_extra_conf' ) )
