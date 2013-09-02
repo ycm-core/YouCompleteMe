@@ -51,6 +51,19 @@ function! youcompleteme#Enable()
     return
   endif
 
+  call s:SetUpCpoptions()
+  call s:SetUpCompleteopt()
+  call s:SetUpKeyMappings()
+  call s:SetUpBackwardsCompatibility()
+
+  if g:ycm_register_as_syntastic_checker
+    call s:ForceSyntasticCFamilyChecker()
+  endif
+
+  if g:ycm_allow_changing_updatetime
+    set ut=2000
+  endif
+
   py from ycm.youcompleteme import YouCompleteMe
   py ycm_state = YouCompleteMe()
 
@@ -70,19 +83,6 @@ function! youcompleteme#Enable()
     autocmd InsertEnter * call s:OnInsertEnter()
     autocmd VimLeave * call s:OnVimLeave()
   augroup END
-
-  call s:SetUpCpoptions()
-  call s:SetUpCompleteopt()
-  call s:SetUpKeyMappings()
-  call s:SetUpBackwardsCompatibility()
-
-  if g:ycm_register_as_syntastic_checker
-    call s:ForceSyntasticCFamilyChecker()
-  endif
-
-  if g:ycm_allow_changing_updatetime
-    set ut=2000
-  endif
 
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
   " the first loaded file. This should be the last command executed in this
