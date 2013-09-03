@@ -101,16 +101,6 @@ class GeneralCompleterStore( Completer ):
       completer.OnFileReadyToParse()
 
 
-  def OnCursorMovedInsertMode( self ):
-    for completer in self._all_completers:
-      completer.OnCursorMovedInsertMode()
-
-
-  def OnCursorMovedNormalMode( self ):
-    for completer in self._all_completers:
-      completer.OnCursorMovedNormalMode()
-
-
   def OnBufferVisit( self ):
     for completer in self._all_completers:
       completer.OnBufferVisit()
@@ -119,11 +109,6 @@ class GeneralCompleterStore( Completer ):
   def OnBufferUnload( self, deleted_buffer_file ):
     for completer in self._all_completers:
       completer.OnBufferUnload( deleted_buffer_file )
-
-
-  def OnCursorHold( self ):
-    for completer in self._all_completers:
-      completer.OnCursorHold()
 
 
   def OnInsertLeave( self ):

@@ -253,23 +253,11 @@ class Completer( object ):
     pass
 
 
-  def OnCursorMovedInsertMode( self ):
-    pass
-
-
-  def OnCursorMovedNormalMode( self ):
-    pass
-
-
   def OnBufferVisit( self ):
     pass
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
-    pass
-
-
-  def OnCursorHold( self ):
     pass
 
 
