@@ -22,8 +22,6 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:searched_and_results_found = 0
-let s:should_use_filetype_completion = 0
-let s:completion_start_column = 0
 let s:omnifunc_mode = 0
 
 let s:old_cursor_position = []
@@ -497,29 +495,26 @@ function! s:InvokeCompletion()
 endfunction
 
 
-function! s:CompletionsForQuery( query, use_filetype_completer,
-      \ completion_start_column )
-  if a:use_filetype_completer
-    py completer = ycm_state.GetFiletypeCompleter()
-  else
-    py completer = ycm_state.GetGeneralCompleter()
-  endif
-
-  py completer.CandidatesForQueryAsync( vim.eval( 'a:query' ),
-        \ int( vim.eval( 'a:completion_start_column' ) ) )
-
-  let l:results_ready = 0
-  while !l:results_ready
-    let l:results_ready = pyeval( 'completer.AsyncCandidateRequestReady()' )
-    if complete_check()
-      let s:searched_and_results_found = 0
+python << EOF
+def GetCompletions( query ):
+  request = ycm_state.GetCurrentCompletionRequest()
+  request.Start( query )
+  results_ready = False
+  while not results_ready:
+    results_ready = request.Done()
+    if bool( int( vim.eval( 'complete_check()' ) ) ):
       return { 'words' : [], 'refresh' : 'always'}
-    endif
-  endwhile
 
-  let l:results = pyeval( 'base.AdjustCandidateInsertionText( completer.CandidatesFromStoredRequest() )' )
-  let s:searched_and_results_found = len( l:results ) != 0
-  return { 'words' : l:results, 'refresh' : 'always' }
+  results = base.AdjustCandidateInsertionText( request.Results() )
+  return { 'words' : results, 'refresh' : 'always' }
+EOF
+
+
+function! s:CompletionsForQuery( query )
+  py results = GetCompletions( vim.eval( 'a:query' ) )
+  let results = pyeval( 'results' )
+  let s:searched_and_results_found = len( results.words ) != 0
+  return results
 endfunction
 
 
@@ -543,24 +538,15 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
 
-
-    " TODO: make this a function-local variable instead of a script-local one
-    let s:completion_start_column = pyeval( 'base.CompletionStartColumn()' )
-    let s:should_use_filetype_completion =
-          \ pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
-          \ s:completion_start_column . ')' )
-
-    if !s:should_use_filetype_completion &&
-          \ !pyeval( 'ycm_state.ShouldUseGeneralCompleter(' .
-          \ s:completion_start_column . ')' )
+    py request = ycm_state.CreateCompletionRequest()
+    if !pyeval( 'request.ShouldComplete()' )
       " for vim, -2 means not found but don't trigger an error message
       " see :h complete-functions
       return -2
     endif
-    return s:completion_start_column
+    return pyeval( 'request.CompletionStartColumn()' )
   else
-    return s:CompletionsForQuery( a:base, s:should_use_filetype_completion,
-          \ s:completion_start_column )
+    return s:CompletionsForQuery( a:base )
   endif
 endfunction
 
@@ -568,10 +554,9 @@ endfunction
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
-    let s:completion_start_column = pyeval( 'base.CompletionStartColumn()' )
-    return s:completion_start_column
+    return pyeval( 'ycm_state.CreateCompletionRequest().CompletionStartColumn()' )
   else
-    return s:CompletionsForQuery( a:base, 1, s:completion_start_column )
+    return s:CompletionsForQuery( a:base )
   endif
 endfunction
 

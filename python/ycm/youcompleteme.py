@@ -22,8 +22,43 @@ import os
 import vim
 import ycm_core
 from ycm import vimsupport
+from ycm import base
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
+
+
+class CompletionRequest( object ):
+  def __init__( self, ycm_state ):
+    self._completion_start_column = base.CompletionStartColumn()
+    self._ycm_state = ycm_state
+    self._do_filetype_completion = self._ycm_state.ShouldUseFiletypeCompleter(
+      self._completion_start_column )
+    self._completer = ( self._ycm_state.GetFiletypeCompleter() if
+                        self._do_filetype_completion else
+                        self._ycm_state.GetGeneralCompleter() )
+
+
+  def ShouldComplete( self ):
+    return ( self._do_filetype_completion or
+             self._ycm_state.ShouldUseGeneralCompleter(
+               self._completion_start_column ) )
+
+
+  def CompletionStartColumn( self ):
+    return self._completion_start_column
+
+
+  def Start( self, query ):
+    self._completer.CandidatesForQueryAsync( query,
+                                             self._completion_start_column )
+
+  def Done( self ):
+    return self._completer.AsyncCandidateRequestReady()
+
+
+  def Results( self ):
+    return self._completer.CandidatesFromStoredRequest()
+
 
 
 class YouCompleteMe( object ):
@@ -32,6 +67,19 @@ class YouCompleteMe( object ):
     self._gencomp = GeneralCompleterStore( user_options )
     self._omnicomp = OmniCompleter( user_options )
     self._filetype_completers = {}
+    self._current_completion_request = None
+
+
+  def CreateCompletionRequest( self ):
+    # We have to store a reference to the newly created CompletionRequest
+    # because VimScript can't store a reference to a Python object across
+    # function calls... Thus we need to keep this request somewhere.
+    self._current_completion_request = CompletionRequest( self )
+    return self._current_completion_request
+
+
+  def GetCurrentCompletionRequest( self ):
+    return self._current_completion_request
 
 
   def GetGeneralCompleter( self ):
