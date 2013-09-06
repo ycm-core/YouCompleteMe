@@ -20,6 +20,7 @@
 
 from ycm.completers.general_completer import GeneralCompleter
 from UltiSnips import UltiSnips_Manager
+from ycm import server_responses
 
 
 class UltiSnipsCompleter( GeneralCompleter ):
@@ -33,13 +34,13 @@ class UltiSnipsCompleter( GeneralCompleter ):
     self._filtered_candidates = None
 
 
-  def ShouldUseNowInner( self, start_column, unused_current_line ):
-    return self.QueryLengthAboveMinThreshold( start_column )
+  def ShouldUseNowInner( self, request_data ):
+    return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def CandidatesForQueryAsync( self, query, unused_start_column ):
-    self._filtered_candidates = self.FilterAndSortCandidates( self._candidates,
-                                                              query )
+  def CandidatesForQueryAsync( self, request_data ):
+    self._filtered_candidates = self.FilterAndSortCandidates(
+      self._candidates, request_data[ 'query' ] )
 
 
   def AsyncCandidateRequestReady( self ):
@@ -61,8 +62,9 @@ def _GetCandidates():
     # UltiSnips_Manager._snips() returns a class instance where:
     # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
     # class.description - description of the snippet
-    return  [ { 'word': str( snip.trigger ),
-                'menu': str( '<snip> ' + snip.description.encode('utf-8') ) }
-              for snip in rawsnips ]
+    return [ server_responses.BuildCompletionData(
+              str( snip.trigger ),
+              str( '<snip> ' + snip.description.encode( 'utf-8' ) ) )
+            for snip in rawsnips ]
   except:
     return []

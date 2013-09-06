@@ -103,7 +103,7 @@ void ClangCompleter::EnableThreading() {
 
 
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
-  const std::string &filename ) {
+  std::string filename ) {
   shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
 
   if ( !unit )
@@ -127,9 +127,9 @@ bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
 
 
 void ClangCompleter::UpdateTranslationUnit(
-  const std::string &filename,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags ) {
+  std::string filename,
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
   bool translation_unit_created;
   shared_ptr< TranslationUnit > unit = translation_unit_store_.GetOrCreate(
       filename,
@@ -182,11 +182,11 @@ Future< void > ClangCompleter::UpdateTranslationUnitAsync(
 
 std::vector< CompletionData >
 ClangCompleter::CandidatesForLocationInFile(
-  const std::string &filename,
+  std::string filename,
   int line,
   int column,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags ) {
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -201,12 +201,12 @@ ClangCompleter::CandidatesForLocationInFile(
 
 Future< AsyncCompletions >
 ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
-  const std::string &query,
-  const std::string &filename,
+  std::string query,
+  std::string filename,
   int line,
   int column,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags ) {
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
   // TODO: throw exception when threading is not enabled and this is called
   if ( !threading_enabled_ )
     return Future< AsyncCompletions >();
@@ -238,7 +238,11 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
   CreateSortingTask( query, future );
 
   if ( skip_clang_result_cache ) {
-    CreateClangTask( filename, line, column, unsaved_files, flags );
+    CreateClangTask( boost::move( filename ),
+                     line,
+                     column,
+                     boost::move( unsaved_files ),
+                     boost::move( flags ) );
   }
 
   return Future< AsyncCompletions >( boost::move( future ) );
@@ -246,11 +250,11 @@ ClangCompleter::CandidatesForQueryAndLocationInFileAsync(
 
 
 Location ClangCompleter::GetDeclarationLocation(
-  const std::string &filename,
+  std::string filename,
   int line,
   int column,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags ) {
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -263,11 +267,11 @@ Location ClangCompleter::GetDeclarationLocation(
 
 
 Location ClangCompleter::GetDefinitionLocation(
-  const std::string &filename,
+  std::string filename,
   int line,
   int column,
-  const std::vector< UnsavedFile > &unsaved_files,
-  const std::vector< std::string > &flags ) {
+  std::vector< UnsavedFile > unsaved_files,
+  std::vector< std::string > flags ) {
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -279,7 +283,7 @@ Location ClangCompleter::GetDefinitionLocation(
 }
 
 
-void ClangCompleter::DeleteCachesForFileAsync( const std::string &filename ) {
+void ClangCompleter::DeleteCachesForFileAsync( std::string filename ) {
   file_cache_delete_stack_.Push( filename );
 }
 

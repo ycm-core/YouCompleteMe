@@ -58,18 +58,17 @@ class GeneralCompleterStore( Completer ):
     return set()
 
 
-  def ShouldUseNow( self, start_column, current_line ):
+  def ShouldUseNow( self, request_data ):
     self._current_query_completers = []
 
-    if self._filename_completer.ShouldUseNow( start_column, current_line ):
+    if self._filename_completer.ShouldUseNow( request_data ):
       self._current_query_completers = [ self._filename_completer ]
       return True
 
     should_use_now = False
 
     for completer in self._non_filename_completers:
-      should_use_this_completer = completer.ShouldUseNow( start_column,
-                                                          current_line )
+      should_use_this_completer = completer.ShouldUseNow( request_data )
       should_use_now = should_use_now or should_use_this_completer
 
       if should_use_this_completer:
@@ -78,9 +77,9 @@ class GeneralCompleterStore( Completer ):
     return should_use_now
 
 
-  def CandidatesForQueryAsync( self, query, start_column ):
+  def CandidatesForQueryAsync( self, request_data ):
     for completer in self._current_query_completers:
-      completer.CandidatesForQueryAsync( query, start_column )
+      completer.CandidatesForQueryAsync( request_data )
 
 
   def AsyncCandidateRequestReady( self ):
@@ -96,9 +95,9 @@ class GeneralCompleterStore( Completer ):
     return candidates
 
 
-  def OnFileReadyToParse( self ):
+  def OnFileReadyToParse( self, request_data ):
     for completer in self._all_completers:
-      completer.OnFileReadyToParse()
+      completer.OnFileReadyToParse( request_data )
 
 
   def OnBufferVisit( self ):

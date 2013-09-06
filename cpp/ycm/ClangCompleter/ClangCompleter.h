@@ -59,18 +59,23 @@ public:
 
   void EnableThreading();
 
-  std::vector< Diagnostic > DiagnosticsForFile( const std::string &filename );
+  std::vector< Diagnostic > DiagnosticsForFile( std::string filename );
 
   bool UpdatingTranslationUnit( const std::string &filename );
 
+  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
+  // avoid internal copies if params are taken by value (move ctors FTW), and we
+  // need to ensure we own the memory.
+  // TODO: Change some of these params back to const ref where possible after we
+  // get the server up.
+  // TODO: Remove the async methods and the threads when the server is ready.
+
   // Public because of unit tests (gtest is not very thread-friendly)
   void UpdateTranslationUnit(
-    const std::string &filename,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    std::string filename,
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
-  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
-  // avoid internal copies if params are taken by value (move ctors FTW)
   Future< void > UpdateTranslationUnitAsync(
     std::string filename,
     std::vector< UnsavedFile > unsaved_files,
@@ -78,35 +83,35 @@ public:
 
   // Public because of unit tests (gtest is not very thread-friendly)
   std::vector< CompletionData > CandidatesForLocationInFile(
-    const std::string &filename,
+    std::string filename,
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
   Future< AsyncCompletions > CandidatesForQueryAndLocationInFileAsync(
-    const std::string &query,
-    const std::string &filename,
+    std::string query,
+    std::string filename,
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
   Location GetDeclarationLocation(
-    const std::string &filename,
+    std::string filename,
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
   Location GetDefinitionLocation(
-    const std::string &filename,
+    std::string filename,
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    std::vector< UnsavedFile > unsaved_files,
+    std::vector< std::string > flags );
 
-  void DeleteCachesForFileAsync( const std::string &filename );
+  void DeleteCachesForFileAsync( std::string filename );
 
 private:
 

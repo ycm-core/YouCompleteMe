@@ -18,14 +18,23 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
-import vim
 import ycm_core
-from ycm import vimsupport
+import logging
+from ycm import server_responses
 from ycm import extra_conf_store
 from ycm.completers.completer import Completer
 from ycm.completers.cpp.flags import Flags
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
+MIN_LINES_IN_FILE_TO_PARSE = 5
+PARSING_FILE_MESSAGE = 'Still parsing file, no completions yet.'
+NO_COMPILE_FLAGS_MESSAGE = 'Still no compile flags, no completions yet.'
+NO_COMPLETIONS_MESSAGE = 'No completions found; errors in the file?'
+INVALID_FILE_MESSAGE = 'File is invalid.'
+FILE_TOO_SHORT_MESSAGE = (
+  'File is less than {} lines long; not compiling.'.format(
+    MIN_LINES_IN_FILE_TO_PARSE ) )
+NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 
 
 class ClangCompleter( Completer ):
@@ -35,12 +44,11 @@ class ClangCompleter( Completer ):
       'max_diagnostics_to_display' ]
     self.completer = ycm_core.ClangCompleter()
     self.completer.EnableThreading()
-    self.contents_holder = []
-    self.filename_holder = []
     self.last_prepared_diagnostics = []
     self.parse_future = None
     self.flags = Flags()
     self.diagnostic_store = None
+    self._logger = logging.getLogger( __name__ )
 
     # We set this flag when a compilation request comes in while one is already
     # in progress. We use this to trigger the pending request after the previous
@@ -53,63 +61,52 @@ class ClangCompleter( Completer ):
     return CLANG_FILETYPES
 
 
-  def GetUnsavedFilesVector( self ):
-    # CAREFUL HERE! For UnsavedFile filename and contents we are referring
-    # directly to Python-allocated and -managed memory since we are accepting
-    # pointers to data members of python objects. We need to ensure that those
-    # objects outlive our UnsavedFile objects. This is why we need the
-    # contents_holder and filename_holder lists, to make sure the string objects
-    # are still around when we call CandidatesForQueryAndLocationInFile.  We do
-    # this to avoid an extra copy of the entire file contents.
-
+  def GetUnsavedFilesVector( self, request_data ):
     files = ycm_core.UnsavedFileVec()
-    self.contents_holder = []
-    self.filename_holder = []
-    for buffer in vimsupport.GetUnsavedBuffers():
-      if not ClangAvailableForBuffer( buffer ):
+    for filename, file_data in request_data[ 'file_data' ].iteritems():
+      if not ClangAvailableForFiletypes( file_data[ 'filetypes' ] ):
         continue
-      contents = '\n'.join( buffer )
-      name = buffer.name
-      if not contents or not name:
+      contents = file_data[ 'contents' ]
+      if not contents or not filename:
         continue
-      self.contents_holder.append( contents )
-      self.filename_holder.append( name )
 
       unsaved_file = ycm_core.UnsavedFile()
-      unsaved_file.contents_ = self.contents_holder[ -1 ]
-      unsaved_file.length_ = len( self.contents_holder[ -1 ] )
-      unsaved_file.filename_ = self.filename_holder[ -1 ]
+      unsaved_file.contents_ = contents
+      unsaved_file.length_ = len( contents )
+      unsaved_file.filename_ = filename
 
       files.append( unsaved_file )
-
     return files
 
 
-  def CandidatesForQueryAsync( self, query, start_column ):
-    filename = vim.current.buffer.name
+  def CandidatesForQueryAsync( self, request_data ):
+    filename = request_data[ 'filepath' ]
 
     if not filename:
       return
 
     if self.completer.UpdatingTranslationUnit( filename ):
-      vimsupport.PostVimMessage( 'Still parsing file, no completions yet.' )
       self.completions_future = None
-      return
+      self._logger.info( PARSING_FILE_MESSAGE )
+      return server_responses.BuildDisplayMessageResponse(
+        PARSING_FILE_MESSAGE )
 
     flags = self.flags.FlagsForFile( filename )
     if not flags:
-      vimsupport.PostVimMessage( 'Still no compile flags, no completions yet.' )
       self.completions_future = None
-      return
+      self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
+      return server_responses.BuildDisplayMessageResponse(
+        NO_COMPILE_FLAGS_MESSAGE )
 
     # TODO: sanitize query, probably in C++ code
 
     files = ycm_core.UnsavedFileVec()
+    query = request_data[ 'query' ]
     if not query:
-      files = self.GetUnsavedFilesVector()
+      files = self.GetUnsavedFilesVector( request_data )
 
-    line, _ = vim.current.window.cursor
-    column = start_column + 1
+    line = request_data[ 'line_num' ] + 1
+    column = request_data[ 'start_column' ] + 1
     self.completions_future = (
       self.completer.CandidatesForQueryAndLocationInFileAsync(
         query,
@@ -123,10 +120,11 @@ class ClangCompleter( Completer ):
   def CandidatesFromStoredRequest( self ):
     if not self.completions_future:
       return []
-    results = [ CompletionDataToDict( x ) for x in
+    results = [ ConvertCompletionData( x ) for x in
                 self.completions_future.GetResults() ]
     if not results:
-      vimsupport.PostVimMessage( 'No completions found; errors in the file?' )
+      self._logger.warning( NO_COMPLETIONS_MESSAGE )
+      raise RuntimeError( NO_COMPLETIONS_MESSAGE )
     return results
 
 
@@ -137,37 +135,37 @@ class ClangCompleter( Completer ):
              'ClearCompilationFlagCache']
 
 
-  def OnUserCommand( self, arguments ):
+  def OnUserCommand( self, arguments, request_data ):
     if not arguments:
-      self.EchoUserCommandsHelpMessage()
-      return
+      raise ValueError( self.UserCommandsHelpMessage() )
 
     command = arguments[ 0 ]
     if command == 'GoToDefinition':
-      self._GoToDefinition()
+      self._GoToDefinition( request_data )
     elif command == 'GoToDeclaration':
-      self._GoToDeclaration()
+      self._GoToDeclaration( request_data )
     elif command == 'GoToDefinitionElseDeclaration':
-      self._GoToDefinitionElseDeclaration()
+      self._GoToDefinitionElseDeclaration( request_data )
     elif command == 'ClearCompilationFlagCache':
-      self._ClearCompilationFlagCache()
+      self._ClearCompilationFlagCache( request_data )
 
 
-  def _LocationForGoTo( self, goto_function ):
-    filename = vim.current.buffer.name
+  def _LocationForGoTo( self, goto_function, request_data ):
+    filename = request_data[ 'filepath' ]
     if not filename:
-      return None
+      self._logger.warning( INVALID_FILE_MESSAGE )
+      return server_responses.BuildDisplayMessageResponse(
+        INVALID_FILE_MESSAGE )
 
     flags = self.flags.FlagsForFile( filename )
     if not flags:
-      vimsupport.PostVimMessage( 'Still no compile flags, can\'t compile.' )
-      return None
+      self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
+      return server_responses.BuildDisplayMessageResponse(
+        NO_COMPILE_FLAGS_MESSAGE )
 
     files = self.GetUnsavedFilesVector()
-    line, column = vimsupport.CurrentLineAndColumn()
-    # Making the line & column 1-based instead of 0-based
-    line += 1
-    column += 1
+    line = request_data[ 'line_num' ] + 1
+    column = request_data[ 'start_column' ] + 1
     return getattr( self.completer, goto_function )(
         filename,
         line,
@@ -176,39 +174,37 @@ class ClangCompleter( Completer ):
         flags )
 
 
-  def _GoToDefinition( self ):
+  def _GoToDefinition( self, request_data ):
     location = self._LocationForGoTo( 'GetDefinitionLocation' )
     if not location or not location.IsValid():
-      vimsupport.PostVimMessage( 'Can\'t jump to definition.' )
-      return
+      raise RuntimeError( 'Can\'t jump to definition.' )
 
-    vimsupport.JumpToLocation( location.filename_,
-                               location.line_number_,
-                               location.column_number_ )
+    return server_responses.BuildGoToResponse( location.filename_,
+                                               location.line_number_,
+                                               location.column_number_ )
 
 
-  def _GoToDeclaration( self ):
+  def _GoToDeclaration( self, request_data ):
     location = self._LocationForGoTo( 'GetDeclarationLocation' )
     if not location or not location.IsValid():
-      vimsupport.PostVimMessage( 'Can\'t jump to declaration.' )
-      return
+      raise RuntimeError( 'Can\'t jump to declaration.' )
 
-    vimsupport.JumpToLocation( location.filename_,
-                               location.line_number_,
-                               location.column_number_ )
+    return server_responses.BuildGoToResponse( location.filename_,
+                                               location.line_number_,
+                                               location.column_number_ )
 
 
-  def _GoToDefinitionElseDeclaration( self ):
+  def _GoToDefinitionElseDeclaration( self, request_data ):
     location = self._LocationForGoTo( 'GetDefinitionLocation' )
     if not location or not location.IsValid():
       location = self._LocationForGoTo( 'GetDeclarationLocation' )
     if not location or not location.IsValid():
-      vimsupport.PostVimMessage( 'Can\'t jump to definition or declaration.' )
-      return
+      raise RuntimeError( 'Can\'t jump to definition or declaration.' )
 
-    vimsupport.JumpToLocation( location.filename_,
-                               location.line_number_,
-                               location.column_number_ )
+    return server_responses.BuildGoToResponse( location.filename_,
+                                               location.line_number_,
+                                               location.column_number_ )
+
 
 
   def _ClearCompilationFlagCache( self ):
@@ -216,14 +212,18 @@ class ClangCompleter( Completer ):
 
 
 
-  def OnFileReadyToParse( self ):
-    if vimsupport.NumLinesInBuffer( vim.current.buffer ) < 5:
+  def OnFileReadyToParse( self, request_data ):
+    filename = request_data[ 'filepath' ]
+    contents = request_data[ 'file_data' ][ filename ][ 'contents' ]
+    if contents.count( '\n' ) < MIN_LINES_IN_FILE_TO_PARSE:
       self.parse_future = None
-      return
+      self._logger.warning( FILE_TOO_SHORT_MESSAGE )
+      raise ValueError( FILE_TOO_SHORT_MESSAGE )
 
-    filename = vim.current.buffer.name
     if not filename:
-      return
+      self._logger.warning( INVALID_FILE_MESSAGE )
+      return server_responses.BuildDisplayMessageResponse(
+        INVALID_FILE_MESSAGE )
 
     if self.completer.UpdatingTranslationUnit( filename ):
       self.extra_parse_desired = True
@@ -232,11 +232,13 @@ class ClangCompleter( Completer ):
     flags = self.flags.FlagsForFile( filename )
     if not flags:
       self.parse_future = None
-      return
+      self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
+      return server_responses.BuildDisplayMessageResponse(
+        NO_COMPILE_FLAGS_MESSAGE )
 
     self.parse_future = self.completer.UpdateTranslationUnitAsync(
       filename,
-      self.GetUnsavedFilesVector(),
+      self.GetUnsavedFilesVector( request_data ),
       flags )
 
     self.extra_parse_desired = False
@@ -253,16 +255,18 @@ class ClangCompleter( Completer ):
     return self.parse_future.ResultsReady()
 
 
-  def GettingCompletions( self ):
-    return self.completer.UpdatingTranslationUnit( vim.current.buffer.name )
+  def GettingCompletions( self, request_data ):
+    return self.completer.UpdatingTranslationUnit( request_data[ 'filepath' ] )
 
 
-  def GetDiagnosticsForCurrentFile( self ):
+  def GetDiagnosticsForCurrentFile( self, request_data ):
+    filename = request_data[ 'filepath' ]
     if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self.completer.DiagnosticsForFile( vim.current.buffer.name )
+      diagnostics = self.completer.DiagnosticsForFile( filename )
       self.diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
-      self.last_prepared_diagnostics = [ DiagnosticToDict( x ) for x in
-          diagnostics[ : self.max_diagnostics_to_display ] ]
+      self.last_prepared_diagnostics = [
+        server_responses.BuildDiagnosticData( x ) for x in
+        diagnostics[ : self.max_diagnostics_to_display ] ]
       self.parse_future = None
 
       if self.extra_parse_desired:
@@ -271,23 +275,19 @@ class ClangCompleter( Completer ):
     return self.last_prepared_diagnostics
 
 
-  def ShowDetailedDiagnostic( self ):
-    current_line, current_column = vimsupport.CurrentLineAndColumn()
-
-    # CurrentLineAndColumn() numbers are 0-based, clang numbers are 1-based
-    current_line += 1
-    current_column += 1
-
-    current_file = vim.current.buffer.name
+  def GetDetailedDiagnostic( self, request_data ):
+    current_line = request_data[ 'line_num' ] + 1
+    current_column = request_data[ 'column_num' ] + 1
+    current_file = request_data[ 'filepath' ]
 
     if not self.diagnostic_store:
-      vimsupport.PostVimMessage( "No diagnostic for current line!" )
-      return
+      return server_responses.BuildDisplayMessageResponse(
+        NO_DIAGNOSTIC_MESSAGE )
 
     diagnostics = self.diagnostic_store[ current_file ][ current_line ]
     if not diagnostics:
-      vimsupport.PostVimMessage( "No diagnostic for current line!" )
-      return
+      return server_responses.BuildDisplayMessageResponse(
+        NO_DIAGNOSTIC_MESSAGE )
 
     closest_diagnostic = None
     distance_to_closest_diagnostic = 999
@@ -298,50 +298,61 @@ class ClangCompleter( Completer ):
         distance_to_closest_diagnostic = distance
         closest_diagnostic = diagnostic
 
-    vimsupport.EchoText( closest_diagnostic.long_formatted_text_ )
+    return server_responses.BuildDisplayMessageResponse(
+      closest_diagnostic.long_formatted_text_ )
 
 
-  def ShouldUseNow( self, start_column, current_line ):
+  def ShouldUseNow( self, request_data ):
     # We don't want to use the Completer API cache, we use one in the C++ code.
-    return self.ShouldUseNowInner( start_column, current_line )
+    return self.ShouldUseNowInner( request_data )
 
 
-  def DebugInfo( self ):
-    filename = vim.current.buffer.name
+  def DebugInfo( self, request_data ):
+    filename = request_data[ 'filepath' ]
     if not filename:
       return ''
     flags = self.flags.FlagsForFile( filename ) or []
     source = extra_conf_store.ModuleFileForSourceFile( filename )
-    return 'Flags for {0} loaded from {1}:\n{2}'.format( filename,
-                                                         source,
-                                                         list( flags ) )
+    return server_responses.BuildDisplayMessageResponse(
+      'Flags for {0} loaded from {1}:\n{2}'.format( filename,
+                                                    source,
+                                                    list( flags ) ) )
 
 
 # TODO: make these functions module-local
-def CompletionDataToDict( completion_data ):
-  # see :h complete-items for a description of the dictionary fields
-  return {
-    'word' : completion_data.TextToInsertInBuffer(),
-    'abbr' : completion_data.MainCompletionText(),
-    'menu' : completion_data.ExtraMenuInfo(),
-    'kind' : completion_data.kind_,
-    'info' : completion_data.DetailedInfoForPreviewWindow(),
-    'dup'  : 1,
-  }
+# def CompletionDataToDict( completion_data ):
+#   # see :h complete-items for a description of the dictionary fields
+#   return {
+#     'word' : completion_data.TextToInsertInBuffer(),
+#     'abbr' : completion_data.MainCompletionText(),
+#     'menu' : completion_data.ExtraMenuInfo(),
+#     'kind' : completion_data.kind_,
+#     'info' : completion_data.DetailedInfoForPreviewWindow(),
+#     'dup'  : 1,
+#   }
 
 
-def DiagnosticToDict( diagnostic ):
-  # see :h getqflist for a description of the dictionary fields
-  return {
-    # TODO: wrap the bufnr generation into a function
-    'bufnr' : int( vim.eval( "bufnr('{0}', 1)".format(
-      diagnostic.filename_ ) ) ),
-    'lnum'  : diagnostic.line_number_,
-    'col'   : diagnostic.column_number_,
-    'text'  : diagnostic.text_,
-    'type'  : diagnostic.kind_,
-    'valid' : 1
-  }
+# def DiagnosticToDict( diagnostic ):
+#   # see :h getqflist for a description of the dictionary fields
+#   return {
+#     # TODO: wrap the bufnr generation into a function
+#     'bufnr' : int( vim.eval( "bufnr('{0}', 1)".format(
+#       diagnostic.filename_ ) ) ),
+#     'lnum'  : diagnostic.line_number_,
+#     'col'   : diagnostic.column_number_,
+#     'text'  : diagnostic.text_,
+#     'type'  : diagnostic.kind_,
+#     'valid' : 1
+#   }
+
+
+def ConvertCompletionData( completion_data ):
+  return server_responses.BuildCompletionData(
+    insertion_text = completion_data.TextToInsertInBuffer(),
+    menu_text = completion_data.MainCompletionText(),
+    extra_menu_info = completion_data.ExtraMenuInfo(),
+    kind = completion_data.kind_,
+    detailed_info = completion_data.DetailedInfoForPreviewWindow() )
 
 
 def DiagnosticsToDiagStructure( diagnostics ):
@@ -352,12 +363,9 @@ def DiagnosticsToDiagStructure( diagnostics ):
   return structure
 
 
-def ClangAvailableForBuffer( buffer_object ):
-  filetypes = vimsupport.FiletypesForBuffer( buffer_object )
+def ClangAvailableForFiletypes( filetypes ):
   return any( [ filetype in CLANG_FILETYPES for filetype in filetypes ] )
 
 
-def InCFamilyFile():
-  return any( [ filetype in CLANG_FILETYPES for filetype in
-                vimsupport.CurrentFiletypes() ] )
-
+def InCFamilyFile( filetypes ):
+  return ClangAvailableForFiletypes( filetypes )

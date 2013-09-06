@@ -25,6 +25,7 @@ from ycm.completers.general_completer import GeneralCompleter
 from ycm.completers.general import syntax_parse
 from ycm import vimsupport
 from ycm import utils
+from ycm import server_responses
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
@@ -39,15 +40,14 @@ class IdentifierCompleter( GeneralCompleter ):
     self.filetypes_with_keywords_loaded = set()
 
 
-  def ShouldUseNow( self, start_column, unused_current_line ):
-    return self.QueryLengthAboveMinThreshold( start_column )
+  def ShouldUseNow( self, request_data ):
+    return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def CandidatesForQueryAsync( self, query, unused_start_column ):
-    filetype = vim.eval( "&filetype" )
+  def CandidatesForQueryAsync( self, request_data ):
     self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
-      utils.SanitizeQuery( query ),
-      filetype )
+      utils.SanitizeQuery( request_data[ 'query' ] ),
+      request_data[ 'filetypes' ][ 0 ] )
 
 
   def AddIdentifier( self, identifier ):
@@ -83,17 +83,16 @@ class IdentifierCompleter( GeneralCompleter ):
     self.AddIdentifier( stripped_cursor_identifier )
 
 
-  def AddBufferIdentifiers( self ):
-    # TODO: use vimsupport.GetFiletypes; also elsewhere in file
-    filetype = vim.eval( "&filetype" )
-    filepath = vim.eval( "expand('%:p')" )
+  def AddBufferIdentifiers( self, request_data ):
+    filetype = request_data[ 'filetypes' ][ 0 ]
+    filepath = request_data[ 'filepath' ]
     collect_from_comments_and_strings = bool( self.user_options[
       'collect_identifiers_from_comments_and_strings' ] )
 
     if not filetype or not filepath:
       return
 
-    text = "\n".join( vim.current.buffer )
+    text = request_data[ 'file_data' ][ filepath ][ 'contents' ]
     self.completer.AddIdentifiersToDatabaseFromBufferAsync(
       text,
       filetype,
@@ -147,14 +146,15 @@ class IdentifierCompleter( GeneralCompleter ):
                                              filepath )
 
 
-  def OnFileReadyToParse( self ):
-    self.AddBufferIdentifiers()
+  def OnFileReadyToParse( self, request_data ):
+    self.AddBufferIdentifiers( request_data )
 
-    if self.user_options[ 'collect_identifiers_from_tags_files' ]:
-      self.AddIdentifiersFromTagFiles()
+    # TODO: make these work again
+    # if self.user_options[ 'collect_identifiers_from_tags_files' ]:
+    #   self.AddIdentifiersFromTagFiles()
 
-    if self.user_options[ 'seed_identifiers_with_syntax' ]:
-      self.AddIdentifiersFromSyntax()
+    # if self.user_options[ 'seed_identifiers_with_syntax' ]:
+    #   self.AddIdentifiersFromSyntax()
 
 
   def OnInsertLeave( self ):
@@ -174,11 +174,7 @@ class IdentifierCompleter( GeneralCompleter ):
     completions = _RemoveSmallCandidates(
       completions, self.user_options[ 'min_num_identifier_candidate_chars' ] )
 
-    # We will never have duplicates in completions so with 'dup':1 we tell Vim
-    # to add this candidate even if it's a duplicate of an existing one (which
-    # will never happen). This saves us some expensive string matching
-    # operations in Vim.
-    return [ { 'word': x, 'dup': 1 } for x in completions ]
+    return [ server_responses.BuildCompletionData( x ) for x in completions ]
 
 
 def _PreviousIdentifier( min_num_completion_start_chars ):

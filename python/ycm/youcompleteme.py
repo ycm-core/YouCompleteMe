@@ -19,20 +19,25 @@
 
 import imp
 import os
+import time
 import vim
 import ycm_core
+import logging
+import tempfile
 from ycm import vimsupport
 from ycm import base
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
 
+# TODO: Put the Request classes in separate files
 class CompletionRequest( object ):
   def __init__( self, ycm_state ):
     self._completion_start_column = base.CompletionStartColumn()
     self._ycm_state = ycm_state
+    self._request_data = _BuildRequestData( self._completion_start_column )
     self._do_filetype_completion = self._ycm_state.ShouldUseFiletypeCompleter(
-      self._completion_start_column )
+      self._request_data )
     self._completer = ( self._ycm_state.GetFiletypeCompleter() if
                         self._do_filetype_completion else
                         self._ycm_state.GetGeneralCompleter() )
@@ -40,8 +45,7 @@ class CompletionRequest( object ):
 
   def ShouldComplete( self ):
     return ( self._do_filetype_completion or
-             self._ycm_state.ShouldUseGeneralCompleter(
-               self._completion_start_column ) )
+             self._ycm_state.ShouldUseGeneralCompleter( self._request_data ) )
 
 
   def CompletionStartColumn( self ):
@@ -49,20 +53,80 @@ class CompletionRequest( object ):
 
 
   def Start( self, query ):
-    self._completer.CandidatesForQueryAsync( query,
-                                             self._completion_start_column )
+    self._request_data[ 'query' ] = query
+    self._completer.CandidatesForQueryAsync( self._request_data )
 
   def Done( self ):
     return self._completer.AsyncCandidateRequestReady()
 
 
   def Results( self ):
-    return self._completer.CandidatesFromStoredRequest()
+    try:
+      return [ _ConvertCompletionDataToVimData( x )
+              for x in self._completer.CandidatesFromStoredRequest() ]
+    except Exception as e:
+      vimsupport.PostVimMessage( str( e ) )
+      return []
+
+
+
+class CommandRequest( object ):
+  class ServerResponse( object ):
+    def __init__( self ):
+      pass
+
+    def Valid( self ):
+      return True
+
+  def __init__( self, ycm_state, arguments, completer_target = None ):
+    if not completer_target:
+      completer_target = 'filetpe_default'
+
+    if completer_target == 'omni':
+      self._completer = ycm_state.GetOmniCompleter()
+    elif completer_target == 'identifier':
+      self._completer = ycm_state.GetGeneralCompleter()
+    else:
+      self._completer = ycm_state.GetFiletypeCompleter()
+    self._arguments = arguments
+
+
+  def Start( self ):
+    self._completer.OnUserCommand( self._arguments,
+                                   _BuildRequestData() )
+
+  def Done( self ):
+    return True
+
+
+  def Response( self ):
+    # TODO: Call vimsupport.JumpToLocation if the user called a GoTo command...
+    # we may want to have specific subclasses of CommandRequest so that a
+    # GoToRequest knows it needs to jump after the data comes back.
+    #
+    # Also need to run the following on GoTo data:
+    # CAREFUL about line/column number 0-based/1-based confusion!
+    #
+    # defs = []
+    # defs.append( {'filename': definition.module_path.encode( 'utf-8' ),
+    #               'lnum': definition.line,
+    #               'col': definition.column + 1,
+    #               'text': definition.description.encode( 'utf-8' ) } )
+    # vim.eval( 'setqflist( %s )' % repr( defs ) )
+    # vim.eval( 'youcompleteme#OpenGoToList()' )
+    return self.ServerResponse()
 
 
 
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
+    # TODO: This should go into the server
+    # TODO: Use more logging like we do in cs_completer
+    self._logfile = tempfile.NamedTemporaryFile()
+    logging.basicConfig( format='%(asctime)s - %(levelname)s - %(message)s',
+                         filename=self._logfile.name,
+                         level=logging.DEBUG )
+
     self._user_options = user_options
     self._gencomp = GeneralCompleterStore( user_options )
     self._omnicomp = OmniCompleter( user_options )
@@ -76,6 +140,16 @@ class YouCompleteMe( object ):
     # function calls... Thus we need to keep this request somewhere.
     self._current_completion_request = CompletionRequest( self )
     return self._current_completion_request
+
+
+  def SendCommandRequest( self, arguments, completer ):
+    # TODO: This should be inside a method in a command_request module
+    request = CommandRequest( self, arguments, completer )
+    request.Start()
+    while not request.Done():
+      time.sleep( 0.1 )
+
+    return request.Response()
 
 
   def GetCurrentCompletionRequest( self ):
@@ -131,14 +205,13 @@ class YouCompleteMe( object ):
     return completer
 
 
-  def ShouldUseGeneralCompleter( self, start_column ):
-    return self._gencomp.ShouldUseNow( start_column, vim.current.line )
+  def ShouldUseGeneralCompleter( self, request_data ):
+    return self._gencomp.ShouldUseNow( request_data )
 
 
-  def ShouldUseFiletypeCompleter( self, start_column ):
+  def ShouldUseFiletypeCompleter( self, request_data ):
     if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().ShouldUseNow(
-        start_column, vim.current.line )
+      return self.GetFiletypeCompleter().ShouldUseNow( request_data )
     return False
 
 
@@ -162,10 +235,10 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
-    self._gencomp.OnFileReadyToParse()
+    self._gencomp.OnFileReadyToParse( _BuildRequestData() )
 
     if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnFileReadyToParse()
+      self.GetFiletypeCompleter().OnFileReadyToParse( _BuildRequestData() )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -208,9 +281,9 @@ class YouCompleteMe( object ):
     return []
 
 
-  def ShowDetailedDiagnostic( self ):
+  def GetDetailedDiagnostic( self ):
     if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().ShowDetailedDiagnostic()
+      return self.GetFiletypeCompleter().GetDetailedDiagnostic()
 
 
   def GettingCompletions( self ):
@@ -263,3 +336,37 @@ def _PathToFiletypeCompleterPluginLoader( filetype ):
   return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
 
 
+def _BuildRequestData( start_column = None, query = None ):
+  line, column = vimsupport.CurrentLineAndColumn()
+  request_data = {
+    'filetypes': vimsupport.CurrentFiletypes(),
+    'line_num': line,
+    'column_num': column,
+    'start_column': start_column,
+    'line_value': vim.current.line,
+    'filepath': vim.current.buffer.name,
+    'file_data': vimsupport.GetUnsavedAndCurrentBufferData()
+  }
+
+  if query:
+    request_data[ 'query' ] = query
+
+  return request_data
+
+def _ConvertCompletionDataToVimData( completion_data ):
+  # see :h complete-items for a description of the dictionary fields
+  vim_data = {
+    'word' : completion_data[ 'insertion_text' ],
+    'dup'  : 1,
+  }
+
+  if 'menu_text' in completion_data:
+    vim_data[ 'abbr' ] = completion_data[ 'menu_text' ]
+  if 'extra_menu_info' in completion_data:
+    vim_data[ 'menu' ] = completion_data[ 'extra_menu_info' ]
+  if 'kind' in completion_data:
+    vim_data[ 'kind' ] = completion_data[ 'kind' ]
+  if 'detailed_info' in completion_data:
+    vim_data[ 'info' ] = completion_data[ 'detailed_info' ]
+
+  return vim_data

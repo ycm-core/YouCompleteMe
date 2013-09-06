@@ -40,29 +40,27 @@ class OmniCompleter( Completer ):
     return bool( self.user_options[ 'cache_omnifunc' ] )
 
 
-  def ShouldUseNow( self, start_column, current_line ):
+  def ShouldUseNow( self, request_data ):
     if self.ShouldUseCache():
-      return super( OmniCompleter, self ).ShouldUseNow( start_column,
-                                                        current_line )
-    return self.ShouldUseNowInner( start_column, current_line )
+      return super( OmniCompleter, self ).ShouldUseNow( request_data )
+    return self.ShouldUseNowInner( request_data )
 
 
-  def ShouldUseNowInner( self, start_column, current_line ):
+  def ShouldUseNowInner( self, request_data ):
     if not self.omnifunc:
       return False
-    return super( OmniCompleter, self ).ShouldUseNowInner( start_column,
-                                                           current_line )
+    return super( OmniCompleter, self ).ShouldUseNowInner( request_data )
 
 
-  def CandidatesForQueryAsync( self, query, unused_start_column ):
+  def CandidatesForQueryAsync( self, request_data ):
     if self.ShouldUseCache():
       return super( OmniCompleter, self ).CandidatesForQueryAsync(
-          query, unused_start_column )
+        request_data )
     else:
-      return self.CandidatesForQueryAsyncInner( query, unused_start_column )
+      return self.CandidatesForQueryAsyncInner( request_data )
 
 
-  def CandidatesForQueryAsyncInner( self, query, unused_start_column ):
+  def CandidatesForQueryAsyncInner( self, request_data ):
     if not self.omnifunc:
       self.stored_candidates = None
       return
@@ -75,7 +73,7 @@ class OmniCompleter( Completer ):
 
       omnifunc_call = [ self.omnifunc,
                         "(0,'",
-                        vimsupport.EscapeForVim( query ),
+                        vimsupport.EscapeForVim( request_data[ 'query' ] ),
                         "')" ]
 
       items = vim.eval( ''.join( omnifunc_call ) )
@@ -98,7 +96,7 @@ class OmniCompleter( Completer ):
     return True
 
 
-  def OnFileReadyToParse( self ):
+  def OnFileReadyToParse( self, request_data ):
     self.omnifunc = vim.eval( '&omnifunc' )
 
 

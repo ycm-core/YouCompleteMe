@@ -41,6 +41,7 @@ function! youcompleteme#Enable()
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
   py from ycm import base
+  py from ycm import vimsupport
   py from ycm import user_options_store
   py user_options_store.SetAll( base.BuildServerConf() )
   py from ycm import extra_conf_store
@@ -260,7 +261,7 @@ function! s:OnCursorHold()
   call s:SetUpCompleteopt()
   " Order is important here; we need to extract any done diagnostics before
   " reparsing the file again
-  call s:UpdateDiagnosticNotifications()
+  " call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
 endfunction
 
@@ -327,7 +328,7 @@ function! s:OnCursorMovedNormalMode()
     return
   endif
 
-  call s:UpdateDiagnosticNotifications()
+  " call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
 endfunction
 
@@ -338,7 +339,7 @@ function! s:OnInsertLeave()
   endif
 
   let s:omnifunc_mode = 0
-  call s:UpdateDiagnosticNotifications()
+  " call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
   py ycm_state.OnInsertLeave()
   if g:ycm_autoclose_preview_window_after_completion ||
@@ -572,7 +573,9 @@ command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
 " required (currently that's on buffer save) OR when the SyntasticCheck command
 " is invoked
 function! youcompleteme#CurrentFileDiagnostics()
-  return pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
+  " TODO: Make this work again.
+  " return pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
+  return []
 endfunction
 
 
@@ -595,28 +598,24 @@ function! s:CompleterCommand(...)
   " to select the omni completer or "ft=ycm:ident" to select the identifier
   " completer.  The remaining arguments will passed to the completer.
   let arguments = copy(a:000)
+  let completer = ''
 
   if a:0 > 0 && strpart(a:1, 0, 3) == 'ft='
     if a:1 == 'ft=ycm:omni'
-      py completer = ycm_state.GetOmniCompleter()
+      let completer = 'omni'
     elseif a:1 == 'ft=ycm:ident'
-      py completer = ycm_state.GetGeneralCompleter()
-    else
-      py completer = ycm_state.GetFiletypeCompleterForFiletype(
-                   \ vim.eval('a:1').lstrip('ft=') )
+      let completer = 'identifier'
     endif
     let arguments = arguments[1:]
-  elseif pyeval( 'ycm_state.NativeFiletypeCompletionAvailable()' )
-    py completer = ycm_state.GetFiletypeCompleter()
-  else
-    echohl WarningMsg |
-      \ echomsg "No native completer found for current buffer." |
-      \ echomsg  "Use ft=... as the first argument to specify a completer." |
-      \ echohl None
-    return
   endif
 
-  py completer.OnUserCommand( vim.eval( 'l:arguments' ) )
+py << EOF
+response = ycm_state.SendCommandRequest( vim.eval( 'l:arguments' ),
+                                         vim.eval( 'l:completer' ) )
+if not response.Valid():
+  vimsupport.PostVimMessage( 'No native completer found for current buffer. ' +
+     'Use ft=... as the first argument to specify a completer.')
+EOF
 endfunction
 
 

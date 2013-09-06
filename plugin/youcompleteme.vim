@@ -143,8 +143,8 @@ let g:ycm_extra_conf_globlist =
 let g:ycm_filepath_completion_use_working_dir =
       \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
 
-" Default semantic triggers are in python/ycm/completers/completer.py, these
-" just append new triggers to the default dict.
+" Default semantic triggers are in python/ycm/completers/completer_utils.py
+" these just append new triggers to the default dict.
 let g:ycm_semantic_triggers =
       \ get( g:, 'ycm_semantic_triggers', {} )
 

@@ -19,12 +19,11 @@
 
 import ycm_core
 import os
-from ycm import vimsupport
 from ycm import extra_conf_store
 
-NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
+NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. Go READ THE '
-  'DOCS *NOW*, DON\'T file a bug report.').format(
+  'DOCS *NOW*, DON\'T file a bug report.' ).format(
     extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
 
@@ -37,7 +36,6 @@ class Flags( object ):
     # It's caches all the way down...
     self.flags_for_file = {}
     self.special_clang_flags = _SpecialClangIncludes()
-    self.no_extra_conf_file_warning_posted = False
 
 
   def FlagsForFile( self, filename, add_special_clang_flags = True ):
@@ -46,10 +44,7 @@ class Flags( object ):
     except KeyError:
       module = extra_conf_store.ModuleForSourceFile( filename )
       if not module:
-        if not self.no_extra_conf_file_warning_posted:
-          vimsupport.PostVimMessage( NO_EXTRA_CONF_FILENAME_MESSAGE )
-          self.no_extra_conf_file_warning_posted = True
-        return None
+        raise RuntimeError( NO_EXTRA_CONF_FILENAME_MESSAGE )
 
       results = module.FlagsForFile( filename )
 

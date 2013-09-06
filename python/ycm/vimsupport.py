@@ -46,12 +46,33 @@ def TextAfterCursor():
   return vim.current.line[ CurrentColumn(): ]
 
 
-def GetUnsavedBuffers():
-  def BufferModified( buffer_number ):
-    to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )
-    return GetBoolValue( to_eval )
+# Note the difference between buffer OPTIONS and VARIABLES; the two are not
+# the same.
+def GetBufferOption( buffer_object, option ):
+  # The 'options' property is only available in recent (7.4+) Vim builds
+  if hasattr( buffer_object, 'options' ):
+    return buffer_object.options[ option ]
 
-  return ( x for x in vim.buffers if BufferModified( x.number ) )
+  to_eval = 'getbufvar({0}, "&{1}")'.format( buffer.number, option )
+  return GetVariableValue( to_eval )
+
+
+def GetUnsavedAndCurrentBufferData():
+  def BufferModified( buffer_object ):
+    return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
+
+  buffers_data = {}
+  for buffer_object in vim.buffers:
+    if not ( BufferModified( buffer_object ) or
+             buffer_object == vim.current.buffer ):
+      continue
+
+    buffers_data[ buffer_object.name ] = {
+      'contents': '\n'.join( buffer_object ),
+      'filetypes': FiletypesForBuffer( buffer_object )
+    }
+
+  return buffers_data
 
 
 # Both |line| and |column| need to be 1-based
@@ -73,9 +94,9 @@ def JumpToLocation( filename, line, column ):
   vim.command( 'normal! zz' )
 
 
-def NumLinesInBuffer( buffer ):
+def NumLinesInBuffer( buffer_object ):
   # This is actually less than obvious, that's why it's wrapped in a function
-  return len( buffer )
+  return len( buffer_object )
 
 
 def PostVimMessage( message ):
@@ -128,15 +149,13 @@ def EscapeForVim( text ):
 
 
 def CurrentFiletypes():
-  ft_string = vim.eval( "&filetype" )
-  return ft_string.split( '.' )
+  return vim.eval( "&filetype" ).split( '.' )
 
 
 def FiletypesForBuffer( buffer_object ):
   # NOTE: Getting &ft for other buffers only works when the buffer has been
   # visited by the user at least once, which is true for modified buffers
-  ft_string = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
-  return ft_string.split( '.' )
+  return GetBufferOption( buffer_object, 'ft' ).split( '.' )
 
 
 def GetVariableValue( variable ):

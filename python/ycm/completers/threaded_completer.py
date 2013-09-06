@@ -52,11 +52,10 @@ class ThreadedCompleter( Completer ):
     self._completion_thread.start()
 
 
-  def CandidatesForQueryAsyncInner( self, query, start_column ):
+  def CandidatesForQueryAsyncInner( self, request_data ):
     self._candidates = None
     self._candidates_ready.clear()
-    self._query = query
-    self._start_column = start_column
+    self._request_data = request_data
     self._query_ready.set()
 
 
@@ -69,7 +68,7 @@ class ThreadedCompleter( Completer ):
 
 
   @abc.abstractmethod
-  def ComputeCandidates( self, query, start_column ):
+  def ComputeCandidates( self, request_data ):
     """This function should compute the candidates to show to the user.
     The return value should be of the same type as that for
     CandidatesFromStoredRequest()."""
@@ -80,8 +79,7 @@ class ThreadedCompleter( Completer ):
     while True:
       try:
         WaitAndClearIfSet( self._query_ready )
-        self._candidates = self.ComputeCandidates( self._query,
-                                                   self._start_column )
+        self._candidates = self.ComputeCandidates( self._request_data )
       except:
         self._query_ready.clear()
         self._candidates = []
