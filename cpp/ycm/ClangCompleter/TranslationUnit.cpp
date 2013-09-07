@@ -56,14 +56,15 @@ TranslationUnit::TranslationUnit(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
-  const UnsavedFile *unsaved = cxunsaved_files.size() > 0 ? &unsaved_files [0] : NULL;
+  const CXUnsavedFile *unsaved = cxunsaved_files.size() > 0
+    ? &cxunsaved_files [0] : NULL;
 
   clang_translation_unit_ = clang_parseTranslationUnit(
                               clang_index,
                               filename.c_str(),
                               &pointer_flags[ 0 ],
                               pointer_flags.size(),
-                              (CXUnsavedFile *)unsaved,
+                              const_cast<CXUnsavedFile *>(unsaved),
                               cxunsaved_files.size(),
                               clang_defaultEditingTranslationUnitOptions() );
 
@@ -155,7 +156,8 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
-  const UnsavedFile *unsaved = cxunsaved_files.size() > 0 ? &unsaved_files [0] : NULL;
+  const CXUnsavedFile *unsaved = cxunsaved_files.size() > 0
+    ? &cxunsaved_files [0] : NULL;
   // codeCompleteAt reparses the TU if the underlying source file has changed on
   // disk since the last time the TU was updated and there are no unsaved files.
   // If there are unsaved files, then codeCompleteAt will parse the in-memory
@@ -171,7 +173,7 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
                           filename_.c_str(),
                           line,
                           column,
-                          (CXUnsavedFile *)unsaved,
+                          const_cast<CXUnsavedFile *>(unsaved),
                           cxunsaved_files.size(),
                           clang_defaultCodeCompleteOptions() ),
     clang_disposeCodeCompleteResults );
@@ -250,7 +252,8 @@ void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
 
     if ( !clang_translation_unit_ )
       return;
-	CXUnsavedFile *unsaved = unsaved_files.size() > 0 ? &unsaved_files [0] : NULL;
+    CXUnsavedFile *unsaved = unsaved_files.size() > 0
+      ? &unsaved_files [0] : NULL;
     failure = clang_reparseTranslationUnit( clang_translation_unit_,
                                             unsaved_files.size(),
                                             unsaved,
