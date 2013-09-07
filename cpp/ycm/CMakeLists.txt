@@ -123,7 +123,9 @@ endif()
 
 # This is a workaround for a CMake bug with include_directories(SYSTEM ...)
 # on Mac OS X. Bug report: http://public.kitware.com/Bug/view.php?id=10837
+if (NOT MSVC)
 set( CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem " )
+endif()
 
 # The SYSTEM flag makes sure that -isystem[header path] is passed to the
 # compiler instead of the standard -I[header path]. Headers included with
