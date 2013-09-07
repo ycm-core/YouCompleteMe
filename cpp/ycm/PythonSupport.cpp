@@ -27,6 +27,7 @@
 using boost::algorithm::any_of;
 using boost::algorithm::is_upper;
 using boost::python::len;
+using boost::python::str;
 using boost::python::extract;
 using boost::python::object;
 typedef boost::python::list pylist;
@@ -34,6 +35,13 @@ typedef boost::python::list pylist;
 namespace YouCompleteMe {
 
 namespace {
+
+std::string GetUtf8String( const boost::python::object &string_or_unicode ) {
+  extract< std::string > to_string( string_or_unicode );
+  if ( to_string.check() )
+    return to_string();
+  return extract< std::string >( str( string_or_unicode ).encode( "utf8" ) );
+}
 
 std::vector< const Candidate * > CandidatesFromObjectList(
   const pylist &candidates,
@@ -44,10 +52,10 @@ std::vector< const Candidate * > CandidatesFromObjectList(
 
   for ( int i = 0; i < num_candidates; ++i ) {
     if ( candidate_property.empty() ) {
-      candidate_strings.push_back( extract< std::string >( candidates[ i ] ) );
+      candidate_strings.push_back( GetUtf8String( candidates[ i ] ) );
     } else {
       object holder = extract< object >( candidates[ i ] );
-      candidate_strings.push_back( extract< std::string >(
+      candidate_strings.push_back( GetUtf8String(
                                      holder[ candidate_property.c_str() ] ) );
     }
   }

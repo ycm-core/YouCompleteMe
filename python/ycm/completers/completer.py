@@ -178,7 +178,7 @@ class Completer( object ):
       self.completions_cache.filtered_completions = (
         self.FilterAndSortCandidates(
           self.completions_cache.raw_completions,
-          ToUtf8IfNeeded( request_data[ 'query' ] ) ) )
+          request_data[ 'query' ] ) )
     else:
       self.completions_cache = None
       self.CandidatesForQueryAsyncInner( request_data )
@@ -216,7 +216,7 @@ class Completer( object ):
     matches = ycm_core.FilterAndSortCandidates(
       candidates,
       sort_property,
-      query )
+      ToUtf8IfNeeded( query ) )
 
     return matches
 
