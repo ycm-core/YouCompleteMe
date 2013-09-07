@@ -22,6 +22,7 @@ import ycm_core
 import logging
 from ycm import server_responses
 from ycm import extra_conf_store
+from ycm.utils import ToUtf8IfNeeded
 from ycm.completers.completer import Completer
 from ycm.completers.cpp.flags import Flags
 
@@ -109,8 +110,8 @@ class ClangCompleter( Completer ):
     column = request_data[ 'start_column' ] + 1
     self.completions_future = (
       self.completer.CandidatesForQueryAndLocationInFileAsync(
-        query,
-        filename,
+        ToUtf8IfNeeded( query ),
+        ToUtf8IfNeeded( filename ),
         line,
         column,
         files,
@@ -369,3 +370,5 @@ def ClangAvailableForFiletypes( filetypes ):
 
 def InCFamilyFile( filetypes ):
   return ClangAvailableForFiletypes( filetypes )
+
+

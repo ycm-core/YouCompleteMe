@@ -19,6 +19,7 @@
 
 import abc
 import ycm_core
+from ycm.utils import ToUtf8IfNeeded
 from ycm.completers.completer_utils import TriggersForFiletype
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
@@ -177,7 +178,7 @@ class Completer( object ):
       self.completions_cache.filtered_completions = (
         self.FilterAndSortCandidates(
           self.completions_cache.raw_completions,
-          request_data[ 'query' ] ) )
+          ToUtf8IfNeeded( request_data[ 'query' ] ) ) )
     else:
       self.completions_cache = None
       self.CandidatesForQueryAsyncInner( request_data )
