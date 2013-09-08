@@ -100,29 +100,29 @@ class GeneralCompleterStore( Completer ):
       completer.OnFileReadyToParse( request_data )
 
 
-  def OnBufferVisit( self ):
+  def OnBufferVisit( self, request_data ):
     for completer in self._all_completers:
-      completer.OnBufferVisit()
+      completer.OnBufferVisit( request_data )
 
 
-  def OnBufferUnload( self, deleted_buffer_file ):
+  def OnBufferUnload( self, request_data ):
     for completer in self._all_completers:
-      completer.OnBufferUnload( deleted_buffer_file )
+      completer.OnBufferUnload( request_data )
 
 
-  def OnInsertLeave( self ):
+  def OnInsertLeave( self, request_data ):
     for completer in self._all_completers:
-      completer.OnInsertLeave()
+      completer.OnInsertLeave( request_data )
 
 
-  def OnVimLeave( self ):
+  def OnVimLeave( self, request_data ):
     for completer in self._all_completers:
-      completer.OnVimLeave()
+      completer.OnVimLeave( request_data )
 
 
-  def OnCurrentIdentifierFinished( self ):
+  def OnCurrentIdentifierFinished( self, request_data ):
     for completer in self._all_completers:
-      completer.OnCurrentIdentifierFinished()
+      completer.OnCurrentIdentifierFinished( request_data )
 
 
   def GettingCompletions( self ):

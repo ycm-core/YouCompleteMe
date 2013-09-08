@@ -31,8 +31,27 @@ from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
 
 # TODO: Put the Request classes in separate files
-class CompletionRequest( object ):
+class BaseRequest( object ):
+  def __init__( self ):
+    pass
+
+
+  def Start( self ):
+    pass
+
+
+  def Done( self ):
+    return True
+
+
+  def Response( self ):
+    return {}
+
+
+class CompletionRequest( BaseRequest ):
   def __init__( self, ycm_state ):
+    super( CompletionRequest, self ).__init__()
+
     self._completion_start_column = base.CompletionStartColumn()
     self._ycm_state = ycm_state
     self._request_data = _BuildRequestData( self._completion_start_column )
@@ -70,7 +89,7 @@ class CompletionRequest( object ):
 
 
 
-class CommandRequest( object ):
+class CommandRequest( BaseRequest ):
   class ServerResponse( object ):
     def __init__( self ):
       pass
@@ -79,6 +98,8 @@ class CommandRequest( object ):
       return True
 
   def __init__( self, ycm_state, arguments, completer_target = None ):
+    super( CommandRequest, self ).__init__()
+
     if not completer_target:
       completer_target = 'filetpe_default'
 
@@ -94,9 +115,6 @@ class CommandRequest( object ):
   def Start( self ):
     self._completer.OnUserCommand( self._arguments,
                                    _BuildRequestData() )
-
-  def Done( self ):
-    return True
 
 
   def Response( self ):
@@ -116,6 +134,31 @@ class CommandRequest( object ):
     # vim.eval( 'youcompleteme#OpenGoToList()' )
     return self.ServerResponse()
 
+
+class EventNotification( BaseRequest ):
+  def __init__( self, event_name, ycm_state, extra_data = None ):
+    super( EventNotification, self ).__init__()
+
+    self._ycm_state = ycm_state
+    self._event_name = event_name
+    self._request_data = _BuildRequestData()
+    if extra_data:
+      self._request_data.update( extra_data )
+
+
+  def Start( self ):
+    getattr( self._ycm_state.GetGeneralCompleter(),
+             'On' + self._event_name )( self._request_data )
+
+    if self._ycm_state.FiletypeCompletionUsable():
+      getattr( self._ycm_state.GetFiletypeCompleter(),
+               'On' + self._event_name )( self._request_data )
+
+
+
+def SendEventNotificationAsync( event_name, ycm_state, extra_data = None ):
+  event = EventNotification( event_name, ycm_state, extra_data )
+  event.Start()
 
 
 class YouCompleteMe( object ):
@@ -235,38 +278,36 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
-    self._gencomp.OnFileReadyToParse( _BuildRequestData() )
+    extra_data = {}
+    if self._user_options[ 'collect_identifiers_from_tags_files' ]:
+      extra_data[ 'tag_files' ] = _GetTagFiles()
 
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnFileReadyToParse( _BuildRequestData() )
+    # TODO: make this work again
+    # if self._user_options[ 'seed_identifiers_with_syntax' ]:
+
+    SendEventNotificationAsync( 'FileReadyToParse', self, extra_data )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
-    self._gencomp.OnBufferUnload( deleted_buffer_file )
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnBufferUnload( deleted_buffer_file )
+    SendEventNotificationAsync( 'BufferUnload',
+                                self,
+                                { 'unloaded_buffer': deleted_buffer_file } )
 
 
   def OnBufferVisit( self ):
-    self._gencomp.OnBufferVisit()
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnBufferVisit()
+    SendEventNotificationAsync( 'BufferVisit', self )
 
 
   def OnInsertLeave( self ):
-    self._gencomp.OnInsertLeave()
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnInsertLeave()
+    SendEventNotificationAsync( 'InsertLeave', self )
 
 
   def OnVimLeave( self ):
-    self._gencomp.OnVimLeave()
+    SendEventNotificationAsync( 'VimLeave', self )
 
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnVimLeave()
+
+  def OnCurrentIdentifierFinished( self ):
+    SendEventNotificationAsync( 'CurrentIdentifierFinished', self )
 
 
   def DiagnosticsForCurrentFileReady( self ):
@@ -290,13 +331,6 @@ class YouCompleteMe( object ):
     if self.FiletypeCompletionUsable():
       return self.GetFiletypeCompleter().GettingCompletions()
     return False
-
-
-  def OnCurrentIdentifierFinished( self ):
-    self._gencomp.OnCurrentIdentifierFinished()
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnCurrentIdentifierFinished()
 
 
   def DebugInfo( self ):
@@ -370,3 +404,8 @@ def _ConvertCompletionDataToVimData( completion_data ):
     vim_data[ 'info' ] = completion_data[ 'detailed_info' ]
 
   return vim_data
+
+def _GetTagFiles():
+  tag_files = vim.eval( 'tagfiles()' )
+  current_working_directory = os.getcwd()
+  return [ os.path.join( current_working_directory, x ) for x in tag_files ]

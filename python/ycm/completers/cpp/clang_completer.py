@@ -245,8 +245,8 @@ class ClangCompleter( Completer ):
     self.extra_parse_desired = False
 
 
-  def OnBufferUnload( self, deleted_buffer_file ):
-    self.completer.DeleteCachesForFileAsync( deleted_buffer_file )
+  def OnBufferUnload( self, request_data ):
+    self.completer.DeleteCachesForFileAsync( request_data[ 'unloaded_buffer' ] )
 
 
   def DiagnosticsForCurrentFileReady( self ):
@@ -271,7 +271,7 @@ class ClangCompleter( Completer ):
       self.parse_future = None
 
       if self.extra_parse_desired:
-        self.OnFileReadyToParse()
+        self.OnFileReadyToParse( request_data )
 
     return self.last_prepared_diagnostics
 

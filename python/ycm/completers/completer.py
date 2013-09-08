@@ -265,19 +265,19 @@ class Completer( object ):
     pass
 
 
-  def OnBufferVisit( self ):
+  def OnBufferVisit( self, request_data ):
     pass
 
 
-  def OnBufferUnload( self, deleted_buffer_file ):
+  def OnBufferUnload( self, request_data ):
     pass
 
 
-  def OnInsertLeave( self ):
+  def OnInsertLeave( self, request_data ):
     pass
 
 
-  def OnVimLeave( self ):
+  def OnVimLeave( self, request_data ):
     pass
 
 
@@ -285,7 +285,7 @@ class Completer( object ):
     raise NotImplementedError( NO_USER_COMMANDS )
 
 
-  def OnCurrentIdentifierFinished( self ):
+  def OnCurrentIdentifierFinished( self, request_data ):
     pass
 
 

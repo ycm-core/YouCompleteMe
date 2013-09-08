@@ -51,7 +51,9 @@ class UltiSnipsCompleter( GeneralCompleter ):
     return self._filtered_candidates if self._filtered_candidates else []
 
 
-  def OnBufferVisit( self ):
+  def OnBufferVisit( self, request_data ):
+    # TODO: _GetCandidates should be called on the client and it should send
+    # the snippets to the server
     self._candidates = _GetCandidates()
 
 
