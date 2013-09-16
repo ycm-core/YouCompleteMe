@@ -24,7 +24,6 @@ import imp
 import random
 import string
 import sys
-import vim
 from ycm import vimsupport
 from ycm import user_options_store
 from fnmatch import fnmatch
@@ -66,7 +65,7 @@ def CallExtraConfVimCloseIfExists():
 
 
 def _CallExtraConfMethod( function_name ):
-  vim_current_working_directory = vim.eval( 'getcwd()' )
+  vim_current_working_directory = os.getcwd()
   path_to_dummy = os.path.join( vim_current_working_directory, 'DUMMY_FILE' )
   # The dummy file in the Vim CWD ensures we find the correct extra conf file
   module = ModuleForSourceFile( path_to_dummy )
