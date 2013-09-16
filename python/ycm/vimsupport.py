@@ -53,7 +53,7 @@ def GetBufferOption( buffer_object, option ):
   if hasattr( buffer_object, 'options' ):
     return buffer_object.options[ option ]
 
-  to_eval = 'getbufvar({0}, "&{1}")'.format( buffer.number, option )
+  to_eval = 'getbufvar({0}, "&{1}")'.format( buffer_object.number, option )
   return GetVariableValue( to_eval )
 
 
