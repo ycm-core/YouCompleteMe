@@ -59,7 +59,6 @@ class JediCompleter( ThreadedCompleter ):
       # Jedi expects lines to start at 1, not 0
       line = request_data[ 'line_num' ] + 1
       column = request_data[ 'column_num' ]
-      print contents
 
       return jedi.Script( contents, line, column, filename )
 
