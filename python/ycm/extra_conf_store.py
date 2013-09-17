@@ -24,7 +24,6 @@ import imp
 import random
 import string
 import sys
-from ycm import vimsupport
 from ycm import user_options_store
 from fnmatch import fnmatch
 
@@ -36,6 +35,12 @@ CONFIRM_CONF_FILE_MESSAGE = ('Found {0}. Load? \n\n(Question can be turned '
 # Singleton variables
 _module_for_module_file = {}
 _module_file_for_source_file = {}
+
+class UnknownExtraConf( Exception ):
+  def __init__( self, extra_conf_file ):
+    message = CONFIRM_CONF_FILE_MESSAGE.format( extra_conf_file )
+    super( UnknownExtraConf, self ).__init__( message )
+    self.extra_conf_file = extra_conf_file
 
 
 def ModuleForSourceFile( filename ):
@@ -60,7 +65,7 @@ def CallExtraConfYcmCorePreloadIfExists():
   _CallExtraConfMethod( 'YcmCorePreload' )
 
 
-def CallExtraConfVimCloseIfExists():
+def OnVimLeave( request_data ):
   _CallExtraConfMethod( 'VimClose' )
 
 
@@ -94,7 +99,7 @@ def _ShouldLoad( module_file ):
     if _MatchesGlobPattern( module_file, glob.lstrip('!') ):
       return not is_blacklisted
 
-  return vimsupport.Confirm( CONFIRM_CONF_FILE_MESSAGE.format( module_file ) )
+  raise UnknownExtraConf( module_file )
 
 
 def _Load( module_file, force = False ):

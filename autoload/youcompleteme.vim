@@ -223,7 +223,6 @@ endfunction
 
 function! s:OnVimLeave()
   py ycm_state.OnVimLeave()
-  py extra_conf_store.CallExtraConfVimCloseIfExists()
 endfunction
 
 

@@ -26,6 +26,7 @@ import logging
 import tempfile
 from ycm import vimsupport
 from ycm import base
+from ycm import extra_conf_store
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
@@ -147,12 +148,16 @@ class EventNotification( BaseRequest ):
 
 
   def Start( self ):
+    event_handler = 'On' + self._event_name
     getattr( self._ycm_state.GetGeneralCompleter(),
-             'On' + self._event_name )( self._request_data )
+             event_handler )( self._request_data )
 
     if self._ycm_state.FiletypeCompletionUsable():
       getattr( self._ycm_state.GetFiletypeCompleter(),
-               'On' + self._event_name )( self._request_data )
+               event_handler )( self._request_data )
+
+    if hasattr( extra_conf_store, event_handler ):
+      getattr( extra_conf_store, event_handler )( self._request_data )
 
 
 
