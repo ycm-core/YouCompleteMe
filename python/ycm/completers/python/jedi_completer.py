@@ -66,9 +66,10 @@ class JediCompleter( ThreadedCompleter ):
 
   def ComputeCandidates( self, request_data ):
     script = self._GetJediScript( request_data )
-    return [ server_responses.BuildCompletionData( completion.name,
-                                                   completion.description,
-                                                   completion.doc )
+    return [ server_responses.BuildCompletionData(
+                str( completion.name ),
+                str( completion.description ),
+                str( completion.doc ) )
              for completion in script.completions() ]
 
   def DefinedSubcommands( self ):
