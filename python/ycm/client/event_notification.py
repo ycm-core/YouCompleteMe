@@ -17,33 +17,26 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
-import os
-from ycm.frozendict import frozendict
-
-_USER_OPTIONS = {}
-
-def SetAll( new_options ):
-  global _USER_OPTIONS
-  _USER_OPTIONS = frozendict( new_options )
+from ycm.client.base_request import BaseRequest, BuildRequestData
 
 
-def GetAll():
-  return _USER_OPTIONS
+class EventNotification( BaseRequest ):
+  def __init__( self, event_name, extra_data = None ):
+    super( EventNotification, self ).__init__()
+    self._event_name = event_name
+    self._extra_data = extra_data
 
 
-def Value( key ):
-  return _USER_OPTIONS[ key ]
+  def Start( self ):
+    request_data = BuildRequestData()
+    if self._extra_data:
+      request_data.update( self._extra_data )
+    request_data[ 'event_name' ] = self._event_name
+
+    self.PostDataToHandler( request_data, 'event_notification' )
 
 
-def LoadDefaults():
-  SetAll( _DefaultOptions() )
-
-
-def _DefaultOptions():
-  settings_path = os.path.join(
-      os.path.dirname( os.path.abspath( __file__ ) ),
-      'server/default_settings.json' )
-  with open( settings_path ) as f:
-    return json.loads( f.read() )
+def SendEventNotificationAsync( event_name, extra_data = None ):
+  event = EventNotification( event_name, extra_data )
+  event.Start()
 

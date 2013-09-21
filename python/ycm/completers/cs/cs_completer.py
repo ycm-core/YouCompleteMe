@@ -22,13 +22,13 @@ import os
 from sys import platform
 import glob
 from ycm.completers.threaded_completer import ThreadedCompleter
-from ycm import server_responses
+from ycm.server import responses
+from ycm import utils
 import urllib2
 import urllib
 import urlparse
 import json
 import subprocess
-import tempfile
 import logging
 
 
@@ -44,7 +44,7 @@ class CsharpCompleter( ThreadedCompleter ):
   def __init__( self, user_options ):
     super( CsharpCompleter, self ).__init__( user_options )
     self._omnisharp_port = None
-    self._logger = logging.getLogger(__name__)
+    self._logger = logging.getLogger( __name__ )
 
     # if self.user_options[ 'auto_start_csharp_server' ]:
     #   self._StartServer()
@@ -62,7 +62,7 @@ class CsharpCompleter( ThreadedCompleter ):
 
 
   def ComputeCandidates( self, request_data ):
-    return [ server_responses.BuildCompletionData(
+    return [ responses.BuildCompletionData(
                 completion[ 'CompletionText' ],
                 completion[ 'DisplayText' ],
                 completion[ 'Description' ] )
@@ -135,8 +135,8 @@ class CsharpCompleter( ThreadedCompleter ):
     command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
                 path_to_solutionfile ]
 
-    filename_format = ( tempfile.gettempdir() +
-                        '/omnisharp_{port}_{sln}_{std}.log' )
+    filename_format = os.path.join( utils.PathToTempDir(),
+                                   'omnisharp_{port}_{sln}_{std}.log' )
 
     self._filename_stdout = filename_format.format(
         port=self._omnisharp_port, sln=solutionfile, std='stdout' )
@@ -169,9 +169,9 @@ class CsharpCompleter( ThreadedCompleter ):
     definition = self._GetResponse( '/gotodefinition',
                                     self._DefaultParameters( request_data ) )
     if definition[ 'FileName' ] != None:
-      return server_responses.BuildGoToResponse( definition[ 'FileName' ],
-                                                 definition[ 'Line' ],
-                                                 definition[ 'Column' ] )
+      return responses.BuildGoToResponse( definition[ 'FileName' ],
+                                          definition[ 'Line' ],
+                                          definition[ 'Column' ] )
     else:
       raise RuntimeError( 'Can\'t jump to definition' )
 

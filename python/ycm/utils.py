@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import tempfile
+import os
+
 def IsIdentifierChar( char ):
   return char.isalnum() or char == '_'
 
@@ -29,3 +32,7 @@ def ToUtf8IfNeeded( string_or_unicode ):
   if isinstance( string_or_unicode, unicode ):
     return string_or_unicode.encode( 'utf8' )
   return string_or_unicode
+
+
+def PathToTempDir():
+  return os.path.join( tempfile.gettempdir(), 'ycm_temp' )

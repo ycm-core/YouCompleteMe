@@ -18,6 +18,8 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# TODO: Move this file under server/ and rename it responses.py
+
 def BuildGoToResponse( filepath, line_num, column_num, description = None ):
   response = {
     'filepath': filepath,

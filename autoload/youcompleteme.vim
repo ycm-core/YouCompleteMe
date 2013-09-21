@@ -539,11 +539,6 @@ function! youcompleteme#Complete( findstart, base )
     endif
 
     py request = ycm_state.CreateCompletionRequest()
-    if !pyeval( 'request.ShouldComplete()' )
-      " for vim, -2 means not found but don't trigger an error message
-      " see :h complete-functions
-      return -2
-    endif
     return pyeval( 'request.CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
@@ -628,14 +623,15 @@ function! youcompleteme#OpenGoToList()
 endfunction
 
 
-command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
-  \ YcmCompleter call s:CompleterCommand(<f-args>)
-
-
-function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
-  return join( pyeval( 'ycm_state.GetFiletypeCompleter().DefinedSubcommands()' ),
-    \ "\n")
-endfunction
+" TODO: Make this work again
+" command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
+"   \ YcmCompleter call s:CompleterCommand(<f-args>)
+"
+"
+" function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
+"   return join( pyeval( 'ycm_state.GetFiletypeCompleter().DefinedSubcommands()' ),
+"     \ "\n")
+" endfunction
 
 
 function! s:ForceCompile()

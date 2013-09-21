@@ -22,7 +22,7 @@ import re
 from ycm.completers.threaded_completer import ThreadedCompleter
 from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
-from ycm import server_responses
+from ycm.server import responses
 
 class FilenameCompleter( ThreadedCompleter ):
   """
@@ -146,7 +146,7 @@ def _GenerateCandidatesForPaths( absolute_paths ):
 
     is_dir = os.path.isdir( absolute_path )
     completion_dicts.append(
-      server_responses.BuildCompletionData( basename,
-                                            '[Dir]' if is_dir else '[File]' ) )
+      responses.BuildCompletionData( basename,
+                                     '[Dir]' if is_dir else '[File]' ) )
 
   return completion_dicts

@@ -20,7 +20,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycm.completers.threaded_completer import ThreadedCompleter
-from ycm import server_responses
+from ycm.server import responses
 
 import sys
 from os.path import join, abspath, dirname
@@ -65,7 +65,7 @@ class JediCompleter( ThreadedCompleter ):
 
   def ComputeCandidates( self, request_data ):
     script = self._GetJediScript( request_data )
-    return [ server_responses.BuildCompletionData(
+    return [ responses.BuildCompletionData(
                 str( completion.name ),
                 str( completion.description ),
                 str( completion.doc ) )
@@ -140,21 +140,21 @@ class JediCompleter( ThreadedCompleter ):
         else:
           raise RuntimeError( 'Builtin modules cannot be displayed.' )
       else:
-        return server_responses.BuildGoToResponse( definition.module_path,
-                                                   definition.line -1,
-                                                   definition.column )
+        return responses.BuildGoToResponse( definition.module_path,
+                                            definition.line -1,
+                                            definition.column )
     else:
       # multiple definitions
       defs = []
       for definition in definition_list:
         if definition.in_builtin_module():
-          defs.append( server_responses.BuildDescriptionOnlyGoToResponse(
+          defs.append( responses.BuildDescriptionOnlyGoToResponse(
                        'Builting ' + definition.description ) )
         else:
           defs.append(
-            server_responses.BuildGoToResponse( definition.module_path,
-                                                definition.line -1,
-                                                definition.column,
-                                                definition.description ) )
+            responses.BuildGoToResponse( definition.module_path,
+                                         definition.line -1,
+                                         definition.column,
+                                         definition.description ) )
       return defs
 

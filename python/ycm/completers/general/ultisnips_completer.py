@@ -20,7 +20,7 @@
 
 from ycm.completers.general_completer import GeneralCompleter
 from UltiSnips import UltiSnips_Manager
-from ycm import server_responses
+from ycm.server import responses
 
 
 class UltiSnipsCompleter( GeneralCompleter ):
@@ -64,7 +64,7 @@ def _GetCandidates():
     # UltiSnips_Manager._snips() returns a class instance where:
     # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
     # class.description - description of the snippet
-    return [ server_responses.BuildCompletionData(
+    return [ responses.BuildCompletionData(
               str( snip.trigger ),
               str( '<snip> ' + snip.description.encode( 'utf-8' ) ) )
             for snip in rawsnips ]

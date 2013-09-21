@@ -20,7 +20,7 @@
 from collections import defaultdict
 import ycm_core
 import logging
-from ycm import server_responses
+from ycm.server import responses
 from ycm import extra_conf_store
 from ycm.utils import ToUtf8IfNeeded
 from ycm.completers.completer import Completer
@@ -72,9 +72,10 @@ class ClangCompleter( Completer ):
         continue
 
       unsaved_file = ycm_core.UnsavedFile()
-      unsaved_file.contents_ = contents
-      unsaved_file.length_ = len( contents )
-      unsaved_file.filename_ = filename
+      utf8_contents = ToUtf8IfNeeded( contents )
+      unsaved_file.contents_ = utf8_contents
+      unsaved_file.length_ = len( utf8_contents )
+      unsaved_file.filename_ = ToUtf8IfNeeded( filename )
 
       files.append( unsaved_file )
     return files
@@ -86,17 +87,17 @@ class ClangCompleter( Completer ):
     if not filename:
       return
 
-    if self.completer.UpdatingTranslationUnit( filename ):
+    if self.completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
       self.completions_future = None
       self._logger.info( PARSING_FILE_MESSAGE )
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         PARSING_FILE_MESSAGE )
 
     flags = self.flags.FlagsForFile( filename )
     if not flags:
       self.completions_future = None
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         NO_COMPILE_FLAGS_MESSAGE )
 
     # TODO: sanitize query, probably in C++ code
@@ -142,11 +143,11 @@ class ClangCompleter( Completer ):
 
     command = arguments[ 0 ]
     if command == 'GoToDefinition':
-      self._GoToDefinition( request_data )
+      return self._GoToDefinition( request_data )
     elif command == 'GoToDeclaration':
-      self._GoToDeclaration( request_data )
+      return self._GoToDeclaration( request_data )
     elif command == 'GoToDefinitionElseDeclaration':
-      self._GoToDefinitionElseDeclaration( request_data )
+      return self._GoToDefinitionElseDeclaration( request_data )
     elif command == 'ClearCompilationFlagCache':
       self._ClearCompilationFlagCache( request_data )
 
@@ -155,20 +156,20 @@ class ClangCompleter( Completer ):
     filename = request_data[ 'filepath' ]
     if not filename:
       self._logger.warning( INVALID_FILE_MESSAGE )
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         INVALID_FILE_MESSAGE )
 
     flags = self.flags.FlagsForFile( filename )
     if not flags:
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         NO_COMPILE_FLAGS_MESSAGE )
 
-    files = self.GetUnsavedFilesVector()
+    files = self.GetUnsavedFilesVector( request_data )
     line = request_data[ 'line_num' ] + 1
     column = request_data[ 'start_column' ] + 1
     return getattr( self.completer, goto_function )(
-        filename,
+        ToUtf8IfNeeded( filename ),
         line,
         column,
         files,
@@ -180,9 +181,9 @@ class ClangCompleter( Completer ):
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition.' )
 
-    return server_responses.BuildGoToResponse( location.filename_,
-                                               location.line_number_,
-                                               location.column_number_ )
+    return responses.BuildGoToResponse( location.filename_,
+                                        location.line_number_,
+                                        location.column_number_ )
 
 
   def _GoToDeclaration( self, request_data ):
@@ -190,9 +191,9 @@ class ClangCompleter( Completer ):
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to declaration.' )
 
-    return server_responses.BuildGoToResponse( location.filename_,
-                                               location.line_number_,
-                                               location.column_number_ )
+    return responses.BuildGoToResponse( location.filename_,
+                                        location.line_number_,
+                                        location.column_number_ )
 
 
   def _GoToDefinitionElseDeclaration( self, request_data ):
@@ -202,9 +203,9 @@ class ClangCompleter( Completer ):
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition or declaration.' )
 
-    return server_responses.BuildGoToResponse( location.filename_,
-                                               location.line_number_,
-                                               location.column_number_ )
+    return responses.BuildGoToResponse( location.filename_,
+                                        location.line_number_,
+                                        location.column_number_ )
 
 
 
@@ -223,10 +224,10 @@ class ClangCompleter( Completer ):
 
     if not filename:
       self._logger.warning( INVALID_FILE_MESSAGE )
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         INVALID_FILE_MESSAGE )
 
-    if self.completer.UpdatingTranslationUnit( filename ):
+    if self.completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
       self.extra_parse_desired = True
       return
 
@@ -234,11 +235,11 @@ class ClangCompleter( Completer ):
     if not flags:
       self.parse_future = None
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         NO_COMPILE_FLAGS_MESSAGE )
 
     self.parse_future = self.completer.UpdateTranslationUnitAsync(
-      filename,
+      ToUtf8IfNeeded( filename ),
       self.GetUnsavedFilesVector( request_data ),
       flags )
 
@@ -246,7 +247,8 @@ class ClangCompleter( Completer ):
 
 
   def OnBufferUnload( self, request_data ):
-    self.completer.DeleteCachesForFileAsync( request_data[ 'unloaded_buffer' ] )
+    self.completer.DeleteCachesForFileAsync(
+        ToUtf8IfNeeded( request_data[ 'unloaded_buffer' ] ) )
 
 
   def DiagnosticsForCurrentFileReady( self ):
@@ -257,16 +259,18 @@ class ClangCompleter( Completer ):
 
 
   def GettingCompletions( self, request_data ):
-    return self.completer.UpdatingTranslationUnit( request_data[ 'filepath' ] )
+    return self.completer.UpdatingTranslationUnit(
+        ToUtf8IfNeeded( request_data[ 'filepath' ] ) )
 
 
   def GetDiagnosticsForCurrentFile( self, request_data ):
     filename = request_data[ 'filepath' ]
     if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self.completer.DiagnosticsForFile( filename )
+      diagnostics = self.completer.DiagnosticsForFile(
+          ToUtf8IfNeeded( filename ) )
       self.diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
       self.last_prepared_diagnostics = [
-        server_responses.BuildDiagnosticData( x ) for x in
+        responses.BuildDiagnosticData( x ) for x in
         diagnostics[ : self.max_diagnostics_to_display ] ]
       self.parse_future = None
 
@@ -282,12 +286,12 @@ class ClangCompleter( Completer ):
     current_file = request_data[ 'filepath' ]
 
     if not self.diagnostic_store:
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         NO_DIAGNOSTIC_MESSAGE )
 
     diagnostics = self.diagnostic_store[ current_file ][ current_line ]
     if not diagnostics:
-      return server_responses.BuildDisplayMessageResponse(
+      return responses.BuildDisplayMessageResponse(
         NO_DIAGNOSTIC_MESSAGE )
 
     closest_diagnostic = None
@@ -299,7 +303,7 @@ class ClangCompleter( Completer ):
         distance_to_closest_diagnostic = distance
         closest_diagnostic = diagnostic
 
-    return server_responses.BuildDisplayMessageResponse(
+    return responses.BuildDisplayMessageResponse(
       closest_diagnostic.long_formatted_text_ )
 
 
@@ -314,7 +318,7 @@ class ClangCompleter( Completer ):
       return ''
     flags = self.flags.FlagsForFile( filename ) or []
     source = extra_conf_store.ModuleFileForSourceFile( filename )
-    return server_responses.BuildDisplayMessageResponse(
+    return responses.BuildDisplayMessageResponse(
       'Flags for {0} loaded from {1}:\n{2}'.format( filename,
                                                     source,
                                                     list( flags ) ) )
@@ -348,7 +352,7 @@ class ClangCompleter( Completer ):
 
 
 def ConvertCompletionData( completion_data ):
-  return server_responses.BuildCompletionData(
+  return responses.BuildCompletionData(
     insertion_text = completion_data.TextToInsertInBuffer(),
     menu_text = completion_data.MainCompletionText(),
     extra_menu_info = completion_data.ExtraMenuInfo(),

@@ -18,12 +18,14 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import logging
 import ycm_core
 from collections import defaultdict
 from ycm.completers.general_completer import GeneralCompleter
 # from ycm.completers.general import syntax_parse
 from ycm import utils
-from ycm import server_responses
+from ycm.utils import ToUtf8IfNeeded
+from ycm.server import responses
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
@@ -36,6 +38,7 @@ class IdentifierCompleter( GeneralCompleter ):
     self.completer.EnableThreading()
     self.tags_file_last_mtime = defaultdict( int )
     self.filetypes_with_keywords_loaded = set()
+    self._logger = logging.getLogger( __name__ )
 
 
   def ShouldUseNow( self, request_data ):
@@ -44,8 +47,8 @@ class IdentifierCompleter( GeneralCompleter ):
 
   def CandidatesForQueryAsync( self, request_data ):
     self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
-      utils.SanitizeQuery( request_data[ 'query' ] ),
-      request_data[ 'filetypes' ][ 0 ] )
+      ToUtf8IfNeeded( utils.SanitizeQuery( request_data[ 'query' ] ) ),
+      ToUtf8IfNeeded( request_data[ 'filetypes' ][ 0 ] ) )
 
 
   def AddIdentifier( self, identifier, request_data ):
@@ -56,10 +59,11 @@ class IdentifierCompleter( GeneralCompleter ):
       return
 
     vector = ycm_core.StringVec()
-    vector.append( identifier )
+    vector.append( ToUtf8IfNeeded( identifier ) )
+    self._logger.info( 'Adding ONE buffer identifier for file: %s', filepath )
     self.completer.AddIdentifiersToDatabase( vector,
-                                             filetype,
-                                             filepath )
+                                             ToUtf8IfNeeded( filetype ),
+                                             ToUtf8IfNeeded( filepath ) )
 
 
   def AddPreviousIdentifier( self, request_data ):
@@ -88,10 +92,11 @@ class IdentifierCompleter( GeneralCompleter ):
       return
 
     text = request_data[ 'file_data' ][ filepath ][ 'contents' ]
+    self._logger.info( 'Adding buffer identifiers for file: %s', filepath )
     self.completer.AddIdentifiersToDatabaseFromBufferAsync(
-      text,
-      filetype,
-      filepath,
+      ToUtf8IfNeeded( text ),
+      ToUtf8IfNeeded( filetype ),
+      ToUtf8IfNeeded( filepath ),
       collect_from_comments_and_strings )
 
 
@@ -110,7 +115,7 @@ class IdentifierCompleter( GeneralCompleter ):
         continue
 
       self.tags_file_last_mtime[ tag_file ] = current_mtime
-      absolute_paths_to_tag_files.append( tag_file )
+      absolute_paths_to_tag_files.append( ToUtf8IfNeeded( tag_file ) )
 
     if not absolute_paths_to_tag_files:
       return
@@ -161,7 +166,7 @@ class IdentifierCompleter( GeneralCompleter ):
     completions = _RemoveSmallCandidates(
       completions, self.user_options[ 'min_num_identifier_candidate_chars' ] )
 
-    return [ server_responses.BuildCompletionData( x ) for x in completions ]
+    return [ responses.BuildCompletionData( x ) for x in completions ]
 
 
 def _PreviousIdentifier( min_num_completion_start_chars, request_data ):
