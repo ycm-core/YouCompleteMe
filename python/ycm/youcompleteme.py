@@ -25,6 +25,7 @@ import subprocess
 from ycm import vimsupport
 from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
+from ycm.completers.general import syntax_parse
 from ycm.client.base_request import BaseRequest
 from ycm.client.command_request import CommandRequest
 from ycm.client.completion_request import CompletionRequest
@@ -40,6 +41,7 @@ class YouCompleteMe( object ):
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
+    self._filetypes_with_keywords_loaded = set()
     self._SetupServer()
 
 
@@ -127,8 +129,8 @@ class YouCompleteMe( object ):
     if self._user_options[ 'collect_identifiers_from_tags_files' ]:
       extra_data[ 'tag_files' ] = _GetTagFiles()
 
-    # TODO: make this work again
-    # if self._user_options[ 'seed_identifiers_with_syntax' ]:
+    if self._user_options[ 'seed_identifiers_with_syntax' ]:
+      self._AddSyntaxDataIfNeeded( extra_data )
 
     SendEventNotificationAsync( 'FileReadyToParse', extra_data )
 
@@ -210,6 +212,15 @@ class YouCompleteMe( object ):
     return not all([ x in filetype_to_disable for x in filetypes ])
 
 
+  def _AddSyntaxDataIfNeeded( self, extra_data ):
+    filetype = vimsupport.CurrentFiletypes()[ 0 ]
+    if filetype in self._filetypes_with_keywords_loaded:
+      return
+
+    self._filetypes_with_keywords_loaded.add( filetype )
+    extra_data[ 'syntax_keywords' ] = list(
+       syntax_parse.SyntaxKeywordsForCurrentBuffer() )
+
 
 def _GetTagFiles():
   tag_files = vim.eval( 'tagfiles()' )
@@ -220,3 +231,4 @@ def _GetTagFiles():
 def _PathToServerScript():
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
   return os.path.join( dir_of_current_script, 'server/server.py' )
+

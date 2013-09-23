@@ -42,7 +42,7 @@ def GetCompletions_IdentifierCompleterWorks_test():
 
   app.post_json( '/event_notification', event_data )
 
-  line_value = 'oo foo foogoo ba';
+  line_value = 'oo foo foogoo ba'
   completion_data = {
     'query': 'oo',
     'filetypes': ['foo'],
@@ -61,6 +61,45 @@ def GetCompletions_IdentifierCompleterWorks_test():
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
+       app.post_json( '/get_completions', completion_data ).json )
+
+
+def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
+  app = TestApp( server.app )
+  event_data = {
+    'event_name': 'FileReadyToParse',
+    'filetypes': ['foo'],
+    'filepath': '/foo/bar',
+    'file_data': {
+      '/foo/bar': {
+        'contents': '',
+        'filetypes': ['foo']
+      }
+    },
+    'syntax_keywords': ['foo', 'bar', 'zoo']
+  }
+
+  app.post_json( '/event_notification', event_data )
+
+  line_value = 'oo '
+  completion_data = {
+    'query': 'oo',
+    'filetypes': ['foo'],
+    'filepath': '/foo/bar',
+    'line_num': 0,
+    'column_num': 2,
+    'start_column': 0,
+    'line_value': line_value,
+    'file_data': {
+      '/foo/bar': {
+        'contents': line_value,
+        'filetypes': ['foo']
+      }
+    }
+  }
+
+  eq_( [ BuildCompletionData( 'foo' ),
+         BuildCompletionData( 'zoo' ) ],
        app.post_json( '/get_completions', completion_data ).json )
 
 

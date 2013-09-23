@@ -37,7 +37,6 @@ class IdentifierCompleter( GeneralCompleter ):
     self.completer = ycm_core.IdentifierCompleter()
     self.completer.EnableThreading()
     self.tags_file_last_mtime = defaultdict( int )
-    self.filetypes_with_keywords_loaded = set()
     self._logger = logging.getLogger( __name__ )
 
 
@@ -124,29 +123,23 @@ class IdentifierCompleter( GeneralCompleter ):
       absolute_paths_to_tag_files )
 
 
-  # def AddIdentifiersFromSyntax( self ):
-  #   filetype = vim.eval( "&filetype" )
-  #   if filetype in self.filetypes_with_keywords_loaded:
-  #     return
+  def AddIdentifiersFromSyntax( self, keyword_list, filetypes ):
+    keyword_vector = ycm_core.StringVec()
+    for keyword in keyword_list:
+      keyword_vector.append( ToUtf8IfNeeded( keyword ) )
 
-  #   self.filetypes_with_keywords_loaded.add( filetype )
-
-  #   keyword_set = syntax_parse.SyntaxKeywordsForCurrentBuffer()
-  #   keywords = ycm_core.StringVec()
-  #   for keyword in keyword_set:
-  #     keywords.append( keyword )
-
-  #   filepath = SYNTAX_FILENAME + filetype
-  #   self.completer.AddIdentifiersToDatabase( keywords,
-  #                                            filetype,
-  #                                            filepath )
-
+    filepath = SYNTAX_FILENAME + filetypes[ 0 ]
+    self.completer.AddIdentifiersToDatabase( keyword_vector,
+                                             ToUtf8IfNeeded( filetypes[ 0 ] ),
+                                             ToUtf8IfNeeded( filepath ) )
 
   def OnFileReadyToParse( self, request_data ):
     self.AddBufferIdentifiers( request_data )
     if 'tag_files' in request_data:
       self.AddIdentifiersFromTagFiles( request_data[ 'tag_files' ] )
-    #self.AddIdentifiersFromSyntax()
+    if 'syntax_keywords' in request_data:
+      self.AddIdentifiersFromSyntax( request_data[ 'syntax_keywords' ],
+                                     request_data[ 'filetypes' ] )
 
 
   def OnInsertLeave( self, request_data ):
