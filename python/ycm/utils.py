@@ -19,6 +19,8 @@
 
 import tempfile
 import os
+import sys
+import signal
 
 def IsIdentifierChar( char ):
   return char.isalnum() or char == '_'
@@ -36,3 +38,17 @@ def ToUtf8IfNeeded( string_or_unicode ):
 
 def PathToTempDir():
   return os.path.join( tempfile.gettempdir(), 'ycm_temp' )
+
+
+# From here: http://stackoverflow.com/a/8536476/1672783
+def TerminateProcess( pid ):
+  if sys.platform == 'win32':
+    import ctypes
+    PROCESS_TERMINATE = 1
+    handle = ctypes.windll.kernel32.OpenProcess( PROCESS_TERMINATE,
+                                                 False,
+                                                 pid )
+    ctypes.windll.kernel32.TerminateProcess( handle, -1 )
+    ctypes.windll.kernel32.CloseHandle( handle )
+  else:
+    os.kill( pid, signal.SIGTERM )

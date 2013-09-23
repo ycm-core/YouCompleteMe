@@ -160,6 +160,12 @@ let g:ycm_auto_stop_csharp_server =
 let g:ycm_csharp_server_port =
       \ get( g:, 'ycm_csharp_server_port', 2000 )
 
+let g:ycm_server_use_vim_stdout =
+      \ get( g:, 'ycm_server_use_vim_stdout', 0 )
+
+let g:ycm_server_log_level =
+      \ get( g:, 'ycm_server_log_level', 'info' )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart

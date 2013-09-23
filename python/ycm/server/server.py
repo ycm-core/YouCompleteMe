@@ -19,6 +19,7 @@
 
 import sys
 import os
+import threading
 
 # We want to have the YouCompleteMe/python directory on the Python PATH because
 # all the code already assumes that it's there. This is a relic from before the
@@ -38,6 +39,7 @@ from bottle import run, request, response
 import server_state
 from ycm import extra_conf_store
 from ycm import user_options_store
+from ycm import utils
 import argparse
 
 # num bytes for the request body buffer; request.json only works if the request
@@ -66,10 +68,15 @@ def EventNotification():
     getattr( SERVER_STATE.GetFiletypeCompleter( filetypes ),
               event_handler )( request_data )
 
-  if hasattr( extra_conf_store, event_handler ):
-    getattr( extra_conf_store, event_handler )( request_data )
+  try:
+    if hasattr( extra_conf_store, event_handler ):
+      getattr( extra_conf_store, event_handler )( request_data )
+  except OSError as e:
+    LOGGER.exception( e )
 
-  # TODO: shut down the server on VimClose
+  if event_name == 'VimLeave':
+    _ScheduleServerShutdown()
+
 
 
 @app.post( '/run_completer_command' )
@@ -138,6 +145,19 @@ def FiletypeCompletionAvailable():
 def _JsonResponse( data ):
   response.set_header( 'Content-Type', 'application/json' )
   return json.dumps( data )
+
+
+def _ScheduleServerShutdown():
+  # The reason why we want to schedule a shutdown in the near future instead of
+  # just shutting down right now is because we want the current request (the one
+  # that made us want to shutdown) to complete successfully first.
+
+  def Shutdown():
+    # sys.exit() doesn't work because we're not in the main thread.
+    utils.TerminateProcess( os.getpid() )
+
+  killer_thread = threading.Timer( 2, Shutdown )
+  killer_thread.start()
 
 
 def Main():

@@ -37,26 +37,39 @@ class YouCompleteMe( object ):
     self._user_options = user_options
     self._omnicomp = OmniCompleter( user_options )
     self._current_completion_request = None
+    self._server_stdout = None
+    self._server_stderr = None
+    self._SetupServer()
 
+
+  def _SetupServer( self ):
     server_port = SERVER_PORT_RANGE_START + os.getpid()
     command = ''.join( [ 'python ',
                         _PathToServerScript(),
                         ' --port=',
-                        str( server_port ) ] )
+                        str( server_port ),
+                        ' --log=',
+                        self._user_options[ 'server_log_level' ] ] )
 
     BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
-    filename_format = os.path.join( utils.PathToTempDir(),
-                                   'server_{port}_{std}.log' )
+    if self._user_options[ 'server_use_vim_stdout' ]:
+      subprocess.Popen( command, shell = True )
+    else:
+      filename_format = os.path.join( utils.PathToTempDir(),
+                                      'server_{port}_{std}.log' )
 
-    self._server_stdout = filename_format.format( port=server_port,
-                                                  std='stdout' )
-    self._server_stderr = filename_format.format( port=server_port,
-                                                  std='stderr' )
+      self._server_stdout = filename_format.format( port = server_port,
+                                                    std = 'stdout' )
+      self._server_stderr = filename_format.format( port = server_port,
+                                                    std = 'stderr' )
 
-    with open( self._server_stderr, 'w' ) as fstderr:
-      with open( self._server_stdout, 'w' ) as fstdout:
-        subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
+      with open( self._server_stderr, 'w' ) as fstderr:
+        with open( self._server_stdout, 'w' ) as fstdout:
+          subprocess.Popen( command,
+                            stdout = fstdout,
+                            stderr = fstderr,
+                            shell = True )
 
 
   def CreateCompletionRequest( self ):
