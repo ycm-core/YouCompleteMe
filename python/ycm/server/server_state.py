@@ -38,7 +38,8 @@ class ServerState( object ):
 
   def Shutdown( self ):
     for completer in self._filetype_completers.itervalues():
-      completer.Shutdown()
+      if completer:
+        completer.Shutdown()
 
     self._gencomp.Shutdown()
     extra_conf_store.Shutdown()
