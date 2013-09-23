@@ -44,7 +44,6 @@ class ServerState( object ):
     extra_conf_store.Shutdown()
 
 
-
   def _GetFiletypeCompleterForFiletype( self, filetype ):
     try:
       return self._filetype_completers[ filetype ]
