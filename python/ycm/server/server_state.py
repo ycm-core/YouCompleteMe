@@ -19,6 +19,7 @@
 
 import imp
 import os
+from ycm import extra_conf_store
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
 
@@ -27,11 +28,21 @@ class ServerState( object ):
     self._user_options = user_options
     self._filetype_completers = {}
     self._gencomp = GeneralCompleterStore( self._user_options )
+    extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
 
 
   @property
   def user_options( self ):
     return self._user_options
+
+
+  def Shutdown( self ):
+    for completer in self._filetype_completers.itervalues():
+      completer.Shutdown()
+
+    self._gencomp.Shutdown()
+    extra_conf_store.Shutdown()
+
 
 
   def _GetFiletypeCompleterForFiletype( self, filetype ):

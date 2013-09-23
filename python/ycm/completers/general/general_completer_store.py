@@ -115,11 +115,6 @@ class GeneralCompleterStore( Completer ):
       completer.OnInsertLeave( request_data )
 
 
-  def OnVimLeave( self, request_data ):
-    for completer in self._all_completers:
-      completer.OnVimLeave( request_data )
-
-
   def OnCurrentIdentifierFinished( self, request_data ):
     for completer in self._all_completers:
       completer.OnCurrentIdentifierFinished( request_data )
@@ -128,3 +123,10 @@ class GeneralCompleterStore( Completer ):
   def GettingCompletions( self ):
     for completer in self._all_completers:
       completer.GettingCompletions()
+
+
+  def Shutdown( self ):
+    for completer in self._all_completers:
+      completer.Shutdown()
+
+

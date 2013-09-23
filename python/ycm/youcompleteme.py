@@ -39,6 +39,7 @@ class YouCompleteMe( object ):
     self._current_completion_request = None
     self._server_stdout = None
     self._server_stderr = None
+    self._server_popen = None
     self._SetupServer()
 
 
@@ -54,7 +55,7 @@ class YouCompleteMe( object ):
     BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
     if self._user_options[ 'server_use_vim_stdout' ]:
-      subprocess.Popen( command, shell = True )
+      self._server_popen = subprocess.Popen( command, shell = True )
     else:
       filename_format = os.path.join( utils.PathToTempDir(),
                                       'server_{port}_{std}.log' )
@@ -66,10 +67,10 @@ class YouCompleteMe( object ):
 
       with open( self._server_stderr, 'w' ) as fstderr:
         with open( self._server_stdout, 'w' ) as fstdout:
-          subprocess.Popen( command,
-                            stdout = fstdout,
-                            stderr = fstderr,
-                            shell = True )
+          self._server_popen = subprocess.Popen( command,
+                                                 stdout = fstdout,
+                                                 stderr = fstderr,
+                                                 shell = True )
 
 
   def CreateCompletionRequest( self ):
@@ -146,7 +147,7 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
-    SendEventNotificationAsync( 'VimLeave' )
+    self._server_popen.terminate()
 
 
   def OnCurrentIdentifierFinished( self ):

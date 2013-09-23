@@ -46,11 +46,11 @@ class CsharpCompleter( ThreadedCompleter ):
     self._omnisharp_port = None
     self._logger = logging.getLogger( __name__ )
 
-    # if self.user_options[ 'auto_start_csharp_server' ]:
-    #   self._StartServer()
+    if self.user_options[ 'auto_start_csharp_server' ]:
+      self._StartServer()
 
 
-  def OnVimLeave( self ):
+  def Shutdown( self ):
     if ( self.user_options[ 'auto_start_csharp_server' ] and
          self._ServerIsRunning() ):
       self._StopServer()

@@ -109,7 +109,10 @@ class Completer( object ):
   configuration.
   When the command is called with no arguments you should print a short summary
   of the supported commands or point the user to the help section where this
-  information can be found."""
+  information can be found.
+
+  Override the Shutdown() member function if your Completer subclass needs to do
+  custom cleanup logic on server shutdown."""
 
   __metaclass__ = abc.ABCMeta
 
@@ -277,10 +280,6 @@ class Completer( object ):
     pass
 
 
-  def OnVimLeave( self, request_data ):
-    pass
-
-
   def OnUserCommand( self, arguments, request_data ):
     raise NotImplementedError( NO_USER_COMMANDS )
 
@@ -322,6 +321,10 @@ class Completer( object ):
 
   def DebugInfo( self ):
     return ''
+
+
+  def Shutdown( self ):
+    pass
 
 
 class CompletionsCache( object ):

@@ -65,8 +65,11 @@ def CallExtraConfYcmCorePreloadIfExists():
   _CallExtraConfMethod( 'YcmCorePreload' )
 
 
-def OnVimLeave( request_data ):
+def Shutdown():
+  # VimClose is for the sake of backwards compatibility; it's a no-op when it
+  # doesn't exist.
   _CallExtraConfMethod( 'VimClose' )
+  _CallExtraConfMethod( 'Shutdown' )
 
 
 def _CallExtraConfMethod( function_name ):
