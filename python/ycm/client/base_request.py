@@ -43,8 +43,9 @@ class BaseRequest( object ):
 
   def PostDataToHandler( self, data, handler ):
     response = requests.post( _BuildUri( handler ),
-                             data = json.dumps( data ),
-                             headers = HEADERS )
+                              data = json.dumps( data ),
+                              headers = HEADERS )
+
     response.raise_for_status()
     if response.text:
       return response.json()
