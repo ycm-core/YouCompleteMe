@@ -21,8 +21,8 @@ import os
 import vim
 import ycm_core
 import subprocess
-import threading
-from ycm.retries import retries
+import tempfile
+import json
 from ycm import vimsupport
 from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
@@ -43,57 +43,43 @@ class YouCompleteMe( object ):
     self._server_stderr = None
     self._server_popen = None
     self._filetypes_with_keywords_loaded = set()
-    self._options_thread = None
+    self._temp_options_filename = None
     self._SetupServer()
 
 
   def _SetupServer( self ):
     server_port = SERVER_PORT_RANGE_START + os.getpid()
-    command = ''.join( [ 'python ',
-                        _PathToServerScript(),
-                        ' --port=',
-                        str( server_port ),
-                        ' --log=',
-                        self._user_options[ 'server_log_level' ] ] )
+    with tempfile.NamedTemporaryFile( delete = False ) as options_file:
+      self._temp_options_filename = options_file.name
+      json.dump( dict( self._user_options ), options_file )
+      command = ''.join( [ 'python ',
+                          _PathToServerScript(),
+                          ' --port=',
+                          str( server_port ),
+                          ' --options_file=',
+                          options_file.name,
+                          ' --log=',
+                          self._user_options[ 'server_log_level' ] ] )
 
-    BaseRequest.server_location = 'http://localhost:' + str( server_port )
+      BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
-    if self._user_options[ 'server_use_vim_stdout' ]:
-      self._server_popen = subprocess.Popen( command, shell = True )
-    else:
-      filename_format = os.path.join( utils.PathToTempDir(),
-                                      'server_{port}_{std}.log' )
+      if self._user_options[ 'server_use_vim_stdout' ]:
+        self._server_popen = subprocess.Popen( command, shell = True )
+      else:
+        filename_format = os.path.join( utils.PathToTempDir(),
+                                        'server_{port}_{std}.log' )
 
-      self._server_stdout = filename_format.format( port = server_port,
-                                                    std = 'stdout' )
-      self._server_stderr = filename_format.format( port = server_port,
-                                                    std = 'stderr' )
+        self._server_stdout = filename_format.format( port = server_port,
+                                                      std = 'stdout' )
+        self._server_stderr = filename_format.format( port = server_port,
+                                                      std = 'stderr' )
 
-      with open( self._server_stderr, 'w' ) as fstderr:
-        with open( self._server_stdout, 'w' ) as fstdout:
-          self._server_popen = subprocess.Popen( command,
-                                                 stdout = fstdout,
-                                                 stderr = fstderr,
-                                                 shell = True )
-
-    self._StartOptionsThread()
-
-
-  def _StartOptionsThread( self ):
-    def OptionsThreadMain( options ):
-      @retries( 5, delay = 0.5 )
-      def PostOptionsToServer():
-        BaseRequest.PostDataToHandler( options, 'user_options' )
-
-      PostOptionsToServer()
-
-    self._options_thread = threading.Thread(
-        target = OptionsThreadMain,
-        args = ( dict( self._user_options ), ) )
-
-    self._options_thread.daemon = True
-    self._options_thread.start()
-
+        with open( self._server_stderr, 'w' ) as fstderr:
+          with open( self._server_stdout, 'w' ) as fstdout:
+            self._server_popen = subprocess.Popen( command,
+                                                   stdout = fstdout,
+                                                   stderr = fstderr,
+                                                   shell = False )
 
 
   def CreateCompletionRequest( self ):
@@ -165,6 +151,7 @@ class YouCompleteMe( object ):
 
   def OnVimLeave( self ):
     self._server_popen.terminate()
+    os.remove( self._temp_options_filename )
 
 
   def OnCurrentIdentifierFinished( self ):

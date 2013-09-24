@@ -114,12 +114,8 @@ def GetUserOptions():
 
 @app.post( '/user_options' )
 def SetUserOptions():
-  global SERVER_STATE
-
   LOGGER.info( 'Received user options POST request')
-  data = request.json
-  SERVER_STATE = server_state.ServerState( data )
-  user_options_store.SetAll( data )
+  _SetUserOptions( request.json )
 
 
 @app.post( '/filetype_completion_available')
@@ -139,6 +135,13 @@ def _ServerShutdown():
   SERVER_STATE.Shutdown()
 
 
+def _SetUserOptions( options ):
+  global SERVER_STATE
+
+  SERVER_STATE = server_state.ServerState( options )
+  user_options_store.SetAll( options )
+
+
 def Main():
   global LOGGER
   parser = argparse.ArgumentParser()
@@ -149,7 +152,12 @@ def Main():
   parser.add_argument( '--log', type = str, default = 'info',
                        help='log level, one of '
                             '[debug|info|warning|error|critical]')
+  parser.add_argument( '--options_file', type = str, default = '',
+                       help='file with user options, in JSON format')
   args = parser.parse_args()
+
+  if args.options_file:
+    _SetUserOptions( json.load( open( args.options_file, 'r' ) ) )
 
   numeric_level = getattr( logging, args.log.upper(), None )
   if not isinstance( numeric_level, int ):
