@@ -21,6 +21,8 @@ import os
 import vim
 import ycm_core
 import subprocess
+import threading
+from ycm.retries import retries
 from ycm import vimsupport
 from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
@@ -41,6 +43,7 @@ class YouCompleteMe( object ):
     self._server_stderr = None
     self._server_popen = None
     self._filetypes_with_keywords_loaded = set()
+    self._options_thread = None
     self._SetupServer()
 
 
@@ -72,6 +75,25 @@ class YouCompleteMe( object ):
                                                  stdout = fstdout,
                                                  stderr = fstderr,
                                                  shell = True )
+
+    self._StartOptionsThread()
+
+
+  def _StartOptionsThread( self ):
+    def OptionsThreadMain( options ):
+      @retries( 5, delay = 0.5 )
+      def PostOptionsToServer():
+        BaseRequest.PostDataToHandler( options, 'user_options' )
+
+      PostOptionsToServer()
+
+    self._options_thread = threading.Thread(
+        target = OptionsThreadMain,
+        args = ( dict( self._user_options ), ) )
+
+    self._options_thread.daemon = True
+    self._options_thread.start()
+
 
 
   def CreateCompletionRequest( self ):

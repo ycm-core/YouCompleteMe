@@ -32,7 +32,6 @@ sys.path.insert( 0, os.path.join(
 
 import logging
 import time
-import httplib
 import json
 import bottle
 from bottle import run, request, response
@@ -107,20 +106,20 @@ def GetCompletions():
   return _JsonResponse( completer.CandidatesFromStoredRequest() )
 
 
-@app.route( '/user_options' )
-def UserOptions():
+@app.get( '/user_options' )
+def GetUserOptions():
+  LOGGER.info( 'Received user options GET request')
+  return _JsonResponse( dict( SERVER_STATE.user_options ) )
+
+
+@app.post( '/user_options' )
+def SetUserOptions():
   global SERVER_STATE
 
-  if request.method == 'GET':
-    LOGGER.info( 'Received user options GET request')
-    return SERVER_STATE.user_options
-  elif request.method == 'POST':
-    LOGGER.info( 'Received user options POST request')
-    data = request.json
-    SERVER_STATE = server_state.ServerState( data )
-    user_options_store.SetAll( data )
-  else:
-    response.status = httplib.BAD_REQUEST
+  LOGGER.info( 'Received user options POST request')
+  data = request.json
+  SERVER_STATE = server_state.ServerState( data )
+  user_options_store.SetAll( data )
 
 
 @app.post( '/filetype_completion_available')

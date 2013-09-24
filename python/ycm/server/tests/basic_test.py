@@ -95,3 +95,15 @@ def FiletypeCompletionAvailable_Works_test():
 
   ok_( app.post_json( '/filetype_completion_available',
                       request_data ).json )
+
+
+def UserOptions_Works_test():
+  app = TestApp( server.app )
+  options = app.get( '/user_options' ).json
+  ok_( len( options ) )
+
+  options[ 'foobar' ] = 'zoo'
+
+  app.post_json( '/user_options', options )
+  eq_( options, app.get( '/user_options' ).json )
+

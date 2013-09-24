@@ -41,7 +41,8 @@ class BaseRequest( object ):
     return {}
 
 
-  def PostDataToHandler( self, data, handler ):
+  @staticmethod
+  def PostDataToHandler( data, handler ):
     response = requests.post( _BuildUri( handler ),
                               data = json.dumps( data ),
                               headers = HEADERS )
