@@ -25,39 +25,38 @@ import bottle
 
 bottle.debug( True )
 
+# 'contents' should be just one line of text
+def RequestDataForFileWithContents( filename, contents ):
+  return {
+    'filetypes': ['foo'],
+    'filepath': filename,
+    'line_value': contents,
+    'file_data': {
+      filename: {
+        'contents': contents,
+        'filetypes': ['foo']
+      }
+    }
+  }
+
 
 def GetCompletions_IdentifierCompleterWorks_test():
   app = TestApp( server.app )
-  event_data = {
+  event_data = RequestDataForFileWithContents( '/foo/bar', 'foo foogoo ba' )
+  event_data.update( {
     'event_name': 'FileReadyToParse',
-    'filetypes': ['foo'],
-    'filepath': '/foo/bar',
-    'file_data': {
-      '/foo/bar': {
-        'contents': 'foo foogoo ba',
-        'filetypes': ['foo']
-      }
-    }
-  }
+  } )
 
   app.post_json( '/event_notification', event_data )
 
-  line_value = 'oo foo foogoo ba'
-  completion_data = {
+  completion_data = RequestDataForFileWithContents( '/foo/bar',
+                                                    'oo foo foogoo ba' )
+  completion_data.update( {
     'query': 'oo',
-    'filetypes': ['foo'],
-    'filepath': '/foo/bar',
     'line_num': 0,
     'column_num': 2,
     'start_column': 0,
-    'line_value': line_value,
-    'file_data': {
-      '/foo/bar': {
-        'contents': line_value,
-        'filetypes': ['foo']
-      }
-    }
-  }
+  } )
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
@@ -66,37 +65,22 @@ def GetCompletions_IdentifierCompleterWorks_test():
 
 def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
   app = TestApp( server.app )
-  event_data = {
+  event_data = RequestDataForFileWithContents( '/foo/bar', '' )
+  event_data.update( {
     'event_name': 'FileReadyToParse',
-    'filetypes': ['foo'],
-    'filepath': '/foo/bar',
-    'file_data': {
-      '/foo/bar': {
-        'contents': '',
-        'filetypes': ['foo']
-      }
-    },
     'syntax_keywords': ['foo', 'bar', 'zoo']
-  }
+  } )
 
   app.post_json( '/event_notification', event_data )
 
-  line_value = 'oo '
-  completion_data = {
+  completion_data = RequestDataForFileWithContents( '/foo/bar',
+                                                    'oo ' )
+  completion_data.update( {
     'query': 'oo',
-    'filetypes': ['foo'],
-    'filepath': '/foo/bar',
     'line_num': 0,
     'column_num': 2,
     'start_column': 0,
-    'line_value': line_value,
-    'file_data': {
-      '/foo/bar': {
-        'contents': line_value,
-        'filetypes': ['foo']
-      }
-    }
-  }
+  } )
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'zoo' ) ],

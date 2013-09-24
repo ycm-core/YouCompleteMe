@@ -133,6 +133,7 @@ class IdentifierCompleter( GeneralCompleter ):
                                              ToUtf8IfNeeded( filetypes[ 0 ] ),
                                              ToUtf8IfNeeded( filepath ) )
 
+
   def OnFileReadyToParse( self, request_data ):
     self.AddBufferIdentifiers( request_data )
     if 'tag_files' in request_data:
