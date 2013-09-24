@@ -27,7 +27,7 @@ from ycm import vimsupport
 from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general import syntax_parse
-from ycm.client.base_request import BaseRequest
+from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.event_notification import SendEventNotificationAsync
@@ -103,8 +103,11 @@ class YouCompleteMe( object ):
 
 
   def NativeFiletypeCompletionAvailable( self ):
-    # TODO: Talk to server about this.
-    return False
+    try:
+      return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                            'filetype_completion_available')
+    except:
+      return False
 
 
   # TODO: This may not be needed at all when the server is ready. Evaluate this
