@@ -18,7 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from webtest import TestApp
-from .. import server
+from .. import ycmd
 from ..responses import BuildCompletionData
 from nose.tools import ok_, eq_
 import bottle
@@ -41,7 +41,7 @@ def RequestDataForFileWithContents( filename, contents ):
 
 
 def GetCompletions_IdentifierCompleterWorks_test():
-  app = TestApp( server.app )
+  app = TestApp( ycmd.app )
   event_data = RequestDataForFileWithContents( '/foo/bar', 'foo foogoo ba' )
   event_data.update( {
     'event_name': 'FileReadyToParse',
@@ -64,7 +64,7 @@ def GetCompletions_IdentifierCompleterWorks_test():
 
 
 def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
-  app = TestApp( server.app )
+  app = TestApp( ycmd.app )
   event_data = RequestDataForFileWithContents( '/foo/bar', '' )
   event_data.update( {
     'event_name': 'FileReadyToParse',
@@ -88,7 +88,7 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
 
 
 def FiletypeCompletionAvailable_Works_test():
-  app = TestApp( server.app )
+  app = TestApp( ycmd.app )
   request_data = {
     'filetypes': ['cpp']
   }
@@ -98,7 +98,7 @@ def FiletypeCompletionAvailable_Works_test():
 
 
 def UserOptions_Works_test():
-  app = TestApp( server.app )
+  app = TestApp( ycmd.app )
   options = app.get( '/user_options' ).json
   ok_( len( options ) )
 
