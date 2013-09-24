@@ -18,7 +18,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import time
 import vim
 import ycm_core
 import subprocess
@@ -27,7 +26,7 @@ from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general import syntax_parse
 from ycm.client.base_request import BaseRequest
-from ycm.client.command_request import CommandRequest
+from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.event_notification import SendEventNotificationAsync
 
@@ -84,13 +83,7 @@ class YouCompleteMe( object ):
 
 
   def SendCommandRequest( self, arguments, completer ):
-    # TODO: This should be inside a method in a command_request module
-    request = CommandRequest( self, arguments, completer )
-    request.Start()
-    while not request.Done():
-      time.sleep( 0.1 )
-
-    return request.Response()
+    return SendCommandRequest( arguments, completer )
 
 
   def GetCurrentCompletionRequest( self ):

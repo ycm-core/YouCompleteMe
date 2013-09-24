@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
 from ycm.client.base_request import BaseRequest, BuildRequestData
 
 
@@ -64,4 +65,13 @@ class CommandRequest( BaseRequest ):
     # vim.eval( 'setqflist( %s )' % repr( defs ) )
     # vim.eval( 'youcompleteme#OpenGoToList()' )
     return self.ServerResponse()
+
+
+def SendCommandRequest( self, arguments, completer ):
+  request = CommandRequest( self, arguments, completer )
+  request.Start()
+  while not request.Done():
+    time.sleep( 0.1 )
+
+  return request.Response()
 
