@@ -44,8 +44,7 @@ import argparse
 bottle.Request.MEMFILE_MAX = 300 * 1024
 
 SERVER_STATE = None
-# TODO: is init needed here?
-LOGGER = logging.getLogger( __name__ )
+LOGGER = None
 app = bottle.Bottle()
 
 
@@ -143,7 +142,8 @@ def _SetUserOptions( options ):
 
 
 def SetServerStateToDefaults():
-  global SERVER_STATE
+  global SERVER_STATE, LOGGER
+  LOGGER = logging.getLogger( __name__ )
   user_options_store.LoadDefaults()
   SERVER_STATE = server_state.ServerState( user_options_store.GetAll() )
 
