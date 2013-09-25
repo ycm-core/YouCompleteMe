@@ -152,14 +152,14 @@ def Main():
   global LOGGER
   parser = argparse.ArgumentParser()
   parser.add_argument( '--host', type = str, default = 'localhost',
-                       help='server hostname')
+                       help = 'server hostname')
   parser.add_argument( '--port', type = int, default = 6666,
-                       help='server port')
+                       help = 'server port')
   parser.add_argument( '--log', type = str, default = 'info',
-                       help='log level, one of '
-                            '[debug|info|warning|error|critical]')
+                       help = 'log level, one of '
+                              '[debug|info|warning|error|critical]' )
   parser.add_argument( '--options_file', type = str, default = '',
-                       help='file with user options, in JSON format')
+                       help = 'file with user options, in JSON format' )
   args = parser.parse_args()
 
   if args.options_file:
