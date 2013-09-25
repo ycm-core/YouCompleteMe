@@ -21,13 +21,7 @@
 from ycm.completers.completer import Completer
 from ycm.completers.all.identifier_completer import IdentifierCompleter
 from ycm.completers.general.filename_completer import FilenameCompleter
-
-try:
-  from ycm.completers.general.ultisnips_completer import UltiSnipsCompleter
-  USE_ULTISNIPS_COMPLETER = True
-except ImportError:
-  USE_ULTISNIPS_COMPLETER = False
-
+from ycm.completers.general.ultisnips_completer import UltiSnipsCompleter
 
 
 class GeneralCompleterStore( Completer ):
@@ -42,8 +36,7 @@ class GeneralCompleterStore( Completer ):
     super( GeneralCompleterStore, self ).__init__( user_options )
     self._identifier_completer = IdentifierCompleter( user_options )
     self._filename_completer = FilenameCompleter( user_options )
-    self._ultisnips_completer = ( UltiSnipsCompleter( user_options )
-                                  if USE_ULTISNIPS_COMPLETER else None )
+    self._ultisnips_completer = UltiSnipsCompleter( user_options )
     self._non_filename_completers = filter( lambda x: x,
                                             [ self._ultisnips_completer,
                                               self._identifier_completer ] )

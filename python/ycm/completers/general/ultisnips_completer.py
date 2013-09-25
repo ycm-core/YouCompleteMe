@@ -19,7 +19,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycm.completers.general_completer import GeneralCompleter
-from UltiSnips import UltiSnips_Manager
 from ycm.server import responses
 
 
@@ -52,21 +51,10 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
 
   def OnBufferVisit( self, request_data ):
-    # TODO: _GetCandidates should be called on the client and it should send
-    # the snippets to the server
-    self._candidates = _GetCandidates()
+    raw_candidates = request_data[ 'ultisnips_snippets' ]
+    self._candidates = [
+        responses.BuildCompletionData(
+            str( snip[ 'trigger' ] ),
+            str( '<snip> ' + snip[ 'description' ].encode( 'utf-8' ) ) )
+        for snip in raw_candidates ]
 
-
-def _GetCandidates():
-  try:
-    rawsnips = UltiSnips_Manager._snips( '', 1 )
-
-    # UltiSnips_Manager._snips() returns a class instance where:
-    # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
-    # class.description - description of the snippet
-    return [ responses.BuildCompletionData(
-              str( snip.trigger ),
-              str( '<snip> ' + snip.description.encode( 'utf-8' ) ) )
-            for snip in rawsnips ]
-  except:
-    return []

@@ -55,6 +55,9 @@ class ClangCompleter( Completer ):
     # in progress. We use this to trigger the pending request after the previous
     # one completes (from GetDiagnosticsForCurrentFile because that's the only
     # method that knows when the compilation has finished).
+    # TODO: Remove this now that we have multiple threads in the server; the
+    # subsequent requests that want to parse will just block until the current
+    # parse is done and will then proceed.
     self.extra_parse_desired = False
 
 
@@ -211,7 +214,6 @@ class ClangCompleter( Completer ):
 
   def _ClearCompilationFlagCache( self ):
     self.flags.Clear()
-
 
 
   def OnFileReadyToParse( self, request_data ):

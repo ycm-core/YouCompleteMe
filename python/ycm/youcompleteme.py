@@ -32,6 +32,12 @@ from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.event_notification import SendEventNotificationAsync
 
+try:
+  from UltiSnips import UltiSnips_Manager
+  USE_ULTISNIPS_DATA = True
+except ImportError:
+  USE_ULTISNIPS_DATA = False
+
 SERVER_PORT_RANGE_START = 10000
 
 class YouCompleteMe( object ):
@@ -145,7 +151,9 @@ class YouCompleteMe( object ):
 
 
   def OnBufferVisit( self ):
-    SendEventNotificationAsync( 'BufferVisit' )
+    extra_data = {}
+    _AddUltiSnipsDataIfNeeded( extra_data )
+    SendEventNotificationAsync( 'BufferVisit', extra_data )
 
 
   def OnInsertLeave( self ):
@@ -236,4 +244,22 @@ def _GetTagFiles():
 def _PathToServerScript():
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
   return os.path.join( dir_of_current_script, 'server/ycmd.py' )
+
+
+def _AddUltiSnipsDataIfNeeded( extra_data ):
+  if not USE_ULTISNIPS_DATA:
+    return
+
+  try:
+    rawsnips = UltiSnips_Manager._snips( '', 1 )
+  except:
+    return
+
+  # UltiSnips_Manager._snips() returns a class instance where:
+  # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
+  # class.description - description of the snippet
+  extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
+                                           'description': x.description
+                                         } for x in rawsnips ]
+
 

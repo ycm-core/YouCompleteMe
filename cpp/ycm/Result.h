@@ -88,6 +88,7 @@ private:
 
 template< class T >
 struct ResultAnd {
+  // TODO: Swap the order of these parameters
   ResultAnd( T extra_object, const Result &result )
     : extra_object_( extra_object ), result_( result ) {}
 

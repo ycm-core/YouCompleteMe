@@ -43,9 +43,8 @@ import argparse
 # size is less than this
 bottle.Request.MEMFILE_MAX = 300 * 1024
 
-user_options_store.LoadDefaults()
-SERVER_STATE = server_state.ServerState( user_options_store.GetAll() )
-
+SERVER_STATE = None
+# TODO: is init needed here?
 LOGGER = logging.getLogger( __name__ )
 app = bottle.Bottle()
 
@@ -132,14 +131,21 @@ def _JsonResponse( data ):
 
 @atexit.register
 def _ServerShutdown():
-  SERVER_STATE.Shutdown()
+  if SERVER_STATE:
+    SERVER_STATE.Shutdown()
 
 
 def _SetUserOptions( options ):
   global SERVER_STATE
 
-  SERVER_STATE = server_state.ServerState( options )
   user_options_store.SetAll( options )
+  SERVER_STATE = server_state.ServerState( options )
+
+
+def SetServerStateToDefaults():
+  global SERVER_STATE
+  user_options_store.LoadDefaults()
+  SERVER_STATE = server_state.ServerState( user_options_store.GetAll() )
 
 
 def Main():

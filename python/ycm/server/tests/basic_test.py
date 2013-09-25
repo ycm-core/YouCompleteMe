@@ -20,7 +20,7 @@
 from webtest import TestApp
 from .. import ycmd
 from ..responses import BuildCompletionData
-from nose.tools import ok_, eq_
+from nose.tools import ok_, eq_, with_setup
 import bottle
 
 bottle.debug( True )
@@ -40,7 +40,12 @@ def RequestDataForFileWithContents( filename, contents ):
   }
 
 
-def GetCompletions_IdentifierCompleterWorks_test():
+def Setup():
+  ycmd.SetServerStateToDefaults()
+
+
+@with_setup( Setup )
+def GetCompletions_IdentifierCompleter_Works_test():
   app = TestApp( ycmd.app )
   event_data = RequestDataForFileWithContents( '/foo/bar', 'foo foogoo ba' )
   event_data.update( {
@@ -63,6 +68,7 @@ def GetCompletions_IdentifierCompleterWorks_test():
        app.post_json( '/get_completions', completion_data ).json )
 
 
+@with_setup( Setup )
 def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
   app = TestApp( ycmd.app )
   event_data = RequestDataForFileWithContents( '/foo/bar', '' )
@@ -87,6 +93,34 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
        app.post_json( '/get_completions', completion_data ).json )
 
 
+@with_setup( Setup )
+def GetCompletions_UltiSnipsCompleter_Works_test():
+  app = TestApp( ycmd.app )
+  event_data = RequestDataForFileWithContents( '/foo/bar', '' )
+  event_data.update( {
+    'event_name': 'BufferVisit',
+    'ultisnips_snippets': [
+        {'trigger': 'foo', 'description': 'bar'},
+        {'trigger': 'zoo', 'description': 'goo'},
+    ]
+  } )
+
+  app.post_json( '/event_notification', event_data )
+
+  completion_data = RequestDataForFileWithContents( '/foo/bar', 'oo ' )
+  completion_data.update( {
+    'query': 'oo',
+    'line_num': 0,
+    'column_num': 2,
+    'start_column': 0,
+  } )
+
+  eq_( [ BuildCompletionData( 'foo', '<snip> bar' ),
+         BuildCompletionData( 'zoo', '<snip> goo' ) ],
+       app.post_json( '/get_completions', completion_data ).json )
+
+
+@with_setup( Setup )
 def FiletypeCompletionAvailable_Works_test():
   app = TestApp( ycmd.app )
   request_data = {
@@ -97,6 +131,7 @@ def FiletypeCompletionAvailable_Works_test():
                       request_data ).json )
 
 
+@with_setup( Setup )
 def UserOptions_Works_test():
   app = TestApp( ycmd.app )
   options = app.get( '/user_options' ).json

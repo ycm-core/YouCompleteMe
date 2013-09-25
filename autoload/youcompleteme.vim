@@ -44,6 +44,7 @@ function! youcompleteme#Enable()
   py from ycm import vimsupport
   py from ycm import user_options_store
   py user_options_store.SetAll( base.BuildServerConf() )
+  " TODO: Remove the call to YcmPreload
   py from ycm import extra_conf_store
   py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
 
@@ -549,6 +550,7 @@ endfunction
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
+    " TODO: Force semantic mode here (<c-space> needs to work)
     return pyeval( 'ycm_state.CreateCompletionRequest().CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
