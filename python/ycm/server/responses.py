@@ -17,12 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 
-# TODO: Move this file under server/ and rename it responses.py
 
 def BuildGoToResponse( filepath, line_num, column_num, description = None ):
   response = {
-    'filepath': filepath,
+    'filepath': os.path.realpath( filepath ),
     'line_num': line_num,
     'column_num': column_num
   }
