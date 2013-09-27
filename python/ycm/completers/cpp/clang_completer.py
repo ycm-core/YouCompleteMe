@@ -152,7 +152,7 @@ class ClangCompleter( Completer ):
     elif command == 'GoToDefinitionElseDeclaration':
       return self._GoToDefinitionElseDeclaration( request_data )
     elif command == 'ClearCompilationFlagCache':
-      return self._ClearCompilationFlagCache( request_data )
+      return self._ClearCompilationFlagCache()
     raise ValueError( self.UserCommandsHelpMessage() )
 
 
