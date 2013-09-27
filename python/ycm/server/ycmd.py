@@ -69,12 +69,7 @@ def EventNotification():
 def RunCompleterCommand():
   LOGGER.info( 'Received command request')
   request_data = request.json
-  completer_target = request_data[ 'completer_target' ]
-
-  if completer_target == 'identifier':
-    completer = SERVER_STATE.GetGeneralCompleter().GetIdentifierCompleter()
-  else:
-    completer = SERVER_STATE.GetFiletypeCompleter( request_data[ 'filetypes' ] )
+  completer = _GetCompleterForRequestData( request_data )
 
   return _JsonResponse( completer.OnUserCommand(
       request_data[ 'command_arguments' ],
@@ -124,6 +119,14 @@ def FiletypeCompletionAvailable():
       request.json[ 'filetypes' ] ) )
 
 
+@app.post( '/defined_subcommands')
+def DefinedSubcommands():
+  LOGGER.info( 'Received defined subcommands request')
+  completer = _GetCompleterForRequestData( request.json )
+
+  return _JsonResponse( completer.DefinedSubcommands() )
+
+
 # The type of the param is Bottle.HTTPError
 @app.error( 500 )
 def ErrorHandler( httperror ):
@@ -134,6 +137,17 @@ def ErrorHandler( httperror ):
 def _JsonResponse( data ):
   response.set_header( 'Content-Type', 'application/json' )
   return json.dumps( data )
+
+
+def _GetCompleterForRequestData( request_data ):
+  completer_target = request_data.get( 'completer_target', None )
+
+  if completer_target == 'identifier':
+    return SERVER_STATE.GetGeneralCompleter().GetIdentifierCompleter()
+  elif completer_target == 'filetype_default' or not completer_target:
+    return SERVER_STATE.GetFiletypeCompleter( request_data[ 'filetypes' ] )
+  else:
+    return SERVER_STATE.GetFiletypeCompleter( [ completer_target ] )
 
 
 @atexit.register

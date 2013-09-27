@@ -26,14 +26,15 @@ import bottle
 bottle.debug( True )
 
 # 'contents' should be just one line of text
-def RequestDataForFileWithContents( filename, contents ):
+def RequestDataForFileWithContents( filename, contents = None ):
+  real_contents = contents if contents else ''
   return {
     'filetypes': ['foo'],
     'filepath': filename,
-    'line_value': contents,
+    'line_value': real_contents,
     'file_data': {
       filename: {
-        'contents': contents,
+        'contents': real_contents,
         'filetypes': ['foo']
       }
     }
@@ -71,7 +72,7 @@ def GetCompletions_IdentifierCompleter_Works_test():
 @with_setup( Setup )
 def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
   app = TestApp( ycmd.app )
-  event_data = RequestDataForFileWithContents( '/foo/bar', '' )
+  event_data = RequestDataForFileWithContents( '/foo/bar' )
   event_data.update( {
     'event_name': 'FileReadyToParse',
     'syntax_keywords': ['foo', 'bar', 'zoo']
@@ -96,7 +97,7 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
 @with_setup( Setup )
 def GetCompletions_UltiSnipsCompleter_Works_test():
   app = TestApp( ycmd.app )
-  event_data = RequestDataForFileWithContents( '/foo/bar', '' )
+  event_data = RequestDataForFileWithContents( '/foo/bar' )
   event_data.update( {
     'event_name': 'BufferVisit',
     'ultisnips_snippets': [
@@ -195,6 +196,41 @@ int main()
         'column_num': 7
       },
       app.post_json( '/run_completer_command', goto_data ).json )
+
+
+@with_setup( Setup )
+def DefinedSubcommands_Works_test():
+  app = TestApp( ycmd.app )
+  subcommands_data = RequestDataForFileWithContents( '/foo/bar' )
+  subcommands_data.update( {
+    'completer_target': 'python',
+  } )
+
+  eq_( [ 'GoToDefinition',
+         'GoToDeclaration',
+         'GoToDefinitionElseDeclaration' ],
+       app.post_json( '/defined_subcommands', subcommands_data ).json )
+
+
+@with_setup( Setup )
+def DefinedSubcommands_WorksWhenNoExplicitCompleterTargetSpecified_test():
+  app = TestApp( ycmd.app )
+  filename = 'foo.py'
+  subcommands_data = {
+    'filetypes': ['python'],
+    'filepath': filename,
+    'file_data': {
+      filename: {
+        'contents': '',
+        'filetypes': ['python']
+      }
+    }
+  }
+
+  eq_( [ 'GoToDefinition',
+         'GoToDeclaration',
+         'GoToDefinitionElseDeclaration' ],
+       app.post_json( '/defined_subcommands', subcommands_data ).json )
 
 
 @with_setup( Setup )

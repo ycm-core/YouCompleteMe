@@ -100,6 +100,11 @@ class YouCompleteMe( object ):
     return SendCommandRequest( arguments, completer )
 
 
+  def GetDefinedSubcommands( self ):
+    return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                          'defined_subcommands' )
+
+
   def GetCurrentCompletionRequest( self ):
     return self._current_completion_request
 
