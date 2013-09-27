@@ -95,6 +95,7 @@ class CsharpCompleter( ThreadedCompleter ):
                       'GoToDeclaration',
                       'GoToDefinitionElseDeclaration' ]:
       return self._GoToDefinition( request_data )
+    raise ValueError( self.UserCommandsHelpMessage() )
 
 
   def DebugInfo( self ):

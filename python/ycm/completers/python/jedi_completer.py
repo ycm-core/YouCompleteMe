@@ -88,6 +88,7 @@ class JediCompleter( ThreadedCompleter ):
       return self._GoToDeclaration( request_data )
     elif command == 'GoToDefinitionElseDeclaration':
       return self._GoToDefinitionElseDeclaration( request_data )
+    raise ValueError( self.UserCommandsHelpMessage() )
 
 
   def _GoToDefinition( self, request_data ):
@@ -107,8 +108,8 @@ class JediCompleter( ThreadedCompleter ):
 
 
   def _GoToDefinitionElseDeclaration( self, request_data ):
-    definitions = self._GetDefinitionsList() or \
-        self._GetDefinitionsList( request_data, declaration = True )
+    definitions = ( self._GetDefinitionsList( request_data ) or
+        self._GetDefinitionsList( request_data, declaration = True ) )
     if definitions:
       return self._BuildGoToResponse( definitions )
     else:
@@ -141,7 +142,7 @@ class JediCompleter( ThreadedCompleter ):
           raise RuntimeError( 'Builtin modules cannot be displayed.' )
       else:
         return responses.BuildGoToResponse( definition.module_path,
-                                            definition.line -1,
+                                            definition.line - 1,
                                             definition.column )
     else:
       # multiple definitions
@@ -149,11 +150,11 @@ class JediCompleter( ThreadedCompleter ):
       for definition in definition_list:
         if definition.in_builtin_module():
           defs.append( responses.BuildDescriptionOnlyGoToResponse(
-                       'Builting ' + definition.description ) )
+                       'Builtin ' + definition.description ) )
         else:
           defs.append(
             responses.BuildGoToResponse( definition.module_path,
-                                         definition.line -1,
+                                         definition.line - 1,
                                          definition.column,
                                          definition.description ) )
       return defs

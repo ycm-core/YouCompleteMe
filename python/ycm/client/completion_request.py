@@ -30,6 +30,7 @@ class CompletionRequest( BaseRequest ):
     self._request_data = BuildRequestData( self._completion_start_column )
 
 
+  # TODO: Do we need this anymore?
   # def ShouldComplete( self ):
   #   return ( self._do_filetype_completion or
   #            self._ycm_state.ShouldUseGeneralCompleter( self._request_data ) )

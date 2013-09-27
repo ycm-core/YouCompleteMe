@@ -74,12 +74,16 @@ class ServerState( object ):
       if completer:
         return completer
 
-    return None
+    raise ValueError( 'No semantic completer exists for filetypes: {}'.format(
+        current_filetypes ) )
 
 
   def FiletypeCompletionAvailable( self, filetypes ):
-    return bool( self.GetFiletypeCompleter( filetypes ) )
-
+    try:
+      self.GetFiletypeCompleter( filetypes )
+      return True
+    except:
+      return False
 
   def FiletypeCompletionUsable( self, filetypes ):
     return ( self.CurrentFiletypeCompletionEnabled( filetypes ) and

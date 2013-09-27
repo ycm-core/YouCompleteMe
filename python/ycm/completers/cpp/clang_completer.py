@@ -152,7 +152,8 @@ class ClangCompleter( Completer ):
     elif command == 'GoToDefinitionElseDeclaration':
       return self._GoToDefinitionElseDeclaration( request_data )
     elif command == 'ClearCompilationFlagCache':
-      self._ClearCompilationFlagCache( request_data )
+      return self._ClearCompilationFlagCache( request_data )
+    raise ValueError( self.UserCommandsHelpMessage() )
 
 
   def _LocationForGoTo( self, goto_function, request_data ):
@@ -170,7 +171,7 @@ class ClangCompleter( Completer ):
 
     files = self.GetUnsavedFilesVector( request_data )
     line = request_data[ 'line_num' ] + 1
-    column = request_data[ 'start_column' ] + 1
+    column = request_data[ 'column_num' ] + 1
     return getattr( self.completer, goto_function )(
         ToUtf8IfNeeded( filename ),
         line,
@@ -180,7 +181,7 @@ class ClangCompleter( Completer ):
 
 
   def _GoToDefinition( self, request_data ):
-    location = self._LocationForGoTo( 'GetDefinitionLocation' )
+    location = self._LocationForGoTo( 'GetDefinitionLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition.' )
 
@@ -190,7 +191,7 @@ class ClangCompleter( Completer ):
 
 
   def _GoToDeclaration( self, request_data ):
-    location = self._LocationForGoTo( 'GetDeclarationLocation' )
+    location = self._LocationForGoTo( 'GetDeclarationLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to declaration.' )
 
@@ -200,9 +201,9 @@ class ClangCompleter( Completer ):
 
 
   def _GoToDefinitionElseDeclaration( self, request_data ):
-    location = self._LocationForGoTo( 'GetDefinitionLocation' )
+    location = self._LocationForGoTo( 'GetDefinitionLocation', request_data )
     if not location or not location.IsValid():
-      location = self._LocationForGoTo( 'GetDeclarationLocation' )
+      location = self._LocationForGoTo( 'GetDeclarationLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition or declaration.' )
 
@@ -325,20 +326,7 @@ class ClangCompleter( Completer ):
                                                     source,
                                                     list( flags ) ) )
 
-
-# TODO: make these functions module-local
-# def CompletionDataToDict( completion_data ):
-#   # see :h complete-items for a description of the dictionary fields
-#   return {
-#     'word' : completion_data.TextToInsertInBuffer(),
-#     'abbr' : completion_data.MainCompletionText(),
-#     'menu' : completion_data.ExtraMenuInfo(),
-#     'kind' : completion_data.kind_,
-#     'info' : completion_data.DetailedInfoForPreviewWindow(),
-#     'dup'  : 1,
-#   }
-
-
+# TODO: Make this work again
 # def DiagnosticToDict( diagnostic ):
 #   # see :h getqflist for a description of the dictionary fields
 #   return {

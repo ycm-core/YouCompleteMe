@@ -585,33 +585,27 @@ endfunction
 
 command! YcmDebugInfo call s:DebugInfo()
 
+
 function! s:CompleterCommand(...)
   " CompleterCommand will call the OnUserCommand function of a completer.
   " If the first arguments is of the form "ft=..." it can be used to specify the
   " completer to use (for example "ft=cpp").  Else the native filetype completer
   " of the current buffer is used.  If no native filetype completer is found and
-  " no completer was specified this throws an error.  You can use "ft=ycm:omni"
-  " to select the omni completer or "ft=ycm:ident" to select the identifier
-  " completer.  The remaining arguments will passed to the completer.
+  " no completer was specified this throws an error.  You can use
+  " "ft=ycm:ident" to select the identifier completer.
+  " The remaining arguments will be passed to the completer.
   let arguments = copy(a:000)
   let completer = ''
 
   if a:0 > 0 && strpart(a:1, 0, 3) == 'ft='
-    if a:1 == 'ft=ycm:omni'
-      let completer = 'omni'
-    elseif a:1 == 'ft=ycm:ident'
+    if a:1 == 'ft=ycm:ident'
       let completer = 'identifier'
     endif
     let arguments = arguments[1:]
   endif
 
-py << EOF
-response = ycm_state.SendCommandRequest( vim.eval( 'l:arguments' ),
-                                         vim.eval( 'l:completer' ) )
-if not response.Valid():
-  vimsupport.PostVimMessage( 'No native completer found for current buffer. ' +
-     'Use ft=... as the first argument to specify a completer.')
-EOF
+  py ycm_state.SendCommandRequest( vim.eval( 'l:arguments' ),
+        \                          vim.eval( 'l:completer' ) )
 endfunction
 
 
@@ -624,6 +618,8 @@ function! youcompleteme#OpenGoToList()
   redraw!
 endfunction
 
+
+command! -nargs=* YcmCompleter call s:CompleterCommand(<f-args>)
 
 " TODO: Make this work again
 " command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete

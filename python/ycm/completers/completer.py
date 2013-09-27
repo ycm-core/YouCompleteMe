@@ -198,7 +198,7 @@ class Completer( object ):
                '\n'.join( subcommands ) +
                '\nSee the docs for information on what they do.' )
     else:
-      return 'No supported subcommands'
+      return 'This Completer has no supported subcommands.'
 
 
   def FilterAndSortCandidates( self, candidates, query ):

@@ -121,6 +121,41 @@ def GetCompletions_UltiSnipsCompleter_Works_test():
 
 
 @with_setup( Setup )
+def RunCompleterCommand_GoTo_Jedi_ZeroBasedLineAndColumn_test():
+  app = TestApp( ycmd.app )
+  contents = """
+def foo():
+  pass
+
+foo()
+"""
+
+  goto_data = {
+    'completer_target': 'filetype_default',
+    'command_arguments': ['GoToDefinition'],
+    'line_num': 4,
+    'column_num': 0,
+    'filetypes': ['python'],
+    'filepath': '/foo.py',
+    'line_value': contents,
+    'file_data': {
+      '/foo.py': {
+        'contents': contents,
+        'filetypes': ['python']
+      }
+    }
+  }
+
+  # 0-based line and column!
+  eq_( {
+         'filepath': '/foo.py',
+         'line_num': 1,
+         'column_num': 4
+       },
+       app.post_json( '/run_completer_command', goto_data ).json )
+
+
+@with_setup( Setup )
 def FiletypeCompletionAvailable_Works_test():
   app = TestApp( ycmd.app )
   request_data = {

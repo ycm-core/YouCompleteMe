@@ -76,3 +76,11 @@ def BuildDiagnosticData( filepath,
     'text': text,
     'kind': kind
   }
+
+
+def BuildExceptionResponse( error_message, traceback ):
+  return {
+    'message': error_message,
+    'traceback': traceback
+  }
+

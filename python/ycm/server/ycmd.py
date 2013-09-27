@@ -37,6 +37,7 @@ import bottle
 from bottle import run, request, response
 import server_state
 from ycm import user_options_store
+from ycm.server.responses import BuildExceptionResponse
 import argparse
 
 # num bytes for the request body buffer; request.json only works if the request
@@ -71,13 +72,13 @@ def RunCompleterCommand():
   completer_target = request_data[ 'completer_target' ]
 
   if completer_target == 'identifier':
-    completer = SERVER_STATE.GetGeneralCompleter()
+    completer = SERVER_STATE.GetGeneralCompleter().GetIdentifierCompleter()
   else:
-    completer = SERVER_STATE.GetFiletypeCompleter()
+    completer = SERVER_STATE.GetFiletypeCompleter( request_data[ 'filetypes' ] )
 
-  return _JsonResponse(
-      completer.OnUserCommand( request_data[ 'command_arguments' ],
-                               request_data ) )
+  return _JsonResponse( completer.OnUserCommand(
+      request_data[ 'command_arguments' ],
+      request_data ) )
 
 
 @app.post( '/get_completions' )
@@ -121,6 +122,13 @@ def FiletypeCompletionAvailable():
   LOGGER.info( 'Received filetype completion available request')
   return _JsonResponse( SERVER_STATE.FiletypeCompletionAvailable(
       request.json[ 'filetypes' ] ) )
+
+
+# The type of the param is Bottle.HTTPError
+@app.error( 500 )
+def ErrorHandler( httperror ):
+  return _JsonResponse( BuildExceptionResponse( str( httperror.exception ),
+                                                httperror.traceback ) )
 
 
 def _JsonResponse( data ):

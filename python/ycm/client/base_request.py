@@ -24,6 +24,11 @@ from ycm import vimsupport
 
 HEADERS = {'content-type': 'application/json'}
 
+class ServerError( Exception ):
+  def __init__( self, message ):
+    super( ServerError, self ).__init__( message )
+
+
 class BaseRequest( object ):
   def __init__( self ):
     pass
@@ -46,8 +51,13 @@ class BaseRequest( object ):
     response = requests.post( _BuildUri( handler ),
                               data = json.dumps( data ),
                               headers = HEADERS )
+    if response.status_code == requests.codes.server_error:
+      raise ServerError( response.json()[ 'message' ] )
 
+    # We let Requests handle the other status types, we only handle the 500
+    # error code.
     response.raise_for_status()
+
     if response.text:
       return response.json()
     return None

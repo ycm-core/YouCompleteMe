@@ -105,7 +105,7 @@ def PostVimMessage( message ):
   # non-GUI thread which *sometimes* crashes Vim because Vim is not thread-safe.
   # A consistent crash should force us to notice the error.
   vim.command( "echohl WarningMsg | echomsg '{0}' | echohl None"
-               .format( EscapeForVim( message ) ) )
+               .format( EscapeForVim( str( message ) ) ) )
 
 
 def PresentDialog( message, choices, default_choice_index = 0 ):

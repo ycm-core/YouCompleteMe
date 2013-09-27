@@ -51,6 +51,10 @@ class GeneralCompleterStore( Completer ):
     return set()
 
 
+  def GetIdentifierCompleter( self ):
+    return self._identifier_completer
+
+
   def ShouldUseNow( self, request_data ):
     self._current_query_completers = []
 
