@@ -72,9 +72,9 @@ class JediCompleter( ThreadedCompleter ):
              for completion in script.completions() ]
 
   def DefinedSubcommands( self ):
-    return [ "GoToDefinition",
-             "GoToDeclaration",
-             "GoToDefinitionElseDeclaration" ]
+    return [ 'GoToDefinition',
+             'GoToDeclaration',
+             'GoToDefinitionElseDeclaration' ]
 
 
   def OnUserCommand( self, arguments, request_data ):
