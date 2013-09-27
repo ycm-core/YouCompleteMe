@@ -39,6 +39,7 @@ import server_state
 from ycm import user_options_store
 from ycm.server.responses import BuildExceptionResponse
 import argparse
+import httplib
 
 # num bytes for the request body buffer; request.json only works if the request
 # size is less than this
@@ -128,7 +129,7 @@ def DefinedSubcommands():
 
 
 # The type of the param is Bottle.HTTPError
-@app.error( 500 )
+@app.error( httplib.INTERNAL_SERVER_ERROR )
 def ErrorHandler( httperror ):
   return _JsonResponse( BuildExceptionResponse( str( httperror.exception ),
                                                 httperror.traceback ) )
