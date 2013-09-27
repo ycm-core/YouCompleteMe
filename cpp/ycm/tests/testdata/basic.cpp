@@ -2,7 +2,7 @@ struct Foo {
   int x;
   int y;
   char c;
-}
+};
 
 int main()
 {

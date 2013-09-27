@@ -63,7 +63,7 @@ class CommandRequest( BaseRequest ):
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
                                  self._response[ 'line_num' ] + 1,
-                                 self._response[ 'column_num' ] )
+                                 self._response[ 'column_num' ] + 1)
 
 
 

@@ -137,7 +137,6 @@ foo()
     'column_num': 0,
     'filetypes': ['python'],
     'filepath': '/foo.py',
-    'line_value': contents,
     'file_data': {
       '/foo.py': {
         'contents': contents,
@@ -153,6 +152,49 @@ foo()
          'column_num': 4
        },
        app.post_json( '/run_completer_command', goto_data ).json )
+
+
+@with_setup( Setup )
+def RunCompleterCommand_GoTo_Clang_ZeroBasedLineAndColumn_test():
+  app = TestApp( ycmd.app )
+  contents = """
+struct Foo {
+  int x;
+  int y;
+  char c;
+};
+
+int main()
+{
+  Foo foo;
+  return 0;
+}
+"""
+
+  filename = '/foo.cpp'
+  goto_data = {
+    'compilation_flags': ['-x', 'c++'],
+    'completer_target': 'filetype_default',
+    'command_arguments': ['GoToDefinition'],
+    'line_num': 9,
+    'column_num': 2,
+    'filetypes': ['cpp'],
+    'filepath': filename,
+    'file_data': {
+      filename: {
+        'contents': contents,
+        'filetypes': ['cpp']
+      }
+    }
+  }
+
+  # 0-based line and column!
+  eq_( {
+        'filepath': '/foo.cpp',
+        'line_num': 1,
+        'column_num': 7
+      },
+      app.post_json( '/run_completer_command', goto_data ).json )
 
 
 @with_setup( Setup )

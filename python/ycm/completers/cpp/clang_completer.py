@@ -24,7 +24,7 @@ from ycm.server import responses
 from ycm import extra_conf_store
 from ycm.utils import ToUtf8IfNeeded
 from ycm.completers.completer import Completer
-from ycm.completers.cpp.flags import Flags
+from ycm.completers.cpp.flags import Flags, PrepareFlagsForClang
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MIN_LINES_IN_FILE_TO_PARSE = 5
@@ -96,7 +96,7 @@ class ClangCompleter( Completer ):
       return responses.BuildDisplayMessageResponse(
         PARSING_FILE_MESSAGE )
 
-    flags = self.flags.FlagsForFile( filename )
+    flags = self._FlagsForRequest( request_data )
     if not flags:
       self.completions_future = None
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
@@ -160,14 +160,12 @@ class ClangCompleter( Completer ):
     filename = request_data[ 'filepath' ]
     if not filename:
       self._logger.warning( INVALID_FILE_MESSAGE )
-      return responses.BuildDisplayMessageResponse(
-        INVALID_FILE_MESSAGE )
+      raise ValueError( INVALID_FILE_MESSAGE )
 
-    flags = self.flags.FlagsForFile( filename )
+    flags = self._FlagsForRequest( request_data )
     if not flags:
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
-      return responses.BuildDisplayMessageResponse(
-        NO_COMPILE_FLAGS_MESSAGE )
+      raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
 
     files = self.GetUnsavedFilesVector( request_data )
     line = request_data[ 'line_num' ] + 1
@@ -186,8 +184,8 @@ class ClangCompleter( Completer ):
       raise RuntimeError( 'Can\'t jump to definition.' )
 
     return responses.BuildGoToResponse( location.filename_,
-                                        location.line_number_,
-                                        location.column_number_ )
+                                        location.line_number_ - 1,
+                                        location.column_number_ - 1)
 
 
   def _GoToDeclaration( self, request_data ):
@@ -196,8 +194,8 @@ class ClangCompleter( Completer ):
       raise RuntimeError( 'Can\'t jump to declaration.' )
 
     return responses.BuildGoToResponse( location.filename_,
-                                        location.line_number_,
-                                        location.column_number_ )
+                                        location.line_number_ - 1,
+                                        location.column_number_ - 1)
 
 
   def _GoToDefinitionElseDeclaration( self, request_data ):
@@ -208,8 +206,8 @@ class ClangCompleter( Completer ):
       raise RuntimeError( 'Can\'t jump to definition or declaration.' )
 
     return responses.BuildGoToResponse( location.filename_,
-                                        location.line_number_,
-                                        location.column_number_ )
+                                        location.line_number_ - 1,
+                                        location.column_number_ - 1)
 
 
 
@@ -234,7 +232,7 @@ class ClangCompleter( Completer ):
       self.extra_parse_desired = True
       return
 
-    flags = self.flags.FlagsForFile( filename )
+    flags = self._FlagsForRequest( request_data )
     if not flags:
       self.parse_future = None
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
@@ -319,12 +317,19 @@ class ClangCompleter( Completer ):
     filename = request_data[ 'filepath' ]
     if not filename:
       return ''
-    flags = self.flags.FlagsForFile( filename ) or []
+    flags = self._FlagsForRequest( request_data ) or []
     source = extra_conf_store.ModuleFileForSourceFile( filename )
     return responses.BuildDisplayMessageResponse(
       'Flags for {0} loaded from {1}:\n{2}'.format( filename,
                                                     source,
                                                     list( flags ) ) )
+
+  def _FlagsForRequest( self, request_data ):
+    filename = request_data[ 'filepath' ]
+    if 'compilation_flags' in request_data:
+      return PrepareFlagsForClang( request_data[ 'compilation_flags' ],
+                                   filename )
+    return self.flags.FlagsForFile( filename )
 
 # TODO: Make this work again
 # def DiagnosticToDict( diagnostic ):

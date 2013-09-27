@@ -61,4 +61,21 @@ TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync ) {
   EXPECT_TRUE( !completions_future.GetResults()->empty() );
 }
 
+TEST( ClangCompleterTest, GetDefinitionLocation ) {
+  ClangCompleter completer;
+  std::string filename = PathToTestFile( "basic.cpp" ).string();
+
+  // Clang operates on the reasonable assumption that line and column numbers
+  // are 1-based.
+  Location actual_location =
+    completer.GetDefinitionLocation(
+      filename,
+      9,
+      3,
+      std::vector< UnsavedFile >(),
+      std::vector< std::string >() );
+
+  EXPECT_EQ( Location( filename, 1, 8 ), actual_location );
+}
+
 } // namespace YouCompleteMe
