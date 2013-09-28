@@ -84,7 +84,7 @@ class YouCompleteMe( object ):
             self._server_popen = subprocess.Popen( command,
                                                    stdout = fstdout,
                                                    stderr = fstderr,
-                                                   shell = False )
+                                                   shell = True )
 
 
   def CreateCompletionRequest( self ):
@@ -202,8 +202,16 @@ class YouCompleteMe( object ):
 
 
   def DebugInfo( self ):
-    return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                          'debug_info' )
+    debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                'debug_info' )
+    debug_info += '\nServer running at: {}'.format(
+        BaseRequest.server_location )
+    if self._server_stderr or self._server_stdout:
+      debug_info += '\nServer logfiles:\n  {}\n  {}'.format(
+        self._server_stdout,
+        self._server_stderr )
+
+    return debug_info
 
 
   def CurrentFiletypeCompletionEnabled( self ):

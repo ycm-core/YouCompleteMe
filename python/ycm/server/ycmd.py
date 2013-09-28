@@ -143,8 +143,11 @@ def DebugInfo():
     output.append( ycm_core.ClangVersion() )
 
   request_data = request.json
-  output.append(
-      _GetCompleterForRequestData( request_data ).DebugInfo( request_data) )
+  try:
+    output.append(
+        _GetCompleterForRequestData( request_data ).DebugInfo( request_data) )
+  except:
+    pass
   return _JsonResponse( '\n'.join( output ) )
 
 
