@@ -319,7 +319,7 @@ class Completer( object ):
     pass
 
 
-  def DebugInfo( self ):
+  def DebugInfo( self, request_data ):
     return ''
 
 

@@ -128,6 +128,26 @@ def DefinedSubcommands():
   return _JsonResponse( completer.DefinedSubcommands() )
 
 
+@app.post( '/debug_info')
+def DebugInfo():
+  # This can't be at the top level because of possible extra conf preload
+  import ycm_core
+  LOGGER.info( 'Received debug info request')
+
+  output = []
+  has_clang_support = ycm_core.HasClangSupport()
+  output.append( 'Server has Clang support compiled in: {0}'.format(
+    has_clang_support ) )
+
+  if has_clang_support:
+    output.append( ycm_core.ClangVersion() )
+
+  request_data = request.json
+  output.append(
+      _GetCompleterForRequestData( request_data ).DebugInfo( request_data) )
+  return _JsonResponse( '\n'.join( output ) )
+
+
 # The type of the param is Bottle.HTTPError
 @app.error( httplib.INTERNAL_SERVER_ERROR )
 def ErrorHandler( httperror ):

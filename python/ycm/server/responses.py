@@ -38,6 +38,8 @@ def BuildDescriptionOnlyGoToResponse( text ):
   }
 
 
+# TODO: Look at all the callers and ensure they are not using this instead of an
+# exception.
 def BuildDisplayMessageResponse( text ):
   return {
     'message': text

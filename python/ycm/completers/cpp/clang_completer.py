@@ -319,10 +319,9 @@ class ClangCompleter( Completer ):
       return ''
     flags = self._FlagsForRequest( request_data ) or []
     source = extra_conf_store.ModuleFileForSourceFile( filename )
-    return responses.BuildDisplayMessageResponse(
-      'Flags for {0} loaded from {1}:\n{2}'.format( filename,
-                                                    source,
-                                                    list( flags ) ) )
+    return 'Flags for {0} loaded from {1}:\n{2}'.format( filename,
+                                                         source,
+                                                         list( flags ) )
 
   def _FlagsForRequest( self, request_data ):
     filename = request_data[ 'filepath' ]

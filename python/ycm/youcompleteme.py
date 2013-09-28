@@ -19,7 +19,6 @@
 
 import os
 import vim
-import ycm_core
 import subprocess
 import tempfile
 import json
@@ -203,24 +202,8 @@ class YouCompleteMe( object ):
 
 
   def DebugInfo( self ):
-    completers = set( self._filetype_completers.values() )
-    completers.add( self._gencomp )
-    output = []
-    for completer in completers:
-      if not completer:
-        continue
-      debug = completer.DebugInfo()
-      if debug:
-        output.append( debug )
-
-    has_clang_support = ycm_core.HasClangSupport()
-    output.append( 'Has Clang support compiled in: {0}'.format(
-      has_clang_support ) )
-
-    if has_clang_support:
-      output.append( ycm_core.ClangVersion() )
-
-    return '\n'.join( output )
+    return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                          'debug_info' )
 
 
   def CurrentFiletypeCompletionEnabled( self ):
