@@ -60,36 +60,24 @@ BOOST_PYTHON_MODULE(ycm_core)
   def( "YcmCoreVersion", YcmCoreVersion );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
-    .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
     .def( "AddIdentifiersToDatabase",
           &IdentifierCompleter::AddIdentifiersToDatabase )
-    .def( "AddIdentifiersToDatabaseFromTagFilesAsync",
-          &IdentifierCompleter::AddIdentifiersToDatabaseFromTagFilesAsync )
-    .def( "AddIdentifiersToDatabaseFromBufferAsync",
-          &IdentifierCompleter::AddIdentifiersToDatabaseFromBufferAsync )
-    .def( "CandidatesForQueryAndTypeAsync",
-          &IdentifierCompleter::CandidatesForQueryAndTypeAsync );
+    .def( "AddIdentifiersToDatabaseFromTagFiles",
+          &IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles )
+    .def( "AddIdentifiersToDatabaseFromBuffer",
+          &IdentifierCompleter::AddIdentifiersToDatabaseFromBuffer )
+    .def( "CandidatesForQueryAndType",
+          &IdentifierCompleter::CandidatesForQueryAndType );
 
   // TODO: rename these *Vec classes to *Vector; don't forget the python file
   class_< std::vector< std::string >,
       boost::shared_ptr< std::vector< std::string > > >( "StringVec" )
     .def( vector_indexing_suite< std::vector< std::string > >() );
 
-  class_< Future< AsyncResults > >( "FutureResults" )
-    .def( "ResultsReady", &Future< AsyncResults >::ResultsReady )
-    .def( "GetResults", &Future< AsyncResults >::GetResults );
-
-  class_< Future< void > >( "FutureVoid" )
-    .def( "ResultsReady", &Future< void >::ResultsReady )
-    .def( "GetResults", &Future< void >::GetResults );
-
 #ifdef USE_CLANG_COMPLETER
   def( "ClangVersion", ClangVersion );
 
-  class_< Future< AsyncCompletions > >( "FutureCompletions" )
-    .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
-    .def( "GetResults", &Future< AsyncCompletions >::GetResults );
-
+  // TODO: We may not need this at all anymore. Look into it.
   class_< Future< AsyncCompilationInfoForFile > >(
       "FutureCompilationInfoForFile" )
     .def( "ResultsReady",
@@ -116,17 +104,14 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( vector_indexing_suite< std::vector< UnsavedFile > >() );
 
   class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
-    .def( "EnableThreading", &ClangCompleter::EnableThreading )
     .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
     .def( "GetDeclarationLocation", &ClangCompleter::GetDeclarationLocation )
     .def( "GetDefinitionLocation", &ClangCompleter::GetDefinitionLocation )
-    .def( "DeleteCachesForFileAsync",
-          &ClangCompleter::DeleteCachesForFileAsync )
+    .def( "DeleteCachesForFile", &ClangCompleter::DeleteCachesForFile )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
-    .def( "UpdateTranslationUnitAsync",
-          &ClangCompleter::UpdateTranslationUnitAsync )
-    .def( "CandidatesForQueryAndLocationInFileAsync",
-          &ClangCompleter::CandidatesForQueryAndLocationInFileAsync );
+    .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
+    .def( "CandidatesForLocationInFile",
+          &ClangCompleter::CandidatesForLocationInFile );
 
   class_< CompletionData >( "CompletionData" )
     .def( "TextToInsertInBuffer", &CompletionData::TextToInsertInBuffer )

@@ -33,21 +33,15 @@ class UltiSnipsCompleter( GeneralCompleter ):
     self._filtered_candidates = None
 
 
-  def ShouldUseNowInner( self, request_data ):
+  def ShouldUseNow( self, request_data ):
     return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def CandidatesForQueryAsync( self, request_data ):
-    self._filtered_candidates = self.FilterAndSortCandidates(
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
+    return self.FilterAndSortCandidates(
       self._candidates, request_data[ 'query' ] )
-
-
-  def AsyncCandidateRequestReady( self ):
-    return True
-
-
-  def CandidatesFromStoredRequest( self ):
-    return self._filtered_candidates if self._filtered_candidates else []
 
 
   def OnBufferVisit( self, request_data ):

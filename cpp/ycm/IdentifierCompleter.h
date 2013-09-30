@@ -36,8 +36,6 @@ namespace YouCompleteMe {
 
 class Candidate;
 
-typedef boost::shared_ptr< std::vector< std::string > > AsyncResults;
-
 
 class IdentifierCompleter : boost::noncopyable {
 public:
@@ -47,10 +45,6 @@ public:
                        const std::string &filetype,
                        const std::string &filepath );
 
-  ~IdentifierCompleter();
-
-  void EnableThreading();
-
   void AddIdentifiersToDatabase(
     const std::vector< std::string > &new_candidates,
     const std::string &filetype,
@@ -59,23 +53,10 @@ public:
   void AddIdentifiersToDatabaseFromTagFiles(
     const std::vector< std::string > &absolute_paths_to_tag_files );
 
-  // NOTE: params are taken by value on purpose!
-  void AddIdentifiersToDatabaseFromTagFilesAsync(
-    std::vector< std::string > absolute_paths_to_tag_files );
-
   void AddIdentifiersToDatabaseFromBuffer(
     const std::string &buffer_contents,
     const std::string &filetype,
     const std::string &filepath,
-    bool collect_from_comments_and_strings );
-
-  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
-  // avoid an expensive copy of buffer_contents if the param is taken by value
-  // (move ctors FTW)
-  void AddIdentifiersToDatabaseFromBufferAsync(
-    std::string buffer_contents,
-    std::string filetype,
-    std::string filepath,
     bool collect_from_comments_and_strings );
 
   // Only provided for tests!
@@ -86,37 +67,13 @@ public:
     const std::string &query,
     const std::string &filetype ) const;
 
-  Future< AsyncResults > CandidatesForQueryAndTypeAsync(
-    const std::string &query,
-    const std::string &filetype ) const;
-
-  typedef boost::shared_ptr <
-  boost::packaged_task< AsyncResults > > QueryTask;
-
-  typedef ConcurrentLatestValue< QueryTask > LatestQueryTask;
-
-  typedef ConcurrentStack< VoidTask > BufferIdentifiersTaskStack;
-
 private:
-
-  void InitThreads();
-
 
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES
   /////////////////////////////
 
   IdentifierDatabase identifier_database_;
-
-  bool threading_enabled_;
-
-  boost::thread_group query_threads_;
-
-  boost::scoped_ptr< boost::thread > buffer_identifiers_thread_;
-
-  mutable LatestQueryTask latest_query_task_;
-
-  BufferIdentifiersTaskStack buffer_identifiers_task_stack_;
 };
 
 } // namespace YouCompleteMe

@@ -30,8 +30,8 @@ CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MIN_LINES_IN_FILE_TO_PARSE = 5
 PARSING_FILE_MESSAGE = 'Still parsing file, no completions yet.'
 NO_COMPILE_FLAGS_MESSAGE = 'Still no compile flags, no completions yet.'
-NO_COMPLETIONS_MESSAGE = 'No completions found; errors in the file?'
 INVALID_FILE_MESSAGE = 'File is invalid.'
+NO_COMPLETIONS_MESSAGE = 'No completions found; errors in the file?'
 FILE_TOO_SHORT_MESSAGE = (
   'File is less than {} lines long; not compiling.'.format(
     MIN_LINES_IN_FILE_TO_PARSE ) )
@@ -41,24 +41,13 @@ NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 class ClangCompleter( Completer ):
   def __init__( self, user_options ):
     super( ClangCompleter, self ).__init__( user_options )
-    self.max_diagnostics_to_display = user_options[
+    self._max_diagnostics_to_display = user_options[
       'max_diagnostics_to_display' ]
-    self.completer = ycm_core.ClangCompleter()
-    self.completer.EnableThreading()
-    self.last_prepared_diagnostics = []
-    self.parse_future = None
-    self.flags = Flags()
-    self.diagnostic_store = None
+    self._completer = ycm_core.ClangCompleter()
+    self._last_prepared_diagnostics = []
+    self._flags = Flags()
+    self._diagnostic_store = None
     self._logger = logging.getLogger( __name__ )
-
-    # We set this flag when a compilation request comes in while one is already
-    # in progress. We use this to trigger the pending request after the previous
-    # one completes (from GetDiagnosticsForCurrentFile because that's the only
-    # method that knows when the compilation has finished).
-    # TODO: Remove this now that we have multiple threads in the server; the
-    # subsequent requests that want to parse will just block until the current
-    # parse is done and will then proceed.
-    self.extra_parse_desired = False
 
 
   def SupportedFiletypes( self ):
@@ -84,53 +73,35 @@ class ClangCompleter( Completer ):
     return files
 
 
-  def CandidatesForQueryAsync( self, request_data ):
+  def ComputeCandidatesInner( self, request_data ):
     filename = request_data[ 'filepath' ]
-
     if not filename:
       return
 
-    if self.completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
-      self.completions_future = None
+    if self._completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
       self._logger.info( PARSING_FILE_MESSAGE )
-      return responses.BuildDisplayMessageResponse(
-        PARSING_FILE_MESSAGE )
+      raise RuntimeError( PARSING_FILE_MESSAGE )
 
     flags = self._FlagsForRequest( request_data )
     if not flags:
-      self.completions_future = None
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
-      return responses.BuildDisplayMessageResponse(
-        NO_COMPILE_FLAGS_MESSAGE )
+      raise RuntimeError( NO_COMPILE_FLAGS_MESSAGE )
 
-    # TODO: sanitize query, probably in C++ code
-
-    files = ycm_core.UnsavedFileVec()
-    query = request_data[ 'query' ]
-    if not query:
-      files = self.GetUnsavedFilesVector( request_data )
-
+    files = self.GetUnsavedFilesVector( request_data )
     line = request_data[ 'line_num' ] + 1
     column = request_data[ 'start_column' ] + 1
-    self.completions_future = (
-      self.completer.CandidatesForQueryAndLocationInFileAsync(
-        ToUtf8IfNeeded( query ),
+    results = self._completer.CandidatesForLocationInFile(
         ToUtf8IfNeeded( filename ),
         line,
         column,
         files,
-        flags ) )
+        flags )
 
-
-  def CandidatesFromStoredRequest( self ):
-    if not self.completions_future:
-      return []
-    results = [ ConvertCompletionData( x ) for x in
-                self.completions_future.GetResults() ]
     if not results:
       self._logger.warning( NO_COMPLETIONS_MESSAGE )
       raise RuntimeError( NO_COMPLETIONS_MESSAGE )
-    return results
+
+    return [ ConvertCompletionData( x ) for x in results ]
 
 
   def DefinedSubcommands( self ):
@@ -170,7 +141,7 @@ class ClangCompleter( Completer ):
     files = self.GetUnsavedFilesVector( request_data )
     line = request_data[ 'line_num' ] + 1
     column = request_data[ 'column_num' ] + 1
-    return getattr( self.completer, goto_function )(
+    return getattr( self._completer, goto_function )(
         ToUtf8IfNeeded( filename ),
         line,
         column,
@@ -212,73 +183,63 @@ class ClangCompleter( Completer ):
 
 
   def _ClearCompilationFlagCache( self ):
-    self.flags.Clear()
+    self._flags.Clear()
 
 
   def OnFileReadyToParse( self, request_data ):
     filename = request_data[ 'filepath' ]
     contents = request_data[ 'file_data' ][ filename ][ 'contents' ]
     if contents.count( '\n' ) < MIN_LINES_IN_FILE_TO_PARSE:
-      self.parse_future = None
       self._logger.warning( FILE_TOO_SHORT_MESSAGE )
       raise ValueError( FILE_TOO_SHORT_MESSAGE )
 
     if not filename:
       self._logger.warning( INVALID_FILE_MESSAGE )
-      return responses.BuildDisplayMessageResponse(
-        INVALID_FILE_MESSAGE )
-
-    if self.completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
-      self.extra_parse_desired = True
-      return
+      raise ValueError( INVALID_FILE_MESSAGE )
 
     flags = self._FlagsForRequest( request_data )
     if not flags:
-      self.parse_future = None
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
-      return responses.BuildDisplayMessageResponse(
-        NO_COMPILE_FLAGS_MESSAGE )
+      raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
 
-    self.parse_future = self.completer.UpdateTranslationUnitAsync(
+    self._completer.UpdateTranslationUnit(
       ToUtf8IfNeeded( filename ),
       self.GetUnsavedFilesVector( request_data ),
       flags )
 
-    self.extra_parse_desired = False
-
 
   def OnBufferUnload( self, request_data ):
-    self.completer.DeleteCachesForFileAsync(
+    self._completer.DeleteCachesForFile(
         ToUtf8IfNeeded( request_data[ 'unloaded_buffer' ] ) )
 
 
   def DiagnosticsForCurrentFileReady( self ):
-    if not self.parse_future:
-      return False
-
-    return self.parse_future.ResultsReady()
+    # if not self.parse_future:
+    #   return False
+    # return self.parse_future.ResultsReady()
+    pass
 
 
   def GettingCompletions( self, request_data ):
-    return self.completer.UpdatingTranslationUnit(
+    return self._completer.UpdatingTranslationUnit(
         ToUtf8IfNeeded( request_data[ 'filepath' ] ) )
 
 
   def GetDiagnosticsForCurrentFile( self, request_data ):
     filename = request_data[ 'filepath' ]
     if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self.completer.DiagnosticsForFile(
+      diagnostics = self._completer.DiagnosticsForFile(
           ToUtf8IfNeeded( filename ) )
-      self.diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
-      self.last_prepared_diagnostics = [
+      self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
+      self._last_prepared_diagnostics = [
         responses.BuildDiagnosticData( x ) for x in
-        diagnostics[ : self.max_diagnostics_to_display ] ]
-      self.parse_future = None
+        diagnostics[ : self._max_diagnostics_to_display ] ]
+      # self.parse_future = None
 
-      if self.extra_parse_desired:
-        self.OnFileReadyToParse( request_data )
+      # if self.extra_parse_desired:
+      #   self.OnFileReadyToParse( request_data )
 
-    return self.last_prepared_diagnostics
+    return self._last_prepared_diagnostics
 
 
   def GetDetailedDiagnostic( self, request_data ):
@@ -286,11 +247,11 @@ class ClangCompleter( Completer ):
     current_column = request_data[ 'column_num' ] + 1
     current_file = request_data[ 'filepath' ]
 
-    if not self.diagnostic_store:
+    if not self._diagnostic_store:
       return responses.BuildDisplayMessageResponse(
         NO_DIAGNOSTIC_MESSAGE )
 
-    diagnostics = self.diagnostic_store[ current_file ][ current_line ]
+    diagnostics = self._diagnostic_store[ current_file ][ current_line ]
     if not diagnostics:
       return responses.BuildDisplayMessageResponse(
         NO_DIAGNOSTIC_MESSAGE )
@@ -308,11 +269,6 @@ class ClangCompleter( Completer ):
       closest_diagnostic.long_formatted_text_ )
 
 
-  def ShouldUseNow( self, request_data ):
-    # We don't want to use the Completer API cache, we use one in the C++ code.
-    return self.ShouldUseNowInner( request_data )
-
-
   def DebugInfo( self, request_data ):
     filename = request_data[ 'filepath' ]
     if not filename:
@@ -328,7 +284,7 @@ class ClangCompleter( Completer ):
     if 'compilation_flags' in request_data:
       return PrepareFlagsForClang( request_data[ 'compilation_flags' ],
                                    filename )
-    return self.flags.FlagsForFile( filename )
+    return self._flags.FlagsForFile( filename )
 
 # TODO: Make this work again
 # def DiagnosticToDict( diagnostic ):

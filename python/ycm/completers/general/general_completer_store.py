@@ -74,20 +74,13 @@ class GeneralCompleterStore( Completer ):
     return should_use_now
 
 
-  def CandidatesForQueryAsync( self, request_data ):
-    for completer in self._current_query_completers:
-      completer.CandidatesForQueryAsync( request_data )
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
 
-
-  def AsyncCandidateRequestReady( self ):
-    return all( x.AsyncCandidateRequestReady() for x in
-                self._current_query_completers )
-
-
-  def CandidatesFromStoredRequest( self ):
     candidates = []
     for completer in self._current_query_completers:
-      candidates += completer.CandidatesFromStoredRequest()
+      candidates += completer.ComputeCandidates( request_data )
 
     return candidates
 

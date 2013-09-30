@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.threaded_completer import ThreadedCompleter
+from ycm.completers.completer import Completer
 from ycm.server import responses
 
 import sys
@@ -38,7 +38,7 @@ except ImportError:
 sys.path.pop( 0 )
 
 
-class JediCompleter( ThreadedCompleter ):
+class JediCompleter( Completer ):
   """
   A Completer that uses the Jedi completion engine.
   https://jedi.readthedocs.org/en/latest/
@@ -63,7 +63,7 @@ class JediCompleter( ThreadedCompleter ):
       return jedi.Script( contents, line, column, filename )
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidatesInner( self, request_data ):
     script = self._GetJediScript( request_data )
     return [ responses.BuildCompletionData(
                 str( completion.name ),

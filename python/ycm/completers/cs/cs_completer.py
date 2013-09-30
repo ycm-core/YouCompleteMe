@@ -21,7 +21,7 @@
 import os
 from sys import platform
 import glob
-from ycm.completers.threaded_completer import ThreadedCompleter
+from ycm.completers.completer import Completer
 from ycm.server import responses
 from ycm import utils
 import urllib2
@@ -36,7 +36,7 @@ SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
 '"./install.sh --omnisharp-completer".' )
 
-class CsharpCompleter( ThreadedCompleter ):
+class CsharpCompleter( Completer ):
   """
   A Completer that uses the Omnisharp server as completion engine.
   """
@@ -61,7 +61,7 @@ class CsharpCompleter( ThreadedCompleter ):
     return [ 'cs' ]
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidatesInner( self, request_data ):
     return [ responses.BuildCompletionData(
                 completion[ 'CompletionText' ],
                 completion[ 'DisplayText' ],

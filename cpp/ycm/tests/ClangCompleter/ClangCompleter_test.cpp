@@ -43,24 +43,6 @@ TEST( ClangCompleterTest, CandidatesForLocationInFile ) {
 }
 
 
-TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync ) {
-  ClangCompleter completer;
-  completer.EnableThreading();
-
-  Future< AsyncCompletions > completions_future =
-    completer.CandidatesForQueryAndLocationInFileAsync(
-      "",
-      PathToTestFile( "basic.cpp" ).string(),
-      11,
-      7,
-      std::vector< UnsavedFile >(),
-      std::vector< std::string >() );
-
-  completions_future.Wait();
-
-  EXPECT_TRUE( !completions_future.GetResults()->empty() );
-}
-
 TEST( ClangCompleterTest, GetDefinitionLocation ) {
   ClangCompleter completer;
   std::string filename = PathToTestFile( "basic.cpp" ).string();

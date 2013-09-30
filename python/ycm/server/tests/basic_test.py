@@ -21,6 +21,7 @@ from webtest import TestApp
 from .. import ycmd
 from ..responses import BuildCompletionData
 from nose.tools import ok_, eq_, with_setup
+from hamcrest import assert_that, has_items, has_entry
 import bottle
 
 bottle.debug( True )
@@ -39,6 +40,11 @@ def RequestDataForFileWithContents( filename, contents = None ):
       }
     }
   }
+
+
+# TODO: Make the other tests use this helper too instead of BuildCompletionData
+def CompletionEntryMatcher( insertion_text ):
+  return has_entry( 'insertion_text', insertion_text )
 
 
 def Setup():
@@ -67,6 +73,48 @@ def GetCompletions_IdentifierCompleter_Works_test():
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
        app.post_json( '/get_completions', completion_data ).json )
+
+
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_Works_test():
+  app = TestApp( ycmd.app )
+  contents = """
+struct Foo {
+  int x;
+  int y;
+  char c;
+};
+
+int main()
+{
+  Foo foo;
+  foo.
+}
+"""
+
+  filename = '/foo.cpp'
+  completion_data = {
+    'compilation_flags': ['-x', 'c++'],
+    # 0-based line and column!
+    'query': '',
+    'line_num': 10,
+    'column_num': 6,
+    'start_column': 6,
+    'line_value': '  foo.',
+    'filetypes': ['cpp'],
+    'filepath': filename,
+    'file_data': {
+      filename: {
+        'contents': contents,
+        'filetypes': ['cpp']
+      }
+    }
+  }
+
+  results = app.post_json( '/get_completions', completion_data ).json
+  assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
+                                   CompletionEntryMatcher( 'x' ),
+                                   CompletionEntryMatcher( 'y' ) ) )
 
 
 @with_setup( Setup )

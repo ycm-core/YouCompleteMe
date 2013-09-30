@@ -58,44 +58,21 @@ class Completer( object ):
   and will NOT re-query your completer but will in fact provide fuzzy-search on
   the candidate strings that were stored in the cache.
 
-  CandidatesForQueryAsync() is the main entry point when the user types. For
+  ComputeCandidates() is the main entry point when the user types. For
   "foo.bar", the user query is "bar" and completions matching this string should
-  be shown. The job of CandidatesForQueryAsync() is to merely initiate this
-  request, which will hopefully be processed in a background thread. You may
-  want to subclass ThreadedCompleter instead of Completer directly.
+  be shown. It should return the list of candidates.  The format of the result
+  can be a list of strings or a more complicated list of dictionaries. Use
+  ycm.server.responses.BuildCompletionData to build the detailed response. See
+  clang_completer.py to see how its used in practice.
 
-  AsyncCandidateRequestReady() is the function that is repeatedly polled until
-  it returns True. If CandidatesForQueryAsync() started a background task of
-  collecting the required completions, AsyncCandidateRequestReady() would check
-  the state of that task and return False until it was completed.
-
-  CandidatesFromStoredRequest() should return the list of candidates. This is
-  what YCM calls after AsyncCandidateRequestReady() returns True. The format of
-  the result can be a list of strings or a more complicated list of
-  dictionaries. See ':h complete-items' for the format, and clang_completer.py
-  to see how its used in practice.
+  Again, you probably want to override ComputeCandidatesInner().
 
   You also need to implement the SupportedFiletypes() function which should
   return a list of strings, where the strings are Vim filetypes your completer
   supports.
 
-  clang_completer.py is a good example of a "complicated" completer that
-  maintains its own internal cache and therefore directly overrides the "main"
-  functions in the API instead of the *Inner versions. A good example of a
-  simple completer that does not do this is omni_completer.py.
-
-  If you're confident your completer doesn't need a background task (think
-  again, you probably do) because you can "certainly" furnish a response in
-  under 10ms, then you can perform your backend processing in a synchronous
-  fashion. You may also need to do this because of technical restrictions (much
-  like omni_completer.py has to do it because accessing Vim internals is not
-  thread-safe). But even if you're certain, still try to do the processing in a
-  background thread. Your completer is unlikely to be merged if it does not,
-  because synchronous processing will block Vim's GUI thread and that's a very,
-  VERY bad thing (so try not to do it!). Again, you may want to subclass
-  ThreadedCompleter instead of Completer directly; ThreadedCompleter will
-  abstract away the use of a background thread for you. See
-  threaded_completer.py.
+  clang_completer.py is a good example of a "complicated" completer that A good
+  example of a simple completer is ultisnips_completer.py.
 
   The On* functions are provided for your convenience. They are called when
   their specific events occur. For instance, the identifier completer collects
@@ -122,7 +99,7 @@ class Completer( object ):
     self.triggers_for_filetype = TriggersForFiletype(
       user_options[ 'semantic_triggers' ] )
     self.completions_future = None
-    self.completions_cache = None
+    self._completions_cache = None
 
 
   # It's highly likely you DON'T want to override this function but the *Inner
@@ -130,13 +107,13 @@ class Completer( object ):
   def ShouldUseNow( self, request_data ):
     inner_says_yes = self.ShouldUseNowInner( request_data )
     if not inner_says_yes:
-      self.completions_cache = None
+      self._completions_cache = None
 
-    previous_results_were_empty = ( self.completions_cache and
-                                    self.completions_cache.CacheValid(
+    previous_results_were_empty = ( self._completions_cache and
+                                    self._completions_cache.CacheValid(
                                       request_data[ 'line_num' ],
                                       request_data[ 'start_column' ] ) and
-                                    not self.completions_cache.raw_completions )
+                                    not self._completions_cache.raw_completions )
     return inner_says_yes and not previous_results_were_empty
 
 
@@ -171,20 +148,28 @@ class Completer( object ):
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
-  def CandidatesForQueryAsync( self, request_data ):
-    self.request_data = request_data
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
 
     if ( request_data[ 'query' ] and
-         self.completions_cache and
-         self.completions_cache.CacheValid( request_data[ 'line_num' ],
-                                            request_data[ 'start_column' ] ) ):
-      self.completions_cache.filtered_completions = (
-        self.FilterAndSortCandidates(
-          self.completions_cache.raw_completions,
-          request_data[ 'query' ] ) )
+         self._completions_cache and
+         self._completions_cache.CacheValid( request_data[ 'line_num' ],
+                                             request_data[ 'start_column' ] ) ):
+      return self.FilterAndSortCandidates(
+          self._completions_cache.raw_completions,
+          request_data[ 'query' ] )
     else:
-      self.completions_cache = None
-      self.CandidatesForQueryAsyncInner( request_data )
+      self._completions_cache = CompletionsCache()
+      self._completions_cache.raw_completions = self.ComputeCandidatesInner(
+          request_data )
+      self._completions_cache.line = request_data[ 'line_num' ]
+      self._completions_cache.column = request_data[ 'start_column' ]
+      return self._completions_cache.raw_completions
+
+
+  def ComputeCandidatesInner( self, request_data ):
+    pass
 
 
   def DefinedSubcommands( self ):
@@ -222,46 +207,6 @@ class Completer( object ):
       ToUtf8IfNeeded( query ) )
 
     return matches
-
-
-  def CandidatesForQueryAsyncInner( self, query, start_column ):
-    pass
-
-
-  # It's highly likely you DON'T want to override this function but the *Inner
-  # version of it.
-  def AsyncCandidateRequestReady( self ):
-    if self.completions_cache:
-      return True
-    else:
-      return self.AsyncCandidateRequestReadyInner()
-
-
-  def AsyncCandidateRequestReadyInner( self ):
-    if not self.completions_future:
-      # We return True so that the caller can extract the default value from the
-      # future
-      return True
-    return self.completions_future.ResultsReady()
-
-
-  # It's highly likely you DON'T want to override this function but the *Inner
-  # version of it.
-  def CandidatesFromStoredRequest( self ):
-    if self.completions_cache:
-      return self.completions_cache.filtered_completions
-    else:
-      self.completions_cache = CompletionsCache()
-      self.completions_cache.raw_completions = self.CandidatesFromStoredRequestInner()
-      self.completions_cache.line = self.request_data[ 'line_num' ]
-      self.completions_cache.column = self.request_data[ 'start_column' ]
-      return self.completions_cache.raw_completions
-
-
-  def CandidatesFromStoredRequestInner( self ):
-    if not self.completions_future:
-      return []
-    return self.completions_future.GetResults()
 
 
   def OnFileReadyToParse( self, request_data ):

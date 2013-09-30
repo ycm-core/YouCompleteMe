@@ -34,9 +34,8 @@ SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 class IdentifierCompleter( GeneralCompleter ):
   def __init__( self, user_options ):
     super( IdentifierCompleter, self ).__init__( user_options )
-    self.completer = ycm_core.IdentifierCompleter()
-    self.completer.EnableThreading()
-    self.tags_file_last_mtime = defaultdict( int )
+    self._completer = ycm_core.IdentifierCompleter()
+    self._tags_file_last_mtime = defaultdict( int )
     self._logger = logging.getLogger( __name__ )
 
 
@@ -44,10 +43,19 @@ class IdentifierCompleter( GeneralCompleter ):
     return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def CandidatesForQueryAsync( self, request_data ):
-    self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
+
+    completions = self._completer.CandidatesForQueryAndType(
       ToUtf8IfNeeded( utils.SanitizeQuery( request_data[ 'query' ] ) ),
       ToUtf8IfNeeded( request_data[ 'filetypes' ][ 0 ] ) )
+
+    completions = completions[ : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
+    completions = _RemoveSmallCandidates(
+      completions, self.user_options[ 'min_num_identifier_candidate_chars' ] )
+
+    return [ responses.BuildCompletionData( x ) for x in completions ]
 
 
   def AddIdentifier( self, identifier, request_data ):
@@ -60,7 +68,7 @@ class IdentifierCompleter( GeneralCompleter ):
     vector = ycm_core.StringVec()
     vector.append( ToUtf8IfNeeded( identifier ) )
     self._logger.info( 'Adding ONE buffer identifier for file: %s', filepath )
-    self.completer.AddIdentifiersToDatabase( vector,
+    self._completer.AddIdentifiersToDatabase( vector,
                                              ToUtf8IfNeeded( filetype ),
                                              ToUtf8IfNeeded( filepath ) )
 
@@ -92,7 +100,7 @@ class IdentifierCompleter( GeneralCompleter ):
 
     text = request_data[ 'file_data' ][ filepath ][ 'contents' ]
     self._logger.info( 'Adding buffer identifiers for file: %s', filepath )
-    self.completer.AddIdentifiersToDatabaseFromBufferAsync(
+    self._completer.AddIdentifiersToDatabaseFromBuffer(
       ToUtf8IfNeeded( text ),
       ToUtf8IfNeeded( filetype ),
       ToUtf8IfNeeded( filepath ),
@@ -106,20 +114,20 @@ class IdentifierCompleter( GeneralCompleter ):
         current_mtime = os.path.getmtime( tag_file )
       except:
         continue
-      last_mtime = self.tags_file_last_mtime[ tag_file ]
+      last_mtime = self._tags_file_last_mtime[ tag_file ]
 
       # We don't want to repeatedly process the same file over and over; we only
       # process if it's changed since the last time we looked at it
       if current_mtime <= last_mtime:
         continue
 
-      self.tags_file_last_mtime[ tag_file ] = current_mtime
+      self._tags_file_last_mtime[ tag_file ] = current_mtime
       absolute_paths_to_tag_files.append( ToUtf8IfNeeded( tag_file ) )
 
     if not absolute_paths_to_tag_files:
       return
 
-    self.completer.AddIdentifiersToDatabaseFromTagFilesAsync(
+    self._completer.AddIdentifiersToDatabaseFromTagFiles(
       absolute_paths_to_tag_files )
 
 
@@ -129,7 +137,7 @@ class IdentifierCompleter( GeneralCompleter ):
       keyword_vector.append( ToUtf8IfNeeded( keyword ) )
 
     filepath = SYNTAX_FILENAME + filetypes[ 0 ]
-    self.completer.AddIdentifiersToDatabase( keyword_vector,
+    self._completer.AddIdentifiersToDatabase( keyword_vector,
                                              ToUtf8IfNeeded( filetypes[ 0 ] ),
                                              ToUtf8IfNeeded( filepath ) )
 
@@ -149,18 +157,6 @@ class IdentifierCompleter( GeneralCompleter ):
 
   def OnCurrentIdentifierFinished( self, request_data ):
     self.AddPreviousIdentifier( request_data )
-
-
-  def CandidatesFromStoredRequest( self ):
-    if not self.completions_future:
-      return []
-    completions = self.completions_future.GetResults()[
-      : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
-
-    completions = _RemoveSmallCandidates(
-      completions, self.user_options[ 'min_num_identifier_candidate_chars' ] )
-
-    return [ responses.BuildCompletionData( x ) for x in completions ]
 
 
 def _PreviousIdentifier( min_num_completion_start_chars, request_data ):

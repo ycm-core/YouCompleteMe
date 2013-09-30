@@ -19,12 +19,12 @@
 import os
 import re
 
-from ycm.completers.threaded_completer import ThreadedCompleter
+from ycm.completers.completer import Completer
 from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
 from ycm.server import responses
 
-class FilenameCompleter( ThreadedCompleter ):
+class FilenameCompleter( Completer ):
   """
   General completer that provides filename and filepath completions.
   """
@@ -73,7 +73,7 @@ class FilenameCompleter( ThreadedCompleter ):
     return []
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidatesInner( self, request_data ):
     current_line = request_data[ 'line_value' ]
     start_column = request_data[ 'start_column' ]
     filepath = request_data[ 'filepath' ]

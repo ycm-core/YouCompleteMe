@@ -31,7 +31,6 @@ sys.path.insert( 0, os.path.join(
                         '../..' ) )
 
 import logging
-import time
 import json
 import bottle
 from bottle import run, request, response
@@ -89,16 +88,7 @@ def GetCompletions():
                 do_filetype_completion else
                 SERVER_STATE.GetGeneralCompleter() )
 
-  # This is necessary so that general_completer_store fills up
-  # _current_query_completers.
-  # TODO: Fix this.
-  completer.ShouldUseNow( request_data )
-
-  # TODO: This should not be async anymore, server is multi-threaded
-  completer.CandidatesForQueryAsync( request_data )
-  while not completer.AsyncCandidateRequestReady():
-    time.sleep( 0.03 )
-  return _JsonResponse( completer.CandidatesFromStoredRequest() )
+  return _JsonResponse( completer.ComputeCandidates( request_data ) )
 
 
 @app.get( '/user_options' )
