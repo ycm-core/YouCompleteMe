@@ -18,7 +18,6 @@
 #ifndef TRANSLATIONUNIT_H_XQ7I6SVA
 #define TRANSLATIONUNIT_H_XQ7I6SVA
 
-#include "Future.h"
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
 #include "Location.h"

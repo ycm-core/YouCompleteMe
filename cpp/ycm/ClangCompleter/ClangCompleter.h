@@ -18,7 +18,6 @@
 #ifndef CLANGCOMPLETE_H_WLKDU0ZV
 #define CLANGCOMPLETE_H_WLKDU0ZV
 
-#include "Future.h"
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
 #include "TranslationUnitStore.h"

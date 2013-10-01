@@ -18,9 +18,6 @@
 #ifndef COMPILATIONDATABASE_H_ZT7MQXPG
 #define COMPILATIONDATABASE_H_ZT7MQXPG
 
-#include "Future.h"
-#include "ConcurrentStack.h"
-
 #include <vector>
 #include <string>
 #include <boost/utility.hpp>

@@ -18,10 +18,7 @@
 #ifndef COMPLETER_H_7AR4UGXE
 #define COMPLETER_H_7AR4UGXE
 
-#include "ConcurrentLatestValue.h"
-#include "ConcurrentStack.h"
 #include "IdentifierDatabase.h"
-#include "Future.h"
 
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>

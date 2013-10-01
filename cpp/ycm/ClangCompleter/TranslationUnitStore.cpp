@@ -21,6 +21,7 @@
 #include "exceptions.h"
 
 #include <boost/thread/locks.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
 
 using boost::lock_guard;
