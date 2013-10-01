@@ -99,11 +99,10 @@ def NumLinesInBuffer( buffer_object ):
   return len( buffer_object )
 
 
+# Calling this function from the non-GUI thread will sometimes crash Vim. At the
+# time of writing, YCM only uses the GUI thread inside Vim (this used to not be
+# the case).
 def PostVimMessage( message ):
-  # TODO: Check are we on the main thread or not, and if not, force a crash
-  # here. This should make it impossible to accidentally call this from a
-  # non-GUI thread which *sometimes* crashes Vim because Vim is not thread-safe.
-  # A consistent crash should force us to notice the error.
   vim.command( "echohl WarningMsg | echomsg '{0}' | echohl None"
                .format( EscapeForVim( str( message ) ) ) )
 
