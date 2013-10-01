@@ -25,7 +25,9 @@
 #include <string>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <clang-c/CXCompilationDatabase.h>
+
 
 namespace YouCompleteMe {
 
@@ -34,8 +36,6 @@ struct CompilationInfoForFile {
   std::string compiler_working_dir_;
 };
 
-typedef boost::shared_ptr< CompilationInfoForFile >
-AsyncCompilationInfoForFile;
 
 class CompilationDatabase : boost::noncopyable {
 public:
@@ -44,28 +44,14 @@ public:
 
   bool DatabaseSuccessfullyLoaded();
 
-  void EnableThreading();
-
   CompilationInfoForFile GetCompilationInfoForFile(
     const std::string &path_to_file );
 
-  Future< AsyncCompilationInfoForFile > GetCompilationInfoForFileAsync(
-    const std::string &path_to_file );
-
-  typedef boost::shared_ptr <
-  boost::packaged_task< AsyncCompilationInfoForFile > > InfoTask;
-
-  typedef ConcurrentStack< InfoTask > InfoTaskStack;
-
 private:
-  void InitThreads();
 
-  bool threading_enabled_;
   bool is_loaded_;
   CXCompilationDatabase compilation_database_;
-
-  boost::thread info_thread_;
-  InfoTaskStack info_task_stack_;
+  boost::mutex compilation_database_mutex_;
 };
 
 } // namespace YouCompleteMe

@@ -23,7 +23,6 @@
 #include "standard.h"
 #include "CandidateRepository.h"
 #include "CompletionData.h"
-#include "ConcurrentLatestValue.h"
 #include "Utils.h"
 #include "ClangUtils.h"
 

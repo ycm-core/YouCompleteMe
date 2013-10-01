@@ -17,7 +17,6 @@
 
 #include "IdentifierCompleter.h"
 #include "PythonSupport.h"
-#include "Future.h"
 
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter.h"
@@ -76,14 +75,6 @@ BOOST_PYTHON_MODULE(ycm_core)
 
 #ifdef USE_CLANG_COMPLETER
   def( "ClangVersion", ClangVersion );
-
-  // TODO: We may not need this at all anymore. Look into it.
-  class_< Future< AsyncCompilationInfoForFile > >(
-      "FutureCompilationInfoForFile" )
-    .def( "ResultsReady",
-          &Future< AsyncCompilationInfoForFile >::ResultsReady )
-    .def( "GetResults",
-          &Future< AsyncCompilationInfoForFile >::GetResults );
 
   // CAREFUL HERE! For filename and contents we are referring directly to
   // Python-allocated and -managed memory since we are accepting pointers to
@@ -145,13 +136,10 @@ BOOST_PYTHON_MODULE(ycm_core)
 
   class_< CompilationDatabase, boost::noncopyable >(
       "CompilationDatabase", init< std::string >() )
-    .def( "EnableThreading", &CompilationDatabase::EnableThreading )
     .def( "DatabaseSuccessfullyLoaded",
           &CompilationDatabase::DatabaseSuccessfullyLoaded )
     .def( "GetCompilationInfoForFile",
-          &CompilationDatabase::GetCompilationInfoForFile )
-    .def( "GetCompilationInfoForFileAsync",
-          &CompilationDatabase::GetCompilationInfoForFileAsync );
+          &CompilationDatabase::GetCompilationInfoForFile );
 
   class_< CompilationInfoForFile,
       boost::shared_ptr< CompilationInfoForFile > >(

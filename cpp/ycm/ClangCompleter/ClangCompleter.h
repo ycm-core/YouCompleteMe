@@ -18,8 +18,6 @@
 #ifndef CLANGCOMPLETE_H_WLKDU0ZV
 #define CLANGCOMPLETE_H_WLKDU0ZV
 
-#include "ConcurrentLatestValue.h"
-#include "ConcurrentStack.h"
 #include "Future.h"
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
