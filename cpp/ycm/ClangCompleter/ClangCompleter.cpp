@@ -59,7 +59,7 @@ ClangCompleter::~ClangCompleter() {
 
 
 std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
-  std::string filename ) {
+  const std::string &filename ) {
   shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
 
   if ( !unit )
@@ -83,9 +83,9 @@ bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
 
 
 void ClangCompleter::UpdateTranslationUnit(
-  std::string filename,
-  std::vector< UnsavedFile > unsaved_files,
-  std::vector< std::string > flags ) {
+  const std::string &filename,
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   bool translation_unit_created;
   shared_ptr< TranslationUnit > unit = translation_unit_store_.GetOrCreate(
       filename,
@@ -114,11 +114,11 @@ void ClangCompleter::UpdateTranslationUnit(
 
 std::vector< CompletionData >
 ClangCompleter::CandidatesForLocationInFile(
-  std::string filename,
+  const std::string &filename,
   int line,
   int column,
-  std::vector< UnsavedFile > unsaved_files,
-  std::vector< std::string > flags ) {
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -132,11 +132,11 @@ ClangCompleter::CandidatesForLocationInFile(
 
 
 Location ClangCompleter::GetDeclarationLocation(
-  std::string filename,
+  const std::string &filename,
   int line,
   int column,
-  std::vector< UnsavedFile > unsaved_files,
-  std::vector< std::string > flags ) {
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -149,11 +149,11 @@ Location ClangCompleter::GetDeclarationLocation(
 
 
 Location ClangCompleter::GetDefinitionLocation(
-  std::string filename,
+  const std::string &filename,
   int line,
   int column,
-  std::vector< UnsavedFile > unsaved_files,
-  std::vector< std::string > flags ) {
+  const std::vector< UnsavedFile > &unsaved_files,
+  const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -165,7 +165,7 @@ Location ClangCompleter::GetDefinitionLocation(
 }
 
 
-void ClangCompleter::DeleteCachesForFile( std::string filename ) {
+void ClangCompleter::DeleteCachesForFile( const std::string &filename ) {
   translation_unit_store_.Remove( filename );
 }
 

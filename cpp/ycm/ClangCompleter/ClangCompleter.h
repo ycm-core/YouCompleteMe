@@ -37,48 +37,43 @@ struct Location;
 typedef std::vector< CompletionData > CompletionDatas;
 
 
-// TODO: document that all filename parameters must be absolute paths
+// All filename parameters must be absolute paths.
 class ClangCompleter : boost::noncopyable {
 public:
   ClangCompleter();
   ~ClangCompleter();
 
-  std::vector< Diagnostic > DiagnosticsForFile( std::string filename );
+  std::vector< Diagnostic > DiagnosticsForFile( const std::string &filename );
 
   bool UpdatingTranslationUnit( const std::string &filename );
 
-  // NOTE: params are taken by value on purpose! With a C++11 compiler we can
-  // avoid internal copies if params are taken by value (move ctors FTW), and we
-  // need to ensure we own the memory.
-  // TODO: Change some of these params back to const ref where possible after we
-  // get the server up.
   void UpdateTranslationUnit(
-    std::string filename,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags );
+    const std::string &filename,
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
   std::vector< CompletionData > CandidatesForLocationInFile(
-    std::string filename,
+    const std::string &filename,
     int line,
     int column,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags );
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
   Location GetDeclarationLocation(
-    std::string filename,
+    const std::string &filename,
     int line,
     int column,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags );
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
   Location GetDefinitionLocation(
-    std::string filename,
+    const std::string &filename,
     int line,
     int column,
-    std::vector< UnsavedFile > unsaved_files,
-    std::vector< std::string > flags );
+    const std::vector< UnsavedFile > &unsaved_files,
+    const std::vector< std::string > &flags );
 
-  void DeleteCachesForFile( std::string filename );
+  void DeleteCachesForFile( const std::string &filename );
 
 private:
 
