@@ -4,3 +4,6 @@
 [submodule "python/ycm/completers/cs/OmniSharpServer"]
 	path = python/ycm/completers/cs/OmniSharpServer
 	url = https://github.com/nosami/OmniSharpServer.git
+[submodule "third_party/requests-futures"]
+	path = third_party/requests-futures
+	url = https://github.com/ross/requests-futures
