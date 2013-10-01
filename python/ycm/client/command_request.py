@@ -18,7 +18,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
-import time
 from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
 from ycm import vimsupport
 from ycm.utils import ToUtf8IfNeeded
@@ -70,10 +69,8 @@ class CommandRequest( BaseRequest ):
 
 def SendCommandRequest( arguments, completer ):
   request = CommandRequest( arguments, completer )
+  # This is a blocking call.
   request.Start()
-  while not request.Done():
-    time.sleep( 0.1 )
-
   request.RunPostCommandActionsIfNeeded()
   return request.Response()
 

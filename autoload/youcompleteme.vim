@@ -40,6 +40,8 @@ function! youcompleteme#Enable()
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+  py from ycm import utils
+  py utils.AddThirdPartyFoldersToSysPath()
   py from ycm import base
   py from ycm import vimsupport
   py from ycm import user_options_store
@@ -497,13 +499,11 @@ python << EOF
 def GetCompletions( query ):
   request = ycm_state.GetCurrentCompletionRequest()
   request.Start( query )
-  results_ready = False
-  while not results_ready:
-    results_ready = request.Done()
+  while not request.Done():
     if bool( int( vim.eval( 'complete_check()' ) ) ):
       return { 'words' : [], 'refresh' : 'always'}
 
-  results = base.AdjustCandidateInsertionText( request.Results() )
+  results = base.AdjustCandidateInsertionText( request.Response() )
   return { 'words' : results, 'refresh' : 'always' }
 EOF
 

@@ -19,7 +19,8 @@
 
 from ycm import base
 from ycm import vimsupport
-from ycm.client.base_request import BaseRequest, BuildRequestData
+from ycm.client.base_request import ( BaseRequest, BuildRequestData,
+                                     JsonFromFuture )
 
 
 class CompletionRequest( BaseRequest ):
@@ -30,27 +31,26 @@ class CompletionRequest( BaseRequest ):
     self._request_data = BuildRequestData( self._completion_start_column )
 
 
-  # TODO: Do we need this anymore?
-  # def ShouldComplete( self ):
-  #   return ( self._do_filetype_completion or
-  #            self._ycm_state.ShouldUseGeneralCompleter( self._request_data ) )
-
-
   def CompletionStartColumn( self ):
     return self._completion_start_column
 
 
   def Start( self, query ):
     self._request_data[ 'query' ] = query
-    self._response = self.PostDataToHandler( self._request_data,
-                                             'get_completions' )
+    self._response_future = self.PostDataToHandlerAsync( self._request_data,
+                                                         'get_completions' )
 
 
-  def Results( self ):
-    if not self._response:
+  def Done( self ):
+    return self._response_future.done()
+
+
+  def Response( self ):
+    if not self._response_future:
       return []
     try:
-      return [ _ConvertCompletionDataToVimData( x ) for x in self._response ]
+      return [ _ConvertCompletionDataToVimData( x )
+               for x in JsonFromFuture( self._response_future ) ]
     except Exception as e:
       vimsupport.PostVimMessage( str( e ) )
       return []

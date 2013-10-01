@@ -20,6 +20,7 @@
 import vim
 import json
 import requests
+from requests_futures.sessions import FuturesSession
 from ycm import vimsupport
 
 HEADERS = {'content-type': 'application/json'}
@@ -46,22 +47,22 @@ class BaseRequest( object ):
     return {}
 
 
+  # This is the blocking version of the method. See below for async.
   @staticmethod
   def PostDataToHandler( data, handler ):
-    response = requests.post( _BuildUri( handler ),
-                              data = json.dumps( data ),
-                              headers = HEADERS )
-    if response.status_code == requests.codes.server_error:
-      raise ServerError( response.json()[ 'message' ] )
+    return JsonFromFuture( BaseRequest.PostDataToHandlerAsync( data,
+                                                               handler ) )
 
-    # We let Requests handle the other status types, we only handle the 500
-    # error code.
-    response.raise_for_status()
 
-    if response.text:
-      return response.json()
-    return None
+  # This returns a future! Use JsonFromFuture to get the value.
+  @staticmethod
+  def PostDataToHandlerAsync( data, handler ):
+    return BaseRequest.session.post( _BuildUri( handler ),
+                                     data = json.dumps( data ),
+                                     headers = HEADERS )
 
+
+  session = FuturesSession( max_workers = 4 )
   server_location = 'http://localhost:6666'
 
 
@@ -81,6 +82,20 @@ def BuildRequestData( start_column = None, query = None ):
     request_data[ 'query' ] = query
 
   return request_data
+
+
+def JsonFromFuture( future ):
+  response = future.result()
+  if response.status_code == requests.codes.server_error:
+    raise ServerError( response.json()[ 'message' ] )
+
+  # We let Requests handle the other status types, we only handle the 500
+  # error code.
+  response.raise_for_status()
+
+  if response.text:
+    return response.json()
+  return None
 
 
 def _BuildUri( handler ):

@@ -165,6 +165,7 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
+    # TODO: There should be a faster way of shutting down the server
     self._server_popen.terminate()
     os.remove( self._temp_options_filename )
 

@@ -41,7 +41,7 @@ class EventNotification( BaseRequest ):
     # quietly to the Vim message log because nothing bad will happen if the
     # server misses some events and we don't want to annoy the user.
     try:
-      self.PostDataToHandler( request_data, 'event_notification' )
+      self.PostDataToHandlerAsync( request_data, 'event_notification' )
     except:
       vimsupport.EchoText( traceback.format_exc() )
 

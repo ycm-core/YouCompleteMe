@@ -52,3 +52,15 @@ def TerminateProcess( pid ):
     ctypes.windll.kernel32.CloseHandle( handle )
   else:
     os.kill( pid, signal.SIGTERM )
+
+
+def AddThirdPartyFoldersToSysPath():
+  path_to_third_party = os.path.join(
+                          os.path.dirname( os.path.abspath( __file__ ) ),
+                          '../../third_party' )
+
+  for folder in os.listdir( path_to_third_party ):
+    sys.path.insert( 0, os.path.realpath( os.path.join( path_to_third_party,
+                                                        folder ) ) )
+
+
