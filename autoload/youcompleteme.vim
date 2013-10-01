@@ -44,9 +44,6 @@ function! youcompleteme#Enable()
   py from ycm import vimsupport
   py from ycm import user_options_store
   py user_options_store.SetAll( base.BuildServerConf() )
-  " TODO: Remove the call to YcmPreload
-  py from ycm import extra_conf_store
-  py extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
 
   if !pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
