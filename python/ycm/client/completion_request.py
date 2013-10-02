@@ -38,7 +38,7 @@ class CompletionRequest( BaseRequest ):
   def Start( self, query ):
     self._request_data[ 'query' ] = query
     self._response_future = self.PostDataToHandlerAsync( self._request_data,
-                                                         'get_completions' )
+                                                         'completions' )
 
 
   def Done( self ):

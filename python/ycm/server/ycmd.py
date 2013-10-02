@@ -79,7 +79,7 @@ def RunCompleterCommand():
       request_data ) )
 
 
-@app.post( '/get_completions' )
+@app.post( '/completions' )
 def GetCompletions():
   LOGGER.info( 'Received completion request')
   request_data = request.json

@@ -72,7 +72,7 @@ def GetCompletions_IdentifierCompleter_Works_test():
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
-       app.post_json( '/get_completions', completion_data ).json )
+       app.post_json( '/completions', completion_data ).json )
 
 
 @with_setup( Setup )
@@ -111,7 +111,7 @@ int main()
     }
   }
 
-  results = app.post_json( '/get_completions', completion_data ).json
+  results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
                                    CompletionEntryMatcher( 'x' ),
                                    CompletionEntryMatcher( 'y' ) ) )
@@ -139,7 +139,7 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'zoo' ) ],
-       app.post_json( '/get_completions', completion_data ).json )
+       app.post_json( '/completions', completion_data ).json )
 
 
 @with_setup( Setup )
@@ -166,7 +166,7 @@ def GetCompletions_UltiSnipsCompleter_Works_test():
 
   eq_( [ BuildCompletionData( 'foo', '<snip> bar' ),
          BuildCompletionData( 'zoo', '<snip> goo' ) ],
-       app.post_json( '/get_completions', completion_data ).json )
+       app.post_json( '/completions', completion_data ).json )
 
 
 @with_setup( Setup )
