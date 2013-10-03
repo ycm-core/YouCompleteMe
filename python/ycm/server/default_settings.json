@@ -18,15 +18,15 @@
   "seed_identifiers_with_syntax": 0,
   "csharp_server_port": 2000,
   "filetype_whitelist": {
-    "*": "1"
+    "*": 1
   },
   "auto_start_csharp_server": 1,
   "filetype_blacklist": {
-    "tagbar": "1",
-    "qf": "1",
-    "notes": "1",
-    "markdown": "1",
-    "unite": "1",
-    "text": "1"
+    "tagbar": 1,
+    "qf": 1,
+    "notes": 1,
+    "markdown": 1,
+    "unite": 1,
+    "text": 1
   }
 }
