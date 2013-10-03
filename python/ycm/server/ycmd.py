@@ -63,9 +63,14 @@ def EventNotification():
   getattr( SERVER_STATE.GetGeneralCompleter(), event_handler )( request_data )
 
   filetypes = request_data[ 'filetypes' ]
+  response_data = None
   if SERVER_STATE.FiletypeCompletionUsable( filetypes ):
-    getattr( SERVER_STATE.GetFiletypeCompleter( filetypes ),
-              event_handler )( request_data )
+    response_data = getattr( SERVER_STATE.GetFiletypeCompleter( filetypes ),
+                             event_handler )( request_data )
+
+  if response_data:
+    return _JsonResponse( response_data )
+
 
 
 @app.post( '/run_completer_command' )
@@ -92,16 +97,6 @@ def GetCompletions():
                 SERVER_STATE.GetGeneralCompleter() )
 
   return _JsonResponse( completer.ComputeCandidates( request_data ) )
-
-
-@app.post( '/diagnostics' )
-def GetDiagnostics():
-  LOGGER.info( 'Received diagnostics request')
-  request_data = request.json
-  completer = _GetCompleterForRequestData( request_data )
-
-  return _JsonResponse( completer.GetDiagnosticsForCurrentFile(
-      request_data ) )
 
 
 @app.get( '/user_options' )

@@ -283,7 +283,7 @@ def DefinedSubcommands_WorksWhenNoExplicitCompleterTargetSpecified_test():
 
 
 @with_setup( Setup )
-def GetDiagnostics_ClangCompleter_ZeroBasedLineAndColumn_test():
+def Diagnostics_ClangCompleter_ZeroBasedLineAndColumn_test():
   app = TestApp( ycmd.app )
   contents = """
 struct Foo {
@@ -314,8 +314,7 @@ struct Foo {
     'event_name': 'FileReadyToParse',
   } )
 
-  app.post_json( '/event_notification', event_data )
-  results = app.post_json( '/diagnostics', diag_data ).json
+  results = app.post_json( '/event_notification', event_data ).json
   assert_that( results,
                contains(
                   has_entries( { 'text': contains_string( "expected ';'" ),

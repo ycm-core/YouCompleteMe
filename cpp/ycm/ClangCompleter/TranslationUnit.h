@@ -56,7 +56,8 @@ public:
 
   bool IsCurrentlyUpdating() const;
 
-  void Reparse( const std::vector< UnsavedFile > &unsaved_files );
+  std::vector< Diagnostic > Reparse(
+      const std::vector< UnsavedFile > &unsaved_files );
 
   void ReparseForIndexing( const std::vector< UnsavedFile > &unsaved_files );
 

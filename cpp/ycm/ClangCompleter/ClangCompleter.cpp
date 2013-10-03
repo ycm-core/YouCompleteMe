@@ -58,17 +58,6 @@ ClangCompleter::~ClangCompleter() {
 }
 
 
-std::vector< Diagnostic > ClangCompleter::DiagnosticsForFile(
-  const std::string &filename ) {
-  shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
-
-  if ( !unit )
-    return std::vector< Diagnostic >();
-
-  return unit->LatestDiagnostics();
-}
-
-
 bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
   shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
 
@@ -82,7 +71,7 @@ bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
 }
 
 
-void ClangCompleter::UpdateTranslationUnit(
+std::vector< Diagnostic > ClangCompleter::UpdateTranslationUnit(
   const std::string &filename,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
@@ -94,13 +83,14 @@ void ClangCompleter::UpdateTranslationUnit(
       translation_unit_created );
 
   if ( !unit )
-    return;
+    return std::vector< Diagnostic >();
 
   try {
     // There's no point in reparsing a TU that was just created, it was just
     // parsed in the TU constructor
     if ( !translation_unit_created )
-      unit->Reparse( unsaved_files );
+      return unit->Reparse( unsaved_files );
+    return unit->LatestDiagnostics();
   }
 
   catch ( ClangParseError & ) {
@@ -109,6 +99,8 @@ void ClangCompleter::UpdateTranslationUnit(
     // TU map.
     translation_unit_store_.Remove( filename );
   }
+
+  return std::vector< Diagnostic >();
 }
 
 

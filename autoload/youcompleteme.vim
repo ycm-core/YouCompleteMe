@@ -258,9 +258,6 @@ function! s:OnCursorHold()
   endif
 
   call s:SetUpCompleteopt()
-  " Order is important here; we need to extract any done diagnostics before
-  " reparsing the file again
-  call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
 endfunction
 
@@ -270,9 +267,14 @@ function! s:OnFileReadyToParse()
   " happen for special buffers.
   call s:SetUpYcmChangedTick()
 
+  " Order is important here; we need to extract any done diagnostics before
+  " reparsing the file again. If we sent the new parse request first, then
+  " the response would always be pending when we called
+  " UpdateDiagnosticNotifications.
+  call s:UpdateDiagnosticNotifications()
+
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
-    py ycm_state.RequestDiagnosticsForCurrentFile()
     py ycm_state.OnFileReadyToParse()
   endif
   let b:ycm_changedtick.file_ready_to_parse = b:changedtick
@@ -328,7 +330,6 @@ function! s:OnCursorMovedNormalMode()
     return
   endif
 
-  call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
 endfunction
 
@@ -339,7 +340,6 @@ function! s:OnInsertLeave()
   endif
 
   let s:omnifunc_mode = 0
-  call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
   py ycm_state.OnInsertLeave()
   if g:ycm_autoclose_preview_window_after_completion ||
@@ -660,13 +660,14 @@ function! s:ForceCompile()
 endfunction
 
 
+" TODO: Make this work again.
 function! s:ForceCompileAndDiagnostics()
   let compilation_succeeded = s:ForceCompile()
   if !compilation_succeeded
     return
   endif
 
-  call s:UpdateDiagnosticNotifications()
+  " call s:UpdateDiagnosticNotifications()
   echom "Diagnostics refreshed."
 endfunction
 

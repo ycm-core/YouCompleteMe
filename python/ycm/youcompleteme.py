@@ -29,8 +29,8 @@ from ycm.completers.general import syntax_parse
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
-from ycm.client.diagnostics_request import DiagnosticsRequest
-from ycm.client.event_notification import SendEventNotificationAsync
+from ycm.client.event_notification import ( SendEventNotificationAsync,
+                                            EventNotification )
 
 try:
   from UltiSnips import UltiSnips_Manager
@@ -45,7 +45,7 @@ class YouCompleteMe( object ):
     self._user_options = user_options
     self._omnicomp = OmniCompleter( user_options )
     self._latest_completion_request = None
-    self._latest_diagnostics_request = None
+    self._latest_file_parse_request = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -147,7 +147,9 @@ class YouCompleteMe( object ):
     if self._user_options[ 'seed_identifiers_with_syntax' ]:
       self._AddSyntaxDataIfNeeded( extra_data )
 
-    SendEventNotificationAsync( 'FileReadyToParse', extra_data )
+    self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
+                                                          extra_data )
+    self._latest_file_parse_request.Start()
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -176,23 +178,18 @@ class YouCompleteMe( object ):
 
 
   def DiagnosticsForCurrentFileReady( self ):
-    return bool( self._latest_diagnostics_request and
-                 self._latest_diagnostics_request.Done() )
-
-
-  def RequestDiagnosticsForCurrentFile( self ):
-    self._latest_diagnostics_request = DiagnosticsRequest()
-    self._latest_diagnostics_request.Start()
+    return bool( self._latest_file_parse_request and
+                 self._latest_file_parse_request.Done() )
 
 
   def GetDiagnosticsFromStoredRequest( self ):
-    if self._latest_diagnostics_request:
-      to_return = self._latest_diagnostics_request.Response()
+    if self._latest_file_parse_request:
+      to_return = self._latest_file_parse_request.Response()
       # We set the diagnostics request to None because we want to prevent
       # Syntastic from repeatedly refreshing the buffer with the same diags.
       # Setting this to None makes DiagnosticsForCurrentFileReady return False
       # until the next request is created.
-      self._latest_diagnostics_request = None
+      self._latest_file_parse_request = None
       return to_return
     return []
 

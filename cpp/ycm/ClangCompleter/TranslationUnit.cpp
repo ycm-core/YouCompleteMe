@@ -111,12 +111,15 @@ bool TranslationUnit::IsCurrentlyUpdating() const {
 }
 
 
-void TranslationUnit::Reparse(
+std::vector< Diagnostic > TranslationUnit::Reparse(
   const std::vector< UnsavedFile > &unsaved_files ) {
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
 
   Reparse( cxunsaved_files );
+
+  unique_lock< mutex > lock( diagnostics_mutex_ );
+  return latest_diagnostics_;
 }
 
 

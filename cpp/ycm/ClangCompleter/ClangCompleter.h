@@ -43,11 +43,9 @@ public:
   ClangCompleter();
   ~ClangCompleter();
 
-  std::vector< Diagnostic > DiagnosticsForFile( const std::string &filename );
-
   bool UpdatingTranslationUnit( const std::string &filename );
 
-  void UpdateTranslationUnit(
+  std::vector< Diagnostic > UpdateTranslationUnit(
     const std::string &filename,
     const std::vector< UnsavedFile > &unsaved_files,
     const std::vector< std::string > &flags );

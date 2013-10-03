@@ -201,10 +201,14 @@ class ClangCompleter( Completer ):
       self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
 
-    self._completer.UpdateTranslationUnit(
+    diagnostics = self._completer.UpdateTranslationUnit(
       ToUtf8IfNeeded( filename ),
       self.GetUnsavedFilesVector( request_data ),
       flags )
+
+    self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
+    return [ ConvertToDiagnosticResponse( x ) for x in
+             diagnostics[ : self._max_diagnostics_to_display ] ]
 
 
   def OnBufferUnload( self, request_data ):
@@ -215,15 +219,6 @@ class ClangCompleter( Completer ):
   def GettingCompletions( self, request_data ):
     return self._completer.UpdatingTranslationUnit(
         ToUtf8IfNeeded( request_data[ 'filepath' ] ) )
-
-
-  def GetDiagnosticsForCurrentFile( self, request_data ):
-    filename = request_data[ 'filepath' ]
-    diagnostics = self._completer.DiagnosticsForFile(
-        ToUtf8IfNeeded( filename ) )
-    self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
-    return [ ConvertToDiagnosticResponse( x ) for x in
-             diagnostics[ : self._max_diagnostics_to_display ] ]
 
 
   def GetDetailedDiagnostic( self, request_data ):
