@@ -37,6 +37,8 @@ std::string CXStringToString( CXString text );
 std::vector< CompletionData > ToCompletionDataVector(
   CXCodeCompleteResults *results );
 
+// NOTE: CXUnsavedFiles store pointers to data in UnsavedFiles, so UnsavedFiles
+// need to outlive CXUnsavedFiles!
 std::vector< CXUnsavedFile > ToCXUnsavedFiles(
   const std::vector< UnsavedFile > &unsaved_files );
 
