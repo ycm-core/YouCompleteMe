@@ -20,10 +20,15 @@
 import vim
 import json
 import requests
+from retries import retries
 from requests_futures.sessions import FuturesSession
+from concurrent.futures import ThreadPoolExecutor
 from ycm import vimsupport
 
 HEADERS = {'content-type': 'application/json'}
+# TODO: This TPE might be the reason we're shutting down slowly. It seems that
+# it waits for all worker threads to stop before letting the interpreter exit.
+EXECUTOR = ThreadPoolExecutor( max_workers = 4 )
 
 class ServerError( Exception ):
   def __init__( self, message ):
@@ -57,12 +62,24 @@ class BaseRequest( object ):
   # This returns a future! Use JsonFromFuture to get the value.
   @staticmethod
   def PostDataToHandlerAsync( data, handler ):
-    return BaseRequest.session.post( _BuildUri( handler ),
-                                     data = json.dumps( data ),
-                                     headers = HEADERS )
+    def PostData( data, handler ):
+      return BaseRequest.session.post( _BuildUri( handler ),
+                                      data = json.dumps( data ),
+                                      headers = HEADERS )
+
+    @retries( 3, delay = 0.5 )
+    def DelayedPostData( data, handler ):
+      return requests.post( _BuildUri( handler ),
+                            data = json.dumps( data ),
+                            headers = HEADERS )
+
+    if not _CheckServerIsHealthyWithCache():
+      return EXECUTOR.submit( DelayedPostData, data, handler )
+
+    return PostData( data, handler )
 
 
-  session = FuturesSession( max_workers = 4 )
+  session = FuturesSession( executor = EXECUTOR )
   server_location = 'http://localhost:6666'
 
 
@@ -101,4 +118,23 @@ def JsonFromFuture( future ):
 def _BuildUri( handler ):
   return ''.join( [ BaseRequest.server_location, '/', handler ] )
 
+
+SERVER_HEALTHY = False
+
+def _CheckServerIsHealthyWithCache():
+  global SERVER_HEALTHY
+
+  def _ServerIsHealthy():
+    response = requests.get( _BuildUri( 'healthy' ) )
+    response.raise_for_status()
+    return response.json()
+
+  if SERVER_HEALTHY:
+    return True
+
+  try:
+    SERVER_HEALTHY = _ServerIsHealthy()
+    return SERVER_HEALTHY
+  except:
+    return False
 

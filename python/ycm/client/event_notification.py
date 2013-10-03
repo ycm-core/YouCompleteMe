@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import traceback
-from ycm import vimsupport
 from ycm.client.base_request import BaseRequest, BuildRequestData
 
 
@@ -35,15 +33,7 @@ class EventNotification( BaseRequest ):
       request_data.update( self._extra_data )
     request_data[ 'event_name' ] = self._event_name
 
-    # On occasion, Vim tries to send event notifications to the server before
-    # it's up. This causes intrusive exception messages to interrupt the user.
-    # While we do want to log these exceptions just in case, we post them
-    # quietly to the Vim message log because nothing bad will happen if the
-    # server misses some events and we don't want to annoy the user.
-    try:
-      self.PostDataToHandlerAsync( request_data, 'event_notification' )
-    except:
-      vimsupport.EchoText( traceback.format_exc() )
+    self.PostDataToHandlerAsync( request_data, 'event_notification' )
 
 
 def SendEventNotificationAsync( event_name, extra_data = None ):
