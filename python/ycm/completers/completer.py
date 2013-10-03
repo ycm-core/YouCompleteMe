@@ -233,11 +233,7 @@ class Completer( object ):
     pass
 
 
-  def DiagnosticsForCurrentFileReady( self ):
-    return False
-
-
-  def GetDiagnosticsForCurrentFile( self ):
+  def GetDiagnosticsForCurrentFile( self, request_data ):
     return []
 
 

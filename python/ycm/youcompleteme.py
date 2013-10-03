@@ -29,6 +29,7 @@ from ycm.completers.general import syntax_parse
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
+from ycm.client.diagnostics_request import DiagnosticsRequest
 from ycm.client.event_notification import SendEventNotificationAsync
 
 try:
@@ -43,7 +44,8 @@ class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
     self._omnicomp = OmniCompleter( user_options )
-    self._current_completion_request = None
+    self._latest_completion_request = None
+    self._latest_diagnostics_request = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -91,8 +93,8 @@ class YouCompleteMe( object ):
     # We have to store a reference to the newly created CompletionRequest
     # because VimScript can't store a reference to a Python object across
     # function calls... Thus we need to keep this request somewhere.
-    self._current_completion_request = CompletionRequest()
-    return self._current_completion_request
+    self._latest_completion_request = CompletionRequest()
+    return self._latest_completion_request
 
 
   def SendCommandRequest( self, arguments, completer ):
@@ -105,7 +107,7 @@ class YouCompleteMe( object ):
 
 
   def GetCurrentCompletionRequest( self ):
-    return self._current_completion_request
+    return self._latest_completion_request
 
 
   def GetOmniCompleter( self ):
@@ -114,8 +116,7 @@ class YouCompleteMe( object ):
 
   def NativeFiletypeCompletionAvailable( self ):
     try:
-      return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                            'filetype_completion_available')
+      return _NativeFiletypeCompletionAvailableForFile( vim.current.buffer.name )
     except:
       return False
 
@@ -174,17 +175,25 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'CurrentIdentifierFinished' )
 
 
-  # TODO: Make this work again.
   def DiagnosticsForCurrentFileReady( self ):
-    # if self.FiletypeCompletionUsable():
-    #   return self.GetFiletypeCompleter().DiagnosticsForCurrentFileReady()
-    return False
+    return bool( self._latest_diagnostics_request and
+                 self._latest_diagnostics_request.Done() )
 
 
-  # TODO: Make this work again.
-  def GetDiagnosticsForCurrentFile( self ):
-    # if self.FiletypeCompletionUsable():
-    #   return self.GetFiletypeCompleter().GetDiagnosticsForCurrentFile()
+  def RequestDiagnosticsForCurrentFile( self ):
+    self._latest_diagnostics_request = DiagnosticsRequest()
+    self._latest_diagnostics_request.Start()
+
+
+  def GetDiagnosticsFromStoredRequest( self ):
+    if self._latest_diagnostics_request:
+      to_return = self._latest_diagnostics_request.Response()
+      # We set the diagnostics request to None because we want to prevent
+      # Syntastic from repeatedly refreshing the buffer with the same diags.
+      # Setting this to None makes DiagnosticsForCurrentFileReady return False
+      # until the next request is created.
+      self._latest_diagnostics_request = None
+      return to_return
     return []
 
 
@@ -259,4 +268,13 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
                                            'description': x.description
                                          } for x in rawsnips ]
 
+
+# 'filepath' is here only as a key for Memoize
+# This can't be a nested function inside NativeFiletypeCompletionAvailable
+# because then the Memoize decorator wouldn't work (nested functions are
+# re-created on every call to the outer function).
+@utils.Memoize
+def _NativeFiletypeCompletionAvailableForFile( filepath ):
+  return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                        'filetype_completion_available')
 

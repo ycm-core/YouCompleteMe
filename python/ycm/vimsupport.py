@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
+import os
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -73,6 +74,12 @@ def GetUnsavedAndCurrentBufferData():
     }
 
   return buffers_data
+
+
+def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
+  return int( vim.eval( "bufnr('{0}', {1})".format(
+      os.path.realpath( filename ),
+      int( open_file_if_needed ) ) ) )
 
 
 # Both |line| and |column| need to be 1-based

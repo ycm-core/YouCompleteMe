@@ -92,25 +92,11 @@ void TranslationUnit::Destroy() {
 
 
 std::vector< Diagnostic > TranslationUnit::LatestDiagnostics() {
-  std::vector< Diagnostic > diagnostics;
-
   if ( !clang_translation_unit_ )
-    return diagnostics;
+    return std::vector< Diagnostic >();
 
   unique_lock< mutex > lock( diagnostics_mutex_ );
-
-  // We don't need the latest diags after we return them once so we swap the
-  // internal data with a new, empty diag vector. This vector is then returned
-  // and on C++11 compilers a move ctor is invoked, thus no copy is created.
-  // Theoretically, just returning the value of a
-  // [boost::|std::]move(latest_diagnostics_) call _should_ leave the
-  // latest_diagnostics_ vector in an emtpy, valid state but I'm not going to
-  // rely on that. I just had to look this up in the standard to be sure, and
-  // future readers of this code (myself included) should not be forced to do
-  // that to understand what the hell is going on.
-
-  std::swap( latest_diagnostics_, diagnostics );
-  return diagnostics;
+  return latest_diagnostics_;
 }
 
 

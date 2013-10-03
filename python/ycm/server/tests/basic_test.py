@@ -21,7 +21,8 @@ from webtest import TestApp
 from .. import ycmd
 from ..responses import BuildCompletionData
 from nose.tools import ok_, eq_, with_setup
-from hamcrest import assert_that, has_items, has_entry
+from hamcrest import ( assert_that, has_items, has_entry, contains,
+                       contains_string, has_entries )
 import bottle
 
 bottle.debug( True )
@@ -279,6 +280,47 @@ def DefinedSubcommands_WorksWhenNoExplicitCompleterTargetSpecified_test():
          'GoToDeclaration',
          'GoToDefinitionElseDeclaration' ],
        app.post_json( '/defined_subcommands', subcommands_data ).json )
+
+
+@with_setup( Setup )
+def GetDiagnostics_ClangCompleter_ZeroBasedLineAndColumn_test():
+  app = TestApp( ycmd.app )
+  contents = """
+struct Foo {
+  int x  // semicolon missing here!
+  int y;
+  int c;
+  int d;
+};
+"""
+
+  filename = '/foo.cpp'
+  diag_data = {
+    'compilation_flags': ['-x', 'c++'],
+    'line_num': 0,
+    'column_num': 0,
+    'filetypes': ['cpp'],
+    'filepath': filename,
+    'file_data': {
+      filename: {
+        'contents': contents,
+        'filetypes': ['cpp']
+      }
+    }
+  }
+
+  event_data = diag_data.copy()
+  event_data.update( {
+    'event_name': 'FileReadyToParse',
+  } )
+
+  app.post_json( '/event_notification', event_data )
+  results = app.post_json( '/diagnostics', diag_data ).json
+  assert_that( results,
+               contains(
+                  has_entries( { 'text': contains_string( "expected ';'" ),
+                                 'line_num': 2,
+                                 'column_num': 7 } ) ) )
 
 
 @with_setup( Setup )

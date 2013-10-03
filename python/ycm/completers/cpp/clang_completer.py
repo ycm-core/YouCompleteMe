@@ -44,7 +44,6 @@ class ClangCompleter( Completer ):
     self._max_diagnostics_to_display = user_options[
       'max_diagnostics_to_display' ]
     self._completer = ycm_core.ClangCompleter()
-    self._last_prepared_diagnostics = []
     self._flags = Flags()
     self._diagnostic_store = None
     self._logger = logging.getLogger( __name__ )
@@ -213,13 +212,6 @@ class ClangCompleter( Completer ):
         ToUtf8IfNeeded( request_data[ 'unloaded_buffer' ] ) )
 
 
-  def DiagnosticsForCurrentFileReady( self ):
-    # if not self.parse_future:
-    #   return False
-    # return self.parse_future.ResultsReady()
-    pass
-
-
   def GettingCompletions( self, request_data ):
     return self._completer.UpdatingTranslationUnit(
         ToUtf8IfNeeded( request_data[ 'filepath' ] ) )
@@ -227,19 +219,11 @@ class ClangCompleter( Completer ):
 
   def GetDiagnosticsForCurrentFile( self, request_data ):
     filename = request_data[ 'filepath' ]
-    if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self._completer.DiagnosticsForFile(
-          ToUtf8IfNeeded( filename ) )
-      self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
-      self._last_prepared_diagnostics = [
-        responses.BuildDiagnosticData( x ) for x in
-        diagnostics[ : self._max_diagnostics_to_display ] ]
-      # self.parse_future = None
-
-      # if self.extra_parse_desired:
-      #   self.OnFileReadyToParse( request_data )
-
-    return self._last_prepared_diagnostics
+    diagnostics = self._completer.DiagnosticsForFile(
+        ToUtf8IfNeeded( filename ) )
+    self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
+    return [ ConvertToDiagnosticResponse( x ) for x in
+             diagnostics[ : self._max_diagnostics_to_display ] ]
 
 
   def GetDetailedDiagnostic( self, request_data ):
@@ -279,26 +263,13 @@ class ClangCompleter( Completer ):
                                                          source,
                                                          list( flags ) )
 
+
   def _FlagsForRequest( self, request_data ):
     filename = request_data[ 'filepath' ]
     if 'compilation_flags' in request_data:
       return PrepareFlagsForClang( request_data[ 'compilation_flags' ],
                                    filename )
     return self._flags.FlagsForFile( filename )
-
-# TODO: Make this work again
-# def DiagnosticToDict( diagnostic ):
-#   # see :h getqflist for a description of the dictionary fields
-#   return {
-#     # TODO: wrap the bufnr generation into a function
-#     'bufnr' : int( vim.eval( "bufnr('{0}', 1)".format(
-#       diagnostic.filename_ ) ) ),
-#     'lnum'  : diagnostic.line_number_,
-#     'col'   : diagnostic.column_number_,
-#     'text'  : diagnostic.text_,
-#     'type'  : diagnostic.kind_,
-#     'valid' : 1
-#   }
 
 
 def ConvertCompletionData( completion_data ):
@@ -324,5 +295,13 @@ def ClangAvailableForFiletypes( filetypes ):
 
 def InCFamilyFile( filetypes ):
   return ClangAvailableForFiletypes( filetypes )
+
+
+def ConvertToDiagnosticResponse( diagnostic ):
+  return responses.BuildDiagnosticData( diagnostic.filename_,
+                                        diagnostic.line_number_ - 1,
+                                        diagnostic.column_number_ - 1,
+                                        diagnostic.text_,
+                                        diagnostic.kind_ )
 
 

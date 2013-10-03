@@ -260,7 +260,7 @@ function! s:OnCursorHold()
   call s:SetUpCompleteopt()
   " Order is important here; we need to extract any done diagnostics before
   " reparsing the file again
-  " call s:UpdateDiagnosticNotifications()
+  call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
 endfunction
 
@@ -272,6 +272,7 @@ function! s:OnFileReadyToParse()
 
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
+    py ycm_state.RequestDiagnosticsForCurrentFile()
     py ycm_state.OnFileReadyToParse()
   endif
   let b:ycm_changedtick.file_ready_to_parse = b:changedtick
@@ -327,7 +328,7 @@ function! s:OnCursorMovedNormalMode()
     return
   endif
 
-  " call s:UpdateDiagnosticNotifications()
+  call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
 endfunction
 
@@ -338,7 +339,7 @@ function! s:OnInsertLeave()
   endif
 
   let s:omnifunc_mode = 0
-  " call s:UpdateDiagnosticNotifications()
+  call s:UpdateDiagnosticNotifications()
   call s:OnFileReadyToParse()
   py ycm_state.OnInsertLeave()
   if g:ycm_autoclose_preview_window_after_completion ||
@@ -408,10 +409,16 @@ endfunction
 
 
 function! s:UpdateDiagnosticNotifications()
-  if get( g:, 'loaded_syntastic_plugin', 0 ) &&
-        \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
-        \ pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' ) &&
-        \ g:ycm_register_as_syntastic_checker
+  let should_display_diagnostics =
+        \ get( g:, 'loaded_syntastic_plugin', 0 ) &&
+        \ g:ycm_register_as_syntastic_checker &&
+        \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+
+  if !should_display_diagnostics
+    return
+  endif
+
+  if pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
 endfunction
@@ -566,9 +573,7 @@ command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
 " required (currently that's on buffer save) OR when the SyntasticCheck command
 " is invoked
 function! youcompleteme#CurrentFileDiagnostics()
-  " TODO: Make this work again.
-  " return pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
-  return []
+  return pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
 endfunction
 
 

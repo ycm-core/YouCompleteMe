@@ -94,10 +94,26 @@ def GetCompletions():
   return _JsonResponse( completer.ComputeCandidates( request_data ) )
 
 
+@app.post( '/diagnostics' )
+def GetDiagnostics():
+  LOGGER.info( 'Received diagnostics request')
+  request_data = request.json
+  completer = _GetCompleterForRequestData( request_data )
+
+  return _JsonResponse( completer.GetDiagnosticsForCurrentFile(
+      request_data ) )
+
+
 @app.get( '/user_options' )
 def GetUserOptions():
   LOGGER.info( 'Received user options GET request')
   return _JsonResponse( dict( SERVER_STATE.user_options ) )
+
+
+@app.get( '/healthy' )
+def GetHealthy():
+  LOGGER.info( 'Received health request')
+  return _JsonResponse( True )
 
 
 @app.post( '/user_options' )
@@ -106,6 +122,7 @@ def SetUserOptions():
   _SetUserOptions( request.json )
 
 
+# TODO: Rename this to 'semantic_completion_available'
 @app.post( '/filetype_completion_available')
 def FiletypeCompletionAvailable():
   LOGGER.info( 'Received filetype completion available request')

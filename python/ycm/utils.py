@@ -21,6 +21,7 @@ import tempfile
 import os
 import sys
 import signal
+import functools
 
 def IsIdentifierChar( char ):
   return char.isalnum() or char == '_'
@@ -63,4 +64,13 @@ def AddThirdPartyFoldersToSysPath():
     sys.path.insert( 0, os.path.realpath( os.path.join( path_to_third_party,
                                                         folder ) ) )
 
+def Memoize( obj ):
+  cache = obj.cache = {}
 
+  @functools.wraps( obj )
+  def memoizer( *args, **kwargs ):
+    key = str( args ) + str( kwargs )
+    if key not in cache:
+      cache[ key ] = obj( *args, **kwargs )
+    return cache[ key ]
+  return memoizer

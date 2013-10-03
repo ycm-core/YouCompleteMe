@@ -30,7 +30,7 @@ class CommandRequest( BaseRequest ):
     self._completer_target = ( completer_target if completer_target
                                else 'filetype_default' )
     self._is_goto_command = (
-        True if arguments and arguments[ 0 ].startswith( 'GoTo' ) else False )
+        arguments and arguments[ 0 ].startswith( 'GoTo' ) )
     self._response = None
 
 
