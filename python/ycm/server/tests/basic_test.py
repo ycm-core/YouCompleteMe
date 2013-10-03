@@ -295,9 +295,45 @@ struct Foo {
 """
 
   filename = '/foo.cpp'
-  diag_data = {
+  event_data = {
+    'event_name': 'FileReadyToParse',
     'compilation_flags': ['-x', 'c++'],
     'line_num': 0,
+    'column_num': 0,
+    'filetypes': ['cpp'],
+    'filepath': filename,
+    'file_data': {
+      filename: {
+        'contents': contents,
+        'filetypes': ['cpp']
+      }
+    }
+  }
+
+  results = app.post_json( '/event_notification', event_data ).json
+  assert_that( results,
+               contains(
+                  has_entries( { 'text': contains_string( "expected ';'" ),
+                                 'line_num': 2,
+                                 'column_num': 7 } ) ) )
+
+
+@with_setup( Setup )
+def GetDetailedDiagnostic_ClangCompleter_Works_test():
+  app = TestApp( ycmd.app )
+  contents = """
+struct Foo {
+  int x  // semicolon missing here!
+  int y;
+  int c;
+  int d;
+};
+"""
+
+  filename = '/foo.cpp'
+  diag_data = {
+    'compilation_flags': ['-x', 'c++'],
+    'line_num': 2,
     'column_num': 0,
     'filetypes': ['cpp'],
     'filepath': filename,
@@ -314,12 +350,10 @@ struct Foo {
     'event_name': 'FileReadyToParse',
   } )
 
-  results = app.post_json( '/event_notification', event_data ).json
+  app.post_json( '/event_notification', event_data )
+  results = app.post_json( '/detailed_diagnostic', diag_data ).json
   assert_that( results,
-               contains(
-                  has_entries( { 'text': contains_string( "expected ';'" ),
-                                 'line_num': 2,
-                                 'column_num': 7 } ) ) )
+               has_entry( 'message', contains_string( "expected ';'" ) ) )
 
 
 @with_setup( Setup )

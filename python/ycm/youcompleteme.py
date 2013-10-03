@@ -194,11 +194,11 @@ class YouCompleteMe( object ):
     return []
 
 
-  # TODO: Make this work again.
-  def GetDetailedDiagnostic( self ):
-    # if self.FiletypeCompletionUsable():
-    #   return self.GetFiletypeCompleter().GetDetailedDiagnostic()
-    pass
+  def ShowDetailedDiagnostic( self ):
+    debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                'detailed_diagnostic' )
+    if 'message' in debug_info:
+      vimsupport.EchoText( debug_info[ 'message' ] )
 
 
   def DebugInfo( self ):

@@ -227,13 +227,11 @@ class ClangCompleter( Completer ):
     current_file = request_data[ 'filepath' ]
 
     if not self._diagnostic_store:
-      return responses.BuildDisplayMessageResponse(
-        NO_DIAGNOSTIC_MESSAGE )
+      raise ValueError( NO_DIAGNOSTIC_MESSAGE )
 
     diagnostics = self._diagnostic_store[ current_file ][ current_line ]
     if not diagnostics:
-      return responses.BuildDisplayMessageResponse(
-        NO_DIAGNOSTIC_MESSAGE )
+      raise ValueError( NO_DIAGNOSTIC_MESSAGE )
 
     closest_diagnostic = None
     distance_to_closest_diagnostic = 999

@@ -133,6 +133,15 @@ def DefinedSubcommands():
   return _JsonResponse( completer.DefinedSubcommands() )
 
 
+@app.post( '/detailed_diagnostic')
+def GetDetailedDiagnostic():
+  LOGGER.info( 'Received detailed diagnostic request')
+  request_data = request.json
+  completer = _GetCompleterForRequestData( request_data )
+
+  return _JsonResponse( completer.GetDetailedDiagnostic( request_data ) )
+
+
 @app.post( '/debug_info')
 def DebugInfo():
   # This can't be at the top level because of possible extra conf preload

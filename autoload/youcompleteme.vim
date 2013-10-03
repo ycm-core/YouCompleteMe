@@ -562,7 +562,6 @@ function! youcompleteme#OmniComplete( findstart, base )
 endfunction
 
 
-" TODO: Make this work again
 function! s:ShowDetailedDiagnostic()
   py ycm_state.ShowDetailedDiagnostic()
 endfunction
