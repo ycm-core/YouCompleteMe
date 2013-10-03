@@ -77,6 +77,7 @@ let g:ycm_filetype_blacklist =
       \ get( g:, 'ycm_filetype_blacklist',
       \   get( g:, 'ycm_filetypes_to_completely_ignore', {
       \     'notes' : 1,
+      \     'qf': 1,
       \     'markdown' : 1,
       \     'text' : 1,
       \     'unite' : 1,

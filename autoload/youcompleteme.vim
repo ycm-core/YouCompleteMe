@@ -562,6 +562,7 @@ function! youcompleteme#OmniComplete( findstart, base )
 endfunction
 
 
+" TODO: Make this work again
 function! s:ShowDetailedDiagnostic()
   py ycm_state.ShowDetailedDiagnostic()
 endfunction
@@ -646,28 +647,19 @@ function! s:ForceCompile()
       break
     endif
 
-    let getting_completions = pyeval(
-          \ 'ycm_state.GettingCompletions()' )
-
-    if !getting_completions
-      echom "Unable to retrieve diagnostics, see output of `:mes` for possible details."
-      return 0
-    endif
-
     sleep 100m
   endwhile
   return 1
 endfunction
 
 
-" TODO: Make this work again.
 function! s:ForceCompileAndDiagnostics()
   let compilation_succeeded = s:ForceCompile()
   if !compilation_succeeded
     return
   endif
 
-  " call s:UpdateDiagnosticNotifications()
+  call s:UpdateDiagnosticNotifications()
   echom "Diagnostics refreshed."
 endfunction
 
@@ -680,7 +672,7 @@ function! s:ShowDiagnostics()
     return
   endif
 
-  let diags = pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
+  let diags = pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
   if !empty( diags )
     call setloclist( 0, diags )
     lopen

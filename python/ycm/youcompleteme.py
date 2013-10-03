@@ -201,13 +201,6 @@ class YouCompleteMe( object ):
     pass
 
 
-  # TODO: Make this work again.
-  def GettingCompletions( self ):
-    # if self.FiletypeCompletionUsable():
-    #   return self.GetFiletypeCompleter().GettingCompletions()
-    return False
-
-
   def DebugInfo( self ):
     debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
                                                 'debug_info' )
