@@ -29,6 +29,14 @@ let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
 let s:previous_num_chars_on_current_line = -1
 
+let s:forced_syntastic_checker_for = {
+      \ 'cpp': 1,
+      \ 'c': 1,
+      \ 'objc': 1,
+      \ 'objcpp': 1,
+      \ }
+
+
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
   if &diff
@@ -162,6 +170,12 @@ function! s:ForceSyntasticCFamilyChecker()
   let g:syntastic_c_checkers = ['ycm']
   let g:syntastic_objc_checkers = ['ycm']
   let g:syntastic_objcpp_checkers = ['ycm']
+endfunction
+
+
+function! s:ForcedAsSyntasticCheckerForCurrentFiletype()
+  return g:ycm_register_as_syntastic_checker &&
+         \ get( s:forced_syntastic_checker_for, &filetype, 0 )
 endfunction
 
 
@@ -411,7 +425,7 @@ endfunction
 function! s:UpdateDiagnosticNotifications()
   let should_display_diagnostics =
         \ get( g:, 'loaded_syntastic_plugin', 0 ) &&
-        \ g:ycm_register_as_syntastic_checker &&
+        \ s:ForcedAsSyntasticCheckerForCurrentFiletype() &&
         \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
 
   if !should_display_diagnostics
