@@ -37,10 +37,10 @@ def Value( key ):
 
 
 def LoadDefaults():
-  SetAll( _DefaultOptions() )
+  SetAll( DefaultOptions() )
 
 
-def _DefaultOptions():
+def DefaultOptions():
   settings_path = os.path.join(
       os.path.dirname( os.path.abspath( __file__ ) ),
       'server/default_settings.json' )

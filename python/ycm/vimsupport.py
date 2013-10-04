@@ -19,6 +19,7 @@
 
 import vim
 import os
+import json
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -80,6 +81,26 @@ def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
   return int( vim.eval( "bufnr('{0}', {1})".format(
       os.path.realpath( filename ),
       int( open_file_if_needed ) ) ) )
+
+
+# Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
+# When |overwrite| is True, overwrites the existing value in Vim.
+def LoadDictIntoVimGlobals( new_globals, overwrite = True ):
+  extend_option = '"force"' if overwrite else '"keep"'
+
+  # We need to use json.dumps because that won't use the 'u' prefix on strings
+  # which Vim would bork on.
+  vim.eval( 'extend( g:, {}, {})'.format( json.dumps( new_globals ),
+                                          extend_option ) )
+
+
+# Changing the returned dict will NOT change the value in Vim.
+def GetReadOnlyVimGlobals():
+  try:
+    # vim.vars is fairly new so it might not exist
+    return vim.vars
+  except:
+    return vim.eval( 'g:' )
 
 
 # Both |line| and |column| need to be 1-based

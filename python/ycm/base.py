@@ -22,6 +22,7 @@ import re
 import vim
 from ycm import vimsupport
 from ycm import utils
+from ycm import user_options_store
 
 YCM_VAR_PREFIX = 'ycm_'
 
@@ -40,12 +41,7 @@ def BuildServerConf():
   """Builds a dictionary mapping YCM Vim user options to values. Option names
   don't have the 'ycm_' prefix."""
 
-  try:
-    # vim.vars is fairly new so it might not exist
-    vim_globals = vim.vars
-  except:
-    vim_globals = vim.eval( 'g:' )
-
+  vim_globals = vimsupport.GetReadOnlyVimGlobals()
   server_conf = {}
   for key, value in vim_globals.items():
     if not key.startswith( YCM_VAR_PREFIX ):
@@ -58,6 +54,15 @@ def BuildServerConf():
     server_conf[ new_key ] = new_value
 
   return server_conf
+
+
+def LoadJsonDefaultsIntoVim():
+  defaults = user_options_store.DefaultOptions()
+  vim_defaults = {}
+  for key, value in defaults.iteritems():
+    vim_defaults[ 'ycm_' + key ] = value
+
+  vimsupport.LoadDictIntoVimGlobals( vim_defaults, overwrite = False )
 
 
 def CompletionStartColumn():

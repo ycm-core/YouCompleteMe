@@ -51,6 +51,7 @@ function! youcompleteme#Enable()
   py from ycm import utils
   py utils.AddThirdPartyFoldersToSysPath()
   py from ycm import base
+  py base.LoadJsonDefaultsIntoVim()
   py from ycm import vimsupport
   py from ycm import user_options_store
   py user_options_store.SetAll( base.BuildServerConf() )
@@ -160,6 +161,11 @@ function! s:SetUpBackwardsCompatibility()
   if complete_in_comments_and_strings
     let g:ycm_complete_in_strings = 1
     let g:ycm_complete_in_comments = 1
+  endif
+
+  " ycm_filetypes_to_completely_ignore is the old name for fileype_blacklist
+  if has_key( g:, 'ycm_filetypes_to_completely_ignore' )
+    let g:filetype_blacklist =  g:ycm_filetypes_to_completely_ignore
   endif
 endfunction
 
