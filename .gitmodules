@@ -10,3 +10,6 @@
 [submodule "third_party/requests"]
 	path = third_party/requests
 	url = https://github.com/kennethreitz/requests
+[submodule "third_party/waitress"]
+	path = third_party/waitress
+	url = https://github.com/Pylons/waitress
