@@ -35,7 +35,7 @@ EXTRA_CMAKE_ARGS=$extra_cmake_args YCM_TESTRUN=1 ./install.sh
 
 for directory in third_party/*; do
   if [ -d "${directory}" ]; then
-    export PYTHONPATH=$(realpath ${directory}):$PYTHONPATH
+    export PYTHONPATH=$PWD/${directory}:$PYTHONPATH
   fi
 done
 
