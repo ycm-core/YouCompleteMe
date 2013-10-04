@@ -19,3 +19,6 @@
 [submodule "third_party/frozendict"]
 	path = third_party/frozendict
 	url = https://github.com/slezica/python-frozendict
+[submodule "third_party/argparse"]
+	path = third_party/argparse
+	url = https://github.com/bewest/argparse
