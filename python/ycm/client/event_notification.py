@@ -51,13 +51,17 @@ class EventNotification( BaseRequest ):
       return []
 
     try:
-      self._cached_response = [ _ConvertDiagnosticDataToVimData( x )
-                                for x in JsonFromFuture(
-                                    self._response_future ) ]
-      return self._cached_response
+      self._cached_response = JsonFromFuture( self._response_future )
     except Exception as e:
       vimsupport.PostVimMessage( str( e ) )
       return []
+
+    if not self._cached_response:
+      return []
+
+    self._cached_response = [ _ConvertDiagnosticDataToVimData( x )
+                              for x in self._cached_response ]
+    return self._cached_response
 
 
 def _ConvertDiagnosticDataToVimData( diagnostic ):
