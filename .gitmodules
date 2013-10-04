@@ -1,6 +1,6 @@
-[submodule "python/ycm/completers/python/jedi"]
-	path = python/ycm/completers/python/jedi
-	url = https://github.com/davidhalter/jedi.git
+[submodule "third_party/jedi"]
+	path = third_party/jedi
+	url = https://github.com/davidhalter/jedi
 [submodule "python/ycm/completers/cs/OmniSharpServer"]
 	path = python/ycm/completers/cs/OmniSharpServer
 	url = https://github.com/nosami/OmniSharpServer.git
