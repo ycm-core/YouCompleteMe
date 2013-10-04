@@ -19,7 +19,7 @@
 
 import json
 import os
-from ycm.frozendict import frozendict
+from frozendict import frozendict
 
 _USER_OPTIONS = {}
 

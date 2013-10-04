@@ -16,3 +16,6 @@
 [submodule "third_party/bottle"]
 	path = third_party/bottle
 	url = https://github.com/defnull/bottle
+[submodule "third_party/frozendict"]
+	path = third_party/frozendict
+	url = https://github.com/slezica/python-frozendict
