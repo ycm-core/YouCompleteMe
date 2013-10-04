@@ -13,3 +13,6 @@
 [submodule "third_party/waitress"]
 	path = third_party/waitress
 	url = https://github.com/Pylons/waitress
+[submodule "third_party/bottle"]
+	path = third_party/bottle
+	url = https://github.com/defnull/bottle
