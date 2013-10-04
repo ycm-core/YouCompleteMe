@@ -22,20 +22,12 @@
 from ycm.completers.completer import Completer
 from ycm.server import responses
 
-import sys
-from os.path import join, abspath, dirname
-
-# We need to add the jedi package to sys.path, but it's important that we clean
-# up after ourselves, because ycm.YouCompletMe.GetFiletypeCompleterForFiletype
-# removes sys.path[0] after importing completers.python.hook
-sys.path.insert( 0, join( abspath( dirname( __file__ ) ), 'jedi' ) )
 try:
   import jedi
 except ImportError:
   raise ImportError(
     'Error importing jedi. Make sure the jedi submodule has been checked out. '
     'In the YouCompleteMe folder, run "git submodule update --init --recursive"')
-sys.path.pop( 0 )
 
 
 class JediCompleter( Completer ):
