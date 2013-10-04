@@ -360,7 +360,7 @@ struct Foo {
 def FiletypeCompletionAvailable_Works_test():
   app = TestApp( ycmd.app )
   request_data = {
-    'filetypes': ['cpp']
+    'filetypes': ['python']
   }
 
   ok_( app.post_json( '/filetype_completion_available',
