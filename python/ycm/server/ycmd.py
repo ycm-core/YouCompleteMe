@@ -233,7 +233,7 @@ def Main():
                        level = numeric_level )
 
   LOGGER = logging.getLogger( __name__ )
-  run( app = app, host = args.host, port = args.port, server='cherrypy' )
+  run( app = app, host = args.host, port = args.port, server='waitress' )
 
 
 if __name__ == "__main__":
