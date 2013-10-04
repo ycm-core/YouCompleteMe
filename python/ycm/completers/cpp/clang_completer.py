@@ -33,7 +33,7 @@ NO_COMPILE_FLAGS_MESSAGE = 'Still no compile flags, no completions yet.'
 INVALID_FILE_MESSAGE = 'File is invalid.'
 NO_COMPLETIONS_MESSAGE = 'No completions found; errors in the file?'
 FILE_TOO_SHORT_MESSAGE = (
-  'File is less than {} lines long; not compiling.'.format(
+  'File is less than {0} lines long; not compiling.'.format(
     MIN_LINES_IN_FILE_TO_PARSE ) )
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 

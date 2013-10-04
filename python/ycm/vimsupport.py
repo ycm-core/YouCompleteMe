@@ -90,8 +90,8 @@ def LoadDictIntoVimGlobals( new_globals, overwrite = True ):
 
   # We need to use json.dumps because that won't use the 'u' prefix on strings
   # which Vim would bork on.
-  vim.eval( 'extend( g:, {}, {})'.format( json.dumps( new_globals ),
-                                          extend_option ) )
+  vim.eval( 'extend( g:, {0}, {1})'.format( json.dumps( new_globals ),
+                                            extend_option ) )
 
 
 # Changing the returned dict will NOT change the value in Vim.

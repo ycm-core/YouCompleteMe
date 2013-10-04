@@ -100,7 +100,7 @@ class CsharpCompleter( Completer ):
 
   def DebugInfo( self ):
     if self._ServerIsRunning():
-      return 'Server running at: {}\nLogfiles:\n{}\n{}'.format(
+      return 'Server running at: {0}\nLogfiles:\n{1}\n{2}'.format(
         self._PortToHost(), self._filename_stdout, self._filename_stderr )
     else:
       return 'Server is not running'
@@ -118,7 +118,7 @@ class CsharpCompleter( Completer ):
       solutionfile = solutionfiles[ 0 ]
     else:
       raise RuntimeError(
-        'Found multiple solution files instead of one!\n{}'.format(
+        'Found multiple solution files instead of one!\n{0}'.format(
           solutionfiles ) )
 
     omnisharp = os.path.join(

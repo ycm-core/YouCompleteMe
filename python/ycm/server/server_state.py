@@ -74,7 +74,7 @@ class ServerState( object ):
       if completer:
         return completer
 
-    raise ValueError( 'No semantic completer exists for filetypes: {}'.format(
+    raise ValueError( 'No semantic completer exists for filetypes: {0}'.format(
         current_filetypes ) )
 
 
