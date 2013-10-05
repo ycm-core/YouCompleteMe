@@ -27,6 +27,8 @@ import bottle
 
 bottle.debug( True )
 
+# TODO: Split this file into multiple files.
+
 # 'contents' should be just one line of text
 def RequestDataForFileWithContents( filename, contents = None ):
   real_contents = contents if contents else ''
