@@ -41,7 +41,7 @@ def BuildServerConf():
   """Builds a dictionary mapping YCM Vim user options to values. Option names
   don't have the 'ycm_' prefix."""
 
-  vim_globals = vimsupport.GetReadOnlyVimGlobals()
+  vim_globals = vimsupport.GetReadOnlyVimGlobals( force_python_objects = True )
   server_conf = {}
   for key, value in vim_globals.items():
     if not key.startswith( YCM_VAR_PREFIX ):

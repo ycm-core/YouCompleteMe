@@ -95,7 +95,10 @@ def LoadDictIntoVimGlobals( new_globals, overwrite = True ):
 
 
 # Changing the returned dict will NOT change the value in Vim.
-def GetReadOnlyVimGlobals():
+def GetReadOnlyVimGlobals( force_python_objects = False ):
+  if force_python_objects:
+    return vim.eval( 'g:' )
+
   try:
     # vim.vars is fairly new so it might not exist
     return vim.vars
