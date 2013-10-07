@@ -1367,6 +1367,7 @@ License
 This software is licensed under the [GPL v3 license][gpl].
 © 2012 Strahinja Val Markovic &lt;<val@markovic.io>&gt;.
 
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/gmarik/vundle#about
