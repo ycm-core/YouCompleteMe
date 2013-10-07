@@ -315,7 +315,7 @@ def FiletypeCompletionAvailable_Works_test():
     'filetypes': ['python']
   }
 
-  ok_( app.post_json( '/filetype_completion_available',
+  ok_( app.post_json( '/semantic_completion_available',
                       request_data ).json )
 
 

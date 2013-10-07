@@ -117,8 +117,7 @@ def SetUserOptions():
   _SetUserOptions( request.json )
 
 
-# TODO: Rename this to 'semantic_completion_available'
-@app.post( '/filetype_completion_available')
+@app.post( '/semantic_completion_available')
 def FiletypeCompletionAvailable():
   LOGGER.info( 'Received filetype completion available request')
   return _JsonResponse( SERVER_STATE.FiletypeCompletionAvailable(
