@@ -26,8 +26,6 @@ from concurrent.futures import ThreadPoolExecutor
 from ycm import vimsupport
 
 HEADERS = {'content-type': 'application/json'}
-# TODO: This TPE might be the reason we're shutting down slowly. It seems that
-# it waits for all worker threads to stop before letting the interpreter exit.
 EXECUTOR = ThreadPoolExecutor( max_workers = 4 )
 
 class ServerError( Exception ):
