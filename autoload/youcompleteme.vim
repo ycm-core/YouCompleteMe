@@ -566,8 +566,7 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
 
-    py request = ycm_state.CreateCompletionRequest()
-    return pyeval( 'request.CompletionStartColumn()' )
+    return pyeval( 'ycm_state.CreateCompletionRequest().CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
   endif
@@ -577,8 +576,8 @@ endfunction
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
-    " TODO: Force semantic mode here (<c-space> needs to work)
-    return pyeval( 'ycm_state.CreateCompletionRequest().CompletionStartColumn()' )
+    py request = ycm_state.CreateCompletionRequest( force_semantic = True )
+    return pyeval( 'request.CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
   endif

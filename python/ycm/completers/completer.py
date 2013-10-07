@@ -19,7 +19,7 @@
 
 import abc
 import ycm_core
-from ycm.utils import ToUtf8IfNeeded
+from ycm.utils import ToUtf8IfNeeded, ForceSemanticCompletion
 from ycm.completers.completer_utils import TriggersForFiletype
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
@@ -149,7 +149,8 @@ class Completer( object ):
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
   def ComputeCandidates( self, request_data ):
-    if not self.ShouldUseNow( request_data ):
+    if ( not ForceSemanticCompletion( request_data ) and
+         not self.ShouldUseNow( request_data ) ):
       return []
 
     if ( request_data[ 'query' ] and

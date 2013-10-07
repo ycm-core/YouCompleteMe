@@ -20,6 +20,7 @@
 import imp
 import os
 from ycm import extra_conf_store
+from ycm.utils import ForceSemanticCompletion
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
 
 
@@ -85,6 +86,7 @@ class ServerState( object ):
     except:
       return False
 
+
   def FiletypeCompletionUsable( self, filetypes ):
     return ( self.CurrentFiletypeCompletionEnabled( filetypes ) and
              self.FiletypeCompletionAvailable( filetypes ) )
@@ -97,7 +99,9 @@ class ServerState( object ):
   def ShouldUseFiletypeCompleter( self, request_data ):
     filetypes = request_data[ 'filetypes' ]
     if self.FiletypeCompletionUsable( filetypes ):
-      return self.GetFiletypeCompleter( filetypes ).ShouldUseNow( request_data )
+      return ( ForceSemanticCompletion( request_data ) or
+               self.GetFiletypeCompleter( filetypes ).ShouldUseNow(
+                 request_data ) )
     return False
 
 

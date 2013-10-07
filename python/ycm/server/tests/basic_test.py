@@ -30,16 +30,23 @@ bottle.debug( True )
 # TODO: Split this file into multiple files.
 
 # 'contents' should be just one line of text
-def RequestDataForFileWithContents( filename, contents = None ):
+def RequestDataForFileWithContents( filename,
+                                    contents = None,
+                                    filetype = None ):
   real_contents = contents if contents else ''
+  filetype_to_use = filetype or 'foo'
   return {
-    'filetypes': ['foo'],
+    'query': '',
+    'line_num': 0,
+    'column_num': 0,
+    'start_column': 0,
+    'filetypes': [ filetype_to_use ],
     'filepath': filename,
     'line_value': real_contents,
     'file_data': {
       filename: {
         'contents': real_contents,
-        'filetypes': ['foo']
+        'filetypes': [ filetype_to_use ]
       }
     }
   }
@@ -118,6 +125,22 @@ int main()
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
                                    CompletionEntryMatcher( 'x' ),
                                    CompletionEntryMatcher( 'y' ) ) )
+
+
+@with_setup( Setup )
+def GetCompletions_ForceSemantic_Works_test():
+  app = TestApp( ycmd.app )
+
+  completion_data = RequestDataForFileWithContents( 'foo.py',
+                                                    filetype = 'python' )
+  completion_data.update( {
+    'force_semantic': True,
+  } )
+
+  results = app.post_json( '/completions', completion_data ).json
+  assert_that( results, has_items( CompletionEntryMatcher( 'abs' ),
+                                   CompletionEntryMatcher( 'open' ),
+                                   CompletionEntryMatcher( 'bool' ) ) )
 
 
 @with_setup( Setup )

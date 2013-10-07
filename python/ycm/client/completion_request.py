@@ -24,11 +24,13 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
 
 
 class CompletionRequest( BaseRequest ):
-  def __init__( self ):
+  def __init__( self, force_semantic = False ):
     super( CompletionRequest, self ).__init__()
 
     self._completion_start_column = base.CompletionStartColumn()
     self._request_data = BuildRequestData( self._completion_start_column )
+    if force_semantic:
+      self._request_data[ 'force_semantic' ] = True
 
 
   def CompletionStartColumn( self ):

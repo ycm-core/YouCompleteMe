@@ -77,3 +77,8 @@ def Memoize( obj ):
       cache[ key ] = obj( *args, **kwargs )
     return cache[ key ]
   return memoizer
+
+
+def ForceSemanticCompletion( request_data ):
+  return ( 'force_semantic' in request_data and
+           bool( request_data[ 'force_semantic' ] ) )

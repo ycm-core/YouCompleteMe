@@ -89,11 +89,11 @@ class YouCompleteMe( object ):
                                                    shell = True )
 
 
-  def CreateCompletionRequest( self ):
+  def CreateCompletionRequest( self, force_semantic = False ):
     # We have to store a reference to the newly created CompletionRequest
     # because VimScript can't store a reference to a Python object across
     # function calls... Thus we need to keep this request somewhere.
-    self._latest_completion_request = CompletionRequest()
+    self._latest_completion_request = CompletionRequest( force_semantic )
     return self._latest_completion_request
 
 
