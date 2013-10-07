@@ -154,7 +154,7 @@ def DebugInfo():
     has_clang_support ) )
 
   if has_clang_support:
-    output.append( ycm_core.ClangVersion() )
+    output.append( 'Clang version: ' + ycm_core.ClangVersion() )
 
   request_data = request.json
   try:
