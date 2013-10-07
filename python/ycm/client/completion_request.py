@@ -28,9 +28,11 @@ class CompletionRequest( BaseRequest ):
     super( CompletionRequest, self ).__init__()
 
     self._completion_start_column = base.CompletionStartColumn()
-    self._request_data = BuildRequestData( self._completion_start_column )
+
+    # This field is also used by the omni_completion_request subclass
+    self.request_data = BuildRequestData( self._completion_start_column )
     if force_semantic:
-      self._request_data[ 'force_semantic' ] = True
+      self.request_data[ 'force_semantic' ] = True
 
 
   def CompletionStartColumn( self ):
@@ -38,8 +40,8 @@ class CompletionRequest( BaseRequest ):
 
 
   def Start( self, query ):
-    self._request_data[ 'query' ] = query
-    self._response_future = self.PostDataToHandlerAsync( self._request_data,
+    self.request_data[ 'query' ] = query
+    self._response_future = self.PostDataToHandlerAsync( self.request_data,
                                                          'completions' )
 
 

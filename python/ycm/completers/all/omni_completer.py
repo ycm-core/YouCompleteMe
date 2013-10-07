@@ -28,12 +28,15 @@ OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
 class OmniCompleter( Completer ):
   def __init__( self, user_options ):
     super( OmniCompleter, self ).__init__( user_options )
-    self.omnifunc = None
-    self.stored_candidates = None
+    self._omnifunc = None
 
 
   def SupportedFiletypes( self ):
     return []
+
+
+  def Available( self ):
+    return bool( self._omnifunc )
 
 
   def ShouldUseCache( self ):
@@ -47,31 +50,31 @@ class OmniCompleter( Completer ):
 
 
   def ShouldUseNowInner( self, request_data ):
-    if not self.omnifunc:
+    if not self._omnifunc:
       return False
     return super( OmniCompleter, self ).ShouldUseNowInner( request_data )
 
 
-  def CandidatesForQueryAsync( self, request_data ):
+  def ComputeCandidates( self, request_data ):
     if self.ShouldUseCache():
-      return super( OmniCompleter, self ).CandidatesForQueryAsync(
+      return super( OmniCompleter, self ).ComputeCandidates(
         request_data )
     else:
-      return self.CandidatesForQueryAsyncInner( request_data )
+      if self.ShouldUseNowInner( request_data ):
+        return self.ComputeCandidatesInner( request_data )
+      return []
 
 
-  def CandidatesForQueryAsyncInner( self, request_data ):
-    if not self.omnifunc:
-      self.stored_candidates = None
-      return
+  def ComputeCandidatesInner( self, request_data ):
+    if not self._omnifunc:
+      return []
 
     try:
-      return_value = int( vim.eval( self.omnifunc + '(1,"")' ) )
+      return_value = int( vim.eval( self._omnifunc + '(1,"")' ) )
       if return_value < 0:
-        self.stored_candidates = None
-        return
+        return []
 
-      omnifunc_call = [ self.omnifunc,
+      omnifunc_call = [ self._omnifunc,
                         "(0,'",
                         vimsupport.EscapeForVim( request_data[ 'query' ] ),
                         "')" ]
@@ -79,34 +82,17 @@ class OmniCompleter( Completer ):
       items = vim.eval( ''.join( omnifunc_call ) )
 
       if 'words' in items:
-        items = items['words']
+        items = items[ 'words' ]
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      self.stored_candidates = filter( bool, items )
-    except (TypeError, ValueError) as error:
+      return filter( bool, items )
+    except ( TypeError, ValueError ) as error:
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )
-      self.stored_candidates = None
-      return
-
-
-
-  def AsyncCandidateRequestReadyInner( self ):
-    return True
+      return []
 
 
   def OnFileReadyToParse( self, request_data ):
-    self.omnifunc = vim.eval( '&omnifunc' )
-
-
-  def CandidatesFromStoredRequest( self ):
-    if self.ShouldUseCache():
-      return super( OmniCompleter, self ).CandidatesFromStoredRequest()
-    else:
-      return self.CandidatesFromStoredRequestInner()
-
-
-  def CandidatesFromStoredRequestInner( self ):
-    return self.stored_candidates if self.stored_candidates else []
+    self._omnifunc = vim.eval( '&omnifunc' )
 

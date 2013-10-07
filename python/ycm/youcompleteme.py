@@ -29,6 +29,7 @@ from ycm.completers.general import syntax_parse
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
+from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
 
@@ -93,7 +94,12 @@ class YouCompleteMe( object ):
     # We have to store a reference to the newly created CompletionRequest
     # because VimScript can't store a reference to a Python object across
     # function calls... Thus we need to keep this request somewhere.
-    self._latest_completion_request = CompletionRequest( force_semantic )
+    if ( not self.NativeFiletypeCompletionAvailable() and
+         self.CurrentFiletypeCompletionEnabled() and
+         self._omnicomp.Available() ):
+      self._latest_completion_request = OmniCompletionRequest( self._omnicomp )
+    else:
+      self._latest_completion_request = CompletionRequest( force_semantic )
     return self._latest_completion_request
 
 
@@ -122,25 +128,14 @@ class YouCompleteMe( object ):
       return False
 
 
-  # TODO: This may not be needed at all when the server is ready. Evaluate this
-  # later.
-  # def FiletypeCompletionAvailable( self ):
-  #   return bool( self.GetFiletypeCompleter() )
-
-
   def NativeFiletypeCompletionUsable( self ):
     return ( self.CurrentFiletypeCompletionEnabled() and
              self.NativeFiletypeCompletionAvailable() )
 
 
-  # TODO: This may not be needed at all when the server is ready. Evaluate this
-  # later.
-  # def FiletypeCompletionUsable( self ):
-  #   return ( self.CurrentFiletypeCompletionEnabled() and
-  #            self.FiletypeCompletionAvailable() )
-
-
   def OnFileReadyToParse( self ):
+    self._omnicomp.OnFileReadyToParse( None )
+
     extra_data = {}
     if self._user_options[ 'collect_identifiers_from_tags_files' ]:
       extra_data[ 'tag_files' ] = _GetTagFiles()
