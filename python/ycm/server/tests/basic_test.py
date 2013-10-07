@@ -29,27 +29,39 @@ bottle.debug( True )
 
 # TODO: Split this file into multiple files.
 
-# 'contents' should be just one line of text
-def RequestDataForFileWithContents( filename,
-                                    contents = None,
-                                    filetype = None ):
-  real_contents = contents if contents else ''
-  filetype_to_use = filetype or 'foo'
-  return {
+def BuildRequest( **kwargs ):
+  filepath = kwargs[ 'filepath' ] if 'filepath' in kwargs else '/foo'
+  contents = kwargs[ 'contents' ] if 'contents' in kwargs else ''
+  filetype = kwargs[ 'filetype' ] if 'filetype' in kwargs else 'foo'
+
+  request = {
     'query': '',
     'line_num': 0,
     'column_num': 0,
     'start_column': 0,
-    'filetypes': [ filetype_to_use ],
-    'filepath': filename,
-    'line_value': real_contents,
+    'filetypes': [ filetype ],
+    'filepath': filepath,
+    'line_value': contents,
     'file_data': {
-      filename: {
-        'contents': real_contents,
-        'filetypes': [ filetype_to_use ]
+      filepath: {
+        'contents': contents,
+        'filetypes': [ filetype ]
       }
     }
   }
+
+  for key, value in kwargs.iteritems():
+    if key in [ 'contents', 'filetype', 'filepath' ]:
+      continue
+    request[ key ] = value
+
+    if key == 'line_num':
+      lines = contents.splitlines()
+      if len( lines ) > 1:
+        # NOTE: assumes 0-based line_num
+        request[ 'line_value' ] = lines[ value ]
+
+  return request
 
 
 # TODO: Make the other tests use this helper too instead of BuildCompletionData
@@ -64,21 +76,14 @@ def Setup():
 @with_setup( Setup )
 def GetCompletions_IdentifierCompleter_Works_test():
   app = TestApp( ycmd.app )
-  event_data = RequestDataForFileWithContents( '/foo/bar', 'foo foogoo ba' )
-  event_data.update( {
-    'event_name': 'FileReadyToParse',
-  } )
+  event_data = BuildRequest( contents = 'foo foogoo ba',
+                             event_name = 'FileReadyToParse' )
 
   app.post_json( '/event_notification', event_data )
 
-  completion_data = RequestDataForFileWithContents( '/foo/bar',
-                                                    'oo foo foogoo ba' )
-  completion_data.update( {
-    'query': 'oo',
-    'line_num': 0,
-    'column_num': 2,
-    'start_column': 0,
-  } )
+  completion_data = BuildRequest( contents = 'oo foo foogoo ba',
+                                  query = 'oo',
+                                  column_num = 2 )
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
@@ -102,24 +107,14 @@ int main()
 }
 """
 
-  filename = '/foo.cpp'
-  completion_data = {
-    'compilation_flags': ['-x', 'c++'],
-    # 0-based line and column!
-    'query': '',
-    'line_num': 10,
-    'column_num': 6,
-    'start_column': 6,
-    'line_value': '  foo.',
-    'filetypes': ['cpp'],
-    'filepath': filename,
-    'file_data': {
-      filename: {
-        'contents': contents,
-        'filetypes': ['cpp']
-      }
-    }
-  }
+  # 0-based line and column!
+  completion_data = BuildRequest( filepath = '/foo.cpp',
+                                  filetype = 'cpp',
+                                  contents = contents,
+                                  line_num = 10,
+                                  column_num = 6,
+                                  start_column = 6,
+                                  compilation_flags = ['-x', 'c++'] )
 
   results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
@@ -131,11 +126,8 @@ int main()
 def GetCompletions_ForceSemantic_Works_test():
   app = TestApp( ycmd.app )
 
-  completion_data = RequestDataForFileWithContents( 'foo.py',
-                                                    filetype = 'python' )
-  completion_data.update( {
-    'force_semantic': True,
-  } )
+  completion_data = BuildRequest( filetype = 'python',
+                                  force_semantic = True )
 
   results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'abs' ),
@@ -146,22 +138,14 @@ def GetCompletions_ForceSemantic_Works_test():
 @with_setup( Setup )
 def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
   app = TestApp( ycmd.app )
-  event_data = RequestDataForFileWithContents( '/foo/bar' )
-  event_data.update( {
-    'event_name': 'FileReadyToParse',
-    'syntax_keywords': ['foo', 'bar', 'zoo']
-  } )
+  event_data = BuildRequest( event_name = 'FileReadyToParse',
+                             syntax_keywords = ['foo', 'bar', 'zoo'] )
 
   app.post_json( '/event_notification', event_data )
 
-  completion_data = RequestDataForFileWithContents( '/foo/bar',
-                                                    'oo ' )
-  completion_data.update( {
-    'query': 'oo',
-    'line_num': 0,
-    'column_num': 2,
-    'start_column': 0,
-  } )
+  completion_data = BuildRequest( contents =  'oo ',
+                                  query = 'oo',
+                                  column_num = 2 )
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'zoo' ) ],
@@ -171,24 +155,18 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
 @with_setup( Setup )
 def GetCompletions_UltiSnipsCompleter_Works_test():
   app = TestApp( ycmd.app )
-  event_data = RequestDataForFileWithContents( '/foo/bar' )
-  event_data.update( {
-    'event_name': 'BufferVisit',
-    'ultisnips_snippets': [
+  event_data = BuildRequest(
+    event_name = 'BufferVisit',
+    ultisnips_snippets = [
         {'trigger': 'foo', 'description': 'bar'},
         {'trigger': 'zoo', 'description': 'goo'},
-    ]
-  } )
+    ] )
 
   app.post_json( '/event_notification', event_data )
 
-  completion_data = RequestDataForFileWithContents( '/foo/bar', 'oo ' )
-  completion_data.update( {
-    'query': 'oo',
-    'line_num': 0,
-    'column_num': 2,
-    'start_column': 0,
-  } )
+  completion_data = BuildRequest( contents =  'oo ',
+                                  query = 'oo',
+                                  column_num = 2 )
 
   eq_( [ BuildCompletionData( 'foo', '<snip> bar' ),
          BuildCompletionData( 'zoo', '<snip> goo' ) ],
@@ -205,20 +183,12 @@ def foo():
 foo()
 """
 
-  goto_data = {
-    'completer_target': 'filetype_default',
-    'command_arguments': ['GoToDefinition'],
-    'line_num': 4,
-    'column_num': 0,
-    'filetypes': ['python'],
-    'filepath': '/foo.py',
-    'file_data': {
-      '/foo.py': {
-        'contents': contents,
-        'filetypes': ['python']
-      }
-    }
-  }
+  goto_data = BuildRequest( completer_target = 'filetype_default',
+                            command_arguments = ['GoToDefinition'],
+                            line_num = 4,
+                            contents = contents,
+                            filetype = 'python',
+                            filepath = '/foo.py' )
 
   # 0-based line and column!
   eq_( {
@@ -246,26 +216,17 @@ int main()
 }
 """
 
-  filename = '/foo.cpp'
-  goto_data = {
-    'compilation_flags': ['-x', 'c++'],
-    'completer_target': 'filetype_default',
-    'command_arguments': ['GoToDefinition'],
-    'line_num': 9,
-    'column_num': 2,
-    'filetypes': ['cpp'],
-    'filepath': filename,
-    'file_data': {
-      filename: {
-        'contents': contents,
-        'filetypes': ['cpp']
-      }
-    }
-  }
+  goto_data = BuildRequest( completer_target = 'filetype_default',
+                            command_arguments = ['GoToDefinition'],
+                            compilation_flags = ['-x', 'c++'],
+                            line_num = 9,
+                            column_num = 2,
+                            contents = contents,
+                            filetype = 'cpp' )
 
   # 0-based line and column!
   eq_( {
-        'filepath': '/foo.cpp',
+        'filepath': '/foo',
         'line_num': 1,
         'column_num': 7
       },
@@ -275,10 +236,7 @@ int main()
 @with_setup( Setup )
 def DefinedSubcommands_Works_test():
   app = TestApp( ycmd.app )
-  subcommands_data = RequestDataForFileWithContents( '/foo/bar' )
-  subcommands_data.update( {
-    'completer_target': 'python',
-  } )
+  subcommands_data = BuildRequest( completer_target = 'python' )
 
   eq_( [ 'GoToDefinition',
          'GoToDeclaration',
@@ -289,17 +247,7 @@ def DefinedSubcommands_Works_test():
 @with_setup( Setup )
 def DefinedSubcommands_WorksWhenNoExplicitCompleterTargetSpecified_test():
   app = TestApp( ycmd.app )
-  filename = 'foo.py'
-  subcommands_data = {
-    'filetypes': ['python'],
-    'filepath': filename,
-    'file_data': {
-      filename: {
-        'contents': '',
-        'filetypes': ['python']
-      }
-    }
-  }
+  subcommands_data = BuildRequest( filetype = 'python' )
 
   eq_( [ 'GoToDefinition',
          'GoToDeclaration',
@@ -319,21 +267,10 @@ struct Foo {
 };
 """
 
-  filename = '/foo.cpp'
-  event_data = {
-    'event_name': 'FileReadyToParse',
-    'compilation_flags': ['-x', 'c++'],
-    'line_num': 0,
-    'column_num': 0,
-    'filetypes': ['cpp'],
-    'filepath': filename,
-    'file_data': {
-      filename: {
-        'contents': contents,
-        'filetypes': ['cpp']
-      }
-    }
-  }
+  event_data = BuildRequest( compilation_flags = ['-x', 'c++'],
+                             event_name = 'FileReadyToParse',
+                             contents = contents,
+                             filetype = 'cpp' )
 
   results = app.post_json( '/event_notification', event_data ).json
   assert_that( results,
@@ -355,20 +292,10 @@ struct Foo {
 };
 """
 
-  filename = '/foo.cpp'
-  diag_data = {
-    'compilation_flags': ['-x', 'c++'],
-    'line_num': 2,
-    'column_num': 0,
-    'filetypes': ['cpp'],
-    'filepath': filename,
-    'file_data': {
-      filename: {
-        'contents': contents,
-        'filetypes': ['cpp']
-      }
-    }
-  }
+  diag_data = BuildRequest( compilation_flags = ['-x', 'c++'],
+                            line_num = 2,
+                            contents = contents,
+                            filetype = 'cpp' )
 
   event_data = diag_data.copy()
   event_data.update( {
