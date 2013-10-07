@@ -26,6 +26,7 @@ from ycm import vimsupport
 from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general import syntax_parse
+from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
@@ -121,11 +122,8 @@ class YouCompleteMe( object ):
 
 
   def NativeFiletypeCompletionAvailable( self ):
-    try:
-      return _NativeFiletypeCompletionAvailableForFile(
-        vimsupport.GetCurrentBufferFilepath() )
-    except:
-      return False
+    return any( [ FiletypeCompleterExistsForFiletype( x ) for x in
+                  vimsupport.CurrentFiletypes() ] )
 
 
   def NativeFiletypeCompletionUsable( self ):
@@ -252,14 +250,3 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
   extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
                                            'description': x.description
                                          } for x in rawsnips ]
-
-
-# 'filepath' is here only as a key for Memoize
-# This can't be a nested function inside NativeFiletypeCompletionAvailable
-# because then the Memoize decorator wouldn't work (nested functions are
-# re-created on every call to the outer function).
-@utils.Memoize
-def _NativeFiletypeCompletionAvailableForFile( filepath ):
-  return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                        'filetype_completion_available')
-

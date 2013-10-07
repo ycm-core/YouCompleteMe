@@ -22,6 +22,7 @@ import os
 from ycm import extra_conf_store
 from ycm.utils import ForceSemanticCompletion
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
+from ycm.completers.completer_utils import PathToFiletypeCompleterPluginLoader
 
 
 class ServerState( object ):
@@ -52,8 +53,7 @@ class ServerState( object ):
     except KeyError:
       pass
 
-    module_path = _PathToFiletypeCompleterPluginLoader( filetype )
-
+    module_path = PathToFiletypeCompleterPluginLoader( filetype )
     completer = None
     supported_filetypes = [ filetype ]
     if os.path.exists( module_path ):
@@ -113,15 +113,4 @@ class ServerState( object ):
     filetype_to_disable = self._user_options[
         'filetype_specific_completion_to_disable' ]
     return not all([ x in filetype_to_disable for x in current_filetypes ])
-
-
-
-def _PathToCompletersFolder():
-  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
-  return os.path.join( dir_of_current_script, '..', 'completers' )
-
-
-def _PathToFiletypeCompleterPluginLoader( filetype ):
-  return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
-
 
