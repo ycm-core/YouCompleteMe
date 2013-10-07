@@ -38,7 +38,10 @@ def ToUtf8IfNeeded( string_or_unicode ):
 
 
 def PathToTempDir():
-  return os.path.join( tempfile.gettempdir(), 'ycm_temp' )
+  tempdir = os.path.join( tempfile.gettempdir(), 'ycm_temp' )
+  if not os.path.exists( tempdir ):
+    os.makedirs( tempdir )
+  return tempdir
 
 
 # From here: http://stackoverflow.com/a/8536476/1672783
