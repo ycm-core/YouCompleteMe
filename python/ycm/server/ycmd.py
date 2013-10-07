@@ -54,7 +54,7 @@ app = bottle.Bottle()
 
 @app.post( '/event_notification' )
 def EventNotification():
-  LOGGER.info( 'Received event notification')
+  LOGGER.info( 'Received event notification' )
   request_data = request.json
   event_name = request_data[ 'event_name' ]
   LOGGER.debug( 'Event name: %s', event_name )
@@ -75,7 +75,7 @@ def EventNotification():
 
 @app.post( '/run_completer_command' )
 def RunCompleterCommand():
-  LOGGER.info( 'Received command request')
+  LOGGER.info( 'Received command request' )
   request_data = request.json
   completer = _GetCompleterForRequestData( request_data )
 
@@ -86,7 +86,7 @@ def RunCompleterCommand():
 
 @app.post( '/completions' )
 def GetCompletions():
-  LOGGER.info( 'Received completion request')
+  LOGGER.info( 'Received completion request' )
   request_data = request.json
   do_filetype_completion = SERVER_STATE.ShouldUseFiletypeCompleter(
     request_data )
@@ -101,51 +101,51 @@ def GetCompletions():
 
 @app.get( '/user_options' )
 def GetUserOptions():
-  LOGGER.info( 'Received user options GET request')
+  LOGGER.info( 'Received user options GET request' )
   return _JsonResponse( dict( SERVER_STATE.user_options ) )
 
 
 @app.get( '/healthy' )
 def GetHealthy():
-  LOGGER.info( 'Received health request')
+  LOGGER.info( 'Received health request' )
   return _JsonResponse( True )
 
 
 @app.post( '/user_options' )
 def SetUserOptions():
-  LOGGER.info( 'Received user options POST request')
+  LOGGER.info( 'Received user options POST request' )
   _SetUserOptions( request.json )
 
 
-@app.post( '/semantic_completion_available')
+@app.post( '/semantic_completion_available' )
 def FiletypeCompletionAvailable():
-  LOGGER.info( 'Received filetype completion available request')
+  LOGGER.info( 'Received filetype completion available request' )
   return _JsonResponse( SERVER_STATE.FiletypeCompletionAvailable(
       request.json[ 'filetypes' ] ) )
 
 
-@app.post( '/defined_subcommands')
+@app.post( '/defined_subcommands' )
 def DefinedSubcommands():
-  LOGGER.info( 'Received defined subcommands request')
+  LOGGER.info( 'Received defined subcommands request' )
   completer = _GetCompleterForRequestData( request.json )
 
   return _JsonResponse( completer.DefinedSubcommands() )
 
 
-@app.post( '/detailed_diagnostic')
+@app.post( '/detailed_diagnostic' )
 def GetDetailedDiagnostic():
-  LOGGER.info( 'Received detailed diagnostic request')
+  LOGGER.info( 'Received detailed diagnostic request' )
   request_data = request.json
   completer = _GetCompleterForRequestData( request_data )
 
   return _JsonResponse( completer.GetDetailedDiagnostic( request_data ) )
 
 
-@app.post( '/debug_info')
+@app.post( '/debug_info' )
 def DebugInfo():
   # This can't be at the top level because of possible extra conf preload
   import ycm_core
-  LOGGER.info( 'Received debug info request')
+  LOGGER.info( 'Received debug info request' )
 
   output = []
   has_clang_support = ycm_core.HasClangSupport()
