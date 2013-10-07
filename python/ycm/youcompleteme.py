@@ -116,7 +116,8 @@ class YouCompleteMe( object ):
 
   def NativeFiletypeCompletionAvailable( self ):
     try:
-      return _NativeFiletypeCompletionAvailableForFile( vim.current.buffer.name )
+      return _NativeFiletypeCompletionAvailableForFile(
+        vimsupport.GetCurrentBufferFilepath() )
     except:
       return False
 

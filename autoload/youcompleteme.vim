@@ -87,7 +87,10 @@ function! youcompleteme#Enable()
     " is read. This is because youcompleteme#Enable() is called on VimEnter and
     " that happens *after" BufRead/BufEnter has already triggered for the
     " initial file.
-    autocmd BufRead,BufEnter * call s:OnBufferVisit()
+    " We also need to trigger buf init code on the FileType event because when
+    " the user does :enew and then :set ft=something, we need to run buf init
+    " code again.
+    autocmd BufRead,BufEnter,FileType * call s:OnBufferVisit()
     autocmd BufUnload * call s:OnBufferUnload( expand( '<afile>:p' ) )
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()

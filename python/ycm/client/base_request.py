@@ -85,13 +85,14 @@ class BaseRequest( object ):
 
 def BuildRequestData( start_column = None, query = None ):
   line, column = vimsupport.CurrentLineAndColumn()
+  filepath = vimsupport.GetCurrentBufferFilepath()
   request_data = {
     'filetypes': vimsupport.CurrentFiletypes(),
     'line_num': line,
     'column_num': column,
     'start_column': start_column,
     'line_value': vim.current.line,
-    'filepath': vim.current.buffer.name,
+    'filepath': filepath,
     'file_data': vimsupport.GetUnsavedAndCurrentBufferData()
   }
 

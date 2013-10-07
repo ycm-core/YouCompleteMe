@@ -69,7 +69,7 @@ def GetUnsavedAndCurrentBufferData():
              buffer_object == vim.current.buffer ):
       continue
 
-    buffers_data[ buffer_object.name ] = {
+    buffers_data[ GetBufferFilepath( buffer_object ) ] = {
       'contents': '\n'.join( buffer_object ),
       'filetypes': FiletypesForBuffer( buffer_object )
     }
@@ -81,6 +81,18 @@ def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
   return int( vim.eval( "bufnr('{0}', {1})".format(
       os.path.realpath( filename ),
       int( open_file_if_needed ) ) ) )
+
+
+def GetCurrentBufferFilepath():
+  return GetBufferFilepath( vim.current.buffer )
+
+
+def GetBufferFilepath( buffer_object ):
+  if buffer_object.name:
+    return buffer_object.name
+  # Buffers that have just been created by a command like :enew don't have any
+  # buffer name so we use the buffer number for that.
+  return os.path.join( os.getcwd(), str( buffer_object.number ) )
 
 
 # Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
@@ -111,7 +123,7 @@ def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
   vim.command( "normal! m'" )
 
-  if filename != vim.current.buffer.name:
+  if filename != GetCurrentBufferFilepath():
     # We prefix the command with 'keepjumps' so that opening the file is not
     # recorded in the jumplist. So when we open the file and move the cursor to
     # a location in it, the user can use CTRL-O to jump back to the original
