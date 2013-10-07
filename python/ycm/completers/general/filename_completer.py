@@ -77,9 +77,10 @@ class FilenameCompleter( Completer ):
     current_line = request_data[ 'line_value' ]
     start_column = request_data[ 'start_column' ]
     filepath = request_data[ 'filepath' ]
+    filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
     line = current_line[ :start_column ]
 
-    if InCFamilyFile():
+    if InCFamilyFile( filetypes ):
       include_match = self._include_regex.search( line )
       if include_match:
         path_dir = line[ include_match.end(): ]
