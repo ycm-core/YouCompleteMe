@@ -18,8 +18,10 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycm import vimsupport
+from ycm.server.responses import UnknownExtraConf
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                      JsonFromFuture )
+
 
 class EventNotification( BaseRequest ):
   def __init__( self, event_name, extra_data = None ):
@@ -51,10 +53,13 @@ class EventNotification( BaseRequest ):
       return []
 
     try:
-      self._cached_response = JsonFromFuture( self._response_future )
+      try:
+        self._cached_response = JsonFromFuture( self._response_future )
+      except UnknownExtraConf as e:
+          if vimsupport.Confirm( str( e ) ):
+            _LoadExtraConfFile( e.extra_conf_file )
     except Exception as e:
       vimsupport.PostVimMessage( str( e ) )
-      return []
 
     if not self._cached_response:
       return []
@@ -83,3 +88,6 @@ def SendEventNotificationAsync( event_name, extra_data = None ):
   event = EventNotification( event_name, extra_data )
   event.Start()
 
+def _LoadExtraConfFile( filepath ):
+  BaseRequest.PostDataToHandler( { 'filepath': filepath },
+                                 'load_extra_conf_file' )

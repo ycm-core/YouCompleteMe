@@ -36,17 +36,19 @@ utils.AddThirdPartyFoldersToSysPath()
 import logging
 import json
 import bottle
+import argparse
+import httplib
 from bottle import run, request, response
 import server_state
 from ycm import user_options_store
 from ycm.server.responses import BuildExceptionResponse
-import argparse
-import httplib
+from ycm import extra_conf_store
 
 # num bytes for the request body buffer; request.json only works if the request
 # size is less than this
 bottle.Request.MEMFILE_MAX = 300 * 1024
 
+# TODO: rename these to _lower_case
 SERVER_STATE = None
 LOGGER = None
 app = bottle.Bottle()
@@ -70,7 +72,6 @@ def EventNotification():
 
   if response_data:
     return _JsonResponse( response_data )
-
 
 
 @app.post( '/run_completer_command' )
@@ -141,6 +142,13 @@ def GetDetailedDiagnostic():
   return _JsonResponse( completer.GetDetailedDiagnostic( request_data ) )
 
 
+@app.post( '/load_extra_conf_file' )
+def LoadExtraConfFile():
+  LOGGER.info( 'Received extra conf load request' )
+  request_data = request.json
+  extra_conf_store.Load( request_data[ 'filepath' ], force = True )
+
+
 @app.post( '/debug_info' )
 def DebugInfo():
   # This can't be at the top level because of possible extra conf preload
@@ -167,13 +175,19 @@ def DebugInfo():
 # The type of the param is Bottle.HTTPError
 @app.error( httplib.INTERNAL_SERVER_ERROR )
 def ErrorHandler( httperror ):
-  return _JsonResponse( BuildExceptionResponse( str( httperror.exception ),
+  return _JsonResponse( BuildExceptionResponse( httperror.exception,
                                                 httperror.traceback ) )
 
 
 def _JsonResponse( data ):
   response.set_header( 'Content-Type', 'application/json' )
-  return json.dumps( data )
+  return json.dumps( data, default = _UniversalSerialize )
+
+
+def _UniversalSerialize( obj ):
+  serialized = obj.__dict__.copy()
+  serialized[ 'TYPE' ] = type( obj ).__name__
+  return serialized
 
 
 def _GetCompleterForRequestData( request_data ):
@@ -205,6 +219,7 @@ def SetServerStateToDefaults():
   LOGGER = logging.getLogger( __name__ )
   user_options_store.LoadDefaults()
   SERVER_STATE = server_state.ServerState( user_options_store.GetAll() )
+  extra_conf_store.Reset()
 
 
 def Main():

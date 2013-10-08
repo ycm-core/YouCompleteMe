@@ -24,14 +24,10 @@ from retries import retries
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import ThreadPoolExecutor
 from ycm import vimsupport
+from ycm.server.responses import ServerError, UnknownExtraConf
 
 HEADERS = {'content-type': 'application/json'}
 EXECUTOR = ThreadPoolExecutor( max_workers = 4 )
-
-class ServerError( Exception ):
-  def __init__( self, message ):
-    super( ServerError, self ).__init__( message )
-
 
 class BaseRequest( object ):
   def __init__( self ):
@@ -103,7 +99,7 @@ def BuildRequestData( start_column = None, query = None ):
 def JsonFromFuture( future ):
   response = future.result()
   if response.status_code == requests.codes.server_error:
-    raise ServerError( response.json()[ 'message' ] )
+    _RaiseExceptionForData( response.json() )
 
   # We let Requests handle the other status types, we only handle the 500
   # error code.
@@ -137,3 +133,10 @@ def _CheckServerIsHealthyWithCache():
   except:
     return False
 
+
+def _RaiseExceptionForData( data ):
+  if data[ 'exception' ][ 'TYPE' ] == UnknownExtraConf.__name__:
+    raise UnknownExtraConf( data[ 'exception' ][ 'extra_conf_file' ] )
+
+  raise ServerError( '{0}: {1}'.format( data[ 'exception' ][ 'TYPE' ],
+                                        data[ 'message' ] ) )

@@ -24,27 +24,29 @@ import imp
 import random
 import string
 import sys
+from threading import Lock
 from ycm import user_options_store
+from ycm.server.responses import UnknownExtraConf
 from fnmatch import fnmatch
 
 # Constants
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
-CONFIRM_CONF_FILE_MESSAGE = ('Found {0}. Load? \n\n(Question can be turned '
-                             'off with options, see YCM docs)')
 
 # Singleton variables
 _module_for_module_file = {}
+_module_for_module_file_lock = Lock()
 _module_file_for_source_file = {}
+_module_file_for_source_file_lock = Lock()
 
-class UnknownExtraConf( Exception ):
-  def __init__( self, extra_conf_file ):
-    message = CONFIRM_CONF_FILE_MESSAGE.format( extra_conf_file )
-    super( UnknownExtraConf, self ).__init__( message )
-    self.extra_conf_file = extra_conf_file
+
+def Reset():
+  global _module_for_module_file, _module_file_for_source_file
+  _module_for_module_file = {}
+  _module_file_for_source_file = {}
 
 
 def ModuleForSourceFile( filename ):
-  return _Load( ModuleFileForSourceFile( filename ) )
+  return Load( ModuleFileForSourceFile( filename ) )
 
 
 def ModuleFileForSourceFile( filename ):
@@ -52,11 +54,12 @@ def ModuleFileForSourceFile( filename ):
   order and return the filename of the first module that was allowed to load.
   If no module was found or allowed to load, None is returned."""
 
-  if not filename in _module_file_for_source_file:
-    for module_file in _ExtraConfModuleSourceFilesForFile( filename ):
-      if _Load( module_file ):
-        _module_file_for_source_file[ filename ] = module_file
-        break
+  with _module_file_for_source_file_lock:
+    if not filename in _module_file_for_source_file:
+      for module_file in _ExtraConfModuleSourceFilesForFile( filename ):
+        if Load( module_file ):
+          _module_file_for_source_file[ filename ] = module_file
+          break
 
   return _module_file_for_source_file.setdefault( filename )
 
@@ -84,7 +87,8 @@ def _CallExtraConfMethod( function_name ):
 
 def _Disable( module_file ):
   """Disables the loading of a module for the current session."""
-  _module_for_module_file[ module_file ] = None
+  with _module_for_module_file_lock:
+    _module_for_module_file[ module_file ] = None
 
 
 def _ShouldLoad( module_file ):
@@ -102,10 +106,15 @@ def _ShouldLoad( module_file ):
     if _MatchesGlobPattern( module_file, glob.lstrip('!') ):
       return not is_blacklisted
 
+  # We disable the file if it's unknown so that we don't ask the user about it
+  # repeatedly. Raising UnknownExtraConf should result in the client sending
+  # another request to load the module file if the user explicitly chooses to do
+  # that.
+  _Disable( module_file )
   raise UnknownExtraConf( module_file )
 
 
-def _Load( module_file, force = False ):
+def Load( module_file, force = False ):
   """Load and return the module contained in a file.
   Using force = True the module will be loaded regardless
   of the criteria in _ShouldLoad.
@@ -115,11 +124,13 @@ def _Load( module_file, force = False ):
     return None
 
   if not force:
-    if module_file in _module_for_module_file:
-      return _module_for_module_file[ module_file ]
+    with _module_for_module_file_lock:
+      if module_file in _module_for_module_file:
+        return _module_for_module_file[ module_file ]
 
     if not _ShouldLoad( module_file ):
-      return _Disable( module_file )
+      _Disable( module_file )
+      return None
 
   # This has to be here because a long time ago, the ycm_extra_conf.py files
   # used to import clang_helpers.py from the cpp folder. This is not needed
@@ -129,7 +140,8 @@ def _Load( module_file, force = False ):
   module = imp.load_source( _RandomName(), module_file )
   del sys.path[ 0 ]
 
-  _module_for_module_file[ module_file ] = module
+  with _module_for_module_file_lock:
+    _module_for_module_file[ module_file ] = module
   return module
 
 

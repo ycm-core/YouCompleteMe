@@ -37,6 +37,7 @@ class Flags( object ):
     # It's caches all the way down...
     self.flags_for_file = {}
     self.special_clang_flags = _SpecialClangIncludes()
+    self.no_extra_conf_file_warning_posted = False
 
 
   def FlagsForFile( self, filename, add_special_clang_flags = True ):
@@ -45,7 +46,10 @@ class Flags( object ):
     except KeyError:
       module = extra_conf_store.ModuleForSourceFile( filename )
       if not module:
-        raise RuntimeError( NO_EXTRA_CONF_FILENAME_MESSAGE )
+        if not self.no_extra_conf_file_warning_posted:
+          self.no_extra_conf_file_warning_posted = True
+          raise RuntimeError( NO_EXTRA_CONF_FILENAME_MESSAGE )
+        return None
 
       results = module.FlagsForFile( filename )
 

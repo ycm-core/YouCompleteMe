@@ -19,6 +19,21 @@
 
 import os
 
+CONFIRM_CONF_FILE_MESSAGE = ('Found {0}. Load? \n\n(Question can be turned '
+                             'off with options, see YCM docs)')
+
+class ServerError( Exception ):
+  def __init__( self, message ):
+    super( ServerError, self ).__init__( message )
+
+
+class UnknownExtraConf( ServerError ):
+  def __init__( self, extra_conf_file ):
+    message = CONFIRM_CONF_FILE_MESSAGE.format( extra_conf_file )
+    super( UnknownExtraConf, self ).__init__( message )
+    self.extra_conf_file = extra_conf_file
+
+
 
 def BuildGoToResponse( filepath, line_num, column_num, description = None ):
   response = {
@@ -80,9 +95,10 @@ def BuildDiagnosticData( filepath,
   }
 
 
-def BuildExceptionResponse( error_message, traceback ):
+def BuildExceptionResponse( exception, traceback ):
   return {
-    'message': error_message,
+    'exception': exception,
+    'message': str( exception ),
     'traceback': traceback
   }
 

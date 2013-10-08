@@ -79,6 +79,9 @@ class ClangCompleter( Completer ):
 
     if self._completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
       self._logger.info( PARSING_FILE_MESSAGE )
+      # TODO: For this exception and the NO_COMPILE_FLAGS one, use a special
+      # exception class so that the client can be more silent about these
+      # messages.
       raise RuntimeError( PARSING_FILE_MESSAGE )
 
     flags = self._FlagsForRequest( request_data )

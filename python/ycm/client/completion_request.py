@@ -57,7 +57,7 @@ class CompletionRequest( BaseRequest ):
                for x in JsonFromFuture( self._response_future ) ]
     except Exception as e:
       vimsupport.PostVimMessage( str( e ) )
-      return []
+    return []
 
 
 def _ConvertCompletionDataToVimData( completion_data ):

@@ -17,9 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import httplib
 from webtest import TestApp
 from .. import ycmd
-from ..responses import BuildCompletionData
+from ..responses import BuildCompletionData, UnknownExtraConf
 from nose.tools import ok_, eq_, with_setup
 from hamcrest import ( assert_that, has_items, has_entry, contains,
                        contains_string, has_entries )
@@ -73,6 +75,15 @@ def Setup():
   ycmd.SetServerStateToDefaults()
 
 
+def PathToTestDataDir():
+  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
+  return os.path.join( dir_of_current_script, 'testdata' )
+
+
+def PathToTestFile( test_basename ):
+  return os.path.join( PathToTestDataDir(), test_basename )
+
+
 @with_setup( Setup )
 def GetCompletions_IdentifierCompleter_Works_test():
   app = TestApp( ycmd.app )
@@ -91,7 +102,7 @@ def GetCompletions_IdentifierCompleter_Works_test():
 
 
 @with_setup( Setup )
-def GetCompletions_ClangCompleter_Works_test():
+def GetCompletions_ClangCompleter_WorksWithExplicitFlags_test():
   app = TestApp( ycmd.app )
   contents = """
 struct Foo {
@@ -115,6 +126,45 @@ int main()
                                   column_num = 6,
                                   start_column = 6,
                                   compilation_flags = ['-x', 'c++'] )
+
+  results = app.post_json( '/completions', completion_data ).json
+  assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
+                                   CompletionEntryMatcher( 'x' ),
+                                   CompletionEntryMatcher( 'y' ) ) )
+
+
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_UnknownExtraConfException_test():
+  app = TestApp( ycmd.app )
+  filepath = PathToTestFile( 'basic.cpp' )
+  completion_data = BuildRequest( filepath = filepath,
+                                  filetype = 'cpp',
+                                  contents = open( filepath ).read(),
+                                  force_semantic = True )
+
+  response = app.post_json( '/completions',
+                            completion_data,
+                            expect_errors = True )
+
+  eq_( response.status_code, httplib.INTERNAL_SERVER_ERROR )
+  assert_that( response.json,
+               has_entry( 'exception',
+                          has_entry( 'TYPE', UnknownExtraConf.__name__ ) ) )
+
+
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
+  app = TestApp( ycmd.app )
+  app.post_json( '/load_extra_conf_file',
+                 { 'filepath': PathToTestFile( '.ycm_extra_conf.py' ) } )
+
+  filepath = PathToTestFile( 'basic.cpp' )
+  completion_data = BuildRequest( filepath = filepath,
+                                  filetype = 'cpp',
+                                  contents = open( filepath ).read(),
+                                  line_num = 10,
+                                  column_num = 6,
+                                  start_column = 6 )
 
   results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
