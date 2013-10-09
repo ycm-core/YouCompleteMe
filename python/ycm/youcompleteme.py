@@ -19,6 +19,7 @@
 
 import os
 import vim
+import signal
 import subprocess
 import tempfile
 import json
@@ -73,7 +74,9 @@ class YouCompleteMe( object ):
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
       if self._user_options[ 'server_use_vim_stdout' ]:
-        self._server_popen = subprocess.Popen( command, shell = True )
+        self._server_popen = subprocess.Popen( command,
+                                               shell = True,
+                                               preexec_fn = os.setsid )
       else:
         filename_format = os.path.join( utils.PathToTempDir(),
                                         'server_{port}_{std}.log' )
@@ -88,7 +91,8 @@ class YouCompleteMe( object ):
             self._server_popen = subprocess.Popen( command,
                                                    stdout = fstdout,
                                                    stderr = fstderr,
-                                                   shell = True )
+                                                   shell = True,
+                                                   preexec_fn = os.setsid )
 
 
   def CreateCompletionRequest( self, force_semantic = False ):
@@ -162,7 +166,7 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
-    self._server_popen.terminate()
+    os.killpg( self._server_popen.pid, signal.SIGTERM )
     os.remove( self._temp_options_filename )
 
 
