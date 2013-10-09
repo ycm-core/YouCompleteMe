@@ -87,8 +87,7 @@ class YouCompleteMe( object ):
           with open( self._server_stdout, 'w' ) as fstdout:
             self._server_popen = subprocess.Popen( command,
                                                    stdout = fstdout,
-                                                   stderr = fstderr,
-                                                   shell = True )
+                                                   stderr = fstderr )
 
 
   def CreateCompletionRequest( self, force_semantic = False ):
