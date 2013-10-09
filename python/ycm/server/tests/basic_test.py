@@ -115,8 +115,14 @@ def GetCompletions_CsCompleter_Works_test():
   app.post_json( '/event_notification', event_data )
 
   # We need to wait until the server has started up.
-  # TODO: This is a HORRIBLE hack. Fix it!
-  time.sleep( 2 )
+  while True:
+    result = app.post_json( '/run_completer_command',
+                            BuildRequest( completer_target = 'filetype_default',
+                                          command_arguments = ['ServerRunning'],
+                                          filetype = 'cs' ) ).json
+    if result:
+      break
+    time.sleep( 0.2 )
 
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cs',
