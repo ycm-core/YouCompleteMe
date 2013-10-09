@@ -19,6 +19,7 @@
 
 import os
 import httplib
+import time
 from webtest import TestApp
 from .. import ycmd
 from ..responses import BuildCompletionData, UnknownExtraConf
@@ -99,6 +100,34 @@ def GetCompletions_IdentifierCompleter_Works_test():
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
        app.post_json( '/completions', completion_data ).json )
+
+
+@with_setup( Setup )
+def GetCompletions_CsCompleter_Works_test():
+  app = TestApp( ycmd.app )
+  filepath = PathToTestFile( 'testy/Program.cs' )
+  contents = open( filepath ).read()
+  event_data = BuildRequest( filepath = filepath,
+                             filetype = 'cs',
+                             contents = contents,
+                             event_name = 'FileReadyToParse' )
+
+  app.post_json( '/event_notification', event_data )
+
+  # We need to wait until the server has started up.
+  # TODO: This is a HORRIBLE hack. Fix it!
+  time.sleep( 2 )
+
+  completion_data = BuildRequest( filepath = filepath,
+                                  filetype = 'cs',
+                                  contents = contents,
+                                  line_num = 8,
+                                  column_num = 11,
+                                  start_column = 11 )
+
+  results = app.post_json( '/completions', completion_data ).json
+  assert_that( results, has_items( CompletionEntryMatcher( 'CursorLeft' ),
+                                   CompletionEntryMatcher( 'CursorSize' ) ) )
 
 
 @with_setup( Setup )
