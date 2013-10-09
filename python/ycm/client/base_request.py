@@ -20,6 +20,7 @@
 import vim
 import json
 import requests
+import urlparse
 from retries import retries
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import ThreadPoolExecutor
@@ -111,7 +112,7 @@ def JsonFromFuture( future ):
 
 
 def _BuildUri( handler ):
-  return ''.join( [ BaseRequest.server_location, '/', handler ] )
+  return urlparse.urljoin( BaseRequest.server_location, handler )
 
 
 SERVER_HEALTHY = False
