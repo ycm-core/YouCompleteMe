@@ -19,7 +19,6 @@
 
 from collections import defaultdict
 import ycm_core
-import logging
 from ycm.server import responses
 from ycm import extra_conf_store
 from ycm.utils import ToUtf8IfNeeded
@@ -46,7 +45,6 @@ class ClangCompleter( Completer ):
     self._completer = ycm_core.ClangCompleter()
     self._flags = Flags()
     self._diagnostic_store = None
-    self._logger = logging.getLogger( __name__ )
 
 
   def SupportedFiletypes( self ):
@@ -78,15 +76,10 @@ class ClangCompleter( Completer ):
       return
 
     if self._completer.UpdatingTranslationUnit( ToUtf8IfNeeded( filename ) ):
-      self._logger.info( PARSING_FILE_MESSAGE )
-      # TODO: For this exception and the NO_COMPILE_FLAGS one, use a special
-      # exception class so that the client can be more silent about these
-      # messages.
       raise RuntimeError( PARSING_FILE_MESSAGE )
 
     flags = self._FlagsForRequest( request_data )
     if not flags:
-      self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
       raise RuntimeError( NO_COMPILE_FLAGS_MESSAGE )
 
     files = self.GetUnsavedFilesVector( request_data )
@@ -100,7 +93,6 @@ class ClangCompleter( Completer ):
         flags )
 
     if not results:
-      self._logger.warning( NO_COMPLETIONS_MESSAGE )
       raise RuntimeError( NO_COMPLETIONS_MESSAGE )
 
     return [ ConvertCompletionData( x ) for x in results ]
@@ -132,12 +124,10 @@ class ClangCompleter( Completer ):
   def _LocationForGoTo( self, goto_function, request_data ):
     filename = request_data[ 'filepath' ]
     if not filename:
-      self._logger.warning( INVALID_FILE_MESSAGE )
       raise ValueError( INVALID_FILE_MESSAGE )
 
     flags = self._FlagsForRequest( request_data )
     if not flags:
-      self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
 
     files = self.GetUnsavedFilesVector( request_data )
@@ -192,16 +182,13 @@ class ClangCompleter( Completer ):
     filename = request_data[ 'filepath' ]
     contents = request_data[ 'file_data' ][ filename ][ 'contents' ]
     if contents.count( '\n' ) < MIN_LINES_IN_FILE_TO_PARSE:
-      self._logger.warning( FILE_TOO_SHORT_MESSAGE )
       raise ValueError( FILE_TOO_SHORT_MESSAGE )
 
     if not filename:
-      self._logger.warning( INVALID_FILE_MESSAGE )
       raise ValueError( INVALID_FILE_MESSAGE )
 
     flags = self._FlagsForRequest( request_data )
     if not flags:
-      self._logger.info( NO_COMPILE_FLAGS_MESSAGE )
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
 
     diagnostics = self._completer.UpdateTranslationUnit(
