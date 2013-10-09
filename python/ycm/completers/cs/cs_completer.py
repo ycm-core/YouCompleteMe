@@ -36,6 +36,8 @@ SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
 '"./install.sh --omnisharp-completer".' )
 
+CS_SERVER_PORT_RANGE_START = 10001
+
 class CsharpCompleter( Completer ):
   """
   A Completer that uses the Omnisharp server as completion engine.
@@ -45,9 +47,6 @@ class CsharpCompleter( Completer ):
     super( CsharpCompleter, self ).__init__( user_options )
     self._omnisharp_port = None
     self._logger = logging.getLogger( __name__ )
-
-    if self.user_options[ 'auto_start_csharp_server' ]:
-      self._StartServer()
 
 
   def Shutdown( self ):
@@ -78,6 +77,12 @@ class CsharpCompleter( Completer ):
              'GoToDefinitionElseDeclaration' ]
 
 
+  def OnFileReadyToParse( self, request_data ):
+    if ( not self._omnisharp_port and
+         self.user_options[ 'auto_start_csharp_server' ] ):
+      self._StartServer( request_data )
+
+
   def OnUserCommand( self, arguments, request_data ):
     if not arguments:
       raise ValueError( self.UserCommandsHelpMessage() )
@@ -101,14 +106,16 @@ class CsharpCompleter( Completer ):
   def DebugInfo( self ):
     if self._ServerIsRunning():
       return 'Server running at: {0}\nLogfiles:\n{1}\n{2}'.format(
-        self._PortToHost(), self._filename_stdout, self._filename_stderr )
+        self._ServerLocation(), self._filename_stdout, self._filename_stderr )
     else:
       return 'Server is not running'
 
 
   def _StartServer( self, request_data ):
     """ Start the OmniSharp server """
-    self._omnisharp_port = self._FindFreePort()
+    self._logger.info( 'startup' )
+
+    self._omnisharp_port = CS_SERVER_PORT_RANGE_START + os.getpid()
     solutionfiles, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
 
     if len( solutionfiles ) == 0:
@@ -192,29 +199,17 @@ class CsharpCompleter( Completer ):
   def _ServerIsRunning( self ):
     """ Check if our OmniSharp server is running """
     return  ( self._omnisharp_port != None and
-        self._GetResponse( '/checkalivestatus', silent=True ) != None )
+        self._GetResponse( '/checkalivestatus', silent = True ) != None )
 
 
-  def _FindFreePort( self ):
-    """ Find port without an OmniSharp server running on it """
-    port = self.user_options[ 'csharp_server_port' ]
-    while self._GetResponse( '/checkalivestatus',
-        silent=True,
-        port=port ) != None:
-      port += 1
-    return port
+  def _ServerLocation( self ):
+    return 'http://localhost:' + str( self._omnisharp_port )
 
 
-  def _PortToHost( self, port=None ):
-    if port == None:
-      port = self._omnisharp_port
-    return 'http://localhost:' + str( port )
-
-
-  def _GetResponse( self, endPoint, parameters={}, silent=False, port=None ):
+  def _GetResponse( self, handler, parameters = {}, silent = False ):
     """ Handle communication with server """
     # TODO: Replace usage of urllib with Requests
-    target = urlparse.urljoin( self._PortToHost( port ), endPoint )
+    target = urlparse.urljoin( self._ServerLocation(), handler )
     parameters = urllib.urlencode( parameters )
     response = urllib2.urlopen( target, parameters )
     return json.loads( response.read() )
