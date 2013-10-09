@@ -31,7 +31,7 @@ else
   extra_cmake_args="-DUSE_DEV_FLAGS=ON"
 fi
 
-EXTRA_CMAKE_ARGS=$extra_cmake_args YCM_TESTRUN=1 ./install.sh
+EXTRA_CMAKE_ARGS=$extra_cmake_args YCM_TESTRUN=1 ./install.sh --omnisharp-completer
 
 for directory in third_party/*; do
   if [ -d "${directory}" ]; then
