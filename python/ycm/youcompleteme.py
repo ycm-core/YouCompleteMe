@@ -62,19 +62,16 @@ class YouCompleteMe( object ):
     with tempfile.NamedTemporaryFile( delete = False ) as options_file:
       self._temp_options_filename = options_file.name
       json.dump( dict( self._user_options ), options_file )
-      command = ''.join( [ sys.executable + ' ',
-                          _PathToServerScript(),
-                          ' --port=',
-                          str( server_port ),
-                          ' --options_file=',
-                          options_file.name,
-                          ' --log=',
-                          self._user_options[ 'server_log_level' ] ] )
+      args = [ sys.executable,
+               _PathToServerScript(),
+               '--port={0}'.format( server_port ),
+               '--options_file={0}'.format( options_file.name ),
+               '--log={0}'.format( self._user_options[ 'server_log_level' ] ) ]
 
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
       if self._user_options[ 'server_use_vim_stdout' ]:
-        self._server_popen = subprocess.Popen( command, shell = True )
+        self._server_popen = subprocess.Popen( args )
       else:
         filename_format = os.path.join( utils.PathToTempDir(),
                                         'server_{port}_{std}.log' )
@@ -86,7 +83,7 @@ class YouCompleteMe( object ):
 
         with open( self._server_stderr, 'w' ) as fstderr:
           with open( self._server_stdout, 'w' ) as fstdout:
-            self._server_popen = subprocess.Popen( command,
+            self._server_popen = subprocess.Popen( args,
                                                    stdout = fstdout,
                                                    stderr = fstderr )
 
