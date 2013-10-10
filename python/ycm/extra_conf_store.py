@@ -79,7 +79,11 @@ def _CallExtraConfMethod( function_name ):
   vim_current_working_directory = os.getcwd()
   path_to_dummy = os.path.join( vim_current_working_directory, 'DUMMY_FILE' )
   # The dummy file in the Vim CWD ensures we find the correct extra conf file
-  module = ModuleForSourceFile( path_to_dummy )
+  try:
+    module = ModuleForSourceFile( path_to_dummy )
+  except UnknownExtraConf:
+    return
+
   if not module or not hasattr( module, function_name ):
     return
   getattr( module, function_name )()
