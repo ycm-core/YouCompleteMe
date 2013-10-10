@@ -30,7 +30,7 @@ class ServerState( object ):
     self._user_options = user_options
     self._filetype_completers = {}
     self._gencomp = GeneralCompleterStore( self._user_options )
-    extra_conf_store.CallExtraConfYcmCorePreloadIfExists()
+    extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
 
 
   @property

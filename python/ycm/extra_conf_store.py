@@ -64,26 +64,24 @@ def ModuleFileForSourceFile( filename ):
   return _module_file_for_source_file.setdefault( filename )
 
 
-def CallExtraConfYcmCorePreloadIfExists():
-  _CallExtraConfMethod( 'YcmCorePreload' )
+def CallGlobalExtraConfYcmCorePreloadIfExists():
+  _CallGlobalExtraConfMethod( 'YcmCorePreload' )
 
 
 def Shutdown():
   # VimClose is for the sake of backwards compatibility; it's a no-op when it
   # doesn't exist.
-  _CallExtraConfMethod( 'VimClose' )
-  _CallExtraConfMethod( 'Shutdown' )
+  _CallGlobalExtraConfMethod( 'VimClose' )
+  _CallGlobalExtraConfMethod( 'Shutdown' )
 
 
-def _CallExtraConfMethod( function_name ):
-  vim_current_working_directory = os.getcwd()
-  path_to_dummy = os.path.join( vim_current_working_directory, 'DUMMY_FILE' )
-  # The dummy file in the Vim CWD ensures we find the correct extra conf file
-  try:
-    module = ModuleForSourceFile( path_to_dummy )
-  except UnknownExtraConf:
+def _CallGlobalExtraConfMethod( function_name ):
+  global_ycm_extra_conf = _GlobalYcmExtraConfFileLocation()
+  if not ( global_ycm_extra_conf and
+           os.path.exists( global_ycm_extra_conf ) ):
     return
 
+  module = Load( global_ycm_extra_conf, force = True )
   if not module or not hasattr( module, function_name ):
     return
   getattr( module, function_name )()
