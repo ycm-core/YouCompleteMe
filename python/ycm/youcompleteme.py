@@ -20,6 +20,7 @@
 import os
 import vim
 import subprocess
+import sys
 import tempfile
 import json
 from ycm import vimsupport
@@ -61,7 +62,7 @@ class YouCompleteMe( object ):
     with tempfile.NamedTemporaryFile( delete = False ) as options_file:
       self._temp_options_filename = options_file.name
       json.dump( dict( self._user_options ), options_file )
-      command = ''.join( [ 'python ',
+      command = ''.join( [ sys.executable + ' ',
                           _PathToServerScript(),
                           ' --port=',
                           str( server_port ),
