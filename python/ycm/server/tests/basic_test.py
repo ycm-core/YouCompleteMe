@@ -25,7 +25,7 @@ from .. import ycmd
 from ..responses import BuildCompletionData, UnknownExtraConf
 from nose.tools import ok_, eq_, with_setup
 from hamcrest import ( assert_that, has_items, has_entry, contains,
-                       contains_string, has_entries )
+                       contains_string, has_entries, contains_inanyorder )
 import bottle
 
 bottle.debug( True )
@@ -205,6 +205,38 @@ def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
                                    CompletionEntryMatcher( 'x' ),
                                    CompletionEntryMatcher( 'y' ) ) )
+
+
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_ForceSemantic_OnlyFileteredCompletions_test():
+  app = TestApp( ycmd.app )
+  contents = """
+int main()
+{
+  int foobar;
+  int floozar;
+  int gooboo;
+  int bleble;
+
+  fooar
+}
+"""
+
+  # 0-based line and column!
+  completion_data = BuildRequest( filepath = '/foo.cpp',
+                                  filetype = 'cpp',
+                                  force_semantic = True,
+                                  contents = contents,
+                                  line_num = 8,
+                                  column_num = 7,
+                                  start_column = 7,
+                                  query = 'fooar',
+                                  compilation_flags = ['-x', 'c++'] )
+
+  results = app.post_json( '/completions', completion_data ).json
+  assert_that( results,
+               contains_inanyorder( CompletionEntryMatcher( 'foobar' ),
+                                    CompletionEntryMatcher( 'floozar' ) ) )
 
 
 @with_setup( Setup )

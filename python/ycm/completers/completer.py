@@ -153,13 +153,18 @@ class Completer( object ):
          not self.ShouldUseNow( request_data ) ):
       return []
 
-    if ( request_data[ 'query' ] and
-         self._completions_cache and
+    candidates = self._GetCandidatesFromSubclass( request_data )
+    if request_data[ 'query' ]:
+      candidates = self.FilterAndSortCandidates( candidates,
+                                                 request_data[ 'query' ] )
+    return candidates
+
+
+  def _GetCandidatesFromSubclass( self, request_data ):
+    if ( self._completions_cache and
          self._completions_cache.CacheValid( request_data[ 'line_num' ],
                                              request_data[ 'start_column' ] ) ):
-      return self.FilterAndSortCandidates(
-          self._completions_cache.raw_completions,
-          request_data[ 'query' ] )
+      return self._completions_cache.raw_completions
     else:
       self._completions_cache = CompletionsCache()
       self._completions_cache.raw_completions = self.ComputeCandidatesInner(
