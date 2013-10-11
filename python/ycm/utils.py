@@ -23,6 +23,10 @@ import sys
 import signal
 import functools
 
+WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
+WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
+
+
 def IsIdentifierChar( char ):
   return char.isalnum() or char == '_'
 
@@ -44,9 +48,33 @@ def PathToTempDir():
   return tempdir
 
 
+def PathToPythonInterpreter():
+  # This is a bit tricky. Normally, sys.executable has the full path to the
+  # Python interpreter. But this code is also executed from inside Vim's
+  # embedded Python. On Unix machines, even that Python returns a good value for
+  # sys.executable, but on Windows it returns the path to the Vim binary, which
+  # is useless to us (issue #581). So we check the common install location for
+  # Python on Windows, first for Python 2.7 and then for 2.6.
+  #
+  # I'm open to better ideas on how to do this.
+
+  if OnWindows():
+    if os.path.exists( WIN_PYTHON27_PATH ):
+      return WIN_PYTHON27_PATH
+    elif os.path.exists( WIN_PYTHON26_PATH ):
+      return WIN_PYTHON26_PATH
+    raise RuntimeError( 'Python 2.7/2.6 not installed!' )
+  else:
+    return sys.executable
+
+
+def OnWindows():
+  return sys.platform == 'win32'
+
+
 # From here: http://stackoverflow.com/a/8536476/1672783
 def TerminateProcess( pid ):
-  if sys.platform == 'win32':
+  if OnWindows():
     import ctypes
     PROCESS_TERMINATE = 1
     handle = ctypes.windll.kernel32.OpenProcess( PROCESS_TERMINATE,
