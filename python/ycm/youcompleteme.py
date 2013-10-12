@@ -172,7 +172,7 @@ class YouCompleteMe( object ):
 
 
   def GetDiagnosticsFromStoredRequest( self ):
-    if self._latest_file_parse_request:
+    if self.DiagnosticsForCurrentFileReady():
       to_return = self._latest_file_parse_request.Response()
       # We set the diagnostics request to None because we want to prevent
       # Syntastic from repeatedly refreshing the buffer with the same diags.
