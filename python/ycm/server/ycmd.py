@@ -38,7 +38,8 @@ import json
 import bottle
 import argparse
 import httplib
-from bottle import run, request, response
+import waitress
+from bottle import request, response
 import server_state
 from ycm import user_options_store
 from ycm.server.responses import BuildExceptionResponse
@@ -247,7 +248,7 @@ def Main():
                        level = numeric_level )
 
   LOGGER = logging.getLogger( __name__ )
-  run( app = app, host = args.host, port = args.port, server='waitress' )
+  waitress.serve( app, host = args.host, port = args.port, threads = 10 )
 
 
 if __name__ == "__main__":

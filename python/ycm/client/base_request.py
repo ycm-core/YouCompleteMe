@@ -28,7 +28,7 @@ from ycm import vimsupport
 from ycm.server.responses import ServerError, UnknownExtraConf
 
 HEADERS = {'content-type': 'application/json'}
-EXECUTOR = ThreadPoolExecutor( max_workers = 4 )
+EXECUTOR = ThreadPoolExecutor( max_workers = 10 )
 
 class BaseRequest( object ):
   def __init__( self ):
