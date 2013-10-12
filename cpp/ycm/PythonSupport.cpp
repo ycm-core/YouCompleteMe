@@ -20,6 +20,8 @@
 #include "Result.h"
 #include "Candidate.h"
 #include "CandidateRepository.h"
+#include "ReleaseGil.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/cxx11/any_of.hpp>
 #include <vector>
@@ -76,31 +78,33 @@ boost::python::list FilterAndSortCandidates(
     return candidates;
   }
 
+  int num_candidates = len( candidates );
   std::vector< const Candidate * > repository_candidates =
     CandidatesFromObjectList( candidates, candidate_property );
 
-  Bitset query_bitset = LetterBitsetFromString( query );
-  bool query_has_uppercase_letters = any_of( query, is_upper() );
-
-  int num_candidates = len( candidates );
   std::vector< ResultAnd< int > > object_and_results;
+  {
+    ReleaseGil unlock;
+    Bitset query_bitset = LetterBitsetFromString( query );
+    bool query_has_uppercase_letters = any_of( query, is_upper() );
 
-  for ( int i = 0; i < num_candidates; ++i ) {
-    const Candidate *candidate = repository_candidates[ i ];
+    for ( int i = 0; i < num_candidates; ++i ) {
+      const Candidate *candidate = repository_candidates[ i ];
 
-    if ( !candidate->MatchesQueryBitset( query_bitset ) )
-      continue;
+      if ( !candidate->MatchesQueryBitset( query_bitset ) )
+        continue;
 
-    Result result = candidate->QueryMatchResult( query,
-                                                 query_has_uppercase_letters );
+      Result result = candidate->QueryMatchResult( query,
+                                                  query_has_uppercase_letters );
 
-    if ( result.IsSubsequence() ) {
-      ResultAnd< int > object_and_result( i, result );
-      object_and_results.push_back( boost::move( object_and_result ) );
+      if ( result.IsSubsequence() ) {
+        ResultAnd< int > object_and_result( i, result );
+        object_and_results.push_back( boost::move( object_and_result ) );
+      }
     }
-  }
 
-  std::sort( object_and_results.begin(), object_and_results.end() );
+    std::sort( object_and_results.begin(), object_and_results.end() );
+  }
 
   foreach ( const ResultAnd< int > &object_and_result,
             object_and_results ) {

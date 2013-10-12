@@ -18,6 +18,7 @@
 #include "CompilationDatabase.h"
 #include "ClangUtils.h"
 #include "standard.h"
+#include "ReleaseGil.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -58,6 +59,7 @@ bool CompilationDatabase::DatabaseSuccessfullyLoaded() {
 
 CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
   const std::string &path_to_file ) {
+  ReleaseGil unlock;
   CompilationInfoForFile info;
 
   if ( !is_loaded_ )

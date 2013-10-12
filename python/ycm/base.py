@@ -152,7 +152,7 @@ def AdjustCandidateInsertionText( candidates ):
   return new_candidates
 
 
-COMPATIBLE_WITH_CORE_VERSION = 5
+COMPATIBLE_WITH_CORE_VERSION = 6
 
 def CompatibleWithYcmCore():
   try:

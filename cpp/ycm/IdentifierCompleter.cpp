@@ -22,6 +22,7 @@
 #include "IdentifierUtils.h"
 #include "Result.h"
 #include "Utils.h"
+#include "ReleaseGil.h"
 
 #include <algorithm>
 
@@ -49,6 +50,7 @@ void IdentifierCompleter::AddIdentifiersToDatabase(
   const std::vector< std::string > &new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
+  ReleaseGil unlock;
   identifier_database_.AddIdentifiers( new_candidates,
                                        filetype,
                                        filepath );
@@ -57,6 +59,7 @@ void IdentifierCompleter::AddIdentifiersToDatabase(
 
 void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles(
   const std::vector< std::string > &absolute_paths_to_tag_files ) {
+  ReleaseGil unlock;
   foreach( const std::string & path, absolute_paths_to_tag_files ) {
     identifier_database_.AddIdentifiers(
       ExtractIdentifiersFromTagsFile( path ) );
@@ -69,6 +72,7 @@ void IdentifierCompleter::AddIdentifiersToDatabaseFromBuffer(
   const std::string &filetype,
   const std::string &filepath,
   bool collect_from_comments_and_strings ) {
+  ReleaseGil unlock;
   identifier_database_.ClearCandidatesStoredForFile( filetype, filepath );
 
   std::string new_contents =
@@ -92,6 +96,7 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQuery(
 std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
   const std::string &query,
   const std::string &filetype ) const {
+  ReleaseGil unlock;
   std::vector< Result > results;
   identifier_database_.ResultsForQueryAndType( query, filetype, results );
 

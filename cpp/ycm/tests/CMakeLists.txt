@@ -68,7 +68,7 @@ add_executable( ${PROJECT_NAME}
 
 target_link_libraries( ${PROJECT_NAME}
                        ycm_core
-                       gmock_main )
+                       gmock )
 
 
 if ( NOT CMAKE_GENERATOR_IS_XCODE )

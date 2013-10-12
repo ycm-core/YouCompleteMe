@@ -45,7 +45,7 @@ int YcmCoreVersion()
 {
   // We increment this every time when we want to force users to recompile
   // ycm_core.
-  return 5;
+  return 6;
 }
 
 
@@ -53,6 +53,9 @@ BOOST_PYTHON_MODULE(ycm_core)
 {
   using namespace boost::python;
   using namespace YouCompleteMe;
+
+  // Necessary because of usage of the ReleaseGil class
+  PyEval_InitThreads();
 
   def( "HasClangSupport", HasClangSupport );
   def( "FilterAndSortCandidates", FilterAndSortCandidates );

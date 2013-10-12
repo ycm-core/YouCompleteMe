@@ -25,6 +25,7 @@
 #include "CompletionData.h"
 #include "Utils.h"
 #include "ClangUtils.h"
+#include "ReleaseGil.h"
 
 #include <clang-c/Index.h>
 #include <boost/shared_ptr.hpp>
@@ -59,6 +60,7 @@ ClangCompleter::~ClangCompleter() {
 
 
 bool ClangCompleter::UpdatingTranslationUnit( const std::string &filename ) {
+  ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit = translation_unit_store_.Get( filename );
 
   if ( !unit )
@@ -75,6 +77,7 @@ std::vector< Diagnostic > ClangCompleter::UpdateTranslationUnit(
   const std::string &filename,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
+  ReleaseGil unlock;
   bool translation_unit_created;
   shared_ptr< TranslationUnit > unit = translation_unit_store_.GetOrCreate(
       filename,
@@ -111,6 +114,7 @@ ClangCompleter::CandidatesForLocationInFile(
   int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
+  ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -129,6 +133,7 @@ Location ClangCompleter::GetDeclarationLocation(
   int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
+  ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -146,6 +151,7 @@ Location ClangCompleter::GetDefinitionLocation(
   int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
+  ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit =
       translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
@@ -158,6 +164,7 @@ Location ClangCompleter::GetDefinitionLocation(
 
 
 void ClangCompleter::DeleteCachesForFile( const std::string &filename ) {
+  ReleaseGil unlock;
   translation_unit_store_.Remove( filename );
 }
 
