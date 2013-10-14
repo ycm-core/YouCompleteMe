@@ -34,6 +34,7 @@ struct CompilationInfoForFile {
 };
 
 
+// Access to Clang's internal CompilationDatabase. This class is thread-safe.
 class CompilationDatabase : boost::noncopyable {
 public:
   CompilationDatabase( const std::string &path_to_directory );
@@ -41,6 +42,12 @@ public:
 
   bool DatabaseSuccessfullyLoaded();
 
+  // Returns true when a separate thread is already getting flags; this is
+  // useful so that the caller doesn't need to block.
+  bool AlreadyGettingFlags();
+
+  // NOTE: Multiple calls to this function from separate threads will be
+  // serialized since Clang internals are not thread-safe.
   CompilationInfoForFile GetCompilationInfoForFile(
     const std::string &path_to_file );
 

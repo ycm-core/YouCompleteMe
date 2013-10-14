@@ -140,6 +140,8 @@ BOOST_PYTHON_MODULE(ycm_core)
       "CompilationDatabase", init< std::string >() )
     .def( "DatabaseSuccessfullyLoaded",
           &CompilationDatabase::DatabaseSuccessfullyLoaded )
+    .def( "AlreadyGettingFlags",
+          &CompilationDatabase::AlreadyGettingFlags )
     .def( "GetCompilationInfoForFile",
           &CompilationDatabase::GetCompilationInfoForFile );
 

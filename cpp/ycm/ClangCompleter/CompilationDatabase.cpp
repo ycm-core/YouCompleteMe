@@ -26,6 +26,8 @@
 #include <boost/thread/locks.hpp>
 
 using boost::lock_guard;
+using boost::unique_lock;
+using boost::try_to_lock_t;
 using boost::remove_pointer;
 using boost::shared_ptr;
 using boost::mutex;
@@ -54,6 +56,12 @@ CompilationDatabase::~CompilationDatabase() {
 
 bool CompilationDatabase::DatabaseSuccessfullyLoaded() {
   return is_loaded_;
+}
+
+
+bool CompilationDatabase::AlreadyGettingFlags() {
+  unique_lock< mutex > lock( compilation_database_mutex_, try_to_lock_t() );
+  return !lock.owns_lock();
 }
 
 
