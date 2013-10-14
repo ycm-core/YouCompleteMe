@@ -45,7 +45,7 @@ class UltiSnipsCompleter( GeneralCompleter ):
 
 
   def OnBufferVisit( self, request_data ):
-    raw_candidates = request_data[ 'ultisnips_snippets' ]
+    raw_candidates = request_data.get( 'ultisnips_snippets', [] )
     self._candidates = [
         responses.BuildCompletionData(
             str( snip[ 'trigger' ] ),
