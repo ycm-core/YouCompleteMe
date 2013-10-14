@@ -19,7 +19,9 @@
 
 import vim
 from ycm import vimsupport
+from ycm import base
 from ycm.completers.completer import Completer
+from ycm.client.base_request import BuildRequestData
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
 OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
@@ -35,15 +37,21 @@ class OmniCompleter( Completer ):
     return []
 
 
-  def Available( self ):
-    return bool( self._omnifunc )
-
-
   def ShouldUseCache( self ):
     return bool( self.user_options[ 'cache_omnifunc' ] )
 
 
-  def ShouldUseNow( self, request_data ):
+  # We let the caller call this without passing in request_data. This is useful
+  # for figuring out should we even be preparing the "real" request_data in
+  # omni_completion_request. The real request_data is much bigger and takes
+  # longer to prepare, and we want to avoid creating it twice.
+  def ShouldUseNow( self, request_data = None ):
+    if not self._omnifunc:
+      return False
+
+    if not request_data:
+      request_data = _BuildRequestDataSubstitute()
+
     if self.ShouldUseCache():
       return super( OmniCompleter, self ).ShouldUseNow( request_data )
     return self.ShouldUseNowInner( request_data )
@@ -95,4 +103,11 @@ class OmniCompleter( Completer ):
 
   def OnFileReadyToParse( self, request_data ):
     self._omnifunc = vim.eval( '&omnifunc' )
+
+
+def _BuildRequestDataSubstitute():
+  data = BuildRequestData( include_buffer_data = False )
+  data[ 'start_column' ] = base.CompletionStartColumn()
+  return data
+
 

@@ -93,7 +93,7 @@ class YouCompleteMe( object ):
     # function calls... Thus we need to keep this request somewhere.
     if ( not self.NativeFiletypeCompletionAvailable() and
          self.CurrentFiletypeCompletionEnabled() and
-         self._omnicomp.Available() ):
+         self._omnicomp.ShouldUseNow() ):
       self._latest_completion_request = OmniCompletionRequest( self._omnicomp )
     else:
       self._latest_completion_request = CompletionRequest( force_semantic )

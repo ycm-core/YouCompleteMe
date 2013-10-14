@@ -84,7 +84,9 @@ class BaseRequest( object ):
   server_location = 'http://localhost:6666'
 
 
-def BuildRequestData( start_column = None, query = None ):
+def BuildRequestData( start_column = None,
+                      query = None,
+                      include_buffer_data = True ):
   line, column = vimsupport.CurrentLineAndColumn()
   filepath = vimsupport.GetCurrentBufferFilepath()
   request_data = {
@@ -93,10 +95,11 @@ def BuildRequestData( start_column = None, query = None ):
     'column_num': column,
     'start_column': start_column,
     'line_value': vim.current.line,
-    'filepath': filepath,
-    'file_data': vimsupport.GetUnsavedAndCurrentBufferData()
+    'filepath': filepath
   }
 
+  if include_buffer_data:
+    request_data[ 'file_data' ] = vimsupport.GetUnsavedAndCurrentBufferData()
   if query:
     request_data[ 'query' ] = query
 
