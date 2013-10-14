@@ -19,7 +19,6 @@
 
 import imp
 import os
-from ycm import extra_conf_store
 from ycm.utils import ForceSemanticCompletion
 from ycm.completers.general.general_completer_store import GeneralCompleterStore
 from ycm.completers.completer_utils import PathToFiletypeCompleterPluginLoader
@@ -30,7 +29,6 @@ class ServerState( object ):
     self._user_options = user_options
     self._filetype_completers = {}
     self._gencomp = GeneralCompleterStore( self._user_options )
-    extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
 
 
   @property
@@ -44,7 +42,6 @@ class ServerState( object ):
         completer.Shutdown()
 
     self._gencomp.Shutdown()
-    extra_conf_store.Shutdown()
 
 
   def _GetFiletypeCompleterForFiletype( self, filetype ):

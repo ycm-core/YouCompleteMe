@@ -17,214 +17,24 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from server_utils import SetUpPythonPath
+SetUpPythonPath()
+
 import sys
-import os
-import atexit
-
-# We want to have the YouCompleteMe/python directory on the Python PATH because
-# all the code already assumes that it's there. This is a relic from before the
-# client/server architecture.
-# TODO: Fix things so that this is not needed anymore when we split ycmd into a
-# separate repository.
-sys.path.insert( 0, os.path.join(
-                        os.path.dirname( os.path.abspath( __file__ ) ),
-                        '../..' ) )
-
-from ycm import utils
-utils.AddThirdPartyFoldersToSysPath()
-
 import logging
 import json
-import bottle
 import argparse
-import httplib
 import waitress
-from bottle import request, response
-import server_state
 from ycm import user_options_store
-from ycm.server.responses import BuildExceptionResponse
 from ycm import extra_conf_store
 
-# num bytes for the request body buffer; request.json only works if the request
-# size is less than this
-bottle.Request.MEMFILE_MAX = 300 * 1024
 
-# TODO: rename these to _lower_case
-SERVER_STATE = None
-LOGGER = None
-app = bottle.Bottle()
-
-
-@app.post( '/event_notification' )
-def EventNotification():
-  LOGGER.info( 'Received event notification' )
-  request_data = request.json
-  event_name = request_data[ 'event_name' ]
-  LOGGER.debug( 'Event name: %s', event_name )
-
-  event_handler = 'On' + event_name
-  getattr( SERVER_STATE.GetGeneralCompleter(), event_handler )( request_data )
-
-  filetypes = request_data[ 'filetypes' ]
-  response_data = None
-  if SERVER_STATE.FiletypeCompletionUsable( filetypes ):
-    response_data = getattr( SERVER_STATE.GetFiletypeCompleter( filetypes ),
-                             event_handler )( request_data )
-
-  if response_data:
-    return _JsonResponse( response_data )
-
-
-@app.post( '/run_completer_command' )
-def RunCompleterCommand():
-  LOGGER.info( 'Received command request' )
-  request_data = request.json
-  completer = _GetCompleterForRequestData( request_data )
-
-  return _JsonResponse( completer.OnUserCommand(
-      request_data[ 'command_arguments' ],
-      request_data ) )
-
-
-@app.post( '/completions' )
-def GetCompletions():
-  LOGGER.info( 'Received completion request' )
-  request_data = request.json
-  do_filetype_completion = SERVER_STATE.ShouldUseFiletypeCompleter(
-    request_data )
-  LOGGER.debug( 'Using filetype completion: %s', do_filetype_completion )
-  filetypes = request_data[ 'filetypes' ]
-  completer = ( SERVER_STATE.GetFiletypeCompleter( filetypes ) if
-                do_filetype_completion else
-                SERVER_STATE.GetGeneralCompleter() )
-
-  return _JsonResponse( completer.ComputeCandidates( request_data ) )
-
-
-@app.get( '/user_options' )
-def GetUserOptions():
-  LOGGER.info( 'Received user options GET request' )
-  return _JsonResponse( dict( SERVER_STATE.user_options ) )
-
-
-@app.get( '/healthy' )
-def GetHealthy():
-  LOGGER.info( 'Received health request' )
-  return _JsonResponse( True )
-
-
-@app.post( '/user_options' )
-def SetUserOptions():
-  LOGGER.info( 'Received user options POST request' )
-  _SetUserOptions( request.json )
-
-
-@app.post( '/semantic_completion_available' )
-def FiletypeCompletionAvailable():
-  LOGGER.info( 'Received filetype completion available request' )
-  return _JsonResponse( SERVER_STATE.FiletypeCompletionAvailable(
-      request.json[ 'filetypes' ] ) )
-
-
-@app.post( '/defined_subcommands' )
-def DefinedSubcommands():
-  LOGGER.info( 'Received defined subcommands request' )
-  completer = _GetCompleterForRequestData( request.json )
-
-  return _JsonResponse( completer.DefinedSubcommands() )
-
-
-@app.post( '/detailed_diagnostic' )
-def GetDetailedDiagnostic():
-  LOGGER.info( 'Received detailed diagnostic request' )
-  request_data = request.json
-  completer = _GetCompleterForRequestData( request_data )
-
-  return _JsonResponse( completer.GetDetailedDiagnostic( request_data ) )
-
-
-@app.post( '/load_extra_conf_file' )
-def LoadExtraConfFile():
-  LOGGER.info( 'Received extra conf load request' )
-  request_data = request.json
-  extra_conf_store.Load( request_data[ 'filepath' ], force = True )
-
-
-@app.post( '/debug_info' )
-def DebugInfo():
-  # This can't be at the top level because of possible extra conf preload
-  import ycm_core
-  LOGGER.info( 'Received debug info request' )
-
-  output = []
-  has_clang_support = ycm_core.HasClangSupport()
-  output.append( 'Server has Clang support compiled in: {0}'.format(
-    has_clang_support ) )
-
-  if has_clang_support:
-    output.append( 'Clang version: ' + ycm_core.ClangVersion() )
-
-  request_data = request.json
-  try:
-    output.append(
-        _GetCompleterForRequestData( request_data ).DebugInfo( request_data) )
-  except:
-    pass
-  return _JsonResponse( '\n'.join( output ) )
-
-
-# The type of the param is Bottle.HTTPError
-@app.error( httplib.INTERNAL_SERVER_ERROR )
-def ErrorHandler( httperror ):
-  return _JsonResponse( BuildExceptionResponse( httperror.exception,
-                                                httperror.traceback ) )
-
-
-def _JsonResponse( data ):
-  response.set_header( 'Content-Type', 'application/json' )
-  return json.dumps( data, default = _UniversalSerialize )
-
-
-def _UniversalSerialize( obj ):
-  serialized = obj.__dict__.copy()
-  serialized[ 'TYPE' ] = type( obj ).__name__
-  return serialized
-
-
-def _GetCompleterForRequestData( request_data ):
-  completer_target = request_data.get( 'completer_target', None )
-
-  if completer_target == 'identifier':
-    return SERVER_STATE.GetGeneralCompleter().GetIdentifierCompleter()
-  elif completer_target == 'filetype_default' or not completer_target:
-    return SERVER_STATE.GetFiletypeCompleter( request_data[ 'filetypes' ] )
-  else:
-    return SERVER_STATE.GetFiletypeCompleter( [ completer_target ] )
-
-
-@atexit.register
-def _ServerShutdown():
-  if SERVER_STATE:
-    SERVER_STATE.Shutdown()
-
-
-def _SetUserOptions( options ):
-  global SERVER_STATE
-
-  user_options_store.SetAll( options )
-  SERVER_STATE = server_state.ServerState( options )
-
-
-def SetServerStateToDefaults():
-  global SERVER_STATE, LOGGER
-  LOGGER = logging.getLogger( __name__ )
-  user_options_store.LoadDefaults()
-  SERVER_STATE = server_state.ServerState( user_options_store.GetAll() )
-  extra_conf_store.Reset()
+def YcmCoreSanityCheck():
+  if 'ycm_core' in sys.modules:
+    raise RuntimeError( 'ycm_core already imported, ycmd has a bug!' )
 
 
 def Main():
-  global LOGGER
   parser = argparse.ArgumentParser()
   parser.add_argument( '--host', type = str, default = 'localhost',
                        help = 'server hostname')
@@ -237,18 +47,31 @@ def Main():
                        help = 'file with user options, in JSON format' )
   args = parser.parse_args()
 
-  if args.options_file:
-    _SetUserOptions( json.load( open( args.options_file, 'r' ) ) )
-
   numeric_level = getattr( logging, args.log.upper(), None )
   if not isinstance( numeric_level, int ):
     raise ValueError( 'Invalid log level: %s' % args.log )
 
+  # Has to be called before any call to logging.getLogger()
   logging.basicConfig( format = '%(asctime)s - %(levelname)s - %(message)s',
                        level = numeric_level )
 
-  LOGGER = logging.getLogger( __name__ )
-  waitress.serve( app, host = args.host, port = args.port, threads = 10 )
+  options = None
+  if args.options_file:
+    options = json.load( open( args.options_file, 'r' ) )
+    user_options_store.SetAll( options )
+    # This ensures that ycm_core is not loaded before extra conf preload
+    # was run.
+    YcmCoreSanityCheck()
+    extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
+
+  # This can't be a top-level import because it transitively imports ycm_core
+  # which we want to be imported ONLY after extra conf preload has executed.
+  import handlers
+  handlers.UpdateUserOptions( options )
+  waitress.serve( handlers.app,
+                  host = args.host,
+                  port = args.port,
+                  threads = 10 )
 
 
 if __name__ == "__main__":

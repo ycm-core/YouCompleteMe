@@ -20,8 +20,10 @@
 import os
 import httplib
 import time
+from ..server_utils import SetUpPythonPath
+SetUpPythonPath()
 from webtest import TestApp
-from .. import ycmd
+from .. import handlers
 from ..responses import BuildCompletionData, UnknownExtraConf
 from nose.tools import ok_, eq_, with_setup
 from hamcrest import ( assert_that, has_items, has_entry, contains,
@@ -73,7 +75,7 @@ def CompletionEntryMatcher( insertion_text ):
 
 
 def Setup():
-  ycmd.SetServerStateToDefaults()
+  handlers.SetServerStateToDefaults()
 
 
 def PathToTestDataDir():
@@ -87,7 +89,7 @@ def PathToTestFile( test_basename ):
 
 @with_setup( Setup )
 def GetCompletions_IdentifierCompleter_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   event_data = BuildRequest( contents = 'foo foogoo ba',
                              event_name = 'FileReadyToParse' )
 
@@ -104,7 +106,7 @@ def GetCompletions_IdentifierCompleter_Works_test():
 
 @with_setup( Setup )
 def GetCompletions_CsCompleter_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   filepath = PathToTestFile( 'testy/Program.cs' )
   contents = open( filepath ).read()
   event_data = BuildRequest( filepath = filepath,
@@ -138,7 +140,7 @@ def GetCompletions_CsCompleter_Works_test():
 
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_WorksWithExplicitFlags_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   contents = """
 struct Foo {
   int x;
@@ -170,7 +172,7 @@ int main()
 
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_UnknownExtraConfException_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   filepath = PathToTestFile( 'basic.cpp' )
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cpp',
@@ -189,7 +191,7 @@ def GetCompletions_ClangCompleter_UnknownExtraConfException_test():
 
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   app.post_json( '/load_extra_conf_file',
                  { 'filepath': PathToTestFile( '.ycm_extra_conf.py' ) } )
 
@@ -209,7 +211,7 @@ def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
 
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_ForceSemantic_OnlyFileteredCompletions_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   contents = """
 int main()
 {
@@ -241,7 +243,7 @@ int main()
 
 @with_setup( Setup )
 def GetCompletions_ForceSemantic_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
 
   completion_data = BuildRequest( filetype = 'python',
                                   force_semantic = True )
@@ -254,7 +256,7 @@ def GetCompletions_ForceSemantic_Works_test():
 
 @with_setup( Setup )
 def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   event_data = BuildRequest( event_name = 'FileReadyToParse',
                              syntax_keywords = ['foo', 'bar', 'zoo'] )
 
@@ -271,7 +273,7 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
 
 @with_setup( Setup )
 def GetCompletions_UltiSnipsCompleter_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   event_data = BuildRequest(
     event_name = 'BufferVisit',
     ultisnips_snippets = [
@@ -292,7 +294,7 @@ def GetCompletions_UltiSnipsCompleter_Works_test():
 
 @with_setup( Setup )
 def RunCompleterCommand_GoTo_Jedi_ZeroBasedLineAndColumn_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   contents = """
 def foo():
   pass
@@ -318,7 +320,7 @@ foo()
 
 @with_setup( Setup )
 def RunCompleterCommand_GoTo_Clang_ZeroBasedLineAndColumn_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   contents = """
 struct Foo {
   int x;
@@ -352,7 +354,7 @@ int main()
 
 @with_setup( Setup )
 def DefinedSubcommands_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   subcommands_data = BuildRequest( completer_target = 'python' )
 
   eq_( [ 'GoToDefinition',
@@ -363,7 +365,7 @@ def DefinedSubcommands_Works_test():
 
 @with_setup( Setup )
 def DefinedSubcommands_WorksWhenNoExplicitCompleterTargetSpecified_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   subcommands_data = BuildRequest( filetype = 'python' )
 
   eq_( [ 'GoToDefinition',
@@ -374,7 +376,7 @@ def DefinedSubcommands_WorksWhenNoExplicitCompleterTargetSpecified_test():
 
 @with_setup( Setup )
 def Diagnostics_ClangCompleter_ZeroBasedLineAndColumn_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   contents = """
 struct Foo {
   int x  // semicolon missing here!
@@ -399,7 +401,7 @@ struct Foo {
 
 @with_setup( Setup )
 def GetDetailedDiagnostic_ClangCompleter_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   contents = """
 struct Foo {
   int x  // semicolon missing here!
@@ -427,7 +429,7 @@ struct Foo {
 
 @with_setup( Setup )
 def FiletypeCompletionAvailable_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   request_data = {
     'filetypes': ['python']
   }
@@ -438,7 +440,7 @@ def FiletypeCompletionAvailable_Works_test():
 
 @with_setup( Setup )
 def UserOptions_Works_test():
-  app = TestApp( ycmd.app )
+  app = TestApp( handlers.app )
   options = app.get( '/user_options' ).json
   ok_( len( options ) )
 
