@@ -48,19 +48,25 @@ class BaseRequest( object ):
 
 
   # This is the blocking version of the method. See below for async.
+  # |timeout| is num seconds to tolerate no response from server before giving
+  # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandler( data, handler ):
+  def PostDataToHandler( data, handler, timeout = None ):
     return JsonFromFuture( BaseRequest.PostDataToHandlerAsync( data,
-                                                               handler ) )
+                                                               handler,
+                                                               timeout ) )
 
 
   # This returns a future! Use JsonFromFuture to get the value.
+  # |timeout| is num seconds to tolerate no response from server before giving
+  # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandlerAsync( data, handler ):
-    def PostData( data, handler ):
+  def PostDataToHandlerAsync( data, handler, timeout = None ):
+    def PostData( data, handler, timeout ):
       return BaseRequest.session.post( _BuildUri( handler ),
-                                      data = json.dumps( data ),
-                                      headers = HEADERS )
+                                       data = json.dumps( data ),
+                                       headers = HEADERS,
+                                       timeout = timeout )
 
     @retries( 3, delay = 0.5 )
     def DelayedPostData( data, handler ):
@@ -71,7 +77,7 @@ class BaseRequest( object ):
     if not _CheckServerIsHealthyWithCache():
       return EXECUTOR.submit( DelayedPostData, data, handler )
 
-    return PostData( data, handler )
+    return PostData( data, handler, timeout )
 
 
   session = FuturesSession( executor = EXECUTOR )

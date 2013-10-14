@@ -20,8 +20,9 @@
 from ycm import base
 from ycm import vimsupport
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                     JsonFromFuture )
+                                      JsonFromFuture )
 
+TIMEOUT_SECONDS = 0.5
 
 class CompletionRequest( BaseRequest ):
   def __init__( self, force_semantic = False ):
@@ -42,7 +43,8 @@ class CompletionRequest( BaseRequest ):
   def Start( self, query ):
     self.request_data[ 'query' ] = query
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
-                                                         'completions' )
+                                                         'completions',
+                                                         TIMEOUT_SECONDS )
 
 
   def Done( self ):
