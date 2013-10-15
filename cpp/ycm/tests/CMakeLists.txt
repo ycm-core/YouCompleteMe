@@ -28,7 +28,7 @@ endif()
 add_subdirectory( gmock )
 
 include_directories(
-  ${ycm_core_SOURCE_DIR}
+  ${ycm_support_libs_SOURCE_DIR}
   )
 
 include_directories(
@@ -67,7 +67,8 @@ add_executable( ${PROJECT_NAME}
               )
 
 target_link_libraries( ${PROJECT_NAME}
-                       ycm_core
+                       ${SERVER_LIB}
+                       ${CLIENT_LIB}
                        gmock )
 
 

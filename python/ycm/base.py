@@ -17,24 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import re
 import vim
 from ycm import vimsupport
 from ycm import utils
 from ycm import user_options_store
+import ycm_client_support
 
 YCM_VAR_PREFIX = 'ycm_'
-
-try:
-  import ycm_core
-except ImportError as e:
-  vimsupport.PostVimMessage(
-    'Error importing ycm_core. Are you sure you have placed a version 3.2+ '
-    'libclang.[so|dll|dylib] in folder "{0}"? See the Installation Guide in '
-    'the docs. Full error: {1}'.format(
-      os.path.dirname( os.path.dirname( os.path.abspath( __file__ ) ) ),
-      str( e ) ) )
 
 
 def BuildServerConf():
@@ -152,11 +142,11 @@ def AdjustCandidateInsertionText( candidates ):
   return new_candidates
 
 
-COMPATIBLE_WITH_CORE_VERSION = 6
+COMPATIBLE_WITH_CORE_VERSION = 7
 
 def CompatibleWithYcmCore():
   try:
-    current_core_version = ycm_core.YcmCoreVersion()
+    current_core_version = ycm_client_support.YcmCoreVersion()
   except AttributeError:
     return False
 

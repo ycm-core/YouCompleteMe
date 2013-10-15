@@ -17,6 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from os import path
+
+try:
+  import ycm_core
+except ImportError as e:
+  raise RuntimeError(
+    'Error importing ycm_core. Are you sure you have placed a '
+    'version 3.2+ libclang.[so|dll|dylib] in folder "{0}"? '
+    'See the Installation Guide in the docs. Full error: {1}'.format(
+      path.realpath( path.join( path.abspath( __file__ ), '../../..' ) ),
+      str( e ) ) )
+
 import atexit
 import logging
 import json
@@ -27,6 +39,7 @@ import server_state
 from ycm import user_options_store
 from ycm.server.responses import BuildExceptionResponse
 from ycm import extra_conf_store
+
 
 # num bytes for the request body buffer; request.json only works if the request
 # size is less than this
@@ -135,8 +148,6 @@ def LoadExtraConfFile():
 
 @app.post( '/debug_info' )
 def DebugInfo():
-  # This can't be at the top level because of possible extra conf preload
-  import ycm_core
   LOGGER.info( 'Received debug info request' )
 
   output = []

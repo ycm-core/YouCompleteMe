@@ -58,7 +58,7 @@ function! youcompleteme#Enable()
 
   if !pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
-      \ echomsg "YouCompleteMe unavailable: ycm_core too old, PLEASE RECOMPILE ycm_core" |
+      \ echomsg "YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE" |
       \ echohl None
     return
   endif

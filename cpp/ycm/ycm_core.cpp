@@ -17,6 +17,7 @@
 
 #include "IdentifierCompleter.h"
 #include "PythonSupport.h"
+#include "versioning.h"
 
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter.h"
@@ -32,20 +33,12 @@
 #include <boost/utility.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-bool HasClangSupport()
-{
+bool HasClangSupport() {
 #ifdef USE_CLANG_COMPLETER
   return true;
 #else
   return false;
 #endif // USE_CLANG_COMPLETER
-}
-
-int YcmCoreVersion()
-{
-  // We increment this every time when we want to force users to recompile
-  // ycm_core.
-  return 6;
 }
 
 

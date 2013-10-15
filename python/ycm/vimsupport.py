@@ -146,7 +146,14 @@ def NumLinesInBuffer( buffer_object ):
 # time of writing, YCM only uses the GUI thread inside Vim (this used to not be
 # the case).
 def PostVimMessage( message ):
-  vim.command( "echohl WarningMsg | echomsg '{0}' | echohl None"
+  vim.command( "echohl WarningMsg | echom '{0}' | echohl None"
+               .format( EscapeForVim( str( message ) ) ) )
+
+# Unlike PostVimMesasge, this supports messages with newlines in them because it
+# uses 'echo' instead of 'echomsg'. This also means that the message will NOT
+# appear in Vim's message log.
+def PostMultiLineNotice( message ):
+  vim.command( "echohl WarningMsg | echo '{0}' | echohl None"
                .format( EscapeForVim( str( message ) ) ) )
 
 

@@ -40,6 +40,11 @@ try:
 except ImportError:
   USE_ULTISNIPS_DATA = False
 
+SERVER_CRASH_MESSAGE_STDERR_FILE = 'The ycmd server crashed with output:\n'
+SERVER_CRASH_MESSAGE_SAME_STDERR = (
+  'The ycmd server crashed, check console output for logs!' )
+
+
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
@@ -83,6 +88,18 @@ class YouCompleteMe( object ):
             self._server_popen = subprocess.Popen( args,
                                                    stdout = fstdout,
                                                    stderr = fstderr )
+    self._CheckIfServerCrashed()
+
+
+  def _CheckIfServerCrashed( self ):
+    server_crashed = self._server_popen.poll()
+    if server_crashed:
+      if self._server_stderr:
+        with open( self._server_stderr, 'r' ) as server_stderr_file:
+          vimsupport.PostMultiLineNotice( SERVER_CRASH_MESSAGE_STDERR_FILE +
+                                          server_stderr_file.read() )
+      else:
+          vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
 
 
   def CreateCompletionRequest( self, force_semantic = False ):
@@ -126,6 +143,7 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
+    self._CheckIfServerCrashed()
     self._omnicomp.OnFileReadyToParse( None )
 
     extra_data = {}

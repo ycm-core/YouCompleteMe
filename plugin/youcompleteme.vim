@@ -37,11 +37,14 @@ let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 
 function! s:HasYcmCore()
   let path_prefix = s:script_folder_path . '/../python/'
-  if filereadable(path_prefix . 'ycm_core.so')
+  if filereadable(path_prefix . 'ycm_client_support.so') &&
+        \ filereadable(path_prefix . 'ycm_core.so')
     return 1
-  elseif filereadable(path_prefix . 'ycm_core.pyd')
+  elseif filereadable(path_prefix . 'ycm_client_support.pyd') &&
+        \ filereadable(path_prefix . 'ycm_core.pyd')
     return 1
-  elseif filereadable(path_prefix . 'ycm_core.dll')
+  elseif filereadable(path_prefix . 'ycm_client_support.dll')
+        \ filereadable(path_prefix . 'ycm_core.dll')
     return 1
   endif
   return 0
@@ -52,7 +55,8 @@ let g:ycm_check_if_ycm_core_present =
 
 if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
   echohl WarningMsg |
-        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+        \ echomsg "ycm_client_support.[so|pyd|dll] and " .
+        \ "ycm_core.[so|pyd|dll] not detected; you need to compile " .
         \ "YCM before using it. Read the docs!" |
         \ echohl None
   finish
