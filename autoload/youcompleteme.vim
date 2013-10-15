@@ -566,7 +566,11 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
 
-    return pyeval( 'ycm_state.CreateCompletionRequest().CompletionStartColumn()' )
+    py request = ycm_state.CreateCompletionRequest()
+    if !pyeval( 'bool(request)' )
+      return -2
+    endif
+    return pyeval( 'request.CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
   endif
@@ -582,6 +586,13 @@ function! youcompleteme#OmniComplete( findstart, base )
     return s:CompletionsForQuery( a:base )
   endif
 endfunction
+
+
+function! s:RestartServer()
+  py ycm_state.RestartServer()
+endfunction
+
+command! YcmRestartServer call s:RestartServer()
 
 
 function! s:ShowDetailedDiagnostic()

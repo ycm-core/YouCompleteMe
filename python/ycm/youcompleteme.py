@@ -88,18 +88,30 @@ class YouCompleteMe( object ):
             self._server_popen = subprocess.Popen( args,
                                                    stdout = fstdout,
                                                    stderr = fstderr )
-    self._CheckIfServerCrashed()
+    self._NotifyUserIfServerCrashed()
 
 
-  def _CheckIfServerCrashed( self ):
-    server_crashed = self._server_popen.poll()
-    if server_crashed:
-      if self._server_stderr:
-        with open( self._server_stderr, 'r' ) as server_stderr_file:
-          vimsupport.PostMultiLineNotice( SERVER_CRASH_MESSAGE_STDERR_FILE +
-                                          server_stderr_file.read() )
-      else:
-          vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
+  def _IsServerAlive( self ):
+    returncode = self._server_popen.poll()
+    # When the process hasn't finished yet, poll() returns None.
+    return returncode is None
+
+
+  def _NotifyUserIfServerCrashed( self ):
+    if self._IsServerAlive():
+      return
+    if self._server_stderr:
+      with open( self._server_stderr, 'r' ) as server_stderr_file:
+        vimsupport.PostMultiLineNotice( SERVER_CRASH_MESSAGE_STDERR_FILE +
+                                        server_stderr_file.read() )
+    else:
+        vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
+
+
+  def RestartServer( self ):
+    vimsupport.PostVimMessage( 'Restarting ycmd server...' )
+    self.OnVimLeave()
+    self._SetupServer()
 
 
   def CreateCompletionRequest( self, force_semantic = False ):
@@ -111,17 +123,23 @@ class YouCompleteMe( object ):
          self._omnicomp.ShouldUseNow() ):
       self._latest_completion_request = OmniCompletionRequest( self._omnicomp )
     else:
-      self._latest_completion_request = CompletionRequest( force_semantic )
+      self._latest_completion_request = ( CompletionRequest( force_semantic )
+                                          if self._IsServerAlive() else
+                                          None )
     return self._latest_completion_request
 
 
   def SendCommandRequest( self, arguments, completer ):
-    return SendCommandRequest( arguments, completer )
+    if self._IsServerAlive():
+      return SendCommandRequest( arguments, completer )
 
 
   def GetDefinedSubcommands( self ):
-    return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                          'defined_subcommands' )
+    if self._IsServerAlive():
+      return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                            'defined_subcommands' )
+    else:
+      return []
 
 
   def GetCurrentCompletionRequest( self ):
@@ -143,8 +161,10 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
-    self._CheckIfServerCrashed()
     self._omnicomp.OnFileReadyToParse( None )
+
+    if not self._IsServerAlive():
+      self._NotifyUserIfServerCrashed()
 
     extra_data = {}
     if self._user_options[ 'collect_identifiers_from_tags_files' ]:
@@ -159,26 +179,35 @@ class YouCompleteMe( object ):
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
+    if not self._IsServerAlive():
+      return
     SendEventNotificationAsync( 'BufferUnload',
                                 { 'unloaded_buffer': deleted_buffer_file } )
 
 
   def OnBufferVisit( self ):
+    if not self._IsServerAlive():
+      return
     extra_data = {}
     _AddUltiSnipsDataIfNeeded( extra_data )
     SendEventNotificationAsync( 'BufferVisit', extra_data )
 
 
   def OnInsertLeave( self ):
+    if not self._IsServerAlive():
+      return
     SendEventNotificationAsync( 'InsertLeave' )
 
 
   def OnVimLeave( self ):
-    self._server_popen.terminate()
+    if self._IsServerAlive():
+      self._server_popen.terminate()
     os.remove( self._temp_options_filename )
 
 
   def OnCurrentIdentifierFinished( self ):
+    if not self._IsServerAlive():
+      return
     SendEventNotificationAsync( 'CurrentIdentifierFinished' )
 
 
@@ -200,6 +229,8 @@ class YouCompleteMe( object ):
 
 
   def ShowDetailedDiagnostic( self ):
+    if not self._IsServerAlive():
+      return
     debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
                                                 'detailed_diagnostic' )
     if 'message' in debug_info:
@@ -207,8 +238,11 @@ class YouCompleteMe( object ):
 
 
   def DebugInfo( self ):
-    debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                'debug_info' )
+    if self._IsServerAlive():
+      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                  'debug_info' )
+    else:
+      debug_info = 'Server crashed, no debug info from server'
     debug_info += '\nServer running at: {0}'.format(
         BaseRequest.server_location )
     if self._server_stderr or self._server_stdout:
