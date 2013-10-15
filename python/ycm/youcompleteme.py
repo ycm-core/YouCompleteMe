@@ -40,8 +40,6 @@ try:
 except ImportError:
   USE_ULTISNIPS_DATA = False
 
-SERVER_PORT_RANGE_START = 10000
-
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
