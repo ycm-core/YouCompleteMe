@@ -22,6 +22,7 @@ import os
 import sys
 import signal
 import functools
+import socket
 
 WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
 WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
@@ -46,6 +47,15 @@ def PathToTempDir():
   if not os.path.exists( tempdir ):
     os.makedirs( tempdir )
   return tempdir
+
+
+def GetUnusedLocalhostPort():
+  sock = socket.socket()
+  # This tells the OS to give us any free port in the range [1024 - 65535]
+  sock.bind( ( '', 0 ) )
+  port = sock.getsockname()[ 1 ]
+  sock.close()
+  return port
 
 
 def PathToPythonInterpreter():

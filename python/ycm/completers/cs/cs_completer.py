@@ -31,12 +31,10 @@ import json
 import subprocess
 import logging
 
-
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
 '"./install.sh --omnisharp-completer".' )
 
-CS_SERVER_PORT_RANGE_START = 10001
 
 class CsharpCompleter( Completer ):
   """
@@ -118,7 +116,7 @@ class CsharpCompleter( Completer ):
     """ Start the OmniSharp server """
     self._logger.info( 'startup' )
 
-    self._omnisharp_port = CS_SERVER_PORT_RANGE_START + os.getpid()
+    self._omnisharp_port = utils.GetUnusedLocalhostPort()
     solutionfiles, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
 
     if len( solutionfiles ) == 0:
