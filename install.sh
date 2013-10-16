@@ -77,7 +77,7 @@ function install {
     cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
   fi
 
-  make -j $(num_cores) ycm_core
+  make -j $(num_cores) ycm_support_libs
   popd
   rm -rf $build_dir
 }
