@@ -189,10 +189,6 @@ endfunction
 
 
 function! s:AllowedToCompleteInCurrentFile()
-  if empty( &filetype ) || getbufvar(winbufnr(winnr()), "&buftype") ==# 'nofile'
-    return 0
-  endif
-
   let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' ) ||
         \ has_key( g:ycm_filetype_whitelist, &filetype )
   let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
