@@ -33,6 +33,7 @@ from ycm.client.completion_request import CompletionRequest
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
+from ycm.server.responses import ServerError
 
 try:
   from UltiSnips import UltiSnips_Manager
@@ -231,10 +232,13 @@ class YouCompleteMe( object ):
   def ShowDetailedDiagnostic( self ):
     if not self._IsServerAlive():
       return
-    debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                'detailed_diagnostic' )
-    if 'message' in debug_info:
-      vimsupport.EchoText( debug_info[ 'message' ] )
+    try:
+      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                  'detailed_diagnostic' )
+      if 'message' in debug_info:
+        vimsupport.EchoText( debug_info[ 'message' ] )
+    except ServerError as e:
+      vimsupport.PostVimMessage( str( e ) )
 
 
   def DebugInfo( self ):
