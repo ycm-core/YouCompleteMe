@@ -43,7 +43,7 @@ function! s:HasYcmCore()
   elseif filereadable(path_prefix . 'ycm_client_support.pyd') &&
         \ filereadable(path_prefix . 'ycm_core.pyd')
     return 1
-  elseif filereadable(path_prefix . 'ycm_client_support.dll')
+  elseif filereadable(path_prefix . 'ycm_client_support.dll') &&
         \ filereadable(path_prefix . 'ycm_core.dll')
     return 1
   endif
