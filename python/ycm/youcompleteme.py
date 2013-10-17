@@ -205,6 +205,12 @@ class YouCompleteMe( object ):
       self._server_popen.terminate()
     os.remove( self._temp_options_filename )
 
+    if not self._user_options[ 'server_keep_logfiles' ]:
+      if self._server_stderr:
+        os.remove( self._server_stderr )
+      if self._server_stdout:
+        os.remove( self._server_stdout )
+
 
   def OnCurrentIdentifierFinished( self ):
     if not self._IsServerAlive():

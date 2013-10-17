@@ -25,6 +25,7 @@ import logging
 import json
 import argparse
 import waitress
+import signal
 from ycm import user_options_store
 from ycm import extra_conf_store
 
@@ -32,6 +33,20 @@ from ycm import extra_conf_store
 def YcmCoreSanityCheck():
   if 'ycm_core' in sys.modules:
     raise RuntimeError( 'ycm_core already imported, ycmd has a bug!' )
+
+
+# We need to manually call ServerShutdown for the signals that turn down ycmd
+# because atexit won't handle them.
+def SetUpSignalHandler():
+  def SignalHandler():
+    import handlers
+    handlers.ServerShutdown()
+
+  for sig in [ signal.SIGTERM,
+               signal.SIGINT,
+               signal.SIGHUP,
+               signal.SIGQUIT ]:
+    signal.signal( sig, SignalHandler )
 
 
 def Main():
@@ -69,6 +84,7 @@ def Main():
   # preload has executed.
   import handlers
   handlers.UpdateUserOptions( options )
+  SetUpSignalHandler()
   waitress.serve( handlers.app,
                   host = args.host,
                   port = args.port,

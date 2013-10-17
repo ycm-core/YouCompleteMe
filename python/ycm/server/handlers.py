@@ -197,7 +197,7 @@ def _GetCompleterForRequestData( request_data ):
 
 
 @atexit.register
-def _ServerShutdown():
+def ServerShutdown():
   LOGGER.info( 'Server shutting down' )
   if SERVER_STATE:
     SERVER_STATE.Shutdown()

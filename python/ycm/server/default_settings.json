@@ -28,6 +28,7 @@
   },
   "server_use_vim_stdout": 0,
   "server_log_level": "info",
+  "server_keep_logfiles": 0,
   "auto_start_csharp_server": 1,
   "auto_stop_csharp_server": 1,
   "csharp_server_port": 2000
