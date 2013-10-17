@@ -24,6 +24,7 @@ import imp
 import random
 import string
 import sys
+import logging
 from threading import Lock
 from ycm import user_options_store
 from ycm.server.responses import UnknownExtraConf
@@ -76,14 +77,21 @@ def Shutdown():
 
 
 def _CallGlobalExtraConfMethod( function_name ):
+  logger = _Logger()
   global_ycm_extra_conf = _GlobalYcmExtraConfFileLocation()
   if not ( global_ycm_extra_conf and
            os.path.exists( global_ycm_extra_conf ) ):
+    logger.debug( 'No global extra conf, not calling method ' + function_name )
     return
 
   module = Load( global_ycm_extra_conf, force = True )
   if not module or not hasattr( module, function_name ):
+    logger.debug( 'Global extra conf not loaded or no function ' +
+                  function_name )
     return
+
+  logger.info( 'Calling global extra conf method {0} on conf file {1}'.format(
+      function_name, global_ycm_extra_conf ) )
   getattr( module, function_name )()
 
 
@@ -214,3 +222,7 @@ def _RandomName():
 def _GlobalYcmExtraConfFileLocation():
   return os.path.expanduser(
     user_options_store.Value( 'global_ycm_extra_conf' ) )
+
+
+def _Logger():
+  return logging.getLogger( __name__ )
