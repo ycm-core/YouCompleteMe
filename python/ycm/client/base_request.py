@@ -29,6 +29,8 @@ from ycm.server.responses import ServerError, UnknownExtraConf
 
 HEADERS = {'content-type': 'application/json'}
 EXECUTOR = ThreadPoolExecutor( max_workers = 10 )
+# Setting this to None seems to screw up the Requests/urllib3 libs.
+DEFAULT_TIMEOUT_SEC = 30
 
 class BaseRequest( object ):
   def __init__( self ):
@@ -51,7 +53,7 @@ class BaseRequest( object ):
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandler( data, handler, timeout = None ):
+  def PostDataToHandler( data, handler, timeout = DEFAULT_TIMEOUT_SEC ):
     return JsonFromFuture( BaseRequest.PostDataToHandlerAsync( data,
                                                                handler,
                                                                timeout ) )
@@ -61,7 +63,7 @@ class BaseRequest( object ):
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandlerAsync( data, handler, timeout = None ):
+  def PostDataToHandlerAsync( data, handler, timeout = DEFAULT_TIMEOUT_SEC ):
     def PostData( data, handler, timeout ):
       return BaseRequest.session.post( _BuildUri( handler ),
                                        data = json.dumps( data ),
