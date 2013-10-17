@@ -70,7 +70,7 @@ class BaseRequest( object ):
                                        headers = HEADERS,
                                        timeout = timeout )
 
-    @retries( 3, delay = 0.5 )
+    @retries( 5, delay = 0.5, backoff = 1.5 )
     def DelayedPostData( data, handler ):
       return requests.post( _BuildUri( handler ),
                             data = json.dumps( data ),
