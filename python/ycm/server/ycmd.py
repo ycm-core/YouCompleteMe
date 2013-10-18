@@ -35,12 +35,11 @@ def YcmCoreSanityCheck():
     raise RuntimeError( 'ycm_core already imported, ycmd has a bug!' )
 
 
-# We need to manually call ServerShutdown for the signals that turn down ycmd
-# because atexit won't handle them.
+# We manually call sys.exit() on SIGTERM and SIGINT so that atexit handlers are
+# properly executed.
 def SetUpSignalHandler():
   def SignalHandler( signum, frame ):
-    import handlers
-    handlers.ServerShutdown()
+    sys.exit()
 
   for sig in [ signal.SIGTERM,
                signal.SIGINT ]:
