@@ -38,7 +38,7 @@ def YcmCoreSanityCheck():
 # We need to manually call ServerShutdown for the signals that turn down ycmd
 # because atexit won't handle them.
 def SetUpSignalHandler():
-  def SignalHandler():
+  def SignalHandler( signum, frame ):
     import handlers
     handlers.ServerShutdown()
 
