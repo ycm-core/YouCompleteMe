@@ -71,7 +71,7 @@ class Completer( object ):
   return a list of strings, where the strings are Vim filetypes your completer
   supports.
 
-  clang_completer.py is a good example of a "complicated" completer that A good
+  clang_completer.py is a good example of a "complicated" completer. A good
   example of a simple completer is ultisnips_completer.py.
 
   The On* functions are provided for your convenience. They are called when
@@ -82,8 +82,7 @@ class Completer( object ):
   One special function is OnUserCommand. It is called when the user uses the
   command :YcmCompleter and is passed all extra arguments used on command
   invocation (e.g. OnUserCommand(['first argument', 'second'])).  This can be
-  used for completer-specific commands such as reloading external
-  configuration.
+  used for completer-specific commands such as reloading external configuration.
   When the command is called with no arguments you should print a short summary
   of the supported commands or point the user to the help section where this
   information can be found.
