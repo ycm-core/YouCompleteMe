@@ -43,9 +43,7 @@ def SetUpSignalHandler():
     handlers.ServerShutdown()
 
   for sig in [ signal.SIGTERM,
-               signal.SIGINT,
-               signal.SIGHUP,
-               signal.SIGQUIT ]:
+               signal.SIGINT ]:
     signal.signal( sig, SignalHandler )
 
 
