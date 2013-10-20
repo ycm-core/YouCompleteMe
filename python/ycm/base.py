@@ -71,6 +71,19 @@ def CompletionStartColumn():
   return start_column
 
 
+def CmdlineCompletionStartColumn():
+  """Returns the 0-based index where the completion string should start in the
+  cmdline.
+  """
+
+  line = vimsupport.CurrentCmdline()
+  start_column = vimsupport.CurrentCmdlineColumn()
+
+  while start_column > 0 and utils.IsIdentifierChar( line[ start_column - 1 ] ):
+    start_column -= 1
+  return start_column
+
+
 def CurrentIdentifierFinished():
   current_column = vimsupport.CurrentColumn()
   previous_char_index = current_column - 1
