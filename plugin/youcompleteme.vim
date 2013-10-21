@@ -100,6 +100,9 @@ let g:ycm_key_detailed_diagnostics =
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
 
+let g:ycm_key_cmdline_completion =
+      \ get( g:, 'ycm_key_cmdline_completion', ['<C-N>', '<C-P>'] )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart

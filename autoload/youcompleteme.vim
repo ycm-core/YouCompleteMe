@@ -36,6 +36,13 @@ let s:forced_syntastic_checker_for = {
       \ 'objcpp': 1,
       \ }
 
+let s:cmdline = {
+      \ 'base'         : '',
+      \ 'index'        : 0 ,
+      \ 'last_pos'     : 0 ,
+      \ 'last_cmdline' : '',
+      \ 'completions'  : [],
+      \ }
 
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
@@ -154,6 +161,11 @@ function! s:SetUpKeyMappings()
     silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<cr>'
   endif
+  " Command Line Completion
+  for i in [0, 1]
+    exe 'cnoremap <unique> ' . g:ycm_key_cmdline_completion[i] .
+        \ ' <C-r>=youcompleteme#CmdlineComplete(' . i .')<CR>'
+  endfor
 endfunction
 
 
@@ -585,6 +597,61 @@ function! youcompleteme#OmniComplete( findstart, base )
   else
     return s:CompletionsForQuery( a:base )
   endif
+endfunction
+
+
+function! youcompleteme#CmdlineComplete( direction )
+    let cmdline = getcmdline()
+    let pos = getcmdpos()
+
+    " Fetch completion candidates if cmdline, or pos changed since last call
+    if cmdline != s:cmdline['last_cmdline'] || pos != s:cmdline['last_pos']
+	let s:cmdline['last_cmdline'] = cmdline
+	let s:cmdline['last_pos'] = pos
+
+	let s = match( strpart(cmdline, 0, pos - 1), '\k*$' )
+	let s:cmdline['base'] = strpart( cmdline, s, pos - 1 - s )
+
+        py request = ycm_state.CreateCompletionRequest( cmdline_completion = True )
+        if !pyeval( 'bool(request)' )
+          return
+        endif
+
+        let s:cmdline['completions'] = [s:cmdline['base']] +
+            \ s:CompletionsForQuery( s:cmdline['base'] )['words']
+
+	let s:cmdline['index'] = 0
+    endif
+
+    if len( s:cmdline['completions'] ) == 1
+      return ''
+    endif
+
+    let old_candidate = s:cmdline['completions'][s:cmdline['index']]
+
+    if a:direction
+	if s:cmdline['index'] == 0
+	    let s:cmdline['index'] = len( s:cmdline['completions'] ) - 1
+	else
+	    let s:cmdline['index'] = s:cmdline['index'] - 1
+	endif
+    else
+	if s:cmdline['index'] == len( s:cmdline['completions'] ) - 1
+	    let s:cmdline['index'] = 0
+	else
+	    let s:cmdline['index'] = s:cmdline['index'] + 1
+	endif
+    endif
+
+    let new_candidate = s:cmdline['completions'][s:cmdline['index']]
+
+    " remember the last cmdline, cmdpos and cursor for next call
+    let s:cmdline['last_cmdline'] = strpart(
+	\ s:cmdline['last_cmdline'], 0, s:cmdline['last_pos'] - 1 - strlen( old_candidate) )
+	\ . new_candidate . strpart( s:cmdline['last_cmdline'], s:cmdline['last_pos'] - 1 )
+    let s:cmdline['last_pos'] = s:cmdline['last_pos'] - len( old_candidate) + len(new_candidate )
+
+    return repeat( "\<c-h>", len(old_candidate) ) . new_candidate
 endfunction
 
 

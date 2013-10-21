@@ -30,6 +30,7 @@ from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
+from ycm.client.cmdline_completion_request import CmdlineCompletionRequest
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
@@ -115,11 +116,17 @@ class YouCompleteMe( object ):
     self._SetupServer()
 
 
-  def CreateCompletionRequest( self, force_semantic = False ):
+  def CreateCompletionRequest( self,
+                               force_semantic = False,
+                               cmdline_completion = False ):
     # We have to store a reference to the newly created CompletionRequest
     # because VimScript can't store a reference to a Python object across
     # function calls... Thus we need to keep this request somewhere.
-    if ( not self.NativeFiletypeCompletionAvailable() and
+    if cmdline_completion:
+      self._latest_completion_request = ( CmdlineCompletionRequest()
+                                          if self._IsServerAlive() else
+                                          None )
+    elif ( not self.NativeFiletypeCompletionAvailable() and
          self.CurrentFiletypeCompletionEnabled() and
          self._omnicomp.ShouldUseNow() ):
       self._latest_completion_request = OmniCompletionRequest( self._omnicomp )

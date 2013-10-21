@@ -20,6 +20,40 @@
 import vim
 import os
 import json
+import sys
+try:
+  def GetVimFunc( f, rettype=None ):
+    '''Return a vim function binding.'''
+    try:
+      func = vim.bindeval( 'function("' + f + '")' )
+      if sys.version_info >= (3,) and rettype is str:
+        return ( lambda *args, **kwargs:
+                 func( *args, **kwargs ).decode('utf-8', errors='replace') )
+      return func
+    except vim.error:
+      return None
+except AttributeError:
+  import json
+  class VimFunc( object ):
+    '''Evaluate a vim function using vim.eval().
+
+    This is a fallback class for older vim versions.
+    '''
+    __slots__ = ('f', 'rettype')
+
+    def __init__( self, f, rettype=None ):
+      self.f = f
+      self.rettype = rettype
+
+    def __call__( self, *args ):
+      r = vim.eval( self.f + '(' + json.dumps(args)[1:-1] + ')' )
+      if self.rettype:
+        return self.rettype(r)
+      return r
+
+  GetVimFunc = VimFunc
+
+VimMode = GetVimFunc('mode')
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -28,6 +62,16 @@ def CurrentLineAndColumn():
   line, column = vim.current.window.cursor
   line -= 1
   return line, column
+
+
+def CurrentCmdline():
+  """Returns current cmdline."""
+  return str( vim.eval( 'getcmdline()' ) )
+
+
+def CurrentCmdlineColumn():
+  """Returns the 0-based cmdline current column."""
+  return int( vim.eval( 'getcmdpos()' ) ) - 1
 
 
 def CurrentColumn():
@@ -45,7 +89,11 @@ def CurrentColumn():
 
 def TextAfterCursor():
   """Returns the text after CurrentColumn."""
-  return vim.current.line[ CurrentColumn(): ]
+  if VimMode() == 'c':
+    cmdline = CurrentCmdline()
+    return cmdline[ CurrentCmdlineColumn(): ]
+  else:
+    return vim.current.line[ CurrentColumn(): ]
 
 
 # Note the difference between buffer OPTIONS and VARIABLES; the two are not
