@@ -242,7 +242,7 @@ class Completer( object ):
     return []
 
 
-  def GetDetailedDiagnostic( self ):
+  def GetDetailedDiagnostic( self, request_data ):
     pass
 
 
