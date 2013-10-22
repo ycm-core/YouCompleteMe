@@ -261,6 +261,7 @@ class YouCompleteMe( object ):
       debug_info = 'Server crashed, no debug info from server'
     debug_info += '\nServer running at: {0}'.format(
         BaseRequest.server_location )
+    debug_info += '\nServer process ID: {0}'.format( self._server_popen.pid )
     if self._server_stderr or self._server_stdout:
       debug_info += '\nServer logfiles:\n  {0}\n  {1}'.format(
         self._server_stdout,
