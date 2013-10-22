@@ -246,10 +246,6 @@ class Completer( object ):
     pass
 
 
-  def GettingCompletions( self ):
-    return False
-
-
   def _CurrentFiletype( self, filetypes ):
     supported = self.SupportedFiletypes()
 

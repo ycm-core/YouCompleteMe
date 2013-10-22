@@ -206,11 +206,6 @@ class ClangCompleter( Completer ):
         ToUtf8IfNeeded( request_data[ 'unloaded_buffer' ] ) )
 
 
-  def GettingCompletions( self, request_data ):
-    return self._completer.UpdatingTranslationUnit(
-        ToUtf8IfNeeded( request_data[ 'filepath' ] ) )
-
-
   def GetDetailedDiagnostic( self, request_data ):
     current_line = request_data[ 'line_num' ] + 1
     current_column = request_data[ 'column_num' ] + 1
