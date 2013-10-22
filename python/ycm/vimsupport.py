@@ -217,3 +217,4 @@ def GetBoolValue( variable ):
 
 def GetIntValue( variable ):
   return int( vim.eval( variable ) )
+

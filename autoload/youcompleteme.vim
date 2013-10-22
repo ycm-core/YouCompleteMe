@@ -588,6 +588,11 @@ function! youcompleteme#OmniComplete( findstart, base )
 endfunction
 
 
+function! youcompleteme#ServerPid()
+  return pyeval( 'ycm_state.ServerPid()' )
+endfunction
+
+
 function! s:RestartServer()
   py ycm_state.RestartServer()
 endfunction

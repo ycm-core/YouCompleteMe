@@ -109,6 +109,12 @@ class YouCompleteMe( object ):
         vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
 
 
+  def ServerPid( self ):
+    if not self._server_popen:
+      return -1
+    return self._server_popen.pid
+
+
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
     self.OnVimLeave()
