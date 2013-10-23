@@ -119,6 +119,9 @@ for flag in $@; do
     --omnisharp-completer)
       omnisharp_completer=true
       ;;
+    -DPYTHON*)
+     cmake_args="$cmake_args $flag"
+     ;;
     *)
       usage
       ;;
