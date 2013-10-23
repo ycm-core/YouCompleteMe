@@ -28,6 +28,7 @@ import waitress
 import signal
 from ycm import user_options_store
 from ycm import extra_conf_store
+from ycm.server.watchdog_plugin import WatchdogPlugin
 
 
 def YcmCoreSanityCheck():
@@ -55,6 +56,8 @@ def Main():
   parser.add_argument( '--log', type = str, default = 'info',
                        help = 'log level, one of '
                               '[debug|info|warning|error|critical]' )
+  parser.add_argument( '--idle_shutdown_seconds', type = int, default = 0,
+                       help = 'num idle seconds before server shuts down')
   parser.add_argument( '--options_file', type = str, default = '',
                        help = 'file with user options, in JSON format' )
   args = parser.parse_args()
@@ -79,9 +82,10 @@ def Main():
   # This can't be a top-level import because it transitively imports
   # ycm_core which we want to be imported ONLY after extra conf
   # preload has executed.
-  import handlers
+  from ycm.server import handlers
   handlers.UpdateUserOptions( options )
   SetUpSignalHandler()
+  handlers.app.install( WatchdogPlugin( args.idle_shutdown_seconds ) )
   waitress.serve( handlers.app,
                   host = args.host,
                   port = args.port,

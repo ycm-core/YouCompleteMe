@@ -41,9 +41,9 @@ try:
 except ImportError:
   USE_ULTISNIPS_DATA = False
 
-SERVER_CRASH_MESSAGE_STDERR_FILE = 'The ycmd server crashed with output:\n'
+SERVER_CRASH_MESSAGE_STDERR_FILE = 'The ycmd server SHUT DOWN with output:\n'
 SERVER_CRASH_MESSAGE_SAME_STDERR = (
-  'The ycmd server crashed, check console output for logs!' )
+  'The ycmd server shut down, check console output for logs!' )
 
 
 class YouCompleteMe( object ):
@@ -69,7 +69,9 @@ class YouCompleteMe( object ):
                _PathToServerScript(),
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),
-               '--log={0}'.format( self._user_options[ 'server_log_level' ] ) ]
+               '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
+               '--idle_shutdown_seconds={0}'.format(
+                  self._user_options[ 'server_idle_shutdown_seconds' ] ) ]
 
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
