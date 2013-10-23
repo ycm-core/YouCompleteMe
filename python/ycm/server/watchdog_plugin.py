@@ -29,7 +29,7 @@ from threading import Thread, Lock
 # The idea here is to decorate every route handler automatically so that on
 # every request, we log when the request was made. Then a watchdog thread checks
 # every check_interval_seconds whether the server has been idle for a time
-# greater that the passed-in idle_shutdown_seconds. If it has, we kill the
+# greater that the passed-in idle_suicide_seconds. If it has, we kill the
 # server.
 #
 # We want to do this so that if something goes bonkers in Vim and the server
@@ -40,13 +40,13 @@ class WatchdogPlugin( object ):
 
 
   def __init__( self,
-                idle_shutdown_seconds,
+                idle_suicide_seconds,
                 check_interval_seconds = 60 * 10 ):
     self._check_interval_seconds = check_interval_seconds
-    self._idle_shutdown_seconds = idle_shutdown_seconds
+    self._idle_suicide_seconds = idle_suicide_seconds
     self._last_request_time = time.time()
     self._last_request_time_lock = Lock()
-    if idle_shutdown_seconds <= 0:
+    if idle_suicide_seconds <= 0:
       return
     self._watchdog_thread = Thread( target = self._WatchdogMain )
     self._watchdog_thread.daemon = True
@@ -66,7 +66,7 @@ class WatchdogPlugin( object ):
   def _WatchdogMain( self ):
     while True:
       time.sleep( self._check_interval_seconds )
-      if time.time() - self._GetLastRequestTime() > self._idle_shutdown_seconds:
+      if time.time() - self._GetLastRequestTime() > self._idle_suicide_seconds:
         utils.TerminateProcess( os.getpid() )
 
 

@@ -56,7 +56,7 @@ def Main():
   parser.add_argument( '--log', type = str, default = 'info',
                        help = 'log level, one of '
                               '[debug|info|warning|error|critical]' )
-  parser.add_argument( '--idle_shutdown_seconds', type = int, default = 0,
+  parser.add_argument( '--idle_suicide_seconds', type = int, default = 0,
                        help = 'num idle seconds before server shuts down')
   parser.add_argument( '--options_file', type = str, default = '',
                        help = 'file with user options, in JSON format' )
@@ -85,7 +85,7 @@ def Main():
   from ycm.server import handlers
   handlers.UpdateUserOptions( options )
   SetUpSignalHandler()
-  handlers.app.install( WatchdogPlugin( args.idle_shutdown_seconds ) )
+  handlers.app.install( WatchdogPlugin( args.idle_suicide_seconds ) )
   waitress.serve( handlers.app,
                   host = args.host,
                   port = args.port,

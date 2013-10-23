@@ -70,8 +70,8 @@ class YouCompleteMe( object ):
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),
                '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
-               '--idle_shutdown_seconds={0}'.format(
-                  self._user_options[ 'server_idle_shutdown_seconds' ] ) ]
+               '--idle_suicide_seconds={0}'.format(
+                  self._user_options[ 'server_idle_suicide_seconds' ] ) ]
 
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
