@@ -19,34 +19,25 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import vim
-from ycm.completers.threaded_completer import ThreadedCompleter
-from ycm import vimsupport
+from ycm.completers.completer import Completer
+from ycm.server import responses
 
-import sys
-from os.path import join, abspath, dirname
-
-# We need to add the jedi package to sys.path, but it's important that we clean
-# up after ourselves, because ycm.YouCompletMe.GetFiletypeCompleterForFiletype
-# removes sys.path[0] after importing completers.python.hook
-sys.path.insert( 0, join( abspath( dirname( __file__ ) ), 'jedi' ) )
 try:
   import jedi
 except ImportError:
-  vimsupport.PostVimMessage(
+  raise ImportError(
     'Error importing jedi. Make sure the jedi submodule has been checked out. '
     'In the YouCompleteMe folder, run "git submodule update --init --recursive"')
-sys.path.pop( 0 )
 
 
-class JediCompleter( ThreadedCompleter ):
+class JediCompleter( Completer ):
   """
   A Completer that uses the Jedi completion engine.
   https://jedi.readthedocs.org/en/latest/
   """
 
-  def __init__( self ):
-    super( JediCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( JediCompleter, self ).__init__( user_options )
 
 
   def SupportedFiletypes( self ):
@@ -54,113 +45,109 @@ class JediCompleter( ThreadedCompleter ):
     return [ 'python' ]
 
 
-  def _GetJediScript( self ):
-      contents = '\n'.join( vim.current.buffer )
-      line, column = vimsupport.CurrentLineAndColumn()
+  def _GetJediScript( self, request_data ):
+      filename = request_data[ 'filepath' ]
+      contents = request_data[ 'file_data' ][ filename ][ 'contents' ]
       # Jedi expects lines to start at 1, not 0
-      line += 1
-      filename = vim.current.buffer.name
+      line = request_data[ 'line_num' ] + 1
+      column = request_data[ 'column_num' ]
 
       return jedi.Script( contents, line, column, filename )
 
 
-  def ComputeCandidates( self, unused_query, unused_start_column ):
-    script = self._GetJediScript()
-
-    return [ { 'word': str( completion.name ),
-               'menu': str( completion.description ),
-               'info': str( completion.doc ) }
+  def ComputeCandidatesInner( self, request_data ):
+    script = self._GetJediScript( request_data )
+    return [ responses.BuildCompletionData(
+                str( completion.name ),
+                str( completion.description ),
+                str( completion.doc ) )
              for completion in script.completions() ]
 
-
   def DefinedSubcommands( self ):
-    return [ "GoToDefinition",
-             "GoToDeclaration",
-             "GoToDefinitionElseDeclaration" ]
+    return [ 'GoToDefinition',
+             'GoToDeclaration',
+             'GoToDefinitionElseDeclaration' ]
 
 
-  def OnUserCommand( self, arguments ):
+  def OnUserCommand( self, arguments, request_data ):
     if not arguments:
-      self.EchoUserCommandsHelpMessage()
-      return
+      raise ValueError( self.UserCommandsHelpMessage() )
 
     command = arguments[ 0 ]
     if command == 'GoToDefinition':
-      self._GoToDefinition()
+      return self._GoToDefinition( request_data )
     elif command == 'GoToDeclaration':
-      self._GoToDeclaration()
+      return self._GoToDeclaration( request_data )
     elif command == 'GoToDefinitionElseDeclaration':
-      self._GoToDefinitionElseDeclaration()
+      return self._GoToDefinitionElseDeclaration( request_data )
+    raise ValueError( self.UserCommandsHelpMessage() )
 
 
-  def _GoToDefinition( self ):
-    definitions = self._GetDefinitionsList()
+  def _GoToDefinition( self, request_data ):
+    definitions = self._GetDefinitionsList( request_data )
     if definitions:
-      self._JumpToLocation( definitions )
+      return self._BuildGoToResponse( definitions )
     else:
-      vimsupport.PostVimMessage( 'Can\'t jump to definition.' )
+      raise RuntimeError( 'Can\'t jump to definition.' )
 
 
-  def _GoToDeclaration( self ):
-    definitions = self._GetDefinitionsList( declaration = True )
+  def _GoToDeclaration( self, request_data ):
+    definitions = self._GetDefinitionsList( request_data, declaration = True )
     if definitions:
-      self._JumpToLocation( definitions )
+      return self._BuildGoToResponse( definitions )
     else:
-      vimsupport.PostVimMessage( 'Can\'t jump to declaration.' )
+      raise RuntimeError( 'Can\'t jump to declaration.' )
 
 
-  def _GoToDefinitionElseDeclaration( self ):
-    definitions = self._GetDefinitionsList() or \
-        self._GetDefinitionsList( declaration = True )
+  def _GoToDefinitionElseDeclaration( self, request_data ):
+    definitions = ( self._GetDefinitionsList( request_data ) or
+        self._GetDefinitionsList( request_data, declaration = True ) )
     if definitions:
-      self._JumpToLocation( definitions )
+      return self._BuildGoToResponse( definitions )
     else:
-      vimsupport.PostVimMessage( 'Can\'t jump to definition or declaration.' )
+      raise RuntimeError( 'Can\'t jump to definition or declaration.' )
 
 
-  def _GetDefinitionsList( self, declaration = False ):
+  def _GetDefinitionsList( self, request_data, declaration = False ):
     definitions = []
-    script = self._GetJediScript()
+    script = self._GetJediScript( request_data )
     try:
       if declaration:
         definitions = script.goto_definitions()
       else:
         definitions = script.goto_assignments()
     except jedi.NotFoundError:
-      vimsupport.PostVimMessage(
-                  "Cannot follow nothing. Put your cursor on a valid name." )
-    except Exception as e:
-      vimsupport.PostVimMessage(
-                  "Caught exception, aborting. Full error: " + str( e ) )
+      raise RuntimeError(
+                  'Cannot follow nothing. Put your cursor on a valid name.' )
 
     return definitions
 
 
-  def _JumpToLocation( self, definition_list ):
+  def _BuildGoToResponse( self, definition_list ):
     if len( definition_list ) == 1:
       definition = definition_list[ 0 ]
       if definition.in_builtin_module():
         if definition.is_keyword:
-          vimsupport.PostVimMessage(
-                  "Cannot get the definition of Python keywords." )
+          raise RuntimeError(
+                  'Cannot get the definition of Python keywords.' )
         else:
-          vimsupport.PostVimMessage( "Builtin modules cannot be displayed." )
+          raise RuntimeError( 'Builtin modules cannot be displayed.' )
       else:
-        vimsupport.JumpToLocation( definition.module_path,
-                                   definition.line,
-                                   definition.column + 1 )
+        return responses.BuildGoToResponse( definition.module_path,
+                                            definition.line - 1,
+                                            definition.column )
     else:
       # multiple definitions
       defs = []
       for definition in definition_list:
         if definition.in_builtin_module():
-          defs.append( {'text': 'Builtin ' + \
-                       definition.description.encode( 'utf-8' ) } )
+          defs.append( responses.BuildDescriptionOnlyGoToResponse(
+                       'Builtin ' + definition.description ) )
         else:
-          defs.append( {'filename': definition.module_path.encode( 'utf-8' ),
-                        'lnum': definition.line,
-                        'col': definition.column + 1,
-                        'text': definition.description.encode( 'utf-8' ) } )
+          defs.append(
+            responses.BuildGoToResponse( definition.module_path,
+                                         definition.line - 1,
+                                         definition.column,
+                                         definition.description ) )
+      return defs
 
-      vim.eval( 'setqflist( %s )' % repr( defs ) )
-      vim.eval( 'youcompleteme#OpenGoToList()' )

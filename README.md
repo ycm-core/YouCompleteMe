@@ -89,8 +89,9 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library API has changed (happens rarely), YCM will
-notify you to recompile it. You should then rerun the install process.
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
 
 It's recommended that you have the latest Xcode installed along with the latest
 Command Line Tools (that you install from within Xcode).
@@ -136,8 +137,9 @@ from source][vim-build] (don't worry, it's easy).
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library API has changed (happens rarely), YCM will
-notify you to recompile it. You should then rerun the install process.
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
 
 Install development tools and CMake: `sudo apt-get install build-essential cmake`
 
@@ -184,8 +186,9 @@ that platform).
 See the _FAQ_ if you have any issues.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library API has changed (happens rarely), YCM will
-notify you to recompile it. You should then rerun the install process.
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
@@ -221,8 +224,8 @@ notify you to recompile it. You should then rerun the install process.
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
 
-4.  **Compile the `ycm_core` plugin plugin** (ha!) that YCM needs. This is the
-    C++ engine that YCM uses to get fast completions.
+4.  **Compile the `ycm_support_libs` libraries** that YCM needs. These libs
+    are the C++ engines that YCM uses to get fast completions.
 
     You will need to have `cmake` installed in order to generate the required
     makefiles. Linux users can install cmake with their package manager (`sudo
@@ -261,7 +264,7 @@ notify you to recompile it. You should then rerun the install process.
 
     Now that makefiles have been generated, simply run:
 
-        make ycm_core
+        make ycm_support_libs
 
     For those who want to use the system version of libclang, you would pass
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
@@ -322,6 +325,13 @@ filepath completer.
 YCM automatically detects which completion engine would be the best in any
 situation. On occasion, it queries several of them at once, merges the
 outputs and presents the results to you.
+
+### Client-server architecture
+
+YCM has a client-server architecture; the Vim part of YCM is only a thin client
+that talks to the `ycmd` HTTP+JSON server that has the vast majority of YCM
+logic and functionality. The server is started and stopped automatically as you
+start and stop Vim.
 
 ### Completion string ranking
 
@@ -497,6 +507,11 @@ yours truly.
 
 Commands
 --------
+
+### The `:YcmRestartServer` command
+
+If the `ycmd` completion server suddenly stops for some reason, you can restart
+it with this command.
 
 ### The `:YcmForceCompileAndDiagnostics` command
 
@@ -831,6 +846,64 @@ Usually at least 95% of the keywords are successfully extracted.
 Default: `0`
 
     let g:ycm_seed_identifiers_with_syntax = 0
+
+### The `g:ycm_server_use_vim_stdout` option
+
+By default, the `ycmd` completion server writes logs to logfiles. When this
+option is set to `1`, the server writes logs to Vim's stdout (so you'll see them
+in the console).
+
+Default: `0`
+
+    let g:ycm_server_use_vim_stdout = 0
+
+### The `g:ycm_server_keep_logfiles` option
+
+When this option is set to `1`, the `ycmd` completion server will keep the
+logfiles around after shutting down (they are deleted on shutdown by default).
+
+To see where the logfiles are, call `:YcmDebugInfo`.
+
+Default: `0`
+
+    let g:ycm_server_keep_logfiles = 0
+
+### The `g:ycm_server_log_level` option
+
+The logging level that the `ycmd` completion server uses. Valid values are the
+following, from most verbose to least verbose:
+- `debug`
+- `info`
+- `warning`
+- `error`
+- `critical`
+
+Note that `debug` is _very_ verbose.
+
+Default: `info`
+
+    let g:ycm_server_log_level = 'info'
+
+### The `g:ycm_server_idle_suicide_seconds` option
+
+This option sets the number of seconds of `ycmd` server idleness (no requests
+received) after which the server stops itself. NOTE: the YCM Vim client sends a
+shutdown request to the server when Vim is shutting down.
+
+If your Vim crashes for instance, `ycmd` never gets the shutdown command and
+becomes a zombie process. This option prevents such zombies from sticking around
+forever.
+
+The default option is `43200` seconds which is 12 hours. The reason for the
+interval being this long is to prevent the server from shutting down if you
+leave your computer (and Vim) turned on during the night.
+
+The server "heartbeat" that checks whether this interval has passed occurs every
+10 minutes.
+
+Default: `43200`
+
+    let g:ycm_server_idle_suicide_seconds = 43200
 
 ### The `g:ycm_csharp_server_port` option
 

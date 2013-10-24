@@ -21,6 +21,7 @@
 #include "exceptions.h"
 
 #include <boost/thread/locks.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
 
 using boost::lock_guard;
@@ -38,13 +39,16 @@ std::size_t HashForFlags( const std::vector< std::string > &flags ) {
 
 }  // unnamed namespace
 
+
 TranslationUnitStore::TranslationUnitStore( CXIndex clang_index )
   : clang_index_( clang_index ) {
 }
 
+
 TranslationUnitStore::~TranslationUnitStore() {
   RemoveAll();
 }
+
 
 shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
   const std::string &filename,
@@ -104,11 +108,13 @@ shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
   return unit;
 }
 
+
 shared_ptr< TranslationUnit > TranslationUnitStore::Get(
     const std::string &filename ) {
   lock_guard< mutex > lock( filename_to_translation_unit_and_flags_mutex_ );
   return GetNoLock( filename );
 }
+
 
 bool TranslationUnitStore::Remove( const std::string &filename ) {
   lock_guard< mutex > lock( filename_to_translation_unit_and_flags_mutex_ );
@@ -116,11 +122,13 @@ bool TranslationUnitStore::Remove( const std::string &filename ) {
   return Erase( filename_to_translation_unit_, filename );
 }
 
+
 void TranslationUnitStore::RemoveAll() {
   lock_guard< mutex > lock( filename_to_translation_unit_and_flags_mutex_ );
   filename_to_translation_unit_.clear();
   filename_to_flags_hash_.clear();
 }
+
 
 shared_ptr< TranslationUnit > TranslationUnitStore::GetNoLock(
     const std::string &filename ) {

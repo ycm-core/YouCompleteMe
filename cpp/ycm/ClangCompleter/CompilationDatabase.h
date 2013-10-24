@@ -18,14 +18,13 @@
 #ifndef COMPILATIONDATABASE_H_ZT7MQXPG
 #define COMPILATIONDATABASE_H_ZT7MQXPG
 
-#include "Future.h"
-#include "ConcurrentStack.h"
-
 #include <vector>
 #include <string>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <clang-c/CXCompilationDatabase.h>
+
 
 namespace YouCompleteMe {
 
@@ -34,9 +33,8 @@ struct CompilationInfoForFile {
   std::string compiler_working_dir_;
 };
 
-typedef boost::shared_ptr< CompilationInfoForFile >
-AsyncCompilationInfoForFile;
 
+// Access to Clang's internal CompilationDatabase. This class is thread-safe.
 class CompilationDatabase : boost::noncopyable {
 public:
   CompilationDatabase( const std::string &path_to_directory );
@@ -44,28 +42,20 @@ public:
 
   bool DatabaseSuccessfullyLoaded();
 
-  void EnableThreading();
+  // Returns true when a separate thread is already getting flags; this is
+  // useful so that the caller doesn't need to block.
+  bool AlreadyGettingFlags();
 
+  // NOTE: Multiple calls to this function from separate threads will be
+  // serialized since Clang internals are not thread-safe.
   CompilationInfoForFile GetCompilationInfoForFile(
     const std::string &path_to_file );
 
-  Future< AsyncCompilationInfoForFile > GetCompilationInfoForFileAsync(
-    const std::string &path_to_file );
-
-  typedef boost::shared_ptr <
-  boost::packaged_task< AsyncCompilationInfoForFile > > InfoTask;
-
-  typedef ConcurrentStack< InfoTask > InfoTaskStack;
-
 private:
-  void InitThreads();
 
-  bool threading_enabled_;
   bool is_loaded_;
   CXCompilationDatabase compilation_database_;
-
-  boost::thread info_thread_;
-  InfoTaskStack info_task_stack_;
+  boost::mutex compilation_database_mutex_;
 };
 
 } // namespace YouCompleteMe

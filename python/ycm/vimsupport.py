@@ -18,6 +18,8 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
+import os
+import json
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -46,12 +48,74 @@ def TextAfterCursor():
   return vim.current.line[ CurrentColumn(): ]
 
 
-def GetUnsavedBuffers():
-  def BufferModified( buffer_number ):
-    to_eval = 'getbufvar({0}, "&mod")'.format( buffer_number )
-    return GetBoolValue( to_eval )
+# Note the difference between buffer OPTIONS and VARIABLES; the two are not
+# the same.
+def GetBufferOption( buffer_object, option ):
+  # The 'options' property is only available in recent (7.4+) Vim builds
+  if hasattr( buffer_object, 'options' ):
+    return buffer_object.options[ option ]
 
-  return ( x for x in vim.buffers if BufferModified( x.number ) )
+  to_eval = 'getbufvar({0}, "&{1}")'.format( buffer_object.number, option )
+  return GetVariableValue( to_eval )
+
+
+def GetUnsavedAndCurrentBufferData():
+  def BufferModified( buffer_object ):
+    return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
+
+  buffers_data = {}
+  for buffer_object in vim.buffers:
+    if not ( BufferModified( buffer_object ) or
+             buffer_object == vim.current.buffer ):
+      continue
+
+    buffers_data[ GetBufferFilepath( buffer_object ) ] = {
+      'contents': '\n'.join( buffer_object ),
+      'filetypes': FiletypesForBuffer( buffer_object )
+    }
+
+  return buffers_data
+
+
+def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
+  return int( vim.eval( "bufnr('{0}', {1})".format(
+      os.path.realpath( filename ),
+      int( open_file_if_needed ) ) ) )
+
+
+def GetCurrentBufferFilepath():
+  return GetBufferFilepath( vim.current.buffer )
+
+
+def GetBufferFilepath( buffer_object ):
+  if buffer_object.name:
+    return buffer_object.name
+  # Buffers that have just been created by a command like :enew don't have any
+  # buffer name so we use the buffer number for that.
+  return os.path.join( os.getcwd(), str( buffer_object.number ) )
+
+
+# Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
+# When |overwrite| is True, overwrites the existing value in Vim.
+def LoadDictIntoVimGlobals( new_globals, overwrite = True ):
+  extend_option = '"force"' if overwrite else '"keep"'
+
+  # We need to use json.dumps because that won't use the 'u' prefix on strings
+  # which Vim would bork on.
+  vim.eval( 'extend( g:, {0}, {1})'.format( json.dumps( new_globals ),
+                                            extend_option ) )
+
+
+# Changing the returned dict will NOT change the value in Vim.
+def GetReadOnlyVimGlobals( force_python_objects = False ):
+  if force_python_objects:
+    return vim.eval( 'g:' )
+
+  try:
+    # vim.vars is fairly new so it might not exist
+    return vim.vars
+  except:
+    return vim.eval( 'g:' )
 
 
 # Both |line| and |column| need to be 1-based
@@ -59,7 +123,7 @@ def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
   vim.command( "normal! m'" )
 
-  if filename != vim.current.buffer.name:
+  if filename != GetCurrentBufferFilepath():
     # We prefix the command with 'keepjumps' so that opening the file is not
     # recorded in the jumplist. So when we open the file and move the cursor to
     # a location in it, the user can use CTRL-O to jump back to the original
@@ -73,18 +137,24 @@ def JumpToLocation( filename, line, column ):
   vim.command( 'normal! zz' )
 
 
-def NumLinesInBuffer( buffer ):
+def NumLinesInBuffer( buffer_object ):
   # This is actually less than obvious, that's why it's wrapped in a function
-  return len( buffer )
+  return len( buffer_object )
 
 
+# Calling this function from the non-GUI thread will sometimes crash Vim. At the
+# time of writing, YCM only uses the GUI thread inside Vim (this used to not be
+# the case).
 def PostVimMessage( message ):
-  # TODO: Check are we on the main thread or not, and if not, force a crash
-  # here. This should make it impossible to accidentally call this from a
-  # non-GUI thread which *sometimes* crashes Vim because Vim is not thread-safe.
-  # A consistent crash should force us to notice the error.
-  vim.command( "echohl WarningMsg | echomsg '{0}' | echohl None"
-               .format( EscapeForVim( message ) ) )
+  vim.command( "echohl WarningMsg | echom '{0}' | echohl None"
+               .format( EscapeForVim( str( message ) ) ) )
+
+# Unlike PostVimMesasge, this supports messages with newlines in them because it
+# uses 'echo' instead of 'echomsg'. This also means that the message will NOT
+# appear in Vim's message log.
+def PostMultiLineNotice( message ):
+  vim.command( "echohl WarningMsg | echo '{0}' | echohl None"
+               .format( EscapeForVim( str( message ) ) ) )
 
 
 def PresentDialog( message, choices, default_choice_index = 0 ):
@@ -128,15 +198,13 @@ def EscapeForVim( text ):
 
 
 def CurrentFiletypes():
-  ft_string = vim.eval( "&filetype" )
-  return ft_string.split( '.' )
+  return vim.eval( "&filetype" ).split( '.' )
 
 
 def FiletypesForBuffer( buffer_object ):
   # NOTE: Getting &ft for other buffers only works when the buffer has been
   # visited by the user at least once, which is true for modified buffers
-  ft_string = vim.eval( 'getbufvar({0}, "&ft")'.format( buffer_object.number ) )
-  return ft_string.split( '.' )
+  return GetBufferOption( buffer_object, 'ft' ).split( '.' )
 
 
 def GetVariableValue( variable ):
@@ -145,3 +213,8 @@ def GetVariableValue( variable ):
 
 def GetBoolValue( variable ):
   return bool( int( vim.eval( variable ) ) )
+
+
+def GetIntValue( variable ):
+  return int( vim.eval( variable ) )
+

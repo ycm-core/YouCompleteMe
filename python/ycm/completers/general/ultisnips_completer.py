@@ -19,7 +19,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycm.completers.general_completer import GeneralCompleter
-from UltiSnips import UltiSnips_Manager
+from ycm.server import responses
 
 
 class UltiSnipsCompleter( GeneralCompleter ):
@@ -27,42 +27,28 @@ class UltiSnipsCompleter( GeneralCompleter ):
   General completer that provides UltiSnips snippet names in completions.
   """
 
-  def __init__( self ):
-    super( UltiSnipsCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( UltiSnipsCompleter, self ).__init__( user_options )
     self._candidates = None
     self._filtered_candidates = None
 
 
-  def ShouldUseNowInner( self, start_column ):
-    return self.QueryLengthAboveMinThreshold( start_column )
+  def ShouldUseNow( self, request_data ):
+    return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def CandidatesForQueryAsync( self, query, unused_start_column ):
-    self._filtered_candidates = self.FilterAndSortCandidates( self._candidates,
-                                                              query )
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
+    return self.FilterAndSortCandidates(
+      self._candidates, request_data[ 'query' ] )
 
 
-  def AsyncCandidateRequestReady( self ):
-    return True
+  def OnBufferVisit( self, request_data ):
+    raw_candidates = request_data.get( 'ultisnips_snippets', [] )
+    self._candidates = [
+        responses.BuildCompletionData(
+            str( snip[ 'trigger' ] ),
+            str( '<snip> ' + snip[ 'description' ].encode( 'utf-8' ) ) )
+        for snip in raw_candidates ]
 
-
-  def CandidatesFromStoredRequest( self ):
-    return self._filtered_candidates if self._filtered_candidates else []
-
-
-  def OnBufferVisit( self ):
-    self._candidates = _GetCandidates()
-
-
-def _GetCandidates():
-  try:
-    rawsnips = UltiSnips_Manager._snips( '', 1 )
-
-    # UltiSnips_Manager._snips() returns a class instance where:
-    # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
-    # class.description - description of the snippet
-    return  [ { 'word': str( snip.trigger ),
-                'menu': str( '<snip> ' + snip.description.encode('utf-8') ) }
-              for snip in rawsnips ]
-  except:
-    return []

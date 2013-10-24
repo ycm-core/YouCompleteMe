@@ -18,175 +18,154 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import vim
+import logging
 import ycm_core
 from collections import defaultdict
 from ycm.completers.general_completer import GeneralCompleter
-from ycm.completers.general import syntax_parse
-from ycm import vimsupport
+# from ycm.completers.general import syntax_parse
 from ycm import utils
+from ycm.utils import ToUtf8IfNeeded
+from ycm.server import responses
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
-MIN_NUM_COMPLETION_START_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_of_chars_for_completion" ) )
-MIN_NUM_CANDIDATE_SIZE_CHARS = int( vimsupport.GetVariableValue(
-  "g:ycm_min_num_identifier_candidate_chars" ) )
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 
 
 class IdentifierCompleter( GeneralCompleter ):
-  def __init__( self ):
-    super( IdentifierCompleter, self ).__init__()
-    self.completer = ycm_core.IdentifierCompleter()
-    self.completer.EnableThreading()
-    self.tags_file_last_mtime = defaultdict( int )
-    self.filetypes_with_keywords_loaded = set()
+  def __init__( self, user_options ):
+    super( IdentifierCompleter, self ).__init__( user_options )
+    self._completer = ycm_core.IdentifierCompleter()
+    self._tags_file_last_mtime = defaultdict( int )
+    self._logger = logging.getLogger( __name__ )
 
 
-  def ShouldUseNow( self, start_column ):
-      return self.QueryLengthAboveMinThreshold( start_column )
+  def ShouldUseNow( self, request_data ):
+    return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def CandidatesForQueryAsync( self, query, unused_start_column ):
-    filetype = vim.eval( "&filetype" )
-    self.completions_future = self.completer.CandidatesForQueryAndTypeAsync(
-      utils.SanitizeQuery( query ),
-      filetype )
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
+
+    completions = self._completer.CandidatesForQueryAndType(
+      ToUtf8IfNeeded( utils.SanitizeQuery( request_data[ 'query' ] ) ),
+      ToUtf8IfNeeded( request_data[ 'filetypes' ][ 0 ] ) )
+
+    completions = completions[ : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
+    completions = _RemoveSmallCandidates(
+      completions, self.user_options[ 'min_num_identifier_candidate_chars' ] )
+
+    return [ responses.BuildCompletionData( x ) for x in completions ]
 
 
-  def AddIdentifier( self, identifier ):
-    filetype = vim.eval( "&filetype" )
-    filepath = vim.eval( "expand('%:p')" )
+  def AddIdentifier( self, identifier, request_data ):
+    filetype = request_data[ 'filetypes' ][ 0 ]
+    filepath = request_data[ 'filepath' ]
 
     if not filetype or not filepath or not identifier:
       return
 
     vector = ycm_core.StringVec()
-    vector.append( identifier )
-    self.completer.AddIdentifiersToDatabase( vector,
-                                             filetype,
-                                             filepath )
+    vector.append( ToUtf8IfNeeded( identifier ) )
+    self._logger.info( 'Adding ONE buffer identifier for file: %s', filepath )
+    self._completer.AddIdentifiersToDatabase( vector,
+                                             ToUtf8IfNeeded( filetype ),
+                                             ToUtf8IfNeeded( filepath ) )
 
 
-  def AddPreviousIdentifier( self ):
-    self.AddIdentifier( PreviousIdentifier() )
+  def AddPreviousIdentifier( self, request_data ):
+    self.AddIdentifier(
+      _PreviousIdentifier(
+        self.user_options[ 'min_num_of_chars_for_completion' ],
+        request_data ),
+      request_data )
 
 
-  def AddIdentifierUnderCursor( self ):
-    cursor_identifier = vim.eval( 'expand("<cword>")' )
+  def AddIdentifierUnderCursor( self, request_data ):
+    cursor_identifier = _GetCursorIdentifier( request_data )
     if not cursor_identifier:
       return
 
-    stripped_cursor_identifier = ''.join( ( x for x in
-                                            cursor_identifier if
-                                            utils.IsIdentifierChar( x ) ) )
-    if not stripped_cursor_identifier:
-      return
-
-    self.AddIdentifier( stripped_cursor_identifier )
+    self.AddIdentifier( cursor_identifier, request_data )
 
 
-  def AddBufferIdentifiers( self ):
-    # TODO: use vimsupport.GetFiletypes; also elsewhere in file
-    filetype = vim.eval( "&filetype" )
-    filepath = vim.eval( "expand('%:p')" )
-    collect_from_comments_and_strings = vimsupport.GetBoolValue(
-      "g:ycm_collect_identifiers_from_comments_and_strings" )
+  def AddBufferIdentifiers( self, request_data ):
+    filetype = request_data[ 'filetypes' ][ 0 ]
+    filepath = request_data[ 'filepath' ]
+    collect_from_comments_and_strings = bool( self.user_options[
+      'collect_identifiers_from_comments_and_strings' ] )
 
     if not filetype or not filepath:
       return
 
-    text = "\n".join( vim.current.buffer )
-    self.completer.AddIdentifiersToDatabaseFromBufferAsync(
-      text,
-      filetype,
-      filepath,
+    text = request_data[ 'file_data' ][ filepath ][ 'contents' ]
+    self._logger.info( 'Adding buffer identifiers for file: %s', filepath )
+    self._completer.AddIdentifiersToDatabaseFromBuffer(
+      ToUtf8IfNeeded( text ),
+      ToUtf8IfNeeded( filetype ),
+      ToUtf8IfNeeded( filepath ),
       collect_from_comments_and_strings )
 
 
-  def AddIdentifiersFromTagFiles( self ):
-    tag_files = vim.eval( 'tagfiles()' )
-    current_working_directory = os.getcwd()
+  def AddIdentifiersFromTagFiles( self, tag_files ):
     absolute_paths_to_tag_files = ycm_core.StringVec()
     for tag_file in tag_files:
-      absolute_tag_file = os.path.join( current_working_directory,
-                                        tag_file )
       try:
-        current_mtime = os.path.getmtime( absolute_tag_file )
+        current_mtime = os.path.getmtime( tag_file )
       except:
         continue
-      last_mtime = self.tags_file_last_mtime[ absolute_tag_file ]
+      last_mtime = self._tags_file_last_mtime[ tag_file ]
 
       # We don't want to repeatedly process the same file over and over; we only
       # process if it's changed since the last time we looked at it
       if current_mtime <= last_mtime:
         continue
 
-      self.tags_file_last_mtime[ absolute_tag_file ] = current_mtime
-      absolute_paths_to_tag_files.append( absolute_tag_file )
+      self._tags_file_last_mtime[ tag_file ] = current_mtime
+      absolute_paths_to_tag_files.append( ToUtf8IfNeeded( tag_file ) )
 
     if not absolute_paths_to_tag_files:
       return
 
-    self.completer.AddIdentifiersToDatabaseFromTagFilesAsync(
+    self._completer.AddIdentifiersToDatabaseFromTagFiles(
       absolute_paths_to_tag_files )
 
 
-  def AddIdentifiersFromSyntax( self ):
-    filetype = vim.eval( "&filetype" )
-    if filetype in self.filetypes_with_keywords_loaded:
-      return
+  def AddIdentifiersFromSyntax( self, keyword_list, filetypes ):
+    keyword_vector = ycm_core.StringVec()
+    for keyword in keyword_list:
+      keyword_vector.append( ToUtf8IfNeeded( keyword ) )
 
-    self.filetypes_with_keywords_loaded.add( filetype )
-
-    keyword_set = syntax_parse.SyntaxKeywordsForCurrentBuffer()
-    keywords = ycm_core.StringVec()
-    for keyword in keyword_set:
-      keywords.append( keyword )
-
-    filepath = SYNTAX_FILENAME + filetype
-    self.completer.AddIdentifiersToDatabase( keywords,
-                                             filetype,
-                                             filepath )
+    filepath = SYNTAX_FILENAME + filetypes[ 0 ]
+    self._completer.AddIdentifiersToDatabase( keyword_vector,
+                                             ToUtf8IfNeeded( filetypes[ 0 ] ),
+                                             ToUtf8IfNeeded( filepath ) )
 
 
-  def OnFileReadyToParse( self ):
-    self.AddBufferIdentifiers()
-
-    if vimsupport.GetBoolValue( 'g:ycm_collect_identifiers_from_tags_files' ):
-      self.AddIdentifiersFromTagFiles()
-
-    if vimsupport.GetBoolValue( 'g:ycm_seed_identifiers_with_syntax' ):
-      self.AddIdentifiersFromSyntax()
-
-
-  def OnInsertLeave( self ):
-    self.AddIdentifierUnderCursor()
+  def OnFileReadyToParse( self, request_data ):
+    self.AddBufferIdentifiers( request_data )
+    if 'tag_files' in request_data:
+      self.AddIdentifiersFromTagFiles( request_data[ 'tag_files' ] )
+    if 'syntax_keywords' in request_data:
+      self.AddIdentifiersFromSyntax( request_data[ 'syntax_keywords' ],
+                                     request_data[ 'filetypes' ] )
 
 
-  def OnCurrentIdentifierFinished( self ):
-    self.AddPreviousIdentifier()
+  def OnInsertLeave( self, request_data ):
+    self.AddIdentifierUnderCursor( request_data )
 
 
-  def CandidatesFromStoredRequest( self ):
-    if not self.completions_future:
-      return []
-    completions = self.completions_future.GetResults()[
-      : MAX_IDENTIFIER_COMPLETIONS_RETURNED ]
-
-    completions = _RemoveSmallCandidates( completions )
-
-    # We will never have duplicates in completions so with 'dup':1 we tell Vim
-    # to add this candidate even if it's a duplicate of an existing one (which
-    # will never happen). This saves us some expensive string matching
-    # operations in Vim.
-    return [ { 'word': x, 'dup': 1 } for x in completions ]
+  def OnCurrentIdentifierFinished( self, request_data ):
+    self.AddPreviousIdentifier( request_data )
 
 
-def PreviousIdentifier():
-  line_num, column_num = vimsupport.CurrentLineAndColumn()
-  buffer = vim.current.buffer
-  line = buffer[ line_num ]
+def _PreviousIdentifier( min_num_completion_start_chars, request_data ):
+  line_num = request_data[ 'line_num' ]
+  column_num = request_data[ 'column_num' ]
+  filepath = request_data[ 'filepath' ]
+  contents_per_line = (
+    request_data[ 'file_data' ][ filepath ][ 'contents' ].split( '\n' ) )
+  line = contents_per_line[ line_num ]
 
   end_column = column_num
 
@@ -196,7 +175,7 @@ def PreviousIdentifier():
   # Look at the previous line if we reached the end of the current one
   if end_column == 0:
     try:
-      line = buffer[ line_num - 1]
+      line = contents_per_line[ line_num - 1 ]
     except:
       return ""
     end_column = len( line )
@@ -208,15 +187,52 @@ def PreviousIdentifier():
   while start_column > 0 and utils.IsIdentifierChar( line[ start_column - 1 ] ):
     start_column -= 1
 
-  if end_column - start_column < MIN_NUM_COMPLETION_START_CHARS:
+  if end_column - start_column < min_num_completion_start_chars:
     return ""
 
   return line[ start_column : end_column ]
 
 
-def _RemoveSmallCandidates( candidates ):
-  if MIN_NUM_CANDIDATE_SIZE_CHARS == 0:
+def _RemoveSmallCandidates( candidates, min_num_candidate_size_chars ):
+  if min_num_candidate_size_chars == 0:
     return candidates
 
-  return [ x for x in candidates if len( x ) >= MIN_NUM_CANDIDATE_SIZE_CHARS ]
+  return [ x for x in candidates if len( x ) >= min_num_candidate_size_chars ]
+
+
+# This is meant to behave like 'expand("<cword")' in Vim, thus starting at the
+# cursor column and returning the "cursor word". If the cursor is not on a valid
+# character, it searches forward until a valid identifier is found.
+def _GetCursorIdentifier( request_data ):
+  def FindFirstValidChar( line, column ):
+    current_column = column
+    while not utils.IsIdentifierChar( line[ current_column ] ):
+      current_column += 1
+    return current_column
+
+
+  def FindIdentifierStart( line, valid_char_column ):
+    identifier_start = valid_char_column
+    while identifier_start > 0 and utils.IsIdentifierChar( line[
+      identifier_start - 1 ] ):
+      identifier_start -= 1
+    return identifier_start
+
+
+  def FindIdentifierEnd( line, valid_char_column ):
+    identifier_end = valid_char_column
+    while identifier_end < len( line ) - 1 and utils.IsIdentifierChar( line[
+      identifier_end + 1 ] ):
+      identifier_end += 1
+    return identifier_end + 1
+
+  column_num = request_data[ 'column_num' ]
+  line = request_data[ 'line_value' ]
+
+  try:
+    valid_char_column = FindFirstValidChar( line, column_num )
+    return line[ FindIdentifierStart( line, valid_char_column ) :
+                 FindIdentifierEnd( line, valid_char_column ) ]
+  except:
+    return ''
 

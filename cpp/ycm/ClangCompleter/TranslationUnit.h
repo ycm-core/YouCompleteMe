@@ -18,8 +18,6 @@
 #ifndef TRANSLATIONUNIT_H_XQ7I6SVA
 #define TRANSLATIONUNIT_H_XQ7I6SVA
 
-#include "ConcurrentLatestValue.h"
-#include "Future.h"
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
 #include "Location.h"
@@ -58,7 +56,8 @@ public:
 
   bool IsCurrentlyUpdating() const;
 
-  void Reparse( const std::vector< UnsavedFile > &unsaved_files );
+  std::vector< Diagnostic > Reparse(
+      const std::vector< UnsavedFile > &unsaved_files );
 
   void ReparseForIndexing( const std::vector< UnsavedFile > &unsaved_files );
 

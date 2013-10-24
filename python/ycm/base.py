@@ -17,21 +17,42 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import re
 import vim
 from ycm import vimsupport
 from ycm import utils
+from ycm import user_options_store
+import ycm_client_support
 
-try:
-  import ycm_core
-except ImportError as e:
-  vimsupport.PostVimMessage(
-    'Error importing ycm_core. Are you sure you have placed a version 3.2+ '
-    'libclang.[so|dll|dylib] in folder "{0}"? See the Installation Guide in '
-    'the docs. Full error: {1}'.format(
-      os.path.dirname( os.path.dirname( os.path.abspath( __file__ ) ) ),
-      str( e ) ) )
+YCM_VAR_PREFIX = 'ycm_'
+
+
+def BuildServerConf():
+  """Builds a dictionary mapping YCM Vim user options to values. Option names
+  don't have the 'ycm_' prefix."""
+
+  vim_globals = vimsupport.GetReadOnlyVimGlobals( force_python_objects = True )
+  server_conf = {}
+  for key, value in vim_globals.items():
+    if not key.startswith( YCM_VAR_PREFIX ):
+      continue
+    try:
+      new_value = int( value )
+    except:
+      new_value = value
+    new_key = key[ len( YCM_VAR_PREFIX ): ]
+    server_conf[ new_key ] = new_value
+
+  return server_conf
+
+
+def LoadJsonDefaultsIntoVim():
+  defaults = user_options_store.DefaultOptions()
+  vim_defaults = {}
+  for key, value in defaults.iteritems():
+    vim_defaults[ 'ycm_' + key ] = value
+
+  vimsupport.LoadDictIntoVimGlobals( vim_defaults, overwrite = False )
 
 
 def CompletionStartColumn():
@@ -121,11 +142,11 @@ def AdjustCandidateInsertionText( candidates ):
   return new_candidates
 
 
-COMPATIBLE_WITH_CORE_VERSION = 4
+COMPATIBLE_WITH_CORE_VERSION = 7
 
 def CompatibleWithYcmCore():
   try:
-    current_core_version = ycm_core.YcmCoreVersion()
+    current_core_version = ycm_client_support.YcmCoreVersion()
   except AttributeError:
     return False
 

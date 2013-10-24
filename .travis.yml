@@ -4,10 +4,11 @@ python:
   - "2.7"
 install:
   - pip install -r python/test_requirements.txt --use-mirrors
+  - sudo apt-get install mono-devel
 compiler:
   - gcc
   - clang
-script: flake8 --exclude=jedi --select=F,C9 --max-complexity=10 python && ./install.sh && nosetests python
+script: ./run_tests.sh
 env:
-  - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS=""
-  - YCM_TESTRUN=1 EXTRA_CMAKE_ARGS="-DUSE_CLANG_COMPLETER=ON"
+  - USE_CLANG_COMPLETER="true"
+  - USE_CLANG_COMPLETER="false"

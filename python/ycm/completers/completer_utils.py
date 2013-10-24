@@ -19,7 +19,7 @@
 
 from collections import defaultdict
 from copy import deepcopy
-import vim
+import os
 
 DEFAULT_FILETYPE_TRIGGERS = {
   'c' : ['->', '.'],
@@ -58,12 +58,21 @@ def _FiletypeDictUnion( dict_one, dict_two ):
   return final_dict
 
 
-def TriggersForFiletype():
-  user_triggers = _FiletypeTriggerDictFromSpec(
-    vim.eval( 'g:ycm_semantic_triggers' ) )
-
+def TriggersForFiletype( user_triggers ):
   default_triggers = _FiletypeTriggerDictFromSpec(
     DEFAULT_FILETYPE_TRIGGERS )
 
-  return _FiletypeDictUnion( default_triggers, user_triggers )
+  return _FiletypeDictUnion( default_triggers, dict( user_triggers ) )
 
+
+def _PathToCompletersFolder():
+  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
+  return os.path.join( dir_of_current_script )
+
+
+def PathToFiletypeCompleterPluginLoader( filetype ):
+  return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
+
+
+def FiletypeCompleterExistsForFiletype( filetype ):
+  return os.path.exists( PathToFiletypeCompleterPluginLoader( filetype ) )

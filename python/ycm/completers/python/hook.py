@@ -17,5 +17,5 @@
 
 from ycm.completers.python.jedi_completer import JediCompleter
 
-def GetCompleter():
-    return JediCompleter()
+def GetCompleter( user_options ):
+  return JediCompleter( user_options )

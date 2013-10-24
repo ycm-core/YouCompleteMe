@@ -19,17 +19,18 @@
 
 import vim
 from ycm import vimsupport
+from ycm import base
 from ycm.completers.completer import Completer
+from ycm.client.base_request import BuildRequestData
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
 OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
                      ' list when expected.' )
 
 class OmniCompleter( Completer ):
-  def __init__( self ):
-    super( OmniCompleter, self ).__init__()
-    self.omnifunc = None
-    self.stored_candidates = None
+  def __init__( self, user_options ):
+    super( OmniCompleter, self ).__init__( user_options )
+    self._omnifunc = None
 
 
   def SupportedFiletypes( self ):
@@ -37,76 +38,76 @@ class OmniCompleter( Completer ):
 
 
   def ShouldUseCache( self ):
-    return vimsupport.GetBoolValue( "g:ycm_cache_omnifunc" )
+    return bool( self.user_options[ 'cache_omnifunc' ] )
 
 
-  def ShouldUseNow( self, start_column ):
-    if self.ShouldUseCache():
-      return super( OmniCompleter, self ).ShouldUseNow( start_column )
-    return self.ShouldUseNowInner( start_column )
-
-
-  def ShouldUseNowInner( self, start_column ):
-    if not self.omnifunc:
+  # We let the caller call this without passing in request_data. This is useful
+  # for figuring out should we even be preparing the "real" request_data in
+  # omni_completion_request. The real request_data is much bigger and takes
+  # longer to prepare, and we want to avoid creating it twice.
+  def ShouldUseNow( self, request_data = None ):
+    if not self._omnifunc:
       return False
-    return super( OmniCompleter, self ).ShouldUseNowInner( start_column )
 
+    if not request_data:
+      request_data = _BuildRequestDataSubstitute()
 
-  def CandidatesForQueryAsync( self, query, unused_start_column ):
     if self.ShouldUseCache():
-      return super( OmniCompleter, self ).CandidatesForQueryAsync(
-          query, unused_start_column )
+      return super( OmniCompleter, self ).ShouldUseNow( request_data )
+    return self.ShouldUseNowInner( request_data )
+
+
+  def ShouldUseNowInner( self, request_data ):
+    if not self._omnifunc:
+      return False
+    return super( OmniCompleter, self ).ShouldUseNowInner( request_data )
+
+
+  def ComputeCandidates( self, request_data ):
+    if self.ShouldUseCache():
+      return super( OmniCompleter, self ).ComputeCandidates(
+        request_data )
     else:
-      return self.CandidatesForQueryAsyncInner( query, unused_start_column )
+      if self.ShouldUseNowInner( request_data ):
+        return self.ComputeCandidatesInner( request_data )
+      return []
 
 
-  def CandidatesForQueryAsyncInner( self, query, unused_start_column ):
-    if not self.omnifunc:
-      self.stored_candidates = None
-      return
+  def ComputeCandidatesInner( self, request_data ):
+    if not self._omnifunc:
+      return []
 
     try:
-      return_value = int( vim.eval( self.omnifunc + '(1,"")' ) )
+      return_value = int( vim.eval( self._omnifunc + '(1,"")' ) )
       if return_value < 0:
-        self.stored_candidates = None
-        return
+        return []
 
-      omnifunc_call = [ self.omnifunc,
+      omnifunc_call = [ self._omnifunc,
                         "(0,'",
-                        vimsupport.EscapeForVim( query ),
+                        vimsupport.EscapeForVim( request_data[ 'query' ] ),
                         "')" ]
 
       items = vim.eval( ''.join( omnifunc_call ) )
 
       if 'words' in items:
-        items = items['words']
+        items = items[ 'words' ]
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      self.stored_candidates = filter( bool, items )
-    except (TypeError, ValueError) as error:
+      return filter( bool, items )
+    except ( TypeError, ValueError ) as error:
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )
-      self.stored_candidates = None
-      return
+      return []
 
 
-
-  def AsyncCandidateRequestReadyInner( self ):
-    return True
-
-
-  def OnFileReadyToParse( self ):
-    self.omnifunc = vim.eval( '&omnifunc' )
+  def OnFileReadyToParse( self, request_data ):
+    self._omnifunc = vim.eval( '&omnifunc' )
 
 
-  def CandidatesFromStoredRequest( self ):
-    if self.ShouldUseCache():
-      return super( OmniCompleter, self ).CandidatesFromStoredRequest()
-    else:
-      return self.CandidatesFromStoredRequestInner()
+def _BuildRequestDataSubstitute():
+  data = BuildRequestData( include_buffer_data = False )
+  data[ 'start_column' ] = base.CompletionStartColumn()
+  return data
 
-
-  def CandidatesFromStoredRequestInner( self ):
-    return self.stored_candidates if self.stored_candidates else []
 

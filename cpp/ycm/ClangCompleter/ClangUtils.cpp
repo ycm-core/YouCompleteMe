@@ -112,11 +112,8 @@ std::vector< CXUnsavedFile > ToCXUnsavedFiles(
   std::vector< CXUnsavedFile > clang_unsaved_files( unsaved_files.size() );
 
   for ( uint i = 0; i < unsaved_files.size(); ++i ) {
-    X_VERIFY( unsaved_files[ i ].filename_ );
-    X_VERIFY( unsaved_files[ i ].contents_ );
-    X_VERIFY( unsaved_files[ i ].length_ );
-    clang_unsaved_files[ i ].Filename = unsaved_files[ i ].filename_;
-    clang_unsaved_files[ i ].Contents = unsaved_files[ i ].contents_;
+    clang_unsaved_files[ i ].Filename = unsaved_files[ i ].filename_.c_str();
+    clang_unsaved_files[ i ].Contents = unsaved_files[ i ].contents_.c_str();
     clang_unsaved_files[ i ].Length   = unsaved_files[ i ].length_;
   }
 

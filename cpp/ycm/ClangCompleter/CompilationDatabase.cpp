@@ -18,20 +18,19 @@
 #include "CompilationDatabase.h"
 #include "ClangUtils.h"
 #include "standard.h"
+#include "ReleaseGil.h"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+#include <boost/thread/locks.hpp>
 
-using boost::bind;
-using boost::make_shared;
-using boost::packaged_task;
+using boost::lock_guard;
+using boost::unique_lock;
+using boost::try_to_lock_t;
 using boost::remove_pointer;
 using boost::shared_ptr;
-using boost::thread;
-using boost::unique_future;
-using boost::function;
+using boost::mutex;
 
 namespace YouCompleteMe {
 
@@ -39,22 +38,9 @@ typedef shared_ptr <
 remove_pointer< CXCompileCommands >::type > CompileCommandsWrap;
 
 
-void QueryThreadMain( CompilationDatabase::InfoTaskStack &info_task_stack ) {
-  while ( true ) {
-    try {
-      ( *info_task_stack.Pop() )();
-    } catch ( boost::thread_interrupted & ) {
-      return;
-    }
-  }
-
-}
-
-
 CompilationDatabase::CompilationDatabase(
   const std::string &path_to_directory )
-  : threading_enabled_( false ),
-    is_loaded_( false ) {
+  : is_loaded_( false ) {
   CXCompilationDatabase_Error status;
   compilation_database_ = clang_CompilationDatabase_fromDirectory(
                             path_to_directory.c_str(),
@@ -68,27 +54,26 @@ CompilationDatabase::~CompilationDatabase() {
 }
 
 
-// We need this mostly so that we can not use it in tests. Apparently the
-// GoogleTest framework goes apeshit on us if we enable threads by default.
-void CompilationDatabase::EnableThreading() {
-  threading_enabled_ = true;
-  InitThreads();
-}
-
-
 bool CompilationDatabase::DatabaseSuccessfullyLoaded() {
   return is_loaded_;
 }
 
 
+bool CompilationDatabase::AlreadyGettingFlags() {
+  unique_lock< mutex > lock( compilation_database_mutex_, try_to_lock_t() );
+  return !lock.owns_lock();
+}
+
+
 CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
   const std::string &path_to_file ) {
+  ReleaseGil unlock;
   CompilationInfoForFile info;
 
   if ( !is_loaded_ )
     return info;
 
-  // TODO: mutex protect calls to getCompileCommands and getDirectory
+  lock_guard< mutex > lock( compilation_database_mutex_ );
 
   CompileCommandsWrap commands(
     clang_CompilationDatabase_getCompileCommands(
@@ -118,35 +103,6 @@ CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
   }
 
   return info;
-}
-
-
-Future< AsyncCompilationInfoForFile >
-CompilationDatabase::GetCompilationInfoForFileAsync(
-  const std::string &path_to_file ) {
-  // TODO: throw exception when threading is not enabled and this is called
-  if ( !threading_enabled_ )
-    return Future< AsyncCompilationInfoForFile >();
-
-  function< CompilationInfoForFile() > functor =
-    boost::bind( &CompilationDatabase::GetCompilationInfoForFile,
-                 boost::ref( *this ),
-                 path_to_file );
-
-  InfoTask task =
-    make_shared< packaged_task< AsyncCompilationInfoForFile > >(
-      bind( ReturnValueAsShared< CompilationInfoForFile >,
-            functor ) );
-
-  unique_future< AsyncCompilationInfoForFile > future = task->get_future();
-  info_task_stack_.Push( task );
-  return Future< AsyncCompilationInfoForFile >( boost::move( future ) );
-}
-
-
-void CompilationDatabase::InitThreads() {
-  info_thread_ = boost::thread( QueryThreadMain,
-                                boost::ref( info_task_stack_ ) );
 }
 
 } // namespace YouCompleteMe

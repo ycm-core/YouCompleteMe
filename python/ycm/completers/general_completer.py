@@ -29,8 +29,8 @@ class GeneralCompleter( Completer ):
   Subclass Completer directly.
 
   """
-  def __init__( self ):
-    super( GeneralCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( GeneralCompleter, self ).__init__( user_options )
 
 
   def SupportedFiletypes( self ):

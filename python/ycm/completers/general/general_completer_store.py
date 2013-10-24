@@ -21,13 +21,7 @@
 from ycm.completers.completer import Completer
 from ycm.completers.all.identifier_completer import IdentifierCompleter
 from ycm.completers.general.filename_completer import FilenameCompleter
-
-try:
-  from ycm.completers.general.ultisnips_completer import UltiSnipsCompleter
-  USE_ULTISNIPS_COMPLETER = True
-except ImportError:
-  USE_ULTISNIPS_COMPLETER = False
-
+from ycm.completers.general.ultisnips_completer import UltiSnipsCompleter
 
 
 class GeneralCompleterStore( Completer ):
@@ -38,12 +32,11 @@ class GeneralCompleterStore( Completer ):
   GeneralCompleterStore are passed to all general completers.
   """
 
-  def __init__( self ):
-    super( GeneralCompleterStore, self ).__init__()
-    self._identifier_completer = IdentifierCompleter()
-    self._filename_completer = FilenameCompleter()
-    self._ultisnips_completer = ( UltiSnipsCompleter()
-                                  if USE_ULTISNIPS_COMPLETER else None )
+  def __init__( self, user_options ):
+    super( GeneralCompleterStore, self ).__init__( user_options )
+    self._identifier_completer = IdentifierCompleter( user_options )
+    self._filename_completer = FilenameCompleter( user_options )
+    self._ultisnips_completer = UltiSnipsCompleter( user_options )
     self._non_filename_completers = filter( lambda x: x,
                                             [ self._ultisnips_completer,
                                               self._identifier_completer ] )
@@ -58,17 +51,21 @@ class GeneralCompleterStore( Completer ):
     return set()
 
 
-  def ShouldUseNow( self, start_column ):
+  def GetIdentifierCompleter( self ):
+    return self._identifier_completer
+
+
+  def ShouldUseNow( self, request_data ):
     self._current_query_completers = []
 
-    if self._filename_completer.ShouldUseNow( start_column ):
+    if self._filename_completer.ShouldUseNow( request_data ):
       self._current_query_completers = [ self._filename_completer ]
       return True
 
     should_use_now = False
 
     for completer in self._non_filename_completers:
-      should_use_this_completer = completer.ShouldUseNow( start_column )
+      should_use_this_completer = completer.ShouldUseNow( request_data )
       should_use_now = should_use_now or should_use_this_completer
 
       if should_use_this_completer:
@@ -77,69 +74,49 @@ class GeneralCompleterStore( Completer ):
     return should_use_now
 
 
-  def CandidatesForQueryAsync( self, query, start_column ):
-    for completer in self._current_query_completers:
-      completer.CandidatesForQueryAsync( query, start_column )
+  def ComputeCandidates( self, request_data ):
+    if not self.ShouldUseNow( request_data ):
+      return []
 
-
-  def AsyncCandidateRequestReady( self ):
-    return all( x.AsyncCandidateRequestReady() for x in
-                self._current_query_completers )
-
-
-  def CandidatesFromStoredRequest( self ):
     candidates = []
     for completer in self._current_query_completers:
-      candidates += completer.CandidatesFromStoredRequest()
+      candidates += completer.ComputeCandidates( request_data )
 
     return candidates
 
 
-  def OnFileReadyToParse( self ):
+  def OnFileReadyToParse( self, request_data ):
     for completer in self._all_completers:
-      completer.OnFileReadyToParse()
+      completer.OnFileReadyToParse( request_data )
 
 
-  def OnCursorMovedInsertMode( self ):
+  def OnBufferVisit( self, request_data ):
     for completer in self._all_completers:
-      completer.OnCursorMovedInsertMode()
+      completer.OnBufferVisit( request_data )
 
 
-  def OnCursorMovedNormalMode( self ):
+  def OnBufferUnload( self, request_data ):
     for completer in self._all_completers:
-      completer.OnCursorMovedNormalMode()
+      completer.OnBufferUnload( request_data )
 
 
-  def OnBufferVisit( self ):
+  def OnInsertLeave( self, request_data ):
     for completer in self._all_completers:
-      completer.OnBufferVisit()
+      completer.OnInsertLeave( request_data )
 
 
-  def OnBufferUnload( self, deleted_buffer_file ):
+  def OnCurrentIdentifierFinished( self, request_data ):
     for completer in self._all_completers:
-      completer.OnBufferUnload( deleted_buffer_file )
-
-
-  def OnCursorHold( self ):
-    for completer in self._all_completers:
-      completer.OnCursorHold()
-
-
-  def OnInsertLeave( self ):
-    for completer in self._all_completers:
-      completer.OnInsertLeave()
-
-
-  def OnVimLeave( self ):
-    for completer in self._all_completers:
-      completer.OnVimLeave()
-
-
-  def OnCurrentIdentifierFinished( self ):
-    for completer in self._all_completers:
-      completer.OnCurrentIdentifierFinished()
+      completer.OnCurrentIdentifierFinished( request_data )
 
 
   def GettingCompletions( self ):
     for completer in self._all_completers:
       completer.GettingCompletions()
+
+
+  def Shutdown( self ):
+    for completer in self._all_completers:
+      completer.Shutdown()
+
+

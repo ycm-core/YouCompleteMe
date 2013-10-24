@@ -37,11 +37,14 @@ let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 
 function! s:HasYcmCore()
   let path_prefix = s:script_folder_path . '/../python/'
-  if filereadable(path_prefix . 'ycm_core.so')
+  if filereadable(path_prefix . 'ycm_client_support.so') &&
+        \ filereadable(path_prefix . 'ycm_core.so')
     return 1
-  elseif filereadable(path_prefix . 'ycm_core.pyd')
+  elseif filereadable(path_prefix . 'ycm_client_support.pyd') &&
+        \ filereadable(path_prefix . 'ycm_core.pyd')
     return 1
-  elseif filereadable(path_prefix . 'ycm_core.dll')
+  elseif filereadable(path_prefix . 'ycm_client_support.dll') &&
+        \ filereadable(path_prefix . 'ycm_core.dll')
     return 1
   endif
   return 0
@@ -52,7 +55,8 @@ let g:ycm_check_if_ycm_core_present =
 
 if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
   echohl WarningMsg |
-        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+        \ echomsg "ycm_client_support.[so|pyd|dll] and " .
+        \ "ycm_core.[so|pyd|dll] not detected; you need to compile " .
         \ "YCM before using it. Read the docs!" |
         \ echohl None
   finish
@@ -60,31 +64,11 @@ endif
 
 let g:loaded_youcompleteme = 1
 
-let g:ycm_min_num_of_chars_for_completion  =
-      \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
-
-let g:ycm_min_num_identifier_candidate_chars =
-      \ get( g:, 'ycm_min_num_identifier_candidate_chars', 0 )
-
-let g:ycm_filetype_whitelist =
-      \ get( g:, 'ycm_filetype_whitelist', {
-      \   '*' : 1,
-      \ } )
-
-" The fallback to g:ycm_filetypes_to_completely_ignore is here because of
-" backwards compatibility with previous versions of YCM.
-let g:ycm_filetype_blacklist =
-      \ get( g:, 'ycm_filetype_blacklist',
-      \   get( g:, 'ycm_filetypes_to_completely_ignore', {
-      \     'notes' : 1,
-      \     'markdown' : 1,
-      \     'text' : 1,
-      \     'unite' : 1,
-      \     'tagbar' : 1,
-      \ } ) )
-
-let g:ycm_filetype_specific_completion_to_disable =
-      \ get( g:, 'ycm_filetype_specific_completion_to_disable', {} )
+" NOTE: Most defaults are in default_settings.json. They are loaded into Vim
+" global with the 'ycm_' prefix if such a key does not already exist; thus, the
+" user can override the defaults.
+" The only defaults that are here are the ones that are only relevant to the YCM
+" Vim client and not the server.
 
 let g:ycm_register_as_syntastic_checker =
       \ get( g:, 'ycm_register_as_syntastic_checker', 1 )
@@ -95,29 +79,11 @@ let g:ycm_allow_changing_updatetime =
 let g:ycm_add_preview_to_completeopt =
       \ get( g:, 'ycm_add_preview_to_completeopt', 0 )
 
-let g:ycm_complete_in_comments =
-      \ get( g:, 'ycm_complete_in_comments', 0 )
-
-let g:ycm_complete_in_strings =
-      \ get( g:, 'ycm_complete_in_strings', 1 )
-
-let g:ycm_collect_identifiers_from_comments_and_strings =
-      \ get( g:, 'ycm_collect_identifiers_from_comments_and_strings', 0 )
-
-let g:ycm_collect_identifiers_from_tags_files =
-      \ get( g:, 'ycm_collect_identifiers_from_tags_files', 0 )
-
-let g:ycm_seed_identifiers_with_syntax =
-      \ get( g:, 'ycm_seed_identifiers_with_syntax', 0 )
-
 let g:ycm_autoclose_preview_window_after_completion =
       \ get( g:, 'ycm_autoclose_preview_window_after_completion', 0 )
 
 let g:ycm_autoclose_preview_window_after_insertion =
       \ get( g:, 'ycm_autoclose_preview_window_after_insertion', 0 )
-
-let g:ycm_max_diagnostics_to_display =
-      \ get( g:, 'ycm_max_diagnostics_to_display', 30 )
 
 let g:ycm_key_list_select_completion =
       \ get( g:, 'ycm_key_list_select_completion', ['<TAB>', '<Down>'] )
@@ -131,34 +97,21 @@ let g:ycm_key_invoke_completion =
 let g:ycm_key_detailed_diagnostics =
       \ get( g:, 'ycm_key_detailed_diagnostics', '<leader>d' )
 
-let g:ycm_global_ycm_extra_conf =
-      \ get( g:, 'ycm_global_ycm_extra_conf', '' )
-
-let g:ycm_confirm_extra_conf =
-      \ get( g:, 'ycm_confirm_extra_conf', 1 )
-
-let g:ycm_extra_conf_globlist =
-      \ get( g:, 'ycm_extra_conf_globlist', [] )
-
-let g:ycm_filepath_completion_use_working_dir =
-      \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
-
-" Default semantic triggers are in python/ycm/completers/completer.py, these
-" just append new triggers to the default dict.
-let g:ycm_semantic_triggers =
-      \ get( g:, 'ycm_semantic_triggers', {} )
-
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
 
-let g:ycm_auto_start_csharp_server =
-      \ get( g:, 'ycm_auto_start_csharp_server', 1 )
+let g:ycm_server_use_vim_stdout =
+      \ get( g:, 'ycm_server_use_vim_stdout', 0 )
 
-let g:ycm_auto_stop_csharp_server =
-            \ get( g:, 'ycm_auto_stop_csharp_server', 1 )
+let g:ycm_server_log_level =
+      \ get( g:, 'ycm_server_log_level', 'info' )
 
-let g:ycm_csharp_server_port =
-      \ get( g:, 'ycm_csharp_server_port', 2000 )
+let g:ycm_server_keep_logfiles =
+      \ get( g:, 'ycm_server_keep_logfiles', 0 )
+
+let g:ycm_server_idle_suicide_seconds =
+      \ get( g:, 'ycm_server_idle_suicide_seconds', 43200 )
+
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.

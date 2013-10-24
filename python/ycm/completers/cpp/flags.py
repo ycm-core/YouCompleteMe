@@ -19,12 +19,12 @@
 
 import ycm_core
 import os
-from ycm import vimsupport
 from ycm import extra_conf_store
+from ycm.utils import ToUtf8IfNeeded
 
-NO_EXTRA_CONF_FILENAME_MESSAGE = ('No {0} file detected, so no compile flags '
+NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. Go READ THE '
-  'DOCS *NOW*, DON\'T file a bug report.').format(
+  'DOCS *NOW*, DON\'T file a bug report.' ).format(
     extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
 
@@ -47,8 +47,8 @@ class Flags( object ):
       module = extra_conf_store.ModuleForSourceFile( filename )
       if not module:
         if not self.no_extra_conf_file_warning_posted:
-          vimsupport.PostVimMessage( NO_EXTRA_CONF_FILENAME_MESSAGE )
           self.no_extra_conf_file_warning_posted = True
+          raise RuntimeError( NO_EXTRA_CONF_FILENAME_MESSAGE )
         return None
 
       results = module.FlagsForFile( filename )
@@ -59,7 +59,7 @@ class Flags( object ):
       flags = list( results[ 'flags' ] )
       if add_special_clang_flags:
         flags += self.special_clang_flags
-      sanitized_flags = _PrepareFlagsForClang( flags, filename )
+      sanitized_flags = PrepareFlagsForClang( flags, filename )
 
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
@@ -95,7 +95,7 @@ class Flags( object ):
     self.flags_for_file.clear()
 
 
-def _PrepareFlagsForClang( flags, filename ):
+def PrepareFlagsForClang( flags, filename ):
   flags = _RemoveUnusedFlags( flags, filename )
   flags = _SanitizeFlags( flags )
   return flags
@@ -121,7 +121,7 @@ def _SanitizeFlags( flags ):
 
   vector = ycm_core.StringVec()
   for flag in sanitized_flags:
-    vector.append( flag )
+    vector.append( ToUtf8IfNeeded( flag ) )
   return vector
 
 

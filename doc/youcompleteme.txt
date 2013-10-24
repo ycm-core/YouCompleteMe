@@ -1,4 +1,4 @@
-*youcompleteme*  YouCompleteMe: a code-completion engine for Vim
+*youcompleteme.txt*  YouCompleteMe: a code-completion engine for Vim
 
 ===============================================================================
 Contents ~
@@ -10,20 +10,22 @@ Contents ~
  5. Full Installation Guide             |youcompleteme-full-installation-guide|
  6. User Guide                                       |youcompleteme-user-guide|
   1. General Usage                                |youcompleteme-general-usage|
-  2. Completion string ranking        |youcompleteme-completion-string-ranking|
-  3. General Semantic Completion Engine Usage |youcompleteme-general-semantic-completion-engine-usage|
-  4. C-family Semantic Completion Engine Usage |youcompleteme-c-family-semantic-completion-engine-usage|
-  5. Python semantic completion      |youcompleteme-python-semantic-completion|
-  6. C# semantic completion               |youcompleteme-c-semantic-completion|
-  7. Semantic completion for other languages |youcompleteme-semantic-completion-for-other-languages|
-  8. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
-  9. Syntastic integration                |youcompleteme-syntastic-integration|
+  2. Client-server architecture      |youcompleteme-client-server-architecture|
+  3. Completion string ranking        |youcompleteme-completion-string-ranking|
+  4. General Semantic Completion Engine Usage |youcompleteme-general-semantic-completion-engine-usage|
+  5. C-family Semantic Completion Engine Usage |youcompleteme-c-family-semantic-completion-engine-usage|
+  6. Python semantic completion      |youcompleteme-python-semantic-completion|
+  7. C# semantic completion               |youcompleteme-c-semantic-completion|
+  8. Semantic completion for other languages |youcompleteme-semantic-completion-for-other-languages|
+  9. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
+  10. Syntastic integration               |youcompleteme-syntastic-integration|
  7. Commands                                           |youcompleteme-commands|
-  1. The |:YcmForceCompileAndDiagnostics| command
-  2. The |:YcmDiags| command
-  3. The |:YcmShowDetailedDiagnostic| command
-  4. The |:YcmDebugInfo| command
-  5. The |:YcmCompleter| command
+  1. The |:YcmRestartServer| command
+  2. The |:YcmForceCompileAndDiagnostics| command
+  3. The |:YcmDiags| command
+  4. The |:YcmShowDetailedDiagnostic| command
+  5. The |:YcmDebugInfo| command
+  6. The |:YcmCompleter| command
  8. YcmCompleter subcommands           |youcompleteme-ycmcompleter-subcommands|
   1. The |GoToDeclaration| subcommand
   2. The |GoToDefinition| subcommand
@@ -45,23 +47,27 @@ Contents ~
   10. The |g:ycm_collect_identifiers_from_comments_and_strings| option
   11. The |g:ycm_collect_identifiers_from_tags_files| option
   12. The |g:ycm_seed_identifiers_with_syntax| option
-  13. The |g:ycm_csharp_server_port| option
-  14. The |g:ycm_auto_start_csharp_server| option
-  15. The |g:ycm_auto_stop_csharp_server| option
-  16. The |g:ycm_add_preview_to_completeopt| option
-  17. The |g:ycm_autoclose_preview_window_after_completion| option
-  18. The |g:ycm_autoclose_preview_window_after_insertion| option
-  19. The |g:ycm_max_diagnostics_to_display| option
-  20. The |g:ycm_key_list_select_completion| option
-  21. The |g:ycm_key_list_previous_completion| option
-  22. The |g:ycm_key_invoke_completion| option
-  23. The |g:ycm_key_detailed_diagnostics| option
-  24. The |g:ycm_global_ycm_extra_conf| option
-  25. The |g:ycm_confirm_extra_conf| option
-  26. The |g:ycm_extra_conf_globlist| option
-  27. The |g:ycm_filepath_completion_use_working_dir| option
-  28. The |g:ycm_semantic_triggers| option
-  29. The |g:ycm_cache_omnifunc| option
+  13. The |g:ycm_server_use_vim_stdout| option
+  14. The |g:ycm_server_keep_logfiles| option
+  15. The |g:ycm_server_log_level| option
+  16. The |g:ycm_server_idle_suicide_seconds| option
+  17. The |g:ycm_csharp_server_port| option
+  18. The |g:ycm_auto_start_csharp_server| option
+  19. The |g:ycm_auto_stop_csharp_server| option
+  20. The |g:ycm_add_preview_to_completeopt| option
+  21. The |g:ycm_autoclose_preview_window_after_completion| option
+  22. The |g:ycm_autoclose_preview_window_after_insertion| option
+  23. The |g:ycm_max_diagnostics_to_display| option
+  24. The |g:ycm_key_list_select_completion| option
+  25. The |g:ycm_key_list_previous_completion| option
+  26. The |g:ycm_key_invoke_completion| option
+  27. The |g:ycm_key_detailed_diagnostics| option
+  28. The |g:ycm_global_ycm_extra_conf| option
+  29. The |g:ycm_confirm_extra_conf| option
+  30. The |g:ycm_extra_conf_globlist| option
+  31. The |g:ycm_filepath_completion_use_working_dir| option
+  32. The |g:ycm_semantic_triggers| option
+  33. The |g:ycm_cache_omnifunc| option
  10. FAQ                                                    |youcompleteme-faq|
   1. I get a linker warning regarding |libpython| on Mac when compiling YCM
   2. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
@@ -182,8 +188,9 @@ local binary folder (for example '/usr/local/bin/mvim') and then symlink it:
 Install YouCompleteMe with Vundle [11].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library API has changed (happens rarely), YCM
-will notify you to recompile it. You should then rerun the install process.
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
 
 It's recommended that you have the latest Xcode installed along with the latest
 Command Line Tools (that you install from within Xcode).
@@ -230,8 +237,9 @@ from source [14] (don't worry, it's easy).
 Install YouCompleteMe with Vundle [11].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library API has changed (happens rarely), YCM
-will notify you to recompile it. You should then rerun the install process.
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
 
 Install development tools and CMake: 'sudo apt-get install build-essential
 cmake'
@@ -281,8 +289,9 @@ that platform).
 See the _FAQ_ if you have any issues.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library API has changed (happens rarely), YCM
-will notify you to recompile it. You should then rerun the install process.
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
@@ -319,8 +328,8 @@ will notify you to recompile it. You should then rerun the install process.
    official binaries from llvm.org [18] if at all possible. Make sure you
    download the correct archive file for your OS.
 
-4. **Compile the 'ycm_core' plugin plugin** (ha!) that YCM needs. This is
-   the C++ engine that YCM uses to get fast completions.
+4. **Compile the 'ycm_support_libs' libraries** that YCM needs. These libs
+   are the C++ engines that YCM uses to get fast completions.
 
    You will need to have 'cmake' installed in order to generate the required
    makefiles. Linux users can install cmake with their package manager
@@ -359,7 +368,7 @@ will notify you to recompile it. You should then rerun the install process.
 <
    Now that makefiles have been generated, simply run:
 >
-   make ycm_core
+   make ycm_support_libs
 <
    For those who want to use the system version of libclang, you would pass
    '-DUSE_SYSTEM_LIBCLANG=ON' to cmake _instead of_ the
@@ -426,6 +435,15 @@ filepath completer.
 YCM automatically detects which completion engine would be the best in any
 situation. On occasion, it queries several of them at once, merges the outputs
 and presents the results to you.
+
+-------------------------------------------------------------------------------
+                                     *youcompleteme-client-server-architecture*
+Client-server architecture ~
+
+YCM has a client-server architecture; the Vim part of YCM is only a thin client
+that talks to the 'ycmd' HTTP+JSON server that has the vast majority of YCM
+logic and functionality. The server is started and stopped automatically as you
+start and stop Vim.
 
 -------------------------------------------------------------------------------
                                       *youcompleteme-completion-string-ranking*
@@ -625,6 +643,12 @@ yours truly.
 Commands ~
 
 -------------------------------------------------------------------------------
+The *:YcmRestartServer* command
+
+If the 'ycmd' completion server suddenly stops for some reason, you can restart
+it with this command.
+
+-------------------------------------------------------------------------------
 The *:YcmForceCompileAndDiagnostics* command
 
 Calling this command will force YCM to immediately recompile your file and
@@ -694,7 +718,7 @@ The *GoToDeclaration* subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, python'
+Supported in filetypes: 'c, cpp, objc, objcpp, python, cs'
 
 -------------------------------------------------------------------------------
 The *GoToDefinition* subcommand
@@ -706,7 +730,7 @@ when the definition of the symbol is in the current translation unit. A
 translation unit consists of the file you are editing and all the files you are
 including with '#include' directives (directly or indirectly) in that file.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, python'
+Supported in filetypes: 'c, cpp, objc, objcpp, python, cs'
 
 -------------------------------------------------------------------------------
 The *GoToDefinitionElseDeclaration* subcommand
@@ -715,7 +739,7 @@ Looks up the symbol under the cursor and jumps to its definition if possible;
 if the definition is not accessible from the current translation unit, jumps to
 the symbol's declaration.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, python'
+Supported in filetypes: 'c, cpp, objc, objcpp, python, cs'
 
 -------------------------------------------------------------------------------
 The *ClearCompilationFlagCache* subcommand
@@ -980,6 +1004,64 @@ Usually at least 95% of the keywords are successfully extracted.
 Default: '0'
 >
   let g:ycm_seed_identifiers_with_syntax = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_server_use_vim_stdout* option
+
+By default, the 'ycmd' completion server writes logs to logfiles. When this
+option is set to '1', the server writes logs to Vim's stdout (so you'll see
+them in the console).
+
+Default: '0'
+>
+  let g:ycm_server_use_vim_stdout = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_server_keep_logfiles* option
+
+When this option is set to '1', the 'ycmd' completion server will keep the
+logfiles around after shutting down (they are deleted on shutdown by default).
+
+To see where the logfiles are, call |:YcmDebugInfo|.
+
+Default: '0'
+>
+  let g:ycm_server_keep_logfiles = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_server_log_level* option
+
+The logging level that the 'ycmd' completion server uses. Valid values are the
+following, from most verbose to least verbose: - 'debug' - 'info' - 'warning' -
+'error' - 'critical'
+
+Note that 'debug' is _very_ verbose.
+
+Default: 'info'
+>
+  let g:ycm_server_log_level = 'info'
+<
+-------------------------------------------------------------------------------
+The *g:ycm_server_idle_suicide_seconds* option
+
+This option sets the number of seconds of 'ycmd' server idleness (no requests
+received) after which the server stops itself. NOTE: the YCM Vim client sends a
+shutdown request to the server when Vim is shutting down.
+
+If your Vim crashes for instance, 'ycmd' never gets the shutdown command and
+becomes a zombie process. This option prevents such zombies from sticking
+around forever.
+
+The default option is '43200' seconds which is 12 hours. The reason for the
+interval being this long is to prevent the server from shutting down if you
+leave your computer (and Vim) turned on during the night.
+
+The server "heartbeat" that checks whether this interval has passed occurs
+every 10 minutes.
+
+Default: '43200'
+>
+  let g:ycm_server_idle_suicide_seconds = 43200
 <
 -------------------------------------------------------------------------------
 The *g:ycm_csharp_server_port* option
@@ -1575,6 +1657,8 @@ License ~
 This software is licensed under the GPL v3 license [31]. © 2012 Strahinja Val
 Markovic <val@markovic.io>.
 
+  Image: Bitdeli Badge [32]
+
 ===============================================================================
                                                      *youcompleteme-references*
 References ~
@@ -1610,5 +1694,7 @@ References ~
 [29] https://groups.google.com/forum/?hl=en#!forum/ycm-users
 [30] https://github.com/Valloric/YouCompleteMe/issues?state=open
 [31] http://www.gnu.org/copyleft/gpl.html
+[32] https://bitdeli.com/free
+[33] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
 
 vim: ft=help

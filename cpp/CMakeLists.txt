@@ -138,19 +138,18 @@ endif()
 # the compiler to output a warning during linking:
 #  clang: warning: argument unused during compilation: '-std=c++0x'
 # This is caused by cmake passing this flag to the linking stage which it
-# shouldn't do. It's ignored so it does no harm, but the warning is annoying and
-# there's no way around the problem (the flag is correctly used during the
-# compilation stage). We could use add_definitions(-std=c++0x), but this will
-# break the llvm build since the flag will then be used when compiling C code
-# too. Sadly there's no way around the warning.
+# shouldn't do. It's ignored so it does no harm, but the warning is annoying.
+#
+# Putting the flag in add_definitions() works around the issue, even though it
+# shouldn't in theory go there.
 if ( CPP11_AVAILABLE )
   message( "Your C++ compiler supports C++11, compiling in that mode." )
 
   # Cygwin needs its hand held a bit; see issue #473
   if ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x" )
+    add_definitions( -std=gnu++0x )
   else()
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x" )
+    add_definitions( -std=c++0x )
   endif()
 else()
   message(

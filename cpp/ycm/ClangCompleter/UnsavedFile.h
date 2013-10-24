@@ -18,13 +18,13 @@
 #ifndef UNSAVEDFILE_H_0GIYZQL4
 #define UNSAVEDFILE_H_0GIYZQL4
 
-#include <cstddef>
+#include <string>
 
 struct UnsavedFile {
-  UnsavedFile() : filename_( NULL ), contents_( NULL ), length_( 0 ) {}
+  UnsavedFile() : filename_( "" ), contents_( "" ), length_( 0 ) {}
 
-  const char *filename_;
-  const char *contents_;
+  std::string filename_;
+  std::string contents_;
   unsigned long length_;
 
   // We need this to be able to export this struct to Python via Boost.Python's

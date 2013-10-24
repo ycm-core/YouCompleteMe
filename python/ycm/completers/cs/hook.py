@@ -17,5 +17,5 @@
 
 from ycm.completers.cs.cs_completer import CsharpCompleter
 
-def GetCompleter():
-    return CsharpCompleter()
+def GetCompleter( user_options ):
+  return CsharpCompleter( user_options )

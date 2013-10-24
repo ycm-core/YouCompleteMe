@@ -16,26 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import vim
 import os
 import re
 
-from ycm import vimsupport
-from ycm.completers.threaded_completer import ThreadedCompleter
+from ycm.completers.completer import Completer
 from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
+from ycm.server import responses
 
-USE_WORKING_DIR = vimsupport.GetBoolValue(
-  'g:ycm_filepath_completion_use_working_dir' )
-
-
-class FilenameCompleter( ThreadedCompleter ):
+class FilenameCompleter( Completer ):
   """
   General completer that provides filename and filepath completions.
   """
 
-  def __init__( self ):
-    super( FilenameCompleter, self ).__init__()
+  def __init__( self, user_options ):
+    super( FilenameCompleter, self ).__init__( user_options )
     self._flags = Flags()
 
     self._path_regex = re.compile( """
@@ -57,25 +52,35 @@ class FilenameCompleter( ThreadedCompleter ):
     self._include_regex = re.compile( include_regex_common )
 
 
-  def AtIncludeStatementStart( self, start_column ):
-    return ( InCFamilyFile() and
+  def AtIncludeStatementStart( self, request_data ):
+    start_column = request_data[ 'start_column' ]
+    current_line = request_data[ 'line_value' ]
+    filepath = request_data[ 'filepath' ]
+    filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
+    return ( InCFamilyFile( filetypes ) and
              self._include_start_regex.match(
-               vim.current.line[ :start_column ] ) )
+               current_line[ :start_column ] ) )
 
 
-  def ShouldUseNowInner( self, start_column ):
-    return ( start_column and ( vim.current.line[ start_column - 1 ] == '/' or
-             self.AtIncludeStatementStart( start_column ) ) )
+  def ShouldUseNowInner( self, request_data ):
+    start_column = request_data[ 'start_column' ]
+    current_line = request_data[ 'line_value' ]
+    return ( start_column and ( current_line[ start_column - 1 ] == '/' or
+             self.AtIncludeStatementStart( request_data ) ) )
 
 
   def SupportedFiletypes( self ):
     return []
 
 
-  def ComputeCandidates( self, unused_query, start_column ):
-    line = vim.current.line[ :start_column ]
+  def ComputeCandidatesInner( self, request_data ):
+    current_line = request_data[ 'line_value' ]
+    start_column = request_data[ 'start_column' ]
+    filepath = request_data[ 'filepath' ]
+    filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
+    line = current_line[ :start_column ]
 
-    if InCFamilyFile():
+    if InCFamilyFile( filetypes ):
       include_match = self._include_regex.search( line )
       if include_match:
         path_dir = line[ include_match.end(): ]
@@ -83,20 +88,26 @@ class FilenameCompleter( ThreadedCompleter ):
         # http://gcc.gnu.org/onlinedocs/cpp/Include-Syntax.html
         include_current_file_dir = '<' not in include_match.group()
         return _GenerateCandidatesForPaths(
-          self.GetPathsIncludeCase( path_dir, include_current_file_dir ) )
+          self.GetPathsIncludeCase( path_dir,
+                                    include_current_file_dir,
+                                    filepath ) )
 
     path_match = self._path_regex.search( line )
     path_dir = os.path.expanduser( path_match.group() ) if path_match else ''
 
-    return _GenerateCandidatesForPaths( _GetPathsStandardCase( path_dir ) )
+    return _GenerateCandidatesForPaths(
+      _GetPathsStandardCase(
+        path_dir,
+        self.user_options[ 'filepath_completion_use_working_dir' ],
+        filepath ) )
 
 
-  def GetPathsIncludeCase( self, path_dir, include_current_file_dir ):
+  def GetPathsIncludeCase( self, path_dir, include_current_file_dir, filepath ):
     paths = []
-    include_paths = self._flags.UserIncludePaths( vim.current.buffer.name )
+    include_paths = self._flags.UserIncludePaths( filepath )
 
     if include_current_file_dir:
-      include_paths.append( os.path.dirname( vim.current.buffer.name ) )
+      include_paths.append( os.path.dirname( filepath ) )
 
     for include_path in include_paths:
       try:
@@ -110,9 +121,9 @@ class FilenameCompleter( ThreadedCompleter ):
     return sorted( set( paths ) )
 
 
-def _GetPathsStandardCase( path_dir ):
-  if not USE_WORKING_DIR and not path_dir.startswith( '/' ):
-    path_dir = os.path.join( os.path.dirname( vim.current.buffer.name ),
+def _GetPathsStandardCase( path_dir, use_working_dir, filepath ):
+  if not use_working_dir and not path_dir.startswith( '/' ):
+    path_dir = os.path.join( os.path.dirname( filepath ),
                              path_dir )
 
   try:
@@ -135,8 +146,8 @@ def _GenerateCandidatesForPaths( absolute_paths ):
     seen_basenames.add( basename )
 
     is_dir = os.path.isdir( absolute_path )
-    completion_dicts.append( { 'word': basename,
-                               'dup': 1,
-                               'menu': '[Dir]' if is_dir else '[File]' } )
+    completion_dicts.append(
+      responses.BuildCompletionData( basename,
+                                     '[Dir]' if is_dir else '[File]' ) )
 
   return completion_dicts

@@ -20,6 +20,8 @@
 #include "Result.h"
 #include "Candidate.h"
 #include "CandidateRepository.h"
+#include "ReleaseGil.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/cxx11/any_of.hpp>
 #include <vector>
@@ -27,6 +29,7 @@
 using boost::algorithm::any_of;
 using boost::algorithm::is_upper;
 using boost::python::len;
+using boost::python::str;
 using boost::python::extract;
 using boost::python::object;
 typedef boost::python::list pylist;
@@ -34,6 +37,13 @@ typedef boost::python::list pylist;
 namespace YouCompleteMe {
 
 namespace {
+
+std::string GetUtf8String( const boost::python::object &string_or_unicode ) {
+  extract< std::string > to_string( string_or_unicode );
+  if ( to_string.check() )
+    return to_string();
+  return extract< std::string >( str( string_or_unicode ).encode( "utf8" ) );
+}
 
 std::vector< const Candidate * > CandidatesFromObjectList(
   const pylist &candidates,
@@ -44,10 +54,10 @@ std::vector< const Candidate * > CandidatesFromObjectList(
 
   for ( int i = 0; i < num_candidates; ++i ) {
     if ( candidate_property.empty() ) {
-      candidate_strings.push_back( extract< std::string >( candidates[ i ] ) );
+      candidate_strings.push_back( GetUtf8String( candidates[ i ] ) );
     } else {
       object holder = extract< object >( candidates[ i ] );
-      candidate_strings.push_back( extract< std::string >(
+      candidate_strings.push_back( GetUtf8String(
                                      holder[ candidate_property.c_str() ] ) );
     }
   }
@@ -68,31 +78,33 @@ boost::python::list FilterAndSortCandidates(
     return candidates;
   }
 
+  int num_candidates = len( candidates );
   std::vector< const Candidate * > repository_candidates =
     CandidatesFromObjectList( candidates, candidate_property );
 
-  Bitset query_bitset = LetterBitsetFromString( query );
-  bool query_has_uppercase_letters = any_of( query, is_upper() );
-
-  int num_candidates = len( candidates );
   std::vector< ResultAnd< int > > object_and_results;
+  {
+    ReleaseGil unlock;
+    Bitset query_bitset = LetterBitsetFromString( query );
+    bool query_has_uppercase_letters = any_of( query, is_upper() );
 
-  for ( int i = 0; i < num_candidates; ++i ) {
-    const Candidate *candidate = repository_candidates[ i ];
+    for ( int i = 0; i < num_candidates; ++i ) {
+      const Candidate *candidate = repository_candidates[ i ];
 
-    if ( !candidate->MatchesQueryBitset( query_bitset ) )
-      continue;
+      if ( !candidate->MatchesQueryBitset( query_bitset ) )
+        continue;
 
-    Result result = candidate->QueryMatchResult( query,
-                                                 query_has_uppercase_letters );
+      Result result = candidate->QueryMatchResult( query,
+                                                  query_has_uppercase_letters );
 
-    if ( result.IsSubsequence() ) {
-      ResultAnd< int > object_and_result( i, result );
-      object_and_results.push_back( boost::move( object_and_result ) );
+      if ( result.IsSubsequence() ) {
+        ResultAnd< int > object_and_result( i, result );
+        object_and_results.push_back( boost::move( object_and_result ) );
+      }
     }
-  }
 
-  std::sort( object_and_results.begin(), object_and_results.end() );
+    std::sort( object_and_results.begin(), object_and_results.end() );
+  }
 
   foreach ( const ResultAnd< int > &object_and_result,
             object_and_results ) {

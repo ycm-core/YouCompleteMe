@@ -1,4 +1,4 @@
-// Copyright (C) 2011, 2012  Strahinja Val Markovic  <val@markovic.io>
+// Copyright (C) 2013  Strahinja Val Markovic  <val@markovic.io>
 //
 // This file is part of YouCompleteMe.
 //
@@ -15,29 +15,28 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "ClangResultsCache.h"
-#include "standard.h"
+#ifndef RELEASEGIL_H_RDIEBSQ1
+#define RELEASEGIL_H_RDIEBSQ1
 
-using boost::shared_mutex;
-using boost::shared_lock;
-using boost::unique_lock;
+#include <boost/python.hpp>
 
 namespace YouCompleteMe {
 
-bool ClangResultsCache::NewPositionDifferentFromStoredPosition( int new_line,
-                                                                int new_colum )
-const {
-  shared_lock< shared_mutex > reader_lock( access_mutex_ );
-  return line_ != new_line || column_ != new_colum;
-}
+class ReleaseGil {
+public:
+  ReleaseGil() {
+    thread_state_ = PyEval_SaveThread();
+  }
 
-void ClangResultsCache::ResetWithNewLineAndColumn( int new_line,
-                                                   int new_colum ) {
-  unique_lock< shared_mutex > reader_lock( access_mutex_ );
+  ~ReleaseGil() {
+    PyEval_RestoreThread( thread_state_ );
+  }
 
-  line_ = new_line;
-  column_ = new_colum;
-  completion_datas_.clear();
-}
+private:
+  PyThreadState *thread_state_;
+};
 
 } // namespace YouCompleteMe
+
+#endif /* end of include guard: RELEASEGIL_H_RDIEBSQ1 */
+

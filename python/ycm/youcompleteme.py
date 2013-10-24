@@ -17,203 +17,301 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import imp
 import os
 import vim
-import ycm_core
+import subprocess
+import tempfile
+import json
 from ycm import vimsupport
+from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
-from ycm.completers.general.general_completer_store import GeneralCompleterStore
+from ycm.completers.general import syntax_parse
+from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
+from ycm.client.base_request import BaseRequest, BuildRequestData
+from ycm.client.command_request import SendCommandRequest
+from ycm.client.completion_request import CompletionRequest
+from ycm.client.omni_completion_request import OmniCompletionRequest
+from ycm.client.event_notification import ( SendEventNotificationAsync,
+                                            EventNotification )
+from ycm.server.responses import ServerError
 
+try:
+  from UltiSnips import UltiSnips_Manager
+  USE_ULTISNIPS_DATA = True
+except ImportError:
+  USE_ULTISNIPS_DATA = False
 
-FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE = vim.eval(
-  'g:ycm_filetype_specific_completion_to_disable' )
+SERVER_CRASH_MESSAGE_STDERR_FILE = 'The ycmd server SHUT DOWN with output:\n'
+SERVER_CRASH_MESSAGE_SAME_STDERR = (
+  'The ycmd server shut down, check console output for logs!' )
 
 
 class YouCompleteMe( object ):
-  def __init__( self ):
-    self.gencomp = GeneralCompleterStore()
-    self.omnicomp = OmniCompleter()
-    self.filetype_completers = {}
+  def __init__( self, user_options ):
+    self._user_options = user_options
+    self._omnicomp = OmniCompleter( user_options )
+    self._latest_completion_request = None
+    self._latest_file_parse_request = None
+    self._server_stdout = None
+    self._server_stderr = None
+    self._server_popen = None
+    self._filetypes_with_keywords_loaded = set()
+    self._temp_options_filename = None
+    self._SetupServer()
 
 
-  def GetGeneralCompleter( self ):
-    return self.gencomp
+  def _SetupServer( self ):
+    server_port = utils.GetUnusedLocalhostPort()
+    with tempfile.NamedTemporaryFile( delete = False ) as options_file:
+      self._temp_options_filename = options_file.name
+      json.dump( dict( self._user_options ), options_file )
+      args = [ utils.PathToPythonInterpreter(),
+               _PathToServerScript(),
+               '--port={0}'.format( server_port ),
+               '--options_file={0}'.format( options_file.name ),
+               '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
+               '--idle_suicide_seconds={0}'.format(
+                  self._user_options[ 'server_idle_suicide_seconds' ] ) ]
+
+      BaseRequest.server_location = 'http://localhost:' + str( server_port )
+
+      if self._user_options[ 'server_use_vim_stdout' ]:
+        self._server_popen = subprocess.Popen( args )
+      else:
+        filename_format = os.path.join( utils.PathToTempDir(),
+                                        'server_{port}_{std}.log' )
+
+        self._server_stdout = filename_format.format( port = server_port,
+                                                      std = 'stdout' )
+        self._server_stderr = filename_format.format( port = server_port,
+                                                      std = 'stderr' )
+
+        with open( self._server_stderr, 'w' ) as fstderr:
+          with open( self._server_stdout, 'w' ) as fstdout:
+            self._server_popen = subprocess.Popen( args,
+                                                   stdout = fstdout,
+                                                   stderr = fstderr )
+    self._NotifyUserIfServerCrashed()
+
+
+  def _IsServerAlive( self ):
+    returncode = self._server_popen.poll()
+    # When the process hasn't finished yet, poll() returns None.
+    return returncode is None
+
+
+  def _NotifyUserIfServerCrashed( self ):
+    if self._IsServerAlive():
+      return
+    if self._server_stderr:
+      with open( self._server_stderr, 'r' ) as server_stderr_file:
+        vimsupport.PostMultiLineNotice( SERVER_CRASH_MESSAGE_STDERR_FILE +
+                                        server_stderr_file.read() )
+    else:
+        vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
+
+
+  def ServerPid( self ):
+    if not self._server_popen:
+      return -1
+    return self._server_popen.pid
+
+
+  def RestartServer( self ):
+    vimsupport.PostVimMessage( 'Restarting ycmd server...' )
+    self.OnVimLeave()
+    self._SetupServer()
+
+
+  def CreateCompletionRequest( self, force_semantic = False ):
+    # We have to store a reference to the newly created CompletionRequest
+    # because VimScript can't store a reference to a Python object across
+    # function calls... Thus we need to keep this request somewhere.
+    if ( not self.NativeFiletypeCompletionAvailable() and
+         self.CurrentFiletypeCompletionEnabled() and
+         self._omnicomp.ShouldUseNow() ):
+      self._latest_completion_request = OmniCompletionRequest( self._omnicomp )
+    else:
+      self._latest_completion_request = ( CompletionRequest( force_semantic )
+                                          if self._IsServerAlive() else
+                                          None )
+    return self._latest_completion_request
+
+
+  def SendCommandRequest( self, arguments, completer ):
+    if self._IsServerAlive():
+      return SendCommandRequest( arguments, completer )
+
+
+  def GetDefinedSubcommands( self ):
+    if self._IsServerAlive():
+      return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                            'defined_subcommands' )
+    else:
+      return []
+
+
+  def GetCurrentCompletionRequest( self ):
+    return self._latest_completion_request
 
 
   def GetOmniCompleter( self ):
-    return self.omnicomp
-
-
-  def GetFiletypeCompleter( self ):
-    filetypes = vimsupport.CurrentFiletypes()
-
-    completers = [ self.GetFiletypeCompleterForFiletype( filetype )
-                   for filetype in filetypes ]
-
-    if not completers:
-      return None
-
-    # Try to find a native completer first
-    for completer in completers:
-      if completer and completer is not self.omnicomp:
-        return completer
-
-    # Return the omni completer for the first filetype
-    return completers[0]
-
-
-  def GetFiletypeCompleterForFiletype( self, filetype ):
-    try:
-      return self.filetype_completers[ filetype ]
-    except KeyError:
-      pass
-
-    module_path = _PathToFiletypeCompleterPluginLoader( filetype )
-
-    completer = None
-    supported_filetypes = [ filetype ]
-    if os.path.exists( module_path ):
-      module = imp.load_source( filetype, module_path )
-      completer = module.GetCompleter()
-      if completer:
-        supported_filetypes.extend( completer.SupportedFiletypes() )
-    else:
-      completer = self.omnicomp
-
-    for supported_filetype in supported_filetypes:
-      self.filetype_completers[ supported_filetype ] = completer
-    return completer
-
-
-  def ShouldUseGeneralCompleter( self, start_column ):
-    return self.gencomp.ShouldUseNow( start_column )
-
-
-  def ShouldUseFiletypeCompleter( self, start_column ):
-    if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().ShouldUseNow(
-        start_column )
-    return False
+    return self._omnicomp
 
 
   def NativeFiletypeCompletionAvailable( self ):
-    completer = self.GetFiletypeCompleter()
-    return bool( completer ) and completer is not self.omnicomp
-
-
-  def FiletypeCompletionAvailable( self ):
-    return bool( self.GetFiletypeCompleter() )
+    return any( [ FiletypeCompleterExistsForFiletype( x ) for x in
+                  vimsupport.CurrentFiletypes() ] )
 
 
   def NativeFiletypeCompletionUsable( self ):
-    return ( _CurrentFiletypeCompletionEnabled() and
+    return ( self.CurrentFiletypeCompletionEnabled() and
              self.NativeFiletypeCompletionAvailable() )
 
 
-  def FiletypeCompletionUsable( self ):
-    return ( _CurrentFiletypeCompletionEnabled() and
-             self.FiletypeCompletionAvailable() )
-
-
   def OnFileReadyToParse( self ):
-    self.gencomp.OnFileReadyToParse()
+    self._omnicomp.OnFileReadyToParse( None )
 
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnFileReadyToParse()
+    if not self._IsServerAlive():
+      self._NotifyUserIfServerCrashed()
+
+    extra_data = {}
+    if self._user_options[ 'collect_identifiers_from_tags_files' ]:
+      extra_data[ 'tag_files' ] = _GetTagFiles()
+
+    if self._user_options[ 'seed_identifiers_with_syntax' ]:
+      self._AddSyntaxDataIfNeeded( extra_data )
+
+    self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
+                                                          extra_data )
+    self._latest_file_parse_request.Start()
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
-    self.gencomp.OnBufferUnload( deleted_buffer_file )
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnBufferUnload( deleted_buffer_file )
+    if not self._IsServerAlive():
+      return
+    SendEventNotificationAsync( 'BufferUnload',
+                                { 'unloaded_buffer': deleted_buffer_file } )
 
 
   def OnBufferVisit( self ):
-    self.gencomp.OnBufferVisit()
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnBufferVisit()
+    if not self._IsServerAlive():
+      return
+    extra_data = {}
+    _AddUltiSnipsDataIfNeeded( extra_data )
+    SendEventNotificationAsync( 'BufferVisit', extra_data )
 
 
   def OnInsertLeave( self ):
-    self.gencomp.OnInsertLeave()
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnInsertLeave()
+    if not self._IsServerAlive():
+      return
+    SendEventNotificationAsync( 'InsertLeave' )
 
 
   def OnVimLeave( self ):
-    self.gencomp.OnVimLeave()
+    if self._IsServerAlive():
+      self._server_popen.terminate()
+    os.remove( self._temp_options_filename )
 
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnVimLeave()
+    if not self._user_options[ 'server_keep_logfiles' ]:
+      if self._server_stderr:
+        os.remove( self._server_stderr )
+      if self._server_stdout:
+        os.remove( self._server_stdout )
+
+
+  def OnCurrentIdentifierFinished( self ):
+    if not self._IsServerAlive():
+      return
+    SendEventNotificationAsync( 'CurrentIdentifierFinished' )
 
 
   def DiagnosticsForCurrentFileReady( self ):
-    if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().DiagnosticsForCurrentFileReady()
-    return False
+    return bool( self._latest_file_parse_request and
+                 self._latest_file_parse_request.Done() )
 
 
-  def GetDiagnosticsForCurrentFile( self ):
-    if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().GetDiagnosticsForCurrentFile()
+  def GetDiagnosticsFromStoredRequest( self ):
+    if self.DiagnosticsForCurrentFileReady():
+      to_return = self._latest_file_parse_request.Response()
+      # We set the diagnostics request to None because we want to prevent
+      # Syntastic from repeatedly refreshing the buffer with the same diags.
+      # Setting this to None makes DiagnosticsForCurrentFileReady return False
+      # until the next request is created.
+      self._latest_file_parse_request = None
+      return to_return
     return []
 
 
   def ShowDetailedDiagnostic( self ):
-    if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().ShowDetailedDiagnostic()
-
-
-  def GettingCompletions( self ):
-    if self.FiletypeCompletionUsable():
-      return self.GetFiletypeCompleter().GettingCompletions()
-    return False
-
-
-  def OnCurrentIdentifierFinished( self ):
-    self.gencomp.OnCurrentIdentifierFinished()
-
-    if self.FiletypeCompletionUsable():
-      self.GetFiletypeCompleter().OnCurrentIdentifierFinished()
+    if not self._IsServerAlive():
+      return
+    try:
+      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                  'detailed_diagnostic' )
+      if 'message' in debug_info:
+        vimsupport.EchoText( debug_info[ 'message' ] )
+    except ServerError as e:
+      vimsupport.PostVimMessage( str( e ) )
 
 
   def DebugInfo( self ):
-    completers = set( self.filetype_completers.values() )
-    completers.add( self.gencomp )
-    output = []
-    for completer in completers:
-      if not completer:
-        continue
-      debug = completer.DebugInfo()
-      if debug:
-        output.append( debug )
+    if self._IsServerAlive():
+      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                  'debug_info' )
+    else:
+      debug_info = 'Server crashed, no debug info from server'
+    debug_info += '\nServer running at: {0}'.format(
+        BaseRequest.server_location )
+    debug_info += '\nServer process ID: {0}'.format( self._server_popen.pid )
+    if self._server_stderr or self._server_stdout:
+      debug_info += '\nServer logfiles:\n  {0}\n  {1}'.format(
+        self._server_stdout,
+        self._server_stderr )
 
-    has_clang_support = ycm_core.HasClangSupport()
-    output.append( 'Has Clang support compiled in: {0}'.format(
-      has_clang_support ) )
-
-    if has_clang_support:
-      output.append( ycm_core.ClangVersion() )
-
-    return '\n'.join( output )
+    return debug_info
 
 
-def _CurrentFiletypeCompletionEnabled():
-  filetypes = vimsupport.CurrentFiletypes()
-  return not all([ x in FILETYPE_SPECIFIC_COMPLETION_TO_DISABLE
-                   for x in filetypes ])
+  def CurrentFiletypeCompletionEnabled( self ):
+    filetypes = vimsupport.CurrentFiletypes()
+    filetype_to_disable = self._user_options[
+      'filetype_specific_completion_to_disable' ]
+    return not all([ x in filetype_to_disable for x in filetypes ])
 
 
-def _PathToCompletersFolder():
+  def _AddSyntaxDataIfNeeded( self, extra_data ):
+    filetype = vimsupport.CurrentFiletypes()[ 0 ]
+    if filetype in self._filetypes_with_keywords_loaded:
+      return
+
+    self._filetypes_with_keywords_loaded.add( filetype )
+    extra_data[ 'syntax_keywords' ] = list(
+       syntax_parse.SyntaxKeywordsForCurrentBuffer() )
+
+
+def _GetTagFiles():
+  tag_files = vim.eval( 'tagfiles()' )
+  current_working_directory = os.getcwd()
+  return [ os.path.join( current_working_directory, x ) for x in tag_files ]
+
+
+def _PathToServerScript():
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
-  return os.path.join( dir_of_current_script, 'completers' )
+  return os.path.join( dir_of_current_script, 'server/ycmd.py' )
 
 
-def _PathToFiletypeCompleterPluginLoader( filetype ):
-  return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
+def _AddUltiSnipsDataIfNeeded( extra_data ):
+  if not USE_ULTISNIPS_DATA:
+    return
 
+  try:
+    rawsnips = UltiSnips_Manager._snips( '', 1 )
+  except:
+    return
 
+  # UltiSnips_Manager._snips() returns a class instance where:
+  # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
+  # class.description - description of the snippet
+  extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
+                                           'description': x.description
+                                         } for x in rawsnips ]

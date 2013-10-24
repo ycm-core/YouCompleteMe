@@ -1,6 +1,24 @@
-[submodule "python/ycm/completers/python/jedi"]
-	path = python/ycm/completers/python/jedi
-	url = https://github.com/davidhalter/jedi.git
+[submodule "third_party/jedi"]
+	path = third_party/jedi
+	url = https://github.com/davidhalter/jedi
 [submodule "python/ycm/completers/cs/OmniSharpServer"]
 	path = python/ycm/completers/cs/OmniSharpServer
 	url = https://github.com/nosami/OmniSharpServer.git
+[submodule "third_party/requests-futures"]
+	path = third_party/requests-futures
+	url = https://github.com/ross/requests-futures
+[submodule "third_party/requests"]
+	path = third_party/requests
+	url = https://github.com/kennethreitz/requests
+[submodule "third_party/waitress"]
+	path = third_party/waitress
+	url = https://github.com/Pylons/waitress
+[submodule "third_party/bottle"]
+	path = third_party/bottle
+	url = https://github.com/defnull/bottle
+[submodule "third_party/frozendict"]
+	path = third_party/frozendict
+	url = https://github.com/slezica/python-frozendict
+[submodule "third_party/argparse"]
+	path = third_party/argparse
+	url = https://github.com/bewest/argparse
