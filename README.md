@@ -212,7 +212,7 @@ process.
 
     If you don't install YCM with Vundle, make sure you have run
     `git submodule update --init --recursive` after checking out the YCM
-    repository (Vundle will do this for you).
+    repository (Vundle will do this for you) to fetch YCM's dependencies.
 
 3.  [Complete this step ONLY if you care about semantic completion support for
     C-family languages. Otherwise it's not neccessary.]
