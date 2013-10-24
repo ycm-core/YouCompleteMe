@@ -23,6 +23,7 @@ import sys
 import signal
 import functools
 import socket
+import stat
 
 WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
 WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
@@ -46,7 +47,18 @@ def PathToTempDir():
   tempdir = os.path.join( tempfile.gettempdir(), 'ycm_temp' )
   if not os.path.exists( tempdir ):
     os.makedirs( tempdir )
+    # Needed to support multiple users working on the same machine;
+    # see issue 606.
+    MakeFolderAccessibleToAll( tempdir )
   return tempdir
+
+
+def MakeFolderAccessibleToAll( path_to_folder ):
+  current_stat = os.stat( path_to_folder )
+  # readable, writable and executable by everyone
+  flags = ( current_stat.st_mode | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
+            | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP )
+  os.chmod( path_to_folder, flags )
 
 
 def GetUnusedLocalhostPort():
