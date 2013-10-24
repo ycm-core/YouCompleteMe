@@ -106,6 +106,22 @@ function usage {
   exit 0
 }
 
+function check_third_party_libs {
+  libs_present=true
+  for folder in third_party/*; do
+    num_files_in_folder=$(find $folder -maxdepth 1 -mindepth 1 | wc -l)
+    if [[ $num_files_in_folder -eq 0 ]]; then
+      libs_present=false
+    fi
+  done
+
+  if ! $libs_present; then
+    echo "Some folders in ./third_party are empty; you probably forgot to run:"
+    printf "\n\tgit submodule update --init --recursive\n\n"
+    exit 1
+  fi
+}
+
 cmake_args=""
 omnisharp_completer=false
 for flag in $@; do
@@ -129,6 +145,8 @@ if [[ $cmake_args == *-DUSE_SYSTEM_LIBCLANG=ON* ]] && \
    [[ $cmake_args != *-DUSE_CLANG_COMPLETER=ON* ]]; then
   usage
 fi
+
+check_third_party_libs
 
 if ! command_exists cmake; then
   echo "CMake is required to build YouCompleteMe."
