@@ -15,6 +15,7 @@
   "complete_in_comments": 0,
   "complete_in_strings": 1,
   "max_diagnostics_to_display": 30,
+  "use_custom_clang_handling" : 0,
   "filetype_whitelist": {
     "*": 1
   },
