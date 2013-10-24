@@ -45,10 +45,12 @@ Here are the things you should do when creating an issue:
    your issue.** If we can't reproduce the issue, then we can't fix it. It's
    that simple.
 2. Put the following options in your vimrc:
-   ```
+   
+   ```viml
    let g:ycm_server_use_vim_stdout = 1
    let g:ycm_server_log_level = 'debug'
    ```
+   
    Then start gvim/macvim (not console vim) from the console. As you use Vim,
    you'll see the `ycmd` debug output stream in the console. Attach that to you
    issue.
