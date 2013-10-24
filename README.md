@@ -1082,6 +1082,18 @@ Default: `1`
 
     let g:ycm_cache_omnifunc = 1
 
+### The `g:ycm_use_custom_clang_handling` option
+
+By default ycm removes -arch flags and automatically adds the clang_includes
+directory to the include path. In cases where this is not desired (perhaps
+the -arch flag is needed to compile source files correctly, or one needs to
+include a different clang includes directory), this option can be used to 
+turn that off.
+
+Default: `0`
+
+    let g:ycm_use_custom_clang_handling = 0
+
 FAQ
 ---
 
