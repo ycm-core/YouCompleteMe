@@ -71,14 +71,15 @@ def Main():
   logging.basicConfig( format = '%(asctime)s - %(levelname)s - %(message)s',
                        level = numeric_level )
 
-  options = None
-  if args.options_file:
-    options = json.load( open( args.options_file, 'r' ) )
-    user_options_store.SetAll( options )
-    # This ensures that ycm_core is not loaded before extra conf
-    # preload was run.
-    YcmCoreSanityCheck()
-    extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
+  options = ( json.load( open( args.options_file, 'r' ) )
+              if args.options_file
+              else user_options_store.DefaultOptions() )
+  user_options_store.SetAll( options )
+
+  # This ensures that ycm_core is not loaded before extra conf
+  # preload was run.
+  YcmCoreSanityCheck()
+  extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
 
   # This can't be a top-level import because it transitively imports
   # ycm_core which we want to be imported ONLY after extra conf
