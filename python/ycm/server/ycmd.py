@@ -51,7 +51,8 @@ def Main():
   parser = argparse.ArgumentParser()
   parser.add_argument( '--host', type = str, default = 'localhost',
                        help = 'server hostname')
-  parser.add_argument( '--port', type = int, default = 6666,
+  # Default of 0 will make the OS pick a free port for us
+  parser.add_argument( '--port', type = int, default = 0,
                        help = 'server port')
   parser.add_argument( '--log', type = str, default = 'info',
                        help = 'log level, one of '
