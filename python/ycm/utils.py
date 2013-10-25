@@ -77,7 +77,7 @@ def PathToPythonInterpreter():
   # We check for 'python2' before 'python' because some OS's (I'm looking at you
   # Arch Linux) have made the... interesting decision to point /usr/bin/python
   # to python3.
-  path_to_python = FindPathToFirstExecutable(
+  path_to_python = PathToFirstExistingExecutable(
     [ 'pythonw', 'python2', 'python' ] )
   if not path_to_python:
     # On Windows, Python may not be on the PATH at all, so we check some common
@@ -91,7 +91,7 @@ def PathToPythonInterpreter():
   return path_to_python
 
 
-def FindPathToFirstExecutable( executable_name_list ):
+def PathToFirstExistingExecutable( executable_name_list ):
   for executable_name in executable_name_list:
     path = find_executable( executable_name )
     if path:
