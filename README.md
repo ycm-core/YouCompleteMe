@@ -1159,6 +1159,20 @@ Default: `1`
 
     let g:ycm_cache_omnifunc = 1
 
+### The `g:ycm_sanitize_clang_flags` option
+Sanitize clang flags by removing unsage flags like -arch that may crash clang
+
+Default: `1`
+
+    let g:ycm_sanitize_clang_flags = 1
+ 
+### The `g:ycm_add_special_clang_includes` option
+Add special clang headers directory to include path
+
+Default: `1`
+
+    let g:ycm_add_special_clang_includes = 1
+ 
 FAQ
 ---
 

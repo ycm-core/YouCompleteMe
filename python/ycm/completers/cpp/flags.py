@@ -33,10 +33,12 @@ class Flags( object ):
   The flags are loaded from user-created python files (hereafter referred to as
   'modules') that contain a method FlagsForFile( filename )."""
 
-  def __init__( self ):
-    # It's caches all the way down...
+  def __init__( self, sanitize_clang_flags, add_special_clang_includes):
+        # It's caches all the way down...
     self.flags_for_file = {}
     self.special_clang_flags = _SpecialClangIncludes()
+    self.sanitize_clang_flags = sanitize_clang_flags
+    self.add_special_clang_includes = add_special_clang_includes
     self.no_extra_conf_file_warning_posted = False
 
 
@@ -57,9 +59,9 @@ class Flags( object ):
         return None
 
       flags = list( results[ 'flags' ] )
-      if add_special_clang_flags:
+      if add_special_clang_flags and self.add_special_clang_includes:
         flags += self.special_clang_flags
-      sanitized_flags = PrepareFlagsForClang( flags, filename )
+      sanitized_flags = PrepareFlagsForClang( flags, filename, self.sanitize_clang_flags )
 
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
@@ -95,10 +97,17 @@ class Flags( object ):
     self.flags_for_file.clear()
 
 
-def PrepareFlagsForClang( flags, filename ):
+def PrepareFlagsForClang( flags, filename, sanitize_clang_flags = True ):
   flags = _RemoveUnusedFlags( flags, filename )
-  flags = _SanitizeFlags( flags )
-  return flags
+
+  if sanitize_clang_flags:
+    flags = _SanitizeFlags( flags )
+
+  vector = ycm_core.StringVec()
+  for flag in flags:
+    vector.append( ToUtf8IfNeeded( flag ) )
+
+  return vector
 
 
 def _SanitizeFlags( flags ):
@@ -119,10 +128,7 @@ def _SanitizeFlags( flags ):
 
     sanitized_flags.append( flag )
 
-  vector = ycm_core.StringVec()
-  for flag in sanitized_flags:
-    vector.append( ToUtf8IfNeeded( flag ) )
-  return vector
+  return sanitized_flags
 
 
 def _RemoveUnusedFlags( flags, filename ):
