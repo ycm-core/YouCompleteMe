@@ -24,6 +24,7 @@ import signal
 import functools
 import socket
 import stat
+from distutils.spawn import find_executable
 
 WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
 WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
@@ -71,23 +72,31 @@ def GetUnusedLocalhostPort():
 
 
 def PathToPythonInterpreter():
-  # This is a bit tricky. Normally, sys.executable has the full path to the
-  # Python interpreter. But this code is also executed from inside Vim's
-  # embedded Python. On Unix machines, even that Python returns a good value for
-  # sys.executable, but on Windows it returns the path to the Vim binary, which
-  # is useless to us (issue #581). So we check the common install location for
-  # Python on Windows, first for Python 2.7 and then for 2.6.
-  #
-  # I'm open to better ideas on how to do this.
-
-  if OnWindows():
-    if os.path.exists( WIN_PYTHON27_PATH ):
-      return WIN_PYTHON27_PATH
-    elif os.path.exists( WIN_PYTHON26_PATH ):
-      return WIN_PYTHON26_PATH
+  # We check for 'pythonw' first because that covers the Windows use case (and
+  # 'pythonw' doesn't pop-up a console window like running 'python' does).
+  # We check for 'python2' before 'python' because some OS's (I'm looking at you
+  # Arch Linux) have made the... interesting decision to point /usr/bin/python
+  # to python3.
+  path_to_python = FindPathToFirstExecutable(
+    [ 'pythonw', 'python2', 'python' ] )
+  if not path_to_python:
+    # On Windows, Python may not be on the PATH at all, so we check some common
+    # install locations.
+    if OnWindows():
+      if os.path.exists( WIN_PYTHON27_PATH ):
+        return WIN_PYTHON27_PATH
+      elif os.path.exists( WIN_PYTHON26_PATH ):
+        return WIN_PYTHON26_PATH
     raise RuntimeError( 'Python 2.7/2.6 not installed!' )
-  else:
-    return sys.executable
+  return path_to_python
+
+
+def FindPathToFirstExecutable( executable_name_list ):
+  for executable_name in executable_name_list:
+    path = find_executable( executable_name )
+    if path:
+      return path
+  return None
 
 
 def OnWindows():
