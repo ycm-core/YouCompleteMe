@@ -43,7 +43,7 @@ class ClangCompleter( Completer ):
     self._max_diagnostics_to_display = user_options[
       'max_diagnostics_to_display' ]
     self._completer = ycm_core.ClangCompleter()
-    self._flags = Flags()
+    self._flags = Flags(user_options['sanitize_clang_flags'], user_options['add_special_clang_includes'])
     self._diagnostic_store = None
 
 

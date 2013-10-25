@@ -31,7 +31,7 @@ class FilenameCompleter( Completer ):
 
   def __init__( self, user_options ):
     super( FilenameCompleter, self ).__init__( user_options )
-    self._flags = Flags()
+    self._flags = Flags(user_options['sanitize_clang_flags'], user_options['add_special_clang_includes'])
 
     self._path_regex = re.compile( """
       # 1 or more 'D:/'-like token or '/' or '~' or './' or '../'
