@@ -88,6 +88,12 @@ def GetCompletions_CsCompleter_Works_test():
   assert_that( results, has_items( CompletionEntryMatcher( 'CursorLeft' ),
                                    CompletionEntryMatcher( 'CursorSize' ) ) )
 
+  # We need to turn off the CS server so that it doesn't stick around
+  app.post_json( '/run_completer_command',
+                 BuildRequest( completer_target = 'filetype_default',
+                               command_arguments = ['StopServer'],
+                               filetype = 'cs' ) )
+
 
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_WorksWithExplicitFlags_test():
