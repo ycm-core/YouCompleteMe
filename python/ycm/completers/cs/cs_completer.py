@@ -88,13 +88,13 @@ class CsharpCompleter( Completer ):
 
     command = arguments[ 0 ]
     if command == 'StartServer':
-      self._StartServer( request_data )
+      return self._StartServer( request_data )
     elif command == 'StopServer':
-      self._StopServer()
+      return self._StopServer()
     elif command == 'RestartServer':
       if self._ServerIsRunning():
         self._StopServer()
-      self._StartServer( request_data )
+      return self._StartServer( request_data )
     elif command == 'ServerRunning':
       return self._ServerIsRunning()
     elif command in [ 'GoToDefinition',
