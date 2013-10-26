@@ -851,6 +851,31 @@ Default: `0`
 
     let g:ycm_seed_identifiers_with_syntax = 0
 
+### The `g:ycm_extra_conf_vim_data` option
+
+If you're using semantic completion for C-family files, this option might come
+handy; it's a way of sending data from Vim to your `FlagsForFile` function in
+your `.ycm_extra_conf.py` file.
+
+This option is supposed to be a list of VimScript expression strings that are
+evaluated for every request to the `ycmd` server and then passed to your
+`FlagsForFile` function as a `client_data` keyword argument.
+
+For instance, if you set this option to `['v:version']`, your `FlagsForFile`
+function will be called like this:
+
+```python
+# The '704' value is of course contingent on Vim 7.4; in 7.3 it would be '703'
+FlagsForFile(filename, client_data = {'v:version': 704})
+```
+
+So the `client_data` parameter is a dictionary mapping Vim expression strings to
+their values at the time of the request.
+
+Default: `[]`
+
+    let g:ycm_extra_conf_vim_data = []
+
 ### The `g:ycm_server_use_vim_stdout` option
 
 By default, the `ycmd` completion server writes logs to logfiles. When this
@@ -1161,6 +1186,20 @@ Default: `1`
 
 FAQ
 ---
+
+### I used to be able to `import vim` in `.ycm_extra_conf.py`, but now can't
+
+YCM was rewritten to use a client-server architecture where most of the logic is
+in the `ycmd` server. So the magic `vim` module you could have previously
+imported in your `.ycm_extra_conf.py` files doesn't exist anymore.
+
+To be fair, importing the magic `vim` module in extra conf files was never
+supported in the first place; it only ever worked by accident and was never a
+part of the extra conf API.
+
+But fear not, you should be able to tweak your extra conf files to continue
+working by using the `g:ycm_extra_conf_vim_data` option. See the docs on that
+option for details.
 
 ### I get a linker warning regarding `libpython` on Mac when compiling YCM
 

@@ -118,6 +118,16 @@ def GetReadOnlyVimGlobals( force_python_objects = False ):
     return vim.eval( 'g:' )
 
 
+def VimExpressionToPythonType( vim_expression ):
+  result = vim.eval( vim_expression )
+  if not isinstance( result, basestring ):
+    return result
+  try:
+    return int( result )
+  except ValueError:
+    return result
+
+
 # Both |line| and |column| need to be 1-based
 def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist

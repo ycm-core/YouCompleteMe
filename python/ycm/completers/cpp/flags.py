@@ -19,6 +19,7 @@
 
 import ycm_core
 import os
+import inspect
 from ycm import extra_conf_store
 from ycm.utils import ToUtf8IfNeeded
 
@@ -40,7 +41,10 @@ class Flags( object ):
     self.no_extra_conf_file_warning_posted = False
 
 
-  def FlagsForFile( self, filename, add_special_clang_flags = True ):
+  def FlagsForFile( self,
+                    filename,
+                    add_special_clang_flags = True,
+                    client_data = None ):
     try:
       return self.flags_for_file[ filename ]
     except KeyError:
@@ -51,7 +55,9 @@ class Flags( object ):
           raise RuntimeError( NO_EXTRA_CONF_FILENAME_MESSAGE )
         return None
 
-      results = module.FlagsForFile( filename )
+      results = _CallExtraConfFlagsForFile( module,
+                                            filename,
+                                            client_data )
 
       if not results.get( 'flags_ready', True ):
         return None
@@ -93,6 +99,15 @@ class Flags( object ):
 
   def Clear( self ):
     self.flags_for_file.clear()
+
+
+def _CallExtraConfFlagsForFile( module, filename, client_data ):
+  # For the sake of backwards compatibility, we need to first check whether the
+  # FlagsForFile function in the extra conf module even allows keyword args.
+  if inspect.getargspec( module.FlagsForFile ).keywords:
+    return module.FlagsForFile( filename, client_data = client_data )
+  else:
+    return module.FlagsForFile( filename )
 
 
 def PrepareFlagsForClang( flags, filename ):

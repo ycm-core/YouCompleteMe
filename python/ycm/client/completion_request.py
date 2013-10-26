@@ -25,15 +25,15 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
 TIMEOUT_SECONDS = 0.5
 
 class CompletionRequest( BaseRequest ):
-  def __init__( self, force_semantic = False ):
+  def __init__( self, extra_data = None ):
     super( CompletionRequest, self ).__init__()
 
     self._completion_start_column = base.CompletionStartColumn()
 
     # This field is also used by the omni_completion_request subclass
     self.request_data = BuildRequestData( self._completion_start_column )
-    if force_semantic:
-      self.request_data[ 'force_semantic' ] = True
+    if extra_data:
+      self.request_data.update( extra_data )
 
 
   def CompletionStartColumn( self ):

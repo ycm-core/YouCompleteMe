@@ -112,6 +112,9 @@ let g:ycm_server_keep_logfiles =
 let g:ycm_server_idle_suicide_seconds =
       \ get( g:, 'ycm_server_idle_suicide_seconds', 43200 )
 
+let g:ycm_extra_conf_vim_data =
+      \ get( g:, 'ycm_extra_conf_vim_data', [] )
+
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.

@@ -247,7 +247,8 @@ class ClangCompleter( Completer ):
     if 'compilation_flags' in request_data:
       return PrepareFlagsForClang( request_data[ 'compilation_flags' ],
                                    filename )
-    return self._flags.FlagsForFile( filename )
+    client_data = request_data.get( 'extra_conf_data', None )
+    return self._flags.FlagsForFile( filename, client_data = client_data )
 
 
 def ConvertCompletionData( completion_data ):

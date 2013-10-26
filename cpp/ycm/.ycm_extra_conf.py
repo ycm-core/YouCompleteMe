@@ -43,6 +43,8 @@ flags = [
 '-Wno-variadic-macros',
 '-fexceptions',
 '-DNDEBUG',
+# You 100% do NOT need -DUSE_CLANG_COMPLETER in your flags; only the YCM
+# source code needs it.
 '-DUSE_CLANG_COMPLETER',
 # THIS IS IMPORTANT! Without a "-std=<something>" flag, clang won't know which
 # language to use when compiling headers. So it will guess. Badly. So C++
@@ -128,7 +130,7 @@ def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
   return new_flags
 
 
-def FlagsForFile( filename ):
+def FlagsForFile( filename, **kwargs ):
   if database:
     # Bear in mind that compilation_info.compiler_flags_ does NOT return a
     # python list, but a "list-like" StringVec object

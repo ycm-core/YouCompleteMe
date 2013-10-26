@@ -24,7 +24,7 @@ import httplib
 from .test_utils import Setup, BuildRequest, PathToTestFile
 from webtest import TestApp
 from nose.tools import eq_, with_setup
-from hamcrest import ( assert_that, has_items, has_entry,
+from hamcrest import ( assert_that, has_item, has_items, has_entry,
                        contains_inanyorder )
 from ..responses import BuildCompletionData, UnknownExtraConf
 from .. import handlers
@@ -209,6 +209,28 @@ def GetCompletions_ForceSemantic_Works_test():
   assert_that( results, has_items( CompletionEntryMatcher( 'abs' ),
                                    CompletionEntryMatcher( 'open' ),
                                    CompletionEntryMatcher( 'bool' ) ) )
+
+
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_ClientDataGivenToExtraConf_test():
+  app = TestApp( handlers.app )
+  app.post_json( '/load_extra_conf_file',
+                 { 'filepath': PathToTestFile(
+                                  'client_data/.ycm_extra_conf.py' ) } )
+
+  filepath = PathToTestFile( 'client_data/main.cpp' )
+  completion_data = BuildRequest( filepath = filepath,
+                                  filetype = 'cpp',
+                                  contents = open( filepath ).read(),
+                                  line_num = 8,
+                                  column_num = 6,
+                                  start_column = 6,
+                                  extra_conf_data = {
+                                    'flags': ['-x', 'c++']
+                                  })
+
+  results = app.post_json( '/completions', completion_data ).json
+  assert_that( results, has_item( CompletionEntryMatcher( 'x' ) ) )
 
 
 @with_setup( Setup )

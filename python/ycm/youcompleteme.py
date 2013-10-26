@@ -132,7 +132,12 @@ class YouCompleteMe( object ):
          self._omnicomp.ShouldUseNow() ):
       self._latest_completion_request = OmniCompletionRequest( self._omnicomp )
     else:
-      self._latest_completion_request = ( CompletionRequest( force_semantic )
+      extra_data = {}
+      self._AddExtraConfDataIfNeeded( extra_data )
+      if force_semantic:
+        extra_data[ 'force_semantic' ] = True
+
+      self._latest_completion_request = ( CompletionRequest( extra_data )
                                           if self._IsServerAlive() else
                                           None )
     return self._latest_completion_request
@@ -176,11 +181,9 @@ class YouCompleteMe( object ):
       self._NotifyUserIfServerCrashed()
 
     extra_data = {}
-    if self._user_options[ 'collect_identifiers_from_tags_files' ]:
-      extra_data[ 'tag_files' ] = _GetTagFiles()
-
-    if self._user_options[ 'seed_identifiers_with_syntax' ]:
-      self._AddSyntaxDataIfNeeded( extra_data )
+    self._AddTagsFilesIfNeeded( extra_data )
+    self._AddSyntaxDataIfNeeded( extra_data )
+    self._AddExtraConfDataIfNeeded( extra_data )
 
     self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
                                                           extra_data )
@@ -280,6 +283,8 @@ class YouCompleteMe( object ):
 
 
   def _AddSyntaxDataIfNeeded( self, extra_data ):
+    if not self._user_options[ 'seed_identifiers_with_syntax' ]:
+      return
     filetype = vimsupport.CurrentFiletypes()[ 0 ]
     if filetype in self._filetypes_with_keywords_loaded:
       return
@@ -289,10 +294,26 @@ class YouCompleteMe( object ):
        syntax_parse.SyntaxKeywordsForCurrentBuffer() )
 
 
-def _GetTagFiles():
-  tag_files = vim.eval( 'tagfiles()' )
-  current_working_directory = os.getcwd()
-  return [ os.path.join( current_working_directory, x ) for x in tag_files ]
+  def _AddTagsFilesIfNeeded( self, extra_data ):
+    def GetTagFiles():
+      tag_files = vim.eval( 'tagfiles()' )
+      current_working_directory = os.getcwd()
+      return [ os.path.join( current_working_directory, x ) for x in tag_files ]
+
+    if not self._user_options[ 'collect_identifiers_from_tags_files' ]:
+      return
+    extra_data[ 'tag_files' ] = GetTagFiles()
+
+
+  def _AddExtraConfDataIfNeeded( self, extra_data ):
+    def BuildExtraConfData( extra_conf_vim_data ):
+      return dict( ( expr, vimsupport.VimExpressionToPythonType( expr ) )
+                   for expr in extra_conf_vim_data )
+
+    extra_conf_vim_data = self._user_options[ 'extra_conf_vim_data' ]
+    if extra_conf_vim_data:
+      extra_data[ 'extra_conf_data' ] = BuildExtraConfData(
+        extra_conf_vim_data )
 
 
 def _PathToServerScript():
