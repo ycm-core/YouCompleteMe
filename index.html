@@ -140,6 +140,9 @@ version of Vim with Python support.</p>
 <p><strong>Install YCM</strong> with <a href="https://github.com/gmarik/vundle#about">Vundle</a> (or <a href="https://github.com/tpope/vim-pathogen#pathogenvim">Pathogen</a>, but Vundle is a better
     idea). With Vundle, this would mean adding a <code>Bundle
     'Valloric/YouCompleteMe'</code> line to your <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc</a>.</p>
+<p>If you don't install YCM with Vundle, make sure you have run
+<code>git submodule update --init --recursive</code> after checking out the YCM
+repository (Vundle will do this for you) to fetch YCM's dependencies.</p>
 </li>
 <li>
 <p>[Complete this step ONLY if you care about semantic completion support for
@@ -457,6 +460,15 @@ identifier database with the keywords of the programming language you're
 writing.</p><p>Since the keywords are extracted from the Vim syntax file for the filetype, all
 keywords may not be collected, depending on how the syntax file was written.
 Usually at least 95% of the keywords are successfully extracted.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_seed_identifiers_with_syntax = 0
+</code></pre><h3>The <code>g:ycm_extra_conf_vim_data</code> option</h3><p>If you're using semantic completion for C-family files, this option might come
+handy; it's a way of sending data from Vim to your <code>FlagsForFile</code> function in
+your <code>.ycm_extra_conf.py</code> file.</p><p>This option is supposed to be a list of VimScript expression strings that are
+evaluated for every request to the <code>ycmd</code> server and then passed to your
+<code>FlagsForFile</code> function as a <code>client_data</code> keyword argument.</p><p>For instance, if you set this option to <code>['v:version']</code>, your <code>FlagsForFile</code>
+function will be called like this:</p><pre><code class="python"># The '704' value is of course contingent on Vim 7.4; in 7.3 it would be '703'
+FlagsForFile(filename, client_data = {'v:version': 704})
+</code></pre><p>So the <code>client_data</code> parameter is a dictionary mapping Vim expression strings to
+their values at the time of the request.</p><p>Default: <code>[]</code></p><pre><code>let g:ycm_extra_conf_vim_data = []
 </code></pre><h3>The <code>g:ycm_server_use_vim_stdout</code> option</h3><p>By default, the <code>ycmd</code> completion server writes logs to logfiles. When this
 option is set to <code>1</code>, the server writes logs to Vim's stdout (so you'll see them
 in the console).</p><p>Default: <code>0</code></p><pre><code>let g:ycm_server_use_vim_stdout = 0
@@ -583,7 +595,13 @@ they might not produce all possible results for a given prefix. By unsetting
 this option you can ensure that the omnicompletion engine is requeried on every
 keypress. That will ensure all completions will be presented, but might cause
 stuttering and lagginess if the omnifunc is slow.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_cache_omnifunc = 1
-</code></pre><h2>FAQ</h2><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
+</code></pre><h2>FAQ</h2><h3>I used to be able to <code>import vim</code> in <code>.ycm_extra_conf.py</code>, but now can't</h3><p>YCM was rewritten to use a client-server architecture where most of the logic is
+in the <code>ycmd</code> server. So the magic <code>vim</code> module you could have previously
+imported in your <code>.ycm_extra_conf.py</code> files doesn't exist anymore.</p><p>To be fair, importing the magic <code>vim</code> module in extra conf files was never
+supported in the first place; it only ever worked by accident and was never a
+part of the extra conf API.</p><p>But fear not, you should be able to tweak your extra conf files to continue
+working by using the <code>g:ycm_extra_conf_vim_data</code> option. See the docs on that
+option for details.</p><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory</code>, then feel free to ignore it; it's caused by a limitation of
 CMake and is not an issue. Everything should still work fine.</p><h3>I get a weird window at the top of my file when I use the semantic engine</h3><p>This is Vim's <code>preview</code> window. Vim uses it to show you extra information about
 something if such information is available. YCM provides Vim with such extra
