@@ -872,14 +872,13 @@ FlagsForFile(filename, client_data = {'v:version': 704})
 So the `client_data` parameter is a dictionary mapping Vim expression strings to
 their values at the time of the request.
 
-The correct way to define parameters for your `FlagsForFile` function is like
-this:
+The correct way to define parameters for your `FlagsForFile` function:
 
 ```python
 def FlagsForFile(filename, **kwargs):
 ```
 
-You can then get to `client_data` like this: `kwargs['client_data']`.
+You can then get to `client_data` with `kwargs['client_data']`.
 
 Default: `[]`
 
