@@ -28,7 +28,8 @@ elseif v:version < 703 || (v:version == 703 && !has('patch584'))
   finish
 elseif !has( 'python' )
   echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires python 2.x" |
+        \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
+        \ " Python 2.x support" |
         \ echohl None
   finish
 endif
