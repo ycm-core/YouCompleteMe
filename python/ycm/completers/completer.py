@@ -18,8 +18,13 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import abc
-import ycm_client_support
-from ycm.utils import ToUtf8IfNeeded, ForceSemanticCompletion
+from ycm.utils import ToUtf8IfNeeded, ForceSemanticCompletion, RunningInsideVim
+
+if RunningInsideVim():
+  from ycm_client_support import FilterAndSortCandidates
+else:
+  from ycm_core import FilterAndSortCandidates
+
 from ycm.completers.completer_utils import TriggersForFiletype
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
@@ -206,10 +211,9 @@ class Completer( object ):
     elif 'insertion_text' in candidates[ 0 ]:
       sort_property = 'insertion_text'
 
-    matches = ycm_client_support.FilterAndSortCandidates(
-      candidates,
-      sort_property,
-      ToUtf8IfNeeded( query ) )
+    matches = FilterAndSortCandidates( candidates,
+                                       sort_property,
+                                       ToUtf8IfNeeded( query ) )
 
     return matches
 

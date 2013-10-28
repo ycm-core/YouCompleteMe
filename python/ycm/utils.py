@@ -62,6 +62,14 @@ def MakeFolderAccessibleToAll( path_to_folder ):
   os.chmod( path_to_folder, flags )
 
 
+def RunningInsideVim():
+  try:
+    import vim  # NOQA
+    return True
+  except ImportError:
+    return False
+
+
 def GetUnusedLocalhostPort():
   sock = socket.socket()
   # This tells the OS to give us any free port in the range [1024 - 65535]
