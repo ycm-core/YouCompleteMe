@@ -30,7 +30,7 @@ namespace fs = boost::filesystem;
 
 namespace {
 
-const char *COMMENT_AND_STRING_REGEX =
+const char * const COMMENT_AND_STRING_REGEX =
   "//.*?$" // Anything following '//'
   "|"
   "#.*?$"  // Anything following '#'
@@ -50,12 +50,12 @@ const char *COMMENT_AND_STRING_REGEX =
   //  3. the escaped double quote inside the string
   "(?<!\\\\)\"(?:\\\\\\\\|\\\\\"|.)*?\"";
 
-const char *IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
+const char * const IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
 
 // For details on the tag format supported, see here for details:
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
-const char *TAG_REGEX =
+const char * const TAG_REGEX =
   "^([^\\t\\n\\r]+)"  // The first field is the identifier
   "\\t"  // A TAB char is the field separator
   // The second field is the path to the file that has the identifier; either
@@ -128,7 +128,7 @@ const boost::unordered_map< const char*,
   ( "Vim"        , "vim"        )
   ( "YACC"       , "yacc"       );
 
-const char* NOT_FOUND = "YCMFOOBAR_NOT_FOUND";
+const char * const NOT_FOUND = "YCMFOOBAR_NOT_FOUND";
 
 }  // unnamed namespace
 
