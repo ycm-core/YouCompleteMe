@@ -935,6 +935,8 @@ The default option is `43200` seconds which is 12 hours. The reason for the
 interval being this long is to prevent the server from shutting down if you
 leave your computer (and Vim) turned on during the night.
 
+A setting of `0` turns off the timer.
+
 The server "heartbeat" that checks whether this interval has passed occurs every
 10 minutes.
 
