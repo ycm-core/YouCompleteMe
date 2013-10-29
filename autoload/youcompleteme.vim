@@ -72,6 +72,9 @@ function! youcompleteme#Enable()
 
   if g:ycm_register_as_syntastic_checker
     call s:ForceSyntasticCFamilyChecker()
+    " We set this to work around segfaults in old versions of Vim
+    " See here for details: https://github.com/scrooloose/syntastic/issues/834
+    let g:syntastic_delayed_redraws = 1
   endif
 
   if g:ycm_allow_changing_updatetime
