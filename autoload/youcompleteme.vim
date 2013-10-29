@@ -71,10 +71,7 @@ function! youcompleteme#Enable()
   call s:SetUpKeyMappings()
 
   if g:ycm_register_as_syntastic_checker
-    call s:ForceSyntasticCFamilyChecker()
-    " We set this to work around segfaults in old versions of Vim
-    " See here for details: https://github.com/scrooloose/syntastic/issues/834
-    let g:syntastic_delayed_redraws = 1
+    call s:TweakSyntasticOptions()
   endif
 
   if g:ycm_allow_changing_updatetime
@@ -176,12 +173,32 @@ function! s:SetUpBackwardsCompatibility()
 endfunction
 
 
+function! s:TweakSyntasticOptions()
+  call s:ForceCFamilyFiletypesSyntasticPassiveMode()
+  call s:ForceSyntasticCFamilyChecker()
+
+  " We set this to work around segfaults in old versions of Vim
+  " See here for details: https://github.com/scrooloose/syntastic/issues/834
+  let g:syntastic_delayed_redraws = 1
+endfunction
+
+
+" Needed so that YCM is used as the syntastic checker
 function! s:ForceSyntasticCFamilyChecker()
-  " Needed so that YCM is used as the syntastic checker
   let g:syntastic_cpp_checkers = ['ycm']
   let g:syntastic_c_checkers = ['ycm']
   let g:syntastic_objc_checkers = ['ycm']
   let g:syntastic_objcpp_checkers = ['ycm']
+endfunction
+
+
+" Needed so that Syntastic doesn't call :SyntasticCheck (and thus YCM code) on
+" file save unnecessarily. We call :SyntasticCheck ourselves often enough.
+function! s:ForceCFamilyFiletypesSyntasticPassiveMode()
+  let mode_map = get( g:, 'syntastic_mode_map', {} )
+  let mode_map.passive_filetypes = get( mode_map, 'passive_filetypes', [] ) +
+        \ ['cpp', 'c', 'objc', 'objcpp']
+  let g:syntastic_mode_map = mode_map
 endfunction
 
 
