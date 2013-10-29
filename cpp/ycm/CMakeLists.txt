@@ -189,7 +189,8 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
                   PATHS
                   ${ENV_LIB_PATHS}
                   /usr/lib
-                  /usr/lib/llvm )
+                  /usr/lib/llvm
+                  /Library/Developer/CommandLineTools/usr/lib )
     set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
   else()
     # For Macs, we do things differently; look further in this file.
