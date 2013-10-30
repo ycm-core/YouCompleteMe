@@ -24,7 +24,8 @@
     "notes": 1,
     "markdown": 1,
     "unite": 1,
-    "text": 1
+    "text": 1,
+    "vimwiki": 1
   },
   "auto_start_csharp_server": 1,
   "auto_stop_csharp_server": 1,
