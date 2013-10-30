@@ -717,13 +717,16 @@ is used like a hash set, meaning that only the keys matter).
 
 See the `g:ycm_filetype_whitelist` option for more details on how this works.
 
-Default: `{'notes': 1, 'markdown': 1, 'text': 1}`
+Default: `[see next line]`
 
     let g:ycm_filetype_blacklist = {
+          \ 'tagbar' : 1,
+          \ 'qf' : 1,
           \ 'notes' : 1,
           \ 'markdown' : 1,
-          \ 'text' : 1,
           \ 'unite' : 1,
+          \ 'text' : 1,
+          \ 'vimwiki' : 1,
           \}
 
 ### The `g:ycm_filetype_specific_completion_to_disable` option
