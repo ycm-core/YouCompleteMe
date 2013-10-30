@@ -43,7 +43,7 @@ from ycm import extra_conf_store
 
 # num bytes for the request body buffer; request.json only works if the request
 # size is less than this
-bottle.Request.MEMFILE_MAX = 500 * 1024
+bottle.Request.MEMFILE_MAX = 1000 * 1024
 
 # TODO: rename these to _lower_case
 SERVER_STATE = None
