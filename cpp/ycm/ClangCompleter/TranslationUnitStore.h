@@ -67,10 +67,10 @@ private:
   boost::shared_ptr< TranslationUnit > GetNoLock( const std::string &filename );
 
 
-  typedef boost::unordered_map< std::string,
+  typedef boost::unordered_map < std::string,
           boost::shared_ptr< TranslationUnit > > TranslationUnitForFilename;
 
-  typedef boost::unordered_map< std::string,
+  typedef boost::unordered_map < std::string,
           std::size_t > FlagsHashForFilename;
 
   CXIndex clang_index_;

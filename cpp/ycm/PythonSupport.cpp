@@ -40,8 +40,10 @@ namespace {
 
 std::string GetUtf8String( const boost::python::object &string_or_unicode ) {
   extract< std::string > to_string( string_or_unicode );
+
   if ( to_string.check() )
     return to_string();
+
   return extract< std::string >( str( string_or_unicode ).encode( "utf8" ) );
 }
 
@@ -95,7 +97,7 @@ boost::python::list FilterAndSortCandidates(
         continue;
 
       Result result = candidate->QueryMatchResult( query,
-                                                  query_has_uppercase_letters );
+                                                   query_has_uppercase_letters );
 
       if ( result.IsSubsequence() ) {
         ResultAnd< int > object_and_result( i, result );

@@ -79,7 +79,7 @@ shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
     // TU object. When we are done creating the TU, we will overwrite this value
     // with the valid object.
     filename_to_translation_unit_[ filename ] =
-        make_shared< TranslationUnit >();
+      make_shared< TranslationUnit >();
 
     // We need to store the flags for the sentinel TU so that other threads end
     // up returning the sentinel TU while the real one is being created.
@@ -110,7 +110,7 @@ shared_ptr< TranslationUnit > TranslationUnitStore::GetOrCreate(
 
 
 shared_ptr< TranslationUnit > TranslationUnitStore::Get(
-    const std::string &filename ) {
+  const std::string &filename ) {
   lock_guard< mutex > lock( filename_to_translation_unit_and_flags_mutex_ );
   return GetNoLock( filename );
 }
@@ -131,7 +131,7 @@ void TranslationUnitStore::RemoveAll() {
 
 
 shared_ptr< TranslationUnit > TranslationUnitStore::GetNoLock(
-    const std::string &filename ) {
+  const std::string &filename ) {
   return FindWithDefault( filename_to_translation_unit_,
                           filename,
                           shared_ptr< TranslationUnit >() );

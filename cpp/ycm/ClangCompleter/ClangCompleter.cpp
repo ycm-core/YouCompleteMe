@@ -80,10 +80,10 @@ std::vector< Diagnostic > ClangCompleter::UpdateTranslationUnit(
   ReleaseGil unlock;
   bool translation_unit_created;
   shared_ptr< TranslationUnit > unit = translation_unit_store_.GetOrCreate(
-      filename,
-      unsaved_files,
-      flags,
-      translation_unit_created );
+                                         filename,
+                                         unsaved_files,
+                                         flags,
+                                         translation_unit_created );
 
   if ( !unit )
     return std::vector< Diagnostic >();
@@ -93,6 +93,7 @@ std::vector< Diagnostic > ClangCompleter::UpdateTranslationUnit(
     // parsed in the TU constructor
     if ( !translation_unit_created )
       return unit->Reparse( unsaved_files );
+
     return unit->LatestDiagnostics();
   }
 
@@ -116,7 +117,7 @@ ClangCompleter::CandidatesForLocationInFile(
   const std::vector< std::string > &flags ) {
   ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit =
-      translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
+    translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
   if ( !unit )
     return std::vector< CompletionData >();
@@ -135,7 +136,7 @@ Location ClangCompleter::GetDeclarationLocation(
   const std::vector< std::string > &flags ) {
   ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit =
-      translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
+    translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
   if ( !unit ) {
     return Location();
@@ -153,7 +154,7 @@ Location ClangCompleter::GetDefinitionLocation(
   const std::vector< std::string > &flags ) {
   ReleaseGil unlock;
   shared_ptr< TranslationUnit > unit =
-      translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
+    translation_unit_store_.GetOrCreate( filename, unsaved_files, flags );
 
   if ( !unit ) {
     return Location();

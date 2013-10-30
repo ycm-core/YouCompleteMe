@@ -30,7 +30,7 @@ namespace fs = boost::filesystem;
 
 namespace {
 
-const char * const COMMENT_AND_STRING_REGEX =
+const char *const COMMENT_AND_STRING_REGEX =
   "//.*?$" // Anything following '//'
   "|"
   "#.*?$"  // Anything following '#'
@@ -50,12 +50,12 @@ const char * const COMMENT_AND_STRING_REGEX =
   //  3. the escaped double quote inside the string
   "(?<!\\\\)\"(?:\\\\\\\\|\\\\\"|.)*?\"";
 
-const char * const IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
+const char *const IDENTIFIER_REGEX = "[_a-zA-Z]\\w*";
 
 // For details on the tag format supported, see here for details:
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
-const char * const TAG_REGEX =
+const char *const TAG_REGEX =
   "^([^\\t\\n\\r]+)"  // The first field is the identifier
   "\\t"  // A TAB char is the field separator
   // The second field is the path to the file that has the identifier; either
@@ -71,11 +71,10 @@ const char * const TAG_REGEX =
 // When passed a const char* this will create a temporary std::string for
 // comparison, but it's fast enough for our use case.
 struct StringEqualityComparer :
-  std::binary_function< std::string, std::string, bool >
-{
-    bool operator()( const std::string &a, const std::string &b ) const {
-      return a == b;
-    }
+    std::binary_function< std::string, std::string, bool > {
+  bool operator()( const std::string &a, const std::string &b ) const {
+    return a == b;
+  }
 };
 
 // List of languages Exuberant Ctags supports:
@@ -84,51 +83,51 @@ struct StringEqualityComparer :
 //   :e $VIMRUNTIME/filetype.vim
 // This is a map of const char* and not std::string to prevent issues with
 // static initialization.
-const boost::unordered_map< const char*,
-                            const char*,
-                            boost::hash< std::string >,
-                            StringEqualityComparer > LANG_TO_FILETYPE =
-  boost::assign::map_list_of
-  ( "Ant"        , "ant"        )
-  ( "Asm"        , "asm"        )
-  ( "Awk"        , "awk"        )
-  ( "Basic"      , "basic"      )
-  ( "C++"        , "cpp"        )
-  ( "C#"         , "cs"         )
-  ( "C"          , "c"          )
-  ( "COBOL"      , "cobol"      )
-  ( "DosBatch"   , "dosbatch"   )
-  ( "Eiffel"     , "eiffel"     )
-  ( "Erlang"     , "erlang"     )
-  ( "Fortran"    , "fortran"    )
-  ( "HTML"       , "html"       )
-  ( "Java"       , "java"       )
-  ( "JavaScript" , "javascript" )
-  ( "Lisp"       , "lisp"       )
-  ( "Lua"        , "lua"        )
-  ( "Make"       , "make"       )
-  ( "MatLab"     , "matlab"     )
-  ( "OCaml"      , "ocaml"      )
-  ( "Pascal"     , "pascal"     )
-  ( "Perl"       , "perl"       )
-  ( "PHP"        , "php"        )
-  ( "Python"     , "python"     )
-  ( "REXX"       , "rexx"       )
-  ( "Ruby"       , "ruby"       )
-  ( "Scheme"     , "scheme"     )
-  ( "Sh"         , "sh"         )
-  ( "SLang"      , "slang"      )
-  ( "SML"        , "sml"        )
-  ( "SQL"        , "sql"        )
-  ( "Tcl"        , "tcl"        )
-  ( "Tex"        , "tex"        )
-  ( "Vera"       , "vera"       )
-  ( "Verilog"    , "verilog"    )
-  ( "VHDL"       , "vhdl"       )
-  ( "Vim"        , "vim"        )
-  ( "YACC"       , "yacc"       );
+const boost::unordered_map < const char *,
+      const char *,
+      boost::hash< std::string >,
+      StringEqualityComparer > LANG_TO_FILETYPE =
+        boost::assign::map_list_of
+        ( "Ant"        , "ant"        )
+        ( "Asm"        , "asm"        )
+        ( "Awk"        , "awk"        )
+        ( "Basic"      , "basic"      )
+        ( "C++"        , "cpp"        )
+        ( "C#"         , "cs"         )
+        ( "C"          , "c"          )
+        ( "COBOL"      , "cobol"      )
+        ( "DosBatch"   , "dosbatch"   )
+        ( "Eiffel"     , "eiffel"     )
+        ( "Erlang"     , "erlang"     )
+        ( "Fortran"    , "fortran"    )
+        ( "HTML"       , "html"       )
+        ( "Java"       , "java"       )
+        ( "JavaScript" , "javascript" )
+        ( "Lisp"       , "lisp"       )
+        ( "Lua"        , "lua"        )
+        ( "Make"       , "make"       )
+        ( "MatLab"     , "matlab"     )
+        ( "OCaml"      , "ocaml"      )
+        ( "Pascal"     , "pascal"     )
+        ( "Perl"       , "perl"       )
+        ( "PHP"        , "php"        )
+        ( "Python"     , "python"     )
+        ( "REXX"       , "rexx"       )
+        ( "Ruby"       , "ruby"       )
+        ( "Scheme"     , "scheme"     )
+        ( "Sh"         , "sh"         )
+        ( "SLang"      , "slang"      )
+        ( "SML"        , "sml"        )
+        ( "SQL"        , "sql"        )
+        ( "Tcl"        , "tcl"        )
+        ( "Tex"        , "tex"        )
+        ( "Vera"       , "vera"       )
+        ( "Verilog"    , "verilog"    )
+        ( "VHDL"       , "vhdl"       )
+        ( "Vim"        , "vim"        )
+        ( "YACC"       , "yacc"       );
 
-const char * const NOT_FOUND = "YCMFOOBAR_NOT_FOUND";
+const char *const NOT_FOUND = "YCMFOOBAR_NOT_FOUND";
 
 }  // unnamed namespace
 

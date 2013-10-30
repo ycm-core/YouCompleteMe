@@ -7,7 +7,7 @@ int main( int argc, char **argv ) {
   // Necessary because of usage of the ReleaseGil class
   PyEval_InitThreads();
 
-  testing::InitGoogleMock(&argc, argv);
+  testing::InitGoogleMock( &argc, argv );
   return RUN_ALL_TESTS();
 }
 
