@@ -23,12 +23,12 @@ import requests
 import urlparse
 from retries import retries
 from requests_futures.sessions import FuturesSession
-from concurrent.futures import ThreadPoolExecutor
+from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
 from ycm.server.responses import ServerError, UnknownExtraConf
 
 HEADERS = {'content-type': 'application/json'}
-EXECUTOR = ThreadPoolExecutor( max_workers = 10 )
+EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 10 )
 # Setting this to None seems to screw up the Requests/urllib3 libs.
 DEFAULT_TIMEOUT_SEC = 30
 
