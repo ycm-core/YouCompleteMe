@@ -87,16 +87,17 @@ def PathToPythonInterpreter():
   # to python3.
   path_to_python = PathToFirstExistingExecutable(
     [ 'pythonw', 'python2', 'python' ] )
-  if not path_to_python:
-    # On Windows, Python may not be on the PATH at all, so we check some common
-    # install locations.
-    if OnWindows():
-      if os.path.exists( WIN_PYTHON27_PATH ):
-        return WIN_PYTHON27_PATH
-      elif os.path.exists( WIN_PYTHON26_PATH ):
-        return WIN_PYTHON26_PATH
-    raise RuntimeError( 'Python 2.7/2.6 not installed!' )
-  return path_to_python
+  if path_to_python:
+    return path_to_python
+
+  # On Windows, Python may not be on the PATH at all, so we check some common
+  # install locations.
+  if OnWindows():
+    if os.path.exists( WIN_PYTHON27_PATH ):
+      return WIN_PYTHON27_PATH
+    elif os.path.exists( WIN_PYTHON26_PATH ):
+      return WIN_PYTHON26_PATH
+  raise RuntimeError( 'Python 2.7/2.6 not installed!' )
 
 
 def PathToFirstExistingExecutable( executable_name_list ):
