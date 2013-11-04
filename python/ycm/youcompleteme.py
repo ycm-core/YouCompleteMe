@@ -41,6 +41,15 @@ try:
 except ImportError:
   USE_ULTISNIPS_DATA = False
 
+# We need this so that Requests doesn't end up using the local HTTP proxy when
+# talking to ycmd. Users should actually be setting this themselves when
+# configuring a proxy server on their machine, but most don't know they need to
+# or how to do it, so we do it for them.
+# Relevant issues:
+#  https://github.com/Valloric/YouCompleteMe/issues/641
+#  https://github.com/kennethreitz/requests/issues/879
+os.environ['no_proxy'] = '127.0.0.1,localhost'
+
 SERVER_CRASH_MESSAGE_STDERR_FILE = 'The ycmd server SHUT DOWN with output:\n'
 SERVER_CRASH_MESSAGE_SAME_STDERR = (
   'The ycmd server shut down, check console output for logs!' )
