@@ -101,9 +101,16 @@ class YouCompleteMe( object ):
 
         with open( self._server_stderr, 'w' ) as fstderr:
           with open( self._server_stdout, 'w' ) as fstdout:
+            startupinfo = None
+            if os.name == 'nt':
+              startupinfo = subprocess.STARTUPINFO()
+              startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             self._server_popen = subprocess.Popen( args,
+                                                   startupinfo = startupinfo,
+                                                   stdin = subprocess.PIPE,
                                                    stdout = fstdout,
                                                    stderr = fstderr )
+
     self._NotifyUserIfServerCrashed()
 
 
