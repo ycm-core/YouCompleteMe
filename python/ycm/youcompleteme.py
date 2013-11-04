@@ -50,9 +50,13 @@ except ImportError:
 #  https://github.com/kennethreitz/requests/issues/879
 os.environ['no_proxy'] = '127.0.0.1,localhost'
 
-SERVER_CRASH_MESSAGE_STDERR_FILE = 'The ycmd server SHUT DOWN with output:\n'
+NUM_YCMD_STDERR_LINES_ON_CRASH = 30
+SERVER_CRASH_MESSAGE_STDERR_FILE = (
+  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). ' +
+  'Stderr (last {0} lines):\n\n'.format( NUM_YCMD_STDERR_LINES_ON_CRASH ) )
 SERVER_CRASH_MESSAGE_SAME_STDERR = (
-  'The ycmd server shut down, check console output for logs!' )
+  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
+  ' check console output for logs!' )
 
 
 class YouCompleteMe( object ):
@@ -114,8 +118,10 @@ class YouCompleteMe( object ):
       return
     if self._server_stderr:
       with open( self._server_stderr, 'r' ) as server_stderr_file:
+        error_output = ''.join( server_stderr_file.readlines()[
+            : - NUM_YCMD_STDERR_LINES_ON_CRASH ] )
         vimsupport.PostMultiLineNotice( SERVER_CRASH_MESSAGE_STDERR_FILE +
-                                        server_stderr_file.read() )
+                                        error_output )
     else:
         vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
 
