@@ -243,7 +243,7 @@ class ClangCompleter( Completer ):
 
 
   def _FlagsForRequest( self, request_data ):
-    filename = request_data[ 'filepath' ]
+    filename = ToUtf8IfNeeded( request_data[ 'filepath' ] )
     if 'compilation_flags' in request_data:
       return PrepareFlagsForClang( request_data[ 'compilation_flags' ],
                                    filename )
