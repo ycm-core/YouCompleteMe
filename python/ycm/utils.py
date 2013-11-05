@@ -80,13 +80,16 @@ def GetUnusedLocalhostPort():
 
 
 def PathToPythonInterpreter():
-  # We check for 'pythonw' first because that covers the Windows use case (and
-  # 'pythonw' doesn't pop-up a console window like running 'python' does).
   # We check for 'python2' before 'python' because some OS's (I'm looking at you
   # Arch Linux) have made the... interesting decision to point /usr/bin/python
   # to python3.
-  path_to_python = PathToFirstExistingExecutable(
-    [ 'pythonw', 'python2', 'python' ] )
+  python_names = [ 'python2', 'python' ]
+  if OnWindows():
+    # On Windows, 'pythonw' doesn't pop-up a console window like running
+    # 'python' does.
+    python_names.insert( 0, 'pythonw' )
+
+  path_to_python = PathToFirstExistingExecutable( python_names )
   if path_to_python:
     return path_to_python
 
