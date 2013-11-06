@@ -581,18 +581,32 @@ function! youcompleteme#Complete( findstart, base )
     " Vim bugs and unfortunate interactions with the autocommands of other
     " plugins
     if !s:cursor_moved
-      " for vim, -2 means not found but don't trigger an error message
+      " for vim, -3 means to cancel silently and leave completion mode.
       " see :h complete-functions
-      return -2
+      return -3
     endif
 
     py request = ycm_state.CreateCompletionRequest()
     if !pyeval( 'bool(request)' )
-      return -2
+      return -3
     endif
-    return pyeval( 'request.CompletionStartColumn()' )
+
+    return s:ComputeCandidates( pyeval( 'request.CompletionStartColumn()' ) )
   else
-    return s:CompletionsForQuery( a:base )
+    return s:current_candidates
+  endif
+endfunction
+
+
+function! s:ComputeCandidates(start_column)
+  let base = strpart( getline( '.' ), a:start_column )
+
+  let s:current_candidates = s:CompletionsForQuery( base )
+
+  if s:searched_and_results_found
+    return a:start_column
+  else
+    return -3
   endif
 endfunction
 
@@ -601,9 +615,9 @@ function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
     py request = ycm_state.CreateCompletionRequest( force_semantic = True )
-    return pyeval( 'request.CompletionStartColumn()' )
+    return s:ComputeCandidates( pyeval( 'request.CompletionStartColumn()' ) )
   else
-    return s:CompletionsForQuery( a:base )
+    return s:current_candidates
   endif
 endfunction
 
