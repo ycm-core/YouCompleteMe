@@ -98,10 +98,13 @@ class YouCompleteMe( object ):
                                                       std = 'stdout' )
         self._server_stderr = filename_format.format( port = server_port,
                                                       std = 'stderr' )
+        # We need this on Windows otherwise bad things happen. See issue #637.
+        stdin = subprocess.PIPE if utils.OnWindows() else None
 
         with open( self._server_stderr, 'w' ) as fstderr:
           with open( self._server_stdout, 'w' ) as fstdout:
             self._server_popen = subprocess.Popen( args,
+                                                   stdin = stdin,
                                                    stdout = fstdout,
                                                    stderr = fstderr )
     self._NotifyUserIfServerCrashed()
