@@ -206,6 +206,24 @@ TEST( IdentifierCompleterTest, SameLowercaseCandidateWins ) {
                    "Foobar" ) ).CandidatesForQuery( "foo" ),
                ElementsAre( "foobar",
                             "Foobar" ) );
+
+}
+
+TEST( IdentifierCompleterTest, PreferLowercaseCandidate ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "chatContentExtension",
+                   "ChatContentExtension" ) ).CandidatesForQuery(
+                       "chatContent" ),
+               ElementsAre( "chatContentExtension",
+                            "ChatContentExtension" ) );
+
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "fooBar",
+                   "FooBar" ) ).CandidatesForQuery( "oba" ),
+               ElementsAre( "fooBar",
+                            "FooBar" ) );
 }
 
 TEST( IdentifierCompleterTest, ShorterAndLowercaseWins ) {
