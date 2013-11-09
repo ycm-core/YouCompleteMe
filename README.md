@@ -1479,7 +1479,7 @@ for bug reports and feature requests.
 ### I get an internal compiler error when installing
 
 This can be a problem on virtual servers with limited memory. A possible
-solution is to add more swap memory. (Add Swap File)[https://www.digitalocean.com/community/articles/how-to-add-swap-on-ubuntu-12-04]
+solution is to add more swap memory.
 
 Contact
 -------
