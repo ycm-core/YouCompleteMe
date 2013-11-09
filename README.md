@@ -1476,6 +1476,11 @@ If you have questions about the plugin or need help, please use the
 [ycm-users][] mailing list, _don't_ create issues on the tracker. The tracker is
 for bug reports and feature requests.
 
+### I get an internal compiler error when installing
+
+This can be a problem on virtual servers with limited memory. A possible
+solution is to add more swap memory.
+
 Contact
 -------
 
