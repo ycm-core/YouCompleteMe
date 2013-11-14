@@ -21,6 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/function.hpp>
 #include <algorithm>
+#include <locale>
 
 using boost::algorithm::istarts_with;
 
@@ -29,9 +30,9 @@ namespace YouCompleteMe {
 namespace {
 
 char ChangeCharCase( char c ) {
-  if ( std::isupper( c ) )
-    return std::tolower( c );
-  return std::toupper( c );
+  if ( std::isupper( c, std::locale() ) )
+    return std::tolower( c, std::locale() );
+  return std::toupper( c, std::locale() );
 }
 
 
