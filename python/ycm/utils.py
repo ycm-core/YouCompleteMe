@@ -30,6 +30,18 @@ WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
 WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
 
 
+def Memoize( obj ):
+  cache = obj.cache = {}
+
+  @functools.wraps( obj )
+  def memoizer( *args, **kwargs ):
+    key = str( args ) + str( kwargs )
+    if key not in cache:
+      cache[ key ] = obj( *args, **kwargs )
+    return cache[ key ]
+  return memoizer
+
+
 def IsIdentifierChar( char ):
   return char.isalnum() or char == '_'
 
@@ -79,7 +91,19 @@ def GetUnusedLocalhostPort():
   return port
 
 
+@Memoize
 def PathToPythonInterpreter():
+  try:
+    # If we're in vim, need to look for python
+    import vim
+  except ImportError:
+    # Otherwise, just return the current interpreter
+    return sys.executable
+
+  # Check to see if the user set the python path
+  if "ycm_python_interpreter" in vim.vars:
+    return vim.vars["ycm_python_interpreter"]
+
   # We check for 'python2' before 'python' because some OS's (I'm looking at you
   # Arch Linux) have made the... interesting decision to point /usr/bin/python
   # to python3.
@@ -137,17 +161,6 @@ def AddThirdPartyFoldersToSysPath():
   for folder in os.listdir( path_to_third_party ):
     sys.path.insert( 0, os.path.realpath( os.path.join( path_to_third_party,
                                                         folder ) ) )
-
-def Memoize( obj ):
-  cache = obj.cache = {}
-
-  @functools.wraps( obj )
-  def memoizer( *args, **kwargs ):
-    key = str( args ) + str( kwargs )
-    if key not in cache:
-      cache[ key ] = obj( *args, **kwargs )
-    return cache[ key ]
-  return memoizer
 
 
 def ForceSemanticCompletion( request_data ):
