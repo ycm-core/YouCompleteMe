@@ -79,7 +79,28 @@ def GetUnusedLocalhostPort():
   return port
 
 
+def Memoize( obj ):
+  cache = obj.cache = {}
+
+  @functools.wraps( obj )
+  def memoizer( *args, **kwargs ):
+    key = str( args ) + str( kwargs )
+    if key not in cache:
+      cache[ key ] = obj( *args, **kwargs )
+    return cache[ key ]
+  return memoizer
+
+
+@Memoize
 def PathToPythonInterpreter():
+  if not RunningInsideVim():
+    return sys.executable
+
+  import vim  # NOQA
+  user_path_to_python = vim.eval( 'g:ycm_path_to_python_interpreter' )
+  if user_path_to_python:
+    return user_path_to_python
+
   # We check for 'python2' before 'python' because some OS's (I'm looking at you
   # Arch Linux) have made the... interesting decision to point /usr/bin/python
   # to python3.
@@ -137,18 +158,6 @@ def AddThirdPartyFoldersToSysPath():
   for folder in os.listdir( path_to_third_party ):
     sys.path.insert( 0, os.path.realpath( os.path.join( path_to_third_party,
                                                         folder ) ) )
-
-def Memoize( obj ):
-  cache = obj.cache = {}
-
-  @functools.wraps( obj )
-  def memoizer( *args, **kwargs ):
-    key = str( args ) + str( kwargs )
-    if key not in cache:
-      cache[ key ] = obj( *args, **kwargs )
-    return cache[ key ]
-  return memoizer
-
 
 def ForceSemanticCompletion( request_data ):
   return ( 'force_semantic' in request_data and

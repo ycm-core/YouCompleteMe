@@ -116,6 +116,9 @@ let g:ycm_server_idle_suicide_seconds =
 let g:ycm_extra_conf_vim_data =
       \ get( g:, 'ycm_extra_conf_vim_data', [] )
 
+let g:ycm_path_to_python_interpreter =
+      \ get( g:, 'path_to_python_interpreter', '' )
+
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.

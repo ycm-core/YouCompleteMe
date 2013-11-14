@@ -887,6 +887,20 @@ Default: `[]`
 
     let g:ycm_extra_conf_vim_data = []
 
+### The `g:ycm_path_to_python_interpreter` option
+
+YCM will by default search for an appropriate Python interpreter on your system.
+You can use this option to override that behavior and force the use of a
+specific interpreter of your choosing.
+
+NOTE: This interpreter is only used for the `ycmd` server. The YCM client
+running inside Vim always uses the Python interpreter that's embedded inside
+Vim.
+
+Default: `''`
+
+    let g:ycm_path_to_python_interpreter = ''
+
 ### The `g:ycm_server_use_vim_stdout` option
 
 By default, the `ycmd` completion server writes logs to logfiles. When this
