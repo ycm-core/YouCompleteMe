@@ -37,13 +37,11 @@ class GeneralCompleterStore( Completer ):
     self._identifier_completer = IdentifierCompleter( user_options )
     self._filename_completer = FilenameCompleter( user_options )
     self._ultisnips_completer = UltiSnipsCompleter( user_options )
-    self._non_filename_completers = filter( lambda x: x,
-                                            [ self._ultisnips_completer,
-                                              self._identifier_completer ] )
-    self._all_completers = filter( lambda x: x,
-                                   [ self._identifier_completer,
-                                     self._filename_completer,
-                                     self._ultisnips_completer ] )
+    self._non_filename_completers = [ self._ultisnips_completer,
+                                      self._identifier_completer ]
+    self._all_completers = [ self._identifier_completer,
+                             self._filename_completer,
+                             self._ultisnips_completer ]
     self._current_query_completers = []
 
 
