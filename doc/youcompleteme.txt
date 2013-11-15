@@ -505,6 +505,11 @@ projects.
 Yes, Clang's 'CompilationDatabase' system [20] is also supported. Again, see
 the above linked example file.
 
+YCM also provides a default '.ycm.py' that searches for a '.ycm'
+file (also recursively), and reads its content as compilation flags or path
+to a compilation database. You could put that file anywhere, and point
+*g:ycm_global_ycm_extra_conf* to it.
+
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions. When
 the completion menu finally appears, it's going to have a large number of
