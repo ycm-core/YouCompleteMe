@@ -48,27 +48,29 @@ Contents ~
   11. The |g:ycm_collect_identifiers_from_tags_files| option
   12. The |g:ycm_seed_identifiers_with_syntax| option
   13. The |g:ycm_extra_conf_vim_data| option
-  14. The |g:ycm_server_use_vim_stdout| option
-  15. The |g:ycm_server_keep_logfiles| option
-  16. The |g:ycm_server_log_level| option
-  17. The |g:ycm_server_idle_suicide_seconds| option
-  18. The |g:ycm_csharp_server_port| option
-  19. The |g:ycm_auto_start_csharp_server| option
-  20. The |g:ycm_auto_stop_csharp_server| option
-  21. The |g:ycm_add_preview_to_completeopt| option
-  22. The |g:ycm_autoclose_preview_window_after_completion| option
-  23. The |g:ycm_autoclose_preview_window_after_insertion| option
-  24. The |g:ycm_max_diagnostics_to_display| option
-  25. The |g:ycm_key_list_select_completion| option
-  26. The |g:ycm_key_list_previous_completion| option
-  27. The |g:ycm_key_invoke_completion| option
-  28. The |g:ycm_key_detailed_diagnostics| option
-  29. The |g:ycm_global_ycm_extra_conf| option
-  30. The |g:ycm_confirm_extra_conf| option
-  31. The |g:ycm_extra_conf_globlist| option
-  32. The |g:ycm_filepath_completion_use_working_dir| option
-  33. The |g:ycm_semantic_triggers| option
-  34. The |g:ycm_cache_omnifunc| option
+  14. The |g:ycm_path_to_python_interpreter| option
+  15. The |g:ycm_server_use_vim_stdout| option
+  16. The |g:ycm_server_keep_logfiles| option
+  17. The |g:ycm_server_log_level| option
+  18. The |g:ycm_server_idle_suicide_seconds| option
+  19. The |g:ycm_csharp_server_port| option
+  20. The |g:ycm_auto_start_csharp_server| option
+  21. The |g:ycm_auto_stop_csharp_server| option
+  22. The |g:ycm_add_preview_to_completeopt| option
+  23. The |g:ycm_autoclose_preview_window_after_completion| option
+  24. The |g:ycm_autoclose_preview_window_after_insertion| option
+  25. The |g:ycm_max_diagnostics_to_display| option
+  26. The |g:ycm_key_list_select_completion| option
+  27. The |g:ycm_key_list_previous_completion| option
+  28. The |g:ycm_key_invoke_completion| option
+  29. The |g:ycm_key_detailed_diagnostics| option
+  30. The |g:ycm_global_ycm_extra_conf| option
+  31. The |g:ycm_confirm_extra_conf| option
+  32. The |g:ycm_extra_conf_globlist| option
+  33. The |g:ycm_filepath_completion_use_working_dir| option
+  34. The |g:ycm_semantic_triggers| option
+  35. The |g:ycm_cache_omnifunc| option
+  36. The |g:ycm_use_ultisnips_completer| option
  10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. I get a linker warning regarding |libpython| on Mac when compiling YCM
@@ -94,6 +96,7 @@ Contents ~
   22. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
   23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
   24. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  25. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
  11. Contact                                            |youcompleteme-contact|
  12. License                                            |youcompleteme-license|
  13. References                                      |youcompleteme-references|
@@ -1034,9 +1037,30 @@ function will be called like this:
 So the 'client_data' parameter is a dictionary mapping Vim expression strings
 to their values at the time of the request.
 
+The correct way to define parameters for your 'FlagsForFile' function:
+>
+  def FlagsForFile(filename, **kwargs):
+<
+You can then get to 'client_data' with "kwargs['client_data']".
+
 Default: '[]'
 >
   let g:ycm_extra_conf_vim_data = []
+<
+-------------------------------------------------------------------------------
+The *g:ycm_path_to_python_interpreter* option
+
+YCM will by default search for an appropriate Python interpreter on your
+system. You can use this option to override that behavior and force the use of
+a specific interpreter of your choosing.
+
+NOTE: This interpreter is only used for the 'ycmd' server. The YCM client
+running inside Vim always uses the Python interpreter that's embedded inside
+Vim.
+
+Default: "''"
+>
+  let g:ycm_path_to_python_interpreter = ''
 <
 -------------------------------------------------------------------------------
 The *g:ycm_server_use_vim_stdout* option
@@ -1088,6 +1112,8 @@ around forever.
 The default option is '43200' seconds which is 12 hours. The reason for the
 interval being this long is to prevent the server from shutting down if you
 leave your computer (and Vim) turned on during the night.
+
+A setting of '0' turns off the timer.
 
 The server "heartbeat" that checks whether this interval has passed occurs
 every 10 minutes.
@@ -1365,6 +1391,16 @@ stuttering and lagginess if the omnifunc is slow.
 Default: '1'
 >
   let g:ycm_cache_omnifunc = 1
+<
+-------------------------------------------------------------------------------
+The *g:ycm_use_ultisnips_completer* option
+
+By default, YCM will query the UltiSnips plugin for possible completions of
+snippet triggers. This option can turn that behavior off.
+
+Default: '1'
+>
+  let g:ycm_use_ultisnips_completer = 1
 <
 ===============================================================================
                                                             *youcompleteme-faq*
@@ -1683,6 +1719,13 @@ Is there some sort of YCM mailing list? I have questions ~
 If you have questions about the plugin or need help, please use the ycm-users
 [29] mailing list, _don't_ create issues on the tracker. The tracker is for bug
 reports and feature requests.
+
+-------------------------------------------------------------------------------
+               *youcompleteme-i-get-an-internal-compiler-error-when-installing*
+I get an internal compiler error when installing ~
+
+This can be a problem on virtual servers with limited memory. A possible
+solution is to add more swap memory.
 
 ===============================================================================
                                                         *youcompleteme-contact*
