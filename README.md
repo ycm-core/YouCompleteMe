@@ -1211,6 +1211,15 @@ Default: `1`
 
     let g:ycm_cache_omnifunc = 1
 
+### The `g:ycm_use_ultisnips_completer` option
+
+By default, YCM will query the UltiSnips plugin for possible completions of
+snippet triggers. This option can turn that behavior off.
+
+Default: `1`
+
+    let g:ycm_use_ultisnips_completer = 1
+
 FAQ
 ---
 

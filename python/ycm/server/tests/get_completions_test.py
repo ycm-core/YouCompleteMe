@@ -21,7 +21,8 @@ from ..server_utils import SetUpPythonPath
 SetUpPythonPath()
 import time
 import httplib
-from .test_utils import Setup, BuildRequest, PathToTestFile
+from .test_utils import ( Setup, BuildRequest, PathToTestFile,
+                          ChangeSpecificOptions )
 from webtest import TestApp
 from nose.tools import eq_, with_setup
 from hamcrest import ( assert_that, has_item, has_items, has_entry,
@@ -269,5 +270,26 @@ def GetCompletions_UltiSnipsCompleter_Works_test():
   eq_( [ BuildCompletionData( 'foo', '<snip> bar' ),
          BuildCompletionData( 'zoo', '<snip> goo' ) ],
        app.post_json( '/completions', completion_data ).json )
+
+
+@with_setup( Setup )
+def GetCompletions_UltiSnipsCompleter_UnusedWhenOffWithOption_test():
+  ChangeSpecificOptions( { 'use_ultisnips_completer': False } )
+  app = TestApp( handlers.app )
+
+  event_data = BuildRequest(
+    event_name = 'BufferVisit',
+    ultisnips_snippets = [
+        {'trigger': 'foo', 'description': 'bar'},
+        {'trigger': 'zoo', 'description': 'goo'},
+    ] )
+
+  app.post_json( '/event_notification', event_data )
+
+  completion_data = BuildRequest( contents = 'oo ',
+                                  query = 'oo',
+                                  column_num = 2 )
+
+  eq_( [], app.post_json( '/completions', completion_data ).json )
 
 

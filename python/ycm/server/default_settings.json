@@ -29,5 +29,6 @@
   },
   "auto_start_csharp_server": 1,
   "auto_stop_csharp_server": 1,
+  "use_ultisnips_completer": 1,
   "csharp_server_port": 2000
 }

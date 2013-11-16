@@ -37,8 +37,10 @@ class GeneralCompleterStore( Completer ):
     self._identifier_completer = IdentifierCompleter( user_options )
     self._filename_completer = FilenameCompleter( user_options )
     self._ultisnips_completer = UltiSnipsCompleter( user_options )
-    self._non_filename_completers = [ self._ultisnips_completer,
-                                      self._identifier_completer ]
+    self._non_filename_completers = [ self._identifier_completer ]
+    if user_options.get( 'use_ultisnips_completer', True ):
+      self._non_filename_completers.append( self._ultisnips_completer )
+
     self._all_completers = [ self._identifier_completer,
                              self._filename_completer,
                              self._ultisnips_completer ]

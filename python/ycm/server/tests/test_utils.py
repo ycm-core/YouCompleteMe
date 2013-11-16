@@ -19,6 +19,7 @@
 
 import os
 from .. import handlers
+from ycm import user_options_store
 
 def BuildRequest( **kwargs ):
   filepath = kwargs[ 'filepath' ] if 'filepath' in kwargs else '/foo'
@@ -57,6 +58,12 @@ def BuildRequest( **kwargs ):
 
 def Setup():
   handlers.SetServerStateToDefaults()
+
+
+def ChangeSpecificOptions( options ):
+  current_options = dict( user_options_store.GetAll() )
+  current_options.update( options )
+  handlers.UpdateUserOptions( current_options )
 
 
 def PathToTestDataDir():
