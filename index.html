@@ -407,11 +407,14 @@ semantic engine will operate in them.</p><p>You can get the filetype of the curr
 </code></pre><h3>The <code>g:ycm_filetype_blacklist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
 turned off. The option value should be a Vim dictionary with keys being filetype
 strings (like <code>python</code>, <code>cpp</code> etc) and values being unimportant (the dictionary
-is used like a hash set, meaning that only the keys matter).</p><p>See the <code>g:ycm_filetype_whitelist</code> option for more details on how this works.</p><p>Default: <code>{'notes': 1, 'markdown': 1, 'text': 1}</code></p><pre><code>let g:ycm_filetype_blacklist = {
+is used like a hash set, meaning that only the keys matter).</p><p>See the <code>g:ycm_filetype_whitelist</code> option for more details on how this works.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_filetype_blacklist = {
+      \ 'tagbar' : 1,
+      \ 'qf' : 1,
       \ 'notes' : 1,
       \ 'markdown' : 1,
-      \ 'text' : 1,
       \ 'unite' : 1,
+      \ 'text' : 1,
+      \ 'vimwiki' : 1,
       \}
 </code></pre><h3>The <code>g:ycm_filetype_specific_completion_to_disable</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should the YCM
 semantic completion engine be turned off. The option value should be a Vim
@@ -468,7 +471,13 @@ evaluated for every request to the <code>ycmd</code> server and then passed to y
 function will be called like this:</p><pre><code class="python"># The '704' value is of course contingent on Vim 7.4; in 7.3 it would be '703'
 FlagsForFile(filename, client_data = {'v:version': 704})
 </code></pre><p>So the <code>client_data</code> parameter is a dictionary mapping Vim expression strings to
-their values at the time of the request.</p><p>Default: <code>[]</code></p><pre><code>let g:ycm_extra_conf_vim_data = []
+their values at the time of the request.</p><p>The correct way to define parameters for your <code>FlagsForFile</code> function:</p><pre><code class="python">def FlagsForFile(filename, **kwargs):
+</code></pre><p>You can then get to <code>client_data</code> with <code>kwargs['client_data']</code>.</p><p>Default: <code>[]</code></p><pre><code>let g:ycm_extra_conf_vim_data = []
+</code></pre><h3>The <code>g:ycm_path_to_python_interpreter</code> option</h3><p>YCM will by default search for an appropriate Python interpreter on your system.
+You can use this option to override that behavior and force the use of a
+specific interpreter of your choosing.</p><p>NOTE: This interpreter is only used for the <code>ycmd</code> server. The YCM client
+running inside Vim always uses the Python interpreter that's embedded inside
+Vim.</p><p>Default: <code>''</code></p><pre><code>let g:ycm_path_to_python_interpreter = ''
 </code></pre><h3>The <code>g:ycm_server_use_vim_stdout</code> option</h3><p>By default, the <code>ycmd</code> completion server writes logs to logfiles. When this
 option is set to <code>1</code>, the server writes logs to Vim's stdout (so you'll see them
 in the console).</p><p>Default: <code>0</code></p><pre><code>let g:ycm_server_use_vim_stdout = 0
@@ -487,7 +496,7 @@ shutdown request to the server when Vim is shutting down.</p><p>If your Vim cras
 becomes a zombie process. This option prevents such zombies from sticking around
 forever.</p><p>The default option is <code>43200</code> seconds which is 12 hours. The reason for the
 interval being this long is to prevent the server from shutting down if you
-leave your computer (and Vim) turned on during the night.</p><p>The server "heartbeat" that checks whether this interval has passed occurs every
+leave your computer (and Vim) turned on during the night.</p><p>A setting of <code>0</code> turns off the timer.</p><p>The server "heartbeat" that checks whether this interval has passed occurs every
 10 minutes.</p><p>Default: <code>43200</code></p><pre><code>let g:ycm_server_idle_suicide_seconds = 43200
 </code></pre><h3>The <code>g:ycm_csharp_server_port</code> option</h3><p>The port number (on <code>localhost</code>) on which the OmniSharp server should be
 started.</p><p>Default: <code>2000</code></p><pre><code>let g:ycm_csharp_server_port = 2000
@@ -595,6 +604,8 @@ they might not produce all possible results for a given prefix. By unsetting
 this option you can ensure that the omnicompletion engine is requeried on every
 keypress. That will ensure all completions will be presented, but might cause
 stuttering and lagginess if the omnifunc is slow.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_cache_omnifunc = 1
+</code></pre><h3>The <code>g:ycm_use_ultisnips_completer</code> option</h3><p>By default, YCM will query the UltiSnips plugin for possible completions of
+snippet triggers. This option can turn that behavior off.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_use_ultisnips_completer = 1
 </code></pre><h2>FAQ</h2><h3>I used to be able to <code>import vim</code> in <code>.ycm_extra_conf.py</code>, but now can't</h3><p>YCM was rewritten to use a client-server architecture where most of the logic is
 in the <code>ycmd</code> server. So the magic <code>vim</code> module you could have previously
 imported in your <code>.ycm_extra_conf.py</code> files doesn't exist anymore.</p><p>To be fair, importing the magic <code>vim</code> module in extra conf files was never
@@ -711,7 +722,8 @@ and similar, then sadly there's no fix for those. Vim will emit them no matter
 how hard I try to silence them.</p><p>You'll have to learn to ignore them. It's a shitty "solution", I know.</p><h3>Nasty bugs happen if I have the <code>vim-autoclose</code> plugin installed</h3><p>Use the <a href="https://github.com/Raimondi/delimitMate">delimitMate</a> plugin instead. It does the same thing without
 conflicting with YCM.</p><h3>Is there some sort of YCM mailing list? I have questions</h3><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list, <em>don't</em> create issues on the tracker. The tracker is
-for bug reports and feature requests.</p><h2>Contact</h2><p>If you have questions about the plugin or need help, please use the
+for bug reports and feature requests.</p><h3>I get an internal compiler error when installing</h3><p>This can be a problem on virtual servers with limited memory. A possible
+solution is to add more swap memory.</p><h2>Contact</h2><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list.</p><p>If you have bug reports or feature suggestions, please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
 tracker</a>.</p><p>The latest version of the plugin is available at
 <a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2>License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
