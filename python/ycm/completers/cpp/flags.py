@@ -28,6 +28,7 @@ NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
   'DOCS *NOW*, DON\'T file a bug report.' ).format(
     extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
+INCLUDE_FLAGS = [ '-isystem', '-I', '-iquote', '--sysroot=' ]
 
 class Flags( object ):
   """Keeps track of the flags necessary to compile a file.
@@ -143,8 +144,13 @@ def _SanitizeFlags( flags ):
 def _RemoveUnusedFlags( flags, filename ):
   """Given an iterable object that produces strings (flags for Clang), removes
   the '-c' and '-o' options that Clang does not like to see when it's producing
-  completions for a file. Also removes the first flag in the list if it does not
-  start with a '-' (it's highly likely to be the compiler name/path)."""
+  completions for a file.
+
+  Also removes the first flag in the list if it does not
+  start with a '-' (it's highly likely to be the compiler name/path).
+
+  We also try to remove any stray filenames in the flags that aren't include
+  dirs."""
 
   new_flags = []
 
@@ -154,23 +160,40 @@ def _RemoveUnusedFlags( flags, filename ):
   if not flags[ 0 ].startswith( '-' ):
     flags = flags[ 1: ]
 
-  skip = False
+  skip_next = False
+  previous_flag_is_include = False
+  previous_flag_starts_with_dash = False
+  current_flag_starts_with_dash = False
   for flag in flags:
-    if skip:
-      skip = False
+    previous_flag_starts_with_dash = current_flag_starts_with_dash
+    current_flag_starts_with_dash = flag.startswith( '-' )
+    if skip_next:
+      skip_next = False
       continue
 
     if flag == '-c':
       continue
 
     if flag == '-o':
-      skip = True;
+      skip_next = True;
       continue
 
     if flag == filename or os.path.realpath( flag ) == filename:
       continue
 
+    # We want to make sure that we don't have any stray filenames in our flags;
+    # filenames that are part of include flags are ok, but others are not. This
+    # solves the case where we ask the compilation database for flags for
+    # "foo.cpp" when we are compiling "foo.h" because the comp db doesn't have
+    # flags for headers. The returned flags include "foo.cpp" and we need to
+    # remove that.
+    if ( not current_flag_starts_with_dash and
+          ( not previous_flag_starts_with_dash or
+            ( not previous_flag_is_include and '/' in flag ) ) ):
+      continue
+
     new_flags.append( flag )
+    previous_flag_is_include = flag in INCLUDE_FLAGS
   return new_flags
 
 
