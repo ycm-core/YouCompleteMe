@@ -166,6 +166,7 @@ def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
                                    CompletionEntryMatcher( 'x' ),
                                    CompletionEntryMatcher( 'y' ) ) )
 
+
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_ExceptionWhenNoFlagsFromExtraConf_test():
   app = TestApp( handlers.app )
