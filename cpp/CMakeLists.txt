@@ -71,6 +71,12 @@ if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   if ( NOT DEFINED ENV{TRAVIS} )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
   endif()
+
+  # Ninja will by default prevent Clang from outputting diagnostics in color, so
+  # we force color output
+  if ( CMAKE_GENERATOR STREQUAL "Ninja" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics" )
+  endif()
 endif()
 
 #############################################################################
