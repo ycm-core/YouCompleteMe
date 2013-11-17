@@ -166,6 +166,29 @@ def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
                                    CompletionEntryMatcher( 'x' ),
                                    CompletionEntryMatcher( 'y' ) ) )
 
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_ExceptionWhenNoFlagsFromExtraConf_test():
+  app = TestApp( handlers.app )
+  app.post_json( '/load_extra_conf_file',
+                 { 'filepath': PathToTestFile(
+                     'noflags/.ycm_extra_conf.py' ) } )
+
+  filepath = PathToTestFile( 'noflags/basic.cpp' )
+  completion_data = BuildRequest( filepath = filepath,
+                                  filetype = 'cpp',
+                                  contents = open( filepath ).read(),
+                                  line_num = 10,
+                                  column_num = 6,
+                                  start_column = 6 )
+
+  response = app.post_json( '/completions',
+                            completion_data,
+                            expect_errors = True )
+  eq_( response.status_code, httplib.INTERNAL_SERVER_ERROR )
+  assert_that( response.json,
+               has_entry( 'exception',
+                          has_entry( 'TYPE', RuntimeError.__name__ ) ) )
+
 
 @with_setup( Setup )
 def GetCompletions_ClangCompleter_ForceSemantic_OnlyFileteredCompletions_test():
