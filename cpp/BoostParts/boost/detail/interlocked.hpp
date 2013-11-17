@@ -125,14 +125,30 @@ extern "C" void* __cdecl _InterlockedExchangePointer( void* volatile *, void* );
 # define BOOST_INTERLOCKED_EXCHANGE _InterlockedExchange
 # define BOOST_INTERLOCKED_EXCHANGE_ADD _InterlockedExchangeAdd
 
+// Unlike __MINGW64__, __MINGW64_VERSION_MAJOR is defined by MinGW-w64 for both 32 and 64-bit targets.
+#elif defined(__MINGW64_VERSION_MAJOR)
+
+// MinGW-w64 provides intrin.h for both 32 and 64-bit targets.
+#include <intrin.h>
+
+# define BOOST_INTERLOCKED_INCREMENT _InterlockedIncrement
+# define BOOST_INTERLOCKED_DECREMENT _InterlockedDecrement
+# define BOOST_INTERLOCKED_COMPARE_EXCHANGE _InterlockedCompareExchange
+# define BOOST_INTERLOCKED_EXCHANGE _InterlockedExchange
+# define BOOST_INTERLOCKED_EXCHANGE_ADD _InterlockedExchangeAdd
+# if defined(__x86_64__) || defined(__x86_64)
+#  define BOOST_INTERLOCKED_COMPARE_EXCHANGE_POINTER _InterlockedCompareExchangePointer
+#  define BOOST_INTERLOCKED_EXCHANGE_POINTER _InterlockedExchangePointer
+# else
+#  define BOOST_INTERLOCKED_COMPARE_EXCHANGE_POINTER(dest,exchange,compare) \
+    ((void*)BOOST_INTERLOCKED_COMPARE_EXCHANGE((long volatile*)(dest),(long)(exchange),(long)(compare)))
+#  define BOOST_INTERLOCKED_EXCHANGE_POINTER(dest,exchange) \
+    ((void*)BOOST_INTERLOCKED_EXCHANGE((long volatile*)(dest),(long)(exchange)))
+# endif
+
 #elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __CYGWIN__ )
 
-#if defined(__MINGW64__)
-#define BOOST_INTERLOCKED_IMPORT
-#else
 #define BOOST_INTERLOCKED_IMPORT __declspec(dllimport)
-#endif
-
 
 namespace boost
 {
