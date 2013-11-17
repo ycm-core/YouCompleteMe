@@ -520,10 +520,6 @@ function! s:InvokeCompletion()
     return
   endif
 
-  if g:ycm_min_num_of_chars_for_completion < 0
-    return
-  endif
-
   if s:InsideCommentOrStringAndShouldStop() || s:OnBlankLine()
     return
   endif
