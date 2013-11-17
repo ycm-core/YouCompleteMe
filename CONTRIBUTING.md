@@ -77,7 +77,16 @@ Creating good pull requests
       match the code style you see.
     - Same thing for VimScript. Match the style of the existing code.
 
-2.  **Explain in detail why your pull request makes sense.** Ask yourself, would
+2.  **Your code needs to be well written and easy to maintain**. This is of the
+    _utmost_ importance. Other people will have to maintain your code so don't
+    just throw stuff against the wall until things kinda work.
+
+3.  **Write tests for your code**. If you're changing the VimScript code then
+    you don't have to since it's hard to test that code. This is also why you
+    should strive to implement your change in Python if at all possible (and if
+    it makes sense to do so). Python is also _much_ faster than VimScript.
+
+4.  **Explain in detail why your pull request makes sense.** Ask yourself, would
     this feature be helpful to others? Not just a few people, but a lot of YCM’s
     users? See, good features are useful to many. If your feature is only useful
     to you and _maybe_ a couple of others, then that’s not a good feature.
@@ -93,15 +102,6 @@ Creating good pull requests
     why is important - it's not always clear why a feature is really useful. And
     sometimes what you want can be done in a different way if the reason for the
     change is known. _What goal is your change trying to accomplish?_
-
-3.  **Your code needs to be well written and easy to maintain**. This is of the
-    _utmost_ importance. Other people will have to maintain your code so don't
-    just throw stuff against the wall until things kinda work.
-
-4.  **Write tests for your code**. If you're changing the VimScript code then
-    you don't have to since it's hard to test that code. This is also why you
-    should strive to implement your change in Python if at all possible (and if
-    it makes sense to do so). Python is also _much_ faster than VimScript.
 
 [build-bots]: https://travis-ci.org/Valloric/YouCompleteMe
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
