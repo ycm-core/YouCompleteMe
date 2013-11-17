@@ -656,8 +656,8 @@ option is set to `2`, then when the user types a second alphanumeric character
 after a whitespace character, completion suggestions will be triggered. This
 option is NOT used for semantic completion.
 
-Setting this option to a high number like `99` effectively turns off the
-identifier completion engine and just leaves the semantic engine.
+Special value `-1` disables identifier completion engine and just leaves the
+semantic engine.
 
 Default: `2`
 
