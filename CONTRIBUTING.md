@@ -45,12 +45,12 @@ Here are the things you should do when creating an issue:
    your issue.** If we can't reproduce the issue, then we can't fix it. It's
    that simple.
 2. Put the following options in your vimrc:
-   
+
    ```viml
    let g:ycm_server_use_vim_stdout = 1
    let g:ycm_server_log_level = 'debug'
    ```
-   
+
    Then start gvim/macvim (not console vim) from the console. As you use Vim,
    you'll see the `ycmd` debug output stream in the console. Attach that to you
    issue.
@@ -93,6 +93,15 @@ Creating good pull requests
     why is important - it's not always clear why a feature is really useful. And
     sometimes what you want can be done in a different way if the reason for the
     change is known. _What goal is your change trying to accomplish?_
+
+3.  **Your code needs to be well written and easy to maintain**. This is of the
+    _utmost_ importance. Other people will have to maintain your code so don't
+    just throw stuff against the wall until things kinda work.
+
+4.  **Write tests for your code**. If you're changing the VimScript code then
+    you don't have to since it's hard to test that code. This is also why you
+    should strive to implement your change in Python if at all possible (and if
+    it makes sense to do so). Python is also _much_ faster than VimScript.
 
 [build-bots]: https://travis-ci.org/Valloric/YouCompleteMe
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
