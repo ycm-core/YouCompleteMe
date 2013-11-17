@@ -60,7 +60,7 @@ class Flags( object ):
                                             filename,
                                             client_data )
 
-      if not results.get( 'flags_ready', True ):
+      if not results or not results.get( 'flags_ready', True ):
         return None
 
       flags = list( results[ 'flags' ] )
