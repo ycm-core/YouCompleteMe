@@ -656,8 +656,10 @@ option is set to `2`, then when the user types a second alphanumeric character
 after a whitespace character, completion suggestions will be triggered. This
 option is NOT used for semantic completion.
 
-Special value `-1` disables identifier completion engine and just leaves the
-semantic engine.
+Setting this to `-1` will disable the identifier completion engine; only the
+semantic engine will remain. NOTE: this also turns off other engines that tie
+into the identifier completion engine, like UltiSnips trigger completion or
+filename completion.
 
 Default: `2`
 
