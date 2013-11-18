@@ -35,6 +35,7 @@ FILE_TOO_SHORT_MESSAGE = (
   'File is less than {0} lines long; not compiling.'.format(
     MIN_LINES_IN_FILE_TO_PARSE ) )
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
+PRAGMA_DIAG_TEXT_TO_IGNORE = '#pragma once in main file'
 
 
 class ClangCompleter( Completer ):
@@ -196,6 +197,7 @@ class ClangCompleter( Completer ):
       self.GetUnsavedFilesVector( request_data ),
       flags )
 
+    diagnostics = _FilterDiagnostics( diagnostics )
     self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
     return [ ConvertToDiagnosticResponse( x ) for x in
              diagnostics[ : self._max_diagnostics_to_display ] ]
@@ -261,7 +263,7 @@ def ConvertCompletionData( completion_data ):
 
 
 def DiagnosticsToDiagStructure( diagnostics ):
-  structure = defaultdict(lambda : defaultdict(list))
+  structure = defaultdict( lambda : defaultdict( list ) )
   for diagnostic in diagnostics:
     structure[ diagnostic.filename_ ][ diagnostic.line_number_ ].append(
         diagnostic )
@@ -282,5 +284,15 @@ def ConvertToDiagnosticResponse( diagnostic ):
                                         diagnostic.column_number_ - 1,
                                         diagnostic.text_,
                                         diagnostic.kind_ )
+
+def _FilterDiagnostics( diagnostics ):
+  # Clang has an annoying warning that shows up when we try to compile header
+  # files if the header has "#pragma once" inside it. The error is not
+  # legitimate because it shows up because libclang thinks we are compiling a
+  # source file instead of a header file.
+  #
+  # See our issue #216 and upstream bug:
+  #   http://llvm.org/bugs/show_bug.cgi?id=16686
+  return [ x for x in diagnostics if x.text_ != PRAGMA_DIAG_TEXT_TO_IGNORE ]
 
 

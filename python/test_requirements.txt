@@ -1,6 +1,6 @@
 flake8>=2.0
 mock>=1.0.1
 nose>=1.3.0
-PyHamcrest>=1.7.2
+PyHamcrest>=1.8.0
 WebTest>=2.0.9
 

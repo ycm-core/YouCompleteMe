@@ -23,7 +23,7 @@ from .test_utils import Setup, BuildRequest
 from webtest import TestApp
 from nose.tools import with_setup
 from hamcrest import ( assert_that, contains, contains_string, has_entries,
-                       has_entry )
+                       has_entry, empty )
 from .. import handlers
 import bottle
 
@@ -52,6 +52,29 @@ struct Foo {
                   has_entries( { 'text': contains_string( "expected ';'" ),
                                  'line_num': 2,
                                  'column_num': 7 } ) ) )
+
+@with_setup( Setup )
+def Diagnostics_ClangCompleter_PragmaOnceWarningIgnored_test():
+  app = TestApp( handlers.app )
+  contents = """
+#pragma once
+
+struct Foo {
+  int x;
+  int y;
+  int c;
+  int d;
+};
+"""
+
+  event_data = BuildRequest( compilation_flags = ['-x', 'c++'],
+                             event_name = 'FileReadyToParse',
+                             contents = contents,
+                             filepath = '/foo.h',
+                             filetype = 'cpp' )
+
+  response = app.post_json( '/event_notification', event_data )
+  assert_that( response.body, empty() )
 
 
 @with_setup( Setup )
