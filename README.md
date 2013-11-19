@@ -1504,6 +1504,21 @@ for bug reports and feature requests.
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
 
+### Completion doesn't work with the C++ standard library headers
+
+This is caused by an issue with libclang. Compiling from `clang` the binary uses
+the correct default header search paths but compiling from `libclang.so` does
+not. The issue seems to impact some OS's more than others. It appears that OS X
+Mavericks in particular has problems with this.
+
+The current workaround is to call `echo | clang -v -E -x c++ -` and look at the
+paths under the `#include <...> search starts here:` heading. You should take
+those paths, prepend `-isystem` to each individual path and append them all to
+the list of flags you return from your `FlagsForFile` function in your
+`.ycm_extra_conf.py` file.
+
+See issue #303 for details.
+
 Contact
 -------
 
