@@ -1517,7 +1517,7 @@ those paths, prepend `-isystem` to each individual path and append them all to
 the list of flags you return from your `FlagsForFile` function in your
 `.ycm_extra_conf.py` file.
 
-See issue #303 for details.
+See [issue #303][issue-303] for details.
 
 Contact
 -------
@@ -1570,3 +1570,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [vundle-bug]: https://github.com/gmarik/vundle/issues/48
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
 [omnisharp]: https://github.com/nosami/OmniSharpServer
+[issue-303]: https://github.com/Valloric/YouCompleteMe/issues/303
