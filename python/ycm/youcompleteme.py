@@ -27,6 +27,7 @@ from ycm import utils
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general import syntax_parse
 from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
+from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
@@ -57,6 +58,7 @@ SERVER_CRASH_MESSAGE_STDERR_FILE = (
 SERVER_CRASH_MESSAGE_SAME_STDERR = (
   'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
   ' check console output for logs!' )
+SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 
 
 class YouCompleteMe( object ):
@@ -70,7 +72,9 @@ class YouCompleteMe( object ):
     self._server_popen = None
     self._filetypes_with_keywords_loaded = set()
     self._temp_options_filename = None
+    self._ycmd_keepalive = YcmdKeepalive()
     self._SetupServer()
+    self._ycmd_keepalive.Start()
 
 
   def _SetupServer( self ):
@@ -84,7 +88,7 @@ class YouCompleteMe( object ):
                '--options_file={0}'.format( options_file.name ),
                '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
                '--idle_suicide_seconds={0}'.format(
-                  self._user_options[ 'server_idle_suicide_seconds' ] ) ]
+                  SERVER_IDLE_SUICIDE_SECONDS ) ]
 
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 

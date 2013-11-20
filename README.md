@@ -938,29 +938,6 @@ Default: `info`
 
     let g:ycm_server_log_level = 'info'
 
-### The `g:ycm_server_idle_suicide_seconds` option
-
-This option sets the number of seconds of `ycmd` server idleness (no requests
-received) after which the server stops itself. NOTE: the YCM Vim client sends a
-shutdown request to the server when Vim is shutting down.
-
-If your Vim crashes for instance, `ycmd` never gets the shutdown command and
-becomes a zombie process. This option prevents such zombies from sticking around
-forever.
-
-The default option is `43200` seconds which is 12 hours. The reason for the
-interval being this long is to prevent the server from shutting down if you
-leave your computer (and Vim) turned on during the night.
-
-A setting of `0` turns off the timer.
-
-The server "heartbeat" that checks whether this interval has passed occurs every
-10 minutes.
-
-Default: `43200`
-
-    let g:ycm_server_idle_suicide_seconds = 43200
-
 ### The `g:ycm_csharp_server_port` option
 
 The port number (on `localhost`) on which the OmniSharp server should be

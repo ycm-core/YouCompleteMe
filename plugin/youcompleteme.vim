@@ -110,9 +110,6 @@ let g:ycm_server_log_level =
 let g:ycm_server_keep_logfiles =
       \ get( g:, 'ycm_server_keep_logfiles', 0 )
 
-let g:ycm_server_idle_suicide_seconds =
-      \ get( g:, 'ycm_server_idle_suicide_seconds', 86400 )
-
 let g:ycm_extra_conf_vim_data =
       \ get( g:, 'ycm_extra_conf_vim_data', [] )
 

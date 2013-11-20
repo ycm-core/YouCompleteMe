@@ -48,6 +48,16 @@ class BaseRequest( object ):
   def Response( self ):
     return {}
 
+  # This method blocks
+  # |timeout| is num seconds to tolerate no response from server before giving
+  # up; see Requests docs for details (we just pass the param along).
+  @staticmethod
+  def GetDataFromHandler( handler, timeout = DEFAULT_TIMEOUT_SEC ):
+    return JsonFromFuture( BaseRequest._TalkToHandlerAsync( '',
+                                                            handler,
+                                                            'GET',
+                                                            timeout ) )
+
 
   # This is the blocking version of the method. See below for async.
   # |timeout| is num seconds to tolerate no response from server before giving
@@ -64,22 +74,43 @@ class BaseRequest( object ):
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
   def PostDataToHandlerAsync( data, handler, timeout = DEFAULT_TIMEOUT_SEC ):
-    def PostData( data, handler, timeout ):
-      return BaseRequest.session.post( _BuildUri( handler ),
-                                       data = json.dumps( data ),
-                                       headers = HEADERS,
-                                       timeout = timeout )
+    return BaseRequest._TalkToHandlerAsync( data, handler, 'POST', timeout )
+
+
+  # This returns a future! Use JsonFromFuture to get the value.
+  # |method| is either 'POST' or 'GET'.
+  # |timeout| is num seconds to tolerate no response from server before giving
+  # up; see Requests docs for details (we just pass the param along).
+  @staticmethod
+  def _TalkToHandlerAsync( data,
+                           handler,
+                           method,
+                           timeout = DEFAULT_TIMEOUT_SEC ):
+    def SendRequest( data, handler, method, timeout ):
+      if method == 'POST':
+        return BaseRequest.session.post( _BuildUri( handler ),
+                                        data = json.dumps( data ),
+                                        headers = HEADERS,
+                                        timeout = timeout )
+      if method == 'GET':
+        return BaseRequest.session.get( _BuildUri( handler ),
+                                        headers = HEADERS,
+                                        timeout = timeout )
 
     @retries( 5, delay = 0.5, backoff = 1.5 )
-    def DelayedPostData( data, handler ):
-      return requests.post( _BuildUri( handler ),
-                            data = json.dumps( data ),
-                            headers = HEADERS )
+    def DelayedSendRequest( data, handler, method ):
+      if method == 'POST':
+        return requests.post( _BuildUri( handler ),
+                              data = json.dumps( data ),
+                              headers = HEADERS )
+      if method == 'GET':
+        return requests.get( _BuildUri( handler ),
+                             headers = HEADERS )
 
     if not _CheckServerIsHealthyWithCache():
-      return EXECUTOR.submit( DelayedPostData, data, handler )
+      return EXECUTOR.submit( DelayedSendRequest, data, handler, method )
 
-    return PostData( data, handler, timeout )
+    return SendRequest( data, handler, method, timeout )
 
 
   session = FuturesSession( executor = EXECUTOR )
