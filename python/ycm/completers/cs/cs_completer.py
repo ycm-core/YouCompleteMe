@@ -48,7 +48,7 @@ class CsharpCompleter( Completer ):
 
 
   def Shutdown( self ):
-    if ( self.user_options[ 'auto_start_csharp_server' ] and
+    if ( self.user_options[ 'auto_stop_csharp_server' ] and
          self._ServerIsRunning() ):
       self._StopServer()
 
