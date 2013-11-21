@@ -125,9 +125,23 @@ class CsharpCompleter( Completer ):
     elif len( solutionfiles ) == 1:
       solutionfile = solutionfiles[ 0 ]
     else:
-      raise RuntimeError(
-        'Found multiple solution files instead of one!\n{0}'.format(
-          solutionfiles ) )
+      # multiple solutions found : if there is one whose name is the same
+      # as the folder containing the file we edit, use this one
+      # (e.g. if we have bla/Project.sln and we are editing
+      # bla/Project/Folder/File.cs, use bla/Project.sln)
+      filepath = _SplitPath( request_data[ 'filepath' ] )
+      solutionpath = _SplitPath( folder )
+      foldername = ''
+      if len( filepath ) > len( solutionpath ):
+          foldername = filepath[ len( solutionpath ) ]
+      solutionfilecandidates = [ solutionfile for solutionfile in solutionfiles
+        if _GetFilenameWithoutExtension( solutionfile ) == foldername ]
+      if len( solutionfilecandidates ) == 1:
+        solutionfile = solutionfilecandidates[ 0 ]
+      else:
+        raise RuntimeError(
+          'Found multiple solution files instead of one!\n{0}'.format(
+            solutionfiles ) )
 
     omnisharp = os.path.join(
       os.path.abspath( os.path.dirname( __file__ ) ),
@@ -230,3 +244,20 @@ def _FindSolutionFiles( filepath ):
       break
     solutionfiles = glob.glob1( folder, '*.sln' )
   return solutionfiles, folder
+
+def _SplitPath( path ):
+  result = []
+  while True:
+    path, folder = os.path.split( path )
+    if folder:
+      result.append( folder )
+    else:
+      if path:
+        result.append( path )
+      break
+  result.reverse()
+  return result
+
+def _GetFilenameWithoutExtension( path ):
+    return os.path.splitext( os.path.basename ( path ) )[ 0 ]
+
