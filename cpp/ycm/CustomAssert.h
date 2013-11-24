@@ -53,7 +53,7 @@ FailBehavior ReportFailure(const char* condition,
 
 #if defined(_MSC_VER)
 #   define X_HALT() __debugbreak()
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__)
 #   define X_HALT() __builtin_trap()
 #else
 #    define X_HALT() exit(__LINE__)
