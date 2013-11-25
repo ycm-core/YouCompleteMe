@@ -36,6 +36,7 @@ FILE_TOO_SHORT_MESSAGE = (
     MIN_LINES_IN_FILE_TO_PARSE ) )
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 PRAGMA_DIAG_TEXT_TO_IGNORE = '#pragma once in main file'
+TOO_MANY_ERRORS_DIAG_TEXT_TO_IGNORE = 'too many errors emitted, stopping now'
 
 
 class ClangCompleter( Completer ):
@@ -293,6 +294,11 @@ def _FilterDiagnostics( diagnostics ):
   #
   # See our issue #216 and upstream bug:
   #   http://llvm.org/bugs/show_bug.cgi?id=16686
-  return [ x for x in diagnostics if x.text_ != PRAGMA_DIAG_TEXT_TO_IGNORE ]
+  #
+  # The second thing we want to filter out are those incredibly annoying "too
+  # many errors emitted" diagnostics that are utterly useless.
+  return [ x for x in diagnostics if
+           x.text_ != PRAGMA_DIAG_TEXT_TO_IGNORE and
+           x.text_ != TOO_MANY_ERRORS_DIAG_TEXT_TO_IGNORE ]
 
 
