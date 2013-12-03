@@ -678,6 +678,21 @@ Default: `0`
 
     let g:ycm_min_num_identifier_candidate_chars = 0
 
+### The `g:ycm_auto_trigger` option
+
+When set to `0`, this option turns off YCM's identifier completer (the
+as-you-type popup) _and_ the semantic triggers (the popup you'd get after typing
+`.` or `->` in say C++). The Syntastic integration remains working and you can
+still force semantic completion with the `<C-Space>` shortcut.
+
+If you want to just turn off the identifier completer but keep the semantic
+triggers, you should set `g:ycm_min_num_of_chars_for_completion` to a high
+number like `99`.
+
+Default: `1`
+
+    let g:ycm_auto_trigger = 1
+
 ### The `g:ycm_filetype_whitelist` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be

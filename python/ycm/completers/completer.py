@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import abc
+from collections import defaultdict
 from ycm.utils import ToUtf8IfNeeded, ForceSemanticCompletion, RunningInsideVim
 
 if RunningInsideVim():
@@ -100,8 +101,9 @@ class Completer( object ):
   def __init__( self, user_options ):
     self.user_options = user_options
     self.min_num_chars = user_options[ 'min_num_of_chars_for_completion' ]
-    self.triggers_for_filetype = TriggersForFiletype(
-      user_options[ 'semantic_triggers' ] )
+    self.triggers_for_filetype = (
+        TriggersForFiletype( user_options[ 'semantic_triggers' ] )
+        if user_options[ 'auto_trigger' ] else defaultdict( set ) )
     self.completions_future = None
     self._completions_cache = None
 

@@ -26,7 +26,7 @@ from .test_utils import ( Setup, BuildRequest, PathToTestFile,
 from webtest import TestApp
 from nose.tools import eq_, with_setup
 from hamcrest import ( assert_that, has_item, has_items, has_entry,
-                       contains_inanyorder )
+                       contains_inanyorder, empty )
 from ..responses import BuildCompletionData, UnknownExtraConf
 from .. import handlers
 import bottle
@@ -126,6 +126,36 @@ int main()
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
                                    CompletionEntryMatcher( 'x' ),
                                    CompletionEntryMatcher( 'y' ) ) )
+
+@with_setup( Setup )
+def GetCompletions_ClangCompleter_NoCompletionsWhenAutoTriggerOff_test():
+  ChangeSpecificOptions( { 'auto_trigger': False } )
+  app = TestApp( handlers.app )
+  contents = """
+struct Foo {
+  int x;
+  int y;
+  char c;
+};
+
+int main()
+{
+  Foo foo;
+  foo.
+}
+"""
+
+  # 0-based line and column!
+  completion_data = BuildRequest( filepath = '/foo.cpp',
+                                  filetype = 'cpp',
+                                  contents = contents,
+                                  line_num = 10,
+                                  column_num = 6,
+                                  start_column = 6,
+                                  compilation_flags = ['-x', 'c++'] )
+
+  results = app.post_json( '/completions', completion_data ).json
+  assert_that( results, empty() )
 
 
 @with_setup( Setup )

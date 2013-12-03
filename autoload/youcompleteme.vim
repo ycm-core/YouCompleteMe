@@ -366,7 +366,10 @@ function! s:OnCursorMovedInsertMode()
   if g:ycm_autoclose_preview_window_after_completion
     call s:ClosePreviewWindowIfNeeded()
   endif
-  call s:InvokeCompletion()
+
+  if g:ycm_auto_trigger
+    call s:InvokeCompletion()
+  endif
 endfunction
 
 

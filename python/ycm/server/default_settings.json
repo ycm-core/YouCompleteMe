@@ -1,5 +1,6 @@
 {
   "filepath_completion_use_working_dir": 0,
+  "auto_trigger": 1,
   "min_num_of_chars_for_completion": 2,
   "min_num_identifier_candidate_chars": 0,
   "semantic_triggers": {},
