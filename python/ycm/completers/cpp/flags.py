@@ -28,7 +28,8 @@ NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
   'DOCS *NOW*, DON\'T file a bug report.' ).format(
     extra_conf_store.YCM_EXTRA_CONF_FILENAME )
 
-INCLUDE_FLAGS = [ '-isystem', '-I', '-iquote', '--sysroot=', '-isysroot' ]
+INCLUDE_FLAGS = [ '-isystem', '-I', '-iquote', '--sysroot=', '-isysroot',
+                  '-include' ]
 
 class Flags( object ):
   """Keeps track of the flags necessary to compile a file.
