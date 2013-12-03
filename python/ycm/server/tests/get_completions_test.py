@@ -138,16 +138,16 @@ def GetCompletions_CsCompleter_DoesntStartWithAmbiguousMultipleSolutions_test():
                              contents = contents,
                              event_name = 'FileReadyToParse' )
 
-  exceptioncaught = False
+  exception_caught = False
   try:
     app.post_json( '/event_notification', event_data )
   except AppError as e:
     if 'Found multiple solution files' in str(e):
-      exceptioncaught = True
+      exception_caught = True
 
   # the test passes if we caught an exception when trying to start it,
   # so raise one if it managed to start
-  if exceptioncaught == False:
+  if not exception_caught:
     # Now for some cleanup: wait for the server to start then shut it down
     while True:
       result = app.post_json( '/run_completer_command',
