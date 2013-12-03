@@ -93,6 +93,20 @@ def CurrentIdentifierFinished():
     return line[ : current_column ].isspace()
 
 
+def LastEnteredCharIsIdentifierChar():
+  current_column = vimsupport.CurrentColumn()
+  previous_char_index = current_column - 1
+  if previous_char_index < 0:
+    return False
+  line = vim.current.line
+  try:
+    previous_char = line[ previous_char_index ]
+  except IndexError:
+    return False
+
+  return utils.IsIdentifierChar( previous_char )
+
+
 def AdjustCandidateInsertionText( candidates ):
   """This function adjusts the candidate insertion text to take into account the
   text that's currently in front of the cursor.

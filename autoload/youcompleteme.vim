@@ -370,6 +370,13 @@ function! s:OnCursorMovedInsertMode()
   if g:ycm_auto_trigger || s:omnifunc_mode
     call s:InvokeCompletion()
   endif
+
+  " We have to make sure we correctly leave omnifunc mode even when the user
+  " inserts something like a "operator[]" candidate string which fails
+  " CurrentIdentifierFinished check.
+  if s:omnifunc_mode && !pyeval( 'base.LastEnteredCharIsIdentifierChar()')
+    let s:omnifunc_mode = 0
+  endif
 endfunction
 
 
