@@ -367,7 +367,7 @@ function! s:OnCursorMovedInsertMode()
     call s:ClosePreviewWindowIfNeeded()
   endif
 
-  if g:ycm_auto_trigger
+  if g:ycm_auto_trigger || s:omnifunc_mode
     call s:InvokeCompletion()
   endif
 endfunction
