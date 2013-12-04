@@ -150,13 +150,12 @@ class CsharpCompleter( Completer ):
     if not os.path.isfile( omnisharp ):
       raise RuntimeError( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
 
-    if not platform.startswith( 'win' ):
-      omnisharp = 'mono ' + omnisharp
-
     path_to_solutionfile = os.path.join( folder, solutionfile )
-    # command has to be provided as one string for some reason
-    command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
+    command = [ omnisharp, '-p', str( self._omnisharp_port ), '-s',
                 path_to_solutionfile ]
+
+    if not platform.startswith( 'win' ):
+      command.insert(0, 'mono')
 
     filename_format = os.path.join( utils.PathToTempDir(),
                                    'omnisharp_{port}_{sln}_{std}.log' )
@@ -168,7 +167,7 @@ class CsharpCompleter( Completer ):
 
     with open( self._filename_stderr, 'w' ) as fstderr:
       with open( self._filename_stdout, 'w' ) as fstdout:
-        subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
+        subprocess.Popen( command, stdout=fstdout, stderr=fstderr )
 
     self._logger.info( 'Starting OmniSharp server' )
 
