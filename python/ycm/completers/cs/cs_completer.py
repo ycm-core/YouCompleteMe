@@ -117,17 +117,31 @@ class CsharpCompleter( Completer ):
     self._logger.info( 'startup' )
 
     self._omnisharp_port = utils.GetUnusedLocalhostPort()
-    solutionfiles, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
+    solution_files, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
 
-    if len( solutionfiles ) == 0:
+    if len( solution_files ) == 0:
       raise RuntimeError(
         'Error starting OmniSharp server: no solutionfile found' )
-    elif len( solutionfiles ) == 1:
-      solutionfile = solutionfiles[ 0 ]
+    elif len( solution_files ) == 1:
+      solutionfile = solution_files[ 0 ]
     else:
-      raise RuntimeError(
-        'Found multiple solution files instead of one!\n{0}'.format(
-          solutionfiles ) )
+      # multiple solutions found : if there is one whose name is the same
+      # as the folder containing the file we edit, use this one
+      # (e.g. if we have bla/Project.sln and we are editing
+      # bla/Project/Folder/File.cs, use bla/Project.sln)
+      filepath_components = _PathComponents( request_data[ 'filepath' ] )
+      solutionpath = _PathComponents( folder )
+      foldername = ''
+      if len( filepath_components ) > len( solutionpath ):
+          foldername = filepath_components[ len( solutionpath ) ]
+      solution_file_candidates = [ solutionfile for solutionfile in solution_files
+        if _GetFilenameWithoutExtension( solutionfile ) == foldername ]
+      if len( solution_file_candidates ) == 1:
+        solutionfile = solution_file_candidates[ 0 ]
+      else:
+        raise RuntimeError(
+          'Found multiple solution files instead of one!\n{0}'.format(
+            solution_files ) )
 
     omnisharp = os.path.join(
       os.path.abspath( os.path.dirname( __file__ ) ),
@@ -230,3 +244,20 @@ def _FindSolutionFiles( filepath ):
       break
     solutionfiles = glob.glob1( folder, '*.sln' )
   return solutionfiles, folder
+
+def _PathComponents( path ):
+  path_components = []
+  while True:
+    path, folder = os.path.split( path )
+    if folder:
+      path_components.append( folder )
+    else:
+      if path:
+        path_components.append( path )
+      break
+  path_components.reverse()
+  return path_components
+
+def _GetFilenameWithoutExtension( path ):
+    return os.path.splitext( os.path.basename ( path ) )[ 0 ]
+
