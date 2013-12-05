@@ -154,7 +154,7 @@ class CsharpCompleter( Completer ):
     command = [ omnisharp, '-p', str( self._omnisharp_port ), '-s',
                 path_to_solutionfile ]
 
-    if not platform.startswith( 'win' ):
+    if utils.OnWindows():
       command.insert(0, 'mono')
 
     filename_format = os.path.join( utils.PathToTempDir(),
