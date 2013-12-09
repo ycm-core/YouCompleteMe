@@ -64,6 +64,7 @@ SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
+    self._user_notified_about_crash = False
     self._omnicomp = OmniCompleter( user_options )
     self._latest_completion_request = None
     self._latest_file_parse_request = None
@@ -121,8 +122,9 @@ class YouCompleteMe( object ):
 
 
   def _NotifyUserIfServerCrashed( self ):
-    if self._IsServerAlive():
+    if self._user_notified_about_crash or self._IsServerAlive():
       return
+    self._user_notified_about_crash = True
     if self._server_stderr:
       with open( self._server_stderr, 'r' ) as server_stderr_file:
         error_output = ''.join( server_stderr_file.readlines()[
@@ -141,6 +143,7 @@ class YouCompleteMe( object ):
 
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
+    self._user_notified_about_crash = False
     self.OnVimLeave()
     self._SetupServer()
 
