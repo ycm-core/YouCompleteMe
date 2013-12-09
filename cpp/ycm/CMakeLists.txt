@@ -184,12 +184,15 @@ if ( EXTERNAL_LIBCLANG_PATH OR USE_SYSTEM_LIBCLANG )
     else ()
       set( ENV_LIB_PATHS "" )
     endif()
+    # On Debian-based systems, llvm installs into /usr/lib/llvm-x.y.
+    file( GLOB SYS_LLVM_PATHS "/usr/lib/llvm*/lib" )
     # Need TEMP because find_library does not work with an option variable
     find_library( TEMP clang
                   PATHS
                   ${ENV_LIB_PATHS}
                   /usr/lib
                   /usr/lib/llvm
+                  ${SYS_LLVM_PATHS}
                   /Library/Developer/CommandLineTools/usr/lib )
     set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
   else()
