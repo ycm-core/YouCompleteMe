@@ -1229,6 +1229,11 @@ But fear not, you should be able to tweak your extra conf files to continue
 working by using the `g:ycm_extra_conf_vim_data` option. See the docs on that
 option for details.
 
+### On very rare occasions Vim crashes when I tab through the completion menu
+
+That's a very rare Vim bug most users never encounter. It's fixed in Vim
+7.4.72. Update to that version (or above) to resolve the issue.
+
 ### I get a linker warning regarding `libpython` on Mac when compiling YCM
 
 If the warning is `ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
