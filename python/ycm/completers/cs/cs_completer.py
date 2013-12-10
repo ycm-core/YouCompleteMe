@@ -19,7 +19,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from sys import platform
 import glob
 from ycm.completers.completer import Completer
 from ycm.server import responses
