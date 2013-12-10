@@ -391,6 +391,12 @@ identifier completion engine and just leaves the semantic engine.</p><p>Default:
 candidate coming from the identifier completer must have to be shown in the
 popup menu.</p><p>A special value of <code>0</code> means there is no limit.</p><p>NOTE: This option only applies to the identifier completer; it has no effect on
 the various semantic completers.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_min_num_identifier_candidate_chars = 0
+</code></pre><h3>The <code>g:ycm_auto_trigger</code> option</h3><p>When set to <code>0</code>, this option turns off YCM's identifier completer (the
+as-you-type popup) <em>and</em> the semantic triggers (the popup you'd get after typing
+<code>.</code> or <code>-&gt;</code> in say C++). The Syntastic integration remains working and you can
+still force semantic completion with the <code>&lt;C-Space&gt;</code> shortcut.</p><p>If you want to just turn off the identifier completer but keep the semantic
+triggers, you should set <code>g:ycm_min_num_of_chars_for_completion</code> to a high
+number like <code>99</code>.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_auto_trigger = 1
 </code></pre><h3>The <code>g:ycm_filetype_whitelist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
 turned on. The option value should be a Vim dictionary with keys being filetype
 strings (like <code>python</code>, <code>cpp</code> etc) and values being unimportant (the dictionary
@@ -490,14 +496,6 @@ following, from most verbose to least verbose:
 - <code>warning</code>
 - <code>error</code>
 - <code>critical</code></p><p>Note that <code>debug</code> is <em>very</em> verbose.</p><p>Default: <code>info</code></p><pre><code>let g:ycm_server_log_level = 'info'
-</code></pre><h3>The <code>g:ycm_server_idle_suicide_seconds</code> option</h3><p>This option sets the number of seconds of <code>ycmd</code> server idleness (no requests
-received) after which the server stops itself. NOTE: the YCM Vim client sends a
-shutdown request to the server when Vim is shutting down.</p><p>If your Vim crashes for instance, <code>ycmd</code> never gets the shutdown command and
-becomes a zombie process. This option prevents such zombies from sticking around
-forever.</p><p>The default option is <code>43200</code> seconds which is 12 hours. The reason for the
-interval being this long is to prevent the server from shutting down if you
-leave your computer (and Vim) turned on during the night.</p><p>A setting of <code>0</code> turns off the timer.</p><p>The server "heartbeat" that checks whether this interval has passed occurs every
-10 minutes.</p><p>Default: <code>43200</code></p><pre><code>let g:ycm_server_idle_suicide_seconds = 43200
 </code></pre><h3>The <code>g:ycm_csharp_server_port</code> option</h3><p>The port number (on <code>localhost</code>) on which the OmniSharp server should be
 started.</p><p>Default: <code>2000</code></p><pre><code>let g:ycm_csharp_server_port = 2000
 </code></pre><h3>The <code>g:ycm_auto_start_csharp_server</code> option</h3><p>When set to <code>1</code>, the OmniSharp server will be automatically started (once per
@@ -612,7 +610,8 @@ imported in your <code>.ycm_extra_conf.py</code> files doesn't exist anymore.</p
 supported in the first place; it only ever worked by accident and was never a
 part of the extra conf API.</p><p>But fear not, you should be able to tweak your extra conf files to continue
 working by using the <code>g:ycm_extra_conf_vim_data</code> option. See the docs on that
-option for details.</p><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
+option for details.</p><h3>On very rare occasions Vim crashes when I tab through the completion menu</h3><p>That's a very rare Vim bug most users never encounter. It's fixed in Vim
+7.4.72. Update to that version (or above) to resolve the issue.</p><h3>I get a linker warning regarding <code>libpython</code> on Mac when compiling YCM</h3><p>If the warning is <code>ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory</code>, then feel free to ignore it; it's caused by a limitation of
 CMake and is not an issue. Everything should still work fine.</p><h3>I get a weird window at the top of my file when I use the semantic engine</h3><p>This is Vim's <code>preview</code> window. Vim uses it to show you extra information about
 something if such information is available. YCM provides Vim with such extra
@@ -723,7 +722,14 @@ how hard I try to silence them.</p><p>You'll have to learn to ignore them. It's 
 conflicting with YCM.</p><h3>Is there some sort of YCM mailing list? I have questions</h3><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list, <em>don't</em> create issues on the tracker. The tracker is
 for bug reports and feature requests.</p><h3>I get an internal compiler error when installing</h3><p>This can be a problem on virtual servers with limited memory. A possible
-solution is to add more swap memory.</p><h2>Contact</h2><p>If you have questions about the plugin or need help, please use the
+solution is to add more swap memory.</p><h3>Completion doesn't work with the C++ standard library headers</h3><p>This is caused by an issue with libclang. Compiling from <code>clang</code> the binary uses
+the correct default header search paths but compiling from <code>libclang.so</code> does
+not. The issue seems to impact some OS's more than others. It appears that OS X
+Mavericks in particular has problems with this.</p><p>The current workaround is to call <code>echo | clang -v -E -x c++ -</code> and look at the
+paths under the <code>#include &lt;...&gt; search starts here:</code> heading. You should take
+those paths, prepend <code>-isystem</code> to each individual path and append them all to
+the list of flags you return from your <code>FlagsForFile</code> function in your
+<code>.ycm_extra_conf.py</code> file.</p><p>See <a href="https://github.com/Valloric/YouCompleteMe/issues/303">issue #303</a> for details.</p><h2>Contact</h2><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list.</p><p>If you have bug reports or feature suggestions, please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
 tracker</a>.</p><p>The latest version of the plugin is available at
 <a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2>License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
