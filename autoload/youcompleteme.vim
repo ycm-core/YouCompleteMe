@@ -176,10 +176,6 @@ endfunction
 function! s:TweakSyntasticOptions()
   call s:ForceCFamilyFiletypesSyntasticPassiveMode()
   call s:ForceSyntasticCFamilyChecker()
-
-  " We set this to work around segfaults in old versions of Vim
-  " See here for details: https://github.com/scrooloose/syntastic/issues/834
-  let g:syntastic_delayed_redraws = 1
 endfunction
 
 
