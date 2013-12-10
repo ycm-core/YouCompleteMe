@@ -1,4 +1,4 @@
-*youcompleteme*  YouCompleteMe: a code-completion engine for Vim
+*youcompleteme.txt*  YouCompleteMe: a code-completion engine for Vim
 
 ===============================================================================
 Contents ~
@@ -37,22 +37,22 @@ Contents ~
  9. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
-  3. The |g:ycm_filetype_whitelist| option
-  4. The |g:ycm_filetype_blacklist| option
-  5. The |g:ycm_filetype_specific_completion_to_disable| option
-  6. The |g:ycm_register_as_syntastic_checker| option
-  7. The |g:ycm_allow_changing_updatetime| option
-  8. The |g:ycm_complete_in_comments| option
-  9. The |g:ycm_complete_in_strings| option
-  10. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  11. The |g:ycm_collect_identifiers_from_tags_files| option
-  12. The |g:ycm_seed_identifiers_with_syntax| option
-  13. The |g:ycm_extra_conf_vim_data| option
-  14. The |g:ycm_path_to_python_interpreter| option
-  15. The |g:ycm_server_use_vim_stdout| option
-  16. The |g:ycm_server_keep_logfiles| option
-  17. The |g:ycm_server_log_level| option
-  18. The |g:ycm_server_idle_suicide_seconds| option
+  3. The |g:ycm_auto_trigger| option
+  4. The |g:ycm_filetype_whitelist| option
+  5. The |g:ycm_filetype_blacklist| option
+  6. The |g:ycm_filetype_specific_completion_to_disable| option
+  7. The |g:ycm_register_as_syntastic_checker| option
+  8. The |g:ycm_allow_changing_updatetime| option
+  9. The |g:ycm_complete_in_comments| option
+  10. The |g:ycm_complete_in_strings| option
+  11. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  12. The |g:ycm_collect_identifiers_from_tags_files| option
+  13. The |g:ycm_seed_identifiers_with_syntax| option
+  14. The |g:ycm_extra_conf_vim_data| option
+  15. The |g:ycm_path_to_python_interpreter| option
+  16. The |g:ycm_server_use_vim_stdout| option
+  17. The |g:ycm_server_keep_logfiles| option
+  18. The |g:ycm_server_log_level| option
   19. The |g:ycm_csharp_server_port| option
   20. The |g:ycm_auto_start_csharp_server| option
   21. The |g:ycm_auto_stop_csharp_server| option
@@ -73,30 +73,32 @@ Contents ~
   36. The |g:ycm_use_ultisnips_completer| option
  10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
-  2. I get a linker warning regarding |libpython| on Mac when compiling YCM
-  3. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
-  4. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
-  5. I cannot get the Syntastic integration to work |youcompleteme-i-cannot-get-syntastic-integration-to-work|
-  6. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
-  7. Vim flickers every time I move the cursor or moving the cursor is slow |youcompleteme-vim-flickers-every-time-i-move-cursor-or-moving-cursor-is-slow|
-  8. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
-  9. I get a 'E227: mapping already exists for <blah>' error when I start Vim |E227:-mapping-already-exists-for-blah|
-  10. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |GLIBC_2.XX-not-found()|
-  11. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
-  12. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
-  13. Vim segfaults when I use the semantic completer in Ruby files |youcompleteme-vim-segfaults-when-i-use-semantic-completer-in-ruby-files|
-  14. I get 'LONG_BIT definition appears wrong for platform' when compiling |LONG_BIT-definition-appears-wrong-for-platform|
-  15. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
-  16. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
-  17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
-  18. 'CTRL-U' in insert mode does not work                        |CTRL-sub-U|
-  19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  20. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
-  21. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  22. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
-  23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
-  24. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
-  25. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
+  3. I get a linker warning regarding |libpython| on Mac when compiling YCM
+  4. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
+  5. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
+  6. I cannot get the Syntastic integration to work |youcompleteme-i-cannot-get-syntastic-integration-to-work|
+  7. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
+  8. Vim flickers every time I move the cursor or moving the cursor is slow |youcompleteme-vim-flickers-every-time-i-move-cursor-or-moving-cursor-is-slow|
+  9. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
+  10. I get a 'E227: mapping already exists for <blah>' error when I start Vim |E227:-mapping-already-exists-for-blah|
+  11. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |GLIBC_2.XX-not-found()|
+  12. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
+  13. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
+  14. Vim segfaults when I use the semantic completer in Ruby files |youcompleteme-vim-segfaults-when-i-use-semantic-completer-in-ruby-files|
+  15. I get 'LONG_BIT definition appears wrong for platform' when compiling |LONG_BIT-definition-appears-wrong-for-platform|
+  16. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
+  17. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
+  18. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
+  19. 'CTRL-U' in insert mode does not work                        |CTRL-sub-U|
+  20. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
+  21. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
+  22. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
+  23. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
+  24. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
+  25. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  26. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  27. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
  11. Contact                                            |youcompleteme-contact|
  12. License                                            |youcompleteme-license|
  13. References                                      |youcompleteme-references|
@@ -833,6 +835,22 @@ Default: '0'
   let g:ycm_min_num_identifier_candidate_chars = 0
 <
 -------------------------------------------------------------------------------
+The *g:ycm_auto_trigger* option
+
+When set to '0', this option turns off YCM's identifier completer (the as-you-
+type popup) _and_ the semantic triggers (the popup you'd get after typing '.'
+or '->' in say C++). The Syntastic integration remains working and you can
+still force semantic completion with the '<C-Space>' shortcut.
+
+If you want to just turn off the identifier completer but keep the semantic
+triggers, you should set |g:ycm_min_num_of_chars_for_completion| to a high
+number like '99'.
+
+Default: '1'
+>
+  let g:ycm_auto_trigger = 1
+<
+-------------------------------------------------------------------------------
 The *g:ycm_filetype_whitelist* option
 
 This option controls for which Vim filetypes (see ':h filetype') should YCM be
@@ -1097,30 +1115,6 @@ Note that 'debug' is _very_ verbose.
 Default: 'info'
 >
   let g:ycm_server_log_level = 'info'
-<
--------------------------------------------------------------------------------
-The *g:ycm_server_idle_suicide_seconds* option
-
-This option sets the number of seconds of 'ycmd' server idleness (no requests
-received) after which the server stops itself. NOTE: the YCM Vim client sends a
-shutdown request to the server when Vim is shutting down.
-
-If your Vim crashes for instance, 'ycmd' never gets the shutdown command and
-becomes a zombie process. This option prevents such zombies from sticking
-around forever.
-
-The default option is '43200' seconds which is 12 hours. The reason for the
-interval being this long is to prevent the server from shutting down if you
-leave your computer (and Vim) turned on during the night.
-
-A setting of '0' turns off the timer.
-
-The server "heartbeat" that checks whether this interval has passed occurs
-every 10 minutes.
-
-Default: '43200'
->
-  let g:ycm_server_idle_suicide_seconds = 43200
 <
 -------------------------------------------------------------------------------
 The *g:ycm_csharp_server_port* option
@@ -1421,6 +1415,13 @@ part of the extra conf API.
 But fear not, you should be able to tweak your extra conf files to continue
 working by using the |g:ycm_extra_conf_vim_data| option. See the docs on that
 option for details.
+
+-------------------------------------------------------------------------------
+*youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu*
+On very rare occasions Vim crashes when I tab through the completion menu ~
+
+That's a very rare Vim bug most users never encounter. It's fixed in Vim
+7.4.72. Update to that version (or above) to resolve the issue.
 
 -------------------------------------------------------------------------------
 I get a linker warning regarding *libpython* on Mac when compiling YCM
@@ -1727,6 +1728,23 @@ I get an internal compiler error when installing ~
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
 
+-------------------------------------------------------------------------------
+         *youcompleteme-completion-doesnt-work-with-c-standard-library-headers*
+Completion doesn't work with the C++ standard library headers ~
+
+This is caused by an issue with libclang. Compiling from 'clang' the binary
+uses the correct default header search paths but compiling from 'libclang.so'
+does not. The issue seems to impact some OS's more than others. It appears that
+OS X Mavericks in particular has problems with this.
+
+The current workaround is to call 'echo | clang -v -E -x c++ -' and look at the
+paths under the '#include <...> search starts here:' heading. You should take
+those paths, prepend '-isystem' to each individual path and append them all to
+the list of flags you return from your 'FlagsForFile' function in your
+'.ycm_extra_conf.py' file.
+
+See issue #303 [30] for details.
+
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
@@ -1735,7 +1753,7 @@ If you have questions about the plugin or need help, please use the ycm-users
 [29] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[30].
+[31].
 
 The latest version of the plugin is available at
 http://valloric.github.io/YouCompleteMe/.
@@ -1746,10 +1764,10 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [31]. © 2012 Strahinja Val
+This software is licensed under the GPL v3 license [32]. © 2012 Strahinja Val
 Markovic <val@markovic.io>.
 
-  Image: Bitdeli Badge [32]
+  Image: Bitdeli Badge [33]
 
 ===============================================================================
                                                      *youcompleteme-references*
@@ -1784,9 +1802,10 @@ References ~
 [27] http://ctags.sourceforge.net/
 [28] https://github.com/Raimondi/delimitMate
 [29] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[30] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[31] http://www.gnu.org/copyleft/gpl.html
-[32] https://bitdeli.com/free
-[33] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[30] https://github.com/Valloric/YouCompleteMe/issues/303
+[31] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[32] http://www.gnu.org/copyleft/gpl.html
+[33] https://bitdeli.com/free
+[34] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
 
 vim: ft=help
