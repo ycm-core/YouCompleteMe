@@ -27,7 +27,6 @@ import urllib2
 import urllib
 import urlparse
 import json
-import subprocess
 import logging
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
@@ -170,7 +169,7 @@ class CsharpCompleter( Completer ):
       with open( self._filename_stdout, 'w' ) as fstdout:
         # shell=True is needed for Windows so OmniSharp does not spawn
         # in a new visible window
-        subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
+        utils.SafePopen( command, stdout=fstdout, stderr=fstderr, shell=True )
 
     self._logger.info( 'Starting OmniSharp server' )
 

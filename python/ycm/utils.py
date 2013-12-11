@@ -25,6 +25,7 @@ import functools
 import socket
 import stat
 from distutils.spawn import find_executable
+import subprocess
 
 WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
 WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
@@ -162,3 +163,18 @@ def AddThirdPartyFoldersToSysPath():
 def ForceSemanticCompletion( request_data ):
   return ( 'force_semantic' in request_data and
            bool( request_data[ 'force_semantic' ] ) )
+
+def SafePopen( args, bufsize = 0, executable = None, stdin = None,
+               stdout = None, stderr = None, preexec_fn = None,
+               close_fds = False, shell = False, cwd = None, env = None,
+               universal_newlines = False, startupinfo = None,
+               creationflags = 0 ):
+  if stdin is None:
+    # We need this on Windows otherwise bad things happen. See issue #637.
+    stdin = subprocess.PIPE if OnWindows() else None
+
+  return subprocess.Popen( args, bufsize, executable, stdin, stdout, stderr,
+                           preexec_fn, close_fds, shell, cwd, env,
+                           universal_newlines, startupinfo, creationflags )
+
+
