@@ -152,8 +152,8 @@ class CsharpCompleter( Completer ):
     path_to_solutionfile = os.path.join( folder, solutionfile )
     # we need to pass the command to Popen as a string since we're passing
     # shell=True (as recommended by Python's doc)
-    command = omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' + \
-              path_to_solutionfile
+    command = ( omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
+                path_to_solutionfile )
 
     if not utils.OnWindows():
       command = 'mono ' + command
