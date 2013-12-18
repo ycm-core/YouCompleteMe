@@ -67,8 +67,11 @@ endif()
 if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   set( COMPILER_IS_CLANG true )
 
-  # The Travis CI build machines don't have libc++ installed
-  if ( NOT DEFINED ENV{TRAVIS} )
+  # Linux machines don't necessarily have libc++ installed alongside clang,
+  # but HAS_LIBCXX11 doesn't always trigger for machines that DO have libc++. We
+  # know that at least all the Mac OS versions we support that use Clang have
+  # libc++, so we're safe there.
+  if ( HAS_LIBCXX11 OR APPLE )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
   endif()
 
