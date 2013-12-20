@@ -141,10 +141,22 @@ class YouCompleteMe( object ):
     return self._server_popen.pid
 
 
+  def _ServerCleanup( self ):
+    if self._IsServerAlive():
+      self._server_popen.terminate()
+    utils.RemoveIfExists( self._temp_options_filename )
+
+    if not self._user_options[ 'server_keep_logfiles' ]:
+      if self._server_stderr:
+        utils.RemoveIfExists( self._server_stderr )
+      if self._server_stdout:
+        utils.RemoveIfExists( self._server_stdout )
+
+
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
     self._user_notified_about_crash = False
-    self.OnVimLeave()
+    self._ServerCleanup()
     self._SetupServer()
 
 
@@ -237,15 +249,7 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
-    if self._IsServerAlive():
-      self._server_popen.terminate()
-    os.remove( self._temp_options_filename )
-
-    if not self._user_options[ 'server_keep_logfiles' ]:
-      if self._server_stderr:
-        os.remove( self._server_stderr )
-      if self._server_stdout:
-        os.remove( self._server_stdout )
+    self._ServerCleanup()
 
 
   def OnCurrentIdentifierFinished( self ):

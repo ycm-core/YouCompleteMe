@@ -79,6 +79,13 @@ def GetUnusedLocalhostPort():
   return port
 
 
+def RemoveIfExists( filename ):
+  try:
+    os.remove( filename )
+  except OSError:
+    pass
+
+
 def Memoize( obj ):
   cache = obj.cache = {}
 
