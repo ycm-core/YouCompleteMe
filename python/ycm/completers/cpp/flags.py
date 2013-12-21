@@ -22,11 +22,7 @@ import os
 import inspect
 from ycm import extra_conf_store
 from ycm.utils import ToUtf8IfNeeded
-
-NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
-  'are available. Thus no semantic support for C/C++/ObjC/ObjC++. Go READ THE '
-  'DOCS *NOW*, DON\'T file a bug report.' ).format(
-    extra_conf_store.YCM_EXTRA_CONF_FILENAME )
+from ycm.server.responses import NoExtraConfDetected
 
 INCLUDE_FLAGS = [ '-isystem', '-I', '-iquote', '--sysroot=', '-isysroot',
                   '-include' ]
@@ -54,7 +50,7 @@ class Flags( object ):
       if not module:
         if not self.no_extra_conf_file_warning_posted:
           self.no_extra_conf_file_warning_posted = True
-          raise RuntimeError( NO_EXTRA_CONF_FILENAME_MESSAGE )
+          raise NoExtraConfDetected
         return None
 
       results = _CallExtraConfFlagsForFile( module,

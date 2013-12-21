@@ -146,6 +146,13 @@ def LoadExtraConfFile():
   extra_conf_store.Load( request_data[ 'filepath' ], force = True )
 
 
+@app.post( '/ignore_extra_conf_file' )
+def IgnoreExtraConfFile():
+  LOGGER.info( 'Received extra conf ignore request' )
+  request_data = request.json
+  extra_conf_store.Disable( request_data[ 'filepath' ] )
+
+
 @app.post( '/debug_info' )
 def DebugInfo():
   LOGGER.info( 'Received debug info request' )

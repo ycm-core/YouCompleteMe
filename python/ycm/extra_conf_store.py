@@ -27,11 +27,9 @@ import sys
 import logging
 from threading import Lock
 from ycm import user_options_store
-from ycm.server.responses import UnknownExtraConf
+from ycm.server.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
 from fnmatch import fnmatch
 
-# Constants
-YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
 
 # Singleton variables
 _module_for_module_file = {}
@@ -95,7 +93,7 @@ def _CallGlobalExtraConfMethod( function_name ):
   getattr( module, function_name )()
 
 
-def _Disable( module_file ):
+def Disable( module_file ):
   """Disables the loading of a module for the current session."""
   with _module_for_module_file_lock:
     _module_for_module_file[ module_file ] = None
@@ -116,11 +114,6 @@ def _ShouldLoad( module_file ):
     if _MatchesGlobPattern( module_file, glob.lstrip('!') ):
       return not is_blacklisted
 
-  # We disable the file if it's unknown so that we don't ask the user about it
-  # repeatedly. Raising UnknownExtraConf should result in the client sending
-  # another request to load the module file if the user explicitly chooses to do
-  # that.
-  _Disable( module_file )
   raise UnknownExtraConf( module_file )
 
 
@@ -139,7 +132,7 @@ def Load( module_file, force = False ):
         return _module_for_module_file[ module_file ]
 
     if not _ShouldLoad( module_file ):
-      _Disable( module_file )
+      Disable( module_file )
       return None
 
   # This has to be here because a long time ago, the ycm_extra_conf.py files

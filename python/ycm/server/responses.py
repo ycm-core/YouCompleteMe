@@ -19,8 +19,15 @@
 
 import os
 
+YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
+
 CONFIRM_CONF_FILE_MESSAGE = ('Found {0}. Load? \n\n(Question can be turned '
                              'off with options, see YCM docs)')
+
+NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
+  'are available. Thus no semantic support for C/C++/ObjC/ObjC++. Go READ THE '
+  'DOCS *NOW*, DON\'T file a bug report.' ).format( YCM_EXTRA_CONF_FILENAME )
+
 
 class ServerError( Exception ):
   def __init__( self, message ):
@@ -33,6 +40,11 @@ class UnknownExtraConf( ServerError ):
     super( UnknownExtraConf, self ).__init__( message )
     self.extra_conf_file = extra_conf_file
 
+
+class NoExtraConfDetected( ServerError ):
+  def __init__( self ):
+    super( NoExtraConfDetected, self ).__init__(
+      NO_EXTRA_CONF_FILENAME_MESSAGE )
 
 
 def BuildGoToResponse( filepath, line_num, column_num, description = None ):

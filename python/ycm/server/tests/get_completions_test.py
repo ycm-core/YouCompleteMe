@@ -27,7 +27,8 @@ from webtest import TestApp, AppError
 from nose.tools import eq_, with_setup
 from hamcrest import ( assert_that, has_item, has_items, has_entry,
                        contains_inanyorder, empty )
-from ..responses import BuildCompletionData, UnknownExtraConf
+from ..responses import ( BuildCompletionData, UnknownExtraConf,
+                          NoExtraConfDetected )
 from .. import handlers
 import bottle
 
@@ -239,6 +240,9 @@ def GetCompletions_ClangCompleter_UnknownExtraConfException_test():
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cpp',
                                   contents = open( filepath ).read(),
+                                  line_num = 10,
+                                  column_num = 6,
+                                  start_column = 6,
                                   force_semantic = True )
 
   response = app.post_json( '/completions',
@@ -249,6 +253,18 @@ def GetCompletions_ClangCompleter_UnknownExtraConfException_test():
   assert_that( response.json,
                has_entry( 'exception',
                           has_entry( 'TYPE', UnknownExtraConf.__name__ ) ) )
+
+  app.post_json( '/ignore_extra_conf_file',
+                 { 'filepath': PathToTestFile( '.ycm_extra_conf.py' ) } )
+
+  response = app.post_json( '/completions',
+                            completion_data,
+                            expect_errors = True )
+
+  eq_( response.status_code, httplib.INTERNAL_SERVER_ERROR )
+  assert_that( response.json,
+               has_entry( 'exception',
+                          has_entry( 'TYPE', NoExtraConfDetected.__name__ ) ) )
 
 
 @with_setup( Setup )
