@@ -58,6 +58,8 @@ class EventNotification( BaseRequest ):
       except UnknownExtraConf as e:
           if vimsupport.Confirm( str( e ) ):
             _LoadExtraConfFile( e.extra_conf_file )
+          else:
+            _IgnoreExtraConfFile( e.extra_conf_file )
     except Exception as e:
       vimsupport.PostVimMessage( str( e ) )
 
@@ -91,3 +93,7 @@ def SendEventNotificationAsync( event_name, extra_data = None ):
 def _LoadExtraConfFile( filepath ):
   BaseRequest.PostDataToHandler( { 'filepath': filepath },
                                  'load_extra_conf_file' )
+
+def _IgnoreExtraConfFile( filepath ):
+  BaseRequest.PostDataToHandler( { 'filepath': filepath },
+                                 'ignore_extra_conf_file' )
