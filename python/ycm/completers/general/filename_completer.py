@@ -96,7 +96,7 @@ class FilenameCompleter( Completer ):
     path_dir = os.path.expanduser( path_match.group() ) if path_match else ''
 
     return _GenerateCandidatesForPaths(
-      _GetPathsStandardCase(
+      _GetPathsStandardCase(self.user_options['path_completion'],
         path_dir,
         self.user_options[ 'filepath_completion_use_working_dir' ],
         filepath ) )
@@ -121,16 +121,18 @@ class FilenameCompleter( Completer ):
     return sorted( set( paths ) )
 
 
-def _GetPathsStandardCase( path_dir, use_working_dir, filepath ):
-  if not use_working_dir and not path_dir.startswith( '/' ):
-    path_dir = os.path.join( os.path.dirname( filepath ),
-                             path_dir )
-
-  try:
-    relative_paths = os.listdir( path_dir )
-  except:
-    relative_paths = []
-
+def _GetPathsStandardCase( path_completion,path_dir, use_working_dir, filepath ):
+  if path_completion != 0:
+    if not use_working_dir and not path_dir.startswith( '/' ):
+      path_dir = os.path.join( os.path.dirname( filepath ),
+                               path_dir )
+  
+    try:
+      relative_paths = os.listdir( path_dir )
+    except:
+      relative_paths = []
+  else:
+    return []  
   return ( os.path.join( path_dir, relative_path )
            for relative_path in relative_paths )
 

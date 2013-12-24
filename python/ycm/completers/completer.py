@@ -101,6 +101,7 @@ class Completer( object ):
   def __init__( self, user_options ):
     self.user_options = user_options
     self.min_num_chars = user_options[ 'min_num_of_chars_for_completion' ]
+    self.path_completion = user_options ['path_completion']
     self.triggers_for_filetype = (
         TriggersForFiletype( user_options[ 'semantic_triggers' ] )
         if user_options[ 'auto_trigger' ] else defaultdict( set ) )

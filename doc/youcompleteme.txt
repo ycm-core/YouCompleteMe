@@ -71,6 +71,7 @@ Contents ~
   34. The |g:ycm_semantic_triggers| option
   35. The |g:ycm_cache_omnifunc| option
   36. The |g:ycm_use_ultisnips_completer| option
+  37. The |g:ycm_path_completion| option
  10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
