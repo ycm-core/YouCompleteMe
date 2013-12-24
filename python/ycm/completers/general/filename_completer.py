@@ -24,6 +24,8 @@ from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
 from ycm.server import responses
 
+EXTRA_INFO_MAP = { 1 : '[File]', 2 : '[Dir]', 3 : '[File&Dir]' }
+
 class FilenameCompleter( Completer ):
   """
   General completer that provides filename and filepath completions.
@@ -136,18 +138,16 @@ def _GetPathsStandardCase( path_dir, use_working_dir, filepath ):
 
 
 def _GenerateCandidatesForPaths( absolute_paths ):
-  seen_basenames = set()
-  completion_dicts = []
-
+  extra_info = dict()
   for absolute_path in absolute_paths:
     basename = os.path.basename( absolute_path )
-    if basename in seen_basenames:
-      continue
-    seen_basenames.add( basename )
-
     is_dir = os.path.isdir( absolute_path )
+    extra_info[ basename ] = extra_info.get( basename, 0 ) | \
+                             ( 2 if is_dir else 1 )
+
+  completion_dicts = []
+  for basename, value in extra_info.iteritems():
     completion_dicts.append(
-      responses.BuildCompletionData( basename,
-                                     '[Dir]' if is_dir else '[File]' ) )
+      responses.BuildCompletionData( basename, EXTRA_INFO_MAP[ value ] ) )
 
   return completion_dicts
