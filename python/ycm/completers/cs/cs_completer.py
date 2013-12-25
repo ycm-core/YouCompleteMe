@@ -19,7 +19,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from sys import platform
 import glob
 from ycm.completers.completer import Completer
 from ycm.server import responses
@@ -28,7 +27,6 @@ import urllib2
 import urllib
 import urlparse
 import json
-import subprocess
 import logging
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
@@ -150,13 +148,14 @@ class CsharpCompleter( Completer ):
     if not os.path.isfile( omnisharp ):
       raise RuntimeError( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
 
-    if not platform.startswith( 'win' ):
-      omnisharp = 'mono ' + omnisharp
-
     path_to_solutionfile = os.path.join( folder, solutionfile )
-    # command has to be provided as one string for some reason
-    command = [ omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
-                path_to_solutionfile ]
+    # we need to pass the command to Popen as a string since we're passing
+    # shell=True (as recommended by Python's doc)
+    command = ( omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
+                path_to_solutionfile )
+
+    if not utils.OnWindows():
+      command = 'mono ' + command
 
     filename_format = os.path.join( utils.PathToTempDir(),
                                    'omnisharp_{port}_{sln}_{std}.log' )
@@ -168,7 +167,9 @@ class CsharpCompleter( Completer ):
 
     with open( self._filename_stderr, 'w' ) as fstderr:
       with open( self._filename_stdout, 'w' ) as fstdout:
-        subprocess.Popen( command, stdout=fstdout, stderr=fstderr, shell=True )
+        # shell=True is needed for Windows so OmniSharp does not spawn
+        # in a new visible window
+        utils.SafePopen( command, stdout=fstdout, stderr=fstderr, shell=True )
 
     self._logger.info( 'Starting OmniSharp server' )
 
