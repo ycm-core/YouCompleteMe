@@ -19,7 +19,6 @@
 
 import os
 import vim
-import subprocess
 import tempfile
 import json
 from ycm import vimsupport
@@ -94,7 +93,7 @@ class YouCompleteMe( object ):
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
       if self._user_options[ 'server_use_vim_stdout' ]:
-        self._server_popen = subprocess.Popen( args )
+        self._server_popen = utils.SafePopen( args )
       else:
         filename_format = os.path.join( utils.PathToTempDir(),
                                         'server_{port}_{std}.log' )
@@ -103,15 +102,12 @@ class YouCompleteMe( object ):
                                                       std = 'stdout' )
         self._server_stderr = filename_format.format( port = server_port,
                                                       std = 'stderr' )
-        # We need this on Windows otherwise bad things happen. See issue #637.
-        stdin = subprocess.PIPE if utils.OnWindows() else None
 
         with open( self._server_stderr, 'w' ) as fstderr:
           with open( self._server_stdout, 'w' ) as fstdout:
-            self._server_popen = subprocess.Popen( args,
-                                                   stdin = stdin,
-                                                   stdout = fstdout,
-                                                   stderr = fstderr )
+            self._server_popen = utils.SafePopen( args,
+                                                  stdout = fstdout,
+                                                  stderr = fstderr )
     self._NotifyUserIfServerCrashed()
 
 
