@@ -97,7 +97,7 @@ std::string buildFileContext( const std::string& file_path,
  *
  * @return the string describing the given diagnostic.
  */
-std::string CXDiagnosticToLocationAndRangesText( CXDiagnostic cxdiagnostic ) {
+std::string CXDiagnosticToLocationAndRangesText( const CXDiagnostic& cxdiagnostic ) {
   // resulting map of <file name, map<line number, description>>
   std::map<std::string, std::map<unsigned, std::string>> result;
 
