@@ -28,6 +28,9 @@ NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
   'are available. Thus no semantic support for C/C++/ObjC/ObjC++. Go READ THE '
   'DOCS *NOW*, DON\'T file a bug report.' ).format( YCM_EXTRA_CONF_FILENAME )
 
+NO_DIAGNOSTIC_SUPPORT_MESSAGE = ( 'YCM has no diagnostics support for this '
+  'filetype; refer to Syntastic docs if using Syntastic.')
+
 
 class ServerError( Exception ):
   def __init__( self, message ):
@@ -45,6 +48,11 @@ class NoExtraConfDetected( ServerError ):
   def __init__( self ):
     super( NoExtraConfDetected, self ).__init__(
       NO_EXTRA_CONF_FILENAME_MESSAGE )
+
+
+class NoDiagnosticSupport( ServerError ):
+  def __init__( self ):
+    super( NoDiagnosticSupport, self ).__init__( NO_DIAGNOSTIC_SUPPORT_MESSAGE )
 
 
 def BuildGoToResponse( filepath, line_num, column_num, description = None ):

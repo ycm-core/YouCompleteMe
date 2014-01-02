@@ -27,6 +27,7 @@ else:
   from ycm_core import FilterAndSortCandidates
 
 from ycm.completers.completer_utils import TriggersForFiletype
+from ycm.server.responses import NoDiagnosticSupport
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
@@ -245,11 +246,11 @@ class Completer( object ):
 
 
   def GetDiagnosticsForCurrentFile( self, request_data ):
-    return []
+    raise NoDiagnosticSupport
 
 
   def GetDetailedDiagnostic( self, request_data ):
-    pass
+    raise NoDiagnosticSupport
 
 
   def _CurrentFiletype( self, filetypes ):

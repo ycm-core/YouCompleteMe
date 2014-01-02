@@ -21,11 +21,13 @@ from ..server_utils import SetUpPythonPath
 SetUpPythonPath()
 from .test_utils import Setup, BuildRequest
 from webtest import TestApp
-from nose.tools import with_setup
+from nose.tools import with_setup, eq_
 from hamcrest import ( assert_that, contains, contains_string, has_entries,
                        has_entry, empty )
+from ..responses import NoDiagnosticSupport
 from .. import handlers
 import bottle
+import httplib
 
 bottle.debug( True )
 
@@ -103,4 +105,20 @@ struct Foo {
   results = app.post_json( '/detailed_diagnostic', diag_data ).json
   assert_that( results,
                has_entry( 'message', contains_string( "expected ';'" ) ) )
+
+
+@with_setup( Setup )
+def GetDetailedDiagnostic_JediCompleter_DoesntWork_test():
+  app = TestApp( handlers.app )
+  diag_data = BuildRequest( contents = "foo = 5",
+                            line_num = 1,
+                            filetype = 'python' )
+  response = app.post_json( '/detailed_diagnostic',
+                            diag_data,
+                            expect_errors = True )
+
+  eq_( response.status_code, httplib.INTERNAL_SERVER_ERROR )
+  assert_that( response.json,
+               has_entry( 'exception',
+                          has_entry( 'TYPE', NoDiagnosticSupport.__name__ ) ) )
 
