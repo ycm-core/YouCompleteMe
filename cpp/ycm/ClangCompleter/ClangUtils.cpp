@@ -45,10 +45,43 @@ namespace {
 
 
 /**
+ * @brief read a file's lines whose index are listed in \a lines
+ *
+ * @param file_path path of the file to read
+ * @param lines lines of the file to read
+ *
+ * @return a map of line_index -> line text
+ */
+std::map<unsigned, std::string> fetchSourceCode( const std::string& file_path,
+                                                 const std::set<unsigned>& lines ) {
+  std::map<unsigned, std::string> result;
+  std::ifstream infile( file_path );
+  std::string line;
+  unsigned current_line_idx = 0;
+
+  for ( unsigned current_line : lines ) {
+    line = "YCM ERROR WHILE READING FILE \"" + file_path + "\". Try saving file.";
+
+    while ( infile.good() and std::getline( infile, line ) ) {
+      if ( ++current_line_idx == current_line ) {
+        break;
+      }
+
+      line = "YCM ERROR WHILE READING FILE \"" + file_path + "\". Try saving file.";
+    }
+
+    // add the source code line
+    result[current_line] = line;
+  }
+  return result;
+}
+
+/**
  * @brief read the file corresponding to the given path and concatenate
  * the given "underline" strings after each marked line.
  *
  * @param file_path path of the file which is read
+ * @param file_lines lines of the given files which are underlined
  * @param underlines map of "underline" strings per line in the file
  * @param add_file_path enable the concatenation of the path of the file
  * before the file's lines.
@@ -57,6 +90,7 @@ namespace {
  * file.
  */
 std::string buildFileContext( const std::string& file_path,
+                              const std::map<unsigned, std::string>& file_lines,
                               const std::map<unsigned, std::string>& underlines,
                               bool add_file_path ) {
   std::string str_result;
@@ -64,24 +98,10 @@ std::string buildFileContext( const std::string& file_path,
     str_result.append( file_path + ": context:\n" );
   }
 
-  std::ifstream infile( file_path );
-  std::string line;
-  unsigned current_line_idx = 0;
-
   for ( auto current_line : underlines ) {
-    line = "YCM ERROR WHILE READING FILE \"" + file_path + "\"";
-
-    while ( infile.good() and std::getline( infile, line ) ) {
-      if ( ++current_line_idx == current_line.first ) {
-        break;
-      }
-
-      line = "YCM ERROR WHILE READING FILE \"" + file_path + "\"";
-    }
-
     // prepend the prefix and the source code line before the underline
-    std::string index = std::to_string( current_line_idx ) + ": ";
-    str_result.append( index + line + "\n"
+    std::string index = std::to_string( current_line.first ) + ": ";
+    str_result.append( index + file_lines.at(current_line.first) + "\n"
             + std::string( index.size(), ' ' ) + current_line.second + "\n" );
   }
   return str_result;
@@ -111,13 +131,52 @@ std::string CXDiagnosticToLocationAndRangesText( const CXDiagnostic& cxdiagnosti
 
   // map all the ranges in a map of <file name, map<line number, set<ranges' column indexes>>>
   const unsigned num_ranges = clang_getDiagnosticNumRanges( cxdiagnostic );
-  std::map<std::string, std::map<unsigned, std::set<unsigned>>> range_idxs {};
 
+  // map of <file path, lines to read>
+  std::map<std::string, std::set<unsigned>> referenced_files;
+
+  // list the files to read
+  referenced_files[loc_path].insert(loc_line);
   for ( unsigned range = 0; range < num_ranges; ++range ) {
     CXSourceLocation range_start = clang_getRangeStart(
                                      clang_getDiagnosticRange( cxdiagnostic, range ) );
     CXSourceLocation range_end = clang_getRangeEnd(
-                                   clang_getDiagnosticRange( cxdiagnostic, range ) );
+                                     clang_getDiagnosticRange( cxdiagnostic, range ) );
+
+    CXFile start_file, end_file;
+    unsigned start_line, end_line;
+    clang_getSpellingLocation( range_start, &start_file, &start_line, 0, 0 );
+    clang_getSpellingLocation( range_end, &end_file, &end_line, 0, 0 );
+
+    const std::string start_path = CXStringToString( clang_getFileName( start_file ) );
+    const std::string end_path = CXStringToString( clang_getFileName( end_file ) );
+
+    std::set<unsigned>& lines = referenced_files[start_path];
+
+    if ( start_path == end_path ) {
+      // retrieve the file's lines ranges. Create it if none exists.
+      for ( unsigned l = start_line; l <= end_line; ++l ) {
+        lines.insert(l);
+      }
+    } else {
+      // The range spans on multiple files... only add the start line
+      lines.insert( start_line );
+    }
+  }
+
+  // read the needed files and add the lines in a map of <file path, map<line index, line>>
+  std::map<std::string, std::map<unsigned, std::string>> files_lines;
+  for ( auto& file : referenced_files ) {
+    files_lines[file.first] = fetchSourceCode( file.first, file.second );
+  }
+
+  // create for each file's line the set of columns which are underlined
+  std::map<std::string, std::map<unsigned, std::set<unsigned>>> range_idxs {};
+  for ( unsigned range = 0; range < num_ranges; ++range ) {
+    CXSourceLocation range_start = clang_getRangeStart(
+                                     clang_getDiagnosticRange( cxdiagnostic, range ) );
+    CXSourceLocation range_end = clang_getRangeEnd(
+                                     clang_getDiagnosticRange( cxdiagnostic, range ) );
 
     CXFile start_file, end_file;
     unsigned start_col, end_col, start_line, end_line;
@@ -127,22 +186,38 @@ std::string CXDiagnosticToLocationAndRangesText( const CXDiagnostic& cxdiagnosti
     const std::string start_path = CXStringToString( clang_getFileName( start_file ) );
     const std::string end_path = CXStringToString( clang_getFileName( end_file ) );
 
+    const std::map<unsigned, std::string> &lines = files_lines[start_path];
+    // retrieve the file's lines ranges. Create it if none exists.
+    std::map<unsigned, std::set<unsigned>> &range_lines = range_idxs[start_path];
+
     if ( start_path == end_path ) {
-      // retrieve the file's lines ranges. Create it if none exists.
-      std::map<unsigned, std::set<unsigned>> &range_lines = range_idxs[start_path];
-
-      for ( unsigned l = start_line; l <= end_line; ++l ) {
-        // retrieve the ranged columns for the current line. Create it if none exists.
-        std::set<unsigned> &range_line = range_lines[l];
-
-        for ( unsigned c = start_col; c < end_col; ++c ) {
+      // add the columns of the lines from start_line to end_line - 1
+      for ( unsigned l = start_line; l < end_line; ++l ) {
+        // first column start at start_col for the first line and at 1 for the next ones
+        const unsigned cur_line_start_col = ( l == start_line ? start_col : 1 );
+        // getline does not take the newline and the columns start at index 1 and not 0.
+        const unsigned cur_line_end_col = lines.at(l).size() + 1;
+        // FIXME: we have to perform this test because when the files are not saved the lines
+        // will not match. TODO: we should read the compiled buffers and not the saved files.
+        if ( cur_line_end_col > cur_line_start_col ) {
+          std::set<unsigned> &range_line = range_lines[l];
+          // retrieve the ranged columns for the current line. Create it if none exists.
+          for ( unsigned c = cur_line_start_col; c < cur_line_end_col; ++c ) {
+            range_line.insert( c );
+          }
+        }
+      }
+      // add all the columns up to end_line on the last line.
+      const unsigned end_line_start_col = start_line == end_line ? start_col : 1;
+      if ( end_col > end_line_start_col ) {
+        std::set<unsigned> &range_line = range_lines[end_line];
+        for ( unsigned c = end_line_start_col; c < end_col; ++c ) {
           range_line.insert( c );
         }
       }
     } else {
       // The range spans on multiple files... only take the first character of the first
       // line
-      std::map<unsigned, std::set<unsigned>> &range_lines = range_idxs[start_path];
       std::set<unsigned> &range_line = range_lines[start_line];
       range_line.insert( start_col );
     }
@@ -152,11 +227,11 @@ std::string CXDiagnosticToLocationAndRangesText( const CXDiagnostic& cxdiagnosti
   // by the diagnostic's location then add the caret under the location.
   bool loc_processed = false; // true if the location has been processed
 
-  for ( auto current_file : range_idxs ) {
+  for ( auto &current_file : range_idxs ) {
     const std::string current_path = current_file.first;
     std::map<unsigned, std::string> &result_file = result[current_path];
 
-    for ( auto current_line : current_file.second ) {
+    for ( auto &current_line : current_file.second ) {
       // retrieve the current line result
       std::string &result_line = result_file[current_line.first];
       const std::set<unsigned> &line_idxs = current_line.second;
@@ -192,12 +267,16 @@ std::string CXDiagnosticToLocationAndRangesText( const CXDiagnostic& cxdiagnosti
   // for each underline, read the corresponding line in the source file and generate the
   // resulting description (~= source line \n underline)
   std::string str_result;
+
   // first add the context of the location's file
-  str_result.append( buildFileContext( loc_path, result[loc_path], false ) );
+  str_result.append( buildFileContext( loc_path, files_lines.at( loc_path ),
+                                       result[loc_path], false ) );
+
   // then add other files with their path printed beforehand
-  for ( auto current_file : result ) {
+  for ( auto& current_file : result ) {
     if ( current_file.first != loc_path ) {
       str_result.append( buildFileContext( current_file.first,
+                                           files_lines.at( current_file.first ),
                                            current_file.second,
                                            true ) );
     }
