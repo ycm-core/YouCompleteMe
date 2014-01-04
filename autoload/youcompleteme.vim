@@ -29,7 +29,7 @@ let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
 let s:previous_num_chars_on_current_line = -1
 
-let s:forced_syntastic_checker_for = {
+let s:diagnostic_ui_filetypes = {
       \ 'cpp': 1,
       \ 'c': 1,
       \ 'objc': 1,
@@ -70,9 +70,11 @@ function! youcompleteme#Enable()
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
 
-  if g:ycm_register_as_syntastic_checker
-    call s:TweakSyntasticOptions()
+  if g:ycm_show_diagnostics_ui
+    call s:TurnOffSyntasticForCFamily()
   endif
+
+  call s:SetUpSigns()
 
   if g:ycm_allow_changing_updatetime
     set ut=2000
@@ -157,6 +159,41 @@ function! s:SetUpKeyMappings()
 endfunction
 
 
+function! s:SetUpSigns()
+  " We try to ensure backwards compatibility with Syntastic if the user has
+  " already defined styling for Syntastic highlight groups.
+
+  if !hlexists( 'YcmErrorSign' )
+    if hlexists( 'SyntasticErrorSign')
+      highlight link YcmErrorSign SyntasticErrorSign
+    else
+      highlight link YcmErrorSign error
+    endif
+  endif
+
+  if !hlexists( 'YcmWarningSign' )
+    if hlexists( 'SyntasticWarningSign')
+      highlight link YcmWarningSign SyntasticWarningSign
+    else
+      highlight link YcmWarningSign todo
+    endif
+  endif
+
+  if !hlexists( 'YcmErrorLine' )
+    highlight link YcmErrorLine SyntasticErrorLine
+  endif
+
+  if !hlexists( 'YcmWarningLine' )
+    highlight link YcmWarningLine SyntasticWarningLine
+  endif
+
+  exe 'sign define YcmError text=' . g:ycm_error_symbol .
+        \ ' texthl=YcmErrorSign linehl=YcmErrorLine'
+  exe 'sign define YcmWarning text=' . g:ycm_warning_symbol .
+        \ ' texthl=YcmWarningSign linehl=YcmWarningLine'
+endfunction
+
+
 function! s:SetUpBackwardsCompatibility()
   let complete_in_comments_and_strings =
         \ get( g:, 'ycm_complete_in_comments_and_strings', 0 )
@@ -173,38 +210,17 @@ function! s:SetUpBackwardsCompatibility()
 endfunction
 
 
-function! s:TweakSyntasticOptions()
-  call s:ForceCFamilyFiletypesSyntasticPassiveMode()
-  call s:ForceSyntasticCFamilyChecker()
-
-  " We set this to work around segfaults in old versions of Vim
-  " See here for details: https://github.com/scrooloose/syntastic/issues/834
-  let g:syntastic_delayed_redraws = 1
+" Needed so that YCM is used instead of Syntastic
+function! s:TurnOffSyntasticForCFamily()
+  let g:syntastic_cpp_checkers = []
+  let g:syntastic_c_checkers = []
+  let g:syntastic_objc_checkers = []
+  let g:syntastic_objcpp_checkers = []
 endfunction
 
 
-" Needed so that YCM is used as the syntastic checker
-function! s:ForceSyntasticCFamilyChecker()
-  let g:syntastic_cpp_checkers = ['ycm']
-  let g:syntastic_c_checkers = ['ycm']
-  let g:syntastic_objc_checkers = ['ycm']
-  let g:syntastic_objcpp_checkers = ['ycm']
-endfunction
-
-
-" Needed so that Syntastic doesn't call :SyntasticCheck (and thus YCM code) on
-" file save unnecessarily. We call :SyntasticCheck ourselves often enough.
-function! s:ForceCFamilyFiletypesSyntasticPassiveMode()
-  let mode_map = get( g:, 'syntastic_mode_map', {} )
-  let mode_map.passive_filetypes = get( mode_map, 'passive_filetypes', [] ) +
-        \ ['cpp', 'c', 'objc', 'objcpp']
-  let g:syntastic_mode_map = mode_map
-endfunction
-
-
-function! s:ForcedAsSyntasticCheckerForCurrentFiletype()
-  return g:ycm_register_as_syntastic_checker &&
-         \ get( s:forced_syntastic_checker_for, &filetype, 0 )
+function! s:DiagnosticUiSupportedForCurrentFiletype()
+  return get( s:diagnostic_ui_filetypes, &filetype, 0 )
 endfunction
 
 
@@ -464,18 +480,15 @@ endfunction
 
 
 function! s:UpdateDiagnosticNotifications()
-  let should_display_diagnostics =
-        \ get( g:, 'loaded_syntastic_plugin', 0 ) &&
-        \ s:ForcedAsSyntasticCheckerForCurrentFiletype() &&
+  let should_display_diagnostics = g:ycm_show_diagnostics_ui &&
+        \ s:DiagnosticUiSupportedForCurrentFiletype() &&
         \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
 
   if !should_display_diagnostics
     return
   endif
 
-  if pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
-    SyntasticCheck
-  endif
+  py ycm_state.UpdateDiagnosticInterface()
 endfunction
 
 
@@ -637,14 +650,6 @@ function! s:ShowDetailedDiagnostic()
 endfunction
 
 command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
-
-
-" This is what Syntastic calls indirectly when it decides an auto-check is
-" required (currently that's on buffer save) OR when the SyntasticCheck command
-" is invoked
-function! youcompleteme#CurrentFileDiagnostics()
-  return pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
-endfunction
 
 
 function! s:DebugInfo()

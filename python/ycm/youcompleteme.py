@@ -23,6 +23,7 @@ import tempfile
 import json
 from ycm import vimsupport
 from ycm import utils
+from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general import syntax_parse
 from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
@@ -64,6 +65,7 @@ class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
     self._user_notified_about_crash = False
+    self._diag_interface = DiagnosticInterface()
     self._omnicomp = OmniCompleter( user_options )
     self._latest_completion_request = None
     self._latest_file_parse_request = None
@@ -269,6 +271,13 @@ class YouCompleteMe( object ):
       self._latest_file_parse_request = None
       return to_return
     return []
+
+
+  def UpdateDiagnosticInterface( self ):
+    if not self.DiagnosticsForCurrentFileReady():
+      return
+    self._diag_interface.UpdateWithNewDiagnostics(
+      self.GetDiagnosticsFromStoredRequest() )
 
 
   def ShowDetailedDiagnostic( self ):

@@ -71,9 +71,6 @@ let g:loaded_youcompleteme = 1
 " The only defaults that are here are the ones that are only relevant to the YCM
 " Vim client and not the server.
 
-let g:ycm_register_as_syntastic_checker =
-      \ get( g:, 'ycm_register_as_syntastic_checker', 1 )
-
 let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )
 
@@ -116,6 +113,17 @@ let g:ycm_extra_conf_vim_data =
 let g:ycm_path_to_python_interpreter =
       \ get( g:, 'ycm_path_to_python_interpreter', '' )
 
+let g:ycm_show_diagnostics_ui =
+      \ get( g:, 'ycm_show_diagnostics_ui',
+      \ get( g:, 'ycm_register_as_syntastic_checker', 1 ) )
+
+let g:ycm_error_symbol =
+      \ get( g:, 'ycm_error_symbol',
+      \ get( g:, 'syntastic_error_symbol', '>>' ) )
+
+let g:ycm_warning_symbol =
+      \ get( g:, 'ycm_warning_symbol',
+      \ get( g:, 'syntastic_warning_symbol', '>>' ) )
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.

@@ -83,13 +83,20 @@ def GetUnsavedAndCurrentBufferData():
 
 
 def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
-  return int( vim.eval( "bufnr('{0}', {1})".format(
+  return GetIntValue( "bufnr('{0}', {1})".format(
       os.path.realpath( filename ),
-      int( open_file_if_needed ) ) ) )
+      int( open_file_if_needed ) ) )
 
 
 def GetCurrentBufferFilepath():
   return GetBufferFilepath( vim.current.buffer )
+
+
+def BufferIsVisible( buffer_number ):
+  if buffer_number < 0:
+    return False
+  window_number = GetIntValue( "bufwinnr({0})".format( buffer_number ) )
+  return window_number != -1
 
 
 def GetBufferFilepath( buffer_object ):
@@ -98,6 +105,18 @@ def GetBufferFilepath( buffer_object ):
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that.
   return os.path.join( os.getcwd(), str( buffer_object.number ) )
+
+
+def UnplaceAllSignsInBuffer( buffer_number ):
+  if buffer_number < 0:
+    return
+  vim.command( 'sign unplace * buffer={0}'.format( buffer_number ) )
+
+
+def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
+  sign_name = 'YcmError' if is_error else 'YcmWarning'
+  vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
+    sign_id, line_num, sign_name, buffer_num ) )
 
 
 # Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
@@ -163,6 +182,7 @@ def NumLinesInBuffer( buffer_object ):
 def PostVimMessage( message ):
   vim.command( "echohl WarningMsg | echom '{0}' | echohl None"
                .format( EscapeForVim( str( message ) ) ) )
+
 
 # Unlike PostVimMesasge, this supports messages with newlines in them because it
 # uses 'echo' instead of 'echomsg'. This also means that the message will NOT
