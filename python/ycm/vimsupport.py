@@ -128,10 +128,23 @@ def ClearYcmSyntaxMatches():
 
 
 # Returns the ID of the newly added match
-def AddDiagnosticSyntaxMatch( line_num, column_num, is_error ):
+def AddDiagnosticSyntaxMatch( line_num,
+                              column_num,
+                              line_end_num = None,
+                              column_end_num = None,
+                              is_error = True ):
   group = 'YcmErrorSection' if is_error else 'YcmWarningSection'
-  return GetIntValue(
-    "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
+
+  if not line_end_num:
+    line_end_num = line_num
+
+  if not column_end_num:
+    return GetIntValue(
+      "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
+  else:
+    return GetIntValue(
+      "matchadd('{0}', '\%{1}l\%{2}c.*\%{3}l\%{4}c')".format(
+        group, line_num, column_num, line_end_num, column_end_num ) )
 
 
 # Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'

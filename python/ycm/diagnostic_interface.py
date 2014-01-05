@@ -63,9 +63,20 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
   for diags in line_to_diags.itervalues():
     for diag in diags:
       location = diag[ 'location' ]
-      vimsupport.AddDiagnosticSyntaxMatch( location[ 'line_num' ] + 1,
-                                           location[ 'column_num' ] + 1,
-                                           _DiagnosticIsError( diag ) )
+      is_error = _DiagnosticIsError( diag )
+
+      vimsupport.AddDiagnosticSyntaxMatch(
+        location[ 'line_num' ] + 1,
+        location[ 'column_num' ] + 1,
+        is_error = is_error )
+
+      for diag_range in diag[ 'ranges' ]:
+        vimsupport.AddDiagnosticSyntaxMatch(
+          diag_range[ 'start' ][ 'line_num' ] + 1,
+          diag_range[ 'start' ][ 'column_num' ] + 1,
+          diag_range[ 'end' ][ 'line_num' ] + 1,
+          diag_range[ 'end' ][ 'column_num' ] + 1,
+          is_error = is_error )
 
 
 def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
