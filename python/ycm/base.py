@@ -187,7 +187,7 @@ def OverlapLength( left_string, right_string ):
       length += 1
 
 
-COMPATIBLE_WITH_CORE_VERSION = 7
+COMPATIBLE_WITH_CORE_VERSION = 8
 
 def CompatibleWithYcmCore():
   try:
