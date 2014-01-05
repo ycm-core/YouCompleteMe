@@ -225,7 +225,7 @@ class ClangCompleter( Completer ):
     distance_to_closest_diagnostic = 999
 
     for diagnostic in diagnostics:
-      distance = abs( current_column - diagnostic.column_number_ )
+      distance = abs( current_column - diagnostic.location_.column_number_ )
       if distance < distance_to_closest_diagnostic:
         distance_to_closest_diagnostic = distance
         closest_diagnostic = diagnostic
@@ -266,8 +266,8 @@ def ConvertCompletionData( completion_data ):
 def DiagnosticsToDiagStructure( diagnostics ):
   structure = defaultdict( lambda : defaultdict( list ) )
   for diagnostic in diagnostics:
-    structure[ diagnostic.filename_ ][ diagnostic.line_number_ ].append(
-        diagnostic )
+    structure[ diagnostic.location_.filename_ ][
+      diagnostic.location_.line_number_ ].append( diagnostic )
   return structure
 
 
@@ -280,9 +280,9 @@ def InCFamilyFile( filetypes ):
 
 
 def ConvertToDiagnosticResponse( diagnostic ):
-  return responses.BuildDiagnosticData( diagnostic.filename_,
-                                        diagnostic.line_number_ - 1,
-                                        diagnostic.column_number_ - 1,
+  return responses.BuildDiagnosticData( diagnostic.location_.filename_,
+                                        diagnostic.location_.line_number_ - 1,
+                                        diagnostic.location_.column_number_ - 1,
                                         diagnostic.text_,
                                         diagnostic.kind_ )
 

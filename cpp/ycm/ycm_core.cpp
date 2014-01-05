@@ -25,6 +25,7 @@
 #  include "CompletionData.h"
 #  include "Diagnostic.h"
 #  include "Location.h"
+#  include "Range.h"
 #  include "UnsavedFile.h"
 #  include "CompilationDatabase.h"
 #endif // USE_CLANG_COMPLETER
@@ -112,19 +113,27 @@ BOOST_PYTHON_MODULE(ycm_core)
           "CompletionVec" )
     .def( vector_indexing_suite< std::vector< CompletionData > >() );
 
-  class_< Diagnostic >( "Diagnostic" )
-    .def_readonly( "line_number_", &Diagnostic::line_number_ )
-    .def_readonly( "column_number_", &Diagnostic::column_number_ )
-    .def_readonly( "kind_", &Diagnostic::kind_ )
-    .def_readonly( "filename_", &Diagnostic::filename_ )
-    .def_readonly( "text_", &Diagnostic::text_ )
-    .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ );
-
   class_< Location >( "Location" )
     .def_readonly( "line_number_", &Location::line_number_ )
     .def_readonly( "column_number_", &Location::column_number_ )
     .def_readonly( "filename_", &Location::filename_ )
     .def( "IsValid", &Location::IsValid );
+
+  class_< Range >( "Range" )
+    .def_readonly( "start_", &Range::start_ )
+    .def_readonly( "end_", &Range::end_ );
+
+  class_< std::vector< Range >,
+      boost::shared_ptr< std::vector< Range > > >(
+          "RangeVec" )
+    .def( vector_indexing_suite< std::vector< Range > >() );
+
+  class_< Diagnostic >( "Diagnostic" )
+    .def_readonly( "ranges_", &Diagnostic::ranges_ )
+    .def_readonly( "location_", &Diagnostic::location_ )
+    .def_readonly( "kind_", &Diagnostic::kind_ )
+    .def_readonly( "text_", &Diagnostic::text_ )
+    .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ );
 
   class_< std::vector< Diagnostic > >( "DiagnosticVec" )
     .def( vector_indexing_suite< std::vector< Diagnostic > >() );

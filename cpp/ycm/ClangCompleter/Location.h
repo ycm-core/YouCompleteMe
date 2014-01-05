@@ -19,6 +19,8 @@
 #define LOCATION_H_6TLFQH4I
 
 #include "standard.h"
+#include "ClangUtils.h"
+
 #include <string>
 #include <clang-c/Index.h>
 
@@ -35,6 +37,17 @@ struct Location {
     : line_number_( line ),
       column_number_( column ),
       filename_( filename ) {}
+
+  Location( const CXSourceLocation &location ) {
+    CXFile file;
+    uint unused_offset;
+    clang_getExpansionLocation( location,
+                                &file,
+                                &line_number_,
+                                &column_number_,
+                                &unused_offset );
+    filename_ = CXFileToFilepath( file );
+  }
 
   bool operator== ( const Location &other ) const {
     return

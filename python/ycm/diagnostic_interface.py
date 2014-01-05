@@ -69,6 +69,7 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
 
 
 def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
+  vimsupport.UnplaceAllSignsInBuffer( vim.current.buffer.number )
   for buffer_number, line_to_diags in buffer_number_to_line_to_diags.iteritems():
     if not vimsupport.BufferIsVisible( buffer_number ):
       continue
