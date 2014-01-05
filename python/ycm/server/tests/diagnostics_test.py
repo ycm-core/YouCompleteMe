@@ -35,12 +35,11 @@ bottle.debug( True )
 def Diagnostics_ClangCompleter_ZeroBasedLineAndColumn_test():
   app = TestApp( handlers.app )
   contents = """
-struct Foo {
-  int x  // semicolon missing here!
-  int y;
-  int c;
-  int d;
-};
+void foo() {
+  double baz = "foo";
+}
+// Padding to 5 lines
+// Padding to 5 lines
 """
 
   event_data = BuildRequest( compilation_flags = ['-x', 'c++'],
@@ -49,11 +48,26 @@ struct Foo {
                              filetype = 'cpp' )
 
   results = app.post_json( '/event_notification', event_data ).json
+  print results
   assert_that( results,
                contains(
-                  has_entries( { 'text': contains_string( "expected ';'" ),
-                                 'line_num': 2,
-                                 'column_num': 7 } ) ) )
+                  has_entries( {
+                    'text': contains_string( 'cannot initialize' ),
+                    'ranges': contains( has_entries( {
+                      'start': has_entries( {
+                        'line_num': 2,
+                        'column_num': 15,
+                      } ),
+                      'end': has_entries( {
+                        'line_num': 2,
+                        'column_num': 20,
+                      } ),
+                    } ) ),
+                    'location': has_entries( {
+                      'line_num': 2,
+                      'column_num': 9
+                    } )
+                  } ) ) )
 
 @with_setup( Setup )
 def Diagnostics_ClangCompleter_PragmaOnceWarningIgnored_test():

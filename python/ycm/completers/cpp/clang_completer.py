@@ -200,7 +200,7 @@ class ClangCompleter( Completer ):
 
     diagnostics = _FilterDiagnostics( diagnostics )
     self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
-    return [ ConvertToDiagnosticResponse( x ) for x in
+    return [ responses.BuildDiagnosticData( x ) for x in
              diagnostics[ : self._max_diagnostics_to_display ] ]
 
 
@@ -278,13 +278,6 @@ def ClangAvailableForFiletypes( filetypes ):
 def InCFamilyFile( filetypes ):
   return ClangAvailableForFiletypes( filetypes )
 
-
-def ConvertToDiagnosticResponse( diagnostic ):
-  return responses.BuildDiagnosticData( diagnostic.location_.filename_,
-                                        diagnostic.location_.line_number_ - 1,
-                                        diagnostic.location_.column_number_ - 1,
-                                        diagnostic.text_,
-                                        diagnostic.kind_ )
 
 def _FilterDiagnostics( diagnostics ):
   # Clang has an annoying warning that shows up when we try to compile header

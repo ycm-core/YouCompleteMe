@@ -109,8 +109,7 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def_readonly( "kind_", &CompletionData::kind_ );
 
   class_< std::vector< CompletionData >,
-      boost::shared_ptr< std::vector< CompletionData > > >(
-          "CompletionVec" )
+      boost::shared_ptr< std::vector< CompletionData > > >( "CompletionVec" )
     .def( vector_indexing_suite< std::vector< CompletionData > >() );
 
   class_< Location >( "Location" )
@@ -123,9 +122,7 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def_readonly( "start_", &Range::start_ )
     .def_readonly( "end_", &Range::end_ );
 
-  class_< std::vector< Range >,
-      boost::shared_ptr< std::vector< Range > > >(
-          "RangeVec" )
+  class_< std::vector< Range > >( "RangeVec" )
     .def( vector_indexing_suite< std::vector< Range > >() );
 
   class_< Diagnostic >( "Diagnostic" )

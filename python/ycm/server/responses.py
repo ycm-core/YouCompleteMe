@@ -101,17 +101,25 @@ def BuildCompletionData( insertion_text,
   return completion_data
 
 
-def BuildDiagnosticData( filepath,
-                         line_num,
-                         column_num,
-                         text,
-                         kind ):
+def BuildDiagnosticData( diagnostic ):
+  def BuildRangeData( source_range ):
+    return {
+      'start': BuildLocationData( source_range.start_ ),
+      'end': BuildLocationData( source_range.end_ ),
+    }
+
+  def BuildLocationData( location ):
+    return {
+      'line_num': location.line_number_ - 1,
+      'column_num': location.column_number_ - 1,
+      'filepath': location.filename_,
+    }
+
   return {
-    'filepath': filepath,
-    'line_num': line_num,
-    'column_num': column_num,
-    'text': text,
-    'kind': kind
+    'ranges': [ BuildRangeData( x ) for x in diagnostic.ranges_ ],
+    'location': BuildLocationData( diagnostic.location_ ),
+    'text': diagnostic.text_,
+    'kind': diagnostic.kind_
   }
 
 

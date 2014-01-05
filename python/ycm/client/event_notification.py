@@ -76,10 +76,11 @@ def _ConvertDiagnosticDataToVimData( diagnostic ):
   # Note that, as usual, Vim is completely inconsistent about whether
   # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
   # them to be 1-based.
+  location = diagnostic[ 'location' ]
   return {
-    'bufnr' : vimsupport.GetBufferNumberForFilename( diagnostic[ 'filepath' ] ),
-    'lnum'  : diagnostic[ 'line_num' ] + 1,
-    'col'   : diagnostic[ 'column_num' ] + 1,
+    'bufnr' : vimsupport.GetBufferNumberForFilename( location[ 'filepath' ] ),
+    'lnum'  : location[ 'line_num' ] + 1,
+    'col'   : location[ 'column_num' ] + 1,
     'text'  : diagnostic[ 'text' ],
     'type'  : diagnostic[ 'kind' ],
     'valid' : 1
