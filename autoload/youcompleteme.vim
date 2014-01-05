@@ -75,6 +75,7 @@ function! youcompleteme#Enable()
   endif
 
   call s:SetUpSigns()
+  call s:SetUpSyntaxHighlighting()
 
   if g:ycm_allow_changing_updatetime
     set ut=2000
@@ -191,6 +192,28 @@ function! s:SetUpSigns()
         \ ' texthl=YcmErrorSign linehl=YcmErrorLine'
   exe 'sign define YcmWarning text=' . g:ycm_warning_symbol .
         \ ' texthl=YcmWarningSign linehl=YcmWarningLine'
+endfunction
+
+
+function! s:SetUpSyntaxHighlighting()
+  " We try to ensure backwards compatibility with Syntastic if the user has
+  " already defined styling for Syntastic highlight groups.
+
+  if !hlexists( 'YcmErrorSection' )
+    if hlexists( 'SyntasticError' )
+      highlight link YcmErrorSection SyntasticError
+    else
+      highlight link YcmErrorSection SpellBad
+    endif
+  endif
+
+  if !hlexists( 'YcmWarningSection' )
+    if hlexists( 'SyntasticWarning' )
+      highlight link YcmWarningSection SyntasticWarning
+    else
+      highlight link YcmWarningSection SpellCap
+    endif
+  endif
 endfunction
 
 

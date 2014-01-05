@@ -107,6 +107,7 @@ def GetBufferFilepath( buffer_object ):
   return os.path.join( os.getcwd(), str( buffer_object.number ) )
 
 
+# TODO: only unplace our signs, not all signs
 def UnplaceAllSignsInBuffer( buffer_number ):
   if buffer_number < 0:
     return
@@ -117,6 +118,20 @@ def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
   sign_name = 'YcmError' if is_error else 'YcmWarning'
   vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
     sign_id, line_num, sign_name, buffer_num ) )
+
+
+def ClearYcmSyntaxMatches():
+  matches = VimExpressionToPythonType( 'getmatches()' )
+  for match in matches:
+    if match[ 'group' ].startswith( 'Ycm' ):
+      vim.eval( 'matchdelete({0})'.format( match[ 'id' ] ) )
+
+
+# Returns the ID of the newly added match
+def AddDiagnosticSyntaxMatch( line_num, column_num, is_error ):
+  group = 'YcmErrorSection' if is_error else 'YcmWarningSection'
+  return GetIntValue(
+    "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
 
 
 # Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'

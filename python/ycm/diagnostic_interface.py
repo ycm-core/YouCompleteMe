@@ -44,6 +44,7 @@ class DiagnosticInterface( object ):
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict( diags )
     self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
                                        self._next_sign_id )
+    _UpdateSquiggles( self._buffer_number_to_line_to_diags )
 
 
   def _EchoDiagnosticForLine( self, line_num ):
@@ -54,6 +55,17 @@ class DiagnosticInterface( object ):
       vimsupport.EchoText( '', False )
       return
     vimsupport.EchoTextVimWidth( diags[ 0 ][ 'text' ] )
+
+
+def _UpdateSquiggles( buffer_number_to_line_to_diags ):
+  vimsupport.ClearYcmSyntaxMatches()
+  line_to_diags = buffer_number_to_line_to_diags[ vim.current.buffer.number ]
+
+  for diags in line_to_diags.itervalues():
+    for diag in diags:
+      vimsupport.AddDiagnosticSyntaxMatch( diag[ 'lnum' ],
+                                           diag[ 'col' ],
+                                           _DiagnosticIsError( diag ) )
 
 
 def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
@@ -67,7 +79,7 @@ def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
         vimsupport.PlaceSign( next_sign_id,
                               line,
                               buffer_number,
-                              diag[ 'type' ] == 'E' )
+                              _DiagnosticIsError( diag ) )
         next_sign_id += 1
   return next_sign_id
 
@@ -82,4 +94,8 @@ def _ConvertDiagListToDict( diag_list ):
       # hidden by the warnings; Vim won't place a sign oven an existing one.
       diags.sort( key = lambda diag: itemgetter( 'col', 'type' ) )
   return buffer_to_line_to_diags
+
+
+def _DiagnosticIsError( diag ):
+  return diag[ 'type' ] == 'E'
 
