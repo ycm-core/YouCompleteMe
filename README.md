@@ -1501,6 +1501,42 @@ for bug reports and feature requests.
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
 
+### Why did YCM move away from Syntastic for display of diagnostics?
+
+Previously, YCM would send any diagnostics it would receive from the libclang
+semantic engine to Syntastic for display as signs in the gutter, red squiggles
+etc. Today, YCM uses its own code to do that.
+
+Using Syntastic for this was always a kludge. Syntastic assumes its "checker"
+plugins behave in a certain way; those assumptions have never fit YCM. For
+instance, YCM continuously recompiles your code in the background for C-family
+languages and tries to push new diagnostics to the user as fast as possible,
+even while the user types.
+
+Syntastic assumes that a checker only runs on file save ("active" mode) or even
+less frequently, when the user explicitly invokes it ("passive" mode). This
+mismatch in assumptions causes performance problems since Syntastic code isn't
+optimized for this use case of constant diagnostic refreshing.
+
+Poor support for this use case also led to crash bugs in Vim caused by
+Syntastic-Vim interactions (issue #593) and incredibly annoying screen
+flickering (issue #669). Attempts were made to resolve these issues in
+Syntastic, but ultimately some of them failed (for various reasons).
+
+Implementing diagnostic display code directly in YCM resolves all of these
+problems. Performance should also improve substantially since the relevant code
+is now written in Python instead of VimScript (which is very slow) and is
+tailored only for YCM's use-cases. We're also able to introduce new features in
+this area since we're not limited to the Syntastic checker API.
+
+We've tried to implement this in the most backwards-compatible way possible; YCM
+options that control diagnostic display fall back to Syntastic options that
+control the same concepts if the user has those set.
+
+Still, some Syntastic-specific configuration you might have had might not
+be supported by the new code. Please file issues on the tracker for such
+cases; if we find the request to be reasonable, we'll find a way to address it.
+
 ### Completion doesn't work with the C++ standard library headers
 
 This is caused by an issue with libclang. Compiling from `clang` the binary uses
