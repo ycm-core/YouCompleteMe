@@ -129,10 +129,11 @@ def AdjustCandidateInsertionText( candidates ):
       return to_insert[ :-overlap_len ]
     return to_insert
 
-  new_candidates = []
   text_after_cursor = vimsupport.TextAfterCursor()
   if not text_after_cursor:
     return candidates
+
+  new_candidates = []
   for candidate in candidates:
     if type( candidate ) is dict:
       new_candidate = candidate.copy()
