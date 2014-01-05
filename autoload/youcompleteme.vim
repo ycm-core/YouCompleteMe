@@ -771,7 +771,8 @@ function! s:ShowDiagnostics()
     return
   endif
 
-  let diags = pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
+  let diags = pyeval(
+        \ 'ycm_state.GetDiagnosticsFromStoredRequest( qflist_format = True )' )
   if !empty( diags )
     call setloclist( 0, diags )
     lopen

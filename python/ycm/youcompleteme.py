@@ -265,15 +265,18 @@ class YouCompleteMe( object ):
                  self._latest_file_parse_request.Done() )
 
 
-  def GetDiagnosticsFromStoredRequest( self ):
+  def GetDiagnosticsFromStoredRequest( self, qflist_format = False ):
     if self.DiagnosticsForCurrentFileReady():
-      to_return = self._latest_file_parse_request.Response()
+      diagnostics = self._latest_file_parse_request.Response()
       # We set the diagnostics request to None because we want to prevent
       # Syntastic from repeatedly refreshing the buffer with the same diags.
       # Setting this to None makes DiagnosticsForCurrentFileReady return False
       # until the next request is created.
       self._latest_file_parse_request = None
-      return to_return
+      if qflist_format:
+        return [ _ConvertDiagnosticDataToVimData( x ) for x in diagnostics ]
+      else:
+        return diagnostics
     return []
 
 
@@ -374,3 +377,19 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
   extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
                                            'description': x.description
                                          } for x in rawsnips ]
+
+
+def _ConvertDiagnosticDataToVimData( diagnostic ):
+  # see :h getqflist for a description of the dictionary fields
+  # Note that, as usual, Vim is completely inconsistent about whether
+  # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
+  # them to be 1-based.
+  location = diagnostic[ 'location' ]
+  return {
+    'bufnr' : vimsupport.GetBufferNumberForFilename( location[ 'filepath' ] ),
+    'lnum'  : location[ 'line_num' ] + 1,
+    'col'   : location[ 'column_num' ] + 1,
+    'text'  : diagnostic[ 'text' ],
+    'type'  : diagnostic[ 'kind' ],
+    'valid' : 1
+  }

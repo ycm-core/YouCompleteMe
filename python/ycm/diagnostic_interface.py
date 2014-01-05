@@ -18,7 +18,6 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
-from operator import itemgetter
 from ycm import vimsupport
 import vim
 
@@ -63,8 +62,9 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
 
   for diags in line_to_diags.itervalues():
     for diag in diags:
-      vimsupport.AddDiagnosticSyntaxMatch( diag[ 'lnum' ],
-                                           diag[ 'col' ],
+      location = diag[ 'location' ]
+      vimsupport.AddDiagnosticSyntaxMatch( location[ 'line_num' ] + 1,
+                                           location[ 'column_num' ] + 1,
                                            _DiagnosticIsError( diag ) )
 
 
@@ -88,15 +88,21 @@ def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
 def _ConvertDiagListToDict( diag_list ):
   buffer_to_line_to_diags = defaultdict( lambda: defaultdict( list ) )
   for diag in diag_list:
-    buffer_to_line_to_diags[ diag[ 'bufnr' ] ][ diag[ 'lnum' ] ].append( diag )
+    location = diag[ 'location' ]
+    buffer_number = vimsupport.GetBufferNumberForFilename(
+      location[ 'filepath' ] )
+    line_number = location[ 'line_num' ] + 1
+    buffer_to_line_to_diags[ buffer_number ][ line_number ].append( diag )
+
   for line_to_diags in buffer_to_line_to_diags.itervalues():
     for diags in line_to_diags.itervalues():
       # We also want errors to be listed before warnings so that errors aren't
       # hidden by the warnings; Vim won't place a sign oven an existing one.
-      diags.sort( key = lambda diag: itemgetter( 'col', 'type' ) )
+      diags.sort( key = lambda diag: ( diag[ 'location' ][ 'column_num' ],
+                                       diag[ 'kind' ] ) )
   return buffer_to_line_to_diags
 
 
 def _DiagnosticIsError( diag ):
-  return diag[ 'type' ] == 'E'
+  return diag[ 'kind' ] == 'E'
 
