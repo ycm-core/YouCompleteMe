@@ -67,8 +67,8 @@ def AdjustCandidateInsertionText_NotSuffix_test():
 
 def AdjustCandidateInsertionText_NothingAfterCursor_test():
   vimsupport.TextAfterCursor = MagicMock( return_value = '' )
-  eq_( [ { 'abbr': 'foofoo', 'word': 'foofoo' },
-         { 'abbr': 'zobar', 'word': 'zobar' }, ],
+  eq_( [ 'foofoo',
+         'zobar' ],
        base.AdjustCandidateInsertionText( [ 'foofoo',
                                             'zobar' ] ) )
 
