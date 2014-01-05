@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import vim
 from ycm import vimsupport
 from ycm import utils
@@ -124,18 +123,14 @@ def AdjustCandidateInsertionText( candidates ):
   to implement and is probably not worth doing.
   """
 
-  def NewCandidateInsertionText( to_insert, word_after_cursor ):
-    if to_insert.endswith( word_after_cursor ):
-      return to_insert[ : - len( word_after_cursor ) ]
+  def NewCandidateInsertionText( to_insert, text_after_cursor ):
+    overlap_len = OverlapLength( to_insert, text_after_cursor )
+    if overlap_len:
+      return to_insert[ :-overlap_len ]
     return to_insert
 
-  match = re.search( r'^(\w+)', vimsupport.TextAfterCursor() )
-  if not match:
-    return candidates
-
   new_candidates = []
-
-  word_after_cursor = match.group( 1 )
+  text_after_cursor = vimsupport.TextAfterCursor()
   for candidate in candidates:
     if type( candidate ) is dict:
       new_candidate = candidate.copy()
@@ -145,15 +140,49 @@ def AdjustCandidateInsertionText( candidates ):
 
       new_candidate[ 'word' ] = NewCandidateInsertionText(
         new_candidate[ 'word' ],
-        word_after_cursor )
+        text_after_cursor )
 
       new_candidates.append( new_candidate )
 
     elif type( candidate ) is str:
       new_candidates.append(
         { 'abbr': candidate,
-          'word': NewCandidateInsertionText( candidate, word_after_cursor ) } )
+          'word': NewCandidateInsertionText( candidate, text_after_cursor ) } )
   return new_candidates
+
+
+def OverlapLength( left_string, right_string ):
+  """Returns the length of the overlap between two strings.
+  Example: "foo baro" and "baro zoo" -> 4
+  """
+  left_string_length = len( left_string )
+  right_string_length = len( right_string )
+
+  if not left_string_length or not right_string_length:
+    return 0
+
+  # Truncate the longer string.
+  if left_string_length > right_string_length:
+    left_string = left_string[ -right_string_length: ]
+  elif left_string_length < right_string_length:
+    right_string = right_string[ :left_string_length ]
+
+  if left_string == right_string:
+    return min( left_string_length, right_string_length )
+
+  # Start by looking for a single character match
+  # and increase length until no match is found.
+  best = 0
+  length = 1
+  while True:
+    pattern = left_string[ -length: ]
+    found = right_string.find( pattern )
+    if found < 0:
+      return best
+    length += found
+    if left_string[ -length: ] == right_string[ :length ]:
+      best = length
+      length += 1
 
 
 COMPATIBLE_WITH_CORE_VERSION = 7

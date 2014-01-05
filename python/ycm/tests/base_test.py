@@ -49,6 +49,16 @@ def AdjustCandidateInsertionText_WhitespaceInTextAfterCursor_test():
        base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
 
+def AdjustCandidateInsertionText_MoreThanWordMatchingAfterCursor_test():
+  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar.h' )
+  eq_( [ { 'abbr': 'foobar.h', 'word': 'foo' } ],
+       base.AdjustCandidateInsertionText( [ 'foobar.h' ] ) )
+
+  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar(zoo' )
+  eq_( [ { 'abbr': 'foobar(zoo', 'word': 'foo' } ],
+       base.AdjustCandidateInsertionText( [ 'foobar(zoo' ] ) )
+
+
 def AdjustCandidateInsertionText_NotSuffix_test():
   vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
   eq_( [ { 'abbr': 'foofoo', 'word': 'foofoo' } ],
@@ -57,8 +67,8 @@ def AdjustCandidateInsertionText_NotSuffix_test():
 
 def AdjustCandidateInsertionText_NothingAfterCursor_test():
   vimsupport.TextAfterCursor = MagicMock( return_value = '' )
-  eq_( [ 'foofoo',
-         'zobar' ],
+  eq_( [ { 'abbr': 'foofoo', 'word': 'foofoo' },
+         { 'abbr': 'zobar', 'word': 'zobar' }, ],
        base.AdjustCandidateInsertionText( [ 'foofoo',
                                             'zobar' ] ) )
 
@@ -88,3 +98,37 @@ def AdjustCandidateInsertionText_DontTouchAbbr_test():
   eq_( [ { 'abbr': '1234', 'word': 'foo' } ],
        base.AdjustCandidateInsertionText(
          [ { 'abbr': '1234', 'word': 'foobar' } ] ) )
+
+
+def OverlapLength_Basic_test():
+  eq_( 3, base.OverlapLength( 'foo bar', 'bar zoo' ) )
+  eq_( 3, base.OverlapLength( 'foobar', 'barzoo' ) )
+
+
+def OverlapLength_OneCharOverlap_test():
+  eq_( 1, base.OverlapLength( 'foo b', 'b zoo' ) )
+
+
+def OverlapLength_SameStrings_test():
+  eq_( 6, base.OverlapLength( 'foobar', 'foobar' ) )
+
+
+def OverlapLength_Substring_test():
+  eq_( 6, base.OverlapLength( 'foobar', 'foobarzoo' ) )
+  eq_( 6, base.OverlapLength( 'zoofoobar', 'foobar' ) )
+
+
+def OverlapLength_LongestOverlap_test():
+  eq_( 7, base.OverlapLength( 'bar foo foo', 'foo foo bar' ) )
+
+
+def OverlapLength_EmptyInput_test():
+  eq_( 0, base.OverlapLength( '', 'goobar' ) )
+  eq_( 0, base.OverlapLength( 'foobar', '' ) )
+  eq_( 0, base.OverlapLength( '', '' ) )
+
+
+def OverlapLength_NoOverlap_test():
+  eq_( 0, base.OverlapLength( 'foobar', 'goobar' ) )
+  eq_( 0, base.OverlapLength( 'foobar', '(^($@#$#@' ) )
+  eq_( 0, base.OverlapLength( 'foo bar zoo', 'foo zoo bar' ) )
