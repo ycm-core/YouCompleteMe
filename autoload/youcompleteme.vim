@@ -365,6 +365,7 @@ function! s:OnCursorMovedInsertMode()
     return
   endif
 
+  py ycm_state.OnCursorMoved()
   call s:UpdateCursorMoved()
 
   " Basically, we need to only trigger the completion menu when the user has
@@ -402,6 +403,7 @@ function! s:OnCursorMovedNormalMode()
   endif
 
   call s:OnFileReadyToParse()
+  py ycm_state.OnCursorMoved()
 endfunction
 
 

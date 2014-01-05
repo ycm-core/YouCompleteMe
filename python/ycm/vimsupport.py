@@ -220,12 +220,21 @@ def Confirm( message ):
   return bool( PresentDialog( message, [ "Ok", "Cancel" ] ) == 0 )
 
 
-def EchoText( text ):
+def EchoText( text, log_as_message = True ):
   def EchoLine( text ):
-    vim.command( "echom '{0}'".format( EscapeForVim( text ) ) )
+    command = 'echom' if log_as_message else 'echo'
+    vim.command( "{0} '{1}'".format( command, EscapeForVim( text ) ) )
 
   for line in text.split( '\n' ):
     EchoLine( line )
+
+
+# Echos text but truncates the text so that it all fits on one line
+def EchoTextVimWidth( text ):
+  vim_width = GetIntValue( '&columns' )
+  truncated_text = text[ : int( vim_width * 0.9 ) ]
+  truncated_text.replace( '\n', ' ' )
+  EchoText( truncated_text, False )
 
 
 def EscapeForVim( text ):

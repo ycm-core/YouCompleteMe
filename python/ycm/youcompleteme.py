@@ -246,6 +246,10 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'InsertLeave' )
 
 
+  def OnCursorMoved( self ):
+    self._diag_interface.OnCursorMoved()
+
+
   def OnVimLeave( self ):
     self._ServerCleanup()
 

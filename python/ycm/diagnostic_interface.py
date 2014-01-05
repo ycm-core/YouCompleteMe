@@ -20,36 +20,66 @@
 from collections import defaultdict
 from operator import itemgetter
 from ycm import vimsupport
+import vim
 
 
 class DiagnosticInterface( object ):
   def __init__( self ):
-    self._buffer_number_to_diags = {}
+    # Line and column numbers are 1-based
+    self._buffer_number_to_line_to_diags = defaultdict(
+      lambda: defaultdict( list ) )
     self._next_sign_id = 1
+    self._previous_line_number = -1
+
+
+  def OnCursorMoved( self ):
+    line, _ = vimsupport.CurrentLineAndColumn()
+    line += 1  # Convert to 1-based
+    if line != self._previous_line_number:
+      self._previous_line_number = line
+      self._EchoDiagnosticForLine( line )
 
 
   def UpdateWithNewDiagnostics( self, diags ):
-    self._buffer_number_to_diags = ConvertDiagListToDict( diags )
-    for buffer_number, buffer_diags in self._buffer_number_to_diags.iteritems():
-      if not vimsupport.BufferIsVisible( buffer_number ):
-        continue
+    self._buffer_number_to_line_to_diags = _ConvertDiagListToDict( diags )
+    self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
+                                       self._next_sign_id )
 
-      vimsupport.UnplaceAllSignsInBuffer( buffer_number )
-      for diag in buffer_diags:
-        vimsupport.PlaceSign( self._next_sign_id,
-                              diag[ 'lnum' ],
+
+  def _EchoDiagnosticForLine( self, line_num ):
+    buffer_num = vim.current.buffer.number
+    diags = self._buffer_number_to_line_to_diags[ buffer_num ][ line_num ]
+    if not diags:
+      # Clear any previous diag echo
+      vimsupport.EchoText( '', False )
+      return
+    vimsupport.EchoTextVimWidth( diags[ 0 ][ 'text' ] )
+
+
+def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
+  for buffer_number, line_to_diags in buffer_number_to_line_to_diags.iteritems():
+    if not vimsupport.BufferIsVisible( buffer_number ):
+      continue
+
+    vimsupport.UnplaceAllSignsInBuffer( buffer_number )
+    for line, diags in line_to_diags.iteritems():
+      for diag in diags:
+        vimsupport.PlaceSign( next_sign_id,
+                              line,
                               buffer_number,
                               diag[ 'type' ] == 'E' )
-        self._next_sign_id += 1
+        next_sign_id += 1
+  return next_sign_id
 
 
-def ConvertDiagListToDict( diags ):
-  buffer_to_diags = defaultdict( list )
-  for diag in diags:
-    buffer_to_diags[ diag[ 'bufnr' ] ].append( diag )
-  for buffer_diags in buffer_to_diags.itervalues():
-    # We also want errors to be listed before warnings so that errors aren't
-    # hidden by the warnings; Vim won't place a sign oven an existing one.
-    buffer_diags.sort( key = lambda diag: itemgetter( 'lnum', 'col', 'type' ) )
-  return buffer_to_diags
+def _ConvertDiagListToDict( diag_list ):
+  buffer_to_line_to_diags = defaultdict( lambda: defaultdict( list ) )
+  for diag in diag_list:
+    buffer_to_line_to_diags[ diag[ 'bufnr' ] ][ diag[ 'lnum' ] ].append( diag )
+  for line_to_diags in buffer_to_line_to_diags.itervalues():
+    for diags in line_to_diags.itervalues():
+      # We also want errors to be listed before warnings so that errors aren't
+      # hidden by the warnings; Vim won't place a sign oven an existing one.
+      diags.sort( key = lambda diag: itemgetter( 'col', 'type' ) )
+  return buffer_to_line_to_diags
 
