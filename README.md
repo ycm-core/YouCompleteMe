@@ -1501,7 +1501,7 @@ for bug reports and feature requests.
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
 
-### Why did YCM stop using Syntastic diagnostics display?
+### Why did YCM stop using Syntastic for diagnostics display?
 
 Previously, YCM would send any diagnostics it would receive from the libclang
 semantic engine to Syntastic for display as signs in the gutter, red squiggles
