@@ -72,8 +72,6 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
         location_extent[ 'end' ][ 'column_num' ] + 1,
         is_error = is_error )
 
-      vimsupport.EchoText( diag )
-
       for diag_range in diag[ 'ranges' ]:
         vimsupport.AddDiagnosticSyntaxMatch(
           diag_range[ 'start' ][ 'line_num' ] + 1,
