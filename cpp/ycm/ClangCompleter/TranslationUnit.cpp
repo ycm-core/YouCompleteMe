@@ -270,9 +270,10 @@ void TranslationUnit::UpdateLatestDiagnostics() {
 
   for ( uint i = 0; i < num_diagnostics; ++i ) {
     Diagnostic diagnostic =
-      DiagnosticWrapToDiagnostic(
+      BuildDiagnostic(
         DiagnosticWrap( clang_getDiagnostic( clang_translation_unit_, i ),
-                        clang_disposeDiagnostic ) );
+                        clang_disposeDiagnostic ),
+        clang_translation_unit_ );
 
     if ( diagnostic.kind_ != 'I' )
       latest_diagnostics_.push_back( diagnostic );

@@ -37,6 +37,8 @@ struct Diagnostic {
 
   Location location_;
 
+  Range location_extent_;
+
   std::vector< Range > ranges_;
 
   // Vim's error "kind"

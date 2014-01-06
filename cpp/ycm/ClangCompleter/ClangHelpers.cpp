@@ -107,6 +107,42 @@ std::vector< Range > GetRanges( const DiagnosticWrap &diagnostic_wrap ) {
   return ranges;
 }
 
+
+Range GetLocationExtent( CXSourceLocation source_location,
+                         CXTranslationUnit translation_unit ) {
+  // If you think the below code is an idiotic way of getting the source range
+  // for an identifier at a specific source location, you are not the only one.
+  // I cannot believe that this is the only way to achieve this with the
+  // libclang API in a robust way.
+  // I've tried many simpler ways of doing this and they all fail in various
+  // situations.
+
+  CXSourceRange range = clang_getCursorExtent(
+      clang_getCursor( translation_unit, source_location ) );
+  CXToken *tokens;
+  uint num_tokens;
+  clang_tokenize( translation_unit, range, &tokens, &num_tokens );
+
+  Location location( source_location );
+  Range final_range;
+  for ( uint i = 0; i < num_tokens; ++i ) {
+    Location token_location( clang_getTokenLocation( translation_unit,
+                                                     tokens[ i ] ) );
+    if ( token_location == location ) {
+      std::string name = CXStringToString(
+          clang_getTokenSpelling( translation_unit, tokens[ i ] ) );
+      Location end_location = location;
+      end_location.column_number_ += name.length();
+      final_range = Range( location, end_location );
+      break;
+    }
+  }
+
+  clang_disposeTokens( translation_unit, tokens, num_tokens );
+  return final_range;
+}
+
+
 } // unnamed namespace
 
 std::vector< CXUnsavedFile > ToCXUnsavedFiles(
@@ -164,7 +200,8 @@ std::vector< CompletionData > ToCompletionDataVector(
 }
 
 
-Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap ) {
+Diagnostic BuildDiagnostic( DiagnosticWrap diagnostic_wrap,
+                            CXTranslationUnit translation_unit ) {
   Diagnostic diagnostic;
 
   if ( !diagnostic_wrap )
@@ -178,8 +215,11 @@ Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap ) {
   if ( diagnostic.kind_ == 'I' )
     return diagnostic;
 
-  diagnostic.location_ = Location(
-      clang_getDiagnosticLocation( diagnostic_wrap.get() ) );
+  CXSourceLocation source_location =
+      clang_getDiagnosticLocation( diagnostic_wrap.get() );
+  diagnostic.location_ = Location( source_location );
+  diagnostic.location_extent_ = GetLocationExtent( source_location,
+                                                   translation_unit );
   diagnostic.ranges_ = GetRanges( diagnostic_wrap );
   diagnostic.text_ = CXStringToString(
                        clang_getDiagnosticSpelling( diagnostic_wrap.get() ) );

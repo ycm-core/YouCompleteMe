@@ -118,6 +118,7 @@ def BuildDiagnosticData( diagnostic ):
   return {
     'ranges': [ BuildRangeData( x ) for x in diagnostic.ranges_ ],
     'location': BuildLocationData( diagnostic.location_ ),
+    'location_extent': BuildRangeData( diagnostic.location_extent_ ),
     'text': diagnostic.text_,
     'kind': diagnostic.kind_
   }

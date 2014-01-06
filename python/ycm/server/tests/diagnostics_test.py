@@ -48,7 +48,6 @@ void foo() {
                              filetype = 'cpp' )
 
   results = app.post_json( '/event_notification', event_data ).json
-  print results
   assert_that( results,
                contains(
                   has_entries( {
@@ -66,8 +65,52 @@ void foo() {
                     'location': has_entries( {
                       'line_num': 2,
                       'column_num': 9
+                    } ),
+                    'location_extent': has_entries( {
+                      'start': has_entries( {
+                        'line_num': 2,
+                        'column_num': 9,
+                      } ),
+                      'end': has_entries( {
+                        'line_num': 2,
+                        'column_num': 12,
+                      } ),
                     } )
                   } ) ) )
+
+
+@with_setup( Setup )
+def Diagnostics_ClangCompleter_SimpleLocationExtent_test():
+  app = TestApp( handlers.app )
+  contents = """
+void foo() {
+  baz = 5;
+}
+// Padding to 5 lines
+// Padding to 5 lines
+"""
+
+  event_data = BuildRequest( compilation_flags = ['-x', 'c++'],
+                             event_name = 'FileReadyToParse',
+                             contents = contents,
+                             filetype = 'cpp' )
+
+  results = app.post_json( '/event_notification', event_data ).json
+  assert_that( results,
+               contains(
+                  has_entries( {
+                    'location_extent': has_entries( {
+                      'start': has_entries( {
+                        'line_num': 2,
+                        'column_num': 2,
+                      } ),
+                      'end': has_entries( {
+                        'line_num': 2,
+                        'column_num': 5,
+                      } ),
+                    } )
+                  } ) ) )
+
 
 @with_setup( Setup )
 def Diagnostics_ClangCompleter_PragmaOnceWarningIgnored_test():

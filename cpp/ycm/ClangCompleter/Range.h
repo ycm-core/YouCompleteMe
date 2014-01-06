@@ -23,6 +23,7 @@
 
 namespace YouCompleteMe {
 
+// Half-open, [start, end>
 struct Range {
   Range() {}
 

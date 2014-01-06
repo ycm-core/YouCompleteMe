@@ -143,7 +143,7 @@ def AddDiagnosticSyntaxMatch( line_num,
       "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
   else:
     return GetIntValue(
-      "matchadd('{0}', '\%{1}l\%{2}c.*\%{3}l\%{4}c')".format(
+      "matchadd('{0}', '\%{1}l\%{2}c\_.*\%{3}l\%{4}c')".format(
         group, line_num, column_num, line_end_num, column_end_num ) )
 
 
@@ -253,14 +253,14 @@ def EchoText( text, log_as_message = True ):
     command = 'echom' if log_as_message else 'echo'
     vim.command( "{0} '{1}'".format( command, EscapeForVim( text ) ) )
 
-  for line in text.split( '\n' ):
+  for line in str( text ).split( '\n' ):
     EchoLine( line )
 
 
 # Echos text but truncates the text so that it all fits on one line
 def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
-  truncated_text = text[ : int( vim_width * 0.9 ) ]
+  truncated_text = str( text )[ : int( vim_width * 0.9 ) ]
   truncated_text.replace( '\n', ' ' )
   EchoText( truncated_text, False )
 

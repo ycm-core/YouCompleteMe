@@ -128,6 +128,7 @@ BOOST_PYTHON_MODULE(ycm_core)
   class_< Diagnostic >( "Diagnostic" )
     .def_readonly( "ranges_", &Diagnostic::ranges_ )
     .def_readonly( "location_", &Diagnostic::location_ )
+    .def_readonly( "location_extent_", &Diagnostic::location_extent_ )
     .def_readonly( "kind_", &Diagnostic::kind_ )
     .def_readonly( "text_", &Diagnostic::text_ )
     .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ );
