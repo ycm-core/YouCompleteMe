@@ -51,9 +51,14 @@ def TextAfterCursor():
 # Note the difference between buffer OPTIONS and VARIABLES; the two are not
 # the same.
 def GetBufferOption( buffer_object, option ):
-  # The 'options' property is only available in recent (7.4+) Vim builds
-  if hasattr( buffer_object, 'options' ):
-    return buffer_object.options[ option ]
+  # NOTE: We used to check for the 'options' property on the buffer_object which
+  # is available in recent versions of Vim and would then use:
+  #
+  #   buffer_object.options[ option ]
+  #
+  # to read the value, BUT this caused annoying flickering when the
+  # buffer_object was a hidden buffer (with option = 'ft'). This was all due to
+  # a Vim bug. Until this is fixed, we won't use it.
 
   to_eval = 'getbufvar({0}, "&{1}")'.format( buffer_object.number, option )
   return GetVariableValue( to_eval )
