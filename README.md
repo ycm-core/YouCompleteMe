@@ -1501,7 +1501,7 @@ for bug reports and feature requests.
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
 
-### Why did YCM move away from Syntastic for display of diagnostics?
+### Why did YCM stop using Syntastic diagnostics display?
 
 Previously, YCM would send any diagnostics it would receive from the libclang
 semantic engine to Syntastic for display as signs in the gutter, red squiggles
@@ -1519,9 +1519,9 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions (issue #593) and incredibly annoying screen
-flickering (issue #669). Attempts were made to resolve these issues in
-Syntastic, but ultimately some of them failed (for various reasons).
+Syntastic-Vim interactions ([issue #593][issue-593]) and incredibly annoying
+screen flickering ([issue #669][issue-669]). Attempts were made to resolve these
+issues in Syntastic, but ultimately some of them failed (for various reasons).
 
 Implementing diagnostic display code directly in YCM resolves all of these
 problems. Performance should also improve substantially since the relevant code
@@ -1534,7 +1534,7 @@ options that control diagnostic display fall back to Syntastic options that
 control the same concepts if the user has those set.
 
 Still, some Syntastic-specific configuration you might have had might not
-be supported by the new code. Please file issues on the tracker for such
+be supported by the new code. Please file issues on the tracker in such
 cases; if we find the request to be reasonable, we'll find a way to address it.
 
 ### Completion doesn't work with the C++ standard library headers
@@ -1604,3 +1604,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
 [omnisharp]: https://github.com/nosami/OmniSharpServer
 [issue-303]: https://github.com/Valloric/YouCompleteMe/issues/303
+[issue-593]: https://github.com/Valloric/YouCompleteMe/issues/593
+[issue-669]: https://github.com/Valloric/YouCompleteMe/issues/669
