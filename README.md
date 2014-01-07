@@ -48,12 +48,12 @@ or `::` while typing in insert mode (for C++; different triggers are used for
 other languages), the semantic engine is triggered (it can also be triggered
 with a keyboard shortcut; see the rest of the docs).
 
-The last thing that you can see in the demo is YCM's integration with
-[Syntastic][] (the little red X that shows up in the left gutter) if you are
-editing a C-family file. As Clang compiles your file and detects warnings or
-errors, they will be piped to Syntastic for display. You don't need to save your
-file or press any keyboard shortcut to trigger this, it "just happens" in the
-background.
+The last thing that you can see in the demo is YCM's diagnostic display features
+(the little red X that shows up in the left gutter; inspired by [Syntastic][])
+if you are editing a C-family file. As Clang compiles your file and detects
+warnings or errors, they will be presented in various ways. You don't need to
+save your file or press any keyboard shortcut to trigger this, it "just happens"
+in the background.
 
 In essence, YCM obsoletes the following Vim plugins because it has all of their
 features plus extra:
@@ -357,10 +357,6 @@ string.
 
 ### C-family Semantic Completion Engine Usage
 
-- You _really_ also want to install the latest version of the [Syntastic][] Vim
-  plugin. It has support for YCM and together they will provide you with compile
-  errors/warnings practically instantly and without saving the file.
-
 YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file or
 in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
@@ -394,7 +390,7 @@ file if there are any errors in the included headers and that preamble is key to
 getting fast completions.
 
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
-your file. Even better, use Syntastic.
+your file.
 
 ### Python semantic completion
 
@@ -465,22 +461,15 @@ complete-functions`. For the Completer API, see [the API docs][completer-api].
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
 
-### Syntastic integration
+### Diagnostic display
 
-YCM has explicit support for [Syntastic][] (and vice-versa) if you compiled YCM
-with Clang support; this means that any diagnostics (errors or warnings) that
-Clang encounters while compiling your file will be fed back to Syntastic for
-display.
+YCM will display diagnostic notifications if you compiled YCM with Clang
+support. Since YCM continuously recompiles your file as you type, you'll get
+notified of errors and warnings in your file as fast as possible.
 
-YCM will recompile your file in the background `updatetime` (see `:h updatetime`
-in Vim) milliseconds after you stop typing (to be specific, on `CursorHold` and
-`CursorHoldI` Vim events). YCM will change your `updatetime` value to be `2000`
-milliseconds (there's an option to tell it not to do this if you wish).
-
-The new diagnostics (if any) will be fed back to Syntastic the next time you
-press any key on the keyboard. So if you stop typing and just wait for the new
-diagnostics to come in, that _will not work_. You need to press some key for the
-GUI to update.
+The new diagnostics (if any) will be displayed the next time you press any key
+on the keyboard. So if you stop typing and just wait for the new diagnostics to
+come in, that _will not work_. You need to press some key for the GUI to update.
 
 Having to press a key to get the updates is unfortunate, but cannot be changed
 due to the way Vim internals operate; there is no way that a background task can
@@ -495,10 +484,10 @@ and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI _will_ be
 blocked.
 
-After the errors are displayed by Syntastic, it will display a short diagnostic
-message when you move your cursor to the line with the error. You can get a
-detailed diagnostic message with the `<leader>d` key mapping (can be changed in
-the options) YCM provides when your cursor is on the line with the diagnostic.
+YCM will display a short diagnostic message when you move your cursor to the
+line with the error. You can get a detailed diagnostic message with the
+`<leader>d` key mapping (can be changed in the options) YCM provides when your
+cursor is on the line with the diagnostic.
 
 You can also see the full diagnostic message for all the diagnostics in the
 current file in Vim's `locationlist`, which can be opened with the `:lopen` and
