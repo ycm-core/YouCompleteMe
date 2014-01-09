@@ -514,7 +514,7 @@ in the Vim gutter, the relevant groups are:
 
 - `YcmErrorSign`, which falls back to group `SyntasticErrorSign` and then
   `error` if they exist
-- `YcmErrorSign`, which falls back to group `SyntasticWarningSign` and then
+- `YcmWarningSign`, which falls back to group `SyntasticWarningSign` and then
   `todo` if they exist
 
 You can also style the line that has the warning/error with these groups:
