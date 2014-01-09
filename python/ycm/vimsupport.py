@@ -286,7 +286,15 @@ def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
   truncated_text = str( text )[ : int( vim_width * 0.9 ) ]
   truncated_text.replace( '\n', ' ' )
+
+  old_ruler = GetIntValue( '&ruler' )
+  old_showcmd = GetIntValue( '&showcmd' )
+  vim.command( 'set noruler noshowcmd' )
+
   EchoText( truncated_text, False )
+
+  vim.command( 'let &ruler = {0}'.format( old_ruler ) )
+  vim.command( 'let &showcmd = {0}'.format( old_showcmd ) )
 
 
 def EscapeForVim( text ):
