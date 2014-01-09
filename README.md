@@ -469,7 +469,7 @@ notified of errors and warnings in your file as fast as possible.
 
 Here are the various pieces of the diagnostic UI:
 
-- Icons in the Vim gutter on lines that have a diagnostic.
+- Icons show up in the Vim gutter on lines that have a diagnostic.
 - Regions of text related to diagnostics are highlighted (by default, a red
   wawy underline in `gvim` and a red background in `vim`).
 - Moving the cursor to a line with a diagnostic echoes the diagnostic text.
