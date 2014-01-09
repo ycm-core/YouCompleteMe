@@ -128,6 +128,7 @@ def ClearYcmSyntaxMatches():
 
 
 # Returns the ID of the newly added match
+# Both line and column numbers are 1-based
 def AddDiagnosticSyntaxMatch( line_num,
                               column_num,
                               line_end_num = None,
@@ -138,6 +139,10 @@ def AddDiagnosticSyntaxMatch( line_num,
   if not line_end_num:
     line_end_num = line_num
 
+  line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
+  line_end_num, column_end_num = LineAndColumnNumbersClamped( line_end_num,
+                                                              column_end_num )
+
   if not column_end_num:
     return GetIntValue(
       "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
@@ -145,6 +150,23 @@ def AddDiagnosticSyntaxMatch( line_num,
     return GetIntValue(
       "matchadd('{0}', '\%{1}l\%{2}c\_.*\%{3}l\%{4}c')".format(
         group, line_num, column_num, line_end_num, column_end_num ) )
+
+
+# Clamps the line and column numbers so that they are not past the contents of
+# the buffer. Numbers are 1-based.
+def LineAndColumnNumbersClamped( line_num, column_num ):
+  new_line_num = line_num
+  new_column_num = column_num
+
+  max_line = len( vim.current.buffer )
+  if line_num and line_num > max_line:
+    new_line_num = max_line
+
+  max_column = len( vim.current.buffer[ new_line_num - 1 ] )
+  if column_num and column_num > max_column:
+    new_column_num = max_column
+
+  return new_line_num, new_column_num
 
 
 def SetLocationList( diagnostics ):

@@ -76,12 +76,18 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
       location_extent = diag[ 'location_extent' ]
       is_error = _DiagnosticIsError( diag )
 
-      vimsupport.AddDiagnosticSyntaxMatch(
-        location_extent[ 'start' ][ 'line_num' ] + 1,
-        location_extent[ 'start' ][ 'column_num' ] + 1,
-        location_extent[ 'end' ][ 'line_num' ] + 1,
-        location_extent[ 'end' ][ 'column_num' ] + 1,
-        is_error = is_error )
+      if location_extent[ 'start' ][ 'line_num' ] < 0:
+        location = diag[ 'location' ]
+        vimsupport.AddDiagnosticSyntaxMatch(
+            location[ 'line_num' ] + 1,
+            location[ 'column_num' ] + 1 )
+      else:
+        vimsupport.AddDiagnosticSyntaxMatch(
+          location_extent[ 'start' ][ 'line_num' ] + 1,
+          location_extent[ 'start' ][ 'column_num' ] + 1,
+          location_extent[ 'end' ][ 'line_num' ] + 1,
+          location_extent[ 'end' ][ 'column_num' ] + 1,
+          is_error = is_error )
 
       for diag_range in diag[ 'ranges' ]:
         vimsupport.AddDiagnosticSyntaxMatch(
