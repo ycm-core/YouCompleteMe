@@ -471,7 +471,7 @@ Here are the various pieces of the diagnostic UI:
 
 - Icons show up in the Vim gutter on lines that have a diagnostic.
 - Regions of text related to diagnostics are highlighted (by default, a red
-  wawy underline in `gvim` and a red background in `vim`).
+  wavy underline in `gvim` and a red background in `vim`).
 - Moving the cursor to a line with a diagnostic echoes the diagnostic text.
 - Vim's location list is automatically populated with diagnostic data (off by
   default, see options).
