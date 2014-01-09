@@ -23,7 +23,8 @@ import vim
 
 
 class DiagnosticInterface( object ):
-  def __init__( self ):
+  def __init__( self, user_options ):
+    self._user_options = user_options
     # Line and column numbers are 1-based
     self._buffer_number_to_line_to_diags = defaultdict(
       lambda: defaultdict( list ) )
@@ -36,14 +37,20 @@ class DiagnosticInterface( object ):
     line += 1  # Convert to 1-based
     if line != self._previous_line_number:
       self._previous_line_number = line
-      self._EchoDiagnosticForLine( line )
+
+      if self._user_options[ 'echo_current_diagnostic' ]:
+        self._EchoDiagnosticForLine( line )
 
 
   def UpdateWithNewDiagnostics( self, diags ):
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict( diags )
-    self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
-                                       self._next_sign_id )
-    _UpdateSquiggles( self._buffer_number_to_line_to_diags )
+
+    if self._user_options[ 'enable_signs' ]:
+      self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
+                                        self._next_sign_id )
+
+    if self._user_options[ 'enable_highlighting' ]:
+      _UpdateSquiggles( self._buffer_number_to_line_to_diags )
 
 
   def _EchoDiagnosticForLine( self, line_num ):

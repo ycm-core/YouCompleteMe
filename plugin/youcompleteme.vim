@@ -117,6 +117,18 @@ let g:ycm_show_diagnostics_ui =
       \ get( g:, 'ycm_show_diagnostics_ui',
       \ get( g:, 'ycm_register_as_syntastic_checker', 1 ) )
 
+let g:ycm_enable_signs =
+      \ get( g:, 'ycm_enable_signs',
+      \ get( g:, 'syntastic_enable_signs', 1 ) )
+
+let g:ycm_enable_highlighting =
+      \ get( g:, 'ycm_enable_highlighting',
+      \ get( g:, 'syntastic_enable_highlighting', 1 ) )
+
+let g:ycm_echo_current_diagnostic =
+      \ get( g:, 'ycm_echo_current_diagnostic',
+      \ get( g:, 'syntastic_echo_current_error', 1 ) )
+
 let g:ycm_error_symbol =
       \ get( g:, 'ycm_error_symbol',
       \ get( g:, 'syntastic_error_symbol', '>>' ) )
