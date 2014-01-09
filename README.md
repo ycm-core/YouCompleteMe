@@ -467,6 +467,15 @@ YCM will display diagnostic notifications if you compiled YCM with Clang
 support. Since YCM continuously recompiles your file as you type, you'll get
 notified of errors and warnings in your file as fast as possible.
 
+Here are the various pieces of the diagnostic UI:
+
+- Icons in the Vim gutter on lines that have a diagnostic.
+- Regions of text related to diagnostics are highlighted (by default, a red
+  wawy underline in `gvim` and a red background in `vim`).
+- Moving the cursor to a line with a diagnostic echoes the diagnostic text.
+- Vim's location list is automatically populated with diagnostic data (off by
+  default, see options).
+
 The new diagnostics (if any) will be displayed the next time you press any key
 on the keyboard. So if you stop typing and just wait for the new diagnostics to
 come in, that _will not work_. You need to press some key for the GUI to update.
@@ -492,11 +501,33 @@ cursor is on the line with the diagnostic.
 You can also see the full diagnostic message for all the diagnostics in the
 current file in Vim's `locationlist`, which can be opened with the `:lopen` and
 `:lclose` commands (make sure you have set `let
-g:syntastic_always_populate_loc_list = 1` in your vimrc). A good way to toggle
+g:ycm_always_populate_location_list = 1` in your vimrc). A good way to toggle
 the display of the `locationlist` with a single key mapping is provided by
 another (very small) Vim plugin called [ListToggle][] (which also makes it
 possible to change the height of the `locationlist` window), also written by
 yours truly.
+
+#### Diagnostic highlighting groups
+
+You can change the styling for the highlighting groups YCM uses. For the signs
+in the Vim gutter, the relevant groups are:
+
+- `YcmErrorSign`, which falls back to group `SyntasticErrorSign` and then
+  `error` if they exist
+- `YcmErrorSign`, which falls back to group `SyntasticWarningSign` and then
+  `todo` if they exist
+
+You can also style the line that has the warning/error with these groups:
+
+- `YcmErrorLine`, which falls back to group `SyntasticErrorLine` if it exists
+- `YcmWarningLine`, which falls back to group `SyntasticWarningLine` if it
+  exists
+
+Here's how you'd change the style for a group:
+
+```
+highlight YcmErrorLine guibg=#3f0000
+```
 
 Commands
 --------
@@ -520,10 +551,6 @@ You may want to map this command to a key; try putting `nnoremap <F5>
 
 Calling this command will fill Vim's `locationlist` with errors or warnings if
 any were detected in your file and then open it.
-
-A better option would be to use Syntastic which will keep your `locationlist`
-up to date automatically and will also show error/warning notifications in Vim's
-gutter.
 
 ### The `:YcmShowDetailedDiagnostic` command
 
@@ -671,8 +698,8 @@ Default: `0`
 
 When set to `0`, this option turns off YCM's identifier completer (the
 as-you-type popup) _and_ the semantic triggers (the popup you'd get after typing
-`.` or `->` in say C++). The Syntastic integration remains working and you can
-still force semantic completion with the `<C-Space>` shortcut.
+`.` or `->` in say C++). You can still force semantic completion with the
+`<C-Space>` shortcut.
 
 If you want to just turn off the identifier completer but keep the semantic
 triggers, you should set `g:ycm_min_num_of_chars_for_completion` to a high
@@ -1103,8 +1130,7 @@ Default: `0`
 
 This option controls the maximum number of diagnostics shown to the user when
 errors or warnings are detected in the file. This option is only relevant if you
-are using the semantic completion engine and have installed the version of the
-Syntastic plugin that supports YCM.
+are using the C-family semantic completion engine.
 
 Default: `30`
 
@@ -1347,34 +1373,16 @@ Also, you may want to run the `:YcmDebugInfo` command; it will make YCM spew out
 various debugging information, including the compile flags for the file if the
 file is a C-family language file and you have compiled in Clang support.
 
-### I cannot get the Syntastic integration to work
-
-Try to update your version of Syntastic. At the time of writing (Jan 2013), the
-YCM integration is very recent and it's likely that your version of Syntastic
-does not have it.
-
 ### Sometimes it takes much longer to get semantic completions than normal
 
 This means that libclang (which YCM uses for C-family semantic completion)
 failed to pre-compile your file's preamble. In other words, there was an error
 compiling some of the source code you pulled in through your header files. I
-suggest calling the `:YcmDiags` command to see what they were (even better, have
-Syntastic installed and call `:lopen`).
+suggest calling the `:YcmDiags` command to see what they were.
 
 Bottom line, if libclang can't pre-compile your file's preamble because there
 were errors in it, you're going to get slow completions because there's no AST
 cache.
-
-### Vim flickers every time I move the cursor or moving the cursor is slow
-
-You probably have an old version of Syntastic installed. If you are using
-Vundle, make sure that your bundle command is `Bundle 'scrooloose/syntastic'`
-and **not** `Bundle 'Syntastic'`. The first command pulls in the latest version of
-Syntastic from GitHub while the second one pulls in an old version from vim.org.
-
-Because of [a Vundle bug][vundle-bug], make sure you have completely removed
-everything in your Vundle bundle directory (`~/.vim/bundle` by default) before
-switching from one Syntastic bundle command to the other.
 
 ### YCM auto-inserts completion strings I don't want!
 
@@ -1597,15 +1605,15 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions ([issue #593][issue-593]) and incredibly annoying
-screen flickering ([issue #669][issue-669]). Attempts were made to resolve these
-issues in Syntastic, but ultimately some of them failed (for various reasons).
+Syntastic-Vim interactions ([issue #593][issue-593]) and other problems, like
+random Vim flickering. Attempts were made to resolve these issues in
+Syntastic, but ultimately some of them failed (for various reasons).
 
 Implementing diagnostic display code directly in YCM resolves all of these
-problems. Performance should also improve substantially since the relevant code
-is now written in Python instead of VimScript (which is very slow) and is
-tailored only for YCM's use-cases. We're also able to introduce new features in
-this area since we're not limited to the Syntastic checker API.
+problems. Performance also improved substantially since the relevant code is now
+written in Python instead of VimScript (which is very slow) and is tailored only
+for YCM's use-cases. We were also able to introduce new features in this area
+since we're now not limited to the Syntastic checker API.
 
 We've tried to implement this in the most backwards-compatible way possible; YCM
 options that control diagnostic display fall back to Syntastic options that
