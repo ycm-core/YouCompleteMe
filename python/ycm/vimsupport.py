@@ -281,7 +281,7 @@ def EchoText( text, log_as_message = True ):
     EchoLine( line )
 
 
-# Echos text but truncates the text so that it all fits on one line
+# Echos text but truncates it so that it all fits on one line
 def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
   truncated_text = str( text )[ : int( vim_width * 0.9 ) ]

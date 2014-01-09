@@ -523,6 +523,9 @@ You can also style the line that has the warning/error with these groups:
 - `YcmWarningLine`, which falls back to group `SyntasticWarningLine` if it
   exists
 
+Note that the line highlighting groups only work when gutter signs are turned
+on.
+
 Here's how you'd change the style for a group:
 
 ```
@@ -832,7 +835,8 @@ Default: `>>`
 ### The `g:ycm_enable_diagnostic_signs` option
 
 When this option is set, YCM will put icons in Vim's gutter on lines that have a
-diagnostic set.
+diagnostic set. Turning this off will also turn off the `YcmErrorLine` and
+`YcmWarningLine` highlighting.
 
 This option is part of the Syntastic compatibility layer; if the option is not
 set, YCM will fall back to the value of the `g:syntastic_enable_signs` option
