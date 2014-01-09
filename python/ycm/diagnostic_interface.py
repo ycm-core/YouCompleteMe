@@ -47,10 +47,14 @@ class DiagnosticInterface( object ):
 
     if self._user_options[ 'enable_signs' ]:
       self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
-                                        self._next_sign_id )
+                                         self._next_sign_id )
 
     if self._user_options[ 'enable_highlighting' ]:
       _UpdateSquiggles( self._buffer_number_to_line_to_diags )
+
+    if self._user_options[ 'always_populate_loc_list' ]:
+      vimsupport.SetLocationList(
+        vimsupport.ConvertDiagnosticsToQfList( diags ) )
 
 
   def _EchoDiagnosticForLine( self, line_num ):

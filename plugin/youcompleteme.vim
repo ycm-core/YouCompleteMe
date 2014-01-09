@@ -129,6 +129,10 @@ let g:ycm_echo_current_diagnostic =
       \ get( g:, 'ycm_echo_current_diagnostic',
       \ get( g:, 'syntastic_echo_current_error', 1 ) )
 
+let g:ycm_always_populate_loc_list =
+      \ get( g:, 'ycm_always_populate_loc_list',
+      \ get( g:, 'syntastic_always_populate_loc_list', 0 ) )
+
 let g:ycm_error_symbol =
       \ get( g:, 'ycm_error_symbol',
       \ get( g:, 'syntastic_error_symbol', '>>' ) )

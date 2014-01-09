@@ -147,6 +147,30 @@ def AddDiagnosticSyntaxMatch( line_num,
         group, line_num, column_num, line_end_num, column_end_num ) )
 
 
+def SetLocationList( diagnostics ):
+  """Diagnostics should be in qflist format; see ":h setqflist" for details."""
+  vim.eval( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+
+
+def ConvertDiagnosticsToQfList( diagnostics ):
+  def ConvertDiagnosticToQfFormat( diagnostic ):
+    # see :h getqflist for a description of the dictionary fields
+    # Note that, as usual, Vim is completely inconsistent about whether
+    # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
+    # them to be 1-based.
+    location = diagnostic[ 'location' ]
+    return {
+      'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
+      'lnum'  : location[ 'line_num' ] + 1,
+      'col'   : location[ 'column_num' ] + 1,
+      'text'  : diagnostic[ 'text' ],
+      'type'  : diagnostic[ 'kind' ],
+      'valid' : 1
+    }
+
+  return [ ConvertDiagnosticToQfFormat( x ) for x in diagnostics ]
+
+
 # Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
 # When |overwrite| is True, overwrites the existing value in Vim.
 def LoadDictIntoVimGlobals( new_globals, overwrite = True ):

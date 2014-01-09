@@ -274,7 +274,7 @@ class YouCompleteMe( object ):
       # until the next request is created.
       self._latest_file_parse_request = None
       if qflist_format:
-        return [ _ConvertDiagnosticDataToVimData( x ) for x in diagnostics ]
+        return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
       else:
         return diagnostics
     return []
@@ -379,17 +379,3 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
                                          } for x in rawsnips ]
 
 
-def _ConvertDiagnosticDataToVimData( diagnostic ):
-  # see :h getqflist for a description of the dictionary fields
-  # Note that, as usual, Vim is completely inconsistent about whether
-  # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
-  # them to be 1-based.
-  location = diagnostic[ 'location' ]
-  return {
-    'bufnr' : vimsupport.GetBufferNumberForFilename( location[ 'filepath' ] ),
-    'lnum'  : location[ 'line_num' ] + 1,
-    'col'   : location[ 'column_num' ] + 1,
-    'text'  : diagnostic[ 'text' ],
-    'type'  : diagnostic[ 'kind' ],
-    'valid' : 1
-  }
