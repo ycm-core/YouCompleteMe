@@ -753,21 +753,110 @@ Default: `{}`
 
     let g:ycm_filetype_specific_completion_to_disable = {}
 
-### The `g:ycm_register_as_syntastic_checker` option
+### The `g:ycm_show_diagnostics_ui` option
 
-When set, this option makes YCM register itself as the Syntastic checker for the
-`c`, `cpp`, `objc` and `objcpp` filetypes. This enables the YCM-Syntastic
-integration.
+When set, this option turns on YCM's diagnostic display features. See the
+_Diagnostic display_ section in the _User Manual_ for more details.
+
+Specific parts of the diagnostics UI (like the gutter signs, text highlighting,
+diagnostic echo and auto location list population) can be individually turned on
+or off. See the other options below for details.
+
+Note that YCM's diagnostics UI is only supported for C-family languages.
+
+When set, this option also makes YCM remove all Syntastic checkers set for the
+`c`, `cpp`, `objc` and `objcpp` filetypes since this would conflict with YCM's
+own diagnostics UI.
 
 If you're using YCM's identifier completer in C-family languages but cannot use
 the clang-based semantic completer for those languages _and_ want to use the GCC
 Syntastic checkers, unset this option.
 
-Don't unset this option unless you're sure you know what you're doing.
+Default: `1`
+
+    let g:ycm_show_diagnostics_ui = 1
+
+### The `g:ycm_error_symbol` option
+
+YCM will use the value of this option as the symbol for errors in the Vim
+gutter.
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the `g:syntastic_error_symbol` option
+before using this option's default.
+
+Default: `>>`
+
+    let g:ycm_error_symbol = '>>'
+
+### The `g:ycm_warning_symbol` option
+
+YCM will use the value of this option as the symbol for warnings in the Vim
+gutter.
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the `g:syntastic_warning_symbol` option
+before using this option's default.
+
+Default: `>>`
+
+    let g:ycm_warning_symbol = '>>'
+
+### The `g:ycm_enable_diagnostic_signs` option
+
+When this option is set, YCM will put icons in Vim's gutter on lines that have a
+diagnostic set.
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the `g:syntastic_enable_signs` option
+before using this option's default.
 
 Default: `1`
 
-    let g:ycm_register_as_syntastic_checker = 1
+    let g:ycm_enable_diagnostic_signs = 1
+
+### The `g:ycm_enable_diagnostic_highlighting` option
+
+When this option is set, YCM will highlight regions of text that are related to
+the diagnostic that is present on a line, if any.
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the `g:syntastic_enable_highlighting`
+option before using this option's default.
+
+Default: `1`
+
+    let g:ycm_enable_diagnostic_highlighting = 1
+
+### The `g:ycm_echo_current_diagnostic` option
+
+When this option is set, YCM will echo the text of the diagnostic present on the
+current line when you move your cursor to that line.
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the `g:syntastic_echo_current_error`
+option before using this option's default.
+
+Default: `1`
+
+    let g:ycm_echo_current_diagnostic = 1
+
+### The `g:ycm_always_populate_location_list` option
+
+When this option is set, YCM will populate the location list automatically every
+time it gets new diagnostic data. This option is off by default so as not to
+interfere with other data you might have placed in the location list.
+
+See `:help location-list` in Vim to learn more about the location list.
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the
+`g:syntastic_always_populate_loc_list` option before using this option's
+default.
+
+Default: `0`
+
+    let g:ycm_always_populate_location_list = 0
 
 ### The `g:ycm_allow_changing_updatetime` option
 

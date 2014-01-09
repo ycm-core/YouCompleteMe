@@ -45,14 +45,14 @@ class DiagnosticInterface( object ):
   def UpdateWithNewDiagnostics( self, diags ):
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict( diags )
 
-    if self._user_options[ 'enable_signs' ]:
+    if self._user_options[ 'enable_diagnostic_signs' ]:
       self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
                                          self._next_sign_id )
 
-    if self._user_options[ 'enable_highlighting' ]:
+    if self._user_options[ 'enable_diagnostic_highlighting' ]:
       _UpdateSquiggles( self._buffer_number_to_line_to_diags )
 
-    if self._user_options[ 'always_populate_loc_list' ]:
+    if self._user_options[ 'always_populate_location_list' ]:
       vimsupport.SetLocationList(
         vimsupport.ConvertDiagnosticsToQfList( diags ) )
 

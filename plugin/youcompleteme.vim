@@ -117,20 +117,20 @@ let g:ycm_show_diagnostics_ui =
       \ get( g:, 'ycm_show_diagnostics_ui',
       \ get( g:, 'ycm_register_as_syntastic_checker', 1 ) )
 
-let g:ycm_enable_signs =
-      \ get( g:, 'ycm_enable_signs',
+let g:ycm_enable_diagnostic_signs =
+      \ get( g:, 'ycm_enable_diagnostic_signs',
       \ get( g:, 'syntastic_enable_signs', 1 ) )
 
-let g:ycm_enable_highlighting =
-      \ get( g:, 'ycm_enable_highlighting',
+let g:ycm_enable_diagnostic_highlighting =
+      \ get( g:, 'ycm_enable_diagnostic_highlighting',
       \ get( g:, 'syntastic_enable_highlighting', 1 ) )
 
 let g:ycm_echo_current_diagnostic =
       \ get( g:, 'ycm_echo_current_diagnostic',
       \ get( g:, 'syntastic_echo_current_error', 1 ) )
 
-let g:ycm_always_populate_loc_list =
-      \ get( g:, 'ycm_always_populate_loc_list',
+let g:ycm_always_populate_location_list =
+      \ get( g:, 'ycm_always_populate_location_list',
       \ get( g:, 'syntastic_always_populate_loc_list', 0 ) )
 
 let g:ycm_error_symbol =
