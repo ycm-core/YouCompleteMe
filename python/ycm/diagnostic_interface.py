@@ -30,6 +30,7 @@ class DiagnosticInterface( object ):
       lambda: defaultdict( list ) )
     self._next_sign_id = 1
     self._previous_line_number = -1
+    self._diag_message_needs_clearing = False
 
 
   def OnCursorMoved( self ):
@@ -61,10 +62,13 @@ class DiagnosticInterface( object ):
     buffer_num = vim.current.buffer.number
     diags = self._buffer_number_to_line_to_diags[ buffer_num ][ line_num ]
     if not diags:
-      # Clear any previous diag echo
-      vimsupport.EchoText( '', False )
+      if self._diag_message_needs_clearing:
+        # Clear any previous diag echo
+        vimsupport.EchoText( '', False )
+        self._diag_message_needs_clearing = False
       return
     vimsupport.EchoTextVimWidth( diags[ 0 ][ 'text' ] )
+    self._diag_message_needs_clearing = True
 
 
 def _UpdateSquiggles( buffer_number_to_line_to_diags ):
