@@ -107,7 +107,12 @@ def GetBufferFilepath( buffer_object ):
   return os.path.join( os.getcwd(), str( buffer_object.number ) )
 
 
-# TODO: only unplace our signs, not all signs
+# NOTE: This unplaces *all* signs in a buffer, not just the ones we placed. We
+# used to track which signs we ended up placing and would then only unplace
+# ours, but that causes flickering Vim since we have to call
+#    sign unplace <id> buffer=<buffer-num>
+# in a loop. So we're forced to unplace all signs, which might conflict with
+# other Vim plugins.
 def UnplaceAllSignsInBuffer( buffer_number ):
   if buffer_number < 0:
     return
