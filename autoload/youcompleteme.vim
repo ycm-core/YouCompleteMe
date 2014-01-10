@@ -266,6 +266,18 @@ function! s:SetUpCpoptions()
   " Without this flag in cpoptions, critical YCM mappings do not work. There's
   " no way to not have this and have YCM working, so force the flag.
   set cpoptions+=B
+
+  " This prevents the display of "Pattern not found" & similar messages during
+  " completion.
+  " Patch: https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8
+  " At the time of writing, the patch hasn't been merged into Vim upstream, but
+  " will at some point.
+  " TODO: Check the Vim version (when patch lands) instead of doing try-catch
+  " here.
+  try
+    set shortmess+=c
+  catch /E539: Illegal character/
+  endtry
 endfunction
 
 
