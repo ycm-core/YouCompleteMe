@@ -107,11 +107,11 @@ def GetBufferFilepath( buffer_object ):
   return os.path.join( os.getcwd(), str( buffer_object.number ) )
 
 
-# TODO: only unplace our signs, not all signs
-def UnplaceAllSignsInBuffer( buffer_number ):
+def UnplaceSignsInBuffer( buffer_number, signs ):
   if buffer_number < 0:
     return
-  vim.command( 'sign unplace * buffer={0}'.format( buffer_number ) )
+  for sign in signs:
+    vim.command( 'sign unplace {0} buffer={1}'.format( sign, buffer_number ) )
 
 
 def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):

@@ -31,6 +31,7 @@ class DiagnosticInterface( object ):
     self._next_sign_id = 1
     self._previous_line_number = -1
     self._diag_message_needs_clearing = False
+    self._buffer_number_to_sign_ids = defaultdict( set )
 
 
   def OnCursorMoved( self ):
@@ -47,8 +48,7 @@ class DiagnosticInterface( object ):
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict( diags )
 
     if self._user_options[ 'enable_diagnostic_signs' ]:
-      self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
-                                         self._next_sign_id )
+      self._UpdateSigns()
 
     if self._user_options[ 'enable_diagnostic_highlighting' ]:
       _UpdateSquiggles( self._buffer_number_to_line_to_diags )
@@ -69,6 +69,40 @@ class DiagnosticInterface( object ):
       return
     vimsupport.EchoTextVimWidth( diags[ 0 ][ 'text' ] )
     self._diag_message_needs_clearing = True
+
+
+  def _UnplaceSignsInBuffer( self, buffer_number ):
+    vimsupport.UnplaceSignsInBuffer(
+        buffer_number,
+        self._buffer_number_to_sign_ids[ buffer_number ] )
+
+    self._buffer_number_to_sign_ids[ buffer_number ].clear()
+
+
+  def _PlaceSignInBuffer( self, line, buffer_number, is_error ):
+    vimsupport.PlaceSign( self._next_sign_id,
+                          line,
+                          buffer_number,
+                          is_error )
+    self._buffer_number_to_sign_ids[ buffer_number ].add( self._next_sign_id )
+    self._next_sign_id += 1
+
+
+  def _UpdateSigns( self ):
+    self._UnplaceSignsInBuffer( vim.current.buffer.number )
+
+    for buffer_number, line_to_diags in \
+        self._buffer_number_to_line_to_diags.iteritems():
+      if not vimsupport.BufferIsVisible( buffer_number ):
+        continue
+
+      self._UnplaceSignsInBuffer( buffer_number )
+
+      for line, diags in line_to_diags.iteritems():
+        for diag in diags:
+          self._PlaceSignInBuffer( line,
+                                   buffer_number,
+                                   _DiagnosticIsError( diag ) )
 
 
 def _UpdateSquiggles( buffer_number_to_line_to_diags ):
@@ -100,23 +134,6 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
           diag_range[ 'end' ][ 'line_num' ] + 1,
           diag_range[ 'end' ][ 'column_num' ] + 1,
           is_error = is_error )
-
-
-def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
-  vimsupport.UnplaceAllSignsInBuffer( vim.current.buffer.number )
-  for buffer_number, line_to_diags in buffer_number_to_line_to_diags.iteritems():
-    if not vimsupport.BufferIsVisible( buffer_number ):
-      continue
-
-    vimsupport.UnplaceAllSignsInBuffer( buffer_number )
-    for line, diags in line_to_diags.iteritems():
-      for diag in diags:
-        vimsupport.PlaceSign( next_sign_id,
-                              line,
-                              buffer_number,
-                              _DiagnosticIsError( diag ) )
-        next_sign_id += 1
-  return next_sign_id
 
 
 def _ConvertDiagListToDict( diag_list ):
