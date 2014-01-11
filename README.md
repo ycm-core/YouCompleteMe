@@ -220,8 +220,8 @@ process.
     **Download the latest version of `libclang`**. Clang is an open-source
     compiler that can compile C/C++/Objective-C/Objective-C++. The `libclang`
     library it provides is used to power the YCM semantic completion engine for
-    those languages. YCM is designed to work with libclang version 3.3 or
-    higher, but can in theory work with 3.2 as well.
+    those languages. YCM is designed to work with libclang version 3.4 or
+    higher, but can in theory work with any 3.2+ version as well.
 
     You can use the system libclang _only if you are sure it is version 3.3 or
     higher_, otherwise don't. Even if it is, I recommend using the [official
