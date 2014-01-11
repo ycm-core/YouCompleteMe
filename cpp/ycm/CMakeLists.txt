@@ -37,23 +37,26 @@ set( PATH_TO_LLVM_ROOT "" CACHE PATH "Path to the root of a LLVM+Clang binary di
 set( EXTERNAL_LIBCLANG_PATH "" CACHE PATH  "Path libclang library to use" )
 
 if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
-  message( "Downloading Clang 3.3" )
+  message( "Downloading Clang 3.4" )
 
-  set( CLANG_URL "http://llvm.org/releases/3.3" )
+  set( CLANG_URL "http://llvm.org/releases/3.4" )
 
   if ( APPLE )
-    set( CLANG_DIRNAME "clang+llvm-3.3-x86_64-apple-darwin12" )
-    set( CLANG_MD5 "3c9984ca05f68ca5dc7e06dad92a96ab" )
+    set( CLANG_DIRNAME "clang+llvm-3.4-x86_64-apple-darwin10.9" )
+    set( CLANG_MD5 "4f43ea0e87090ae5e7bec12373ca4927" )
     set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.gz" )
   else()
     if ( 64_BIT_PLATFORM )
-      set( CLANG_DIRNAME "clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu" )
-      set( CLANG_MD5 "c0cbbe86c5836e03fe6eb96e95d059fa" )
+      set( CLANG_DIRNAME "clang+llvm-3.4-x86_64-unknown-ubuntu12.04" )
+      set( CLANG_MD5 "6077459d20a7ff412eefc6ce3b9f5c85" )
+      set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.xz" )
     else()
+      message( "No pre-built Clang 3.4 binaries for 32 bit linux, "
+               "downloading Clang 3.3" )
       set( CLANG_DIRNAME "clang+llvm-3.3-i386-debian6" )
       set( CLANG_MD5 "415d033b60659433d4631df894673802" )
+      set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.bz2" )
     endif()
-    set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.bz2" )
   endif()
 
   file(
@@ -63,6 +66,8 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
 
   if ( CLANG_FILENAME MATCHES ".+bz2" )
     execute_process( COMMAND tar -xjf ${CLANG_FILENAME} )
+  elseif( CLANG_FILENAME MATCHES ".+xz" )
+    execute_process( COMMAND tar -xJf ${CLANG_FILENAME} )
   else()
     execute_process( COMMAND tar -xzf ${CLANG_FILENAME} )
   endif()
