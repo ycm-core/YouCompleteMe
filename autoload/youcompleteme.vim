@@ -276,7 +276,7 @@ function! s:SetUpCpoptions()
   " here.
   try
     set shortmess+=c
-  catch /E539: Illegal character/
+  catch
   endtry
 endfunction
 
