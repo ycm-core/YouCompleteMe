@@ -1,4 +1,4 @@
-// Copyright (C) 2011, 2012  Strahinja Val Markovic  <val@markovic.io>
+// Copyright (C) 2013  Strahinja Val Markovic  <val@markovic.io>
 //
 // This file is part of YouCompleteMe.
 //
@@ -15,27 +15,33 @@
 // You should have received a copy of the GNU General Public License
 // along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLANGUTILS_H_9MVHQLJS
-#define CLANGUTILS_H_9MVHQLJS
+#ifndef RANGE_H_4MFTIGQK
+#define RANGE_H_4MFTIGQK
 
-#include <clang-c/Index.h>
-#include <string>
+#include "standard.h"
+#include "Location.h"
 
 namespace YouCompleteMe {
 
-std::string CXStringToString( CXString text );
+// Half-open, [start, end>
+struct Range {
+  Range() {}
 
-bool CursorIsValid( CXCursor cursor );
+  Range( const Location &start_location, const Location &end_location )
+    : start_( start_location ), end_( end_location ) {}
 
-bool CursorIsReference( CXCursor cursor );
+  Range( const CXSourceRange &range );
 
-bool CursorIsDeclaration( CXCursor cursor );
+  bool operator== ( const Range &other ) const {
+    return
+      start_ == other.start_ &&
+      end_ == other.end_;
+  }
 
-std::string CXFileToFilepath( CXFile file );
-
-std::string ClangVersion();
+  Location start_;
+  Location end_;
+};
 
 } // namespace YouCompleteMe
 
-#endif /* end of include guard: CLANGUTILS_H_9MVHQLJS */
-
+#endif /* end of include guard: RANGE_H_4MFTIGQK */

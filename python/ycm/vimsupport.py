@@ -83,13 +83,20 @@ def GetUnsavedAndCurrentBufferData():
 
 
 def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
-  return int( vim.eval( "bufnr('{0}', {1})".format(
+  return GetIntValue( "bufnr('{0}', {1})".format(
       os.path.realpath( filename ),
-      int( open_file_if_needed ) ) ) )
+      int( open_file_if_needed ) ) )
 
 
 def GetCurrentBufferFilepath():
   return GetBufferFilepath( vim.current.buffer )
+
+
+def BufferIsVisible( buffer_number ):
+  if buffer_number < 0:
+    return False
+  window_number = GetIntValue( "bufwinnr({0})".format( buffer_number ) )
+  return window_number != -1
 
 
 def GetBufferFilepath( buffer_object ):
@@ -98,6 +105,97 @@ def GetBufferFilepath( buffer_object ):
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that.
   return os.path.join( os.getcwd(), str( buffer_object.number ) )
+
+
+# NOTE: This unplaces *all* signs in a buffer, not just the ones we placed. We
+# used to track which signs we ended up placing and would then only unplace
+# ours, but that causes flickering Vim since we have to call
+#    sign unplace <id> buffer=<buffer-num>
+# in a loop. So we're forced to unplace all signs, which might conflict with
+# other Vim plugins.
+def UnplaceAllSignsInBuffer( buffer_number ):
+  if buffer_number < 0:
+    return
+  vim.command( 'sign unplace * buffer={0}'.format( buffer_number ) )
+
+
+def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
+  sign_name = 'YcmError' if is_error else 'YcmWarning'
+  vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
+    sign_id, line_num, sign_name, buffer_num ) )
+
+
+def ClearYcmSyntaxMatches():
+  matches = VimExpressionToPythonType( 'getmatches()' )
+  for match in matches:
+    if match[ 'group' ].startswith( 'Ycm' ):
+      vim.eval( 'matchdelete({0})'.format( match[ 'id' ] ) )
+
+
+# Returns the ID of the newly added match
+# Both line and column numbers are 1-based
+def AddDiagnosticSyntaxMatch( line_num,
+                              column_num,
+                              line_end_num = None,
+                              column_end_num = None,
+                              is_error = True ):
+  group = 'YcmErrorSection' if is_error else 'YcmWarningSection'
+
+  if not line_end_num:
+    line_end_num = line_num
+
+  line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
+  line_end_num, column_end_num = LineAndColumnNumbersClamped( line_end_num,
+                                                              column_end_num )
+
+  if not column_end_num:
+    return GetIntValue(
+      "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
+  else:
+    return GetIntValue(
+      "matchadd('{0}', '\%{1}l\%{2}c\_.*\%{3}l\%{4}c')".format(
+        group, line_num, column_num, line_end_num, column_end_num ) )
+
+
+# Clamps the line and column numbers so that they are not past the contents of
+# the buffer. Numbers are 1-based.
+def LineAndColumnNumbersClamped( line_num, column_num ):
+  new_line_num = line_num
+  new_column_num = column_num
+
+  max_line = len( vim.current.buffer )
+  if line_num and line_num > max_line:
+    new_line_num = max_line
+
+  max_column = len( vim.current.buffer[ new_line_num - 1 ] )
+  if column_num and column_num > max_column:
+    new_column_num = max_column
+
+  return new_line_num, new_column_num
+
+
+def SetLocationList( diagnostics ):
+  """Diagnostics should be in qflist format; see ":h setqflist" for details."""
+  vim.eval( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+
+
+def ConvertDiagnosticsToQfList( diagnostics ):
+  def ConvertDiagnosticToQfFormat( diagnostic ):
+    # see :h getqflist for a description of the dictionary fields
+    # Note that, as usual, Vim is completely inconsistent about whether
+    # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
+    # them to be 1-based.
+    location = diagnostic[ 'location' ]
+    return {
+      'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
+      'lnum'  : location[ 'line_num' ] + 1,
+      'col'   : location[ 'column_num' ] + 1,
+      'text'  : diagnostic[ 'text' ],
+      'type'  : diagnostic[ 'kind' ],
+      'valid' : 1
+    }
+
+  return [ ConvertDiagnosticToQfFormat( x ) for x in diagnostics ]
 
 
 # Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
@@ -164,6 +262,7 @@ def PostVimMessage( message ):
   vim.command( "echohl WarningMsg | echom '{0}' | echohl None"
                .format( EscapeForVim( str( message ) ) ) )
 
+
 # Unlike PostVimMesasge, this supports messages with newlines in them because it
 # uses 'echo' instead of 'echomsg'. This also means that the message will NOT
 # appear in Vim's message log.
@@ -200,12 +299,29 @@ def Confirm( message ):
   return bool( PresentDialog( message, [ "Ok", "Cancel" ] ) == 0 )
 
 
-def EchoText( text ):
+def EchoText( text, log_as_message = True ):
   def EchoLine( text ):
-    vim.command( "echom '{0}'".format( EscapeForVim( text ) ) )
+    command = 'echom' if log_as_message else 'echo'
+    vim.command( "{0} '{1}'".format( command, EscapeForVim( text ) ) )
 
-  for line in text.split( '\n' ):
+  for line in str( text ).split( '\n' ):
     EchoLine( line )
+
+
+# Echos text but truncates it so that it all fits on one line
+def EchoTextVimWidth( text ):
+  vim_width = GetIntValue( '&columns' )
+  truncated_text = str( text )[ : int( vim_width * 0.9 ) ]
+  truncated_text.replace( '\n', ' ' )
+
+  old_ruler = GetIntValue( '&ruler' )
+  old_showcmd = GetIntValue( '&showcmd' )
+  vim.command( 'set noruler noshowcmd' )
+
+  EchoText( truncated_text, False )
+
+  vim.command( 'let &ruler = {0}'.format( old_ruler ) )
+  vim.command( 'let &showcmd = {0}'.format( old_showcmd ) )
 
 
 def EscapeForVim( text ):

@@ -23,6 +23,7 @@ import tempfile
 import json
 from ycm import vimsupport
 from ycm import utils
+from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.completers.all.omni_completer import OmniCompleter
 from ycm.completers.general import syntax_parse
 from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
@@ -64,6 +65,7 @@ class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
     self._user_notified_about_crash = False
+    self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
     self._latest_completion_request = None
     self._latest_file_parse_request = None
@@ -244,6 +246,10 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'InsertLeave' )
 
 
+  def OnCursorMoved( self ):
+    self._diag_interface.OnCursorMoved()
+
+
   def OnVimLeave( self ):
     self._ServerCleanup()
 
@@ -259,16 +265,26 @@ class YouCompleteMe( object ):
                  self._latest_file_parse_request.Done() )
 
 
-  def GetDiagnosticsFromStoredRequest( self ):
+  def GetDiagnosticsFromStoredRequest( self, qflist_format = False ):
     if self.DiagnosticsForCurrentFileReady():
-      to_return = self._latest_file_parse_request.Response()
+      diagnostics = self._latest_file_parse_request.Response()
       # We set the diagnostics request to None because we want to prevent
       # Syntastic from repeatedly refreshing the buffer with the same diags.
       # Setting this to None makes DiagnosticsForCurrentFileReady return False
       # until the next request is created.
       self._latest_file_parse_request = None
-      return to_return
+      if qflist_format:
+        return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
+      else:
+        return diagnostics
     return []
+
+
+  def UpdateDiagnosticInterface( self ):
+    if not self.DiagnosticsForCurrentFileReady():
+      return
+    self._diag_interface.UpdateWithNewDiagnostics(
+      self.GetDiagnosticsFromStoredRequest() )
 
 
   def ShowDetailedDiagnostic( self ):
@@ -361,3 +377,5 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
   extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
                                            'description': x.description
                                          } for x in rawsnips ]
+
+

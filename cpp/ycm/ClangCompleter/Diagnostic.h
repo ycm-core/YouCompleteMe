@@ -19,29 +19,33 @@
 #define DIAGNOSTIC_H_BZH3BWIZ
 
 #include "standard.h"
+#include "Range.h"
+#include "Location.h"
+
 #include <string>
+#include <vector>
 
 namespace YouCompleteMe {
 
 struct Diagnostic {
   bool operator== ( const Diagnostic &other ) const {
     return
-      line_number_ == other.line_number_ &&
-      column_number_ == other.column_number_ &&
+      location_ == other.location_ &&
       kind_ == other.kind_ &&
       text_ == other.text_;
   }
 
-  uint line_number_;
-  uint column_number_;
+  Location location_;
+
+  Range location_extent_;
+
+  std::vector< Range > ranges_;
 
   // Vim's error "kind"
   //  'I' -> informational
   //  'W' -> warning
   //  'E' -> error
   char kind_;
-
-  std::string filename_;
 
   std::string text_;
 

@@ -20,6 +20,7 @@
 #include "standard.h"
 #include "exceptions.h"
 #include "ClangUtils.h"
+#include "ClangHelpers.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
@@ -193,8 +194,7 @@ Location TranslationUnit::GetDeclarationLocation(
   if ( !CursorIsValid( referenced_cursor ) )
     return Location();
 
-  return LocationFromSourceLocation(
-           clang_getCursorLocation( referenced_cursor ) );
+  return Location( clang_getCursorLocation( referenced_cursor ) );
 }
 
 Location TranslationUnit::GetDefinitionLocation(
@@ -217,8 +217,7 @@ Location TranslationUnit::GetDefinitionLocation(
   if ( !CursorIsValid( definition_cursor ) )
     return Location();
 
-  return LocationFromSourceLocation(
-           clang_getCursorLocation( definition_cursor ) );
+  return Location( clang_getCursorLocation( definition_cursor ) );
 }
 
 
@@ -271,9 +270,10 @@ void TranslationUnit::UpdateLatestDiagnostics() {
 
   for ( uint i = 0; i < num_diagnostics; ++i ) {
     Diagnostic diagnostic =
-      DiagnosticWrapToDiagnostic(
+      BuildDiagnostic(
         DiagnosticWrap( clang_getDiagnostic( clang_translation_unit_, i ),
-                        clang_disposeDiagnostic ) );
+                        clang_disposeDiagnostic ),
+        clang_translation_unit_ );
 
     if ( diagnostic.kind_ != 'I' )
       latest_diagnostics_.push_back( diagnostic );
@@ -293,20 +293,6 @@ CXCursor TranslationUnit::GetCursor( int line, int column ) {
                                        column );
 
   return clang_getCursor( clang_translation_unit_, source_location );
-}
-
-Location TranslationUnit::LocationFromSourceLocation(
-  CXSourceLocation source_location ) {
-  // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_!
-  if ( !clang_translation_unit_ )
-    return Location();
-
-  CXFile file;
-  uint line;
-  uint column;
-  uint offset;
-  clang_getExpansionLocation( source_location, &file, &line, &column, &offset );
-  return Location( CXFileToFilepath( file ), line, column );
 }
 
 } // namespace YouCompleteMe

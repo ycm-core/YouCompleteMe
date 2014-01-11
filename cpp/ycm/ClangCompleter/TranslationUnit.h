@@ -86,8 +86,6 @@ private:
 
   CXCursor GetCursor( int line, int column );
 
-  Location LocationFromSourceLocation( CXSourceLocation source_location );
-
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES
   /////////////////////////////

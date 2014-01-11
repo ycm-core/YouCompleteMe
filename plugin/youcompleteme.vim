@@ -71,9 +71,6 @@ let g:loaded_youcompleteme = 1
 " The only defaults that are here are the ones that are only relevant to the YCM
 " Vim client and not the server.
 
-let g:ycm_register_as_syntastic_checker =
-      \ get( g:, 'ycm_register_as_syntastic_checker', 1 )
-
 let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )
 
@@ -116,6 +113,33 @@ let g:ycm_extra_conf_vim_data =
 let g:ycm_path_to_python_interpreter =
       \ get( g:, 'ycm_path_to_python_interpreter', '' )
 
+let g:ycm_show_diagnostics_ui =
+      \ get( g:, 'ycm_show_diagnostics_ui',
+      \ get( g:, 'ycm_register_as_syntastic_checker', 1 ) )
+
+let g:ycm_enable_diagnostic_signs =
+      \ get( g:, 'ycm_enable_diagnostic_signs',
+      \ get( g:, 'syntastic_enable_signs', 1 ) )
+
+let g:ycm_enable_diagnostic_highlighting =
+      \ get( g:, 'ycm_enable_diagnostic_highlighting',
+      \ get( g:, 'syntastic_enable_highlighting', 1 ) )
+
+let g:ycm_echo_current_diagnostic =
+      \ get( g:, 'ycm_echo_current_diagnostic',
+      \ get( g:, 'syntastic_echo_current_error', 1 ) )
+
+let g:ycm_always_populate_location_list =
+      \ get( g:, 'ycm_always_populate_location_list',
+      \ get( g:, 'syntastic_always_populate_loc_list', 0 ) )
+
+let g:ycm_error_symbol =
+      \ get( g:, 'ycm_error_symbol',
+      \ get( g:, 'syntastic_error_symbol', '>>' ) )
+
+let g:ycm_warning_symbol =
+      \ get( g:, 'ycm_warning_symbol',
+      \ get( g:, 'syntastic_warning_symbol', '>>' ) )
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
