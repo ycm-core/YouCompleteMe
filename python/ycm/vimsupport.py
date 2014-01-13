@@ -311,7 +311,7 @@ def EchoText( text, log_as_message = True ):
 # Echos text but truncates it so that it all fits on one line
 def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
-  truncated_text = str( text )[ : int( vim_width * 0.9 ) ]
+  truncated_text = text.encode('utf-8')[ : int( vim_width * 0.9 ) ]
   truncated_text.replace( '\n', ' ' )
 
   old_ruler = GetIntValue( '&ruler' )
