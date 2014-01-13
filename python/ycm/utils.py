@@ -39,10 +39,12 @@ def SanitizeQuery( query ):
   return query.strip()
 
 
-def ToUtf8IfNeeded( string_or_unicode ):
-  if isinstance( string_or_unicode, unicode ):
-    return string_or_unicode.encode( 'utf8' )
-  return string_or_unicode
+def ToUtf8IfNeeded( value ):
+  if isinstance( value, unicode ):
+    return value.encode( 'utf8' )
+  if isinstance( value, str ):
+    return value
+  return str( value )
 
 
 def PathToTempDir():

@@ -20,6 +20,7 @@
 import vim
 import os
 import json
+from ycm.utils import ToUtf8IfNeeded
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -190,7 +191,7 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
       'lnum'  : location[ 'line_num' ] + 1,
       'col'   : location[ 'column_num' ] + 1,
-      'text'  : diagnostic[ 'text' ],
+      'text'  : ToUtf8IfNeeded( diagnostic[ 'text' ] ),
       'type'  : diagnostic[ 'kind' ],
       'valid' : 1
     }
@@ -311,7 +312,7 @@ def EchoText( text, log_as_message = True ):
 # Echos text but truncates it so that it all fits on one line
 def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
-  truncated_text = text.encode('utf-8')[ : int( vim_width * 0.9 ) ]
+  truncated_text = ToUtf8IfNeeded( text )[ : int( vim_width * 0.9 ) ]
   truncated_text.replace( '\n', ' ' )
 
   old_ruler = GetIntValue( '&ruler' )
