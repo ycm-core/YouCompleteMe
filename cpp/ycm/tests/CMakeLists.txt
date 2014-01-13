@@ -1,4 +1,4 @@
-# Copyright (C) 2011  Strahinja Markovic  <strahinja.markovic@gmail.com>
+# Copyright (C) 2011 Google Inc.
 #
 # This file is part of YouCompleteMe.
 #

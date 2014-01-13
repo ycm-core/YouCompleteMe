@@ -1656,11 +1656,20 @@ The latest version of the plugin is available at
 
 The author's homepage is <http://val.markovic.io>.
 
+Project Management
+------------------
+
+This open-source project is run by me, Strahinja Val Markovic. I also happen to
+work for Google and the code I write here is under Google copyright (for the
+sake of simplicity and other reasons). This does **NOT** mean that this is an
+official Google product (it isn't) or that Google has (or wants to have)
+anything to do with it.
+
 License
 -------
 
 This software is licensed under the [GPL v3 license][gpl].
-© 2012 Strahinja Val Markovic &lt;<val@markovic.io>&gt;.
+© 2013 Google Inc.
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 

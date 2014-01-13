@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (C) 2011, 2012  Chiel ten Brinke <ctenbrinke@gmail.com>
-#                           Strahinja Val Markovic <val@markovic.io>
+#                           Google Inc.
 #
 # This file is part of YouCompleteMe.
 #

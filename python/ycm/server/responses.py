@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2013  Strahinja Val Markovic <val@markovic.io>
+# Copyright (C) 2013  Google Inc.
 #
 # This file is part of YouCompleteMe.
 #

@@ -1,7 +1,7 @@
 # Copyright 2009 Brian Quinlan. All Rights Reserved.
 #   Licensed to PSF under a Contributor Agreement.
 #
-# Copyright (C) 2013  Strahinja Val Markovic  <val@markovic.io>
+# Copyright (C) 2013  Google Inc.
 #   Changes to this file are licensed under the same terms as the original file
 #   (the Python Software Foundation License).
 

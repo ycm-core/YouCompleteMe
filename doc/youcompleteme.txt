@@ -1896,8 +1896,7 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [32]. © 2012 Strahinja Val
-Markovic <val@markovic.io>.
+This software is licensed under the GPL v3 license [32]. © 2013 Google Inc.
 
   Image: Bitdeli Badge [33]
 

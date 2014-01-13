@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (C) 2011, 2012  Stephen Sugden <me@stephensugden.com>
-#                           Strahinja Val Markovic <val@markovic.io>
+#                           Google Inc.
 #                           Stanislav Golovanov <stgolovanov@gmail.com>
 #
 # This file is part of YouCompleteMe.
