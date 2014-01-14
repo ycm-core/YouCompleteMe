@@ -84,6 +84,7 @@ class YouCompleteMe( object ):
     with tempfile.NamedTemporaryFile( delete = False ) as options_file:
       self._temp_options_filename = options_file.name
       json.dump( dict( self._user_options ), options_file )
+      options_file.flush()
       args = [ utils.PathToPythonInterpreter(),
                _PathToServerScript(),
                '--port={0}'.format( server_port ),
