@@ -19,6 +19,7 @@
 
 from ycm import base
 from ycm import vimsupport
+from ycm.utils import ToUtf8IfNeeded
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       JsonFromFuture )
 
@@ -65,17 +66,17 @@ class CompletionRequest( BaseRequest ):
 def _ConvertCompletionDataToVimData( completion_data ):
   # see :h complete-items for a description of the dictionary fields
   vim_data = {
-    'word' : completion_data[ 'insertion_text' ],
+    'word' : ToUtf8IfNeeded( completion_data[ 'insertion_text' ] ),
     'dup'  : 1,
   }
 
   if 'menu_text' in completion_data:
-    vim_data[ 'abbr' ] = completion_data[ 'menu_text' ]
+    vim_data[ 'abbr' ] = ToUtf8IfNeeded( completion_data[ 'menu_text' ] )
   if 'extra_menu_info' in completion_data:
-    vim_data[ 'menu' ] = completion_data[ 'extra_menu_info' ]
+    vim_data[ 'menu' ] = ToUtf8IfNeeded( completion_data[ 'extra_menu_info' ] )
   if 'kind' in completion_data:
-    vim_data[ 'kind' ] = completion_data[ 'kind' ]
+    vim_data[ 'kind' ] = ToUtf8IfNeeded( completion_data[ 'kind' ] )
   if 'detailed_info' in completion_data:
-    vim_data[ 'info' ] = completion_data[ 'detailed_info' ]
+    vim_data[ 'info' ] = ToUtf8IfNeeded( completion_data[ 'detailed_info' ] )
 
   return vim_data
