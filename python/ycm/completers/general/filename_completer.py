@@ -22,6 +22,7 @@ import re
 from ycm.completers.completer import Completer
 from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
+from ycm.utils import ToUtf8IfNeeded
 from ycm.server import responses
 
 class FilenameCompleter( Completer ):
@@ -55,7 +56,7 @@ class FilenameCompleter( Completer ):
   def AtIncludeStatementStart( self, request_data ):
     start_column = request_data[ 'start_column' ]
     current_line = request_data[ 'line_value' ]
-    filepath = request_data[ 'filepath' ]
+    filepath = ToUtf8IfNeeded( request_data[ 'filepath' ] )
     filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
     return ( InCFamilyFile( filetypes ) and
              self._include_start_regex.match(
@@ -76,7 +77,7 @@ class FilenameCompleter( Completer ):
   def ComputeCandidatesInner( self, request_data ):
     current_line = request_data[ 'line_value' ]
     start_column = request_data[ 'start_column' ]
-    filepath = request_data[ 'filepath' ]
+    filepath = ToUtf8IfNeeded( request_data[ 'filepath' ] )
     filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
     line = current_line[ :start_column ]
 

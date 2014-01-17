@@ -103,6 +103,7 @@ class Flags( object ):
 
 
 def _CallExtraConfFlagsForFile( module, filename, client_data ):
+  filename = ToUtf8IfNeeded( filename )
   # For the sake of backwards compatibility, we need to first check whether the
   # FlagsForFile function in the extra conf module even allows keyword args.
   if inspect.getargspec( module.FlagsForFile ).keywords:
