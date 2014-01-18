@@ -1576,6 +1576,9 @@ how hard I try to silence them.
 
 You'll have to learn to ignore them. It's a shitty "solution", I know.
 
+There's an [outstanding patch for Vim that fixes this issue][status-mes], but at
+the time of writing Vim upstream hasn't yet merged it in.
+
 ### Nasty bugs happen if I have the `vim-autoclose` plugin installed
 
 Use the [delimitMate][] plugin instead. It does the same thing without
@@ -1706,3 +1709,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [issue-303]: https://github.com/Valloric/YouCompleteMe/issues/303
 [issue-593]: https://github.com/Valloric/YouCompleteMe/issues/593
 [issue-669]: https://github.com/Valloric/YouCompleteMe/issues/669
+[status-mes]: https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8
