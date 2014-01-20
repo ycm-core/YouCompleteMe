@@ -105,7 +105,7 @@ Creating good pull requests
 
 5.  **Sign the Google [Contributor License Agreement][cla]** (you can sign
     online at the bottom of that page). You _must_ sign this form, otherwise we
-    cannot merge in your changes. **Always mention in the pull request that
+    cannot merge in your changes. **_Always_ mention in the pull request that
     you've signed it**, even if you signed it for a previous pull request (you
     only need to sign the CLA once).
 
