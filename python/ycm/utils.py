@@ -176,7 +176,7 @@ def ForceSemanticCompletion( request_data ):
 
 # A wrapper for subprocess.Popen that works around a Popen bug on Windows.
 def SafePopen( *args, **kwargs ):
-  if kwargs.get( 'stdin', '' ) is None:
+  if kwargs.get( 'stdin' ) is None:
     # We need this on Windows otherwise bad things happen. See issue #637.
     kwargs[ 'stdin' ] = subprocess.PIPE if OnWindows() else None
 
