@@ -70,8 +70,9 @@ if ( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
   # Linux machines don't necessarily have libc++ installed alongside clang,
   # but HAS_LIBCXX11 doesn't always trigger for machines that DO have libc++. We
   # know that at least all the Mac OS versions we support that use Clang have
-  # libc++, so we're safe there.
-  if ( HAS_LIBCXX11 OR APPLE )
+  # libc++, so we're safe there. On FreeBSD 9 libc++ is an optional build
+  # toggle. On FreeBSD 10 it is the default.
+  if ( HAS_LIBCXX11 OR APPLE OR SYSTEM_IS_FREEBSD )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
   endif()
 
