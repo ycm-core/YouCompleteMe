@@ -53,6 +53,7 @@ if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
     else()
       message( "No pre-built Clang 3.4 binaries for 32 bit linux, "
                "downloading Clang 3.3" )
+      set( CLANG_URL "http://llvm.org/releases/3.3" )
       set( CLANG_DIRNAME "clang+llvm-3.3-i386-debian6" )
       set( CLANG_MD5 "415d033b60659433d4631df894673802" )
       set( CLANG_FILENAME "${CLANG_DIRNAME}.tar.bz2" )
