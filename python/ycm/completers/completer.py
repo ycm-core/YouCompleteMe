@@ -105,7 +105,6 @@ class Completer( object ):
     self.triggers_for_filetype = (
         TriggersForFiletype( user_options[ 'semantic_triggers' ] )
         if user_options[ 'auto_trigger' ] else defaultdict( set ) )
-    self.completions_future = None
     self._completions_cache = None
 
 
