@@ -49,35 +49,36 @@ Contents ~
   11. The |g:ycm_enable_diagnostic_highlighting| option
   12. The |g:ycm_echo_current_diagnostic| option
   13. The |g:ycm_always_populate_location_list| option
-  14. The |g:ycm_allow_changing_updatetime| option
-  15. The |g:ycm_complete_in_comments| option
-  16. The |g:ycm_complete_in_strings| option
-  17. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  18. The |g:ycm_collect_identifiers_from_tags_files| option
-  19. The |g:ycm_seed_identifiers_with_syntax| option
-  20. The |g:ycm_extra_conf_vim_data| option
-  21. The |g:ycm_path_to_python_interpreter| option
-  22. The |g:ycm_server_use_vim_stdout| option
-  23. The |g:ycm_server_keep_logfiles| option
-  24. The |g:ycm_server_log_level| option
-  25. The |g:ycm_csharp_server_port| option
-  26. The |g:ycm_auto_start_csharp_server| option
-  27. The |g:ycm_auto_stop_csharp_server| option
-  28. The |g:ycm_add_preview_to_completeopt| option
-  29. The |g:ycm_autoclose_preview_window_after_completion| option
-  30. The |g:ycm_autoclose_preview_window_after_insertion| option
-  31. The |g:ycm_max_diagnostics_to_display| option
-  32. The |g:ycm_key_list_select_completion| option
-  33. The |g:ycm_key_list_previous_completion| option
-  34. The |g:ycm_key_invoke_completion| option
-  35. The |g:ycm_key_detailed_diagnostics| option
-  36. The |g:ycm_global_ycm_extra_conf| option
-  37. The |g:ycm_confirm_extra_conf| option
-  38. The |g:ycm_extra_conf_globlist| option
-  39. The |g:ycm_filepath_completion_use_working_dir| option
-  40. The |g:ycm_semantic_triggers| option
-  41. The |g:ycm_cache_omnifunc| option
-  42. The |g:ycm_use_ultisnips_completer| option
+  14. The |g:ycm_open_loclist_on_ycm_diags| option
+  15. The |g:ycm_allow_changing_updatetime| option
+  16. The |g:ycm_complete_in_comments| option
+  17. The |g:ycm_complete_in_strings| option
+  18. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  19. The |g:ycm_collect_identifiers_from_tags_files| option
+  20. The |g:ycm_seed_identifiers_with_syntax| option
+  21. The |g:ycm_extra_conf_vim_data| option
+  22. The |g:ycm_path_to_python_interpreter| option
+  23. The |g:ycm_server_use_vim_stdout| option
+  24. The |g:ycm_server_keep_logfiles| option
+  25. The |g:ycm_server_log_level| option
+  26. The |g:ycm_csharp_server_port| option
+  27. The |g:ycm_auto_start_csharp_server| option
+  28. The |g:ycm_auto_stop_csharp_server| option
+  29. The |g:ycm_add_preview_to_completeopt| option
+  30. The |g:ycm_autoclose_preview_window_after_completion| option
+  31. The |g:ycm_autoclose_preview_window_after_insertion| option
+  32. The |g:ycm_max_diagnostics_to_display| option
+  33. The |g:ycm_key_list_select_completion| option
+  34. The |g:ycm_key_list_previous_completion| option
+  35. The |g:ycm_key_invoke_completion| option
+  36. The |g:ycm_key_detailed_diagnostics| option
+  37. The |g:ycm_global_ycm_extra_conf| option
+  38. The |g:ycm_confirm_extra_conf| option
+  39. The |g:ycm_extra_conf_globlist| option
+  40. The |g:ycm_filepath_completion_use_working_dir| option
+  41. The |g:ycm_semantic_triggers| option
+  42. The |g:ycm_cache_omnifunc| option
+  43. The |g:ycm_use_ultisnips_completer| option
  10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
@@ -103,11 +104,13 @@ Contents ~
   22. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
   23. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
   24. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  25. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
-  26. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
+  25. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
+  26. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
+  27. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
  11. Contact                                            |youcompleteme-contact|
- 12. License                                            |youcompleteme-license|
- 13. References                                      |youcompleteme-references|
+ 12. Project Management                      |youcompleteme-project-management|
+ 13. License                                            |youcompleteme-license|
+ 14. References                                      |youcompleteme-references|
 
 ===============================================================================
                                                    *youcompleteme-introduction*
@@ -337,8 +340,8 @@ process.
    **Download the latest version of 'libclang'**. Clang is an open-source
    compiler that can compile C/C++/Objective-C/Objective-C++. The 'libclang'
    library it provides is used to power the YCM semantic completion engine
-   for those languages. YCM is designed to work with libclang version 3.3 or
-   higher, but can in theory work with 3.2 as well.
+   for those languages. YCM is designed to work with libclang version 3.4 or
+   higher, but can in theory work with any 3.2+ version as well.
 
    You can use the system libclang _only if you are sure it is version 3.3
    or higher_, otherwise don't. Even if it is, I recommend using the
@@ -616,7 +619,7 @@ Here are the various pieces of the diagnostic UI:
 
 - Icons show up in the Vim gutter on lines that have a diagnostic.
 - Regions of text related to diagnostics are highlighted (by default, a red
-  wawy underline in 'gvim' and a red background in 'vim').
+  wavy underline in 'gvim' and a red background in 'vim').
 - Moving the cursor to a line with a diagnostic echoes the diagnostic text.
 - Vim's location list is automatically populated with diagnostic data (off by
   default, see options).
@@ -663,7 +666,7 @@ in the Vim gutter, the relevant groups are:
 - 'YcmErrorSign', which falls back to group 'SyntasticErrorSign' and then
   'error' if they exist
 
-- 'YcmErrorSign', which falls back to group 'SyntasticWarningSign' and then
+- 'YcmWarningSign', which falls back to group 'SyntasticWarningSign' and then
   'todo' if they exist
 
 You can also style the line that has the warning/error with these groups:
@@ -671,6 +674,9 @@ You can also style the line that has the warning/error with these groups:
 - 'YcmErrorLine', which falls back to group 'SyntasticErrorLine' if it exists
 - 'YcmWarningLine', which falls back to group 'SyntasticWarningLine' if it
   exists
+
+Note that the line highlighting groups only work when gutter signs are turned
+on.
 
 Here's how you'd change the style for a group:
 >
@@ -701,6 +707,10 @@ The *:YcmDiags* command
 
 Calling this command will fill Vim's 'locationlist' with errors or warnings if
 any were detected in your file and then open it.
+
+The |g:ycm_open_loclist_on_ycm_diags| option can be used to prevent the
+location list from opening, but still have it filled with new diagnostic data.
+See the _Options_ section for details.
 
 -------------------------------------------------------------------------------
 The *:YcmShowDetailedDiagnostic* command
@@ -924,6 +934,7 @@ Default: '[see next line]'
         \ 'unite' : 1,
         \ 'text' : 1,
         \ 'vimwiki' : 1,
+        \ 'pandoc' : 1
         \}
 <
 -------------------------------------------------------------------------------
@@ -1003,7 +1014,8 @@ Default: '>>'
 The *g:ycm_enable_diagnostic_signs* option
 
 When this option is set, YCM will put icons in Vim's gutter on lines that have
-a diagnostic set.
+a diagnostic set. Turning this off will also turn off the 'YcmErrorLine' and
+'YcmWarningLine' highlighting.
 
 This option is part of the Syntastic compatibility layer; if the option is not
 set, YCM will fall back to the value of the 'g:syntastic_enable_signs' option
@@ -1058,6 +1070,18 @@ default.
 Default: '0'
 >
   let g:ycm_always_populate_location_list = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_open_loclist_on_ycm_diags* option
+
+When this option is set, |:YcmDiags| will automatically open the location list
+after forcing a compilation and filling the list with diagnostic data.
+
+See ':help location-list' in Vim to learn more about the location list.
+
+Default: '1'
+>
+  let g:ycm_open_loclist_on_ycm_diags = 1
 <
 -------------------------------------------------------------------------------
 The *g:ycm_allow_changing_updatetime* option
@@ -1800,11 +1824,14 @@ how hard I try to silence them.
 
 You'll have to learn to ignore them. It's a shitty "solution", I know.
 
+There's an outstanding patch for Vim that fixes this issue [27], but at the
+time of writing Vim upstream hasn't yet merged it in.
+
 -------------------------------------------------------------------------------
                                                             *vim-sub-autoclose*
 Nasty bugs happen if I have the 'vim-autoclose' plugin installed ~
 
-Use the delimitMate [27] plugin instead. It does the same thing without
+Use the delimitMate [28] plugin instead. It does the same thing without
 conflicting with YCM.
 
 -------------------------------------------------------------------------------
@@ -1812,7 +1839,7 @@ conflicting with YCM.
 Is there some sort of YCM mailing list? I have questions ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[28] mailing list, _don't_ create issues on the tracker. The tracker is for bug
+[29] mailing list, _don't_ create issues on the tracker. The tracker is for bug
 reports and feature requests.
 
 -------------------------------------------------------------------------------
@@ -1821,6 +1848,26 @@ I get an internal compiler error when installing ~
 
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
+
+-------------------------------------------------------------------------------
+                                                                   *Ctrl-sub-C*
+I get weird errors when I press 'Ctrl-C' in Vim ~
+
+_Never_ use 'Ctrl-C' in Vim.
+
+Using 'Ctrl-C' to exit insert mode in Vim is a bad idea. The main issue here is
+that 'Ctrl-C' in Vim doesn't just leave insert mode, it leaves it without
+triggering 'InsertLeave' autocommands (as per Vim docs). This is a bad idea and
+is likely to break many other things and not just YCM.
+
+Bottom line, if you use 'Ctrl-C' to exit insert mode in Vim, you're gonna have
+a bad time.
+
+If pressing '<esc>' is too annoying (agreed, it is), we suggest mapping it to
+something more convenient. On a QWERTY keyboard, a good pick for the '<esc>'
+map is 'inoremap jk <Esc>'. This is right on the home row, it's an incredibly
+rare digraph in English and if you ever need to type those two chars in
+sequence in insert mode, you just type 'j', then wait 500ms, then type 'k'.
 
 -------------------------------------------------------------------------------
        *youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display*
@@ -1842,7 +1889,7 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions (issue #593 [29]) and other problems, like random
+Syntastic-Vim interactions (issue #593 [30]) and other problems, like random
 Vim flickering. Attempts were made to resolve these issues in Syntastic, but
 ultimately some of them failed (for various reasons).
 
@@ -1875,17 +1922,17 @@ those paths, prepend '-isystem' to each individual path and append them all to
 the list of flags you return from your 'FlagsForFile' function in your
 '.ycm_extra_conf.py' file.
 
-See issue #303 [30] for details.
+See issue #303 [31] for details.
 
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[28] mailing list.
+[29] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[31].
+[32].
 
 The latest version of the plugin is available at
 http://valloric.github.io/YouCompleteMe/.
@@ -1893,12 +1940,22 @@ http://valloric.github.io/YouCompleteMe/.
 The author's homepage is http://val.markovic.io.
 
 ===============================================================================
+                                             *youcompleteme-project-management*
+Project Management ~
+
+This open-source project is run by me, Strahinja Val Markovic. I also happen to
+work for Google and the code I write here is under Google copyright (for the
+sake of simplicity and other reasons). This does **NOT** mean that this is an
+official Google product (it isn't) or that Google has (or wants to have)
+anything to do with it.
+
+===============================================================================
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [32]. © 2013 Google Inc.
+This software is licensed under the GPL v3 license [33]. © 2013 Google Inc.
 
-  Image: Bitdeli Badge [33]
+  Image: Bitdeli Badge [34]
 
 ===============================================================================
                                                      *youcompleteme-references*
@@ -1930,13 +1987,14 @@ References ~
 [24] http://ctags.sourceforge.net/FORMAT
 [25] https://github.com/Valloric/YouCompleteMe/issues/18
 [26] http://ctags.sourceforge.net/
-[27] https://github.com/Raimondi/delimitMate
-[28] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[29] https://github.com/Valloric/YouCompleteMe/issues/593
-[30] https://github.com/Valloric/YouCompleteMe/issues/303
-[31] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[32] http://www.gnu.org/copyleft/gpl.html
-[33] https://bitdeli.com/free
-[34] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[27] https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8
+[28] https://github.com/Raimondi/delimitMate
+[29] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[30] https://github.com/Valloric/YouCompleteMe/issues/593
+[31] https://github.com/Valloric/YouCompleteMe/issues/303
+[32] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[33] http://www.gnu.org/copyleft/gpl.html
+[34] https://bitdeli.com/free
+[35] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
 
 vim: ft=help
