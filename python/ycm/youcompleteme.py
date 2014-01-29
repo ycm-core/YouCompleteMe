@@ -21,6 +21,7 @@ import os
 import vim
 import tempfile
 import json
+import signal
 from ycm import vimsupport
 from ycm import utils
 from ycm.diagnostic_interface import DiagnosticInterface
@@ -50,6 +51,11 @@ except ImportError:
 #  https://github.com/Valloric/YouCompleteMe/issues/641
 #  https://github.com/kennethreitz/requests/issues/879
 os.environ['no_proxy'] = '127.0.0.1,localhost'
+
+# Force the Python interpreter embedded in Vim (in which we are running) to
+# ignore the SIGINT signal. This helps reduce the fallout of a user pressing
+# Ctrl-C in Vim.
+signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 NUM_YCMD_STDERR_LINES_ON_CRASH = 30
 SERVER_CRASH_MESSAGE_STDERR_FILE = (
