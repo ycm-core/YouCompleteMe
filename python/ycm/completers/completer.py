@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import abc
+import threading
 from collections import defaultdict
 from ycm.utils import ToUtf8IfNeeded, ForceSemanticCompletion, RunningInsideVim
 
@@ -105,22 +106,29 @@ class Completer( object ):
     self.triggers_for_filetype = (
         TriggersForFiletype( user_options[ 'semantic_triggers' ] )
         if user_options[ 'auto_trigger' ] else defaultdict( set ) )
-    self._completions_cache = None
+    self._completions_cache = CompletionsCache()
 
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
   def ShouldUseNow( self, request_data ):
-    inner_says_yes = self.ShouldUseNowInner( request_data )
-    if not inner_says_yes:
-      self._completions_cache = None
+    if not self.ShouldUseNowInner( request_data ):
+      self._completions_cache.Invalidate()
+      return False
 
-    previous_results_were_empty = ( self._completions_cache and
-                                    self._completions_cache.CacheValid(
-                                      request_data[ 'line_num' ],
-                                      request_data[ 'start_column' ] ) and
-                                    not self._completions_cache.raw_completions )
-    return inner_says_yes and not previous_results_were_empty
+    # We have to do the cache valid check and get the completions as part of one
+    # call because we have to ensure a different thread doesn't change the cache
+    # data.
+    cache_completions = self._completions_cache.GetCompletionsIfCacheValid(
+        request_data[ 'line_num' ],
+        request_data[ 'start_column' ] )
+
+    # If None, then the cache isn't valid and we know we should return true
+    if cache_completions is None:
+      return True
+    else:
+      previous_results_were_valid = bool( cache_completions )
+      return previous_results_were_valid
 
 
   def ShouldUseNowInner( self, request_data ):
@@ -167,17 +175,19 @@ class Completer( object ):
 
 
   def _GetCandidatesFromSubclass( self, request_data ):
-    if ( self._completions_cache and
-         self._completions_cache.CacheValid( request_data[ 'line_num' ],
-                                             request_data[ 'start_column' ] ) ):
-      return self._completions_cache.raw_completions
+    cache_completions = self._completions_cache.GetCompletionsIfCacheValid(
+          request_data[ 'line_num' ],
+          request_data[ 'start_column' ] )
+
+    if cache_completions:
+      return cache_completions
     else:
-      self._completions_cache = CompletionsCache()
-      self._completions_cache.raw_completions = self.ComputeCandidatesInner(
-          request_data )
-      self._completions_cache.line = request_data[ 'line_num' ]
-      self._completions_cache.column = request_data[ 'start_column' ]
-      return self._completions_cache.raw_completions
+      raw_completions = self.ComputeCandidatesInner( request_data )
+      self._completions_cache.Update(
+          request_data[ 'line_num' ],
+          request_data[ 'start_column' ],
+          raw_completions )
+      return raw_completions
 
 
   def ComputeCandidatesInner( self, request_data ):
@@ -277,13 +287,41 @@ class Completer( object ):
 
 class CompletionsCache( object ):
   def __init__( self ):
-    self.line = -1
-    self.column = -1
-    self.raw_completions = []
-    self.filtered_completions = []
+    self._access_lock = threading.Lock()
+    self.Invalidate()
+
+
+  def Invalidate( self ):
+    with self._access_lock:
+      self._line = -1
+      self._column = -1
+      self._completions = []
+
+
+  def Update( self, line, column, completions ):
+    with self._access_lock:
+      self._line = line
+      self._column = column
+      self._completions = completions
+
+
+  def GetCompletions( self ):
+    with self._access_lock:
+      return self._completions
+
+
+  def GetCompletionsIfCacheValid( self, current_line, start_column ):
+    with self._access_lock:
+      if not self._CacheValidNoLock( current_line, start_column ):
+        return None
+      return self._completions
 
 
   def CacheValid( self, current_line, start_column ):
-    return current_line == self.line and start_column == self.column
+    with self._access_lock:
+      return self._CacheValidNoLock( current_line, start_column )
 
+
+  def _CacheValidNoLock( self, current_line, start_column ):
+    return current_line == self._line and start_column == self._column
 
