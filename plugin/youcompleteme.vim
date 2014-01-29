@@ -74,6 +74,9 @@ let g:loaded_youcompleteme = 1
 let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )
 
+let g:ycm_open_loclist_on_ycm_diags =
+      \ get( g:, 'ycm_open_loclist_on_ycm_diags', 1 )
+
 let g:ycm_add_preview_to_completeopt =
       \ get( g:, 'ycm_add_preview_to_completeopt', 0 )
 

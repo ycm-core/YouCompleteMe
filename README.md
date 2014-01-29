@@ -555,6 +555,10 @@ You may want to map this command to a key; try putting `nnoremap <F5>
 Calling this command will fill Vim's `locationlist` with errors or warnings if
 any were detected in your file and then open it.
 
+The `g:ycm_open_loclist_on_ycm_diags` option can be used to prevent the location
+list from opening, but still have it filled with new diagnostic data. See the
+_Options_ section for details.
+
 ### The `:YcmShowDetailedDiagnostic` command
 
 This command shows the full diagnostic text when the user's cursor is on the
@@ -889,6 +893,17 @@ default.
 Default: `0`
 
     let g:ycm_always_populate_location_list = 0
+
+### The `g:ycm_open_loclist_on_ycm_diags` option
+
+When this option is set, `:YcmDiags` will automatically open the location list
+after forcing a compilation and filling the list with diagnostic data.
+
+See `:help location-list` in Vim to learn more about the location list.
+
+Default: `1`
+
+    let g:ycm_open_loclist_on_ycm_diags = 1
 
 ### The `g:ycm_allow_changing_updatetime` option
 

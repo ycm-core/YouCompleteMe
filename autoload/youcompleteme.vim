@@ -787,7 +787,10 @@ function! s:ShowDiagnostics()
         \ 'ycm_state.GetDiagnosticsFromStoredRequest( qflist_format = True )' )
   if !empty( diags )
     call setloclist( 0, diags )
-    lopen
+
+    if g:ycm_open_loclist_on_ycm_diags
+      lopen
+    endif
   else
     echom "No warnings or errors detected"
   endif
