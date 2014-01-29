@@ -1595,6 +1595,24 @@ for bug reports and feature requests.
 This can be a problem on virtual servers with limited memory. A possible
 solution is to add more swap memory.
 
+### I get weird errors when I press `Ctrl-C` in Vim
+
+_Never_ use `Ctrl-C` in Vim.
+
+Using `Ctrl-C` to exit insert mode in Vim is a bad idea. The main issue here is
+that `Ctrl-C` in Vim doesn't just leave insert mode, it leaves it without
+triggering `InsertLeave` autocommands (as per Vim docs). This is a bad idea and
+is likely to break many other things and not just YCM.
+
+Bottom line, if you use `Ctrl-C` to exit insert mode in Vim, you're gonna have a
+bad time.
+
+If pressing `<esc>` is too annoying (agreed, it is), we suggest mapping it to
+something more convenient. On a QWERTY keyboard, a good pick for the `<esc>` map
+is `inoremap jk <Esc>`. This is right on the home row, it's an incredibly rare
+digraph in English and if you ever need to type those two chars in sequence in
+insert mode, you just type `j`, then wait 500ms, then type `k`.
+
 ### Why did YCM stop using Syntastic for diagnostics display?
 
 Previously, YCM would send any diagnostics it would receive from the libclang
