@@ -63,12 +63,12 @@ current file and other files you visit (and your tags files) and searches them
 when you type (identifiers are put into per-filetype groups).</p><p>The demo also shows the semantic engine in use. When the user presses <code>.</code>, <code>-&gt;</code>
 or <code>::</code> while typing in insert mode (for C++; different triggers are used for
 other languages), the semantic engine is triggered (it can also be triggered
-with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's integration with
-<a href="https://github.com/scrooloose/syntastic">Syntastic</a> (the little red X that shows up in the left gutter) if you are
-editing a C-family file. As Clang compiles your file and detects warnings or
-errors, they will be piped to Syntastic for display. You don't need to save your
-file or press any keyboard shortcut to trigger this, it "just happens" in the
-background.</p><p>In essence, YCM obsoletes the following Vim plugins because it has all of their
+with a keyboard shortcut; see the rest of the docs).</p><p>The last thing that you can see in the demo is YCM's diagnostic display features
+(the little red X that shows up in the left gutter; inspired by <a href="https://github.com/scrooloose/syntastic">Syntastic</a>)
+if you are editing a C-family file. As Clang compiles your file and detects
+warnings or errors, they will be presented in various ways. You don't need to
+save your file or press any keyboard shortcut to trigger this, it "just happens"
+in the background.</p><p>In essence, YCM obsoletes the following Vim plugins because it has all of their
 features plus extra:</p><ul>
 <li>clang_complete</li>
 <li>AutoComplPop</li>
@@ -150,8 +150,8 @@ repository (Vundle will do this for you) to fetch YCM's dependencies.</p>
 <p><strong>Download the latest version of <code>libclang</code></strong>. Clang is an open-source
 compiler that can compile C/C++/Objective-C/Objective-C++. The <code>libclang</code>
 library it provides is used to power the YCM semantic completion engine for
-those languages. YCM is designed to work with libclang version 3.3 or
-higher, but can in theory work with 3.2 as well.</p>
+those languages. YCM is designed to work with libclang version 3.4 or
+higher, but can in theory work with any 3.2+ version as well.</p>
 <p>You can use the system libclang <em>only if you are sure it is version 3.3 or
 higher</em>, otherwise don't. Even if it is, I recommend using the <a href="http://llvm.org/releases/download.html#3.3">official
 binaries from llvm.org</a> if at all possible. Make sure you
@@ -248,11 +248,7 @@ string.</p><h3>General Semantic Completion Engine Usage</h3><ul>
 <li>You can use Ctrl+Space to trigger the completion suggestions anywhere, even
   without a string prefix. This is useful to see which top-level functions are
   available for use.</li>
-</ul><h3>C-family Semantic Completion Engine Usage</h3><ul>
-<li>You <em>really</em> also want to install the latest version of the <a href="https://github.com/scrooloose/syntastic">Syntastic</a> Vim
-  plugin. It has support for YCM and together they will provide you with compile
-  errors/warnings practically instantly and without saving the file.</li>
-</ul><p>YCM looks for a <code>.ycm_extra_conf.py</code> file in the directory of the opened file or
+</ul><h3>C-family Semantic Completion Engine Usage</h3><p>YCM looks for a <code>.ycm_extra_conf.py</code> file in the directory of the opened file or
 in any directory above it in the hierarchy (recursively); when the file is
 found, it is loaded (only once!) as a Python module. YCM calls a <code>FlagsForFile</code>
 method in that module which should provide it with the information necessary to
@@ -275,7 +271,7 @@ unrelated completion strings (type/function names that are not actually
 members). This is because Clang fails to build a precompiled preamble for your
 file if there are any errors in the included headers and that preamble is key to
 getting fast completions.</p><p>Call the <code>:YcmDiags</code> command to see if any errors or warnings were detected in
-your file. Even better, use Syntastic.</p><h3>Python semantic completion</h3><p>YCM uses <a href="https://github.com/davidhalter/jedi">Jedi</a> to power its semantic completion for Python. This should "just
+your file.</p><h3>Python semantic completion</h3><p>YCM uses <a href="https://github.com/davidhalter/jedi">Jedi</a> to power its semantic completion for Python. This should "just
 work" without any configuration from the user. You do NOT need to install Jedi
 yourself; YCM uses it as a git subrepo. If you're installing YCM with Vundle
 (which is the recommended way) then Vundle will make sure that the subrepo is
@@ -312,16 +308,18 @@ using the <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/
   VimScript.</li>
 </ul><p>If you want to use the <code>omnifunc</code> system, see the relevant Vim docs with <code>:h
 complete-functions</code>. For the Completer API, see <a href="https://github.com/Valloric/YouCompleteMe/blob/master/python/ycm/completers/completer.py">the API docs</a>.</p><p>If you want to upstream your completer into YCM's source, you should use the
-Completer API.</p><h3>Syntastic integration</h3><p>YCM has explicit support for <a href="https://github.com/scrooloose/syntastic">Syntastic</a> (and vice-versa) if you compiled YCM
-with Clang support; this means that any diagnostics (errors or warnings) that
-Clang encounters while compiling your file will be fed back to Syntastic for
-display.</p><p>YCM will recompile your file in the background <code>updatetime</code> (see <code>:h updatetime</code>
-in Vim) milliseconds after you stop typing (to be specific, on <code>CursorHold</code> and
-<code>CursorHoldI</code> Vim events). YCM will change your <code>updatetime</code> value to be <code>2000</code>
-milliseconds (there's an option to tell it not to do this if you wish).</p><p>The new diagnostics (if any) will be fed back to Syntastic the next time you
-press any key on the keyboard. So if you stop typing and just wait for the new
-diagnostics to come in, that <em>will not work</em>. You need to press some key for the
-GUI to update.</p><p>Having to press a key to get the updates is unfortunate, but cannot be changed
+Completer API.</p><h3>Diagnostic display</h3><p>YCM will display diagnostic notifications if you compiled YCM with Clang
+support. Since YCM continuously recompiles your file as you type, you'll get
+notified of errors and warnings in your file as fast as possible.</p><p>Here are the various pieces of the diagnostic UI:</p><ul>
+<li>Icons show up in the Vim gutter on lines that have a diagnostic.</li>
+<li>Regions of text related to diagnostics are highlighted (by default, a red
+  wavy underline in <code>gvim</code> and a red background in <code>vim</code>).</li>
+<li>Moving the cursor to a line with a diagnostic echoes the diagnostic text.</li>
+<li>Vim's location list is automatically populated with diagnostic data (off by
+  default, see options).</li>
+</ul><p>The new diagnostics (if any) will be displayed the next time you press any key
+on the keyboard. So if you stop typing and just wait for the new diagnostics to
+come in, that <em>will not work</em>. You need to press some key for the GUI to update.</p><p>Having to press a key to get the updates is unfortunate, but cannot be changed
 due to the way Vim internals operate; there is no way that a background task can
 update Vim's GUI after it has finished running.  You <em>have to</em> press a key. This
 will make YCM check for any pending diagnostics updates.</p><p>You <em>can</em> force a full, blocking compilation cycle with the
@@ -330,25 +328,37 @@ key; try putting <code>nnoremap &lt;F5&gt; :YcmForceCompileAndDiagnostics&lt;CR&
 vimrc). Calling this command will force YCM to immediately recompile your file
 and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI <em>will</em> be
-blocked.</p><p>After the errors are displayed by Syntastic, it will display a short diagnostic
-message when you move your cursor to the line with the error. You can get a
-detailed diagnostic message with the <code>&lt;leader&gt;d</code> key mapping (can be changed in
-the options) YCM provides when your cursor is on the line with the diagnostic.</p><p>You can also see the full diagnostic message for all the diagnostics in the
+blocked.</p><p>YCM will display a short diagnostic message when you move your cursor to the
+line with the error. You can get a detailed diagnostic message with the
+<code>&lt;leader&gt;d</code> key mapping (can be changed in the options) YCM provides when your
+cursor is on the line with the diagnostic.</p><p>You can also see the full diagnostic message for all the diagnostics in the
 current file in Vim's <code>locationlist</code>, which can be opened with the <code>:lopen</code> and
 <code>:lclose</code> commands (make sure you have set <code>let
-g:syntastic_always_populate_loc_list = 1</code> in your vimrc). A good way to toggle
+g:ycm_always_populate_location_list = 1</code> in your vimrc). A good way to toggle
 the display of the <code>locationlist</code> with a single key mapping is provided by
 another (very small) Vim plugin called <a href="https://github.com/Valloric/ListToggle">ListToggle</a> (which also makes it
 possible to change the height of the <code>locationlist</code> window), also written by
-yours truly.</p><h2>Commands</h2><h3>The <code>:YcmRestartServer</code> command</h3><p>If the <code>ycmd</code> completion server suddenly stops for some reason, you can restart
+yours truly.</p><h4>Diagnostic highlighting groups</h4><p>You can change the styling for the highlighting groups YCM uses. For the signs
+in the Vim gutter, the relevant groups are:</p><ul>
+<li><code>YcmErrorSign</code>, which falls back to group <code>SyntasticErrorSign</code> and then
+  <code>error</code> if they exist</li>
+<li><code>YcmWarningSign</code>, which falls back to group <code>SyntasticWarningSign</code> and then
+  <code>todo</code> if they exist</li>
+</ul><p>You can also style the line that has the warning/error with these groups:</p><ul>
+<li><code>YcmErrorLine</code>, which falls back to group <code>SyntasticErrorLine</code> if it exists</li>
+<li><code>YcmWarningLine</code>, which falls back to group <code>SyntasticWarningLine</code> if it
+  exists</li>
+</ul><p>Note that the line highlighting groups only work when gutter signs are turned
+on.</p><p>Here's how you'd change the style for a group:</p><pre><code>highlight YcmErrorLine guibg=#3f0000
+</code></pre><h2>Commands</h2><h3>The <code>:YcmRestartServer</code> command</h3><p>If the <code>ycmd</code> completion server suddenly stops for some reason, you can restart
 it with this command.</p><h3>The <code>:YcmForceCompileAndDiagnostics</code> command</h3><p>Calling this command will force YCM to immediately recompile your file
 and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI <em>will</em> be
 blocked.</p><p>You may want to map this command to a key; try putting <code>nnoremap &lt;F5&gt;
 :YcmForceCompileAndDiagnostics&lt;CR&gt;</code> in your vimrc.</p><h3>The <code>:YcmDiags</code> command</h3><p>Calling this command will fill Vim's <code>locationlist</code> with errors or warnings if
-any were detected in your file and then open it.</p><p>A better option would be to use Syntastic which will keep your <code>locationlist</code>
-up to date automatically and will also show error/warning notifications in Vim's
-gutter.</p><h3>The <code>:YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
+any were detected in your file and then open it.</p><p>The <code>g:ycm_open_loclist_on_ycm_diags</code> option can be used to prevent the location
+list from opening, but still have it filled with new diagnostic data. See the
+<em>Options</em> section for details.</p><h3>The <code>:YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.</p><h3>The <code>:YcmDebugInfo</code> command</h3><p>This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the semantic
 completion engine.</p><h3>The <code>:YcmCompleter</code> command</h3><p>This command can be used to invoke completer-specific commands.  If the first
@@ -393,8 +403,8 @@ popup menu.</p><p>A special value of <code>0</code> means there is no limit.</p>
 the various semantic completers.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_min_num_identifier_candidate_chars = 0
 </code></pre><h3>The <code>g:ycm_auto_trigger</code> option</h3><p>When set to <code>0</code>, this option turns off YCM's identifier completer (the
 as-you-type popup) <em>and</em> the semantic triggers (the popup you'd get after typing
-<code>.</code> or <code>-&gt;</code> in say C++). The Syntastic integration remains working and you can
-still force semantic completion with the <code>&lt;C-Space&gt;</code> shortcut.</p><p>If you want to just turn off the identifier completer but keep the semantic
+<code>.</code> or <code>-&gt;</code> in say C++). You can still force semantic completion with the
+<code>&lt;C-Space&gt;</code> shortcut.</p><p>If you want to just turn off the identifier completer but keep the semantic
 triggers, you should set <code>g:ycm_min_num_of_chars_for_completion</code> to a high
 number like <code>99</code>.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_auto_trigger = 1
 </code></pre><h3>The <code>g:ycm_filetype_whitelist</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should YCM be
@@ -421,6 +431,7 @@ is used like a hash set, meaning that only the keys matter).</p><p>See the <code
       \ 'unite' : 1,
       \ 'text' : 1,
       \ 'vimwiki' : 1,
+      \ 'pandoc' : 1
       \}
 </code></pre><h3>The <code>g:ycm_filetype_specific_completion_to_disable</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should the YCM
 semantic completion engine be turned off. The option value should be a Vim
@@ -431,11 +442,43 @@ completion engine, but the identifier-based completion engine will still trigger
 in files of those filetypes.</p><p>Note that even if semantic completion is not turned off for a specific filetype,
 you will not get semantic completion if the semantic engine does not support
 that filetype.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>{}</code></p><pre><code>let g:ycm_filetype_specific_completion_to_disable = {}
-</code></pre><h3>The <code>g:ycm_register_as_syntastic_checker</code> option</h3><p>When set, this option makes YCM register itself as the Syntastic checker for the
-<code>c</code>, <code>cpp</code>, <code>objc</code> and <code>objcpp</code> filetypes. This enables the YCM-Syntastic
-integration.</p><p>If you're using YCM's identifier completer in C-family languages but cannot use
+</code></pre><h3>The <code>g:ycm_show_diagnostics_ui</code> option</h3><p>When set, this option turns on YCM's diagnostic display features. See the
+<em>Diagnostic display</em> section in the <em>User Manual</em> for more details.</p><p>Specific parts of the diagnostics UI (like the gutter signs, text highlighting,
+diagnostic echo and auto location list population) can be individually turned on
+or off. See the other options below for details.</p><p>Note that YCM's diagnostics UI is only supported for C-family languages.</p><p>When set, this option also makes YCM remove all Syntastic checkers set for the
+<code>c</code>, <code>cpp</code>, <code>objc</code> and <code>objcpp</code> filetypes since this would conflict with YCM's
+own diagnostics UI.</p><p>If you're using YCM's identifier completer in C-family languages but cannot use
 the clang-based semantic completer for those languages <em>and</em> want to use the GCC
-Syntastic checkers, unset this option.</p><p>Don't unset this option unless you're sure you know what you're doing.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_register_as_syntastic_checker = 1
+Syntastic checkers, unset this option.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_show_diagnostics_ui = 1
+</code></pre><h3>The <code>g:ycm_error_symbol</code> option</h3><p>YCM will use the value of this option as the symbol for errors in the Vim
+gutter.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the <code>g:syntastic_error_symbol</code> option
+before using this option's default.</p><p>Default: <code>&gt;&gt;</code></p><pre><code>let g:ycm_error_symbol = '&gt;&gt;'
+</code></pre><h3>The <code>g:ycm_warning_symbol</code> option</h3><p>YCM will use the value of this option as the symbol for warnings in the Vim
+gutter.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the <code>g:syntastic_warning_symbol</code> option
+before using this option's default.</p><p>Default: <code>&gt;&gt;</code></p><pre><code>let g:ycm_warning_symbol = '&gt;&gt;'
+</code></pre><h3>The <code>g:ycm_enable_diagnostic_signs</code> option</h3><p>When this option is set, YCM will put icons in Vim's gutter on lines that have a
+diagnostic set. Turning this off will also turn off the <code>YcmErrorLine</code> and
+<code>YcmWarningLine</code> highlighting.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the <code>g:syntastic_enable_signs</code> option
+before using this option's default.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_enable_diagnostic_signs = 1
+</code></pre><h3>The <code>g:ycm_enable_diagnostic_highlighting</code> option</h3><p>When this option is set, YCM will highlight regions of text that are related to
+the diagnostic that is present on a line, if any.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the <code>g:syntastic_enable_highlighting</code>
+option before using this option's default.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_enable_diagnostic_highlighting = 1
+</code></pre><h3>The <code>g:ycm_echo_current_diagnostic</code> option</h3><p>When this option is set, YCM will echo the text of the diagnostic present on the
+current line when you move your cursor to that line.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the <code>g:syntastic_echo_current_error</code>
+option before using this option's default.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_echo_current_diagnostic = 1
+</code></pre><h3>The <code>g:ycm_always_populate_location_list</code> option</h3><p>When this option is set, YCM will populate the location list automatically every
+time it gets new diagnostic data. This option is off by default so as not to
+interfere with other data you might have placed in the location list.</p><p>See <code>:help location-list</code> in Vim to learn more about the location list.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the
+<code>g:syntastic_always_populate_loc_list</code> option before using this option's
+default.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_always_populate_location_list = 0
+</code></pre><h3>The <code>g:ycm_open_loclist_on_ycm_diags</code> option</h3><p>When this option is set, <code>:YcmDiags</code> will automatically open the location list
+after forcing a compilation and filling the list with diagnostic data.</p><p>See <code>:help location-list</code> in Vim to learn more about the location list.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_open_loclist_on_ycm_diags = 1
 </code></pre><h3>The <code>g:ycm_allow_changing_updatetime</code> option</h3><p>When this option is set to <code>1</code>, YCM will change the <code>updatetime</code> Vim option to
 <code>2000</code> (see <code>:h updatetime</code>). This may conflict with some other plugins you have
 (but it's unlikely). The <code>updatetime</code> option is the number of milliseconds that
@@ -522,8 +565,7 @@ window is triggered. See the <code>g:ycm_add_preview_to_completeopt</code> optio
 details.</p><p>Default: <code>0</code></p><pre><code>let g:ycm_autoclose_preview_window_after_insertion = 0
 </code></pre><h3>The <code>g:ycm_max_diagnostics_to_display</code> option</h3><p>This option controls the maximum number of diagnostics shown to the user when
 errors or warnings are detected in the file. This option is only relevant if you
-are using the semantic completion engine and have installed the version of the
-Syntastic plugin that supports YCM.</p><p>Default: <code>30</code></p><pre><code>let g:ycm_max_diagnostics_to_display = 30
+are using the C-family semantic completion engine.</p><p>Default: <code>30</code></p><pre><code>let g:ycm_max_diagnostics_to_display = 30
 </code></pre><h3>The <code>g:ycm_key_list_select_completion</code> option</h3><p>This option controls the key mappings used to select the first completion
 string.  Invoking any of them repeatedly cycles forward through the completion
 list.</p><p>Some users like adding <code>&lt;Enter&gt;</code> to this list.</p><p>Default: <code>['&lt;TAB&gt;', '&lt;Down&gt;']</code></p><pre><code>let g:ycm_key_list_select_completion = ['&lt;TAB&gt;', '&lt;Down&gt;']
@@ -628,20 +670,12 @@ is set to <code>0</code>.</p><h3>It appears that YCM is not working</h3><p>In Vi
 the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.</p><p>Also, you may want to run the <code>:YcmDebugInfo</code> command; it will make YCM spew out
 various debugging information, including the compile flags for the file if the
-file is a C-family language file and you have compiled in Clang support.</p><h3>I cannot get the Syntastic integration to work</h3><p>Try to update your version of Syntastic. At the time of writing (Jan 2013), the
-YCM integration is very recent and it's likely that your version of Syntastic
-does not have it.</p><h3>Sometimes it takes much longer to get semantic completions than normal</h3><p>This means that libclang (which YCM uses for C-family semantic completion)
+file is a C-family language file and you have compiled in Clang support.</p><h3>Sometimes it takes much longer to get semantic completions than normal</h3><p>This means that libclang (which YCM uses for C-family semantic completion)
 failed to pre-compile your file's preamble. In other words, there was an error
 compiling some of the source code you pulled in through your header files. I
-suggest calling the <code>:YcmDiags</code> command to see what they were (even better, have
-Syntastic installed and call <code>:lopen</code>).</p><p>Bottom line, if libclang can't pre-compile your file's preamble because there
+suggest calling the <code>:YcmDiags</code> command to see what they were.</p><p>Bottom line, if libclang can't pre-compile your file's preamble because there
 were errors in it, you're going to get slow completions because there's no AST
-cache.</p><h3>Vim flickers every time I move the cursor or moving the cursor is slow</h3><p>You probably have an old version of Syntastic installed. If you are using
-Vundle, make sure that your bundle command is <code>Bundle 'scrooloose/syntastic'</code>
-and <strong>not</strong> <code>Bundle 'Syntastic'</code>. The first command pulls in the latest version of
-Syntastic from GitHub while the second one pulls in an old version from vim.org.</p><p>Because of <a href="https://github.com/gmarik/vundle/issues/48">a Vundle bug</a>, make sure you have completely removed
-everything in your Vundle bundle directory (<code>~/.vim/bundle</code> by default) before
-switching from one Syntastic bundle command to the other.</p><h3>YCM auto-inserts completion strings I don't want!</h3><p>This means you probably have some mappings that interfere with YCM's internal
+cache.</p><h3>YCM auto-inserts completion strings I don't want!</h3><p>This means you probably have some mappings that interfere with YCM's internal
 ones. Make sure you don't have something mapped to <code>&lt;C-p&gt;</code>, <code>&lt;C-x&gt;</code> or <code>&lt;C-u&gt;</code>
 (in insert mode).</p><p>YCM <em>never</em> selects something for you; it just shows you a menu and the user has
 to explicitly select something. If something is being selected automatically,
@@ -718,11 +752,40 @@ even more since less time was spent serializing and deserializing data between
 Vim and the embedded Python interpreter. A few critical bugfixes for <code>pyeval()</code>
 landed in Vim 7.3.584 (and a few commits before that).</p><h3>I get annoying messages in Vim's status area when I type</h3><p>If you're referring to the <code>User defined completion &lt;bla bla&gt; back at original</code>
 and similar, then sadly there's no fix for those. Vim will emit them no matter
-how hard I try to silence them.</p><p>You'll have to learn to ignore them. It's a shitty "solution", I know.</p><h3>Nasty bugs happen if I have the <code>vim-autoclose</code> plugin installed</h3><p>Use the <a href="https://github.com/Raimondi/delimitMate">delimitMate</a> plugin instead. It does the same thing without
+how hard I try to silence them.</p><p>You'll have to learn to ignore them. It's a shitty "solution", I know.</p><p>There's an <a href="https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8">outstanding patch for Vim that fixes this issue</a>, but at
+the time of writing Vim upstream hasn't yet merged it in.</p><h3>Nasty bugs happen if I have the <code>vim-autoclose</code> plugin installed</h3><p>Use the <a href="https://github.com/Raimondi/delimitMate">delimitMate</a> plugin instead. It does the same thing without
 conflicting with YCM.</p><h3>Is there some sort of YCM mailing list? I have questions</h3><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list, <em>don't</em> create issues on the tracker. The tracker is
 for bug reports and feature requests.</p><h3>I get an internal compiler error when installing</h3><p>This can be a problem on virtual servers with limited memory. A possible
-solution is to add more swap memory.</p><h3>Completion doesn't work with the C++ standard library headers</h3><p>This is caused by an issue with libclang. Compiling from <code>clang</code> the binary uses
+solution is to add more swap memory.</p><h3>I get weird errors when I press <code>Ctrl-C</code> in Vim</h3><p><em>Never</em> use <code>Ctrl-C</code> in Vim.</p><p>Using <code>Ctrl-C</code> to exit insert mode in Vim is a bad idea. The main issue here is
+that <code>Ctrl-C</code> in Vim doesn't just leave insert mode, it leaves it without
+triggering <code>InsertLeave</code> autocommands (as per Vim docs). This is a bad idea and
+is likely to break many other things and not just YCM.</p><p>Bottom line, if you use <code>Ctrl-C</code> to exit insert mode in Vim, you're gonna have a
+bad time.</p><p>If pressing <code>&lt;esc&gt;</code> is too annoying (agreed, it is), we suggest mapping it to
+something more convenient. On a QWERTY keyboard, a good pick for the <code>&lt;esc&gt;</code> map
+is <code>inoremap jk &lt;Esc&gt;</code>. This is right on the home row, it's an incredibly rare
+digraph in English and if you ever need to type those two chars in sequence in
+insert mode, you just type <code>j</code>, then wait 500ms, then type <code>k</code>.</p><h3>Why did YCM stop using Syntastic for diagnostics display?</h3><p>Previously, YCM would send any diagnostics it would receive from the libclang
+semantic engine to Syntastic for display as signs in the gutter, red squiggles
+etc. Today, YCM uses its own code to do that.</p><p>Using Syntastic for this was always a kludge. Syntastic assumes its "checker"
+plugins behave in a certain way; those assumptions have never fit YCM. For
+instance, YCM continuously recompiles your code in the background for C-family
+languages and tries to push new diagnostics to the user as fast as possible,
+even while the user types.</p><p>Syntastic assumes that a checker only runs on file save ("active" mode) or even
+less frequently, when the user explicitly invokes it ("passive" mode). This
+mismatch in assumptions causes performance problems since Syntastic code isn't
+optimized for this use case of constant diagnostic refreshing.</p><p>Poor support for this use case also led to crash bugs in Vim caused by
+Syntastic-Vim interactions (<a href="https://github.com/Valloric/YouCompleteMe/issues/593">issue #593</a>) and other problems, like
+random Vim flickering. Attempts were made to resolve these issues in
+Syntastic, but ultimately some of them failed (for various reasons).</p><p>Implementing diagnostic display code directly in YCM resolves all of these
+problems. Performance also improved substantially since the relevant code is now
+written in Python instead of VimScript (which is very slow) and is tailored only
+for YCM's use-cases. We were also able to introduce new features in this area
+since we're now not limited to the Syntastic checker API.</p><p>We've tried to implement this in the most backwards-compatible way possible; YCM
+options that control diagnostic display fall back to Syntastic options that
+control the same concepts if the user has those set.</p><p>Still, some Syntastic-specific configuration you might have had might not
+be supported by the new code. Please file issues on the tracker in such
+cases; if we find the request to be reasonable, we'll find a way to address it.</p><h3>Completion doesn't work with the C++ standard library headers</h3><p>This is caused by an issue with libclang. Compiling from <code>clang</code> the binary uses
 the correct default header search paths but compiling from <code>libclang.so</code> does
 not. The issue seems to impact some OS's more than others. It appears that OS X
 Mavericks in particular has problems with this.</p><p>The current workaround is to call <code>echo | clang -v -E -x c++ -</code> and look at the
@@ -732,8 +795,12 @@ the list of flags you return from your <code>FlagsForFile</code> function in you
 <code>.ycm_extra_conf.py</code> file.</p><p>See <a href="https://github.com/Valloric/YouCompleteMe/issues/303">issue #303</a> for details.</p><h2>Contact</h2><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list.</p><p>If you have bug reports or feature suggestions, please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
 tracker</a>.</p><p>The latest version of the plugin is available at
-<a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2>License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
-© 2012 Strahinja Val Markovic &lt;<a href="mailto:val@markovic.io">val@markovic.io</a>&gt;.</p><p><a href="https://bitdeli.com/free" title="Bitdeli Badge"><img alt="Bitdeli Badge" src="https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png"/></a></p></div>
+<a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2>Project Management</h2><p>This open-source project is run by me, Strahinja Val Markovic. I also happen to
+work for Google and the code I write here is under Google copyright (for the
+sake of simplicity and other reasons). This does <strong>NOT</strong> mean that this is an
+official Google product (it isn't) or that Google has (or wants to have)
+anything to do with it.</p><h2>License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
+© 2013 Google Inc.</p><p><a href="https://bitdeli.com/free" title="Bitdeli Badge"><img alt="Bitdeli Badge" src="https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png"/></a></p></div>
       </section>
 
     </div>
