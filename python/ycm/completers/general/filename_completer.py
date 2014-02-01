@@ -18,6 +18,7 @@
 
 import os
 import re
+from collections import defaultdict
 
 from ycm.completers.completer import Completer
 from ycm.completers.cpp.clang_completer import InCFamilyFile
@@ -138,16 +139,20 @@ def _GetPathsStandardCase( path_dir, use_working_dir, filepath ):
 
 
 def _GenerateCandidatesForPaths( absolute_paths ):
-  extra_info = dict()
+  extra_info = defaultdict(int)
+  basenames = []
   for absolute_path in absolute_paths:
     basename = os.path.basename( absolute_path )
+    if extra_info[ basename ] == 0:
+      basenames.append( basename )
     is_dir = os.path.isdir( absolute_path )
-    extra_info[ basename ] = extra_info.get( basename, 0 ) | \
-                             ( 2 if is_dir else 1 )
+    extra_info[ basename ] |= ( 2 if is_dir else 1 )
 
   completion_dicts = []
-  for basename, value in extra_info.iteritems():
+  # Keep original ordering
+  for basename in basenames:
     completion_dicts.append(
-      responses.BuildCompletionData( basename, EXTRA_INFO_MAP[ value ] ) )
+      responses.BuildCompletionData( basename,
+                                     EXTRA_INFO_MAP[ extra_info[ basename ] ] ) )
 
   return completion_dicts
