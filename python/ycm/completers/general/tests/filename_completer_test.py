@@ -87,15 +87,17 @@ def IncludeCompletion_test():
 
 def SystemPathCompletion_test():
   request_data[ 'line_value' ] = 'const char* c = "./'
-  data = GetCompletionData( request_data )
+  # Order of system path completion entries may differ
+  # on different systems
+  data = sorted( GetCompletionData( request_data ) )
   eq_( [
+        ( 'include',  '[Dir]' ),
         ( 'test.cpp', '[File]' ),
         ( 'test.hpp', '[File]' ),
-        ( 'include',  '[Dir]' ),
        ], data )
 
   request_data[ 'line_value' ] = 'const char* c = "./include/'
-  data = GetCompletionData( request_data )
+  data = sorted( GetCompletionData( request_data ) )
   eq_( [
         ( 'Qt',       '[Dir]' ),
         ( 'QtGui',    '[Dir]' ),
