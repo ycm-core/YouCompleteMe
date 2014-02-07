@@ -28,7 +28,7 @@ from ycm import vimsupport
 from ycm.server.responses import ServerError, UnknownExtraConf
 
 HEADERS = {'content-type': 'application/json'}
-EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 10 )
+EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )
 # Setting this to None seems to screw up the Requests/urllib3 libs.
 DEFAULT_TIMEOUT_SEC = 30
 

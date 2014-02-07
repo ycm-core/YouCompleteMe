@@ -91,7 +91,7 @@ def Main():
   waitress.serve( handlers.app,
                   host = args.host,
                   port = args.port,
-                  threads = 10 )
+                  threads = 30 )
 
 
 if __name__ == "__main__":
