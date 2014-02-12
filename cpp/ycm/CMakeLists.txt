@@ -317,10 +317,14 @@ endif()
 set_target_properties( ${CLIENT_LIB} PROPERTIES PREFIX "")
 set_target_properties( ${SERVER_LIB} PROPERTIES PREFIX "")
 
-if ( WIN32 OR CYGWIN )
+if ( WIN32 )
   # This is the extension for compiled Python modules on Windows
   set_target_properties( ${CLIENT_LIB} PROPERTIES SUFFIX ".pyd")
   set_target_properties( ${SERVER_LIB} PROPERTIES SUFFIX ".pyd")
+elseif ( CYGWIN )
+  # This is the extension for compiled Python modules in Cygwin
+  set_target_properties( ${CLIENT_LIB} PROPERTIES SUFFIX ".dll")
+  set_target_properties( ${SERVER_LIB} PROPERTIES SUFFIX ".dll")
 else()
   # Even on macs, we want a .so extension instead of a .dylib which is what
   # cmake would give us by default. Python won't recognize a .dylib as a module,
