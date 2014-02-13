@@ -64,7 +64,8 @@ function! youcompleteme#Enable()
   endif
 
   py from ycm.youcompleteme import YouCompleteMe
-  py ycm_state = YouCompleteMe( user_options_store.GetAll() )
+  py Snips_Manager = UltiSnips_Manager if 'UltiSnips_Manager' in locals() else None
+  py ycm_state = YouCompleteMe( user_options_store.GetAll(), Snips_Manager )
 
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
@@ -334,7 +335,7 @@ function! s:OnBufferVisit()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
-  py ycm_state.OnBufferVisit()
+  py ycm_state.OnBufferVisit( ycm_state.UltiSnips_Manager )
   call s:OnFileReadyToParse()
 endfunction
 
