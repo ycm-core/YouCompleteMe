@@ -174,10 +174,18 @@ TEST( IdentifierUtilsTest, ExtractIdentifiersFromTagsFileWorks ) {
   expected[ "cpp" ][ ( testfile_parent / "bar" ).string() ]
   .push_back( "fooaaa" );
 
+#if __CYGWIN__
+  // TODO: Real absolute file test here
+  expected[ "c" ][ ( testfile_parent ).string() + "/foo/zoo" ].push_back( "Floo::goo" );
+  expected[ "c" ][ ( testfile_parent ).string() + "/foo/goo maa" ].push_back( "!goo" );
+
+  expected[ "cs" ][ ( testfile_parent ).string() + "/m_oo" ].push_back( "#bleh" );
+#else
   expected[ "c" ][ "/foo/zoo" ].push_back( "Floo::goo" );
   expected[ "c" ][ "/foo/goo maa" ].push_back( "!goo" );
 
   expected[ "cs" ][ "/m_oo" ].push_back( "#bleh" );
+#endif
 
   EXPECT_THAT( ExtractIdentifiersFromTagsFile( testfile ),
                ContainerEq( expected ) );

@@ -40,6 +40,8 @@ else()
   set( 64_BIT_PLATFORM 1 )
 endif()
 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs" )
+
 #############################################################################
 
 # Turning on this flag tells cmake to emit a compile_commands.json file.
