@@ -37,11 +37,6 @@ from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
 from ycm.server.responses import ServerError
 
-try:
-  from UltiSnips import UltiSnips_Manager
-  USE_ULTISNIPS_DATA = True
-except ImportError:
-  USE_ULTISNIPS_DATA = False
 
 # We need this so that Requests doesn't end up using the local HTTP proxy when
 # talking to ycmd. Users should actually be setting this themselves when
@@ -68,7 +63,7 @@ SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 
 
 class YouCompleteMe( object ):
-  def __init__( self, user_options ):
+  def __init__( self, user_options, UltiSnips_Manager ):
     self._user_options = user_options
     self._user_notified_about_crash = False
     self._diag_interface = DiagnosticInterface( user_options )
@@ -83,6 +78,7 @@ class YouCompleteMe( object ):
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetupServer()
     self._ycmd_keepalive.Start()
+    self.UltiSnips_Manager = UltiSnips_Manager
 
 
   def _SetupServer( self ):
@@ -239,11 +235,11 @@ class YouCompleteMe( object ):
                                 { 'unloaded_buffer': deleted_buffer_file } )
 
 
-  def OnBufferVisit( self ):
+  def OnBufferVisit( self, UltiSnips_Manager ):
     if not self._IsServerAlive():
       return
     extra_data = {}
-    _AddUltiSnipsDataIfNeeded( extra_data )
+    _AddUltiSnipsDataIfNeeded( extra_data, UltiSnips_Manager )
     SendEventNotificationAsync( 'BufferVisit', extra_data )
 
 
@@ -369,8 +365,8 @@ def _PathToServerScript():
   return os.path.join( dir_of_current_script, 'server/ycmd.py' )
 
 
-def _AddUltiSnipsDataIfNeeded( extra_data ):
-  if not USE_ULTISNIPS_DATA:
+def _AddUltiSnipsDataIfNeeded( extra_data, UltiSnips_Manager ):
+  if not UltiSnips_Manager:
     return
 
   try:
