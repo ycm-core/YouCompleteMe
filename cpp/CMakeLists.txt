@@ -16,6 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 cmake_minimum_required( VERSION 2.8 )
+set( CMAKE_LEGACY_CYGWIN_WIN32 0 )
 project( YouCompleteMe )
 
 option( UNIVERSAL "Build universal mac binary" OFF )
