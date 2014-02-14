@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import defaultdict
 import os
 import glob
 from ycm.completers.completer import Completer
@@ -32,7 +33,35 @@ import logging
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
 '"./install.sh --omnisharp-completer".' )
+MIN_LINES_IN_FILE_TO_PARSE = 5
+INVALID_FILE_MESSAGE = 'File is invalid.'
+FILE_TOO_SHORT_MESSAGE = (
+  'File is less than {0} lines long; not parsing.'.format(
+    MIN_LINES_IN_FILE_TO_PARSE ) )
+NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 
+
+#TODO: Handle this better than dummy classes
+class CsharpDiagnostic:
+  def __init__ ( self, ranges, location, location_extent, text, kind ):
+    self.ranges_ = ranges
+    self.location_ = location
+    self.location_extent_ = location_extent
+    self.text_ = text
+    self.kind_ = kind
+
+
+class CsharpDiagnosticRange:
+  def __init__ ( self, start, end ):
+    self.start_ = start
+    self.end_ = end
+
+
+class CsharpDiagnosticLocation:
+  def __init__ ( self, line, column, filename ):
+    self.line_number_ = line
+    self.column_number_ = column
+    self.filename_ = filename
 
 class CsharpCompleter( Completer ):
   """
@@ -55,6 +84,9 @@ class CsharpCompleter( Completer ):
     super( CsharpCompleter, self ).__init__( user_options )
     self._omnisharp_port = None
     self._logger = logging.getLogger( __name__ )
+    self._diagnostic_store = None
+    self._max_diagnostics_to_display = user_options[
+      'max_diagnostics_to_display' ]
 
 
   def Shutdown( self ):
@@ -84,6 +116,59 @@ class CsharpCompleter( Completer ):
     if ( not self._omnisharp_port and
          self.user_options[ 'auto_start_csharp_server' ] ):
       self._StartServer( request_data )
+      return
+
+    filename = request_data[ 'filepath' ]
+    contents = request_data[ 'file_data' ][ filename ][ 'contents' ]
+    if contents.count( '\n' ) < MIN_LINES_IN_FILE_TO_PARSE:
+      raise ValueError( FILE_TOO_SHORT_MESSAGE )
+
+    if not filename:
+      raise ValueError( INVALID_FILE_MESSAGE )
+
+    syntax_errors = self._GetResponse( '/syntaxerrors',
+                                     self._DefaultParameters( request_data ) )
+
+    diagnostics = [ self._SyntaxErrorToDiagnostic( x ) for x in
+                    syntax_errors[ "Errors" ] ]
+
+    self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
+
+    return [ responses.BuildDiagnosticData( x ) for x in
+             diagnostics[ : self._max_diagnostics_to_display ] ]
+
+
+  def _SyntaxErrorToDiagnostic( self, syntax_error ):
+    filename = syntax_error[ "FileName" ]
+
+    location = CsharpDiagnosticLocation( syntax_error[ "Line" ], syntax_error[ "Column" ], filename )
+    location_range = CsharpDiagnosticRange( location, location )
+    return CsharpDiagnostic( list(), location, location_range, syntax_error[ "Message" ], "E" )
+
+
+  def GetDetailedDiagnostic( self, request_data ):
+    current_line = request_data[ 'line_num' ] + 1
+    current_column = request_data[ 'column_num' ] + 1
+    current_file = request_data[ 'filepath' ]
+
+    if not self._diagnostic_store:
+      raise ValueError( NO_DIAGNOSTIC_MESSAGE )
+
+    diagnostics = self._diagnostic_store[ current_file ][ current_line ]
+    if not diagnostics:
+      raise ValueError( NO_DIAGNOSTIC_MESSAGE )
+
+    closest_diagnostic = None
+    distance_to_closest_diagnostic = 999
+
+    for diagnostic in diagnostics:
+      distance = abs( current_column - diagnostic.location_.column_number_ )
+      if distance < distance_to_closest_diagnostic:
+        distance_to_closest_diagnostic = distance
+        closest_diagnostic = diagnostic
+
+    return responses.BuildDisplayMessageResponse(
+      closest_diagnostic.text_ )
 
 
   def OnUserCommand( self, arguments, request_data ):
@@ -283,3 +368,9 @@ def _PathComponents( path ):
 def _GetFilenameWithoutExtension( path ):
     return os.path.splitext( os.path.basename ( path ) )[ 0 ]
 
+def DiagnosticsToDiagStructure( diagnostics ):
+  structure = defaultdict( lambda : defaultdict( list ) )
+  for diagnostic in diagnostics:
+    structure[ diagnostic.location_.filename_ ][
+      diagnostic.location_.line_number_ ].append( diagnostic )
+  return structure
