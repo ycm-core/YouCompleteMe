@@ -20,6 +20,7 @@
 
 import os
 import glob
+from ycm import extra_conf_store
 from ycm.completers.completer import Completer
 from ycm.server import responses
 from ycm import utils
@@ -110,32 +111,73 @@ class CsharpCompleter( Completer ):
     """ Start the OmniSharp server """
     self._logger.info( 'startup' )
 
-    self._omnisharp_port = utils.GetUnusedLocalhostPort()
-    solution_files, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
+    # try to load ycm_extra_conf
+    # if it needs to be verified, abort here and try again later
+    filepath = request_data[ 'filepath' ]
+    module = extra_conf_store.ModuleForSourceFile( filepath )
+    path_to_solutionfile=None
+    if module:
+      try:
+        preferred_name=module.CSharpSolutionFile( filepath )
+        self._logger.info( 'extra_conf_store suggests {0} as solution file'.format(
+            str(preferred_name) ))
+        if preferred_name :
+          # is this an exact location or just a name?
+          if os.path.isfile(preferred_name):
+            # received path seems to be a solution
+            path_to_solutionfile=preferred_name
+            self._logger.info(
+                'Using solution file {0} selected by extra_conf_store'.format(
+                path_to_solutionfile) )
+      except AttributeError, e:
+        # the config script might not provide solution file locations
+        self._logger.error(
+            'Could not retrieve solution for {0} from extra_conf_store: {1}'.format(
+            filepath,str(e)) )
+        preferred_name=None
 
-    if len( solution_files ) == 0:
-      raise RuntimeError(
-        'Error starting OmniSharp server: no solutionfile found' )
-    elif len( solution_files ) == 1:
-      solutionfile = solution_files[ 0 ]
-    else:
-      # multiple solutions found : if there is one whose name is the same
-      # as the folder containing the file we edit, use this one
-      # (e.g. if we have bla/Project.sln and we are editing
-      # bla/Project/Folder/File.cs, use bla/Project.sln)
-      filepath_components = _PathComponents( request_data[ 'filepath' ] )
-      solutionpath = _PathComponents( folder )
-      foldername = ''
-      if len( filepath_components ) > len( solutionpath ):
-          foldername = filepath_components[ len( solutionpath ) ]
-      solution_file_candidates = [ sfile for sfile in solution_files
-        if _GetFilenameWithoutExtension( sfile ) == foldername ]
-      if len( solution_file_candidates ) == 1:
-        solutionfile = solution_file_candidates[ 0 ]
-      else:
+    self._omnisharp_port = utils.GetUnusedLocalhostPort()
+
+    if not path_to_solutionfile:
+      # no solution file selected yet, try to find one
+      solution_files, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
+
+      if len( solution_files ) == 0:
         raise RuntimeError(
-          'Found multiple solution files instead of one!\n{0}'.format(
-            solution_files ) )
+            'Error starting OmniSharp server: no solutionfile found' )
+      elif len( solution_files ) == 1:
+        #TODO might want to continue looking if this doesn't match a given preferred_name
+        solutionfile = solution_files[ 0 ]
+      else:
+        filepath = request_data[ 'filepath' ]
+        # multiple solutions found: does one look like the one our
+        # config script suggested?
+        filepath_components = _PathComponents( request_data[ 'filepath' ] )
+        solutionpath = _PathComponents( folder )
+        foldername = ''
+        if len( filepath_components ) > len( solutionpath ):
+          foldername = filepath_components[ len( solutionpath ) ]
+        if preferred_name:
+          solution_file_candidates = [ solutionfile for solutionfile in solution_files
+            if ( solutionfile == preferred_name) or
+               (( os.path.splitext( os.path.basename ( solutionfile ) )[ 0 ]) == preferred_name) ]
+        else:
+          solution_file_candidates=solution_files
+        if len( solution_file_candidates ) == 1:
+          solutionfile = solution_file_candidates[ 0 ]
+          self._logger.info(
+              'selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+              os.path.join( folder, solutionfile ), preferred_name) )
+        else:
+          self._logger.error( 'failed to select solution file')
+          #solutionfile = solution_files[ 0 ]
+          raise RuntimeError(
+              'Found multiple solution files instead of one!\n{0}'.format(
+              solution_files ) )
+
+      path_to_solutionfile = os.path.join( folder, solutionfile )
+    else:
+      solutionfile=os.path.basename(path_to_solutionfile)
 
     omnisharp = os.path.join(
       os.path.abspath( os.path.dirname( __file__ ) ),
@@ -144,7 +186,6 @@ class CsharpCompleter( Completer ):
     if not os.path.isfile( omnisharp ):
       raise RuntimeError( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
 
-    path_to_solutionfile = os.path.join( folder, solutionfile )
     # we need to pass the command to Popen as a string since we're passing
     # shell=True (as recommended by Python's doc)
     command = ( omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
@@ -277,6 +318,4 @@ def _PathComponents( path ):
   path_components.reverse()
   return path_components
 
-def _GetFilenameWithoutExtension( path ):
-    return os.path.splitext( os.path.basename ( path ) )[ 0 ]
 

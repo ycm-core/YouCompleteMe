@@ -34,6 +34,7 @@ let s:diagnostic_ui_filetypes = {
       \ 'c': 1,
       \ 'objc': 1,
       \ 'objcpp': 1,
+      \ 'cs': 1,
       \ }
 
 
