@@ -82,7 +82,9 @@
 // Some things we need in order to get Python.h to work with compilers other
 // than MSVC on Win32
 //
-#if defined(_WIN32) || defined(__CYGWIN__)
+// only performing the check for defined(__CYGWIN__) on 32-bit systems
+// ensuring that SIZEOF_LONG is only altered on 32-bit CYGWIN systems
+#if defined(_WIN32)
 # if defined(__GNUC__) && defined(__CYGWIN__)
 
 #  define SIZEOF_LONG 4
