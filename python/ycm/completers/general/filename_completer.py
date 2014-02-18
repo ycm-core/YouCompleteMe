@@ -18,12 +18,15 @@
 
 import os
 import re
+from collections import defaultdict
 
 from ycm.completers.completer import Completer
 from ycm.completers.cpp.clang_completer import InCFamilyFile
 from ycm.completers.cpp.flags import Flags
 from ycm.utils import ToUtf8IfNeeded
 from ycm.server import responses
+
+EXTRA_INFO_MAP = { 1 : '[File]', 2 : '[Dir]', 3 : '[File&Dir]' }
 
 class FilenameCompleter( Completer ):
   """
@@ -137,18 +140,20 @@ def _GetPathsStandardCase( path_dir, use_working_dir, filepath ):
 
 
 def _GenerateCandidatesForPaths( absolute_paths ):
-  seen_basenames = set()
-  completion_dicts = []
-
+  extra_info = defaultdict(int)
+  basenames = []
   for absolute_path in absolute_paths:
     basename = os.path.basename( absolute_path )
-    if basename in seen_basenames:
-      continue
-    seen_basenames.add( basename )
-
+    if extra_info[ basename ] == 0:
+      basenames.append( basename )
     is_dir = os.path.isdir( absolute_path )
+    extra_info[ basename ] |= ( 2 if is_dir else 1 )
+
+  completion_dicts = []
+  # Keep original ordering
+  for basename in basenames:
     completion_dicts.append(
       responses.BuildCompletionData( basename,
-                                     '[Dir]' if is_dir else '[File]' ) )
+                                     EXTRA_INFO_MAP[ extra_info[ basename ] ] ) )
 
   return completion_dicts
