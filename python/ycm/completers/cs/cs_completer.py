@@ -39,6 +39,17 @@ class CsharpCompleter( Completer ):
   A Completer that uses the Omnisharp server as completion engine.
   """
 
+  subcommands = {
+    'StartServer': (lambda self, request_data: self._StartServer( request_data )),
+    'StopServer': (lambda self, request_data: self._StopServer()),
+    'RestartServer': (lambda self, request_data: self._RestartServer( request_data )),
+    'ServerRunning': (lambda self, request_data: self._ServerIsRunning()),
+    'ServerReady': (lambda self, request_data: self._ServerIsReady()),
+    'GoToDefinition': (lambda self, request_data: self._GoToDefinition( request_data )),
+    'GoToDeclaration': (lambda self, request_data: self._GoToDefinition( request_data )),
+    'GoToDefinitionElseDeclaration': (lambda self, request_data: self._GoToDefinition( request_data ))
+  }
+
   def __init__( self, user_options ):
     super( CsharpCompleter, self ).__init__( user_options )
     self._omnisharp_port = None
@@ -65,14 +76,7 @@ class CsharpCompleter( Completer ):
 
 
   def DefinedSubcommands( self ):
-    return [ 'StartServer',
-             'StopServer',
-             'RestartServer',
-             'ServerRunning',
-             'ServerReady',
-             'GoToDefinition',
-             'GoToDeclaration',
-             'GoToDefinitionElseDeclaration' ]
+    return CsharpCompleter.subcommands.keys()
 
 
   def OnFileReadyToParse( self, request_data ):
@@ -86,23 +90,11 @@ class CsharpCompleter( Completer ):
       raise ValueError( self.UserCommandsHelpMessage() )
 
     command = arguments[ 0 ]
-    if command == 'StartServer':
-      return self._StartServer( request_data )
-    elif command == 'StopServer':
-      return self._StopServer()
-    elif command == 'RestartServer':
-      if self._ServerIsRunning():
-        self._StopServer()
-      return self._StartServer( request_data )
-    elif command == 'ServerRunning':
-      return self._ServerIsRunning()
-    elif command == 'ServerReady':
-      return self._ServerIsReady()
-    elif command in [ 'GoToDefinition',
-                      'GoToDeclaration',
-                      'GoToDefinitionElseDeclaration' ]:
-      return self._GoToDefinition( request_data )
-    raise ValueError( self.UserCommandsHelpMessage() )
+    if command in CsharpCompleter.subcommands:
+      command_lamba = CsharpCompleter.subcommands[ command ]
+      return command_lamba( self, request_data )
+    else:
+      raise ValueError( self.UserCommandsHelpMessage() )
 
 
   def DebugInfo( self ):
@@ -182,6 +174,13 @@ class CsharpCompleter( Completer ):
     self._GetResponse( '/stopserver' )
     self._omnisharp_port = None
     self._logger.info( 'Stopping OmniSharp server' )
+
+
+  def _RestartServer ( self, request_data ):
+    """ Restarts the OmniSharp server """
+    if self._ServerIsRunning():
+      self._StopServer()
+    return self._StartServer( request_data )
 
 
   def _GetCompletions( self, request_data ):
