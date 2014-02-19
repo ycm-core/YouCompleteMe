@@ -73,7 +73,7 @@ def GetCompletions_CsCompleter_Works_test():
   while True:
     result = app.post_json( '/run_completer_command',
                             BuildRequest( completer_target = 'filetype_default',
-                                          command_arguments = ['ServerRunning'],
+                                          command_arguments = ['ServerReady'],
                                           filetype = 'cs' ) ).json
     if result:
       break

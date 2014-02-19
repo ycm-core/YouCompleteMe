@@ -69,6 +69,7 @@ class CsharpCompleter( Completer ):
              'StopServer',
              'RestartServer',
              'ServerRunning',
+             'ServerReady',
              'GoToDefinition',
              'GoToDeclaration',
              'GoToDefinitionElseDeclaration' ]
@@ -95,6 +96,8 @@ class CsharpCompleter( Completer ):
       return self._StartServer( request_data )
     elif command == 'ServerRunning':
       return self._ServerIsRunning()
+    elif command == 'ServerReady':
+      return self._ServerIsReady()
     elif command in [ 'GoToDefinition',
                       'GoToDeclaration',
                       'GoToDefinitionElseDeclaration' ]:
@@ -217,6 +220,15 @@ class CsharpCompleter( Completer ):
     try:
       return bool( self._omnisharp_port and
                   self._GetResponse( '/checkalivestatus', silent = True ) )
+    except:
+      return False
+
+
+  def _ServerIsReady( self ):
+    """ Check if our OmniSharp server is ready """
+    try:
+      return bool( self._omnisharp_port and
+                  self._GetResponse( '/checkreadystatus', silent = True ) )
     except:
       return False
 
