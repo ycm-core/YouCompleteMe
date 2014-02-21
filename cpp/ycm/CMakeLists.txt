@@ -34,9 +34,12 @@ option( USE_DEV_FLAGS "Use compilation flags meant for YCM developers" OFF )
 option( USE_CLANG_COMPLETER "Use Clang semantic completer for C/C++/ObjC" OFF )
 option( USE_SYSTEM_LIBCLANG "Set to ON to use the system libclang library" OFF )
 set( PATH_TO_LLVM_ROOT "" CACHE PATH "Path to the root of a LLVM+Clang binary distribution" )
-set( EXTERNAL_LIBCLANG_PATH "" CACHE PATH  "Path libclang library to use" )
+set( EXTERNAL_LIBCLANG_PATH "" CACHE PATH "Path to the libclang library to use" )
 
-if ( USE_CLANG_COMPLETER AND NOT USE_SYSTEM_LIBCLANG AND NOT PATH_TO_LLVM_ROOT )
+if ( USE_CLANG_COMPLETER AND
+     NOT USE_SYSTEM_LIBCLANG AND
+     NOT PATH_TO_LLVM_ROOT AND
+     NOT EXTERNAL_LIBCLANG_PATH )
   message( "Downloading Clang 3.4" )
 
   set( CLANG_URL "http://llvm.org/releases/3.4" )
