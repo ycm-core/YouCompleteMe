@@ -21,6 +21,7 @@ import vim
 import os
 import json
 from ycm.utils import ToUtf8IfNeeded
+from ycm import user_options_store
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -65,10 +66,10 @@ def GetBufferOption( buffer_object, option ):
   return GetVariableValue( to_eval )
 
 
-def GetUnsavedAndCurrentBufferData():
-  def BufferModified( buffer_object ):
-    return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
+def BufferModified( buffer_object ):
+  return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
+def GetUnsavedAndCurrentBufferData():
   buffers_data = {}
   for buffer_object in vim.buffers:
     if not ( BufferModified( buffer_object ) or
@@ -244,7 +245,12 @@ def JumpToLocation( filename, line, column ):
     # location, not to the start of the newly opened file.
     # Sadly this fails on random occasions and the undesired jump remains in the
     # jumplist.
-    vim.command( 'keepjumps edit {0}'.format( filename ) )
+    if ( user_options_store.Value( 'goto_same_buffer' ) and
+         not BufferModified( vim.current.buffer ) ):
+      vim.command( 'keepjumps edit {0}'.format( filename ) )
+    else:
+      vim.command( 'keepjumps {0} {1}'.format( user_options_store.Value( 'goto_buffer_command'),
+                                               filename ) )
   vim.current.window.cursor = ( line, column - 1 )
 
   # Center the screen on the jumped-to location
