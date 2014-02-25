@@ -29,6 +29,7 @@ import urllib
 import urlparse
 import json
 import logging
+from inspect import getfile
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
@@ -115,69 +116,44 @@ class CsharpCompleter( Completer ):
     # if it needs to be verified, abort here and try again later
     filepath = request_data[ 'filepath' ]
     module = extra_conf_store.ModuleForSourceFile( filepath )
-    path_to_solutionfile=None
+    path_to_solutionfile = None
     if module:
       try:
-        preferred_name=module.CSharpSolutionFile( filepath )
+        preferred_name = module.CSharpSolutionFile( filepath )
         self._logger.info( 'extra_conf_store suggests {0} as solution file'.format(
-            str(preferred_name) ))
-        if preferred_name :
-          # is this an exact location or just a name?
-          if os.path.isfile(preferred_name):
-            # received path seems to be a solution
-            path_to_solutionfile=preferred_name
-            self._logger.info(
-                'Using solution file {0} selected by extra_conf_store'.format(
-                path_to_solutionfile) )
+            str( preferred_name ) ) )
+        if preferred_name:
+          # received a full path or the name of a solution right next to the config?
+          candidates = [ preferred_name,
+            os.path.join( os.path.dirname( getfile( module ) ),
+                          preferred_name ),
+            os.path.normpath( os.path.join( os.path.dirname( getfile( module ) ),
+                          "{0}.sln".format(preferred_name) ) ) ]
+          # try the assumptions
+          for path in candidates:
+            if os.path.isfile( path ):
+              # path seems to point to a solution
+              path_to_solutionfile = path
+              self._logger.info(
+                  'Using solution file {0} selected by extra_conf_store'.format(
+                  path_to_solutionfile) )
+              break
       except AttributeError, e:
         # the config script might not provide solution file locations
         self._logger.error(
             'Could not retrieve solution for {0} from extra_conf_store: {1}'.format(
-            filepath,str(e)) )
-        preferred_name=None
+            filepath, str( e )) )
+        preferred_name = None
 
     self._omnisharp_port = utils.GetUnusedLocalhostPort()
 
     if not path_to_solutionfile:
-      # no solution file selected yet, try to find one
-      solution_files, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
+      # no solution file provided, try to find one
+      path_to_solutionfile = self._GuessSolutionFile( request_data[ 'filepath' ], preferred_name )
 
-      if len( solution_files ) == 0:
-        raise RuntimeError(
-            'Error starting OmniSharp server: no solutionfile found' )
-      elif len( solution_files ) == 1:
-        #TODO might want to continue looking if this doesn't match a given preferred_name
-        solutionfile = solution_files[ 0 ]
-      else:
-        filepath = request_data[ 'filepath' ]
-        # multiple solutions found: does one look like the one our
-        # config script suggested?
-        filepath_components = _PathComponents( request_data[ 'filepath' ] )
-        solutionpath = _PathComponents( folder )
-        foldername = ''
-        if len( filepath_components ) > len( solutionpath ):
-          foldername = filepath_components[ len( solutionpath ) ]
-        if preferred_name:
-          solution_file_candidates = [ solutionfile for solutionfile in solution_files
-            if ( solutionfile == preferred_name) or
-               (( os.path.splitext( os.path.basename ( solutionfile ) )[ 0 ]) == preferred_name) ]
-        else:
-          solution_file_candidates=solution_files
-        if len( solution_file_candidates ) == 1:
-          solutionfile = solution_file_candidates[ 0 ]
-          self._logger.info(
-              'selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
-              os.path.join( folder, solutionfile ), preferred_name) )
-        else:
-          self._logger.error( 'failed to select solution file')
-          #solutionfile = solution_files[ 0 ]
-          raise RuntimeError(
-              'Found multiple solution files instead of one!\n{0}'.format(
-              solution_files ) )
-
-      path_to_solutionfile = os.path.join( folder, solutionfile )
-    else:
-      solutionfile=os.path.basename(path_to_solutionfile)
+    if not path_to_solutionfile:
+      raise RuntimeError( 'Autodetection of solution file failed.\n' )
+    self._logger.info( 'Loading solution file {0}'.format( path_to_solutionfile ) )
 
     omnisharp = os.path.join(
       os.path.abspath( os.path.dirname( __file__ ) ),
@@ -197,6 +173,7 @@ class CsharpCompleter( Completer ):
     filename_format = os.path.join( utils.PathToTempDir(),
                                    'omnisharp_{port}_{sln}_{std}.log' )
 
+    solutionfile = os.path.basename( path_to_solutionfile )
     self._filename_stdout = filename_format.format(
         port=self._omnisharp_port, sln=solutionfile, std='stdout' )
     self._filename_stderr = filename_format.format(
@@ -293,17 +270,63 @@ class CsharpCompleter( Completer ):
     return json.loads( response.read() )
 
 
-def _FindSolutionFiles( filepath ):
-  """ Find solution files by searching upwards in the file tree """
-  folder = os.path.dirname( filepath )
-  solutionfiles = glob.glob1( folder, '*.sln' )
-  while not solutionfiles:
-    lastfolder = folder
-    folder = os.path.dirname( folder )
-    if folder == lastfolder:
-      break
-    solutionfiles = glob.glob1( folder, '*.sln' )
-  return solutionfiles, folder
+  def _GuessSolutionFile( self, filepath, preferred_name ):
+    """ Find solution files by searching upwards in the file tree """
+    tokens = _PathComponents( filepath )
+    selection = None
+    first_hit = True
+    for i in reversed( range( len( tokens ) - 1 ) ):
+      path = os.path.join( *tokens[:i + 1] )
+      candidates = glob.glob1( path, "*.sln" )
+      if len( candidates ) > 0:
+        # if a name was provided, try hard to find something matching
+        if preferred_name:
+          check = [ c for c in candidates
+              if ( preferred_name == c or "%s.sln"%preferred_name == c) ]
+          if len( check ) == 1:
+            selection = os.path.join( path, check[0] )
+            self._logger.info(
+                'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+                selection, preferred_name ) )
+            break
+          elif len( check ) == 2:
+            # pick the one ending in sln, can misbehave if there is a file.sln.sln
+            selection = os.path.join( path, "%s.sln"%preferred_name )
+            self._logger.info(
+                'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+                selection, preferred_name ) )
+            break
+        # do the whole procedure only for the first solution file(s) you find
+        if first_hit and not selection:
+          # if there is just one file here, use that
+          if len( candidates ) == 1 :
+            selection = os.path.join( path, candidates[0] )
+            self._logger.info(
+                'Selected solution file {0} as it is the first one found'.format(
+                selection ) )
+          # there is more than one file, try some hints to decide
+          # 1. is there a solution named just like the subdirectory with the source?
+          if (not selection and i < len( tokens ) - 1 and
+              "{0}.sln".format( tokens[i + 1] ) in candidates ):
+            selection = os.path.join( path, "{0}.sln".format( tokens[i + 1] ) )
+            self._logger.info(
+                'Selected solution file {0} as it matches source subfolder'.format(
+                selection ) )
+          # 2. is there a solution named just like the directory containing the solution?
+          if not selection and "{0}.sln".format( tokens[i] ) in candidates:
+            selection = os.path.join( path, "{0}.sln".format( tokens[i] ) )
+            self._logger.info(
+                'Selected solution file {0} as it matches containing folder'.format(
+                selection ) )
+          if not selection:
+            self._logger.error(
+                'Could not decide between multiple solution files:\n{0}'.format(
+                candidates ) )
+          # we could not decide and aren't looking for anything specific, giving up
+          if not preferred_name:
+            break
+        first_hit = False
+    return selection
 
 def _PathComponents( path ):
   path_components = []
