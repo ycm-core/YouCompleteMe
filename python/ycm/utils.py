@@ -146,6 +146,10 @@ def OnWindows():
   return sys.platform == 'win32'
 
 
+def OnCygwin():
+  return sys.platform == 'cygwin'
+
+
 # From here: http://stackoverflow.com/a/8536476/1672783
 def TerminateProcess( pid ):
   if OnWindows():
