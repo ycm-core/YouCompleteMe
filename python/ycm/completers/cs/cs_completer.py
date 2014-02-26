@@ -153,6 +153,9 @@ class CsharpCompleter( Completer ):
     if not utils.OnWindows() and not utils.OnCygwin():
       command = 'mono ' + command
 
+    if utils.OnCygwin():
+      command = command + ' --client-path-mode Cygwin'
+
     filename_format = os.path.join( utils.PathToTempDir(),
                                    'omnisharp_{port}_{sln}_{std}.log' )
 
