@@ -180,5 +180,8 @@ if $omnisharp_completer; then
 
   cd $build_dir
   $buildcommand
+  if [ `uname -o` == 'Cygwin' ] && [ "$buildcommand" != "xbuild" ]; then
+    python ../setup_cygwin.py
+  fi
   cd $ycm_dir
 fi
