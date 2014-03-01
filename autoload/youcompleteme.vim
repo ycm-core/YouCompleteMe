@@ -254,9 +254,27 @@ function! s:AllowedToCompleteInCurrentFile()
     return 0
   endif
 
-  let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' ) ||
-        \ has_key( g:ycm_filetype_whitelist, &filetype )
-  let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
+  " Lookup filetype(s) in white- and blacklist.
+  " NOTE: &ft might be a list, separated by dots (e.g. 'html.xml').
+  let filetypes = split( &filetype, '\.' )
+
+  let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' )
+  if !whitelist_allows
+    for ft in filetypes
+      if has_key( g:ycm_filetype_whitelist, ft )
+        let whitelist_allows = 1
+        break
+      endif
+    endfor
+  endif
+
+  let blacklist_allows = 1
+  for ft in filetypes
+    if has_key( g:ycm_filetype_blacklist, ft )
+      let blacklist_allows = 0
+      break
+    endif
+  endfor
 
   return whitelist_allows && blacklist_allows
 endfunction
