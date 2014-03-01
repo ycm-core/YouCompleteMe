@@ -1,6 +1,6 @@
-//  (C) Copyright John Maddock 2006. 
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  (C) Copyright John Maddock 2006.
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for most recent version.
@@ -18,7 +18,7 @@
 //
 #if !defined(__MINGW32__) && !defined(_MSC_VER) && !defined(linux) && !defined(__linux) && !defined(__linux__)
 # define BOOST_HAS_THREADS
-#endif 
+#endif
 
 //
 // gcc has "long long"
@@ -44,7 +44,7 @@
 #  define BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
 #  define BOOST_NO_CXX11_DELETED_FUNCTIONS
 #  define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
-#  define BOOST_NO_CXX11_SCOPED_ENUMS  
+#  define BOOST_NO_CXX11_SCOPED_ENUMS
 #  define BOOST_NO_SFINAE_EXPR
 #  define BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
 #  define BOOST_NO_CXX11_LAMBDAS
@@ -55,6 +55,9 @@
 #  define BOOST_NO_CXX11_NOEXCEPT
 #  define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 #  define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#  define BOOST_NO_CXX11_ALIGNAS
+#  define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#  define BOOST_NO_CXX11_INLINE_NAMESPACES
 
 #define BOOST_COMPILER "GCC-XML C++ version " __GCCXML__
 

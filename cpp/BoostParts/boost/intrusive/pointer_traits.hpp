@@ -6,7 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2011-2012. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2011-2013. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -74,7 +74,7 @@ struct pointer_traits
       typedef BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_DEFAULT
          (boost::intrusive::detail::, Ptr, difference_type, std::ptrdiff_t)   difference_type;
       //
-      typedef typename boost::intrusive::detail::unvoid<element_type>::type&  reference;
+      typedef typename boost::intrusive::detail::unvoid_ref<element_type>::type  reference;
       //
       template <class U> struct rebind_pointer
       {
@@ -224,7 +224,7 @@ struct pointer_traits<T*>
       //!shall be used instead of rebind<U> to obtain a pointer to U.
       template <class U> using rebind = U*;
    #else
-      typedef typename boost::intrusive::detail::unvoid<element_type>::type& reference;
+      typedef typename boost::intrusive::detail::unvoid_ref<element_type>::type reference;
       #if !defined(BOOST_NO_CXX11_TEMPLATE_ALIASES)
          template <class U> using rebind = U*;
       #endif

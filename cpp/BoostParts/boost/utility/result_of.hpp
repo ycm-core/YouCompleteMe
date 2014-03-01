@@ -38,18 +38,27 @@
 
 // Use the decltype-based version of result_of by default if the compiler
 // supports N3276 <http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2011/n3276.pdf>.
-// The user can force the choice by defining either BOOST_RESULT_OF_USE_DECLTYPE or
-// BOOST_RESULT_OF_USE_TR1, but not both!
-#if defined(BOOST_RESULT_OF_USE_DECLTYPE) && defined(BOOST_RESULT_OF_USE_TR1)
-#  error Both BOOST_RESULT_OF_USE_DECLTYPE and BOOST_RESULT_OF_USE_TR1 cannot be defined at the same time.
+// The user can force the choice by defining BOOST_RESULT_OF_USE_DECLTYPE,
+// BOOST_RESULT_OF_USE_TR1, or BOOST_RESULT_OF_USE_TR1_WITH_DECLTYPE_FALLBACK but not more than one!
+#if (defined(BOOST_RESULT_OF_USE_DECLTYPE) && defined(BOOST_RESULT_OF_USE_TR1)) || \
+    (defined(BOOST_RESULT_OF_USE_DECLTYPE) && defined(BOOST_RESULT_OF_USE_TR1_WITH_DECLTYPE_FALLBACK)) || \
+    (defined(BOOST_RESULT_OF_USE_TR1) && defined(BOOST_RESULT_OF_USE_TR1_WITH_DECLTYPE_FALLBACK))
+#  error More than one of BOOST_RESULT_OF_USE_DECLTYPE, BOOST_RESULT_OF_USE_TR1 and \
+  BOOST_RESULT_OF_USE_TR1_WITH_DECLTYPE_FALLBACK cannot be defined at the same time.
+#endif
+
+#if defined(BOOST_RESULT_OF_USE_TR1_WITH_DECLTYPE_FALLBACK) && defined(BOOST_MPL_CFG_NO_HAS_XXX_TEMPLATE)
+#  error Cannot fallback to decltype if BOOST_MPL_CFG_NO_HAS_XXX_TEMPLATE is not defined.
 #endif
 
 #ifndef BOOST_RESULT_OF_USE_TR1
 #  ifndef BOOST_RESULT_OF_USE_DECLTYPE
-#    ifndef BOOST_NO_CXX11_DECLTYPE_N3276 // this implies !defined(BOOST_NO_CXX11_DECLTYPE)
-#      define BOOST_RESULT_OF_USE_DECLTYPE
-#    else
-#      define BOOST_RESULT_OF_USE_TR1
+#    ifndef BOOST_RESULT_OF_USE_TR1_WITH_DECLTYPE_FALLBACK
+#      ifndef BOOST_NO_CXX11_DECLTYPE_N3276 // this implies !defined(BOOST_NO_CXX11_DECLTYPE)
+#        define BOOST_RESULT_OF_USE_DECLTYPE
+#      else
+#        define BOOST_RESULT_OF_USE_TR1
+#      endif
 #    endif
 #  endif
 #endif
@@ -64,7 +73,11 @@ namespace detail {
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(result_type)
 
+BOOST_MPL_HAS_XXX_TEMPLATE_DEF(result)
+
 template<typename F, typename FArgs, bool HasResultType> struct tr1_result_of_impl;
+
+template<typename F> struct cpp0x_result_of;
 
 #ifdef BOOST_NO_SFINAE_EXPR
 

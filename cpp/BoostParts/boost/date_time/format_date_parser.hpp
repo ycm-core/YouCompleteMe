@@ -7,7 +7,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2013-06-21 08:04:12 -0700 (Fri, 21 Jun 2013) $
+ * $Date: 2013-10-15 08:22:02 -0700 (Tue, 15 Oct 2013) $
  */
 
 
@@ -271,7 +271,8 @@ class format_date_parser
     const_itr itr(format_str.begin());
     while (itr != format_str.end() && (sitr != stream_end)) {
       if (*itr == '%') {
-        itr++;
+        if ( ++itr == format_str.end())
+        	break;
         if (*itr != '%') {
           switch(*itr) {
           case 'a': 
@@ -476,7 +477,8 @@ class format_date_parser
     const_itr itr(format_str.begin());
     while (itr != format_str.end() && (sitr != stream_end)) {
       if (*itr == '%') {
-        itr++;
+        if ( ++itr == format_str.end())
+        	break;
         if (*itr != '%') {
           switch(*itr) {
           case 'b': 
@@ -577,7 +579,8 @@ class format_date_parser
     const_itr itr(format_str.begin());
     while (itr != format_str.end() && (sitr != stream_end)) {
       if (*itr == '%') {
-        itr++;
+        if ( ++itr == format_str.end())
+        	break;
         if (*itr != '%') {
           switch(*itr) {
           case 'a': 
@@ -666,7 +669,8 @@ class format_date_parser
     const_itr itr(format_str.begin());
     while (itr != format_str.end() && (sitr != stream_end)) {
       if (*itr == '%') {
-        itr++;
+        if ( ++itr == format_str.end())
+        	break;
         if (*itr != '%') {
           //match_results mr;
           switch(*itr) {

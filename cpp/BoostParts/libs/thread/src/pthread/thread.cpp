@@ -187,7 +187,9 @@ namespace boost
                 return 0;
             }
         }
-
+    }
+    namespace detail
+    {
         struct externally_launched_thread:
             detail::thread_data_base
         {
@@ -197,7 +199,12 @@ namespace boost
                 interrupt_enabled=false;
 #endif
             }
-
+            ~externally_launched_thread() {
+              BOOST_ASSERT(notify.empty());
+              notify.clear();
+              BOOST_ASSERT(async_states_.empty());
+              async_states_.clear();
+            }
             void run()
             {}
             void notify_all_at_thread_exit(condition_variable*, mutex*)
@@ -208,18 +215,18 @@ namespace boost
             void operator=(externally_launched_thread&);
         };
 
-        detail::thread_data_base* make_external_thread_data()
+        thread_data_base* make_external_thread_data()
         {
-            detail::thread_data_base* const me(new externally_launched_thread());
+            thread_data_base* const me(new externally_launched_thread());
             me->self.reset(me);
             set_current_thread_data(me);
             return me;
         }
 
 
-        detail::thread_data_base* get_or_make_current_thread_data()
+        thread_data_base* get_or_make_current_thread_data()
         {
-            detail::thread_data_base* current_thread_data(detail::get_current_thread_data());
+            thread_data_base* current_thread_data(get_current_thread_data());
             if(!current_thread_data)
             {
                 current_thread_data=make_external_thread_data();
@@ -701,8 +708,11 @@ namespace boost
 
         void erase_tss_node(void const* key)
         {
-            detail::thread_data_base* const current_thread_data(get_or_make_current_thread_data());
-            current_thread_data->tss_data.erase(key);
+            detail::thread_data_base* const current_thread_data(get_current_thread_data());
+            if(current_thread_data)
+            {
+                current_thread_data->tss_data.erase(key);
+            }
         }
 
         void set_tss_data(void const* key,
@@ -740,6 +750,17 @@ namespace boost
         current_thread_data->notify_all_at_thread_exit(&cond, lk.release());
       }
     }
+namespace detail {
+
+    void BOOST_THREAD_DECL make_ready_at_thread_exit(shared_ptr<shared_state_base> as)
+    {
+      detail::thread_data_base* const current_thread_data(detail::get_current_thread_data());
+      if(current_thread_data)
+      {
+        current_thread_data->make_ready_at_thread_exit(as);
+      }
+    }
+}
 
 
 

@@ -1,11 +1,11 @@
-//  (C) Copyright John Maddock 2001 - 2003. 
-//  (C) Copyright Jens Maurer 2001 - 2003. 
-//  (C) Copyright Aleksey Gurtovoy 2002. 
-//  (C) Copyright David Abrahams 2002 - 2003. 
-//  (C) Copyright Toon Knapen 2003. 
+//  (C) Copyright John Maddock 2001 - 2003.
+//  (C) Copyright Jens Maurer 2001 - 2003.
+//  (C) Copyright Aleksey Gurtovoy 2002.
+//  (C) Copyright David Abrahams 2002 - 2003.
+//  (C) Copyright Toon Knapen 2003.
 //  (C) Copyright Boris Gubenko 2006 - 2007.
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for most recent version.
@@ -43,7 +43,7 @@
 #    define BOOST_NO_DEPENDENT_TYPES_IN_TEMPLATE_VALUE_PARAMETERS
 #    define BOOST_NO_IS_ABSTRACT
 #    define BOOST_NO_MEMBER_TEMPLATE_FRIENDS
-#endif 
+#endif
 
 // optional features rather than defects:
 #if (__HP_aCC >= 33900)
@@ -119,8 +119,11 @@
 #define BOOST_NO_CXX11_UNICODE_LITERALS
 #define BOOST_NO_CXX11_VARIADIC_TEMPLATES
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
-/* 
+/*
   See https://forums13.itrc.hp.com/service/forums/questionanswer.do?threadId=1443331 and
       https://forums13.itrc.hp.com/service/forums/questionanswer.do?threadId=1443436
 */

@@ -11,7 +11,7 @@
 #ifndef BOOST_CONTAINER_CONTAINER_FWD_HPP
 #define BOOST_CONTAINER_CONTAINER_FWD_HPP
 
-#if (defined _MSC_VER) && (_MSC_VER >= 1200)
+#if defined(_MSC_VER)
 #  pragma once
 #endif
 
@@ -135,6 +135,10 @@ class basic_string;
 struct ordered_range_t
 {};
 
+//! Value used to tag that the input range is
+//! guaranteed to be ordered
+static const ordered_range_t ordered_range = ordered_range_t();
+
 //! Type used to tag that the input range is
 //! guaranteed to be ordered and unique
 struct ordered_unique_range_t
@@ -142,13 +146,17 @@ struct ordered_unique_range_t
 {};
 
 //! Value used to tag that the input range is
-//! guaranteed to be ordered
-static const ordered_range_t ordered_range = ordered_range_t();
-
-//! Value used to tag that the input range is
 //! guaranteed to be ordered and unique
 static const ordered_unique_range_t ordered_unique_range = ordered_unique_range_t();
 
+//! Type used to tag that the input range is
+//! guaranteed to be ordered and unique
+struct default_init_t
+{};
+
+//! Value used to tag that the input range is
+//! guaranteed to be ordered and unique
+static const default_init_t default_init = default_init_t();
 /// @cond
 
 namespace detail_really_deep_namespace {
@@ -161,6 +169,7 @@ struct dummy
    {
       (void)ordered_range;
       (void)ordered_unique_range;
+      (void)default_init;
    }
 };
 

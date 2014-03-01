@@ -73,6 +73,12 @@ BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,__int64,true)
 BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,boost::int128_type,true)
 BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,boost::uint128_type,true)
 #endif
+#ifndef BOOST_NO_CXX11_CHAR16_T
+BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,char16_t,true)
+#endif
+#ifndef BOOST_NO_CXX11_CHAR32_T
+BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,char32_t,true)
+#endif
 
 #endif  // non-CodeGear implementation
 

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2007-2012
+// (C) Copyright Ion Gaztanaga 2007-2013
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -24,85 +24,71 @@
 
 namespace boost {
 namespace intrusive {
-namespace detail {
 
 /// @cond
 
-enum
-{  NoBaseHook
-,  ListBaseHook
-,  SlistBaseHook
-,  SetBaseHook
-,  UsetBaseHook
-,  SplaySetBaseHook
-,  AvlSetBaseHook
-,  BsSetBaseHook
-,  AnyBaseHook
+enum base_hook_type
+{  NoBaseHookId
+,  ListBaseHookId
+,  SlistBaseHookId
+,  RbTreeBaseHookId
+,  HashBaseHookId
+,  SplayTreeBaseHookId
+,  AvlTreeBaseHookId
+,  BsTreeBaseHookId
+,  AnyBaseHookId
 };
 
-struct no_default_definer{};
 
-template <class Hook, unsigned int>
-struct default_definer;
+template <class HookTags, unsigned int>
+struct hook_tags_definer{};
 
-template <class Hook>
-struct default_definer<Hook, ListBaseHook>
-{  typedef Hook default_list_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, ListBaseHookId>
+{  typedef HookTags default_list_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, SlistBaseHook>
-{  typedef Hook default_slist_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, SlistBaseHookId>
+{  typedef HookTags default_slist_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, SetBaseHook>
-{  typedef Hook default_set_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, RbTreeBaseHookId>
+{  typedef HookTags default_rbtree_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, UsetBaseHook>
-{  typedef Hook default_uset_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, HashBaseHookId>
+{  typedef HookTags default_hashtable_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, SplaySetBaseHook>
-{  typedef Hook default_splay_set_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, SplayTreeBaseHookId>
+{  typedef HookTags default_splaytree_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, AvlSetBaseHook>
-{  typedef Hook default_avl_set_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, AvlTreeBaseHookId>
+{  typedef HookTags default_avltree_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, BsSetBaseHook>
-{  typedef Hook default_bs_set_hook;  };
+template <class HookTags>
+struct hook_tags_definer<HookTags, BsTreeBaseHookId>
+{  typedef HookTags default_bstree_hook;  };
 
-template <class Hook>
-struct default_definer<Hook, AnyBaseHook>
-{  typedef Hook default_any_hook;  };
-
-template <class Hook, unsigned int BaseHookType>
-struct make_default_definer
-{
-   typedef typename detail::if_c
-      < BaseHookType != 0
-      , default_definer<Hook, BaseHookType>
-      , no_default_definer>::type type;
-};
+template <class HookTags>
+struct hook_tags_definer<HookTags, AnyBaseHookId>
+{  typedef HookTags default_any_hook;  };
 
 template
-   < class GetNodeAlgorithms
+   < class NodeTraits
    , class Tag
    , link_mode_type LinkMode
-   , int HookType
+   , base_hook_type BaseHookType
    >
-struct make_node_holder
+struct hooktags_impl
 {
-   typedef typename detail::if_c
-      <!detail::is_same<Tag, member_tag>::value
-      , detail::node_holder
-         < typename GetNodeAlgorithms::type::node
-         , Tag
-         , LinkMode
-         , HookType>
-      , typename GetNodeAlgorithms::type::node
-      >::type type;
+   static const link_mode_type link_mode = LinkMode;
+   typedef Tag tag;
+   typedef NodeTraits node_traits;
+   static const bool is_base_hook = !detail::is_same<Tag, member_tag>::value;
+   static const bool safemode_or_autounlink = is_safe_autounlink<link_mode>::value;
+   static const unsigned int type = BaseHookType;
 };
 
 /// @endcond
@@ -111,22 +97,28 @@ template
    < class GetNodeAlgorithms
    , class Tag
    , link_mode_type LinkMode
-   , int HookType
+   , base_hook_type BaseHookType
    >
 class generic_hook
    /// @cond
-
-   //If the hook is a base hook, derive generic hook from detail::node_holder
+   //If the hook is a base hook, derive generic hook from node_holder
    //so that a unique base class is created to convert from the node
-   //to the type. This mechanism will be used by base_hook_traits.
+   //to the type. This mechanism will be used by bhtraits.
    //
    //If the hook is a member hook, generic hook will directly derive
    //from the hook.
-   : public make_default_definer
-      < generic_hook<GetNodeAlgorithms, Tag, LinkMode, HookType>
-      , detail::is_same<Tag, default_tag>::value*HookType
+   : public detail::if_c
+      < detail::is_same<Tag, member_tag>::value
+      , typename GetNodeAlgorithms::type::node
+      , node_holder<typename GetNodeAlgorithms::type::node, Tag, BaseHookType>
       >::type
-   , public make_node_holder<GetNodeAlgorithms, Tag, LinkMode, HookType>::type
+   //If this is the a default-tagged base hook derive from a class that 
+   //will define an special internal typedef. Containers will be able to detect this
+   //special typedef and obtain generic_hook's internal types in order to deduce
+   //value_traits for this hook.
+   , public hook_tags_definer
+      < generic_hook<GetNodeAlgorithms, Tag, LinkMode, BaseHookType>
+      , detail::is_same<Tag, default_tag>::value*BaseHookType>
    /// @endcond
 {
    /// @cond
@@ -136,16 +128,10 @@ class generic_hook
    typedef typename node_algorithms::const_node_ptr   const_node_ptr;
 
    public:
-   struct boost_intrusive_tags
-   {
-      static const int hook_type = HookType;
-      static const link_mode_type link_mode = LinkMode;
-      typedef Tag                                           tag;
-      typedef typename GetNodeAlgorithms::type::node_traits node_traits;
-      static const bool is_base_hook = !detail::is_same<Tag, member_tag>::value;
-      static const bool safemode_or_autounlink =
-         (int)link_mode == (int)auto_unlink || (int)link_mode == (int)safe_link;
-   };
+
+   typedef hooktags_impl
+      < typename GetNodeAlgorithms::type::node_traits
+      , Tag, LinkMode, BaseHookType>                  hooktags;
 
    node_ptr this_ptr()
    {  return pointer_traits<node_ptr>::pointer_to(static_cast<node&>(*this)); }
@@ -158,14 +144,14 @@ class generic_hook
 
    generic_hook()
    {
-      if(boost_intrusive_tags::safemode_or_autounlink){
+      if(hooktags::safemode_or_autounlink){
          node_algorithms::init(this->this_ptr());
       }
    }
 
    generic_hook(const generic_hook& )
    {
-      if(boost_intrusive_tags::safemode_or_autounlink){
+      if(hooktags::safemode_or_autounlink){
          node_algorithms::init(this->this_ptr());
       }
    }
@@ -176,7 +162,7 @@ class generic_hook
    ~generic_hook()
    {
       destructor_impl
-         (*this, detail::link_dispatch<boost_intrusive_tags::link_mode>());
+         (*this, detail::link_dispatch<hooktags::link_mode>());
    }
 
    void swap_nodes(generic_hook &other)
@@ -188,19 +174,18 @@ class generic_hook
    bool is_linked() const
    {
       //is_linked() can be only used in safe-mode or auto-unlink
-      BOOST_STATIC_ASSERT(( boost_intrusive_tags::safemode_or_autounlink ));
+      BOOST_STATIC_ASSERT(( hooktags::safemode_or_autounlink ));
       return !node_algorithms::unique(this->this_ptr());
    }
 
    void unlink()
    {
-      BOOST_STATIC_ASSERT(( (int)boost_intrusive_tags::link_mode == (int)auto_unlink ));
+      BOOST_STATIC_ASSERT(( (int)hooktags::link_mode == (int)auto_unlink ));
       node_algorithms::unlink(this->this_ptr());
       node_algorithms::init(this->this_ptr());
    }
 };
 
-} //namespace detail
 } //namespace intrusive
 } //namespace boost
 

@@ -6,7 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2011-2012. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2011-2013. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -44,6 +44,10 @@ inline T* addressof(T& obj)
 template <typename T> struct unvoid { typedef T type; };
 template <> struct unvoid<void> { struct type { }; };
 template <> struct unvoid<const void> { struct type { }; };
+
+template <typename T> struct unvoid_ref { typedef T &type; };
+template <> struct unvoid_ref<void> { struct type_impl { }; typedef type_impl & type; };
+template <> struct unvoid_ref<const void> { struct type_impl { }; typedef type_impl & type; };
 
 template <typename T>
 struct LowPriorityConversion

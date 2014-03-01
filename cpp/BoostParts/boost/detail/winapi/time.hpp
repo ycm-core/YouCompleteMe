@@ -6,15 +6,18 @@
 //  See http://www.boost.org/LICENSE_1_0.txt
 
 
-#ifndef BOOST_DETAIL_WIN_TIME_HPP
-#define BOOST_DETAIL_WIN_TIME_HPP
+#ifndef BOOST_DETAIL_WINAPI_TIME_HPP
+#define BOOST_DETAIL_WINAPI_TIME_HPP
 
-#include <boost/detail/win/basic_types.hpp>
+#include <boost/detail/winapi/basic_types.hpp>
 
+#ifdef BOOST_HAS_PRAGMA_ONCE
+#pragma once
+#endif
 
 namespace boost {
 namespace detail {
-namespace win32 {
+namespace winapi {
 #if defined( BOOST_USE_WINDOWS_H )
     typedef FILETIME FILETIME_;
     typedef PFILETIME PFILETIME_;
@@ -23,7 +26,7 @@ namespace win32 {
     typedef SYSTEMTIME SYSTEMTIME_;
     typedef SYSTEMTIME* PSYSTEMTIME_;
 
-    #ifndef UNDER_CE  // Windows CE does not define GetSystemTimeAsFileTime
+    #ifdef BOOST_HAS_GETSYSTEMTIMEASFILETIME  // Windows CE does not define GetSystemTimeAsFileTime
     using ::GetSystemTimeAsFileTime;
     #endif
     using ::FileTimeToLocalFileTime;
@@ -49,24 +52,34 @@ extern "C" {
       WORD_ wMilliseconds;
     } SYSTEMTIME_, *PSYSTEMTIME_;
 
-    #ifndef UNDER_CE  // Windows CE does not define GetSystemTimeAsFileTime
+    #ifdef BOOST_HAS_GETSYSTEMTIMEASFILETIME  // Windows CE does not define GetSystemTimeAsFileTime
     __declspec(dllimport) void WINAPI
         GetSystemTimeAsFileTime(FILETIME_* lpFileTime);
     #endif
     __declspec(dllimport) int WINAPI
-        FileTimeToLocalFileTime(const FILETIME_* lpFileTime, 
+        FileTimeToLocalFileTime(const FILETIME_* lpFileTime,
                 FILETIME_* lpLocalFileTime);
     __declspec(dllimport) void WINAPI
         GetSystemTime(SYSTEMTIME_* lpSystemTime);
     __declspec(dllimport) int WINAPI
-        SystemTimeToFileTime(const SYSTEMTIME_* lpSystemTime, 
+        SystemTimeToFileTime(const SYSTEMTIME_* lpSystemTime,
                 FILETIME_* lpFileTime);
-    __declspec(dllimport) unsigned long __stdcall 
+    __declspec(dllimport) DWORD_ WINAPI
         GetTickCount();
 }
 #endif
+
+#ifndef BOOST_HAS_GETSYSTEMTIMEASFILETIME
+inline void WINAPI GetSystemTimeAsFileTime(FILETIME_* lpFileTime)
+{
+    SYSTEMTIME_ st;
+    GetSystemTime(&st);
+    SystemTimeToFileTime(&st, lpFileTime);
+}
+#endif
+
 }
 }
 }
 
-#endif // BOOST_DETAIL_WIN_TIME_HPP
+#endif // BOOST_DETAIL_WINAPI_TIME_HPP

@@ -13,7 +13,7 @@
 
 #include <boost/detail/iterator.hpp>
 #include <boost/range/value_type.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <boost/range/iterator_range_core.hpp>
 #include <boost/range/as_literal.hpp>
 
 #include <boost/algorithm/string/detail/formatter.hpp>

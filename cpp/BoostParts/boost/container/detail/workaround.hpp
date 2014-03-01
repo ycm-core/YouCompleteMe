@@ -35,6 +35,12 @@
    #define BOOST_CONTAINER_UNIMPLEMENTED_PACK_EXPANSION_TO_FIXED_LIST
 #endif
 
+#if !defined(BOOST_FALLTHOUGH)
+   #define BOOST_CONTAINER_FALLTHOUGH
+#else
+   #define BOOST_CONTAINER_FALLTHOUGH BOOST_FALLTHOUGH;
+#endif
+
 //Macros for documentation purposes. For code, expands to the argument
 #define BOOST_CONTAINER_IMPDEF(TYPE) TYPE
 #define BOOST_CONTAINER_SEEDOC(TYPE) TYPE

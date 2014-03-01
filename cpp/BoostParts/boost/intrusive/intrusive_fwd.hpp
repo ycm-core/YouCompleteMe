@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga  2007-2012
+// (C) Copyright Ion Gaztanaga  2007-2013
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -18,15 +18,6 @@
 #include <boost/intrusive/detail/workaround.hpp>
 
 /// @cond
-
-namespace boost {
-
-namespace intrusive {
-
-struct none;
-
-}  //namespace intrusive{
-}  //namespace boost{
 
 namespace boost {
 namespace intrusive {
@@ -53,11 +44,11 @@ class rbtree_algorithms;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
-   , class O5  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   , class O5  = void
    >
 #else
 template<class T, class ...Options>
@@ -66,9 +57,9 @@ class slist;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -77,9 +68,9 @@ class slist_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -90,9 +81,9 @@ class slist_member_hook;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class T, class ...Options>
@@ -101,9 +92,9 @@ class list;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -112,9 +103,9 @@ class list_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -123,9 +114,9 @@ class list_member_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -136,10 +127,10 @@ class list_hook;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -149,10 +140,10 @@ class rbtree;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -162,10 +153,10 @@ class set;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -174,10 +165,10 @@ class multiset;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class ...Options>
@@ -186,10 +177,10 @@ class set_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class ...Options>
@@ -200,10 +191,10 @@ class set_member_hook;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -213,10 +204,10 @@ class splaytree;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -226,10 +217,10 @@ class splay_set;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -238,9 +229,9 @@ class splay_multiset;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -249,9 +240,9 @@ class splay_set_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -262,10 +253,10 @@ class splay_set_member_hook;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -275,10 +266,10 @@ class avltree;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -288,10 +279,10 @@ class avl_set;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -300,10 +291,10 @@ class avl_multiset;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class ...Options>
@@ -312,10 +303,10 @@ class avl_set_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class ...Options>
@@ -327,10 +318,10 @@ class avl_set_member_hook;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -340,10 +331,10 @@ class treap;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -353,10 +344,10 @@ class treap_set;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -371,10 +362,10 @@ struct priority_compare;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -384,10 +375,10 @@ class sgtree;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -397,10 +388,10 @@ class sg_set;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class T, class ...Options>
@@ -409,9 +400,48 @@ class sg_multiset;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class T
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   >
+#else
+template<class T, class ...Options>
+#endif
+class bstree;
+
+#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
+template
+   < class T
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   >
+#else
+template<class T, class ...Options>
+#endif
+class bs_set;
+
+#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
+template
+   < class T
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   >
+#else
+template<class T, class ...Options>
+#endif
+class bs_multiset;
+
+#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
+template
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -420,9 +450,9 @@ class bs_set_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -434,16 +464,16 @@ class bs_set_member_hook;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
-   , class O5  = none
-   , class O6  = none
-   , class O7  = none
-   , class O8  = none
-   , class O9  = none
-   , class O10 = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   , class O5  = void
+   , class O6  = void
+   , class O7  = void
+   , class O8  = void
+   , class O9  = void
+   , class O10 = void
    >
 #else
 template<class T, class ...Options>
@@ -453,16 +483,16 @@ class hashtable;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
-   , class O5  = none
-   , class O6  = none
-   , class O7  = none
-   , class O8  = none
-   , class O9  = none
-   , class O10 = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   , class O5  = void
+   , class O6  = void
+   , class O7  = void
+   , class O8  = void
+   , class O9  = void
+   , class O10 = void
    >
 #else
 template<class T, class ...Options>
@@ -472,16 +502,16 @@ class unordered_set;
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
    < class T
-   , class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
-   , class O5  = none
-   , class O6  = none
-   , class O7  = none
-   , class O8  = none
-   , class O9  = none
-   , class O10 = none
+   , class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
+   , class O5  = void
+   , class O6  = void
+   , class O7  = void
+   , class O8  = void
+   , class O9  = void
+   , class O10 = void
    >
 #else
 template<class T, class ...Options>
@@ -490,10 +520,10 @@ class unordered_multiset;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class ...Options>
@@ -502,10 +532,10 @@ class unordered_set_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
-   , class O4  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
+   , class O4  = void
    >
 #else
 template<class ...Options>
@@ -514,9 +544,9 @@ class unordered_set_member_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>
@@ -525,9 +555,9 @@ class any_base_hook;
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template
-   < class O1  = none
-   , class O2  = none
-   , class O3  = none
+   < class O1  = void
+   , class O2  = void
+   , class O3  = void
    >
 #else
 template<class ...Options>

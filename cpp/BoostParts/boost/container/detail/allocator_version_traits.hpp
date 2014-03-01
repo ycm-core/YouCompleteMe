@@ -11,7 +11,7 @@
 #ifndef BOOST_CONTAINER_DETAIL_ALLOCATOR_VERSION_TRAITS_HPP
 #define BOOST_CONTAINER_DETAIL_ALLOCATOR_VERSION_TRAITS_HPP
 
-#if (defined _MSC_VER) && (_MSC_VER >= 1200)
+#if defined(_MSC_VER)
 #  pragma once
 #endif
 
@@ -92,8 +92,12 @@ struct allocator_version_traits<Allocator, 1>
 
    static void deallocate_individual(Allocator &a, multiallocation_chain &holder)
    {
-      while(!holder.empty()){
-         a.deallocate(holder.pop_front(), 1);
+      size_type n = holder.size();
+      typename multiallocation_chain::iterator it = holder.begin();
+      while(n--){
+         pointer p = boost::intrusive::pointer_traits<pointer>::pointer_to(*it);
+         ++it;
+         a.deallocate(p, 1);
       }
    }
 

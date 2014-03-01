@@ -768,10 +768,10 @@ namespace boost
    int sign BOOST_NO_MACRO_EXPAND(const T& z);
 
    template <class T, class U>
-   typename tools::promote_args<T, U>::type copysign BOOST_NO_MACRO_EXPAND(const T& x, const U& y);
+   typename tools::promote_args_permissive<T, U>::type copysign BOOST_NO_MACRO_EXPAND(const T& x, const U& y);
 
    template <class T>
-   typename tools::promote_args<T>::type changesign BOOST_NO_MACRO_EXPAND(const T& z);
+   typename tools::promote_args_permissive<T>::type changesign BOOST_NO_MACRO_EXPAND(const T& z);
 
    // Exponential integrals:
    namespace detail{

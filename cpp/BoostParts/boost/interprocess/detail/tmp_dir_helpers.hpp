@@ -58,7 +58,7 @@ namespace ipcdetail {
          struct ::timeval result;
          std::size_t result_len = sizeof result;
 
-         if (::sysctl (request, 2, &result, &result_len, NULL, 0) < 0)
+         if (::sysctl (request, 2, &result, &result_len, 0, 0) < 0)
             return;
 
          char bootstamp_str[256];

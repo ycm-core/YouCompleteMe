@@ -38,6 +38,7 @@
 #include <boost/interprocess/exceptions.hpp>
 #ifndef BOOST_INTERPROCESS_POSIX_TIMEOUTS
 #  include <boost/interprocess/detail/os_thread_functions.hpp>
+#  include <boost/interprocess/sync/spin/wait.hpp>
 #endif
 #include <boost/assert.hpp>
 
@@ -108,7 +109,7 @@ inline bool posix_recursive_mutex::timed_lock(const boost::posix_time::ptime &ab
 
    //Obtain current count and target time
    boost::posix_time::ptime now = microsec_clock::universal_time();
-
+   spin_wait swait;
    do{
       if(this->try_lock()){
          break;
@@ -119,7 +120,7 @@ inline bool posix_recursive_mutex::timed_lock(const boost::posix_time::ptime &ab
          return false;
       }
       // relinquish current time slice
-     thread_yield();
+      swait.yield();
    }while (true);
    return true;
 

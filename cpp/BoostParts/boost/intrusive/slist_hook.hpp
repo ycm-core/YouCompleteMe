@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
-// (C) Copyright Ion Gaztanaga  2006-2012
+// (C) Copyright Ion Gaztanaga  2006-2013
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -40,7 +40,7 @@ struct get_slist_node_algo
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
 #else
-template<class O1 = none, class O2 = none, class O3 = none>
+template<class O1 = void, class O2 = void, class O3 = void>
 #endif
 struct make_slist_base_hook
 {
@@ -54,11 +54,11 @@ struct make_slist_base_hook
          #endif
       >::type packed_options;
 
-   typedef detail::generic_hook
+   typedef generic_hook
    < get_slist_node_algo<typename packed_options::void_pointer>
    , typename packed_options::tag
    , packed_options::link_mode
-   , detail::SlistBaseHook
+   , SlistBaseHookId
    > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -168,7 +168,7 @@ class slist_base_hook
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
 #else
-template<class O1 = none, class O2 = none, class O3 = none>
+template<class O1 = void, class O2 = void, class O3 = void>
 #endif
 struct make_slist_member_hook
 {
@@ -182,11 +182,11 @@ struct make_slist_member_hook
          #endif
       >::type packed_options;
 
-   typedef detail::generic_hook
+   typedef generic_hook
    < get_slist_node_algo<typename packed_options::void_pointer>
    , member_tag
    , packed_options::link_mode
-   , detail::NoBaseHook
+   , NoBaseHookId
    > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

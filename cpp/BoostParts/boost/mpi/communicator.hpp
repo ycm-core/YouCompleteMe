@@ -13,6 +13,7 @@
 #ifndef BOOST_MPI_COMMUNICATOR_HPP
 #define BOOST_MPI_COMMUNICATOR_HPP
 
+#include <boost/assert.hpp>
 #include <boost/mpi/config.hpp>
 #include <boost/mpi/exception.hpp>
 #include <boost/optional.hpp>
@@ -869,6 +870,8 @@ class BOOST_MPI_DECL communicator
   {
     void operator()(MPI_Comm* comm) const
     {
+      BOOST_ASSERT( comm != 0 );
+      BOOST_ASSERT(*comm != MPI_COMM_NULL);
       int finalized;
       BOOST_MPI_CHECK_RESULT(MPI_Finalized, (&finalized));
       if (!finalized)

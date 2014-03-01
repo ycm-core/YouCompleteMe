@@ -330,6 +330,25 @@ reduce(const communicator& comm, const T* in_values, int n, Op op, int root)
                       is_mpi_op<Op, T>(), is_mpi_datatype<T>());
 }
 
+template<typename T, typename Op> 
+void 
+reduce(const communicator & comm, std::vector<T> const & in_values, Op op, 
+       int root) 
+{
+  reduce(comm, &in_values.front(), in_values.size(), op, root);
+}
+
+template<typename T, typename Op> 
+void 
+reduce(const communicator & comm, std::vector<T> const & in_values, 
+       std::vector<T> & out_values, Op op, int root) 
+{
+  out_values.resize(in_values.size());
+  reduce(comm, &in_values.front(), in_values.size(), &out_values.front(), op, 
+         root);
+}
+
+
 template<typename T, typename Op>
 void
 reduce(const communicator& comm, const T& in_value, T& out_value, Op op,

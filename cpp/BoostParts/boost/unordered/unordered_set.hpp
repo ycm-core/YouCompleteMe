@@ -115,11 +115,13 @@ namespace unordered
 
 #if defined(BOOST_UNORDERED_USE_MOVE)
         unordered_set(BOOST_RV_REF(unordered_set) other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
 #elif !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_set(unordered_set&& other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
@@ -140,7 +142,7 @@ namespace unordered
 
         // Destructor
 
-        ~unordered_set();
+        ~unordered_set() BOOST_NOEXCEPT;
 
         // Assign
 
@@ -582,11 +584,13 @@ namespace unordered
 
 #if defined(BOOST_UNORDERED_USE_MOVE)
         unordered_multiset(BOOST_RV_REF(unordered_multiset) other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
 #elif !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_multiset(unordered_multiset&& other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
@@ -607,7 +611,7 @@ namespace unordered
 
         // Destructor
 
-        ~unordered_multiset();
+        ~unordered_multiset() BOOST_NOEXCEPT;
 
         // Assign
 
@@ -1032,7 +1036,7 @@ namespace unordered
     }
     
     template <class T, class H, class P, class A>
-    unordered_set<T,H,P,A>::~unordered_set() {}
+    unordered_set<T,H,P,A>::~unordered_set() BOOST_NOEXCEPT {}
 
     template <class T, class H, class P, class A>
     unordered_set<T,H,P,A>::unordered_set(
@@ -1316,7 +1320,7 @@ namespace unordered
     }
     
     template <class T, class H, class P, class A>
-    unordered_multiset<T,H,P,A>::~unordered_multiset() {}
+    unordered_multiset<T,H,P,A>::~unordered_multiset() BOOST_NOEXCEPT {}
 
     template <class T, class H, class P, class A>
     unordered_multiset<T,H,P,A>::unordered_multiset(

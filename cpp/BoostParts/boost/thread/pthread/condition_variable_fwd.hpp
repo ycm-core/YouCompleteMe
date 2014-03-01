@@ -98,21 +98,21 @@ namespace boost
 #if defined BOOST_THREAD_USES_DATETIME
         inline bool timed_wait(
             unique_lock<mutex>& m,
-            boost::system_time const& wait_until)
+            boost::system_time const& abs_time)
         {
 #if defined BOOST_THREAD_WAIT_BUG
-            struct timespec const timeout=detail::to_timespec(wait_until + BOOST_THREAD_WAIT_BUG);
+            struct timespec const timeout=detail::to_timespec(abs_time + BOOST_THREAD_WAIT_BUG);
             return do_wait_until(m, timeout);
 #else
-            struct timespec const timeout=detail::to_timespec(wait_until);
+            struct timespec const timeout=detail::to_timespec(abs_time);
             return do_wait_until(m, timeout);
 #endif
         }
         bool timed_wait(
             unique_lock<mutex>& m,
-            xtime const& wait_until)
+            xtime const& abs_time)
         {
-            return timed_wait(m,system_time(wait_until));
+            return timed_wait(m,system_time(abs_time));
         }
 
         template<typename duration_type>
@@ -126,11 +126,11 @@ namespace boost
         template<typename predicate_type>
         bool timed_wait(
             unique_lock<mutex>& m,
-            boost::system_time const& wait_until,predicate_type pred)
+            boost::system_time const& abs_time,predicate_type pred)
         {
             while (!pred())
             {
-                if(!timed_wait(m, wait_until))
+                if(!timed_wait(m, abs_time))
                     return pred();
             }
             return true;
@@ -139,9 +139,9 @@ namespace boost
         template<typename predicate_type>
         bool timed_wait(
             unique_lock<mutex>& m,
-            xtime const& wait_until,predicate_type pred)
+            xtime const& abs_time,predicate_type pred)
         {
-            return timed_wait(m,system_time(wait_until),pred);
+            return timed_wait(m,system_time(abs_time),pred);
         }
 
         template<typename duration_type,typename predicate_type>

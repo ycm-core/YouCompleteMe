@@ -243,10 +243,10 @@ class transform_multiallocation_chain
 
    iterator before_begin()
    {  return iterator(holder_.before_begin());   }
-
+*/
    iterator begin()
-   {  return iterator(holder_.begin());   }
-
+   {  return iterator(this->MultiallocationChain::begin());   }
+/*
    iterator end()
    {  return iterator(holder_.end());   }
 

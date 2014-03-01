@@ -10,7 +10,7 @@
 #include <boost/atomic/detail/config.hpp>
 #include <boost/type_traits/is_integral.hpp>
 
-#ifdef BOOST_ATOMIC_HAS_PRAGMA_ONCE
+#ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
 #endif
 
@@ -36,7 +36,7 @@ struct storage_size_of
     enum _
     {
         size = sizeof(T),
-        value = (size == 3 ? 4 : (size == 5 || size == 6 || size == 7 ? 8 : size))
+        value = (size == 3 ? 4 : (size >= 5 && size <= 7 ? 8 : (size >= 9 && size <= 15 ? 16 : size)))
     };
 };
 

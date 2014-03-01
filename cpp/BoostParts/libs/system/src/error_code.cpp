@@ -26,7 +26,9 @@
 
 # if defined( BOOST_WINDOWS_API )
 #   include <windows.h>
-#   include "local_free_on_destruction.hpp"
+#   if !defined(WINAPI_FAMILY) || ((WINAPI_FAMILY & WINAPI_PARTITION_DESKTOP) != 0)
+#     include "local_free_on_destruction.hpp"
+#   endif
 #   ifndef ERROR_INCORRECT_SIZE
 #     define ERROR_INCORRECT_SIZE ERROR_BAD_ARGUMENTS
 #   endif
@@ -171,6 +173,17 @@ namespace
 #if defined(__PGI)
       using boost::system::errc::invalid_argument;
 #endif
+
+# if defined(BOOST_WINDOWS_API)
+#   if defined(WINAPI_FAMILY) && ((WINAPI_FAMILY & WINAPI_PARTITION_APP) != 0)
+    // When using the Windows Runtime, most system errors are reported as HRESULTs.
+    // We want to map the common Win32 errors to their equivalent error condition,
+    // whether or not they are reported via an HRESULT.
+    if ( ev < 0 ) // Check for failed HRESULTs only.
+      if ( HRESULT_FACILITY( ev ) == FACILITY_WIN32 )
+        ev = HRESULT_CODE( ev );
+#   endif
+# endif
 
     switch ( ev )
     {
@@ -359,7 +372,36 @@ namespace
 
   std::string system_error_category::message( int ev ) const
   {
-# ifndef BOOST_NO_ANSI_APIS  
+# if defined(WINAPI_FAMILY) && ((WINAPI_FAMILY & WINAPI_PARTITION_DESKTOP) == 0)
+    std::string str( 128, char() );
+    for (;;)
+    {
+      DWORD retval = ::FormatMessageA( 
+          FORMAT_MESSAGE_FROM_SYSTEM | 
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+          NULL,
+          ev,
+          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+          &str[0],
+          str.size(),
+          NULL 
+      );
+
+      if ( retval > 0 )
+      {
+        str.resize( retval );
+        break;
+      }
+      else if ( ::GetLastError() != ERROR_INSUFFICIENT_BUFFER )
+      {
+        return std::string("Unknown error");
+      }
+      else
+      {
+        str.resize( str.size() + str.size()/2 );
+      }
+    }
+# elif !defined(BOOST_NO_ANSI_APIS)
     LPVOID lpMsgBuf = 0;
     DWORD retval = ::FormatMessageA( 
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 

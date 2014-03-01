@@ -110,7 +110,8 @@
 #  define BOOST_NO_CXX11_SMART_PTR
 #endif
 
-#if (!defined(_HAS_TR1_IMPORTS) || (_HAS_TR1_IMPORTS+0 == 0)) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
+#if ((!defined(_HAS_TR1_IMPORTS) || (_HAS_TR1_IMPORTS+0 == 0)) && !defined(BOOST_NO_CXX11_HDR_TUPLE)) \
+  && (!defined(_CPPLIB_VER) || _CPPLIB_VER < 610)
 #  define BOOST_NO_CXX11_HDR_TUPLE
 #endif
 
@@ -128,10 +129,11 @@
 #  define BOOST_NO_CXX11_ATOMIC_SMART_PTR
 #endif
 
+//  C++0x headers implemented in 610 (as shipped by Microsoft)
 //
-//  C++0x headers not yet (fully) implemented:
-//
+#if !defined(_CPPLIB_VER) || _CPPLIB_VER < 610
 #  define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
+#endif
 
 #ifdef _CPPLIB_VER
 #  define BOOST_DINKUMWARE_STDLIB _CPPLIB_VER

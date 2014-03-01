@@ -15,9 +15,9 @@
 #include <boost/detail/sp_typeinfo.hpp>
 #include <boost/current_function.hpp>
 #include <boost/config.hpp>
-#ifndef BOOST_NO_TYPEID
-#include <boost/units/detail/utility.hpp>
-#endif
+//#ifndef BOOST_NO_TYPEID
+//#include <boost/units/detail/utility.hpp>
+//#endif
 #include <string>
 
 namespace
@@ -31,7 +31,7 @@ boost
 #ifdef BOOST_NO_TYPEID
         return BOOST_CURRENT_FUNCTION;
 #else
-        return units::detail::demangle(typeid(T*).name());
+        return /*units::detail::demangle*/(typeid(T*).name());
 #endif
         }
 
@@ -43,7 +43,7 @@ boost
 #ifdef BOOST_NO_TYPEID
         return BOOST_CURRENT_FUNCTION;
 #else
-        return units::detail::demangle(typeid(T).name());
+        return /*units::detail::demangle*/(typeid(T).name());
 #endif
         }
 

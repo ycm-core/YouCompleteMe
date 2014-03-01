@@ -16,9 +16,9 @@
 #include <boost/exception/get_error_info.hpp>
 #include <boost/exception/info.hpp>
 #include <boost/utility/enable_if.hpp>
-#ifndef BOOST_NO_RTTI
-#include <boost/units/detail/utility.hpp>
-#endif
+//#ifndef BOOST_NO_RTTI
+//#include <boost/units/detail/utility.hpp>
+//#endif
 #include <exception>
 #include <sstream>
 #include <string>
@@ -151,7 +151,7 @@ boost
 #ifndef BOOST_NO_RTTI
             if ( verbose )
                 tmp << std::string("Dynamic exception type: ") <<
-                    units::detail::demangle((be?(BOOST_EXCEPTION_DYNAMIC_TYPEID(*be)):(BOOST_EXCEPTION_DYNAMIC_TYPEID(*se))).type_->name()) << '\n';
+                    /*units::detail::demangle*/((be?(BOOST_EXCEPTION_DYNAMIC_TYPEID(*be)):(BOOST_EXCEPTION_DYNAMIC_TYPEID(*se))).type_->name()) << '\n';
 #endif
             if( with_what && se && verbose )
                 tmp << "std::exception::what: " << wh << '\n';

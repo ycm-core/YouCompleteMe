@@ -22,7 +22,7 @@
 #include <boost/mpl/and.hpp>
 #endif
 
-#ifdef BOOST_ATOMIC_HAS_PRAGMA_ONCE
+#ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
 #endif
 
@@ -58,6 +58,10 @@ namespace boost {
 
 #ifndef BOOST_ATOMIC_LLONG_LOCK_FREE
 #define BOOST_ATOMIC_LLONG_LOCK_FREE 0
+#endif
+
+#ifndef BOOST_ATOMIC_INT128_LOCK_FREE
+#define BOOST_ATOMIC_INT128_LOCK_FREE 0
 #endif
 
 #ifndef BOOST_ATOMIC_POINTER_LOCK_FREE
@@ -112,11 +116,18 @@ private:
         mpl::and_< boost::is_integral<T>, boost::is_signed<T> >::value
 #endif
     > super;
-public:
-    atomic(void) BOOST_NOEXCEPT : super() {}
-    BOOST_CONSTEXPR atomic(value_type v) BOOST_NOEXCEPT : super(v) {}
+    typedef typename super::value_arg_type value_arg_type;
 
-    value_type operator=(value_type v) volatile BOOST_NOEXCEPT
+public:
+    BOOST_DEFAULTED_FUNCTION(atomic(void), BOOST_NOEXCEPT {})
+
+    // NOTE: The constructor is made explicit because gcc 4.7 complains that
+    //       operator=(value_arg_type) is considered ambiguous with operator=(atomic const&)
+    //       in assignment expressions, even though conversion to atomic<> is less preferred
+    //       than conversion to value_arg_type.
+    explicit BOOST_CONSTEXPR atomic(value_arg_type v) BOOST_NOEXCEPT : super(v) {}
+
+    value_type operator=(value_arg_type v) volatile BOOST_NOEXCEPT
     {
         this->store(v);
         return v;
@@ -127,14 +138,8 @@ public:
         return this->load();
     }
 
-#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
-private:
-    atomic(const atomic &) /* =delete */ ;
-    atomic & operator=(const atomic &) volatile /* =delete */ ;
-#else
-    atomic(const atomic &) = delete;
-    atomic & operator=(const atomic &) volatile = delete;
-#endif
+    BOOST_DELETED_FUNCTION(atomic(atomic const&))
+    BOOST_DELETED_FUNCTION(atomic& operator=(atomic const&) volatile)
 };
 
 typedef atomic<char> atomic_char;
@@ -190,25 +195,9 @@ typedef atomic<uintmax_t> atomic_uintmax_t;
 typedef atomic<std::size_t> atomic_size_t;
 typedef atomic<std::ptrdiff_t> atomic_ptrdiff_t;
 
-// PGI seems to not support intptr_t/uintptr_t properly. BOOST_HAS_STDINT_H is not defined for this compiler by Boost.Config.
-#if !defined(__PGIC__)
-
-#if (defined(BOOST_WINDOWS) && !defined(_WIN32_WCE)) \
-    || (defined(_XOPEN_UNIX) && (_XOPEN_UNIX+0 > 0) && !defined(__UCLIBC__)) \
-    || defined(__CYGWIN__) \
-    || defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__) \
-    || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(BOOST_HAS_INTPTR_T)
 typedef atomic<intptr_t> atomic_intptr_t;
 typedef atomic<uintptr_t> atomic_uintptr_t;
-#elif defined(__GNUC__) || defined(__clang__)
-#if defined(__INTPTR_TYPE__)
-typedef atomic< __INTPTR_TYPE__ > atomic_intptr_t;
-#endif
-#if defined(__UINTPTR_TYPE__)
-typedef atomic< __UINTPTR_TYPE__ > atomic_uintptr_t;
-#endif
-#endif
-
 #endif
 
 #ifndef BOOST_ATOMIC_FLAG_LOCK_FREE
@@ -229,9 +218,11 @@ public:
     {
         v_.store(false, order);
     }
+
+    BOOST_DELETED_FUNCTION(atomic_flag(atomic_flag const&))
+    BOOST_DELETED_FUNCTION(atomic_flag& operator=(atomic_flag const&))
+
 private:
-    atomic_flag(const atomic_flag &) /* = delete */ ;
-    atomic_flag & operator=(const atomic_flag &) /* = delete */ ;
     atomic<bool> v_;
 };
 #endif

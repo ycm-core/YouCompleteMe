@@ -37,7 +37,7 @@
    template <class T>
    inline typename ::boost::move_detail::enable_if_c
       < enable_move_utility_emulation<T>::value && !has_move_emulation_enabled<T>::value, T&>::type
-         move(T& x)
+         move(T& x) BOOST_NOEXCEPT
    {
       return x;
    }
@@ -45,7 +45,7 @@
    template <class T>
    inline typename ::boost::move_detail::enable_if_c
       < enable_move_utility_emulation<T>::value && has_move_emulation_enabled<T>::value, rv<T>&>::type
-         move(T& x)
+         move(T& x) BOOST_NOEXCEPT
    {
       return *static_cast<rv<T>* >(::boost::move_detail::addressof(x));
    }
@@ -53,7 +53,7 @@
    template <class T>
    inline typename ::boost::move_detail::enable_if_c
       < enable_move_utility_emulation<T>::value && has_move_emulation_enabled<T>::value, rv<T>&>::type
-         move(rv<T>& x)
+         move(rv<T>& x) BOOST_NOEXCEPT
    {
       return x;
    }
@@ -67,7 +67,7 @@
    template <class T>
    inline typename ::boost::move_detail::enable_if_c
       < enable_move_utility_emulation<T>::value && ::boost::move_detail::is_rv<T>::value, T &>::type
-         forward(const typename ::boost::move_detail::identity<T>::type &x)
+         forward(const typename ::boost::move_detail::identity<T>::type &x) BOOST_NOEXCEPT
    {
       return const_cast<T&>(x);
    }
@@ -75,7 +75,7 @@
    template <class T>
    inline typename ::boost::move_detail::enable_if_c
       < enable_move_utility_emulation<T>::value && !::boost::move_detail::is_rv<T>::value, const T &>::type
-      forward(const typename ::boost::move_detail::identity<T>::type &x)
+      forward(const typename ::boost::move_detail::identity<T>::type &x) BOOST_NOEXCEPT
    {
       return x;
    }
@@ -123,19 +123,19 @@
          //! in compilers with rvalue references. For other compilers converts T & into
          //! <i>::boost::rv<T> &</i> so that move emulation is activated.
          template <class T>
-         rvalue_reference move (input_reference);
+         rvalue_reference move(input_reference) noexcept;
 
       #elif defined(BOOST_MOVE_OLD_RVALUE_REF_BINDING_RULES)
 
          //Old move approach, lvalues could bind to rvalue references
          template <class T>
-         inline typename remove_reference<T>::type && move(T&& t)
+         inline typename remove_reference<T>::type && move(T&& t) BOOST_NOEXCEPT
          {  return t;   }
 
       #else //BOOST_MOVE_OLD_RVALUE_REF_BINDING_RULES
 
          template <class T>
-         inline typename remove_reference<T>::type && move(T&& t)
+         inline typename remove_reference<T>::type && move(T&& t) BOOST_NOEXCEPT
          { return static_cast<typename remove_reference<T>::type &&>(t); }
 
       #endif   //BOOST_MOVE_OLD_RVALUE_REF_BINDING_RULES
@@ -159,13 +159,13 @@
          //!   ::boost::rv<T> &
          //!
          //! * Else, output_reference is equal to input_reference.
-         template <class T> output_reference forward(input_reference);
+         template <class T> output_reference forward(input_reference) noexcept;
       #elif defined(BOOST_MOVE_OLD_RVALUE_REF_BINDING_RULES)
 
          //Old move approach, lvalues could bind to rvalue references
 
          template <class T>
-         inline T&& forward (typename ::boost::move_detail::identity<T>::type&& t)
+         inline T&& forward(typename ::boost::move_detail::identity<T>::type&& t) BOOST_NOEXCEPT
          {  return t;   }
 
       #else //Old move
@@ -178,7 +178,7 @@
                move_detail::is_lvalue_reference<T>::value ? move_detail::is_lvalue_reference<U>::value : true>::type * = 0/*
              , typename ::boost::move_detail::enable_if_c<
                move_detail::is_convertible
-                  <typename remove_reference<U>::type*, typename remove_reference<T>::type*>::value>::type * = 0*/)
+                  <typename remove_reference<U>::type*, typename remove_reference<T>::type*>::value>::type * = 0*/) BOOST_NOEXCEPT
          { return static_cast<T&&>(t);   }
 
       #endif   //BOOST_MOVE_DOXYGEN_INVOKED

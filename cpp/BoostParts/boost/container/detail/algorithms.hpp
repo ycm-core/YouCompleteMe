@@ -13,7 +13,7 @@
 #ifndef BOOST_CONTAINER_DETAIL_ALGORITHMS_HPP
 #define BOOST_CONTAINER_DETAIL_ALGORITHMS_HPP
 
-#if (defined _MSC_VER) && (_MSC_VER >= 1200)
+#if defined(_MSC_VER)
 #  pragma once
 #endif
 
@@ -35,13 +35,13 @@ namespace boost {
 namespace container {
 
 template<class It>
-struct is_default_construct_iterator
+struct is_value_init_construct_iterator
 {
    static const bool value = false;
 };
 
 template<class U, class D>
-struct is_default_construct_iterator<default_construct_iterator<U, D> >
+struct is_value_init_construct_iterator<value_init_construct_iterator<U, D> >
 {
    static const bool value = true;
 };
@@ -64,9 +64,15 @@ inline void construct_in_place(A &a, T* dest, InpIt source)
 //#endif
 
 template<class A, class T, class U, class D>
-inline void construct_in_place(A &a, T *dest, default_construct_iterator<U, D>)
+inline void construct_in_place(A &a, T *dest, value_init_construct_iterator<U, D>)
 {
    boost::container::allocator_traits<A>::construct(a, dest);
+}
+
+template<class A, class T, class U, class D>
+inline void construct_in_place(A &a, T *dest, default_init_construct_iterator<U, D>)
+{
+   boost::container::allocator_traits<A>::construct(a, dest, default_init);
 }
 
 template<class A, class T, class U, class EF, class D>

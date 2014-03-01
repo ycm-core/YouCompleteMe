@@ -1,10 +1,10 @@
-//  (C) Copyright John Maddock 2001 - 2002. 
-//  (C) Copyright Jens Maurer 2001. 
-//  (C) Copyright David Abrahams 2002. 
-//  (C) Copyright Aleksey Gurtovoy 2002. 
+//  (C) Copyright John Maddock 2001 - 2002.
+//  (C) Copyright Jens Maurer 2001.
+//  (C) Copyright David Abrahams 2002.
+//  (C) Copyright Aleksey Gurtovoy 2002.
 //  (C) Copyright Markus Schoepflin 2005.
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for most recent version.
@@ -33,15 +33,15 @@
 
 #if (__EDG_VERSION__ <= 244) && !defined(BOOST_NO_TEMPLATE_TEMPLATES)
 #   define BOOST_NO_TEMPLATE_TEMPLATES
-#endif 
+#endif
 
 #if (__EDG_VERSION__ < 300) && !defined(BOOST_NO_IS_ABSTRACT)
 #   define BOOST_NO_IS_ABSTRACT
-#endif 
+#endif
 
 #if (__EDG_VERSION__ <= 303) && !defined(BOOST_FUNCTION_SCOPE_USING_DECLARATION_BREAKS_ADL)
 #   define BOOST_FUNCTION_SCOPE_USING_DECLARATION_BREAKS_ADL
-#endif 
+#endif
 
 // See also kai.hpp which checks a Kai-specific symbol for EH
 # if !defined(__KCC) && !defined(__EXCEPTIONS) && !defined(BOOST_NO_EXCEPTIONS)
@@ -53,6 +53,11 @@
 # else
 #     define BOOST_NO_LONG_LONG
 # endif
+
+// Not sure what version was the first to support #pragma once, but
+// different EDG-based compilers (e.g. Intel) supported it for ages.
+// Add a proper version check if it causes problems.
+#define BOOST_HAS_PRAGMA_ONCE
 
 //
 // C++0x features
@@ -96,6 +101,9 @@
 #define BOOST_NO_CXX11_VARIADIC_TEMPLATES
 #define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
 #ifdef c_plusplus
 // EDG has "long long" in non-strict mode

@@ -1,8 +1,8 @@
 //  Copyright (C) Christof Meerwald 2003
 //  Copyright (C) Dan Watkins 2003
 //
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  Digital Mars C++ compiler setup:
@@ -11,15 +11,7 @@
 #define BOOST_HAS_LONG_LONG
 #define BOOST_HAS_PRAGMA_ONCE
 
-#if (__DMC__ <= 0x833)
-#define BOOST_FUNCTION_SCOPE_USING_DECLARATION_BREAKS_ADL
-#define BOOST_NO_TEMPLATE_TEMPLATES
-#define BOOST_NEEDS_TOKEN_PASTING_OP_FOR_TOKENS_JUXTAPOSING
-#define BOOST_NO_ARRAY_TYPE_SPECIALIZATIONS
-#define BOOST_NO_EXPLICIT_FUNCTION_TEMPLATE_ARGUMENTS
-#endif
-#if (__DMC__ <= 0x840) || !defined(BOOST_STRICT_CONFIG)
-#define BOOST_NO_EXPLICIT_FUNCTION_TEMPLATE_ARGUMENTS
+#if !defined(BOOST_STRICT_CONFIG)
 #define BOOST_NO_MEMBER_TEMPLATE_FRIENDS
 #define BOOST_NO_OPERATORS_IN_NAMESPACE
 #define BOOST_NO_UNREACHABLE_RETURN_DETECTION
@@ -30,11 +22,9 @@
 
 //
 // has macros:
-#if (__DMC__ >= 0x840)
 #define BOOST_HAS_DIRENT_H
 #define BOOST_HAS_STDINT_H
 #define BOOST_HAS_WINTHREADS
-#endif
 
 #if (__DMC__ >= 0x847)
 #define BOOST_HAS_EXPM1
@@ -87,12 +77,11 @@
 #define BOOST_NO_CXX11_VARIADIC_TEMPLATES
 #define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
-#if (__DMC__ < 0x812)
-#define BOOST_NO_CXX11_VARIADIC_MACROS
-#endif
-
-#if __DMC__ < 0x800
+#if (__DMC__ <= 0x840)
 #error "Compiler not supported or configured - please reconfigure"
 #endif
 //

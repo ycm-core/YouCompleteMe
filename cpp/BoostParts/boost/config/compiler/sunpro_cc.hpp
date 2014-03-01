@@ -1,10 +1,10 @@
-//  (C) Copyright John Maddock 2001. 
-//  (C) Copyright Jens Maurer 2001 - 2003. 
-//  (C) Copyright Peter Dimov 2002. 
-//  (C) Copyright Aleksey Gurtovoy 2002 - 2003. 
-//  (C) Copyright David Abrahams 2002. 
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  (C) Copyright John Maddock 2001.
+//  (C) Copyright Jens Maurer 2001 - 2003.
+//  (C) Copyright Peter Dimov 2002.
+//  (C) Copyright Aleksey Gurtovoy 2002 - 2003.
+//  (C) Copyright David Abrahams 2002.
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for most recent version.
@@ -34,7 +34,7 @@
 #      define BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 #    endif
 
-#    if (__SUNPRO_CC <= 0x530) 
+#    if (__SUNPRO_CC <= 0x530)
        // Requesting debug info (-g) with Boost.Python results
        // in an internal compiler error for "static const"
        // initialized in-class.
@@ -57,7 +57,7 @@
 #      define BOOST_NO_INTEGRAL_INT64_T
 #    endif
 
-#    if (__SUNPRO_CC < 0x570) 
+#    if (__SUNPRO_CC < 0x570)
 #      define BOOST_NO_TEMPLATE_TEMPLATES
        // see http://lists.boost.org/MailArchives/boost/msg47184.php
        // and http://lists.boost.org/MailArchives/boost/msg47220.php
@@ -65,7 +65,7 @@
 #      define BOOST_NO_SFINAE
 #      define BOOST_NO_ARRAY_TYPE_SPECIALIZATIONS
 #    endif
-#    if (__SUNPRO_CC <= 0x580) 
+#    if (__SUNPRO_CC <= 0x580)
 #      define BOOST_NO_IS_ABSTRACT
 #    endif
 
@@ -128,6 +128,9 @@
 #define BOOST_NO_CXX11_VARIADIC_MACROS
 #define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
 //
 // Version

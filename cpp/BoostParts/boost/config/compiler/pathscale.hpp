@@ -1,7 +1,7 @@
 //  (C) Copyright Bryce Lelbach 2011
 
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for most recent version.
@@ -77,5 +77,7 @@
 #  define BOOST_NO_CXX11_HDR_CODECVT
 #  define BOOST_NO_CXX11_HDR_CHRONO
 #  define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#  define BOOST_NO_CXX11_ALIGNAS
+#  define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#  define BOOST_NO_CXX11_INLINE_NAMESPACES
 #endif
-

@@ -117,11 +117,13 @@ namespace unordered
 
 #if defined(BOOST_UNORDERED_USE_MOVE)
         unordered_map(BOOST_RV_REF(unordered_map) other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
 #elif !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_map(unordered_map&& other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
@@ -142,7 +144,7 @@ namespace unordered
 
         // Destructor
 
-        ~unordered_map();
+        ~unordered_map() BOOST_NOEXCEPT;
 
         // Assign
 
@@ -598,11 +600,13 @@ namespace unordered
 
 #if defined(BOOST_UNORDERED_USE_MOVE)
         unordered_multimap(BOOST_RV_REF(unordered_multimap) other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
 #elif !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         unordered_multimap(unordered_multimap&& other)
+                BOOST_NOEXCEPT_IF(table::nothrow_move_constructible)
             : table_(other.table_, boost::unordered::detail::move_tag())
         {
         }
@@ -623,7 +627,7 @@ namespace unordered
 
         // Destructor
 
-        ~unordered_multimap();
+        ~unordered_multimap() BOOST_NOEXCEPT;
 
         // Assign
 
@@ -1057,7 +1061,7 @@ namespace unordered
     }
     
     template <class K, class T, class H, class P, class A>
-    unordered_map<K,T,H,P,A>::~unordered_map() {}
+    unordered_map<K,T,H,P,A>::~unordered_map() BOOST_NOEXCEPT {}
 
     template <class K, class T, class H, class P, class A>
     unordered_map<K,T,H,P,A>::unordered_map(
@@ -1390,7 +1394,7 @@ namespace unordered
     }
     
     template <class K, class T, class H, class P, class A>
-    unordered_multimap<K,T,H,P,A>::~unordered_multimap() {}
+    unordered_multimap<K,T,H,P,A>::~unordered_multimap() BOOST_NOEXCEPT {}
 
     template <class K, class T, class H, class P, class A>
     unordered_multimap<K,T,H,P,A>::unordered_multimap(

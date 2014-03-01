@@ -18,17 +18,24 @@
 
 #include <boost/move/detail/config_begin.hpp>
 
+//boost_move_no_copy_constructor_or_assign typedef
+//used to detect noncopyable types for other Boost libraries.
 #ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
    #define BOOST_MOVE_IMPL_NO_COPY_CTOR_OR_ASSIGN(TYPE) \
       private:\
       TYPE(TYPE &);\
       TYPE& operator=(TYPE &);\
+      public:\
+      typedef int boost_move_no_copy_constructor_or_assign; \
+      private:\
    //
 #else
    #define BOOST_MOVE_IMPL_NO_COPY_CTOR_OR_ASSIGN(TYPE) \
       public:\
       TYPE(TYPE const &) = delete;\
       TYPE& operator=(TYPE const &) = delete;\
+      public:\
+      typedef int boost_move_no_copy_constructor_or_assign; \
       private:\
    //
 #endif   //BOOST_NO_CXX11_DELETED_FUNCTIONS

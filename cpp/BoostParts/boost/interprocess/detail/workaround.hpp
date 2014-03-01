@@ -24,8 +24,25 @@
 
    #if defined(_POSIX_THREAD_PROCESS_SHARED) && ((_POSIX_THREAD_PROCESS_SHARED - 0) > 0)
       //Cygwin defines _POSIX_THREAD_PROCESS_SHARED but does not implement it.
-      //Mac Os X >= Leopard defines _POSIX_THREAD_PROCESS_SHARED but does not seem to work.
-      #if !defined(__CYGWIN__) && !defined(__APPLE__)
+      #if defined(__CYGWIN__)
+         #define BOOST_INTERPROCESS_BUGGY_POSIX_PROCESS_SHARED
+      //Mac Os X < Lion (10.7) might define _POSIX_THREAD_PROCESS_SHARED but there is no real support.
+      #elif defined(__APPLE__)
+         #include "TargetConditionals.h"
+         //Check we're on Mac OS target
+         #if defined(TARGET_OS_MAC)
+            #include "AvailabilityMacros.h"
+            //If minimum target for this compilation is older than Mac Os Lion, then we are out of luck
+            #if MAC_OS_X_VERSION_MIN_REQUIRED < 1070
+               #define BOOST_INTERPROCESS_BUGGY_POSIX_PROCESS_SHARED
+            #endif
+         #endif
+      #endif
+
+      //If buggy _POSIX_THREAD_PROCESS_SHARED is detected avoid using it
+      #if defined(BOOST_INTERPROCESS_BUGGY_POSIX_PROCESS_SHARED)
+         #undef BOOST_INTERPROCESS_BUGGY_POSIX_PROCESS_SHARED
+      #else
          #define BOOST_INTERPROCESS_POSIX_PROCESS_SHARED
       #endif
    #endif

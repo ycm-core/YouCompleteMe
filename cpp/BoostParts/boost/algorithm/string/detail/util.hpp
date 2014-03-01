@@ -13,7 +13,7 @@
 
 #include <boost/algorithm/string/config.hpp>
 #include <functional>
-#include <boost/range/iterator_range.hpp>
+#include <boost/range/iterator_range_core.hpp>
 
 namespace boost {
     namespace algorithm {

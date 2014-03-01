@@ -11,11 +11,17 @@
 
 #include <boost/atomic/detail/config.hpp>
 
-#ifdef BOOST_ATOMIC_HAS_PRAGMA_ONCE
+#ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
 #endif
 
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+// Intel compiler does not support __atomic* intrinsics properly, although defines them (tested with 13.0.1 and 13.1.1 on Linux)
+#if (defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 407) && !defined(BOOST_INTEL_CXX_VERSION))\
+    || (defined(BOOST_CLANG) && ((__clang_major__ * 100 + __clang_minor__) >= 302))
+
+    #include <boost/atomic/detail/gcc-atomic.hpp>
+
+#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 
     #include <boost/atomic/detail/gcc-x86.hpp>
 
@@ -32,7 +38,10 @@
 // I don't know how complete it is.
 #elif defined(__GNUC__) && (defined(__ARM_ARCH_6__)  || defined(__ARM_ARCH_6J__) \
                          || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__) \
-                         || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_7A__))
+                         || defined(__ARM_ARCH_6K__) \
+                         || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) \
+                         || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) \
+                         || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7S__))
 
     #include <boost/atomic/detail/gcc-armv6plus.hpp>
 

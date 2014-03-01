@@ -52,7 +52,7 @@ public:
 
         /// don't do anything when saving primitive types
     template<class T>
-    void save(const T & t)
+    void save(const T &)
     {
     }
 };

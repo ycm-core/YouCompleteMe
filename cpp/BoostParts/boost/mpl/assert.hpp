@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Id: assert.hpp 84442 2013-05-23 14:38:22Z steven_watanabe $
-// $Date: 2013-05-23 07:38:22 -0700 (Thu, 23 May 2013) $
-// $Revision: 84442 $
+// $Id: assert.hpp 86514 2013-10-29 13:15:03Z bemandawes $
+// $Date: 2013-10-29 06:15:03 -0700 (Tue, 29 Oct 2013) $
+// $Revision: 86514 $
 
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/aux_/value_wknd.hpp>
@@ -134,7 +134,7 @@ template< assert_::relations r, long x, long y > struct assert_relation {};
 
 #endif 
 
-#if BOOST_WORKAROUND(BOOST_MSVC, >= 1700)
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
 
 template<class Pred>
 struct extract_assert_pred;

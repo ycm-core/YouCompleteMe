@@ -38,6 +38,7 @@
 #    endif
 #    define BOOST_PP_TUPLE_REM_I(size) BOOST_PP_TUPLE_REM_ ## size
 # endif
+# define BOOST_PP_TUPLE_REM_0()
 # define BOOST_PP_TUPLE_REM_1(e0) e0
 # define BOOST_PP_TUPLE_REM_2(e0, e1) e0, e1
 # define BOOST_PP_TUPLE_REM_3(e0, e1, e2) e0, e1, e2

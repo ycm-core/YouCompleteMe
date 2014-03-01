@@ -14,7 +14,7 @@ fi
 pushd $1
 
 ./bootstrap.sh
-b2 tools/bcp
+./b2 tools/bcp
 
 boost_part_dir=`mktemp -d -t boost_parts.XXXXXX`
 

@@ -19,6 +19,7 @@
 #define BOOST_MPI_PACKED_OARCHIVE_HPP
 
 #include <boost/mpi/datatype.hpp>
+#include <boost/archive/basic_archive.hpp>
 #include <boost/archive/detail/auto_link_archive.hpp>
 #include <boost/archive/detail/common_oarchive.hpp>
 #include <boost/archive/shared_ptr_helper.hpp>
@@ -36,13 +37,13 @@ namespace boost { namespace mpi {
   typedef packed_oprimitive oprimitive;
 #endif
 
-/** @brief An archive that unpacks binary data from an MPI buffer.
+/** @brief An archive that packs binary data into an MPI buffer.
  *
- *  The @c packed_oarchive class is an Archiver (as in the
- *  Boost.Serialization library) that unpacks binary data from a
- *  buffer received via MPI. It can operate on any Serializable data
- *  type and will use the @c MPI_Unpack function of the underlying MPI
- *  implementation to perform deserialization.
+ *  The @c packed_iarchive class is an Archiver (as in the
+ *  Boost.Serialization library) that packs binary data into a buffer
+ *  for transmission via MPI. It can operate on any Serializable data
+ *  type and will use the @c MPI_Pack function of the underlying MPI
+ *  implementation to perform serialization.
  */
   
 class BOOST_MPI_DECL packed_oarchive
@@ -52,35 +53,42 @@ class BOOST_MPI_DECL packed_oarchive
 {
 public:
   /**
-   *  Construct a @c packed_oarchive to receive data over the given
+   *  Construct a @c packed_oarchive for transmission over the given
    *  MPI communicator and with an initial buffer.
    *
    *  @param comm The communicator over which this archive will be
-   *  received.
+   *  sent.
    *
-   *  @param b A user-defined buffer that contains the binary
-   *  representation of serialized objects.
+   *  @param b A user-defined buffer that will be filled with the
+   *  binary representation of serialized objects.
    *
    *  @param flags Control the serialization of the data types. Refer
    *  to the Boost.Serialization documentation before changing the
    *  default flags.
+   *
+   *  @param position Set the offset into buffer @p b at which
+   *  deserialization will begin.
    */
+   
   packed_oarchive( MPI_Comm const & comm, buffer_type & b, unsigned int flags = boost::archive::no_header)
          : oprimitive(b,comm),
            archive::detail::common_oarchive<packed_oarchive>(flags)
         {}
 
   /**
-   *  Construct a @c packed_oarchive to receive data over the given
+   *  Construct a @c packed_oarchive for transmission over the given
    *  MPI communicator.
    *
    *  @param comm The communicator over which this archive will be
-   *  received.
+   *  sent.
+   *
+   *  @param s The size of the buffer to be received.
    *
    *  @param flags Control the serialization of the data types. Refer
    *  to the Boost.Serialization documentation before changing the
    *  default flags.
    */
+   
   packed_oarchive ( MPI_Comm const & comm, unsigned int flags =  boost::archive::no_header)
          : oprimitive(internal_buffer_,comm),
            archive::detail::common_oarchive<packed_oarchive>(flags)
@@ -93,7 +101,7 @@ public:
     archive::detail::common_oarchive<packed_oarchive>::save_override(x,version);
   }
 
-  // Save it directly using the primnivites
+  // Save it directly using the primitives
   template<class T>
   void save_override(T const& x, int /*version*/, mpl::true_)
   {
@@ -117,6 +125,11 @@ public:
       * this->This() << s;
   }
 
+  void save_override(archive::class_id_type & t, int version){
+    const boost::int_least16_t x = t;
+    * this->This() << x;
+  }
+  
 private:
   /// An internal buffer to be used when the user does not supply his
   /// own buffer.

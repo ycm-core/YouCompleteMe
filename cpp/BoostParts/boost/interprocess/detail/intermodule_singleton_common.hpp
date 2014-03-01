@@ -23,6 +23,7 @@
 #include <boost/interprocess/exceptions.hpp>
 #include <boost/type_traits/type_with_alignment.hpp>
 #include <boost/interprocess/detail/mpl.hpp>
+#include <boost/interprocess/sync/spin/wait.hpp>
 #include <boost/assert.hpp>
 #include <cstddef>
 #include <cstdio>
@@ -145,6 +146,7 @@ class intermodule_singleton_common
          //If previous state was initializing, this means that another winner thread is
          //trying to initialize the singleton. Just wait until completes its work.
          else if(previous_module_singleton_initialized == Initializing){
+            spin_wait swait;
             while(1){
                previous_module_singleton_initialized = atomic_read32(&this_module_singleton_initialized);
                if(previous_module_singleton_initialized >= Initialized){
@@ -152,7 +154,7 @@ class intermodule_singleton_common
                   break;
                }
                else if(previous_module_singleton_initialized == Initializing){
-                  thread_yield();
+                  swait.yield();
                }
                else{
                   //This can't be happening!
@@ -206,6 +208,7 @@ class intermodule_singleton_common
    static void initialize_global_map_handle()
    {
       //Obtain unique map name and size
+      spin_wait swait;
       while(1){
          //Try to pass map state to initializing
          ::boost::uint32_t tmp = atomic_cas32(&this_module_map_initialized, Initializing, Uninitialized);
@@ -218,7 +221,7 @@ class intermodule_singleton_common
          }
          //If some other thread is doing the work wait
          else if(tmp == Initializing){
-            thread_yield();
+            swait.yield();
          }
          else{ //(tmp == Uninitialized)
             //If not initialized try it again?
@@ -309,7 +312,7 @@ struct ref_count_ptr
 
 
 //Now this class is a singleton, initializing the singleton in
-//the first get() function call if LazyInit is false. If true
+//the first get() function call if LazyInit is true. If false
 //then the singleton will be initialized when loading the module.
 template<typename C, bool LazyInit, bool Phoenix, class ThreadSafeGlobalMap>
 class intermodule_singleton_impl

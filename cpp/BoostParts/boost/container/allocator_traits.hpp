@@ -17,12 +17,13 @@
 #ifndef BOOST_CONTAINER_ALLOCATOR_ALLOCATOR_TRAITS_HPP
 #define BOOST_CONTAINER_ALLOCATOR_ALLOCATOR_TRAITS_HPP
 
-#if (defined _MSC_VER) && (_MSC_VER >= 1200)
+#if defined(_MSC_VER)
 #  pragma once
 #endif
 
 #include <boost/container/detail/config_begin.hpp>
 #include <boost/container/detail/workaround.hpp>
+#include <boost/container/container_fwd.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/memory_util.hpp>
 #include <boost/container/detail/memory_util.hpp>
@@ -387,6 +388,10 @@ struct allocator_traits
          #define BOOST_PP_LOCAL_LIMITS (0, BOOST_CONTAINER_MAX_CONSTRUCTOR_PARAMETERS)
          #include BOOST_PP_LOCAL_ITERATE()
       #endif   // #if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
+
+      template<class T>
+      static void priv_construct_dispatch2(boost::false_type, Alloc &, T *p, ::boost::container::default_init_t)
+      {  ::new((void*)p) T; }
    #endif   //#if defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
 
    ///@endcond

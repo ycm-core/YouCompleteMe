@@ -14,15 +14,3 @@
 // NVIDIA Specific support
 // BOOST_GPU_ENABLED : Flag a function or a method as being enabled on the host and device
 #define BOOST_GPU_ENABLED __host__ __device__
-
-// Boost support macro for NVCC 
-// NVCC Basically behaves like some flavor of MSVC6 + some specific quirks
-#ifdef __GNUC__
-
-#include <boost/config/compiler/gcc.hpp>
-
-#elif defined(_MSC_VER)
-
-#include <boost/config/compiler/visualc.hpp>
-
-#endif

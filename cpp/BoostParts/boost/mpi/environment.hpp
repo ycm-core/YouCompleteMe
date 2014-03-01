@@ -17,9 +17,46 @@
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <string>
+#include <iosfwd>
 
 namespace boost { namespace mpi {
+namespace threading {
+/** @brief specify the supported threading level.
+ * 
+ * Based on MPI 2 standard/8.7.3
+ */
+enum level {
+  /** Only one thread will execute. 
+   */
+  single     = MPI_THREAD_SINGLE,
+  /** Only main thread will do MPI calls.
+   * 
+   * The process may be multi-threaded, but only the main 
+   * thread will make MPI calls (all MPI calls are ``funneled''
+   * to the main thread).
+   */
+  funneled   = MPI_THREAD_FUNNELED,
+  /** Only one thread at the time do MPI calls.
+   * 
+   * The process may be multi-threaded, and multiple 
+   * threads may make MPI calls, but only one at a time:
+   * MPI calls are not made concurrently from two distinct 
+   * threads (all MPI calls are ``serialized'').
+   */
+  serialized = MPI_THREAD_SERIALIZED,
+  /** Multiple thread may do MPI calls.
+   * 
+   * Multiple threads may call MPI, with no restrictions.
+   */
+  multiple   = MPI_THREAD_MULTIPLE
+};
 
+/** Formated output for threading level. */
+std::ostream& operator<<(std::ostream& out, level l);
+
+/** Formated input for threading level. */
+std::istream& operator>>(std::istream& in, level& l);
+} // namespace threading
 /** @brief Initialize, finalize, and query the MPI environment.
  *
  *  The @c environment class is used to initialize, finalize, and
@@ -62,6 +99,22 @@ public:
    *  program if it is destructed due to an uncaught exception.
    */
   explicit environment(bool abort_on_exception = true);
+  /** Initialize the MPI environment. 
+   *
+   *  If the MPI environment has not already been initialized,
+   *  initializes MPI with a call to @c MPI_Init_thread. Since this
+   *  constructor does not take command-line arguments (@c argc and @c
+   *  argv), it is only available when the underlying MPI
+   *  implementation supports calling @c MPI_Init with @c NULL
+   *  arguments, indicated by the macro @c
+   *  BOOST_MPI_HAS_NOARG_INITIALIZATION.
+   *
+   *  @param mt_level the required level of threading support.
+   *
+   *  @param abort_on_exception When true, this object will abort the
+   *  program if it is destructed due to an uncaught exception.
+   */
+  explicit environment(threading::level mt_level, bool abort_on_exception = true);
 #endif
 
   /** Initialize the MPI environment.
@@ -79,6 +132,25 @@ public:
    *  program if it is destructed due to an uncaught exception.
    */
   environment(int& argc, char** &argv, bool abort_on_exception = true);
+
+  /** Initialize the MPI environment.
+   *
+   *  If the MPI environment has not already been initialized,
+   *  initializes MPI with a call to @c MPI_Init_thread.
+   *
+   *  @param argc The number of arguments provided in @p argv, as
+   *  passed into the program's @c main function.
+   *
+   *  @param argv The array of argument strings passed to the program
+   *  via @c main.
+   *
+   *  @param mt_level the required level of threading support
+   *
+   *  @param abort_on_exception When true, this object will abort the
+   *  program if it is destructed due to an uncaught exception.
+   */
+  environment(int& argc, char** &argv, threading::level mt_level,
+              bool abort_on_exception = true);
 
   /** Shuts down the MPI environment.
    *
@@ -185,13 +257,21 @@ public:
    */
   static std::string processor_name();
 
+  /** Query the current level of thread support.
+   */
+  static threading::level thread_level();
+
+  /** Are we in the main thread?
+   */
+  static bool is_main_thread();
+  
 private:
   /// Whether this environment object called MPI_Init
   bool i_initialized;
 
   /// Whether we should abort if the destructor is
   bool abort_on_exception;
-
+  
   /// The number of reserved tags.
   static const int num_reserved_tags = 1;
 };

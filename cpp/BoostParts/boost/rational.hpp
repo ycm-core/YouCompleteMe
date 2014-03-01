@@ -28,9 +28,9 @@
 //  31 Oct 06  Recoded both operator< to use round-to-negative-infinity
 //             divisions; the rational-value version now uses continued fraction
 //             expansion to avoid overflows, for bug #798357 (Daryle Walker)
-//  20 Oct 06  Fix operator bool_type for CW 8.3 (Joaquín M López Muñoz)
+//  20 Oct 06  Fix operator bool_type for CW 8.3 (JoaquÃ­n M LÃ³pez MuÃ±oz)
 //  18 Oct 06  Use EXPLICIT_TEMPLATE_TYPE helper macros from Boost.Config
-//             (Joaquín M López Muñoz)
+//             (JoaquÃ­n M LÃ³pez MuÃ±oz)
 //  27 Dec 05  Add Boolean conversion operator (Daryle Walker)
 //  28 Sep 02  Use _left versions of operators from operators.hpp
 //  05 Jul 01  Recode gcd(), avoiding std::swap (Helmut Zeisel)
@@ -389,9 +389,11 @@ bool rational<IntType>::operator< (const rational<IntType>& r) const
 
     // Determine relative order by expanding each value to its simple continued
     // fraction representation using the Euclidian GCD algorithm.
-    struct { int_type  n, d, q, r; }  ts = { this->num, this->den, this->num /
-     this->den, this->num % this->den }, rs = { r.num, r.den, r.num / r.den,
-     r.num % r.den };
+    struct { int_type  n, d, q, r; }
+     ts = { this->num, this->den, static_cast<int_type>(this->num / this->den),
+     static_cast<int_type>(this->num % this->den) },
+     rs = { r.num, r.den, static_cast<int_type>(r.num / r.den),
+     static_cast<int_type>(r.num % r.den) };
     unsigned  reverse = 0u;
 
     // Normalize negative moduli by repeatedly adding the (positive) denominator

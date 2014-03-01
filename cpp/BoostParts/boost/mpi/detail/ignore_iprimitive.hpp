@@ -44,7 +44,7 @@ public:
 
         /// don't do anything when loading primitive types
     template<class T>
-    void load(T & t)
+    void load(T &)
     {
     }
 };

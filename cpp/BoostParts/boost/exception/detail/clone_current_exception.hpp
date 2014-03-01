@@ -1,10 +1,16 @@
-//Copyright (c) 2006-2009 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2006-2013 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef UUID_81522C0EB56511DFAB613DB0DFD72085
 #define UUID_81522C0EB56511DFAB613DB0DFD72085
+#if (__GNUC__*100+__GNUC_MINOR__>301) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
+#pragma GCC system_header
+#endif
+#if defined(_MSC_VER) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
+#pragma warning(push,1)
+#endif
 
 #ifdef BOOST_NO_EXCEPTIONS
 #    error This header requires exception handling to be enabled.
@@ -44,4 +50,7 @@ boost
         }
     }
 
+#if defined(_MSC_VER) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
+#pragma warning(pop)
+#endif
 #endif

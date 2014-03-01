@@ -12,7 +12,7 @@
 #define BOOST_STRING_CONCEPT_HPP
 
 #include <boost/concept_check.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <boost/range/iterator_range_core.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 

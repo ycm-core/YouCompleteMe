@@ -19,6 +19,8 @@
 
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || (defined(_MSC_VER) && (_MSC_VER == 1600))
 #include <boost/type_traits/is_same.hpp>
+#include <boost/type_traits/is_class.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 #endif
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) 
@@ -28,6 +30,7 @@
 
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 struct not_a_type;
+struct not_a_type2;
 #define BOOST_MOVE_CATCH_CONST(U)  \
    typename ::boost::mpl::if_< ::boost::is_class<U>, BOOST_CATCH_CONST_RLVALUE(U), const U &>::type
 #define BOOST_MOVE_CATCH_RVALUE(U)\
@@ -40,7 +43,6 @@ struct not_a_type;
 #endif
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-
 #define BOOST_MOVE_CONVERSION_AWARE_CATCH(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION)\
    RETURN_VALUE PUB_FUNCTION(BOOST_MOVE_CATCH_CONST(TYPE) x)\
    {  return FWD_FUNCTION(static_cast<const TYPE&>(x)); }\
@@ -72,7 +74,7 @@ struct not_a_type;
       return FWD_FUNCTION(::boost::move(t));\
    }\
 //
-
+//                         ::boost::is_convertible<BOOST_MOVE_TEMPL_PARAM, TYPE>::value &&
 #elif (defined(_MSC_VER) && (_MSC_VER == 1600))
 
 #define BOOST_MOVE_CONVERSION_AWARE_CATCH(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION)\
@@ -108,7 +110,7 @@ struct not_a_type;
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
-#define BOOST_MOVE_CONVERSION_AWARE_CATCH_1ARG(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION, ARG1)\
+#define BOOST_MOVE_CONVERSION_AWARE_CATCH_1ARG(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION, ARG1, UNLESS_CONVERTIBLE_TO)\
    RETURN_VALUE PUB_FUNCTION(ARG1 arg1, BOOST_MOVE_CATCH_CONST(TYPE) x)\
    {  return FWD_FUNCTION(arg1, static_cast<const TYPE&>(x)); }\
 \
@@ -119,8 +121,7 @@ struct not_a_type;
    {  return FWD_FUNCTION(arg1, const_cast<const TYPE &>(x)); }\
 \
    template<class BOOST_MOVE_TEMPL_PARAM>\
-   typename ::boost::enable_if_c\
-                     <  ::boost::is_class<TYPE>::value &&\
+   typename ::boost::enable_if_c<\
                         ::boost::is_same<TYPE, BOOST_MOVE_TEMPL_PARAM>::value &&\
                        !::boost::has_move_emulation_enabled<BOOST_MOVE_TEMPL_PARAM>::value\
                      , RETURN_VALUE >::type\
@@ -128,10 +129,10 @@ struct not_a_type;
    { return FWD_FUNCTION(arg1, u); }\
 \
    template<class BOOST_MOVE_TEMPL_PARAM>\
-   typename ::boost::enable_if_c\
-                     < (!::boost::is_class<BOOST_MOVE_TEMPL_PARAM>::value || \
-                        !::boost::move_detail::is_rv<BOOST_MOVE_TEMPL_PARAM>::value) && \
-                       !::boost::is_same<TYPE, BOOST_MOVE_TEMPL_PARAM>::value \
+   typename ::boost::enable_if_c<\
+                       !::boost::move_detail::is_rv<BOOST_MOVE_TEMPL_PARAM>::value && \
+                       !::boost::is_same<TYPE, BOOST_MOVE_TEMPL_PARAM>::value && \
+                       !::boost::is_convertible<BOOST_MOVE_TEMPL_PARAM, UNLESS_CONVERTIBLE_TO>::value \
                      , RETURN_VALUE >::type\
    PUB_FUNCTION(ARG1 arg1, const BOOST_MOVE_TEMPL_PARAM &u)\
    {\
@@ -142,7 +143,7 @@ struct not_a_type;
 
 #elif (defined(_MSC_VER) && (_MSC_VER == 1600))
 
-#define BOOST_MOVE_CONVERSION_AWARE_CATCH_1ARG(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION, ARG1)\
+#define BOOST_MOVE_CONVERSION_AWARE_CATCH_1ARG(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION, ARG1, UNLESS_CONVERTIBLE_TO)\
    RETURN_VALUE PUB_FUNCTION(ARG1 arg1, BOOST_MOVE_CATCH_CONST(TYPE) x)\
    {  return FWD_FUNCTION(arg1, static_cast<const TYPE&>(x)); }\
 \
@@ -151,7 +152,8 @@ struct not_a_type;
 \
    template<class BOOST_MOVE_TEMPL_PARAM>\
    typename ::boost::enable_if_c\
-                     <  !::boost::is_same<TYPE, BOOST_MOVE_TEMPL_PARAM>::value\
+                     <  !::boost::is_same<TYPE, BOOST_MOVE_TEMPL_PARAM>::value && \
+                       !::boost::is_convertible<BOOST_MOVE_TEMPL_PARAM, UNLESS_CONVERTIBLE_TO>::value \
                      , RETURN_VALUE >::type\
    PUB_FUNCTION(ARG1 arg1, const BOOST_MOVE_TEMPL_PARAM &u)\
    {\
@@ -162,7 +164,7 @@ struct not_a_type;
 
 #else
 
-#define BOOST_MOVE_CONVERSION_AWARE_CATCH_1ARG(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION, ARG1)\
+#define BOOST_MOVE_CONVERSION_AWARE_CATCH_1ARG(PUB_FUNCTION, TYPE, RETURN_VALUE, FWD_FUNCTION, ARG1, UNLESS_CONVERTIBLE_TO)\
    RETURN_VALUE PUB_FUNCTION(ARG1 arg1, BOOST_MOVE_CATCH_CONST(TYPE) x)\
    {  return FWD_FUNCTION(arg1, static_cast<const TYPE&>(x)); }\
 \

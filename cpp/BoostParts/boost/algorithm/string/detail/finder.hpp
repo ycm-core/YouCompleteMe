@@ -15,7 +15,7 @@
 #include <boost/algorithm/string/constants.hpp>
 #include <boost/detail/iterator.hpp>
 
-#include <boost/range/iterator_range.hpp>
+#include <boost/range/iterator_range_core.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/empty.hpp>
@@ -142,7 +142,6 @@ namespace boost {
                     ForwardIteratorT End,
                     std::forward_iterator_tag ) const
                 {
-                    typedef ForwardIteratorT input_iterator_type;
                     typedef iterator_range<ForwardIteratorT> result_type;
 
                     first_finder_type first_finder(
@@ -263,7 +262,6 @@ namespace boost {
                     ForwardIteratorT End,
                     unsigned int N) const
                 {
-                    typedef ForwardIteratorT input_iterator_type;
                     typedef iterator_range<ForwardIteratorT> result_type;
 
                     // Sanity check
@@ -298,7 +296,6 @@ namespace boost {
                     ForwardIteratorT End,
                     unsigned int N) const
                 {
-                    typedef ForwardIteratorT input_iterator_type;
                     typedef iterator_range<ForwardIteratorT> result_type;
 
                     // Sanity check
@@ -362,7 +359,6 @@ namespace boost {
                 unsigned int N,
                 std::random_access_iterator_tag )
             {
-                typedef ForwardIteratorT input_iterator_type;
                 typedef iterator_range<ForwardIteratorT> result_type;
 
                 if ( (End<=Begin) || ( static_cast<unsigned int>(End-Begin) < N ) )
@@ -436,7 +432,6 @@ namespace boost {
                 unsigned int N,
                 std::random_access_iterator_tag )
             {
-                typedef ForwardIteratorT input_iterator_type;
                 typedef iterator_range<ForwardIteratorT> result_type;
 
                 if ( (End<=Begin) || ( static_cast<unsigned int>(End-Begin) < N ) )

@@ -234,9 +234,11 @@ namespace boost { namespace unordered { namespace detail {
 #pragma warning(disable:4100) // unreferenced formal parameter
 #endif
 
-    template <class T>
-    inline void destroy(T* x) {
-        x->~T();
+    namespace func {
+        template <class T>
+        inline void destroy(T* x) {
+            x->~T();
+        }
     }
 
 #if defined(BOOST_MSVC)
@@ -257,13 +259,12 @@ namespace boost { namespace unordered { namespace detail {
 
     template <typename T, unsigned int> struct expr_test;
     template <typename T> struct expr_test<T, sizeof(char)> : T {};
-    template <typename U> static char for_expr_test(U const&);
 
 #   define BOOST_UNORDERED_CHECK_EXPRESSION(count, result, expression)      \
         template <typename U>                                               \
         static typename boost::unordered::detail::expr_test<                \
             BOOST_PP_CAT(choice, result),                                   \
-            sizeof(boost::unordered::detail::for_expr_test((                \
+            sizeof(for_expr_test((                                          \
                 (expression),                                               \
             0)))>::type test(                                               \
             BOOST_PP_CAT(choice, count))
@@ -276,6 +277,7 @@ namespace boost { namespace unordered { namespace detail {
 #   define BOOST_UNORDERED_HAS_FUNCTION(name, thing, args, _)               \
     struct BOOST_PP_CAT(has_, name)                                         \
     {                                                                       \
+        template <typename U> static char for_expr_test(U const&);          \
         BOOST_UNORDERED_CHECK_EXPRESSION(1, 1,                              \
             boost::unordered::detail::make< thing >().name args);           \
         BOOST_UNORDERED_DEFAULT_EXPRESSION(2, 2);                           \
@@ -473,6 +475,9 @@ namespace boost { namespace unordered { namespace detail {
 
 #   endif
 
+    namespace func
+    {
+
     template <typename Alloc>
     inline Alloc call_select_on_container_copy_construction(const Alloc& rhs,
         typename boost::enable_if_c<
@@ -509,6 +514,8 @@ namespace boost { namespace unordered { namespace detail {
     {
         return (std::numeric_limits<SizeType>::max)();
     }
+
+    } // namespace func.
 
     template <typename Alloc>
     struct allocator_traits
@@ -589,7 +596,7 @@ namespace boost { namespace unordered { namespace detail {
                 boost::unordered::detail::has_destroy<Alloc, T>::value>::type
             destroy(Alloc&, T* p)
         {
-            boost::unordered::detail::destroy(p);
+            boost::unordered::detail::func::destroy(p);
         }
 
 #   elif !defined(BOOST_NO_SFINAE_EXPR)
@@ -623,7 +630,7 @@ namespace boost { namespace unordered { namespace detail {
                 boost::unordered::detail::has_destroy<Alloc, T>::value>::type
             destroy(Alloc&, T* p)
         {
-            boost::unordered::detail::destroy(p);
+            boost::unordered::detail::func::destroy(p);
         }
 
 #   else
@@ -669,21 +676,22 @@ namespace boost { namespace unordered { namespace detail {
                 boost::is_same<T, value_type>::value,
                 void*>::type = 0)
         {
-            boost::unordered::detail::destroy(p);
+            boost::unordered::detail::func::destroy(p);
         }
 
 #   endif
 
         static size_type max_size(const Alloc& a)
         {
-            return boost::unordered::detail::call_max_size<size_type>(a);
+            return boost::unordered::detail::func::
+                call_max_size<size_type>(a);
         }
 
         // Allocator propagation on construction
 
         static Alloc select_on_container_copy_construction(Alloc const& rhs)
         {
-            return boost::unordered::detail::
+            return boost::unordered::detail::func::
                 call_select_on_container_copy_construction(rhs);
         }
 
@@ -758,7 +766,7 @@ namespace boost { namespace unordered { namespace detail {
 #endif
 
 
-namespace boost { namespace unordered { namespace detail {
+namespace boost { namespace unordered { namespace detail { namespace func {
 
     ////////////////////////////////////////////////////////////////////////////
     // call_construct
@@ -792,7 +800,7 @@ namespace boost { namespace unordered { namespace detail {
 
     template <typename Alloc, typename T>
     inline void destroy_value_impl(Alloc&, T* x) {
-        boost::unordered::detail::destroy(x);
+        boost::unordered::detail::func::destroy(x);
     }
 
 
@@ -802,7 +810,7 @@ namespace boost { namespace unordered { namespace detail {
 
     template <typename Alloc, typename T>
     inline void destroy_value_impl(Alloc&, T* x) {
-        boost::unordered::detail::destroy(x);
+        boost::unordered::detail::func::destroy(x);
     }
 
 #endif
@@ -818,7 +826,7 @@ namespace boost { namespace unordered { namespace detail {
     template<typename Alloc, typename T>                                    \
     void construct_from_tuple(Alloc& alloc, T* ptr, namespace_ tuple<>)     \
     {                                                                       \
-        boost::unordered::detail::call_construct(alloc, ptr);               \
+        boost::unordered::detail::func::call_construct(alloc, ptr);         \
     }                                                                       \
                                                                             \
     BOOST_PP_REPEAT_FROM_TO(1, n,                                           \
@@ -830,7 +838,7 @@ namespace boost { namespace unordered { namespace detail {
     void construct_from_tuple(Alloc& alloc, T* ptr,                         \
             namespace_ tuple<BOOST_PP_ENUM_PARAMS_Z(z, n, A)> const& x)     \
     {                                                                       \
-        boost::unordered::detail::call_construct(alloc, ptr,                \
+        boost::unordered::detail::func::call_construct(alloc, ptr,          \
             BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_GET_TUPLE_ARG, namespace_) \
         );                                                                  \
     }
@@ -945,7 +953,7 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, boost::)
     inline void construct_value_impl(Alloc& alloc, T* address,
         BOOST_FWD_REF(Args)... args)
     {
-        boost::unordered::detail::call_construct(alloc,
+        boost::unordered::detail::func::call_construct(alloc,
             address, boost::forward<Args>(args)...);
     }
 
@@ -960,9 +968,9 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, boost::)
         construct_value_impl(Alloc& alloc, std::pair<A, B>* address,
             BOOST_FWD_REF(A0), BOOST_FWD_REF(A1) a1, BOOST_FWD_REF(A2) a2)
     {
-        boost::unordered::detail::construct_from_tuple(alloc,
+        boost::unordered::detail::func::construct_from_tuple(alloc,
             boost::addressof(address->first), boost::forward<A1>(a1));
-        boost::unordered::detail::construct_from_tuple(alloc,
+        boost::unordered::detail::func::construct_from_tuple(alloc,
             boost::addressof(address->second), boost::forward<A2>(a2));
     }
 
@@ -1032,19 +1040,15 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, boost::)
             boost::unordered::detail::emplace_args3<A0, A1, A2> const& args,
             typename enable_if<use_piecewise<A0>, void*>::type = 0)
     {
-        boost::unordered::detail::construct_from_tuple(alloc,
+        boost::unordered::detail::func::construct_from_tuple(alloc,
             boost::addressof(address->first), args.a1);
-        boost::unordered::detail::construct_from_tuple(alloc,
+        boost::unordered::detail::func::construct_from_tuple(alloc,
             boost::addressof(address->second), args.a2);
     }
 
 #endif // BOOST_NO_CXX11_VARIADIC_TEMPLATES
 
-}}}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Some helper functions for allocating & constructing
+}}}}
 
 namespace boost { namespace unordered { namespace detail {
 

@@ -456,6 +456,8 @@ namespace boost { namespace unordered { namespace detail {
 
         void swap_allocators(table& other, false_type)
         {
+            boost::unordered::detail::func::ignore_unused_variable_warning(other);
+
             // According to 23.2.1.8, if propagate_on_container_swap is
             // false the behaviour is undefined unless the allocators
             // are equal.
@@ -514,7 +516,7 @@ namespace boost { namespace unordered { namespace detail {
             node_pointer n = static_cast<node_pointer>(prev->next_);
             prev->next_ = n->next_;
 
-            boost::unordered::detail::destroy_value_impl(node_alloc(),
+            boost::unordered::detail::func::destroy_value_impl(node_alloc(),
                 n->value_ptr());
             node_allocator_traits::destroy(node_alloc(),
                     boost::addressof(*n));

@@ -18,7 +18,6 @@
 
 #include <boost/move/utility.hpp>
 #include <boost/move/iterator.hpp>
-#include <boost/move/algorithm.hpp>
 #include <boost/detail/no_exceptions_support.hpp>
 
 #include <algorithm> //copy, copy_backward

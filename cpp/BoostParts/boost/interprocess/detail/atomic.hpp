@@ -213,7 +213,7 @@ inline boost::uint32_t atomic_cas32
                  "bne-   1b\n\t"
                  "2:"
                  : "=&r"(prev)
-                 : "b" (mem), "r"(cmp), "r" (with)
+                 : "b" (mem), "r" (with), "r" (cmp)
                  : "cc", "memory");
    return prev;
 }

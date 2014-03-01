@@ -1,6 +1,6 @@
 #ifndef UUID_AA15E74A856F11E08B8D93F24824019B
 #define UUID_AA15E74A856F11E08B8D93F24824019B
-#if defined(__GNUC__) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
+#if (__GNUC__*100+__GNUC_MINOR__>301) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
 #pragma GCC system_header
 #endif
 #if defined(_MSC_VER) && !defined(BOOST_EXCEPTION_ENABLE_WARNINGS)
@@ -41,8 +41,11 @@
 
 #if !defined( BOOST_EXCEPTION_DISABLE )
 # include <boost/exception/exception.hpp>
+#if !defined(BOOST_THROW_EXCEPTION_CURRENT_FUNCTION)
 # include <boost/current_function.hpp>
-# define BOOST_THROW_EXCEPTION(x) ::boost::exception_detail::throw_exception_(x,BOOST_CURRENT_FUNCTION,__FILE__,__LINE__)
+# define BOOST_THROW_EXCEPTION_CURRENT_FUNCTION BOOST_CURRENT_FUNCTION
+#endif
+# define BOOST_THROW_EXCEPTION(x) ::boost::exception_detail::throw_exception_(x,BOOST_THROW_EXCEPTION_CURRENT_FUNCTION,__FILE__,__LINE__)
 #else
 # define BOOST_THROW_EXCEPTION(x) ::boost::throw_exception(x)
 #endif

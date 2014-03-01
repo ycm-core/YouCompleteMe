@@ -6,15 +6,17 @@
 //  See http://www.boost.org/LICENSE_1_0.txt
 
 
-#ifndef BOOST_DETAIL_WIN_BASIC_TYPES_HPP
-#define BOOST_DETAIL_WIN_BASIC_TYPES_HPP
+#ifndef BOOST_DETAIL_WINAPI_BASIC_TYPES_HPP
+#define BOOST_DETAIL_WINAPI_BASIC_TYPES_HPP
+
 #include <boost/config.hpp>
 #include <cstdarg>
 #include <boost/cstdint.hpp>
+
 #if defined( BOOST_USE_WINDOWS_H )
 # include <windows.h>
 #elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) ||  defined(__CYGWIN__)
-# include <WinError.h>
+# include <winerror.h>
 // @FIXME Which condition must be tested
 # ifdef UNDER_CE
 #  ifndef WINAPI
@@ -33,9 +35,13 @@
 # error "Win32 functions not available"
 #endif
 
+#ifdef BOOST_HAS_PRAGMA_ONCE
+#pragma once
+#endif
+
 namespace boost {
 namespace detail {
-namespace win32 {
+namespace winapi {
 #if defined( BOOST_USE_WINDOWS_H )
     typedef ::BOOL BOOL_;
     typedef ::WORD WORD_;
@@ -102,10 +108,9 @@ extern "C" {
     typedef wchar_t WCHAR_;
     typedef WCHAR_ *LPWSTR_;
     typedef const WCHAR_ *LPCWSTR_;
-
 }
 #endif
 }
 }
 }
-#endif // BOOST_DETAIL_WIN_TIME_HPP
+#endif // BOOST_DETAIL_WINAPI_TIME_HPP

@@ -10,7 +10,7 @@
 
 #include <boost/atomic/detail/config.hpp>
 
-#ifdef BOOST_ATOMIC_HAS_PRAGMA_ONCE
+#ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
 #endif
 
@@ -42,6 +42,11 @@
 #define BOOST_ATOMIC_INTERLOCKED_AND(dest, arg) _InterlockedAnd((long*)(dest), (long)(arg))
 #define BOOST_ATOMIC_INTERLOCKED_OR(dest, arg) _InterlockedOr((long*)(dest), (long)(arg))
 #define BOOST_ATOMIC_INTERLOCKED_XOR(dest, arg) _InterlockedXor((long*)(dest), (long)(arg))
+
+#if (defined(_M_IX86) && _M_IX86 >= 500) || defined(_M_AMD64) || defined(_M_IA64)
+#pragma intrinsic(_InterlockedCompareExchange64)
+#define BOOST_ATOMIC_INTERLOCKED_COMPARE_EXCHANGE64(dest, exchange, compare) _InterlockedCompareExchange64((__int64*)(dest), (__int64)(exchange), (__int64)(compare))
+#endif
 
 #if _MSC_VER >= 1600
 
@@ -81,14 +86,12 @@
 
 #if defined(_M_AMD64) || defined(_M_IA64)
 
-#pragma intrinsic(_InterlockedCompareExchange64)
 #pragma intrinsic(_InterlockedExchangeAdd64)
 #pragma intrinsic(_InterlockedExchange64)
 #pragma intrinsic(_InterlockedAnd64)
 #pragma intrinsic(_InterlockedOr64)
 #pragma intrinsic(_InterlockedXor64)
 
-#define BOOST_ATOMIC_INTERLOCKED_COMPARE_EXCHANGE64(dest, exchange, compare) _InterlockedCompareExchange64((__int64*)(dest), (__int64)(exchange), (__int64)(compare))
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE_ADD64(dest, addend) _InterlockedExchangeAdd64((__int64*)(dest), (__int64)(addend))
 #define BOOST_ATOMIC_INTERLOCKED_EXCHANGE64(dest, newval) _InterlockedExchange64((__int64*)(dest), (__int64)(newval))
 #define BOOST_ATOMIC_INTERLOCKED_AND64(dest, arg) _InterlockedAnd64((__int64*)(dest), (__int64)(arg))

@@ -883,6 +883,7 @@ extern "C" __declspec(dllimport) int __stdcall GetProcessTimes
    , interprocess_filetime *lpExitTime,interprocess_filetime *lpKernelTime
    , interprocess_filetime *lpUserTime );
 extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long);
+extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount(void);
 extern "C" __declspec(dllimport) int __stdcall SwitchToThread();
 extern "C" __declspec(dllimport) unsigned long __stdcall GetLastError();
 extern "C" __declspec(dllimport) void __stdcall SetLastError(unsigned long);
@@ -943,7 +944,6 @@ extern "C" __declspec(dllimport) int   __stdcall FreeLibrary(void *);
 extern "C" __declspec(dllimport) void *__stdcall GetProcAddress(void *, const char*);
 extern "C" __declspec(dllimport) void *__stdcall GetModuleHandleA(const char*);
 extern "C" __declspec(dllimport) void *__stdcall GetFileInformationByHandle(void *, interprocess_by_handle_file_information*);
-extern "C" __declspec(dllimport) int  __stdcall QueryPerformanceCounter(__int64 *lpPerformanceCount);
 
 //Advapi32.dll
 extern "C" __declspec(dllimport) long __stdcall RegOpenKeyExA(void *, const char *, unsigned long, unsigned long, void **);
@@ -1013,6 +1013,12 @@ typedef long (__stdcall *NtQuerySection_t)(void*, section_information_class, int
 typedef long (__stdcall *NtQueryInformationFile_t)(void *,io_status_block_t *,void *, long, int);
 typedef long (__stdcall *NtOpenFile_t)(void*,unsigned long ,object_attributes_t*,io_status_block_t*,unsigned long,unsigned long);
 typedef long (__stdcall *NtClose_t) (void*);
+typedef long (__stdcall *NtQueryTimerResolution_t) (unsigned long* LowestResolution, unsigned long* HighestResolution, unsigned long* CurrentResolution);
+typedef long (__stdcall *NtSetTimerResolution_t) (unsigned long RequestedResolution, int Set, unsigned long* ActualResolution);
+
+//kernel32.dll
+typedef int (__stdcall *QueryPerformanceCounter_t)  (__int64 *lpPerformanceCount);
+typedef int (__stdcall *QueryPerformanceFrequency_t)(__int64 *lpFrequency);
 
 }  //namespace winapi {
 }  //namespace interprocess  {
@@ -1047,9 +1053,12 @@ inline unsigned long make_lang_id(unsigned long p, unsigned long s)
 inline void sched_yield()
 {
    if(!SwitchToThread()){
-      Sleep(1);
+      Sleep(0);
    }
 }
+
+inline void sleep_tick()
+{  Sleep(1);   }
 
 inline void sleep(unsigned long ms)
 {  Sleep(ms);  }
@@ -1270,11 +1279,6 @@ inline long reg_query_value_ex(void *hKey, const char *lpValueName, unsigned lon
 inline long reg_close_key(void *hKey)
 {  return RegCloseKey(hKey); }
 
-inline bool query_performance_counter(__int64 *lpPerformanceCount)
-{
-   return 0 != QueryPerformanceCounter(lpPerformanceCount);
-}
-
 inline void initialize_object_attributes
 ( object_attributes_t *pobject_attr, unicode_string_t *name
  , unsigned long attr, void *rootdir, void *security_descr)
@@ -1299,8 +1303,20 @@ inline void rtl_init_empty_unicode_string(unicode_string_t *ucStr, wchar_t *buf,
 template<int Dummy>
 struct function_address_holder
 {
-   enum { NtSetInformationFile, NtQuerySystemInformation, NtQueryObject, NtQuerySemaphore, NtQuerySection, NtOpenFile, NtClose, NumFunction };
-   enum { NtDll_dll, NumModule };
+   enum  { NtSetInformationFile
+         , NtQuerySystemInformation
+         , NtQueryObject
+         , NtQuerySemaphore
+         , NtQuerySection
+         , NtOpenFile
+         , NtClose
+         , NtQueryTimerResolution
+         , NtSetTimerResolution
+         , QueryPerformanceCounter
+         , QueryPerformanceFrequency
+         , NumFunction
+         };
+   enum { NtDll_dll, Kernel32_dll, NumModule };
 
    private:
    static const char *FunctionNames[NumFunction];
@@ -1314,20 +1330,25 @@ struct function_address_holder
    static void *get_module_from_id(unsigned int id)
    {
       BOOST_ASSERT(id < (unsigned int)NumModule);
-      return get_module_handle(ModuleNames[id]);
+      void *addr = get_module_handle(ModuleNames[id]);
+      BOOST_ASSERT(addr);
+      return addr;
    }
 
    static void *get_module(const unsigned int id)
    {
       BOOST_ASSERT(id < (unsigned int)NumModule);
-      while(ModuleStates[id] < 2){
+      for(unsigned i = 0; ModuleStates[id] < 2; ++i){
          if(interlocked_compare_exchange(&ModuleStates[id], 1, 0) == 0){
             ModuleAddresses[id] = get_module_from_id(id);
             interlocked_increment(&ModuleStates[id]);
             break;
          }
-         else{
+         else if(i & 1){
             sched_yield();
+         }
+         else{
+            sleep_tick();
          }
       }
       return ModuleAddresses[id];
@@ -1336,21 +1357,26 @@ struct function_address_holder
    static void *get_address_from_dll(const unsigned int id)
    {
       BOOST_ASSERT(id < (unsigned int)NumFunction);
-      return get_proc_address(get_module(FunctionModules[id]), FunctionNames[id]);
+      void *addr = get_proc_address(get_module(FunctionModules[id]), FunctionNames[id]);
+      BOOST_ASSERT(addr);
+      return addr;
    }
 
    public:
    static void *get(const unsigned int id)
    {
       BOOST_ASSERT(id < (unsigned int)NumFunction);
-      while(FunctionStates[id] < 2){
+      for(unsigned i = 0; FunctionStates[id] < 2; ++i){
          if(interlocked_compare_exchange(&FunctionStates[id], 1, 0) == 0){
             FunctionAddresses[id] = get_address_from_dll(id);
             interlocked_increment(&FunctionStates[id]);
             break;
          }
-         else{
+         else if(i & 1){
             sched_yield();
+         }
+         else{
+            sleep_tick();
          }
       }
       return FunctionAddresses[id];
@@ -1366,7 +1392,11 @@ const char *function_address_holder<Dummy>::FunctionNames[function_address_holde
    "NtQuerySemaphore",
    "NtQuerySection",
    "NtOpenFile",
-   "NtClose"
+   "NtClose",
+   "NtQueryTimerResolution",
+   "NtSetTimerResolution",
+   "QueryPerformanceCounter",
+   "QueryPerformanceFrequency"
 };
 
 template<int Dummy>
@@ -1378,13 +1408,18 @@ unsigned int function_address_holder<Dummy>::FunctionModules[function_address_ho
    NtDll_dll,
    NtDll_dll,
    NtDll_dll,
-   NtDll_dll
+   NtDll_dll,
+   NtDll_dll,
+   NtDll_dll,
+   Kernel32_dll,
+   Kernel32_dll
 };
 
 template<int Dummy>
 const char *function_address_holder<Dummy>::ModuleNames[function_address_holder<Dummy>::NumModule] = 
 {
-   "ntdll.dll"
+   "ntdll.dll",
+   "kernel32.dll"
 };
 
 
@@ -1549,7 +1584,7 @@ class nt_query_mem_deleter
       delete[]m_buf;
    }
 
-   void realloc(std::size_t num_bytes)
+   void realloc_mem(std::size_t num_bytes)
    {
       num_bytes += rename_suffix + rename_offset;
       char *buf = m_buf;
@@ -1584,7 +1619,7 @@ class c_heap_deleter
       if(m_buf) ::free(m_buf);
    }
 
-   void realloc(std::size_t num_bytes)
+   void realloc_mem(std::size_t num_bytes)
    {
       void *buf = ::realloc(m_buf, num_bytes);
       if(!buf){
@@ -1639,7 +1674,7 @@ inline bool unlink_file(const char *filename)
          //Obtain file name with guessed length
          if(pNtQueryObject(fh, object_name_information, nt_query_mem.query_mem(), nt_query_mem.object_name_information_size(), &size)){
             //Obtain file name with exact length buffer
-            nt_query_mem.realloc(size);
+            nt_query_mem.realloc_mem(size);
             if(pNtQueryObject(fh, object_name_information, nt_query_mem.query_mem(), nt_query_mem.object_name_information_size(), &size)){
                return false;
             }
@@ -2021,7 +2056,7 @@ inline bool get_last_bootup_time(std::string &stamp)
                if (error_insufficient_buffer == status) {
                   status = 0;
                   dwBytesToRead = dwMinimumBytesToRead;
-                  heap_deleter.realloc(dwMinimumBytesToRead);
+                  heap_deleter.realloc_mem(dwMinimumBytesToRead);
                   if (!heap_deleter.get()){
                      return false;
                   }
@@ -2065,11 +2100,8 @@ inline bool get_file_mapping_size(void *file_mapping_hnd, __int64 &size)
    interprocess_section_basic_information info;
    unsigned long ntstatus =
       pNtQuerySection(file_mapping_hnd, section_basic_information, &info, sizeof(info), 0);
-   if(ntstatus){
-      return false;
-   }
    size = info.section_size;
-   return true;
+   return !ntstatus;
 }
 
 inline bool get_semaphore_info(void *handle, long &count, long &limit)
@@ -2079,14 +2111,41 @@ inline bool get_semaphore_info(void *handle, long &count, long &limit)
          (winapi::NtQuerySemaphore_t)dll_func::get(winapi::dll_func::NtQuerySemaphore);
    unsigned int ret_len;
    long status = pNtQuerySemaphore(handle, winapi::semaphore_basic_information, &info, sizeof(info), &ret_len);
-   if(status){
-      return false;
-   }
    count = info.count;
    limit = info.limit;
-   return true;
+   return !status;
 }
 
+inline bool query_timer_resolution(unsigned long *lowres, unsigned long *highres, unsigned long *curres) 
+{
+   winapi::NtQueryTimerResolution_t pNtQueryTimerResolution =
+         (winapi::NtQueryTimerResolution_t)dll_func::get(winapi::dll_func::NtQueryTimerResolution);
+   return !pNtQueryTimerResolution(lowres, highres, curres);
+}
+
+inline bool set_timer_resolution(unsigned long RequestedResolution, int Set, unsigned long* ActualResolution)
+{
+   winapi::NtSetTimerResolution_t pNtSetTimerResolution =
+         (winapi::NtSetTimerResolution_t)dll_func::get(winapi::dll_func::NtSetTimerResolution);
+   return !pNtSetTimerResolution(RequestedResolution, Set, ActualResolution);
+}
+
+inline bool query_performance_counter(__int64 *lpPerformanceCount)
+{
+   QueryPerformanceCounter_t pQueryPerformanceCounter = (QueryPerformanceCounter_t)
+         dll_func::get(dll_func::QueryPerformanceCounter);
+   return 0 != pQueryPerformanceCounter(lpPerformanceCount);
+}
+
+inline bool query_performance_frequency(__int64 *lpFrequency)
+{
+   QueryPerformanceCounter_t pQueryPerformanceFrequency = (QueryPerformanceFrequency_t)
+         dll_func::get(dll_func::QueryPerformanceFrequency);
+   return 0 != pQueryPerformanceFrequency(lpFrequency);
+}
+
+inline unsigned long get_tick_count()
+{  return GetTickCount();  }
 
 }  //namespace winapi
 }  //namespace interprocess

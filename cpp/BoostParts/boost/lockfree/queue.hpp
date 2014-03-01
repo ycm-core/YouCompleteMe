@@ -25,6 +25,12 @@
 #include <boost/lockfree/detail/parameter.hpp>
 #include <boost/lockfree/detail/tagged_ptr.hpp>
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4324) // structure was padded due to __declspec(align())
+#endif
+
+
 namespace boost    {
 namespace lockfree {
 namespace detail   {
@@ -540,5 +546,9 @@ private:
 
 } /* namespace lockfree */
 } /* namespace boost */
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #endif /* BOOST_LOCKFREE_FIFO_HPP_INCLUDED */

@@ -27,7 +27,7 @@
 
 // If this is an MPI-2 implementation, define configuration macros for
 // the features we are interested in.
-#if defined(MPI_VERSION) && MPI_VERSION == 2
+#if defined(MPI_VERSION) && MPI_VERSION >= 2
 /** @brief Determine if the MPI implementation has support for memory
  *  allocation.
  *
@@ -48,6 +48,11 @@
  *  environment class will provide a default constructor. This macro is 
  *  always defined for MPI-2 implementations. */
 #  define BOOST_MPI_HAS_NOARG_INITIALIZATION
+#else
+// If this is an MPI-1.x implementation, no arg initialization for
+// mpi environement could still be available, but not mandatory.
+// Undef this if no arg init is available:
+//#  define BOOST_MPI_HAS_NOARG_INITIALIZATION
 #endif
 
 #if defined(MPIAPI)

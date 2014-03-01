@@ -41,6 +41,9 @@
 #define BOOST_HAS_THREADS
 #define BOOST_HAS_NRVO
 #define BOOST_HAS_LONG_LONG
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#  define BOOST_HAS_STDINT_H
+#endif
 
 // options --enable-test wants undefined
 #undef BOOST_NO_STDC_NAMESPACE
@@ -112,6 +115,9 @@
 #define BOOST_NO_CXX11_HDR_CHRONO
 #define BOOST_NO_CXX11_HDR_ARRAY
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
 //
 // version check:

@@ -44,6 +44,23 @@ void copy_payload(T & t, U & u)
     copy_type::copy(t, u);
 }
 
+template <typename T>
+struct consume_via_copy
+{
+    consume_via_copy(T & out):
+        out(out)
+    {}
+
+    template <typename U>
+    void operator()(U & element)
+    {
+        copy_payload(element, out);
+    }
+
+    T &  out;
+};
+
+
 }}}
 
 #endif  /* BOOST_LOCKFREE_DETAIL_COPY_PAYLOAD_HPP_INCLUDED */

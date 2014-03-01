@@ -27,6 +27,13 @@
 #include <typeindex>
 #endif
 
+#if defined(BOOST_MSVC)
+#pragma warning(push)
+#pragma warning(disable:6295) // Ill-defined for-loop : 'unsigned int' values
+                              // are always of range '0' to '4294967295'.
+                              // Loop executes infinitely.
+#endif
+
 #if BOOST_WORKAROUND(__GNUC__, < 3) \
     && !defined(__SGI_STL_PORT) && !defined(_STLPORT_VERSION)
 #define BOOST_HASH_CHAR_TRAITS string_char_traits
@@ -517,6 +524,10 @@ namespace boost
 }
 
 #undef BOOST_HASH_CHAR_TRAITS
+
+#if defined(BOOST_MSVC)
+#pragma warning(pop)
+#endif
 
 #endif // BOOST_FUNCTIONAL_HASH_HASH_HPP
 

@@ -1,11 +1,11 @@
-//  (C) Copyright John Maddock 2001. 
-//  (C) Copyright Darin Adler 2001. 
-//  (C) Copyright Peter Dimov 2001. 
-//  (C) Copyright David Abrahams 2001 - 2002. 
-//  (C) Copyright Beman Dawes 2001 - 2003. 
-//  (C) Copyright Stefan Slapeta 2004. 
-//  Use, modification and distribution are subject to the 
-//  Boost Software License, Version 1.0. (See accompanying file 
+//  (C) Copyright John Maddock 2001.
+//  (C) Copyright Darin Adler 2001.
+//  (C) Copyright Peter Dimov 2001.
+//  (C) Copyright David Abrahams 2001 - 2002.
+//  (C) Copyright Beman Dawes 2001 - 2003.
+//  (C) Copyright Stefan Slapeta 2004.
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for most recent version.
@@ -15,7 +15,7 @@
 // locale support is disabled when linking with the dynamic runtime
 #   ifdef _MSL_NO_LOCALE
 #     define BOOST_NO_STD_LOCALE
-#   endif 
+#   endif
 
 #   if __MWERKS__ <= 0x2301  // 5.3
 #     define BOOST_NO_FUNCTION_TEMPLATE_ORDERING
@@ -90,7 +90,7 @@
 #if __MWERKS__ > 0x3206 && __option(rvalue_refs)
 #  define BOOST_HAS_RVALUE_REFS
 #else
-#  define BOOST_NO_CXX11_RVALUE_REFERENCES              
+#  define BOOST_NO_CXX11_RVALUE_REFERENCES
 #endif
 #define BOOST_NO_CXX11_AUTO_DECLARATIONS
 #define BOOST_NO_CXX11_AUTO_MULTIDECLARATIONS
@@ -120,6 +120,9 @@
 #define BOOST_NO_CXX11_VARIADIC_MACROS
 #define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
 #define BOOST_COMPILER "Metrowerks CodeWarrior C++ version " BOOST_STRINGIZE(BOOST_COMPILER_VERSION)
 

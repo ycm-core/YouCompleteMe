@@ -10,11 +10,10 @@
 //  Copyright (c) 2013 Tim Blechmann
 //  ARM Code by Phil Endecott, based on other architectures.
 
-#include <cstddef>
 #include <boost/cstdint.hpp>
 #include <boost/atomic/detail/config.hpp>
 
-#ifdef BOOST_ATOMIC_HAS_PRAGMA_ONCE
+#ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
 #endif
 
@@ -67,29 +66,27 @@ namespace detail {
 // to annotate the conditional instructions.  These are ignored in other modes (e.g. v6),
 // so they can always be present.
 
-#if defined(__thumb__) && !defined(__ARM_ARCH_7A__)
-// FIXME also other v7 variants.
+#if defined(__thumb__) && !defined(__thumb2__)
 #define BOOST_ATOMIC_ARM_ASM_START(TMPREG) "adr " #TMPREG ", 1f\n" "bx " #TMPREG "\n" ".arm\n" ".align 4\n" "1: "
 #define BOOST_ATOMIC_ARM_ASM_END(TMPREG)   "adr " #TMPREG ", 1f + 1\n" "bx " #TMPREG "\n" ".thumb\n" ".align 2\n" "1: "
-
 #else
 // The tmpreg is wasted in this case, which is non-optimal.
 #define BOOST_ATOMIC_ARM_ASM_START(TMPREG)
 #define BOOST_ATOMIC_ARM_ASM_END(TMPREG)
 #endif
 
-#if defined(__ARM_ARCH_7A__)
-// FIXME ditto.
+#if defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7S__)
 #define BOOST_ATOMIC_ARM_DMB "dmb\n"
 #else
 #define BOOST_ATOMIC_ARM_DMB "mcr\tp15, 0, r0, c7, c10, 5\n"
 #endif
 
 inline void
-arm_barrier(void)
+arm_barrier(void) BOOST_NOEXCEPT
 {
     int brtmp;
-    __asm__ __volatile__ (
+    __asm__ __volatile__
+    (
         BOOST_ATOMIC_ARM_ASM_START(%0)
         BOOST_ATOMIC_ARM_DMB
         BOOST_ATOMIC_ARM_ASM_END(%0)
@@ -98,56 +95,59 @@ arm_barrier(void)
 }
 
 inline void
-platform_fence_before(memory_order order)
+platform_fence_before(memory_order order) BOOST_NOEXCEPT
 {
-    switch(order) {
-        case memory_order_release:
-        case memory_order_acq_rel:
-        case memory_order_seq_cst:
-            arm_barrier();
-        case memory_order_consume:
-        default:;
+    switch(order)
+    {
+    case memory_order_release:
+    case memory_order_acq_rel:
+    case memory_order_seq_cst:
+        arm_barrier();
+    case memory_order_consume:
+    default:;
     }
 }
 
 inline void
-platform_fence_after(memory_order order)
+platform_fence_after(memory_order order) BOOST_NOEXCEPT
 {
-    switch(order) {
-        case memory_order_acquire:
-        case memory_order_acq_rel:
-        case memory_order_seq_cst:
-            arm_barrier();
-        default:;
+    switch(order)
+    {
+    case memory_order_acquire:
+    case memory_order_acq_rel:
+    case memory_order_seq_cst:
+        arm_barrier();
+    default:;
     }
 }
 
 inline void
-platform_fence_before_store(memory_order order)
+platform_fence_before_store(memory_order order) BOOST_NOEXCEPT
 {
     platform_fence_before(order);
 }
 
 inline void
-platform_fence_after_store(memory_order order)
+platform_fence_after_store(memory_order order) BOOST_NOEXCEPT
 {
     if (order == memory_order_seq_cst)
         arm_barrier();
 }
 
 inline void
-platform_fence_after_load(memory_order order)
+platform_fence_after_load(memory_order order) BOOST_NOEXCEPT
 {
     platform_fence_after(order);
 }
 
 template<typename T>
 inline bool
-platform_cmpxchg32(T & expected, T desired, volatile T * ptr)
+platform_cmpxchg32(T & expected, T desired, volatile T * ptr) BOOST_NOEXCEPT
 {
     int success;
     int tmp;
-    __asm__ (
+    __asm__ __volatile__
+    (
         BOOST_ATOMIC_ARM_ASM_START(%2)
         "mov     %1, #0\n"        // success = 0
         "ldrex   %0, %3\n"      // expected' = *(&i)
@@ -164,7 +164,7 @@ platform_cmpxchg32(T & expected, T desired, volatile T * ptr)
             : "r" (expected),    // %4
             "r" (desired) // %5
             : "cc"
-        );
+    );
     return success;
 }
 
@@ -175,13 +175,14 @@ platform_cmpxchg32(T & expected, T desired, volatile T * ptr)
 inline void
 atomic_thread_fence(memory_order order)
 {
-    switch(order) {
-        case memory_order_acquire:
-        case memory_order_release:
-        case memory_order_acq_rel:
-        case memory_order_seq_cst:
-            atomics::detail::arm_barrier();
-        default:;
+    switch(order)
+    {
+    case memory_order_acquire:
+    case memory_order_release:
+    case memory_order_acq_rel:
+    case memory_order_seq_cst:
+        atomics::detail::arm_barrier();
+    default:;
     }
 }
 
@@ -195,9 +196,8 @@ atomic_signal_fence(memory_order)
 class atomic_flag
 {
 private:
-    atomic_flag(const atomic_flag &) /* = delete */ ;
-    atomic_flag & operator=(const atomic_flag &) /* = delete */ ;
     uint32_t v_;
+
 public:
     BOOST_CONSTEXPR atomic_flag(void) BOOST_NOEXCEPT : v_(0) {}
 
@@ -221,7 +221,11 @@ public:
         atomics::detail::platform_fence_after(order);
         return expected;
     }
+
+    BOOST_DELETED_FUNCTION(atomic_flag(const atomic_flag &))
+    BOOST_DELETED_FUNCTION(atomic_flag& operator=(const atomic_flag &))
 };
+
 #define BOOST_ATOMIC_FLAG_LOCK_FREE 2
 
 }
@@ -249,4 +253,3 @@ public:
 #endif /* !defined(BOOST_ATOMIC_FORCE_FALLBACK) */
 
 #endif
-

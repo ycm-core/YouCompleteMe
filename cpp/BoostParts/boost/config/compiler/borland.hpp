@@ -155,7 +155,7 @@
 #  define BOOST_NO_CXX11_DECLTYPE
 #  define BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
 #  define BOOST_NO_CXX11_EXTERN_TEMPLATE
-#  define BOOST_NO_CXX11_RVALUE_REFERENCES 
+#  define BOOST_NO_CXX11_RVALUE_REFERENCES
 #  define BOOST_NO_CXX11_SCOPED_ENUMS
 #  define BOOST_NO_CXX11_STATIC_ASSERT
 #else
@@ -191,6 +191,9 @@
 #define BOOST_NO_CXX11_NOEXCEPT
 #define BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX
 #define BOOST_NO_CXX11_USER_DEFINED_LITERALS
+#define BOOST_NO_CXX11_ALIGNAS
+#define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
+#define BOOST_NO_CXX11_INLINE_NAMESPACES
 
 #if __BORLANDC__ >= 0x590
 #  define BOOST_HAS_TR1_HASH
@@ -243,7 +246,7 @@
 // all versions support __declspec:
 //
 #if defined(__STRICT_ANSI__)
-// config/platform/win32.hpp will define BOOST_SYMBOL_EXPORT, etc., unless already defined  
+// config/platform/win32.hpp will define BOOST_SYMBOL_EXPORT, etc., unless already defined
 #  define BOOST_SYMBOL_EXPORT
 #endif
 //
@@ -282,7 +285,3 @@
 #define BOOST_NO_COMPLETE_VALUE_INITIALIZATION
 
 #define BOOST_COMPILER "Borland C++ version " BOOST_STRINGIZE(__BORLANDC__)
-
-
-
-

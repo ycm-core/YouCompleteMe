@@ -46,4 +46,5 @@
    #pragma warning (disable : 4673) //  throwing '' the following types will not be considered at the catch site
    #pragma warning (disable : 4671) //  the copy constructor is inaccessible
    #pragma warning (disable : 4584) //  X is already a base-class of Y
+   #pragma warning (disable : 4510) //  default constructor could not be generated
 #endif   //BOOST_MSVC

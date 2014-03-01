@@ -34,6 +34,7 @@
 
 #elif defined(BOOST_ENABLE_ASSERT_HANDLER)
 
+#include <boost/config.hpp>
 #include <boost/current_function.hpp>
 
 namespace boost
@@ -42,7 +43,7 @@ namespace boost
                         char const * function, char const * file, long line); // user defined
 } // namespace boost
 
-#define BOOST_ASSERT(expr) ((expr) \
+#define BOOST_ASSERT(expr) (BOOST_LIKELY(!!(expr)) \
   ? ((void)0) \
   : ::boost::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
 
@@ -63,6 +64,7 @@ namespace boost
 
 #elif defined(BOOST_ENABLE_ASSERT_HANDLER)
 
+  #include <boost/config.hpp>
   #include <boost/current_function.hpp>
 
   namespace boost
@@ -71,7 +73,7 @@ namespace boost
                               char const * function, char const * file, long line); // user defined
   } // namespace boost
 
-  #define BOOST_ASSERT_MSG(expr, msg) ((expr) \
+  #define BOOST_ASSERT_MSG(expr, msg) (BOOST_LIKELY(!!(expr)) \
     ? ((void)0) \
     : ::boost::assertion_failed_msg(#expr, msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
 
@@ -80,6 +82,7 @@ namespace boost
     #define BOOST_ASSERT_HPP
     #include <cstdlib>
     #include <iostream>
+    #include <boost/config.hpp>
     #include <boost/current_function.hpp>
 
     //  IDE's like Visual Studio perform better if output goes to std::cout or
@@ -89,31 +92,33 @@ namespace boost
     #endif
 
     namespace boost
-    { 
-      namespace assertion 
-      { 
+    {
+      namespace assertion
+      {
         namespace detail
         {
-          inline void assertion_failed_msg(char const * expr, char const * msg, char const * function,
+          // Note: The template is needed to make the function non-inline and avoid linking errors
+          template< typename CharT >
+          BOOST_NOINLINE void assertion_failed_msg(CharT const * expr, char const * msg, char const * function,
             char const * file, long line)
           {
             BOOST_ASSERT_MSG_OSTREAM
               << "***** Internal Program Error - assertion (" << expr << ") failed in "
               << function << ":\n"
               << file << '(' << line << "): " << msg << std::endl;
-			#ifdef UNDER_CE
-				// The Windows CE CRT library does not have abort() so use exit(-1) instead.
-				std::exit(-1);
-			#else
-				std::abort();
-			#endif
+#ifdef UNDER_CE
+            // The Windows CE CRT library does not have abort() so use exit(-1) instead.
+            std::exit(-1);
+#else
+            std::abort();
+#endif
           }
         } // detail
       } // assertion
     } // detail
   #endif
 
-  #define BOOST_ASSERT_MSG(expr, msg) ((expr) \
+  #define BOOST_ASSERT_MSG(expr, msg) (BOOST_LIKELY(!!(expr)) \
     ? ((void)0) \
     : ::boost::assertion::detail::assertion_failed_msg(#expr, msg, \
           BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))

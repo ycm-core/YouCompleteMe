@@ -22,6 +22,7 @@
 #include <boost/thread/future.hpp>
 
 #include <boost/assert.hpp>
+#include <boost/cstdint.hpp>
 #if defined BOOST_THREAD_USES_DATETIME
 #include <boost/date_time/posix_time/conversion.hpp>
 #endif
@@ -128,7 +129,7 @@ namespace boost
             return ret;
         }
 
-        typedef void* uintptr_t;
+        //typedef void* uintptr_t;
 
         inline uintptr_t _beginthreadex(void* security, unsigned stack_size, unsigned (__stdcall* start_address)(void*),
                                               void* arglist, unsigned initflag, unsigned* thrdaddr)
@@ -277,6 +278,12 @@ namespace boost
 #if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
                 interruption_enabled=false;
 #endif
+            }
+            ~externally_launched_thread() {
+              BOOST_ASSERT(notify.empty());
+              notify.clear();
+              BOOST_ASSERT(async_states_.empty());
+              async_states_.clear();
             }
 
             void run()
@@ -429,7 +436,7 @@ namespace boost
                 LARGE_INTEGER due_time={{0,0}};
                 if(target_time.relative)
                 {
-                    unsigned long const elapsed_milliseconds=GetTickCount()-target_time.start;
+                    unsigned long const elapsed_milliseconds=detail::win32::GetTickCount64()-target_time.start;
                     LONGLONG const remaining_milliseconds=(target_time.milliseconds-elapsed_milliseconds);
                     LONGLONG const hundred_nanoseconds_in_one_millisecond=10000;
 
@@ -747,5 +754,16 @@ namespace boost
         current_thread_data->notify_all_at_thread_exit(&cond, lk.release());
       }
     }
+//namespace detail {
+//
+//    void BOOST_THREAD_DECL make_ready_at_thread_exit(shared_ptr<shared_state_base> as)
+//    {
+//      detail::thread_data_base* const current_thread_data(detail::get_current_thread_data());
+//      if(current_thread_data)
+//      {
+//        current_thread_data->make_ready_at_thread_exit(as);
+//      }
+//    }
+//}
 }
 

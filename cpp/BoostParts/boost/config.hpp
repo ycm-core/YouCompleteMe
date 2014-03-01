@@ -1,6 +1,6 @@
 //  Boost config.hpp configuration header file  ------------------------------//
 
-//  (C) Copyright John Maddock 2002. 
+//  (C) Copyright John Maddock 2002.
 //  Use, modification and distribution are subject to the 
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -56,15 +56,8 @@
 // get config suffix code:
 #include <boost/config/suffix.hpp>
 
+#ifdef BOOST_HAS_PRAGMA_ONCE
+#pragma once
+#endif
+
 #endif  // BOOST_CONFIG_HPP
-
-
-
-
-
-
-
-
-
-
-

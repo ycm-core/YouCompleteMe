@@ -114,7 +114,7 @@ enum error_code_t
    not_such_file_or_directory,
    invalid_argument,
    timeout_when_locking_error,
-   timeout_when_waiting_error,
+   timeout_when_waiting_error
 };
 
 typedef int    native_error_t;

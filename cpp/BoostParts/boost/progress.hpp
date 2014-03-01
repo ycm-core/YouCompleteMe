@@ -38,7 +38,7 @@ class progress_timer : public timer, private noncopyable
  public:
   explicit progress_timer( std::ostream & os = std::cout )
      // os is hint; implementation may ignore, particularly in embedded systems
-     : m_os(os) {}
+     : timer(), noncopyable(), m_os(os) {}
   ~progress_timer()
   {
   //  A) Throwing an exception from a destructor is a Bad Thing.
@@ -83,7 +83,7 @@ class progress_display : private noncopyable
                              const std::string & s2 = "",
                              const std::string & s3 = "" )
    // os is hint; implementation may ignore, particularly in embedded systems
-   : m_os(os), m_s1(s1), m_s2(s2), m_s3(s3) { restart(expected_count); }
+   : noncopyable(), m_os(os), m_s1(s1), m_s2(s2), m_s3(s3) { restart(expected_count); }
 
   void           restart( unsigned long expected_count )
   //  Effects: display appropriate scale

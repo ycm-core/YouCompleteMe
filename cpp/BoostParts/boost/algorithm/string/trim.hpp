@@ -17,7 +17,7 @@
 #include <boost/range/end.hpp>
 #include <boost/range/const_iterator.hpp>
 #include <boost/range/as_literal.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <boost/range/iterator_range_core.hpp>
 
 #include <boost/algorithm/string/detail/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>

@@ -64,6 +64,7 @@ namespace boost {
     BOOST_BGL_ONE_PARAM_CREF(weight_map, edge_weight) \
     BOOST_BGL_ONE_PARAM_CREF(weight_map2, edge_weight2) \
     BOOST_BGL_ONE_PARAM_CREF(distance_map, vertex_distance) \
+    BOOST_BGL_ONE_PARAM_CREF(distance_map2, vertex_distance2) \
     BOOST_BGL_ONE_PARAM_CREF(predecessor_map, vertex_predecessor) \
     BOOST_BGL_ONE_PARAM_CREF(rank_map, vertex_rank) \
     BOOST_BGL_ONE_PARAM_CREF(root_map, vertex_root) \

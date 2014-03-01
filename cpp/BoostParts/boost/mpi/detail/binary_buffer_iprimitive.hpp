@@ -21,6 +21,7 @@
 #include <vector>
 #include <boost/mpi/allocator.hpp>
 #include <cstring> // for memcpy
+#include <cassert>
 
 namespace boost { namespace mpi {
 
@@ -107,7 +108,8 @@ private:
     void load_impl(void * p, int l)
     {
       assert(position+l<=static_cast<int>(buffer_.size()));
-      std::memcpy(p,&buffer_[position],l);
+      if (l)
+        std::memcpy(p,&buffer_[position],l);
       position += l;
     }
 
