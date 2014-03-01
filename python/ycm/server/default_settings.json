@@ -27,7 +27,8 @@
     "unite": 1,
     "text": 1,
     "vimwiki": 1,
-    "pandoc": 1
+    "pandoc": 1,
+    "mail": 1
   },
   "auto_start_csharp_server": 1,
   "auto_stop_csharp_server": 1,

@@ -765,7 +765,8 @@ Default: `[see next line]`
           \ 'unite' : 1,
           \ 'text' : 1,
           \ 'vimwiki' : 1,
-          \ 'pandoc' : 1
+          \ 'pandoc' : 1,
+          \ 'mail' : 1
           \}
 
 ### The `g:ycm_filetype_specific_completion_to_disable` option
