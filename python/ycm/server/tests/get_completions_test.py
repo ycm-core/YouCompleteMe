@@ -97,6 +97,42 @@ def GetCompletions_CsCompleter_Works_test():
                                filetype = 'cs' ) )
 
 @with_setup( Setup )
+def GetCompletions_CsCompleter_ReloadSolutionWorks_test():
+  app = TestApp( handlers.app )
+  filepath = PathToTestFile( 'testy/Program.cs' )
+  contents = open( filepath ).read()
+  event_data = BuildRequest( filepath = filepath,
+                             filetype = 'cs',
+                             contents = contents,
+                             event_name = 'FileReadyToParse' )
+
+  app.post_json( '/event_notification', event_data )
+
+  # We need to wait until the server has started up.
+  while True:
+    result = app.post_json( '/run_completer_command',
+                            BuildRequest( completer_target = 'filetype_default',
+                                          command_arguments = ['ServerReady'],
+                                          filetype = 'cs' ) ).json
+    if result:
+      break
+    time.sleep( 0.2 )
+
+
+  result = app.post_json( '/run_completer_command',
+                          BuildRequest( completer_target = 'filetype_default',
+                                        command_arguments = ['ReloadSolution'],
+                                        filetype = 'cs' ) ).json
+
+  eq_(result, True)
+
+  # We need to turn off the CS server so that it doesn't stick around
+  app.post_json( '/run_completer_command',
+                 BuildRequest( completer_target = 'filetype_default',
+                               command_arguments = ['StopServer'],
+                               filetype = 'cs' ) )
+
+@with_setup( Setup )
 def GetCompletions_CsCompleter_StartsWithUnambiguousMultipleSolutions_test():
   app = TestApp( handlers.app )
   filepath = PathToTestFile( ('testy-multiple-solutions/'

@@ -43,6 +43,7 @@ class CsharpCompleter( Completer ):
     'StartServer': (lambda self, request_data: self._StartServer( request_data )),
     'StopServer': (lambda self, request_data: self._StopServer()),
     'RestartServer': (lambda self, request_data: self._RestartServer( request_data )),
+    'ReloadSolution': (lambda self, request_data: self._ReloadSolution()),
     'ServerRunning': (lambda self, request_data: self._ServerIsRunning()),
     'ServerReady': (lambda self, request_data: self._ServerIsReady()),
     'GoToDefinition': (lambda self, request_data: self._GoToDefinition( request_data )),
@@ -181,6 +182,12 @@ class CsharpCompleter( Completer ):
     if self._ServerIsRunning():
       self._StopServer()
     return self._StartServer( request_data )
+
+
+  def _ReloadSolution( self ):
+    """ Reloads the solutions in the OmniSharp server """
+    self._logger.info( 'Reloading Solution in OmniSharp server' )
+    return self._GetResponse( '/reloadsolution' )
 
 
   def _GetCompletions( self, request_data ):
