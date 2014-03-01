@@ -149,6 +149,7 @@ class YouCompleteMe( object ):
   def _ServerCleanup( self ):
     if self._IsServerAlive():
       self._server_popen.terminate()
+      self._server_popen.communicate()
     utils.RemoveIfExists( self._temp_options_filename )
 
     if not self._user_options[ 'server_keep_logfiles' ]:
