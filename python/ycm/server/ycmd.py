@@ -26,6 +26,7 @@ import json
 import argparse
 import waitress
 import signal
+import os
 from ycm import user_options_store
 from ycm import extra_conf_store
 from ycm.server.watchdog_plugin import WatchdogPlugin
@@ -38,8 +39,25 @@ def YcmCoreSanityCheck():
 
 # We manually call sys.exit() on SIGTERM and SIGINT so that atexit handlers are
 # properly executed.
-def SetUpSignalHandler():
+def SetUpSignalHandler(stdout, stderr, keep_logfiles):
   def SignalHandler( signum, frame ):
+    if stderr:
+      # Reset stderr, just in case something tries to use it
+      tmp = sys.stderr
+      sys.stderr = sys.__stderr__
+      tmp.close()
+    if stdout:
+      # Reset stdout, just in case something tries to use it
+      tmp = sys.stdout
+      sys.stdout = sys.__stdout__
+      tmp.close()
+
+    if not keep_logfiles:
+      if stderr:
+        utils.RemoveIfExists( stderr )
+      if stdout:
+        utils.RemoveIfExists( stdout )
+
     sys.exit()
 
   for sig in [ signal.SIGTERM,
@@ -61,7 +79,20 @@ def Main():
                        help = 'num idle seconds before server shuts down')
   parser.add_argument( '--options_file', type = str, default = '',
                        help = 'file with user options, in JSON format' )
+  parser.add_argument( '--stdout', type = str, default = None,
+                       help = 'optional file to use for stdout' )
+  parser.add_argument( '--stderr', type = str, default = None,
+                       help = 'optional file to use for stderr' )
+  parser.add_argument( '--keep_logfiles', action = 'store_true', default = None,
+                       help = 'optional file to use for stderr' )
   args = parser.parse_args()
+
+  if args.stdout is not None:
+    sys.stdout = open(args.stdout, "wb")
+    #os.dup2(stdout.fileno(), sys.stdout.fileno())
+  if args.stderr is not None:
+    sys.stderr = open(args.stderr, "wb")
+    #os.dup2(stderr.fileno(), sys.stderr.fileno())
 
   numeric_level = getattr( logging, args.log.upper(), None )
   if not isinstance( numeric_level, int ):
@@ -86,7 +117,7 @@ def Main():
   # preload has executed.
   from ycm.server import handlers
   handlers.UpdateUserOptions( options )
-  SetUpSignalHandler()
+  SetUpSignalHandler(args.stdout, args.stderr, args.keep_logfiles)
   handlers.app.install( WatchdogPlugin( args.idle_suicide_seconds ) )
   waitress.serve( handlers.app,
                   host = args.host,
