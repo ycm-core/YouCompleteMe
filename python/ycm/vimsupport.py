@@ -249,7 +249,7 @@ def JumpToLocation( filename, line, column ):
          not BufferModified( vim.current.buffer ) ):
       vim.command( 'keepjumps edit {0}'.format( filename ) )
     else:
-      vim.command( 'keepjumps {0} {1}'.format( user_options_store.Value( 'goto_buffer_command'),
+      vim.command( 'keepjumps {0} {1}'.format( user_options_store.Value( 'goto_buffer_command' ),
                                                filename ) )
   vim.current.window.cursor = ( line, column - 1 )
 
