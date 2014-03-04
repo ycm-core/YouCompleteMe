@@ -26,11 +26,10 @@ import json
 import argparse
 import waitress
 import signal
-import os
 from ycm import user_options_store
 from ycm import extra_conf_store
+from ycm import utils
 from ycm.server.watchdog_plugin import WatchdogPlugin
-
 
 def YcmCoreSanityCheck():
   if 'ycm_core' in sys.modules:
