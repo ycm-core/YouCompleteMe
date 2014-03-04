@@ -128,8 +128,8 @@ class CsharpCompleter( Completer ):
       foldername = ''
       if len( filepath_components ) > len( solutionpath ):
           foldername = filepath_components[ len( solutionpath ) ]
-      solution_file_candidates = [ solutionfile for solutionfile in solution_files
-        if _GetFilenameWithoutExtension( solutionfile ) == foldername ]
+      solution_file_candidates = [ sfile for sfile in solution_files
+        if _GetFilenameWithoutExtension( sfile ) == foldername ]
       if len( solution_file_candidates ) == 1:
         solutionfile = solution_file_candidates[ 0 ]
       else:
