@@ -1336,22 +1336,14 @@ Default: `1`
 
     let g:ycm_use_ultisnips_completer = 1
 
-### The `g:ycm_goto_same_buffer` option
-
-Indicates whether GoTo command result should be opened in the current buffer.
-However if current buffer has unsaved modifications then this option will be ignored and result will be opened in the new buffer created with `g:ycm_goto_buffer_command` command.
-
-Default: `1`
-
-    let g:ycm_goto_same_buffer = 1
-
 ### The `g:ycm_goto_buffer_command` option
 
-Defines command for the new buffer creation where GoTo command result will be opened.
-Value should be one of the following vim commands `[ 'sp[lit]', 'vs[plit]', 'tabe[dit]' ]`
+Defines where `GoTo*` commands result should be opened.
+Can take one of the following values: `[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab' ]`
+If this option is set to `'same-buffer'` but current buffer is modified then result will be opened in horizontal split.
 
-Default: `split`
-    let g:ycm_goto_buffer_command = 'split'
+Default: `'same-buffer'`
+    let g:ycm_goto_buffer_command = 'same-buffer'
 
 FAQ
 ---

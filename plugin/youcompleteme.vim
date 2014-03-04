@@ -144,15 +144,8 @@ let g:ycm_warning_symbol =
       \ get( g:, 'ycm_warning_symbol',
       \ get( g:, 'syntastic_warning_symbol', '>>' ) )
 
-let g:ycm_goto_same_buffer =
-      \ get( g:, 'ycm_goto_same_buffer', 1 )
-
 let g:ycm_goto_buffer_command =
-      \ get( g:, 'ycm_goto_buffer_command', 'split' )
-
-if index( [ 'sp', 'split', 'vs', 'vsplit', 'tabe', 'tabedit' ], g:ycm_goto_buffer_command ) < 0
-    let g:ycm_goto_buffer_command = 'split'
-endif
+      \ get( g:, 'ycm_goto_buffer_command', 'same-buffer' )
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.

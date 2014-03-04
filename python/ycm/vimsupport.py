@@ -23,6 +23,11 @@ import json
 from ycm.utils import ToUtf8IfNeeded
 from ycm import user_options_store
 
+BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
+                       'horizontal-split' : 'split',
+                       'vertical-split'   : 'vsplit',
+                       'new-tab'          : 'tabedit' }
+
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
   # See the comment in CurrentColumn about the calculation for the line and
@@ -245,12 +250,11 @@ def JumpToLocation( filename, line, column ):
     # location, not to the start of the newly opened file.
     # Sadly this fails on random occasions and the undesired jump remains in the
     # jumplist.
-    if ( user_options_store.Value( 'goto_same_buffer' ) and
-         not BufferModified( vim.current.buffer ) ):
-      vim.command( 'keepjumps edit {0}'.format( filename ) )
-    else:
-      vim.command( 'keepjumps {0} {1}'.format( user_options_store.Value( 'goto_buffer_command' ),
-                                               filename ) )
+    user_command = user_options_store.Value( 'goto_buffer_command' )
+    command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
+    if command == 'edit' and BufferModified( vim.current.buffer ):
+      command = 'split'
+    vim.command( 'keepjumps {0} {1}'.format( command, filename ) )
   vim.current.window.cursor = ( line, column - 1 )
 
   # Center the screen on the jumped-to location
