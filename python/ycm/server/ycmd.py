@@ -83,15 +83,13 @@ def Main():
   parser.add_argument( '--stderr', type = str, default = None,
                        help = 'optional file to use for stderr' )
   parser.add_argument( '--keep_logfiles', action = 'store_true', default = None,
-                       help = 'optional file to use for stderr' )
+                       help = 'retain logfiles after the server exits' )
   args = parser.parse_args()
 
   if args.stdout is not None:
-    sys.stdout = open(args.stdout, "wb")
-    #os.dup2(stdout.fileno(), sys.stdout.fileno())
+    sys.stdout = open(args.stdout, "w")
   if args.stderr is not None:
-    sys.stderr = open(args.stderr, "wb")
-    #os.dup2(stderr.fileno(), sys.stderr.fileno())
+    sys.stderr = open(args.stderr, "w")
 
   numeric_level = getattr( logging, args.log.upper(), None )
   if not isinstance( numeric_level, int ):
