@@ -22,6 +22,7 @@ import vim
 import tempfile
 import json
 import signal
+from subprocess import PIPE
 from ycm import vimsupport
 from ycm import utils
 from ycm.diagnostic_interface import DiagnosticInterface
@@ -84,26 +85,22 @@ class YouCompleteMe( object ):
     self._SetupServer()
     self._ycmd_keepalive.Start()
 
-
   def _SetupServer( self ):
     server_port = utils.GetUnusedLocalhostPort()
     with tempfile.NamedTemporaryFile( delete = False ) as options_file:
       self._temp_options_filename = options_file.name
       json.dump( dict( self._user_options ), options_file )
       options_file.flush()
+
       args = [ utils.PathToPythonInterpreter(),
                _PathToServerScript(),
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),
                '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
                '--idle_suicide_seconds={0}'.format(
-                  SERVER_IDLE_SUICIDE_SECONDS ) ]
+                  SERVER_IDLE_SUICIDE_SECONDS )]
 
-      BaseRequest.server_location = 'http://localhost:' + str( server_port )
-
-      if self._user_options[ 'server_use_vim_stdout' ]:
-        self._server_popen = utils.SafePopen( args )
-      else:
+      if not self._user_options[ 'server_use_vim_stdout' ]:
         filename_format = os.path.join( utils.PathToTempDir(),
                                         'server_{port}_{std}.log' )
 
@@ -111,14 +108,17 @@ class YouCompleteMe( object ):
                                                       std = 'stdout' )
         self._server_stderr = filename_format.format( port = server_port,
                                                       std = 'stderr' )
+        args.append('--stdout={0}'.format( self._server_stdout ))
+        args.append('--stderr={0}'.format( self._server_stderr ))
 
-        with open( self._server_stderr, 'w' ) as fstderr:
-          with open( self._server_stdout, 'w' ) as fstdout:
-            self._server_popen = utils.SafePopen( args,
-                                                  stdout = fstdout,
-                                                  stderr = fstderr )
+        if self._user_options[ 'server_keep_logfiles' ]:
+          args.append('--keep_logfiles')
+
+      self._server_popen = utils.SafePopen( args, stdout = PIPE, stderr = PIPE)
+
+      BaseRequest.server_location = 'http://localhost:' + str( server_port )
+
     self._NotifyUserIfServerCrashed()
-
 
   def _IsServerAlive( self ):
     returncode = self._server_popen.poll()
@@ -150,13 +150,6 @@ class YouCompleteMe( object ):
     if self._IsServerAlive():
       self._server_popen.terminate()
     utils.RemoveIfExists( self._temp_options_filename )
-
-    if not self._user_options[ 'server_keep_logfiles' ]:
-      if self._server_stderr:
-        utils.RemoveIfExists( self._server_stderr )
-      if self._server_stdout:
-        utils.RemoveIfExists( self._server_stdout )
-
 
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
