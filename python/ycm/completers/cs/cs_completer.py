@@ -107,16 +107,9 @@ class CsharpCompleter( Completer ):
     else:
       return 'Server is not running'
 
-
-  def _StartServer( self, request_data ):
-    """ Start the OmniSharp server """
-    self._logger.info( 'startup' )
-
-    # try to load ycm_extra_conf
-    # if it needs to be verified, abort here and try again later
-    filepath = request_data[ 'filepath' ]
-    module = extra_conf_store.ModuleForSourceFile( filepath )
-    path_to_solutionfile = None
+  def _PollModuleForSolutionFile( self, module, filepath):
+    path_to_solutionfile=None
+    preferred_name=None
     if module:
       try:
         preferred_name = module.CSharpSolutionFile( filepath )
@@ -138,12 +131,25 @@ class CsharpCompleter( Completer ):
                   'Using solution file {0} selected by extra_conf_store'.format(
                   path_to_solutionfile) )
               break
+          # if no solution file found, use the filename as hint later
+          preferred_name=os.path.basename(preferred_name)
       except AttributeError, e:
         # the config script might not provide solution file locations
         self._logger.error(
             'Could not retrieve solution for {0} from extra_conf_store: {1}'.format(
             filepath, str( e )) )
         preferred_name = None
+    return path_to_solutionfile, preferred_name
+
+  def _StartServer( self, request_data ):
+    """ Start the OmniSharp server """
+    self._logger.info( 'startup' )
+
+    # try to load ycm_extra_conf
+    # if it needs to be verified, abort here and try again later
+    filepath = request_data[ 'filepath' ]
+    module = extra_conf_store.ModuleForSourceFile( filepath )
+    path_to_solutionfile, preferred_name = self._PollModuleForSolutionFile(module, filepath)
 
     self._omnisharp_port = utils.GetUnusedLocalhostPort()
 
@@ -269,6 +275,54 @@ class CsharpCompleter( Completer ):
     response = urllib2.urlopen( target, parameters )
     return json.loads( response.read() )
 
+  def _SolutionTestCheckPreferred( self, path, candidates, preferred_name ):
+    """ Check if one of the candidates matches preferred_name hint """
+    if preferred_name:
+      check = [ c for c in candidates
+          if ( preferred_name == c ) ]
+      if len( check ) == 1:
+        selection = os.path.join( path, check[0] )
+        self._logger.info(
+            'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+            selection, preferred_name ) )
+        return selection
+      elif len( check ) == 2:
+        # pick the one ending in sln, can misbehave if there is a file.sln.sln
+        selection = os.path.join( path, "%s.sln"%preferred_name )
+        self._logger.info(
+            'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+            selection, preferred_name ) )
+        return selection
+
+  def _SolutionTestCheckHeuristics( self, candidates, tokens, i ):
+    """ Test if one of the candidate files stands out """
+    path = os.path.join( *tokens[:i + 1] )
+    selection=None
+    # if there is just one file here, use that
+    if len( candidates ) == 1 :
+      selection = os.path.join( path, candidates[0] )
+      self._logger.info(
+          'Selected solution file {0} as it is the first one found'.format(
+          selection ) )
+    # there is more than one file, try some hints to decide
+    # 1. is there a solution named just like the subdirectory with the source?
+    if (not selection and i < len( tokens ) - 1 and
+        "{0}.sln".format( tokens[i + 1] ) in candidates ):
+      selection = os.path.join( path, "{0}.sln".format( tokens[i + 1] ) )
+      self._logger.info(
+          'Selected solution file {0} as it matches source subfolder'.format(
+          selection ) )
+    # 2. is there a solution named just like the directory containing the solution?
+    if not selection and "{0}.sln".format( tokens[i] ) in candidates:
+      selection = os.path.join( path, "{0}.sln".format( tokens[i] ) )
+      self._logger.info(
+          'Selected solution file {0} as it matches containing folder'.format(
+          selection ) )
+    if not selection:
+      self._logger.error(
+          'Could not decide between multiple solution files:\n{0}'.format(
+          candidates ) )
+    return selection
 
   def _GuessSolutionFile( self, filepath, preferred_name ):
     """ Find solution files by searching upwards in the file tree """
@@ -280,51 +334,15 @@ class CsharpCompleter( Completer ):
       candidates = glob.glob1( path, "*.sln" )
       if len( candidates ) > 0:
         # if a name was provided, try hard to find something matching
-        if preferred_name:
-          check = [ c for c in candidates
-              if ( preferred_name == c or "%s.sln"%preferred_name == c) ]
-          if len( check ) == 1:
-            selection = os.path.join( path, check[0] )
-            self._logger.info(
-                'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
-                selection, preferred_name ) )
-            break
-          elif len( check ) == 2:
-            # pick the one ending in sln, can misbehave if there is a file.sln.sln
-            selection = os.path.join( path, "%s.sln"%preferred_name )
-            self._logger.info(
-                'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
-                selection, preferred_name ) )
-            break
+        final = self._SolutionTestCheckPreferred( path, candidates, preferred_name )
+        if final:
+          return final
         # do the whole procedure only for the first solution file(s) you find
-        if first_hit and not selection:
-          # if there is just one file here, use that
-          if len( candidates ) == 1 :
-            selection = os.path.join( path, candidates[0] )
-            self._logger.info(
-                'Selected solution file {0} as it is the first one found'.format(
-                selection ) )
-          # there is more than one file, try some hints to decide
-          # 1. is there a solution named just like the subdirectory with the source?
-          if (not selection and i < len( tokens ) - 1 and
-              "{0}.sln".format( tokens[i + 1] ) in candidates ):
-            selection = os.path.join( path, "{0}.sln".format( tokens[i + 1] ) )
-            self._logger.info(
-                'Selected solution file {0} as it matches source subfolder'.format(
-                selection ) )
-          # 2. is there a solution named just like the directory containing the solution?
-          if not selection and "{0}.sln".format( tokens[i] ) in candidates:
-            selection = os.path.join( path, "{0}.sln".format( tokens[i] ) )
-            self._logger.info(
-                'Selected solution file {0} as it matches containing folder'.format(
-                selection ) )
-          if not selection:
-            self._logger.error(
-                'Could not decide between multiple solution files:\n{0}'.format(
-                candidates ) )
+        if first_hit :
+          selection = self._SolutionTestCheckHeuristics( candidates, tokens, i )
           # we could not decide and aren't looking for anything specific, giving up
           if not preferred_name:
-            break
+            return selection
         first_hit = False
     return selection
 
