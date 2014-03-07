@@ -115,7 +115,6 @@ class YouCompleteMe( object ):
           args.append('--keep_logfiles')
 
       self._server_popen = utils.SafePopen( args, stdout = PIPE, stderr = PIPE)
-
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
 
     self._NotifyUserIfServerCrashed()
@@ -150,6 +149,7 @@ class YouCompleteMe( object ):
     if self._IsServerAlive():
       self._server_popen.terminate()
     utils.RemoveIfExists( self._temp_options_filename )
+
 
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )

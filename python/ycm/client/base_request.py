@@ -27,10 +27,10 @@ from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
 from ycm.server.responses import ServerError, UnknownExtraConf
 
-HEADERS = {'content-type': 'application/json'}
-EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )
+_HEADERS = {'content-type': 'application/json'}
+_EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )
 # Setting this to None seems to screw up the Requests/urllib3 libs.
-DEFAULT_TIMEOUT_SEC = 30
+_DEFAULT_TIMEOUT_SEC = 30
 
 class BaseRequest( object ):
   def __init__( self ):
@@ -52,7 +52,7 @@ class BaseRequest( object ):
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def GetDataFromHandler( handler, timeout = DEFAULT_TIMEOUT_SEC ):
+  def GetDataFromHandler( handler, timeout = _DEFAULT_TIMEOUT_SEC ):
     return JsonFromFuture( BaseRequest._TalkToHandlerAsync( '',
                                                             handler,
                                                             'GET',
@@ -63,7 +63,7 @@ class BaseRequest( object ):
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandler( data, handler, timeout = DEFAULT_TIMEOUT_SEC ):
+  def PostDataToHandler( data, handler, timeout = _DEFAULT_TIMEOUT_SEC ):
     return JsonFromFuture( BaseRequest.PostDataToHandlerAsync( data,
                                                                handler,
                                                                timeout ) )
@@ -73,7 +73,7 @@ class BaseRequest( object ):
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandlerAsync( data, handler, timeout = DEFAULT_TIMEOUT_SEC ):
+  def PostDataToHandlerAsync( data, handler, timeout = _DEFAULT_TIMEOUT_SEC ):
     return BaseRequest._TalkToHandlerAsync( data, handler, 'POST', timeout )
 
 
@@ -85,16 +85,16 @@ class BaseRequest( object ):
   def _TalkToHandlerAsync( data,
                            handler,
                            method,
-                           timeout = DEFAULT_TIMEOUT_SEC ):
+                           timeout = _DEFAULT_TIMEOUT_SEC ):
     def SendRequest( data, handler, method, timeout ):
       if method == 'POST':
         return BaseRequest.session.post( _BuildUri( handler ),
                                         data = json.dumps( data ),
-                                        headers = HEADERS,
+                                        headers = _HEADERS,
                                         timeout = timeout )
       if method == 'GET':
         return BaseRequest.session.get( _BuildUri( handler ),
-                                        headers = HEADERS,
+                                        headers = _HEADERS,
                                         timeout = timeout )
 
     @retries( 5, delay = 0.5, backoff = 1.5 )
@@ -102,18 +102,18 @@ class BaseRequest( object ):
       if method == 'POST':
         return requests.post( _BuildUri( handler ),
                               data = json.dumps( data ),
-                              headers = HEADERS )
+                              headers = _HEADERS )
       if method == 'GET':
         return requests.get( _BuildUri( handler ),
-                             headers = HEADERS )
+                             headers = _HEADERS )
 
     if not _CheckServerIsHealthyWithCache():
-      return EXECUTOR.submit( DelayedSendRequest, data, handler, method )
+      return _EXECUTOR.submit( DelayedSendRequest, data, handler, method )
 
     return SendRequest( data, handler, method, timeout )
 
 
-  session = FuturesSession( executor = EXECUTOR )
+  session = FuturesSession( executor = _EXECUTOR )
   server_location = 'http://localhost:6666'
 
 
