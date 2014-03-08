@@ -19,18 +19,26 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+function! s:restore_cpo()
+  let &cpo = s:save_cpo
+  unlet s:save_cpo
+endfunction
+
 if exists( "g:loaded_youcompleteme" )
+  call s:restore_cpo()
   finish
 elseif v:version < 703 || (v:version == 703 && !has('patch584'))
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
         \ echohl None
+  call s:restore_cpo()
   finish
 elseif !has( 'python' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
         \ " Python 2.x support" |
         \ echohl None
+  call s:restore_cpo()
   finish
 endif
 
@@ -60,6 +68,7 @@ if g:ycm_check_if_ycm_core_present && !s:HasYcmCore()
         \ "ycm_core.[so|pyd|dll] not detected; you need to compile " .
         \ "YCM before using it. Read the docs!" |
         \ echohl None
+  call s:restore_cpo()
   finish
 endif
 
@@ -152,5 +161,4 @@ augroup youcompletemeStart
 augroup END
 
 " This is basic vim plugin boilerplate
-let &cpo = s:save_cpo
-unlet s:save_cpo
+call s:restore_cpo()
