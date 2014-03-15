@@ -26,6 +26,7 @@ import socket
 import stat
 from distutils.spawn import find_executable
 import subprocess
+import atexit
 
 WIN_PYTHON27_PATH = 'C:\python27\pythonw.exe'
 WIN_PYTHON26_PATH = 'C:\python26\pythonw.exe'
@@ -46,15 +47,14 @@ def ToUtf8IfNeeded( value ):
     return value
   return str( value )
 
+_tempdir = None
 
 def PathToTempDir():
-  tempdir = os.path.join( tempfile.gettempdir(), 'ycm_temp' )
-  if not os.path.exists( tempdir ):
-    os.makedirs( tempdir )
-    # Needed to support multiple users working on the same machine;
-    # see issue 606.
-    MakeFolderAccessibleToAll( tempdir )
-  return tempdir
+  global _tempdir
+  if _tempdir is None:
+    _tempdir = tempfile.mkdtemp( prefix='ycm_temp' )
+    atexit.register( RemoveDirectoryIfExists, _tempdir )
+  return _tempdir
 
 
 def MakeFolderAccessibleToAll( path_to_folder ):
@@ -88,6 +88,11 @@ def RemoveIfExists( filename ):
   except OSError:
     pass
 
+def RemoveDirectoryIfExists( directory ):
+  try:
+    os.rmdir( directory )
+  except OSError:
+    pass
 
 def Memoize( obj ):
   cache = obj.cache = {}
