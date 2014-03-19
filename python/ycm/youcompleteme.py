@@ -76,6 +76,7 @@ class YouCompleteMe( object ):
     self._omnicomp = OmniCompleter( user_options )
     self._latest_completion_request = None
     self._latest_file_parse_request = None
+    self._server_tempdir = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -101,7 +102,8 @@ class YouCompleteMe( object ):
                   SERVER_IDLE_SUICIDE_SECONDS )]
 
       if not self._user_options[ 'server_use_vim_stdout' ]:
-        filename_format = os.path.join( utils.PathToTempDir(),
+        self._server_tempdir = utils.PathToTempDir()
+        filename_format = os.path.join( self._server_tempdir,
                                         'server_{port}_{std}.log' )
 
         self._server_stdout = filename_format.format( port = server_port,
