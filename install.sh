@@ -74,7 +74,11 @@ function install {
   build_dir=`mktemp -d -t ycm_build.XXXXXX`
   pushd $build_dir
 
-  cmake -G "Unix Makefiles" $(python_finder) "$@" . $ycm_dir/cpp
+  if [[ `uname -s` == "Darwin" ]]; then
+    cmake -G "Unix Makefiles" $(python_finder) "$@" . $ycm_dir/cpp
+  else
+    cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
+  fi
 
   make -j $(num_cores) ycm_support_libs
   popd
