@@ -18,13 +18,13 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
-import json
 import requests
 import urlparse
 from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
+from ycm.utils import ToUtf8Json
 from ycm.server.responses import ServerError, UnknownExtraConf
 
 _HEADERS = {'content-type': 'application/json'}
@@ -89,7 +89,7 @@ class BaseRequest( object ):
     def SendRequest( data, handler, method, timeout ):
       if method == 'POST':
         return BaseRequest.session.post( _BuildUri( handler ),
-                                        data = json.dumps( data ),
+                                        data = ToUtf8Json( data ),
                                         headers = _HEADERS,
                                         timeout = timeout )
       if method == 'GET':
@@ -101,7 +101,7 @@ class BaseRequest( object ):
     def DelayedSendRequest( data, handler, method ):
       if method == 'POST':
         return requests.post( _BuildUri( handler ),
-                              data = json.dumps( data ),
+                              data = ToUtf8Json( data ),
                               headers = _HEADERS )
       if method == 'GET':
         return requests.get( _BuildUri( handler ),

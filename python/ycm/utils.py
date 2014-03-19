@@ -24,6 +24,7 @@ import signal
 import functools
 import socket
 import stat
+import json
 from distutils.spawn import find_executable
 import subprocess
 
@@ -45,6 +46,10 @@ def ToUtf8IfNeeded( value ):
   if isinstance( value, str ):
     return value
   return str( value )
+
+
+def ToUtf8Json( data ):
+  return ToUtf8IfNeeded( json.dumps( data, ensure_ascii = False ) )
 
 
 def PathToTempDir():
