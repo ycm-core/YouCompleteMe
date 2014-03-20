@@ -18,6 +18,7 @@
 #ifndef COMPLETER_H_7AR4UGXE
 #define COMPLETER_H_7AR4UGXE
 
+#include "export.h"
 #include "IdentifierDatabase.h"
 
 #include <boost/utility.hpp>
@@ -36,7 +37,9 @@ class Candidate;
 
 class IdentifierCompleter : boost::noncopyable {
 public:
+  __export__
   IdentifierCompleter();
+  __export__
   IdentifierCompleter( const std::vector< std::string > &candidates );
   IdentifierCompleter( const std::vector< std::string > &candidates,
                        const std::string &filetype,
@@ -47,9 +50,11 @@ public:
     const std::string &filetype,
     const std::string &filepath );
 
+  __export__
   void AddIdentifiersToDatabaseFromTagFiles(
     const std::vector< std::string > &absolute_paths_to_tag_files );
 
+  __export__
   void AddIdentifiersToDatabaseFromBuffer(
     const std::string &buffer_contents,
     const std::string &filetype,
@@ -57,9 +62,11 @@ public:
     bool collect_from_comments_and_strings );
 
   // Only provided for tests!
+  __export__
   std::vector< std::string > CandidatesForQuery(
     const std::string &query ) const;
 
+  __export__
   std::vector< std::string > CandidatesForQueryAndType(
     const std::string &query,
     const std::string &filetype ) const;

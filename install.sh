@@ -91,9 +91,10 @@ function testrun {
   pushd $build_dir
 
   cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
+  make -j $(num_cores) ycm_support_libs
   make -j $(num_cores) ycm_core_tests
   cd ycm/tests
-  LD_LIBRARY_PATH=$ycm_dir/python ./ycm_core_tests
+  LD_LIBRARY_PATH=$ycm_dir/python PATH=$PATH:$ycm_dir/python ./ycm_core_tests
 
   popd
   rm -rf $build_dir

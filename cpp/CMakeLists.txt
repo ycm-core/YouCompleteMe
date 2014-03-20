@@ -16,6 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 cmake_minimum_required( VERSION 2.8 )
+set( CMAKE_LEGACY_CYGWIN_WIN32 0 )
 project( YouCompleteMe )
 
 option( UNIVERSAL "Build universal mac binary" OFF )
@@ -38,6 +39,8 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
 else()
   set( 64_BIT_PLATFORM 1 )
 endif()
+
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs" )
 
 #############################################################################
 
