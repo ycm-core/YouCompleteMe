@@ -372,15 +372,21 @@ completer, so <code>:YcmCompleter GoToDefinition</code> will invoke the <code>Go
 subcommand on the Python semantic completer if the currently active file is a
 Python one and on the Clang completer if the currently active file is a
 C/C++/Objective-C one.</p><p>You may also want to map the subcommands to something less verbose; for
-instance, <code>nnoremap &lt;leader&gt;jd :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;</code>
+instance, <code>nnoremap &lt;leader&gt;jd :YcmCompleter GoTo&lt;CR&gt;</code>
 maps the <code>&lt;leader&gt;jd</code> sequence to the longer subcommand invocation.</p><p>The various <code>GoTo*</code> subcommands add entries to Vim's <code>jumplist</code> so you can use
 <code>CTRL-O</code> to jump back to where you where before invoking the command (and
 <code>CTRL-I</code> to jump forward; see <code>:h jumplist</code> for details).</p><h3>The <code>GoToDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python, cs</code></p><h3>The <code>GoToDefinition</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition.</p><p>NOTE: For C-family languages <strong>this only works in certain situations</strong>, namely when
 the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
-with <code>#include</code> directives (directly or indirectly) in that file.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python, cs</code></p><h3>The <code>GoToDefinitionElseDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its definition if possible; if
-the definition is not accessible from the current translation unit, jumps to the
-symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python, cs</code></p><h3>The <code>ClearCompilationFlagCache</code> subcommand</h3><p>YCM caches the flags it gets from the <code>FlagsForFile</code> function in your
+with <code>#include</code> directives (directly or indirectly) in that file.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python, cs</code></p><h3>The <code>GoTo</code> subcommand</h3><p>This command tries to perform the "most sensible" GoTo operation it can.
+Currently, this means that it tries to look up the symbol under the cursor and
+jumps to its definition if possible; if the definition is not accessible from
+the current translation unit, jumps to the symbol's declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, python, cs</code></p><h3>The <code>GoToImprecise</code> subcommand</h3><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GoTo</code> command except that it doesn't recompile the file with
+libclang before looking up nodes in the AST. This can be very useful when you're
+editing files that take long to compile but you know that you haven't made any
+changes since the last parse that would lead to incorrect jumps. When you're
+just browsing around your codebase, this command can spare you quite a bit of
+latency.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h3>The <code>ClearCompilationFlagCache</code> subcommand</h3><p>YCM caches the flags it gets from the <code>FlagsForFile</code> function in your
 <code>ycm_extra_conf.py</code> file if you return them with the <code>do_cache</code> parameter set to
 <code>True</code>. The cache is in memory and is never invalidated (unless you restart Vim
 of course).</p><p>This command clears that cache entirely. YCM will then re-query your
@@ -431,7 +437,8 @@ is used like a hash set, meaning that only the keys matter).</p><p>See the <code
       \ 'unite' : 1,
       \ 'text' : 1,
       \ 'vimwiki' : 1,
-      \ 'pandoc' : 1
+      \ 'pandoc' : 1,
+      \ 'mail' : 1
       \}
 </code></pre><h3>The <code>g:ycm_filetype_specific_completion_to_disable</code> option</h3><p>This option controls for which Vim filetypes (see <code>:h filetype</code>) should the YCM
 semantic completion engine be turned off. The option value should be a Vim
