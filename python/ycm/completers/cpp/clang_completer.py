@@ -103,7 +103,7 @@ class ClangCompleter( Completer ):
   def DefinedSubcommands( self ):
     return [ 'GoToDefinition',
              'GoToDeclaration',
-             'GoToDefinitionElseDeclaration',
+             'GoTo',
              'ClearCompilationFlagCache']
 
 
@@ -116,8 +116,8 @@ class ClangCompleter( Completer ):
       return self._GoToDefinition( request_data )
     elif command == 'GoToDeclaration':
       return self._GoToDeclaration( request_data )
-    elif command == 'GoToDefinitionElseDeclaration':
-      return self._GoToDefinitionElseDeclaration( request_data )
+    elif command == 'GoTo':
+      return self._GoTo( request_data )
     elif command == 'ClearCompilationFlagCache':
       return self._ClearCompilationFlagCache()
     raise ValueError( self.UserCommandsHelpMessage() )
@@ -163,7 +163,7 @@ class ClangCompleter( Completer ):
                                         location.column_number_ - 1)
 
 
-  def _GoToDefinitionElseDeclaration( self, request_data ):
+  def _GoTo( self, request_data ):
     location = self._LocationForGoTo( 'GetDefinitionLocation', request_data )
     if not location or not location.IsValid():
       location = self._LocationForGoTo( 'GetDeclarationLocation', request_data )

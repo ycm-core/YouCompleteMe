@@ -66,7 +66,7 @@ class JediCompleter( Completer ):
   def DefinedSubcommands( self ):
     return [ 'GoToDefinition',
              'GoToDeclaration',
-             'GoToDefinitionElseDeclaration' ]
+             'GoTo' ]
 
 
   def OnUserCommand( self, arguments, request_data ):
@@ -78,8 +78,8 @@ class JediCompleter( Completer ):
       return self._GoToDefinition( request_data )
     elif command == 'GoToDeclaration':
       return self._GoToDeclaration( request_data )
-    elif command == 'GoToDefinitionElseDeclaration':
-      return self._GoToDefinitionElseDeclaration( request_data )
+    elif command == 'GoTo':
+      return self._GoTo( request_data )
     raise ValueError( self.UserCommandsHelpMessage() )
 
 
@@ -99,7 +99,7 @@ class JediCompleter( Completer ):
       raise RuntimeError( 'Can\'t jump to declaration.' )
 
 
-  def _GoToDefinitionElseDeclaration( self, request_data ):
+  def _GoTo( self, request_data ):
     definitions = ( self._GetDefinitionsList( request_data ) or
         self._GetDefinitionsList( request_data, declaration = True ) )
     if definitions:

@@ -594,7 +594,7 @@ Python one and on the Clang completer if the currently active file is a
 C/C++/Objective-C one.
 
 You may also want to map the subcommands to something less verbose; for
-instance, `nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>`
+instance, `nnoremap <leader>jd :YcmCompleter GoTo<CR>`
 maps the `<leader>jd` sequence to the longer subcommand invocation.
 
 The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
@@ -618,11 +618,12 @@ with `#include` directives (directly or indirectly) in that file.
 
 Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
-### The `GoToDefinitionElseDeclaration` subcommand
+### The `GoTo` subcommand
 
-Looks up the symbol under the cursor and jumps to its definition if possible; if
-the definition is not accessible from the current translation unit, jumps to the
-symbol's declaration.
+This command tries to perform the "most sensible" GoTo operation it can.
+Currently, this means that it tries to look up the symbol under the cursor and
+jumps to its definition if possible; if the definition is not accessible from
+the current translation unit, jumps to the symbol's declaration.
 
 Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 

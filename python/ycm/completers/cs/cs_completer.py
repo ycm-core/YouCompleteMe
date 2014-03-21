@@ -48,7 +48,7 @@ class CsharpCompleter( Completer ):
     'ServerReady': (lambda self, request_data: self._ServerIsReady()),
     'GoToDefinition': (lambda self, request_data: self._GoToDefinition( request_data )),
     'GoToDeclaration': (lambda self, request_data: self._GoToDefinition( request_data )),
-    'GoToDefinitionElseDeclaration': (lambda self, request_data: self._GoToDefinition( request_data ))
+    'GoTo': (lambda self, request_data: self._GoToDefinition( request_data ))
   }
 
   def __init__( self, user_options ):

@@ -22,15 +22,20 @@ from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
 from ycm import vimsupport
 from ycm.utils import ToUtf8IfNeeded
 
+def _EnsureBackwardsCompatibility( arguments ):
+  if arguments and arguments[ 0 ] == 'GoToDefinitionElseDeclaration':
+    arguments[ 0 ] = 'GoTo'
+  return arguments
+
 
 class CommandRequest( BaseRequest ):
   def __init__( self, arguments, completer_target = None ):
     super( CommandRequest, self ).__init__()
-    self._arguments = arguments
+    self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._completer_target = ( completer_target if completer_target
                                else 'filetype_default' )
     self._is_goto_command = (
-        arguments and arguments[ 0 ].startswith( 'GoTo' ) )
+        self._arguments and self._arguments[ 0 ].startswith( 'GoTo' ) )
     self._response = None
 
 
