@@ -69,12 +69,14 @@ public:
   Location GetDeclarationLocation(
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files );
+    const std::vector< UnsavedFile > &unsaved_files,
+    bool reparse = true );
 
   Location GetDefinitionLocation(
     int line,
     int column,
-    const std::vector< UnsavedFile > &unsaved_files );
+    const std::vector< UnsavedFile > &unsaved_files,
+    bool reparse = true );
 
 private:
   void Reparse( std::vector< CXUnsavedFile > &unsaved_files );

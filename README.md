@@ -627,6 +627,19 @@ the current translation unit, jumps to the symbol's declaration.
 
 Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
+### The `GoToImprecise` subcommand
+
+WARNING: This command trades correctness for speed!
+
+Same as the `GoTo` command except that it doesn't recompile the file with
+libclang before looking up nodes in the AST. This can be very useful when you're
+editing files that take long to compile but you know that you haven't made any
+changes since the last parse that would lead to incorrect jumps. When you're
+just browsing around your codebase, this command can spare you quite a bit of
+latency.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
 ### The `ClearCompilationFlagCache` subcommand
 
 YCM caches the flags it gets from the `FlagsForFile` function in your

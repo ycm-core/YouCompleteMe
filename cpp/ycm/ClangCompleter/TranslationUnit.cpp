@@ -177,8 +177,10 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 Location TranslationUnit::GetDeclarationLocation(
   int line,
   int column,
-  const std::vector< UnsavedFile > &unsaved_files ) {
-  ReparseForIndexing( unsaved_files );
+  const std::vector< UnsavedFile > &unsaved_files,
+  bool reparse ) {
+  if (reparse)
+    ReparseForIndexing( unsaved_files );
   unique_lock< mutex > lock( clang_access_mutex_ );
 
   if ( !clang_translation_unit_ )
@@ -200,8 +202,10 @@ Location TranslationUnit::GetDeclarationLocation(
 Location TranslationUnit::GetDefinitionLocation(
   int line,
   int column,
-  const std::vector< UnsavedFile > &unsaved_files ) {
-  ReparseForIndexing( unsaved_files );
+  const std::vector< UnsavedFile > &unsaved_files,
+  bool reparse ) {
+  if (reparse)
+    ReparseForIndexing( unsaved_files );
   unique_lock< mutex > lock( clang_access_mutex_ );
 
   if ( !clang_translation_unit_ )

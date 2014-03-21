@@ -104,6 +104,7 @@ class ClangCompleter( Completer ):
     return [ 'GoToDefinition',
              'GoToDeclaration',
              'GoTo',
+             'GoToImprecise',
              'ClearCompilationFlagCache']
 
 
@@ -118,12 +119,14 @@ class ClangCompleter( Completer ):
       return self._GoToDeclaration( request_data )
     elif command == 'GoTo':
       return self._GoTo( request_data )
+    elif command == 'GoToImprecise':
+      return self._GoToImprecise( request_data )
     elif command == 'ClearCompilationFlagCache':
       return self._ClearCompilationFlagCache()
     raise ValueError( self.UserCommandsHelpMessage() )
 
 
-  def _LocationForGoTo( self, goto_function, request_data ):
+  def _LocationForGoTo( self, goto_function, request_data, reparse = True ):
     filename = request_data[ 'filepath' ]
     if not filename:
       raise ValueError( INVALID_FILE_MESSAGE )
@@ -140,27 +143,22 @@ class ClangCompleter( Completer ):
         line,
         column,
         files,
-        flags )
+        flags,
+        reparse )
 
 
   def _GoToDefinition( self, request_data ):
     location = self._LocationForGoTo( 'GetDefinitionLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition.' )
-
-    return responses.BuildGoToResponse( location.filename_,
-                                        location.line_number_ - 1,
-                                        location.column_number_ - 1)
+    return _ResponseForLocation( location )
 
 
   def _GoToDeclaration( self, request_data ):
     location = self._LocationForGoTo( 'GetDeclarationLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to declaration.' )
-
-    return responses.BuildGoToResponse( location.filename_,
-                                        location.line_number_ - 1,
-                                        location.column_number_ - 1)
+    return _ResponseForLocation( location )
 
 
   def _GoTo( self, request_data ):
@@ -169,11 +167,20 @@ class ClangCompleter( Completer ):
       location = self._LocationForGoTo( 'GetDeclarationLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition or declaration.' )
+    return _ResponseForLocation( location )
 
-    return responses.BuildGoToResponse( location.filename_,
-                                        location.line_number_ - 1,
-                                        location.column_number_ - 1)
 
+  def _GoToImprecise( self, request_data ):
+    location = self._LocationForGoTo( 'GetDefinitionLocation',
+                                      request_data,
+                                      reparse = False )
+    if not location or not location.IsValid():
+      location = self._LocationForGoTo( 'GetDeclarationLocation',
+                                        request_data,
+                                        reparse = False )
+    if not location or not location.IsValid():
+      raise RuntimeError( 'Can\'t jump to definition or declaration.' )
+    return _ResponseForLocation( location )
 
 
   def _ClearCompilationFlagCache( self ):
@@ -293,5 +300,11 @@ def _FilterDiagnostics( diagnostics ):
   return [ x for x in diagnostics if
            x.text_ != PRAGMA_DIAG_TEXT_TO_IGNORE and
            x.text_ != TOO_MANY_ERRORS_DIAG_TEXT_TO_IGNORE ]
+
+
+def _ResponseForLocation( location ):
+  return responses.BuildGoToResponse( location.filename_,
+                                      location.line_number_ - 1,
+                                      location.column_number_ - 1)
 
 

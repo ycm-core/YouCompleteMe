@@ -62,14 +62,16 @@ public:
     int line,
     int column,
     const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    const std::vector< std::string > &flags,
+    bool reparse = true );
 
   Location GetDefinitionLocation(
     const std::string &filename,
     int line,
     int column,
     const std::vector< UnsavedFile > &unsaved_files,
-    const std::vector< std::string > &flags );
+    const std::vector< std::string > &flags,
+    bool reparse = true );
 
   void DeleteCachesForFile( const std::string &filename );
 
