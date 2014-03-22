@@ -72,7 +72,8 @@ def GetBufferOption( buffer_object, option ):
 
 
 def BufferModified( buffer_object ):
-  return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
+  return buffer_object.options[ 'mod' ]
+
 
 def GetUnsavedAndCurrentBufferData():
   buffers_data = {}
@@ -238,6 +239,14 @@ def VimExpressionToPythonType( vim_expression ):
     return result
 
 
+def HiddenEnabled( buffer_object ):
+  return vim.options[ 'hid' ]
+
+
+def BufferIsUsable( buffer_object ):
+  return not BufferModified( buffer_object ) or HiddenEnabled( buffer_object )
+
+
 # Both |line| and |column| need to be 1-based
 def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
@@ -252,7 +261,7 @@ def JumpToLocation( filename, line, column ):
     # jumplist.
     user_command = user_options_store.Value( 'goto_buffer_command' )
     command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
-    if command == 'edit' and BufferModified( vim.current.buffer ):
+    if command == 'edit' and not BufferIsUsable( vim.current.buffer ):
       command = 'split'
     vim.command( 'keepjumps {0} {1}'.format( command, filename ) )
   vim.current.window.cursor = ( line, column - 1 )

@@ -1339,8 +1339,11 @@ Default: `1`
 ### The `g:ycm_goto_buffer_command` option
 
 Defines where `GoTo*` commands result should be opened.
-Can take one of the following values: `[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab' ]`
-If this option is set to `'same-buffer'` but current buffer is modified then result will be opened in horizontal split.
+Can take one of the following values:
+`[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab' ]`
+If this option is set to the `'same-buffer'` but current buffer can not
+be switched (when buffer is modified and `nohidden` option is set),
+then result will be opened in horizontal split.
 
 Default: `'same-buffer'`
     let g:ycm_goto_buffer_command = 'same-buffer'
