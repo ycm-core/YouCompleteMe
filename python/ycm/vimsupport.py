@@ -72,7 +72,7 @@ def GetBufferOption( buffer_object, option ):
 
 
 def BufferModified( buffer_object ):
-  return buffer_object.options[ 'mod' ]
+  return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
 
 def GetUnsavedAndCurrentBufferData():
@@ -240,7 +240,7 @@ def VimExpressionToPythonType( vim_expression ):
 
 
 def HiddenEnabled( buffer_object ):
-  return vim.options[ 'hid' ]
+  return bool( int( GetBufferOption( buffer_object, 'hid' ) ) )
 
 
 def BufferIsUsable( buffer_object ):
