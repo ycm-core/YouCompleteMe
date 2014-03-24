@@ -21,6 +21,12 @@ import vim
 import os
 import json
 from ycm.utils import ToUtf8IfNeeded
+from ycm import user_options_store
+
+BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
+                       'horizontal-split' : 'split',
+                       'vertical-split'   : 'vsplit',
+                       'new-tab'          : 'tabedit' }
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -65,10 +71,11 @@ def GetBufferOption( buffer_object, option ):
   return GetVariableValue( to_eval )
 
 
-def GetUnsavedAndCurrentBufferData():
-  def BufferModified( buffer_object ):
-    return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
+def BufferModified( buffer_object ):
+  return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
+
+def GetUnsavedAndCurrentBufferData():
   buffers_data = {}
   for buffer_object in vim.buffers:
     if not ( BufferModified( buffer_object ) or
@@ -232,6 +239,14 @@ def VimExpressionToPythonType( vim_expression ):
     return result
 
 
+def HiddenEnabled( buffer_object ):
+  return bool( int( GetBufferOption( buffer_object, 'hid' ) ) )
+
+
+def BufferIsUsable( buffer_object ):
+  return not BufferModified( buffer_object ) or HiddenEnabled( buffer_object )
+
+
 # Both |line| and |column| need to be 1-based
 def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
@@ -244,7 +259,11 @@ def JumpToLocation( filename, line, column ):
     # location, not to the start of the newly opened file.
     # Sadly this fails on random occasions and the undesired jump remains in the
     # jumplist.
-    vim.command( 'keepjumps edit {0}'.format( filename ) )
+    user_command = user_options_store.Value( 'goto_buffer_command' )
+    command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
+    if command == 'edit' and not BufferIsUsable( vim.current.buffer ):
+      command = 'split'
+    vim.command( 'keepjumps {0} {1}'.format( command, filename ) )
   vim.current.window.cursor = ( line, column - 1 )
 
   # Center the screen on the jumped-to location
