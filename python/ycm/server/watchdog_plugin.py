@@ -44,6 +44,10 @@ class WatchdogPlugin( object ):
                 check_interval_seconds = 60 * 10 ):
     self._check_interval_seconds = check_interval_seconds
     self._idle_suicide_seconds = idle_suicide_seconds
+
+    # No need for a lock on wakeup time since only the watchdog thread ever
+    # reads or sets it.
+    self._last_wakeup_time = time.time()
     self._last_request_time = time.time()
     self._last_request_time_lock = Lock()
     if idle_suicide_seconds <= 0:
@@ -63,11 +67,31 @@ class WatchdogPlugin( object ):
       self._last_request_time = new_value
 
 
+  def _TimeSinceLastRequest( self ):
+    return time.time() - self._GetLastRequestTime()
+
+
+  def _TimeSinceLastWakeup( self ):
+    return time.time() - self._last_wakeup_time()
+
+
+  def _UpdateLastWakeupTime( self ):
+    self._last_wakeup_time = time.time()
+
+
   def _WatchdogMain( self ):
     while True:
       time.sleep( self._check_interval_seconds )
-      if time.time() - self._GetLastRequestTime() > self._idle_suicide_seconds:
+
+      # We make sure we don't terminate if we skipped a wakeup time. If we
+      # skipped a check, that means the machine probably went to sleep and the
+      # client might still actually be up. In such cases, we give it one more
+      # wait interval to contact us before we die.
+      if (self._TimeSinceLastRequest() > self._idle_suicide_seconds and
+          self._TimeSinceLastWakeup() < 2 * self._check_interval_seconds):
         utils.TerminateProcess( os.getpid() )
+
+      self._UpdateLastWakeupTime()
 
 
   def __call__( self, callback ):
