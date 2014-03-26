@@ -319,10 +319,19 @@ set_target_properties( ${SERVER_LIB} PROPERTIES PREFIX "")
 
 if ( WIN32 OR CYGWIN )
   # DLL platforms put dlls in the RUNTIME_OUTPUT_DIRECTORY
+  # First for the generic no-config case (e.g. with mingw)
   set_target_properties( ${CLIENT_LIB} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../.. )
   set_target_properties( ${SERVER_LIB} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../.. )
+  # Second, for multi-config builds (e.g. msvc)
+  foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+    set_target_properties( ${CLIENT_LIB} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_SOURCE_DIR}/../.. )
+    set_target_properties( ${SERVER_LIB} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_SOURCE_DIR}/../.. )
+  endforeach()
 
   if ( WIN32 )
     # This is the extension for compiled Python modules on Windows
