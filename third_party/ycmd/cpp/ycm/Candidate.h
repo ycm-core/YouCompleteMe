@@ -18,6 +18,7 @@
 #ifndef CANDIDATE_H_R5LZH6AC
 #define CANDIDATE_H_R5LZH6AC
 
+#include "export.h"
 #include "LetterNode.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -32,26 +33,32 @@ class Result;
 
 typedef std::bitset< NUM_LETTERS > Bitset;
 
+__export__
 Bitset LetterBitsetFromString( const std::string &text );
 
 // Public for tests
+__export__
 std::string GetWordBoundaryChars( const std::string &text );
 
 class Candidate : boost::noncopyable {
 public:
 
+  __export__
   explicit Candidate( const std::string &text );
 
+  __export__
   inline const std::string &Text() const {
     return text_;
   }
 
   // Returns true if the candidate contains the bits from the query (it may also
   // contain other bits)
+  __export__
   inline bool MatchesQueryBitset( const Bitset &query_bitset ) const {
     return ( letters_present_ & query_bitset ) == query_bitset;
   }
 
+  __export__
   Result QueryMatchResult( const std::string &query,
                            bool case_sensitive ) const;
 

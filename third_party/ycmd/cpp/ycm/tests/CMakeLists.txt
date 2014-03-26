@@ -23,6 +23,8 @@ cmake_minimum_required( VERSION 2.8 )
 if ( COMPILER_IS_CLANG )
   set( CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -Wno-long-long -Wno-variadic-macros -Wno-missing-field-initializers -Wno-unused-private-field" )
+elseif ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs" )
 endif()
 
 add_subdirectory( gmock )
