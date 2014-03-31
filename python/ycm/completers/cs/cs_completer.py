@@ -206,8 +206,8 @@ class CsharpCompleter( Completer ):
                                     self._DefaultParameters( request_data ) )
     if definition[ 'FileName' ] != None:
       return responses.BuildGoToResponse( definition[ 'FileName' ],
-                                          definition[ 'Line' ],
-                                          definition[ 'Column' ] )
+                                          definition[ 'Line' ] - 1,
+                                          definition[ 'Column' ] - 1 )
     else:
       raise RuntimeError( 'Can\'t jump to definition' )
 
