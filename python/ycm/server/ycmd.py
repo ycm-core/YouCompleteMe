@@ -112,7 +112,7 @@ def Main():
 
   # If not on windows, detach from controlling terminal to prevent
   # SIGINT from killing us.
-  if sys.platform is not 'win32':
+  if not utils.OnWindows():
     os.setsid()
 
   # This can't be a top-level import because it transitively imports
