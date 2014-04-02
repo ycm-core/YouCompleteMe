@@ -224,9 +224,13 @@ process.
     higher, but can in theory work with any 3.2+ version as well.
 
     You can use the system libclang _only if you are sure it is version 3.3 or
-    higher_, otherwise don't. Even if it is, I recommend using the [official
+    higher_, otherwise don't. Even if it is, we recommend using the [official
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
+
+    We **STRONGLY recommended AGAINST use** of the system libclang instead of
+    the upstream compiled binaries. Random things may break. Save yourself the
+    hassle and use the upstream pre-built libclang.
 
 4.  **Compile the `ycm_support_libs` libraries** that YCM needs. These libs
     are the C++ engines that YCM uses to get fast completions.
@@ -273,6 +277,10 @@ process.
     For those who want to use the system version of libclang, you would pass
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
     `-DPATH_TO_LLVM_ROOT=...` flag.
+
+    NOTE: We **STRONGLY recommended AGAINST use** of the system libclang instead
+    of the upstream compiled binaries. Random things may break. Save yourself
+    the hassle and use the upstream pre-built libclang.
 
     You could also force the use of a custom libclang library with
     `-DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so` flag (the library would end
