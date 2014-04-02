@@ -26,6 +26,7 @@ import json
 import argparse
 import waitress
 import signal
+import os
 from ycm import user_options_store
 from ycm import extra_conf_store
 from ycm import utils
@@ -108,6 +109,11 @@ def Main():
   # preload was run.
   YcmCoreSanityCheck()
   extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
+
+  # If not on windows, detach from controlling terminal to prevent
+  # SIGINT from killing us.
+  if not utils.OnWindows():
+    os.setsid()
 
   # This can't be a top-level import because it transitively imports
   # ycm_core which we want to be imported ONLY after extra conf
