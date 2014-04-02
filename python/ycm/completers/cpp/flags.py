@@ -35,11 +35,13 @@ class Flags( object ):
   def __init__( self ):
     # It's caches all the way down...
     self.flags_for_file = {}
+    self.special_clang_flags = _SpecialClangIncludes()
     self.no_extra_conf_file_warning_posted = False
 
 
   def FlagsForFile( self,
                     filename,
+                    add_special_clang_flags = True,
                     client_data = None ):
     try:
       return self.flags_for_file[ filename ]
@@ -62,6 +64,8 @@ class Flags( object ):
       if not flags:
         return None
 
+      if add_special_clang_flags:
+        flags += self.special_clang_flags
       sanitized_flags = PrepareFlagsForClang( flags, filename )
 
       if results[ 'do_cache' ]:
@@ -194,5 +198,9 @@ def _RemoveUnusedFlags( flags, filename ):
   return new_flags
 
 
+def _SpecialClangIncludes():
+  libclang_dir = os.path.dirname( ycm_core.__file__ )
+  path_to_includes = os.path.join( libclang_dir, 'clang_includes' )
+  return [ '-isystem', path_to_includes ]
 
 
