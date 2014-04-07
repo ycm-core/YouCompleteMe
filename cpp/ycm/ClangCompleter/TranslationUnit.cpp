@@ -33,6 +33,15 @@ using boost::remove_pointer;
 
 namespace YouCompleteMe {
 
+namespace {
+
+unsigned editingOptions() {
+  return CXTranslationUnit_DetailedPreprocessingRecord |
+      clang_defaultEditingTranslationUnitOptions();
+}
+
+}  // unnamed namespace
+
 typedef shared_ptr <
 remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
@@ -67,7 +76,7 @@ TranslationUnit::TranslationUnit(
                               pointer_flags.size(),
                               const_cast<CXUnsavedFile *>( unsaved ),
                               cxunsaved_files.size(),
-                              clang_defaultEditingTranslationUnitOptions() );
+                              editingOptions() );
 
   if ( !clang_translation_unit_ )
     boost_throw( ClangParseError() );
@@ -230,7 +239,7 @@ Location TranslationUnit::GetDefinitionLocation(
 // param though.
 void TranslationUnit::Reparse(
   std::vector< CXUnsavedFile > &unsaved_files ) {
-  Reparse( unsaved_files, clang_defaultEditingTranslationUnitOptions() );
+  Reparse( unsaved_files, editingOptions() );
 }
 
 
