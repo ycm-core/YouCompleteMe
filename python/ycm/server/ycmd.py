@@ -113,7 +113,11 @@ def Main():
   # If not on windows, detach from controlling terminal to prevent
   # SIGINT from killing us.
   if not utils.OnWindows():
-    os.setsid()
+    try:
+      os.setsid()
+    # setsid() can fail if the user started ycmd directly from a shell.
+    except OSError:
+      pass
 
   # This can't be a top-level import because it transitively imports
   # ycm_core which we want to be imported ONLY after extra conf
