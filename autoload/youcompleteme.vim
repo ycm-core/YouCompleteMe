@@ -77,7 +77,7 @@ function! youcompleteme#Enable()
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
 
-  if g:ycm_allow_changing_updatetime
+  if g:ycm_allow_changing_updatetime && &updatetime > 2000
     set ut=2000
   endif
 
