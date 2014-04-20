@@ -156,6 +156,12 @@ let g:ycm_warning_symbol =
 let g:ycm_goto_buffer_command =
       \ get( g:, 'ycm_goto_buffer_command', 'same-buffer' )
 
+let g:ycm_async_pong =
+      \ get( g:, 'ycm_async_pong', 1 )
+
+let g:ycm_async_pong_tty_patch =
+      \ get( g:, 'ycm_async_pong_tty_patch', 0 )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart
