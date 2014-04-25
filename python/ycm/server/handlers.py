@@ -38,6 +38,7 @@ from bottle import request, response
 import server_state
 from ycm import user_options_store
 from ycm.server.responses import BuildExceptionResponse
+from ycm.server import hmac_plugin
 from ycm import extra_conf_store
 
 
@@ -177,8 +178,10 @@ def DebugInfo():
 # The type of the param is Bottle.HTTPError
 @app.error( httplib.INTERNAL_SERVER_ERROR )
 def ErrorHandler( httperror ):
-  return _JsonResponse( BuildExceptionResponse( httperror.exception,
+  body = _JsonResponse( BuildExceptionResponse( httperror.exception,
                                                 httperror.traceback ) )
+  hmac_plugin.SetHmacHeader( body, user_options_store.Value( 'hmac_secret' ) )
+  return body
 
 
 def _JsonResponse( data ):

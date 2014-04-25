@@ -43,15 +43,20 @@ class HmacPlugin( object ):
   def __call__( self, callback ):
     def wrapper( *args, **kwargs ):
       body = request.body.read()
-      if not utils.ContentHexHmacValid( body,
-                                        request.headers[ _HMAC_HEADER ],
-                                        self._hmac_secret ):
+      if not RequestAuthenticated( body, self._hmac_secret ):
         self._logger.info( 'Dropping request with bad HMAC.' )
         abort( httplib.UNAUTHORIZED, 'Unauthorized, received bad HMAC.')
         return
       body = callback( *args, **kwargs )
-      response.headers[ _HMAC_HEADER ] = utils.CreateHexHmac(
-          body, self._hmac_secret )
+      SetHmacHeader( body, self._hmac_secret )
       return body
     return wrapper
 
+
+def RequestAuthenticated( body, hmac_secret ):
+  return utils.ContentHexHmacValid( body,
+                                    request.headers[ _HMAC_HEADER ],
+                                    hmac_secret )
+
+def SetHmacHeader( body, hmac_secret ):
+  response.headers[ _HMAC_HEADER ] = utils.CreateHexHmac( body, hmac_secret )

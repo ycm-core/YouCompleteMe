@@ -106,7 +106,7 @@ def Main():
               if args.options_file
               else user_options_store.DefaultOptions() )
   utils.RemoveIfExists( args.options_file )
-  hmac_secret = base64.b64decode( options[ 'hmac_secret' ] )
+  options[ 'hmac_secret' ] = base64.b64decode( options[ 'hmac_secret' ] )
   user_options_store.SetAll( options )
 
   # This ensures that ycm_core is not loaded before extra conf
@@ -130,7 +130,7 @@ def Main():
   handlers.UpdateUserOptions( options )
   SetUpSignalHandler(args.stdout, args.stderr, args.keep_logfiles)
   handlers.app.install( WatchdogPlugin( args.idle_suicide_seconds ) )
-  handlers.app.install( HmacPlugin( hmac_secret ) )
+  handlers.app.install( HmacPlugin( options[ 'hmac_secret' ] ) )
   waitress.serve( handlers.app,
                   host = args.host,
                   port = args.port,
