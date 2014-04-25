@@ -24,6 +24,7 @@ from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
+from ycm import utils
 from ycm.utils import ToUtf8Json
 from ycm.server.responses import ServerError, UnknownExtraConf
 
@@ -31,6 +32,7 @@ _HEADERS = {'content-type': 'application/json'}
 _EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )
 # Setting this to None seems to screw up the Requests/urllib3 libs.
 _DEFAULT_TIMEOUT_SEC = 30
+_HMAC_HEADER = 'x-ycm-hmac'
 
 class BaseRequest( object ):
   def __init__( self ):
@@ -88,24 +90,28 @@ class BaseRequest( object ):
                            timeout = _DEFAULT_TIMEOUT_SEC ):
     def SendRequest( data, handler, method, timeout ):
       if method == 'POST':
-        return BaseRequest.session.post( _BuildUri( handler ),
-                                        data = ToUtf8Json( data ),
-                                        headers = _HEADERS,
-                                        timeout = timeout )
+        sent_data = ToUtf8Json( data )
+        return BaseRequest.session.post(
+            _BuildUri( handler ),
+            data = sent_data,
+            headers = BaseRequest._ExtraHeaders( sent_data ),
+            timeout = timeout )
       if method == 'GET':
-        return BaseRequest.session.get( _BuildUri( handler ),
-                                        headers = _HEADERS,
-                                        timeout = timeout )
+        return BaseRequest.session.get(
+            _BuildUri( handler ),
+            headers = BaseRequest._ExtraHeaders(),
+            timeout = timeout )
 
     @retries( 5, delay = 0.5, backoff = 1.5 )
     def DelayedSendRequest( data, handler, method ):
       if method == 'POST':
+        sent_data = ToUtf8Json( data )
         return requests.post( _BuildUri( handler ),
-                              data = ToUtf8Json( data ),
-                              headers = _HEADERS )
+                              data = sent_data,
+                              headers = BaseRequest._ExtraHeaders( sent_data ) )
       if method == 'GET':
         return requests.get( _BuildUri( handler ),
-                             headers = _HEADERS )
+                             headers = BaseRequest._ExtraHeaders() )
 
     if not _CheckServerIsHealthyWithCache():
       return _EXECUTOR.submit( DelayedSendRequest, data, handler, method )
@@ -113,8 +119,18 @@ class BaseRequest( object ):
     return SendRequest( data, handler, method, timeout )
 
 
+  @staticmethod
+  def _ExtraHeaders( request_body = None ):
+    if not request_body:
+      request_body = ''
+    headers = dict( _HEADERS )
+    headers[ _HMAC_HEADER ] = utils.CreateHexHmac( request_body,
+                                                   BaseRequest.hmac_secret )
+    return headers
+
   session = FuturesSession( executor = _EXECUTOR )
   server_location = 'http://localhost:6666'
+  hmac_secret = ''
 
 
 def BuildRequestData( start_column = None,
@@ -141,6 +157,7 @@ def BuildRequestData( start_column = None,
 
 def JsonFromFuture( future ):
   response = future.result()
+  _ValidateResponseObject( response )
   if response.status_code == requests.codes.server_error:
     _RaiseExceptionForData( response.json() )
 
@@ -153,6 +170,13 @@ def JsonFromFuture( future ):
   return None
 
 
+def _ValidateResponseObject( response ):
+  if not utils.ContentHexHmacValid( response.content,
+                                    response.headers[ _HMAC_HEADER ],
+                                    BaseRequest.hmac_secret ):
+    raise RuntimeError( 'Received invalid HMAC for response!' )
+  return True
+
 def _BuildUri( handler ):
   return urlparse.urljoin( BaseRequest.server_location, handler )
 
@@ -163,7 +187,9 @@ def _CheckServerIsHealthyWithCache():
   global SERVER_HEALTHY
 
   def _ServerIsHealthy():
-    response = requests.get( _BuildUri( 'healthy' ) )
+    response = requests.get( _BuildUri( 'healthy' ),
+                             headers = BaseRequest._ExtraHeaders() )
+    _ValidateResponseObject( response )
     response.raise_for_status()
     return response.json()
 

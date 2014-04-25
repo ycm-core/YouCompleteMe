@@ -22,6 +22,7 @@ import vim
 import tempfile
 import json
 import signal
+import base64
 from subprocess import PIPE
 from ycm import vimsupport
 from ycm import utils
@@ -58,6 +59,7 @@ os.environ['no_proxy'] = '127.0.0.1,localhost'
 # Ctrl-C in Vim.
 signal.signal( signal.SIGINT, signal.SIG_IGN )
 
+HMAC_SECRET_LENGTH = 16
 NUM_YCMD_STDERR_LINES_ON_CRASH = 30
 SERVER_CRASH_MESSAGE_STDERR_FILE = (
   'The ycmd server SHUT DOWN (restart with :YcmRestartServer). ' +
@@ -80,16 +82,18 @@ class YouCompleteMe( object ):
     self._server_stderr = None
     self._server_popen = None
     self._filetypes_with_keywords_loaded = set()
-    self._temp_options_filename = None
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetupServer()
     self._ycmd_keepalive.Start()
 
   def _SetupServer( self ):
     server_port = utils.GetUnusedLocalhostPort()
+    # The temp options file is deleted by ycmd during startup
     with tempfile.NamedTemporaryFile( delete = False ) as options_file:
-      self._temp_options_filename = options_file.name
-      json.dump( dict( self._user_options ), options_file )
+      hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
+      options_dict = dict( self._user_options )
+      options_dict[ 'hmac_secret' ] = base64.b64encode( hmac_secret )
+      json.dump( options_dict, options_file )
       options_file.flush()
 
       args = [ utils.PathToPythonInterpreter(),
@@ -116,6 +120,7 @@ class YouCompleteMe( object ):
 
       self._server_popen = utils.SafePopen( args, stdout = PIPE, stderr = PIPE)
       BaseRequest.server_location = 'http://localhost:' + str( server_port )
+      BaseRequest.hmac_secret = hmac_secret
 
     self._NotifyUserIfServerCrashed()
 
@@ -148,7 +153,6 @@ class YouCompleteMe( object ):
   def _ServerCleanup( self ):
     if self._IsServerAlive():
       self._server_popen.terminate()
-    utils.RemoveIfExists( self._temp_options_filename )
 
 
   def RestartServer( self ):

@@ -27,10 +27,12 @@ import argparse
 import waitress
 import signal
 import os
+import base64
 from ycm import user_options_store
 from ycm import extra_conf_store
 from ycm import utils
 from ycm.server.watchdog_plugin import WatchdogPlugin
+from ycm.server.hmac_plugin import HmacPlugin
 
 def YcmCoreSanityCheck():
   if 'ycm_core' in sys.modules:
@@ -103,6 +105,8 @@ def Main():
   options = ( json.load( open( args.options_file, 'r' ) )
               if args.options_file
               else user_options_store.DefaultOptions() )
+  utils.RemoveIfExists( args.options_file )
+  hmac_secret = base64.b64decode( options[ 'hmac_secret' ] )
   user_options_store.SetAll( options )
 
   # This ensures that ycm_core is not loaded before extra conf
@@ -126,6 +130,7 @@ def Main():
   handlers.UpdateUserOptions( options )
   SetUpSignalHandler(args.stdout, args.stderr, args.keep_logfiles)
   handlers.app.install( WatchdogPlugin( args.idle_suicide_seconds ) )
+  handlers.app.install( HmacPlugin( hmac_secret ) )
   waitress.serve( handlers.app,
                   host = args.host,
                   port = args.port,

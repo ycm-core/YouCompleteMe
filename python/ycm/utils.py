@@ -25,6 +25,8 @@ import functools
 import socket
 import stat
 import json
+import hmac
+import hashlib
 from distutils.spawn import find_executable
 import subprocess
 import collections
@@ -212,3 +214,11 @@ def SafePopen( *args, **kwargs ):
   return subprocess.Popen( *args, **kwargs )
 
 
+def ContentHexHmacValid( content, hmac, hmac_secret ):
+  return hmac == CreateHexHmac( content, hmac_secret )
+
+
+def CreateHexHmac( content, hmac_secret ):
+  return hmac.new( hmac_secret,
+                   msg = content,
+                   digestmod = hashlib.sha256 ).hexdigest()
