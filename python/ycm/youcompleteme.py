@@ -24,7 +24,7 @@ import json
 import signal
 import base64
 from subprocess import PIPE
-from ycm import vimsupport
+from ycm import vimsupport, async_pong
 from ycm import utils
 from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.completers.all.omni_completer import OmniCompleter
@@ -85,6 +85,8 @@ class YouCompleteMe( object ):
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetupServer()
     self._ycmd_keepalive.Start()
+    if self._user_options[ 'async_pong' ]:
+      async_pong.Current=async_pong.Dispatch( tty_patch=self._user_options[ 'async_pong_tty_patch' ] )
 
   def _SetupServer( self ):
     server_port = utils.GetUnusedLocalhostPort()
@@ -227,6 +229,7 @@ class YouCompleteMe( object ):
     self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
                                                           extra_data )
     self._latest_file_parse_request.Start()
+    self._latest_file_parse_request.DoneCallback( async_pong.Current )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -255,6 +258,10 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
+    try:
+      async_pong.Current.Cleanup()
+    except:
+      pass
     self._ServerCleanup()
 
 

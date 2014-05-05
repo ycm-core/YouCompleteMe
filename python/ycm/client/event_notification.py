@@ -44,6 +44,9 @@ class EventNotification( BaseRequest ):
   def Done( self ):
     return self._response_future.done()
 
+  def DoneCallback( self, cb ):
+    self._response_future.add_done_callback( lambda fut: cb() )
+
 
   def Response( self ):
     if self._cached_response:
