@@ -20,6 +20,7 @@
 
 import os
 import glob
+from ycm import extra_conf_store
 from ycm.completers.completer import Completer
 from ycm.server import responses
 from ycm import utils
@@ -28,6 +29,7 @@ import urllib
 import urlparse
 import json
 import logging
+from inspect import getfile
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
 'Did you compile it? You can do so by running ' +
@@ -46,6 +48,7 @@ class CsharpCompleter( Completer ):
     'ReloadSolution': (lambda self, request_data: self._ReloadSolution()),
     'ServerRunning': (lambda self, request_data: self._ServerIsRunning()),
     'ServerReady': (lambda self, request_data: self._ServerIsReady()),
+    'SolutionFile': (lambda self, request_data: self._SolutionFile()),
     'GoToDefinition': (lambda self, request_data: self._GoToDefinition( request_data )),
     'GoToDeclaration': (lambda self, request_data: self._GoToDefinition( request_data )),
     'GoTo': (lambda self, request_data: self._GoToDefinition( request_data ))
@@ -55,6 +58,7 @@ class CsharpCompleter( Completer ):
     super( CsharpCompleter, self ).__init__( user_options )
     self._omnisharp_port = None
     self._logger = logging.getLogger( __name__ )
+    self._solution_path = None
 
 
   def Shutdown( self ):
@@ -105,37 +109,59 @@ class CsharpCompleter( Completer ):
     else:
       return 'Server is not running'
 
+  def _PollModuleForSolutionFile( self, module, filepath):
+    path_to_solutionfile=None
+    preferred_name=None
+    if module:
+      try:
+        preferred_name = module.CSharpSolutionFile( filepath )
+        self._logger.info( 'extra_conf_store suggests {0} as solution file'.format(
+            str( preferred_name ) ) )
+        if preferred_name:
+          # received a full path or the name of a solution right next to the config?
+          candidates = [ preferred_name,
+            os.path.join( os.path.dirname( getfile( module ) ),
+                          preferred_name ),
+            os.path.normpath( os.path.join( os.path.dirname( getfile( module ) ),
+                          "{0}.sln".format(preferred_name) ) ) ]
+          # try the assumptions
+          for path in candidates:
+            if os.path.isfile( path ):
+              # path seems to point to a solution
+              path_to_solutionfile = path
+              self._logger.info(
+                  'Using solution file {0} selected by extra_conf_store'.format(
+                  path_to_solutionfile) )
+              break
+          # if no solution file found, use the filename as hint later
+          preferred_name=os.path.basename(preferred_name)
+      except AttributeError, e:
+        # the config script might not provide solution file locations
+        self._logger.error(
+            'Could not retrieve solution for {0} from extra_conf_store: {1}'.format(
+            filepath, str( e )) )
+        preferred_name = None
+    return path_to_solutionfile, preferred_name
 
   def _StartServer( self, request_data ):
     """ Start the OmniSharp server """
     self._logger.info( 'startup' )
 
-    self._omnisharp_port = utils.GetUnusedLocalhostPort()
-    solution_files, folder = _FindSolutionFiles( request_data[ 'filepath' ] )
+    # try to load ycm_extra_conf
+    # if it needs to be verified, abort here and try again later
+    filepath = request_data[ 'filepath' ]
+    module = extra_conf_store.ModuleForSourceFile( filepath )
+    path_to_solutionfile, preferred_name = self._PollModuleForSolutionFile(module, filepath)
 
-    if len( solution_files ) == 0:
-      raise RuntimeError(
-        'Error starting OmniSharp server: no solutionfile found' )
-    elif len( solution_files ) == 1:
-      solutionfile = solution_files[ 0 ]
-    else:
-      # multiple solutions found : if there is one whose name is the same
-      # as the folder containing the file we edit, use this one
-      # (e.g. if we have bla/Project.sln and we are editing
-      # bla/Project/Folder/File.cs, use bla/Project.sln)
-      filepath_components = _PathComponents( request_data[ 'filepath' ] )
-      solutionpath = _PathComponents( folder )
-      foldername = ''
-      if len( filepath_components ) > len( solutionpath ):
-          foldername = filepath_components[ len( solutionpath ) ]
-      solution_file_candidates = [ sfile for sfile in solution_files
-        if _GetFilenameWithoutExtension( sfile ) == foldername ]
-      if len( solution_file_candidates ) == 1:
-        solutionfile = solution_file_candidates[ 0 ]
-      else:
-        raise RuntimeError(
-          'Found multiple solution files instead of one!\n{0}'.format(
-            solution_files ) )
+    self._omnisharp_port = utils.GetUnusedLocalhostPort()
+
+    if not path_to_solutionfile:
+      # no solution file provided, try to find one
+      path_to_solutionfile = self._GuessSolutionFile( request_data[ 'filepath' ], preferred_name )
+
+    if not path_to_solutionfile:
+      raise RuntimeError( 'Autodetection of solution file failed.\n' )
+    self._logger.info( 'Loading solution file {0}'.format( path_to_solutionfile ) )
 
     omnisharp = os.path.join(
       os.path.abspath( os.path.dirname( __file__ ) ),
@@ -144,7 +170,6 @@ class CsharpCompleter( Completer ):
     if not os.path.isfile( omnisharp ):
       raise RuntimeError( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
 
-    path_to_solutionfile = os.path.join( folder, solutionfile )
     # we need to pass the command to Popen as a string since we're passing
     # shell=True (as recommended by Python's doc)
     command = ( omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
@@ -159,6 +184,7 @@ class CsharpCompleter( Completer ):
     filename_format = os.path.join( utils.PathToTempDir(),
                                    'omnisharp_{port}_{sln}_{std}.log' )
 
+    solutionfile = os.path.basename( path_to_solutionfile )
     self._filename_stdout = filename_format.format(
         port=self._omnisharp_port, sln=solutionfile, std='stdout' )
     self._filename_stderr = filename_format.format(
@@ -169,6 +195,8 @@ class CsharpCompleter( Completer ):
         # shell=True is needed for Windows so OmniSharp does not spawn
         # in a new visible window
         utils.SafePopen( command, stdout=fstdout, stderr=fstderr, shell=True )
+
+    self._solution_path = path_to_solutionfile
 
     self._logger.info( 'Starting OmniSharp server' )
 
@@ -241,6 +269,9 @@ class CsharpCompleter( Completer ):
     except:
       return False
 
+  def _SolutionFile( self ):
+    """ Find out which solution file server was started with """
+    return self._solution_path
 
   def _ServerLocation( self ):
     return 'http://localhost:' + str( self._omnisharp_port )
@@ -254,18 +285,76 @@ class CsharpCompleter( Completer ):
     response = urllib2.urlopen( target, parameters )
     return json.loads( response.read() )
 
+  def _SolutionTestCheckPreferred( self, path, candidates, preferred_name ):
+    """ Check if one of the candidates matches preferred_name hint """
+    if preferred_name:
+      check = [ c for c in candidates
+          if ( preferred_name == c ) ]
+      if len( check ) == 1:
+        selection = os.path.join( path, check[0] )
+        self._logger.info(
+            'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+            selection, preferred_name ) )
+        return selection
+      elif len( check ) == 2:
+        # pick the one ending in sln, can misbehave if there is a file.sln.sln
+        selection = os.path.join( path, "%s.sln"%preferred_name )
+        self._logger.info(
+            'Selected solution file {0} as it matches {1} (from extra_conf_store)'.format(
+            selection, preferred_name ) )
+        return selection
 
-def _FindSolutionFiles( filepath ):
-  """ Find solution files by searching upwards in the file tree """
-  folder = os.path.dirname( filepath )
-  solutionfiles = glob.glob1( folder, '*.sln' )
-  while not solutionfiles:
-    lastfolder = folder
-    folder = os.path.dirname( folder )
-    if folder == lastfolder:
-      break
-    solutionfiles = glob.glob1( folder, '*.sln' )
-  return solutionfiles, folder
+  def _SolutionTestCheckHeuristics( self, candidates, tokens, i ):
+    """ Test if one of the candidate files stands out """
+    path = os.path.join( *tokens[:i + 1] )
+    selection=None
+    # if there is just one file here, use that
+    if len( candidates ) == 1 :
+      selection = os.path.join( path, candidates[0] )
+      self._logger.info(
+          'Selected solution file {0} as it is the first one found'.format(
+          selection ) )
+    # there is more than one file, try some hints to decide
+    # 1. is there a solution named just like the subdirectory with the source?
+    if (not selection and i < len( tokens ) - 1 and
+        "{0}.sln".format( tokens[i + 1] ) in candidates ):
+      selection = os.path.join( path, "{0}.sln".format( tokens[i + 1] ) )
+      self._logger.info(
+          'Selected solution file {0} as it matches source subfolder'.format(
+          selection ) )
+    # 2. is there a solution named just like the directory containing the solution?
+    if not selection and "{0}.sln".format( tokens[i] ) in candidates:
+      selection = os.path.join( path, "{0}.sln".format( tokens[i] ) )
+      self._logger.info(
+          'Selected solution file {0} as it matches containing folder'.format(
+          selection ) )
+    if not selection:
+      self._logger.error(
+          'Could not decide between multiple solution files:\n{0}'.format(
+          candidates ) )
+    return selection
+
+  def _GuessSolutionFile( self, filepath, preferred_name ):
+    """ Find solution files by searching upwards in the file tree """
+    tokens = _PathComponents( filepath )
+    selection = None
+    first_hit = True
+    for i in reversed( range( len( tokens ) - 1 ) ):
+      path = os.path.join( *tokens[:i + 1] )
+      candidates = glob.glob1( path, "*.sln" )
+      if len( candidates ) > 0:
+        # if a name was provided, try hard to find something matching
+        final = self._SolutionTestCheckPreferred( path, candidates, preferred_name )
+        if final:
+          return final
+        # do the whole procedure only for the first solution file(s) you find
+        if first_hit :
+          selection = self._SolutionTestCheckHeuristics( candidates, tokens, i )
+          # we could not decide and aren't looking for anything specific, giving up
+          if not preferred_name:
+            return selection
+        first_hit = False
+    return selection
 
 def _PathComponents( path ):
   path_components = []
@@ -280,6 +369,4 @@ def _PathComponents( path ):
   path_components.reverse()
   return path_components
 
-def _GetFilenameWithoutExtension( path ):
-    return os.path.splitext( os.path.basename ( path ) )[ 0 ]
 
