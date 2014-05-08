@@ -75,3 +75,8 @@ def PathToTestFile( test_basename ):
   return os.path.join( PathToTestDataDir(), test_basename )
 
 
+def StopOmniSharpServer( app ):
+  app.post_json( '/run_completer_command',
+                 BuildRequest( completer_target = 'filetype_default',
+                               command_arguments = ['StopServer'],
+                               filetype = 'cs' ) )

@@ -22,7 +22,7 @@ SetUpPythonPath()
 import time
 import httplib
 from .test_utils import ( Setup, BuildRequest, PathToTestFile,
-                          ChangeSpecificOptions )
+                          ChangeSpecificOptions, StopOmniSharpServer )
 from webtest import TestApp, AppError
 from nose.tools import eq_, with_setup
 from hamcrest import ( assert_that, has_item, has_items, has_entry,
@@ -89,12 +89,8 @@ def GetCompletions_CsCompleter_Works_test():
   results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'CursorLeft' ),
                                    CompletionEntryMatcher( 'CursorSize' ) ) )
+  StopOmniSharpServer( app )
 
-  # We need to turn off the CS server so that it doesn't stick around
-  app.post_json( '/run_completer_command',
-                 BuildRequest( completer_target = 'filetype_default',
-                               command_arguments = ['StopServer'],
-                               filetype = 'cs' ) )
 
 @with_setup( Setup )
 def GetCompletions_CsCompleter_ReloadSolutionWorks_test():
@@ -126,11 +122,7 @@ def GetCompletions_CsCompleter_ReloadSolutionWorks_test():
 
   eq_(result, True)
 
-  # We need to turn off the CS server so that it doesn't stick around
-  app.post_json( '/run_completer_command',
-                 BuildRequest( completer_target = 'filetype_default',
-                               command_arguments = ['StopServer'],
-                               filetype = 'cs' ) )
+  StopOmniSharpServer( app )
 
 @with_setup( Setup )
 def GetCompletions_CsCompleter_StartsWithUnambiguousMultipleSolutions_test():
@@ -157,11 +149,7 @@ def GetCompletions_CsCompleter_StartsWithUnambiguousMultipleSolutions_test():
       break
     time.sleep( 0.2 )
 
-  # We need to turn off the CS server so that it doesn't stick around
-  app.post_json( '/run_completer_command',
-                 BuildRequest( completer_target = 'filetype_default',
-                               command_arguments = ['StopServer'],
-                               filetype = 'cs' ) )
+  StopOmniSharpServer( app )
 
 @with_setup( Setup )
 def GetCompletions_CsCompleter_DoesntStartWithAmbiguousMultipleSolutions_test():
@@ -195,12 +183,7 @@ def GetCompletions_CsCompleter_DoesntStartWithAmbiguousMultipleSolutions_test():
         break
       time.sleep( 0.2 )
 
-    # We need to turn off the CS server so that it doesn't stick around
-    app.post_json( '/run_completer_command',
-                   BuildRequest( completer_target = 'filetype_default',
-                                 command_arguments = ['StopServer'],
-                                 filetype = 'cs' ) )
-
+    StopOmniSharpServer( app )
     raise Exception( ('The Omnisharp server started, despite us not being able '
                       'to find a suitable solution file to feed it. Did you '
                       'fiddle with the solution finding code in '
