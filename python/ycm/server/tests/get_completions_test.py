@@ -181,6 +181,8 @@ def GetCompletions_CsCompleter_DoesntStartWithAmbiguousMultipleSolutions_test():
   except AppError as e:
     if 'Found multiple solution files' in str(e):
       exception_caught = True
+    else:
+      raise
 
   # the test passes if we caught an exception when trying to start it,
   # so raise one if it managed to start

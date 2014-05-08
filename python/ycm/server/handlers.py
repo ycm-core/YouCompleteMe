@@ -180,7 +180,7 @@ def DebugInfo():
 def ErrorHandler( httperror ):
   body = _JsonResponse( BuildExceptionResponse( httperror.exception,
                                                 httperror.traceback ) )
-  hmac_plugin.SetHmacHeader( body, user_options_store.Value( 'hmac_secret' ) )
+  hmac_plugin.SetHmacHeader( body, user_options_store.Value( 'hmac_secret' ).encode('utf8') )
   return body
 
 
