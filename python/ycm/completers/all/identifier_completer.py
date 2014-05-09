@@ -160,8 +160,8 @@ class IdentifierCompleter( GeneralCompleter ):
 
 
 def _PreviousIdentifier( min_num_completion_start_chars, request_data ):
-  line_num = request_data[ 'line_num' ]
-  column_num = request_data[ 'column_num' ]
+  line_num = request_data[ 'line_num' ] - 1
+  column_num = request_data[ 'column_num' ] - 1
   filepath = request_data[ 'filepath' ]
   contents_per_line = (
     request_data[ 'file_data' ][ filepath ][ 'contents' ].split( '\n' ) )
@@ -226,7 +226,7 @@ def _GetCursorIdentifier( request_data ):
       identifier_end += 1
     return identifier_end + 1
 
-  column_num = request_data[ 'column_num' ]
+  column_num = request_data[ 'column_num' ] - 1
   line = request_data[ 'line_value' ]
 
   try:

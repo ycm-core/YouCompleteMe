@@ -157,8 +157,8 @@ class CsharpCompleter( Completer ):
 
 
   def GetDetailedDiagnostic( self, request_data ):
-    current_line = request_data[ 'line_num' ] + 1
-    current_column = request_data[ 'column_num' ] + 1
+    current_line = request_data[ 'line_num' ]
+    current_column = request_data[ 'column_num' ]
     current_file = request_data[ 'filepath' ]
 
     if not self._diagnostic_store:
@@ -301,8 +301,8 @@ class CsharpCompleter( Completer ):
                                     self._DefaultParameters( request_data ) )
     if definition[ 'FileName' ] != None:
       return responses.BuildGoToResponse( definition[ 'FileName' ],
-                                          definition[ 'Line' ] - 1,
-                                          definition[ 'Column' ] - 1 )
+                                          definition[ 'Line' ],
+                                          definition[ 'Column' ] )
     else:
       raise RuntimeError( 'Can\'t jump to definition' )
 
@@ -310,11 +310,11 @@ class CsharpCompleter( Completer ):
   def _DefaultParameters( self, request_data ):
     """ Some very common request parameters """
     parameters = {}
-    parameters[ 'line' ] = request_data[ 'line_num' ] + 1
-    parameters[ 'column' ] = request_data[ 'column_num' ] + 1
+    parameters[ 'line' ] = request_data[ 'line_num' ]
+    parameters[ 'column' ] = request_data[ 'column_num' ]
     filepath = request_data[ 'filepath' ]
-    parameters[ 'buffer' ] = request_data[ 'file_data' ][ filepath ][
-      'contents' ]
+    parameters[ 'buffer' ] = (
+      request_data[ 'file_data' ][ filepath ][ 'contents' ] )
     parameters[ 'filename' ] = filepath
     return parameters
 

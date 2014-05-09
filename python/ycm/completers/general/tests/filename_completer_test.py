@@ -40,7 +40,7 @@ request_data = {
 }
 
 def GetCompletionData( request_data ):
-  request_data[ 'start_column' ] = len( request_data[ 'line_value' ] )
+  request_data[ 'start_column' ] = len( request_data[ 'line_value' ] ) + 1
   candidates = fnc.ComputeCandidatesInner( request_data )
   return [ ( c[ 'insertion_text' ], c[ 'extra_menu_info' ] ) for c in candidates ]
 

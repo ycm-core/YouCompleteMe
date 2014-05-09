@@ -50,7 +50,7 @@ def GetCompletions_IdentifierCompleter_Works_test():
 
   completion_data = BuildRequest( contents = 'oo foo foogoo ba',
                                   query = 'oo',
-                                  column_num = 2 )
+                                  column_num = 3 )
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'foogoo' ) ],
@@ -73,9 +73,9 @@ def GetCompletions_CsCompleter_Works_test():
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cs',
                                   contents = contents,
-                                  line_num = 8,
-                                  column_num = 11,
-                                  start_column = 11 )
+                                  line_num = 9,
+                                  column_num = 12,
+                                  start_column = 12 )
 
   results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'CursorLeft' ),
@@ -172,9 +172,9 @@ int main()
   completion_data = BuildRequest( filepath = '/foo.cpp',
                                   filetype = 'cpp',
                                   contents = contents,
-                                  line_num = 10,
-                                  column_num = 6,
-                                  start_column = 6,
+                                  line_num = 11,
+                                  column_num = 7,
+                                  start_column = 7,
                                   compilation_flags = ['-x', 'c++'] )
 
   results = app.post_json( '/completions', completion_data ).json
@@ -204,9 +204,9 @@ int main()
   completion_data = BuildRequest( filepath = '/foo.cpp',
                                   filetype = 'cpp',
                                   contents = contents,
-                                  line_num = 10,
-                                  column_num = 6,
-                                  start_column = 6,
+                                  line_num = 11,
+                                  column_num = 7,
+                                  start_column = 7,
                                   compilation_flags = ['-x', 'c++'] )
 
   results = app.post_json( '/completions', completion_data ).json
@@ -220,9 +220,9 @@ def GetCompletions_ClangCompleter_UnknownExtraConfException_test():
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cpp',
                                   contents = open( filepath ).read(),
-                                  line_num = 10,
-                                  column_num = 6,
-                                  start_column = 6,
+                                  line_num = 11,
+                                  column_num = 7,
+                                  start_column = 7,
                                   force_semantic = True )
 
   response = app.post_json( '/completions',
@@ -257,9 +257,9 @@ def GetCompletions_ClangCompleter_WorksWhenExtraConfExplicitlyAllowed_test():
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cpp',
                                   contents = open( filepath ).read(),
-                                  line_num = 10,
-                                  column_num = 6,
-                                  start_column = 6 )
+                                  line_num = 11,
+                                  column_num = 7,
+                                  start_column = 7 )
 
   results = app.post_json( '/completions', completion_data ).json
   assert_that( results, has_items( CompletionEntryMatcher( 'c' ),
@@ -278,9 +278,9 @@ def GetCompletions_ClangCompleter_ExceptionWhenNoFlagsFromExtraConf_test():
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cpp',
                                   contents = open( filepath ).read(),
-                                  line_num = 10,
-                                  column_num = 6,
-                                  start_column = 6 )
+                                  line_num = 11,
+                                  column_num = 7,
+                                  start_column = 7 )
 
   response = app.post_json( '/completions',
                             completion_data,
@@ -311,9 +311,9 @@ int main()
                                   filetype = 'cpp',
                                   force_semantic = True,
                                   contents = contents,
-                                  line_num = 8,
-                                  column_num = 7,
-                                  start_column = 7,
+                                  line_num = 9,
+                                  column_num = 8,
+                                  start_column = 8,
                                   query = 'fooar',
                                   compilation_flags = ['-x', 'c++'] )
 
@@ -347,9 +347,9 @@ def GetCompletions_ClangCompleter_ClientDataGivenToExtraConf_test():
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'cpp',
                                   contents = open( filepath ).read(),
-                                  line_num = 8,
-                                  column_num = 6,
-                                  start_column = 6,
+                                  line_num = 9,
+                                  column_num = 7,
+                                  start_column = 7,
                                   extra_conf_data = {
                                     'flags': ['-x', 'c++']
                                   })
@@ -368,7 +368,7 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test():
 
   completion_data = BuildRequest( contents =  'oo ',
                                   query = 'oo',
-                                  column_num = 2 )
+                                  column_num = 3 )
 
   eq_( [ BuildCompletionData( 'foo' ),
          BuildCompletionData( 'zoo' ) ],
@@ -389,7 +389,7 @@ def GetCompletions_UltiSnipsCompleter_Works_test():
 
   completion_data = BuildRequest( contents =  'oo ',
                                   query = 'oo',
-                                  column_num = 2 )
+                                  column_num = 3 )
 
   eq_( [ BuildCompletionData( 'foo', '<snip> bar' ),
          BuildCompletionData( 'zoo', '<snip> goo' ) ],
@@ -412,7 +412,7 @@ def GetCompletions_UltiSnipsCompleter_UnusedWhenOffWithOption_test():
 
   completion_data = BuildRequest( contents = 'oo ',
                                   query = 'oo',
-                                  column_num = 2 )
+                                  column_num = 3 )
 
   eq_( [], app.post_json( '/completions', completion_data ).json )
 

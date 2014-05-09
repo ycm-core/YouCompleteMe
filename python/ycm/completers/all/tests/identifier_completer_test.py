@@ -25,14 +25,14 @@ def GetCursorIdentifier_StartOfLine_test():
   eq_( 'foo',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 0,
+           'column_num': 1,
            'line_value': 'foo'
          } ) )
 
   eq_( 'fooBar',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 0,
+           'column_num': 1,
            'line_value': 'fooBar'
          } ) )
 
@@ -41,7 +41,7 @@ def GetCursorIdentifier_EndOfLine_test():
   eq_( 'foo',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 2,
+           'column_num': 3,
            'line_value': 'foo'
          } ) )
 
@@ -50,7 +50,7 @@ def GetCursorIdentifier_PastEndOfLine_test():
   eq_( '',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 10,
+           'column_num': 11,
            'line_value': 'foo'
          } ) )
 
@@ -68,7 +68,7 @@ def GetCursorIdentifier_StartOfLine_StopsAtNonIdentifierChar_test():
   eq_( 'foo',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 0,
+           'column_num': 1,
            'line_value': 'foo(goo)'
          } ) )
 
@@ -77,7 +77,7 @@ def GetCursorIdentifier_AtNonIdentifier_test():
   eq_( 'goo',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 3,
+           'column_num': 4,
            'line_value': 'foo(goo)'
          } ) )
 
@@ -86,7 +86,7 @@ def GetCursorIdentifier_WalksForwardForIdentifier_test():
   eq_( 'foo',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 0,
+           'column_num': 1,
            'line_value': '       foo'
          } ) )
 
@@ -95,7 +95,7 @@ def GetCursorIdentifier_FindsNothingForward_test():
   eq_( '',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 4,
+           'column_num': 5,
            'line_value': 'foo   ()***()'
          } ) )
 
@@ -104,7 +104,7 @@ def GetCursorIdentifier_SingleCharIdentifier_test():
   eq_( 'f',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 0,
+           'column_num': 1,
            'line_value': '    f    '
          } ) )
 
@@ -113,7 +113,7 @@ def GetCursorIdentifier_StartsInMiddleOfIdentifier_test():
   eq_( 'foobar',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 3,
+           'column_num': 4,
            'line_value': 'foobar'
          } ) )
 
@@ -122,6 +122,6 @@ def GetCursorIdentifier_LineEmpty_test():
   eq_( '',
        identifier_completer._GetCursorIdentifier(
          {
-           'column_num': 11,
+           'column_num': 12,
            'line_value': ''
          } ) )

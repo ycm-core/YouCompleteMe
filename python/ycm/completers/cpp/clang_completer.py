@@ -85,8 +85,8 @@ class ClangCompleter( Completer ):
       raise RuntimeError( NO_COMPILE_FLAGS_MESSAGE )
 
     files = self.GetUnsavedFilesVector( request_data )
-    line = request_data[ 'line_num' ] + 1
-    column = request_data[ 'start_column' ] + 1
+    line = request_data[ 'line_num' ]
+    column = request_data[ 'start_column' ]
     results = self._completer.CandidatesForLocationInFile(
         ToUtf8IfNeeded( filename ),
         line,
@@ -136,8 +136,8 @@ class ClangCompleter( Completer ):
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
 
     files = self.GetUnsavedFilesVector( request_data )
-    line = request_data[ 'line_num' ] + 1
-    column = request_data[ 'column_num' ] + 1
+    line = request_data[ 'line_num' ]
+    column = request_data[ 'column_num' ]
     return getattr( self._completer, goto_function )(
         ToUtf8IfNeeded( filename ),
         line,
@@ -217,8 +217,8 @@ class ClangCompleter( Completer ):
 
 
   def GetDetailedDiagnostic( self, request_data ):
-    current_line = request_data[ 'line_num' ] + 1
-    current_column = request_data[ 'column_num' ] + 1
+    current_line = request_data[ 'line_num' ]
+    current_column = request_data[ 'column_num' ]
     current_file = request_data[ 'filepath' ]
 
     if not self._diagnostic_store:
@@ -304,7 +304,7 @@ def _FilterDiagnostics( diagnostics ):
 
 def _ResponseForLocation( location ):
   return responses.BuildGoToResponse( location.filename_,
-                                      location.line_number_ - 1,
-                                      location.column_number_ - 1)
+                                      location.line_number_,
+                                      location.column_number_ )
 
 

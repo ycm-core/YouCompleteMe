@@ -57,7 +57,7 @@ class FilenameCompleter( Completer ):
 
 
   def AtIncludeStatementStart( self, request_data ):
-    start_column = request_data[ 'start_column' ]
+    start_column = request_data[ 'start_column' ] - 1
     current_line = request_data[ 'line_value' ]
     filepath = ToUtf8IfNeeded( request_data[ 'filepath' ] )
     filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
@@ -67,7 +67,7 @@ class FilenameCompleter( Completer ):
 
 
   def ShouldUseNowInner( self, request_data ):
-    start_column = request_data[ 'start_column' ]
+    start_column = request_data[ 'start_column' ] - 1
     current_line = request_data[ 'line_value' ]
     return ( start_column and ( current_line[ start_column - 1 ] == '/' or
              self.AtIncludeStatementStart( request_data ) ) )
@@ -79,7 +79,7 @@ class FilenameCompleter( Completer ):
 
   def ComputeCandidatesInner( self, request_data ):
     current_line = request_data[ 'line_value' ]
-    start_column = request_data[ 'start_column' ]
+    start_column = request_data[ 'start_column' ] - 1
     filepath = ToUtf8IfNeeded( request_data[ 'filepath' ] )
     filetypes = request_data[ 'file_data' ][ filepath ][ 'filetypes' ]
     line = current_line[ :start_column ]

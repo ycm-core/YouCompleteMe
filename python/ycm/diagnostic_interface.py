@@ -83,22 +83,22 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
       if location_extent[ 'start' ][ 'line_num' ] < 0:
         location = diag[ 'location' ]
         vimsupport.AddDiagnosticSyntaxMatch(
-            location[ 'line_num' ] + 1,
-            location[ 'column_num' ] + 1 )
+            location[ 'line_num' ],
+            location[ 'column_num' ] )
       else:
         vimsupport.AddDiagnosticSyntaxMatch(
-          location_extent[ 'start' ][ 'line_num' ] + 1,
-          location_extent[ 'start' ][ 'column_num' ] + 1,
-          location_extent[ 'end' ][ 'line_num' ] + 1,
-          location_extent[ 'end' ][ 'column_num' ] + 1,
+          location_extent[ 'start' ][ 'line_num' ],
+          location_extent[ 'start' ][ 'column_num' ],
+          location_extent[ 'end' ][ 'line_num' ],
+          location_extent[ 'end' ][ 'column_num' ],
           is_error = is_error )
 
       for diag_range in diag[ 'ranges' ]:
         vimsupport.AddDiagnosticSyntaxMatch(
-          diag_range[ 'start' ][ 'line_num' ] + 1,
-          diag_range[ 'start' ][ 'column_num' ] + 1,
-          diag_range[ 'end' ][ 'line_num' ] + 1,
-          diag_range[ 'end' ][ 'column_num' ] + 1,
+          diag_range[ 'start' ][ 'line_num' ],
+          diag_range[ 'start' ][ 'column_num' ],
+          diag_range[ 'end' ][ 'line_num' ],
+          diag_range[ 'end' ][ 'column_num' ],
           is_error = is_error )
 
 
@@ -125,7 +125,7 @@ def _ConvertDiagListToDict( diag_list ):
     location = diag[ 'location' ]
     buffer_number = vimsupport.GetBufferNumberForFilename(
       location[ 'filepath' ] )
-    line_number = location[ 'line_num' ] + 1
+    line_number = location[ 'line_num' ]
     buffer_to_line_to_diags[ buffer_number ][ line_number ].append( diag )
 
   for line_to_diags in buffer_to_line_to_diags.itervalues():

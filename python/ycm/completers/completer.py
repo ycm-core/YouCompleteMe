@@ -133,7 +133,7 @@ class Completer( object ):
 
   def ShouldUseNowInner( self, request_data ):
     current_line = request_data[ 'line_value' ]
-    start_column = request_data[ 'start_column' ]
+    start_column = request_data[ 'start_column' ] - 1
     line_length = len( current_line )
     if not line_length or start_column - 1 >= line_length:
       return False

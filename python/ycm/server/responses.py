@@ -110,8 +110,8 @@ def BuildDiagnosticData( diagnostic ):
 
   def BuildLocationData( location ):
     return {
-      'line_num': location.line_number_ - 1,
-      'column_num': location.column_number_ - 1,
+      'line_num': location.line_number_,
+      'column_num': location.column_number_,
       'filepath': location.filename_,
     }
 

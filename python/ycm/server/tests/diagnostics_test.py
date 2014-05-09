@@ -55,26 +55,26 @@ void foo() {
                     'text': contains_string( 'cannot initialize' ),
                     'ranges': contains( has_entries( {
                       'start': has_entries( {
-                        'line_num': 2,
-                        'column_num': 15,
+                        'line_num': 3,
+                        'column_num': 16,
                       } ),
                       'end': has_entries( {
-                        'line_num': 2,
-                        'column_num': 20,
+                        'line_num': 3,
+                        'column_num': 21,
                       } ),
                     } ) ),
                     'location': has_entries( {
-                      'line_num': 2,
-                      'column_num': 9
+                      'line_num': 3,
+                      'column_num': 10
                     } ),
                     'location_extent': has_entries( {
                       'start': has_entries( {
-                        'line_num': 2,
-                        'column_num': 9,
+                        'line_num': 3,
+                        'column_num': 10,
                       } ),
                       'end': has_entries( {
-                        'line_num': 2,
-                        'column_num': 12,
+                        'line_num': 3,
+                        'column_num': 13,
                       } ),
                     } )
                   } ) ) )
@@ -102,12 +102,12 @@ void foo() {
                   has_entries( {
                     'location_extent': has_entries( {
                       'start': has_entries( {
-                        'line_num': 2,
-                        'column_num': 2,
+                        'line_num': 3,
+                        'column_num': 3,
                       } ),
                       'end': has_entries( {
-                        'line_num': 2,
-                        'column_num': 5,
+                        'line_num': 3,
+                        'column_num': 6,
                       } ),
                     } )
                   } ) ) )
@@ -163,17 +163,17 @@ def Diagnostics_CsCompleter_ZeroBasedLineAndColumn_test():
                     'text': contains_string(
                         "Unexpected symbol `}'', expecting identifier" ),
                     'location': has_entries( {
-                      'line_num': 9,
-                      'column_num': 1
+                      'line_num': 10,
+                      'column_num': 2
                     } ),
                     'location_extent': has_entries( {
                       'start': has_entries( {
-                        'line_num': 9,
-                        'column_num': 1,
+                        'line_num': 10,
+                        'column_num': 2,
                       } ),
                       'end': has_entries( {
-                        'line_num': 9,
-                        'column_num': 1,
+                        'line_num': 10,
+                        'column_num': 2,
                       } ),
                     } )
                   } ) ) )
@@ -194,7 +194,7 @@ struct Foo {
 """
 
   diag_data = BuildRequest( compilation_flags = ['-x', 'c++'],
-                            line_num = 2,
+                            line_num = 3,
                             contents = contents,
                             filetype = 'cpp' )
 
@@ -226,9 +226,9 @@ def GetDetailedDiagnostic_CsCompleter_Works_test():
   diag_data = BuildRequest( filepath = filepath,
                                   filetype = 'cs',
                                   contents = contents,
-                                  line_num = 9,
-                                  column_num = 1,
-                                  start_column = 1 )
+                                  line_num = 10,
+                                  column_num = 2,
+                                  start_column = 2 )
 
   results = app.post_json( '/detailed_diagnostic', diag_data ).json
   assert_that( results,
@@ -244,7 +244,7 @@ def GetDetailedDiagnostic_CsCompleter_Works_test():
 def GetDetailedDiagnostic_JediCompleter_DoesntWork_test():
   app = TestApp( handlers.app )
   diag_data = BuildRequest( contents = "foo = 5",
-                            line_num = 1,
+                            line_num = 2,
                             filetype = 'python' )
   response = app.post_json( '/detailed_diagnostic',
                             diag_data,

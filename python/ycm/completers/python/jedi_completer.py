@@ -48,9 +48,9 @@ class JediCompleter( Completer ):
   def _GetJediScript( self, request_data ):
       filename = request_data[ 'filepath' ]
       contents = request_data[ 'file_data' ][ filename ][ 'contents' ]
-      # Jedi expects lines to start at 1, not 0
-      line = request_data[ 'line_num' ] + 1
-      column = request_data[ 'column_num' ]
+      line = request_data[ 'line_num' ]
+      # Jedi expects columns to start at 0, not 1
+      column = request_data[ 'column_num' ] - 1
 
       return jedi.Script( contents, line, column, filename )
 
@@ -134,8 +134,8 @@ class JediCompleter( Completer ):
           raise RuntimeError( 'Builtin modules cannot be displayed.' )
       else:
         return responses.BuildGoToResponse( definition.module_path,
-                                            definition.line - 1,
-                                            definition.column )
+                                            definition.line,
+                                            definition.column + 1 )
     else:
       # multiple definitions
       defs = []
@@ -146,8 +146,8 @@ class JediCompleter( Completer ):
         else:
           defs.append(
             responses.BuildGoToResponse( definition.module_path,
-                                         definition.line - 1,
-                                         definition.column,
+                                         definition.line,
+                                         definition.column + 1,
                                          definition.description ) )
       return defs
 

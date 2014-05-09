@@ -137,13 +137,15 @@ class BaseRequest( object ):
 def BuildRequestData( start_column = None,
                       query = None,
                       include_buffer_data = True ):
+  if start_column is None:
+    start_column = 0
   line, column = vimsupport.CurrentLineAndColumn()
   filepath = vimsupport.GetCurrentBufferFilepath()
   request_data = {
     'filetypes': vimsupport.CurrentFiletypes(),
-    'line_num': line,
-    'column_num': column,
-    'start_column': start_column,
+    'line_num': line + 1,
+    'column_num': column + 1,
+    'start_column': start_column + 1,
     'line_value': vim.current.line,
     'filepath': filepath
   }

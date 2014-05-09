@@ -40,16 +40,15 @@ foo()
 
   goto_data = BuildRequest( completer_target = 'filetype_default',
                             command_arguments = ['GoToDefinition'],
-                            line_num = 4,
+                            line_num = 5,
                             contents = contents,
                             filetype = 'python',
                             filepath = '/foo.py' )
 
-  # 0-based line and column!
   eq_( {
          'filepath': '/foo.py',
-         'line_num': 1,
-         'column_num': 4
+         'line_num': 2,
+         'column_num': 5
        },
        app.post_json( '/run_completer_command', goto_data ).json )
 
@@ -74,16 +73,15 @@ int main()
   goto_data = BuildRequest( completer_target = 'filetype_default',
                             command_arguments = ['GoToDefinition'],
                             compilation_flags = ['-x', 'c++'],
-                            line_num = 9,
-                            column_num = 2,
+                            line_num = 10,
+                            column_num = 3,
                             contents = contents,
                             filetype = 'cpp' )
 
-  # 0-based line and column!
   eq_( {
         'filepath': '/foo',
-        'line_num': 1,
-        'column_num': 7
+        'line_num': 2,
+        'column_num': 8
       },
       app.post_json( '/run_completer_command', goto_data ).json )
 
