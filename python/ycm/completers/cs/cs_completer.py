@@ -69,14 +69,18 @@ class CsharpCompleter( Completer ):
   """
 
   subcommands = {
-    'StartServer': (lambda self, request_data: self._StartServer( request_data )),
+    'StartServer': (lambda self, request_data: self._StartServer(
+        request_data ) ),
     'StopServer': (lambda self, request_data: self._StopServer()),
-    'RestartServer': (lambda self, request_data: self._RestartServer( request_data )),
+    'RestartServer': (lambda self, request_data: self._RestartServer(
+        request_data ) ),
     'ReloadSolution': (lambda self, request_data: self._ReloadSolution()),
     'ServerRunning': (lambda self, request_data: self._ServerIsRunning()),
     'ServerReady': (lambda self, request_data: self._ServerIsReady()),
-    'GoToDefinition': (lambda self, request_data: self._GoToDefinition( request_data )),
-    'GoToDeclaration': (lambda self, request_data: self._GoToDefinition( request_data )),
+    'GoToDefinition': (lambda self, request_data: self._GoToDefinition(
+        request_data ) ),
+    'GoToDeclaration': (lambda self, request_data: self._GoToDefinition(
+        request_data ) ),
     'GoTo': (lambda self, request_data: self._GoToDefinition( request_data ))
   }
 
@@ -141,9 +145,14 @@ class CsharpCompleter( Completer ):
   def _SyntaxErrorToDiagnostic( self, syntax_error ):
     filename = syntax_error[ "FileName" ]
 
-    location = CsharpDiagnosticLocation( syntax_error[ "Line" ], syntax_error[ "Column" ], filename )
+    location = CsharpDiagnosticLocation( syntax_error[ "Line" ],
+                                         syntax_error[ "Column" ], filename )
     location_range = CsharpDiagnosticRange( location, location )
-    return CsharpDiagnostic( list(), location, location_range, syntax_error[ "Message" ], "E" )
+    return CsharpDiagnostic( list(),
+                             location,
+                             location_range,
+                             syntax_error[ "Message" ],
+                             "E" )
 
 
   def GetDetailedDiagnostic( self, request_data ):
@@ -352,6 +361,7 @@ def _FindSolutionFiles( filepath ):
     solutionfiles = glob.glob1( folder, '*.sln' )
   return solutionfiles, folder
 
+
 def _PathComponents( path ):
   path_components = []
   while True:
@@ -365,8 +375,10 @@ def _PathComponents( path ):
   path_components.reverse()
   return path_components
 
+
 def _GetFilenameWithoutExtension( path ):
     return os.path.splitext( os.path.basename ( path ) )[ 0 ]
+
 
 def DiagnosticsToDiagStructure( diagnostics ):
   structure = defaultdict( lambda : defaultdict( list ) )
