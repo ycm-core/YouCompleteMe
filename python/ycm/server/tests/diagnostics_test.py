@@ -19,7 +19,6 @@
 
 from ..server_utils import SetUpPythonPath
 SetUpPythonPath()
-import time
 from .test_utils import ( Setup, BuildRequest, PathToTestFile,
                           StopOmniSharpServer, WaitUntilOmniSharpServerReady )
 from webtest import TestApp
