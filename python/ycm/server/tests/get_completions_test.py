@@ -173,16 +173,6 @@ def GetCompletions_CsCompleter_DoesntStartWithAmbiguousMultipleSolutions_test():
   # the test passes if we caught an exception when trying to start it,
   # so raise one if it managed to start
   if not exception_caught:
-    # Now for some cleanup: wait for the server to start then shut it down
-    while True:
-      result = app.post_json( '/run_completer_command',
-                              BuildRequest( completer_target = 'filetype_default',
-                                            command_arguments = ['ServerRunning'],
-                                            filetype = 'cs' ) ).json
-      if result:
-        break
-      time.sleep( 0.2 )
-
     StopOmniSharpServer( app )
     raise Exception( ('The Omnisharp server started, despite us not being able '
                       'to find a suitable solution file to feed it. Did you '

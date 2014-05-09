@@ -219,7 +219,8 @@ def ContentHexHmacValid( content, hmac, hmac_secret ):
 
 
 def CreateHexHmac( content, hmac_secret ):
-  return hmac.new( hmac_secret,
+  # Must ensure that hmac_secret is str and not unicode
+  return hmac.new( str( hmac_secret ),
                    msg = content,
                    digestmod = hashlib.sha256 ).hexdigest()
 
