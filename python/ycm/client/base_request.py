@@ -20,6 +20,7 @@
 import vim
 import requests
 import urlparse
+from base64 import b64decode, b64encode
 from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
@@ -124,8 +125,8 @@ class BaseRequest( object ):
     if not request_body:
       request_body = ''
     headers = dict( _HEADERS )
-    headers[ _HMAC_HEADER ] = utils.CreateHexHmac( request_body,
-                                                   BaseRequest.hmac_secret )
+    headers[ _HMAC_HEADER ] = b64encode(
+        utils.CreateHexHmac( request_body, BaseRequest.hmac_secret ) )
     return headers
 
   session = FuturesSession( executor = _EXECUTOR )
@@ -171,9 +172,10 @@ def JsonFromFuture( future ):
 
 
 def _ValidateResponseObject( response ):
-  if not utils.ContentHexHmacValid( response.content,
-                                    response.headers[ _HMAC_HEADER ],
-                                    BaseRequest.hmac_secret ):
+  if not utils.ContentHexHmacValid(
+      response.content,
+      b64decode( response.headers[ _HMAC_HEADER ] ),
+      BaseRequest.hmac_secret ):
     raise RuntimeError( 'Received invalid HMAC for response!' )
   return True
 
