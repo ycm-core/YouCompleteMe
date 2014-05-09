@@ -332,7 +332,7 @@ class CsharpCompleter( Completer ):
     """ Check if our OmniSharp server is ready """
     try:
       return bool( self._omnisharp_port and
-                  self._GetResponse( '/checkreadystatus', silent = True ) )
+                   self._GetResponse( '/checkreadystatus', silent = True ) )
     except:
       return False
 

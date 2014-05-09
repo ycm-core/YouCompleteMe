@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
 from .. import handlers
 from ycm import user_options_store
 
@@ -80,3 +81,15 @@ def StopOmniSharpServer( app ):
                  BuildRequest( completer_target = 'filetype_default',
                                command_arguments = ['StopServer'],
                                filetype = 'cs' ) )
+
+def WaitUntilOmniSharpServerReady( app ):
+  while True:
+    result = app.post_json( '/run_completer_command',
+                            BuildRequest( completer_target = 'filetype_default',
+                                          command_arguments = ['ServerReady'],
+                                          filetype = 'cs' ) ).json
+    if result:
+      break
+    time.sleep( 0.2 )
+
+

@@ -21,7 +21,7 @@ from ..server_utils import SetUpPythonPath
 SetUpPythonPath()
 import time
 from .test_utils import ( Setup, BuildRequest, PathToTestFile,
-                          StopOmniSharpServer )
+                          StopOmniSharpServer, WaitUntilOmniSharpServerReady )
 from webtest import TestApp
 from nose.tools import with_setup, eq_
 from hamcrest import ( assert_that, contains, contains_string, has_entries,
@@ -149,16 +149,7 @@ def Diagnostics_CsCompleter_ZeroBasedLineAndColumn_test():
                              event_name = 'FileReadyToParse' )
 
   results = app.post_json( '/event_notification', event_data )
-
-  # We need to wait until the server has started up.
-  while True:
-    result = app.post_json( '/run_completer_command',
-                            BuildRequest( completer_target = 'filetype_default',
-                                          command_arguments = ['ServerReady'],
-                                          filetype = 'cs' ) ).json
-    if result:
-      break
-    time.sleep( 0.2 )
+  WaitUntilOmniSharpServerReady( app )
 
   event_data = BuildRequest( filepath = filepath,
                              event_name = 'FileReadyToParse',
@@ -230,17 +221,7 @@ def GetDetailedDiagnostic_CsCompleter_Works_test():
                              event_name = 'FileReadyToParse' )
 
   app.post_json( '/event_notification', event_data )
-
-  # We need to wait until the server has started up.
-  while True:
-    result = app.post_json( '/run_completer_command',
-                            BuildRequest( completer_target = 'filetype_default',
-                                          command_arguments = ['ServerReady'],
-                                          filetype = 'cs' ) ).json
-    if result:
-      break
-    time.sleep( 0.2 )
-
+  WaitUntilOmniSharpServerReady( app )
   app.post_json( '/event_notification', event_data )
 
   diag_data = BuildRequest( filepath = filepath,
