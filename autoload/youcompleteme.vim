@@ -31,6 +31,7 @@ let s:previous_num_chars_on_current_line = -1
 
 let s:diagnostic_ui_filetypes = {
       \ 'cpp': 1,
+      \ 'cs': 1,
       \ 'c': 1,
       \ 'objc': 1,
       \ 'objcpp': 1,

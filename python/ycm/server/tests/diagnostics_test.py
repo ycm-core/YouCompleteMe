@@ -19,7 +19,8 @@
 
 from ..server_utils import SetUpPythonPath
 SetUpPythonPath()
-from .test_utils import Setup, BuildRequest
+import time
+from .test_utils import Setup, BuildRequest, PathToTestFile
 from webtest import TestApp
 from nose.tools import with_setup, eq_
 from hamcrest import ( assert_that, contains, contains_string, has_entries,
@@ -137,6 +138,56 @@ struct Foo {
 
 
 @with_setup( Setup )
+def Diagnostics_CsCompleter_ZeroBasedLineAndColumn_test():
+  app = TestApp( handlers.app )
+  filepath = PathToTestFile( 'testy/Program.cs' )
+  contents = open( filepath ).read()
+  event_data = BuildRequest( filepath = filepath,
+                             filetype = 'cs',
+                             contents = contents,
+                             event_name = 'FileReadyToParse' )
+
+  results = app.post_json( '/event_notification', event_data )
+
+  # We need to wait until the server has started up.
+  while True:
+    result = app.post_json( '/run_completer_command',
+                            BuildRequest( completer_target = 'filetype_default',
+                                          command_arguments = ['ServerReady'],
+                                          filetype = 'cs' ) ).json
+    if result:
+      break
+    time.sleep( 0.2 )
+
+  event_data = BuildRequest( filepath = filepath,
+                             event_name = 'FileReadyToParse',
+                             filetype = 'cs',
+                             contents = contents )
+
+  results = app.post_json( '/event_notification', event_data ).json
+
+  assert_that( results,
+               contains(
+                  has_entries( {
+                    'text': contains_string( "Unexpected symbol `}'', expecting identifier" ),
+                    'location': has_entries( {
+                      'line_num': 9,
+                      'column_num': 1
+                    } ),
+                    'location_extent': has_entries( {
+                      'start': has_entries( {
+                        'line_num': 9,
+                        'column_num': 1,
+                      } ),
+                      'end': has_entries( {
+                        'line_num': 9,
+                        'column_num': 1,
+                      } ),
+                    } )
+                  } ) ) )
+
+
+@with_setup( Setup )
 def GetDetailedDiagnostic_ClangCompleter_Works_test():
   app = TestApp( handlers.app )
   contents = """
@@ -162,6 +213,49 @@ struct Foo {
   results = app.post_json( '/detailed_diagnostic', diag_data ).json
   assert_that( results,
                has_entry( 'message', contains_string( "expected ';'" ) ) )
+
+
+@with_setup( Setup )
+def GetDetailedDiagnostic_CsCompleter_Works_test():
+  app = TestApp( handlers.app )
+  filepath = PathToTestFile( 'testy/Program.cs' )
+  contents = open( filepath ).read()
+  event_data = BuildRequest( filepath = filepath,
+                             filetype = 'cs',
+                             contents = contents,
+                             event_name = 'FileReadyToParse' )
+
+  app.post_json( '/event_notification', event_data )
+
+  # We need to wait until the server has started up.
+  while True:
+    result = app.post_json( '/run_completer_command',
+                            BuildRequest( completer_target = 'filetype_default',
+                                          command_arguments = ['ServerReady'],
+                                          filetype = 'cs' ) ).json
+    if result:
+      break
+    time.sleep( 0.2 )
+
+  app.post_json( '/event_notification', event_data )
+
+  diag_data = BuildRequest( filepath = filepath,
+                                  filetype = 'cs',
+                                  contents = contents,
+                                  line_num = 9,
+                                  column_num = 1,
+                                  start_column = 1 )
+
+  results = app.post_json( '/detailed_diagnostic', diag_data ).json
+  assert_that( results,
+               has_entry( 'message', contains_string( "Unexpected symbol `}'', expecting identifier" ) ) )
+
+
+  # We need to turn off the CS server so that it doesn't stick around
+  app.post_json( '/run_completer_command',
+                 BuildRequest( completer_target = 'filetype_default',
+                               command_arguments = ['StopServer'],
+                               filetype = 'cs' ) )
 
 
 @with_setup( Setup )
