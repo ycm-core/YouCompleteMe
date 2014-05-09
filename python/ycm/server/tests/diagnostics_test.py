@@ -20,7 +20,8 @@
 from ..server_utils import SetUpPythonPath
 SetUpPythonPath()
 import time
-from .test_utils import Setup, BuildRequest, PathToTestFile
+from .test_utils import ( Setup, BuildRequest, PathToTestFile,
+                          StopOmniSharpServer )
 from webtest import TestApp
 from nose.tools import with_setup, eq_
 from hamcrest import ( assert_that, contains, contains_string, has_entries,
@@ -169,7 +170,8 @@ def Diagnostics_CsCompleter_ZeroBasedLineAndColumn_test():
   assert_that( results,
                contains(
                   has_entries( {
-                    'text': contains_string( "Unexpected symbol `}'', expecting identifier" ),
+                    'text': contains_string(
+                        "Unexpected symbol `}'', expecting identifier" ),
                     'location': has_entries( {
                       'line_num': 9,
                       'column_num': 1
@@ -185,6 +187,8 @@ def Diagnostics_CsCompleter_ZeroBasedLineAndColumn_test():
                       } ),
                     } )
                   } ) ) )
+
+  StopOmniSharpServer( app )
 
 
 @with_setup( Setup )
@@ -248,14 +252,12 @@ def GetDetailedDiagnostic_CsCompleter_Works_test():
 
   results = app.post_json( '/detailed_diagnostic', diag_data ).json
   assert_that( results,
-               has_entry( 'message', contains_string( "Unexpected symbol `}'', expecting identifier" ) ) )
+               has_entry(
+                  'message',
+                  contains_string(
+                     "Unexpected symbol `}'', expecting identifier" ) ) )
 
-
-  # We need to turn off the CS server so that it doesn't stick around
-  app.post_json( '/run_completer_command',
-                 BuildRequest( completer_target = 'filetype_default',
-                               command_arguments = ['StopServer'],
-                               filetype = 'cs' ) )
+  StopOmniSharpServer( app )
 
 
 @with_setup( Setup )

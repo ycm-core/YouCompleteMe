@@ -63,6 +63,7 @@ class CsharpDiagnosticLocation:
     self.column_number_ = column
     self.filename_ = filename
 
+
 class CsharpCompleter( Completer ):
   """
   A Completer that uses the Omnisharp server as completion engine.
