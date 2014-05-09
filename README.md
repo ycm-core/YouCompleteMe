@@ -534,6 +534,12 @@ You can also style the line that has the warning/error with these groups:
 Note that the line highlighting groups only work when gutter signs are turned
 on.
 
+The syntax groups used to highlight regions of text with errors/warnings:
+- `YcmErrorSection`, which falls back to group `SyntasticError` if it exists and
+  then `SpellBad`
+- `YcmWarningSection`, which falls back to group `SyntasticWarning` if it exists
+  and then `SpellCap`
+
 Here's how you'd change the style for a group:
 
 ```
