@@ -70,19 +70,19 @@ class CsharpCompleter( Completer ):
   """
 
   subcommands = {
-    'StartServer': (lambda self, request_data: self._StartServer(
+    'StartServer': ( lambda self, request_data: self._StartServer(
         request_data ) ),
-    'StopServer': (lambda self, request_data: self._StopServer()),
-    'RestartServer': (lambda self, request_data: self._RestartServer(
+    'StopServer': ( lambda self, request_data: self._StopServer() ),
+    'RestartServer': ( lambda self, request_data: self._RestartServer(
         request_data ) ),
-    'ReloadSolution': (lambda self, request_data: self._ReloadSolution()),
-    'ServerRunning': (lambda self, request_data: self._ServerIsRunning()),
-    'ServerReady': (lambda self, request_data: self._ServerIsReady()),
-    'GoToDefinition': (lambda self, request_data: self._GoToDefinition(
+    'ReloadSolution': ( lambda self, request_data: self._ReloadSolution() ),
+    'ServerRunning': ( lambda self, request_data: self._ServerIsRunning() ),
+    'ServerReady': ( lambda self, request_data: self._ServerIsReady() ),
+    'GoToDefinition': ( lambda self, request_data: self._GoToDefinition(
         request_data ) ),
-    'GoToDeclaration': (lambda self, request_data: self._GoToDefinition(
+    'GoToDeclaration': ( lambda self, request_data: self._GoToDefinition(
         request_data ) ),
-    'GoTo': (lambda self, request_data: self._GoToDefinition( request_data ))
+    'GoTo': ( lambda self, request_data: self._GoToDefinition( request_data ) )
   }
 
   def __init__( self, user_options ):
