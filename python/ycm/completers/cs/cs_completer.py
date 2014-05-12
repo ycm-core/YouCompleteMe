@@ -31,14 +31,17 @@ import json
 import logging
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
-'Did you compile it? You can do so by running ' +
-'"./install.sh --omnisharp-completer".' )
+                         'Did you compile it? You can do so by running ' +
+                         '"./install.sh --omnisharp-completer".' )
 MIN_LINES_IN_FILE_TO_PARSE = 5
 INVALID_FILE_MESSAGE = 'File is invalid.'
 FILE_TOO_SHORT_MESSAGE = (
   'File is less than {0} lines long; not parsing.'.format(
     MIN_LINES_IN_FILE_TO_PARSE ) )
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
+PATH_TO_OMNISHARP_BINARY = os.path.join(
+  os.path.abspath( os.path.dirname( __file__ ) ),
+  '../../../../third_party/OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
 
 
 #TODO: Handle this better than dummy classes
@@ -92,6 +95,10 @@ class CsharpCompleter( Completer ):
     self._diagnostic_store = None
     self._max_diagnostics_to_display = user_options[
       'max_diagnostics_to_display' ]
+
+    if not os.path.isfile( PATH_TO_OMNISHARP_BINARY ):
+      raise RuntimeError(
+           SERVER_NOT_FOUND_MSG.format( PATH_TO_OMNISHARP_BINARY ) )
 
 
   def Shutdown( self ):
@@ -232,18 +239,14 @@ class CsharpCompleter( Completer ):
           'Found multiple solution files instead of one!\n{0}'.format(
             solution_files ) )
 
-    omnisharp = os.path.join(
-      os.path.abspath( os.path.dirname( __file__ ) ),
-      'OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
-
-    if not os.path.isfile( omnisharp ):
-      raise RuntimeError( SERVER_NOT_FOUND_MSG.format( omnisharp ) )
-
     path_to_solutionfile = os.path.join( folder, solutionfile )
     # we need to pass the command to Popen as a string since we're passing
     # shell=True (as recommended by Python's doc)
-    command = ( omnisharp + ' -p ' + str( self._omnisharp_port ) + ' -s ' +
-                path_to_solutionfile )
+    command = ' '.join( [ PATH_TO_OMNISHARP_BINARY,
+                         '-p',
+                         str( self._omnisharp_port ),
+                         '-s',
+                         path_to_solutionfile ] )
 
     if not utils.OnWindows() and not utils.OnCygwin():
       command = 'mono ' + command

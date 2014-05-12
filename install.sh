@@ -176,7 +176,7 @@ if $omnisharp_completer; then
   fi
 
   ycm_dir=`pwd`
-  build_dir=$ycm_dir"/python/ycm/completers/cs/OmniSharpServer"
+  build_dir=$ycm_dir"/third_party/OmniSharpServer"
 
   cd $build_dir
   $buildcommand
