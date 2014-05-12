@@ -106,8 +106,7 @@ class OmniCompleter( Completer ):
 
 
 def _BuildRequestDataSubstitute():
-  data = BuildRequestData( include_buffer_data = False )
-  data[ 'start_column' ] = base.CompletionStartColumn()
-  return data
+  return BuildRequestData( start_column = base.CompletionStartColumn(),
+                           include_buffer_data = False )
 
 
