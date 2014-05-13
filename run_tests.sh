@@ -7,7 +7,8 @@ function usage {
   exit 0
 }
 
-flake8 --select=F,C9 --max-complexity=10 python
+flake8 --select=F,C9 --max-complexity=10 --exclude=.git,cpp \
+   python third_party/ycmd/ycmd
 
 use_clang_completer=true
 for flag in $@; do
@@ -40,7 +41,7 @@ for directory in third_party/*; do
 done
 
 if $use_clang_completer; then
-  nosetests -v python
+  nosetests -v python third_party/ycmd/ycmd
 else
-  nosetests -v --exclude=".*Clang.*" python
+  nosetests -v --exclude=".*Clang.*" python third_party/ycmd/ycmd
 fi

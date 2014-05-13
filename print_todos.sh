@@ -5,4 +5,4 @@ ag \
 --ignore OmniSharpServer \
 --ignore testdata \
 TODO \
-cpp/ycm python autoload plugin
+third_party/ycmd/cpp/ycm python autoload plugin

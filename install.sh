@@ -70,14 +70,14 @@ function num_cores {
 
 
 function install {
-  ycm_dir=`pwd`
+  ycmd_dir=`pwd`/third_party/ycmd
   build_dir=`mktemp -d -t ycm_build.XXXXXX`
   pushd $build_dir
 
   if [[ `uname -s` == "Darwin" ]]; then
-    cmake -G "Unix Makefiles" $(python_finder) "$@" . $ycm_dir/cpp
+    cmake -G "Unix Makefiles" $(python_finder) "$@" . $ycmd_dir/cpp
   else
-    cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
+    cmake -G "Unix Makefiles" "$@" . $ycmd_dir/cpp
   fi
 
   make -j $(num_cores) ycm_support_libs
@@ -86,14 +86,14 @@ function install {
 }
 
 function testrun {
-  ycm_dir=`pwd`
+  ycmd_dir=`pwd`/third_party/ycmd
   build_dir=`mktemp -d -t ycm_build.XXXXXX`
   pushd $build_dir
 
-  cmake -G "Unix Makefiles" "$@" . $ycm_dir/cpp
+  cmake -G "Unix Makefiles" "$@" . $ycmd_dir/cpp
   make -j $(num_cores) ycm_core_tests
   cd ycm/tests
-  LD_LIBRARY_PATH=$ycm_dir/python ./ycm_core_tests
+  LD_LIBRARY_PATH=$ycmd_dir ./ycm_core_tests
 
   popd
   rm -rf $build_dir
