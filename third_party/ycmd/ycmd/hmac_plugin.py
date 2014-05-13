@@ -21,7 +21,7 @@ import logging
 import httplib
 from base64 import b64decode, b64encode
 from bottle import request, response, abort
-from ycm import utils
+from ycmd import utils
 
 _HMAC_HEADER = 'x-ycm-hmac'
 

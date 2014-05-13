@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.python.jedi_completer import JediCompleter
+from ycmd.completers.python.jedi_completer import JediCompleter
 
 def GetCompleter( user_options ):
   return JediCompleter( user_options )

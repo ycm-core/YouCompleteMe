@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.cs.cs_completer import CsharpCompleter
+from ycmd.completers.cs.cs_completer import CsharpCompleter
 
 def GetCompleter( user_options ):
   return CsharpCompleter( user_options )

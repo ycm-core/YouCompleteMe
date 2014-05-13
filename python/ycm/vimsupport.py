@@ -20,8 +20,8 @@
 import vim
 import os
 import json
-from ycm.utils import ToUtf8IfNeeded
-from ycm import user_options_store
+from ycmd.utils import ToUtf8IfNeeded
+from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'horizontal-split' : 'split',

@@ -49,12 +49,13 @@ function! youcompleteme#Enable()
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
-  py from ycm import utils
+  exe 'python sys.path.insert( 0, "' . s:script_folder_path .
+        \ '/../third_party/ycmd" )'
+  py from ycmd import utils
   py utils.AddThirdPartyFoldersToSysPath()
   py from ycm import base
   py base.LoadJsonDefaultsIntoVim()
-  py from ycm import vimsupport
-  py from ycm import user_options_store
+  py from ycmd import user_options_store
   py user_options_store.SetAll( base.BuildServerConf() )
 
   if !pyeval( 'base.CompatibleWithYcmCore()')

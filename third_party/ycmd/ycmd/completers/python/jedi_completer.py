@@ -19,8 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.completer import Completer
-from ycm.server import responses
+from ycmd.completers.completer import Completer
+from ycmd import responses
 
 try:
   import jedi

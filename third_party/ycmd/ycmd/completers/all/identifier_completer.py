@@ -21,11 +21,10 @@ import os
 import logging
 import ycm_core
 from collections import defaultdict
-from ycm.completers.general_completer import GeneralCompleter
-# from ycm.completers.general import syntax_parse
-from ycm import utils
-from ycm.utils import ToUtf8IfNeeded
-from ycm.server import responses
+from ycmd.completers.general_completer import GeneralCompleter
+from ycmd import utils
+from ycmd.utils import ToUtf8IfNeeded
+from ycmd import responses
 
 MAX_IDENTIFIER_COMPLETIONS_RETURNED = 10
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'

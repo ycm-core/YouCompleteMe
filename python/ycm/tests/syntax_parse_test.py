@@ -21,7 +21,7 @@ import os
 from nose.tools import eq_
 from ycm.test_utils import MockVimModule
 vim_mock = MockVimModule()
-from ycm.completers.general import syntax_parse
+from ycm import syntax_parse
 
 
 def ContentsOfTestFile( test_file ):

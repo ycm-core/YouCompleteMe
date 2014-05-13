@@ -18,7 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycm import vimsupport
-from ycm.server.responses import UnknownExtraConf
+from ycmd.responses import UnknownExtraConf
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                      JsonFromFuture )
 

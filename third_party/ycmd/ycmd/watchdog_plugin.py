@@ -20,7 +20,7 @@
 import time
 import os
 import copy
-from ycm import utils
+from ycmd import utils
 from threading import Thread, Lock
 
 # This class implements the Bottle plugin API:

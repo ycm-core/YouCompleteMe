@@ -18,10 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.completer import Completer
-from ycm.completers.all.identifier_completer import IdentifierCompleter
-from ycm.completers.general.filename_completer import FilenameCompleter
-from ycm.completers.general.ultisnips_completer import UltiSnipsCompleter
+from ycmd.completers.completer import Completer
+from ycmd.completers.all.identifier_completer import IdentifierCompleter
+from ycmd.completers.general.filename_completer import FilenameCompleter
+from ycmd.completers.general.ultisnips_completer import UltiSnipsCompleter
 
 
 class GeneralCompleterStore( Completer ):

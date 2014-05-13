@@ -18,9 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from nose.tools import eq_
-from ycm.test_utils import MockVimModule
-vim_mock = MockVimModule()
-from ycm.extra_conf_store import _PathsToAllParentFolders
+from ycmd.extra_conf_store import _PathsToAllParentFolders
 
 
 def PathsToAllParentFolders_Basic_test():

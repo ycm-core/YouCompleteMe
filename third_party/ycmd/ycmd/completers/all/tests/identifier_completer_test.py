@@ -18,7 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from nose.tools import eq_
-from ycm.completers.all import identifier_completer
+from ycmd.completers.all import identifier_completer
 
 
 def GetCursorIdentifier_StartOfLine_test():

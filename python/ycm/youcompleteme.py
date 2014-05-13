@@ -25,11 +25,11 @@ import signal
 import base64
 from subprocess import PIPE
 from ycm import vimsupport
-from ycm import utils
+from ycmd import utils
 from ycm.diagnostic_interface import DiagnosticInterface
-from ycm.completers.all.omni_completer import OmniCompleter
-from ycm.completers.general import syntax_parse
-from ycm.completers.completer_utils import FiletypeCompleterExistsForFiletype
+from ycm.omni_completer import OmniCompleter
+from ycm import syntax_parse
+from ycmd.completers.completer_utils import FiletypeCompleterExistsForFiletype
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.command_request import SendCommandRequest
@@ -37,7 +37,7 @@ from ycm.client.completion_request import CompletionRequest
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
-from ycm.server.responses import ServerError
+from ycmd.responses import ServerError
 
 try:
   from UltiSnips import UltiSnips_Manager
@@ -363,7 +363,7 @@ class YouCompleteMe( object ):
 
 def _PathToServerScript():
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
-  return os.path.join( dir_of_current_script, 'server/ycmd.py' )
+  return os.path.join( dir_of_current_script, '../../third_party/ycmd/ycmd' )
 
 
 def _AddUltiSnipsDataIfNeeded( extra_data ):

@@ -19,9 +19,9 @@
 
 import imp
 import os
-from ycm.utils import ForceSemanticCompletion
-from ycm.completers.general.general_completer_store import GeneralCompleterStore
-from ycm.completers.completer_utils import PathToFiletypeCompleterPluginLoader
+from ycmd.utils import ForceSemanticCompletion
+from ycmd.completers.general.general_completer_store import GeneralCompleterStore
+from ycmd.completers.completer_utils import PathToFiletypeCompleterPluginLoader
 
 
 class ServerState( object ):

@@ -19,11 +19,11 @@
 
 from collections import defaultdict
 import ycm_core
-from ycm.server import responses
-from ycm import extra_conf_store
-from ycm.utils import ToUtf8IfNeeded
-from ycm.completers.completer import Completer
-from ycm.completers.cpp.flags import Flags, PrepareFlagsForClang
+from ycmd import responses
+from ycmd import extra_conf_store
+from ycmd.utils import ToUtf8IfNeeded
+from ycmd.completers.completer import Completer
+from ycmd.completers.cpp.flags import Flags, PrepareFlagsForClang
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MIN_LINES_IN_FILE_TO_PARSE = 5

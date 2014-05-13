@@ -191,14 +191,34 @@ def TerminateProcess( pid ):
     os.kill( pid, signal.SIGTERM )
 
 
+def AncestorFolders( path ):
+  folder = os.path.abspath( path )
+  while True:
+    parent = os.path.dirname( folder )
+    if parent == folder:
+      break
+    folder = parent
+    yield folder
+
+
+def PathToNearestThirdPartyFolder( path ):
+  for folder in AncestorFolders( path ):
+    path_to_third_party = os.path.join( folder, 'third_party' )
+    if os.path.isdir( path_to_third_party ):
+      return path_to_third_party
+  return None
+
+
 def AddThirdPartyFoldersToSysPath():
-  path_to_third_party = os.path.join(
-                          os.path.dirname( os.path.abspath( __file__ ) ),
-                          '../../third_party' )
+  path_to_third_party = PathToNearestThirdPartyFolder( __file__ )
+  if not path_to_third_party:
+    raise RuntimeError(
+        'No third_party folder found for: {0}'.format( __file__) )
 
   for folder in os.listdir( path_to_third_party ):
     sys.path.insert( 0, os.path.realpath( os.path.join( path_to_third_party,
                                                         folder ) ) )
+
 
 def ForceSemanticCompletion( request_data ):
   return ( 'force_semantic' in request_data and

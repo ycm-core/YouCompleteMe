@@ -20,7 +20,7 @@
 import vim
 from ycm import vimsupport
 from ycm import base
-from ycm.completers.completer import Completer
+from ycmd.completers.completer import Completer
 from ycm.client.base_request import BuildRequestData
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'

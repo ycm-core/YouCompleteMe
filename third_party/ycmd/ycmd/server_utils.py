@@ -21,14 +21,9 @@ import sys
 import os
 
 def SetUpPythonPath():
-  # We want to have the YouCompleteMe/python directory on the Python PATH
-  # because all the code already assumes that it's there. This is a relic from
-  # before the client/server architecture.
-  # TODO: Fix things so that this is not needed anymore when we split ycmd into
-  # a separate repository.
   sys.path.insert( 0, os.path.join(
                           os.path.dirname( os.path.abspath( __file__ ) ),
-                          '../..' ) )
+                          '..' ) )
 
-  from ycm import utils
+  from ycmd import utils
   utils.AddThirdPartyFoldersToSysPath()

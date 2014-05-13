@@ -26,8 +26,8 @@ import string
 import sys
 import logging
 from threading import Lock
-from ycm import user_options_store
-from ycm.server.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
+from ycmd import user_options_store
+from ycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
 from fnmatch import fnmatch
 
 

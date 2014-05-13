@@ -19,8 +19,8 @@
 
 import os
 from nose.tools import eq_
-from ycm.completers.general.filename_completer import FilenameCompleter
-from ycm import user_options_store
+from ycmd.completers.general.filename_completer import FilenameCompleter
+from ycmd import user_options_store
 
 test_dir = os.path.dirname( os.path.abspath( __file__ ) )
 data_dir = os.path.join( test_dir, "testdata", "filename_completer" )

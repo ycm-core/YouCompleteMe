@@ -19,8 +19,8 @@
 
 import vim
 from ycm import vimsupport
-from ycm import utils
-from ycm import user_options_store
+from ycmd import utils
+from ycmd import user_options_store
 import ycm_client_support
 
 YCM_VAR_PREFIX = 'ycm_'

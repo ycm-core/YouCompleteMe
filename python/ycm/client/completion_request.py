@@ -19,7 +19,7 @@
 
 from ycm import base
 from ycm import vimsupport
-from ycm.utils import ToUtf8IfNeeded
+from ycmd.utils import ToUtf8IfNeeded
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       JsonFromFuture )
 

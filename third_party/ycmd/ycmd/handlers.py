@@ -26,7 +26,7 @@ except ImportError as e:
     'Error importing ycm_core. Are you sure you have placed a '
     'version 3.2+ libclang.[so|dll|dylib] in folder "{0}"? '
     'See the Installation Guide in the docs. Full error: {1}'.format(
-      path.realpath( path.join( path.abspath( __file__ ), '../../..' ) ),
+      path.realpath( path.join( path.abspath( __file__ ), '../..' ) ),
       str( e ) ) )
 
 import atexit
@@ -36,10 +36,10 @@ import bottle
 import httplib
 from bottle import request, response
 import server_state
-from ycm import user_options_store
-from ycm.server.responses import BuildExceptionResponse
-from ycm.server import hmac_plugin
-from ycm import extra_conf_store
+from ycmd import user_options_store
+from ycmd.responses import BuildExceptionResponse
+from ycmd import hmac_plugin
+from ycmd import extra_conf_store
 
 
 # num bytes for the request body buffer; request.json only works if the request

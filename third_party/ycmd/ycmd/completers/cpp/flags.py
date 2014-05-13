@@ -20,9 +20,9 @@
 import ycm_core
 import os
 import inspect
-from ycm import extra_conf_store
-from ycm.utils import ToUtf8IfNeeded
-from ycm.server.responses import NoExtraConfDetected
+from ycmd import extra_conf_store
+from ycmd.utils import ToUtf8IfNeeded
+from ycmd.responses import NoExtraConfDetected
 
 INCLUDE_FLAGS = [ '-isystem', '-I', '-iquote', '--sysroot=', '-isysroot',
                   '-include' ]

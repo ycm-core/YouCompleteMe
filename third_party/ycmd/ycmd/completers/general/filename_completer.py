@@ -20,11 +20,11 @@ import os
 import re
 from collections import defaultdict
 
-from ycm.completers.completer import Completer
-from ycm.completers.cpp.clang_completer import InCFamilyFile
-from ycm.completers.cpp.flags import Flags
-from ycm.utils import ToUtf8IfNeeded
-from ycm.server import responses
+from ycmd.completers.completer import Completer
+from ycmd.completers.cpp.clang_completer import InCFamilyFile
+from ycmd.completers.cpp.flags import Flags
+from ycmd.utils import ToUtf8IfNeeded
+from ycmd import responses
 
 EXTRA_INFO_MAP = { 1 : '[File]', 2 : '[Dir]', 3 : '[File&Dir]' }
 

@@ -20,7 +20,7 @@
 import vim
 from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
 from ycm import vimsupport
-from ycm.utils import ToUtf8IfNeeded
+from ycmd.utils import ToUtf8IfNeeded
 
 def _EnsureBackwardsCompatibility( arguments ):
   if arguments and arguments[ 0 ] == 'GoToDefinitionElseDeclaration':

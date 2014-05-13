@@ -21,9 +21,9 @@
 from collections import defaultdict
 import os
 import glob
-from ycm.completers.completer import Completer
-from ycm.server import responses
-from ycm import utils
+from ycmd.completers.completer import Completer
+from ycmd import responses
+from ycmd import utils
 import urllib2
 import urllib
 import urlparse
@@ -41,7 +41,7 @@ FILE_TOO_SHORT_MESSAGE = (
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 PATH_TO_OMNISHARP_BINARY = os.path.join(
   os.path.abspath( os.path.dirname( __file__ ) ),
-  '../../../../third_party/OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
+  '../../../../OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
 
 
 #TODO: Handle this better than dummy classes

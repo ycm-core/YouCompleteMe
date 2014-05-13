@@ -20,7 +20,7 @@
 import os
 import time
 from .. import handlers
-from ycm import user_options_store
+from ycmd import user_options_store
 
 def BuildRequest( **kwargs ):
   filepath = kwargs[ 'filepath' ] if 'filepath' in kwargs else '/foo'

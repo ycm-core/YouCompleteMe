@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.completers.general_completer import GeneralCompleter
-from ycm.server import responses
+from ycmd.completers.general_completer import GeneralCompleter
+from ycmd import responses
 
 
 class UltiSnipsCompleter( GeneralCompleter ):

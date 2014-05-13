@@ -19,9 +19,7 @@
 
 from collections import defaultdict
 from nose.tools import eq_
-from ycm.test_utils import MockVimModule
-vim_mock = MockVimModule()
-from ycm.completers import completer_utils
+from ycmd.completers import completer_utils
 
 
 def FiletypeTriggerDictFromSpec_Works_test():

@@ -20,15 +20,15 @@
 import abc
 import threading
 from collections import defaultdict
-from ycm.utils import ToUtf8IfNeeded, ForceSemanticCompletion, RunningInsideVim
+from ycmd.utils import ToUtf8IfNeeded, ForceSemanticCompletion, RunningInsideVim
 
 if RunningInsideVim():
   from ycm_client_support import FilterAndSortCandidates
 else:
   from ycm_core import FilterAndSortCandidates
 
-from ycm.completers.completer_utils import TriggersForFiletype
-from ycm.server.responses import NoDiagnosticSupport
+from ycmd.completers.completer_utils import TriggersForFiletype
+from ycmd.responses import NoDiagnosticSupport
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
@@ -70,7 +70,7 @@ class Completer( object ):
   "foo.bar", the user query is "bar" and completions matching this string should
   be shown. It should return the list of candidates.  The format of the result
   can be a list of strings or a more complicated list of dictionaries. Use
-  ycm.server.responses.BuildCompletionData to build the detailed response. See
+  ycmd.responses.BuildCompletionData to build the detailed response. See
   clang_completer.py to see how its used in practice.
 
   Again, you probably want to override ComputeCandidatesInner().

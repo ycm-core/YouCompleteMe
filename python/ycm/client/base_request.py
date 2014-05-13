@@ -25,9 +25,9 @@ from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
-from ycm import utils
-from ycm.utils import ToUtf8Json
-from ycm.server.responses import ServerError, UnknownExtraConf
+from ycmd import utils
+from ycmd.utils import ToUtf8Json
+from ycmd.responses import ServerError, UnknownExtraConf
 
 _HEADERS = {'content-type': 'application/json'}
 _EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )

@@ -42,8 +42,7 @@ def LoadDefaults():
 
 def DefaultOptions():
   settings_path = os.path.join(
-      os.path.dirname( os.path.abspath( __file__ ) ),
-      'server/default_settings.json' )
+      os.path.dirname( os.path.abspath( __file__ ) ), 'default_settings.json' )
   with open( settings_path ) as f:
     return json.loads( f.read() )
 
