@@ -320,9 +320,9 @@ set_target_properties( ${SERVER_LIB} PROPERTIES PREFIX "")
 if ( WIN32 OR CYGWIN )
   # DLL platforms put dlls in the RUNTIME_OUTPUT_DIRECTORY
   set_target_properties( ${CLIENT_LIB} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../python )
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../.. )
   set_target_properties( ${SERVER_LIB} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../python )
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../.. )
 
   if ( WIN32 )
     # This is the extension for compiled Python modules on Windows
@@ -342,9 +342,9 @@ else()
 endif()
 
 set_target_properties( ${CLIENT_LIB} PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../python )
+  LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../.. )
 set_target_properties( ${SERVER_LIB} PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../python )
+  LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../.. )
 
 #############################################################################
 
