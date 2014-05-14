@@ -14,4 +14,11 @@ for directory in $SCRIPT_DIR/third_party/*; do
   fi
 done
 
+
+for directory in $SCRIPT_DIR/third_party/ycmd/third_party/*; do
+  if [ -d "${directory}" ]; then
+    export PYTHONPATH=${directory}:$PYTHONPATH
+  fi
+done
+
 nosetests -v $SCRIPT_DIR/python
