@@ -26,4 +26,4 @@ def SetUpPythonPath():
                           '..' ) )
 
   from ycmd import utils
-  utils.AddThirdPartyFoldersToSysPath()
+  utils.AddNearestThirdPartyFoldersToSysPath( __file__ )

@@ -41,7 +41,7 @@ FILE_TOO_SHORT_MESSAGE = (
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 PATH_TO_OMNISHARP_BINARY = os.path.join(
   os.path.abspath( os.path.dirname( __file__ ) ),
-  '../../../../OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
+  '../../../third_party/OmniSharpServer/OmniSharp/bin/Debug/OmniSharp.exe' )
 
 
 #TODO: Handle this better than dummy classes

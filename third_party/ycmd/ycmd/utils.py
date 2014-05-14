@@ -209,11 +209,11 @@ def PathToNearestThirdPartyFolder( path ):
   return None
 
 
-def AddThirdPartyFoldersToSysPath():
-  path_to_third_party = PathToNearestThirdPartyFolder( __file__ )
+def AddNearestThirdPartyFoldersToSysPath( filepath ):
+  path_to_third_party = PathToNearestThirdPartyFolder( filepath )
   if not path_to_third_party:
     raise RuntimeError(
-        'No third_party folder found for: {0}'.format( __file__) )
+        'No third_party folder found for: {0}'.format( filepath ) )
 
   for folder in os.listdir( path_to_third_party ):
     sys.path.insert( 0, os.path.realpath( os.path.join( path_to_third_party,

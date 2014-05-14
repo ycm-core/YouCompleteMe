@@ -46,27 +46,9 @@ function! youcompleteme#Enable()
 
   call s:SetUpBackwardsCompatibility()
 
-  py import sys
-  py import vim
-  exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
-  exe 'python sys.path.insert( 0, "' . s:script_folder_path .
-        \ '/../third_party/ycmd" )'
-  py from ycmd import utils
-  py utils.AddThirdPartyFoldersToSysPath()
-  py from ycm import base
-  py base.LoadJsonDefaultsIntoVim()
-  py from ycmd import user_options_store
-  py user_options_store.SetAll( base.BuildServerConf() )
-
-  if !pyeval( 'base.CompatibleWithYcmCore()')
-    echohl WarningMsg |
-      \ echomsg "YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE" |
-      \ echohl None
+  if !s:SetUpPython()
     return
   endif
-
-  py from ycm.youcompleteme import YouCompleteMe
-  py ycm_state = YouCompleteMe( user_options_store.GetAll() )
 
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
@@ -107,6 +89,33 @@ function! youcompleteme#Enable()
   " the first loaded file. This should be the last command executed in this
   " function!
   call s:OnBufferVisit()
+endfunction
+
+
+function! s:SetUpPython()
+  py import sys
+  py import vim
+  exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+  exe 'python sys.path.insert( 0, "' . s:script_folder_path .
+        \ '/../third_party/ycmd" )'
+  py from ycmd import utils
+  exe 'py utils.AddNearestThirdPartyFoldersToSysPath("'
+        \ . s:script_folder_path . '")'
+  py from ycm import base
+  py base.LoadJsonDefaultsIntoVim()
+  py from ycmd import user_options_store
+  py user_options_store.SetAll( base.BuildServerConf() )
+
+  if !pyeval( 'base.CompatibleWithYcmCore()')
+    echohl WarningMsg |
+      \ echomsg "YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE" |
+      \ echohl None
+    return 0
+  endif
+
+  py from ycm.youcompleteme import YouCompleteMe
+  py ycm_state = YouCompleteMe( user_options_store.GetAll() )
+  return 1
 endfunction
 
 

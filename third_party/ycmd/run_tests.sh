@@ -36,9 +36,7 @@ fi
 EXTRA_CMAKE_ARGS=$extra_cmake_args YCM_TESTRUN=1 \
    $SCRIPT_DIR/build.sh --omnisharp-completer
 
-# TODO: change to the following when we have own third_party:
-#   $SCRIPT_DIR/third_party/*
-for directory in $SCRIPT_DIR/../*; do
+for directory in $SCRIPT_DIR/third_party/*; do
   if [ -d "${directory}" ]; then
     export PYTHONPATH=${directory}:$PYTHONPATH
   fi

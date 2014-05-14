@@ -175,9 +175,7 @@ if $omnisharp_completer; then
     fi
   fi
 
-  # TODO: change to the following when omnisharp in own third_party:
-  #   $SCRIPT_DIR"/third_party/OmniSharpServer"
-  build_dir=$SCRIPT_DIR"/../OmniSharpServer"
+  build_dir=$SCRIPT_DIR"/third_party/OmniSharpServer"
 
   cd $build_dir
   $buildcommand
