@@ -101,6 +101,10 @@ function! s:SetUpPython()
   py from ycmd import utils
   exe 'py utils.AddNearestThirdPartyFoldersToSysPath("'
         \ . s:script_folder_path . '")'
+
+  " We need to import ycmd's third_party folders as well since we import and
+  " use ycmd code in the client.
+  py utils.AddNearestThirdPartyFoldersToSysPath( utils.__file__ )
   py from ycm import base
   py base.LoadJsonDefaultsIntoVim()
   py from ycmd import user_options_store
