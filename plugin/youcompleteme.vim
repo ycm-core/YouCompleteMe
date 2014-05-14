@@ -36,7 +36,7 @@ elseif v:version < 703 || (v:version == 703 && !has('patch584'))
 elseif !has( 'python' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
-        \ " Python 2.x support" |
+        \ "Python 2.x support" |
         \ echohl None
   call s:restore_cpo()
   finish
@@ -62,7 +62,8 @@ endfunction
 
 if s:YcmLibsPresentIn( s:python_folder_path )
   echohl WarningMsg |
-        \ echomsg "YCM libraries found in old location; please RECOMPILE YCM." |
+        \ echomsg "YCM libraries found in old YouCompleteMe/python location; " .
+        \ "please RECOMPILE YCM." |
         \ echohl None
   call s:restore_cpo()
   finish
