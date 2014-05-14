@@ -259,7 +259,7 @@ process.
     support for C-family languages, run the following command in the `ycm_build`
     directory:
 
-        cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/cpp
+        cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
     If you DO care about semantic support for C-family languages, then your
     `cmake` call will be a bit more complicated.  We'll assume you downloaded a
@@ -268,7 +268,7 @@ process.
     `lib`, `include` etc. folders right inside that folder). With that in mind,
     run the following command in the `ycm_build` directory:
 
-        cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/cpp
+        cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
     Now that makefiles have been generated, simply run:
 
