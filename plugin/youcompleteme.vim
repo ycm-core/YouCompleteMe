@@ -44,7 +44,7 @@ endif
 
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:python_folder_path = s:script_folder_path . '/../python/'
-let s:ycmd_folder_path = s:script_folder_path . '/../third_party/ycmd'
+let s:ycmd_folder_path = s:script_folder_path . '/../third_party/ycmd/'
 
 function! s:YcmLibsPresentIn( path_prefix )
   if filereadable(a:path_prefix . 'ycm_client_support.so') &&
