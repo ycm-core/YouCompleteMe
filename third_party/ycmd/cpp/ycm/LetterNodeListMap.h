@@ -18,6 +18,8 @@
 #ifndef LETTERNODELISTMAP_H_BRK2UMC1
 #define LETTERNODELISTMAP_H_BRK2UMC1
 
+#include "export.h"
+
 #include <list>
 #include <boost/utility.hpp>
 #include <boost/array.hpp>
@@ -30,12 +32,15 @@ class LetterNode;
 
 extern const int kNumLetters;
 
+__export__
 int IndexForChar( char letter );
+__export__
 bool IsUppercase( char letter );
 
 class LetterNodeListMap : boost::noncopyable {
 public:
   LetterNodeListMap();
+  __export__
   ~LetterNodeListMap();
 
   bool HasLetter( char letter );
