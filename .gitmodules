@@ -6,4 +6,4 @@
 	url = https://github.com/kennethreitz/requests
 [submodule "third_party/ycmd"]
 	path = third_party/ycmd
-	url = git@github.com:Valloric/ycmd.git
+	url = https://github.com/Valloric/ycmd
