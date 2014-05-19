@@ -247,6 +247,10 @@ def BufferIsUsable( buffer_object ):
   return not BufferModified( buffer_object ) or HiddenEnabled( buffer_object )
 
 
+def EscapedFilepath( filepath ):
+  return filepath.replace( ' ' , r'\ ' )
+
+
 # Both |line| and |column| need to be 1-based
 def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
@@ -263,7 +267,8 @@ def JumpToLocation( filename, line, column ):
     command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
     if command == 'edit' and not BufferIsUsable( vim.current.buffer ):
       command = 'split'
-    vim.command( 'keepjumps {0} {1}'.format( command, filename ) )
+    vim.command( 'keepjumps {0} {1}'.format( command,
+                                             EscapedFilepath( filename ) ) )
   vim.current.window.cursor = ( line, column - 1 )
 
   # Center the screen on the jumped-to location
