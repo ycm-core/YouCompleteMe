@@ -161,7 +161,7 @@ def AddDiagnosticSyntaxMatch( line_num,
       "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
   else:
     return GetIntValue(
-      "matchadd('{0}', '\%{1}l\%{2}c\_.*\%{3}l\%{4}c')".format(
+      "matchadd('{0}', '\%{1}l\%{2}c\_.\\{{-}}\%{3}l\%{4}c')".format(
         group, line_num, column_num, line_end_num, column_end_num ) )
 
 
