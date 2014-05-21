@@ -6,11 +6,4 @@ before_install:
   - git submodule update --init --recursive
 install:
   - pip install -r python/test_requirements.txt --use-mirrors
-  - sudo apt-get install mono-devel
-compiler:
-  - gcc
-  - clang
 script: ./run_tests.sh
-env:
-  - USE_CLANG_COMPLETER="true"
-  - USE_CLANG_COMPLETER="false"
