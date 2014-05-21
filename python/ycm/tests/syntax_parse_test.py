@@ -32,25 +32,38 @@ def ContentsOfTestFile( test_file ):
 
 
 def KeywordsFromSyntaxListOutput_PythonSyntax_test():
-  eq_( set(['and', 'IndexError', 'elif', 'BytesWarning', 'ZeroDivisionError',
-            'ImportError', 'is', 'global', 'UnicodeTranslateError',
-            'GeneratorExit', 'BufferError', 'StopIteration', 'as',
-            'SystemError', 'UnicodeError', 'EnvironmentError', 'in', 'EOFError',
-            'LookupError', 'Exception', 'PendingDeprecationWarning', 'if',
-            'OSError', 'DeprecationWarning', 'raise', 'for',
-            'FloatingPointError', 'UnicodeWarning', 'VMSError', 'except',
-            'nonlocal', 'ReferenceError', 'NameError', 'pass', 'finally',
-            'Warning', 'UnboundLocalError', 'print', 'IOError',
-            'IndentationError', 'True', 'RuntimeError', 'FutureWarning',
-            'ImportWarning', 'SystemExit', 'None', 'return', 'StandardError',
-            'exec', 'ValueError', 'TabError', 'else', 'break', 'SyntaxError',
-            'UnicodeEncodeError', 'WindowsError', 'not', 'UnicodeDecodeError',
-            'with', 'class', 'KeyError', 'AssertionError', 'assert',
-            'TypeError', 'False', 'RuntimeWarning', 'KeyboardInterrupt',
-            'UserWarning', 'SyntaxWarning', 'yield', 'OverflowError', 'try',
-            'ArithmeticError', 'while', 'continue', 'del', 'MemoryError',
-            'NotImplementedError', 'BaseException', 'AttributeError', 'or',
-            'def', 'lambda', 'from', 'import']),
+  eq_( set(['bytearray', 'IndexError', 'all', 'help', 'vars',
+            'SyntaxError', 'global', 'elif', 'unicode', 'sorted', 'memoryview',
+            'isinstance', 'except', 'nonlocal', 'NameError', 'finally',
+            'BytesWarning', 'dict', 'IOError', 'pass', 'oct', 'match', 'bin',
+            'SystemExit', 'return', 'StandardError', 'format', 'TabError',
+            'break', 'next', 'not', 'UnicodeDecodeError', 'False',
+            'RuntimeWarning', 'list', 'iter', 'try', 'reload', 'Warning',
+            'round', 'dir', 'cmp', 'set', 'bytes', 'UnicodeTranslateError',
+            'intern', 'issubclass', 'yield', 'Ellipsis', 'hash', 'locals',
+            'BufferError', 'slice', 'for', 'FloatingPointError', 'sum',
+            'VMSError', 'getattr', 'abs', 'print', 'import', 'True',
+            'FutureWarning', 'ImportWarning', 'None', 'EOFError', 'len',
+            'frozenset', 'ord', 'super', 'raise', 'TypeError',
+            'KeyboardInterrupt', 'UserWarning', 'filter', 'range',
+            'staticmethod', 'SystemError', 'or', 'BaseException', 'pow',
+            'RuntimeError', 'float', 'MemoryError', 'StopIteration', 'globals',
+            'divmod', 'enumerate', 'apply', 'LookupError', 'open', 'basestring',
+            'from', 'UnicodeError', 'zip', 'hex', 'long', 'IndentationError',
+            'int', 'chr', '__import__', 'type', 'Exception', 'continue',
+            'tuple', 'reduce', 'reversed', 'else', 'assert',
+            'UnicodeEncodeError', 'input', 'with', 'hasattr', 'delattr',
+            'setattr', 'raw_input', 'PendingDeprecationWarning', 'compile',
+            'ArithmeticError', 'while', 'del', 'str', 'property', 'def', 'and',
+            'GeneratorExit', 'ImportError', 'xrange', 'is', 'EnvironmentError',
+            'KeyError', 'coerce', 'SyntaxWarning', 'file', 'in', 'unichr',
+            'ascii', 'any', 'as', 'if', 'OSError', 'DeprecationWarning', 'min',
+            'UnicodeWarning', 'execfile', 'id', 'complex', 'bool', 'ValueError',
+            'NotImplemented', 'map', 'exec', 'buffer', 'max', 'class', 'object',
+            'repr', 'callable', 'ZeroDivisionError', 'eval', '__debug__',
+            'ReferenceError', 'AssertionError', 'classmethod',
+            'UnboundLocalError', 'NotImplementedError', 'lambda',
+            'AttributeError', 'OverflowError', 'WindowsError'] ),
        syntax_parse._KeywordsFromSyntaxListOutput(
          ContentsOfTestFile( 'python_syntax' ) ) )
 
@@ -104,6 +117,16 @@ def KeywordsFromSyntaxListOutput_Basic_test():
 foogroup xxx foo bar
              zoo goo
              links to Statement"""
+         )
+     )
+
+
+def KeywordsFromSyntaxListOutput_Function_test():
+  eq_( set([ 'foo', 'bar', 'zoo', 'goo' ]),
+       syntax_parse._KeywordsFromSyntaxListOutput( """
+foogroup xxx foo bar
+             zoo goo
+             links to Function"""
          )
      )
 
