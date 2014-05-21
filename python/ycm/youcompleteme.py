@@ -123,7 +123,7 @@ class YouCompleteMe( object ):
           args.append('--keep_logfiles')
 
       self._server_popen = utils.SafePopen( args, stdout = PIPE, stderr = PIPE)
-      BaseRequest.server_location = 'http://localhost:' + str( server_port )
+      BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
       BaseRequest.hmac_secret = hmac_secret
 
     self._NotifyUserIfServerCrashed()
