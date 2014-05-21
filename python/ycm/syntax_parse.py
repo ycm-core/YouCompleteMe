@@ -149,6 +149,7 @@ def _CreateInitialGroupMap():
   AddToGroupMap( 'Operator'   , statement_group )
   AddToGroupMap( 'Keyword'    , statement_group )
   AddToGroupMap( 'Exception'  , statement_group )
+  AddToGroupMap( 'Function'   , statement_group )
 
   AddToGroupMap( 'StorageClass', type_group )
   AddToGroupMap( 'Structure'   , type_group )
