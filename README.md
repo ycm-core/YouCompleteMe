@@ -471,9 +471,10 @@ Completer API.
 
 ### Diagnostic display
 
-YCM will display diagnostic notifications if you compiled YCM with Clang
-support. Since YCM continuously recompiles your file as you type, you'll get
-notified of errors and warnings in your file as fast as possible.
+YCM will display diagnostic notifications for C-family and C# languages if you
+compiled YCM with Clang and Omnisharp support, respectively. Since YCM continuously
+recompiles your file as you type, you'll get notified of errors and warnings
+in your file as fast as possible.
 
 Here are the various pieces of the diagnostic UI:
 
@@ -514,6 +515,15 @@ the display of the `locationlist` with a single key mapping is provided by
 another (very small) Vim plugin called [ListToggle][] (which also makes it
 possible to change the height of the `locationlist` window), also written by
 yours truly.
+
+#### C# Diagnostic Support
+Unlike the C-family diagnostic support, the C# diagnostic support is not a full
+compile run. Instead, it is a simple syntax check of the current file _only_.
+The `:YcmForceCompileAndDiagnostics` command also is only a simple syntax check,
+_not_ a compile. This means that only syntax errors will be displayed, and not
+semantic errors. For example, omitting the semicolon at the end of statement
+will be displayed as a diagnostic error, but using a nonexistence class or
+variable will not be.
 
 #### Diagnostic highlighting groups
 
@@ -637,7 +647,8 @@ Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
 jumps to its definition if possible; if the definition is not accessible from
-the current translation unit, jumps to the symbol's declaration.
+the current translation unit, jumps to the symbol's declaration. For C#,
+implementations are also considered and preferred.
 
 Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
@@ -684,6 +695,30 @@ Supported in filetypes: `cs`
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
+
+Supported in filetypes: `cs`
+
+### The `ReloadSolution` subcommand
+
+Instruct the Omnisharp server to clear its cache and reload all files from disk.
+This is useful when files are added, removed, or renamed in the solution, files
+are changed outside of Vim, or whenever Omnisharp cache is out-of-sync.
+
+Supported in filetypes: `cs`
+
+### The `GoToImplemention` subcommand
+
+Looks up the symbol under the cursor and jumps to its implementation (i.e.
+non-interface). If there are multiple implementations, instead provides a list
+of implementations to choose from.
+
+Supported in filetypes: `cs`
+
+### The `GoToImplementationElseDeclaration` subcommand
+
+Looks up the symbol under the cursor and jumps to its implementation if one,
+else jump to its declaration. If there are multiple implementations, instead
+provides a list of implementations to choose from.
 
 Supported in filetypes: `cs`
 
@@ -1106,15 +1141,6 @@ Note that `debug` is _very_ verbose.
 Default: `info`
 
     let g:ycm_server_log_level = 'info'
-
-### The `g:ycm_csharp_server_port` option
-
-The port number (on `localhost`) on which the OmniSharp server should be
-started.
-
-Default: `2000`
-
-    let g:ycm_csharp_server_port = 2000
 
 ### The `g:ycm_auto_start_csharp_server` option
 
