@@ -196,8 +196,11 @@ class YouCompleteMe( object ):
 
   def GetDefinedSubcommands( self ):
     if self._IsServerAlive():
-      return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                            'defined_subcommands' )
+      try:
+        return BaseRequest.PostDataToHandler( BuildRequestData(),
+                                             'defined_subcommands' )
+      except ServerError:
+        return []
     else:
       return []
 
