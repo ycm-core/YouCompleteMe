@@ -522,7 +522,7 @@ compile run. Instead, it is a simple syntax check of the current file _only_.
 The `:YcmForceCompileAndDiagnostics` command also is only a simple syntax check,
 _not_ a compile. This means that only syntax errors will be displayed, and not
 semantic errors. For example, omitting the semicolon at the end of statement
-will be displayed as a diagnostic error, but using a nonexistence class or
+will be displayed as a diagnostic error, but using a nonexistent class or
 variable will not be.
 
 #### Diagnostic highlighting groups
