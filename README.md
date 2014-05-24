@@ -829,6 +829,7 @@ Default: `[see next line]`
           \ 'text' : 1,
           \ 'vimwiki' : 1,
           \ 'pandoc' : 1,
+          \ 'infolog' : 1,
           \ 'mail' : 1
           \}
 
