@@ -876,6 +876,24 @@ Default: `1`
 
     let g:ycm_show_diagnostics_ui = 1
 
+### The `g:ycm_diagnostic_ignore_files` option
+
+Use this option to specify files that do not display diagnostic UI. It's a list
+of regular-expression patterns. The full paths of files are matched against
+these patterns, and the matches are case sensitive. Use `\c` to specify case
+insensitive patterns. For example, if you do not want to diagnose the files in
+'/usr/include' and all the C header files, set this in ~/.vimrc:
+
+    let g:ycm_diagnostic_ignore_files = ['\m^/usr/include/',  '\m\c\.h$']
+
+This option is part of the Syntastic compatibility layer; if the option is not
+set, YCM will fall back to the value of the `g:syntastic_ignore_files` option
+before using this option's default.
+
+Default: `[]`
+
+    let g:ycm_diagnostic_ignore_files = []
+
 ### The `g:ycm_error_symbol` option
 
 YCM will use the value of this option as the symbol for errors in the Vim
