@@ -106,6 +106,6 @@ class OmniCompleter( Completer ):
 
 
 def _BuildRequestDataSubstitute():
-  return RequestWrap( BuildRequestData( include_buffer_data = False ) )
+  return RequestWrap( BuildRequestData() )
 
 
