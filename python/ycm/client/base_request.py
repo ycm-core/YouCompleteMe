@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import vim
 import requests
 import urlparse
 from base64 import b64decode, b64encode
@@ -134,26 +133,18 @@ class BaseRequest( object ):
   hmac_secret = ''
 
 
-def BuildRequestData( start_column = None,
-                      query = None,
-                      include_buffer_data = True ):
-  if start_column is None:
-    start_column = 0
+def BuildRequestData( include_buffer_data = True ):
   line, column = vimsupport.CurrentLineAndColumn()
   filepath = vimsupport.GetCurrentBufferFilepath()
   request_data = {
     'filetypes': vimsupport.CurrentFiletypes(),
     'line_num': line + 1,
     'column_num': column + 1,
-    'start_column': start_column + 1,
-    'line_value': vim.current.line,
     'filepath': filepath
   }
 
   if include_buffer_data:
     request_data[ 'file_data' ] = vimsupport.GetUnsavedAndCurrentBufferData()
-  if query:
-    request_data[ 'query' ] = query
 
   return request_data
 

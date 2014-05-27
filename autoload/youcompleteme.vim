@@ -623,9 +623,9 @@ endfunction
 
 
 python << EOF
-def GetCompletions( query ):
+def GetCompletionsInner():
   request = ycm_state.GetCurrentCompletionRequest()
-  request.Start( query )
+  request.Start()
   while not request.Done():
     if bool( int( vim.eval( 'complete_check()' ) ) ):
       return { 'words' : [], 'refresh' : 'always'}
@@ -635,8 +635,8 @@ def GetCompletions( query ):
 EOF
 
 
-function! s:CompletionsForQuery( query )
-  py results = GetCompletions( vim.eval( 'a:query' ) )
+function! s:GetCompletions()
+  py results = GetCompletionsInner()
   let results = pyeval( 'results' )
   let s:searched_and_results_found = len( results.words ) != 0
   return results
@@ -669,7 +669,7 @@ function! youcompleteme#Complete( findstart, base )
     endif
     return pyeval( 'request.CompletionStartColumn()' )
   else
-    return s:CompletionsForQuery( a:base )
+    return s:GetCompletions()
   endif
 endfunction
 
@@ -680,7 +680,7 @@ function! youcompleteme#OmniComplete( findstart, base )
     py request = ycm_state.CreateCompletionRequest( force_semantic = True )
     return pyeval( 'request.CompletionStartColumn()' )
   else
-    return s:CompletionsForQuery( a:base )
+    return s:GetCompletions()
   endif
 endfunction
 

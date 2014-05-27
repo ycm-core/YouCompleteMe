@@ -21,6 +21,7 @@ import vim
 from ycm import vimsupport
 from ycmd import utils
 from ycmd import user_options_store
+from ycmd import request_wrap
 import ycm_client_support
 
 YCM_VAR_PREFIX = 'ycm_'
@@ -55,19 +56,8 @@ def LoadJsonDefaultsIntoVim():
 
 
 def CompletionStartColumn():
-  """Returns the 0-based index where the completion string should start. So if
-  the user enters:
-    foo.bar^
-  with the cursor being at the location of the caret, then the starting column
-  would be the index of the letter 'b'.
-  """
-
-  line = vim.current.line
-  start_column = vimsupport.CurrentColumn()
-
-  while start_column > 0 and utils.IsIdentifierChar( line[ start_column - 1 ] ):
-    start_column -= 1
-  return start_column
+  return ( request_wrap.CompletionStartColumn(
+      vim.current.line, vimsupport.CurrentColumn() + 1 ) - 1 )
 
 
 def CurrentIdentifierFinished():

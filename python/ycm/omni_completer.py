@@ -19,8 +19,8 @@
 
 import vim
 from ycm import vimsupport
-from ycm import base
 from ycmd.completers.completer import Completer
+from ycmd.request_wrap import RequestWrap
 from ycm.client.base_request import BuildRequestData
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
@@ -106,7 +106,6 @@ class OmniCompleter( Completer ):
 
 
 def _BuildRequestDataSubstitute():
-  return BuildRequestData( start_column = base.CompletionStartColumn(),
-                           include_buffer_data = False )
+  return RequestWrap( BuildRequestData( include_buffer_data = False ) )
 
 

@@ -26,8 +26,7 @@ class OmniCompletionRequest( CompletionRequest ):
     self._omni_completer = omni_completer
 
 
-  def Start( self, query ):
-    self.request_data[ 'query' ] = query
+  def Start( self ):
     self._results = self._omni_completer.ComputeCandidates( self.request_data )
 
 

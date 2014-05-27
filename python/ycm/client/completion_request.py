@@ -32,7 +32,7 @@ class CompletionRequest( BaseRequest ):
     self._completion_start_column = base.CompletionStartColumn()
 
     # This field is also used by the omni_completion_request subclass
-    self.request_data = BuildRequestData( self._completion_start_column )
+    self.request_data = BuildRequestData()
     if extra_data:
       self.request_data.update( extra_data )
 
@@ -41,8 +41,7 @@ class CompletionRequest( BaseRequest ):
     return self._completion_start_column
 
 
-  def Start( self, query ):
-    self.request_data[ 'query' ] = query
+  def Start( self ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
                                                          'completions',
                                                          TIMEOUT_SECONDS )
