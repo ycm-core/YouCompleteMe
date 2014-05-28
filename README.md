@@ -1654,7 +1654,7 @@ landed in Vim 7.3.584 (and a few commits before that).
 ### I get annoying messages in Vim's status area when I type
 
 If you're referring to the `User defined completion <bla bla> back at original`
-and similar, then just update to Vim 7.4.314 and they'll go away.
+and similar, then just update to Vim 7.4.314 (or later) and they'll go away.
 
 ### Nasty bugs happen if I have the `vim-autoclose` plugin installed
 
