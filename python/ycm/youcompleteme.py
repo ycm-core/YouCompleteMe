@@ -26,6 +26,7 @@ import base64
 from subprocess import PIPE
 from ycm import vimsupport
 from ycmd import utils
+from ycmd.request_wrap import RequestWrap
 from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
@@ -80,8 +81,8 @@ class YouCompleteMe( object ):
     self._user_notified_about_crash = False
     self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
-    self._latest_completion_request = None
     self._latest_file_parse_request = None
+    self._latest_completion_request = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -128,14 +129,14 @@ class YouCompleteMe( object ):
 
     self._NotifyUserIfServerCrashed()
 
-  def _IsServerAlive( self ):
+  def IsServerAlive( self ):
     returncode = self._server_popen.poll()
     # When the process hasn't finished yet, poll() returns None.
     return returncode is None
 
 
   def _NotifyUserIfServerCrashed( self ):
-    if self._user_notified_about_crash or self._IsServerAlive():
+    if self._user_notified_about_crash or self.IsServerAlive():
       return
     self._user_notified_about_crash = True
     if self._server_stderr:
@@ -158,7 +159,7 @@ class YouCompleteMe( object ):
 
 
   def _ServerCleanup( self ):
-    if self._IsServerAlive():
+    if self.IsServerAlive():
       self._server_popen.terminate()
 
 
@@ -170,32 +171,29 @@ class YouCompleteMe( object ):
 
 
   def CreateCompletionRequest( self, force_semantic = False ):
-    # We have to store a reference to the newly created CompletionRequest
-    # because VimScript can't store a reference to a Python object across
-    # function calls... Thus we need to keep this request somewhere.
+    request_data = BuildRequestData()
     if ( not self.NativeFiletypeCompletionAvailable() and
-         self.CurrentFiletypeCompletionEnabled() and
-         self._omnicomp.ShouldUseNow() ):
-      self._latest_completion_request = OmniCompletionRequest( self._omnicomp )
-    else:
-      extra_data = {}
-      self._AddExtraConfDataIfNeeded( extra_data )
-      if force_semantic:
-        extra_data[ 'force_semantic' ] = True
+         self.CurrentFiletypeCompletionEnabled() ):
+      wrapped_request_data = RequestWrap( request_data )
+      if self._omnicomp.ShouldUseNow( wrapped_request_data ):
+        self._latest_completion_request = OmniCompletionRequest(
+            self._omnicomp, wrapped_request_data )
+        return self._latest_completion_request
 
-      self._latest_completion_request = ( CompletionRequest( extra_data )
-                                          if self._IsServerAlive() else
-                                          None )
+    self._AddExtraConfDataIfNeeded( request_data )
+    if force_semantic:
+      request_data[ 'force_semantic' ] = True
+    self._latest_completion_request = CompletionRequest( request_data )
     return self._latest_completion_request
 
 
   def SendCommandRequest( self, arguments, completer ):
-    if self._IsServerAlive():
+    if self.IsServerAlive():
       return SendCommandRequest( arguments, completer )
 
 
   def GetDefinedSubcommands( self ):
-    if self._IsServerAlive():
+    if self.IsServerAlive():
       try:
         return BaseRequest.PostDataToHandler( BuildRequestData(),
                                              'defined_subcommands' )
@@ -226,7 +224,7 @@ class YouCompleteMe( object ):
   def OnFileReadyToParse( self ):
     self._omnicomp.OnFileReadyToParse( None )
 
-    if not self._IsServerAlive():
+    if not self.IsServerAlive():
       self._NotifyUserIfServerCrashed()
 
     extra_data = {}
@@ -240,14 +238,14 @@ class YouCompleteMe( object ):
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
-    if not self._IsServerAlive():
+    if not self.IsServerAlive():
       return
     SendEventNotificationAsync( 'BufferUnload',
                                 { 'unloaded_buffer': deleted_buffer_file } )
 
 
   def OnBufferVisit( self ):
-    if not self._IsServerAlive():
+    if not self.IsServerAlive():
       return
     extra_data = {}
     _AddUltiSnipsDataIfNeeded( extra_data )
@@ -255,7 +253,7 @@ class YouCompleteMe( object ):
 
 
   def OnInsertLeave( self ):
-    if not self._IsServerAlive():
+    if not self.IsServerAlive():
       return
     SendEventNotificationAsync( 'InsertLeave' )
 
@@ -269,7 +267,7 @@ class YouCompleteMe( object ):
 
 
   def OnCurrentIdentifierFinished( self ):
-    if not self._IsServerAlive():
+    if not self.IsServerAlive():
       return
     SendEventNotificationAsync( 'CurrentIdentifierFinished' )
 
@@ -302,7 +300,7 @@ class YouCompleteMe( object ):
 
 
   def ShowDetailedDiagnostic( self ):
-    if not self._IsServerAlive():
+    if not self.IsServerAlive():
       return
     try:
       debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
@@ -314,7 +312,7 @@ class YouCompleteMe( object ):
 
 
   def DebugInfo( self ):
-    if self._IsServerAlive():
+    if self.IsServerAlive():
       debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
                                                   'debug_info' )
     else:

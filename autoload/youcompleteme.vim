@@ -663,11 +663,11 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
 
-    py request = ycm_state.CreateCompletionRequest()
-    if !pyeval( 'bool(request)' )
+    if !pyeval( 'ycm_state.IsServerAlive()' )
       return -2
     endif
-    return pyeval( 'request.CompletionStartColumn()' )
+    py ycm_state.CreateCompletionRequest()
+    return pyeval( 'base.CompletionStartColumn()' )
   else
     return s:GetCompletions()
   endif
@@ -676,9 +676,12 @@ endfunction
 
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
+    if !pyeval( 'ycm_state.IsServerAlive()' )
+      return -2
+    endif
     let s:omnifunc_mode = 1
-    py request = ycm_state.CreateCompletionRequest( force_semantic = True )
-    return pyeval( 'request.CompletionStartColumn()' )
+    py ycm_state.CreateCompletionRequest( force_semantic = True )
+    return pyeval( 'base.CompletionStartColumn()' )
   else
     return s:GetCompletions()
   endif

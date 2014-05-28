@@ -17,28 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm import base
 from ycm import vimsupport
 from ycmd.utils import ToUtf8IfNeeded
-from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                      JsonFromFuture )
+from ycm.client.base_request import BaseRequest, JsonFromFuture
 
 TIMEOUT_SECONDS = 0.5
 
 class CompletionRequest( BaseRequest ):
-  def __init__( self, extra_data = None ):
+  def __init__( self, request_data ):
     super( CompletionRequest, self ).__init__()
-
-    self._completion_start_column = base.CompletionStartColumn()
-
-    # This field is also used by the omni_completion_request subclass
-    self.request_data = BuildRequestData()
-    if extra_data:
-      self.request_data.update( extra_data )
-
-
-  def CompletionStartColumn( self ):
-    return self._completion_start_column
+    self.request_data = request_data
 
 
   def Start( self ):
