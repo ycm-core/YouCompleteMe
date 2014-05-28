@@ -109,6 +109,7 @@ function! s:SetUpPython()
   py base.LoadJsonDefaultsIntoVim()
   py from ycmd import user_options_store
   py user_options_store.SetAll( base.BuildServerConf() )
+  py from ycm import vimsupport
 
   if !pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
@@ -283,16 +284,10 @@ function! s:SetUpCpoptions()
   set cpoptions+=B
 
   " This prevents the display of "Pattern not found" & similar messages during
-  " completion.
-  " Patch: https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8
-  " At the time of writing, the patch hasn't been merged into Vim upstream, but
-  " will at some point.
-  " TODO: Check the Vim version (when patch lands) instead of doing try-catch
-  " here.
-  try
+  " completion. This is only available since Vim 7.4.314
+  if pyeval( 'vimsupport.VimVersionAtLeast("7.4.314")' )
     set shortmess+=c
-  catch
-  endtry
+  endif
 endfunction
 
 
