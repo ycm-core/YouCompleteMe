@@ -21,8 +21,8 @@ from ycm.client.completion_request import CompletionRequest
 
 
 class OmniCompletionRequest( CompletionRequest ):
-  def __init__( self, omni_completer ):
-    super( OmniCompletionRequest, self ).__init__()
+  def __init__( self, omni_completer, request_data ):
+    super( OmniCompletionRequest, self ). __init__( request_data )
     self._omni_completer = omni_completer
 
 
