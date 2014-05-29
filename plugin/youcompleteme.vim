@@ -140,6 +140,10 @@ let g:ycm_show_diagnostics_ui =
       \ get( g:, 'ycm_show_diagnostics_ui',
       \ get( g:, 'ycm_register_as_syntastic_checker', 1 ) )
 
+let g:ycm_diagnostic_ignore_files =
+      \ get( g:, 'ycm_diagnostic_ignore_files',
+      \ get( g:, 'syntastic_ignore_files', [] ) )
+
 let g:ycm_enable_diagnostic_signs =
       \ get( g:, 'ycm_enable_diagnostic_signs',
       \ get( g:, 'syntastic_enable_signs', 1 ) )

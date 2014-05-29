@@ -262,6 +262,15 @@ function! s:DiagnosticUiSupportedForCurrentFiletype()
   return get( s:diagnostic_ui_filetypes, &filetype, 0 )
 endfunction
 
+function! s:DiagnosticUiSkip()
+  let fname = expand('%')
+  for pat in g:ycm_diagnostic_ignore_files
+    if fname =~# pat
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
 
 function! s:AllowedToCompleteInCurrentFile()
   if empty( &filetype ) ||
@@ -529,6 +538,7 @@ endfunction
 function! s:UpdateDiagnosticNotifications()
   let should_display_diagnostics = g:ycm_show_diagnostics_ui &&
         \ s:DiagnosticUiSupportedForCurrentFiletype() &&
+        \ !s:DiagnosticUiSkip() &&
         \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
 
   if !should_display_diagnostics
