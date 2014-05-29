@@ -137,7 +137,6 @@ def BuildRequestData( include_buffer_data = True ):
   line, column = vimsupport.CurrentLineAndColumn()
   filepath = vimsupport.GetCurrentBufferFilepath()
   request_data = {
-    'filetypes': vimsupport.CurrentFiletypes(),
     'line_num': line + 1,
     'column_num': column + 1,
     'filepath': filepath
