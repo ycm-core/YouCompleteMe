@@ -206,9 +206,16 @@ def ConvertDiagnosticsToQfList( diagnostics ):
     # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
     # them to be 1-based.
     location = diagnostic[ 'location' ]
+    line_num = location[ 'line_num' ] + 1
+
+    # libclang can give us diagnostics that point "outside" the file; Vim borks
+    # on these.
+    if line_num < 1:
+      line_num = 1
+
     return {
       'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
-      'lnum'  : location[ 'line_num' ] + 1,
+      'lnum'  : line_num,
       'col'   : location[ 'column_num' ] + 1,
       'text'  : ToUtf8IfNeeded( diagnostic[ 'text' ] ),
       'type'  : diagnostic[ 'kind' ],
