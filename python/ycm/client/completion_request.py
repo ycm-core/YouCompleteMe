@@ -43,8 +43,8 @@ class CompletionRequest( BaseRequest ):
     if not self._response_future:
       return []
     try:
-      return [ _ConvertCompletionDataToVimData( x )
-               for x in JsonFromFuture( self._response_future ) ]
+      return _ConvertCompletionResponseToVimDatas(
+          JsonFromFuture( self._response_future ) )
     except Exception as e:
       vimsupport.PostVimMessage( str( e ) )
     return []
@@ -67,3 +67,8 @@ def _ConvertCompletionDataToVimData( completion_data ):
     vim_data[ 'info' ] = ToUtf8IfNeeded( completion_data[ 'detailed_info' ] )
 
   return vim_data
+
+
+def _ConvertCompletionResponseToVimDatas( response_data ):
+  return [ _ConvertCompletionDataToVimData( x )
+           for x in response_data[ 'completions' ] ]
