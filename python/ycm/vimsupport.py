@@ -218,7 +218,7 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'lnum'  : line_num,
       'col'   : location[ 'column_num' ] + 1,
       'text'  : ToUtf8IfNeeded( diagnostic[ 'text' ] ),
-      'type'  : diagnostic[ 'kind' ],
+      'type'  : diagnostic[ 'kind' ][ 0 ],
       'valid' : 1
     }
 

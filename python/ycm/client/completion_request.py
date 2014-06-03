@@ -62,7 +62,8 @@ def _ConvertCompletionDataToVimData( completion_data ):
   if 'extra_menu_info' in completion_data:
     vim_data[ 'menu' ] = ToUtf8IfNeeded( completion_data[ 'extra_menu_info' ] )
   if 'kind' in completion_data:
-    vim_data[ 'kind' ] = ToUtf8IfNeeded( completion_data[ 'kind' ] )
+    vim_data[ 'kind' ] = ToUtf8IfNeeded(
+        completion_data[ 'kind' ] )[ 0 ].lower()
   if 'detailed_info' in completion_data:
     vim_data[ 'info' ] = ToUtf8IfNeeded( completion_data[ 'detailed_info' ] )
 
