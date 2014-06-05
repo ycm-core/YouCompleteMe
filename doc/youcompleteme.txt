@@ -562,7 +562,7 @@ C# semantic completion ~
 YCM uses OmniSharp [5] to provide semantic completion for C#. It's used as a
 git subrepo. If you're installing YCM with Vundle (which is the recommended
 way) then Vundle will make sure that the subrepo is checked out when you do
-':PluginChange reference of `Bundle` to `Plugin` in the docsInstall'. If you're installing YCM by hand, then you need to run 'git
+':PluginInstall'. If you're installing YCM by hand, then you need to run 'git
 submodule update --init --recursive' when you're checking out the YCM
 repository.
 
