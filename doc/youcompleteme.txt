@@ -332,7 +332,7 @@ process.
    get a version of Vim with Python support.
 
 2. **Install YCM** with Vundle [11] (or Pathogen [16], but Vundle is a
-   better idea). With Vundle, this would mean adding a "Bundle
+   better idea). With Vundle, this would mean adding a "Plugin
    'Valloric/YouCompleteMe'" line to your vimrc [17].
 
    If you don't install YCM with Vundle, make sure you have run 'git
@@ -547,7 +547,7 @@ YCM uses Jedi [4] to power its semantic completion for Python. This should
 "just work" without any configuration from the user. You do NOT need to install
 Jedi yourself; YCM uses it as a git subrepo. If you're installing YCM with
 Vundle (which is the recommended way) then Vundle will make sure that the
-subrepo is checked out when you do ':BundleInstall'. If you're installing YCM
+subrepo is checked out when you do ':PluginInstall'. If you're installing YCM
 by hand, then you need to run 'git submodule update --init --recursive' when
 you're checking out the YCM repository. That's it.
 
@@ -562,7 +562,7 @@ C# semantic completion ~
 YCM uses OmniSharp [5] to provide semantic completion for C#. It's used as a
 git subrepo. If you're installing YCM with Vundle (which is the recommended
 way) then Vundle will make sure that the subrepo is checked out when you do
-':BundleInstall'. If you're installing YCM by hand, then you need to run 'git
+':PluginInstall'. If you're installing YCM by hand, then you need to run 'git
 submodule update --init --recursive' when you're checking out the YCM
 repository.
 
