@@ -140,8 +140,10 @@ def UnplaceAllSignsInBuffer( buffer_number ):
 
 
 def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
-  sign_name = 'YcmError' if is_error else 'YcmWarning'
-  vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
+    if  line_num < 1:
+        return
+    sign_name = 'YcmError' if is_error else 'YcmWarning'
+    vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
     sign_id, line_num, sign_name, buffer_num ) )
 
 
