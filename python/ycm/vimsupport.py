@@ -140,6 +140,11 @@ def UnplaceAllSignsInBuffer( buffer_number ):
 
 
 def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
+  # libclang can give us diagnostics that point "outside" the file; Vim borks
+  # on these.
+  if line_num < 1:
+    line_num = 1
+
   sign_name = 'YcmError' if is_error else 'YcmWarning'
   vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
     sign_id, line_num, sign_name, buffer_num ) )
