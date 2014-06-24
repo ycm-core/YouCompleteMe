@@ -706,7 +706,7 @@ are changed outside of Vim, or whenever Omnisharp cache is out-of-sync.
 
 Supported in filetypes: `cs`
 
-### The `GoToImplemention` subcommand
+### The `GoToImplementation` subcommand
 
 Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
