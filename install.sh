@@ -10,7 +10,7 @@ if [[ ! -f "$build_file" ]]; then
   exit 1
 fi
 
-$build_file "$@"
+"$build_file" "$@"
 
 # Remove old YCM libs if present so that YCM can start.
 rm -f python/*ycm_core.* &> /dev/null
