@@ -134,18 +134,7 @@ class BaseRequest( object ):
 
 
 def BuildRequestData( include_buffer_data = True ):
-  line, column = vimsupport.CurrentLineAndColumn()
-  filepath = vimsupport.GetCurrentBufferFilepath()
-  request_data = {
-    'line_num': line + 1,
-    'column_num': column + 1,
-    'filepath': filepath
-  }
-
-  if include_buffer_data:
-    request_data[ 'file_data' ] = vimsupport.GetUnsavedAndCurrentBufferData()
-
-  return request_data
+  return vimsupport.BuildRequestData( include_buffer_data )
 
 
 def JsonFromFuture( future ):

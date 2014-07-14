@@ -812,6 +812,47 @@ endfunction
 command! YcmDiags call s:ShowDiagnostics()
 
 
+function youcompleteme#GetCurrentBufferFilepath()
+  let filepath = expand( '%:p' )
+
+  if empty( filepath )
+    " Buffers that have just been created by a command like :enew don't have
+    " any buffer name so we use the buffer number for that.
+    let filepath = getcwd() . '/' . bufnr( '%' )
+  endif
+
+  return filepath
+endfunction
+
+
+function youcompleteme#BuildRequestData( include_buffer_data )
+  let pos = getpos( '.' )
+  let filepath = youcompleteme#GetCurrentBufferFilepath()
+
+  let data = {
+        \ 'line_num': pos[ 1 ],
+        \ 'column_num': pos[ 2 ],
+        \ 'filepath': filepath
+        \ }
+
+  if a:include_buffer_data
+    let data.file_data = s:GetUnsavedAndCurrentBufferData( filepath )
+  endif
+
+  return data
+endfunction
+
+
+function s:GetUnsavedAndCurrentBufferData( filepath )
+  let file_data = {}
+  let file_data[ a:filepath ] = {
+        \ 'filetypes': split( &filetype, ',' ),
+        \ 'contents': join( getline( 1, '$' ), "\n" ),
+        \ }
+  return file_data
+endfunction
+
+
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
 unlet s:save_cpo
