@@ -75,8 +75,15 @@ class BaseRequest( object ):
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
-  def PostDataToHandlerAsync( data, handler, timeout = _DEFAULT_TIMEOUT_SEC ):
-    return BaseRequest._TalkToHandlerAsync( data, handler, 'POST', timeout )
+  def PostDataToHandlerAsync( data,
+                              handler,
+                              timeout = _DEFAULT_TIMEOUT_SEC,
+                              request = None ):
+    return BaseRequest._TalkToHandlerAsync( data,
+                                            handler,
+                                            'POST',
+                                            timeout,
+                                            request )
 
 
   # This returns a future! Use JsonFromFuture to get the value.
@@ -87,7 +94,12 @@ class BaseRequest( object ):
   def _TalkToHandlerAsync( data,
                            handler,
                            method,
-                           timeout = _DEFAULT_TIMEOUT_SEC ):
+                           timeout = _DEFAULT_TIMEOUT_SEC,
+                           request = None ):
+    def Callback( session, resp ):
+      if request:
+        vimsupport.PushMessage( 'ycmd_response_ready', request )
+
     def SendRequest( data, handler, method, timeout ):
       if method == 'POST':
         sent_data = ToUtf8Json( data )
@@ -95,23 +107,27 @@ class BaseRequest( object ):
             _BuildUri( handler ),
             data = sent_data,
             headers = BaseRequest._ExtraHeaders( sent_data ),
-            timeout = timeout )
+            timeout = timeout,
+            background_callback = Callback )
       if method == 'GET':
         return BaseRequest.session.get(
             _BuildUri( handler ),
             headers = BaseRequest._ExtraHeaders(),
-            timeout = timeout )
+            timeout = timeout,
+            background_callback = Callback )
 
     @retries( 5, delay = 0.5, backoff = 1.5 )
     def DelayedSendRequest( data, handler, method ):
       if method == 'POST':
         sent_data = ToUtf8Json( data )
-        return requests.post( _BuildUri( handler ),
+        resp = requests.post( _BuildUri( handler ),
                               data = sent_data,
                               headers = BaseRequest._ExtraHeaders( sent_data ) )
       if method == 'GET':
-        return requests.get( _BuildUri( handler ),
+        resp = requests.get( _BuildUri( handler ),
                              headers = BaseRequest._ExtraHeaders() )
+      Callback( None, resp )
+      return resp
 
     if not _CheckServerIsHealthyWithCache():
       return _EXECUTOR.submit( DelayedSendRequest, data, handler, method )

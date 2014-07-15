@@ -382,3 +382,11 @@ def BuildRequestData( include_buffer_data = True ):
   data[ 'line_num' ] = int( data[ 'line_num' ] )
   data[ 'column_num' ] = int( data[ 'column_num' ] )
   return data
+
+
+if int( vim.eval( 'has("neovim")' ) ):
+  def PushMessage( name, args ):
+    vim.push_message( name, args )
+else:
+  def PushMessage( name, args ):
+    pass

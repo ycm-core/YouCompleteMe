@@ -39,7 +39,8 @@ class EventNotification( BaseRequest ):
     request_data[ 'event_name' ] = self._event_name
 
     self._response_future = self.PostDataToHandlerAsync( request_data,
-                                                         'event_notification' )
+                                                         'event_notification',
+                                                         request = self )
 
 
   def Done( self ):
