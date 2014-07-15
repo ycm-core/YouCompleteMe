@@ -12,7 +12,7 @@ class NvimYcmAsyncHelper(object):
       self.base = self.script_context.base
 
 
-    def on_ycm_teardown( self, none ):
+    def on_plugin_teardown( self ):
       self.ycm_state.OnVimLeave()
 
 

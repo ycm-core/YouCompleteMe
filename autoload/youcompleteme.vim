@@ -344,9 +344,7 @@ endfunction
 
 
 function! s:OnVimLeave()
-  if s:is_nvim
-    call send_event( s:channel_id, 'ycm_teardown', 0 )
-  else
+  if !s:is_nvim
     py ycm_state.OnVimLeave()
   endif
 endfunction
