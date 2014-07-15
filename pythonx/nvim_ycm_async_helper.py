@@ -1,15 +1,18 @@
+from json import dumps
+
 class NvimYcmAsyncHelper(object):
-    def __init__(self, vim):
+    def __init__( self, vim ):
       self.vim = vim
       self.script_context = vim.script_context
       self.ycm_state = None
 
 
-    def on_ycm_setup(self, none):
+    def on_ycm_setup( self, none ):
       self.ycm_state = self.script_context.ycm_state
+      self.base = self.script_context.base
 
 
-    def on_ycm_teardown(self, none):
+    def on_ycm_teardown( self, none ):
       self.ycm_state.OnVimLeave()
 
 
@@ -21,8 +24,14 @@ class NvimYcmAsyncHelper(object):
         # Avoid sending big files back to nvim
         del request_data[ 'file_data' ]
 
-      if getattr( request, '_event_name', None ) == 'FileReadyToParse':
-        self.on_end_compilation( request_data, response_data )
+      if hasattr( request, '_event_name' ):
+        if request._event_name == 'FileReadyToParse':
+          self.ycm_state.UpdateDiagnosticInterface()
+      else:
+        # Completion response
+        results = self.base.AdjustCandidateInsertionText( response_data )
+        args = dumps( [ request_data, results ] )[ 1 : -1 ]
+        self.vim.eval( 'youcompleteme#EndCompletion({0})'.format( args ) )
 
 
     def on_buffer_visit( self, request_data ):
@@ -37,7 +46,7 @@ class NvimYcmAsyncHelper(object):
       self.ycm_state.OnFileReadyToParse( request_data )
 
     
-    def on_end_compilation( self, request_data, response_data ):
-      self.ycm_state.UpdateDiagnosticInterface()
-
-
+    def on_begin_completion( self, request_data ):
+      vim = self.vim
+      self.ycm_state.CreateCompletionRequest( request_data = request_data )
+      self.ycm_state._latest_completion_request.Start()

@@ -174,9 +174,15 @@ function! s:SetUpKeyMappings()
       let invoke_key = '<Nul>'
     endif
 
-    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
-    " candidate that vim selects by default
-    silent! exe 'inoremap <unique> ' . invoke_key .  ' <C-X><C-O><C-P>'
+    if s:is_nvim
+      silent! exe 'inoremap ' . invoke_key .
+            \     ' <C-R>=youcompleteme#BeginCompletion()<cr>'
+    else
+      " <c-x><c-o> trigger omni completion, <c-p> deselects the first
+      " completion candidate that vim selects by default
+      silent! exe 'inoremap <unique> ' . invoke_key .  ' <C-X><C-O><C-P>'
+    endif
+
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
@@ -464,7 +470,11 @@ function! s:OnCursorMovedInsertMode()
   endif
 
   if g:ycm_auto_trigger || s:omnifunc_mode
-    call s:InvokeCompletion()
+    if s:is_nvim
+      call youcompleteme#BeginCompletion()
+    else
+      call s:InvokeCompletion()
+    endif
   endif
 
   " We have to make sure we correctly leave omnifunc mode even when the user
@@ -900,6 +910,61 @@ function s:GetUnsavedAndCurrentBufferData( filepath )
         \ 'contents': join( getline( 1, '$' ), "\n" ),
         \ }
   return file_data
+endfunction
+ 
+
+let s:next_completion_id = 1
+let s:current_completion_id = 0
+
+
+function! youcompleteme#BeginCompletion()
+  let s:current_completion_id = s:next_completion_id
+  let s:next_completion_id += 1
+
+  let data = youcompleteme#BuildRequestData( 1 )
+  let data.id = s:current_completion_id
+  let data.position = s:GetCompletionPosition()
+
+  call send_event( s:channel_id, 'begin_completion', data ) 
+  return ''
+endfunction
+
+
+function! youcompleteme#EndCompletion( data, result )
+  if mode() != 'i'
+    " Not in insert mode, ignore
+    return
+  endif
+
+  let completion_id = a:data.id
+  if s:current_completion_id != completion_id
+    " Completion expired
+    return
+  endif
+
+  let completion_pos = a:data.position
+  let current_pos = s:GetCompletionPosition()
+  if current_pos[ 0 ] != completion_pos[ 0 ]
+        \    || current_pos[ 1 ] != completion_pos[ 1 ]
+    " Completion position changed 
+    return
+  endif
+
+  if empty( a:result )
+    return
+  endif
+
+  call complete( completion_pos[ 1 ], a:result )
+  " Deselect the first match
+  call feedkeys( "\<C-P>", 'n' )
+endfunction
+
+
+function! s:GetCompletionPosition()
+  " The completion position is the start of the current identifier 
+  let pos = searchpos( '\i\@!', 'bn', line( '.' ) )
+  let pos[ 1 ] += 1
+  return pos
 endfunction
 
 

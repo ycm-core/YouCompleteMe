@@ -170,8 +170,11 @@ class YouCompleteMe( object ):
     self._SetupServer()
 
 
-  def CreateCompletionRequest( self, force_semantic = False ):
-    request_data = BuildRequestData()
+  def CreateCompletionRequest( self,
+                               force_semantic = False,
+                               request_data = None ):
+    if not request_data:
+      request_data = BuildRequestData()
     if ( not self.NativeFiletypeCompletionAvailable() and
          self.CurrentFiletypeCompletionEnabled() ):
       wrapped_request_data = RequestWrap( request_data )
