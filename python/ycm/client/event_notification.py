@@ -23,6 +23,9 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                      JsonFromFuture )
 
 
+asked = False
+
+
 class EventNotification( BaseRequest ):
   def __init__( self, event_name, request_data, extra_data = None ):
     super( EventNotification, self ).__init__()
@@ -48,6 +51,8 @@ class EventNotification( BaseRequest ):
 
 
   def Response( self ):
+    global asked
+
     if self._cached_response:
       return self._cached_response
 
@@ -58,6 +63,8 @@ class EventNotification( BaseRequest ):
       try:
         self._cached_response = JsonFromFuture( self._response_future )
       except UnknownExtraConf as e:
+        if not asked:
+          asked = True
           if vimsupport.Confirm( str( e ) ):
             _LoadExtraConfFile( e.extra_conf_file )
           else:

@@ -18,6 +18,11 @@
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim
+ 
+let s:is_nvim = has( 'neovim' )
+if s:is_nvim
+  let s:channel_id = pyeval( 'vim.channel_id' )
+endif
 
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
@@ -120,6 +125,11 @@ function! s:SetUpPython()
 
   py from ycm.youcompleteme import YouCompleteMe
   py ycm_state = YouCompleteMe( user_options_store.GetAll() )
+
+  if s:is_nvim
+    call send_event( s:channel_id, 'ycm_setup', 0 )
+  endif
+
   return 1
 endfunction
 
@@ -285,7 +295,7 @@ function! s:SetUpCpoptions()
 
   " This prevents the display of "Pattern not found" & similar messages during
   " completion. This is only available since Vim 7.4.314
-  if pyeval( 'vimsupport.VimVersionAtLeast("7.4.314")' )
+  if !s:is_nvim && pyeval( 'vimsupport.VimVersionAtLeast("7.4.314")' )
     set shortmess+=c
   endif
 endfunction
@@ -328,7 +338,11 @@ endfunction
 
 
 function! s:OnVimLeave()
-  py ycm_state.OnVimLeave()
+  if s:is_nvim
+    call send_event( s:channel_id, 'ycm_teardown', 0 )
+  else
+    py ycm_state.OnVimLeave()
+  endif
 endfunction
 
 
@@ -344,7 +358,14 @@ function! s:OnBufferVisit()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
-  py ycm_state.OnBufferVisit()
+
+  if s:is_nvim
+    call send_event( s:channel_id,
+          \          'buffer_visit',
+          \          youcompleteme#BuildRequestData( 0 ) )
+  else
+    py ycm_state.OnBufferVisit()
+  endif
   call s:OnFileReadyToParse()
 endfunction
 
@@ -354,7 +375,11 @@ function! s:OnBufferUnload( deleted_buffer_file )
     return
   endif
 
-  py ycm_state.OnBufferUnload( vim.eval( 'a:deleted_buffer_file' ) )
+  if s:is_nvim
+    call send_event( s:channel_id, 'buffer_unload', a:deleted_buffer_file )
+  else
+    py ycm_state.OnBufferUnload( vim.eval( 'a:deleted_buffer_file' ) )
+  endif
 endfunction
 
 
@@ -373,15 +398,21 @@ function! s:OnFileReadyToParse()
   " happen for special buffers.
   call s:SetUpYcmChangedTick()
 
-  " Order is important here; we need to extract any done diagnostics before
-  " reparsing the file again. If we sent the new parse request first, then
-  " the response would always be pending when we called
-  " UpdateDiagnosticNotifications.
-  call s:UpdateDiagnosticNotifications()
+  if !s:is_nvim
+    " Order is important here; we need to extract any done diagnostics before
+    " reparsing the file again. If we sent the new parse request first, then
+    " the response would always be pending when we called
+    " UpdateDiagnosticNotifications.
+    call s:UpdateDiagnosticNotifications()
+  endif
 
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
-    py ycm_state.OnFileReadyToParse()
+    if s:is_nvim
+      call s:BeginCompilation()
+    else
+      py ycm_state.OnFileReadyToParse()
+    endif
   endif
   let b:ycm_changedtick.file_ready_to_parse = b:changedtick
 endfunction
@@ -410,7 +441,10 @@ function! s:OnCursorMovedInsertMode()
     return
   endif
 
-  py ycm_state.OnCursorMoved()
+  if !s:is_nvim
+    py ycm_state.OnCursorMoved()
+  endif
+
   call s:UpdateCursorMoved()
 
   " Basically, we need to only trigger the completion menu when the user has
@@ -459,7 +493,11 @@ function! s:OnInsertLeave()
 
   let s:omnifunc_mode = 0
   call s:OnFileReadyToParse()
-  py ycm_state.OnInsertLeave()
+
+  if !s:is_nvim
+    py ycm_state.OnCursorMoved()
+  endif
+
   if g:ycm_autoclose_preview_window_after_completion ||
         \ g:ycm_autoclose_preview_window_after_insertion
     call s:ClosePreviewWindowIfNeeded()
@@ -810,6 +848,18 @@ function! s:ShowDiagnostics()
 endfunction
 
 command! YcmDiags call s:ShowDiagnostics()
+
+
+function! s:BeginCompilation()
+  if b:changedtick == get(b:, 'last_changedtick', -1)
+    return
+  endif
+
+  let b:last_changedtick = b:changedtick
+  call send_event( s:channel_id,
+        \          'begin_compilation',
+        \          youcompleteme#BuildRequestData( 1 ) ) 
+endfunction
 
 
 function youcompleteme#GetCurrentBufferFilepath()
