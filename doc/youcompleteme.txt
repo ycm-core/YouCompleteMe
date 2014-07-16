@@ -38,7 +38,7 @@ Contents ~
   7. The |StopServer| subcommand
   8. The |RestartServer| subcommand
   9. The |ReloadSolution| subcommand
-  10. The |GoToImplemention| subcommand
+  10. The |GoToImplementation| subcommand
   11. The |GoToImplementationElseDeclaration| subcommand
  9. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
@@ -879,7 +879,7 @@ files are changed outside of Vim, or whenever Omnisharp cache is out-of-sync.
 Supported in filetypes: 'cs'
 
 -------------------------------------------------------------------------------
-The *GoToImplemention* subcommand
+The *GoToImplementation* subcommand
 
 Looks up the symbol under the cursor and jumps to its implementation (i.e. non-
 interface). If there are multiple implementations, instead provides a list of
