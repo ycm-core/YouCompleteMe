@@ -1030,6 +1030,9 @@ support that filetype.
 
 You can get the filetype of the current file in Vim with ':set ft?'.
 
+To disable the semantic completion engine for all filetypes, you can use '*'
+as a special wildcard filetype key: {'*': 1}.
+
 Default: '{}'
 >
   let g:ycm_filetype_specific_completion_to_disable = {}
