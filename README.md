@@ -386,8 +386,10 @@ needs different flags**. Hint: just replace the strings in the `flags` variable
 with compilation flags necessary for your project. That should be enough for 99%
 of projects.
 
-Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again, see the
-above linked example file.
+Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again,
+see the above linked example file. You can get CMake to generate this file for
+you by adding `set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )` to your project's
+`CMakeLists.txt` file (if using CMake).
 
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions.  When
