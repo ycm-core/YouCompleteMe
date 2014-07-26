@@ -21,7 +21,6 @@ set cpo&vim
 
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
-let s:searched_and_results_found = 0
 let s:omnifunc_mode = 0
 
 let s:old_cursor_position = []
@@ -518,11 +517,9 @@ function! s:ClosePreviewWindowIfNeeded()
     return
   endif
 
-  if s:searched_and_results_found
-    " This command does the actual closing of the preview window. If no preview
-    " window is shown, nothing happens.
-    pclose
-  endif
+  " This command does the actual closing of the preview window. If no preview
+  " window is shown, nothing happens.
+  pclose
 endfunction
 
 
@@ -633,7 +630,6 @@ EOF
 function! s:GetCompletions()
   py results = GetCompletionsInner()
   let results = pyeval( 'results' )
-  let s:searched_and_results_found = len( results.words ) != 0
   return results
 endfunction
 
