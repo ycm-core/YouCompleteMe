@@ -531,7 +531,7 @@ table {
 body {
   padding: 0px 0 20px 0px;
   margin: 0px;
-  font: 14px/1.5 "OpenSansRegular", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 16px/1.5 "OpenSansRegular", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #f0e7d5;
   font-weight: normal;
   background: #252525;
@@ -625,7 +625,7 @@ blockquote {
 code {
   font-family: Consolas, Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal, monospace;
   color: #efefef;
-  font-size: 14px;
+  font-size: 16px;
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   -o-border-radius: 2px;
