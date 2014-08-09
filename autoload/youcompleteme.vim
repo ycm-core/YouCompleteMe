@@ -18,6 +18,11 @@
 " This is basic vim plugin boilerplate
 let s:save_cpo = &cpo
 set cpo&vim
+ 
+let s:is_nvim = has( 'neovim' )
+if s:is_nvim
+  let s:channel_id = pyeval( 'vim.channel_id' )
+endif
 
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
@@ -119,6 +124,11 @@ function! s:SetUpPython()
 
   py from ycm.youcompleteme import YouCompleteMe
   py ycm_state = YouCompleteMe( user_options_store.GetAll() )
+
+  if s:is_nvim
+    call send_event( s:channel_id, 'ycm_setup', 0 )
+  endif
+
   return 1
 endfunction
 
@@ -163,9 +173,15 @@ function! s:SetUpKeyMappings()
       let invoke_key = '<Nul>'
     endif
 
-    " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
-    " candidate that vim selects by default
-    silent! exe 'inoremap <unique> ' . invoke_key .  ' <C-X><C-O><C-P>'
+    if s:is_nvim
+      silent! exe 'inoremap ' . invoke_key .
+            \     ' <C-R>=youcompleteme#BeginCompletion()<cr>'
+    else
+      " <c-x><c-o> trigger omni completion, <c-p> deselects the first
+      " completion candidate that vim selects by default
+      silent! exe 'inoremap <unique> ' . invoke_key .  ' <C-X><C-O><C-P>'
+    endif
+
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
@@ -284,7 +300,7 @@ function! s:SetUpCpoptions()
 
   " This prevents the display of "Pattern not found" & similar messages during
   " completion. This is only available since Vim 7.4.314
-  if pyeval( 'vimsupport.VimVersionAtLeast("7.4.314")' )
+  if !s:is_nvim && pyeval( 'vimsupport.VimVersionAtLeast("7.4.314")' )
     set shortmess+=c
   endif
 endfunction
@@ -327,7 +343,9 @@ endfunction
 
 
 function! s:OnVimLeave()
-  py ycm_state.OnVimLeave()
+  if !s:is_nvim
+    py ycm_state.OnVimLeave()
+  endif
 endfunction
 
 
@@ -343,7 +361,14 @@ function! s:OnBufferVisit()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
-  py ycm_state.OnBufferVisit()
+
+  if s:is_nvim
+    call send_event( s:channel_id,
+          \          'buffer_visit',
+          \          youcompleteme#BuildRequestData( 0 ) )
+  else
+    py ycm_state.OnBufferVisit()
+  endif
   call s:OnFileReadyToParse()
 endfunction
 
@@ -353,7 +378,11 @@ function! s:OnBufferUnload( deleted_buffer_file )
     return
   endif
 
-  py ycm_state.OnBufferUnload( vim.eval( 'a:deleted_buffer_file' ) )
+  if s:is_nvim
+    call send_event( s:channel_id, 'buffer_unload', a:deleted_buffer_file )
+  else
+    py ycm_state.OnBufferUnload( vim.eval( 'a:deleted_buffer_file' ) )
+  endif
 endfunction
 
 
@@ -372,15 +401,21 @@ function! s:OnFileReadyToParse()
   " happen for special buffers.
   call s:SetUpYcmChangedTick()
 
-  " Order is important here; we need to extract any done diagnostics before
-  " reparsing the file again. If we sent the new parse request first, then
-  " the response would always be pending when we called
-  " UpdateDiagnosticNotifications.
-  call s:UpdateDiagnosticNotifications()
+  if !s:is_nvim
+    " Order is important here; we need to extract any done diagnostics before
+    " reparsing the file again. If we sent the new parse request first, then
+    " the response would always be pending when we called
+    " UpdateDiagnosticNotifications.
+    call s:UpdateDiagnosticNotifications()
+  endif
 
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
-    py ycm_state.OnFileReadyToParse()
+    if s:is_nvim
+      call s:BeginCompilation()
+    else
+      py ycm_state.OnFileReadyToParse()
+    endif
   endif
   let b:ycm_changedtick.file_ready_to_parse = b:changedtick
 endfunction
@@ -409,7 +444,10 @@ function! s:OnCursorMovedInsertMode()
     return
   endif
 
-  py ycm_state.OnCursorMoved()
+  if !s:is_nvim
+    py ycm_state.OnCursorMoved()
+  endif
+
   call s:UpdateCursorMoved()
 
   " Basically, we need to only trigger the completion menu when the user has
@@ -429,7 +467,11 @@ function! s:OnCursorMovedInsertMode()
   endif
 
   if g:ycm_auto_trigger || s:omnifunc_mode
-    call s:InvokeCompletion()
+    if s:is_nvim
+      call youcompleteme#BeginCompletion()
+    else
+      call s:InvokeCompletion()
+    endif
   endif
 
   " We have to make sure we correctly leave omnifunc mode even when the user
@@ -458,7 +500,11 @@ function! s:OnInsertLeave()
 
   let s:omnifunc_mode = 0
   call s:OnFileReadyToParse()
-  py ycm_state.OnInsertLeave()
+
+  if !s:is_nvim
+    py ycm_state.OnCursorMoved()
+  endif
+
   if g:ycm_autoclose_preview_window_after_completion ||
         \ g:ycm_autoclose_preview_window_after_insertion
     call s:ClosePreviewWindowIfNeeded()
@@ -806,6 +852,114 @@ function! s:ShowDiagnostics()
 endfunction
 
 command! YcmDiags call s:ShowDiagnostics()
+
+
+function! s:BeginCompilation()
+  if b:changedtick == get(b:, 'last_changedtick', -1)
+    return
+  endif
+
+  let b:last_changedtick = b:changedtick
+  call send_event( s:channel_id,
+        \          'begin_compilation',
+        \          youcompleteme#BuildRequestData( 1 ) ) 
+endfunction
+
+
+function youcompleteme#GetCurrentBufferFilepath()
+  let filepath = expand( '%:p' )
+
+  if empty( filepath )
+    " Buffers that have just been created by a command like :enew don't have
+    " any buffer name so we use the buffer number for that.
+    let filepath = getcwd() . '/' . bufnr( '%' )
+  endif
+
+  return filepath
+endfunction
+
+
+function youcompleteme#BuildRequestData( include_buffer_data )
+  let pos = getpos( '.' )
+  let filepath = youcompleteme#GetCurrentBufferFilepath()
+
+  let data = {
+        \ 'line_num': pos[ 1 ],
+        \ 'column_num': pos[ 2 ],
+        \ 'filepath': filepath
+        \ }
+
+  if a:include_buffer_data
+    let data.file_data = s:GetUnsavedAndCurrentBufferData( filepath )
+  endif
+
+  return data
+endfunction
+
+
+function s:GetUnsavedAndCurrentBufferData( filepath )
+  let file_data = {}
+  let file_data[ a:filepath ] = {
+        \ 'filetypes': split( &filetype, ',' ),
+        \ 'contents': join( getline( 1, '$' ), "\n" ),
+        \ }
+  return file_data
+endfunction
+ 
+
+let s:next_completion_id = 1
+let s:current_completion_id = 0
+
+
+function! youcompleteme#BeginCompletion()
+  let s:current_completion_id = s:next_completion_id
+  let s:next_completion_id += 1
+
+  let data = youcompleteme#BuildRequestData( 1 )
+  let data.id = s:current_completion_id
+  let data.position = s:GetCompletionPosition()
+
+  call send_event( s:channel_id, 'begin_completion', data ) 
+  return ''
+endfunction
+
+
+function! youcompleteme#EndCompletion( data, result )
+  if mode() != 'i'
+    " Not in insert mode, ignore
+    return
+  endif
+
+  let completion_id = a:data.id
+  if s:current_completion_id != completion_id
+    " Completion expired
+    return
+  endif
+
+  let completion_pos = a:data.position
+  let current_pos = s:GetCompletionPosition()
+  if current_pos[ 0 ] != completion_pos[ 0 ]
+        \    || current_pos[ 1 ] != completion_pos[ 1 ]
+    " Completion position changed 
+    return
+  endif
+
+  if empty( a:result )
+    return
+  endif
+
+  call complete( completion_pos[ 1 ], a:result )
+  " Deselect the first match
+  call feedkeys( "\<C-P>", 'n' )
+endfunction
+
+
+function! s:GetCompletionPosition()
+  " The completion position is the start of the current identifier 
+  let pos = searchpos( '\i\@!', 'bn', line( '.' ) )
+  let pos[ 1 ] += 1
+  return pos
+endfunction
 
 
 " This is basic vim plugin boilerplate

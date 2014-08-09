@@ -32,7 +32,8 @@ class CompletionRequest( BaseRequest ):
   def Start( self ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
                                                          'completions',
-                                                         TIMEOUT_SECONDS )
+                                                         TIMEOUT_SECONDS,
+                                                         request = self )
 
 
   def Done( self ):

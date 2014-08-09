@@ -170,8 +170,11 @@ class YouCompleteMe( object ):
     self._SetupServer()
 
 
-  def CreateCompletionRequest( self, force_semantic = False ):
-    request_data = BuildRequestData()
+  def CreateCompletionRequest( self,
+                               force_semantic = False,
+                               request_data = None ):
+    if not request_data:
+      request_data = BuildRequestData()
     if ( not self.NativeFiletypeCompletionAvailable() and
          self.CurrentFiletypeCompletionEnabled() ):
       wrapped_request_data = RequestWrap( request_data )
@@ -221,11 +224,14 @@ class YouCompleteMe( object ):
              self.NativeFiletypeCompletionAvailable() )
 
 
-  def OnFileReadyToParse( self ):
+  def OnFileReadyToParse( self, request_data = None ):
     self._omnicomp.OnFileReadyToParse( None )
 
     if not self.IsServerAlive():
       self._NotifyUserIfServerCrashed()
+
+    if not request_data:
+      request_data = BuildRequestData()
 
     extra_data = {}
     self._AddTagsFilesIfNeeded( extra_data )
@@ -233,6 +239,7 @@ class YouCompleteMe( object ):
     self._AddExtraConfDataIfNeeded( extra_data )
 
     self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
+                                                          request_data,
                                                           extra_data )
     self._latest_file_parse_request.Start()
 
@@ -244,18 +251,22 @@ class YouCompleteMe( object ):
                                 { 'unloaded_buffer': deleted_buffer_file } )
 
 
-  def OnBufferVisit( self ):
+  def OnBufferVisit( self, request_data = None ):
     if not self.IsServerAlive():
       return
+    if not request_data:
+      request_data = BuildRequestData( False )
     extra_data = {}
     _AddUltiSnipsDataIfNeeded( extra_data )
-    SendEventNotificationAsync( 'BufferVisit', extra_data )
+    SendEventNotificationAsync( 'BufferVisit', request_data, extra_data )
 
 
-  def OnInsertLeave( self ):
+  def OnInsertLeave( self, request_data = None ):
     if not self.IsServerAlive():
       return
-    SendEventNotificationAsync( 'InsertLeave' )
+    if not request_data:
+      request_data = BuildRequestData( False )
+    SendEventNotificationAsync( 'InsertLeave', request_data )
 
 
   def OnCursorMoved( self ):
@@ -266,10 +277,12 @@ class YouCompleteMe( object ):
     self._ServerCleanup()
 
 
-  def OnCurrentIdentifierFinished( self ):
+  def OnCurrentIdentifierFinished( self, request_data = None ):
     if not self.IsServerAlive():
       return
-    SendEventNotificationAsync( 'CurrentIdentifierFinished' )
+    if not request_data:
+      request_data = BuildRequestData()
+    SendEventNotificationAsync( 'CurrentIdentifierFinished', request_data )
 
 
   def DiagnosticsForCurrentFileReady( self ):

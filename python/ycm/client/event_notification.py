@@ -23,22 +23,27 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                      JsonFromFuture )
 
 
+asked = False
+
+
 class EventNotification( BaseRequest ):
-  def __init__( self, event_name, extra_data = None ):
+  def __init__( self, event_name, request_data, extra_data = None ):
     super( EventNotification, self ).__init__()
+    self.request_data = request_data
     self._event_name = event_name
     self._extra_data = extra_data
     self._cached_response = None
 
 
   def Start( self ):
-    request_data = BuildRequestData()
+    request_data = dict( self.request_data )
     if self._extra_data:
       request_data.update( self._extra_data )
     request_data[ 'event_name' ] = self._event_name
 
     self._response_future = self.PostDataToHandlerAsync( request_data,
-                                                         'event_notification' )
+                                                         'event_notification',
+                                                         request = self )
 
 
   def Done( self ):
@@ -46,6 +51,8 @@ class EventNotification( BaseRequest ):
 
 
   def Response( self ):
+    global asked
+
     if self._cached_response:
       return self._cached_response
 
@@ -56,6 +63,8 @@ class EventNotification( BaseRequest ):
       try:
         self._cached_response = JsonFromFuture( self._response_future )
       except UnknownExtraConf as e:
+        if not asked:
+          asked = True
           if vimsupport.Confirm( str( e ) ):
             _LoadExtraConfFile( e.extra_conf_file )
           else:
@@ -66,8 +75,8 @@ class EventNotification( BaseRequest ):
     return self._cached_response if self._cached_response else []
 
 
-def SendEventNotificationAsync( event_name, extra_data = None ):
-  event = EventNotification( event_name, extra_data )
+def SendEventNotificationAsync( event_name, request_data, extra_data = None ):
+  event = EventNotification( event_name, request_data, extra_data )
   event.Start()
 
 def _LoadExtraConfFile( filepath ):

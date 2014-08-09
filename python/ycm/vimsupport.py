@@ -87,21 +87,6 @@ def BufferModified( buffer_object ):
   return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
 
-def GetUnsavedAndCurrentBufferData():
-  buffers_data = {}
-  for buffer_object in vim.buffers:
-    if not ( BufferModified( buffer_object ) or
-             buffer_object == vim.current.buffer ):
-      continue
-
-    buffers_data[ GetBufferFilepath( buffer_object ) ] = {
-      'contents': '\n'.join( buffer_object ),
-      'filetypes': FiletypesForBuffer( buffer_object )
-    }
-
-  return buffers_data
-
-
 def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
   return GetIntValue( u"bufnr('{0}', {1})".format(
       EscapeForVim( os.path.realpath( filename ) ),
@@ -109,7 +94,7 @@ def GetBufferNumberForFilename( filename, open_file_if_needed = True ):
 
 
 def GetCurrentBufferFilepath():
-  return GetBufferFilepath( vim.current.buffer )
+  return vim.eval( 'youcompleteme#GetCurrentBufferFilepath()' )
 
 
 def BufferIsVisible( buffer_number ):
@@ -117,14 +102,6 @@ def BufferIsVisible( buffer_number ):
     return False
   window_number = GetIntValue( "bufwinnr({0})".format( buffer_number ) )
   return window_number != -1
-
-
-def GetBufferFilepath( buffer_object ):
-  if buffer_object.name:
-    return buffer_object.name
-  # Buffers that have just been created by a command like :enew don't have any
-  # buffer name so we use the buffer number for that.
-  return os.path.join( os.getcwd(), str( buffer_object.number ) )
 
 
 # NOTE: This unplaces *all* signs in a buffer, not just the ones we placed. We
@@ -398,3 +375,18 @@ def GetBoolValue( variable ):
 def GetIntValue( variable ):
   return int( vim.eval( variable ) )
 
+
+def BuildRequestData( include_buffer_data = True ):
+  data = vim.eval( 'youcompleteme#BuildRequestData({0:d})'.format(
+      include_buffer_data ) )
+  data[ 'line_num' ] = int( data[ 'line_num' ] )
+  data[ 'column_num' ] = int( data[ 'column_num' ] )
+  return data
+
+
+if int( vim.eval( 'has("neovim")' ) ):
+  def PushMessage( name, args ):
+    vim.push_message( name, args )
+else:
+  def PushMessage( name, args ):
+    pass
