@@ -281,9 +281,9 @@ class YouCompleteMe( object ):
     if self.DiagnosticsForCurrentFileReady():
       diagnostics = self._latest_file_parse_request.Response()
       # We set the diagnostics request to None because we want to prevent
-      # Syntastic from repeatedly refreshing the buffer with the same diags.
-      # Setting this to None makes DiagnosticsForCurrentFileReady return False
-      # until the next request is created.
+      # repeated refreshing of the buffer with the same diags. Setting this to
+      # None makes DiagnosticsForCurrentFileReady return False until the next
+      # request is created.
       self._latest_file_parse_request = None
       if qflist_format:
         return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
