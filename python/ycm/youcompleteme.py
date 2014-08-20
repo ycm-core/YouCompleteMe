@@ -353,7 +353,11 @@ class YouCompleteMe( object ):
   def _AddTagsFilesIfNeeded( self, extra_data ):
     def GetTagFiles():
       tag_files = vim.eval( 'tagfiles()' )
-      current_working_directory = os.getcwd()
+      # getcwd() throws an exception when the CWD has been deleted.
+      try:
+        current_working_directory = os.getcwd()
+      except OSError:
+        return []
       return [ os.path.join( current_working_directory, x ) for x in tag_files ]
 
     if not self._user_options[ 'collect_identifiers_from_tags_files' ]:

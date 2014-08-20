@@ -19,6 +19,7 @@
 
 import vim
 import os
+import tempfile
 import json
 from ycmd.utils import ToUtf8IfNeeded
 from ycmd import user_options_store
@@ -123,8 +124,13 @@ def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
     return buffer_object.name
   # Buffers that have just been created by a command like :enew don't have any
-  # buffer name so we use the buffer number for that.
-  return os.path.join( os.getcwd(), str( buffer_object.number ) )
+  # buffer name so we use the buffer number for that. Also, os.getcwd() throws
+  # an exception when the CWD has been deleted so we handle that.
+  try:
+    folder_path = os.getcwd()
+  except OSError:
+    folder_path = tempfile.gettempdir()
+  return os.path.join( folder_path, str( buffer_object.number ) )
 
 
 # NOTE: This unplaces *all* signs in a buffer, not just the ones we placed. We
