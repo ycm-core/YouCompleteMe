@@ -129,7 +129,7 @@ class BaseRequest( object ):
     return headers
 
   session = FuturesSession( executor = _EXECUTOR )
-  server_location = 'http://localhost:6666'
+  server_location = ''
   hmac_secret = ''
 
 
