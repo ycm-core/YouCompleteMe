@@ -1670,7 +1670,13 @@ for bug reports and feature requests.
 ### I get an internal compiler error when installing
 
 This can be a problem on virtual servers with limited memory. A possible
-solution is to add more swap memory.
+solution is to add more swap memory. A more practical solution would be to force
+the build script to run only one compile job at a time. You can do this by
+setting the `YCM_CORES` environment variable to `1`. Example:
+
+```
+YCM_CORES=1 ./install.sh --clang-completer
+```
 
 ### I get weird errors when I press `Ctrl-C` in Vim
 
