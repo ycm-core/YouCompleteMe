@@ -414,8 +414,6 @@ out the YCM repository. That's it.
 
 But again, installing YCM with Vundle takes care of all of this for you.
 
-In the future expect to see features like go-to-definition for Python as well.
-
 ### C# semantic completion
 
 YCM uses [OmniSharp][] to provide semantic completion for C#. It's used as a git
