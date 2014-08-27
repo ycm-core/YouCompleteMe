@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2013  Google Inc.
 #
@@ -103,6 +104,11 @@ def AdjustCandidateInsertionText_DontTouchAbbr_test():
 def OverlapLength_Basic_test():
   eq_( 3, base.OverlapLength( 'foo bar', 'bar zoo' ) )
   eq_( 3, base.OverlapLength( 'foobar', 'barzoo' ) )
+
+
+def OverlapLength_BasicWithUnicode_test():
+  eq_( 3, base.OverlapLength( u'bar fäö', u'fäö bar' ) )
+  eq_( 3, base.OverlapLength( u'zoofäö', u'fäözoo' ) )
 
 
 def OverlapLength_OneCharOverlap_test():
