@@ -17,11 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-import vim
 from ycm import vimsupport
-from ycmd import utils
 from ycmd import user_options_store
 from ycmd import request_wrap
+from ycmd import identifier_utils
 import ycm_client_support
 
 YCM_VAR_PREFIX = 'ycm_'
@@ -57,7 +56,9 @@ def LoadJsonDefaultsIntoVim():
 
 def CompletionStartColumn():
   return ( request_wrap.CompletionStartColumn(
-      vim.current.line, vimsupport.CurrentColumn() + 1 ) - 1 )
+      vimsupport.CurrentLineContents(),
+      vimsupport.CurrentColumn() + 1,
+      vimsupport.CurrentFiletypes()[ 0 ] ) - 1 )
 
 
 def CurrentIdentifierFinished():
@@ -65,35 +66,27 @@ def CurrentIdentifierFinished():
   previous_char_index = current_column - 1
   if previous_char_index < 0:
     return True
-  line = vim.current.line
-  try:
-    previous_char = line[ previous_char_index ]
-  except IndexError:
-    return False
+  line = vimsupport.CurrentLineContents()
+  filetype = vimsupport.CurrentFiletypes()[ 0 ]
+  regex = identifier_utils.IdentifierRegexForFiletype( filetype )
 
-  if utils.IsIdentifierChar( previous_char ):
-    return False
-
-  if ( not utils.IsIdentifierChar( previous_char ) and
-       previous_char_index > 0 and
-       utils.IsIdentifierChar( line[ previous_char_index - 1 ] ) ):
-    return True
-  else:
-    return line[ : current_column ].isspace()
+  for match in regex.finditer( line ):
+    if match.end() == previous_char_index:
+      return True
+  # If the whole line is whitespace, that means the user probably finished an
+  # identifier on the previous line.
+  return line[ : current_column ].isspace()
 
 
 def LastEnteredCharIsIdentifierChar():
   current_column = vimsupport.CurrentColumn()
-  previous_char_index = current_column - 1
-  if previous_char_index < 0:
+  if current_column - 1 < 0:
     return False
-  line = vim.current.line
-  try:
-    previous_char = line[ previous_char_index ]
-  except IndexError:
-    return False
-
-  return utils.IsIdentifierChar( previous_char )
+  line = vimsupport.CurrentLineContents()
+  filetype = vimsupport.CurrentFiletypes()[ 0 ]
+  return (
+    identifier_utils.StartOfLongestIdentifierEndingAtIndex(
+        line, current_column, filetype ) != current_column )
 
 
 def AdjustCandidateInsertionText( candidates ):
@@ -178,7 +171,7 @@ def OverlapLength( left_string, right_string ):
       length += 1
 
 
-COMPATIBLE_WITH_CORE_VERSION = 11
+COMPATIBLE_WITH_CORE_VERSION = 12
 
 def CompatibleWithYcmCore():
   try:

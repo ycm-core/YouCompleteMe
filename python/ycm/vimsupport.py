@@ -51,6 +51,10 @@ def CurrentColumn():
   return vim.current.window.cursor[ 1 ]
 
 
+def CurrentLineContents():
+  return vim.current.line
+
+
 def TextAfterCursor():
   """Returns the text after CurrentColumn."""
   return vim.current.line[ CurrentColumn(): ]
