@@ -19,6 +19,7 @@
 
 import os
 from nose.tools import eq_
+from hamcrest import assert_that, has_items
 from ycm.test_utils import MockVimModule
 vim_mock = MockVimModule()
 from ycm import syntax_parse
@@ -99,16 +100,38 @@ def KeywordsFromSyntaxListOutput_CppSyntax_test():
 
 
 def KeywordsFromSyntaxListOutput_JavaSyntax_test():
-  eq_( set(['false', 'synchronized', 'int', 'abstract', 'float', 'private',
-            'char', 'catch', 'boolean', 'static', 'native', 'for', 'super',
-            'while', 'long', 'throw', 'strictfp', 'finally', 'continue',
-            'extends', 'volatile', 'if', 'public', 'match', 'do', 'return',
-            'void', 'enum', 'else', 'break', 'transient', 'new', 'interface',
-            'instanceof', 'byte', 'true', 'serializable', 'implements',
-            'assert', 'short', 'package', 'this', 'double', 'final', 'try',
-            'default', 'switch', 'protected', 'throws']),
+  eq_( set(['code', 'text', 'cols', 'datetime', 'disabled', 'shape', 'codetype',
+           'alt', 'compact', 'style', 'valuetype', 'short', 'finally',
+           'continue', 'extends', 'valign', 'match', 'bordercolor', 'do',
+           'return', 'rel', 'rules', 'void', 'nohref', 'abbr', 'background',
+           'scrolling', 'instanceof', 'name', 'summary', 'try', 'default',
+           'noshade', 'coords', 'dir', 'frame', 'usemap', 'ismap', 'static',
+           'hspace', 'vlink', 'for', 'selected', 'rev', 'vspace', 'content',
+           'method', 'version', 'volatile', 'above', 'new', 'charoff', 'public',
+           'alink', 'enum', 'codebase', 'if', 'noresize', 'interface',
+           'checked', 'byte', 'super', 'throw', 'src', 'language', 'package',
+           'standby', 'script', 'longdesc', 'maxlength', 'cellpadding',
+           'throws', 'tabindex', 'color', 'colspan', 'accesskey', 'float',
+           'while', 'private', 'height', 'boolean', 'wrap', 'prompt', 'nowrap',
+           'size', 'rows', 'span', 'clip', 'bgcolor', 'top', 'long', 'start',
+           'scope', 'scheme', 'type', 'final', 'lang', 'visibility', 'else',
+           'assert', 'transient', 'link', 'catch', 'true', 'serializable',
+           'target', 'lowsrc', 'this', 'double', 'align', 'value', 'cite',
+           'headers', 'below', 'protected', 'declare', 'classid', 'defer',
+           'false', 'synchronized', 'int', 'abstract', 'accept', 'hreflang',
+           'char', 'border', 'id', 'native', 'rowspan', 'charset', 'archive',
+           'strictfp', 'readonly', 'axis', 'cellspacing', 'profile', 'multiple',
+           'object', 'action', 'pagex', 'pagey', 'marginheight', 'data',
+           'class', 'frameborder', 'enctype', 'implements', 'break', 'gutter',
+           'url', 'clear', 'face', 'switch', 'marginwidth', 'width', 'left']),
        syntax_parse._KeywordsFromSyntaxListOutput(
          ContentsOfTestFile( 'java_syntax' ) ) )
+
+
+def KeywordsFromSyntaxListOutput_PhpSyntax_ContainsFunctions_test():
+  assert_that( syntax_parse._KeywordsFromSyntaxListOutput(
+                   ContentsOfTestFile( 'php_syntax' ) ),
+               has_items( 'array_change_key_case' ) )
 
 
 def KeywordsFromSyntaxListOutput_Basic_test():
@@ -129,6 +152,14 @@ foogroup xxx foo bar
              links to Function"""
          )
      )
+
+
+def KeywordsFromSyntaxListOutput_ContainedArgAllowed_test():
+  assert_that( syntax_parse._KeywordsFromSyntaxListOutput( """
+phpFunctions   xxx contained gzclose yaz_syntax html_entity_decode fbsql_read_blob png2wbmp mssql_init cpdf_set_title gztell fbsql_insert_id empty cpdf_restore mysql_field_type closelog swftext ldap_search curl_errno gmp_div_r mssql_data_seek getmyinode printer_draw_pie mcve_initconn ncurses_getmaxyx defined
+                   contained replace_child has_attributes specified insertdocument assign node_name hwstat addshape get_attribute_node html_dump_mem userlist
+                   links to Function""" ),
+              has_items( 'gzclose', 'userlist', 'ldap_search' ) )
 
 
 def KeywordsFromSyntaxListOutput_JunkIgnored_test():
@@ -281,5 +312,15 @@ def ExtractKeywordsFromGroup_KeywordAssignAndMiddle_test():
        syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
          'foo end=zoo((^^//)) transparent bar',
          'zoo goo',
+       ] ) )
+     )
+
+
+def ExtractKeywordsFromGroup_ContainedSyntaxArgAllowed_test():
+  eq_( ['foo', 'zoq', 'bar', 'goo', 'far' ],
+       syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
+         'contained foo zoq',
+         'contained bar goo',
+         'far',
        ] ) )
      )

@@ -56,6 +56,11 @@ SYNTAX_ARGUMENTS = set([
   'excludenl',
 ])
 
+# We want to parse lines starting with these args
+ALLOWED_SYNTAX_ARGUMENTS = set([
+  'contained',
+])
+
 # These are the parent groups from which we want to extract keywords
 ROOT_GROUPS = set([
   'Statement',
@@ -197,7 +202,8 @@ def _ExtractKeywordsFromGroup( group ):
       continue
 
     words = line.split()
-    if not words or words[ 0 ] in SYNTAX_ARGUMENTS:
+    if not words or ( words[ 0 ] in SYNTAX_ARGUMENTS and
+                      words[ 0 ] not in ALLOWED_SYNTAX_ARGUMENTS ):
       continue
 
     for word in words:
