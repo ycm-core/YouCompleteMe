@@ -62,6 +62,7 @@ ROOT_GROUPS = set([
   'Boolean',
   'Include',
   'Type',
+  'Identifier',
 ])
 
 
@@ -132,15 +133,17 @@ def _CreateInitialGroupMap():
     group_name_to_group[ name ] = new_group
     parent.children.append( new_group )
 
-  statement_group = SyntaxGroup( 'Statement' )
-  type_group      = SyntaxGroup( 'Type' )
+  statement_group  = SyntaxGroup( 'Statement' )
+  type_group       = SyntaxGroup( 'Type' )
+  identifier_group = SyntaxGroup( 'Identifier' )
 
   # See `:h group-name` for details on how the initial group hierarchy is built
   group_name_to_group = {
     'Statement': statement_group,
     'Type': type_group,
     'Boolean': SyntaxGroup( 'Boolean' ),
-    'Include': SyntaxGroup( 'Include' )
+    'Include': SyntaxGroup( 'Include' ),
+    'Identifier': identifier_group,
   }
 
   AddToGroupMap( 'Conditional', statement_group )
@@ -149,11 +152,12 @@ def _CreateInitialGroupMap():
   AddToGroupMap( 'Operator'   , statement_group )
   AddToGroupMap( 'Keyword'    , statement_group )
   AddToGroupMap( 'Exception'  , statement_group )
-  AddToGroupMap( 'Function'   , statement_group )
 
   AddToGroupMap( 'StorageClass', type_group )
   AddToGroupMap( 'Structure'   , type_group )
   AddToGroupMap( 'Typedef'     , type_group )
+
+  AddToGroupMap( 'Function', identifier_group )
 
   return group_name_to_group
 
