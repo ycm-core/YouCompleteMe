@@ -45,7 +45,9 @@ function! youcompleteme#Enable()
 
   call s:SetUpBackwardsCompatibility()
 
-  if !s:SetUpPython()
+  " This can be 0 if YCM libs are old or -1 if an exception occured while
+  " executing the function.
+  if s:SetUpPython() != 1
     return
   endif
 
@@ -91,7 +93,7 @@ function! youcompleteme#Enable()
 endfunction
 
 
-function! s:SetUpPython()
+function! s:SetUpPython() abort
   py import sys
   py import vim
   exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
