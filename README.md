@@ -70,6 +70,23 @@ engines in the future.
 You'll also find that YCM has filepath completers (try typing `./` in a file)
 and a completer that integrates with [UltiSnips][].
 
+NeoBundle super-quick installation
+----------------------------------
+
+Add the following after your NeoBundle initialisation:
+
+```VimL
+NeoBundle 'Valloric/YouCompleteMe', {
+     \ 'build' : {
+     \     'mac' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+     \     'unix' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+     \     'windows' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+     \     'cygwin' : './install.sh --clang-completer --system-libclang --omnisharp-completer'
+     \    }
+     \ }
+" Add or remove arguments to install.sh as necessary.
+" Additional steps might be necessary for Windows, as always. ;)
+```
 
 Mac OS X super-quick installation
 ---------------------------------
