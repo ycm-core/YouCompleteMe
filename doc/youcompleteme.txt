@@ -413,8 +413,8 @@ process.
    the other flags.
 
    Running the 'make' command will also place the 'libclang.[so|dylib]' in
-   the 'YouCompleteMe/python' folder for you if you compiled with clang
-   support (it needs to be there for YCM to work).
+   the 'YouCompleteMe/third_party/ycmd' folder for you if you compiled with
+   clang support (it needs to be there for YCM to work).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -526,7 +526,9 @@ compilation flags necessary for your project. That should be enough for 99% of
 projects.
 
 Yes, Clang's 'CompilationDatabase' system [20] is also supported. Again, see
-the above linked example file.
+the above linked example file. You can get CMake to generate this file for you
+by adding 'set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )' to your project's
+'CMakeLists.txt' file (if using CMake).
 
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions. When
@@ -552,8 +554,6 @@ by hand, then you need to run 'git submodule update --init --recursive' when
 you're checking out the YCM repository. That's it.
 
 But again, installing YCM with Vundle takes care of all of this for you.
-
-In the future expect to see features like go-to-definition for Python as well.
 
 -------------------------------------------------------------------------------
                                           *youcompleteme-c-semantic-completion*
@@ -1030,12 +1030,11 @@ support that filetype.
 
 You can get the filetype of the current file in Vim with ':set ft?'.
 
-To disable the semantic completion engine for all filetypes, you can use '*'
-as a special wildcard filetype key: {'*': 1}.
-
-Default: '{}'
+Default: '[see next line]'
 >
-  let g:ycm_filetype_specific_completion_to_disable = {}
+  let g:ycm_filetype_specific_completion_to_disable = {
+        \ 'gitcommit': 1
+        \}
 <
 -------------------------------------------------------------------------------
 The *g:ycm_show_diagnostics_ui* option
@@ -1568,6 +1567,12 @@ trigger. So when the user types 'foo.', the semantic engine will trigger and
 serve 'foo''s list of member functions and variables. Since C++ also has '->'
 listed as a trigger, the same thing would happen when the user typed 'foo->'.
 
+It's also possible to use a regular expression as a trigger. You have to prefix
+your trigger with 're!' to signify it's a regex trigger. For instance,
+'re!\w+\.' would only trigger after the '\w+\.' regex matches.
+
+NOTE: The regex syntax is **NOT** Vim's, it's Python's [25].
+
 Default: '[see next line]'
 >
   let g:ycm_semantic_triggers =  {
@@ -1577,7 +1582,8 @@ Default: '[see next line]'
     \   'cpp,objcpp' : ['->', '.', '::'],
     \   'perl' : ['->'],
     \   'php' : ['->', '::'],
-    \   'cs,java,javascript,d,vim,python,perl6,scala,vb,elixir,go' : ['.'],
+    \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+    \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
     \   'ruby' : ['.', '::'],
     \   'lua' : ['.', ':'],
     \   'erlang' : [':'],
@@ -1745,7 +1751,7 @@ I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting ~
 
 You should probably run 'brew rm python; brew install python' to get the latest
 fixes that should make YCM work with such a configuration. Also rebuild Macvim
-then. If you still get problems with this, see issue #18 [25] for suggestions.
+then. If you still get problems with this, see issue #18 [26] for suggestions.
 
 -------------------------------------------------------------------------------
       *youcompleteme-vim-segfaults-when-i-use-semantic-completer-in-ruby-files*
@@ -1830,7 +1836,7 @@ YCM does not read identifiers from my tags files ~
 
 First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
 
-Make sure you are using Exuberant Ctags [26] to produce your tags files since
+Make sure you are using Exuberant Ctags [27] to produce your tags files since
 the only supported tag format is the Exuberant Ctags format [24]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
 list "Exuberant Ctags".
@@ -1905,7 +1911,7 @@ and similar, then just update to Vim 7.4.314 (or later) and they'll go away.
                                                             *vim-sub-autoclose*
 Nasty bugs happen if I have the 'vim-autoclose' plugin installed ~
 
-Use the delimitMate [27] plugin instead. It does the same thing without
+Use the delimitMate [28] plugin instead. It does the same thing without
 conflicting with YCM.
 
 -------------------------------------------------------------------------------
@@ -1913,7 +1919,7 @@ conflicting with YCM.
 Is there some sort of YCM mailing list? I have questions ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[28] mailing list, _don't_ create issues on the tracker. The tracker is for bug
+[29] mailing list, _don't_ create issues on the tracker. The tracker is for bug
 reports and feature requests.
 
 -------------------------------------------------------------------------------
@@ -1921,8 +1927,12 @@ reports and feature requests.
 I get an internal compiler error when installing ~
 
 This can be a problem on virtual servers with limited memory. A possible
-solution is to add more swap memory.
-
+solution is to add more swap memory. A more practical solution would be to
+force the build script to run only one compile job at a time. You can do this
+by setting the 'YCM_CORES' environment variable to '1'. Example:
+>
+  YCM_CORES=1 ./install.sh --clang-completer
+<
 -------------------------------------------------------------------------------
                                                                    *Ctrl-sub-C*
 I get weird errors when I press 'Ctrl-C' in Vim ~
@@ -1963,7 +1973,7 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions (issue #593 [29]) and other problems, like random
+Syntastic-Vim interactions (issue #593 [30]) and other problems, like random
 Vim flickering. Attempts were made to resolve these issues in Syntastic, but
 ultimately some of them failed (for various reasons).
 
@@ -1996,17 +2006,17 @@ those paths, prepend '-isystem' to each individual path and append them all to
 the list of flags you return from your 'FlagsForFile' function in your
 '.ycm_extra_conf.py' file.
 
-See issue #303 [30] for details.
+See issue #303 [31] for details.
 
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[28] mailing list.
+[29] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[31].
+[32].
 
 The latest version of the plugin is available at
 http://valloric.github.io/YouCompleteMe/.
@@ -2027,9 +2037,9 @@ anything to do with it.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [32]. © 2013 Google Inc.
+This software is licensed under the GPL v3 license [33]. © 2013 Google Inc.
 
-  Image: Bitdeli Badge [33]
+  Image: Bitdeli Badge [34]
 
 ===============================================================================
                                                      *youcompleteme-references*
@@ -2059,15 +2069,16 @@ References ~
 [22] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
 [23] https://github.com/Valloric/ListToggle
 [24] http://ctags.sourceforge.net/FORMAT
-[25] https://github.com/Valloric/YouCompleteMe/issues/18
-[26] http://ctags.sourceforge.net/
-[27] https://github.com/Raimondi/delimitMate
-[28] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[29] https://github.com/Valloric/YouCompleteMe/issues/593
-[30] https://github.com/Valloric/YouCompleteMe/issues/303
-[31] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[32] http://www.gnu.org/copyleft/gpl.html
-[33] https://bitdeli.com/free
-[34] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[25] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[26] https://github.com/Valloric/YouCompleteMe/issues/18
+[27] http://ctags.sourceforge.net/
+[28] https://github.com/Raimondi/delimitMate
+[29] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[30] https://github.com/Valloric/YouCompleteMe/issues/593
+[31] https://github.com/Valloric/YouCompleteMe/issues/303
+[32] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[33] http://www.gnu.org/copyleft/gpl.html
+[34] https://bitdeli.com/free
+[35] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
 
 vim: ft=help
