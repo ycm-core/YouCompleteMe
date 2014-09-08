@@ -849,9 +849,12 @@ that filetype.
 
 You can get the filetype of the current file in Vim with `:set ft?`.
 
-Default: `{}`
+Default: `[see next line]`
 
-    let g:ycm_filetype_specific_completion_to_disable = {}
+    let g:ycm_filetype_specific_completion_to_disable = {
+          \ 'gitcommit': 1
+          \}
+
 
 ### The `g:ycm_show_diagnostics_ui` option
 
