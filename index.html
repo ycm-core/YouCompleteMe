@@ -129,7 +129,7 @@ version of Vim with Python support.</p>
 </li>
 <li>
 <p><strong>Install YCM</strong> with <a href="https://github.com/gmarik/vundle#about">Vundle</a> (or <a href="https://github.com/tpope/vim-pathogen#pathogenvim">Pathogen</a>, but Vundle is a better
-    idea). With Vundle, this would mean adding a <code>Bundle
+    idea). With Vundle, this would mean adding a <code>Plugin
     'Valloric/YouCompleteMe'</code> line to your <a href="http://vimhelp.appspot.com/starting.txt.html#vimrc">vimrc</a>.</p>
 <p>If you don't install YCM with Vundle, make sure you have run
 <code>git submodule update --init --recursive</code> after checking out the YCM
@@ -197,8 +197,8 @@ the hassle and use the upstream pre-built libclang.</p>
 with <code>.dylib</code> on a Mac). Again, this flag would be used <em>instead of</em> the
 other flags.</p>
 <p>Running the <code>make</code> command will also place the <code>libclang.[so|dylib]</code> in the
-<code>YouCompleteMe/python</code> folder for you if you compiled with clang support (it
-needs to be there for YCM to work).</p>
+<code>YouCompleteMe/third_party/ycmd</code> folder for you if you compiled with clang
+support (it needs to be there for YCM to work).</p>
 </li>
 </ol><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -260,8 +260,10 @@ works. You should be able to use it <em>as a starting point</em>. <strong>Don't<
 copy/paste that file somewhere and expect things to magically work; <strong>your project
 needs different flags</strong>. Hint: just replace the strings in the <code>flags</code> variable
 with compilation flags necessary for your project. That should be enough for 99%
-of projects.</p><p>Yes, <a href="http://clang.llvm.org/docs/JSONCompilationDatabase.html">Clang's <code>CompilationDatabase</code> system</a> is also supported. Again, see the
-above linked example file.</p><p>If Clang encounters errors when compiling the header files that your file
+of projects.</p><p>Yes, <a href="http://clang.llvm.org/docs/JSONCompilationDatabase.html">Clang's <code>CompilationDatabase</code> system</a> is also supported. Again,
+see the above linked example file. You can get CMake to generate this file for
+you by adding <code>set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )</code> to your project's
+<code>CMakeLists.txt</code> file (if using CMake).</p><p>If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions.  When
 the completion menu finally appears, it's going to have a large number of
 unrelated completion strings (type/function names that are not actually
@@ -272,12 +274,12 @@ your file.</p><h3>Python semantic completion</h3><p>YCM uses <a href="https://gi
 work" without any configuration from the user. You do NOT need to install Jedi
 yourself; YCM uses it as a git subrepo. If you're installing YCM with Vundle
 (which is the recommended way) then Vundle will make sure that the subrepo is
-checked out when you do <code>:BundleInstall</code>. If you're installing YCM by hand, then
+checked out when you do <code>:PluginInstall</code>. If you're installing YCM by hand, then
 you need to run <code>git submodule update --init --recursive</code> when you're checking
-out the YCM repository. That's it.</p><p>But again, installing YCM with Vundle takes care of all of this for you.</p><p>In the future expect to see features like go-to-definition for Python as well.</p><h3>C# semantic completion</h3><p>YCM uses <a href="https://github.com/nosami/OmniSharpServer">OmniSharp</a> to provide semantic completion for C#. It's used as a git
+out the YCM repository. That's it.</p><p>But again, installing YCM with Vundle takes care of all of this for you.</p><h3>C# semantic completion</h3><p>YCM uses <a href="https://github.com/nosami/OmniSharpServer">OmniSharp</a> to provide semantic completion for C#. It's used as a git
 subrepo. If you're installing YCM with Vundle (which is the recommended way)
 then Vundle will make sure that the subrepo is checked out when you do
-<code>:BundleInstall</code>. If you're installing YCM by hand, then you need to run <code>git
+<code>:PluginInstall</code>. If you're installing YCM by hand, then you need to run <code>git
 submodule update --init --recursive</code> when you're checking out the YCM
 repository.</p><p>OmniSharp is written in C# and has to be compiled. The <code>install.sh</code> script takes
 care of this if you pass <code>--omnisharp-completer</code> as an argument.</p><h3>Semantic completion for other languages</h3><p>YCM will use your <code>omnifunc</code> (see <code>:h omnifunc</code> in Vim) as a source for semantic
@@ -404,7 +406,7 @@ work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>
 work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>RestartServer</code> subcommand</h3><p>Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>ReloadSolution</code> subcommand</h3><p>Instruct the Omnisharp server to clear its cache and reload all files from disk.
 This is useful when files are added, removed, or renamed in the solution, files
-are changed outside of Vim, or whenever Omnisharp cache is out-of-sync.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>GoToImplemention</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its implementation (i.e.
+are changed outside of Vim, or whenever Omnisharp cache is out-of-sync.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>GoToImplementation</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.</p><p>Supported in filetypes: <code>cs</code></p><h3>The <code>GoToImplementationElseDeclaration</code> subcommand</h3><p>Looks up the symbol under the cursor and jumps to its implementation if one,
 else jump to its declaration. If there are multiple implementations, instead
@@ -464,7 +466,9 @@ only the keys matter). The listed filetypes will be ignored by the YCM semantic
 completion engine, but the identifier-based completion engine will still trigger
 in files of those filetypes.</p><p>Note that even if semantic completion is not turned off for a specific filetype,
 you will not get semantic completion if the semantic engine does not support
-that filetype.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>{}</code></p><pre><code>let g:ycm_filetype_specific_completion_to_disable = {}
+that filetype.</p><p>You can get the filetype of the current file in Vim with <code>:set ft?</code>.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_filetype_specific_completion_to_disable = {
+      \ 'gitcommit': 1
+      \}
 </code></pre><h3>The <code>g:ycm_show_diagnostics_ui</code> option</h3><p>When set, this option turns on YCM's diagnostic display features. See the
 <em>Diagnostic display</em> section in the <em>User Manual</em> for more details.</p><p>Specific parts of the diagnostics UI (like the gutter signs, text highlighting,
 diagnostic echo and auto location list population) can be individually turned on
@@ -648,14 +652,17 @@ only add new ones.</p><p>A "trigger" is a sequence of one or more characters tha
 completion when typed. For instance, C++ (<code>cpp</code> filetype) has <code>.</code> listed as a
 trigger. So when the user types <code>foo.</code>, the semantic engine will trigger and
 serve <code>foo</code>'s list of member functions and variables. Since C++ also has <code>-&gt;</code>
-listed as a trigger, the same thing would happen when the user typed <code>foo-&gt;</code>.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_semantic_triggers =  {
+listed as a trigger, the same thing would happen when the user typed <code>foo-&gt;</code>.</p><p>It's also possible to use a regular expression as a trigger. You have to prefix
+your trigger with <code>re!</code> to signify it's a regex trigger. For instance,
+<code>re!\w+\.</code> would only trigger after the <code>\w+\.</code> regex matches.</p><p>NOTE: The regex syntax is <strong>NOT</strong> Vim's, it's <a href="https://docs.python.org/2/library/re.html#regular-expression-syntax">Python's</a>.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_semantic_triggers =  {
   \   'c' : ['-&gt;', '.'],
   \   'objc' : ['-&gt;', '.'],
   \   'ocaml' : ['.', '#'],
   \   'cpp,objcpp' : ['-&gt;', '.', '::'],
   \   'perl' : ['-&gt;'],
   \   'php' : ['-&gt;', '::'],
-  \   'cs,java,javascript,d,vim,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
   \   'ruby' : ['.', '::'],
   \   'lua' : ['.', ':'],
   \   'erlang' : [':'],
@@ -672,8 +679,8 @@ Can take one of the following values:
 <code>[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab' ]</code>
 If this option is set to the <code>'same-buffer'</code> but current buffer can not
 be switched (when buffer is modified and <code>nohidden</code> option is set),
-then result will be opened in horizontal split.</p><p>Default: <code>'same-buffer'</code>
-    let g:ycm_goto_buffer_command = 'same-buffer'</p><h2>FAQ</h2><h3>I used to be able to <code>import vim</code> in <code>.ycm_extra_conf.py</code>, but now can't</h3><p>YCM was rewritten to use a client-server architecture where most of the logic is
+then result will be opened in horizontal split.</p><p>Default: <code>'same-buffer'</code></p><pre><code>let g:ycm_goto_buffer_command = 'same-buffer'
+</code></pre><h2>FAQ</h2><h3>I used to be able to <code>import vim</code> in <code>.ycm_extra_conf.py</code>, but now can't</h3><p>YCM was rewritten to use a client-server architecture where most of the logic is
 in the <code>ycmd</code> server. So the magic <code>vim</code> module you could have previously
 imported in your <code>.ycm_extra_conf.py</code> files doesn't exist anymore.</p><p>To be fair, importing the magic <code>vim</code> module in extra conf files was never
 supported in the first place; it only ever worked by accident and was never a
@@ -782,7 +789,10 @@ and similar, then just update to Vim 7.4.314 (or later) and they'll go away.</p>
 conflicting with YCM.</p><h3>Is there some sort of YCM mailing list? I have questions</h3><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list, <em>don't</em> create issues on the tracker. The tracker is
 for bug reports and feature requests.</p><h3>I get an internal compiler error when installing</h3><p>This can be a problem on virtual servers with limited memory. A possible
-solution is to add more swap memory.</p><h3>I get weird errors when I press <code>Ctrl-C</code> in Vim</h3><p><em>Never</em> use <code>Ctrl-C</code> in Vim.</p><p>Using <code>Ctrl-C</code> to exit insert mode in Vim is a bad idea. The main issue here is
+solution is to add more swap memory. A more practical solution would be to force
+the build script to run only one compile job at a time. You can do this by
+setting the <code>YCM_CORES</code> environment variable to <code>1</code>. Example:</p><pre><code>YCM_CORES=1 ./install.sh --clang-completer
+</code></pre><h3>I get weird errors when I press <code>Ctrl-C</code> in Vim</h3><p><em>Never</em> use <code>Ctrl-C</code> in Vim.</p><p>Using <code>Ctrl-C</code> to exit insert mode in Vim is a bad idea. The main issue here is
 that <code>Ctrl-C</code> in Vim doesn't just leave insert mode, it leaves it without
 triggering <code>InsertLeave</code> autocommands (as per Vim docs). This is a bad idea and
 is likely to break many other things and not just YCM.</p><p>Bottom line, if you use <code>Ctrl-C</code> to exit insert mode in Vim, you're gonna have a
@@ -840,5 +850,6 @@ anything to do with it.</p><h2>License</h2><p>This software is licensed under th
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
-    <a href="https://github.com/Valloric/YouCompleteMe"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+    <a href="https://github.com/Valloric/YouCompleteMe"><img alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" style="position: absolute; top: 0; right: 0; border: 0;"/></a>
+
 </body></html>
