@@ -53,7 +53,7 @@ except ImportError:
 # Relevant issues:
 #  https://github.com/Valloric/YouCompleteMe/issues/641
 #  https://github.com/kennethreitz/requests/issues/879
-os.environ['no_proxy'] = '127.0.0.1,localhost'
+os.environ['no_proxy'] =  os.environ['no_proxy'] + (',' if len (os.environ['no_proxy']) > 0 else '') + '127.0.0.1,localhost'
 
 # Force the Python interpreter embedded in Vim (in which we are running) to
 # ignore the SIGINT signal. This helps reduce the fallout of a user pressing
