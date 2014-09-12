@@ -27,6 +27,7 @@ let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
 let s:previous_num_chars_on_current_line = -1
+let s:lock = 0
 
 let s:diagnostic_ui_filetypes = {
       \ 'cpp': 1,
@@ -267,7 +268,8 @@ endfunction
 function! s:AllowedToCompleteInCurrentFile()
   if empty( &filetype ) ||
         \ getbufvar( winbufnr( winnr() ), "&buftype" ) ==# 'nofile' ||
-        \ &filetype ==# 'qf'
+        \ &filetype ==# 'qf' ||
+        \ s:lock
     return 0
   endif
 
@@ -808,6 +810,18 @@ function! s:ShowDiagnostics()
 endfunction
 
 command! YcmDiags call s:ShowDiagnostics()
+
+function! s:lockAutocomplete()
+    let s:lock = 1
+endfunction
+
+command! YcmLock call s:lockAutocomplete()
+
+function! s:unlockAutocomplete()
+    let s:lock = 0
+endfunction
+
+command! YcmUnlock call s:unlockAutocomplete()
 
 
 " This is basic vim plugin boilerplate
