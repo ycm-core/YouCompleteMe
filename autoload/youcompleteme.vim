@@ -268,7 +268,8 @@ endfunction
 function! s:AllowedToCompleteInCurrentFile()
   if empty( &filetype ) ||
         \ getbufvar( winbufnr( winnr() ), "&buftype" ) ==# 'nofile' ||
-        \ &filetype ==# 'qf'
+        \ &filetype ==# 'qf' ||
+        \ s:lock
     return 0
   endif
 
@@ -408,7 +409,7 @@ endfunction
 
 
 function! s:OnCursorMovedInsertMode()
-  if !s:AllowedToCompleteInCurrentFile() || s:lock
+  if !s:AllowedToCompleteInCurrentFile()
     return
   endif
 
@@ -445,7 +446,7 @@ endfunction
 
 
 function! s:OnCursorMovedNormalMode()
-  if !s:AllowedToCompleteInCurrentFile() || s:lock
+  if !s:AllowedToCompleteInCurrentFile()
     return
   endif
 
