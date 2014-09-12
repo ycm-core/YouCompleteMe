@@ -61,6 +61,7 @@ function! youcompleteme#Enable()
 
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
+  call s:SetupCursorAutocmd()
 
   if g:ycm_allow_changing_updatetime && &updatetime > 2000
     set ut=2000
@@ -68,8 +69,6 @@ function! youcompleteme#Enable()
 
   augroup youcompleteme
     autocmd!
-    autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
-    autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     " Note that these events will NOT trigger for the file vim is started with;
     " so if you do "vim foo.cc", these events will not trigger when that buffer
     " is read. This is because youcompleteme#Enable() is called on VimEnter and
@@ -809,6 +808,22 @@ endfunction
 
 command! YcmDiags call s:ShowDiagnostics()
 
+function s:SetupCursorAutocmd()
+    augroup ycmcompletemecursormove
+        autocmd!
+        autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
+        autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    augroup END
+endfunction
+
+command! YcmUnlock call s:SetupCursorAutocmd()
+
+function s:RemoveCursorAutocmd()
+    autocmd! ycmcompletemecursormove CursorMoved *
+    autocmd! ycmcompletemecursormove CursorMovedI *
+endfunction
+
+command! YcmLock call s:RemoveCursorAutocmd()
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
