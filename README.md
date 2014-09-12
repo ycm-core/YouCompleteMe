@@ -1327,6 +1327,10 @@ Example:
 * As the first rule takes precedence everything in the home directory excluding
   the `~/dev` directory will be blacklisted.
 
+NOTE: The glob pattern is first expanded with Python's `os.path.expanduser()`
+and then resolved with `os.path.abspath()` before being matched against the
+filename.
+
 Default: `[]`
 
     let g:ycm_extra_conf_globlist = []
