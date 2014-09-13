@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from ycm import vimsupport
 import vim
 
@@ -31,6 +31,7 @@ class DiagnosticInterface( object ):
     self._next_sign_id = 1
     self._previous_line_number = -1
     self._diag_message_needs_clearing = False
+    self._placed_signs = []
 
 
   def OnCursorMoved( self ):
@@ -47,8 +48,10 @@ class DiagnosticInterface( object ):
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict( diags )
 
     if self._user_options[ 'enable_diagnostic_signs' ]:
-      self._next_sign_id = _UpdateSigns( self._buffer_number_to_line_to_diags,
-                                         self._next_sign_id )
+      self._placed_signs, self._next_sign_id = _UpdateSigns(
+        self._placed_signs,
+        self._buffer_number_to_line_to_diags,
+        self._next_sign_id )
 
     if self._user_options[ 'enable_diagnostic_highlighting' ]:
       _UpdateSquiggles( self._buffer_number_to_line_to_diags )
@@ -102,21 +105,80 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
           is_error = is_error )
 
 
-def _UpdateSigns( buffer_number_to_line_to_diags, next_sign_id ):
-  vimsupport.UnplaceAllSignsInBuffer( vim.current.buffer.number )
+def _UpdateSigns( placed_signs, buffer_number_to_line_to_diags, next_sign_id ):
+  new_signs, kept_signs, next_sign_id = _GetKeptAndNewSigns(
+    placed_signs, buffer_number_to_line_to_diags, next_sign_id
+  )
+  # Dummy sign used to prevent "flickering" in vim when last mark gets
+  # deleted from buffer. Dummy sign prevent vim to collapse sign column in
+  # that case.
+  # There also a vim "bug", which cause whole window to redraw in some
+  # conditions (vim redraw logic is very complex). But, somehow, if we place
+  # dummy sign before placing other real visible sign, it will not redraw the
+  # buffer (patch to vim pending).
+  dummy_sign_needed = False
+  if kept_signs == [] and new_signs != []:
+    dummy_sign_needed = True
+
+  if dummy_sign_needed:
+    vimsupport.PlaceDummySign( next_sign_id + 1, vim.current.buffer.number,
+      new_signs[0].line )
+
+  # Now we can place only that signs that are not placed yet.
+  new_placed_signs = _PlaceNewSigns( kept_signs, new_signs )
+
+  # We use incremental placement, so signs that already placed on right lines
+  # will not be deleted and placed again, which should improve performance in
+  # case of many diags.
+  # Signs which are not exist in current diag should be deleted.
+  _UnplaceRottenSigns( kept_signs, placed_signs )
+
+  if dummy_sign_needed:
+    vimsupport.UnPlaceDummySign( next_sign_id + 1, vim.current.buffer.number )
+
+  return new_placed_signs, next_sign_id
+
+def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
+                         next_sign_id ):
+  new_signs = []
+  kept_signs = []
   for buffer_number, line_to_diags in buffer_number_to_line_to_diags.iteritems():
     if not vimsupport.BufferIsVisible( buffer_number ):
       continue
 
-    vimsupport.UnplaceAllSignsInBuffer( buffer_number )
     for line, diags in line_to_diags.iteritems():
       for diag in diags:
-        vimsupport.PlaceSign( next_sign_id,
-                              line,
-                              buffer_number,
-                              _DiagnosticIsError( diag ) )
-        next_sign_id += 1
-  return next_sign_id
+        sign = _DiagSignPlacement( next_sign_id,
+                                   line,
+                                   buffer_number,
+                                   _DiagnosticIsError( diag ) )
+        if sign not in placed_signs:
+          new_signs += [ sign ]
+          next_sign_id += 1
+        else:
+          # We should use .index here because of `sign` contains new id, but
+          # we need old id to unplace sign in future.
+          kept_signs += [ placed_signs[ placed_signs.index( sign ) ] ]
+  return new_signs, kept_signs, next_sign_id
+
+
+
+def _PlaceNewSigns( kept_signs, new_signs ):
+  placed_signs = kept_signs
+  for sign in new_signs:
+    # Do not add two signs at the same line, it will screw signs remembering.
+    if sign in placed_signs:
+      continue
+    vimsupport.PlaceSign( sign.id, sign.line, sign.buffer, sign.is_err )
+    placed_signs += [ sign ]
+  return placed_signs
+
+
+def _UnplaceRottenSigns( kept_signs, placed_signs ):
+  for sign in placed_signs:
+    if sign not in kept_signs:
+      print("rotten", sign)
+      vimsupport.UnplaceSignInBuffer( sign.buffer, sign.id )
 
 
 def _ConvertDiagListToDict( diag_list ):
@@ -140,3 +202,14 @@ def _ConvertDiagListToDict( diag_list ):
 def _DiagnosticIsError( diag ):
   return diag[ 'kind' ] == 'ERROR'
 
+
+class _DiagSignPlacement(namedtuple( "_DiagSignPlacement",
+                                     [ 'id', 'line', 'buffer', 'is_err' ])):
+  def __eq__(self, another_sign):
+    if self.line != another_sign.line:
+      return False
+    if self.buffer != another_sign.buffer:
+      return False
+    if self.is_err != another_sign.is_err:
+      return False
+    return True

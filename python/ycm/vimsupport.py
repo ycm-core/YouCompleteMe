@@ -137,16 +137,12 @@ def GetBufferFilepath( buffer_object ):
   return os.path.join( folder_path, str( buffer_object.number ) )
 
 
-# NOTE: This unplaces *all* signs in a buffer, not just the ones we placed. We
-# used to track which signs we ended up placing and would then only unplace
-# ours, but that causes flickering Vim since we have to call
-#    sign unplace <id> buffer=<buffer-num>
-# in a loop. So we're forced to unplace all signs, which might conflict with
-# other Vim plugins.
-def UnplaceAllSignsInBuffer( buffer_number ):
+def UnplaceSignInBuffer( buffer_number, sign_id ):
   if buffer_number < 0:
     return
-  vim.command( 'sign unplace * buffer={0}'.format( buffer_number ) )
+  vim.command(
+    'try | exec "sign unplace {0} buffer={1}" | catch /E158/ | endtry'.format(
+        sign_id, buffer_number ) )
 
 
 def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
@@ -158,6 +154,26 @@ def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
   sign_name = 'YcmError' if is_error else 'YcmWarning'
   vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
     sign_id, line_num, sign_name, buffer_num ) )
+
+
+def PlaceDummySign( sign_id, buffer_num, line_num ):
+    if buffer_num < 0 or line_num < 0:
+      return
+    vim.command( 'sign define ycm_dummy_sign' )
+    vim.command(
+      'sign place {0} name=ycm_dummy_sign line={1} buffer={2}'.format(
+        sign_id,
+        line_num,
+        buffer_num,
+      )
+    )
+
+
+def UnPlaceDummySign( sign_id, buffer_num ):
+    if buffer_num < 0:
+      return
+    vim.command( 'sign undefine ycm_dummy_sign' )
+    vim.command( 'sign unplace {0} buffer={1}'.format( sign_id, buffer_num ) )
 
 
 def ClearYcmSyntaxMatches():
