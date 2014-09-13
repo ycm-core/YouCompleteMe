@@ -61,7 +61,7 @@ function! youcompleteme#Enable()
 
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
-  call s:SetupCursorAutocmd()
+  call youcompleteme#EnableCursorMovedAutocommands()
 
   if g:ycm_allow_changing_updatetime && &updatetime > 2000
     set ut=2000
@@ -808,7 +808,7 @@ endfunction
 
 command! YcmDiags call s:ShowDiagnostics()
 
-function s:SetupCursorAutocmd()
+function youcompleteme#EnableCursorMovedAutocommands()
     augroup ycmcompletemecursormove
         autocmd!
         autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
@@ -816,14 +816,14 @@ function s:SetupCursorAutocmd()
     augroup END
 endfunction
 
-command! YcmUnlock call s:SetupCursorAutocmd()
+command! YcmUnlock call youcompleteme#EnableCursorMovedAutocommands()
 
-function s:RemoveCursorAutocmd()
+function youcompleteme#DisableCursorMovedAutocommands()
     autocmd! ycmcompletemecursormove CursorMoved *
     autocmd! ycmcompletemecursormove CursorMovedI *
 endfunction
 
-command! YcmLock call s:RemoveCursorAutocmd()
+command! YcmLock call youcompleteme#DisableCursorMovedAutocommands()
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
