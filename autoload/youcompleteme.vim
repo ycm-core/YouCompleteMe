@@ -61,12 +61,12 @@ function! youcompleteme#Enable()
 
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
-  call youcompleteme#EnableCursorMovedAutocommands()
 
   if g:ycm_allow_changing_updatetime && &updatetime > 2000
     set ut=2000
   endif
 
+  call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
     autocmd!
     " Note that these events will NOT trigger for the file vim is started with;
@@ -89,6 +89,21 @@ function! youcompleteme#Enable()
   " the first loaded file. This should be the last command executed in this
   " function!
   call s:OnBufferVisit()
+endfunction
+
+
+function youcompleteme#EnableCursorMovedAutocommands()
+    augroup ycmcompletemecursormove
+        autocmd!
+        autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
+        autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    augroup END
+endfunction
+
+
+function youcompleteme#DisableCursorMovedAutocommands()
+    autocmd! ycmcompletemecursormove CursorMoved *
+    autocmd! ycmcompletemecursormove CursorMovedI *
 endfunction
 
 
@@ -808,18 +823,6 @@ endfunction
 
 command! YcmDiags call s:ShowDiagnostics()
 
-function youcompleteme#EnableCursorMovedAutocommands()
-    augroup ycmcompletemecursormove
-        autocmd!
-        autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
-        autocmd CursorMoved * call s:OnCursorMovedNormalMode()
-    augroup END
-endfunction
-
-function youcompleteme#DisableCursorMovedAutocommands()
-    autocmd! ycmcompletemecursormove CursorMoved *
-    autocmd! ycmcompletemecursormove CursorMovedI *
-endfunction
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
