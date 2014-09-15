@@ -816,14 +816,10 @@ function youcompleteme#EnableCursorMovedAutocommands()
     augroup END
 endfunction
 
-command! YcmUnlock call youcompleteme#EnableCursorMovedAutocommands()
-
 function youcompleteme#DisableCursorMovedAutocommands()
     autocmd! ycmcompletemecursormove CursorMoved *
     autocmd! ycmcompletemecursormove CursorMovedI *
 endfunction
-
-command! YcmLock call youcompleteme#DisableCursorMovedAutocommands()
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
