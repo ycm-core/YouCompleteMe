@@ -109,34 +109,34 @@ def _UpdateSigns( placed_signs, buffer_number_to_line_to_diags, next_sign_id ):
   new_signs, kept_signs, next_sign_id = _GetKeptAndNewSigns(
     placed_signs, buffer_number_to_line_to_diags, next_sign_id
   )
-  # Dummy sign used to prevent "flickering" in vim when last mark gets
-  # deleted from buffer. Dummy sign prevent vim to collapse sign column in
-  # that case.
-  # There also a vim "bug", which cause whole window to redraw in some
-  # conditions (vim redraw logic is very complex). But, somehow, if we place
-  # dummy sign before placing other real visible sign, it will not redraw the
+  # Dummy sign used to prevent "flickering" in Vim when last mark gets
+  # deleted from buffer. Dummy sign prevents Vim to collapsing the sign column
+  # in that case.
+  # There's also a vim bug which causes the whole window to redraw in some
+  # conditions (vim redraw logic is very complex). But, somehow, if we place a
+  # dummy sign before placing other "real" signs, it will not redraw the
   # buffer (patch to vim pending).
-  dummy_sign_needed = False
-  if kept_signs == [] and new_signs != []:
-    dummy_sign_needed = True
+  dummy_sign_needed = not kept_signs and new_signs
 
   if dummy_sign_needed:
-    vimsupport.PlaceDummySign( next_sign_id + 1, vim.current.buffer.number,
-      new_signs[0].line )
+    vimsupport.PlaceDummySign( next_sign_id + 1,
+                               vim.current.buffer.number,
+                               new_signs[ 0 ].line )
 
-  # Now we can place only that signs that are not placed yet.
+  # We place only those signs that haven't been placed yet.
   new_placed_signs = _PlaceNewSigns( kept_signs, new_signs )
 
-  # We use incremental placement, so signs that already placed on right lines
-  # will not be deleted and placed again, which should improve performance in
-  # case of many diags.
-  # Signs which are not exist in current diag should be deleted.
-  _UnplaceRottenSigns( kept_signs, placed_signs )
+  # We use incremental placement, so signs that already placed on the correct
+  # lines will not be deleted and placed again, which should improve performance
+  # in case of many diags. Signs which don't exist in the current diag should be
+  # deleted.
+  _UnplaceObsoleteSigns( kept_signs, placed_signs )
 
   if dummy_sign_needed:
     vimsupport.UnPlaceDummySign( next_sign_id + 1, vim.current.buffer.number )
 
   return new_placed_signs, next_sign_id
+
 
 def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
                          next_sign_id ):
@@ -156,8 +156,9 @@ def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
           new_signs += [ sign ]
           next_sign_id += 1
         else:
-          # We should use .index here because of `sign` contains new id, but
-          # we need old id to unplace sign in future.
+          # We use .index here because `sign` contains a new id, but
+          # we need the sign with the old id to unplace it later on.
+          # We won't be placing the new sign.
           kept_signs += [ placed_signs[ placed_signs.index( sign ) ] ]
   return new_signs, kept_signs, next_sign_id
 
@@ -166,18 +167,18 @@ def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
 def _PlaceNewSigns( kept_signs, new_signs ):
   placed_signs = kept_signs
   for sign in new_signs:
-    # Do not add two signs at the same line, it will screw signs remembering.
+    # Do not set two signs on the same line, it will screw up storing sign
+    # locations.
     if sign in placed_signs:
       continue
-    vimsupport.PlaceSign( sign.id, sign.line, sign.buffer, sign.is_err )
+    vimsupport.PlaceSign( sign.id, sign.line, sign.buffer, sign.is_error )
     placed_signs += [ sign ]
   return placed_signs
 
 
-def _UnplaceRottenSigns( kept_signs, placed_signs ):
+def _UnplaceObsoleteSigns( kept_signs, placed_signs ):
   for sign in placed_signs:
     if sign not in kept_signs:
-      print("rotten", sign)
       vimsupport.UnplaceSignInBuffer( sign.buffer, sign.id )
 
 
@@ -203,13 +204,11 @@ def _DiagnosticIsError( diag ):
   return diag[ 'kind' ] == 'ERROR'
 
 
-class _DiagSignPlacement(namedtuple( "_DiagSignPlacement",
-                                     [ 'id', 'line', 'buffer', 'is_err' ])):
-  def __eq__(self, another_sign):
-    if self.line != another_sign.line:
-      return False
-    if self.buffer != another_sign.buffer:
-      return False
-    if self.is_err != another_sign.is_err:
-      return False
-    return True
+class _DiagSignPlacement( namedtuple( "_DiagSignPlacement",
+                                      [ 'id', 'line', 'buffer', 'is_error' ] ) ):
+  # We want two signs that have different ids but the same location to compare
+  # equal. ID doesn't matter.
+  def __eq__( self, other ):
+    return ( self.line == other.line and
+             self.buffer == other.buffer and
+             self.is_error == other.is_error )
