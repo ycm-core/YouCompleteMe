@@ -130,8 +130,9 @@ Ubuntu Linux x64 super-quick installation
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.584 with python2 support. At the time of writing, the
-version of Vim shipping with Ubuntu is too old. You may need to [compile Vim
+Make sure you have Vim 7.3.584 with python2 support. Ubuntu 14.04 and later have
+a Vim that's recent enough. You can see the version of Vim installed by running
+`vim --version`. If the version is too old, you may need to [compile Vim
 from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
