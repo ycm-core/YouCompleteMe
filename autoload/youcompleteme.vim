@@ -92,7 +92,7 @@ function! youcompleteme#Enable()
 endfunction
 
 
-function youcompleteme#EnableCursorMovedAutocommands()
+function! youcompleteme#EnableCursorMovedAutocommands()
     augroup ycmcompletemecursormove
         autocmd!
         autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
@@ -101,7 +101,7 @@ function youcompleteme#EnableCursorMovedAutocommands()
 endfunction
 
 
-function youcompleteme#DisableCursorMovedAutocommands()
+function! youcompleteme#DisableCursorMovedAutocommands()
     autocmd! ycmcompletemecursormove CursorMoved *
     autocmd! ycmcompletemecursormove CursorMovedI *
 endfunction
