@@ -89,8 +89,8 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
+using Vundle and the ycm_support_libs library APIs have changed,
+YCM will notify you to recompile it. You should then rerun the install
 process.
 
 It's recommended that you have the latest Xcode installed along with the latest
