@@ -159,6 +159,12 @@ def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
 def PlaceDummySign( sign_id, buffer_num, line_num ):
     if buffer_num < 0 or line_num < 0:
       return
+
+    # we take the line_num from the first diagnostic, which could have 0
+    # as line number; Vim do not accept 0 as a sign's line
+    if line_num < 1:
+      line_num = 1
+
     vim.command( 'sign define ycm_dummy_sign' )
     vim.command(
       'sign place {0} name=ycm_dummy_sign line={1} buffer={2}'.format(
