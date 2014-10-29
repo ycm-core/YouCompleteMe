@@ -165,14 +165,14 @@ def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
 
 
 def _PlaceNewSigns( kept_signs, new_signs ):
-  placed_signs = kept_signs
+  placed_signs = kept_signs[:]
   for sign in new_signs:
     # Do not set two signs on the same line, it will screw up storing sign
     # locations.
     if sign in placed_signs:
       continue
     vimsupport.PlaceSign( sign.id, sign.line, sign.buffer, sign.is_error )
-    placed_signs += [ sign ]
+    placed_signs.append(sign)
   return placed_signs
 
 
