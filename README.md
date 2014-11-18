@@ -175,6 +175,46 @@ YCM has **no official support for Windows**, but that doesn't mean you can't get
 it to work there. See the [Windows Installation Guide][win-wiki] wiki page. Feel
 free to add to it.
 
+OpenBSD Installation
+--------------------
+Please refer to the full Installation Guide below; the following commands are
+provided on a best-effort basis and may not work for you.
+
+Make sure you have Vim 7.3.584 with python2 support. OpenBSD 5.5 and later have
+a Vim that's recent enough. You can see the version of Vim installed by running
+`vim --version`.
+
+Install YouCompleteMe with [Vundle][].
+
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
+
+Install dependencies and CMake: `sudo pkg_add llvm boost cmake`
+
+Compiling YCM **with** semantic support for C-family languages:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.sh --clang-completer --system-clang --system-boost
+
+Compiling YCM **without** semantic support for C-family languages:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.sh --system-boost
+
+If you want semantic C# support, you should add `--omnisharp-completer` to the
+install script as well.
+
+That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
+Don't forget that if you want the C-family semantic completion engine to work,
+you will need to provide the compilation flags for your project to YCM. It's all
+in the User Guide.
+
+YCM comes with sane defaults for its options, but you still may want to take a
+look at what's available for configuration. There are a few interesting options
+that are conservatively turned off by default that you may want to turn on.
+
 Full Installation Guide
 -----------------------
 
@@ -261,6 +301,14 @@ process.
     directory:
 
         cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
+
+    For those who want to use the system version of boost, you would pass
+    `-DUSE_SYSTEM_BOOST=ON` to cmake. This may be neccassery on some systems
+    where the bundled version of boost doesn't compile out of the box.
+
+    NOTE: We **STRONGLY recommended AGAINST use** of the system boost instead
+    of the bundled version of boost. Random things may break. Save yourself
+    the hassle and use the bundled version of boost.
 
     If you DO care about semantic support for C-family languages, then your
     `cmake` call will be a bit more complicated.  We'll assume you downloaded a
