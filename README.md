@@ -196,7 +196,7 @@ Install dependencies and CMake: `sudo pkg_add llvm boost cmake`
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh --clang-completer --system-clang --system-boost
+    ./install.sh --clang-completer --system-libclang --system-boost
 
 Compiling YCM **without** semantic support for C-family languages:
 
