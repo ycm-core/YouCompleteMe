@@ -72,13 +72,18 @@ endif
 let g:ycm_check_if_ycm_core_present =
       \ get( g:, 'ycm_check_if_ycm_core_present', 1 )
 
+let g:ycm_show_missing_core_warning =
+      \ get( g:, 'ycm_show_missing_core_warning', 1 )
+
 if g:ycm_check_if_ycm_core_present &&
       \ !s:YcmLibsPresentIn( s:ycmd_folder_path )
-  echohl WarningMsg |
-        \ echomsg "ycm_client_support.[so|pyd|dll] and " .
-        \ "ycm_core.[so|pyd|dll] not detected; you need to compile " .
-        \ "YCM before using it. Read the docs!" |
-        \ echohl None
+  if g:ycm_show_missing_core_warning
+    echohl WarningMsg |
+          \ echomsg "ycm_client_support.[so|pyd|dll] and " .
+          \ "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+          \ "YCM before using it. Read the docs!" |
+          \ echohl None
+  endif
   call s:restore_cpo()
   finish
 endif
