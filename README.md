@@ -1468,6 +1468,16 @@ Default: `'same-buffer'`
 
     let g:ycm_goto_buffer_command = 'same-buffer'
 
+### The `g:ycm_show_missing_core_warning` option
+
+By default, YCM will display a warning, when starting vim, if YCM
+hasn't been compiled. You can hide this warning by setting this option
+to `0`.
+
+Default: `1`
+
+    let g:ycm_show_missing_core_warning = 1
+
 FAQ
 ---
 
