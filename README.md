@@ -175,16 +175,21 @@ YCM has **no official support for Windows**, but that doesn't mean you can't get
 it to work there. See the [Windows Installation Guide][win-wiki] wiki page. Feel
 free to add to it.
 
-OpenBSD Installation
---------------------
+FreeBSD/OpenBSD Installation
+----------------------------
 
 Please refer to the full Installation Guide below; the following commands are
-provided on a best-effort basis and may not work for you. OpenBSD is also not an
-officially supported platform for YCM.
+provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
+not officially supported platforms by YCM.
 
-Make sure you have Vim 7.3.584 with python2 support. OpenBSD 5.5 and later have
-a Vim that's recent enough. You can see the version of Vim installed by running
-`vim --version`.
+Make sure you have Vim 7.3.584 with python2 support.
+
+OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
+Vim installed by running `vim --version`.
+
+FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
+
+    pkg install llvm35 boost-all boost-python-libs clang35
 
 Install YouCompleteMe with [Vundle][].
 
