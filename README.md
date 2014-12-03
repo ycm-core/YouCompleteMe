@@ -1468,6 +1468,15 @@ Default: `'same-buffer'`
 
     let g:ycm_goto_buffer_command = 'same-buffer'
 
+### The `g:ycm_disable_for_files_larger_than_kb` option
+
+Defines the max size (in Kb) for a file to be considered for completion. If this
+option is set to 0 then no check is made on the size of the file you're opening
+
+Default: 1000
+
+    let g:ycm_disable_for_files_larger_than_kb = 1000
+
 FAQ
 ---
 

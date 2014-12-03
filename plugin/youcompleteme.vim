@@ -167,6 +167,9 @@ let g:ycm_warning_symbol =
 let g:ycm_goto_buffer_command =
       \ get( g:, 'ycm_goto_buffer_command', 'same-buffer' )
 
+let g:ycm_disable_for_files_larger_than_kb =
+      \ get( g:, 'ycm_disable_for_files_larger_than_kb', 1000 )
+
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
 augroup youcompletemeStart

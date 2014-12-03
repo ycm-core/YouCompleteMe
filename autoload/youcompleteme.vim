@@ -77,6 +77,7 @@ function! youcompleteme#Enable()
     " We also need to trigger buf init code on the FileType event because when
     " the user does :enew and then :set ft=something, we need to run buf init
     " code again.
+    autocmd BufReadPre * call s:OnBufferReadPre( expand( '<afile>:p' ) )
     autocmd BufRead,BufEnter,FileType * call s:OnBufferVisit()
     autocmd BufUnload * call s:OnBufferUnload( expand( '<afile>:p' ) )
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
@@ -85,9 +86,10 @@ function! youcompleteme#Enable()
     autocmd VimLeave * call s:OnVimLeave()
   augroup END
 
-  " Calling this once solves the problem of BufRead/BufEnter not triggering for
-  " the first loaded file. This should be the last command executed in this
-  " function!
+  " Calling these once solves the problem of BufReadPre/BufRead/BufEnter not
+  " triggering for the first loaded file. This should be the last commands
+  " executed in this function!
+  call s:OnBufferReadPre( expand( '<afile>:p' ) )
   call s:OnBufferVisit()
 endfunction
 
@@ -285,6 +287,10 @@ function! s:AllowedToCompleteInCurrentFile()
     return 0
   endif
 
+  if exists( 'b:ycm_largefile' )
+    return 0
+  endif
+
   let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' ) ||
         \ has_key( g:ycm_filetype_whitelist, &filetype )
   let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
@@ -346,6 +352,18 @@ function! s:OnVimLeave()
   py ycm_state.OnVimLeave()
 endfunction
 
+
+function! s:OnBufferReadPre(filename)
+  let threshold = g:ycm_disable_for_files_larger_than_kb * 1024
+
+  if threshold > 0 && getfsize( a:filename ) > threshold
+    echohl WarningMsg |
+          \ echomsg "YouCompleteMe is disabled in this buffer; " .
+          \ "the file exceeded the max size (see YCM options)." |
+          \ echohl None
+    let b:ycm_largefile = 1
+  endif
+endfunction
 
 function! s:OnBufferVisit()
   " We need to do this even when we are not allowed to complete in the current
