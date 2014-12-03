@@ -177,8 +177,10 @@ free to add to it.
 
 OpenBSD Installation
 --------------------
+
 Please refer to the full Installation Guide below; the following commands are
-provided on a best-effort basis and may not work for you.
+provided on a best-effort basis and may not work for you. OpenBSD is also not an
+officially supported platform for YCM.
 
 Make sure you have Vim 7.3.584 with python2 support. OpenBSD 5.5 and later have
 a Vim that's recent enough. You can see the version of Vim installed by running
@@ -196,7 +198,7 @@ Install dependencies and CMake: `sudo pkg_add llvm boost cmake`
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh --clang-completer --system-clang --system-boost
+    ./install.sh --clang-completer --system-libclang --system-boost
 
 Compiling YCM **without** semantic support for C-family languages:
 
