@@ -190,6 +190,7 @@ Vim installed by running `vim --version`.
 FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
 
     pkg install llvm35 boost-all boost-python-libs clang35
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/llvm35/lib/
 
 Install YouCompleteMe with [Vundle][].
 
