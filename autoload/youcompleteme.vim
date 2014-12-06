@@ -649,20 +649,20 @@ endfunction
 
 
 python << EOF
-def GetCompletionsInner():
+def GetCompletionsInner(baseText):
   request = ycm_state.GetCurrentCompletionRequest()
   request.Start()
   while not request.Done():
     if bool( int( vim.eval( 'complete_check()' ) ) ):
       return { 'words' : [], 'refresh' : 'always'}
 
-  results = base.AdjustCandidateInsertionText( request.Response() )
+  results = base.AdjustCandidateInsertionText( request.Response(),baseText )
   return { 'words' : results, 'refresh' : 'always' }
 EOF
 
 
-function! s:GetCompletions()
-  py results = GetCompletionsInner()
+function! s:GetCompletions(base)
+  py results = GetCompletionsInner(vim.eval('a:base'))
   let results = pyeval( 'results' )
   return results
 endfunction
@@ -694,7 +694,7 @@ function! youcompleteme#Complete( findstart, base )
     py ycm_state.CreateCompletionRequest()
     return pyeval( 'base.CompletionStartColumn()' )
   else
-    return s:GetCompletions()
+    return s:GetCompletions(a:base)
   endif
 endfunction
 
@@ -708,7 +708,7 @@ function! youcompleteme#OmniComplete( findstart, base )
     py ycm_state.CreateCompletionRequest( force_semantic = True )
     return pyeval( 'base.CompletionStartColumn()' )
   else
-    return s:GetCompletions()
+    return s:GetCompletions(a:base)
   endif
 endfunction
 
