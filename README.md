@@ -1700,6 +1700,7 @@ nothing I can do about this.
 ### YCM conflicts with UltiSnips TAB key usage
 
 For whom wants to use Tab(Shft-Tab) key for both cycling through candidates and placeholder, add following codes in your vim configure file:
+
     let g:UltiSnipsJumpForwardTrigger = "<nop>"
     let g:UltiSnipsJumpBackwardTrigger = "<nop>"
     function! NextCandidateOrJumpForward()
@@ -1732,6 +1733,7 @@ For whom wants to use Tab(Shft-Tab) key for both cycling through candidates and 
     snoremap <silent> <tab> <Esc>:call UltiSnips#JumpBackwards()<cr>
 
 For whom wants to use ENTER key for expanding snippets and select candidates, add following codes in your vim configure file:
+
     let g:UltiSnipsExpandTrigger = "<nop>"
     function! ExpandSnippetOrCarriageReturn()
         let snippet = UltiSnips#ExpandSnippet()
