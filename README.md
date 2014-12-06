@@ -1699,7 +1699,7 @@ nothing I can do about this.
 
 ### YCM conflicts with UltiSnips TAB key usage
 
-For whom wants to use Tab(Shft-Tab) key for both cycling through candidates and placeholder, add following codes in your vim configure file:
+For whom wants to use Tab(Shft-Tab) for both cycling through candidates and placeholders, add following codes in your vim configure file:
 
     let g:UltiSnipsJumpForwardTrigger = "<nop>"
     let g:UltiSnipsJumpBackwardTrigger = "<nop>"
