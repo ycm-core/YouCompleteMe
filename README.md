@@ -1719,7 +1719,7 @@ For whom wants to use Tab(Shft-Tab) key for both cycling through candidates and 
         if pumvisible()
             return "\<c-p>"
         else
-            call UltiSnips$JumpBackwards()
+            call UltiSnips#JumpBackwards()
             if g:ulti_jump_backwards_res == 0
                 return "\<s-tab>"
             endif
@@ -1729,8 +1729,8 @@ For whom wants to use Tab(Shft-Tab) key for both cycling through candidates and 
 
     inoremap <silent> <tab> <C-R>=NextCandidateOrJumpForward()<CR>
     snoremap <silent> <tab> <Esc>:call UltiSnips#JumpForwards()<cr>
-    inoremap <silent> <tab> <C-R>=PrevCandidateOrJumpBackwards()<CR>
-    snoremap <silent> <tab> <Esc>:call UltiSnips#JumpBackwards()<cr>
+    inoremap <silent> <s-tab> <C-R>=PrevCandidateOrJumpBackwards()<CR>
+    snoremap <silent> <s-tab> <Esc>:call UltiSnips#JumpBackwards()<cr>
 
 For whom wants to use ENTER key for expanding snippets and select candidates, add following codes in your vim configure file:
 
@@ -1745,7 +1745,7 @@ For whom wants to use ENTER key for expanding snippets and select candidates, ad
             return "\<CR>"
         endif
     endfunction
-    inoremap <expr> <CR> <C-R>=ExpandSnippetOrCarriageReturn()<CR>
+    inoremap <silent> <CR> <C-R>=ExpandSnippetOrCarriageReturn()<CR>
 
 ### Why isn't YCM just written in plain VimScript, FFS?
 
