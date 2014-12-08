@@ -89,7 +89,7 @@ def LastEnteredCharIsIdentifierChar():
         line, current_column, filetype ) != current_column )
 
 
-def AdjustCandidateInsertionText( candidates, baseText ):
+def AdjustCandidateInsertionText( candidates ):
   """This function adjusts the candidate insertion text to take into account the
   text that's currently in front of the cursor.
 
@@ -111,11 +111,6 @@ def AdjustCandidateInsertionText( candidates, baseText ):
     if overlap_len:
       return to_insert[ :-overlap_len ]
     return to_insert
-
-  """This filter delete the excatly same candidate, we check 'menu' field to
-        preserve the ultisnips' result
-  """
-  candidates = filter(lambda a:a['word']!=baseText or a.get('menu'), candidates);
 
   text_after_cursor = vimsupport.TextAfterCursor()
   if not text_after_cursor:

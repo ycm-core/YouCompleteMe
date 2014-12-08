@@ -656,7 +656,8 @@ def GetCompletionsInner(baseText):
     if bool( int( vim.eval( 'complete_check()' ) ) ):
       return { 'words' : [], 'refresh' : 'always'}
 
-  results = base.AdjustCandidateInsertionText( request.Response(),baseText )
+  results = base.AdjustCandidateInsertionText( request.Response() )
+  results = filter(lambda a:a.get('abbr', a['word'])!=baseText or a.get('menu'), results)
   return { 'words' : results, 'refresh' : 'always' }
 EOF
 
