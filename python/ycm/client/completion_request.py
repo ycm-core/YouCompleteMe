@@ -17,9 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm import vimsupport
 from ycmd.utils import ToUtf8IfNeeded
-from ycm.client.base_request import BaseRequest, JsonFromFuture
+from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
+                                      HandleServerException )
 
 TIMEOUT_SECONDS = 0.5
 
@@ -46,7 +46,7 @@ class CompletionRequest( BaseRequest ):
       return _ConvertCompletionResponseToVimDatas(
           JsonFromFuture( self._response_future ) )
     except Exception as e:
-      vimsupport.PostVimMessage( str( e ) )
+      HandleServerException( e )
     return []
 
 

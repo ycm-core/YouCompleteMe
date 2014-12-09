@@ -163,6 +163,16 @@ def JsonFromFuture( future ):
   return None
 
 
+def HandleServerException( exception ):
+  serialized_exception = str( exception )
+
+  # We ignore the exception about the file already being parsed since it comes
+  # up often and isn't something that's actionable by the user.
+  if 'already being parsed' in serialized_exception:
+    return
+  vimsupport.PostVimMessage( serialized_exception )
+
+
 def _ValidateResponseObject( response ):
   if not utils.ContentHexHmacValid(
       response.content,
