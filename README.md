@@ -1700,14 +1700,53 @@ nothing I can do about this.
 
 ### YCM conflicts with UltiSnips TAB key usage
 
-YCM comes with support for UltiSnips (snippet suggestions in the popup menu),
-but you'll have to change the UltiSnips mappings. See `:h UltiSnips-triggers` in
-Vim for details. You'll probably want to change some/all of the following
-options:
+For whom wants to use Tab(Shft-Tab) for both cycling through candidates and placeholders, add following codes in your vim configure file:
 
-    g:UltiSnipsExpandTrigger
-    g:UltiSnipsJumpForwardTrigger
-    g:UltiSnipsJumpBackwardTrigger
+    let g:UltiSnipsJumpForwardTrigger = "<nop>"
+    let g:UltiSnipsJumpBackwardTrigger = "<nop>"
+    function! NextCandidateOrJumpForward()
+        if pumvisible()
+            return "\<c-n>"
+        else
+            call UltiSnips#JumpForwards()
+            if g:ulti_jump_forwards_res == 0
+                return "\<tab>"
+            endif
+            return ""
+        endif
+    endfunction
+
+    function! PrevCandidateOrJumpBackwards()
+        if pumvisible()
+            return "\<c-p>"
+        else
+            call UltiSnips#JumpBackwards()
+            if g:ulti_jump_backwards_res == 0
+                return "\<s-tab>"
+            endif
+            return ""
+        endif 
+    endfunction
+
+    inoremap <silent> <tab> <C-R>=NextCandidateOrJumpForward()<CR>
+    snoremap <silent> <tab> <Esc>:call UltiSnips#JumpForwards()<cr>
+    inoremap <silent> <s-tab> <C-R>=PrevCandidateOrJumpBackwards()<CR>
+    snoremap <silent> <s-tab> <Esc>:call UltiSnips#JumpBackwards()<cr>
+
+For whom wants to use ENTER key for expanding snippets and select candidates, add following codes in your vim configure file:
+
+    let g:UltiSnipsExpandTrigger = "<nop>"
+    function! ExpandSnippetOrCarriageReturn()
+        let snippet = UltiSnips#ExpandSnippet()
+        if g:ulti_expand_res > 0
+            return snippet
+        elseif pumvisible()
+            return "\<c-y>"
+        else
+            return "\<CR>"
+        endif
+    endfunction
+    inoremap <silent> <CR> <C-R>=ExpandSnippetOrCarriageReturn()<CR>
 
 ### Why isn't YCM just written in plain VimScript, FFS?
 
