@@ -7,8 +7,9 @@ Contents ~
  2. Mac OS X super-quick installation |youcompleteme-mac-os-x-super-quick-installation|
  3. Ubuntu Linux x64 super-quick installation |youcompleteme-ubuntu-linux-x64-super-quick-installation|
  4. Windows Installation                   |youcompleteme-windows-installation|
- 5. Full Installation Guide             |youcompleteme-full-installation-guide|
- 6. User Guide                                       |youcompleteme-user-guide|
+ 5. FreeBSD/OpenBSD Installation   |youcompleteme-freebsd-openbsd-installation|
+ 6. Full Installation Guide             |youcompleteme-full-installation-guide|
+ 7. User Guide                                       |youcompleteme-user-guide|
   1. General Usage                                |youcompleteme-general-usage|
   2. Client-server architecture      |youcompleteme-client-server-architecture|
   3. Completion string ranking        |youcompleteme-completion-string-ranking|
@@ -21,14 +22,14 @@ Contents ~
   10. Diagnostic display                     |youcompleteme-diagnostic-display|
    1. C# Diagnostic Support                |youcompleteme-c-diagnostic-support|
    2. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
- 7. Commands                                           |youcompleteme-commands|
+ 8. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
   2. The |:YcmForceCompileAndDiagnostics| command
   3. The |:YcmDiags| command
   4. The |:YcmShowDetailedDiagnostic| command
   5. The |:YcmDebugInfo| command
   6. The |:YcmCompleter| command
- 8. YcmCompleter subcommands           |youcompleteme-ycmcompleter-subcommands|
+ 9. YcmCompleter subcommands           |youcompleteme-ycmcompleter-subcommands|
   1. The |GoToDeclaration| subcommand
   2. The |GoToDefinition| subcommand
   3. The |GoTo| subcommand
@@ -40,7 +41,7 @@ Contents ~
   9. The |ReloadSolution| subcommand
   10. The |GoToImplementation| subcommand
   11. The |GoToImplementationElseDeclaration| subcommand
- 9. Options                                             |youcompleteme-options|
+ 10. Options                                            |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
   3. The |g:ycm_auto_trigger| option
@@ -84,7 +85,8 @@ Contents ~
   41. The |g:ycm_cache_omnifunc| option
   42. The |g:ycm_use_ultisnips_completer| option
   43. The |g:ycm_goto_buffer_command| option
- 10. FAQ                                                    |youcompleteme-faq|
+  44. The |g:ycm_disable_for_files_larger_than_kb| option
+ 11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
   3. I get a linker warning regarding |libpython| on Mac when compiling YCM
@@ -112,10 +114,10 @@ Contents ~
   25. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
   26. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
   27. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
- 11. Contact                                            |youcompleteme-contact|
- 12. Project Management                      |youcompleteme-project-management|
- 13. License                                            |youcompleteme-license|
- 14. References                                      |youcompleteme-references|
+ 12. Contact                                            |youcompleteme-contact|
+ 13. Project Management                      |youcompleteme-project-management|
+ 14. License                                            |youcompleteme-license|
+ 15. References                                      |youcompleteme-references|
 
 ===============================================================================
                                                    *youcompleteme-introduction*
@@ -251,8 +253,9 @@ Ubuntu Linux x64 super-quick installation ~
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.584 with python2 support. At the time of writing,
-the version of Vim shipping with Ubuntu is too old. You may need to compile Vim
+Make sure you have Vim 7.3.584 with python2 support. Ubuntu 14.04 and later
+have a Vim that's recent enough. You can see the version of Vim installed by
+running 'vim --version'. If the version is too old, you may need to compile Vim
 from source [14] (don't worry, it's easy).
 
 Install YouCompleteMe with Vundle [11].
@@ -296,6 +299,55 @@ Windows Installation ~
 YCM has **no official support for Windows**, but that doesn't mean you can't
 get it to work there. See the Windows Installation Guide [15] wiki page. Feel
 free to add to it.
+
+===============================================================================
+                                   *youcompleteme-freebsd-openbsd-installation*
+FreeBSD/OpenBSD Installation ~
+
+Please refer to the full Installation Guide below; the following commands are
+provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
+not officially supported platforms by YCM.
+
+Make sure you have Vim 7.3.584 with python2 support.
+
+OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version
+of Vim installed by running 'vim --version'.
+
+FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
+>
+  pkg install llvm35 boost-all boost-python-libs clang35
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/llvm35/lib/
+<
+Install YouCompleteMe with Vundle [11].
+
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_support_libs library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
+
+Install dependencies and CMake: 'sudo pkg_add llvm boost cmake'
+
+Compiling YCM **with** semantic support for C-family languages:
+>
+  cd ~/.vim/bundle/YouCompleteMe
+  ./install.sh --clang-completer --system-libclang --system-boost
+<
+Compiling YCM **without** semantic support for C-family languages:
+>
+  cd ~/.vim/bundle/YouCompleteMe
+  ./install.sh --system-boost
+<
+If you want semantic C# support, you should add '--omnisharp-completer' to the
+install script as well.
+
+That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
+Don't forget that if you want the C-family semantic completion engine to work,
+you will need to provide the compilation flags for your project to YCM. It's
+all in the User Guide.
+
+YCM comes with sane defaults for its options, but you still may want to take a
+look at what's available for configuration. There are a few interesting options
+that are conservatively turned off by default that you may want to turn on.
 
 ===============================================================================
                                         *youcompleteme-full-installation-guide*
@@ -345,7 +397,7 @@ process.
    **Download the latest version of 'libclang'**. Clang is an open-source
    compiler that can compile C/C++/Objective-C/Objective-C++. The 'libclang'
    library it provides is used to power the YCM semantic completion engine
-   for those languages. YCM is designed to work with libclang version 3.4 or
+   for those languages. YCM is designed to work with libclang version 3.5 or
    higher, but can in theory work with any 3.2+ version as well.
 
    You can use the system libclang _only if you are sure it is version 3.3
@@ -386,6 +438,14 @@ process.
 >
    cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 <
+   For those who want to use the system version of boost, you would pass
+   '-DUSE_SYSTEM_BOOST=ON' to cmake. This may be neccassery on some systems
+   where the bundled version of boost doesn't compile out of the box.
+
+   NOTE: We **STRONGLY recommended AGAINST use** of the system boost instead
+   of the bundled version of boost. Random things may break. Save yourself
+   the hassle and use the bundled version of boost.
+
    If you DO care about semantic support for C-family languages, then your
    'cmake' call will be a bit more complicated. We'll assume you downloaded
    a binary distribution of LLVM+Clang from llvm.org in step 3 and that you
@@ -1533,6 +1593,10 @@ Example:
 - As the first rule takes precedence everything in the home directory
   excluding the '~/dev' directory will be blacklisted.
 
+NOTE: The glob pattern is first expanded with Python's 'os.path.expanduser()'
+and then resolved with 'os.path.abspath()' before being matched against the
+filename.
+
 Default: '[]'
 >
   let g:ycm_extra_conf_globlist = []
@@ -1621,8 +1685,21 @@ tab' ]" If this option is set to the "'same-buffer'" but current buffer can not
 be switched (when buffer is modified and 'nohidden' option is set), then result
 will be opened in horizontal split.
 
-Default: "'same-buffer'" let g:ycm_goto_buffer_command = 'same-buffer'
+Default: "'same-buffer'"
+>
+  let g:ycm_goto_buffer_command = 'same-buffer'
+<
+-------------------------------------------------------------------------------
+The *g:ycm_disable_for_files_larger_than_kb* option
 
+Defines the max size (in Kb) for a file to be considered for completion. If
+this option is set to 0 then no check is made on the size of the file you're
+opening
+
+Default: 1000
+>
+  let g:ycm_disable_for_files_larger_than_kb = 1000
+<
 ===============================================================================
                                                             *youcompleteme-faq*
 FAQ ~
