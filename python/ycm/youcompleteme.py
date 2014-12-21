@@ -227,13 +227,17 @@ class YouCompleteMe( object ):
              self.NativeFiletypeCompletionAvailable() )
 
 
-  def OnFileReadyToParse( self ):
+  def OnFileReadyToParse( self, is_forced=False ):
     self._omnicomp.OnFileReadyToParse( None )
 
     if not self.IsServerAlive():
       self._NotifyUserIfServerCrashed()
 
     extra_data = {}
+
+    if is_forced:
+      extra_data['is_forced'] = True
+
     self._AddTagsFilesIfNeeded( extra_data )
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
