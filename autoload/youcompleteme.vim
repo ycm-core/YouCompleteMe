@@ -793,7 +793,7 @@ function! s:ForceCompile()
   endif
 
   echom "Forcing compilation, this will block Vim until done."
-  py ycm_state.OnFileReadyToParse()
+  py ycm_state.OnFileReadyToParse( is_forced=True )
   while 1
     let diagnostics_ready = pyeval(
           \ 'ycm_state.DiagnosticsForCurrentFileReady()' )
