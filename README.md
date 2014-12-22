@@ -446,7 +446,8 @@ of projects.
 Yes, [Clang's `CompilationDatabase` system][compdb] is also supported. Again,
 see the above linked example file. You can get CMake to generate this file for
 you by adding `set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )` to your project's
-`CMakeLists.txt` file (if using CMake).
+`CMakeLists.txt` file (if using CMake). If you're not using CMake, you could use
+something like [Bear][] to generate the `compile_commands.json` file.
 
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions.  When
@@ -1893,3 +1894,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [issue-669]: https://github.com/Valloric/YouCompleteMe/issues/669
 [status-mes]: https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8
 [python-re]: https://docs.python.org/2/library/re.html#regular-expression-syntax
+[bear]: https://github.com/rizsotto/Bear
