@@ -6,4 +6,5 @@
 	url = https://github.com/kennethreitz/requests
 [submodule "third_party/ycmd"]
 	path = third_party/ycmd
-	url = https://github.com/Valloric/ycmd
+	url = https://github.com/oblitum/ycmd
+	branch = argument_hints

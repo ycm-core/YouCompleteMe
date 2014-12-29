@@ -53,10 +53,13 @@ class CompletionRequest( BaseRequest ):
 def _ConvertCompletionDataToVimData( completion_data ):
   # see :h complete-items for a description of the dictionary fields
   vim_data = {
-    'word' : ToUtf8IfNeeded( completion_data[ 'insertion_text' ] ),
+    'word' : '',
+    'empty' : 1,
     'dup'  : 1,
   }
 
+  if 'insertion_text' in completion_data:
+    vim_data[ 'word' ] = ToUtf8IfNeeded( completion_data[ 'insertion_text' ] )
   if 'menu_text' in completion_data:
     vim_data[ 'abbr' ] = ToUtf8IfNeeded( completion_data[ 'menu_text' ] )
   if 'extra_menu_info' in completion_data:
