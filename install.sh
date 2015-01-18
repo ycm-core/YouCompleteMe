@@ -12,7 +12,9 @@ if [[ ! -f "$build_file" ]]; then
   exit 1
 fi
 
-"$build_file" "$@"
+PYTHON2=python
+command -v python2 >/dev/null && PYTHON2=python2
+$PYTHON2 "$build_file" "$@"
 
 # Remove old YCM libs if present so that YCM can start.
 rm -f python/*ycm_core.* &> /dev/null
