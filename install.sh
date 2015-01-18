@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-build_file=$SCRIPT_DIR/third_party/ycmd/build.sh
+build_file=$SCRIPT_DIR/third_party/ycmd/build.py
 
 if [[ ! -f "$build_file" ]]; then
   echo "File $build_file doesn't exist; you probably forgot to run:"
