@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-"${SCRIPT_DIR}/third_party/ycmd/build.sh"
+"${SCRIPT_DIR}/third_party/ycmd/build.py"
 
 flake8 --select=F,C9 --max-complexity=10 "${SCRIPT_DIR}/python"
 
