@@ -3,6 +3,33 @@ YouCompleteMe: a code-completion engine for Vim
 
 [![Build Status](https://travis-ci.org/Valloric/YouCompleteMe.png?branch=master)](https://travis-ci.org/Valloric/YouCompleteMe)
 
+- [Installation](#installation)
+    - [Mac OS X](#mac-os-x-super-quick-installation)
+    - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
+    - [Windows](#windows-installation)
+    - [FreeBSD/OpenBSD](#freebsdopenbsd-installation)
+    - [Full Installation Guide](#full-installation-guide)
+- [User Guide](#user-guide)
+    - [General Usage](#general-usage)
+    - [Client-server architecture](#client-server-architecture)
+    - [Completion string ranking](#completion-string-ranking)
+    - [General semantic completion](#general-semantic-completion-engine-usage)
+    - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
+    - [Python semantic completion](#python-semantic-completion)
+    - [C# semantic completion](#c-semantic-completion)
+    - [Semantic completion for other languages](#semantic-completion-for-other-languages)
+    - [Writing new semantic completers](#writing-new-semantic-completers)
+    - [Diagnostic display](#diagnostic-display)
+    - [C# diagnostic support](#c-diagnostic-support)
+    - [Diagnostic highlighting groups](#diagnostic-highlighting-groups)
+- [Commands](#commands)
+    - [YcmCompleter subcommands](#ycmcompleter-subcommands)
+- [Options](#options)
+- [FAQ](#faq)
+- [Contact](#contact)
+- [Project Management](#project-management)
+- [License](#license)
+
 YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 [Vim][]. It has several completion engines: an identifier-based engine that
 works with every programming language, a semantic, [Clang][]-based engine that
@@ -71,8 +98,10 @@ You'll also find that YCM has filepath completers (try typing `./` in a file)
 and a completer that integrates with [UltiSnips][].
 
 
-Mac OS X super-quick installation
----------------------------------
+Installation
+------------
+
+### Mac OS X super-quick installation
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -124,8 +153,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-Ubuntu Linux x64 super-quick installation
------------------------------------------
+### Ubuntu Linux x64 super-quick installation
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -168,15 +196,13 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-Windows Installation
---------------------
+### Windows Installation
 
 YCM has **no official support for Windows**, but that doesn't mean you can't get
 it to work there. See the [Windows Installation Guide][win-wiki] wiki page. Feel
 free to add to it.
 
-FreeBSD/OpenBSD Installation
-----------------------------
+### FreeBSD/OpenBSD Installation
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
@@ -223,8 +249,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-Full Installation Guide
------------------------
+### Full Installation Guide
 
 These are the steps necessary to get YCM working on a Unix OS like Linux or
 Mac OS X. My apologies to Windows users, but I don't have a guide for them. The
