@@ -3,6 +3,7 @@ YouCompleteMe: a code-completion engine for Vim
 
 [![Build Status](https://travis-ci.org/Valloric/YouCompleteMe.png?branch=master)](https://travis-ci.org/Valloric/YouCompleteMe)
 
+- [Intro](#intro)
 - [Installation](#installation)
     - [Mac OS X](#mac-os-x-super-quick-installation)
     - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
@@ -29,6 +30,9 @@ YouCompleteMe: a code-completion engine for Vim
 - [Contact](#contact)
 - [Project Management](#project-management)
 - [License](#license)
+
+Intro
+-----
 
 YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 [Vim][]. It has several completion engines: an identifier-based engine that
