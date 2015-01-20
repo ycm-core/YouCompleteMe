@@ -599,6 +599,11 @@ ul {
   list-style-image: url("../images/bullet.png");
 }
 
+/* We don't want vertical whitespace inside lists-of-lists */
+ul ul {
+  margin: 0;
+}
+
 strong {
   font-family: 'OpenSansBold', "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-weight: normal;
