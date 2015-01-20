@@ -3,9 +3,11 @@
 from bs4 import BeautifulSoup
 from markdown import markdown
 import fileinput
+import re
 
 def ContentToIdValue( content ):
-  return content.lower().replace( ' ', '-' )
+  content = content.replace( ' ', '-' )
+  return re.sub( r'[^\w_-]+', '', content ).lower()
 
 
 def AddIdsForHeadings( soup ):
@@ -38,7 +40,7 @@ with open('index.html', 'r+') as content_file:
   for new_elem in new_tags.body.contents:
     elem.append( new_elem )
 
-  content_file.seek(0)
+  content_file.seek( 0 )
   content_file.truncate()
   content_file.write( str( soup ) )
 
