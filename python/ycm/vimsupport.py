@@ -23,6 +23,7 @@ import tempfile
 import json
 from ycmd.utils import ToUtf8IfNeeded
 from ycmd import user_options_store
+from ycmd import identifier_utils
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'horizontal-split' : 'split',
@@ -35,6 +36,23 @@ def CurrentLineAndColumn():
   # column number
   line, column = vim.current.window.cursor
   line -= 1
+  return line, column
+
+
+def LastTriggerLineAndColumn():
+  line, column = CurrentLineAndColumn()
+  line_value = vim.current.line[ :column ].rstrip()
+  while not line_value:
+    line = line - 1
+    if line == -1:
+      return CurrentLineAndColumn()
+    line_value = vim.current.buffer[ line ].rstrip()
+  column = len( line_value )
+  filetypes =  CurrentFiletypes()
+  filetype = filetypes[ 0 ] if filetypes else None
+  if identifier_utils.IsIdentifier( vim.current.buffer[ line ][ column - 1 ],
+                                    filetype ):
+    return CurrentLineAndColumn()
   return line, column
 
 
