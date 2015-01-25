@@ -85,7 +85,7 @@ def VimVersionAtLeast( version_string ):
   # For Vim 7.4.301, v:version is '704'
   actual_major_and_minor = GetIntValue( 'v:version' )
   if actual_major_and_minor != major * 100 + minor:
-    return False
+    return actual_major_and_minor > major * 100 + minor
 
   return GetBoolValue( 'has("patch{0}")'.format( patch ) )
 
