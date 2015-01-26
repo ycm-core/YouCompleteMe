@@ -134,7 +134,7 @@ class BaseRequest( object ):
 
 
 def BuildRequestData( include_buffer_data = True ):
-  line, column = vimsupport.CurrentLineAndColumn()
+  line, column = vimsupport.LastTriggerLineAndColumn()
   filepath = vimsupport.GetCurrentBufferFilepath()
   request_data = {
     'line_num': line + 1,

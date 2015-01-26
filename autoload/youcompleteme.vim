@@ -23,6 +23,7 @@ set cpo&vim
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:omnifunc_mode = 0
 
+let s:has_textchangedi = 0
 let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
@@ -95,17 +96,21 @@ endfunction
 
 
 function! youcompleteme#EnableCursorMovedAutocommands()
-    augroup ycmcompletemecursormove
-        autocmd!
-        autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
-        autocmd CursorMoved * call s:OnCursorMovedNormalMode()
-    augroup END
+  augroup ycmcompletemecursormove
+    autocmd!
+    autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    let s:has_textchangedi = pyeval( 'vimsupport.VimVersionAtLeast("7.3.867")' )
+    if s:has_textchangedi
+      autocmd TextChangedI * call s:OnTextChangedInsertMode()
+    else
+      autocmd CursorMovedI * call s:OnTextChangedInsertMode()
+    endif
+  augroup END
 endfunction
 
 
 function! youcompleteme#DisableCursorMovedAutocommands()
-    autocmd! ycmcompletemecursormove CursorMoved *
-    autocmd! ycmcompletemecursormove CursorMovedI *
+  autocmd! ycmcompletemecursormove
 endfunction
 
 
@@ -438,7 +443,7 @@ function! s:SetCompleteFunc()
 endfunction
 
 
-function! s:OnCursorMovedInsertMode()
+function! s:OnTextChangedInsertMode()
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
@@ -521,6 +526,10 @@ endfunction
 
 
 function! s:BufferTextChangedSinceLastMoveInInsertMode()
+  if s:has_textchangedi
+    return 1
+  endif
+
   if s:moved_vertically_in_insert_mode
     let s:previous_num_chars_on_current_line = -1
     return 0
@@ -611,17 +620,12 @@ function! s:InsideCommentOrStringAndShouldStop()
 endfunction
 
 
-function! s:OnBlankLine()
-  return pyeval( 'not vim.current.line or vim.current.line.isspace()' )
-endfunction
-
-
 function! s:InvokeCompletion()
   if &completefunc != "youcompleteme#Complete"
     return
   endif
 
-  if s:InsideCommentOrStringAndShouldStop() || s:OnBlankLine()
+  if s:InsideCommentOrStringAndShouldStop()
     return
   endif
 
