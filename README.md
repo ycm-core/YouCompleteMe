@@ -1253,9 +1253,9 @@ Default: `1`
 
 ### The `g:ycm_csharp_server_port` option
 
-When g:ycm_auto_start_csharp_server set to `1`, specifies the port for 
-the OmniSharp server to listen on. When set to `0` uses the OS default
-behavior.
+When g:ycm_auto_start_csharp_server is set to `1`, specifies the port for 
+the OmniSharp server to listen on. When set to `0` uses an unused port provided
+by the OS.
 
 Default: `0`
 
