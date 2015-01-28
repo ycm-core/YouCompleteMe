@@ -184,9 +184,9 @@ suggestions pop up by themselves. If the user doesn't find the completion
 suggestions relevant and/or just wants to type, they can do so; the completion
 engine will not interfere.
 
-When the user sees a useful completion string being offered, they press the TAB
-key to accept it. This inserts the completion string. Repeated presses of the
-TAB key cycle through the offered completions.
+When the user sees a useful completion string being offered, they press the
+'<C-N>' key to accept it. This inserts the completion string. Repeated presses
+of the '<C-N>' key cycle through the offered completions.
 
 If the offered completions are not relevant enough, the user can continue
 typing to further filter out unwanted completions.
@@ -198,7 +198,7 @@ way of saying that any input characters need to be present in a completion
 string in the order in which they appear in the input. So 'abc' is a
 subsequence of 'xaybgc', but not of 'xbyxaxxc'. After the filter, a complicated
 sorting system ranks the completion strings so that the most relevant ones rise
-to the top of the menu (so you usually need to press TAB just once).
+to the top of the menu (so you usually need to press '<C-N>' just once).
 
 **All of the above works with any programming language** because of the
 identifier-based completion engine. It collects all of the identifiers in the
@@ -547,11 +547,8 @@ General Usage ~
   So, "foo" matches "Foo" and "foo", "Foo" matches "Foo" and "FOO" but not
   "foo".
 
-- Use the TAB key to accept a completion and continue pressing TAB to cycle
-  through the completions. Use Shift-TAB to cycle backwards. Note that if
-  you're using console Vim (that is, not Gvim or MacVim) then it's likely
-  that the Shift-TAB binding will not work because the console will not pass
-  it to Vim. You can remap the keys; see the _Options_ section below.
+- Use the '<C-N>' key to accept a completion and continue pressing '<C-N>'to
+  cycle through the completions. Use '<C-P>' to cycle backwards.
 
 Knowing a little bit about how YCM works internally will prevent confusion. YCM
 has several completion engines: an identifier-based completer that collects all
@@ -1525,9 +1522,9 @@ list.
 
 Some users like adding '<Enter>' to this list.
 
-Default: "['<TAB>', '<Down>']"
+Default: "['<Down>']"
 >
-  let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
+  let g:ycm_key_list_select_completion = ['<Down>']
 <
 -------------------------------------------------------------------------------
 The *g:ycm_key_list_previous_completion* option
@@ -1536,14 +1533,9 @@ This option controls the key mappings used to select the previous completion
 string. Invoking any of them repeatedly cycles backwards through the completion
 list.
 
-Note that one of the defaults is '<S-TAB>' which means Shift-TAB. That mapping
-will probably only work in GUI Vim (Gvim or MacVim) and not in plain console
-Vim because the terminal usually does not forward modifier key combinations to
-Vim.
-
-Default: "['<S-TAB>', '<Up>']"
+Default: "['<Up>']"
 >
-  let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>']
+  let g:ycm_key_list_previous_completion = ['<Up>']
 <
 -------------------------------------------------------------------------------
 The *g:ycm_key_invoke_completion* option

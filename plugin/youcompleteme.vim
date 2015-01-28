@@ -107,10 +107,10 @@ let g:ycm_autoclose_preview_window_after_insertion =
       \ get( g:, 'ycm_autoclose_preview_window_after_insertion', 0 )
 
 let g:ycm_key_list_select_completion =
-      \ get( g:, 'ycm_key_list_select_completion', ['<TAB>', '<Down>'] )
+      \ get( g:, 'ycm_key_list_select_completion', ['<Down>'] )
 
 let g:ycm_key_list_previous_completion =
-      \ get( g:, 'ycm_key_list_previous_completion', ['<S-TAB>', '<Up>'] )
+      \ get( g:, 'ycm_key_list_previous_completion', ['<Up>'] )
 
 let g:ycm_key_invoke_completion =
       \ get( g:, 'ycm_key_invoke_completion', '<C-Space>' )
