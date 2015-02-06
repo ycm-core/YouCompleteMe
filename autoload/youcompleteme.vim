@@ -692,10 +692,10 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
     if g:ycm_prefer_semantic
-	    py ycm_state.CreateCompletionRequest( force_semantic = True )
-	else
-	    py ycm_state.CreateCompletionRequest( )
-	endif
+        py ycm_state.CreateCompletionRequest( force_semantic = True )
+    else
+        py ycm_state.CreateCompletionRequest( )
+    endif
     return pyeval( 'base.CompletionStartColumn()' )
   else
     return s:GetCompletions()
