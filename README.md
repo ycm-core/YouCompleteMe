@@ -866,6 +866,18 @@ Default: `1`
 
     let g:ycm_auto_trigger = 1
 
+### The `g:ycm_prefer_semantic` option
+
+When set to `1`, the identifier-based completion engine will be ignored if a
+semantic completion engine is available.
+
+YCM will always use the semantic completion engine when available, 
+even without semantic triggers.
+
+Default: `0`
+
+    let g:ycm_prefer_semantic = 0
+
 ### The `g:ycm_filetype_whitelist` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
