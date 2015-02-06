@@ -274,8 +274,10 @@ process.
     support for python2 scripting**.
 
     Inside Vim, type `:version`. Look at the first two to three lines of output;
-    it should say `Vi IMproved 7.3` and then below that, `Included patches:
-    1-X`, where X will be some number. That number needs to be 584 or higher.
+    it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If 
+    your version is greater than 7.3, then you're all set. If your version is
+    7.3 then look below that where it says, `Included patches: 1-Z`, where Z
+    will be some number. That number needs to be 584 or higher.
 
     If your version of Vim is not recent enough, you may need to [compile Vim
     from source][vim-build] (don't worry, it's easy).
