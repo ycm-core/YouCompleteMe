@@ -37,12 +37,14 @@ Contents ~
   3. The |GoTo| subcommand
   4. The |GoToImprecise| subcommand
   5. The |ClearCompilationFlagCache| subcommand
-  6. The |StartServer| subcommand
-  7. The |StopServer| subcommand
-  8. The |RestartServer| subcommand
-  9. The |ReloadSolution| subcommand
-  10. The |GoToImplementation| subcommand
-  11. The |GoToImplementationElseDeclaration| subcommand
+  6. The |GetType| subcommand
+  7. The |GetParent| subcommand
+  8. The |StartServer| subcommand
+  9. The |StopServer| subcommand
+  10. The |RestartServer| subcommand
+  11. The |ReloadSolution| subcommand
+  12. The |GoToImplementation| subcommand
+  13. The |GoToImplementationElseDeclaration| subcommand
  7. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
@@ -947,6 +949,41 @@ Vim of course).
 
 This command clears that cache entirely. YCM will then re-query your
 'FlagsForFile' function as needed in the future.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
+
+-------------------------------------------------------------------------------
+The *GetType* subcommand
+
+Echos the type of the variable or method under the cursor.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
+
+-------------------------------------------------------------------------------
+The *GetParent* subcommand
+
+Echos the semantic parent of the point under the cursor.
+
+The semantic parent is the item that semantically contains the given position.
+
+For example:
+>
+    class C {
+        void f();
+    };
+
+    void C::f() { 
+    
+    }
+<
+In the out-of-line definition of C::f, the semantic parent is the class C, 
+of which this function is a member.
+
+In the example above, both declarations of C::f have C as their semantic 
+context, while the lexical context of the first C::f is C and the lexical 
+context of the second C::f is the translation unit.
+
+For global declarations, the semantic parent is the translation unit.
 
 Supported in filetypes: 'c, cpp, objc, objcpp'
 
