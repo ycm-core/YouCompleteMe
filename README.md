@@ -774,6 +774,68 @@ This command clears that cache entirely. YCM will then re-query your
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
+### The `GetType` subcommand
+
+Echos the type of the variable or method under the cursor, and where it differs,
+the derived type. 
+
+For example:
+
+```c++
+    std::string s;
+```
+
+Invoking this command on `s` returns `std::string => std::basic_string<char>`
+
+NOTE: Due to limitations of `libclang`, invoking this command on the word
+`auto` typically returns `auto`. However, invoking it on a usage of the variable
+with inferred type returns the correct type, but typically it is repeated due to
+`libclang` returning that the types differ. 
+
+For example:
+
+```c++
+const char *s = "String";
+auto x = &s; // invoking on x or auto returns "auto";
+             // invoking on s returns "const char *"
+std::cout << *x; // invoking on x returns "const char ** => const char **"
+```
+
+NOTE: Causes reparsing of the current translation unit.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
+### The `GetParent` subcommand
+
+Echos the semantic parent of the point under the cursor.
+
+The semantic parent is the item that semantically contains the given position.
+
+For example:
+
+```c++
+class C {
+    void f();
+};
+
+void C::f() { 
+
+}
+```
+
+In the out-of-line definition of `C::f`, the semantic parent is the class `C`, 
+of which this function is a member.
+
+In the example above, both declarations of `C::f` have `C` as their semantic 
+context, while the lexical context of the first `C::f` is `C` and the lexical 
+context of the second `C::f` is the translation unit.
+
+For global declarations, the semantic parent is the translation unit.
+
+NOTE: Causes reparsing of the current translation unit.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
 ### The `StartServer` subcommand
 
 Starts the semantic-engine-as-localhost-server for those semantic engines that
