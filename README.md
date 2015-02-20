@@ -306,7 +306,7 @@ process.
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
 
-    We **STRONGLY recommended AGAINST use** of the system libclang instead of
+    We **STRONGLY recommend AGAINST use** of the system libclang instead of
     the upstream compiled binaries. Random things may break. Save yourself the
     hassle and use the upstream pre-built libclang.
 
@@ -343,7 +343,7 @@ process.
     `-DUSE_SYSTEM_BOOST=ON` to cmake. This may be necessary on some systems
     where the bundled version of boost doesn't compile out of the box.
 
-    NOTE: We **STRONGLY recommended AGAINST use** of the system boost instead
+    NOTE: We **STRONGLY recommend AGAINST use** of the system boost instead
     of the bundled version of boost. Random things may break. Save yourself
     the hassle and use the bundled version of boost.
 
@@ -364,7 +364,7 @@ process.
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
     `-DPATH_TO_LLVM_ROOT=...` flag.
 
-    NOTE: We **STRONGLY recommended AGAINST use** of the system libclang instead
+    NOTE: We **STRONGLY recommend AGAINST use** of the system libclang instead
     of the upstream compiled binaries. Random things may break. Save yourself
     the hassle and use the upstream pre-built libclang.
 
