@@ -1253,6 +1253,16 @@ Default: `1`
 
     let g:ycm_auto_stop_csharp_server = 1
 
+### The `g:ycm_csharp_server_port` option
+
+When g:ycm_auto_start_csharp_server is set to `1`, specifies the port for 
+the OmniSharp server to listen on. When set to `0` uses an unused port provided
+by the OS.
+
+Default: `0`
+
+    let g:ycm_csharp_server_port = 0
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's
