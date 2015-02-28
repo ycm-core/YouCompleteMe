@@ -86,6 +86,11 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
     ln -s /usr/local/bin/mvim vim
 
+Alternatively, if you don't use the MacVim GUI, and you're using homebrew to
+install MacVim, you can use this command to avoid the GUI:
+
+    brew install macvim --override-system-vim
+
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
