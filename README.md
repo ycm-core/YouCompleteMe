@@ -274,7 +274,7 @@ process.
     support for python2 scripting**.
 
     Inside Vim, type `:version`. Look at the first two to three lines of output;
-    it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If 
+    it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If
     your version is greater than 7.3, then you're all set. If your version is
     7.3 then look below that where it says, `Included patches: 1-Z`, where Z
     will be some number. That number needs to be 584 or higher.
@@ -353,8 +353,13 @@ process.
     `cmake` call will be a bit more complicated.  We'll assume you downloaded a
     binary distribution of LLVM+Clang from llvm.org in step 3 and that you
     extracted the archive file to folder `~/ycm_temp/llvm_root_dir` (with `bin`,
-    `lib`, `include` etc. folders right inside that folder). With that in mind,
-    run the following command in the `ycm_build` directory:
+    `lib`, `include` etc. folders right inside that folder).
+
+    NOTE: This _only_ works with a _downloaded_ LLVM binary package, not a
+    custom-built LLVM! See docs below for `EXTERNAL_LIBCLANG_PATH` when using a
+    custom LLVM build.
+
+    With that in mind, run the following command in the `ycm_build` directory:
 
         cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
@@ -373,7 +378,8 @@ process.
     You could also force the use of a custom libclang library with
     `-DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so` flag (the library would end
     with `.dylib` on a Mac). Again, this flag would be used _instead of_ the
-    other flags.
+    other flags. **If you compiled LLVM from source, this is the flag you should
+    be using.**
 
     Running the `make` command will also place the `libclang.[so|dylib]` in the
     `YouCompleteMe/third_party/ycmd` folder for you if you compiled with clang
@@ -1255,7 +1261,7 @@ Default: `1`
 
 ### The `g:ycm_csharp_server_port` option
 
-When g:ycm_auto_start_csharp_server is set to `1`, specifies the port for 
+When g:ycm_auto_start_csharp_server is set to `1`, specifies the port for
 the OmniSharp server to listen on. When set to `0` uses an unused port provided
 by the OS.
 
