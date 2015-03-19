@@ -486,6 +486,8 @@ you by adding `set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )` to your project's
 `CMakeLists.txt` file (if using CMake). If you're not using CMake, you could use
 something like [Bear][] to generate the `compile_commands.json` file.
 
+Consider using [YCM-Generator][ygen] to generate the `ycm_extra_conf.py` file.
+
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions.  When
 the completion menu finally appears, it's going to have a large number of
@@ -1943,3 +1945,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [python-re]: https://docs.python.org/2/library/re.html#regular-expression-syntax
 [bear]: https://github.com/rizsotto/Bear
 [Options]: https://github.com/Valloric/YouCompleteMe#options
+[ygen]: https://github.com/rdnetto/YCM-Generator
