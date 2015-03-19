@@ -57,17 +57,20 @@ class CommandRequest( BaseRequest ):
 
 
   def RunPostCommandActionsIfNeeded( self ):
-    if not self._is_goto_command or not self.Done() or not self._response:
+    if not self.Done() or not self._response:
       return
 
-    if isinstance( self._response, list ):
-      defs = [ _BuildQfListItem( x ) for x in self._response ]
-      vim.eval( 'setqflist( %s )' % repr( defs ) )
-      vim.eval( 'youcompleteme#OpenGoToList()' )
-    else:
-      vimsupport.JumpToLocation( self._response[ 'filepath' ],
-                                 self._response[ 'line_num' ],
-                                 self._response[ 'column_num' ] )
+    if self._is_goto_command: 
+      if isinstance( self._response, list ):
+        defs = [ _BuildQfListItem( x ) for x in self._response ]
+        vim.eval( 'setqflist( %s )' % repr( defs ) )
+        vim.eval( 'youcompleteme#OpenGoToList()' )
+      else:
+        vimsupport.JumpToLocation( self._response[ 'filepath' ],
+                                    self._response[ 'line_num' ],
+                                    self._response[ 'column_num' ] )
+    elif 'message' in self._response:
+        vimsupport.EchoText( self._response['message'] )
 
 
 
