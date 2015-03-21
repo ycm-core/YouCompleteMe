@@ -281,6 +281,10 @@ endfunction
 
 
 function! s:AllowedToCompleteInCurrentFile()
+  if g:ycm_enable_in_command_line_window && 
+        \ bufname( winbufnr( winnr() ) ) ==# "[Command Line]"
+    return 1
+  endif
   if empty( &filetype ) ||
         \ getbufvar( winbufnr( winnr() ), "&buftype" ) ==# 'nofile' ||
         \ &filetype ==# 'qf'
