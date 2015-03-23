@@ -1558,7 +1558,7 @@ Default: `[see next line]`
 
 Some omnicompletion engines do not work well with the YCM cache—in particular,
 they might not produce all possible results for a given prefix. By unsetting
-this option you can ensure that the omnicompletion engine is requeried on every
+this option you can ensure that the omnicompletion engine is re-queried on every
 keypress. That will ensure all completions will be presented, but might cause
 stuttering and lagginess if the omnifunc is slow.
 
