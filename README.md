@@ -1579,7 +1579,8 @@ Default: `1`
 
 Defines where `GoTo*` commands result should be opened.
 Can take one of the following values:
-`[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab' ]`
+`[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab',
+  'new-or-existing-tab' ]`
 If this option is set to the `'same-buffer'` but current buffer can not
 be switched (when buffer is modified and `nohidden` option is set),
 then result will be opened in horizontal split.

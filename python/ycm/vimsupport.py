@@ -302,6 +302,25 @@ def EscapedFilepath( filepath ):
 
 
 # Both |line| and |column| need to be 1-based
+def TryJumpLocationInOpenedTab( filename, line, column ):
+  filepath = os.path.realpath( filename )
+
+  for tab in vim.tabpages:
+    for win in tab.windows:
+      if win.buffer.name == filepath:
+        vim.current.tabpage = tab
+        vim.current.window = win
+        vim.current.window.cursor = ( line, column - 1 )
+
+        # Center the screen on the jumped-to location
+        vim.command( 'normal! zz' )
+        return
+  else:
+    # 'filename' is not opened in any tab pages
+    raise ValueError
+
+
+# Both |line| and |column| need to be 1-based
 def JumpToLocation( filename, line, column ):
   # Add an entry to the jumplist
   vim.command( "normal! m'" )
@@ -314,6 +333,14 @@ def JumpToLocation( filename, line, column ):
     # Sadly this fails on random occasions and the undesired jump remains in the
     # jumplist.
     user_command = user_options_store.Value( 'goto_buffer_command' )
+
+    if user_command == 'new-or-existing-tab':
+      try:
+        TryJumpLocationInOpenedTab( filename, line, column )
+        return
+      except ValueError:
+        user_command = 'new-tab'
+
     command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
     if command == 'edit' and not BufferIsUsable( vim.current.buffer ):
       command = 'split'
