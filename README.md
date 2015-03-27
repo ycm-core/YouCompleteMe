@@ -126,8 +126,9 @@ using Vundle and the ycm_support_libs library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
-It's recommended that you have the latest Xcode installed along with the latest
-Command Line Tools (that you install from within Xcode).
+**NOTE:** If you want C-family completion, you MUST have the latest Xcode
+installed along with the latest Command Line Tools (they are installed when you
+start Xcode for the first time).
 
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
@@ -777,7 +778,7 @@ Supported in filetypes: `c, cpp, objc, objcpp`
 ### The `GetType` subcommand
 
 Echos the type of the variable or method under the cursor, and where it differs,
-the derived type. 
+the derived type.
 
 For example:
 
@@ -790,7 +791,7 @@ Invoking this command on `s` returns `std::string => std::basic_string<char>`
 NOTE: Due to limitations of `libclang`, invoking this command on the word
 `auto` typically returns `auto`. However, invoking it on a usage of the variable
 with inferred type returns the correct type, but typically it is repeated due to
-`libclang` returning that the types differ. 
+`libclang` returning that the types differ.
 
 For example:
 
@@ -818,16 +819,16 @@ class C {
     void f();
 };
 
-void C::f() { 
+void C::f() {
 
 }
 ```
 
-In the out-of-line definition of `C::f`, the semantic parent is the class `C`, 
+In the out-of-line definition of `C::f`, the semantic parent is the class `C`,
 of which this function is a member.
 
-In the example above, both declarations of `C::f` have `C` as their semantic 
-context, while the lexical context of the first `C::f` is `C` and the lexical 
+In the example above, both declarations of `C::f` have `C` as their semantic
+context, while the lexical context of the first `C::f` is `C` and the lexical
 context of the second `C::f` is the translation unit.
 
 For global declarations, the semantic parent is the translation unit.
@@ -1928,12 +1929,15 @@ cases; if we find the request to be reasonable, we'll find a way to address it.
 
 ### Completion doesn't work with the C++ standard library headers
 
-This is caused by an issue with libclang. Compiling from `clang` the binary uses
-the correct default header search paths but compiling from `libclang.so` does
-not. The issue seems to impact some OS's more than others. It appears that OS X
-Mavericks in particular has problems with this.
+This is caused by an issue with libclang that only affects some operating
+systems. Compiling with `clang` the binary will use the correct default header
+search paths but compiling with `libclang.so` (which YCM uses) does not.
 
-The current workaround is to call `echo | clang -v -E -x c++ -` and look at the
+Mac OS X is normally affected, but there's a workaround in YCM for that specific
+OS. If you're not running that OS but still have the same problem, continue
+reading.
+
+The workaround is to call `echo | clang -v -E -x c++ -` and look at the
 paths under the `#include <...> search starts here:` heading. You should take
 those paths, prepend `-isystem` to each individual path and append them all to
 the list of flags you return from your `FlagsForFile` function in your
