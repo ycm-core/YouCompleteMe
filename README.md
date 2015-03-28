@@ -1785,6 +1785,18 @@ CompileCommands API) were added after their cut.
 So just go through the installation guide and make sure you are using a correct
 `libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
 
+### I get `Vim: Caught deadly signal ABRT` on Vim startup
+
+You can get this if you have multiple Python's installed on your system, and
+YCM uses a different Python than Vim itself. This can happen for example when
+you installed Python on OS X with Homebrew. Vim might use OS X's system Python
+and YCM the brewed Python.
+
+To fix this issue, you should make sure YCM uses the same Python as Vim.
+Depending on your setup, the solution may differ. Check out the discussion in
+[this issue](https://github.com/Valloric/YouCompleteMe/issues/8), and in
+particular read [this comment](https://github.com/Valloric/YouCompleteMe/issues/8#issuecomment-34374807).
+
 ### YCM does not read identifiers from my tags files
 
 First, put `let g:ycm_collect_identifiers_from_tags_files = 1` in your vimrc.
