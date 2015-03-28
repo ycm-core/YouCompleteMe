@@ -336,9 +336,14 @@ process.
         mkdir ycm_build
         cd ycm_build
 
-    Now we need to generate the makefiles. If you DON'T care about semantic
-    support for C-family languages, run the following command in the `ycm_build`
-    directory:
+    Now we need to generate the makefiles. This step is divided in people who
+    DO want to have semantic support for C-family languages, and people who
+    DON'T. Follow only one of the approaches, not both. If you DO care about
+    C-family languages make sure you also executed step 3.
+
+    #### If you DON'T care about semantic support for C-family languages:
+
+    Run the following command in the `ycm_build` directory:
 
         cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
@@ -350,11 +355,12 @@ process.
     of the bundled version of boost. Random things may break. Save yourself
     the hassle and use the bundled version of boost.
 
-    If you DO care about semantic support for C-family languages, then your
-    `cmake` call will be a bit more complicated.  We'll assume you downloaded a
-    binary distribution of LLVM+Clang from llvm.org in step 3 and that you
-    extracted the archive file to folder `~/ycm_temp/llvm_root_dir` (with `bin`,
-    `lib`, `include` etc. folders right inside that folder).
+    #### If you DO care about semantic support for C-family languages:
+
+    Your `cmake` call will be a bit more complicated.  We'll assume you
+    downloaded a binary distribution of LLVM+Clang from llvm.org in step 3 and
+    that you extracted the archive file to folder `~/ycm_temp/llvm_root_dir`
+    (with `bin`, `lib`, `include` etc. folders right inside that folder).
 
     NOTE: This _only_ works with a _downloaded_ LLVM binary package, not a
     custom-built LLVM! See docs below for `EXTERNAL_LIBCLANG_PATH` when using a
