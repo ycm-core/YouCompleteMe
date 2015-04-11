@@ -6,6 +6,7 @@ YouCompleteMe: a code-completion engine for Vim
 - [Intro](#intro)
 - [Installation](#installation)
     - [Mac OS X](#mac-os-x-super-quick-installation)
+    - [Debian](#debian-installation)
     - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
     - [Windows](#windows-installation)
     - [FreeBSD/OpenBSD](#freebsdopenbsd-installation)
@@ -157,6 +158,32 @@ in the User Guide.
 YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
+
+### [Debian][Debian] installation
+To install YCM in [Debian][Debian] _you have 2 choices_, **package** or **compilation**.
+
+**Package** name [vim-youcompleteme][vim-youcompleteme] is actually in testing, but you can check by:
+
+    $ apt-cache policy vim-youcompleteme
+
+If you are lucky enough it has become to stable:
+
+    $ sudo apt-get install vim-youcompleteme
+
+Or you can try to install it from an other branch (testing).
+
+    $ sudo apt-get install -t testing vim-youcompleteme
+
+
+**Compile** can require some additional dependencies, install them by:
+
+    $ sudo apt-get build-dep vim-youcompleteme
+
+Again if you do not have the **package** available, you may want to install
+dependencies by hand:
+
+    $ sudo apt-get install debhelper cmake python-dev libclang-dev libboost-python-dev libboost-system-dev libboost-filesystem-dev libboost-regex-dev
+
 
 ### Ubuntu Linux x64 super-quick installation
 
@@ -2013,3 +2040,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [bear]: https://github.com/rizsotto/Bear
 [Options]: https://github.com/Valloric/YouCompleteMe#options
 [ygen]: https://github.com/rdnetto/YCM-Generator
+[Debian]: https://www.debian.org
+[vim-youcompleteme]: https://packages.debian.org/source/jessie/vim-youcompleteme
