@@ -6,6 +6,7 @@ YouCompleteMe: a code-completion engine for Vim
 - [Intro](#intro)
 - [Installation](#installation)
     - [Mac OS X](#mac-os-x-super-quick-installation)
+    - [NeoBundle](#neobundle-installation)
     - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
     - [Windows](#windows-installation)
     - [FreeBSD/OpenBSD](#freebsdopenbsd-installation)
@@ -157,6 +158,25 @@ in the User Guide.
 YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
+
+### [NeoBundle][NeoBundle] installation
+[NeoBundle][NeoBundle] can do the compilation for you just add in your vimrc:
+
+    NeoBundle 'Valloric/YouCompleteMe', {
+         \ 'build'      : {
+            \ 'mac'     : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+            \ 'unix'    : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+            \ 'windows' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+            \ 'cygwin'  : './install.sh --clang-completer --system-libclang --omnisharp-completer'
+            \ }
+         \ }
+
+But you can have a issue about the time needed to get the sub modules and
+compile the whole thing, on my Lenovo t440s it take near 15 minutes, so to
+achieve that, you need to tweak the internal value of timeout in [NeoBundle][NeoBundle],
+add in your vimrc:
+
+    let g:neobundle#install_process_timeout = 1500
 
 ### Ubuntu Linux x64 super-quick installation
 
@@ -2013,3 +2033,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [bear]: https://github.com/rizsotto/Bear
 [Options]: https://github.com/Valloric/YouCompleteMe#options
 [ygen]: https://github.com/rdnetto/YCM-Generator
+[NeoBundle]: https://github.com/Shougo/neobundle.vim
