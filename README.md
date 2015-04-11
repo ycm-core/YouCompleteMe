@@ -1925,6 +1925,24 @@ the list of flags you return from your `FlagsForFile` function in your
 
 See [issue #303][issue-303] for details.
 
+### Install YCM with [NeoBundle][NeoBundle]
+[NeoBundle][NeoBundle] can do the compilation for you; just add the following to your vimrc:
+
+    NeoBundle 'Valloric/YouCompleteMe', {
+         \ 'build'      : {
+            \ 'mac'     : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+            \ 'unix'    : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+            \ 'windows' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+            \ 'cygwin'  : './install.sh --clang-completer --system-libclang --omnisharp-completer'
+            \ }
+         \ }
+
+But you could have problems with the time needed to get the sub modules and
+compile the whole thing.
+To increase the Neobundle timeout to 1500 seconds, add the following to your vimrc:
+
+    let g:neobundle#install_process_timeout = 1500
+
 Contact
 -------
 
@@ -1994,3 +2012,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [Options]: https://github.com/Valloric/YouCompleteMe#options
 [ygen]: https://github.com/rdnetto/YCM-Generator
 [Gocode]: https://github.com/nsf/gocode
+[NeoBundle]: https://github.com/Shougo/neobundle.vim
