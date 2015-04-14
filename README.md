@@ -500,30 +500,6 @@ getting fast completions.
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
 
-### Python semantic completion
-
-YCM uses [Jedi][] to power its semantic completion for Python. This should "just
-work" without any configuration from the user. You do NOT need to install Jedi
-yourself; YCM uses it as a git subrepo. If you're installing YCM with Vundle
-(which is the recommended way) then Vundle will make sure that the subrepo is
-checked out when you do `:PluginInstall`. If you're installing YCM by hand, then
-you need to run `git submodule update --init --recursive` when you're checking
-out the YCM repository. That's it.
-
-But again, installing YCM with Vundle takes care of all of this for you.
-
-### C# semantic completion
-
-YCM uses [OmniSharp][] to provide semantic completion for C#. It's used as a git
-subrepo. If you're installing YCM with Vundle (which is the recommended way)
-then Vundle will make sure that the subrepo is checked out when you do
-`:PluginInstall`. If you're installing YCM by hand, then you need to run `git
-submodule update --init --recursive` when you're checking out the YCM
-repository.
-
-OmniSharp is written in C# and has to be compiled. The `install.sh` script takes
-care of this if you pass `--omnisharp-completer` as an argument.
-
 ### Semantic completion for other languages
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
