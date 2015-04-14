@@ -18,7 +18,7 @@ YouCompleteMe: a code-completion engine for Vim
     - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
     - [Python semantic completion](#python-semantic-completion)
     - [C# semantic completion](#c-semantic-completion)
-    - [Go semantic completion](#c-semantic-completion)
+    - [Go semantic completion](#go-semantic-completion)
     - [Semantic completion for other languages](#semantic-completion-for-other-languages)
     - [Writing new semantic completers](#writing-new-semantic-completers)
     - [Diagnostic display](#diagnostic-display)
