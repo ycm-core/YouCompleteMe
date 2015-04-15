@@ -16,9 +16,6 @@ YouCompleteMe: a code-completion engine for Vim
     - [Completion string ranking](#completion-string-ranking)
     - [General semantic completion](#general-semantic-completion-engine-usage)
     - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
-    - [Python semantic completion](#python-semantic-completion)
-    - [C# semantic completion](#c-semantic-completion)
-    - [Go semantic completion](#go-semantic-completion)
     - [Semantic completion for other languages](#semantic-completion-for-other-languages)
     - [Writing new semantic completers](#writing-new-semantic-completers)
     - [Diagnostic display](#diagnostic-display)
@@ -503,6 +500,11 @@ Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
 
 ### Semantic completion for other languages
+
+Python, C#, and Go are supported natively by YouCompleteMe using the [Jedi][],
+[Omnisharp][], and [Gocode][] engines, respectively. Check the
+[installation](#installation) section for instructions to enable these features
+if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
