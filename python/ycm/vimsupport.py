@@ -100,7 +100,8 @@ def GetUnsavedAndCurrentBufferData():
       continue
 
     buffers_data[ GetBufferFilepath( buffer_object ) ] = {
-      'contents': '\n'.join( buffer_object ),
+      # Add a newline to match what gets saved to disk. See #1455 for details.
+      'contents': '\n'.join( buffer_object ) + '\n',
       'filetypes': FiletypesForBuffer( buffer_object )
     }
 
