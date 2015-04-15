@@ -16,8 +16,6 @@ YouCompleteMe: a code-completion engine for Vim
     - [Completion string ranking](#completion-string-ranking)
     - [General semantic completion](#general-semantic-completion-engine-usage)
     - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
-    - [Python semantic completion](#python-semantic-completion)
-    - [C# semantic completion](#c-semantic-completion)
     - [Semantic completion for other languages](#semantic-completion-for-other-languages)
     - [Writing new semantic completers](#writing-new-semantic-completers)
     - [Diagnostic display](#diagnostic-display)
@@ -39,9 +37,10 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 works with every programming language, a semantic, [Clang][]-based engine that
 provides native semantic code completion for C/C++/Objective-C/Objective-C++
 (from now on referred to as "the C-family languages"), a [Jedi][]-based
-completion engine for Python, an [OmniSharp][]-based completion engine for C#
-and an omnifunc-based completer that uses data from Vim's omnicomplete system to
-provide semantic completions for many other languages (Ruby, PHP etc.).
+completion engine for Python, an [OmniSharp][]-based completion engine for C#,
+a [Gocode][]-based completion engine for Go, and an omnifunc-based completer
+that uses data from Vim's omnicomplete system to provide semantic completions
+for many other languages (Ruby, PHP etc.).
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
@@ -147,7 +146,7 @@ Compiling YCM **without** semantic support for C-family languages:
     ./install.sh
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well.
+install script as well. If you want Go support, you should add `--gocode-completer`.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -190,7 +189,7 @@ Compiling YCM **without** semantic support for C-family languages:
     ./install.sh
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well.
+install script as well. If you want Go support, you should add `--gocode-completer`.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -243,7 +242,7 @@ Compiling YCM **without** semantic support for C-family languages:
     ./install.sh --system-boost
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well.
+install script as well. If you want Go support, you should add `--gocode-completer`.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -501,6 +500,11 @@ Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
 
 ### Semantic completion for other languages
+
+Python, C#, and Go are supported natively by YouCompleteMe using the [Jedi][],
+[Omnisharp][], and [Gocode][] engines, respectively. Check the
+[installation](#installation) section for instructions to enable these features
+if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
@@ -1989,3 +1993,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [bear]: https://github.com/rizsotto/Bear
 [Options]: https://github.com/Valloric/YouCompleteMe#options
 [ygen]: https://github.com/rdnetto/YCM-Generator
+[Gocode]: https://github.com/nsf/gocode
