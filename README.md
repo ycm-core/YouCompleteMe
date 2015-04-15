@@ -40,9 +40,10 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 works with every programming language, a semantic, [Clang][]-based engine that
 provides native semantic code completion for C/C++/Objective-C/Objective-C++
 (from now on referred to as "the C-family languages"), a [Jedi][]-based
-completion engine for Python, an [OmniSharp][]-based completion engine for C#
-and an omnifunc-based completer that uses data from Vim's omnicomplete system to
-provide semantic completions for many other languages (Ruby, PHP etc.).
+completion engine for Python, an [OmniSharp][]-based completion engine for C#,
+a [Gocode][]-based completion engine for Go, and an omnifunc-based completer
+that uses data from Vim's omnicomplete system to provide semantic completions
+for many other languages (Ruby, PHP etc.).
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
