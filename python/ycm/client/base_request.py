@@ -24,8 +24,8 @@ from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
-from ycmd import utils
 from ycmd.utils import ToUtf8Json
+from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureStringsEqual
 from ycmd.responses import ServerError, UnknownExtraConf
 
 _HEADERS = {'content-type': 'application/json'}
@@ -89,29 +89,37 @@ class BaseRequest( object ):
                            method,
                            timeout = _DEFAULT_TIMEOUT_SEC ):
     def SendRequest( data, handler, method, timeout ):
+      request_uri = _BuildUri( handler )
       if method == 'POST':
         sent_data = ToUtf8Json( data )
         return BaseRequest.session.post(
-            _BuildUri( handler ),
+            request_uri,
             data = sent_data,
-            headers = BaseRequest._ExtraHeaders( sent_data ),
+            headers = BaseRequest._ExtraHeaders( method,
+                                                 request_uri,
+                                                 sent_data ),
             timeout = timeout )
       if method == 'GET':
         return BaseRequest.session.get(
-            _BuildUri( handler ),
-            headers = BaseRequest._ExtraHeaders(),
+            request_uri,
+            headers = BaseRequest._ExtraHeaders( method, request_uri ),
             timeout = timeout )
 
     @retries( 5, delay = 0.5, backoff = 1.5 )
     def DelayedSendRequest( data, handler, method ):
+      request_uri = _BuildUri( handler )
       if method == 'POST':
         sent_data = ToUtf8Json( data )
-        return requests.post( _BuildUri( handler ),
-                              data = sent_data,
-                              headers = BaseRequest._ExtraHeaders( sent_data ) )
+        return requests.post(
+            request_uri,
+            data = sent_data,
+            headers = BaseRequest._ExtraHeaders( method,
+                                                 request_uri,
+                                                 sent_data ) )
       if method == 'GET':
-        return requests.get( _BuildUri( handler ),
-                             headers = BaseRequest._ExtraHeaders() )
+        return requests.get(
+            request_uri,
+            headers = BaseRequest._ExtraHeaders( method, request_uri ) )
 
     if not _CheckServerIsHealthyWithCache():
       return _EXECUTOR.submit( DelayedSendRequest, data, handler, method )
@@ -120,12 +128,15 @@ class BaseRequest( object ):
 
 
   @staticmethod
-  def _ExtraHeaders( request_body = None ):
+  def _ExtraHeaders( method, request_uri, request_body = None ):
     if not request_body:
       request_body = ''
     headers = dict( _HEADERS )
     headers[ _HMAC_HEADER ] = b64encode(
-        utils.CreateHexHmac( request_body, BaseRequest.hmac_secret ) )
+        CreateRequestHmac( method,
+                           urlparse.urlparse( request_uri ).path,
+                           request_body,
+                           BaseRequest.hmac_secret ) )
     return headers
 
   session = FuturesSession( executor = _EXECUTOR )
@@ -174,10 +185,9 @@ def HandleServerException( exception ):
 
 
 def _ValidateResponseObject( response ):
-  if not utils.ContentHexHmacValid(
-      response.content,
-      b64decode( response.headers[ _HMAC_HEADER ] ),
-      BaseRequest.hmac_secret ):
+  hmac = CreateHmac( response.content, BaseRequest.hmac_secret )
+  if not SecureStringsEqual( hmac,
+                             b64decode( response.headers[ _HMAC_HEADER ] ) ):
     raise RuntimeError( 'Received invalid HMAC for response!' )
   return True
 
@@ -191,8 +201,10 @@ def _CheckServerIsHealthyWithCache():
   global SERVER_HEALTHY
 
   def _ServerIsHealthy():
-    response = requests.get( _BuildUri( 'healthy' ),
-                             headers = BaseRequest._ExtraHeaders() )
+    request_uri = _BuildUri( 'healthy' )
+    response = requests.get( request_uri,
+                             headers = BaseRequest._ExtraHeaders(
+                                 'GET', request_uri, '' ) )
     _ValidateResponseObject( response )
     response.raise_for_status()
     return response.json()
