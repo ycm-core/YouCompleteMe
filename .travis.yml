@@ -6,4 +6,4 @@ before_install:
   - git submodule update --init --recursive
 install:
   - pip install -r python/test_requirements.txt
-script: ./run_tests.sh
+script: ./run_tests.py
