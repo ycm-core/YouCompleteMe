@@ -1,0 +1,16 @@
+version: '{build}'
+environment:
+  matrix:
+  - arch: 32
+  - arch: 64
+install:
+  - git submodule update --init --recursive
+  - ps: $env:python = if ($env:arch -eq 32) { 'C:\Python27' } else { 'C:\Python27-x64' }
+  - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
+  - set PATH=%python%;%python%\Scripts;%PATH%
+  - python C:\get-pip.py
+  - pip install -r python\test_requirements.txt
+build_script:
+  - run_tests.py
+# Disable automatic tests
+test: off
