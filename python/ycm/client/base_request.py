@@ -144,17 +144,24 @@ class BaseRequest( object ):
   hmac_secret = ''
 
 
-def BuildRequestData( include_buffer_data = True ):
-  line, column = vimsupport.CurrentLineAndColumn()
-  filepath = vimsupport.GetCurrentBufferFilepath()
-  request_data = {
-    'line_num': line + 1,
-    'column_num': column + 1,
-    'filepath': filepath
-  }
+def BuildRequestData( include_buffer_data = True, buffer_info = None ):
+  if buffer_info is None:
+    line, column = vimsupport.CurrentLineAndColumn()
+    filepath = vimsupport.GetCurrentBufferFilepath()
+    buffer_info = {
+      'line_num': line + 1,
+      'column_num': column + 1,
+      'filepath': filepath,
+      'buffer_num': None
+    }
 
+  request_data = {
+    'line_num': buffer_info['line_num'],
+    'column_num': buffer_info['column_num'],
+    'filepath': buffer_info['filepath']
+  }
   if include_buffer_data:
-    request_data[ 'file_data' ] = vimsupport.GetUnsavedAndCurrentBufferData()
+    request_data[ 'file_data' ] = vimsupport.GetUnsavedAndCurrentBufferData( buffer_info[ 'buffer_num' ] )
 
   return request_data
 
