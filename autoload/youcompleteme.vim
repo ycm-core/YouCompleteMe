@@ -344,6 +344,7 @@ endfunction
 
 
 function! s:SetUpCommands()
+  command! YcmStopServer call s:StopServer()
   command! YcmRestartServer call s:RestartServer()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmDebugInfo call s:DebugInfo()
@@ -771,6 +772,11 @@ endfunction
 
 function! youcompleteme#ServerPid()
   return s:Pyeval( 'ycm_state.ServerPid()' )
+endfunction
+
+
+function! s:StopServer()
+  py ycm_state.StopServer()
 endfunction
 
 

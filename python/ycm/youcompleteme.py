@@ -44,6 +44,7 @@ from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
+from ycm.client.shutdown_request import SendShutdownRequest
 from ycm.client.completion_request import ( CompletionRequest,
                                             ConvertCompletionDataToVimData )
 from ycm.client.omni_completion_request import OmniCompletionRequest
@@ -108,7 +109,6 @@ DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
-    self._user_notified_about_crash = False
     self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
     self._latest_file_parse_request = None
@@ -127,6 +127,7 @@ class YouCompleteMe( object ):
 
   def _SetupServer( self ):
     self._available_completers = {}
+    self._user_notified_about_crash = False
     server_port = utils.GetUnusedLocalhostPort()
     # The temp options file is deleted by ycmd during startup
     with NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
@@ -143,7 +144,7 @@ class YouCompleteMe( object ):
                '--options_file={0}'.format( options_file.name ),
                '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
                '--idle_suicide_seconds={0}'.format(
-                  SERVER_IDLE_SUICIDE_SECONDS )]
+                  SERVER_IDLE_SUICIDE_SECONDS ) ]
 
       filename_format = os.path.join( utils.PathToCreatedTempDir(),
                                       'server_{port}_{std}.log' )
@@ -206,16 +207,20 @@ class YouCompleteMe( object ):
     return self._server_popen.pid
 
 
-  def _ServerCleanup( self ):
+  def _ShutdownServer( self ):
     if self.IsServerAlive():
-      self._server_popen.terminate()
+      SendShutdownRequest()
+
+
+  def StopServer( self ):
+    vimsupport.PostVimMessage( 'Stopping ycmd server...' )
+    self._ShutdownServer()
 
 
   def RestartServer( self ):
     self._CloseLogs()
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
-    self._user_notified_about_crash = False
-    self._ServerCleanup()
+    self._ShutdownServer()
     self._SetupServer()
 
 
@@ -332,7 +337,7 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
-    self._ServerCleanup()
+    self._ShutdownServer()
 
 
   def OnCurrentIdentifierFinished( self ):
