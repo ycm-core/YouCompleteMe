@@ -177,8 +177,8 @@ function! s:SetUpKeyMappings()
     let invoke_key = g:ycm_key_invoke_completion
 
     " Inside the console, <C-Space> is passed as <Nul> to Vim
-    if invoke_key ==# '<C-Space>' && !has('gui_running')
-      let invoke_key = '<Nul>'
+    if invoke_key ==# '<C-Space>'
+      imap <Nul> <C-Space>
     endif
 
     " <c-x><c-o> trigger omni completion, <c-p> deselects the first completion
