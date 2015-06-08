@@ -1977,7 +1977,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/gmarik/vundle#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
-[clang-download]: http://llvm.org/releases/download.html#3.3
+[clang-download]: http://llvm.org/releases/download.html
 [brew]: http://mxcl.github.com/homebrew/
 [cmake-download]: http://www.cmake.org/cmake/resources/software.html
 [macvim]: http://code.google.com/p/macvim/#Download
