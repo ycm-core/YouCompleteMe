@@ -299,7 +299,8 @@ class YouCompleteMe( object ):
 
 
   def UpdateDiagnosticInterface( self ):
-    if not self.DiagnosticsForCurrentFileReady():
+    if ( not self.DiagnosticsForCurrentFileReady() or
+         not self.NativeFiletypeCompletionUsable() ):
       return
     self._diag_interface.UpdateWithNewDiagnostics(
       self.GetDiagnosticsFromStoredRequest() )

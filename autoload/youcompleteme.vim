@@ -567,8 +567,7 @@ endfunction
 
 function! s:UpdateDiagnosticNotifications()
   let should_display_diagnostics = g:ycm_show_diagnostics_ui &&
-        \ s:DiagnosticUiSupportedForCurrentFiletype() &&
-        \ pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+        \ s:DiagnosticUiSupportedForCurrentFiletype()
 
   if !should_display_diagnostics
     return
