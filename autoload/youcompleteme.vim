@@ -423,7 +423,10 @@ endfunction
 function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
+endfunction
 
+
+function! s:SetOmnicompleteFunc()
   if pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
@@ -503,6 +506,11 @@ endfunction
 function! s:OnInsertEnter()
   if !s:AllowedToCompleteInCurrentFile()
     return
+  endif
+
+  if get( b:, 'ycm_omnicomplete', 0 )
+    let b:ycm_omnicomplete = 1
+    call s:SetOmnicompleteFunc()
   endif
 
   let s:old_cursor_position = []
