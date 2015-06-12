@@ -341,7 +341,7 @@ class YouCompleteMe( object ):
     if '*' in filetype_to_disable:
       return False
     else:
-      return not all([ x in filetype_to_disable for x in filetypes ])
+      return not any([ x in filetype_to_disable for x in filetypes ])
 
 
   def _AddSyntaxDataIfNeeded( self, extra_data ):
