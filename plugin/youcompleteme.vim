@@ -112,6 +112,9 @@ let g:ycm_key_list_select_completion =
 let g:ycm_key_list_previous_completion =
       \ get( g:, 'ycm_key_list_previous_completion', ['<S-TAB>', '<Up>'] )
 
+let g:ycm_key_list_accept_completion =
+      \ get( g:, 'ycm_key_list_accept_completion', ['<C-Y>'] )
+
 let g:ycm_key_invoke_completion =
       \ get( g:, 'ycm_key_invoke_completion', '<C-Space>' )
 
