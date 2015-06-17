@@ -27,6 +27,7 @@ let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
 let s:previous_num_chars_on_current_line = -1
+let s:completion_accepted = 0
 
 let s:diagnostic_ui_filetypes = {
       \ 'cpp': 1,
@@ -109,6 +110,19 @@ function! youcompleteme#DisableCursorMovedAutocommands()
 endfunction
 
 
+function! youcompleteme#Accept()
+  " Will suppress completion menu until cursor moved, or other suitable autocmd
+  " fires. The value of 2 here is a signal that the cursor will actually need to
+  " move twice before we re-enable completion, because our `<C-y>` here will
+  " actually cause the CursorMovedI autocmd to fire immediately, and we want to
+  " ignore that first move.
+  let s:completion_accepted = 2
+  set completeopt-=menuone
+  set completeopt-=menu
+  return "\<C-y>"
+endfunction
+
+
 function! s:SetUpPython() abort
   py import sys
   py import vim
@@ -171,6 +185,11 @@ function! s:SetUpKeyMappings()
     " This selects the previous candidate for shift-tab (default)
     exe 'inoremap <expr>' . key .
           \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
+  endfor
+
+  for key in g:ycm_key_list_accept_completion
+    exe 'inoremap <expr> ' . key .
+          \ ' pumvisible() ? youcompleteme#Accept() : "\' . key . '"'
   endfor
 
   if !empty( g:ycm_key_invoke_completion )
@@ -281,6 +300,10 @@ endfunction
 
 
 function! s:AllowedToCompleteInCurrentFile()
+  if s:completion_accepted
+    return 0
+  endif
+
   if empty( &filetype ) ||
         \ getbufvar( winbufnr( winnr() ), "&buftype" ) ==# 'nofile' ||
         \ &filetype ==# 'qf'
@@ -318,10 +341,15 @@ function! s:SetUpCompleteopt()
   " There's no two ways about this: if you want to use YCM then you have to
   " have these completeopt settings, otherwise YCM won't work at all.
 
-  " We need menuone in completeopt, otherwise when there's only one candidate
-  " for completion, the menu doesn't show up.
-  set completeopt-=menu
-  set completeopt+=menuone
+  if s:completion_accepted
+    set completeopt-=menu
+    set completeopt-=menuone
+  else
+    " We need menuone in completeopt, otherwise when there's only one candidate
+    " for completion, the menu doesn't show up.
+    set completeopt-=menu
+    set completeopt+=menuone
+  endif
 
   " This is unnecessary with our features. People use this option to insert
   " the common prefix of all the matches and then add more differentiating chars
@@ -442,6 +470,14 @@ endfunction
 
 
 function! s:OnCursorMovedInsertMode()
+  if s:completion_accepted == 2
+    " Ignore first move.
+    let s:completion_accepted -= 1
+    return
+  elseif s:completion_accepted
+    call s:ResetCompletionAccepted()
+  endif
+
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
@@ -504,6 +540,8 @@ endfunction
 
 
 function! s:OnInsertEnter()
+  call s:ResetCompletionAccepted()
+
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
@@ -514,6 +552,14 @@ function! s:OnInsertEnter()
   endif
 
   let s:old_cursor_position = []
+endfunction
+
+
+function! s:ResetCompletionAccepted()
+  if s:completion_accepted
+    let s:completion_accepted = 0
+    call s:SetUpCompleteopt()
+  endif
 endfunction
 
 
