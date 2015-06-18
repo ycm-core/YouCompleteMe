@@ -508,7 +508,7 @@ function! s:OnInsertEnter()
     return
   endif
 
-  if get( b:, 'ycm_omnicomplete', 0 )
+  if !get( b:, 'ycm_omnicomplete', 0 )
     let b:ycm_omnicomplete = 1
     call s:SetOmnicompleteFunc()
   endif
