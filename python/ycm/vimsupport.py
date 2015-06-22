@@ -358,11 +358,13 @@ def NumLinesInBuffer( buffer_object ):
   return len( buffer_object )
 
 
-# Calling this function from the non-GUI thread will sometimes crash Vim. At the
-# time of writing, YCM only uses the GUI thread inside Vim (this used to not be
-# the case).
+# Calling this function from the non-GUI thread will sometimes crash Vim. At
+# the time of writing, YCM only uses the GUI thread inside Vim (this used to
+# not be the case).
+# We redraw the screen before displaying the message to avoid the "Press ENTER
+# or type command to continue" prompt when editing a new C-family file.
 def PostVimMessage( message ):
-  vim.command( "echohl WarningMsg | echom '{0}' | echohl None"
+  vim.command( "redraw | echohl WarningMsg | echom '{0}' | echohl None"
                .format( EscapeForVim( str( message ) ) ) )
 
 
