@@ -49,7 +49,7 @@ class CommandRequest( BaseRequest ):
       self._response = self.PostDataToHandler( request_data,
                                               'run_completer_command' )
     except ServerError as e:
-      vimsupport.PostVimMessage( e )
+      vimsupport.PostMultiLineNotice( e )
 
 
   def Response( self ):
