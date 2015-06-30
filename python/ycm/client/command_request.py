@@ -60,7 +60,7 @@ class CommandRequest( BaseRequest ):
     if not self.Done() or not self._response:
       return
 
-    if self._is_goto_command: 
+    if self._is_goto_command:
       if isinstance( self._response, list ):
         defs = [ _BuildQfListItem( x ) for x in self._response ]
         vim.eval( 'setqflist( %s )' % repr( defs ) )
@@ -70,9 +70,7 @@ class CommandRequest( BaseRequest ):
                                     self._response[ 'line_num' ],
                                     self._response[ 'column_num' ] )
     elif 'message' in self._response:
-        vimsupport.EchoText( self._response['message'] )
-
-
+      vimsupport.EchoText( self._response['message'] )
 
 
 def SendCommandRequest( arguments, completer ):
