@@ -110,34 +110,40 @@ endfunction
 
 
 function! s:SetUpPython() abort
-  py import sys
-  py import vim
-  exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
-  exe 'python sys.path.insert( 0, "' . s:script_folder_path .
-        \ '/../third_party/ycmd" )'
-  py from ycmd import utils
-  exe 'py utils.AddNearestThirdPartyFoldersToSysPath("'
-        \ . s:script_folder_path . '")'
+python << EOF
+import sys
+import vim
+import os
+import subprocess
 
-  " We need to import ycmd's third_party folders as well since we import and
-  " use ycmd code in the client.
-  py utils.AddNearestThirdPartyFoldersToSysPath( utils.__file__ )
-  py from ycm import base
-  py base.LoadJsonDefaultsIntoVim()
-  py from ycmd import user_options_store
-  py user_options_store.SetAll( base.BuildServerConf() )
-  py from ycm import vimsupport
+script_folder = vim.eval( 's:script_folder_path' )
+sys.path.insert( 0, os.path.join( script_folder, '../python' ) )
+sys.path.insert( 0, os.path.join( script_folder, '../third_party/ycmd' ) )
+from ycmd import utils
+utils.AddNearestThirdPartyFoldersToSysPath( script_folder )
 
-  if !pyeval( 'base.CompatibleWithYcmCore()')
-    echohl WarningMsg |
-      \ echomsg "YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE" |
-      \ echohl None
-    return 0
-  endif
+# We need to import ycmd's third_party folders as well since we import and
+# use ycmd code in the client.
+utils.AddNearestThirdPartyFoldersToSysPath( utils.__file__ )
+from ycm import base
+base.LoadJsonDefaultsIntoVim()
+from ycmd import user_options_store
+user_options_store.SetAll( base.BuildServerConf() )
+from ycm import vimsupport
 
-  py from ycm.youcompleteme import YouCompleteMe
-  py ycm_state = YouCompleteMe( user_options_store.GetAll() )
-  return 1
+popen_args =  [ utils.PathToPythonInterpreter(),
+                os.path.join( script_folder,
+                              '../third_party/ycmd/check_core_version.py') ]
+
+if utils.SafePopen( popen_args ).wait() == 2:
+  vimsupport.PostVimMessage(
+    'YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE' )
+  vim.command( 'return 0')
+
+from ycm.youcompleteme import YouCompleteMe
+ycm_state = YouCompleteMe( user_options_store.GetAll() )
+vim.command( 'return 1')
+EOF
 endfunction
 
 
