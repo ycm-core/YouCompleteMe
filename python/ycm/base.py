@@ -21,7 +21,6 @@ from ycm import vimsupport
 from ycmd import user_options_store
 from ycmd import request_wrap
 from ycmd import identifier_utils
-import ycm_client_support
 
 YCM_VAR_PREFIX = 'ycm_'
 
@@ -169,16 +168,3 @@ def OverlapLength( left_string, right_string ):
     if left_string[ -length: ] == right_string[ :length ]:
       best = length
       length += 1
-
-
-COMPATIBLE_WITH_CORE_VERSION = 16
-
-def CompatibleWithYcmCore():
-  try:
-    current_core_version = ycm_client_support.YcmCoreVersion()
-  except AttributeError:
-    return False
-
-  return current_core_version == COMPATIBLE_WITH_CORE_VERSION
-
-
