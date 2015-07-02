@@ -131,9 +131,9 @@ from ycmd import user_options_store
 user_options_store.SetAll( base.BuildServerConf() )
 from ycm import vimsupport
 
-popen_args =  [ utils.PathToPythonInterpreter(),
-                os.path.join( script_folder,
-                              '../third_party/ycmd/check_core_version.py') ]
+popen_args = [ utils.PathToPythonInterpreter(),
+               os.path.join( script_folder,
+                             '../third_party/ycmd/check_core_version.py') ]
 
 if utils.SafePopen( popen_args ).wait() == 2:
   vimsupport.PostVimMessage(
