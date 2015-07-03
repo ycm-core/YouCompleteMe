@@ -7,9 +7,12 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 build_file=$SCRIPT_DIR/third_party/ycmd/build.py
 
 if [[ ! -f "$build_file" ]]; then
-  echo "File $build_file doesn't exist; you probably forgot to run:"
-  printf "\n\tgit submodule update --init --recursive\n\n"
-  exit 1
+  echo "File $build_file doesn't exist; installing modules"
+  git submodule update --init --recursive
+  if [[ ! -f "$build_file" ]]; then
+    echo "Hmmm, still not here after installing modules. Sorry, I don't know how to proceed"
+    exit 1
+  fi
 fi
 
 command_exists() {
