@@ -1980,7 +1980,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [clang-download]: http://llvm.org/releases/download.html
 [brew]: http://mxcl.github.com/homebrew/
 [cmake-download]: http://www.cmake.org/cmake/resources/software.html
-[macvim]: http://code.google.com/p/macvim/#Download
+[macvim]: https://github.com/macvim-dev/macvim/releases
 [vimrc]: http://vimhelp.appspot.com/starting.txt.html#vimrc
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [vim]: http://www.vim.org/
