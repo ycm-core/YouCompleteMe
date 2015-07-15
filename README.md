@@ -146,7 +146,7 @@ Compiling YCM **without** semantic support for C-family languages:
     ./install.sh
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well. If you want Go support, you should add `--gocode-completer`.
+install script as well.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
