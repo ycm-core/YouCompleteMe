@@ -20,6 +20,15 @@
                     "sudo apt-get install -y python-dev"
                 ]
             }
+        },
+        {
+            "name": "build-essential",
+            "recipe": {
+                "darwin": [],
+                "linux": [
+                    "sudo apt-get install -y build-essential"
+                ]
+            }
         }
     ],
     "name": "YouCompleteMe",
