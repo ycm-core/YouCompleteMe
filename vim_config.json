@@ -1,0 +1,33 @@
+@vimpkg
+{
+    "depends-on": [
+        {
+            "name": "cmake",
+            "recipe": {
+                "darwin": [
+                    "brew install cmake"
+                ],
+                "linux": [
+                    "sudo apt-get install -y cmake"
+                ]
+            }
+        },
+        {
+            "name": "python-dev",
+            "recipe": {
+                "darwin": [],
+                "linux": [
+                    "sudo apt-get install -y python-dev"
+                ]
+            }
+        }
+    ],
+    "name": "YouCompleteMe",
+    "pkg-url": "https://github.com/Valloric/YouCompleteMe.git",
+    "recipe": {
+        "all": [
+            "git submodule update --init --recursive",
+            "./install.sh --clang-completer"
+        ]
+    }
+}

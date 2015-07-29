@@ -5,6 +5,7 @@ YouCompleteMe: a code-completion engine for Vim
 
 - [Intro](#intro)
 - [Installation](#installation)
+    - [apt-vim](#apt-vim-installation)
     - [Mac OS X](#mac-os-x-super-quick-installation)
     - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
     - [Windows](#windows-installation)
@@ -103,6 +104,13 @@ and a completer that integrates with [UltiSnips][].
 
 Installation
 ------------
+
+### apt-vim installation
+Install [apt-vim][] and then run the following in terminal:
+
+    apt-vim install -y https://github.com/Valloric/YouCompleteMe
+
+And you're done! The apt-vim method works on Mac OS X as well as Linux (Ubuntu/Debian).
 
 ### Mac OS X super-quick installation
 
@@ -2013,3 +2021,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [ygen]: https://github.com/rdnetto/YCM-Generator
 [Gocode]: https://github.com/nsf/gocode
 [NeoBundle]: https://github.com/Shougo/neobundle.vim
+[apt-vim]: https://github.com/egalpin/apt-vim
