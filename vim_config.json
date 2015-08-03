@@ -1,0 +1,51 @@
+@vimpkg
+{
+    "depends-on": [
+        {
+            "name": "brew",
+            "recipe": {
+                "all": [],
+                "darwin": [
+                    "ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
+                ]
+            }
+        },
+        {
+            "name": "cmake",
+            "recipe": {
+                "darwin": [
+                    "brew install cmake"
+                ],
+                "linux": [
+                    "sudo apt-get install -y cmake"
+                ]
+            }
+        },
+        {
+            "name": "python-dev",
+            "recipe": {
+                "darwin": [],
+                "linux": [
+                    "sudo apt-get install -y python-dev"
+                ]
+            }
+        },
+        {
+            "name": "build-essential",
+            "recipe": {
+                "darwin": [],
+                "linux": [
+                    "sudo apt-get install -y build-essential"
+                ]
+            }
+        }
+    ],
+    "name": "YouCompleteMe",
+    "pkg-url": "https://github.com/Valloric/YouCompleteMe.git",
+    "recipe": {
+        "all": [
+            "git submodule update --init --recursive",
+            "./install.sh --clang-completer"
+        ]
+    }
+}
