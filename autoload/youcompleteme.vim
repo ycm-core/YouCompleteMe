@@ -26,7 +26,7 @@ let s:omnifunc_mode = 0
 let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
-let s:previous_num_chars_on_current_line = -1
+let s:previous_num_chars_on_current_line = strlen( getline('.') )
 
 let s:diagnostic_ui_filetypes = {
       \ 'cpp': 1,
@@ -446,7 +446,6 @@ function! s:SetOmnicompleteFunc()
   endif
 endfunction
 
-
 function! s:OnCursorMovedInsertMode()
   if !s:AllowedToCompleteInCurrentFile()
     return
@@ -510,6 +509,8 @@ endfunction
 
 
 function! s:OnInsertEnter()
+  let s:previous_num_chars_on_current_line = strlen( getline('.') )
+
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
@@ -535,14 +536,9 @@ endfunction
 
 
 function! s:BufferTextChangedSinceLastMoveInInsertMode()
-  if s:moved_vertically_in_insert_mode
-    let s:previous_num_chars_on_current_line = -1
-    return 0
-  endif
-
   let num_chars_in_current_cursor_line = strlen( getline('.') )
 
-  if s:previous_num_chars_on_current_line == -1
+  if s:moved_vertically_in_insert_mode
     let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
     return 0
   endif
