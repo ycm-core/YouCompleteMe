@@ -43,7 +43,6 @@ class DiagnosticInterface( object ):
       if self._user_options[ 'echo_current_diagnostic' ]:
         self._EchoDiagnosticForLine( line )
 
-
   def UpdateWithNewDiagnostics( self, diags ):
     normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
@@ -62,7 +61,6 @@ class DiagnosticInterface( object ):
       vimsupport.SetLocationList(
         vimsupport.ConvertDiagnosticsToQfList( normalized_diags ) )
 
-
   def _EchoDiagnosticForLine( self, line_num ):
     buffer_num = vim.current.buffer.number
     diags = self._buffer_number_to_line_to_diags[ buffer_num ][ line_num ]
@@ -72,7 +70,12 @@ class DiagnosticInterface( object ):
         vimsupport.EchoText( '', False )
         self._diag_message_needs_clearing = False
       return
-    vimsupport.EchoTextVimWidth( diags[ 0 ][ 'text' ] )
+
+    text = diags[ 0 ][ 'text' ]
+    if diags[ 0 ].get( 'fixit_available', False ):
+      text += ' (FixIt)'
+
+    vimsupport.EchoTextVimWidth( text )
     self._diag_message_needs_clearing = True
 
 
