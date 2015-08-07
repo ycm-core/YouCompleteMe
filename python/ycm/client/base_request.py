@@ -163,7 +163,7 @@ def JsonFromFuture( future ):
   response = future.result()
   _ValidateResponseObject( response )
   if response.status_code == requests.codes.server_error:
-    _RaiseExceptionForData( response.json() )
+    raise MakeServerException( response.json() )
 
   # We let Requests handle the other status types, we only handle the 500
   # error code.
@@ -218,10 +218,9 @@ def _CheckServerIsHealthyWithCache():
   except:
     return False
 
-
-def _RaiseExceptionForData( data ):
+def MakeServerException( data ):
   if data[ 'exception' ][ 'TYPE' ] == UnknownExtraConf.__name__:
-    raise UnknownExtraConf( data[ 'exception' ][ 'extra_conf_file' ] )
+    return UnknownExtraConf( data[ 'exception' ][ 'extra_conf_file' ] )
 
-  raise ServerError( '{0}: {1}'.format( data[ 'exception' ][ 'TYPE' ],
-                                        data[ 'message' ] ) )
+  return ServerError( '{0}: {1}'.format( data[ 'exception' ][ 'TYPE' ],
+                                         data[ 'message' ] ) )
