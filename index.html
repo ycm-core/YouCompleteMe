@@ -60,14 +60,18 @@
 <li><a href="#project-management">Project Management</a></li>
 <li><a href="#license">License</a></li>
 </ul><h2 id="intro">Intro</h2><p>YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
-<a href="http://www.vim.org/">Vim</a>. It has several completion engines: an identifier-based engine that
-works with every programming language, a semantic, <a href="http://clang.llvm.org/">Clang</a>-based engine that
-provides native semantic code completion for C/C++/Objective-C/Objective-C++
-(from now on referred to as "the C-family languages"), a <a href="https://github.com/davidhalter/jedi">Jedi</a>-based
-completion engine for Python, an <a href="https://github.com/nosami/OmniSharpServer">OmniSharp</a>-based completion engine for C#,
-a <a href="https://github.com/nsf/gocode">Gocode</a>-based completion engine for Go, and an omnifunc-based completer
-that uses data from Vim's omnicomplete system to provide semantic completions
-for many other languages (Ruby, PHP etc.).</p><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
+<a href="http://www.vim.org/">Vim</a>. It has several completion engines:</p><ul>
+<li>an identifier-based engine that works with every programming language,</li>
+<li>a <a href="http://clang.llvm.org/">Clang</a>-based engine that provides native semantic code
+  completion for C/C++/Objective-C/Objective-C++ (from now on referred to as
+  "the C-family languages"),</li>
+<li>a <a href="https://github.com/davidhalter/jedi">Jedi</a>-based completion engine for Python,</li>
+<li>an <a href="https://github.com/nosami/OmniSharpServer">OmniSharp</a>-based completion engine for C#,</li>
+<li>a <a href="https://github.com/nsf/gocode">Gocode</a>-based completion engine for Go,</li>
+<li>a <a href="https://github.com/Microsoft/TypeScript/tree/master/src/server">TSServer</a>-based completion engine for TypeScript,</li>
+<li>and an omnifunc-based completer that uses data from Vim's omnicomplete system
+  to provide semantic completions for many other languages (Ruby, PHP etc.).</li>
+</ul><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
 of completion candidates at any point in the demo. The user just types and the
 suggestions pop up by themselves. If the user doesn't find the completion
 suggestions relevant and/or just wants to type, they can do so; the completion
@@ -102,9 +106,9 @@ features plus extra:</p><ul>
 languages &amp; Python. Expect more IDE features powered by the various YCM semantic
 engines in the future.</p><p>You'll also find that YCM has filepath completers (try typing <code>./</code> in a file)
 and a completer that integrates with <a href="https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt">UltiSnips</a>.</p><h2 id="installation">Installation</h2><h3 id="mac-os-x-super-quick-installation">Mac OS X super-quick installation</h3><p>Please refer to the full Installation Guide below; the following commands are
-provided on a best-effort basis and may not work for you.</p><p>Install the latest version of <a href="http://code.google.com/p/macvim/#Download">MacVim</a>. Yes, MacVim. And yes, the <em>latest</em>.</p><p>If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
+provided on a best-effort basis and may not work for you.</p><p>Install the latest version of <a href="https://github.com/macvim-dev/macvim/releases">MacVim</a>. Yes, MacVim. And yes, the <em>latest</em>.</p><p>If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
 inside the MacVim.app package (<code>MacVim.app/Contents/MacOS/Vim</code>). To ensure it
-works correctly copy the <code>mvim</code> script from the <a href="http://code.google.com/p/macvim/#Download">MacVim</a> download to your
+works correctly copy the <code>mvim</code> script from the <a href="https://github.com/macvim-dev/macvim/releases">MacVim</a> download to your
 local binary folder (for example <code>/usr/local/bin/mvim</code>) and then symlink it:</p><pre><code>ln -s /usr/local/bin/mvim vim
 </code></pre><p>Install YouCompleteMe with <a href="https://github.com/gmarik/vundle#about">Vundle</a>.</p><p><strong>Remember:</strong> YCM is a plugin with a compiled component. If you <strong>update</strong> YCM
 using Vundle and the ycm_support_libs library APIs have changed (happens
@@ -118,7 +122,9 @@ for details.</p><p>Compiling YCM <strong>with</strong> semantic support for C-fa
 </code></pre><p>Compiling YCM <strong>without</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
 ./install.sh
 </code></pre><p>If you want semantic C# support, you should add <code>--omnisharp-completer</code> to the
-install script as well. If you want Go support, you should add <code>--gocode-completer</code>.</p><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
+install script as well. If you want Go support, you should add <code>--gocode-completer</code>.
+If you want semantic TypeScript support, install the TypeScript SDK with
+<code>npm install -g typescript</code></p><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
 in the User Guide.</p><p>YCM comes with sane defaults for its options, but you still may want to take a
@@ -135,7 +141,9 @@ process.</p><p>Install development tools and CMake: <code>sudo apt-get install b
 </code></pre><p>Compiling YCM <strong>without</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
 ./install.sh
 </code></pre><p>If you want semantic C# support, you should add <code>--omnisharp-completer</code> to the
-install script as well. If you want Go support, you should add <code>--gocode-completer</code>.</p><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
+install script as well. If you want Go support, you should add <code>--gocode-completer</code>.
+If you want semantic TypeScript support, install the TypeScript SDK with
+<code>npm install -g typescript</code>.</p><p>That's it. You're done. Refer to the <em>User Guide</em> section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
 in the User Guide.</p><p>YCM comes with sane defaults for its options, but you still may want to take a
@@ -199,7 +207,7 @@ library it provides is used to power the YCM semantic completion engine for
 those languages. YCM is designed to work with libclang version 3.6 or
 higher, but can in theory work with any 3.2+ version as well.</p>
 <p>You can use the system libclang <em>only if you are sure it is version 3.3 or
-higher</em>, otherwise don't. Even if it is, we recommend using the <a href="http://llvm.org/releases/download.html#3.3">official
+higher</em>, otherwise don't. Even if it is, we recommend using the <a href="http://llvm.org/releases/download.html">official
 binaries from llvm.org</a> if at all possible. Make sure you
 download the correct archive file for your OS.</p>
 <p>We <strong>STRONGLY recommend AGAINST use</strong> of the system libclang instead of
@@ -336,8 +344,8 @@ unrelated completion strings (type/function names that are not actually
 members). This is because Clang fails to build a precompiled preamble for your
 file if there are any errors in the included headers and that preamble is key to
 getting fast completions.</p><p>Call the <code>:YcmDiags</code> command to see if any errors or warnings were detected in
-your file.</p><h3 id="semantic-completion-for-other-languages">Semantic completion for other languages</h3><p>Python, C#, and Go are supported natively by YouCompleteMe using the <a href="https://github.com/davidhalter/jedi">Jedi</a>,
-<a href="https://github.com/nosami/OmniSharpServer">Omnisharp</a>, and <a href="https://github.com/nsf/gocode">Gocode</a> engines, respectively. Check the
+your file.</p><h3 id="semantic-completion-for-other-languages">Semantic completion for other languages</h3><p>Python, C#, Go, and TypeScript are supported natively by YouCompleteMe using the <a href="https://github.com/davidhalter/jedi">Jedi</a>,
+<a href="https://github.com/nosami/OmniSharpServer">Omnisharp</a>, <a href="https://github.com/nsf/gocode">Gocode</a>, and <a href="https://github.com/Microsoft/TypeScript/tree/master/src/server">TSServer</a> engines, respectively. Check the
 <a href="#installation">installation</a> section for instructions to enable these features
 if desired.</p><p>YCM will use your <code>omnifunc</code> (see <code>:h omnifunc</code> in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
@@ -423,7 +431,13 @@ and display any new diagnostics it encounters. Do note that recompilation with
 this command may take a while and during this time the Vim GUI <em>will</em> be
 blocked.</p><p>You may want to map this command to a key; try putting <code>nnoremap &lt;F5&gt;
 :YcmForceCompileAndDiagnostics&lt;CR&gt;</code> in your vimrc.</p><h3 id="the-ycmdiags-command">The <code>:YcmDiags</code> command</h3><p>Calling this command will fill Vim's <code>locationlist</code> with errors or warnings if
-any were detected in your file and then open it.</p><p>The <code>g:ycm_open_loclist_on_ycm_diags</code> option can be used to prevent the location
+any were detected in your file and then open it. If a given error or warning can
+be fixed by a call to <code>:YcmCompleter FixIt</code>, then <code>(FixIt available)</code> is
+appended to the error or warning text. See the <code>FixIt</code> completer subcommand for
+more information.</p><p>NOTE: The absense of <code>(FixIt available)</code> does not strictly imply a fix-it is
+not available as not all completers are able to provide this indication. For
+example, the c-sharp completer provides many fix-its but does not add this
+additional indication.</p><p>The <code>g:ycm_open_loclist_on_ycm_diags</code> option can be used to prevent the location
 list from opening, but still have it filled with new diagnostic data. See the
 <em>Options</em> section for details.</p><h3 id="the-ycmshowdetaileddiagnostic-command">The <code>:YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.</p><h3 id="the-ycmdebuginfo-command">The <code>:YcmDebugInfo</code> command</h3><p>This will print out various debug information for the current file. Useful to
@@ -477,7 +491,25 @@ void C::f() {
 </code></pre><p>In the out-of-line definition of <code>C::f</code>, the semantic parent is the class <code>C</code>,
 of which this function is a member.</p><p>In the example above, both declarations of <code>C::f</code> have <code>C</code> as their semantic
 context, while the lexical context of the first <code>C::f</code> is <code>C</code> and the lexical
-context of the second <code>C::f</code> is the translation unit.</p><p>For global declarations, the semantic parent is the translation unit.</p><p>NOTE: Causes reparsing of the current translation unit.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h3 id="the-startserver-subcommand">The <code>StartServer</code> subcommand</h3><p>Starts the semantic-engine-as-localhost-server for those semantic engines that
+context of the second <code>C::f</code> is the translation unit.</p><p>For global declarations, the semantic parent is the translation unit.</p><p>NOTE: Causes reparsing of the current translation unit.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h3 id="the-fixit-subcommand">The <code>FixIt</code> subcommand</h3><p>Where available, attempts to make changes to the buffer to correct the
+diagnostic closest to the cursor position.</p><p>Completers which provide diagnostics may also provide trivial modifications to
+the source in order to correct the diagnostic. Examples include syntax errors
+such as missing trailing semi-colons, spurious characters, or other errors which
+the semantic engine can deterministically suggest corrections.</p><p>If no fix-it is available for the current line, or there is no diagnostic on the
+current line, this command has no effect on the current buffer. If any
+modifications are made, the number of changes made to the buffer is echo'd and
+the user may use the editor's undo command to revert.</p><p>When a diagnostic is available, and <code>g:ycm_echo_current_diagnostic</code> is set to 1,
+then the text <code>(FixIt)</code> is appended to the echo'd diagnostic when the
+completer is able to add this indication. The text <code>(FixIt available)</code> is
+also appended to the diagnostic text in the output of the <code>:YcmDiags</code> command
+for any diagnostics with available fix-its (where the completer can provide this
+indication).</p><p>NOTE: Causes re-parsing of the current translation unit.</p><p>NOTE: After applying a fix-it, the diagnostics UI is not immediately updated.
+This is due to a technical restriction in vim, and moving the cursor, or issuing
+the the <code>:YcmForceCompileAndDiagnostics</code> command will refresh the diagnostics.
+Repeated invocations of the <code>FixIt</code> command on a given line, however, <em>do</em> apply
+all diagnostics as expected without requiring refreshing of the diagnostics UI.
+This is particularly useful where there are multiple diagnostics on one line, or
+where after fixing one diagnostic, another fix-it is available.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs</code></p><h3 id="the-startserver-subcommand">The <code>StartServer</code> subcommand</h3><p>Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3 id="the-stopserver-subcommand">The <code>StopServer</code> subcommand</h3><p>Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3 id="the-restartserver-subcommand">The <code>RestartServer</code> subcommand</h3><p>Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.</p><p>Supported in filetypes: <code>cs</code></p><h3 id="the-reloadsolution-subcommand">The <code>ReloadSolution</code> subcommand</h3><p>Instruct the Omnisharp server to clear its cache and reload all files from disk.
@@ -571,7 +603,8 @@ the diagnostic that is present on a line, if any.</p><p>This option is part of t
 set, YCM will fall back to the value of the <code>g:syntastic_enable_highlighting</code>
 option before using this option's default.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_enable_diagnostic_highlighting = 1
 </code></pre><h3 id="the-gycm_echo_current_diagnostic-option">The <code>g:ycm_echo_current_diagnostic</code> option</h3><p>When this option is set, YCM will echo the text of the diagnostic present on the
-current line when you move your cursor to that line.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
+current line when you move your cursor to that line. If a <code>FixIt</code> is available
+for the current diagnostic, then <code>(FixIt)</code> is appended.</p><p>This option is part of the Syntastic compatibility layer; if the option is not
 set, YCM will fall back to the value of the <code>g:syntastic_echo_current_error</code>
 option before using this option's default.</p><p>Default: <code>1</code></p><pre><code>let g:ycm_echo_current_diagnostic = 1
 </code></pre><h3 id="the-gycm_always_populate_location_list-option">The <code>g:ycm_always_populate_location_list</code> option</h3><p>When this option is set, YCM will populate the location list automatically every
@@ -737,13 +770,13 @@ listed as a trigger, the same thing would happen when the user typed <code>foo-&
 your trigger with <code>re!</code> to signify it's a regex trigger. For instance,
 <code>re!\w+\.</code> would only trigger after the <code>\w+\.</code> regex matches.</p><p>NOTE: The regex syntax is <strong>NOT</strong> Vim's, it's <a href="https://docs.python.org/2/library/re.html#regular-expression-syntax">Python's</a>.</p><p>Default: <code>[see next line]</code></p><pre><code>let g:ycm_semantic_triggers =  {
   \   'c' : ['-&gt;', '.'],
-  \   'objc' : ['-&gt;', '.'],
+  \   'objc' : ['-&gt;', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+  \             're!\[.*\]\s'],
   \   'ocaml' : ['.', '#'],
   \   'cpp,objcpp' : ['-&gt;', '.', '::'],
   \   'perl' : ['-&gt;'],
   \   'php' : ['-&gt;', '::'],
-  \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-  \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
+  \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
   \   'ruby' : ['.', '::'],
   \   'lua' : ['.', ':'],
   \   'erlang' : [':'],
@@ -804,7 +837,7 @@ with your own. Then change that option value to something else so that the
 conflict goes away.</p><h3 id="i-get-glibc_2xx-not-found-required-by-libclangso-when-starting-vim">I get <code>'GLIBC_2.XX' not found (required by libclang.so)</code> when starting Vim</h3><p>Your system is too old for the precompiled binaries from llvm.org. Compile
 Clang on your machine and then link against the <code>libclang.so</code> you just produced.
 See the full installation guide for help.</p><h3 id="im-trying-to-use-a-homebrew-vim-with-ycm-and-im-getting-segfaults">I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults</h3><p>Something (I don't know what) is wrong with the way that Homebrew configures and
-builds Vim. I recommend using <a href="http://code.google.com/p/macvim/#Download">MacVim</a>. Even if you don't like the MacVim GUI,
+builds Vim. I recommend using <a href="https://github.com/macvim-dev/macvim/releases">MacVim</a>. Even if you don't like the MacVim GUI,
 you can use the Vim binary that is inside the MacVim.app package (it's
 <code>MacVim.app/Contents/MacOS/Vim</code>) and get the Vim console experience.</p><h3 id="i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting">I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting</h3><p>You should probably run <code>brew rm python; brew install python</code> to get the latest
 fixes that should make YCM work with such a configuration. Also rebuild Macvim
@@ -926,12 +959,8 @@ To increase the Neobundle timeout to 1500 seconds, add the following to your vim
 </code></pre><h2 id="contact">Contact</h2><p>If you have questions about the plugin or need help, please use the
 <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list.</p><p>If you have bug reports or feature suggestions, please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
 tracker</a>.</p><p>The latest version of the plugin is available at
-<a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2 id="project-management">Project Management</h2><p>This open-source project is run by me, Strahinja Val Markovic. I also happen to
-work for Google and the code I write here is under Google copyright (for the
-sake of simplicity and other reasons). This does <strong>NOT</strong> mean that this is an
-official Google product (it isn't) or that Google has (or wants to have)
-anything to do with it.</p><h2 id="license">License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
-© 2013 Google Inc.</p><p><a href="https://bitdeli.com/free" title="Bitdeli Badge"><img alt="Bitdeli Badge" src="https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png"/></a></p></div>
+<a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2 id="license">License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
+© 2015 YouCompleteMe contributors</p><p><a href="https://bitdeli.com/free" title="Bitdeli Badge"><img alt="Bitdeli Badge" src="https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png"/></a></p></div>
       </section>
 
     </div>
