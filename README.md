@@ -33,15 +33,18 @@ Intro
 -----
 
 YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
-[Vim][]. It has several completion engines: an identifier-based engine that
-works with every programming language, a semantic, [Clang][]-based engine that
-provides native semantic code completion for C/C++/Objective-C/Objective-C++
-(from now on referred to as "the C-family languages"), a [Jedi][]-based
-completion engine for Python, an [OmniSharp][]-based completion engine for C#,
-a [Gocode][]-based completion engine for Go, a [TSServer][]-based completion
-engine for TypeScript, and an omnifunc-based completer that uses data from Vim's
-omnicomplete system to provide semantic completions for many other languages 
-(Ruby, PHP etc.).
+[Vim][]. It has several completion engines:
+
+- an identifier-based engine that works with every programming language,
+- a [Clang][]-based engine that provides native semantic code
+  completion for C/C++/Objective-C/Objective-C++ (from now on referred to as
+  "the C-family languages"),
+- a [Jedi][]-based completion engine for Python,
+- an [OmniSharp][]-based completion engine for C#,
+- a [Gocode][]-based completion engine for Go,
+- a [TSServer][]-based completion engine for TypeScript,
+- and an omnifunc-based completer that uses data from Vim's omnicomplete system
+  to provide semantic completions for many other languages (Ruby, PHP etc.).
 
 ![YouCompleteMe GIF demo](http://i.imgur.com/0OP4ood.gif)
 
@@ -663,9 +666,9 @@ Calling this command will fill Vim's `locationlist` with errors or warnings if
 any were detected in your file and then open it. If a given error or warning can
 be fixed by a call to `:YcmCompleter FixIt`, then ` (FixIt available)` is
 appended to the error or warning text. See the `FixIt` completer subcommand for
-more information. 
+more information.
 
-NOTE: The absense of ` (FixIt available)` does not strictly imply a fix-it is 
+NOTE: The absense of ` (FixIt available)` does not strictly imply a fix-it is
 not available as not all completers are able to provide this indication. For
 example, the c-sharp completer provides many fix-its but does not add this
 additional indication.
@@ -847,8 +850,8 @@ the user may use the editor's undo command to revert.
 
 When a diagnostic is available, and `g:ycm_echo_current_diagnostic` is set to 1,
 then the text ` (FixIt)` is appended to the echo'd diagnostic when the
-completer is able to add this indication. The text ` (FixIt available)` is 
-also appended to the diagnostic text in the output of the `:YcmDiags` command 
+completer is able to add this indication. The text ` (FixIt available)` is
+also appended to the diagnostic text in the output of the `:YcmDiags` command
 for any diagnostics with available fix-its (where the completer can provide this
 indication).
 
@@ -856,8 +859,8 @@ NOTE: Causes re-parsing of the current translation unit.
 
 NOTE: After applying a fix-it, the diagnostics UI is not immediately updated.
 This is due to a technical restriction in vim, and moving the cursor, or issuing
-the the `:YcmForceCompileAndDiagnostics` command will refresh the diagnostics. 
-Repeated invocations of the `FixIt` command on a given line, however, _do_ apply 
+the the `:YcmForceCompileAndDiagnostics` command will refresh the diagnostics.
+Repeated invocations of the `FixIt` command on a given line, however, _do_ apply
 all diagnostics as expected without requiring refreshing of the diagnostics UI.
 This is particularly useful where there are multiple diagnostics on one line, or
 where after fixing one diagnostic, another fix-it is available.
