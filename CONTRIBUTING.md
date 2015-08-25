@@ -32,7 +32,7 @@ You should also **search the archives of the [ycm-users][] mailing list**.
 
 Lastly, **make sure you are running the latest version of YCM**. The issue you
 have encountered may have already been fixed. **Don't forget to recompile
-ycm_core.so too** (usually by just running `install.sh` again).
+ycm_core.so too** (usually by just running `install.py` again).
 
 OK, so we've reached this far. You need to create an issue. First realize that
 the time it takes to fix your issue is a multiple of how long it takes the

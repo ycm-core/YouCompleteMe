@@ -142,12 +142,12 @@ for details.
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh --clang-completer
+    ./install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh
+    ./install.py
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
 install script as well. If you want Go support, you should add `--gocode-completer`.
@@ -187,12 +187,12 @@ Make sure you have Python headers installed: `sudo apt-get install python-dev`.
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh --clang-completer
+    ./install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh
+    ./install.py
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
 install script as well. If you want Go support, you should add `--gocode-completer`.
@@ -242,12 +242,12 @@ Install dependencies and CMake: `sudo pkg_add llvm boost cmake`
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh --clang-completer --system-libclang --system-boost
+    ./install.py --clang-completer --system-libclang --system-boost
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.sh --system-boost
+    ./install.py --system-boost
 
 If you want semantic C# support, you should add `--omnisharp-completer` to the
 install script as well. If you want Go support, you should add `--gocode-completer`.
@@ -1901,7 +1901,7 @@ the build script to run only one compile job at a time. You can do this by
 setting the `YCM_CORES` environment variable to `1`. Example:
 
 ```
-YCM_CORES=1 ./install.sh --clang-completer
+YCM_CORES=1 ./install.py --clang-completer
 ```
 
 ### I get weird errors when I press `Ctrl-C` in Vim
@@ -1981,10 +1981,10 @@ See [issue #303][issue-303] for details.
 
     NeoBundle 'Valloric/YouCompleteMe', {
          \ 'build'      : {
-            \ 'mac'     : './install.sh --clang-completer --system-libclang --omnisharp-completer',
-            \ 'unix'    : './install.sh --clang-completer --system-libclang --omnisharp-completer',
-            \ 'windows' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
-            \ 'cygwin'  : './install.sh --clang-completer --system-libclang --omnisharp-completer'
+            \ 'mac'     : './install.py --clang-completer --system-libclang --omnisharp-completer',
+            \ 'unix'    : './install.py --clang-completer --system-libclang --omnisharp-completer',
+            \ 'windows' : './install.py --clang-completer --system-libclang --omnisharp-completer',
+            \ 'cygwin'  : './install.py --clang-completer --system-libclang --omnisharp-completer'
             \ }
          \ }
 
