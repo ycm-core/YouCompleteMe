@@ -19,7 +19,7 @@ def Main():
 
   python_binary = sys.executable
   args = ' '.join( sys.argv[1:] )
-  subprocess.call( ' '.join( [ python_binary, build_file, args ] ) )
+  subprocess.call( ' '.join( [ python_binary, build_file, args ] ), shell=True )
 
   # Remove old YCM libs if present so that YCM can start.
   old_libs = (
