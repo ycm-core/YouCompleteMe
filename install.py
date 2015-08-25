@@ -18,8 +18,8 @@ def Main():
               'to run:\n\tgit submodule update --init --recursive\n\n' )
 
   python_binary = sys.executable
-  args = ' '.join( sys.argv[1:] )
-  subprocess.call( ' '.join( [ python_binary, build_file, args ] ) )
+  args = sys.argv[1:]
+  subprocess.call( [ python_binary, build_file ] + args )
 
   # Remove old YCM libs if present so that YCM can start.
   old_libs = (
