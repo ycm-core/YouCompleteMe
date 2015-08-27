@@ -1,7 +1,7 @@
 YouCompleteMe: a code-completion engine for Vim
 ===============================================
 
-[![Build Status](https://travis-ci.org/Valloric/YouCompleteMe.png?branch=master)](https://travis-ci.org/Valloric/YouCompleteMe)
+[![Build Status](https://travis-ci.org/Valloric/YouCompleteMe.svg?branch=master)](https://travis-ci.org/Valloric/YouCompleteMe)
 
 - [Intro](#intro)
 - [Installation](#installation)
