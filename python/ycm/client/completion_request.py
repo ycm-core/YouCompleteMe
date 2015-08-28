@@ -40,7 +40,7 @@ class CompletionRequest( BaseRequest ):
     return self._response_future.done()
 
 
-  def Response( self ):
+  def RawResponse( self ):
     if not self._response_future:
       return []
     try:
@@ -50,11 +50,14 @@ class CompletionRequest( BaseRequest ):
       for e in errors:
         HandleServerException( MakeServerException( e ) )
 
-      return _ConvertCompletionResponseToVimDatas( response )
+      return JsonFromFuture( self._response_future )[ 'completions' ]
     except Exception as e:
       HandleServerException( e )
-
     return []
+
+
+  def Response( self ):
+    return _ConvertCompletionDatasToVimDatas( self.RawResponse() )
 
 
 def _ConvertCompletionDataToVimData( completion_data ):
@@ -77,6 +80,6 @@ def _ConvertCompletionDataToVimData( completion_data ):
   return vim_data
 
 
-def _ConvertCompletionResponseToVimDatas( response_data ):
+def _ConvertCompletionDatasToVimDatas( response_data ):
   return [ _ConvertCompletionDataToVimData( x )
-           for x in response_data[ 'completions' ] ]
+           for x in response_data ]

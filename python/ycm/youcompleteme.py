@@ -292,6 +292,61 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'CurrentIdentifierFinished' )
 
 
+  def OnCompleteDone( self ):
+    if not self.HasPostCompletionAction():
+      return
+
+    latest_completion_request = self.GetCurrentCompletionRequest()
+    if not latest_completion_request.Done():
+      return
+
+    completions = latest_completion_request.RawResponse()
+    completions = list( self.FilterMatchingCompletions( completions ) )
+    if not completions:
+      return
+
+    namespaces = [ self.GetRequiredNamespaceImport( c )
+                   for c in completions ]
+    namespaces = [ n for n in namespaces if n ]
+    if not namespaces:
+      return
+
+    if len( namespaces ) > 1:
+      choices = [ "{0}: {1}".format( i + 1, n )
+                  for i,n in enumerate( namespaces ) ]
+      choice = vimsupport.PresentDialog(
+        "Insert which namespace:", choices )
+      if choice < 0:
+        return
+      namespace = namespaces[ choice ]
+    else:
+      namespace = namespaces[ 0 ]
+
+    vimsupport.InsertNamespace( namespace )
+
+
+  def HasPostCompletionAction( self ):
+    filetype = vimsupport.CurrentFiletypes()[ 0 ]
+    return filetype == 'cs'
+
+
+  def FilterMatchingCompletions( self, completions ):
+    text = vimsupport.TextBeforeCursor() # No support for multiple line completions
+    for completion in completions:
+      word = completion[ "insertion_text" ]
+      for i in [ None, -1 ]:
+        if text[ -1 * len( word ) + ( i or 0 ) : i ] == word:
+          yield completion
+          break
+
+
+  def GetRequiredNamespaceImport( self, completion ):
+    if ( "extra_data" not in completion
+         or "required_namespace_import" not in completion[ "extra_data" ] ):
+      return ""
+    return completion[ "extra_data" ][ "required_namespace_import" ]
+
+
   def DiagnosticsForCurrentFileReady( self ):
     return bool( self._latest_file_parse_request and
                  self._latest_file_parse_request.Done() )

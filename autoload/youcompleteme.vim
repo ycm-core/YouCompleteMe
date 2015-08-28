@@ -84,6 +84,9 @@ function! youcompleteme#Enable()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
     autocmd VimLeave * call s:OnVimLeave()
+    if pyeval( 'vimsupport.VimVersionAtLeast("7.3.598")' )
+      autocmd CompleteDone * call s:OnCompleteDone()
+    endif
   augroup END
 
   " Calling these once solves the problem of BufReadPre/BufRead/BufEnter not
@@ -356,6 +359,11 @@ endfunction
 
 function! s:OnVimLeave()
   py ycm_state.OnVimLeave()
+endfunction
+
+
+function! s:OnCompleteDone()
+  py ycm_state.OnCompleteDone()
 endfunction
 
 
