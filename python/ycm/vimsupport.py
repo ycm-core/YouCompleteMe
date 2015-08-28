@@ -60,14 +60,20 @@ def TextAfterCursor():
   return vim.current.line[ CurrentColumn(): ]
 
 
+def TextBeforeCursor():
+  """Returns the text before CurrentColumn."""
+  return vim.current.line[ :CurrentColumn() ]
+
+
 # Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '7.4.301'
 def VimVersionAtLeast( version_string ):
   major, minor, patch = [ int( x ) for x in version_string.split( '.' ) ]
 
   # For Vim 7.4.301, v:version is '704'
   actual_major_and_minor = GetIntValue( 'v:version' )
-  if actual_major_and_minor != major * 100 + minor:
-    return False
+  matching_major_and_minor = major * 100 + minor
+  if actual_major_and_minor != matching_major_and_minor:
+    return actual_major_and_minor > matching_major_and_minor
 
   return GetBoolValue( 'has("patch{0}")'.format( patch ) )
 
