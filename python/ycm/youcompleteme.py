@@ -21,6 +21,7 @@ import os
 import vim
 import tempfile
 import json
+import re
 import signal
 import base64
 from subprocess import PIPE
@@ -96,6 +97,9 @@ class YouCompleteMe( object ):
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetupServer()
     self._ycmd_keepalive.Start()
+    self._complete_done_hooks = {
+      'cs': lambda( self ): self.OnCompleteDone_Csharp()
+    }
 
   def _SetupServer( self ):
     self._available_completers = {}
@@ -293,18 +297,58 @@ class YouCompleteMe( object ):
 
 
   def OnCompleteDone( self ):
-    if not self.HasPostCompletionAction():
-      return
+    complete_done_actions = self.GetCompleteDoneHooks()
+    for action in complete_done_actions:
+      action(self)
 
+
+  def GetCompleteDoneHooks( self ):
+    filetypes = vimsupport.CurrentFiletypes()
+    for key, value in self._complete_done_hooks.iteritems():
+      if key in filetypes:
+        yield value
+
+
+  def GetMatchingCompletionsOnCursor( self ):
     latest_completion_request = self.GetCurrentCompletionRequest()
     if not latest_completion_request.Done():
-      return
+      return []
 
     completions = latest_completion_request.RawResponse()
-    completions = list( self.FilterMatchingCompletions( completions ) )
-    if not completions:
-      return
+    if self.HasCompletionsThatCouldMatchOnCursorWithMoreText( completions ):
+      # Since the way that YCM works leads to CompleteDone called on every
+      # character, return blank if the completion might not be done. This won't
+      # match if the completion is ended with typing a non-keyword character.
+      return []
 
+    result = self.FilterToCompletionsMatchingOnCursor( completions )
+
+    return list( result )
+
+
+  def FilterToCompletionsMatchingOnCursor( self, completions ):
+    text = vimsupport.TextBeforeCursor() # No support for multiple line completions
+    for completion in completions:
+      word = completion[ "insertion_text" ]
+      # Trim complete-ending character if needed
+      text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
+      buffer_text = text[ -1 * len( word ) : ]
+      if buffer_text == word:
+        yield completion
+
+
+  def HasCompletionsThatCouldMatchOnCursorWithMoreText( self, completions ):
+    text = vimsupport.TextBeforeCursor() # No support for multiple line completions
+    for completion in completions:
+      word = completion[ "insertion_text" ]
+      for i in range( 1, len( word ) - 1 ): # Excluding full word
+        if text[ -1 * i  : ] == word[ : i ]:
+          return True
+    return False
+
+
+  def OnCompleteDone_Csharp( self ):
+    completions = self.GetMatchingCompletionsOnCursor()
     namespaces = [ self.GetRequiredNamespaceImport( c )
                    for c in completions ]
     namespaces = [ n for n in namespaces if n ]
@@ -312,10 +356,9 @@ class YouCompleteMe( object ):
       return
 
     if len( namespaces ) > 1:
-      choices = [ "{0}: {1}".format( i + 1, n )
+      choices = [ "{0} {1}".format( i + 1, n )
                   for i,n in enumerate( namespaces ) ]
-      choice = vimsupport.PresentDialog(
-        "Insert which namespace:", choices )
+      choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
       if choice < 0:
         return
       namespace = namespaces[ choice ]
@@ -325,25 +368,10 @@ class YouCompleteMe( object ):
     vimsupport.InsertNamespace( namespace )
 
 
-  def HasPostCompletionAction( self ):
-    filetype = vimsupport.CurrentFiletypes()[ 0 ]
-    return filetype == 'cs'
-
-
-  def FilterMatchingCompletions( self, completions ):
-    text = vimsupport.TextBeforeCursor() # No support for multiple line completions
-    for completion in completions:
-      word = completion[ "insertion_text" ]
-      for i in [ None, -1 ]:
-        if text[ -1 * len( word ) + ( i or 0 ) : i ] == word:
-          yield completion
-          break
-
-
   def GetRequiredNamespaceImport( self, completion ):
     if ( "extra_data" not in completion
          or "required_namespace_import" not in completion[ "extra_data" ] ):
-      return ""
+      return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
 

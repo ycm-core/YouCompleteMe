@@ -521,19 +521,21 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
 
 
 def InsertNamespace( namespace ):
-  if VariableExists( 'g:ycm_cs_insert_namespace_function' ):
-    function = GetVariableValue( 'g:ycm_cs_insert_namespace_function' )
-    SetVariableValue( "g:ycm_namespace", namespace )
-    vim.eval( function )
-  else:
-    pattern = '^\s*using\(\s\+[a-zA-Z0-9]\+\s\+=\)\?\s\+[a-zA-Z0-9.]\+\s*;\s*'
-    line = SearchInCurrentBuffer( pattern )
-    existing_line = LineTextInCurrentBuffer( line )
-    existing_indent = re.sub( r"\S.*", "", existing_line )
-    new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
-    replace_pos = { 'line_num': line + 1, 'column_num': 1 }
-    ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0 )
-    PostVimMessage( "Add namespace: {0}".format( namespace ) )
+  if VariableExists( 'g:ycm_csharp_insert_namespace_expr' ):
+    expr = GetVariableValue( 'g:ycm_csharp_insert_namespace_expr' )
+    if expr:
+      SetVariableValue( "g:ycm_namespace_to_insert", namespace )
+      vim.eval( expr )
+      return
+
+  pattern = '^\s*using\(\s\+[a-zA-Z0-9]\+\s\+=\)\?\s\+[a-zA-Z0-9.]\+\s*;\s*'
+  line = SearchInCurrentBuffer( pattern )
+  existing_line = LineTextInCurrentBuffer( line )
+  existing_indent = re.sub( r"\S.*", "", existing_line )
+  new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
+  replace_pos = { 'line_num': line + 1, 'column_num': 1 }
+  ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0 )
+  PostVimMessage( "Add namespace: {0}".format( namespace ) )
 
 
 def SearchInCurrentBuffer( pattern ):

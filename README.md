@@ -1365,6 +1365,18 @@ Default: `0`
 
     let g:ycm_csharp_server_port = 0
 
+### The `g:ycm_csharp_insert_namespace_expr` option
+
+When YCM inserts a namespace, by default, it will insert it under the nearest
+using statement. When this option is set, YCM will instead set the global
+variable `g:ycm_namespace_to_insert` to the namespace to insert, and then
+evaluate this option's value as an expression. The expression is responsible
+for inserting the namespace.
+
+Default: `''`
+
+    let g:ycm_csharp_insert_namespace_expr = ''
+
 ### The `g:ycm_add_preview_to_completeopt` option
 
 When this option is set to `1`, YCM will add the `preview` string to Vim's
