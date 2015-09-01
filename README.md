@@ -26,7 +26,6 @@ YouCompleteMe: a code-completion engine for Vim
 - [Options](#options)
 - [FAQ](#faq)
 - [Contact](#contact)
-- [Project Management](#project-management)
 - [License](#license)
 
 Intro

@@ -158,7 +158,6 @@ Introduction ~
 - Options
 - FAQ
 - Contact
-- Project Management
 - License
 
 ===============================================================================
