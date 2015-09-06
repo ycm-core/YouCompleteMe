@@ -20,7 +20,6 @@
 from nose.tools import eq_
 from ycm.test_utils import MockVimModule
 vim_mock = MockVimModule()
-import os
 
 from .. import completion_request
 
@@ -57,7 +56,7 @@ class ConvertCompletionResponseToVimDatas_test:
       'abbr': 'MENU TEXT',
       'menu': 'EXTRA MENU INFO',
       'kind': 'k',
-      'info': 'DETAILED INFO' + os.linesep + 'DOC STRING',
+      'info': 'DETAILED INFO\nDOC STRING',
       'dup' : 1,
     } )
 

@@ -17,8 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from ycm.test_utils import MockVimModule
+MockVimModule()
+
 from ycm import vimsupport
 from nose.tools import eq_
+from mock import MagicMock, call, patch
 
 
 def ReplaceChunk_SingleLine_Repl_1_test():
@@ -576,3 +580,88 @@ def _BuildChunk( start_line, start_column, end_line, end_column,
     },
     'replacement_text': replacement_text
   }
+
+
+def _Mock_tempname( arg ):
+  if arg == 'tempname()':
+    return '_TEMP_FILE_'
+
+  raise ValueError( 'Unexpected evaluation: ' + arg )
+
+
+@patch( 'vim.eval', side_effect=_Mock_tempname )
+@patch( 'vim.command' )
+@patch( 'vim.current' )
+def WriteToPreviewWindow_test( vim_current, vim_command, vim_eval ):
+  vim_current.window.options.__getitem__ = MagicMock( return_value = True )
+
+  vimsupport.WriteToPreviewWindow( "test" )
+
+  vim_command.assert_has_calls( [
+    call( 'silent! pclose!' ),
+    call( 'silent! pedit! _TEMP_FILE_' ),
+    call( 'silent! wincmd P' ),
+    call( 'silent! wincmd p' ) ] )
+
+  vim_current.buffer.__setitem__.assert_called_with(
+      slice( None, None, None ), [ 'test' ] )
+
+  vim_current.buffer.options.__setitem__.assert_has_calls( [
+    call( 'buftype', 'nofile' ),
+    call( 'swapfile', False ),
+    call( 'modifiable', False ),
+    call( 'modified', False ),
+    call( 'readonly', True ),
+  ], any_order = True )
+
+
+@patch( 'vim.eval', side_effect=_Mock_tempname )
+@patch( 'vim.current' )
+def WriteToPreviewWindow_MultiLine_test( vim_current, vim_eval ):
+  vim_current.window.options.__getitem__ = MagicMock( return_value = True )
+  vimsupport.WriteToPreviewWindow( "test\ntest2" )
+
+  vim_current.buffer.__setitem__.assert_called_with(
+      slice( None, None, None ), [ 'test', 'test2' ] )
+
+
+@patch( 'vim.eval', side_effect=_Mock_tempname )
+@patch( 'vim.command' )
+@patch( 'vim.current' )
+def WriteToPreviewWindow_JumpFail_test( vim_current, vim_command, vim_eval ):
+  vim_current.window.options.__getitem__ = MagicMock( return_value = False )
+
+  vimsupport.WriteToPreviewWindow( "test" )
+
+  vim_command.assert_has_calls( [
+    call( 'silent! pclose!' ),
+    call( 'silent! pedit! _TEMP_FILE_' ),
+    call( 'silent! wincmd P' ),
+    call( "echom 'test'" ),
+  ] )
+
+  vim_current.buffer.__setitem__.assert_not_called()
+  vim_current.buffer.options.__setitem__.assert_not_called()
+
+
+@patch( 'vim.eval', side_effect=_Mock_tempname )
+@patch( 'vim.command' )
+@patch( 'vim.current' )
+def WriteToPreviewWindow_JumpFail_MultiLine_test( vim_current,
+                                                  vim_command,
+                                                  vim_eval ):
+
+  vim_current.window.options.__getitem__ = MagicMock( return_value = False )
+
+  vimsupport.WriteToPreviewWindow( "test\ntest2" )
+
+  vim_command.assert_has_calls( [
+    call( 'silent! pclose!' ),
+    call( 'silent! pedit! _TEMP_FILE_' ),
+    call( 'silent! wincmd P' ),
+    call( "echom 'test'" ),
+    call( "echom 'test2'" ),
+  ] )
+
+  vim_current.buffer.__setitem__.assert_not_called()
+  vim_current.buffer.options.__setitem__.assert_not_called()
