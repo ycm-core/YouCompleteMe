@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from mock import MagicMock
+from mock import ( MagicMock, DEFAULT )
 from nose.tools import eq_
 from hamcrest import assert_that, empty
 from ycm import vimsupport
@@ -54,78 +54,170 @@ def OnCompleteDone_NoActionNoError_test():
   ycm_state.OnCompleteDone()
 
 
-def FilterToCompletionsMatchingOnCursor_MatchIsReturned_test():
+def FilterToCompletedCompletions_NewVim_MatchIsReturned_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
-  vimsupport.TextBeforeCursor = MagicMock( return_value = "   Test" )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "Test" )
   completions = [ _BuildCompletion( "Test" ) ]
 
-  result = ycm_state.FilterToCompletionsMatchingOnCursor( completions )
+  result = ycm_state.FilterToCompletedCompletions( completions, False )
 
   eq_( list( result ), completions )
 
 
-def FilterToCompletionsMatchingOnCursor_ShortTextDoesntRaise_test():
+def FilterToCompletedCompletions_NewVim_ShortTextDoesntRaise_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
-  vimsupport.TextBeforeCursor = MagicMock( return_value = "X" )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "A" )
   completions = [ _BuildCompletion( "AAA" ) ]
 
-  ycm_state.FilterToCompletionsMatchingOnCursor( completions )
+  ycm_state.FilterToCompletedCompletions( completions, False )
 
 
-def FilterToCompletionsMatchingOnCursor_ExactMatchIsReturned_test():
+def FilterToCompletedCompletions_NewVim_ExactMatchIsReturned_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
-  vimsupport.TextBeforeCursor = MagicMock( return_value = "Test" )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "Test" )
   completions = [ _BuildCompletion( "Test" ) ]
 
-  result = ycm_state.FilterToCompletionsMatchingOnCursor( completions )
+  result = ycm_state.FilterToCompletedCompletions( completions, False )
 
   eq_( list( result ), completions )
 
 
-def FilterToCompletionsMatchingOnCursor_NonMatchIsntReturned_test():
+def FilterToCompletedCompletions_NewVim_NonMatchIsntReturned_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
-  vimsupport.TextBeforeCursor = MagicMock( return_value = "   Quote" )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "   Quote" )
   completions = [ _BuildCompletion( "A" ) ]
 
-  result = ycm_state.FilterToCompletionsMatchingOnCursor( completions )
+  result = ycm_state.FilterToCompletedCompletions( completions, False )
 
   assert_that( list( result ), empty() )
 
 
-def HasCompletionsThatCouldMatchOnCursorWithMoreText_MatchIsReturned_test():
+def FilterToCompletedCompletions_OldVim_MatchIsReturned_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
+  vimsupport.TextBeforeCursor = MagicMock( return_value = "   Test" )
+  completions = [ _BuildCompletion( "Test" ) ]
+
+  result = ycm_state.FilterToCompletedCompletions( completions, False )
+
+  eq_( list( result ), completions )
+
+
+def FilterToCompletedCompletions_OldVim_ShortTextDoesntRaise_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
+  vimsupport.TextBeforeCursor = MagicMock( return_value = "X" )
+  completions = [ _BuildCompletion( "AAA" ) ]
+
+  ycm_state.FilterToCompletedCompletions( completions, False )
+
+
+def FilterToCompletedCompletions_OldVim_ExactMatchIsReturned_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
+  vimsupport.TextBeforeCursor = MagicMock( return_value = "Test" )
+  completions = [ _BuildCompletion( "Test" ) ]
+
+  result = ycm_state.FilterToCompletedCompletions( completions, False )
+
+  eq_( list( result ), completions )
+
+
+def FilterToCompletedCompletions_OldVim_NonMatchIsntReturned_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
+  vimsupport.TextBeforeCursor = MagicMock( return_value = "   Quote" )
+  completions = [ _BuildCompletion( "A" ) ]
+
+  result = ycm_state.FilterToCompletedCompletions( completions, False )
+
+  assert_that( list( result ), empty() )
+
+
+def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_MatchIsReturned_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
   vimsupport.TextBeforeCursor = MagicMock( return_value = "   Te" )
   completions = [ _BuildCompletion( "Test" ) ]
 
-  result = ycm_state.HasCompletionsThatCouldMatchOnCursorWithMoreText( completions )
+  result = ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
 
   eq_( result, True )
 
 
-def HasCompletionsThatCouldMatchOnCursorWithMoreText_ShortTextDoesntRaise_test():
+def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ShortTextDoesntRaise_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
   vimsupport.TextBeforeCursor = MagicMock( return_value = "X" )
   completions = [ _BuildCompletion( "AAA" ) ]
 
-  ycm_state.HasCompletionsThatCouldMatchOnCursorWithMoreText( completions )
+  ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
 
 
-def HasCompletionsThatCouldMatchOnCursorWithMoreText_ExactMatchIsntReturned_test():
+def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ExactMatchIsntReturned_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
   vimsupport.TextBeforeCursor = MagicMock( return_value = "Test" )
   completions = [ _BuildCompletion( "Test" ) ]
 
-  result = ycm_state.HasCompletionsThatCouldMatchOnCursorWithMoreText( completions )
+  result = ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
 
   eq_( result, False )
 
 
-def HasCompletionsThatCouldMatchOnCursorWithMoreText_NonMatchIsntReturned_test():
+def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_NonMatchIsntReturned_test():
   ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
   vimsupport.TextBeforeCursor = MagicMock( return_value = "   Quote" )
   completions = [ _BuildCompletion( "A" ) ]
 
-  result = ycm_state.HasCompletionsThatCouldMatchOnCursorWithMoreText( completions )
+  result = ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+
+  eq_( result, False )
+
+
+def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_MatchIsReturned_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "Te" )
+  completions = [ _BuildCompletion( "Test" ) ]
+
+  result = ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+
+  eq_( result, True )
+
+
+def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ShortTextDoesntRaise_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "X" )
+  completions = [ _BuildCompletion( "AAA" ) ]
+
+  ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+
+
+def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ExactMatchIsntReturned_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "Test" )
+  completions = [ _BuildCompletion( "Test" ) ]
+
+  result = ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+
+  eq_( result, False )
+
+
+def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_NonMatchIsntReturned_test():
+  ycm_state = YouCompleteMe( MagicMock( spec_set = dict ) )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "   Quote" )
+  completions = [ _BuildCompletion( "A" ) ]
+
+  result = ycm_state.HasCompletionsThatCouldBeCompletedWithMoreText( completions )
 
   eq_( result, False )
 
@@ -145,27 +237,79 @@ def GetRequiredNamespaceImport_ReturnNamespaceFromExtraData_test():
   ))
 
 
-def GetMatchingCompletionsOnCursor_ReturnEmptyIfNotDone_test():
+def GetCompletedCompletions_ReturnEmptyIfNotDone_test():
   ycm_state = _SetupForCsharpCompletionDone( [] )
   ycm_state._latest_completion_request.Done = MagicMock( return_value = False )
 
-  eq_( [], ycm_state.GetMatchingCompletionsOnCursor() )
-  
+  eq_( [], ycm_state.GetCompletedCompletions() )
 
-def GetMatchingCompletionsOnCursor_ReturnEmptyIfPendingMatches_test():
+
+def GetCompletedCompletions_ReturnEmptyIfPendingMatches_NewVim_test():
   completions = [ _BuildCompletion( None ) ]
   ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "Te" )
+
+  eq_( [], ycm_state.GetCompletedCompletions() )
+
+
+def GetCompletedCompletions_ReturnEmptyIfPendingMatches_OldVim_test():
+  completions = [ _BuildCompletion( None ) ]
+  ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
   vimsupport.TextBeforeCursor = MagicMock( return_value = "   Te" )
 
-  eq_( [], ycm_state.GetMatchingCompletionsOnCursor() )
+  eq_( [], ycm_state.GetCompletedCompletions() )
 
 
-def GetMatchingCompletionsOnCursor_ReturnMatchIfMatches_test():
+def GetCompletedCompletions_ReturnMatchIfExactMatches_NewVim_test():
+  info = [ "NS","Test", "Abbr", "Menu", "Info", "Kind" ]
+  completions = [ _BuildCompletion( *info ) ]
+  ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( *info[ 1 : ] )
+
+  eq_( completions, ycm_state.GetCompletedCompletions() )
+
+
+def GetCompletedCompletions_ReturnMatchIfExactMatchesEvenIfPartial_NewVim_test():
+  info = [ "NS", "Test", "Abbr", "Menu", "Info", "Kind" ]
+  completions = [ _BuildCompletion( *info ),
+                  _BuildCompletion( insertion_text = "TestTest" ) ]
+  ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( *info[ 1 : ] )
+
+  eq_( [ completions[ 0 ] ], ycm_state.GetCompletedCompletions() )
+
+
+def GetCompletedCompletions_DontReturnMatchIfNontExactMatchesAndPartial_NewVim_test():
+  info = [ "NS", "Test", "Abbr", "Menu", "Info", "Kind" ]
+  completions = [ _BuildCompletion( insertion_text = info[ 0 ] ),
+                  _BuildCompletion( insertion_text = "TestTest" ) ]
+  ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( *info[ 1 : ] )
+
+  eq_( [], ycm_state.GetCompletedCompletions() )
+
+
+def GetCompletedCompletions_ReturnMatchIfMatches_NewVim_test():
   completions = [ _BuildCompletion( None ) ]
   ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = True )
+  vimsupport.GetVariableValue = GetVariableValue_CompleteItemIs( "Test" )
+
+  eq_( completions, ycm_state.GetCompletedCompletions() )
+
+
+def GetCompletedCompletions_ReturnMatchIfMatches_OldVim_test():
+  completions = [ _BuildCompletion( None ) ]
+  ycm_state = _SetupForCsharpCompletionDone( completions )
+  vimsupport.VimVersionAtLeast = MagicMock( return_value = False )
   vimsupport.TextBeforeCursor = MagicMock( return_value = "   Test" )
 
-  eq_( completions, ycm_state.GetMatchingCompletionsOnCursor() )
+  eq_( completions, ycm_state.GetCompletedCompletions() )
 
 
 def PostCompleteCsharp_EmptyDoesntInsertNamespace_test():
@@ -220,8 +364,29 @@ def _SetupForCsharpCompletionDone( completions ):
   return ycm_state
 
 
-def _BuildCompletion( namespace ):
+def _BuildCompletion( namespace = None, insertion_text = 'Test',
+                      menu_text = None, extra_menu_info = None,
+                      detailed_info = None, kind = None ):
   return {
     'extra_data': { 'required_namespace_import' : namespace },
-    'insertion_text': 'Test'
+    'insertion_text': insertion_text,
+    'menu_text': menu_text,
+    'extra_menu_info': extra_menu_info,
+    'kind': kind,
+    'detailed_info': detailed_info,
   }
+
+def GetVariableValue_CompleteItemIs( word, abbr = None, menu = None,
+                                     info = None, kind = None ):
+  def Result( variable ):
+    if variable == 'v:completed_item':
+      return {
+        'word': word,
+        'abbr': abbr,
+        'menu': menu,
+        'info': info,
+        'kind': kind,
+      }
+    else:
+      return DEFAULT
+  return MagicMock( side_effect = Result )
