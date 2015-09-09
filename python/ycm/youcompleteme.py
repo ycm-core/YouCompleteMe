@@ -35,7 +35,8 @@ from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
-from ycm.client.completion_request import CompletionRequest
+from ycm.client.completion_request import ( CompletionRequest,
+                                            ConvertCompletionDataToVimData )
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
@@ -309,46 +310,88 @@ class YouCompleteMe( object ):
         yield value
 
 
-  def GetMatchingCompletionsOnCursor( self ):
+  def GetCompletedCompletions( self ):
     latest_completion_request = self.GetCurrentCompletionRequest()
-    if not latest_completion_request.Done():
+    if not latest_completion_request or not latest_completion_request.Done():
       return []
 
     completions = latest_completion_request.RawResponse()
-    if self.HasCompletionsThatCouldMatchOnCursorWithMoreText( completions ):
+
+    result = self.FilterToCompletedCompletions( completions,
+                                                full_match_only = True )
+    result = list( result )
+    if result:
+      return result
+
+    if self.HasCompletionsThatCouldBeCompletedWithMoreText( completions ):
       # Since the way that YCM works leads to CompleteDone called on every
       # character, return blank if the completion might not be done. This won't
       # match if the completion is ended with typing a non-keyword character.
       return []
 
-    result = self.FilterToCompletionsMatchingOnCursor( completions )
+    result = self.FilterToCompletedCompletions( completions,
+                                                full_match_only = False )
 
     return list( result )
 
 
-  def FilterToCompletionsMatchingOnCursor( self, completions ):
-    text = vimsupport.TextBeforeCursor() # No support for multiple line completions
-    for completion in completions:
-      word = completion[ "insertion_text" ]
-      # Trim complete-ending character if needed
-      text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
-      buffer_text = text[ -1 * len( word ) : ]
-      if buffer_text == word:
-        yield completion
+  def FilterToCompletedCompletions( self, completions, full_match_only ):
+    if vimsupport.VimVersionAtLeast( "7.4.774" ):
+      completed = vimsupport.GetVariableValue( 'v:completed_item' )
+      for completion in completions:
+        item = ConvertCompletionDataToVimData( completion )
+        match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
+                        else [ 'word' ] )
+        matcher = lambda key: completed.get( key, "" ) == item.get( key, "" )
+        if all( [ matcher( i ) for i in match_keys ] ):
+          yield completion
+    else:
+      if full_match_only:
+        return
+      # No support for multiple line completions
+      text = vimsupport.TextBeforeCursor()
+      for completion in completions:
+        word = completion[ "insertion_text" ]
+        # Trim complete-ending character if needed
+        text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
+        buffer_text = text[ -1 * len( word ) : ]
+        if buffer_text == word:
+          yield completion
 
 
-  def HasCompletionsThatCouldMatchOnCursorWithMoreText( self, completions ):
-    text = vimsupport.TextBeforeCursor() # No support for multiple line completions
-    for completion in completions:
-      word = completion[ "insertion_text" ]
-      for i in range( 1, len( word ) - 1 ): # Excluding full word
-        if text[ -1 * i  : ] == word[ : i ]:
+  def HasCompletionsThatCouldBeCompletedWithMoreText( self, completions ):
+    if vimsupport.VimVersionAtLeast( "7.4.774" ):
+      completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
+      completed_word = completed_item[ 'word' ]
+      if not completed_word:
+        return False
+
+      # Sometime CompleteDone is called after the next character is inserted
+      # If so, use inserted character to filter possible completions further
+      text = vimsupport.TextBeforeCursor()
+      reject_exact_match = True
+      if text and text[ -1 ] != completed_word[ -1 ]:
+        reject_exact_match = False
+        completed_word += text[ -1 ]
+
+      for completion in completions:
+        word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+        if reject_exact_match and word == completed_word:
+          continue
+        if word.startswith( completed_word ):
           return True
+    else:
+      text = vimsupport.TextBeforeCursor() # No support for multiple line completions
+      for completion in completions:
+        word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+        for i in range( 1, len( word ) - 1 ): # Excluding full word
+          if text[ -1 * i  : ] == word[ : i ]:
+            return True
     return False
 
 
   def OnCompleteDone_Csharp( self ):
-    completions = self.GetMatchingCompletionsOnCursor()
+    completions = self.GetCompletedCompletions()
     namespaces = [ self.GetRequiredNamespaceImport( c )
                    for c in completions ]
     namespaces = [ n for n in namespaces if n ]

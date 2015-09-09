@@ -60,7 +60,7 @@ class CompletionRequest( BaseRequest ):
     return _ConvertCompletionDatasToVimDatas( self.RawResponse() )
 
 
-def _ConvertCompletionDataToVimData( completion_data ):
+def ConvertCompletionDataToVimData( completion_data ):
   # see :h complete-items for a description of the dictionary fields
   vim_data = {
     'word' : ToUtf8IfNeeded( completion_data[ 'insertion_text' ] ),
@@ -81,5 +81,5 @@ def _ConvertCompletionDataToVimData( completion_data ):
 
 
 def _ConvertCompletionDatasToVimDatas( response_data ):
-  return [ _ConvertCompletionDataToVimData( x )
+  return [ ConvertCompletionDataToVimData( x )
            for x in response_data ]
