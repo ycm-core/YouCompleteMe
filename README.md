@@ -168,7 +168,7 @@ that are conservatively turned off by default that you may want to turn on.
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.584 with python2 support. Ubuntu 14.04 and later have
+Make sure you have Vim 7.3.598 with python2 support. Ubuntu 14.04 and later have
 a Vim that's recent enough. You can see the version of Vim installed by running
 `vim --version`. If the version is too old, you may need to [compile Vim
 from source][vim-build] (don't worry, it's easy).
@@ -220,7 +220,7 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
 not officially supported platforms by YCM.
 
-Make sure you have Vim 7.3.584 with python2 support.
+Make sure you have Vim 7.3.598 with python2 support.
 
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
 Vim installed by running `vim --version`.
@@ -278,19 +278,19 @@ process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
-1.  **Ensure that your version of Vim is _at least_ 7.3.584 _and_ that it has
+1.  **Ensure that your version of Vim is _at least_ 7.3.598 _and_ that it has
     support for python2 scripting**.
 
     Inside Vim, type `:version`. Look at the first two to three lines of output;
     it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If
     your version is greater than 7.3, then you're all set. If your version is
     7.3 then look below that where it says, `Included patches: 1-Z`, where Z
-    will be some number. That number needs to be 584 or higher.
+    will be some number. That number needs to be 598 or higher.
 
     If your version of Vim is not recent enough, you may need to [compile Vim
     from source][vim-build] (don't worry, it's easy).
 
-    After you have made sure that you have Vim 7.3.584+, type the following in
+    After you have made sure that you have Vim 7.3.598+, type the following in
     Vim: `:echo has('python')`. The output should be 1. If it's 0, then get a
     version of Vim with Python support.
 
