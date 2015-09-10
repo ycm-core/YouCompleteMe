@@ -99,7 +99,7 @@ class YouCompleteMe( object ):
     self._SetupServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
-      'cs': lambda( self ): self.OnCompleteDone_Csharp()
+      'cs': lambda( self ): self._OnCompleteDone_Csharp()
     }
 
   def _SetupServer( self ):
@@ -310,89 +310,121 @@ class YouCompleteMe( object ):
         yield value
 
 
-  def GetCompletedCompletions( self ):
+  def GetCompletionsUserMayHaveCompleted( self ):
     latest_completion_request = self.GetCurrentCompletionRequest()
     if not latest_completion_request or not latest_completion_request.Done():
       return []
 
     completions = latest_completion_request.RawResponse()
 
-    result = self.FilterToCompletedCompletions( completions,
-                                                full_match_only = True )
+    result = self._FilterToMatchingCompletions( completions, True )
     result = list( result )
     if result:
       return result
 
-    if self.HasCompletionsThatCouldBeCompletedWithMoreText( completions ):
+    if self._HasCompletionsThatCouldBeCompletedWithMoreText( completions ):
       # Since the way that YCM works leads to CompleteDone called on every
       # character, return blank if the completion might not be done. This won't
       # match if the completion is ended with typing a non-keyword character.
       return []
 
-    result = self.FilterToCompletedCompletions( completions,
-                                                full_match_only = False )
+    result = self._FilterToMatchingCompletions( completions, False )
 
     return list( result )
 
 
-  def FilterToCompletedCompletions( self, completions, full_match_only ):
+  def _FilterToMatchingCompletions( self, completions, full_match_only ):
+    self._PatchBasedOnVimVersion()
+    return self._FilterToMatchingCompletions( completions, full_match_only)
+
+
+  def _HasCompletionsThatCouldBeCompletedWithMoreText( self, completions ):
+    self._PatchBasedOnVimVersion()
+    return self._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+
+
+  def _PatchBasedOnVimVersion( self ):
     if vimsupport.VimVersionAtLeast( "7.4.774" ):
-      completed = vimsupport.GetVariableValue( 'v:completed_item' )
-      for completion in completions:
-        item = ConvertCompletionDataToVimData( completion )
-        match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
-                        else [ 'word' ] )
-        matcher = lambda key: completed.get( key, "" ) == item.get( key, "" )
-        if all( [ matcher( i ) for i in match_keys ] ):
-          yield completion
+      self._HasCompletionsThatCouldBeCompletedWithMoreText = \
+        self._HasCompletionsThatCouldBeCompletedWithMoreText_NewerVim
+      self._FilterToMatchingCompletions = \
+        self._FilterToMatchingCompletions_NewerVim
     else:
-      if full_match_only:
-        return
-      # No support for multiple line completions
-      text = vimsupport.TextBeforeCursor()
-      for completion in completions:
-        word = completion[ "insertion_text" ]
-        # Trim complete-ending character if needed
-        text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
-        buffer_text = text[ -1 * len( word ) : ]
-        if buffer_text == word:
-          yield completion
+      self._FilterToMatchingCompletions = \
+        self._FilterToMatchingCompletions_OlderVim
+      self._HasCompletionsThatCouldBeCompletedWithMoreText = \
+        self._HasCompletionsThatCouldBeCompletedWithMoreText_OlderVim
 
 
-  def HasCompletionsThatCouldBeCompletedWithMoreText( self, completions ):
-    if vimsupport.VimVersionAtLeast( "7.4.774" ):
-      completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
-      completed_word = completed_item[ 'word' ]
-      if not completed_word:
-        return False
+  def _FilterToMatchingCompletions_NewerVim( self, completions,
+                                             full_match_only ):
+    """ Filter to completions matching the item Vim said was completed """
+    completed = vimsupport.GetVariableValue( 'v:completed_item' )
+    for completion in completions:
+      item = ConvertCompletionDataToVimData( completion )
+      match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
+                      else [ 'word' ] )
+      matcher = lambda key: completed.get( key, "" ) == item.get( key, "" )
+      if all( [ matcher( i ) for i in match_keys ] ):
+        yield completion
 
-      # Sometime CompleteDone is called after the next character is inserted
-      # If so, use inserted character to filter possible completions further
-      text = vimsupport.TextBeforeCursor()
-      reject_exact_match = True
-      if text and text[ -1 ] != completed_word[ -1 ]:
-        reject_exact_match = False
-        completed_word += text[ -1 ]
 
-      for completion in completions:
-        word = ConvertCompletionDataToVimData( completion )[ 'word' ]
-        if reject_exact_match and word == completed_word:
-          continue
-        if word.startswith( completed_word ):
-          return True
-    else:
-      text = vimsupport.TextBeforeCursor() # No support for multiple line completions
-      for completion in completions:
-        word = ConvertCompletionDataToVimData( completion )[ 'word' ]
-        for i in range( 1, len( word ) - 1 ): # Excluding full word
-          if text[ -1 * i  : ] == word[ : i ]:
-            return True
+  def _FilterToMatchingCompletions_OlderVim( self, completions,
+                                             full_match_only ):
+    """ Filter to completions matching the buffer text """
+    if full_match_only:
+      return # Only supported in 7.4.774+
+    # No support for multiple line completions
+    text = vimsupport.TextBeforeCursor()
+    for completion in completions:
+      word = completion[ "insertion_text" ]
+      # Trim complete-ending character if needed
+      text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
+      buffer_text = text[ -1 * len( word ) : ]
+      if buffer_text == word:
+        yield completion
+
+
+  def _HasCompletionsThatCouldBeCompletedWithMoreText_NewerVim( self,
+                                                                completions ):
+    completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
+    completed_word = completed_item[ 'word' ]
+    if not completed_word:
+      return False
+
+    # Sometime CompleteDone is called after the next character is inserted
+    # If so, use inserted character to filter possible completions further
+    text = vimsupport.TextBeforeCursor()
+    reject_exact_match = True
+    if text and text[ -1 ] != completed_word[ -1 ]:
+      reject_exact_match = False
+      completed_word += text[ -1 ]
+
+    for completion in completions:
+      word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+      if reject_exact_match and word == completed_word:
+        continue
+      if word.startswith( completed_word ):
+        return True
     return False
 
 
-  def OnCompleteDone_Csharp( self ):
-    completions = self.GetCompletedCompletions()
-    namespaces = [ self.GetRequiredNamespaceImport( c )
+  def _HasCompletionsThatCouldBeCompletedWithMoreText_OlderVim( self,
+                                                                completions ):
+    # No support for multiple line completions
+    text = vimsupport.TextBeforeCursor()
+    for completion in completions:
+      word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+      for i in range( 1, len( word ) - 1 ): # Excluding full word
+        if text[ -1 * i  : ] == word[ : i ]:
+          return True
+    return False
+
+
+
+  def _OnCompleteDone_Csharp( self ):
+    completions = self.GetCompletionsUserMayHaveCompleted()
+    namespaces = [ self._GetRequiredNamespaceImport( c )
                    for c in completions ]
     namespaces = [ n for n in namespaces if n ]
     if not namespaces:
@@ -411,7 +443,7 @@ class YouCompleteMe( object ):
     vimsupport.InsertNamespace( namespace )
 
 
-  def GetRequiredNamespaceImport( self, completion ):
+  def _GetRequiredNamespaceImport( self, completion ):
     if ( "extra_data" not in completion
          or "required_namespace_import" not in completion[ "extra_data" ] ):
       return None
@@ -542,5 +574,3 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
   extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
                                            'description': x.description
                                          } for x in rawsnips ]
-
-

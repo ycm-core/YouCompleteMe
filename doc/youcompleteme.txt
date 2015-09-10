@@ -1584,11 +1584,12 @@ Default: '0'
 -------------------------------------------------------------------------------
 The *g:ycm_csharp_insert_namespace_expr* option
 
-When YCM inserts a namespace, by default, it will insert it under the nearest
-using statement. When this option is set, YCM will instead set the global
-variable 'g:ycm_namespace_to_insert' to the namespace to insert, and then
-evaluate this option's value as an expression. The expression is responsible
-for inserting the namespace.
+If you desired to control where YCM inserts namespaces, set this option. When
+YCM inserts a namespace, by default, it will insert the namespace under the
+nearest using statement. When this option is set, YCM will instead set the
+global variable 'g:ycm_namespace_to_insert' to the namespace to insert, and
+then evaluate this option's value as an expression. The expression is
+responsible for inserting the namespace.
 
 Default: "''"
 >
