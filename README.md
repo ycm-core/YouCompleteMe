@@ -1367,14 +1367,18 @@ Default: `0`
 
 ### The `g:ycm_csharp_insert_namespace_expr` option
 
-If you desired to control where YCM inserts namespaces, set this option.  When
-YCM inserts a namespace, by default, it will insert the namespace under the
-nearest using statement.  When this option is set, YCM will instead set the
-global variable `g:ycm_namespace_to_insert` to the namespace to insert, and
-then evaluate this option's value as an expression. The expression is
-responsible for inserting the namespace.
+By default, when YCM inserts a namespace, it will insert the `using` statement
+under the nearest `using` statement. You may prefer that the `using` statement is
+inserted somewhere, for example, to preserve sorting. If so, you can set this
+option to override this behaviour.
 
-Default: `''`
+When this option is set, instead of inserting the `using` statement itself, YCM
+will set the global variable `g:ycm_namespace_to_insert` to the namespace to
+insert, and then evaluate this option's value as an expression. The option's
+expression is responsible for inserting the namespace - the default insertion
+will not occur.
+
+Default: ''
 
     let g:ycm_csharp_insert_namespace_expr = ''
 
