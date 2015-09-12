@@ -533,3 +533,46 @@ def _BuildLocations( start_line, start_column, end_line, end_column ):
     'line_num'  : end_line,
     'column_num': end_column,
   }
+
+
+def ReplaceChunksList_SortedChunks_test():
+  chunks = [
+    _BuildChunk( 1, 4, 1, 4, '('),
+    _BuildChunk( 1, 11, 1, 11, ')' )
+  ]
+
+  result_buffer = [ "CT<10 >> 2> ct" ]
+  vimsupport.ReplaceChunksList( chunks, result_buffer )
+
+  expected_buffer = [ "CT<(10 >> 2)> ct" ]
+  eq_( expected_buffer, result_buffer )
+
+
+def ReplaceChunksList_UnsortedChunks_test():
+  chunks = [
+    _BuildChunk( 1, 11, 1, 11, ')'),
+    _BuildChunk( 1, 4, 1, 4, '(' )
+  ]
+
+  result_buffer = [ "CT<10 >> 2> ct" ]
+  vimsupport.ReplaceChunksList( chunks, result_buffer )
+
+  expected_buffer = [ "CT<(10 >> 2)> ct" ]
+  eq_( expected_buffer, result_buffer )
+
+
+def _BuildChunk( start_line, start_column, end_line, end_column,
+                 replacement_text ):
+  return {
+    'range': {
+      'start': {
+        'line_num': start_line,
+        'column_num': start_column,
+      },
+      'end': {
+        'line_num': end_line,
+        'column_num': end_column,
+      },
+    },
+    'replacement_text': replacement_text
+  }
