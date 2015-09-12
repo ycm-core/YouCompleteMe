@@ -466,9 +466,8 @@ def ReplaceChunksList( chunks, vim_buffer = None ):
   # We need to track the difference in length, but ensuring we apply fixes
   # in ascending order of insertion point.
   chunks.sort( key = lambda chunk: (
-    str( chunk[ 'range' ][ 'start' ][ 'line_num' ] )
-    + ','
-    + str( chunk[ 'range' ][ 'start' ][ 'column_num' ] )
+    chunk[ 'range' ][ 'start' ][ 'line_num' ],
+    chunk[ 'range' ][ 'start' ][ 'column_num' ]
   ) )
 
   # Remember the line number we're processing. Negative line number means we
