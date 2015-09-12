@@ -22,6 +22,7 @@ from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
 from ycm import vimsupport
 from ycmd.utils import ToUtf8IfNeeded
 
+
 def _EnsureBackwardsCompatibility( arguments ):
   if arguments and arguments[ 0 ] == 'GoToDefinitionElseDeclaration':
     arguments[ 0 ] = 'GoTo'
@@ -49,13 +50,14 @@ class CommandRequest( BaseRequest ):
     } )
     try:
       self._response = self.PostDataToHandler( request_data,
-                                              'run_completer_command' )
+                                               'run_completer_command' )
     except ServerError as e:
       vimsupport.PostMultiLineNotice( e )
 
 
   def Response( self ):
     return self._response
+
 
   def RunPostCommandActionsIfNeeded( self ):
     if not self.Done() or not self._response:
@@ -68,6 +70,7 @@ class CommandRequest( BaseRequest ):
     elif 'message' in self._response:
       self._HandleMessageResponse()
 
+
   def _HandleGotoResponse( self ):
     if isinstance( self._response, list ):
       defs = [ _BuildQfListItem( x ) for x in self._response ]
@@ -75,55 +78,26 @@ class CommandRequest( BaseRequest ):
       vim.eval( 'youcompleteme#OpenGoToList()' )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
-                                  self._response[ 'line_num' ],
-                                  self._response[ 'column_num' ] )
+                                 self._response[ 'line_num' ],
+                                 self._response[ 'column_num' ] )
+
 
   def _HandleFixitResponse( self ):
     if not len( self._response[ 'fixits' ] ):
       vimsupport.EchoText( "No fixits found for current line" )
     else:
-      fixit = self._response[ 'fixits' ][ 0 ]
+      chunks = self._response[ 'fixits' ][ 0 ][ 'chunks' ]
 
-      # We need to track the difference in length, but ensuring we apply fixes
-      # in ascending order of insertion point.
-      fixit[ 'chunks' ].sort( key = lambda chunk:  (
-        str(chunk[ 'range' ][ 'start' ][ 'line_num' ])
-        + ','
-        + str(chunk[ 'range' ][ 'start' ][ 'column_num' ])
-      ))
+      vimsupport.ReplaceChunksList( chunks )
 
-      # Remember the line number we're processing. Negative line number means we
-      # haven't processed any lines yet (by nature of being not equal to any
-      # real line number).
-      last_line = -1
+      vimsupport.EchoTextVimWidth( "FixIt applied "
+                                   + str( len( chunks ) )
+                                   + " changes" )
 
-      # Counter of changes applied, so the user has a mental picture of the
-      # undo history this change is creating.
-      num_fixed = 0
-      line_delta = 0
-      for chunk in fixit[ 'chunks' ]:
-        if chunk[ 'range' ][ 'start' ][ 'line_num' ] != last_line:
-          # If this chunk is on a different line than the previous chunk,
-          # then ignore previous deltas (as offsets won't have changed).
-          last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
-          char_delta = 0
-
-        (new_line_delta, new_char_delta) = vimsupport.ReplaceChunk(
-                                          chunk[ 'range' ][ 'start' ],
-                                          chunk[ 'range' ][ 'end' ],
-                                          chunk[ 'replacement_text' ],
-                                          line_delta, char_delta )
-        line_delta += new_line_delta
-        char_delta += new_char_delta
-
-        num_fixed = num_fixed + 1
-
-      vimsupport.EchoTextVimWidth("FixIt applied " 
-                                  + str(num_fixed) 
-                                  + " changes")
 
   def _HandleMessageResponse( self ):
     vimsupport.EchoText( self._response[ 'message' ] )
+
 
 def SendCommandRequest( arguments, completer ):
   request = CommandRequest( arguments, completer )
