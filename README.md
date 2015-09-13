@@ -10,6 +10,7 @@ YouCompleteMe: a code-completion engine for Vim
     - [Windows](#windows-installation)
     - [FreeBSD/OpenBSD](#freebsdopenbsd-installation)
     - [Full Installation Guide](#full-installation-guide)
+- [Quick Feature Summary](#quick-feature-summary)
 - [User Guide](#user-guide)
     - [General Usage](#general-usage)
     - [Client-server architecture](#client-server-architecture)
@@ -102,7 +103,6 @@ engines in the future.
 
 You'll also find that YCM has filepath completers (try typing `./` in a file)
 and a completer that integrates with [UltiSnips][].
-
 
 Installation
 ------------
@@ -400,6 +400,50 @@ in the User Guide.
 YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
+
+Quick Feature Summary
+-----
+
+### General (all languages)
+
+* Super-fast identifier completer including tags files and syntax elements
+* Intelligent suggestion ranking and filtering
+* File and path suggestions
+* Suggestions from Vim's OmniFunc
+* UltiSnips snippet suggestions
+
+### C-family languages (C, C++, Objective C, Objective C++)
+
+* Semantic auto-completion
+* Real-time diagnostic display
+* Go to declaration/definition (`GoTo`, etc.)
+* Semantic type information for identifiers (`GetType`)
+* Automatically fix certain errors (`FixIt`)
+
+### C♯
+
+* Semantic auto-completion
+* Real-time diagnostic display
+* Go to declaration/definition (`GoTo`, etc.)
+* Semantic type information for identifiers (`GetType`)
+* Automatically fix certain errors (`FixIt`)
+* Management of OmniSharp server instance
+
+### Python 2
+
+* Intelligent auto-completion
+* Go to declaration/definition (`GoTo`, etc.)
+
+### Go
+
+* Semantic auto-completion
+* Management of `gocode` server instance
+
+### TypeScript
+
+* Semantic auto-completion
+* Go to definition (`GoToDefinition`)
+* Semantic type information for identifiers (`GetType`)
 
 User Guide
 ----------
