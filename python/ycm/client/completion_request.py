@@ -21,6 +21,7 @@ from ycmd.utils import ToUtf8IfNeeded
 from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
+import os
 
 TIMEOUT_SECONDS = 0.5
 
@@ -67,6 +68,13 @@ def ConvertCompletionDataToVimData( completion_data ):
     'dup'  : 1,
   }
 
+  if ( 'extra_data' in completion_data and
+       'doc_string' in completion_data[ 'extra_data' ] ):
+    doc_string = ToUtf8IfNeeded(
+                              completion_data[ 'extra_data' ][ 'doc_string' ] )
+  else:
+    doc_string = ""
+
   if 'menu_text' in completion_data:
     vim_data[ 'abbr' ] = ToUtf8IfNeeded( completion_data[ 'menu_text' ] )
   if 'extra_menu_info' in completion_data:
@@ -76,6 +84,10 @@ def ConvertCompletionDataToVimData( completion_data ):
         completion_data[ 'kind' ] )[ 0 ].lower()
   if 'detailed_info' in completion_data:
     vim_data[ 'info' ] = ToUtf8IfNeeded( completion_data[ 'detailed_info' ] )
+    if doc_string:
+      vim_data[ 'info' ] += os.linesep + doc_string
+  elif doc_string:
+    vim_data[ 'info' ] = doc_string
 
   return vim_data
 

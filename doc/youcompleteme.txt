@@ -159,7 +159,6 @@ Introduction ~
 - Options
 - FAQ
 - Contact
-- Project Management
 - License
 
 ===============================================================================
@@ -2322,7 +2321,7 @@ contributors
 References ~
 
 [1] https://travis-ci.org/Valloric/YouCompleteMe
-[2] https://travis-ci.org/Valloric/YouCompleteMe.png?branch=master
+[2] https://travis-ci.org/Valloric/YouCompleteMe.svg?branch=master
 [3] http://clang.llvm.org/
 [4] https://github.com/davidhalter/jedi
 [5] https://github.com/nosami/OmniSharpServer

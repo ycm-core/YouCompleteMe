@@ -474,6 +474,40 @@ def GetIntValue( variable ):
   return int( vim.eval( variable ) )
 
 
+def ReplaceChunksList( chunks, vim_buffer = None ):
+  if vim_buffer is None:
+    vim_buffer = vim.current.buffer
+
+  # We need to track the difference in length, but ensuring we apply fixes
+  # in ascending order of insertion point.
+  chunks.sort( key = lambda chunk: (
+    chunk[ 'range' ][ 'start' ][ 'line_num' ],
+    chunk[ 'range' ][ 'start' ][ 'column_num' ]
+  ) )
+
+  # Remember the line number we're processing. Negative line number means we
+  # haven't processed any lines yet (by nature of being not equal to any
+  # real line number).
+  last_line = -1
+
+  line_delta = 0
+  for chunk in chunks:
+    if chunk[ 'range' ][ 'start' ][ 'line_num' ] != last_line:
+      # If this chunk is on a different line than the previous chunk,
+      # then ignore previous deltas (as offsets won't have changed).
+      last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
+      char_delta = 0
+
+    ( new_line_delta, new_char_delta ) = ReplaceChunk(
+      chunk[ 'range' ][ 'start' ],
+      chunk[ 'range' ][ 'end' ],
+      chunk[ 'replacement_text' ],
+      line_delta, char_delta,
+      vim_buffer )
+    line_delta += new_line_delta
+    char_delta += new_char_delta
+
+
 # Replace the chunk of text specified by a contiguous range with the supplied
 # text.
 # * start and end are objects with line_num and column_num properties
@@ -484,10 +518,7 @@ def GetIntValue( variable ):
 # returns the delta (in lines and characters) that any position after the end
 # needs to be adjusted by.
 def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
-                  vim_buffer = None ):
-  if vim_buffer is None:
-    vim_buffer = vim.current.buffer
-
+                  vim_buffer ):
   # ycmd's results are all 1-based, but vim's/python's are all 0-based
   # (so we do -1 on all of the values)
   start_line = start[ 'line_num' ] - 1 + line_delta

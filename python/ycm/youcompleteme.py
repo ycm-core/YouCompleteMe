@@ -193,6 +193,8 @@ class YouCompleteMe( object ):
             self._omnicomp, wrapped_request_data )
         return self._latest_completion_request
 
+    request_data[ 'working_dir' ] = os.getcwd()
+
     self._AddExtraConfDataIfNeeded( request_data )
     if force_semantic:
       request_data[ 'force_semantic' ] = True
