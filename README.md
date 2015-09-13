@@ -733,7 +733,7 @@ the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
 with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs, typescript`
 
 ### The `GoTo` subcommand
 
@@ -799,7 +799,7 @@ std::cout << *x; // invoking on x returns "const char ** => const char **"
 
 NOTE: Causes reparsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, typescript`
 
 ### The `GetParent` subcommand
 
