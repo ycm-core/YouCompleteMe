@@ -27,9 +27,9 @@ endfunction
 if exists( "g:loaded_youcompleteme" )
   call s:restore_cpo()
   finish
-elseif v:version < 703 || (v:version == 703 && !has('patch584'))
+elseif v:version < 703 || (v:version == 703 && !has('patch598'))
   echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.584+" |
+        \ echomsg "YouCompleteMe unavailable: requires Vim 7.3.598+" |
         \ echohl None
   call s:restore_cpo()
   finish

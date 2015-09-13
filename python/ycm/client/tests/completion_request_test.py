@@ -29,7 +29,7 @@ class ConvertCompletionResponseToVimDatas_test:
       completion_request._ConvertCompletionResponseToVimDatas method """
 
   def _Check( self, completion_data, expected_vim_data ):
-    vim_data = completion_request._ConvertCompletionDataToVimData(
+    vim_data = completion_request.ConvertCompletionDataToVimData(
         completion_data )
 
     try:

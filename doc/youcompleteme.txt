@@ -73,23 +73,24 @@ Contents ~
   26. The |g:ycm_auto_start_csharp_server| option
   27. The |g:ycm_auto_stop_csharp_server| option
   28. The |g:ycm_csharp_server_port| option
-  29. The |g:ycm_add_preview_to_completeopt| option
-  30. The |g:ycm_autoclose_preview_window_after_completion| option
-  31. The |g:ycm_autoclose_preview_window_after_insertion| option
-  32. The |g:ycm_max_diagnostics_to_display| option
-  33. The |g:ycm_key_list_select_completion| option
-  34. The |g:ycm_key_list_previous_completion| option
-  35. The |g:ycm_key_invoke_completion| option
-  36. The |g:ycm_key_detailed_diagnostics| option
-  37. The |g:ycm_global_ycm_extra_conf| option
-  38. The |g:ycm_confirm_extra_conf| option
-  39. The |g:ycm_extra_conf_globlist| option
-  40. The |g:ycm_filepath_completion_use_working_dir| option
-  41. The |g:ycm_semantic_triggers| option
-  42. The |g:ycm_cache_omnifunc| option
-  43. The |g:ycm_use_ultisnips_completer| option
-  44. The |g:ycm_goto_buffer_command| option
-  45. The |g:ycm_disable_for_files_larger_than_kb| option
+  29. The |g:ycm_csharp_insert_namespace_expr| option
+  30. The |g:ycm_add_preview_to_completeopt| option
+  31. The |g:ycm_autoclose_preview_window_after_completion| option
+  32. The |g:ycm_autoclose_preview_window_after_insertion| option
+  33. The |g:ycm_max_diagnostics_to_display| option
+  34. The |g:ycm_key_list_select_completion| option
+  35. The |g:ycm_key_list_previous_completion| option
+  36. The |g:ycm_key_invoke_completion| option
+  37. The |g:ycm_key_detailed_diagnostics| option
+  38. The |g:ycm_global_ycm_extra_conf| option
+  39. The |g:ycm_confirm_extra_conf| option
+  40. The |g:ycm_extra_conf_globlist| option
+  41. The |g:ycm_filepath_completion_use_working_dir| option
+  42. The |g:ycm_semantic_triggers| option
+  43. The |g:ycm_cache_omnifunc| option
+  44. The |g:ycm_use_ultisnips_completer| option
+  45. The |g:ycm_goto_buffer_command| option
+  46. The |g:ycm_disable_for_files_larger_than_kb| option
  8. FAQ                                                     |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
@@ -311,7 +312,7 @@ Ubuntu Linux x64 super-quick installation ~
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.584 with python2 support. Ubuntu 14.04 and later
+Make sure you have Vim 7.3.598 with python2 support. Ubuntu 14.04 and later
 have a Vim that's recent enough. You can see the version of Vim installed by
 running 'vim --version'. If the version is too old, you may need to compile Vim
 from source [16] (don't worry, it's easy).
@@ -368,7 +369,7 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
 not officially supported platforms by YCM.
 
-Make sure you have Vim 7.3.584 with python2 support.
+Make sure you have Vim 7.3.598 with python2 support.
 
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version
 of Vim installed by running 'vim --version'.
@@ -429,19 +430,19 @@ process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
-1. **Ensure that your version of Vim is _at least_ 7.3.584 _and_ that it has
+1. **Ensure that your version of Vim is _at least_ 7.3.598 _and_ that it has
    support for python2 scripting**.
 
    Inside Vim, type ':version'. Look at the first two to three lines of
    output; it should say 'Vi IMproved X.Y', where X.Y is the major version
    of vim. If your version is greater than 7.3, then you're all set. If your
    version is 7.3 then look below that where it says, 'Included patches:
-   1-Z', where Z will be some number. That number needs to be 584 or higher.
+   1-Z', where Z will be some number. That number needs to be 598 or higher.
 
    If your version of Vim is not recent enough, you may need to compile Vim
    from source [16] (don't worry, it's easy).
 
-   After you have made sure that you have Vim 7.3.584+, type the following
+   After you have made sure that you have Vim 7.3.598+, type the following
    in Vim: ":echo has('python')". The output should be 1. If it's 0, then
    get a version of Vim with Python support.
 
@@ -1578,6 +1579,24 @@ the OS.
 Default: '0'
 >
   let g:ycm_csharp_server_port = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_csharp_insert_namespace_expr* option
+
+By default, when YCM inserts a namespace, it will insert the 'using' statement
+under the nearest 'using' statement. You may prefer that the 'using' statement
+is inserted somewhere, for example, to preserve sorting. If so, you can set
+this option to override this behaviour.
+
+When this option is set, instead of inserting the 'using' statement itself, YCM
+will set the global variable 'g:ycm_namespace_to_insert' to the namespace to
+insert, and then evaluate this option's value as an expression. The option's
+expression is responsible for inserting the namespace - the default insertion
+will not occur.
+
+Default: ''
+>
+  let g:ycm_csharp_insert_namespace_expr = ''
 <
 -------------------------------------------------------------------------------
 The *g:ycm_add_preview_to_completeopt* option
