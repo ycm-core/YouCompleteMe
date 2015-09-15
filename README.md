@@ -637,7 +637,7 @@ The syntax groups used to highlight regions of text with errors/warnings:
 
 Here's how you'd change the style for a group:
 
-```
+```viml
 highlight YcmErrorLine guibg=#3f0000
 ```
 
@@ -918,7 +918,9 @@ All options have reasonable defaults so if the plug-in works after installation
 you don't need to change any options. These options can be configured in your
 [vimrc script][vimrc] by including a line like this:
 
-    let g:ycm_min_num_of_chars_for_completion = 1
+```viml
+let g:ycm_min_num_of_chars_for_completion = 1
+```
 
 Note that after changing an option in your [vimrc script] [vimrc] you have to
 restart Vim for the changes to take effect.
@@ -936,7 +938,9 @@ identifier completion engine and just leaves the semantic engine.
 
 Default: `2`
 
-    let g:ycm_min_num_of_chars_for_completion = 2
+```viml
+let g:ycm_min_num_of_chars_for_completion = 2
+```
 
 ### The `g:ycm_min_num_identifier_candidate_chars` option
 
@@ -951,7 +955,9 @@ the various semantic completers.
 
 Default: `0`
 
-    let g:ycm_min_num_identifier_candidate_chars = 0
+```viml
+let g:ycm_min_num_identifier_candidate_chars = 0
+```
 
 ### The `g:ycm_auto_trigger` option
 
@@ -966,7 +972,9 @@ number like `99`.
 
 Default: `1`
 
-    let g:ycm_auto_trigger = 1
+```viml
+let g:ycm_auto_trigger = 1
+```
 
 ### The `g:ycm_filetype_whitelist` option
 
@@ -996,7 +1004,9 @@ You can get the filetype of the current file in Vim with `:set ft?`.
 
 Default: `{'*' : 1}`
 
-    let g:ycm_filetype_whitelist = { '*': 1 }
+```viml
+let g:ycm_filetype_whitelist = { '*': 1 }
+```
 
 ### The `g:ycm_filetype_blacklist` option
 
@@ -1009,18 +1019,20 @@ See the `g:ycm_filetype_whitelist` option for more details on how this works.
 
 Default: `[see next line]`
 
-    let g:ycm_filetype_blacklist = {
-          \ 'tagbar' : 1,
-          \ 'qf' : 1,
-          \ 'notes' : 1,
-          \ 'markdown' : 1,
-          \ 'unite' : 1,
-          \ 'text' : 1,
-          \ 'vimwiki' : 1,
-          \ 'pandoc' : 1,
-          \ 'infolog' : 1,
-          \ 'mail' : 1
-          \}
+```viml
+let g:ycm_filetype_blacklist = {
+      \ 'tagbar' : 1,
+      \ 'qf' : 1,
+      \ 'notes' : 1,
+      \ 'markdown' : 1,
+      \ 'unite' : 1,
+      \ 'text' : 1,
+      \ 'vimwiki' : 1,
+      \ 'pandoc' : 1,
+      \ 'infolog' : 1,
+      \ 'mail' : 1
+      \}
+```
 
 ### The `g:ycm_filetype_specific_completion_to_disable` option
 
@@ -1040,10 +1052,11 @@ You can get the filetype of the current file in Vim with `:set ft?`.
 
 Default: `[see next line]`
 
-    let g:ycm_filetype_specific_completion_to_disable = {
-          \ 'gitcommit': 1
-          \}
-
+```viml
+let g:ycm_filetype_specific_completion_to_disable = {
+      \ 'gitcommit': 1
+      \}
+```
 
 ### The `g:ycm_show_diagnostics_ui` option
 
@@ -1066,7 +1079,9 @@ Syntastic checkers, unset this option.
 
 Default: `1`
 
-    let g:ycm_show_diagnostics_ui = 1
+```viml
+let g:ycm_show_diagnostics_ui = 1
+```
 
 ### The `g:ycm_error_symbol` option
 
@@ -1079,7 +1094,9 @@ before using this option's default.
 
 Default: `>>`
 
-    let g:ycm_error_symbol = '>>'
+```viml
+let g:ycm_error_symbol = '>>'
+```
 
 ### The `g:ycm_warning_symbol` option
 
@@ -1092,7 +1109,9 @@ before using this option's default.
 
 Default: `>>`
 
-    let g:ycm_warning_symbol = '>>'
+```viml
+let g:ycm_warning_symbol = '>>'
+```
 
 ### The `g:ycm_enable_diagnostic_signs` option
 
@@ -1106,7 +1125,9 @@ before using this option's default.
 
 Default: `1`
 
-    let g:ycm_enable_diagnostic_signs = 1
+```viml
+let g:ycm_enable_diagnostic_signs = 1
+```
 
 ### The `g:ycm_enable_diagnostic_highlighting` option
 
@@ -1119,7 +1140,9 @@ option before using this option's default.
 
 Default: `1`
 
-    let g:ycm_enable_diagnostic_highlighting = 1
+```viml
+let g:ycm_enable_diagnostic_highlighting = 1
+```
 
 ### The `g:ycm_echo_current_diagnostic` option
 
@@ -1133,7 +1156,9 @@ option before using this option's default.
 
 Default: `1`
 
-    let g:ycm_echo_current_diagnostic = 1
+```viml
+let g:ycm_echo_current_diagnostic = 1
+```
 
 ### The `g:ycm_always_populate_location_list` option
 
@@ -1150,7 +1175,9 @@ default.
 
 Default: `0`
 
-    let g:ycm_always_populate_location_list = 0
+```viml
+let g:ycm_always_populate_location_list = 0
+```
 
 ### The `g:ycm_open_loclist_on_ycm_diags` option
 
@@ -1161,7 +1188,9 @@ See `:help location-list` in Vim to learn more about the location list.
 
 Default: `1`
 
-    let g:ycm_open_loclist_on_ycm_diags = 1
+```viml
+let g:ycm_open_loclist_on_ycm_diags = 1
+```
 
 ### The `g:ycm_allow_changing_updatetime` option
 
@@ -1179,7 +1208,9 @@ alone.
 
 Default: `1`
 
-    let g:ycm_allow_changing_updatetime = 1
+```viml
+let g:ycm_allow_changing_updatetime = 1
+```
 
 ### The `g:ycm_complete_in_comments` option
 
@@ -1188,7 +1219,9 @@ typing inside comments.
 
 Default: `0`
 
-    let g:ycm_complete_in_comments = 0
+```viml
+let g:ycm_complete_in_comments = 0
+```
 
 ### The `g:ycm_complete_in_strings` option
 
@@ -1203,7 +1236,9 @@ as well.
 
 Default: `1`
 
-    let g:ycm_complete_in_strings = 1
+```viml
+let g:ycm_complete_in_strings = 1
+```
 
 ### The `g:ycm_collect_identifiers_from_comments_and_strings` option
 
@@ -1213,7 +1248,9 @@ strings will be ignored.
 
 Default: `0`
 
-    let g:ycm_collect_identifiers_from_comments_and_strings = 0
+```viml
+let g:ycm_collect_identifiers_from_comments_and_strings = 0
+```
 
 ### The `g:ycm_collect_identifiers_from_tags_files` option
 
@@ -1236,7 +1273,9 @@ network directory.
 
 Default: `0`
 
-    let g:ycm_collect_identifiers_from_tags_files = 0
+```viml
+let g:ycm_collect_identifiers_from_tags_files = 0
+```
 
 ### The `g:ycm_seed_identifiers_with_syntax` option
 
@@ -1250,7 +1289,9 @@ Usually at least 95% of the keywords are successfully extracted.
 
 Default: `0`
 
-    let g:ycm_seed_identifiers_with_syntax = 0
+```viml
+let g:ycm_seed_identifiers_with_syntax = 0
+```
 
 ### The `g:ycm_extra_conf_vim_data` option
 
@@ -1283,7 +1324,9 @@ You can then get to `client_data` with `kwargs['client_data']`.
 
 Default: `[]`
 
-    let g:ycm_extra_conf_vim_data = []
+```viml
+let g:ycm_extra_conf_vim_data = []
+```
 
 ### The `g:ycm_path_to_python_interpreter` option
 
@@ -1297,7 +1340,9 @@ Vim.
 
 Default: `''`
 
-    let g:ycm_path_to_python_interpreter = ''
+```viml
+let g:ycm_path_to_python_interpreter = ''
+```
 
 ### The `g:ycm_server_use_vim_stdout` option
 
@@ -1307,7 +1352,9 @@ in the console).
 
 Default: `0`
 
-    let g:ycm_server_use_vim_stdout = 0
+```viml
+let g:ycm_server_use_vim_stdout = 0
+```
 
 ### The `g:ycm_server_keep_logfiles` option
 
@@ -1318,7 +1365,9 @@ To see where the logfiles are, call `:YcmDebugInfo`.
 
 Default: `0`
 
-    let g:ycm_server_keep_logfiles = 0
+```viml
+let g:ycm_server_keep_logfiles = 0
+```
 
 ### The `g:ycm_server_log_level` option
 
@@ -1334,7 +1383,9 @@ Note that `debug` is _very_ verbose.
 
 Default: `info`
 
-    let g:ycm_server_log_level = 'info'
+```viml
+let g:ycm_server_log_level = 'info'
+```
 
 ### The `g:ycm_auto_start_csharp_server` option
 
@@ -1343,7 +1394,9 @@ Vim session) when you open a C# file.
 
 Default: `1`
 
-    let g:ycm_auto_start_csharp_server = 1
+```viml
+let g:ycm_auto_start_csharp_server = 1
+```
 
 ### The `g:ycm_auto_stop_csharp_server` option
 
@@ -1352,7 +1405,9 @@ closing Vim.
 
 Default: `1`
 
-    let g:ycm_auto_stop_csharp_server = 1
+```viml
+let g:ycm_auto_stop_csharp_server = 1
+```
 
 ### The `g:ycm_csharp_server_port` option
 
@@ -1362,7 +1417,9 @@ by the OS.
 
 Default: `0`
 
-    let g:ycm_csharp_server_port = 0
+```viml
+let g:ycm_csharp_server_port = 0
+```
 
 ### The `g:ycm_csharp_insert_namespace_expr` option
 
@@ -1379,7 +1436,9 @@ will not occur.
 
 Default: ''
 
-    let g:ycm_csharp_insert_namespace_expr = ''
+```viml
+let g:ycm_csharp_insert_namespace_expr = ''
+```
 
 ### The `g:ycm_add_preview_to_completeopt` option
 
@@ -1397,7 +1456,9 @@ overloads in the window if the current completion is a function name.
 
 Default: `0`
 
-    let g:ycm_add_preview_to_completeopt = 0
+```viml
+let g:ycm_add_preview_to_completeopt = 0
+```
 
 ### The `g:ycm_autoclose_preview_window_after_completion` option
 
@@ -1408,7 +1469,9 @@ irrelevant. See the `g:ycm_add_preview_to_completeopt` option for more details.
 
 Default: `0`
 
-    let g:ycm_autoclose_preview_window_after_completion = 0
+```viml
+let g:ycm_autoclose_preview_window_after_completion = 0
+```
 
 ### The `g:ycm_autoclose_preview_window_after_insertion` option
 
@@ -1420,7 +1483,9 @@ details.
 
 Default: `0`
 
-    let g:ycm_autoclose_preview_window_after_insertion = 0
+```viml
+let g:ycm_autoclose_preview_window_after_insertion = 0
+```
 
 ### The `g:ycm_max_diagnostics_to_display` option
 
@@ -1430,7 +1495,9 @@ are using the C-family semantic completion engine.
 
 Default: `30`
 
-    let g:ycm_max_diagnostics_to_display = 30
+```viml
+let g:ycm_max_diagnostics_to_display = 30
+```
 
 ### The `g:ycm_key_list_select_completion` option
 
@@ -1442,7 +1509,9 @@ Some users like adding `<Enter>` to this list.
 
 Default: `['<TAB>', '<Down>']`
 
-    let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
+```viml
+let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
+```
 
 ### The `g:ycm_key_list_previous_completion` option
 
@@ -1456,7 +1525,9 @@ because the terminal usually does not forward modifier key combinations to Vim.
 
 Default: `['<S-TAB>', '<Up>']`
 
-    let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>']
+```viml
+let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>']
+```
 
 ### The `g:ycm_key_invoke_completion` option
 
@@ -1476,7 +1547,9 @@ Setting this option to an empty string will make sure no mapping is created.
 
 Default: `<C-Space>`
 
-    let g:ycm_key_invoke_completion = '<C-Space>'
+```viml
+let g:ycm_key_invoke_completion = '<C-Space>'
+```
 
 ### The `g:ycm_key_detailed_diagnostics` option
 
@@ -1488,7 +1561,9 @@ Setting this option to an empty string will make sure no mapping is created.
 
 Default: `<leader>d`
 
-    let g:ycm_key_detailed_diagnostics = '<leader>d'
+```viml
+let g:ycm_key_detailed_diagnostics = '<leader>d'
+```
 
 ### The `g:ycm_global_ycm_extra_conf` option
 
@@ -1501,7 +1576,9 @@ You can place such a global file anywhere in your filesystem.
 
 Default: `''`
 
-    let g:ycm_global_ycm_extra_conf = ''
+```viml
+let g:ycm_global_ycm_extra_conf = ''
+```
 
 ### The `g:ycm_confirm_extra_conf` option
 
@@ -1514,7 +1591,9 @@ files, see the `g:ycm_extra_conf_globlist` option.
 
 Default: `1`
 
-    let g:ycm_confirm_extra_conf = 1
+```viml
+let g:ycm_confirm_extra_conf = 1
+```
 
 ### The `g:ycm_extra_conf_globlist` option
 
@@ -1535,7 +1614,9 @@ Rules:
 
 Example:
 
-    let g:ycm_extra_conf_globlist = ['~/dev/*','!~/*']
+```viml
+let g:ycm_extra_conf_globlist = ['~/dev/*','!~/*']
+```
 
 * The first rule will match everything contained in the `~/dev` directory so
   `.ycm_extra_conf.py` files from there will be loaded.
@@ -1550,7 +1631,9 @@ filename.
 
 Default: `[]`
 
-    let g:ycm_extra_conf_globlist = []
+```viml
+let g:ycm_extra_conf_globlist = []
+```
 
 ### The `g:ycm_filepath_completion_use_working_dir` option
 
@@ -1561,7 +1644,9 @@ relative to Vim's current working directory.
 
 Default: `0`
 
-    let g:ycm_filepath_completion_use_working_dir = 0
+```viml
+let g:ycm_filepath_completion_use_working_dir = 0
+```
 
 ### The `g:ycm_semantic_triggers` option
 
@@ -1588,19 +1673,21 @@ NOTE: The regex syntax is **NOT** Vim's, it's [Python's][python-re].
 
 Default: `[see next line]`
 
-    let g:ycm_semantic_triggers =  {
-      \   'c' : ['->', '.'],
-      \   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
-      \             're!\[.*\]\s'],
-      \   'ocaml' : ['.', '#'],
-      \   'cpp,objcpp' : ['->', '.', '::'],
-      \   'perl' : ['->'],
-      \   'php' : ['->', '::'],
-      \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-      \   'ruby' : ['.', '::'],
-      \   'lua' : ['.', ':'],
-      \   'erlang' : [':'],
-      \ }
+```viml
+let g:ycm_semantic_triggers =  {
+  \   'c' : ['->', '.'],
+  \   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+  \             're!\[.*\]\s'],
+  \   'ocaml' : ['.', '#'],
+  \   'cpp,objcpp' : ['->', '.', '::'],
+  \   'perl' : ['->'],
+  \   'php' : ['->', '::'],
+  \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'ruby' : ['.', '::'],
+  \   'lua' : ['.', ':'],
+  \   'erlang' : [':'],
+  \ }
+```
 
 ### The `g:ycm_cache_omnifunc` option
 
@@ -1612,7 +1699,9 @@ stuttering and lagginess if the omnifunc is slow.
 
 Default: `1`
 
-    let g:ycm_cache_omnifunc = 1
+```viml
+let g:ycm_cache_omnifunc = 1
+```
 
 ### The `g:ycm_use_ultisnips_completer` option
 
@@ -1621,7 +1710,9 @@ snippet triggers. This option can turn that behavior off.
 
 Default: `1`
 
-    let g:ycm_use_ultisnips_completer = 1
+```viml
+let g:ycm_use_ultisnips_completer = 1
+```
 
 ### The `g:ycm_goto_buffer_command` option
 
@@ -1635,7 +1726,9 @@ then result will be opened in horizontal split.
 
 Default: `'same-buffer'`
 
-    let g:ycm_goto_buffer_command = 'same-buffer'
+```viml
+let g:ycm_goto_buffer_command = 'same-buffer'
+```
 
 ### The `g:ycm_disable_for_files_larger_than_kb` option
 
@@ -1644,7 +1737,9 @@ option is set to 0 then no check is made on the size of the file you're opening.
 
 Default: 1000
 
-    let g:ycm_disable_for_files_larger_than_kb = 1000
+```viml
+let g:ycm_disable_for_files_larger_than_kb = 1000
+```
 
 FAQ
 ---
@@ -1866,9 +1961,11 @@ but you'll have to change the UltiSnips mappings. See `:h UltiSnips-triggers` in
 Vim for details. You'll probably want to change some/all of the following
 options:
 
-    g:UltiSnipsExpandTrigger
-    g:UltiSnipsJumpForwardTrigger
-    g:UltiSnipsJumpBackwardTrigger
+```viml
+g:UltiSnipsExpandTrigger
+g:UltiSnipsJumpForwardTrigger
+g:UltiSnipsJumpBackwardTrigger
+```
 
 ### Why isn't YCM just written in plain VimScript, FFS?
 
@@ -1995,20 +2092,24 @@ See [issue #303][issue-303] for details.
 ### Install YCM with [NeoBundle][NeoBundle]
 [NeoBundle][NeoBundle] can do the compilation for you; just add the following to your vimrc:
 
-    NeoBundle 'Valloric/YouCompleteMe', {
-         \ 'build'      : {
-            \ 'mac'     : './install.py --clang-completer --system-libclang --omnisharp-completer',
-            \ 'unix'    : './install.py --clang-completer --system-libclang --omnisharp-completer',
-            \ 'windows' : './install.py --clang-completer --system-libclang --omnisharp-completer',
-            \ 'cygwin'  : './install.py --clang-completer --system-libclang --omnisharp-completer'
-            \ }
-         \ }
+```viml
+NeoBundle 'Valloric/YouCompleteMe', {
+     \ 'build'      : {
+        \ 'mac'     : './install.py --clang-completer --system-libclang --omnisharp-completer',
+        \ 'unix'    : './install.py --clang-completer --system-libclang --omnisharp-completer',
+        \ 'windows' : './install.py --clang-completer --system-libclang --omnisharp-completer',
+        \ 'cygwin'  : './install.py --clang-completer --system-libclang --omnisharp-completer'
+        \ }
+     \ }
+```
 
 But you could have problems with the time needed to get the sub modules and
 compile the whole thing.
 To increase the Neobundle timeout to 1500 seconds, add the following to your vimrc:
 
-    let g:neobundle#install_process_timeout = 1500
+```viml
+let g:neobundle#install_process_timeout = 1500
+```
 
 Contact
 -------
