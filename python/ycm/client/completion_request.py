@@ -21,9 +21,9 @@ from ycmd.utils import ToUtf8IfNeeded
 from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
-import os
 
 TIMEOUT_SECONDS = 0.5
+
 
 class CompletionRequest( BaseRequest ):
   def __init__( self, request_data ):
@@ -85,7 +85,7 @@ def ConvertCompletionDataToVimData( completion_data ):
   if 'detailed_info' in completion_data:
     vim_data[ 'info' ] = ToUtf8IfNeeded( completion_data[ 'detailed_info' ] )
     if doc_string:
-      vim_data[ 'info' ] += os.linesep + doc_string
+      vim_data[ 'info' ] += '\n' + doc_string
   elif doc_string:
     vim_data[ 'info' ] = doc_string
 

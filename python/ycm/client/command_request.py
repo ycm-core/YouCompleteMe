@@ -69,6 +69,8 @@ class CommandRequest( BaseRequest ):
       self._HandleFixitResponse()
     elif 'message' in self._response:
       self._HandleMessageResponse()
+    elif 'detailed_info' in self._response:
+      self._HandleDetailedInfoResponse()
 
 
   def _HandleGotoResponse( self ):
@@ -97,6 +99,10 @@ class CommandRequest( BaseRequest ):
 
   def _HandleMessageResponse( self ):
     vimsupport.EchoText( self._response[ 'message' ] )
+
+
+  def _HandleDetailedInfoResponse( self ):
+    vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
 
 
 def SendCommandRequest( arguments, completer ):

@@ -17,11 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from ycm.test_utils import MockVimModule
+MockVimModule()
+
 import os
 from nose.tools import eq_
 from hamcrest import assert_that, has_items
-from ycm.test_utils import MockVimModule
-vim_mock = MockVimModule()
 from ycm import syntax_parse
 
 

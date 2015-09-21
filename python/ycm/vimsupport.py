@@ -575,3 +575,65 @@ def SearchInCurrentBuffer( pattern ):
 
 def LineTextInCurrentBuffer( line ):
   return vim.current.buffer[ line ]
+
+
+def ClosePreviewWindow():
+  """ Close the preview window if it is present, otherwise do nothing """
+  vim.command( 'silent! pclose!' )
+
+
+def JumpToPreviewWindow():
+  """ Jump the vim cursor to the preview window, which must be active. Returns
+  boolean indicating if the cursor ended up in the preview window """
+  vim.command( 'silent! wincmd P' )
+  return vim.current.window.options[ 'previewwindow' ]
+
+
+def JumpToPreviousWindow():
+  """ Jump the vim cursor to its previous window position """
+  vim.command( 'silent! wincmd p' )
+
+
+def OpenFileInPreviewWindow( filename ):
+  """ Open the supplied filename in the preview window """
+  vim.command( 'silent! pedit! ' + filename )
+
+
+def WriteToPreviewWindow( message ):
+  """ Display the supplied message in the preview window """
+
+  # This isn't something that comes naturally to Vim. Vim only wants to show
+  # tags and/or actual files in the preview window, so we have to hack it a
+  # little bit. We generate a temporary file name and "open" that, then write
+  # the data to it. We make sure the buffer can't be edited or saved. Other
+  # approaches include simply opening a split, but we want to take advantage of
+  # the existing Vim options for preview window height, etc.
+
+  ClosePreviewWindow()
+
+  OpenFileInPreviewWindow( vim.eval( 'tempname()' ) )
+
+  if JumpToPreviewWindow():
+    # We actually got to the preview window. By default the preview window can't
+    # be changed, so we make it writable, write to it, then make it read only
+    # again.
+    vim.current.buffer.options[ 'modifiable' ] = True
+    vim.current.buffer.options[ 'readonly' ]   = False
+
+    vim.current.buffer[:] = message.splitlines()
+
+    vim.current.buffer.options[ 'buftype' ]    = 'nofile'
+    vim.current.buffer.options[ 'swapfile' ]   = False
+    vim.current.buffer.options[ 'modifiable' ] = False
+    vim.current.buffer.options[ 'readonly' ]   = True
+
+    # We need to prevent closing the window causing a warning about unsaved
+    # file, so we pretend to Vim that the buffer has not been changed.
+    vim.current.buffer.options[ 'modified' ]   = False
+
+    JumpToPreviousWindow()
+  else:
+    # We couldn't get to the preview window, but we still want to give the user
+    # the information we have. The only remaining option is to echo to the
+    # status area.
+    EchoText( message )
