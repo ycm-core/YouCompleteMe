@@ -420,6 +420,7 @@ Quick Feature Summary
 * Go to declaration/definition (`GoTo`, etc.)
 * Semantic type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
+* View documentation comments for identifiers (`GetDoc`)
 
 ### C♯
 
@@ -429,11 +430,13 @@ Quick Feature Summary
 * Semantic type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
 * Management of OmniSharp server instance
+* View documentation comments for identifiers (`GetDoc`)
 
 ### Python 2
 
 * Intelligent auto-completion
 * Go to declaration/definition (`GoTo`, etc.)
+* View documentation comments for identifiers (`GetDoc`)
 
 ### Go
 
@@ -445,6 +448,7 @@ Quick Feature Summary
 * Semantic auto-completion
 * Go to definition (`GoToDefinition`)
 * Semantic type information for identifiers (`GetType`)
+* View documentation comments for identifiers (`GetDoc`)
 
 User Guide
 ----------
@@ -910,6 +914,18 @@ This is particularly useful where there are multiple diagnostics on one line, or
 where after fixing one diagnostic, another fix-it is available.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs`
+
+### The `GetDoc` subcommand
+
+Displays the preview window populated with quick info about the identifier
+under the cursor. This includes, depending on the language, things like:
+
+* The type or declaration of identifier
+* Doxygen/javadoc comments
+* Python docstrings
+* etc.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript`
 
 ### The `StartServer` subcommand
 
