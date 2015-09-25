@@ -45,12 +45,13 @@ Contents ~
   6. The |GetType| subcommand
   7. The |GetParent| subcommand
   8. The |FixIt| subcommand
-  9. The |StartServer| subcommand
-  10. The |StopServer| subcommand
-  11. The |RestartServer| subcommand
-  12. The |ReloadSolution| subcommand
-  13. The |GoToImplementation| subcommand
-  14. The |GoToImplementationElseDeclaration| subcommand
+  9. The |GetDoc| subcommand
+  10. The |StartServer| subcommand
+  11. The |StopServer| subcommand
+  12. The |RestartServer| subcommand
+  13. The |ReloadSolution| subcommand
+  14. The |GoToImplementation| subcommand
+  15. The |GoToImplementationElseDeclaration| subcommand
  8. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
@@ -586,6 +587,7 @@ C-family languages (C, C++, Objective C, Objective C++) ~
 - Go to declaration/definition (|GoTo|, etc.)
 - Semantic type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
+- View documentation comments for identifiers (|GetDoc|)
 
 -------------------------------------------------------------------------------
                                                               *youcompleteme-c*
@@ -597,6 +599,7 @@ C♯ ~
 - Semantic type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
 - Management of OmniSharp server instance
+- View documentation comments for identifiers (|GetDoc|)
 
 -------------------------------------------------------------------------------
                                                        *youcompleteme-python-2*
@@ -604,6 +607,7 @@ Python 2 ~
 
 - Intelligent auto-completion
 - Go to declaration/definition (|GoTo|, etc.)
+- View documentation comments for identifiers (|GetDoc|)
 
 -------------------------------------------------------------------------------
                                                              *youcompleteme-go*
@@ -619,6 +623,7 @@ TypeScript ~
 - Semantic auto-completion
 - Go to definition (|GoToDefinition|)
 - Semantic type information for identifiers (|GetType|)
+- View documentation comments for identifiers (|GetDoc|)
 
 ===============================================================================
                                                      *youcompleteme-user-guide*
@@ -1121,6 +1126,19 @@ diagnostics on one line, or where after fixing one diagnostic, another fix-it
 is available.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cs'
+
+-------------------------------------------------------------------------------
+The *GetDoc* subcommand
+
+Displays the preview window populated with quick info about the identifier
+under the cursor. This includes, depending on the language, things like:
+
+- The type or declaration of identifier
+- Doxygen/javadoc comments
+- Python docstrings
+- etc.
+
+Supported in filetypes: 'c, cpp, objc, objcpp, cs, python, typescript'
 
 -------------------------------------------------------------------------------
 The *StartServer* subcommand
