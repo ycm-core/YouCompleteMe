@@ -130,20 +130,19 @@ from ycm import base
 base.LoadJsonDefaultsIntoVim()
 from ycmd import user_options_store
 user_options_store.SetAll( base.BuildServerConf() )
-from ycm import vimsupport
+from ycm import paths, vimsupport
 
-popen_args = [ utils.PathToPythonInterpreter(),
-               os.path.join( script_folder,
-                             '../third_party/ycmd/check_core_version.py') ]
+popen_args = [ paths.PathToPythonInterpreter(),
+               paths.PathToCheckCoreVersion() ]
 
 if utils.SafePopen( popen_args ).wait() == 2:
   vimsupport.PostVimMessage(
     'YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE' )
-  vim.command( 'return 0')
+  vim.command( 'return 0' )
 
 from ycm.youcompleteme import YouCompleteMe
 ycm_state = YouCompleteMe( user_options_store.GetAll() )
-vim.command( 'return 1')
+vim.command( 'return 1' )
 EOF
 endfunction
 
