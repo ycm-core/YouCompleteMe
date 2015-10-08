@@ -132,7 +132,7 @@ from ycmd import user_options_store
 user_options_store.SetAll( base.BuildServerConf() )
 from ycm import vimsupport
 
-popen_args = [ utils.PathToPythonInterpreter(),
+popen_args = [ vimsupport.PathToPythonInterpreter(),
                os.path.join( script_folder,
                              '../third_party/ycmd/check_core_version.py') ]
 

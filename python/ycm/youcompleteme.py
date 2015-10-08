@@ -113,7 +113,7 @@ class YouCompleteMe( object ):
       json.dump( options_dict, options_file )
       options_file.flush()
 
-      args = [ utils.PathToPythonInterpreter(),
+      args = [ vimsupport.PathToPythonInterpreter(),
                _PathToServerScript(),
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),

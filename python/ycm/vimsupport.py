@@ -22,8 +22,12 @@ import os
 import tempfile
 import json
 import re
-from ycmd.utils import ToUtf8IfNeeded
+import functools
+from ycmd.utils import ToUtf8IfNeeded, PathToFirstExistingExecutable, OnWindows
 from ycmd import user_options_store
+
+WIN_PYTHON27_PATH = 'C:\python27\python.exe'
+WIN_PYTHON26_PATH = 'C:\python26\python.exe'
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'horizontal-split' : 'split',
@@ -637,3 +641,42 @@ def WriteToPreviewWindow( message ):
     # the information we have. The only remaining option is to echo to the
     # status area.
     EchoText( message )
+
+
+def Memoize( obj ):
+  cache = obj.cache = {}
+
+  @functools.wraps( obj )
+  def memoizer( *args, **kwargs ):
+    key = str( args ) + str( kwargs )
+    if key not in cache:
+      cache[ key ] = obj( *args, **kwargs )
+    return cache[ key ]
+  return memoizer
+
+
+@Memoize
+def PathToPythonInterpreter():
+  user_path_to_python = vim.eval( 'g:ycm_path_to_python_interpreter' )
+
+  if user_path_to_python:
+    return user_path_to_python
+
+  # We check for 'python2' before 'python' because some OS's (I'm looking at
+  # you Arch Linux) have made the... interesting decision to point
+  # /usr/bin/python to python3.
+  python_names = [ 'python2', 'python' ]
+
+  path_to_python = PathToFirstExistingExecutable( python_names )
+  if path_to_python:
+    return path_to_python
+
+  # On Windows, Python may not be on the PATH at all, so we check some common
+  # install locations.
+  if OnWindows():
+    if os.path.exists( WIN_PYTHON27_PATH ):
+      return WIN_PYTHON27_PATH
+    elif os.path.exists( WIN_PYTHON26_PATH ):
+      return WIN_PYTHON26_PATH
+
+  raise RuntimeError( 'Python 2.7/2.6 not installed!' )
