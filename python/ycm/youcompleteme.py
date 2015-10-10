@@ -25,7 +25,7 @@ import re
 import signal
 import base64
 from subprocess import PIPE
-from ycm import vimsupport
+from ycm import paths, vimsupport
 from ycmd import utils
 from ycmd.request_wrap import RequestWrap
 from ycm.diagnostic_interface import DiagnosticInterface
@@ -113,8 +113,8 @@ class YouCompleteMe( object ):
       json.dump( options_dict, options_file )
       options_file.flush()
 
-      args = [ utils.PathToPythonInterpreter(),
-               _PathToServerScript(),
+      args = [ paths.PathToPythonInterpreter(),
+               paths.PathToServerScript(),
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),
                '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
@@ -554,11 +554,6 @@ class YouCompleteMe( object ):
     if extra_conf_vim_data:
       extra_data[ 'extra_conf_data' ] = BuildExtraConfData(
         extra_conf_vim_data )
-
-
-def _PathToServerScript():
-  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
-  return os.path.join( dir_of_current_script, '../../third_party/ycmd/ycmd' )
 
 
 def _AddUltiSnipsDataIfNeeded( extra_data ):
