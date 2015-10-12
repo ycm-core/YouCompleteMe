@@ -20,9 +20,10 @@ import sys
 import vim
 import functools
 import re
-from ycmd import utils
 
 DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
+DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
+                            'ycmd' )
 
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
 PYTHON_BINARY_REGEX = re.compile( r'python(2(\.[67])?)?(.exe)?$' )
@@ -42,13 +43,15 @@ def Memoize( obj ):
 
 @Memoize
 def PathToPythonInterpreter():
+  from ycmd import utils
+
   python_interpreter = vim.eval( 'g:ycm_path_to_python_interpreter' )
 
   if python_interpreter:
     if IsPythonVersionCorrect( python_interpreter ):
       return python_interpreter
 
-    raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
+    raise RuntimeError( "path in 'g:ycm_path_to_python_interpreter' option "
                         "does not point to a valid Python 2.6 or 2.7." )
 
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
@@ -70,7 +73,7 @@ def PathToPythonInterpreter():
   if IsPythonVersionCorrect( python_interpreter ):
     return python_interpreter
 
-  raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
+  raise RuntimeError( "cannot find Python 2.6 or 2.7. You can set its path "
                       "using the 'g:ycm_path_to_python_interpreter' "
                       "option." )
 
@@ -82,6 +85,8 @@ def EndsWithPython( path ):
 
 def IsPythonVersionCorrect( path ):
   """Check if given path is the Python interpreter version 2.6 or 2.7."""
+  from ycmd import utils
+
   if not EndsWithPython( path ):
     return False
 
@@ -95,10 +100,8 @@ def IsPythonVersionCorrect( path ):
 
 
 def PathToServerScript():
-  return os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
-                       'ycmd', 'ycmd' )
+  return os.path.join( DIR_OF_YCMD, 'ycmd' )
 
 
 def PathToCheckCoreVersion():
-  return os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
-                       'ycmd', 'check_core_version.py' )
+  return os.path.join( DIR_OF_YCMD, 'check_core_version.py' )

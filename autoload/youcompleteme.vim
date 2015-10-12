@@ -139,37 +139,33 @@ endfunction
 
 function! s:SetUpPython() abort
 python << EOF
+import os
 import sys
 import vim
-import os
-import subprocess
 
+# Add python sources folder to the system path.
 script_folder = vim.eval( 's:script_folder_path' )
-sys.path.insert( 0, os.path.join( script_folder, '../python' ) )
-sys.path.insert( 0, os.path.join( script_folder, '../third_party/ycmd' ) )
-from ycmd import utils
-utils.AddNearestThirdPartyFoldersToSysPath( script_folder )
+sys.path.insert( 0, os.path.join( script_folder, '..', 'python' ) )
 
-# We need to import ycmd's third_party folders as well since we import and
-# use ycmd code in the client.
-utils.AddNearestThirdPartyFoldersToSysPath( utils.__file__ )
-from ycm import base
-base.LoadJsonDefaultsIntoVim()
-from ycmd import user_options_store
-user_options_store.SetAll( base.BuildServerConf() )
-from ycm import paths, vimsupport
+from ycm.setup import SetUpSystemPaths, SetUpYCM
 
-popen_args = [ paths.PathToPythonInterpreter(),
-               paths.PathToCheckCoreVersion() ]
+# We enclose this code in a try/except block to avoid backtraces in Vim.
+try:
+  SetUpSystemPaths()
 
-if utils.SafePopen( popen_args ).wait() == 2:
-  vimsupport.PostVimMessage(
-    'YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE' )
+  # Import the modules used in this file.
+  from ycm import base, vimsupport
+
+  ycm_state = SetUpYCM()
+except ( RuntimeError, ImportError ) as error:
+  # We don't use PostVimMessage from the vimsupport module because importing
+  # this module may fail.
+  error_message = str( error ).replace( "'", "''" )
+  vim.command( "redraw | echohl WarningMsg | echom '{0}' | echohl None"
+               .format( 'YouCompleteMe unavailable: ' + error_message ) )
   vim.command( 'return 0' )
-
-from ycm.youcompleteme import YouCompleteMe
-ycm_state = YouCompleteMe( user_options_store.GetAll() )
-vim.command( 'return 1' )
+else:
+  vim.command( 'return 1' )
 EOF
 endfunction
 
