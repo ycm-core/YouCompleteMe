@@ -2090,7 +2090,7 @@ Ctags needs to be called with the `--fields=+l` (that's a lowercase `L`, not a
 one) option because YCM needs the `language:<lang>` field in the tags output.
 
 NOTE: [Exuberant Ctags][exuberant-ctags] by default sets language tag for `*.h`
-files as `C++`, which is not correct. If you have C (not C++) project, consider
+files as `C++`. If you have C (not C++) project, consider
 giving parameter `--langmap=c:.c.h` to ctags to see tags from `*.h` files.
 
 NOTE: Mac OS X comes with "plain" ctags installed by default. `brew install
