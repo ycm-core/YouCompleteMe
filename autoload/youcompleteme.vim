@@ -51,6 +51,7 @@ function! youcompleteme#Enable()
     return
   endif
 
+  call s:SetUpCommands()
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
@@ -302,6 +303,17 @@ function! s:AllowedToCompleteInCurrentFile()
   let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
 
   return whitelist_allows && blacklist_allows
+endfunction
+
+
+function! s:SetUpCommands()
+  command! YcmRestartServer call s:RestartServer()
+  command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
+  command! YcmDebugInfo call s:DebugInfo()
+  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
+    \ YcmCompleter call s:CompleterCommand(<f-args>)
+  command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
+  command! YcmDiags call s:ShowDiagnostics()
 endfunction
 
 
@@ -736,14 +748,10 @@ function! s:RestartServer()
   py ycm_state.RestartServer()
 endfunction
 
-command! YcmRestartServer call s:RestartServer()
-
 
 function! s:ShowDetailedDiagnostic()
   py ycm_state.ShowDetailedDiagnostic()
 endfunction
-
-command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
 
 
 function! s:DebugInfo()
@@ -753,8 +761,6 @@ function! s:DebugInfo()
     echom '-- ' . line
   endfor
 endfunction
-
-command! YcmDebugInfo call s:DebugInfo()
 
 
 function! s:CompleterCommand(...)
@@ -789,9 +795,6 @@ function! youcompleteme#OpenGoToList()
   redraw!
 endfunction
 
-
-command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
-  \ YcmCompleter call s:CompleterCommand(<f-args>)
 
 function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
   return join( pyeval( 'ycm_state.GetDefinedSubcommands()' ),
@@ -831,8 +834,6 @@ function! s:ForceCompileAndDiagnostics()
   echom "Diagnostics refreshed."
 endfunction
 
-command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
-
 
 function! s:ShowDiagnostics()
   let compilation_succeeded = s:ForceCompile()
@@ -852,8 +853,6 @@ function! s:ShowDiagnostics()
     echom "No warnings or errors detected"
   endif
 endfunction
-
-command! YcmDiags call s:ShowDiagnostics()
 
 
 " This is basic vim plugin boilerplate
