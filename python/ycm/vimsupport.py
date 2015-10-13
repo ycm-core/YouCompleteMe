@@ -356,8 +356,22 @@ def JumpToLocation( filename, line, column ):
     command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
     if command == 'edit' and not BufferIsUsable( vim.current.buffer ):
       command = 'split'
-    vim.command( 'keepjumps {0} {1}'.format( command,
-                                             EscapedFilepath( filename ) ) )
+    try:
+      vim.command( 'keepjumps {0} {1}'.format( command,
+                                               EscapedFilepath( filename ) ) )
+    # When the file we are trying to jump to has a swap file
+    # Vim opens swap-exists-choices dialog and throws vim.error with E325 error,
+    # or KeyboardInterrupt after user selects one of the options.
+    except vim.error as e:
+      if 'E325' in str(e):
+        # Do nothing if the target file is still not opened (user chose (Q)uit)
+        if filename != GetCurrentBufferFilepath():
+          return
+      else:
+        raise
+    # Thrown when user chooses (A)bort in .swp message box
+    except KeyboardInterrupt:
+      return
   vim.current.window.cursor = ( line, column - 1 )
 
   # Center the screen on the jumped-to location
