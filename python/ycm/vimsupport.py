@@ -326,10 +326,17 @@ def TryJumpLocationInOpenedTab( filename, line, column ):
 
         # Center the screen on the jumped-to location
         vim.command( 'normal! zz' )
-        return
-  else:
-    # 'filename' is not opened in any tab pages
-    raise ValueError
+        return True
+  # 'filename' is not opened in any tab pages
+  return False
+
+
+# Maps User jump command to vim jump command
+def GetVimJumpCommand( user_command ):
+  vim_command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
+  if vim_command == 'edit' and not BufferIsUsable( vim.current.buffer ):
+    vim_command = 'split'
+  return vim_command
 
 
 # Both |line| and |column| need to be 1-based
@@ -347,17 +354,26 @@ def JumpToLocation( filename, line, column ):
     user_command = user_options_store.Value( 'goto_buffer_command' )
 
     if user_command == 'new-or-existing-tab':
-      try:
-        TryJumpLocationInOpenedTab( filename, line, column )
+      if TryJumpLocationInOpenedTab( filename, line, column ):
         return
-      except ValueError:
-        user_command = 'new-tab'
+      user_command = 'new-tab'
 
-    command = BUFFER_COMMAND_MAP.get( user_command, 'edit' )
-    if command == 'edit' and not BufferIsUsable( vim.current.buffer ):
-      command = 'split'
-    vim.command( 'keepjumps {0} {1}'.format( command,
-                                             EscapedFilepath( filename ) ) )
+    vim_command = GetVimJumpCommand( user_command )
+    try:
+      vim.command( 'keepjumps {0} {1}'.format( vim_command,
+                                               EscapedFilepath( filename ) ) )
+    # When the file we are trying to jump to has a swap file
+    # Vim opens swap-exists-choices dialog and throws vim.error with E325 error,
+    # or KeyboardInterrupt after user selects one of the options.
+    except vim.error as e:
+      if 'E325' not in str( e ):
+        raise
+      # Do nothing if the target file is still not opened (user chose (Q)uit)
+      if filename != GetCurrentBufferFilepath():
+        return
+    # Thrown when user chooses (A)bort in .swp message box
+    except KeyboardInterrupt:
+      return
   vim.current.window.cursor = ( line, column - 1 )
 
   # Center the screen on the jumped-to location
