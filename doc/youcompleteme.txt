@@ -37,21 +37,22 @@ Contents ~
   5. The |:YcmDebugInfo| command
   6. The |:YcmCompleter| command
  7. YcmCompleter subcommands           |youcompleteme-ycmcompleter-subcommands|
-  1. The |GoToDeclaration| subcommand
-  2. The |GoToDefinition| subcommand
-  3. The |GoTo| subcommand
-  4. The |GoToImprecise| subcommand
-  5. The |ClearCompilationFlagCache| subcommand
-  6. The |GetType| subcommand
-  7. The |GetParent| subcommand
-  8. The |FixIt| subcommand
-  9. The |GetDoc| subcommand
-  10. The |StartServer| subcommand
-  11. The |StopServer| subcommand
-  12. The |RestartServer| subcommand
-  13. The |ReloadSolution| subcommand
-  14. The |GoToImplementation| subcommand
-  15. The |GoToImplementationElseDeclaration| subcommand
+  1. The |GoToInclude| subcommand
+  2. The |GoToDeclaration| subcommand
+  3. The |GoToDefinition| subcommand
+  4. The |GoTo| subcommand
+  5. The |GoToImprecise| subcommand
+  6. The |ClearCompilationFlagCache| subcommand
+  7. The |GetType| subcommand
+  8. The |GetParent| subcommand
+  9. The |FixIt| subcommand
+  10. The |GetDoc| subcommand
+  11. The |StartServer| subcommand
+  12. The |StopServer| subcommand
+  13. The |RestartServer| subcommand
+  14. The |ReloadSolution| subcommand
+  15. The |GoToImplementation| subcommand
+  16. The |GoToImplementationElseDeclaration| subcommand
  8. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
@@ -671,7 +672,7 @@ C-family languages (C, C++, Objective C, Objective C++) ~
 
 - Semantic auto-completion
 - Real-time diagnostic display
-- Go to declaration/definition (|GoTo|, etc.)
+- Go to include/declaration/definition (|GoTo|, etc.)
 - Semantic type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
 - View documentation comments for identifiers (|GetDoc|)
@@ -1064,6 +1065,13 @@ The various 'GoTo*' subcommands add entries to Vim's 'jumplist' so you can use
 'CTRL-I' to jump forward; see ':h jumplist' for details).
 
 -------------------------------------------------------------------------------
+The *GoToInclude* subcommand
+
+Looks up the current line for a header and jumps to it.
+
+Supported in filetypes: 'c, cpp, objc, objcpp'
+
+-------------------------------------------------------------------------------
 The *GoToDeclaration* subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
@@ -1088,8 +1096,9 @@ The *GoTo* subcommand
 This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
 jumps to its definition if possible; if the definition is not accessible from
-the current translation unit, jumps to the symbol's declaration. For C#,
-implementations are also considered and preferred.
+the current translation unit, jumps to the symbol's declaration. For
+C/C++/Objective-C, it first tries to look up the current line for a header and
+jump to it. For C#, implementations are also considered and preferred.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, python, cs'
 
@@ -2272,6 +2281,10 @@ list "Exuberant Ctags".
 
 Ctags needs to be called with the '--fields=+l' (that's a lowercase 'L', not a
 one) option because YCM needs the 'language:<lang>' field in the tags output.
+
+NOTE: Exuberant Ctags [38] by default sets language tag for '*.h' files as
+'C++'. If you have C (not C++) project, consider giving parameter '--
+langmap=c:.c.h' to ctags to see tags from '*.h' files.
 
 NOTE: Mac OS X comes with "plain" ctags installed by default. 'brew install
 ctags' will get you the Exuberant Ctags version.
