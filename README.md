@@ -505,7 +505,7 @@ Quick Feature Summary
 
 * Semantic auto-completion
 * Real-time diagnostic display
-* Go to declaration/definition (`GoTo`, etc.)
+* Go to include/declaration/definition (`GoTo`, etc.)
 * Semantic type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -855,6 +855,12 @@ The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
 `CTRL-O` to jump back to where you where before invoking the command (and
 `CTRL-I` to jump forward; see `:h jumplist` for details).
 
+### The `GoToInclude` subcommand
+
+Looks up the current line for a header and jumps to it.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
 ### The `GoToDeclaration` subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
@@ -877,8 +883,9 @@ Supported in filetypes: `c, cpp, objc, objcpp, python, cs, typescript`
 This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
 jumps to its definition if possible; if the definition is not accessible from
-the current translation unit, jumps to the symbol's declaration. For C#,
-implementations are also considered and preferred.
+the current translation unit, jumps to the symbol's declaration. For
+C/C++/Objective-C, it first tries to look up the current line for a header and
+jump to it. For C#, implementations are also considered and preferred.
 
 Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
 
