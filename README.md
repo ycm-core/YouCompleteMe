@@ -8,6 +8,7 @@ YouCompleteMe: a code-completion engine for Vim
 - [Installation](#installation)
     - [Mac OS X](#mac-os-x-super-quick-installation)
     - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
+    - [Fedora](#fedora-linux-x64-super-quick-installation)
     - [Windows](#windows-installation)
     - [FreeBSD/OpenBSD](#freebsdopenbsd-installation)
     - [Full Installation Guide](#full-installation-guide)
