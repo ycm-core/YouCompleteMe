@@ -6,9 +6,9 @@ YouCompleteMe: a code-completion engine for Vim
 
 - [Intro](#intro)
 - [Installation](#installation)
-    - [Mac OS X](#mac-os-x-super-quick-installation)
-    - [Ubuntu](#ubuntu-linux-x64-super-quick-installation)
-    - [Fedora](#fedora-linux-x64-super-quick-installation)
+    - [Mac OS X](#mac-os-x-installation)
+    - [Ubuntu](#ubuntu-linux-x64-installation)
+    - [Fedora](#fedora-linux-x64-installation)
     - [Windows](#windows-installation)
     - [FreeBSD/OpenBSD](#freebsdopenbsd-installation)
     - [Full Installation Guide](#full-installation-guide)
@@ -109,7 +109,7 @@ and a completer that integrates with [UltiSnips][].
 Installation
 ------------
 
-### Mac OS X super-quick installation
+### Mac OS X Installation
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -165,7 +165,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### Ubuntu Linux x64 super-quick installation
+### Ubuntu Linux x64 Installation
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -211,7 +211,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### Fedora Linux x64 super-quick installation
+### Fedora Linux x64 Installation
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
