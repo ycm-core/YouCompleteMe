@@ -121,9 +121,6 @@ let g:ycm_key_detailed_diagnostics =
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
 
-let g:ycm_server_use_vim_stdout =
-      \ get( g:, 'ycm_server_use_vim_stdout', 0 )
-
 let g:ycm_server_log_level =
       \ get( g:, 'ycm_server_log_level', 'info' )
 

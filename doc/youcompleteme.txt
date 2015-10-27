@@ -77,30 +77,29 @@ Contents ~
   20. The |g:ycm_seed_identifiers_with_syntax| option
   21. The |g:ycm_extra_conf_vim_data| option
   22. The |g:ycm_path_to_python_interpreter| option
-  23. The |g:ycm_server_use_vim_stdout| option
-  24. The |g:ycm_server_keep_logfiles| option
-  25. The |g:ycm_server_log_level| option
-  26. The |g:ycm_auto_start_csharp_server| option
-  27. The |g:ycm_auto_stop_csharp_server| option
-  28. The |g:ycm_csharp_server_port| option
-  29. The |g:ycm_csharp_insert_namespace_expr| option
-  30. The |g:ycm_add_preview_to_completeopt| option
-  31. The |g:ycm_autoclose_preview_window_after_completion| option
-  32. The |g:ycm_autoclose_preview_window_after_insertion| option
-  33. The |g:ycm_max_diagnostics_to_display| option
-  34. The |g:ycm_key_list_select_completion| option
-  35. The |g:ycm_key_list_previous_completion| option
-  36. The |g:ycm_key_invoke_completion| option
-  37. The |g:ycm_key_detailed_diagnostics| option
-  38. The |g:ycm_global_ycm_extra_conf| option
-  39. The |g:ycm_confirm_extra_conf| option
-  40. The |g:ycm_extra_conf_globlist| option
-  41. The |g:ycm_filepath_completion_use_working_dir| option
-  42. The |g:ycm_semantic_triggers| option
-  43. The |g:ycm_cache_omnifunc| option
-  44. The |g:ycm_use_ultisnips_completer| option
-  45. The |g:ycm_goto_buffer_command| option
-  46. The |g:ycm_disable_for_files_larger_than_kb| option
+  23. The |g:ycm_server_keep_logfiles| option
+  24. The |g:ycm_server_log_level| option
+  25. The |g:ycm_auto_start_csharp_server| option
+  26. The |g:ycm_auto_stop_csharp_server| option
+  27. The |g:ycm_csharp_server_port| option
+  28. The |g:ycm_csharp_insert_namespace_expr| option
+  29. The |g:ycm_add_preview_to_completeopt| option
+  30. The |g:ycm_autoclose_preview_window_after_completion| option
+  31. The |g:ycm_autoclose_preview_window_after_insertion| option
+  32. The |g:ycm_max_diagnostics_to_display| option
+  33. The |g:ycm_key_list_select_completion| option
+  34. The |g:ycm_key_list_previous_completion| option
+  35. The |g:ycm_key_invoke_completion| option
+  36. The |g:ycm_key_detailed_diagnostics| option
+  37. The |g:ycm_global_ycm_extra_conf| option
+  38. The |g:ycm_confirm_extra_conf| option
+  39. The |g:ycm_extra_conf_globlist| option
+  40. The |g:ycm_filepath_completion_use_working_dir| option
+  41. The |g:ycm_semantic_triggers| option
+  42. The |g:ycm_cache_omnifunc| option
+  43. The |g:ycm_use_ultisnips_completer| option
+  44. The |g:ycm_goto_buffer_command| option
+  45. The |g:ycm_disable_for_files_larger_than_kb| option
  9. FAQ                                                     |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
@@ -1741,17 +1740,6 @@ Vim.
 Default: "''"
 >
   let g:ycm_path_to_python_interpreter = ''
-<
--------------------------------------------------------------------------------
-The *g:ycm_server_use_vim_stdout* option
-
-By default, the 'ycmd' completion server writes logs to logfiles. When this
-option is set to '1', the server writes logs to Vim's stdout (so you'll see
-them in the console).
-
-Default: '0'
->
-  let g:ycm_server_use_vim_stdout = 0
 <
 -------------------------------------------------------------------------------
 The *g:ycm_server_keep_logfiles* option

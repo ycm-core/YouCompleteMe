@@ -1547,18 +1547,6 @@ Default: `''`
 let g:ycm_path_to_python_interpreter = ''
 ```
 
-### The `g:ycm_server_use_vim_stdout` option
-
-By default, the `ycmd` completion server writes logs to logfiles. When this
-option is set to `1`, the server writes logs to Vim's stdout (so you'll see them
-in the console).
-
-Default: `0`
-
-```viml
-let g:ycm_server_use_vim_stdout = 0
-```
-
 ### The `g:ycm_server_keep_logfiles` option
 
 When this option is set to `1`, the `ycmd` completion server will keep the
