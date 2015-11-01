@@ -47,15 +47,13 @@ Here are the things you should do when creating an issue:
 2. Put the following options in your vimrc:
 
    ```viml
-   let g:ycm_server_use_vim_stdout = 1
+   let g:ycm_server_keep_logfiles = 1
    let g:ycm_server_log_level = 'debug'
    ```
 
-   Then, if possible, start gvim/macvim (not console vim) from the console.
-   As you use Vim, you'll see the `ycmd` debug output stream in the console.
-   If you can not use gvim/macvim, run `:YcmDebugInfo` in vim to see what
-   temporary files (listed under "Server logfiles") the debug output streams
-   are written to. Attach the debug output stream to your issue.
+   Run `:YcmDebugInfo` in vim to see what temporary files (listed under "Server
+   logfiles") the debug output streams are written to. Attach the debug output
+   stream to your issue.
 3. **Create a test case for your issue**. This is critical. Don't talk about how
    "when I have X in my file" or similar, _create a file with X in it_ and put
    the contents inside code blocks in your issue description. Try to make this
