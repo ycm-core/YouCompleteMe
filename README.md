@@ -871,6 +871,14 @@ This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the semantic
 completion engine.
 
+### The `:YcmToggleLogs` command
+
+This command automatically opens in windows the stdout and stderr logfiles
+written by the `ycmd` server. If one or both logfiles are already opened, they
+are automatically closed. `Stderr` or `Stdout` can be specified as an argument
+of this command to only open the corresponding logfile instead of both. If this
+logfile is already opened, it will be closed. Only for debugging purpose.
+
 ### The `:YcmCompleter` command
 
 This command can be used to invoke completer-specific commands.  If the first
@@ -1986,8 +1994,10 @@ the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
 Also, you may want to run the `:YcmDebugInfo` command; it will make YCM spew out
-various debugging information, including the compile flags for the file if the
-file is a C-family language file and you have compiled in Clang support.
+various debugging information, including the `ycmd` logfile paths and the
+compile flags for the current file if the file is a C-family language file and
+you have compiled in Clang support. Logfiles can be automatically opened in the
+editor using the `:YcmToggleLogs` command.
 
 ### Sometimes it takes much longer to get semantic completions than normal
 
