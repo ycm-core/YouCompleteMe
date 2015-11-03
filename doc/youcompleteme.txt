@@ -36,7 +36,8 @@ Contents ~
   3. The |:YcmDiags| command
   4. The |:YcmShowDetailedDiagnostic| command
   5. The |:YcmDebugInfo| command
-  6. The |:YcmCompleter| command
+  6. The |:YcmToggleLogs| command
+  7. The |:YcmCompleter| command
  7. YcmCompleter subcommands           |youcompleteme-ycmcompleter-subcommands|
   1. The |GoToInclude| subcommand
   2. The |GoToDeclaration| subcommand
@@ -1080,6 +1081,15 @@ The *:YcmDebugInfo* command
 This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the
 semantic completion engine.
+
+-------------------------------------------------------------------------------
+The *:YcmToggleLogs* command
+
+This command automatically opens in windows the stdout and stderr logfiles
+written by the 'ycmd' server. If one or both logfiles are already opened, they
+are automatically closed. 'Stderr' or 'Stdout' can be specified as an argument
+of this command to only open the corresponding logfile instead of both. If this
+logfile is already opened, it will be closed. Only for debugging purpose.
 
 -------------------------------------------------------------------------------
 The *:YcmCompleter* command
@@ -2164,8 +2174,10 @@ to the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
 Also, you may want to run the |:YcmDebugInfo| command; it will make YCM spew
-out various debugging information, including the compile flags for the file if
-the file is a C-family language file and you have compiled in Clang support.
+out various debugging information, including the 'ycmd' logfile paths and the
+compile flags for the current file if the file is a C-family language file and
+you have compiled in Clang support. Logfiles can be automatically opened in the
+editor using the |:YcmToggleLogs| command.
 
 -------------------------------------------------------------------------------
 *youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal*
