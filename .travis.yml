@@ -1,9 +1,28 @@
-language: python
-python:
-  - "2.6"
-  - "2.7"
+language: generic
+os:
+  - linux
+  - osx
+sudo: false
 before_install:
   - git submodule update --init --recursive
 install:
-  - pip install -r python/test_requirements.txt
+  # source because it sets up env vars on some platforms
+  - source travis/travis_install.sh
 script: ./run_tests.py
+env:
+  matrix:
+    - YCMD_PYTHON_VERSION=2.7
+    - YCMD_PYTHON_VERSION=2.6
+addons:
+  apt:
+    sources:
+     - deadsnakes
+    packages:
+     - python2.6
+     - python2.6-dev
+     - python2.7
+     - python2.7-dev
+     - python-virtualenv
+cache:
+  directories:
+    - $HOME/.cache/pip
