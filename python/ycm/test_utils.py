@@ -18,17 +18,22 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from mock import MagicMock
+import re
 import sys
+
+
+BUFNR_REGEX = re.compile( r"bufnr\('(.+)', ([0-9]+)\)" )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
-# and subsquent assignments to sys.modules[ 'vim' ] don't retrospectively update
-# them. The result is that while running the tests, we must assign only one
-# instance of MagicMock to sys.modules[ 'vim' ] and always return it.
+# and subsquent assignments to sys.modules[ 'vim' ] don't retrospectively
+# update them. The result is that while running the tests, we must assign only
+# one instance of MagicMock to sys.modules[ 'vim' ] and always return it.
 #
 # More explanation is available:
 # https://github.com/Valloric/YouCompleteMe/pull/1694
 VIM_MOCK = MagicMock()
+
 
 def MockVimModule():
   """The 'vim' module is something that is only present when running inside the
@@ -55,8 +60,24 @@ def MockVimModule():
   def VimEval( value ):
     if value == "g:ycm_min_num_of_chars_for_completion":
       return 0
-    return ''
+    if value == "g:ycm_path_to_python_interpreter":
+      return ''
+    if value == "tempname()":
+      return '_TEMP_FILE_'
+    if value == "&previewheight":
+      # Default value from Vim
+      return 12
+    match = BUFNR_REGEX.search( value )
+    if match:
+      filename = match.group( 1 )
+      buffers = VIM_MOCK.buffers
+      if filename in buffers and buffers[ filename ]:
+        return buffers[ filename ].pop( 0 )
+      return -1
 
+    raise ValueError( 'Unexpected evaluation: ' + value )
+
+  VIM_MOCK.buffers = {}
   VIM_MOCK.eval = MagicMock( side_effect = VimEval )
   sys.modules[ 'vim' ] = VIM_MOCK
 
