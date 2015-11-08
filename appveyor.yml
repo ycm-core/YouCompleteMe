@@ -11,6 +11,6 @@ install:
   - python C:\get-pip.py
   - pip install -r python\test_requirements.txt
 build_script:
-  - run_tests.py
+  - python run_tests.py
 # Disable automatic tests
 test: off
