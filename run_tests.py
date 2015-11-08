@@ -4,7 +4,6 @@ import os
 import subprocess
 import os.path as p
 import sys
-import argparse
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
@@ -19,8 +18,10 @@ if os.environ.get( 'PYTHONPATH' ):
   python_path.append( os.environ[ 'PYTHONPATH' ] )
 os.environ[ 'PYTHONPATH' ] = os.pathsep.join( python_path )
 
-sys.path.insert( 1, p.abspath( p.join( DIR_OF_THIRD_PARTY, 'argparse' ) ) )
+sys.path.insert( 1, p.abspath( p.join( DIR_OF_YCMD_THIRD_PARTY,
+                                       'argparse' ) ) )
 
+import argparse
 
 def RunFlake8():
   print( 'Running flake8' )
