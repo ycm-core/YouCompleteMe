@@ -671,9 +671,10 @@ def CheckFilename( filename ):
       "filename '{0}' cannot be opened. {1}".format( filename, error ) )
 
 
-def BufferExistsForFilename( filename ):
+def BufferIsVisibleForFilename( filename ):
   """Check if a buffer exists for a specific file."""
-  return GetBufferNumberForFilename( filename, False ) is not -1
+  buffer_number = GetBufferNumberForFilename( filename, False )
+  return BufferIsVisible( buffer_number )
 
 
 def CloseBuffersForFilename( filename ):
@@ -681,7 +682,11 @@ def CloseBuffersForFilename( filename ):
   buffer_number = GetBufferNumberForFilename( filename, False )
   while buffer_number is not -1:
     vim.command( 'silent! bwipeout! {0}'.format( buffer_number ) )
-    buffer_number = GetBufferNumberForFilename( filename, False )
+    new_buffer_number = GetBufferNumberForFilename( filename, False )
+    if buffer_number == new_buffer_number:
+      raise RuntimeError( "Buffer {0} for filename '{1}' should already be "
+                          "wiped out.".format( buffer_number, filename ) )
+    buffer_number = new_buffer_number
 
 
 def OpenFilename( filename, options = {} ):

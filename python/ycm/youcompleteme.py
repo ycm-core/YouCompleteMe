@@ -534,10 +534,13 @@ class YouCompleteMe( object ):
 
   def ToggleLogs( self, stdout = True, stderr = True ):
     if ( stdout and
-         vimsupport.BufferExistsForFilename( self._server_stdout ) or
+         vimsupport.BufferIsVisibleForFilename( self._server_stdout ) or
          stderr and
-         vimsupport.BufferExistsForFilename( self._server_stderr ) ):
+         vimsupport.BufferIsVisibleForFilename( self._server_stderr ) ):
       return self._CloseLogs( stdout = stdout, stderr = stderr )
+
+    # Close hidden logfile buffers if any to keep a clean state
+    self._CloseLogs( stdout = stdout, stderr = stderr )
 
     try:
       self._OpenLogs( stdout = stdout, stderr = stderr )
