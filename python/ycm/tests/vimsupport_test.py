@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.test_utils import MockVimModule
+from ycm.test_utils import MockVimModule, MockVimCommand
 MockVimModule()
 
 from ycm import vimsupport
@@ -672,24 +672,43 @@ def CheckFilename_test():
   assert_that( vimsupport.CheckFilename( __file__ ), none() )
 
 
-def BufferExistsForFilename_test():
-  buffers = {
-    os.path.realpath( 'some_filename' ): [ 1 ],
-  }
+def BufferIsVisibleForFilename_test():
+  buffers = [
+    {
+      'number': 1,
+      'filename': os.path.realpath( 'visible_filename' ),
+      'window': 1
+    },
+    {
+      'number': 2,
+      'filename': os.path.realpath( 'hidden_filename' ),
+    }
+  ]
 
-  with patch.dict( 'vim.buffers', buffers ):
-    eq_( vimsupport.BufferExistsForFilename( 'some_filename' ), True )
-    eq_( vimsupport.BufferExistsForFilename( 'another_filename' ), False )
+  with patch( 'vim.buffers', buffers ):
+    eq_( vimsupport.BufferIsVisibleForFilename( 'visible_filename' ), True )
+    eq_( vimsupport.BufferIsVisibleForFilename( 'hidden_filename' ), False )
+    eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
 
 
-@patch( 'vim.command' )
+@patch( 'vim.command', side_effect = MockVimCommand )
 def CloseBuffersForFilename_test( vim_command ):
-  buffers = {
-    os.path.realpath( 'some_filename' ): [ 2, 5 ],
-    os.path.realpath( 'another_filename' ): [ 1 ]
-  }
+  buffers = [
+    {
+      'number': 2,
+      'filename': os.path.realpath( 'some_filename' ),
+    },
+    {
+      'number': 5,
+      'filename': os.path.realpath( 'some_filename' ),
+    },
+    {
+      'number': 1,
+      'filename': os.path.realpath( 'another_filename' )
+    }
+  ]
 
-  with patch.dict( 'vim.buffers', buffers ):
+  with patch( 'vim.buffers', buffers ):
     vimsupport.CloseBuffersForFilename( 'some_filename' )
 
   vim_command.assert_has_calls( [

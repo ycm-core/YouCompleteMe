@@ -22,7 +22,9 @@ import re
 import sys
 
 
-BUFNR_REGEX = re.compile( r"bufnr\('(.+)', ([0-9]+)\)" )
+BUFNR_REGEX = re.compile( r"^bufnr\('(.+)', ([0-9]+)\)$" )
+BUFWINNR_REGEX = re.compile( r"^bufwinnr\(([0-9]+)\)$" )
+BWIPEOUT_REGEX = re.compile( r"^(?:silent! )bwipeout!? ([0-9]+)$" )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -33,6 +35,58 @@ BUFNR_REGEX = re.compile( r"bufnr\('(.+)', ([0-9]+)\)" )
 # More explanation is available:
 # https://github.com/Valloric/YouCompleteMe/pull/1694
 VIM_MOCK = MagicMock()
+
+
+def MockGetBufferNumber( buffer_filename ):
+  for buffer in VIM_MOCK.buffers:
+    if buffer[ 'filename' ] == buffer_filename:
+      return buffer[ 'number' ]
+  return -1
+
+
+def MockGetBufferWindowNumber( buffer_number ):
+  for buffer in VIM_MOCK.buffers:
+    if buffer[ 'number' ] == buffer_number and 'window' in buffer:
+      return buffer[ 'window' ]
+  return -1
+
+
+def MockVimEval( value ):
+  if value == "g:ycm_min_num_of_chars_for_completion":
+    return 0
+  if value == "g:ycm_path_to_python_interpreter":
+    return ''
+  if value == "tempname()":
+    return '_TEMP_FILE_'
+  if value == "&previewheight":
+    # Default value from Vim
+    return 12
+
+  match = BUFNR_REGEX.search( value )
+  if match:
+    return MockGetBufferNumber( match.group( 1 ) )
+
+  match = BUFWINNR_REGEX.search( value )
+  if match:
+    return MockGetBufferWindowNumber( int( match.group( 1 ) ) )
+
+  raise ValueError( 'Unexpected evaluation: ' + value )
+
+
+def MockWipeoutBuffer( buffer_number ):
+  buffers = VIM_MOCK.buffers
+
+  for index, buffer in enumerate( buffers ):
+    if buffer[ 'number' ] == buffer_number:
+      return buffers.pop( index )
+
+
+def MockVimCommand( command ):
+  match = BWIPEOUT_REGEX.search( command )
+  if match:
+    return MockWipeoutBuffer( int( match.group( 1 ) ) )
+
+  raise RuntimeError( 'Unexpected command: ' + command )
 
 
 def MockVimModule():
@@ -57,28 +111,8 @@ def MockVimModule():
   Failure to use this approach may lead to unexpected failures in other
   tests."""
 
-  def VimEval( value ):
-    if value == "g:ycm_min_num_of_chars_for_completion":
-      return 0
-    if value == "g:ycm_path_to_python_interpreter":
-      return ''
-    if value == "tempname()":
-      return '_TEMP_FILE_'
-    if value == "&previewheight":
-      # Default value from Vim
-      return 12
-    match = BUFNR_REGEX.search( value )
-    if match:
-      filename = match.group( 1 )
-      buffers = VIM_MOCK.buffers
-      if filename in buffers and buffers[ filename ]:
-        return buffers[ filename ].pop( 0 )
-      return -1
-
-    raise ValueError( 'Unexpected evaluation: ' + value )
-
   VIM_MOCK.buffers = {}
-  VIM_MOCK.eval = MagicMock( side_effect = VimEval )
+  VIM_MOCK.eval = MagicMock( side_effect = MockVimEval )
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK
