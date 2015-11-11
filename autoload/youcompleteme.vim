@@ -766,8 +766,8 @@ endfunction
 
 
 function! s:ToggleLogs(...)
-  let stderr = a:0 == 0 || a:1 !=? 'Stdout'
-  let stdout = a:0 == 0 || a:1 !=? 'Stderr'
+  let stderr = a:0 == 0 || a:1 !=? 'stdout'
+  let stdout = a:0 == 0 || a:1 !=? 'stderr'
   py ycm_state.ToggleLogs( stdout = vimsupport.GetBoolValue( 'l:stdout' ),
                          \ stderr = vimsupport.GetBoolValue( 'l:stderr' ) )
 endfunction
@@ -807,7 +807,7 @@ endfunction
 
 
 function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
-  return "Stdout\nStderr"
+  return "stdout\nstderr"
 endfunction
 
 
