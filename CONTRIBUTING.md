@@ -51,7 +51,7 @@ Here are the things you should do when creating an issue:
    let g:ycm_server_log_level = 'debug'
    ```
 
-   Run `:YcmToggleLogs Stderr` in vim to open the logfile. Attach the contents
+   Run `:YcmToggleLogs stderr` in vim to open the logfile. Attach the contents
    of this file to your issue.
 3. Add the output of the `:YcmDebugInfo` command.
 4. **Create a test case for your issue**. This is critical. Don't talk about how

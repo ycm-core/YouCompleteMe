@@ -875,7 +875,7 @@ completion engine.
 
 This command automatically opens in windows the stdout and stderr logfiles
 written by the `ycmd` server. If one or both logfiles are already opened, they
-are automatically closed. `Stderr` or `Stdout` can be specified as an argument
+are automatically closed. `stderr` or `stdout` can be specified as an argument
 of this command to only open the corresponding logfile instead of both. If this
 logfile is already opened, it will be closed. Only for debugging purpose.
 
