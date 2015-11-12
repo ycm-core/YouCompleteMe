@@ -1,4 +1,6 @@
 flake8>=2.0
 mock>=1.0.1
 nose>=1.3.0
+nose-exclude>=0.4.1
 PyHamcrest>=1.8.0
+vimrunner>=1.0.3

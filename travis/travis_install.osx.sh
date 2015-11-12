@@ -1,5 +1,9 @@
 # OS X installation
 
+function brew() {
+  command brew "$@" || command brew "$@"
+}
+
 # OS X comes with 2 versions of python by default, and a neat system
 # (versioner) to switch between them:
 #   /usr/bin/python2.7 - python 2.7
@@ -17,3 +21,6 @@ VENV_VERSION=13.1.2
 curl -O https://pypi.python.org/packages/source/v/virtualenv/virtualenv-${VENV_VERSION}.tar.gz
 tar xvfz virtualenv-${VENV_VERSION}.tar.gz
 python virtualenv-${VENV_VERSION}/virtualenv.py -p python${YCMD_PYTHON_VERSION} ${YCMD_VENV_DIR}
+
+brew update
+brew install --ignore-dependencies macvim --with-python --with-override-system-vim

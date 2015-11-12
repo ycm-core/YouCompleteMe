@@ -2,6 +2,10 @@
 
 set -ev
 
+# In the case of VIMSCRIPT testing we still need to define this variable and we
+# also need to run under 2.7 since vimrunner-python don't support python2.6
+YCMD_PYTHON_VERSION=${YCMD_PYTHON_VERSION:-2.7}
+
 YCMD_VENV_DIR=${HOME}/venvs/ycmd_test
 
 # Requirements of OS-specific install:

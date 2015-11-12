@@ -13,6 +13,7 @@ env:
   matrix:
     - YCMD_PYTHON_VERSION=2.7
     - YCMD_PYTHON_VERSION=2.6
+    - VIMSCRIPT=true
 addons:
   apt:
     sources:
@@ -23,6 +24,8 @@ addons:
      - python2.7
      - python2.7-dev
      - python-virtualenv
+     - xterm
 cache:
   directories:
     - $HOME/.cache/pip
+    - /tmp/vim
