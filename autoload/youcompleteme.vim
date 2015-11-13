@@ -22,6 +22,7 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:omnifunc_mode = 0
+let s:defer_omnifunc = 1
 
 let s:old_cursor_position = []
 let s:cursor_moved = 0
@@ -87,6 +88,15 @@ function! youcompleteme#Enable()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
+
+  if s:defer_omnifunc
+    augroup ycm_defer_omnifunc
+      autocmd!
+      autocmd InsertEnter * call s:SetOmnicompleteFunc()
+                        \ | let s:defer_omnifunc = 0
+                        \ | autocmd! ycm_defer_omnifunc
+    augroup END
+  endif
 
   " Calling these once solves the problem of BufReadPre/BufRead/BufEnter not
   " triggering for the first loaded file. This should be the last commands
@@ -412,6 +422,11 @@ function! s:OnBufferVisit()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+
+  if !s:defer_omnifunc
+    call s:SetOmnicompleteFunc()
+  endif
+
   py ycm_state.OnBufferVisit()
   call s:OnFileReadyToParse()
 endfunction
@@ -542,11 +557,6 @@ function! s:OnInsertEnter()
 
   if !s:AllowedToCompleteInCurrentFile()
     return
-  endif
-
-  if !get( b:, 'ycm_omnicomplete', 0 )
-    let b:ycm_omnicomplete = 1
-    call s:SetOmnicompleteFunc()
   endif
 
   let s:old_cursor_position = []
