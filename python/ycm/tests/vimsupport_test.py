@@ -17,12 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.test_utils import MockVimModule
+from ycm.test_utils import MockVimModule, MockVimCommand
 MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
+from hamcrest import assert_that, calling, raises, none
 from mock import MagicMock, call, patch
+import os
 
 
 def ReplaceChunk_SingleLine_Repl_1_test():
@@ -582,17 +584,9 @@ def _BuildChunk( start_line, start_column, end_line, end_column,
   }
 
 
-def _Mock_tempname( arg ):
-  if arg == 'tempname()':
-    return '_TEMP_FILE_'
-
-  raise ValueError( 'Unexpected evaluation: ' + arg )
-
-
-@patch( 'vim.eval', side_effect=_Mock_tempname )
 @patch( 'vim.command' )
 @patch( 'vim.current' )
-def WriteToPreviewWindow_test( vim_current, vim_command, vim_eval ):
+def WriteToPreviewWindow_test( vim_current, vim_command ):
   vim_current.window.options.__getitem__ = MagicMock( return_value = True )
 
   vimsupport.WriteToPreviewWindow( "test" )
@@ -615,9 +609,8 @@ def WriteToPreviewWindow_test( vim_current, vim_command, vim_eval ):
   ], any_order = True )
 
 
-@patch( 'vim.eval', side_effect=_Mock_tempname )
 @patch( 'vim.current' )
-def WriteToPreviewWindow_MultiLine_test( vim_current, vim_eval ):
+def WriteToPreviewWindow_MultiLine_test( vim_current ):
   vim_current.window.options.__getitem__ = MagicMock( return_value = True )
   vimsupport.WriteToPreviewWindow( "test\ntest2" )
 
@@ -625,10 +618,9 @@ def WriteToPreviewWindow_MultiLine_test( vim_current, vim_eval ):
       slice( None, None, None ), [ 'test', 'test2' ] )
 
 
-@patch( 'vim.eval', side_effect=_Mock_tempname )
 @patch( 'vim.command' )
 @patch( 'vim.current' )
-def WriteToPreviewWindow_JumpFail_test( vim_current, vim_command, vim_eval ):
+def WriteToPreviewWindow_JumpFail_test( vim_current, vim_command ):
   vim_current.window.options.__getitem__ = MagicMock( return_value = False )
 
   vimsupport.WriteToPreviewWindow( "test" )
@@ -644,12 +636,9 @@ def WriteToPreviewWindow_JumpFail_test( vim_current, vim_command, vim_eval ):
   vim_current.buffer.options.__setitem__.assert_not_called()
 
 
-@patch( 'vim.eval', side_effect=_Mock_tempname )
 @patch( 'vim.command' )
 @patch( 'vim.current' )
-def WriteToPreviewWindow_JumpFail_MultiLine_test( vim_current,
-                                                  vim_command,
-                                                  vim_eval ):
+def WriteToPreviewWindow_JumpFail_MultiLine_test( vim_current, vim_command ):
 
   vim_current.window.options.__getitem__ = MagicMock( return_value = False )
 
@@ -665,3 +654,94 @@ def WriteToPreviewWindow_JumpFail_MultiLine_test( vim_current,
 
   vim_current.buffer.__setitem__.assert_not_called()
   vim_current.buffer.options.__setitem__.assert_not_called()
+
+
+def CheckFilename_test():
+  assert_that(
+    calling( vimsupport.CheckFilename ).with_args( None ),
+    raises( RuntimeError, "'None' is not a valid filename" )
+  )
+
+  assert_that(
+    calling( vimsupport.CheckFilename ).with_args( 'nonexistent_file' ),
+    raises( RuntimeError,
+            "filename 'nonexistent_file' cannot be opened. "
+            "\[Errno 2\] No such file or directory: 'nonexistent_file'" )
+  )
+
+  assert_that( vimsupport.CheckFilename( __file__ ), none() )
+
+
+def BufferIsVisibleForFilename_test():
+  buffers = [
+    {
+      'number': 1,
+      'filename': os.path.realpath( 'visible_filename' ),
+      'window': 1
+    },
+    {
+      'number': 2,
+      'filename': os.path.realpath( 'hidden_filename' ),
+    }
+  ]
+
+  with patch( 'vim.buffers', buffers ):
+    eq_( vimsupport.BufferIsVisibleForFilename( 'visible_filename' ), True )
+    eq_( vimsupport.BufferIsVisibleForFilename( 'hidden_filename' ), False )
+    eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
+
+
+@patch( 'vim.command', side_effect = MockVimCommand )
+def CloseBuffersForFilename_test( vim_command ):
+  buffers = [
+    {
+      'number': 2,
+      'filename': os.path.realpath( 'some_filename' ),
+    },
+    {
+      'number': 5,
+      'filename': os.path.realpath( 'some_filename' ),
+    },
+    {
+      'number': 1,
+      'filename': os.path.realpath( 'another_filename' )
+    }
+  ]
+
+  with patch( 'vim.buffers', buffers ):
+    vimsupport.CloseBuffersForFilename( 'some_filename' )
+
+  vim_command.assert_has_calls( [
+    call( 'silent! bwipeout! 2' ),
+    call( 'silent! bwipeout! 5' )
+  ], any_order = True )
+
+
+@patch( 'vim.command' )
+@patch( 'vim.current' )
+def OpenFilename_test( vim_current, vim_command ):
+  # Options used to open a logfile
+  options = {
+    'size': vimsupport.GetIntValue( '&previewheight' ),
+    'fix': True,
+    'watch': True,
+    'position': 'end'
+  }
+
+  vimsupport.OpenFilename( __file__, options )
+
+  vim_command.assert_has_calls( [
+    call( 'silent! 12split {0}'.format( __file__ ) ),
+    call( "exec "
+          "'au BufEnter <buffer> :silent! checktime {0}'".format( __file__ ) ),
+    call( 'silent! normal G zz' ),
+    call( 'silent! wincmd p' )
+  ] )
+
+  vim_current.buffer.options.__setitem__.assert_has_calls( [
+    call( 'autoread', True ),
+  ] )
+
+  vim_current.window.options.__setitem__.assert_has_calls( [
+    call( 'winfixheight', True )
+  ] )

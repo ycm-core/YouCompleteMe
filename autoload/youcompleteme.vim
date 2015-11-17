@@ -310,6 +310,8 @@ function! s:SetUpCommands()
   command! YcmRestartServer call s:RestartServer()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmDebugInfo call s:DebugInfo()
+  command! -nargs=? -complete=custom,youcompleteme#LogsComplete
+    \ YcmToggleLogs call s:ToggleLogs(<f-args>)
   command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
     \ YcmCompleter call s:CompleterCommand(<f-args>)
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
@@ -763,6 +765,14 @@ function! s:DebugInfo()
 endfunction
 
 
+function! s:ToggleLogs(...)
+  let stderr = a:0 == 0 || a:1 !=? 'stdout'
+  let stdout = a:0 == 0 || a:1 !=? 'stderr'
+  py ycm_state.ToggleLogs( stdout = vimsupport.GetBoolValue( 'l:stdout' ),
+                         \ stderr = vimsupport.GetBoolValue( 'l:stderr' ) )
+endfunction
+
+
 function! s:CompleterCommand(...)
   " CompleterCommand will call the OnUserCommand function of a completer.
   " If the first arguments is of the form "ft=..." it can be used to specify the
@@ -793,6 +803,11 @@ function! youcompleteme#OpenGoToList()
   set nolazyredraw
   au WinLeave <buffer> q  " automatically leave, if an option is chosen
   redraw!
+endfunction
+
+
+function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
+  return "stdout\nstderr"
 endfunction
 
 

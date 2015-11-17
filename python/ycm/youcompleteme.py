@@ -176,6 +176,7 @@ class YouCompleteMe( object ):
 
 
   def RestartServer( self ):
+    self._CloseLogs()
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
     self._user_notified_about_crash = False
     self._ServerCleanup()
@@ -505,6 +506,47 @@ class YouCompleteMe( object ):
         self._server_stderr )
 
     return debug_info
+
+
+  def _OpenLogs( self, stdout = True, stderr = True ):
+    # Open log files in a horizontal window with the same behavior as the
+    # preview window (same height and winfixheight enabled). Automatically
+    # watch for changes. Set the cursor position at the end of the file.
+    options = {
+      'size': vimsupport.GetIntValue( '&previewheight' ),
+      'fix': True,
+      'watch': True,
+      'position': 'end'
+    }
+
+    if stdout:
+      vimsupport.OpenFilename( self._server_stdout, options )
+    if stderr:
+      vimsupport.OpenFilename( self._server_stderr, options )
+
+
+  def _CloseLogs( self, stdout = True, stderr = True ):
+    if stdout:
+      vimsupport.CloseBuffersForFilename( self._server_stdout )
+    if stderr:
+      vimsupport.CloseBuffersForFilename( self._server_stderr )
+
+
+  def ToggleLogs( self, stdout = True, stderr = True ):
+    if ( stdout and
+         vimsupport.BufferIsVisibleForFilename( self._server_stdout ) or
+         stderr and
+         vimsupport.BufferIsVisibleForFilename( self._server_stderr ) ):
+      return self._CloseLogs( stdout = stdout, stderr = stderr )
+
+    # Close hidden logfile buffers if any to keep a clean state
+    self._CloseLogs( stdout = stdout, stderr = stderr )
+
+    try:
+      self._OpenLogs( stdout = stdout, stderr = stderr )
+    except RuntimeError as error:
+      vimsupport.PostVimMessage( 'YouCompleteMe encountered an error when '
+                                 'opening logs: {0}.'.format( error ) )
 
 
   def CurrentFiletypeCompletionEnabled( self ):

@@ -51,17 +51,17 @@ Here are the things you should do when creating an issue:
    let g:ycm_server_log_level = 'debug'
    ```
 
-   Run `:YcmDebugInfo` in vim to see what temporary files (listed under "Server
-   logfiles") the debug output streams are written to. Attach the debug output
-   stream to your issue.
-3. **Create a test case for your issue**. This is critical. Don't talk about how
+   Run `:YcmToggleLogs stderr` in vim to open the logfile. Attach the contents
+   of this file to your issue.
+3. Add the output of the `:YcmDebugInfo` command.
+4. **Create a test case for your issue**. This is critical. Don't talk about how
    "when I have X in my file" or similar, _create a file with X in it_ and put
    the contents inside code blocks in your issue description. Try to make this
    test file _as small as possible_. Don't just paste a huge, 500 line source
    file you were editing and present that as a test. _Minimize_ the file so that
    the problem is reproduced with the smallest possible amount of test data.
-4. **Include your OS and OS version.**
-5. **Include the output of `vim --version`.**
+5. **Include your OS and OS version.**
+6. **Include the output of `vim --version`.**
 
 
 Creating good pull requests
