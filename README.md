@@ -2342,7 +2342,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [vundle]: https://github.com/VundleVim/Vundle.vim#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
 [clang-download]: http://llvm.org/releases/download.html
-[brew]: http://mxcl.github.io/homebrew/
+[brew]: http://brew.sh
 [cmake-download]: https://cmake.org/download/
 [macvim]: https://github.com/macvim-dev/macvim/releases
 [vimrc]: http://vimhelp.appspot.com/starting.txt.html#vimrc
