@@ -134,8 +134,7 @@ class YouCompleteMe( object ):
       if self._user_options[ 'server_keep_logfiles' ]:
         args.append( '--keep_logfiles' )
 
-      self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
-                                            stdout = PIPE, stderr = PIPE)
+      self._server_popen = utils.SafePopen( args, stdout = PIPE, stderr = PIPE)
       BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
       BaseRequest.hmac_secret = hmac_secret
 
