@@ -2342,8 +2342,8 @@ This software is licensed under the [GPL v3 license][gpl].
 [vundle]: https://github.com/VundleVim/Vundle.vim#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
 [clang-download]: http://llvm.org/releases/download.html
-[brew]: http://mxcl.github.com/homebrew/
-[cmake-download]: http://www.cmake.org/cmake/resources/software.html
+[brew]: http://mxcl.github.io/homebrew/
+[cmake-download]: https://cmake.org/download/
 [macvim]: https://github.com/macvim-dev/macvim/releases
 [vimrc]: http://vimhelp.appspot.com/starting.txt.html#vimrc
 [gpl]: http://www.gnu.org/copyleft/gpl.html
@@ -2351,7 +2351,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [syntastic]: https://github.com/scrooloose/syntastic
 [flags_example]: https://github.com/Valloric/ycmd/blob/master/cpp/ycm/.ycm_extra_conf.py
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
-[subsequence]: http://en.wikipedia.org/wiki/Subsequence
+[subsequence]: https://en.wikipedia.org/wiki/Subsequence
 [listtoggle]: https://github.com/Valloric/ListToggle
 [vim-build]: https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
 [tracker]: https://github.com/Valloric/YouCompleteMe/issues?state=open
@@ -2363,9 +2363,9 @@ This software is licensed under the [GPL v3 license][gpl].
 [ultisnips]: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 [exuberant-ctags]: http://ctags.sourceforge.net/
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
-[vundle-bug]: https://github.com/gmarik/vundle/issues/48
+[vundle-bug]: https://github.com/VundleVim/Vundle.vim/issues/48
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[omnisharp]: https://github.com/nosami/OmniSharpServer
+[omnisharp]: https://github.com/OmniSharp/omnisharp-server
 [issue-303]: https://github.com/Valloric/YouCompleteMe/issues/303
 [issue-593]: https://github.com/Valloric/YouCompleteMe/issues/593
 [issue-669]: https://github.com/Valloric/YouCompleteMe/issues/669
