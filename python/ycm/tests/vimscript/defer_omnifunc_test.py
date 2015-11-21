@@ -37,6 +37,16 @@ class OmnifuncTest( TestCase ):
     assert_that( vim.eval( '&omnifunc' ), equal_to( 'youcompleteme#OmniComplete' ) )
 
 
+  def omnifunc_is_set_after_re_edit_file_test( self ):
+    vim = self.prepare_editor()
+    vim.edit( 'python/ycm/base.py' )
+    vim.command( 'autocmd FileType python :setlocal omnifunc=noycm' )
+    vim.normal( 'i' )
+    vim.feedkeys( '\<Esc>' )
+    vim.command( 'e!' )
+    assert_that( vim.eval( '&omnifunc' ), equal_to( 'youcompleteme#OmniComplete' ) )
+
+
   def prepare_editor( self ):
     self.vim = self._get_proper_editor()
     self.vim.prepend_runtimepath( DIR_OF_YCM )
