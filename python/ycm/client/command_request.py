@@ -60,17 +60,23 @@ class CommandRequest( BaseRequest ):
 
 
   def RunPostCommandActionsIfNeeded( self ):
-    if not self.Done() or not self._response:
+    if not self.Done() or self._response is None:
       return
 
+    if isinstance( self._response, bool ):
+      return self._HandleBooleanResponse()
+
     if self._is_goto_command:
-      self._HandleGotoResponse()
-    elif self._is_fixit_command:
-      self._HandleFixitResponse()
-    elif 'message' in self._response:
-      self._HandleMessageResponse()
-    elif 'detailed_info' in self._response:
-      self._HandleDetailedInfoResponse()
+      return self._HandleGotoResponse()
+
+    if self._is_fixit_command:
+      return self._HandleFixitResponse()
+
+    if 'message' in self._response:
+      return self._HandleMessageResponse()
+
+    if 'detailed_info' in self._response:
+      return self._HandleDetailedInfoResponse()
 
 
   def _HandleGotoResponse( self ):
@@ -95,6 +101,12 @@ class CommandRequest( BaseRequest ):
       vimsupport.EchoTextVimWidth( "FixIt applied "
                                    + str( len( chunks ) )
                                    + " changes" )
+
+
+  def _HandleBooleanResponse( self ):
+    if self._response:
+      return vimsupport.EchoText( 'Yes' )
+    vimsupport.EchoText( 'No' )
 
 
   def _HandleMessageResponse( self ):
