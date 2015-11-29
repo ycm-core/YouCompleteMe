@@ -63,14 +63,17 @@ class CommandRequest( BaseRequest ):
     if not self.Done() or self._response is None:
       return
 
-    if isinstance( self._response, bool ):
-      return self._HandleBooleanResponse()
-
     if self._is_goto_command:
       return self._HandleGotoResponse()
 
     if self._is_fixit_command:
       return self._HandleFixitResponse()
+
+    # If not a dictionary or a list, the response is necessarily a
+    # scalar: boolean, number, string, etc. In this case, we print
+    # it to the user.
+    if not isinstance( self._response, ( dict, list ) ):
+      return self._HandleBasicResponse()
 
     if 'message' in self._response:
       return self._HandleMessageResponse()
@@ -103,10 +106,8 @@ class CommandRequest( BaseRequest ):
                                    + " changes" )
 
 
-  def _HandleBooleanResponse( self ):
-    if self._response:
-      return vimsupport.EchoText( 'Yes' )
-    vimsupport.EchoText( 'No' )
+  def _HandleBasicResponse( self ):
+    vimsupport.EchoText( self._response )
 
 
   def _HandleMessageResponse( self ):
