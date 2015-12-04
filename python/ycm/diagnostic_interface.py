@@ -45,27 +45,11 @@ class DiagnosticInterface( object ):
 
 
   def GetErrorCount( self ):
-    errors = 0
-    line_to_diags = self._buffer_number_to_line_to_diags[
-      vim.current.buffer.number ]
-
-    for diags in line_to_diags.itervalues():
-      for diag in diags:
-        if _DiagnosticIsError( diag ):
-          errors += 1
-    return errors
+    return len( self._FilterDiagnostics( _DiagnosticIsError ) )
 
 
   def GetWarningCount( self ):
-    warnings = 0
-    line_to_diags = self._buffer_number_to_line_to_diags[
-      vim.current.buffer.number ]
-
-    for diags in line_to_diags.itervalues():
-      for diag in diags:
-        if _DiagnosticIsWarning( diag ):
-          warnings += 1
-    return warnings
+    return len( self._FilterDiagnostics( _DiagnosticIsWarning ) )
 
 
   def UpdateWithNewDiagnostics( self, diags ):
@@ -102,6 +86,16 @@ class DiagnosticInterface( object ):
 
     vimsupport.EchoTextVimWidth( text )
     self._diag_message_needs_clearing = True
+
+
+  def _FilterDiagnostics( self, predicate ):
+    matched_diags = []
+    line_to_diags = self._buffer_number_to_line_to_diags[
+      vim.current.buffer.number ]
+
+    for diags in line_to_diags.itervalues():
+      matched_diags.extend( filter( predicate, diags ) )
+    return matched_diags
 
 
 def _UpdateSquiggles( buffer_number_to_line_to_diags ):

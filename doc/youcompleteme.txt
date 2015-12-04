@@ -55,7 +55,10 @@ Contents ~
   14. The |ReloadSolution| subcommand
   15. The |GoToImplementation| subcommand
   16. The |GoToImplementationElseDeclaration| subcommand
- 8. Options                                             |youcompleteme-options|
+ 8. Functions                                         |youcompleteme-functions|
+  1. The |YcmGetErrorCount| function
+  2. The |YcmGetWarningCount| function
+ 9. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
   3. The |g:ycm_auto_trigger| option
@@ -101,7 +104,7 @@ Contents ~
   43. The |g:ycm_use_ultisnips_completer| option
   44. The |g:ycm_goto_buffer_command| option
   45. The |g:ycm_disable_for_files_larger_than_kb| option
- 9. FAQ                                                     |youcompleteme-faq|
+ 10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
   3. I get a linker warning regarding |libpython| on Mac when compiling YCM
@@ -1346,6 +1349,30 @@ provides a list of implementations to choose from.
 
 Supported in filetypes: 'cs'
 
+===============================================================================
+                                                      *youcompleteme-functions*
+Functions ~
+
+-------------------------------------------------------------------------------
+The *YcmGetErrorCount* function
+
+Get the number of YCM Diagnostic errors. If no errors are present, this function
+returns 0.
+
+For example:
+>
+  call YcmGetErrorCount()
+<
+-------------------------------------------------------------------------------
+The *YcmGetWarningCount* function
+
+Get the number of YCM Diagnostic warnings. If no warnings are present, this
+function returns 0.
+
+For example:
+>
+  call YcmGetWarningCount()
+<
 ===============================================================================
                                                         *youcompleteme-options*
 Options ~
