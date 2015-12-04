@@ -1122,6 +1122,30 @@ provides a list of implementations to choose from.
 
 Supported in filetypes: `cs`
 
+Functions
+--------
+
+### The `YcmGetErrorCount` function
+
+Get the number of YCM Diagnostic errors. If no errors are present, this function
+returns 0.
+
+For example:
+```viml
+  call YcmGetErrorCount()
+```
+
+### The `YcmGetWarningCount` function
+
+Get the number of YCM Diagnostic warnings. If no warnings are present, this
+function returns 0.
+
+For example:
+```viml
+  call YcmGetWarningCount()
+```
+
+
 Options
 -------
 
