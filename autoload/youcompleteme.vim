@@ -870,6 +870,16 @@ function! s:ShowDiagnostics()
 endfunction
 
 
+function! g:YcmGetErrorCount()
+  return pyeval( 'ycm_state.GetErrorCount()' )
+endfunction
+
+
+function! g:YcmGetWarningCount()
+  return pyeval( 'ycm_state.GetWarningCount()' )
+endfunction
+
+
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
 unlet s:save_cpo

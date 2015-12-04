@@ -43,6 +43,31 @@ class DiagnosticInterface( object ):
       if self._user_options[ 'echo_current_diagnostic' ]:
         self._EchoDiagnosticForLine( line )
 
+
+  def GetErrorCount( self ):
+    errors = 0
+    line_to_diags = self._buffer_number_to_line_to_diags[
+      vim.current.buffer.number ]
+
+    for diags in line_to_diags.itervalues():
+      for diag in diags:
+        if _DiagnosticIsError( diag ):
+          errors += 1
+    return errors
+
+
+  def GetWarningCount( self ):
+    warnings = 0
+    line_to_diags = self._buffer_number_to_line_to_diags[
+      vim.current.buffer.number ]
+
+    for diags in line_to_diags.itervalues():
+      for diag in diags:
+        if _DiagnosticIsWarning( diag ):
+          warnings += 1
+    return warnings
+
+
   def UpdateWithNewDiagnostics( self, diags ):
     normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
@@ -207,6 +232,10 @@ def _ConvertDiagListToDict( diag_list ):
 
 def _DiagnosticIsError( diag ):
   return diag[ 'kind' ] == 'ERROR'
+
+
+def _DiagnosticIsWarning( diag ):
+  return diag[ 'kind' ] == 'WARNING'
 
 
 def _NormalizeDiagnostic( diag ):
