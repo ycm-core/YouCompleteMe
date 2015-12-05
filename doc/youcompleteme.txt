@@ -55,7 +55,10 @@ Contents ~
   14. The |ReloadSolution| subcommand
   15. The |GoToImplementation| subcommand
   16. The |GoToImplementationElseDeclaration| subcommand
- 8. Options                                             |youcompleteme-options|
+ 8. Functions                                         |youcompleteme-functions|
+  1. The |youcompleteme#GetErrorCount| function
+  2. The |youcompleteme#GetWarningCount| function
+ 9. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
   3. The |g:ycm_auto_trigger| option
@@ -101,7 +104,7 @@ Contents ~
   43. The |g:ycm_use_ultisnips_completer| option
   44. The |g:ycm_goto_buffer_command| option
   45. The |g:ycm_disable_for_files_larger_than_kb| option
- 9. FAQ                                                     |youcompleteme-faq|
+ 10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
   3. I get a linker warning regarding |libpython| on Mac when compiling YCM
@@ -1228,9 +1231,9 @@ For example:
   class C {
       void f();
   };
-  
+
   void C::f() {
-  
+
   }
 <
 In the out-of-line definition of 'C::f', the semantic parent is the class 'C',
@@ -1346,6 +1349,35 @@ provides a list of implementations to choose from.
 
 Supported in filetypes: 'cs'
 
+===============================================================================
+                                                      *youcompleteme-functions*
+Functions ~
+
+-------------------------------------------------------------------------------
+The *youcompleteme#GetErrorCount* function
+
+Get the number of YCM Diagnostic errors. If no errors are present, this
+function returns 0.
+
+For example:
+>
+  call youcompleteme#GetErrorCount()
+<
+Both this function and |youcompleteme#GetWarningCount| can be useful when
+integrating YCM with other Vim plugins. For example, a lightline [48] user
+could add a diagnostics section to their statusline which would display the
+number of errors and warnings.
+
+-------------------------------------------------------------------------------
+The *youcompleteme#GetWarningCount* function
+
+Get the number of YCM Diagnostic warnings. If no warnings are present, this
+function returns 0.
+
+For example:
+>
+  call youcompleteme#GetWarningCount()
+<
 ===============================================================================
                                                         *youcompleteme-options*
 Options ~
@@ -2600,5 +2632,6 @@ References ~
 [45] http://www.gnu.org/copyleft/gpl.html
 [46] https://bitdeli.com/free
 [47] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[48] https://github.com/itchyny/lightline.vim
 
 vim: ft=help

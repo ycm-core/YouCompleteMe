@@ -451,6 +451,11 @@ class YouCompleteMe( object ):
       return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
+  def GetErrorCount( self ):
+    return self._diag_interface.GetErrorCount()
+
+  def GetWarningCount( self ):
+    return self._diag_interface.GetWarningCount()
 
   def DiagnosticsForCurrentFileReady( self ):
     return bool( self._latest_file_parse_request and
