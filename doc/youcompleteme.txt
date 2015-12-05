@@ -1363,6 +1363,11 @@ For example:
 >
   call youcompleteme#GetErrorCount()
 <
+Both this function and |youcompleteme#GetWarningCount| can be useful when
+integrating YCM with other Vim plugins. For example, a lightline [48] user
+could add a diagnostics section to their statusline which would display the
+number of errors and warnings.
+
 -------------------------------------------------------------------------------
 The *youcompleteme#GetWarningCount* function
 
@@ -2627,5 +2632,6 @@ References ~
 [45] http://www.gnu.org/copyleft/gpl.html
 [46] https://bitdeli.com/free
 [47] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[48] https://github.com/itchyny/lightline.vim
 
 vim: ft=help
