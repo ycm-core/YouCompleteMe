@@ -1125,24 +1125,24 @@ Supported in filetypes: `cs`
 Functions
 --------
 
-### The `YcmGetErrorCount` function
+### The `youcompleteme#GetErrorCount` function
 
 Get the number of YCM Diagnostic errors. If no errors are present, this function
 returns 0.
 
 For example:
 ```viml
-  call YcmGetErrorCount()
+  call youcompleteme#GetErrorCount()
 ```
 
-### The `YcmGetWarningCount` function
+### The `youcompleteme#GetWarningCount` function
 
 Get the number of YCM Diagnostic warnings. If no warnings are present, this
 function returns 0.
 
 For example:
 ```viml
-  call YcmGetWarningCount()
+  call youcompleteme#GetWarningCount()
 ```
 
 

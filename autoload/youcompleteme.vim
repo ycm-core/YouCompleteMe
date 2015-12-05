@@ -111,6 +111,16 @@ function! youcompleteme#DisableCursorMovedAutocommands()
 endfunction
 
 
+function! youcompleteme#GetErrorCount()
+  return pyeval( 'ycm_state.GetErrorCount()' )
+endfunction
+
+
+function! youcompleteme#GetWarningCount()
+  return pyeval( 'ycm_state.GetWarningCount()' )
+endfunction
+
+
 function! s:SetUpPython() abort
 python << EOF
 import sys
@@ -867,16 +877,6 @@ function! s:ShowDiagnostics()
   else
     echom "No warnings or errors detected"
   endif
-endfunction
-
-
-function! g:YcmGetErrorCount()
-  return pyeval( 'ycm_state.GetErrorCount()' )
-endfunction
-
-
-function! g:YcmGetWarningCount()
-  return pyeval( 'ycm_state.GetWarningCount()' )
 endfunction
 
 

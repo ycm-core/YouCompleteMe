@@ -30,6 +30,7 @@ Contents ~
   8. Diagnostic display                      |youcompleteme-diagnostic-display|
    1. C# Diagnostic Support                |youcompleteme-c-diagnostic-support|
    2. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
+
  6. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
   2. The |:YcmForceCompileAndDiagnostics| command
@@ -1231,9 +1232,9 @@ For example:
   class C {
       void f();
   };
-  
+
   void C::f() {
-  
+
   }
 <
 In the out-of-line definition of 'C::f', the semantic parent is the class 'C',
@@ -1354,24 +1355,24 @@ Supported in filetypes: 'cs'
 Functions ~
 
 -------------------------------------------------------------------------------
-The *YcmGetErrorCount* function
+The *youcompleteme#GetErrorCount* function
 
 Get the number of YCM Diagnostic errors. If no errors are present, this function
 returns 0.
 
 For example:
 >
-  call YcmGetErrorCount()
+  call youcompleteme#GetErrorCount()
 <
 -------------------------------------------------------------------------------
-The *YcmGetWarningCount* function
+The *youcompleteme#GetWarningCount* function
 
 Get the number of YCM Diagnostic warnings. If no warnings are present, this
 function returns 0.
 
 For example:
 >
-  call YcmGetWarningCount()
+  call youcompleteme#GetWarningCount()
 <
 ===============================================================================
                                                         *youcompleteme-options*
