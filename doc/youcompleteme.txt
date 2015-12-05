@@ -30,7 +30,6 @@ Contents ~
   8. Diagnostic display                      |youcompleteme-diagnostic-display|
    1. C# Diagnostic Support                |youcompleteme-c-diagnostic-support|
    2. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
-
  6. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
   2. The |:YcmForceCompileAndDiagnostics| command
@@ -57,8 +56,8 @@ Contents ~
   15. The |GoToImplementation| subcommand
   16. The |GoToImplementationElseDeclaration| subcommand
  8. Functions                                         |youcompleteme-functions|
-  1. The |YcmGetErrorCount| function
-  2. The |YcmGetWarningCount| function
+  1. The |youcompleteme#GetErrorCount| function
+  2. The |youcompleteme#GetWarningCount| function
  9. Options                                             |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
@@ -1357,8 +1356,8 @@ Functions ~
 -------------------------------------------------------------------------------
 The *youcompleteme#GetErrorCount* function
 
-Get the number of YCM Diagnostic errors. If no errors are present, this function
-returns 0.
+Get the number of YCM Diagnostic errors. If no errors are present, this
+function returns 0.
 
 For example:
 >
