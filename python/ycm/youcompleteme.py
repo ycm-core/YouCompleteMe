@@ -602,7 +602,14 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
     return
 
   try:
-    rawsnips = UltiSnips_Manager._snips( '', 1 )
+    # Since UltiSnips may run in a different python interpreter (python 3) than
+    # YCM, UltiSnips_Manager singleton is not necessary the same as the one
+    # used by YCM. In particular, it means that we cannot rely on UltiSnips to
+    # set the current filetypes to the singleton. We need to do it ourself.
+    UltiSnips_Manager.reset_buffer_filetypes()
+    UltiSnips_Manager.add_buffer_filetypes(
+      vimsupport.GetVariableValue( '&filetype' ) )
+    rawsnips = UltiSnips_Manager._snips( '', True )
   except:
     return
 
