@@ -602,7 +602,10 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
     return
 
   try:
-    rawsnips = UltiSnips_Manager._snips( '', 1 )
+    UltiSnips_Manager.reset_buffer_filetypes()
+    UltiSnips_Manager.add_buffer_filetypes(
+      vimsupport.GetVariableValue( '&filetype' ) )
+    rawsnips = UltiSnips_Manager._snips( '', True )
   except:
     return
 
