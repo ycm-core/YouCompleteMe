@@ -484,6 +484,29 @@ class YouCompleteMe( object ):
         self.GetDiagnosticsFromStoredRequest() )
 
 
+  def ValidateParseRequest( self ):
+    if ( self.DiagnosticsForCurrentFileReady() and
+         self.NativeFiletypeCompletionUsable() ):
+
+      # For filetypes which don't support diagnostics, we just want to check the
+      # _latest_file_parse_request for any exception or UnknownExtraConf
+      # response. We don't actually use the results (which are diagnositcs)
+      # otherwise. FIXME: should the client even _know_ which filetypes support
+      # diagnostics? Even if it should, it should be told by the sever.
+      self._latest_file_parse_request.Response()
+
+      # We set the diagnostics request to None because we want to prevent
+      # repeated issuing of the same warnings/errors/prompts. Setting this to
+      # None makes DiagnosticsForCurrentFileReady return False until the next
+      # request is created.
+      #
+      # Note: it is the server's responsibility to determine the frequency of
+      # error/warning/prompts when receiving a FileReadyToParse event, but
+      # it our responsibility to ensure that we only apply the
+      # warning/error/prompt received once (for each event).
+      self._latest_file_parse_request = None
+
+
   def ShowDetailedDiagnostic( self ):
     if not self.IsServerAlive():
       return
