@@ -1092,7 +1092,8 @@ the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
 with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs, typescript,
+javascript`
 
 ### The `GoTo` subcommand
 
@@ -1103,7 +1104,7 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs, javascript`
 
 ### The `GoToImprecise` subcommand
 
@@ -1117,6 +1118,14 @@ just browsing around your codebase, this command can spare you quite a bit of
 latency.
 
 Supported in filetypes: `c, cpp, objc, objcpp`
+
+### The `GoToReferences` subcommand
+
+This command attempts to find all of the references within the project to the
+identifier under the cursor and populates the quickfix list with those
+locations.
+
+Supported in filetypes: `javascript`
 
 ### The `ClearCompilationFlagCache` subcommand
 
@@ -1188,9 +1197,9 @@ context of the second `C::f` is the translation unit.
 
 For global declarations, the semantic parent is the translation unit.
 
-NOTE: Causes reparsing of the current translation unit.
+NOTE: Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, typescript, javascript`
 
 ### The `FixIt` subcommand
 
@@ -1236,21 +1245,22 @@ under the cursor. This includes, depending on the language, things like:
 * Python docstrings
 * etc.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
+javascript`
 
 ### The `StartServer` subcommand
 
 Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs`
+Supported in filetypes: `cs, javascript`
 
 ### The `StopServer` subcommand
 
 Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs`
+Supported in filetypes: `cs, javascript`
 
 ### The `RestartServer` subcommand
 
