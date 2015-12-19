@@ -772,10 +772,15 @@ your file.
 
 #### Quick start
 
-Create a `.tern-project` file in the root directory of your JavaScript project,
-by following the [instructions][tern-project] in the [Tern][] documentation.
-Make sure that Vim's working directory is beneath that directory when working
-with JavaScript files.
+1. Ensure that you have enabled the Tern completer. See the 
+   [installation guide](#installation) for details.
+
+2. Create a `.tern-project` file in the root directory of your JavaScript
+   project, by following the [instructions][tern-project] in the [Tern][]
+   documentation.
+
+3. Make sure that Vim's working directory is beneath that directory when working
+   with JavaScript files.
 
 #### Explanation
 
