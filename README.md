@@ -45,6 +45,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - an [OmniSharp][]-based completion engine for C#,
 - a [Gocode][]-based completion engine for Go,
 - a [TSServer][]-based completion engine for TypeScript,
+- a [Tern][]-based completion engine for JavaScript.
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).
 
@@ -131,8 +132,9 @@ rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
 **NOTE:** If you want C-family completion, you MUST have the latest Xcode
-installed along with the latest Command Line Tools (they are installed when you
-start Xcode for the first time).
+installed along with the latest Command Line Tools (they are installed
+automatically when you run `clang` for the first time, or manually by running
+`xcode-select --install`)
 
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
@@ -150,11 +152,20 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py
 
-If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well. If you want Go support, you should add
-`--gocode-completer`. If you want semantic TypeScript support, install the
-TypeScript SDK with `npm install -g typescript` (you'll need to install
-[nodejs and npm][npm-install]).
+The following additional language support options are available:
+
+- C# support: add `--omnisharp-completer` to `./install.py`
+- Go support: ensure go is installed and add `--gocode-completer`
+- TypeScript support: install [nodejs and npm][npm-install] then install the
+  TypeScript SDK with `npm install -g typescript`.
+- JavaScript support: install [nodejs and npm][npm-install] and add
+  `--tern-completer` to `./install.py`
+
+For example, to install with all language features, ensure npm, go, mono and
+typescript API are installed and in your PATH, then:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -196,11 +207,20 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py
 
-If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well. If you want Go support, you should add
-`--gocode-completer`. If you want semantic TypeScript support, install the
-TypeScript SDK with `npm install -g typescript` (you'll need to install
-[nodejs and npm][npm-install]).
+The following additional language support options are available:
+
+- C# support: add `--omnisharp-completer` to `./install.py`
+- Go support: ensure go is installed and add `--gocode-completer`
+- TypeScript support: install [nodejs and npm][npm-install] then install the
+  TypeScript SDK with `npm install -g typescript`.
+- JavaScript support: install [nodejs and npm][npm-install] and add
+  `--tern-completer` to `./install.py`
+
+For example, to install with all language features, ensure node, go, mono and
+typescript API are installed and in your PATH, then:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -242,11 +262,20 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py
 
-If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well. If you want Go support, you should add
-`--gocode-completer`. If you want semantic TypeScript support, install the
-TypeScript SDK with `npm install -g typescript` (you'll need to install
-[nodejs and npm][npm-install]).
+The following additional language support options are available:
+
+- C# support: add `--omnisharp-completer` to `./install.py`
+- Go support: ensure go is installed and add `--gocode-completer`
+- TypeScript support: install [nodejs and npm][npm-install] then install the
+  TypeScript SDK with `npm install -g typescript`.
+- JavaScript support: install [nodejs and npm][npm-install] and add
+  `--tern-completer` to `./install.py`
+
+For example, to install with all language features, ensure node, go, mono and
+typescript API are installed and in your PATH, then:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -301,11 +330,20 @@ Compiling YCM **without** semantic support for C-family languages:
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     install.py
 
-If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well. If you want Go support, you should add
-`--gocode-completer`. If you want semantic TypeScript support, install the
-TypeScript SDK with `npm install -g typescript` (you'll need to install
-[nodejs and npm][npm-install]).
+The following additional language support options are available:
+
+- C# support: add `--omnisharp-completer` to `./install.py`
+- Go support: ensure go is installed and add `--gocode-completer`
+- TypeScript support: install [nodejs and npm][npm-install] then install the
+  TypeScript SDK with `npm install -g typescript`.
+- JavaScript support: install [nodejs and npm][npm-install] and add
+  `--tern-completer` to `./install.py`
+
+For example, to install with all language features, ensure npm, go, mono and
+typescript API are installed and in your `%PATH%`, then:
+
+    cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
+    python install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
 option. YCM officially supports MSVC 11 (Visual Studio 2012), 12 (2013), and 14
@@ -355,8 +393,20 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --system-boost
 
-If you want semantic C# support, you should add `--omnisharp-completer` to the
-install script as well. If you want Go support, you should add `--gocode-completer`.
+The following additional language support options are available:
+
+- C# support: add `--omnisharp-completer` to `./install.py`
+- Go support: ensure go is installed and add `--gocode-completer`
+- TypeScript support: install [nodejs and npm][npm-install] then install the
+  TypeScript SDK with `npm install -g typescript`.
+- JavaScript support: install [nodejs and npm][npm-install] and add
+  `--tern-completer` to `./install.py`
+
+For example, to install with all language features, ensure npm, go, mono and
+typescript API are installed and in your PATH, then:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -528,6 +578,24 @@ process.
     the `YouCompleteMe/third_party/ycmd` folder for you if you compiled with
     clang support (it needs to be there for YCM to work).
 
+5. Set up support for additional languages, as desired:
+
+  - C# support: Navigate to
+    `YouCompleteMe/third-party/ycmd/third-party/OmniSharpServer` and run
+    `msbuild` (Windows) or `xbuild` (other platforms, using mono) depending on
+    your platform. If mono is not installed, install it.
+
+  - Go support: If go is not installed on your system, install it and add it to
+    your path. Navigate to `YouCompleteMe/third-party/ycmd/third-party/gocode`
+    and run `go build`.
+
+  - TypeScript support: As with the quick installation, simply `npm install -g
+    typescript` after successfully installing [nodejs and npm][npm-install].
+
+  - JavaScript support: Install [nodejs and npm][npm-install]. Then navigate to
+    `YouCompleteMe/third-party/ycmd/third-party/tern` and run `npm install
+    --production`
+
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
@@ -584,6 +652,15 @@ Quick Feature Summary
 * Go to definition (`GoToDefinition`)
 * Semantic type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
+
+### JavaScript
+
+* Intelligent auto-completion
+* Go to definition, find references (`GoToDefinition`, `GoToReferences`)
+* Type information for identifiers (`GetType`)
+* View documentation comments for identifiers (`GetDoc`)
+* Management of `Tern` server instance
+
 
 User Guide
 ----------
@@ -2412,3 +2489,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [visual-studio-download]: https://www.visualstudio.com/products/free-developer-offers-vs.aspx
 [7z-download]: http://www.7-zip.org/download.html
 [npm-install]: https://docs.npmjs.com/getting-started/installing-node
+[Tern]: http://ternjs.net
