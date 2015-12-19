@@ -19,6 +19,7 @@ YouCompleteMe: a code-completion engine for Vim
     - [Completion string ranking](#completion-string-ranking)
     - [General semantic completion](#general-semantic-completion-engine-usage)
     - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
+    - [JavaScript semantic completion](#javascript-semantic-completion)
     - [Semantic completion for other languages](#semantic-completion-for-other-languages)
     - [Writing new semantic completers](#writing-new-semantic-completers)
     - [Diagnostic display](#diagnostic-display)
@@ -767,12 +768,95 @@ getting fast completions.
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
 
+### JavaScript semantic completion
+
+#### Quick start
+
+Create a `.tern-project` file in the root directory of your JavaScript project,
+by following the [instructions][tern-project] in the [Tern][] documentation.
+Make sure that Vim's working directory is beneath that directory when working
+with JavaScript files.
+
+#### Explanation
+
+JavaScript completion is based on [Tern][]. This completion engine requires a
+file named [`.tern-project`][tern-project] to exist in the current working
+directory or a directory which is an ancestor of the current working directory
+when the tern server is started. YCM starts the Tern server the first time a
+JavaScript file is edited, thus the working directory of Vim must be, or must be
+a child of, the directory containing the `.tern-project` file.
+
+Alternatively, as described in the [Tern documentation][tern-docs], a global
+`.tern-config` file may be used.
+
+Currently, multiple Tern servers, are not supported. To switch to a different
+project, change Vim's working directory (`:cd /path/to/new/project`), open a
+JavaScript file (or set filetype to JavaScript) and restart the Tern server
+using YCM completer subcommands `:YcmCompleter StopServer` and
+`:YcmCompleter StartServer`.
+
+#### Tips and tricks
+
+The following advice is based on the author's experience. The canonical
+reference for correctly configuring Tern is the [documentation][tern-docs]. Any
+issues, improvements, advice, etc. should be sought from the [Tern][]
+project. For example, see the [list of tern
+plugins](http://ternjs.net/doc/manual.html#plugins) for the list of plugins
+which can be enabled in the `plugins` section of the `.tern-project` file.
+
+##### Configuring Tern for node support
+
+The following simple example `.tern-project` file enables nodejs support:
+
+```json
+{
+    "plugins": {
+        "node": {}
+    }
+}
+
+```
+
+##### Configuring Tern for requirejs support
+
+The Tern requirejs plugin requires that all included "libraries" are rooted
+under the same base directory. If that's not the case for your projects, then it
+is possible to make it work with appropriate symbolic links. For example, create
+a directory `ext_lib` within your project and populate it with symlinks to your
+libraries. Then set up the `.tern-project` something like this:
+
+```json
+
+{
+  "plugins": {
+    "requirejs": {
+      "baseURL": "./ext_lib",
+    }
+  }
+}
+```
+
+Then, given the following structure:
+
+```
+./ext_lib/mylib (symlink)
+./ext_lib/anotherlib (symlink)
+```
+
+Can be used as follows:
+
+```javascript
+define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
+    // etc.
+} );
+```
+
 ### Semantic completion for other languages
 
-Python, C#, Go, and TypeScript are supported natively by YouCompleteMe using the [Jedi][],
-[Omnisharp][], [Gocode][], and [TSServer][] engines, respectively. Check the
-[installation](#installation) section for instructions to enable these features
-if desired.
+Python, C#, Go, and TypeScript are supported natively by YouCompleteMe using the
+[Jedi][], [Omnisharp][], [Gocode][], and [TSServer][] engines, respectively.
+Check the [installation](#installation) section for instructions to enable these
+features if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
@@ -2490,3 +2574,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [7z-download]: http://www.7-zip.org/download.html
 [npm-install]: https://docs.npmjs.com/getting-started/installing-node
 [Tern]: http://ternjs.net
+[tern-project]: http://ternjs.net/doc/manual.html#configuration
+[tern-docs]: http://ternjs.net/doc/manual.html#server
