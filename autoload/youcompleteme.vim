@@ -22,6 +22,7 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:omnifunc_mode = 0
+let s:have_deferred_omnifunc = 0
 
 let s:old_cursor_position = []
 let s:cursor_moved = 0
@@ -87,6 +88,20 @@ function! youcompleteme#Enable()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
+
+  " Setting the omnifunc require us to ask the server if it has a Native
+  " Semantic Completer for the current buffer's filetype. When vim first start
+  " this mean that we have to wait for the server to be up and running which
+  " would block vim. So we defer setting the omnifunc the first time to when
+  " we enter Insert mode and then update it on every BufferVisit.
+  if !s:have_deferred_omnifunc
+    augroup ycm_defer_omnifunc
+      autocmd!
+      autocmd InsertEnter * call s:SetOmnicompleteFunc()
+                        \| let s:have_deferred_omnifunc = 1
+                        \| autocmd! ycm_defer_omnifunc
+    augroup END
+  endif
 
   " Calling these once solves the problem of BufReadPre/BufRead/BufEnter not
   " triggering for the first loaded file. This should be the last commands
@@ -412,6 +427,13 @@ function! s:OnBufferVisit()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+
+  " If we already have deferred setting the omnifunc one time then we can
+  " update it on BufferVisit without the user experience any waiting
+  if s:have_deferred_omnifunc
+    call s:SetOmnicompleteFunc()
+  endif
+
   py ycm_state.OnBufferVisit()
   call s:OnFileReadyToParse()
 endfunction
@@ -542,11 +564,6 @@ function! s:OnInsertEnter()
 
   if !s:AllowedToCompleteInCurrentFile()
     return
-  endif
-
-  if !get( b:, 'ycm_omnicomplete', 0 )
-    let b:ycm_omnicomplete = 1
-    call s:SetOmnicompleteFunc()
   endif
 
   let s:old_cursor_position = []
