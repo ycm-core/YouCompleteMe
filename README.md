@@ -140,6 +140,8 @@ CMake installer][cmake-download].
 _If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
 for details.
 
+**Notice:** make sure you run the `install.py` script with the **same python** which your Vim is built with. If you don't know what python your Vim is built with, check out this issue https://github.com/Valloric/YouCompleteMe/issues/8#issuecomment-34374807
+
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
