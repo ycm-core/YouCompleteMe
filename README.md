@@ -2521,6 +2521,17 @@ To increase the Neobundle timeout to 1500 seconds, add the following to your vim
 let g:neobundle#install_process_timeout = 1500
 ```
 
+### When I open a JavaScript file, I get an annoying warning about `.tern-project` file
+
+Take a look at the [instructions for using the JavaScript
+completer](#javascript-semantic-completion).
+
+If this is still really annoying, and you have a good reason not to have a
+`.tern-project` file, create an empty `.tern-config` file in your home directory
+and YCM will stop complaining.
+
+
+
 Contact
 -------
 

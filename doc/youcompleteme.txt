@@ -141,6 +141,8 @@ Contents ~
   26. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
   27. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
   28. Install YCM with NeoBundle [48] |youcompleteme-install-ycm-with-neobundle-48|
+  29. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+file |.tern-sub-project|
  11. Contact                                            |youcompleteme-contact|
  12. License                                            |youcompleteme-license|
  13. References                                      |youcompleteme-references|
@@ -2741,6 +2743,17 @@ the following to your vimrc:
 >
   let g:neobundle#install_process_timeout = 1500
 <
+-------------------------------------------------------------------------------
+                                                            *.tern-sub-project*
+When I open a JavaScript file, I get an annoying warning about '.tern- ~
+project' file ~
+
+Take a look at the instructions for using the JavaScript completer.
+
+If this is still really annoying, and you have a good reason not to have a
+'.tern-project' file, create an empty '.tern-config' file in your home
+directory and YCM will stop complaining.
+
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
