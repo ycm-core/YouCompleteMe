@@ -19,15 +19,7 @@
 from ..test_utils import MockVimModule
 MockVimModule()
 
-import contextlib, os, sys
-
-DIR_OF_THIS_SCRIPT = os.path.dirname( __file__ )
-sys.path.insert( 0, os.path.join( DIR_OF_THIS_SCRIPT, '../python' ) )
-sys.path.insert( 0, os.path.join( DIR_OF_THIS_SCRIPT, '../third_party/ycmd' ) )
-
-from ycmd import utils
-utils.AddNearestThirdPartyFoldersToSysPath( DIR_OF_THIS_SCRIPT )
-utils.AddNearestThirdPartyFoldersToSysPath( utils.__file__ )
+import contextlib, os
 
 from ..youcompleteme import YouCompleteMe
 from ycmd import user_options_store
