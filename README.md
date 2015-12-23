@@ -795,10 +795,15 @@ Alternatively, as described in the [Tern documentation][tern-docs], a global
 `.tern-config` file may be used.
 
 Currently, multiple Tern servers, are not supported. To switch to a different
-project, change Vim's working directory (`:cd /path/to/new/project`), open a
-JavaScript file (or set filetype to JavaScript) and restart the Tern server
-using YCM completer subcommands `:YcmCompleter StopServer` and
-`:YcmCompleter StartServer`.
+JavaScript project, you can do one of the following:
+
+- start a new instance of Vim from the new project's directory, or
+- change Vim's working directory (`:cd /path/to/new/project`) and restart the
+  `ycmd` server (`:YcmRestartServer`)
+- change Vim's working directory (`:cd /path/to/new/project`), open a JavaScript
+  file (or set filetype to JavaScript) and restart the Tern server using YCM
+  completer subcommands `:YcmCompleter StopServer` and `:YcmCompleter
+  StartServer`.
 
 #### Tips and tricks
 
@@ -1171,9 +1176,9 @@ auto x = &s; // invoking on x or auto returns "auto";
 std::cout << *x; // invoking on x returns "const char ** => const char **"
 ```
 
-NOTE: Causes reparsing of the current translation unit.
+NOTE: Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, typescript, javascript`
 
 ### The `GetParent` subcommand
 
@@ -1204,7 +1209,7 @@ For global declarations, the semantic parent is the translation unit.
 
 NOTE: Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, typescript, javascript`
+Supported in filetypes: `c, cpp, objc, objcpp`
 
 ### The `FixIt` subcommand
 
@@ -1258,14 +1263,14 @@ javascript`
 Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, javascript`
+Supported in filetypes: `cs, javascript, go`
 
 ### The `StopServer` subcommand
 
 Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, javascript`
+Supported in filetypes: `cs, javascript, go`
 
 ### The `RestartServer` subcommand
 
