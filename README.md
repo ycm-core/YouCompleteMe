@@ -779,8 +779,8 @@ your file.
    project, by following the [instructions][tern-project] in the [Tern][]
    documentation.
 
-3. Make sure that Vim's working directory is beneath that directory when working
-   with JavaScript files.
+3. Make sure that Vim's working directory is a descendent of that directory (or
+   that directory itself) when working with JavaScript files.
 
 #### Explanation
 
@@ -788,16 +788,17 @@ JavaScript completion is based on [Tern][]. This completion engine requires a
 file named [`.tern-project`][tern-project] to exist in the current working
 directory or a directory which is an ancestor of the current working directory
 when the tern server is started. YCM starts the Tern server the first time a
-JavaScript file is edited, thus the working directory of Vim must be, or must be
-a child of, the directory containing the `.tern-project` file.
+JavaScript file is edited, so Vim's working directory at that time needs to be a
+descendent of the directory containing the `.tern-project` file (or that
+directory itself).
 
 Alternatively, as described in the [Tern documentation][tern-docs], a global
 `.tern-config` file may be used.
 
-Currently, multiple Tern servers, are not supported. To switch to a different
+Multiple Tern servers, are not supported. To switch to a different
 JavaScript project, you can do one of the following:
 
-- start a new instance of Vim from the new project's directory, or
+- start a new instance of Vim from the new project's directory
 - change Vim's working directory (`:cd /path/to/new/project`) and restart the
   `ycmd` server (`:YcmRestartServer`)
 - change Vim's working directory (`:cd /path/to/new/project`), open a JavaScript
@@ -807,10 +808,10 @@ JavaScript project, you can do one of the following:
 
 #### Tips and tricks
 
-The following advice is based on the author's experience. The canonical
-reference for correctly configuring Tern is the [documentation][tern-docs]. Any
-issues, improvements, advice, etc. should be sought from the [Tern][]
-project. For example, see the [list of tern
+This section contains some advice for configuring `.tern-project` and working
+with JavaScript files. The canonical reference for correctly configuring Tern is
+the [Tern documentation][tern-docs]. Any issues, improvements, advice, etc.
+should be sought from the [Tern][] project. For example, see the [list of tern
 plugins](http://ternjs.net/doc/manual.html#plugins) for the list of plugins
 which can be enabled in the `plugins` section of the `.tern-project` file.
 
