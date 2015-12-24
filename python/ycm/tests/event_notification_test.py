@@ -16,16 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ..test_utils import MockVimModule
+from ycm.test_utils import MockVimModule
 MockVimModule()
 
 import contextlib, os
 
-from ..youcompleteme import YouCompleteMe
+from ycm.youcompleteme import YouCompleteMe
 from ycmd import user_options_store
 from ycmd.responses import UnknownExtraConf
 
-from mock import ( call, MagicMock, patch )
+from mock import call, MagicMock, patch
 
 
 # The default options which are only relevant to the client, not the server and
