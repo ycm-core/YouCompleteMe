@@ -484,6 +484,32 @@ class YouCompleteMe( object ):
         self.GetDiagnosticsFromStoredRequest() )
 
 
+  def ValidateParseRequest( self ):
+    if ( self.DiagnosticsForCurrentFileReady() and
+         self.NativeFiletypeCompletionUsable() ):
+
+      # YCM client has a hard-coded list of filetypes which are known to support
+      # diagnostics. These are found in autoload/youcompleteme.vim in
+      # s:diagnostic_ui_filetypes.
+      #
+      # For filetypes which don't support diagnostics, we just want to check the
+      # _latest_file_parse_request for any exception or UnknownExtraConf
+      # response, to allow the server to raise configuration warnings, etc.
+      # to the user. We ignore any other supplied data.
+      self._latest_file_parse_request.Response()
+
+      # We set the diagnostics request to None because we want to prevent
+      # repeated issuing of the same warnings/errors/prompts. Setting this to
+      # None makes DiagnosticsForCurrentFileReady return False until the next
+      # request is created.
+      #
+      # Note: it is the server's responsibility to determine the frequency of
+      # error/warning/prompts when receiving a FileReadyToParse event, but
+      # it our responsibility to ensure that we only apply the
+      # warning/error/prompt received once (for each event).
+      self._latest_file_parse_request = None
+
+
   def ShowDetailedDiagnostic( self ):
     if not self.IsServerAlive():
       return

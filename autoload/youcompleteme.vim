@@ -601,6 +601,7 @@ function! s:UpdateDiagnosticNotifications()
         \ s:DiagnosticUiSupportedForCurrentFiletype()
 
   if !should_display_diagnostics
+    py ycm_state.ValidateParseRequest()
     return
   endif
 

@@ -38,7 +38,7 @@ def ParseArguments():
   parser.add_argument( '--skip-build', action = 'store_true',
                        help = 'Do not build ycmd before testing.' )
 
-  return parser.parse_args()
+  return parser.parse_known_args()
 
 
 def BuildYcmdLibs( args ):
@@ -49,19 +49,20 @@ def BuildYcmdLibs( args ):
     ] )
 
 
-def NoseTests():
+def NoseTests( extra_args ):
   subprocess.check_call( [
     'nosetests',
     '-v',
+    '-w',
     p.join( DIR_OF_THIS_SCRIPT, 'python' )
-  ] )
+  ] + extra_args )
 
 
 def Main():
-  parsed_args = ParseArguments()
+  ( parsed_args, extra_args ) = ParseArguments()
   RunFlake8()
   BuildYcmdLibs( parsed_args )
-  NoseTests()
+  NoseTests( extra_args )
 
 if __name__ == "__main__":
   Main()
