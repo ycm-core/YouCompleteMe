@@ -390,6 +390,9 @@ class YouCompleteMe( object ):
   def _HasCompletionsThatCouldBeCompletedWithMoreText_NewerVim( self,
                                                                 completions ):
     completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
+    if not completed_item:
+      return False
+
     completed_word = completed_item[ 'word' ]
     if not completed_word:
       return False
