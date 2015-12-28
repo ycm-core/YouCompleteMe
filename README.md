@@ -582,19 +582,19 @@ process.
 5. Set up support for additional languages, as desired:
 
   - C# support: Navigate to
-    `YouCompleteMe/third-party/ycmd/third-party/OmniSharpServer` and run
+    `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer` and run
     `msbuild` (Windows) or `xbuild` (other platforms, using mono) depending on
     your platform. If mono is not installed, install it.
 
   - Go support: If go is not installed on your system, install it and add it to
-    your path. Navigate to `YouCompleteMe/third-party/ycmd/third-party/gocode`
+    your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
     and run `go build`.
 
   - TypeScript support: As with the quick installation, simply `npm install -g
     typescript` after successfully installing [nodejs and npm][npm-install].
 
   - JavaScript support: Install [nodejs and npm][npm-install]. Then navigate to
-    `YouCompleteMe/third-party/ycmd/third-party/tern` and run `npm install
+    `YouCompleteMe/third_party/ycmd/third_party/tern` and run `npm install
     --production`
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
