@@ -89,6 +89,12 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
+  " Setting the omnifunc require us to ask the server if it has a Native
+  " Semantic Completer for the current buffer's filetype. When vim first start
+  " this mean that we have to wait for the server to be up and running which
+  " would block vim's GUI. To avoid this we defer setting the omnifunc the
+  " first time to when we enter Insert mode and then update it on every
+  " BufferVisit as normal.
   if s:defer_omnifunc
     augroup ycm_defer_omnifunc
       autocmd!
