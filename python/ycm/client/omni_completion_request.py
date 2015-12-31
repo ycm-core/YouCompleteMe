@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from ycmd.utils import ToUtf8IfNeeded
 from ycm.client.completion_request import CompletionRequest
 
 
@@ -34,5 +35,32 @@ class OmniCompletionRequest( CompletionRequest ):
     return True
 
 
+  def RawResponse( self ):
+    return _ConvertVimDatasToCompletionDatas( self._results )
+
+
   def Response( self ):
     return self._results
+
+
+def ConvertVimDataToCompletionData( vim_data ):
+  # see :h complete-items for a description of the dictionary fields
+  completion_data = {}
+
+  if 'word' in vim_data:
+    completion_data[ 'insertion_text' ] = ToUtf8IfNeeded( vim_data[ 'word' ] )
+  if 'abbr' in vim_data:
+    completion_data[ 'menu_text' ] = ToUtf8IfNeeded( vim_data[ 'abbr' ] )
+  if 'menu' in vim_data:
+    completion_data[ 'extra_menu_info' ] = ToUtf8IfNeeded( vim_data[ 'menu' ] )
+  if 'kind' in vim_data:
+    completion_data[ 'kind' ] = [ ToUtf8IfNeeded( vim_data[ 'kind' ] ) ]
+  if 'info' in vim_data:
+    completion_data[ 'detailed_info' ] = ToUtf8IfNeeded( vim_data[ 'info' ] )
+
+  return completion_data
+
+
+def _ConvertVimDatasToCompletionDatas( response_data ):
+  return [ ConvertVimDataToCompletionData( x )
+           for x in response_data ]
