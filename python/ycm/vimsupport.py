@@ -24,11 +24,33 @@ import json
 import re
 from ycmd.utils import ToUtf8IfNeeded
 from ycmd import user_options_store
+from ycmd import identifier_utils
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'horizontal-split' : 'split',
                        'vertical-split'   : 'vsplit',
                        'new-tab'          : 'tabedit' }
+
+def CurrentLineAndColumnSnapped():
+  """Will return CurrentLineAndColumn(), except when there's solely whitespace
+     between caret and trigger's position, for which it "snaps to trigger",
+     returning trigger's line and column instead."""
+  line_and_column = CurrentLineAndColumn()
+  line, column = line_and_column
+  line_value = vim.current.line[ :column ].rstrip()
+  while not line_value:
+    line = line - 1
+    if line == -1:
+      return line_and_column
+    line_value = vim.current.buffer[ line ].rstrip()
+  column = len( line_value )
+  filetypes =  CurrentFiletypes()
+  filetype = filetypes[ 0 ] if filetypes else None
+  if identifier_utils.IsIdentifier(
+      str( vim.current.buffer[ line ][ column - 1 ] ), filetype ):
+    return line_and_column
+  return line, column
+
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""

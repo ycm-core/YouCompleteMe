@@ -666,17 +666,12 @@ function! s:InsideCommentOrStringAndShouldStop()
 endfunction
 
 
-function! s:OnBlankLine()
-  return pyeval( 'not vim.current.line or vim.current.line.isspace()' )
-endfunction
-
-
 function! s:InvokeCompletion()
   if &completefunc != "youcompleteme#Complete"
     return
   endif
 
-  if s:InsideCommentOrStringAndShouldStop() || s:OnBlankLine()
+  if s:InsideCommentOrStringAndShouldStop()
     return
   endif
 
