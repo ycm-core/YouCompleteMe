@@ -69,17 +69,13 @@ PatchNoProxy()
 signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 HMAC_SECRET_LENGTH = 16
-NUM_YCMD_STDERR_LINES_ON_CRASH = 30
+SERVER_CRASH_MESSAGE_STDERR_FILE = (
+  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
+  'Run :YcmToggleLogs stderr to check the logs.' )
 SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED = (
   'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
   'Logfile was deleted; set g:ycm_server_keep_logfiles to see errors '
   'in the future.' )
-SERVER_CRASH_MESSAGE_STDERR_FILE = (
-  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). ' +
-  'Stderr (last {0} lines):\n\n'.format( NUM_YCMD_STDERR_LINES_ON_CRASH ) )
-SERVER_CRASH_MESSAGE_SAME_STDERR = (
-  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
-  ' check console output for logs!' )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 
 
@@ -151,17 +147,11 @@ class YouCompleteMe( object ):
     if self._user_notified_about_crash or self.IsServerAlive():
       return
     self._user_notified_about_crash = True
-    if self._server_stderr:
-      try:
-        with open( self._server_stderr, 'r' ) as server_stderr_file:
-          error_output = ''.join( server_stderr_file.readlines()[
-              : - NUM_YCMD_STDERR_LINES_ON_CRASH ] )
-          vimsupport.PostMultiLineNotice( SERVER_CRASH_MESSAGE_STDERR_FILE +
-                                          error_output )
-      except IOError:
-        vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED )
-    else:
-        vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_SAME_STDERR )
+    try:
+      vimsupport.CheckFilename( self._server_stderr )
+      vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE )
+    except RuntimeError:
+      vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED )
 
 
   def ServerPid( self ):
