@@ -184,10 +184,10 @@ def UnPlaceDummySign( sign_id, buffer_num ):
     vim.command( 'sign unplace {0} buffer={1}'.format( sign_id, buffer_num ) )
 
 
-def ClearYcmSyntaxMatches():
+def ClearYcmSyntaxMatches( prefix = 'Ycm' ):
   matches = VimExpressionToPythonType( 'getmatches()' )
   for match in matches:
-    if match[ 'group' ].startswith( 'Ycm' ):
+    if match[ 'group' ].startswith( prefix ):
       vim.eval( 'matchdelete({0})'.format( match[ 'id' ] ) )
 
 
@@ -215,6 +215,17 @@ def AddDiagnosticSyntaxMatch( line_num,
       "matchadd('{0}', '\%{1}l\%{2}c\_.\\{{-}}\%{3}l\%{4}c')".format(
         group, line_num, column_num, line_end_num, column_end_num ) )
 
+
+def AddSemanticTokenMatch( token, prefix ):
+  kind = token[ 'kind' ]
+  le = token[ 'location_extent' ]
+  line = le[ 'start' ][ 'line_num' ]
+  column = le[ 'start' ][ 'column_num' ]
+  length = ( int( le[ 'end' ][ 'column_num' ] ) -
+             int( le[ 'start' ][ 'column_num' ] ) )
+  return GetIntValue(
+    "matchaddpos('{0}{1}', [[{2}, {3}, {4}]], {5})".format(
+      prefix, kind, line, column, length, 9 ) )
 
 # Clamps the line and column numbers so that they are not past the contents of
 # the buffer. Numbers are 1-based.

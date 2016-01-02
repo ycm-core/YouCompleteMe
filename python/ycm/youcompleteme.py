@@ -91,6 +91,9 @@ class YouCompleteMe( object ):
     self._omnicomp = OmniCompleter( user_options )
     self._latest_file_parse_request = None
     self._latest_completion_request = None
+    self._file_parse_result = None
+    self._new_diagnostics = None
+    self._new_semantics = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -460,34 +463,52 @@ class YouCompleteMe( object ):
   def GetWarningCount( self ):
     return self._diag_interface.GetWarningCount()
 
-  def DiagnosticsForCurrentFileReady( self ):
+
+  def FileParseResultReady( self ):
     return bool( self._latest_file_parse_request and
                  self._latest_file_parse_request.Done() )
 
 
+  def HandleFileParseResult( self ):
+    if ( self.FileParseResultReady() and
+         self.NativeFiletypeCompletionUsable() ):
+      parse_result = self._latest_file_parse_request.Response()
+      self._latest_file_parse_request = None
+      if isinstance(parse_result, dict):
+        self._new_diagnostics = parse_result[ 'diagnostics' ]
+        self._new_semantics = parse_result[ 'semantics' ]
+      elif isinstance(parse_result, list):
+        self._new_diagnostics = parse_result
+      return True
+
+    return False
+
+
   def GetDiagnosticsFromStoredRequest( self, qflist_format = False ):
-    if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self._latest_file_parse_request.Response()
-      # We set the diagnostics request to None because we want to prevent
+    self.HandleFileParseResult()
+    if self._new_diagnostics is not None:
+      diagnostics = self._new_diagnostics
+      # We set the diagnostics to None because we want to prevent
       # repeated refreshing of the buffer with the same diags. Setting this to
       # None makes DiagnosticsForCurrentFileReady return False until the next
       # request is created.
-      self._latest_file_parse_request = None
+      self._new_diagnostics = None
       if qflist_format:
         return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
       else:
         return diagnostics
-    return []
+    return [] if qflist_format else None
 
 
   def UpdateDiagnosticInterface( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
-         self.NativeFiletypeCompletionUsable() ):
-      self._diag_interface.UpdateWithNewDiagnostics(
-        self.GetDiagnosticsFromStoredRequest() )
+    diagnostics = self.GetDiagnosticsFromStoredRequest()
+    if diagnostics is not None:
+      self._diag_interface.UpdateWithNewDiagnostics( diagnostics )
 
 
   def ValidateParseRequest( self ):
+    self.HandleFileParseResult()
+    return
     if ( self.DiagnosticsForCurrentFileReady() and
          self.NativeFiletypeCompletionUsable() ):
 
@@ -523,6 +544,25 @@ class YouCompleteMe( object ):
         vimsupport.EchoText( debug_info[ 'message' ] )
     except ServerError as e:
       vimsupport.PostVimMessage( str( e ) )
+
+
+  def GetTokensFromStoredRequest( self ):
+    self.HandleFileParseResult()
+    if self._new_semantics is not None:
+      semantics = self._new_semantics
+      self._new_semantics = None
+      return semantics
+    return None
+
+
+  def UpdateSemanticHighlights( self ):
+    tokens = self.GetTokensFromStoredRequest()
+    if tokens:
+      filetype = vimsupport.CurrentFiletypes()[ 0 ]
+      prefix = 'Token_' + filetype + '_'
+      vimsupport.ClearYcmSyntaxMatches( prefix )
+      for token in tokens:
+        vimsupport.AddSemanticTokenMatch( token, prefix )
 
 
   def DebugInfo( self ):

@@ -37,6 +37,12 @@ let s:diagnostic_ui_filetypes = {
       \ }
 
 
+let s:semantic_highlighting_filetypes = {
+      \ 'cpp': 1,
+      \ 'c': 1,
+      \ }
+
+
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
   if &diff
@@ -257,6 +263,19 @@ function! s:SetUpSyntaxHighlighting()
     endif
   endif
 
+  highlight NormalBold gui=bold
+  highlight TypeBold ctermfg=121 guifg=#b58900 gui=bold
+  highlight link Token_cpp_Namespace Function
+  highlight link Token_cpp_Class TypeBold
+  highlight link Token_cpp_Struct TypeBold
+  highlight link Token_cpp_Union TypeBold
+  highlight link Token_cpp_Typedef TypeBold
+  highlight link Token_cpp_Enum TypeBold
+  highlight link Token_cpp_EnumConstant Constant
+  highlight link Token_cpp_Macro Macro
+  highlight link Token_cpp_Function Function
+  highlight link Token_cpp_FunctionParam NormalBold
+
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
       highlight link YcmWarningSection SyntasticWarning
@@ -294,6 +313,11 @@ endfunction
 
 function! s:DiagnosticUiSupportedForCurrentFiletype()
   return get( s:diagnostic_ui_filetypes, &filetype, 0 )
+endfunction
+
+
+function! s:SemanticHighlightingSupportedForCurrentFiletype()
+  return get( s:semantic_highlighting_filetypes, &filetype, 0 )
 endfunction
 
 
@@ -446,6 +470,7 @@ function! s:OnFileReadyToParse()
   " the response would always be pending when we called
   " UpdateDiagnosticNotifications.
   call s:UpdateDiagnosticNotifications()
+  call s:UpdateSemanticHighlightingNotifications()
 
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
@@ -606,6 +631,18 @@ function! s:UpdateDiagnosticNotifications()
   endif
 
   py ycm_state.UpdateDiagnosticInterface()
+endfunction
+
+
+function! s:UpdateSemanticHighlightingNotifications()
+  let should_highlight_tokens =
+        \ s:SemanticHighlightingSupportedForCurrentFiletype()
+
+  if !should_highlight_tokens
+    return
+  endif
+
+  py ycm_state.UpdateSemanticHighlights()
 endfunction
 
 
@@ -839,7 +876,7 @@ function! s:ForceCompile()
   py ycm_state.OnFileReadyToParse()
   while 1
     let diagnostics_ready = pyeval(
-          \ 'ycm_state.DiagnosticsForCurrentFileReady()' )
+          \ 'ycm_state.HandleFileParseResult()' )
     if diagnostics_ready
       break
     endif
