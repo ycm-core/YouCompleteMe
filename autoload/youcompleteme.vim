@@ -27,7 +27,6 @@ let s:defer_omnifunc = 1
 let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
-let s:previous_num_chars_on_current_line = strlen( getline('.') )
 let s:previous_allowed_buffer_number = 0
 
 
@@ -125,17 +124,16 @@ endfunction
 
 
 function! youcompleteme#EnableCursorMovedAutocommands()
-    augroup ycmcompletemecursormove
-        autocmd!
-        autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
-        autocmd CursorMoved * call s:OnCursorMovedNormalMode()
-    augroup END
+  augroup ycmcompletemecursormove
+    autocmd!
+    autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    autocmd TextChangedI * call s:OnTextChangedInsertMode()
+  augroup END
 endfunction
 
 
 function! youcompleteme#DisableCursorMovedAutocommands()
-    autocmd! ycmcompletemecursormove CursorMoved *
-    autocmd! ycmcompletemecursormove CursorMovedI *
+  autocmd! ycmcompletemecursormove
 endfunction
 
 
@@ -533,24 +531,14 @@ function! s:SetOmnicompleteFunc()
   endif
 endfunction
 
-function! s:OnCursorMovedInsertMode()
+
+function! s:OnTextChangedInsertMode()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
 
   exec s:python_command "ycm_state.OnCursorMoved()"
   call s:UpdateCursorMoved()
-
-  " Basically, we need to only trigger the completion menu when the user has
-  " inserted or deleted a character, NOT just when the user moves in insert mode
-  " (with, say, the arrow keys). If we trigger the menu even on pure moves, then
-  " it's impossible to move in insert mode since the up/down arrows start moving
-  " the selected completion in the completion menu. Yeah, people shouldn't be
-  " moving in insert mode at all (that's what normal mode is for) but explain
-  " that to the users who complain...
-  if !s:BufferTextChangedSinceLastMoveInInsertMode()
-    return
-  endif
 
   call s:IdentifierFinishedOperations()
   if g:ycm_autoclose_preview_window_after_completion
@@ -596,8 +584,6 @@ endfunction
 
 
 function! s:OnInsertEnter()
-  let s:previous_num_chars_on_current_line = strlen( getline('.') )
-
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
@@ -614,22 +600,6 @@ function! s:UpdateCursorMoved()
         \ current_position[ 1 ] != s:old_cursor_position[ 1 ]
 
   let s:old_cursor_position = current_position
-endfunction
-
-
-function! s:BufferTextChangedSinceLastMoveInInsertMode()
-  let num_chars_in_current_cursor_line = strlen( getline('.') )
-
-  if s:moved_vertically_in_insert_mode
-    let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
-    return 0
-  endif
-
-  let changed_text_on_current_line = num_chars_in_current_cursor_line !=
-        \ s:previous_num_chars_on_current_line
-  let s:previous_num_chars_on_current_line = num_chars_in_current_cursor_line
-
-  return changed_text_on_current_line
 endfunction
 
 
