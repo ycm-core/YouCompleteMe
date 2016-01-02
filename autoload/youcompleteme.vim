@@ -113,17 +113,20 @@ endfunction
 
 
 function! youcompleteme#EnableCursorMovedAutocommands()
-    augroup ycmcompletemecursormove
-        autocmd!
-        autocmd CursorMovedI * call s:OnCursorMovedInsertMode()
-        autocmd CursorMoved * call s:OnCursorMovedNormalMode()
-    augroup END
+  augroup ycmcompletemecursormove
+    autocmd!
+    autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    if pyeval( 'vimsupport.VimVersionAtLeast("7.3.867")' )
+      autocmd TextChangedI * call s:OnTextChangedInsertMode()
+    else
+      autocmd CursorMovedI * call s:OnTextChangedInsertMode()
+    endif
+  augroup END
 endfunction
 
 
 function! youcompleteme#DisableCursorMovedAutocommands()
-    autocmd! ycmcompletemecursormove CursorMoved *
-    autocmd! ycmcompletemecursormove CursorMovedI *
+  autocmd! ycmcompletemecursormove
 endfunction
 
 
@@ -496,7 +499,8 @@ function! s:SetOmnicompleteFunc()
   endif
 endfunction
 
-function! s:OnCursorMovedInsertMode()
+
+function! s:OnTextChangedInsertMode()
   if !s:AllowedToCompleteInCurrentFile()
     return
   endif
