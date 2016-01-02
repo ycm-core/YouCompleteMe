@@ -30,7 +30,7 @@ import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToUnicode
+from ycmd.utils import ToUnicode, ToBytes
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -43,6 +43,46 @@ FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
     'currently open. This will therefore open {0} new files in the hidden '
     'buffers. The quickfix list can then be used to review the changes. No '
     'files will be written to disk. Do you wish to continue?' )
+
+potential_hint_triggers = list( map( ToBytes, [ '[', '(', ',', ':' ] ) )
+
+
+def CanComplete():
+  """Returns whether it's appropriate to provide any completion at the current
+     line and column."""
+  try:
+    line, column = LineAndColumnAfterLastNonWhitespace()
+  except TypeError:
+    return False
+  if ( line, column ) == CurrentLineAndColumn():
+    return True
+  return ( ToBytes( vim.current.buffer[ line ][ column - 1 ] )
+           in potential_hint_triggers )
+
+
+def SnappedLineAndColumn():
+  """Will return CurrentLineAndColumn(), except when there's solely whitespace
+     between caret and a potential hint trigger, where it "snaps to trigger",
+     returning hint trigger's line and column instead."""
+  try:
+    line, column = LineAndColumnAfterLastNonWhitespace()
+  except TypeError:
+    return CurrentLineAndColumn()
+  if ( ToBytes( vim.current.buffer[ line ][ column - 1 ] )
+       in potential_hint_triggers ):
+    return ( line, column )
+  return CurrentLineAndColumn()
+
+
+def LineAndColumnAfterLastNonWhitespace():
+  line, column = CurrentLineAndColumn()
+  line_value = vim.current.line[ :column ].rstrip()
+  while not line_value:
+    line = line - 1
+    if line == -1:
+      return None
+    line_value = vim.current.buffer[ line ].rstrip()
+  return line, len( line_value )
 
 
 def CurrentLineAndColumn():
