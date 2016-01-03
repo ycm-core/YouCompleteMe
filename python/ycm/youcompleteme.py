@@ -25,6 +25,7 @@ import re
 import signal
 import base64
 from subprocess import PIPE
+from requests.exceptions import Timeout
 from ycm import paths, vimsupport
 from ycmd import utils
 from ycmd.request_wrap import RequestWrap
@@ -523,6 +524,22 @@ class YouCompleteMe( object ):
         vimsupport.EchoText( debug_info[ 'message' ] )
     except ServerError as e:
       vimsupport.PostVimMessage( str( e ) )
+
+
+  def GetSemantics( self, bufnr, timeout ):
+    if not self.IsServerAlive():
+      return []
+    try:
+      buffer = vim.buffers[ bufnr ]
+      request_data = {
+        'filepath': vimsupport.GetBufferFilepath( buffer ),
+        'filetypes': vimsupport.FiletypesForBuffer( buffer ),
+      }
+      return BaseRequest.PostDataToHandler( request_data, 'semantics', timeout )
+    except ServerError as e:
+      return []
+    except Timeout as t:
+      return 'Timeout'
 
 
   def DebugInfo( self ):

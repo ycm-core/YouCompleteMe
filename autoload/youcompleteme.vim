@@ -111,6 +111,11 @@ function! youcompleteme#DisableCursorMovedAutocommands()
 endfunction
 
 
+function! youcompleteme#GetSemanticTokens( bufnr, timeout )
+  return pyeval( 'ycm_state.GetSemantics(' . string( a:bufnr ) . ', ' .
+                                           \ string( a:timeout ) . ')' )
+endfunction
+
 function! youcompleteme#GetErrorCount()
   return pyeval( 'ycm_state.GetErrorCount()' )
 endfunction
