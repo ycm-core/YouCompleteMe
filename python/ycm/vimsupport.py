@@ -240,10 +240,12 @@ def SetLocationList( diagnostics ):
 
 def ConvertDiagnosticsToQfList( diagnostics ):
   def ConvertDiagnosticToQfFormat( diagnostic ):
-    # see :h getqflist for a description of the dictionary fields
+    # See :h getqflist for a description of the dictionary fields.
     # Note that, as usual, Vim is completely inconsistent about whether
     # line/column numbers are 1 or 0 based in its various APIs. Here, it wants
-    # them to be 1-based.
+    # them to be 1-based. The documentation states quite clearly that it
+    # expects a byte offset, by which it means "1-based column number" as
+    # described in :h getqflist ("the first column is 1").
     location = diagnostic[ 'location' ]
     line_num = location[ 'line_num' ]
 
