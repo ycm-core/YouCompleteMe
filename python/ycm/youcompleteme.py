@@ -70,12 +70,12 @@ signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 HMAC_SECRET_LENGTH = 16
 SERVER_CRASH_MESSAGE_STDERR_FILE = (
-  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
-  'Run :YcmToggleLogs stderr to check the logs.' )
+  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
+  "Run ':YcmToggleLogs stderr' to check the logs." )
 SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED = (
-  'The ycmd server SHUT DOWN (restart with :YcmRestartServer). '
-  'Logfile was deleted; set g:ycm_server_keep_logfiles to see errors '
-  'in the future.' )
+  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
+  "Logfile was deleted; set 'g:ycm_server_keep_logfiles' to see errors "
+  "in the future." )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 
 
