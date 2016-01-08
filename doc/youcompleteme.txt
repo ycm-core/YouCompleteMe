@@ -524,7 +524,7 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to './install.py'
+- C# support: add '--omnisharp-completer' to 'install.py'
 
 - Go support: ensure go is installed and add '--gocode-completer'
 
@@ -532,10 +532,10 @@ The following additional language support options are available:
   SDK with 'npm install -g typescript'.
 
 - JavaScript support: install nodejs and npm [20] and add '--tern-completer'
-  to './install.py'
+  to 'install.py'
 
 - Rust support: install rustc and cargo [21] and add '--racer-completer' to
-  './install.py'
+  'install.py'
 
 For example, to install with all language features, ensure npm, go, mono and
 typescript API are installed and in your '%PATH%', then:
