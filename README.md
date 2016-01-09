@@ -20,6 +20,7 @@ YouCompleteMe: a code-completion engine for Vim
     - [General semantic completion](#general-semantic-completion-engine-usage)
     - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
     - [JavaScript semantic completion](#javascript-semantic-completion)
+    - [Rust semantic completion](#rust-semantic-completion)
     - [Semantic completion for other languages](#semantic-completion-for-other-languages)
     - [Writing new semantic completers](#writing-new-semantic-completers)
     - [Diagnostic display](#diagnostic-display)
@@ -46,7 +47,8 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - an [OmniSharp][]-based completion engine for C#,
 - a [Gocode][]-based completion engine for Go,
 - a [TSServer][]-based completion engine for TypeScript,
-- a [Tern][]-based completion engine for JavaScript.
+- a [Tern][]-based completion engine for JavaScript,
+- a [racer][]-based completion engine for Rust,
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).
 
@@ -161,12 +163,15 @@ The following additional language support options are available:
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
   `--tern-completer` to `./install.py`
+- Rust support: install [rustc and cargo][rust-install] and add
+  `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure npm, go, mono and
-typescript API are installed and in your PATH, then:
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+        --tern-completer --racer-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -216,12 +221,15 @@ The following additional language support options are available:
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
   `--tern-completer` to `./install.py`
+- Rust support: install [rustc and cargo][rust-install] and add
+  `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure node, go, mono and
-typescript API are installed and in your PATH, then:
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+        --tern-completer --racer-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -271,12 +279,15 @@ The following additional language support options are available:
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
   `--tern-completer` to `./install.py`
+- Rust support: install [rustc and cargo][rust-install] and add
+  `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure node, go, mono and
-typescript API are installed and in your PATH, then:
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+        --tern-completer --racer-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -333,18 +344,20 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` to `./install.py`
+- C# support: add `--omnisharp-completer` to `install.py`
 - Go support: ensure go is installed and add `--gocode-completer`
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `./install.py`
+  `--tern-completer` to `install.py`
+- Rust support: install [rustc and cargo][rust-install] and add
+  `--racer-completer` to `install.py`
 
-For example, to install with all language features, ensure npm, go, mono and
-typescript API are installed and in your `%PATH%`, then:
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your `%PATH%`, then:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
-    python install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+    python install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer --racer-completer
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
 option. YCM officially supports MSVC 11 (Visual Studio 2012), 12 (2013), and 14
@@ -402,12 +415,15 @@ The following additional language support options are available:
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
   `--tern-completer` to `./install.py`
+- Rust support: install [rustc and cargo][rust-install] and add
+  `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure npm, go, mono and
-typescript API are installed and in your PATH, then:
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+        --tern-completer --racer-completer
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -597,6 +613,10 @@ process.
     `YouCompleteMe/third_party/ycmd/third_party/tern` and run `npm install
     --production`
 
+  - Rust support: Install [rustc and cargo][rust-install]. Navigate to
+    `YouCompleteMe/third_party/ycmd/third_party/racerd` and run
+    `cargo build --release`.
+
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
@@ -662,6 +682,12 @@ Quick Feature Summary
 * View documentation comments for identifiers (`GetDoc`)
 * Management of `Tern` server instance
 
+### Rust
+
+* Semantic auto-completion
+* Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
+  identical)
+* Management of `racer` server instance
 
 User Guide
 ----------
@@ -862,12 +888,26 @@ define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
 } );
 ```
 
+### Rust semantic completion
+
+Completions and GoTo* within the current crate and its dependencies should work
+out of the box with no additional configuration. For semantic analysis inclusive
+of the standard library, you must have a local copy of
+[the rust source code][rust-src]. You also need to set the following option so
+YouCompleteMe can locate it.
+
+```viml
+" In this example, the rust source code zip has been extracted to
+" /usr/local/rust/rustc-1.5.0
+let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
+```
+
 ### Semantic completion for other languages
 
-Python, C#, Go, and TypeScript are supported natively by YouCompleteMe using the
-[Jedi][], [Omnisharp][], [Gocode][], and [TSServer][] engines, respectively.
-Check the [installation](#installation) section for instructions to enable these
-features if desired.
+Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
+using the [Jedi][], [Omnisharp][], [Gocode][], [racer][], and [TSServer][]
+engines, respectively. Check the [installation](#installation) section for
+instructions to enable these features if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
@@ -1092,7 +1132,7 @@ Supported in filetypes: `c, cpp, objc, objcpp`
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs, rust`
 
 ### The `GoToDefinition` subcommand
 
@@ -1104,7 +1144,7 @@ unit consists of the file you are editing and all the files you are including
 with `#include` directives (directly or indirectly) in that file.
 
 Supported in filetypes: `c, cpp, objc, objcpp, python, cs, typescript,
-javascript`
+javascript, rust`
 
 ### The `GoTo` subcommand
 
@@ -1115,7 +1155,7 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs, javascript`
+Supported in filetypes: `c, cpp, objc, objcpp, python, cs, javascript, rust`
 
 ### The `GoToImprecise` subcommand
 
@@ -1264,21 +1304,21 @@ javascript`
 Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, javascript, go`
+Supported in filetypes: `cs, javascript, go, rust`
 
 ### The `StopServer` subcommand
 
 Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, javascript, go`
+Supported in filetypes: `cs, javascript, go, rust`
 
 ### The `RestartServer` subcommand
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs`
+Supported in filetypes: `cs, rust`
 
 ### The `ReloadSolution` subcommand
 
@@ -2608,3 +2648,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [Tern]: http://ternjs.net
 [tern-project]: http://ternjs.net/doc/manual.html#configuration
 [tern-docs]: http://ternjs.net/doc/manual.html#server
+[racer]: https://github.com/phildawes/racer
+[rust-install]: https://www.rust-lang.org/
+[rust-src]: https://www.rust-lang.org/downloads.html
