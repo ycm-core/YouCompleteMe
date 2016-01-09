@@ -798,7 +798,7 @@ your file.
 
 #### Quick start
 
-1. Ensure that you have enabled the Tern completer. See the 
+1. Ensure that you have enabled the Tern completer. See the
    [installation guide](#installation) for details.
 
 2. Create a `.tern-project` file in the root directory of your JavaScript
@@ -890,11 +890,13 @@ define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
 
 ### Rust semantic completion
 
-Completions and GoTo* within the current crate and its dependencies should work
-out of the box with no additional configuration. For semantic analysis inclusive
-of the standard library, you must have a local copy of
-[the rust source code][rust-src]. You also need to set the following option so
-YouCompleteMe can locate it.
+Completions and GoTo commands within the current crate and its dependencies
+should work out of the box with no additional configuration (provided that you
+built YCM with the `--racer-completer` flag; see the [*Installation*
+section](#installation) for details).  For semantic analysis inclusive of the
+standard library, you must have a local copy of [the rust source
+code][rust-src]. You also need to set the following option so YouCompleteMe can
+locate it.
 
 ```viml
 " In this example, the rust source code zip has been extracted to
