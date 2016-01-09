@@ -549,7 +549,7 @@ file if there are any errors in the included headers and that preamble is key to
 getting fast completions.</p><p>Call the <code>:YcmDiags</code> command to see if any errors or warnings were detected in
 your file.</p><h3 id="javascript-semantic-completion">JavaScript semantic completion</h3><h4 id="quick-start">Quick start</h4><ol>
 <li>
-<p>Ensure that you have enabled the Tern completer. See the 
+<p>Ensure that you have enabled the Tern completer. See the
    <a href="#installation">installation guide</a> for details.</p>
 </li>
 <li>
@@ -605,11 +605,13 @@ libraries. Then set up the <code>.tern-project</code> something like this:</p><p
 </code></pre><p>Can be used as follows:</p><pre><code class="javascript">define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
     // etc.
 } );
-</code></pre><h3 id="rust-semantic-completion">Rust semantic completion</h3><p>Completions and GoTo* within the current crate and its dependencies should work
-out of the box with no additional configuration. For semantic analysis inclusive
-of the standard library, you must have a local copy of
-<a href="https://www.rust-lang.org/downloads.html">the rust source code</a>. You also need to set the following option so
-YouCompleteMe can locate it.</p><pre><code class="viml">" In this example, the rust source code zip has been extracted to
+</code></pre><h3 id="rust-semantic-completion">Rust semantic completion</h3><p>Completions and GoTo commands within the current crate and its dependencies
+should work out of the box with no additional configuration (provided that you
+built YCM with the <code>--racer-completer</code> flag; see the <a href="#installation"><em>Installation</em>
+section</a> for details).  For semantic analysis inclusive of the
+standard library, you must have a local copy of <a href="https://www.rust-lang.org/downloads.html">the rust source
+code</a>. You also need to set the following option so YouCompleteMe can
+locate it.</p><pre><code class="viml">" In this example, the rust source code zip has been extracted to
 " /usr/local/rust/rustc-1.5.0
 let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
 </code></pre><h3 id="semantic-completion-for-other-languages">Semantic completion for other languages</h3><p>Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
