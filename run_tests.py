@@ -61,7 +61,7 @@ def NoseTests( extra_args ):
 def Main():
   ( parsed_args, extra_args ) = ParseArguments()
   RunFlake8()
-  BuildYcmdLibs( parsed_args )
+  #BuildYcmdLibs( parsed_args )
   NoseTests( extra_args )
 
 if __name__ == "__main__":
