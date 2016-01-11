@@ -75,6 +75,7 @@ SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED = (
   "Logfile was deleted; set 'g:ycm_server_keep_logfiles' to see errors "
   "in the future." )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
+DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
 
 
 class YouCompleteMe( object ):
@@ -85,6 +86,7 @@ class YouCompleteMe( object ):
     self._omnicomp = OmniCompleter( user_options )
     self._latest_file_parse_request = None
     self._latest_completion_request = None
+    self._latest_diagnostics = []
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -447,56 +449,64 @@ class YouCompleteMe( object ):
       return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
+
   def GetErrorCount( self ):
     return self._diag_interface.GetErrorCount()
+
 
   def GetWarningCount( self ):
     return self._diag_interface.GetWarningCount()
 
-  def DiagnosticsForCurrentFileReady( self ):
-    return bool( self._latest_file_parse_request and
-                 self._latest_file_parse_request.Done() )
+
+  def DiagnosticUiSupportedForCurrentFiletype( self ):
+    return any( [ x in DIAGNOSTIC_UI_FILETYPES
+                  for x in vimsupport.CurrentFiletypes() ] )
 
 
-  def GetDiagnosticsFromStoredRequest( self, qflist_format = False ):
-    if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self._latest_file_parse_request.Response()
-      # We set the diagnostics request to None because we want to prevent
-      # repeated refreshing of the buffer with the same diags. Setting this to
-      # None makes DiagnosticsForCurrentFileReady return False until the next
-      # request is created.
-      self._latest_file_parse_request = None
-      if qflist_format:
-        return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
-      else:
-        return diagnostics
-    return []
+  def ShouldDisplayDiagnostics( self ):
+    return bool( self._user_options[ 'show_diagnostics_ui' ] and
+                 self.DiagnosticUiSupportedForCurrentFiletype() )
+
+
+  def PopulateLocationListWithLatestDiagnostics( self ):
+    # Do nothing if loc list is already populated by diag_interface
+    if not self._user_options[ 'always_populate_location_list' ]:
+      self._diag_interface.PopulateLocationList( self._latest_diagnostics )
+    return bool( self._latest_diagnostics )
 
 
   def UpdateDiagnosticInterface( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
+    self._diag_interface.UpdateWithNewDiagnostics( self._latest_diagnostics )
+
+
+  def FileParseRequestReady( self, block = False ):
+    return bool( self._latest_file_parse_request and
+                 ( block or self._latest_file_parse_request.Done() ) )
+
+
+  def HandleFileParseRequest( self, block = False ):
+    # Order is important here:
+    # FileParseRequestReady has a low cost, while
+    # NativeFiletypeCompletionUsable is a blocking server request
+    if ( self.FileParseRequestReady( block ) and
          self.NativeFiletypeCompletionUsable() ):
-      self._diag_interface.UpdateWithNewDiagnostics(
-        self.GetDiagnosticsFromStoredRequest() )
 
+      if self.ShouldDisplayDiagnostics():
+        self._latest_diagnostics = self._latest_file_parse_request.Response()
+        self.UpdateDiagnosticInterface()
+      else:
+        # YCM client has a hard-coded list of filetypes which are known
+        # to support diagnostics, self.DiagnosticUiSupportedForCurrentFiletype()
+        #
+        # For filetypes which don't support diagnostics, we just want to check
+        # the _latest_file_parse_request for any exception or UnknownExtraConf
+        # response, to allow the server to raise configuration warnings, etc.
+        # to the user. We ignore any other supplied data.
+        self._latest_file_parse_request.Response()
 
-  def ValidateParseRequest( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
-         self.NativeFiletypeCompletionUsable() ):
-
-      # YCM client has a hard-coded list of filetypes which are known to support
-      # diagnostics. These are found in autoload/youcompleteme.vim in
-      # s:diagnostic_ui_filetypes.
-      #
-      # For filetypes which don't support diagnostics, we just want to check the
-      # _latest_file_parse_request for any exception or UnknownExtraConf
-      # response, to allow the server to raise configuration warnings, etc.
-      # to the user. We ignore any other supplied data.
-      self._latest_file_parse_request.Response()
-
-      # We set the diagnostics request to None because we want to prevent
+      # We set the file parse request to None because we want to prevent
       # repeated issuing of the same warnings/errors/prompts. Setting this to
-      # None makes DiagnosticsForCurrentFileReady return False until the next
+      # None makes FileParseRequestReady return False until the next
       # request is created.
       #
       # Note: it is the server's responsibility to determine the frequency of
