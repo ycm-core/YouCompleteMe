@@ -24,7 +24,9 @@ import json
 import re
 import signal
 import base64
+from inspect import isfunction
 from subprocess import PIPE
+from requests.exceptions import Timeout
 from ycm import paths, vimsupport
 from ycmd import utils
 from ycmd.request_wrap import RequestWrap
@@ -86,7 +88,9 @@ class YouCompleteMe( object ):
     self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
     self._latest_file_parse_request = None
+    self._latest_file_parse_request_bufnr = None
     self._latest_completion_request = None
+    self._latest_diagnostics = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -97,6 +101,11 @@ class YouCompleteMe( object ):
     self._complete_done_hooks = {
       'cs': lambda( self ): self._OnCompleteDone_Csharp()
     }
+    self._tokens_ready_callback = None
+    self._tokens_ready_vim_callback = None
+    self._tokens_ready_python_callback = None
+    self._diagnostic_ui_filetypes = [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ]
+    self._semantic_token_ui_filetypes = [ 'cpp', 'c' ]
 
   def _SetupServer( self ):
     self._available_completers = {}
@@ -252,6 +261,7 @@ class YouCompleteMe( object ):
     self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
                                                           extra_data )
     self._latest_file_parse_request.Start()
+    self._latest_file_parse_request_bufnr = vim.current.buffer.number
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -450,50 +460,67 @@ class YouCompleteMe( object ):
   def GetWarningCount( self ):
     return self._diag_interface.GetWarningCount()
 
-  def DiagnosticsForCurrentFileReady( self ):
-    return bool( self._latest_file_parse_request and
-                 self._latest_file_parse_request.Done() )
+  def RegisterSemanticTokensReadyVimCallback( self, callback ):
+    self._tokens_ready_vim_callback = callback
+    return True
 
+  def RegisterSemanticTokensReadyPythonCallback( self, callback ):
+    if not isfunction( callback ):
+      return False
+    self._tokens_ready_python_callback = callback
+    return True
 
-  def GetDiagnosticsFromStoredRequest( self, qflist_format = False ):
-    if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self._latest_file_parse_request.Response()
-      # We set the diagnostics request to None because we want to prevent
-      # repeated refreshing of the buffer with the same diags. Setting this to
-      # None makes DiagnosticsForCurrentFileReady return False until the next
-      # request is created.
-      self._latest_file_parse_request = None
-      if qflist_format:
-        return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
-      else:
-        return diagnostics
+  def NotifySemanticTokensReady( self, bufnr ):
+    if self._tokens_ready_python_callback:
+      self._tokens_ready_python_callback( bufnr )
+    elif self._tokens_ready_vim_callback:
+      #vim.command( 'try | call {0}({1}) | catch | endtry'.format(
+      vim.command( 'call {0}({1})'.format(
+        self._tokens_ready_vim_callback, bufnr ) )
+
+  def DiagnosticUiSupportedForCurrentFiletype( self ):
+    return any( [ x in self._diagnostic_ui_filetypes
+                  for x in vimsupport.CurrentFiletypes() ] )
+
+  def ShouldDisplayDiagnostics( self ):
+    return bool( self._user_options[ 'show_diagnostics_ui' ] and
+                 self.DiagnosticUiSupportedForCurrentFiletype() )
+
+  def GetLatestDiagnosticsQFList( self ):
+    if self._latest_diagnostics:
+      return vimsupport.ConvertDiagnosticsToQfList( self._latest_diagnostics )
     return []
 
 
   def UpdateDiagnosticInterface( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
-         self.NativeFiletypeCompletionUsable() ):
-      self._diag_interface.UpdateWithNewDiagnostics(
-        self.GetDiagnosticsFromStoredRequest() )
+    self._diag_interface.UpdateWithNewDiagnostics( self._latest_diagnostics )
 
 
-  def ValidateParseRequest( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
-         self.NativeFiletypeCompletionUsable() ):
+  def FileParseRequestReady( self ):
+    return bool( self._latest_file_parse_request and
+                 self._latest_file_parse_request.Done() )
 
-      # YCM client has a hard-coded list of filetypes which are known to support
-      # diagnostics. These are found in autoload/youcompleteme.vim in
-      # s:diagnostic_ui_filetypes.
-      #
-      # For filetypes which don't support diagnostics, we just want to check the
-      # _latest_file_parse_request for any exception or UnknownExtraConf
-      # response, to allow the server to raise configuration warnings, etc.
-      # to the user. We ignore any other supplied data.
-      self._latest_file_parse_request.Response()
 
-      # We set the diagnostics request to None because we want to prevent
+  def HandleFileParseRequest( self, block = False ):
+    if ( self.NativeFiletypeCompletionUsable() and
+         ( block or self.FileParseRequestReady() ) ):
+
+      if self.ShouldDisplayDiagnostics():
+        self._latest_diagnostics = self._latest_file_parse_request.Response()
+        self.UpdateDiagnosticInterface()
+      else:
+        # YCM client has a hard-coded list of filetypes which are known
+        # to support diagnostics. self.DiagnosticUiSupportedForCurrentFiletype()
+        #
+        # For filetypes which don't support diagnostics, we just want to check
+        # the _latest_file_parse_request for any exception or UnknownExtraConf
+        # response, to allow the server to raise configuration warnings, etc.
+        # to the user. We ignore any other supplied data.
+        self._latest_file_parse_request.Response()
+
+      # We set the file parse request to None because we want to prevent
       # repeated issuing of the same warnings/errors/prompts. Setting this to
-      # None makes DiagnosticsForCurrentFileReady return False until the next
+      # None makes FileParseRequestReady return False until the next
       # request is created.
       #
       # Note: it is the server's responsibility to determine the frequency of
@@ -501,6 +528,9 @@ class YouCompleteMe( object ):
       # it our responsibility to ensure that we only apply the
       # warning/error/prompt received once (for each event).
       self._latest_file_parse_request = None
+
+      self.NotifySemanticTokensReady( self._latest_file_parse_request_bufnr )
+      self._latest_file_parse_request_bufnr = None
 
 
   def ShowDetailedDiagnostic( self ):
@@ -513,6 +543,28 @@ class YouCompleteMe( object ):
         vimsupport.EchoText( debug_info[ 'message' ] )
     except ServerError as e:
       vimsupport.PostVimMessage( str( e ) )
+
+
+  def GetSemanticTokens( self, bufnr, start_line, start_column,
+                         end_line, end_column, timeout = 0.01 ):
+    if not self.IsServerAlive():
+      return []
+    try:
+      buffer = vim.buffers[ bufnr ]
+      request_data = {
+        'filepath': vimsupport.GetBufferFilepath( buffer ),
+        'filetypes': vimsupport.FiletypesForBuffer( buffer ),
+        'start_line': start_line,
+        'start_column': start_column,
+        'end_line': end_line,
+        'end_column': end_column,
+      }
+      return BaseRequest.PostDataToHandler( request_data, 'semantic_tokens',
+                                            timeout )
+    except ServerError:
+      return []
+    except Timeout:
+      return 'Timeout'
 
 
   def DebugInfo( self ):

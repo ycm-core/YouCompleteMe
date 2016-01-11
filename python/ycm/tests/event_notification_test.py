@@ -34,6 +34,7 @@ from mock import call, MagicMock, patch
 DEFAULT_CLIENT_OPTIONS = {
   'server_log_level': 'info',
   'extra_conf_vim_data': [],
+  'show_diagnostics_ui': 1,
 }
 
 def PostVimMessage_Call( message ):
@@ -143,7 +144,7 @@ class EventNotification_test( object ):
 
   @patch( 'vim.command' )
   def FileReadyToParse_NonDiagnostic_Error_test( self, vim_command ):
-    # This test validates the behaviour of YouCompleteMe.ValidateParseRequest in
+    # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest in
     # combination with YouCompleteMe.OnFileReadyToParse when the completer
     # raises an exception handling FileReadyToParse event notification
     ERROR_TEXT = 'Some completer response text'
@@ -154,8 +155,8 @@ class EventNotification_test( object ):
     with MockArbitraryBuffer( 'javascript' ):
       with MockEventNotification( ErrorResponse ):
         self.server_state.OnFileReadyToParse()
-        assert self.server_state.DiagnosticsForCurrentFileReady()
-        self.server_state.ValidateParseRequest()
+        assert self.server_state.FileParseRequestReady()
+        self.server_state.HandleFileParseRequest()
 
         # The first call raises a warning
         vim_command.assert_has_calls( [
@@ -163,15 +164,15 @@ class EventNotification_test( object ):
         ] )
 
         # Subsequent calls don't re-raise the warning
-        self.server_state.ValidateParseRequest()
+        self.server_state.HandleFileParseRequest()
         vim_command.assert_has_calls( [
           PostVimMessage_Call( ERROR_TEXT ),
         ] )
 
         # But it does if a subsequent event raises again
         self.server_state.OnFileReadyToParse()
-        assert self.server_state.DiagnosticsForCurrentFileReady()
-        self.server_state.ValidateParseRequest()
+        assert self.server_state.FileParseRequestReady()
+        self.server_state.HandleFileParseRequest()
         vim_command.assert_has_calls( [
           PostVimMessage_Call( ERROR_TEXT ),
           PostVimMessage_Call( ERROR_TEXT ),
@@ -183,7 +184,7 @@ class EventNotification_test( object ):
     with MockArbitraryBuffer( 'javascript' ):
       with MockEventNotification( None, False ):
         self.server_state.OnFileReadyToParse()
-        self.server_state.ValidateParseRequest()
+        self.server_state.HandleFileParseRequest()
         vim_command.assert_not_called()
 
 
@@ -195,7 +196,7 @@ class EventNotification_test( object ):
       load_extra_conf,
       *args ):
 
-    # This test validates the behaviour of YouCompleteMe.ValidateParseRequest in
+    # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest in
     # combination with YouCompleteMe.OnFileReadyToParse when the completer
     # raises the (special) UnknownExtraConf exception
 
@@ -213,8 +214,8 @@ class EventNotification_test( object ):
         with patch( 'ycm.vimsupport.PresentDialog',
                     return_value = 0 ) as present_dialog:
           self.server_state.OnFileReadyToParse()
-          assert self.server_state.DiagnosticsForCurrentFileReady()
-          self.server_state.ValidateParseRequest()
+          assert self.server_state.FileParseRequestReady()
+          self.server_state.HandleFileParseRequest()
 
           present_dialog.assert_has_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
@@ -224,7 +225,7 @@ class EventNotification_test( object ):
           ] )
 
           # Subsequent calls don't re-raise the warning
-          self.server_state.ValidateParseRequest()
+          self.server_state.HandleFileParseRequest()
 
           present_dialog.assert_has_calls( [
             PresentDialog_Confirm_Call( MESSAGE )
@@ -235,8 +236,8 @@ class EventNotification_test( object ):
 
           # But it does if a subsequent event raises again
           self.server_state.OnFileReadyToParse()
-          assert self.server_state.DiagnosticsForCurrentFileReady()
-          self.server_state.ValidateParseRequest()
+          assert self.server_state.FileParseRequestReady()
+          self.server_state.HandleFileParseRequest()
 
           present_dialog.assert_has_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
@@ -251,8 +252,8 @@ class EventNotification_test( object ):
         with patch( 'ycm.vimsupport.PresentDialog',
                     return_value = 1 ) as present_dialog:
           self.server_state.OnFileReadyToParse()
-          assert self.server_state.DiagnosticsForCurrentFileReady()
-          self.server_state.ValidateParseRequest()
+          assert self.server_state.FileParseRequestReady()
+          self.server_state.HandleFileParseRequest()
 
           present_dialog.assert_has_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
@@ -262,7 +263,7 @@ class EventNotification_test( object ):
           ] )
 
           # Subsequent calls don't re-raise the warning
-          self.server_state.ValidateParseRequest()
+          self.server_state.HandleFileParseRequest()
 
           present_dialog.assert_has_calls( [
             PresentDialog_Confirm_Call( MESSAGE )
@@ -273,8 +274,8 @@ class EventNotification_test( object ):
 
           # But it does if a subsequent event raises again
           self.server_state.OnFileReadyToParse()
-          assert self.server_state.DiagnosticsForCurrentFileReady()
-          self.server_state.ValidateParseRequest()
+          assert self.server_state.FileParseRequestReady()
+          self.server_state.HandleFileParseRequest()
 
           present_dialog.assert_has_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
