@@ -80,8 +80,8 @@ class CommandRequest( BaseRequest ):
 
   def _HandleGotoResponse( self ):
     if isinstance( self._response, list ):
-      defs = [ _BuildQfListItem( x ) for x in self._response ]
-      vim.eval( 'setqflist( %s )' % repr( defs ) )
+      vimsupport.SetQuickFixList(
+              [ _BuildQfListItem( x ) for x in self._response ] )
       vim.eval( 'youcompleteme#OpenGoToList()' )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
@@ -94,12 +94,10 @@ class CommandRequest( BaseRequest ):
       vimsupport.EchoText( "No fixits found for current line" )
     else:
       chunks = self._response[ 'fixits' ][ 0 ][ 'chunks' ]
-
-      vimsupport.ReplaceChunksList( chunks )
-
-      vimsupport.EchoTextVimWidth( "FixIt applied "
-                                   + str( len( chunks ) )
-                                   + " changes" )
+      try:
+        vimsupport.ReplaceChunks( chunks )
+      except RuntimeError as e:
+        vimsupport.PostMultiLineNotice( e.message )
 
 
   def _HandleBasicResponse( self ):
