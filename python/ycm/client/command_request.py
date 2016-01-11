@@ -99,7 +99,7 @@ class CommandRequest( BaseRequest ):
     else:
       chunks = self._response[ 'fixits' ][ 0 ][ 'chunks' ]
 
-      vimsupport.ReplaceChunksList( chunks )
+      vimsupport.ReplaceChunks( chunks )
 
       vimsupport.EchoTextVimWidth( "FixIt applied "
                                    + str( len( chunks ) )

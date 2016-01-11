@@ -492,9 +492,40 @@ def GetIntValue( variable ):
   return int( vim.eval( variable ) )
 
 
-def ReplaceChunksList( chunks, vim_buffer = None ):
-  if vim_buffer is None:
-    vim_buffer = vim.current.buffer
+def ReplaceChunks( chunks ):
+  """Replace the chunks in chunks file-wise, where chunks may be in any order
+  across any files"""
+
+  chunks_by_file = dict()
+
+  for chunk in chunks:
+    filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+
+    if not chunks_by_file.has_key( filepath ):
+      chunks_by_file[ filepath ] = [ chunk ]
+    else:
+      chunks_by_file[ filepath ].append( chunk )
+
+  for filepath in chunks_by_file.keys():
+    buffer_num = GetBufferNumberForFilename( filepath, False )
+
+    if not BufferIsVisible( buffer_num ):
+      OpenFilename( filepath )
+
+      # OpenFilename returns us to the original cursor location. This is what we
+      # want, because we don't want to disorientate the user, but we do need to
+      # know the (now open) buffer number for the filename
+      buffer_num = GetBufferNumberForFilename( filepath, False )
+      if not BufferIsVisible( buffer_num ):
+        # We failed to open it, raise an error.
+        # FIXME: we need to undo the partial changes?
+        raise RuntimeError( 'Unable to open file: {0}'.format( filepath ) )
+
+    ReplaceChunksInBuffer( chunks_by_file[ filepath ],
+                           vim.buffers[ buffer_num ] )
+
+
+def ReplaceChunksInBuffer( chunks, vim_buffer ):
 
   # We need to track the difference in length, but ensuring we apply fixes
   # in ascending order of insertion point.
