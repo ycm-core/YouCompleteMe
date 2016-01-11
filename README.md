@@ -537,9 +537,9 @@ process.
     where `<generator>` is `Unix Makefiles` on Unix systems and one of the
     following Visual Studio generators on Windows:
 
-    - `Visual Studio 11 2012 Win64`
-    - `Visual Studio 12 2013 Win64`
-    - `Visual Studio 14 2015 Win64`
+    - `Visual Studio 11 Win64`
+    - `Visual Studio 12 Win64`
+    - `Visual Studio 14 Win64`
 
     Remove the `Win64` part in these generators if your Vim architecture is
     32-bit.
