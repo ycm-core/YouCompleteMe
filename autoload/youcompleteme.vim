@@ -29,14 +29,6 @@ let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
 let s:previous_num_chars_on_current_line = strlen( getline('.') )
 
-let s:diagnostic_ui_filetypes = {
-      \ 'cpp': 1,
-      \ 'cs': 1,
-      \ 'c': 1,
-      \ 'objc': 1,
-      \ 'objcpp': 1,
-      \ }
-
 
 function! youcompleteme#Enable()
   " When vim is in diff mode, don't run
@@ -308,11 +300,6 @@ function! s:TurnOffSyntasticForCFamily()
 endfunction
 
 
-function! s:DiagnosticUiSupportedForCurrentFiletype()
-  return get( s:diagnostic_ui_filetypes, &filetype, 0 )
-endfunction
-
-
 function! s:AllowedToCompleteInCurrentFile()
   if empty( &filetype ) ||
         \ getbufvar( winbufnr( winnr() ), "&buftype" ) ==# 'nofile' ||
@@ -462,11 +449,11 @@ function! s:OnFileReadyToParse()
   " happen for special buffers.
   call s:SetUpYcmChangedTick()
 
-  " Order is important here; we need to extract any done diagnostics before
+  " Order is important here; we need to extract any information before
   " reparsing the file again. If we sent the new parse request first, then
   " the response would always be pending when we called
-  " UpdateDiagnosticNotifications.
-  call s:UpdateDiagnosticNotifications()
+  " HandleFileParseRequest.
+  py ycm_state.HandleFileParseRequest()
 
   let buffer_changed = b:changedtick != b:ycm_changedtick.file_ready_to_parse
   if buffer_changed
@@ -609,19 +596,6 @@ function! s:ClosePreviewWindowIfNeeded()
   " This command does the actual closing of the preview window. If no preview
   " window is shown, nothing happens.
   pclose
-endfunction
-
-
-function! s:UpdateDiagnosticNotifications()
-  let should_display_diagnostics = g:ycm_show_diagnostics_ui &&
-        \ s:DiagnosticUiSupportedForCurrentFiletype()
-
-  if !should_display_diagnostics
-    py ycm_state.ValidateParseRequest()
-    return
-  endif
-
-  py ycm_state.UpdateDiagnosticInterface()
 endfunction
 
 
@@ -853,15 +827,8 @@ function! s:ForceCompile()
 
   echom "Forcing compilation, this will block Vim until done."
   py ycm_state.OnFileReadyToParse()
-  while 1
-    let diagnostics_ready = pyeval(
-          \ 'ycm_state.DiagnosticsForCurrentFileReady()' )
-    if diagnostics_ready
-      break
-    endif
+  py ycm_state.HandleFileParseRequest( True )
 
-    sleep 100m
-  endwhile
   return 1
 endfunction
 
@@ -871,8 +838,6 @@ function! s:ForceCompileAndDiagnostics()
   if !compilation_succeeded
     return
   endif
-
-  call s:UpdateDiagnosticNotifications()
   echom "Diagnostics refreshed."
 endfunction
 
@@ -883,11 +848,7 @@ function! s:ShowDiagnostics()
     return
   endif
 
-  let diags = pyeval(
-        \ 'ycm_state.GetDiagnosticsFromStoredRequest( qflist_format = True )' )
-  if !empty( diags )
-    call setloclist( 0, diags )
-
+  if pyeval( 'ycm_state.PopulateLocationListWithLatestDiagnostics()' )
     if g:ycm_open_loclist_on_ycm_diags
       lopen
     endif
