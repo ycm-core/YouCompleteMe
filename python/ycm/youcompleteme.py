@@ -91,6 +91,7 @@ class YouCompleteMe( object ):
     self._omnicomp = OmniCompleter( user_options )
     self._latest_file_parse_request = None
     self._latest_completion_request = None
+    self._latest_diagnostics = []
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
@@ -101,6 +102,7 @@ class YouCompleteMe( object ):
     self._complete_done_hooks = {
       'cs': lambda( self ): self._OnCompleteDone_Csharp()
     }
+    self._diagnostic_ui_filetypes = [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ]
 
   def _SetupServer( self ):
     self._available_completers = {}
@@ -460,50 +462,49 @@ class YouCompleteMe( object ):
   def GetWarningCount( self ):
     return self._diag_interface.GetWarningCount()
 
-  def DiagnosticsForCurrentFileReady( self ):
-    return bool( self._latest_file_parse_request and
-                 self._latest_file_parse_request.Done() )
+  def DiagnosticUiSupportedForCurrentFiletype( self ):
+    return any( [ x in self._diagnostic_ui_filetypes
+                  for x in vimsupport.CurrentFiletypes() ] )
 
+  def ShouldDisplayDiagnostics( self ):
+    return bool( self._user_options[ 'show_diagnostics_ui' ] and
+                 self.DiagnosticUiSupportedForCurrentFiletype() )
 
-  def GetDiagnosticsFromStoredRequest( self, qflist_format = False ):
-    if self.DiagnosticsForCurrentFileReady():
-      diagnostics = self._latest_file_parse_request.Response()
-      # We set the diagnostics request to None because we want to prevent
-      # repeated refreshing of the buffer with the same diags. Setting this to
-      # None makes DiagnosticsForCurrentFileReady return False until the next
-      # request is created.
-      self._latest_file_parse_request = None
-      if qflist_format:
-        return vimsupport.ConvertDiagnosticsToQfList( diagnostics )
-      else:
-        return diagnostics
+  def GetLatestDiagnosticsQFList( self ):
+    if self._latest_diagnostics:
+      return vimsupport.ConvertDiagnosticsToQfList( self._latest_diagnostics )
     return []
 
 
   def UpdateDiagnosticInterface( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
-         self.NativeFiletypeCompletionUsable() ):
-      self._diag_interface.UpdateWithNewDiagnostics(
-        self.GetDiagnosticsFromStoredRequest() )
+    self._diag_interface.UpdateWithNewDiagnostics( self._latest_diagnostics )
 
 
-  def ValidateParseRequest( self ):
-    if ( self.DiagnosticsForCurrentFileReady() and
-         self.NativeFiletypeCompletionUsable() ):
+  def FileParseRequestReady( self ):
+    return bool( self._latest_file_parse_request and
+                 self._latest_file_parse_request.Done() )
 
-      # YCM client has a hard-coded list of filetypes which are known to support
-      # diagnostics. These are found in autoload/youcompleteme.vim in
-      # s:diagnostic_ui_filetypes.
-      #
-      # For filetypes which don't support diagnostics, we just want to check the
-      # _latest_file_parse_request for any exception or UnknownExtraConf
-      # response, to allow the server to raise configuration warnings, etc.
-      # to the user. We ignore any other supplied data.
-      self._latest_file_parse_request.Response()
 
-      # We set the diagnostics request to None because we want to prevent
+  def HandleFileParseRequest( self, block = False ):
+    if ( self.NativeFiletypeCompletionUsable() and
+         ( block or self.FileParseRequestReady() ) ):
+
+      if self.ShouldDisplayDiagnostics():
+        self._latest_diagnostics = self._latest_file_parse_request.Response()
+        self.UpdateDiagnosticInterface()
+      else:
+        # YCM client has a hard-coded list of filetypes which are known
+        # to support diagnostics. self.DiagnosticUiSupportedForCurrentFiletype()
+        #
+        # For filetypes which don't support diagnostics, we just want to check
+        # the _latest_file_parse_request for any exception or UnknownExtraConf
+        # response, to allow the server to raise configuration warnings, etc.
+        # to the user. We ignore any other supplied data.
+        self._latest_file_parse_request.Response()
+
+      # We set the file parse request to None because we want to prevent
       # repeated issuing of the same warnings/errors/prompts. Setting this to
-      # None makes DiagnosticsForCurrentFileReady return False until the next
+      # None makes FileParseRequestReady return False until the next
       # request is created.
       #
       # Note: it is the server's responsibility to determine the frequency of
