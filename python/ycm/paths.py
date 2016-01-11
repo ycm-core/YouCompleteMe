@@ -18,14 +18,14 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import vim
 import functools
 from ycmd import utils
 
 DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
 
-WIN_PYTHON27_PATH = 'C:\python27\python.exe'
-WIN_PYTHON26_PATH = 'C:\python26\python.exe'
+WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
 
 
 def Memoize( obj ):
@@ -42,29 +42,39 @@ def Memoize( obj ):
 
 @Memoize
 def PathToPythonInterpreter():
-  user_path_to_python = vim.eval( 'g:ycm_path_to_python_interpreter' )
+  python_interpreter = vim.eval( 'g:ycm_path_to_python_interpreter' )
 
-  if user_path_to_python:
-    return user_path_to_python
+  if python_interpreter:
+    if not CheckPythonVersion( python_interpreter ):
+      raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
+                          "does not point to a valid Python 2.6 or 2.7." )
 
-  # We check for 'python2' before 'python' because some OS's (I'm looking at
-  # you Arch Linux) have made the... interesting decision to point
-  # /usr/bin/python to python3.
-  python_names = [ 'python2', 'python' ]
+    return python_interpreter
 
-  path_to_python = utils.PathToFirstExistingExecutable( python_names )
-  if path_to_python:
-    return path_to_python
+  # On UNIX platforms, we use sys.executable as the Python interpreter path.
+  # We cannot use sys.executable on Windows because for unknown reasons, it
+  # returns the Vim executable. Instead, we use sys.exec_prefix to deduce the
+  # interpreter path.
+  python_interpreter = ( WIN_PYTHON_PATH if utils.OnWindows() else
+                         sys.executable )
 
-  # On Windows, Python may not be on the PATH at all, so we check some common
-  # install locations.
-  if utils.OnWindows():
-    if os.path.exists( WIN_PYTHON27_PATH ):
-      return WIN_PYTHON27_PATH
-    elif os.path.exists( WIN_PYTHON26_PATH ):
-      return WIN_PYTHON26_PATH
+  if not CheckPythonVersion( python_interpreter ):
+    raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
+                        "using the 'g:ycm_path_to_python_interpreter' "
+                        "option." )
 
-  raise RuntimeError( 'Python 2.7/2.6 not installed!' )
+  return python_interpreter
+
+
+def CheckPythonVersion( python_interpreter ):
+  """Check if given path is the Python interpreter version 2.6 or 2.7."""
+  command = [ python_interpreter,
+              '-c',
+              "import sys;"
+              "major, minor = sys.version_info[ :2 ];"
+              "sys.exit( major != 2 or minor < 6)" ]
+
+  return utils.SafePopen( command ).wait() == 0
 
 
 def PathToServerScript():
