@@ -21,11 +21,13 @@ import os
 import sys
 import vim
 import functools
+import re
 from ycmd import utils
 
 DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
 
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
+PYTHON_BINARY_REGEX = re.compile( r'python(2(\.[67])?)?(.exe)?$' )
 
 
 def Memoize( obj ):
@@ -45,7 +47,7 @@ def PathToPythonInterpreter():
   python_interpreter = vim.eval( 'g:ycm_path_to_python_interpreter' )
 
   if python_interpreter:
-    if not CheckPythonVersion( python_interpreter ):
+    if not IsPythonVersionCorrect( python_interpreter ):
       raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
                           "does not point to a valid Python 2.6 or 2.7." )
 
@@ -58,7 +60,7 @@ def PathToPythonInterpreter():
   python_interpreter = ( WIN_PYTHON_PATH if utils.OnWindows() else
                          sys.executable )
 
-  if not CheckPythonVersion( python_interpreter ):
+  if not IsPythonVersionCorrect( python_interpreter ):
     raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
                         "using the 'g:ycm_path_to_python_interpreter' "
                         "option." )
@@ -66,9 +68,17 @@ def PathToPythonInterpreter():
   return python_interpreter
 
 
-def CheckPythonVersion( python_interpreter ):
+def EndsWithPython( path ):
+  """Check if given path ends with a python 2.6 or 2.7 name."""
+  return PYTHON_BINARY_REGEX.search( path ) is not None
+
+
+def IsPythonVersionCorrect( path ):
   """Check if given path is the Python interpreter version 2.6 or 2.7."""
-  command = [ python_interpreter,
+  if not EndsWithPython( path ):
+    return False
+
+  command = [ path,
               '-c',
               "import sys;"
               "major, minor = sys.version_info[ :2 ];"
