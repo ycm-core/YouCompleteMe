@@ -229,7 +229,6 @@ class YouCompleteMe( object ):
     if exists_completer is None:
       return False
 
-    exists_completer = bool ( exists_completer )
     self._available_completers[ filetype ] = exists_completer
     return exists_completer
 
