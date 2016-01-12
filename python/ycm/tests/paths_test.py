@@ -23,7 +23,7 @@ from nose.tools import ok_
 from ycm.paths import EndsWithPython
 
 
-def EndsWithPython_PythonPaths_test():
+def EndsWithPython_Python2Paths_test():
   python_paths = [
     'python',
     '/usr/bin/python2.6',
@@ -35,10 +35,12 @@ def EndsWithPython_PythonPaths_test():
     ok_( EndsWithPython( path ) )
 
 
-def EndsWithPython_NotPythonPaths_test():
+def EndsWithPython_NotPython2Paths_test():
   not_python_paths = [
     '/opt/local/bin/vim',
-    r'C:\Program Files\Vim\vim74\gvim.exe'
+    r'C:\Program Files\Vim\vim74\gvim.exe',
+    '/usr/bin/python3',
+    '/home/user/.pyenv/shims/python3',
   ]
 
   for path in not_python_paths:
