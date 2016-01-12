@@ -222,8 +222,14 @@ class YouCompleteMe( object ):
     except KeyError:
       pass
 
-    exists_completer = ( self.IsServerAlive() and
-                         bool( SendCompleterAvailableRequest( filetype ) ) )
+    if not self.IsServerAlive():
+      return False
+
+    exists_completer = SendCompleterAvailableRequest( filetype )
+    if exists_completer is None:
+      return False
+
+    exists_completer = bool ( exists_completer )
     self._available_completers[ filetype ] = exists_completer
     return exists_completer
 
