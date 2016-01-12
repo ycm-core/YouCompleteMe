@@ -28,7 +28,7 @@ def EndsWithPython_Python2Paths_test():
     'python',
     '/usr/bin/python2.6',
     '/home/user/.pyenv/shims/python2.7',
-    r'C:\aPython26\python.exe'
+    r'C:\Python26\python.exe'
   ]
 
   for path in python_paths:
