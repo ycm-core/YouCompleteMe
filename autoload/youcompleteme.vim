@@ -848,11 +848,7 @@ function! s:ShowDiagnostics()
     return
   endif
 
-  let diags = pyeval(
-        \ 'ycm_state.GetLatestDiagnosticsQFList()' )
-  if !empty( diags )
-    call setloclist( 0, diags )
-
+  if pyeval( 'ycm_state.PopulateLocationListWithLatestDiagnostics()' )
     if g:ycm_open_loclist_on_ycm_diags
       lopen
     endif

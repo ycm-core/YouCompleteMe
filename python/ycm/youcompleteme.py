@@ -460,24 +460,26 @@ class YouCompleteMe( object ):
     return bool( self._user_options[ 'show_diagnostics_ui' ] and
                  self.DiagnosticUiSupportedForCurrentFiletype() )
 
-  def GetLatestDiagnosticsQFList( self ):
-    if self._latest_diagnostics:
-      return vimsupport.ConvertDiagnosticsToQfList( self._latest_diagnostics )
-    return []
+
+  def PopulateLocationListWithLatestDiagnostics( self ):
+    # do nothing if loc list is already populated by diag_interface
+    if not self._user_options[ 'always_populate_location_list' ]:
+      self._diag_interface.PopulateLocationList( self._latest_diagnostics )
+    return bool( self._latest_diagnostics )
 
 
   def UpdateDiagnosticInterface( self ):
     self._diag_interface.UpdateWithNewDiagnostics( self._latest_diagnostics )
 
 
-  def FileParseRequestReady( self ):
+  def FileParseRequestReady( self, block = False ):
     return bool( self._latest_file_parse_request and
-                 self._latest_file_parse_request.Done() )
+                 ( block or self._latest_file_parse_request.Done() ) )
 
 
   def HandleFileParseRequest( self, block = False ):
     if ( self.NativeFiletypeCompletionUsable() and
-         ( block or self.FileParseRequestReady() ) ):
+         self.FileParseRequestReady( block ) ):
 
       if self.ShouldDisplayDiagnostics():
         self._latest_diagnostics = self._latest_file_parse_request.Response()
