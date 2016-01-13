@@ -52,12 +52,13 @@ class ConvertCompletionResponseToVimDatas_test:
         'doc_string':    'DOC STRING',
       },
     }, {
-      'word': 'INSERTION TEXT',
-      'abbr': 'MENU TEXT',
-      'menu': 'EXTRA MENU INFO',
-      'kind': 'k',
-      'info': 'DETAILED INFO\nDOC STRING',
-      'dup' : 1,
+      'word' : 'INSERTION TEXT',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'info' : 'DETAILED INFO\nDOC STRING',
+      'dup'  : 1,
+      'empty': 1,
     } )
 
 
@@ -69,12 +70,13 @@ class ConvertCompletionResponseToVimDatas_test:
       'kind':            'K',
       'detailed_info':   'DETAILED INFO',
     }, {
-      'word': 'INSERTION TEXT',
-      'abbr': 'MENU TEXT',
-      'menu': 'EXTRA MENU INFO',
-      'kind': 'k',
-      'info': 'DETAILED INFO',
-      'dup' : 1,
+      'word' : 'INSERTION TEXT',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'info' : 'DETAILED INFO',
+      'dup'  : 1,
+      'empty': 1,
     } )
 
 
@@ -88,12 +90,13 @@ class ConvertCompletionResponseToVimDatas_test:
         'doc_string':    'DOC STRING',
       },
     }, {
-      'word': 'INSERTION TEXT',
-      'abbr': 'MENU TEXT',
-      'menu': 'EXTRA MENU INFO',
-      'kind': 'k',
-      'info': 'DOC STRING',
-      'dup' : 1,
+      'word' : 'INSERTION TEXT',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'info' : 'DOC STRING',
+      'dup'  : 1,
+      'empty': 1,
     } )
 
 
@@ -106,11 +109,12 @@ class ConvertCompletionResponseToVimDatas_test:
       'extra_data': {
       },
     }, {
-      'word': 'INSERTION TEXT',
-      'abbr': 'MENU TEXT',
-      'menu': 'EXTRA MENU INFO',
-      'kind': 'k',
-      'dup' : 1,
+      'word' : 'INSERTION TEXT',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'dup'  : 1,
+      'empty': 1,
     } )
 
 
@@ -124,10 +128,52 @@ class ConvertCompletionResponseToVimDatas_test:
       'extra_data': {
       },
     }, {
-      'word': 'INSERTION TEXT',
-      'abbr': 'MENU TEXT',
-      'menu': 'EXTRA MENU INFO',
-      'kind': 'k',
-      'info': 'DETAILED INFO',
-      'dup' : 1,
+      'word' : 'INSERTION TEXT',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'info' : 'DETAILED INFO',
+      'dup'  : 1,
+      'empty': 1,
+    } )
+
+
+  def Empty_Insertion_Text_test( self ):
+    self._Check( {
+      'insertion_text':  '',
+      'menu_text':       'MENU TEXT',
+      'extra_menu_info': 'EXTRA MENU INFO',
+      'kind':            'K',
+      'detailed_info':   'DETAILED INFO',
+      'extra_data': {
+        'doc_string':    'DOC STRING',
+      },
+    }, {
+      'word' : '',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'info' : 'DETAILED INFO\nDOC STRING',
+      'dup'  : 1,
+      'empty': 1,
+    } )
+
+
+  def No_Insertion_Text_test( self ):
+    self._Check( {
+      'menu_text':       'MENU TEXT',
+      'extra_menu_info': 'EXTRA MENU INFO',
+      'kind':            'K',
+      'detailed_info':   'DETAILED INFO',
+      'extra_data': {
+        'doc_string':    'DOC STRING',
+      },
+    }, {
+      'word' : '',
+      'abbr' : 'MENU TEXT',
+      'menu' : 'EXTRA MENU INFO',
+      'kind' : 'k',
+      'info' : 'DETAILED INFO\nDOC STRING',
+      'dup'  : 1,
+      'empty': 1,
     } )
