@@ -77,6 +77,7 @@ SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED = (
   "Logfile was deleted; set 'g:ycm_server_keep_logfiles' to see errors "
   "in the future." )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
+DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
 
 
 class YouCompleteMe( object ):
@@ -98,7 +99,6 @@ class YouCompleteMe( object ):
     self._complete_done_hooks = {
       'cs': lambda( self ): self._OnCompleteDone_Csharp()
     }
-    self._diagnostic_ui_filetypes = [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ]
 
   def _SetupServer( self ):
     self._available_completers = {}
@@ -453,7 +453,7 @@ class YouCompleteMe( object ):
     return self._diag_interface.GetWarningCount()
 
   def DiagnosticUiSupportedForCurrentFiletype( self ):
-    return any( [ x in self._diagnostic_ui_filetypes
+    return any( [ x in DIAGNOSTIC_UI_FILETYPES
                   for x in vimsupport.CurrentFiletypes() ] )
 
   def ShouldDisplayDiagnostics( self ):
@@ -478,8 +478,11 @@ class YouCompleteMe( object ):
 
 
   def HandleFileParseRequest( self, block = False ):
-    if ( self.NativeFiletypeCompletionUsable() and
-         self.FileParseRequestReady( block ) ):
+    # Order is important here:
+    # FileParseRequestReady has a low cost, while
+    # NativeFiletypeCompletionUsable is a blocking server request
+    if ( self.FileParseRequestReady( block ) and
+         self.NativeFiletypeCompletionUsable() ):
 
       if self.ShouldDisplayDiagnostics():
         self._latest_diagnostics = self._latest_file_parse_request.Response()
