@@ -515,9 +515,15 @@ def ReplaceChunks( chunks ):
       # know the (now open) buffer number for the filename
       buffer_num = GetBufferNumberForFilename( filepath, False )
       if not BufferIsVisible( buffer_num ):
-        # We failed to open it, raise an error.
-        # FIXME: we need to undo the partial changes?
-        raise RuntimeError( 'Unable to open file: {0}'.format( filepath ) )
+        # This happens, for example, if there is a swap file and the user
+        # selects the "Quit" or "Abort" options. We just raise an exception to
+        # make it clear to the user that the abort has left potentially
+        # partially-applied changes.
+        raise RuntimeError(
+            'Unable to open file: {0}\nFixIt/Refactor operation '
+            'aborted prior to completion. Your files have not been '
+            'fully updated. Please use undo commands to revert the'
+            'applied changes.'.format( filepath ) )
 
     ReplaceChunksInBuffer( chunks_by_file[ filepath ],
                            vim.buffers[ buffer_num ] )
@@ -751,7 +757,24 @@ def OpenFilename( filename, options = {} ):
 
   # Open the file
   CheckFilename( filename )
-  vim.command( 'silent! {0}{1} {2}'.format( size, command, filename ) )
+  try:
+    vim.command( '{0}{1} {2}'.format( size, command, filename ) )
+  # When the file we are trying to jump to has a swap file
+  # Vim opens swap-exists-choices dialog and throws vim.error with E325 error,
+  # or KeyboardInterrupt after user selects one of the options which actually
+  # opens the file (Open read-only/Edit anyway).
+  except vim.error as e:
+    if 'E325' not in str( e ):
+      raise
+
+    # Otherwise, the user might have chosen Quit. This is detectable by the
+    # current file not being the target file
+    if filename != GetCurrentBufferFilepath():
+      return
+  except KeyboardInterrupt:
+    # Raised when the user selects "Abort" after swap-exists-choices
+    return
+
 
   if command is 'split':
     vim.current.window.options[ 'winfixheight' ] = options.get( 'fix', False )
