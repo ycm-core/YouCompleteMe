@@ -729,7 +729,7 @@ def OpenFilename_test( vim_current, vim_command ):
   vimsupport.OpenFilename( __file__, options )
 
   vim_command.assert_has_calls( [
-    call( 'silent! 12split {0}'.format( __file__ ) ),
+    call( '12split {0}'.format( __file__ ) ),
     call( "exec "
           "'au BufEnter <buffer> :silent! checktime {0}'".format( __file__ ) ),
     call( 'silent! normal G zz' ),
