@@ -747,13 +747,13 @@ def OpenFilename( filename, options = {} ):
   size = ( options.get( 'size', '' ) if command in [ 'split', 'vsplit' ] else
            '' )
   focus = options.get( 'focus', False )
-  watch = options.get( 'watch', False )
-  position = options.get( 'position', 'start' )
 
   # There is no command in Vim to return to the previous tab so we need to
   # remember the current tab if needed.
   if not focus and command is 'tabedit':
     previous_tab = GetIntValue( 'tabpagenr()' )
+  else:
+    previous_tab = None
 
   # Open the file
   CheckFilename( filename )
@@ -775,19 +775,11 @@ def OpenFilename( filename, options = {} ):
     # Raised when the user selects "Abort" after swap-exists-choices
     return
 
-
-  if command is 'split':
-    vim.current.window.options[ 'winfixheight' ] = options.get( 'fix', False )
-  if command is 'vsplit':
-    vim.current.window.options[ 'winfixwidth' ] = options.get( 'fix', False )
-
-  if watch:
-    vim.current.buffer.options[ 'autoread' ] = True
-    vim.command( "exec 'au BufEnter <buffer> :silent! checktime {0}'"
-                 .format( filename ) )
-
-  if position is 'end':
-    vim.command( 'silent! normal G zz' )
+  _SetUpLoadedBuffer( command,
+                      filename,
+                      options.get( 'fix', False ),
+                      options.get( 'position', 'start' ),
+                      options.get( 'watch', False ) )
 
   # Vim automatically set the focus to the opened file so we need to get the
   # focus back (if the focus option is disabled) when opening a new tab or
@@ -797,3 +789,22 @@ def OpenFilename( filename, options = {} ):
       JumpToTab( previous_tab )
     if command in [ 'split', 'vsplit' ]:
       JumpToPreviousWindow()
+
+
+def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
+  """After opening a buffer, configure it according to the supplied options,
+  which are as defined by the OpenFilename method."""
+
+  if command is 'split':
+    vim.current.window.options[ 'winfixheight' ] = fix
+  if command is 'vsplit':
+    vim.current.window.options[ 'winfixwidth' ] = fix
+
+  if watch:
+    vim.current.buffer.options[ 'autoread' ] = True
+    vim.command( "exec 'au BufEnter <buffer> :silent! checktime {0}'"
+                 .format( filename ) )
+
+  if position is 'end':
+    vim.command( 'silent! normal G zz' )
+
