@@ -96,7 +96,6 @@ class CommandRequest( BaseRequest ):
       vimsupport.EchoText( "No fixits found for current line" )
     else:
       chunks = self._response[ 'fixits' ][ 0 ][ 'chunks' ]
-
       vimsupport.ReplaceChunks( chunks )
 
 
