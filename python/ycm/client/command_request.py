@@ -80,8 +80,8 @@ class CommandRequest( BaseRequest ):
 
   def _HandleGotoResponse( self ):
     if isinstance( self._response, list ):
-      defs = [ _BuildQfListItem( x ) for x in self._response ]
-      vim.eval( 'setqflist( %s )' % repr( defs ) )
+      vimsupport.SetQuickFixList(
+              [ _BuildQfListItem( x ) for x in self._response ] )
       vim.eval( 'youcompleteme#OpenGoToList()' )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],

@@ -237,6 +237,15 @@ def SetLocationList( diagnostics ):
   vim.eval( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
 
 
+def SetQuickFixList( quickfix_list, display=False ):
+  """list should be in qflist format: see ":h setqflist" for details"""
+  vim.eval( 'setqflist( {0} )'.format( json.dumps( quickfix_list ) ) )
+
+  if display:
+    vim.command( 'copen 5' )
+    JumpToPreviousWindow()
+
+
 def ConvertDiagnosticsToQfList( diagnostics ):
   def ConvertDiagnosticToQfFormat( diagnostic ):
     # See :h getqflist for a description of the dictionary fields.
@@ -501,6 +510,7 @@ def ReplaceChunks( chunks ):
     filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
+  locations = []
 
   for filepath in chunks_by_file.iterkeys():
     buffer_num = GetBufferNumberForFilename( filepath, False )
@@ -524,10 +534,17 @@ def ReplaceChunks( chunks ):
             'applied changes.'.format( filepath ) )
 
     ReplaceChunksInBuffer( chunks_by_file[ filepath ],
-                           vim.buffers[ buffer_num ] )
+                           vim.buffers[ buffer_num ],
+                           locations )
+
+  # Open the quickfix list, populated with entries for each location we changed.
+  if locations:
+    SetQuickFixList( locations, True )
 
 
-def ReplaceChunksInBuffer( chunks, vim_buffer ):
+def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
+  """Apply changes in |chunks| to the buffer-like object |buffer|. Append each
+  chunk's start to the list |locations|"""
 
   # We need to track the difference in length, but ensuring we apply fixes
   # in ascending order of insertion point.
@@ -554,7 +571,8 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
       chunk[ 'range' ][ 'end' ],
       chunk[ 'replacement_text' ],
       line_delta, char_delta,
-      vim_buffer )
+      vim_buffer,
+      locations )
     line_delta += new_line_delta
     char_delta += new_char_delta
 
@@ -569,11 +587,12 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
 # returns the delta (in lines and characters) that any position after the end
 # needs to be adjusted by.
 def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
-                  vim_buffer ):
+                  vim_buffer, locations=None ):
   # ycmd's results are all 1-based, but vim's/python's are all 0-based
   # (so we do -1 on all of the values)
   start_line = start[ 'line_num' ] - 1 + line_delta
   end_line = end[ 'line_num' ] - 1 + line_delta
+
   source_lines_count = end_line - start_line + 1
   start_column = start[ 'column_num' ] - 1 + char_delta
   end_column = end[ 'column_num' ] - 1
@@ -597,6 +616,17 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
   replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
 
   vim_buffer[ start_line : end_line + 1 ] = replacement_lines[:]
+
+  if locations is not None:
+    locations.append( {
+      'bufnr': vim_buffer.number,
+      'filename': vim_buffer.name,
+      # line and column numbers are 1-based in qflist
+      'lnum': start_line + 1,
+      'col': start_column + 1,
+      'text': replacement_text,
+      'type': 'F',
+    } )
 
   new_line_delta = replacement_lines_count - source_lines_count
   return ( new_line_delta, new_char_delta )
