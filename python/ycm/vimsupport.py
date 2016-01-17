@@ -515,7 +515,11 @@ def ReplaceChunks( chunks ):
   # Make sure the user is prepared to have her screen mutilated by the new
   # buffers
   num_files_to_open = 0
-  for filepath in chunks_by_file.iterkeys():
+
+  # We sort the file list simply to enable repeatable testing
+  sorted_file_list = sorted( chunks_by_file.iterkeys() )
+
+  for filepath in sorted_file_list:
     if not BufferIsVisible( GetBufferNumberForFilename( filepath, False ) ):
       num_files_to_open += 1
 
@@ -530,7 +534,7 @@ def ReplaceChunks( chunks ):
   # the quickfix window showing the user where we applied changes.
   locations = []
 
-  for filepath in chunks_by_file.iterkeys():
+  for filepath in sorted_file_list:
     buffer_num = GetBufferNumberForFilename( filepath, False )
 
     # We only apply changes in the current tab page (i.e. "visible" windows).
@@ -571,6 +575,7 @@ def ReplaceChunks( chunks ):
     SetQuickFixList( locations, True )
 
   EchoTextVimWidth( "Applied " + str( len( chunks ) ) + " changes" )
+
 
 def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
   """Apply changes in |chunks| to the buffer-like object |buffer|. Append each
