@@ -548,7 +548,7 @@ def ReplaceChunksInBuffer_SortedChunks_test():
   ]
 
   result_buffer = [ "CT<10 >> 2> ct" ]
-  vimsupport.ReplaceChunksInBuffer( chunks, result_buffer )
+  vimsupport.ReplaceChunksInBuffer( chunks, result_buffer, None )
 
   expected_buffer = [ "CT<(10 >> 2)> ct" ]
   eq_( expected_buffer, result_buffer )
@@ -561,7 +561,7 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   ]
 
   result_buffer = [ "CT<10 >> 2> ct" ]
-  vimsupport.ReplaceChunksInBuffer( chunks, result_buffer )
+  vimsupport.ReplaceChunksInBuffer( chunks, result_buffer, None )
 
   expected_buffer = [ "CT<(10 >> 2)> ct" ]
   eq_( expected_buffer, result_buffer )

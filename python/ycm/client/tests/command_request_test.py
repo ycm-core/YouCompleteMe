@@ -19,6 +19,7 @@
 from ycm.test_utils import MockVimModule
 MockVimModule()
 
+import json
 from mock import patch, call
 from ycm.client.command_request import CommandRequest
 
@@ -86,6 +87,6 @@ class GoToResponse_QuickFix_test:
     self._request.RunPostCommandActionsIfNeeded()
 
     vim_eval.assert_has_calls( [
-      call( 'setqflist( {0} )'.format( repr( expected_qf_list ) ) ),
+      call( 'setqflist( {0} )'.format( json.dumps( expected_qf_list ) ) ),
       call( 'youcompleteme#OpenGoToList()' ),
     ] )
