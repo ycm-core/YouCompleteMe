@@ -97,10 +97,6 @@ class CommandRequest( BaseRequest ):
 
       vimsupport.ReplaceChunks( chunks )
 
-      vimsupport.EchoTextVimWidth( "FixIt applied "
-                                   + str( len( chunks ) )
-                                   + " changes" )
-
 
   def _HandleBasicResponse( self ):
     vimsupport.EchoText( self._response )

@@ -438,6 +438,8 @@ def PresentDialog( message, choices, default_choice_index = 0 ):
 
 
 def Confirm( message ):
+  """Display |message| with Ok/Cancel operations, returns True if the user
+  selects Ok"""
   return bool( PresentDialog( message, [ "Ok", "Cancel" ] ) == 0 )
 
 
@@ -510,13 +512,40 @@ def ReplaceChunks( chunks ):
     filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
+  # Make sure the user is prepared to have her screen mutilated by the new
+  # buffers
+  num_files_to_open = 0
+  for filepath in chunks_by_file.iterkeys():
+    if not BufferIsVisible( GetBufferNumberForFilename( filepath, False ) ):
+      num_files_to_open += 1
+
+  if num_files_to_open > 0:
+    if not Confirm( 'The requested operation will apply changes to {0} files '
+                    'which are not currently open. This will therefore open '
+                    '{0} new splits in the current window. '
+                    'Do you wish to continue?'.format(  num_files_to_open ) ):
+      return
+
+  # Store the list of locations where we applied changes. We use this to display
+  # the quickfix window showing the user where we applied changes.
   locations = []
 
   for filepath in chunks_by_file.iterkeys():
     buffer_num = GetBufferNumberForFilename( filepath, False )
 
+    # We only apply changes in the current tab page (i.e. "visible" windows).
+    # Applying changes in tabs does not lead to a better user experience, as the
+    # quickfix list no longer works as you might expect (doesn't jump into other
+    # tabs), and the complexity of choosing where to apply edits is significant.
     if not BufferIsVisible( buffer_num ):
-      OpenFilename( filepath )
+
+      # We open the file with a small, fixed height. This means that we don't
+      # make the current buffer the smallest after a series of splits.
+      OpenFilename( filepath, {
+        'focus': False,
+        'fix': True,
+        'size': GetIntValue( '&previewheight' ),
+      } )
 
       # OpenFilename returns us to the original cursor location. This is what we
       # want, because we don't want to disorientate the user, but we do need to
@@ -541,6 +570,7 @@ def ReplaceChunks( chunks ):
   if locations:
     SetQuickFixList( locations, True )
 
+  EchoTextVimWidth( "Applied " + str( len( chunks ) ) + " changes" )
 
 def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
   """Apply changes in |chunks| to the buffer-like object |buffer|. Append each
