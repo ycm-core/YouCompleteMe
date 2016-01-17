@@ -25,6 +25,7 @@ from nose.tools import eq_
 from hamcrest import assert_that, calling, raises, none
 from mock import MagicMock, call, patch
 import os
+import json
 
 
 def ReplaceChunk_SingleLine_Repl_1_test():
@@ -241,9 +242,9 @@ def ReplaceChunk_SingleToMultipleLines_test():
 
   # now make another change to the "2nd" line
   start, end = _BuildLocations( 2, 3, 2, 4 )
-  ( new_line_offset, new_char_offset ) = vimsupport.ReplaceChunk( 
-                                                           start, 
-                                                           end, 
+  ( new_line_offset, new_char_offset ) = vimsupport.ReplaceChunk(
+                                                           start,
+                                                           end,
                                                            'cccc',
                                                            line_offset,
                                                            char_offset,
@@ -343,7 +344,6 @@ def ReplaceChunk_SingleToMultipleLinesReplace_2_test():
 
   eq_( line_offset, 2 )
   eq_( char_offset, 4 )
-
 
 
 def ReplaceChunk_MultipleLinesToSingleLine_test():
@@ -567,15 +567,275 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   eq_( expected_buffer, result_buffer )
 
 
-def _BuildChunk( start_line, start_column, end_line, end_column,
-                 replacement_text ):
+class MockBuffer( ):
+  """An object that looks like a vim.buffer object, enough for ReplaceChunk to
+  generate a location list"""
+
+  def __init__( self, lines, name, number ):
+    self.lines = lines
+    self.name = name
+    self.number = number
+
+
+  def __getitem__( self, index ):
+    return self.lines[ index ]
+
+
+  def __len__( self ):
+    return len( self.lines )
+
+
+  def __setitem__( self, key, value ):
+    return self.lines.__setitem__( key, value )
+
+
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename', return_value=1 )
+@patch( 'ycm.vimsupport.BufferIsVisible', return_value=True )
+@patch( 'ycm.vimsupport.OpenFilename' )
+@patch( 'ycm.vimsupport.EchoTextVimWidth' )
+@patch( 'vim.eval' )
+@patch( 'vim.command' )
+def ReplaceChunks_SingleFile_Open_test( vim_command,
+                                        vim_eval,
+                                        echo_text_vim_width,
+                                        open_filename,
+                                        buffer_is_visible,
+                                        get_buffer_number_for_filename ):
+
+  chunks = [
+    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+  ]
+
+  result_buffer = MockBuffer( [
+    'line1',
+    'line2',
+    'line3',
+  ], 'single_file', 1 )
+
+  with patch( 'vim.buffers', [ None, result_buffer, None ] ):
+    vimsupport.ReplaceChunks( chunks )
+
+  # Ensure that we applied the replacement correctly
+  eq_( result_buffer.lines, [
+    'replacementline2',
+    'line3',
+  ] )
+
+  # GetBufferNumberForFilename is called twice:
+  #  - once to the check if we would require opening the file (so that we can
+  #    raise a warning)
+  #  - once whilst applying the changes
+  get_buffer_number_for_filename.assert_has_calls( [
+      call( 'single_file', False ),
+      call( 'single_file', False ),
+  ] )
+
+  # BufferIsVisible is called twice for the same reasons as above
+  buffer_is_visible.assert_has_calls( [
+      call( 1 ),
+      call( 1 ),
+  ] )
+
+  # we don't attempt to open any files
+  open_filename.assert_not_called()
+
+  # But we do set the quickfix list
+  vim_eval.assert_has_calls( [
+      call( 'setqflist( {0} )'.format( json.dumps( [ {
+        'bufnr': 1,
+        'filename': 'single_file',
+        'lnum': 1,
+        'col': 1,
+        'text': 'replacement',
+        'type': 'F'
+      } ] ) ) ),
+  ] )
+  vim_command.assert_has_calls( [
+      call( 'copen 5' )
+  ] )
+
+  # And it is ReplaceChunks that prints the message showing the number of
+  # changes
+  echo_text_vim_width.assert_has_calls( [
+      call( 'Applied 1 changes' ),
+  ] )
+
+
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[ -1, -1, 1 ] )
+@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[ False, False, True ] )
+@patch( 'ycm.vimsupport.OpenFilename' )
+@patch( 'ycm.vimsupport.EchoTextVimWidth' )
+@patch( 'ycm.vimsupport.Confirm', return_value=True )
+@patch( 'vim.eval', return_value=10 )
+@patch( 'vim.command' )
+def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
+                                           vim_eval,
+                                           confirm,
+                                           echo_text_vim_width,
+                                           open_filename,
+                                           buffer_is_visible,
+                                           get_buffer_number_for_filename ):
+
+  chunks = [
+    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+  ]
+
+  result_buffer = MockBuffer( [
+    'line1',
+    'line2',
+    'line3',
+  ], 'single_file', 1 )
+
+  with patch( 'vim.buffers', [ None, result_buffer, None ] ):
+    vimsupport.ReplaceChunks( chunks )
+
+  # We checked if it was OK to open the file
+  confirm.assert_has_calls( [
+    call( 'The requested operation will apply changes to 1 files '
+          'which are not currently open. This will therefore open '
+          '1 new splits in the current window. '
+          'Do you wish to continue?' )
+  ] )
+
+  # Ensure that we applied the replacement correctly
+  eq_( result_buffer.lines, [
+    'replacementline2',
+    'line3',
+  ] )
+
+  # GetBufferNumberForFilename is called 3 times. The return values are set in
+  # the @patch call above:
+  #  - once to the check if we would require opening the file (so that we can
+  #    raise a warning) (-1 return)
+  #  - once whilst applying the changes (-1 return)
+  #  - finally after calling OpenFilename (1 return)
+  get_buffer_number_for_filename.assert_has_calls( [
+      call( 'single_file', False ),
+      call( 'single_file', False ),
+      call( 'single_file', False ),
+  ] )
+
+  # BufferIsVisible is called 3 times for the same reasons as above, with the
+  # return of each one
+  buffer_is_visible.assert_has_calls( [
+    call( -1 ),
+    call( -1 ),
+    call( 1 ),
+  ] )
+
+  # We open 'single_file' as expected.
+  open_filename.assert_called_with( 'single_file', {
+    'focus': False,
+    'fix': True,
+    'size': 10
+  } )
+
+  # And update the quickfix list
+  vim_eval.assert_has_calls( [
+    call( '&previewheight' ),
+    call( 'setqflist( {0} )'.format( json.dumps( [ {
+      'bufnr': 1,
+      'filename': 'single_file',
+      'lnum': 1,
+      'col': 1,
+      'text': 'replacement',
+      'type': 'F'
+    } ] ) ) ),
+  ] )
+  vim_command.assert_has_calls( [
+    call( 'copen 5' )
+  ] )
+
+  # And it is ReplaceChunks that prints the message showing the number of
+  # changes
+  echo_text_vim_width.assert_has_calls( [
+    call( 'Applied 1 changes' ),
+  ] )
+
+
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[ -1, -1, 1 ] )
+@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[ False, False, True ] )
+@patch( 'ycm.vimsupport.OpenFilename' )
+@patch( 'ycm.vimsupport.EchoTextVimWidth' )
+@patch( 'ycm.vimsupport.Confirm', return_value=False )
+@patch( 'vim.eval', return_value=10 )
+@patch( 'vim.command' )
+def ReplaceChunks_User_Declines_To_Open_File_test(
+                                           vim_command,
+                                           vim_eval,
+                                           confirm,
+                                           echo_text_vim_width,
+                                           open_filename,
+                                           buffer_is_visible,
+                                           get_buffer_number_for_filename ):
+
+  # Same as above, except the user selects Cancel when asked if they should
+  # allow us to open lots of (ahem, 1) file.
+
+  chunks = [
+    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+  ]
+
+  result_buffer = MockBuffer( [
+    'line1',
+    'line2',
+    'line3',
+  ], 'single_file', 1 )
+
+  with patch( 'vim.buffers', [ None, result_buffer, None ] ):
+    vimsupport.ReplaceChunks( chunks )
+
+  # We checked if it was OK to open the file
+  confirm.assert_has_calls( [
+    call( 'The requested operation will apply changes to 1 files '
+          'which are not currently open. This will therefore open '
+          '1 new splits in the current window. '
+          'Do you wish to continue?' )
+  ] )
+
+  # Ensure that buffer is not changed
+  eq_( result_buffer.lines, [
+    'line1',
+    'line2',
+    'line3',
+  ] )
+
+  # GetBufferNumberForFilename is called once. The return values are set in
+  # the @patch call above:
+  #  - once to the check if we would require opening the file (so that we can
+  #    raise a warning) (-1 return)
+  get_buffer_number_for_filename.assert_has_calls( [
+      call( 'single_file', False ),
+  ] )
+
+  # BufferIsVisible is called 3 times for the same reasons as above, with the
+  # return of each one
+  buffer_is_visible.assert_has_calls( [
+    call( -1 ),
+  ] )
+
+  # We don't attempt to open any files or update any quickfix list or anything
+  # like that
+  open_filename.assert_not_called()
+  vim_eval.assert_not_called()
+  vim_command.assert_not_called()
+  echo_text_vim_width.assert_not_called()
+
+
+def _BuildChunk( start_line,
+                 start_column,
+                 end_line,
+                 end_column,
+                 replacement_text, filepath='test_file_name' ):
   return {
     'range': {
       'start': {
+        'filepath': filepath,
         'line_num': start_line,
         'column_num': start_column,
       },
       'end': {
+        'filepath': filepath,
         'line_num': end_line,
         'column_num': end_column,
       },
