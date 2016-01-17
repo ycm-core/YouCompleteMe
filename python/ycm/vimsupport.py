@@ -20,6 +20,7 @@ import os
 import tempfile
 import json
 import re
+from collections import defaultdict
 from ycmd.utils import ToUtf8IfNeeded
 from ycmd import user_options_store
 
@@ -494,17 +495,14 @@ def ReplaceChunks( chunks ):
   """Replace the chunks in chunks file-wise, where chunks may be in any order
   across any files"""
 
-  chunks_by_file = dict()
+  chunks_by_file = defaultdict( list )
 
   for chunk in chunks:
     filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    chunks_by_file[ filepath ].append( chunk )
 
-    if not chunks_by_file.has_key( filepath ):
-      chunks_by_file[ filepath ] = [ chunk ]
-    else:
-      chunks_by_file[ filepath ].append( chunk )
 
-  for filepath in chunks_by_file.keys():
+  for filepath in chunks_by_file.iterkeys():
     buffer_num = GetBufferNumberForFilename( filepath, False )
 
     if not BufferIsVisible( buffer_num ):
