@@ -822,6 +822,177 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   echo_text_vim_width.assert_not_called()
 
 
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[ -1, -1, 1 ] )
+# Key difference is here: In the final check, BufferIsVisible returns False
+@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[ False, False, False ] )
+@patch( 'ycm.vimsupport.OpenFilename' )
+@patch( 'ycm.vimsupport.EchoTextVimWidth' )
+@patch( 'ycm.vimsupport.Confirm', return_value=True )
+@patch( 'vim.eval', return_value=10 )
+@patch( 'vim.command' )
+def ReplaceChunks_User_Aborts_Opening_File_test(
+                                           vim_command,
+                                           vim_eval,
+                                           confirm,
+                                           echo_text_vim_width,
+                                           open_filename,
+                                           buffer_is_visible,
+                                           get_buffer_number_for_filename ):
+
+  # Same as above, except the user selects Abort or Quick during the
+  # "swap-file-found" dialog
+
+  chunks = [
+    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+  ]
+
+  result_buffer = MockBuffer( [
+    'line1',
+    'line2',
+    'line3',
+  ], 'single_file', 1 )
+
+  with patch( 'vim.buffers', [ None, result_buffer, None ] ):
+    assert_that( calling( vimsupport.ReplaceChunks ).with_args( chunks ),
+                 raises( RuntimeError,
+                  'Unable to open file: single_file\nFixIt/Refactor operation '
+                  'aborted prior to completion. Your files have not been '
+                  'fully updated. Please use undo commands to revert the'
+                  'applied changes.' ) )
+
+  # We checked if it was OK to open the file
+  confirm.assert_has_calls( [
+    call( 'The requested operation will apply changes to 1 files '
+          'which are not currently open. This will therefore open '
+          '1 new splits in the current window. '
+          'Do you wish to continue?' )
+  ] )
+
+  # Ensure that buffer is not changed
+  eq_( result_buffer.lines, [
+    'line1',
+    'line2',
+    'line3',
+  ] )
+
+  # We tried to open this file
+  open_filename.assert_called_with( "single_file", {
+    'focus': False,
+    'fix': True,
+    'size': 10
+  } )
+  vim_eval.assert_called_with( "&previewheight" )
+
+  # But raised an exception before issuing the message at the end
+  echo_text_vim_width.assert_not_called()
+
+
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[
+          22, # first_file (check)
+          -1, # another_file (check)
+          22, # first_file (apply)
+          -1, # another_file (apply)
+          19, # another_file (check after open)
+        ] )
+@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[
+          True,  # first_file (check)
+          False, # second_file (check)
+          True,  # first_file (apply)
+          False, # second_file (apply)
+          True,  # side_effect (check after open)
+        ] )
+@patch( 'ycm.vimsupport.OpenFilename' )
+@patch( 'ycm.vimsupport.EchoTextVimWidth' )
+@patch( 'ycm.vimsupport.Confirm', return_value=True )
+@patch( 'vim.eval', return_value=10 )
+@patch( 'vim.command' )
+def ReplaceChunks_MultiFile_Open_test( vim_command,
+                                       vim_eval,
+                                       confirm,
+                                       echo_text_vim_width,
+                                       open_filename,
+                                       buffer_is_visible,
+                                       get_buffer_number_for_filename ):
+
+  # Chunks are split across 2 files, one is already open, one isn't
+
+  chunks = [
+    _BuildChunk( 1,1, 2, 1, 'first_file_replacement ', '1_first_file' ),
+    _BuildChunk( 2,1, 2, 1, 'second_file_replacement ', '2_another_file' ),
+  ]
+
+  first_file = MockBuffer( [
+    'line1',
+    'line2',
+    'line3',
+  ], '1_first_file', 22 )
+  another_file = MockBuffer( [
+    'another line1',
+    'ACME line2',
+  ], '2_another_file', 19 )
+
+  vim_buffers = [ None ] * 23
+  vim_buffers[ 22 ] = first_file
+  vim_buffers[ 19 ] = another_file
+
+  with patch( 'vim.buffers', vim_buffers ):
+    vimsupport.ReplaceChunks( chunks )
+
+  # We checked if it was OK to open the file
+  confirm.assert_has_calls( [
+    call( 'The requested operation will apply changes to 1 files '
+          'which are not currently open. This will therefore open '
+          '1 new splits in the current window. '
+          'Do you wish to continue?' )
+  ] )
+
+  # Ensure that buffers are updated
+  eq_( another_file.lines, [
+    'another line1',
+    'second_file_replacement ACME line2',
+  ] )
+  eq_( first_file.lines, [
+    'first_file_replacement line2',
+    'line3',
+  ] )
+
+  # We open '2_another_file' as expected.
+  open_filename.assert_called_with( '2_another_file', {
+    'focus': False,
+    'fix': True,
+    'size': 10
+  } )
+
+  # And update the quickfix list with each entry
+  vim_eval.assert_has_calls( [
+    call( '&previewheight' ),
+    call( 'setqflist( {0} )'.format( json.dumps( [ {
+      'bufnr': 22,
+      'filename': '1_first_file',
+      'lnum': 1,
+      'col': 1,
+      'text': 'first_file_replacement ',
+      'type': 'F'
+    }, {
+      'bufnr': 19,
+      'filename': '2_another_file',
+      'lnum': 2,
+      'col': 1,
+      'text': 'second_file_replacement ',
+      'type': 'F'
+    } ] ) ) ),
+  ] )
+  vim_command.assert_has_calls( [
+    call( 'copen 5' )
+  ] )
+
+  # And it is ReplaceChunks that prints the message showing the number of
+  # changes
+  echo_text_vim_width.assert_has_calls( [
+    call( 'Applied 2 changes' ),
+  ] )
+
+
 def _BuildChunk( start_line,
                  start_column,
                  end_line,
