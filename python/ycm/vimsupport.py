@@ -24,6 +24,20 @@ import json
 import re
 from ycmd.utils import ToUtf8IfNeeded
 from ycmd import user_options_store
+# support python3
+try:
+    unicode = unicode
+except NameError:
+    str = str
+    bytes = bytes
+    unicode = str
+    basestring = (str,bytes)
+else:
+    str = str
+    bytes = str
+    unicode = unicode
+    basestring = basestring
+
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'horizontal-split' : 'split',
@@ -295,7 +309,13 @@ def GetReadOnlyVimGlobals( force_python_objects = False ):
 
 def VimExpressionToPythonType( vim_expression ):
   result = vim.eval( vim_expression )
-  if not isinstance( result, basestring ):
+# suppory python3
+  try:
+      instance_check = isinstance(result, basestring )
+  except:
+      instance_check = isinstance(result, str)
+
+  if not instance_check:
     return result
   try:
     return int( result )

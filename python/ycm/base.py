@@ -47,8 +47,13 @@ def BuildServerConf():
 def LoadJsonDefaultsIntoVim():
   defaults = user_options_store.DefaultOptions()
   vim_defaults = {}
-  for key, value in defaults.iteritems():
-    vim_defaults[ 'ycm_' + key ] = value
+# support python3
+  try:
+    for key, value in defaults.iteritems():
+        vim_defaults[ 'ycm_' + key ] = value
+  except AttributeError:
+    for key, value in defaults.items():
+        vim_defaults[ 'ycm_' + key ] = value
 
   vimsupport.LoadDictIntoVimGlobals( vim_defaults, overwrite = False )
 

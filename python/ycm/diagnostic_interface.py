@@ -33,7 +33,6 @@ class DiagnosticInterface( object ):
     self._diag_message_needs_clearing = False
     self._placed_signs = []
 
-
   def OnCursorMoved( self ):
     line, _ = vimsupport.CurrentLineAndColumn()
     line += 1  # Convert to 1-based

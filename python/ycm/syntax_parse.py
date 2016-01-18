@@ -175,8 +175,13 @@ def _ConnectGroupChildren( group_name_to_group ):
       if line.startswith( links_to ):
         parent_names.append( line[ len( links_to ): ] )
     return parent_names
+# support python3
+  try:
+      g_name_to_g_iter = group_name_to_group.itervalues()
+  except AttributeError:
+      g_name_to_g_iter = group_name_to_group.values()
 
-  for group in group_name_to_group.itervalues():
+  for group in g_name_to_g_iter:
     parent_names = GetParentNames( group )
 
     for parent_name in parent_names:

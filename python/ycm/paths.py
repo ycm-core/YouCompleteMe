@@ -50,7 +50,8 @@ def PathToPythonInterpreter():
   # We check for 'python2' before 'python' because some OS's (I'm looking at
   # you Arch Linux) have made the... interesting decision to point
   # /usr/bin/python to python3.
-  python_names = [ 'python2', 'python' ]
+# support python3
+  python_names = ['python3', 'python2', 'python' ]
 
   path_to_python = utils.PathToFirstExistingExecutable( python_names )
   if path_to_python:
