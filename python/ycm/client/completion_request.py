@@ -64,8 +64,9 @@ class CompletionRequest( BaseRequest ):
 def ConvertCompletionDataToVimData( completion_data ):
   # see :h complete-items for a description of the dictionary fields
   vim_data = {
-    'word' : ToUtf8IfNeeded( completion_data[ 'insertion_text' ] ),
-    'dup'  : 1,
+    'word'  : '',
+    'dup'   : 1,
+    'empty' : 1,
   }
 
   if ( 'extra_data' in completion_data and
@@ -75,6 +76,8 @@ def ConvertCompletionDataToVimData( completion_data ):
   else:
     doc_string = ""
 
+  if 'insertion_text' in completion_data:
+    vim_data[ 'word' ] = ToUtf8IfNeeded( completion_data[ 'insertion_text' ] )
   if 'menu_text' in completion_data:
     vim_data[ 'abbr' ] = ToUtf8IfNeeded( completion_data[ 'menu_text' ] )
   if 'extra_menu_info' in completion_data:

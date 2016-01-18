@@ -20,6 +20,7 @@ Contents ~
   5. Go                                                      |youcompleteme-go|
   6. TypeScript                                      |youcompleteme-typescript|
   7. JavaScript                                      |youcompleteme-javascript|
+  8. Rust                                                  |youcompleteme-rust|
  5. User Guide                                       |youcompleteme-user-guide|
   1. General Usage                                |youcompleteme-general-usage|
   2. Client-server architecture      |youcompleteme-client-server-architecture|
@@ -32,9 +33,10 @@ Contents ~
    3. Tips and tricks                               |youcompleteme-tips-tricks|
     1. Configuring Tern for node support |youcompleteme-configuring-tern-for-node-support|
     2. Configuring Tern for requirejs support |youcompleteme-configuring-tern-for-requirejs-support|
-  7. Semantic completion for other languages |youcompleteme-semantic-completion-for-other-languages|
-  8. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
-  9. Diagnostic display                      |youcompleteme-diagnostic-display|
+  7. Rust semantic completion          |youcompleteme-rust-semantic-completion|
+  8. Semantic completion for other languages |youcompleteme-semantic-completion-for-other-languages|
+  9. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
+  10. Diagnostic display                     |youcompleteme-diagnostic-display|
    1. C# Diagnostic Support                |youcompleteme-c-diagnostic-support|
    2. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
  6. Commands                                           |youcompleteme-commands|
@@ -140,7 +142,7 @@ Contents ~
   25. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
   26. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
   27. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  28. Install YCM with NeoBundle [48] |youcompleteme-install-ycm-with-neobundle-48|
+  28. Install YCM with NeoBundle [51] |youcompleteme-install-ycm-with-neobundle-51|
   29. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |.tern-sub-project|
  11. Contact                                            |youcompleteme-contact|
@@ -172,6 +174,7 @@ Image: Build Status [1] Image: Build status [3]
   - General semantic completion
   - C-family semantic completion
   - JavaScript semantic completion
+  - Rust semantic completion
   - Semantic completion for other languages
   - Writing new semantic completers
   - Diagnostic display
@@ -202,12 +205,13 @@ Vim. It has several completion engines:
 - an OmniSharp [7]-based completion engine for C#,
 - a Gocode [8]-based completion engine for Go,
 - a TSServer [9]-based completion engine for TypeScript,
-- a Tern [10]-based completion engine for JavaScript.
+- a Tern [10]-based completion engine for JavaScript,
+- a racer [11]-based completion engine for Rust,
 - and an omnifunc-based completer that uses data from Vim's omnicomplete
   system to provide semantic completions for many other languages (Ruby, PHP
   etc.).
 
-  Image: YouCompleteMe GIF demo (see reference [11])
+  Image: YouCompleteMe GIF demo (see reference [12])
 
 Here's an explanation of what happens in the short GIF demo above.
 
@@ -226,7 +230,7 @@ typing to further filter out unwanted completions.
 
 A critical thing to notice is that the completion **filtering is NOT based on
 the input being a string prefix of the completion** (but that works too). The
-input needs to be a _subsequence [12] match_ of a completion. This is a fancy
+input needs to be a _subsequence [13] match_ of a completion. This is a fancy
 way of saying that any input characters need to be present in a completion
 string in the order in which they appear in the input. So 'abc' is a
 subsequence of 'xaybgc', but not of 'xbyxaxxc'. After the filter, a complicated
@@ -245,7 +249,7 @@ with a keyboard shortcut; see the rest of the docs).
 
 The last thing that you can see in the demo is YCM's diagnostic display
 features (the little red X that shows up in the left gutter; inspired by
-Syntastic [13]) if you are editing a C-family file. As Clang compiles your file
+Syntastic [14]) if you are editing a C-family file. As Clang compiles your file
 and detects warnings or errors, they will be presented in various ways. You
 don't need to save your file or press any keyboard shortcut to trigger this, it
 "just happens" in the background.
@@ -263,7 +267,7 @@ languages & Python. Expect more IDE features powered by the various YCM
 semantic engines in the future.
 
 You'll also find that YCM has filepath completers (try typing './' in a file)
-and a completer that integrates with UltiSnips [14].
+and a completer that integrates with UltiSnips [15].
 
 ===============================================================================
                                                    *youcompleteme-installation*
@@ -276,16 +280,16 @@ Mac OS X Installation ~
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Install the latest version of MacVim [15]. Yes, MacVim. And yes, the _latest_.
+Install the latest version of MacVim [16]. Yes, MacVim. And yes, the _latest_.
 
 If you don't use the MacVim GUI, it is recommended to use the Vim binary that
 is inside the MacVim.app package ('MacVim.app/Contents/MacOS/Vim'). To ensure
-it works correctly copy the 'mvim' script from the MacVim [15] download to your
+it works correctly copy the 'mvim' script from the MacVim [16] download to your
 local binary folder (for example '/usr/local/bin/mvim') and then symlink it:
 >
   ln -s /usr/local/bin/mvim vim
 <
-Install YouCompleteMe with Vundle [16].
+Install YouCompleteMe with Vundle [17].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_support_libs library APIs have changed (happens
@@ -297,8 +301,8 @@ installed along with the latest Command Line Tools (they are installed
 automatically when you run 'clang' for the first time, or manually by running
 'xcode-select --install')
 
-Install CMake. Preferably with Homebrew [17], but here's the stand-alone CMake
-installer [18].
+Install CMake. Preferably with Homebrew [18], but here's the stand-alone CMake
+installer [19].
 
 _If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
 for details.
@@ -316,17 +320,24 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' to './install.py'
+
 - Go support: ensure go is installed and add '--gocode-completer'
-- TypeScript support: install nodejs and npm [19] then install the TypeScript
+
+- TypeScript support: install nodejs and npm [20] then install the TypeScript
   SDK with 'npm install -g typescript'.
-- JavaScript support: install nodejs and npm [19] and add '--tern-completer'
+
+- JavaScript support: install nodejs and npm [20] and add '--tern-completer'
   to './install.py'
 
-For example, to install with all language features, ensure npm, go, mono and
-typescript API are installed and in your PATH, then:
+- Rust support: install rustc and cargo [21] and add '--racer-completer' to
+  './install.py'
+
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 >
   cd ~/.vim/bundle/YouCompleteMe
-  ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+  ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+      --tern-completer --racer-completer
 <
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -347,9 +358,9 @@ provided on a best-effort basis and may not work for you.
 Make sure you have Vim 7.3.598 with python2 support. Ubuntu 14.04 and later
 have a Vim that's recent enough. You can see the version of Vim installed by
 running 'vim --version'. If the version is too old, you may need to compile Vim
-from source [20] (don't worry, it's easy).
+from source [22] (don't worry, it's easy).
 
-Install YouCompleteMe with Vundle [16].
+Install YouCompleteMe with Vundle [17].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_support_libs library APIs have changed (happens
@@ -374,17 +385,24 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' to './install.py'
+
 - Go support: ensure go is installed and add '--gocode-completer'
-- TypeScript support: install nodejs and npm [19] then install the TypeScript
+
+- TypeScript support: install nodejs and npm [20] then install the TypeScript
   SDK with 'npm install -g typescript'.
-- JavaScript support: install nodejs and npm [19] and add '--tern-completer'
+
+- JavaScript support: install nodejs and npm [20] and add '--tern-completer'
   to './install.py'
 
-For example, to install with all language features, ensure node, go, mono and
-typescript API are installed and in your PATH, then:
+- Rust support: install rustc and cargo [21] and add '--racer-completer' to
+  './install.py'
+
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 >
   cd ~/.vim/bundle/YouCompleteMe
-  ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+  ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+      --tern-completer --racer-completer
 <
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -405,9 +423,9 @@ provided on a best-effort basis and may not work for you.
 Make sure you have Vim 7.3.598 with python2 support. Fedora 21 and later have a
 Vim that's recent enough. You can see the version of Vim installed by running
 'vim --version'. If the version is too old, you may need to compile Vim from
-source [20] (don't worry, it's easy).
+source [22] (don't worry, it's easy).
 
-Install YouCompleteMe with Vundle [16].
+Install YouCompleteMe with Vundle [17].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_support_libs library APIs have changed (happens
@@ -432,17 +450,24 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' to './install.py'
+
 - Go support: ensure go is installed and add '--gocode-completer'
-- TypeScript support: install nodejs and npm [19] then install the TypeScript
+
+- TypeScript support: install nodejs and npm [20] then install the TypeScript
   SDK with 'npm install -g typescript'.
-- JavaScript support: install nodejs and npm [19] and add '--tern-completer'
+
+- JavaScript support: install nodejs and npm [20] and add '--tern-completer'
   to './install.py'
 
-For example, to install with all language features, ensure node, go, mono and
-typescript API are installed and in your PATH, then:
+- Rust support: install rustc and cargo [21] and add '--racer-completer' to
+  './install.py'
+
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 >
   cd ~/.vim/bundle/YouCompleteMe
-  ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+  ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+      --tern-completer --racer-completer
 <
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -467,9 +492,9 @@ Make sure you have at least Vim 7.3.598 with python2 support. You can check the
 version by typing ':version' inside Vim. Take note of the Vim architecture,
 i.e. 32 or 64-bit. It will be important when choosing the python2 installer. We
 recommend using a 64-bit client. Don't worry, a frequently updated copy of
-64-bit Vim [21] is available.
+64-bit Vim [23] is available.
 
-Install YouCompleteMe with Vundle [16].
+Install YouCompleteMe with Vundle [17].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_support_libs library APIs have changed (happens
@@ -478,16 +503,16 @@ process.
 
 Download and install the following software:
 
-- python2 [22]. Be sure to pick the version corresponding to your Vim
+- python2 [24]. Be sure to pick the version corresponding to your Vim
   architecture. It is _Windows x86-64 MSI installer_ if you are using the Vim
   previously linked.
 
-- CMake [18]. Add CMake executable to the PATH environment variable.
+- CMake [19]. Add CMake executable to the PATH environment variable.
 
-- Visual Studio [23]. Download the community edition. During setup, choose
+- Visual Studio [25]. Download the community edition. During setup, choose
   _Custom_ as the installation type and select the _Visual C++_ component.
 
-- 7-zip [24]. Required to build YCM with semantic support for C-family
+- 7-zip [26]. Required to build YCM with semantic support for C-family
   languages.
 
 Compiling YCM **with** semantic support for C-family languages:
@@ -502,18 +527,24 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to './install.py'
-- Go support: ensure go is installed and add '--gocode-completer'
-- TypeScript support: install nodejs and npm [19] then install the TypeScript
-  SDK with 'npm install -g typescript'.
-- JavaScript support: install nodejs and npm [19] and add '--tern-completer'
-  to './install.py'
+- C# support: add '--omnisharp-completer' to 'install.py'
 
-For example, to install with all language features, ensure npm, go, mono and
-typescript API are installed and in your '%PATH%', then:
+- Go support: ensure go is installed and add '--gocode-completer'
+
+- TypeScript support: install nodejs and npm [20] then install the TypeScript
+  SDK with 'npm install -g typescript'.
+
+- JavaScript support: install nodejs and npm [20] and add '--tern-completer'
+  to 'install.py'
+
+- Rust support: install rustc and cargo [21] and add '--racer-completer' to
+  'install.py'
+
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your '%PATH%', then:
 >
   cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
-  python install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+  python install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer --racer-completer
 <
 You can specify the Microsoft Visual C++ (MSVC) version using the '--msvc'
 option. YCM officially supports MSVC 11 (Visual Studio 2012), 12 (2013), and 14
@@ -546,7 +577,7 @@ FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
   pkg install llvm35 boost-all boost-python-libs clang35
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/llvm35/lib/
 <
-Install YouCompleteMe with Vundle [16].
+Install YouCompleteMe with Vundle [17].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_support_libs library APIs have changed (happens
@@ -568,17 +599,24 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' to './install.py'
+
 - Go support: ensure go is installed and add '--gocode-completer'
-- TypeScript support: install nodejs and npm [19] then install the TypeScript
+
+- TypeScript support: install nodejs and npm [20] then install the TypeScript
   SDK with 'npm install -g typescript'.
-- JavaScript support: install nodejs and npm [19] and add '--tern-completer'
+
+- JavaScript support: install nodejs and npm [20] and add '--tern-completer'
   to './install.py'
 
-For example, to install with all language features, ensure npm, go, mono and
-typescript API are installed and in your PATH, then:
+- Rust support: install rustc and cargo [21] and add '--racer-completer' to
+  './install.py'
+
+For example, to install with all language features, ensure npm, go, mono, rust,
+and typescript API are installed and in your PATH, then:
 >
   cd ~/.vim/bundle/YouCompleteMe
-  ./install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer
+  ./install.py --clang-completer --omnisharp-completer --gocode-completer \
+      --tern-completer --racer-completer
 <
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -620,7 +658,7 @@ process.
    1-Z', where Z will be some number. That number needs to be 598 or higher.
 
    If your version of Vim is not recent enough, you may need to compile Vim
-   from source [20] (don't worry, it's easy).
+   from source [22] (don't worry, it's easy).
 
    After you have made sure that you have Vim 7.3.598+, type the following
    in Vim: ":echo has('python')". The output should be 1. If it's 0, then
@@ -630,9 +668,9 @@ process.
    critical because it must match the python2 and the YCM libraries
    architectures. We recommend using a 64-bit Vim.
 
-2. **Install YCM** with Vundle [16] (or Pathogen [25], but Vundle is a
+2. **Install YCM** with Vundle [17] (or Pathogen [27], but Vundle is a
    better idea). With Vundle, this would mean adding a "Plugin
-   'Valloric/YouCompleteMe'" line to your vimrc [26].
+   'Valloric/YouCompleteMe'" line to your vimrc [28].
 
    If you don't install YCM with Vundle, make sure you have run 'git
    submodule update --init --recursive' after checking out the YCM
@@ -649,7 +687,7 @@ process.
 
    You can use the system libclang _only if you are sure it is version 3.3
    or higher_, otherwise don't. Even if it is, we recommend using the
-   official binaries from llvm.org [27] if at all possible. Make sure you
+   official binaries from llvm.org [29] if at all possible. Make sure you
    download the correct archive file for your OS.
 
    We **STRONGLY recommend AGAINST use** of the system libclang instead of
@@ -662,17 +700,17 @@ process.
    You will need to have 'cmake' installed in order to generate the required
    makefiles. Linux users can install cmake with their package manager
    ('sudo apt-get install cmake' for Ubuntu) whereas other users can
-   download and install [18] cmake from its project site. Mac users can also
-   get it through Homebrew [17] with 'brew install cmake'.
+   download and install [19] cmake from its project site. Mac users can also
+   get it through Homebrew [18] with 'brew install cmake'.
 
    On a Unix OS, you need to make sure you have Python headers installed. On
    a Debian-like Linux distro, this would be 'sudo apt-get install python-
    dev'. On Mac they should already be present.
 
-   On Windows, you need to download and install python2 [22]. Pick the
+   On Windows, you need to download and install python2 [24]. Pick the
    version corresponding to your Vim architecture. You will also need
    Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by installing
-   Visual Studio [23]. MSVC 11 (Visual Studio 2012), 12 (2013), and 14
+   Visual Studio [25]. MSVC 11 (Visual Studio 2012), 12 (2013), and 14
    (2015) are officially supported.
 
    Here we'll assume you installed YCM with Vundle. That means that the top-
@@ -694,9 +732,9 @@ process.
    where '<generator>' is 'Unix Makefiles' on Unix systems and one of the
    following Visual Studio generators on Windows:
 
-   - 'Visual Studio 11 2012 Win64'
-   - 'Visual Studio 12 2013 Win64'
-   - 'Visual Studio 14 2015 Win64'
+   - 'Visual Studio 11 Win64'
+   - 'Visual Studio 12 Win64'
+   - 'Visual Studio 14 Win64'
 
    Remove the 'Win64' part in these generators if your Vim architecture is
    32-bit.
@@ -715,7 +753,7 @@ process.
    extracted the archive file to folder '~/ycm_temp/llvm_root_dir' (with
    'bin', 'lib', 'include' etc. folders right inside that folder). On
    Windows, you can extract the files from the LLVM+Clang installer using
-   7-zip [24].
+   7-zip [26].
 
    NOTE: This _only_ works with a _downloaded_ LLVM binary package, not a
    custom-built LLVM! See docs below for 'EXTERNAL_LIBCLANG_PATH' when using
@@ -756,21 +794,25 @@ process.
 
 5. Set up support for additional languages, as desired:
 
-6. C# support: Navigate to 'YouCompleteMe/third-party/ycmd/third-
-   party/OmniSharpServer' and run 'msbuild' (Windows) or 'xbuild' (other
-   platforms, using mono) depending on your platform. If mono is not
-   installed, install it.
+6. C# support: Navigate to
+   'YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer' and run
+   'msbuild' (Windows) or 'xbuild' (other platforms, using mono) depending
+   on your platform. If mono is not installed, install it.
 
 7. Go support: If go is not installed on your system, install it and add it
-   to your path. Navigate to 'YouCompleteMe/third-party/ycmd/third-
-   party/gocode' and run 'go build'.
+   to your path. Navigate to
+   'YouCompleteMe/third_party/ycmd/third_party/gocode' and run 'go build'.
 
 8. TypeScript support: As with the quick installation, simply 'npm install
-   -g typescript' after successfully installing nodejs and npm [19].
+   -g typescript' after successfully installing nodejs and npm [20].
 
-9. JavaScript support: Install nodejs and npm [19]. Then navigate to
-   'YouCompleteMe/third-party/ycmd/third-party/tern' and run 'npm install
+9. JavaScript support: Install nodejs and npm [20]. Then navigate to
+   'YouCompleteMe/third_party/ycmd/third_party/tern' and run 'npm install
    --production'
+
+10. Rust support: Install rustc and cargo [21]. Navigate to
+    'YouCompleteMe/third_party/ycmd/third_party/racerd' and run 'cargo
+    build --release'.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -852,6 +894,15 @@ JavaScript ~
 - View documentation comments for identifiers (|GetDoc|)
 - Management of 'Tern' server instance
 
+-------------------------------------------------------------------------------
+                                                           *youcompleteme-rust*
+Rust ~
+
+- Semantic auto-completion
+- Go to definition (|GoTo|, |GoToDefinition|, and |GoToDeclaration| are
+  identical)
+- Management of 'racer' server instance
+
 ===============================================================================
                                                      *youcompleteme-user-guide*
 User Guide ~
@@ -874,7 +925,7 @@ General Usage ~
   through the completions. Use Shift-TAB to cycle backwards. Note that if
   you're using console Vim (that is, not Gvim or MacVim) then it's likely
   that the Shift-TAB binding will not work because the console will not pass
-  it to Vim. You can remap the keys; see the _Options [28]_ section below.
+  it to Vim. You can remap the keys; see the _Options [30]_ section below.
 
 Knowing a little bit about how YCM works internally will prevent confusion. YCM
 has several completion engines: an identifier-based completer that collects all
@@ -945,20 +996,20 @@ This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
 to Clang.
 
-See YCM's own '.ycm_extra_conf.py' [29] for details on how this works. You
+See YCM's own '.ycm_extra_conf.py' [31] for details on how this works. You
 should be able to use it _as a starting point_. **Don't** just copy/paste that
 file somewhere and expect things to magically work; **your project needs
 different flags**. Hint: just replace the strings in the 'flags' variable with
 compilation flags necessary for your project. That should be enough for 99% of
 projects.
 
-Yes, Clang's 'CompilationDatabase' system [30] is also supported. Again, see
+Yes, Clang's 'CompilationDatabase' system [32] is also supported. Again, see
 the above linked example file. You can get CMake to generate this file for you
 by adding 'set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )' to your project's
 'CMakeLists.txt' file (if using CMake). If you're not using CMake, you could
-use something like Bear [31] to generate the 'compile_commands.json' file.
+use something like Bear [33] to generate the 'compile_commands.json' file.
 
-Consider using YCM-Generator [32] to generate the 'ycm_extra_conf.py' file.
+Consider using YCM-Generator [34] to generate the 'ycm_extra_conf.py' file.
 
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions. When
@@ -983,7 +1034,7 @@ Quick start ~
    guide for details.
 
 2. Create a '.tern-project' file in the root directory of your JavaScript
-   project, by following the instructions [33] in the Tern [10]
+   project, by following the instructions [35] in the Tern [10]
    documentation.
 
 3. Make sure that Vim's working directory is a descendent of that directory
@@ -994,13 +1045,13 @@ Quick start ~
 Explanation ~
 
 JavaScript completion is based on Tern [10]. This completion engine requires a
-file named '.tern-project' [33] to exist in the current working directory or a
+file named '.tern-project' [35] to exist in the current working directory or a
 directory which is an ancestor of the current working directory when the tern
 server is started. YCM starts the Tern server the first time a JavaScript file
 is edited, so Vim's working directory at that time needs to be a descendent of
 the directory containing the '.tern-project' file (or that directory itself).
 
-Alternatively, as described in the Tern documentation [34], a global '.tern-
+Alternatively, as described in the Tern documentation [36], a global '.tern-
 config' file may be used.
 
 Multiple Tern servers, are not supported. To switch to a different JavaScript
@@ -1022,9 +1073,9 @@ Tips and tricks ~
 
 This section contains some advice for configuring '.tern-project' and working
 with JavaScript files. The canonical reference for correctly configuring Tern
-is the Tern documentation [34]. Any issues, improvements, advice, etc. should
+is the Tern documentation [36]. Any issues, improvements, advice, etc. should
 be sought from the Tern [10] project. For example, see the list of tern plugins
-[35] for the list of plugins which can be enabled in the 'plugins' section of
+[37] for the list of plugins which can be enabled in the 'plugins' section of
 the '.tern-project' file.
 
 -------------------------------------------------------------------------------
@@ -1069,20 +1120,34 @@ Can be used as follows:
   } );
 <
 -------------------------------------------------------------------------------
+                                       *youcompleteme-rust-semantic-completion*
+Rust semantic completion ~
+
+Completions and GoTo* within the current crate and its dependencies should work
+out of the box with no additional configuration. For semantic analysis
+inclusive of the standard library, you must have a local copy of the rust
+source code [38]. You also need to set the following option so YouCompleteMe
+can locate it.
+>
+  " In this example, the rust source code zip has been extracted to
+  " /usr/local/rust/rustc-1.5.0
+  let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
+<
+-------------------------------------------------------------------------------
                         *youcompleteme-semantic-completion-for-other-languages*
 Semantic completion for other languages ~
 
-Python, C#, Go, and TypeScript are supported natively by YouCompleteMe using
-the Jedi [6], Omnisharp [7], Gocode [8], and TSServer [9] engines,
-respectively. Check the installation section for instructions to enable these
-features if desired.
+Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
+using the Jedi [6], Omnisharp [7], Gocode [8], racer [11], and TSServer [9]
+engines, respectively. Check the installation section for instructions to
+enable these features if desired.
 
 YCM will use your 'omnifunc' (see ':h omnifunc' in Vim) as a source for
 semantic completions if it does not have a native semantic completion engine
 for your file's filetype. Vim comes with okayish omnifuncs for various
 languages like Ruby, PHP etc. It depends on the language.
 
-You can get stellar omnifuncs for Java and Ruby with Eclim [36]. Just make sure
+You can get stellar omnifuncs for Java and Ruby with Eclim [39]. Just make sure
 you have the _latest_ Eclim installed and configured (this means Eclim '>=
 2.2.*' and Eclipse '>= 4.2.*').
 
@@ -1100,7 +1165,7 @@ Writing New Semantic Completers ~
 
 You have two options here: writing an 'omnifunc' for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for
-YCM using the Completer API [37].
+YCM using the Completer API [40].
 
 Here are the differences between the two approaches:
 
@@ -1119,7 +1184,7 @@ Here are the differences between the two approaches:
   than VimScript.
 
 If you want to use the 'omnifunc' system, see the relevant Vim docs with ':h
-complete-functions'. For the Completer API, see the API docs [37].
+complete-functions'. For the Completer API, see the API docs [40].
 
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
@@ -1170,7 +1235,7 @@ current file in Vim's 'locationlist', which can be opened with the ':lopen' and
 ':lclose' commands (make sure you have set 'let
 g:ycm_always_populate_location_list = 1' in your vimrc). A good way to toggle
 the display of the 'locationlist' with a single key mapping is provided by
-another (very small) Vim plugin called ListToggle [38] (which also makes it
+another (very small) Vim plugin called ListToggle [41] (which also makes it
 possible to change the height of the 'locationlist' window), also written by
 yours truly.
 
@@ -1321,7 +1386,7 @@ The *GoToDeclaration* subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, python, cs'
+Supported in filetypes: 'c, cpp, objc, objcpp, python, cs, rust'
 
 -------------------------------------------------------------------------------
 The *GoToDefinition* subcommand
@@ -1334,7 +1399,7 @@ translation unit consists of the file you are editing and all the files you are
 including with '#include' directives (directly or indirectly) in that file.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, python, cs, typescript,
-javascript'
+javascript, rust'
 
 -------------------------------------------------------------------------------
 The *GoTo* subcommand
@@ -1346,7 +1411,7 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, python, cs, javascript'
+Supported in filetypes: 'c, cpp, objc, objcpp, python, cs, javascript, rust'
 
 -------------------------------------------------------------------------------
 The *GoToImprecise* subcommand
@@ -1498,7 +1563,7 @@ The *StartServer* subcommand
 Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: 'cs, javascript, go'
+Supported in filetypes: 'cs, javascript, go, rust'
 
 -------------------------------------------------------------------------------
 The *StopServer* subcommand
@@ -1506,7 +1571,7 @@ The *StopServer* subcommand
 Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: 'cs, javascript, go'
+Supported in filetypes: 'cs, javascript, go, rust'
 
 -------------------------------------------------------------------------------
 The *RestartServer* subcommand
@@ -1514,7 +1579,7 @@ The *RestartServer* subcommand
 Restarts the semantic-engine-as-localhost-server for those semantic engines
 that work as separate servers that YCM talks to.
 
-Supported in filetypes: 'cs'
+Supported in filetypes: 'cs, rust'
 
 -------------------------------------------------------------------------------
 The *ReloadSolution* subcommand
@@ -1558,7 +1623,7 @@ For example:
   call youcompleteme#GetErrorCount()
 <
 Both this function and |youcompleteme#GetWarningCount| can be useful when
-integrating YCM with other Vim plugins. For example, a lightline [39] user
+integrating YCM with other Vim plugins. For example, a lightline [42] user
 could add a diagnostics section to their statusline which would display the
 number of errors and warnings.
 
@@ -1578,11 +1643,11 @@ Options ~
 
 All options have reasonable defaults so if the plug-in works after installation
 you don't need to change any options. These options can be configured in your
-vimrc script [26] by including a line like this:
+vimrc script [28] by including a line like this:
 >
   let g:ycm_min_num_of_chars_for_completion = 1
 <
-Note that after changing an option in your vimrc script [26] you have to
+Note that after changing an option in your vimrc script [28] you have to
 restart Vim for the changes to take effect.
 
 -------------------------------------------------------------------------------
@@ -1903,7 +1968,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [40]. The format
+The only supported tag format is the Exuberant Ctags format [43]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the '--
 fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -2270,7 +2335,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-NOTE: The regex syntax is **NOT** Vim's, it's Python's [41].
+NOTE: The regex syntax is **NOT** Vim's, it's Python's [44].
 
 Default: '[see next line]'
 >
@@ -2455,7 +2520,7 @@ produced. See the full installation guide for help.
 I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults ~
 
 Something (I don't know what) is wrong with the way that Homebrew configures
-and builds Vim. I recommend using MacVim [15]. Even if you don't like the
+and builds Vim. I recommend using MacVim [16]. Even if you don't like the
 MacVim GUI, you can use the Vim binary that is inside the MacVim.app package
 (it's 'MacVim.app/Contents/MacOS/Vim') and get the Vim console experience.
 
@@ -2465,7 +2530,7 @@ I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting ~
 
 You should probably run 'brew rm python; brew install python' to get the latest
 fixes that should make YCM work with such a configuration. Also rebuild Macvim
-then. If you still get problems with this, see issue #18 [42] for suggestions.
+then. If you still get problems with this, see issue #18 [45] for suggestions.
 
 -------------------------------------------------------------------------------
       *youcompleteme-vim-segfaults-when-i-use-semantic-completer-in-ruby-files*
@@ -2550,15 +2615,15 @@ YCM does not read identifiers from my tags files ~
 
 First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
 
-Make sure you are using Exuberant Ctags [43] to produce your tags files since
-the only supported tag format is the Exuberant Ctags format [40]. The format
+Make sure you are using Exuberant Ctags [46] to produce your tags files since
+the only supported tag format is the Exuberant Ctags format [43]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
 list "Exuberant Ctags".
 
 Ctags needs to be called with the '--fields=+l' (that's a lowercase 'L', not a
 one) option because YCM needs the 'language:<lang>' field in the tags output.
 
-NOTE: Exuberant Ctags [43] by default sets language tag for '*.h' files as
+NOTE: Exuberant Ctags [46] by default sets language tag for '*.h' files as
 'C++'. If you have C (not C++) project, consider giving parameter '--
 langmap=c:.c.h' to ctags to see tags from '*.h' files.
 
@@ -2629,7 +2694,7 @@ and similar, then just update to Vim 7.4.314 (or later) and they'll go away.
                                                             *vim-sub-autoclose*
 Nasty bugs happen if I have the 'vim-autoclose' plugin installed ~
 
-Use the delimitMate [44] plugin instead. It does the same thing without
+Use the delimitMate [47] plugin instead. It does the same thing without
 conflicting with YCM.
 
 -------------------------------------------------------------------------------
@@ -2637,7 +2702,7 @@ conflicting with YCM.
 Is there some sort of YCM mailing list? I have questions ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[45] mailing list, _don't_ create issues on the tracker. The tracker is for bug
+[48] mailing list, _don't_ create issues on the tracker. The tracker is for bug
 reports and feature requests.
 
 -------------------------------------------------------------------------------
@@ -2691,7 +2756,7 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions (issue #593 [46]) and other problems, like random
+Syntastic-Vim interactions (issue #593 [49]) and other problems, like random
 Vim flickering. Attempts were made to resolve these issues in Syntastic, but
 ultimately some of them failed (for various reasons).
 
@@ -2727,13 +2792,13 @@ paths, prepend '-isystem' to each individual path and append them all to the
 list of flags you return from your 'FlagsForFile' function in your
 '.ycm_extra_conf.py' file.
 
-See issue #303 [47] for details.
+See issue #303 [50] for details.
 
 -------------------------------------------------------------------------------
-                                  *youcompleteme-install-ycm-with-neobundle-48*
-Install YCM with NeoBundle [48] ~
+                                  *youcompleteme-install-ycm-with-neobundle-51*
+Install YCM with NeoBundle [51] ~
 
-NeoBundle [48] can do the compilation for you; just add the following to your
+NeoBundle [51] can do the compilation for you; just add the following to your
 vimrc:
 >
   NeoBundle 'Valloric/YouCompleteMe', {
@@ -2767,10 +2832,10 @@ directory and YCM will stop complaining.
 Contact ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[45] mailing list.
+[48] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[49].
+[52].
 
 The latest version of the plugin is available at
 http://valloric.github.io/YouCompleteMe/.
@@ -2781,10 +2846,10 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [50]. © 2015 YouCompleteMe
+This software is licensed under the GPL v3 license [53]. © 2015 YouCompleteMe
 contributors
 
-  Image: Bitdeli Badge [51]
+  Image: Bitdeli Badge [54]
 
 ===============================================================================
                                                      *youcompleteme-references*
@@ -2800,47 +2865,50 @@ References ~
 [8] https://github.com/nsf/gocode
 [9] https://github.com/Microsoft/TypeScript/tree/master/src/server
 [10] http://ternjs.net
-[11] http://i.imgur.com/0OP4ood.gif
-[12] https://en.wikipedia.org/wiki/Subsequence
-[13] https://github.com/scrooloose/syntastic
-[14] https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
-[15] https://github.com/macvim-dev/macvim/releases
-[16] https://github.com/VundleVim/Vundle.vim#about
-[17] http://brew.sh
-[18] https://cmake.org/download/
-[19] https://docs.npmjs.com/getting-started/installing-node
-[20] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-[21] https://bintray.com/veegee/generic/vim_x64
-[22] https://www.python.org/downloads/windows/
-[23] https://www.visualstudio.com/products/free-developer-offers-vs.aspx
-[24] http://www.7-zip.org/download.html
-[25] https://github.com/tpope/vim-pathogen#pathogenvim
-[26] http://vimhelp.appspot.com/starting.txt.html#vimrc
-[27] http://llvm.org/releases/download.html
-[28] https://github.com/Valloric/YouCompleteMe#options
-[29] https://github.com/Valloric/ycmd/blob/master/cpp/ycm/.ycm_extra_conf.py
-[30] http://clang.llvm.org/docs/JSONCompilationDatabase.html
-[31] https://github.com/rizsotto/Bear
-[32] https://github.com/rdnetto/YCM-Generator
-[33] http://ternjs.net/doc/manual.html#configuration
-[34] http://ternjs.net/doc/manual.html#server
-[35] http://ternjs.net/doc/manual.html#plugins
-[36] http://eclim.org/
-[37] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
-[38] https://github.com/Valloric/ListToggle
-[39] https://github.com/itchyny/lightline.vim
-[40] http://ctags.sourceforge.net/FORMAT
-[41] https://docs.python.org/2/library/re.html#regular-expression-syntax
-[42] https://github.com/Valloric/YouCompleteMe/issues/18
-[43] http://ctags.sourceforge.net/
-[44] https://github.com/Raimondi/delimitMate
-[45] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[46] https://github.com/Valloric/YouCompleteMe/issues/593
-[47] https://github.com/Valloric/YouCompleteMe/issues/303
-[48] https://github.com/Shougo/neobundle.vim
-[49] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[50] http://www.gnu.org/copyleft/gpl.html
-[51] https://bitdeli.com/free
-[52] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[11] https://github.com/phildawes/racer
+[12] http://i.imgur.com/0OP4ood.gif
+[13] https://en.wikipedia.org/wiki/Subsequence
+[14] https://github.com/scrooloose/syntastic
+[15] https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
+[16] https://github.com/macvim-dev/macvim/releases
+[17] https://github.com/VundleVim/Vundle.vim#about
+[18] http://brew.sh
+[19] https://cmake.org/download/
+[20] https://docs.npmjs.com/getting-started/installing-node
+[21] https://www.rust-lang.org/
+[22] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+[23] https://bintray.com/veegee/generic/vim_x64
+[24] https://www.python.org/downloads/windows/
+[25] https://www.visualstudio.com/products/free-developer-offers-vs.aspx
+[26] http://www.7-zip.org/download.html
+[27] https://github.com/tpope/vim-pathogen#pathogenvim
+[28] http://vimhelp.appspot.com/starting.txt.html#vimrc
+[29] http://llvm.org/releases/download.html
+[30] https://github.com/Valloric/YouCompleteMe#options
+[31] https://github.com/Valloric/ycmd/blob/master/cpp/ycm/.ycm_extra_conf.py
+[32] http://clang.llvm.org/docs/JSONCompilationDatabase.html
+[33] https://github.com/rizsotto/Bear
+[34] https://github.com/rdnetto/YCM-Generator
+[35] http://ternjs.net/doc/manual.html#configuration
+[36] http://ternjs.net/doc/manual.html#server
+[37] http://ternjs.net/doc/manual.html#plugins
+[38] https://www.rust-lang.org/downloads.html
+[39] http://eclim.org/
+[40] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
+[41] https://github.com/Valloric/ListToggle
+[42] https://github.com/itchyny/lightline.vim
+[43] http://ctags.sourceforge.net/FORMAT
+[44] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[45] https://github.com/Valloric/YouCompleteMe/issues/18
+[46] http://ctags.sourceforge.net/
+[47] https://github.com/Raimondi/delimitMate
+[48] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[49] https://github.com/Valloric/YouCompleteMe/issues/593
+[50] https://github.com/Valloric/YouCompleteMe/issues/303
+[51] https://github.com/Shougo/neobundle.vim
+[52] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[53] http://www.gnu.org/copyleft/gpl.html
+[54] https://bitdeli.com/free
+[55] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
 
 vim: ft=help
