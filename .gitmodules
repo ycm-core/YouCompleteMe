@@ -3,4 +3,4 @@
 	url = https://github.com/ross/requests-futures
 [submodule "third_party/ycmd"]
 	path = third_party/ycmd
-	url = https://github.com/Valloric/ycmd
+	url = https://github.com/ocehugo/ycmd

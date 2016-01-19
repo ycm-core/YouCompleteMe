@@ -18,7 +18,11 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import requests
-import urlparse
+# support python3
+try:
+    import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 from base64 import b64decode, b64encode
 from retries import retries
 from requests_futures.sessions import FuturesSession

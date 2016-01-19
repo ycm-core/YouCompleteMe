@@ -16,6 +16,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
+# support python3
+import sys
+if sys.version_info.major > 2:
+    PY3 = True
+else:
+    PY3 = False
 
 import os
 import vim
@@ -94,18 +100,30 @@ class YouCompleteMe( object ):
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetupServer()
     self._ycmd_keepalive.Start()
+    # update syntax to support python3
     self._complete_done_hooks = {
-      'cs': lambda( self ): self._OnCompleteDone_Csharp()
+        'cs': lambda self: self._OnCompleteDone_Csharp()
     }
+
 
   def _SetupServer( self ):
     self._available_completers = {}
     server_port = utils.GetUnusedLocalhostPort()
     # The temp options file is deleted by ycmd during startup
-    with tempfile.NamedTemporaryFile( delete = False ) as options_file:
+# support python3
+    if PY3:
+        temp_mode_opt = 'w+'
+    else:
+        temp_mode_opt = 'w+b'
+
+    with tempfile.NamedTemporaryFile(delete = False, mode=temp_mode_opt ) as options_file:
       hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
       options_dict = dict( self._user_options )
       options_dict[ 'hmac_secret' ] = base64.b64encode( hmac_secret )
+#       support python3
+      if PY3:
+          options_dict[ 'hmac_secret' ] = str(options_dict['hmac_secret'],'utf8')
+
       json.dump( options_dict, options_file )
       options_file.flush()
 
@@ -302,9 +320,14 @@ class YouCompleteMe( object ):
 
   def GetCompleteDoneHooks( self ):
     filetypes = vimsupport.CurrentFiletypes()
-    for key, value in self._complete_done_hooks.iteritems():
-      if key in filetypes:
-        yield value
+    try:
+        for key, value in self._complete_done_hooks.iteritems():
+          if key in filetypes:
+            yield value
+    except AttributeError:
+        for key, value in self._complete_done_hooks.items():
+          if key in filetypes:
+            yield value
 
 
   def GetCompletionsUserMayHaveCompleted( self ):

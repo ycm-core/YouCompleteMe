@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2016 YouCompleteMe Contributors
 #
@@ -21,6 +22,13 @@ MockVimModule()
 
 from mock import patch, call
 from ycm.client.command_request import CommandRequest
+# support python3
+import sys
+
+if sys.version_info.major > 2:
+    PY3 = True
+else:
+    PY3 = False
 
 
 class GoToResponse_QuickFix_test:
@@ -84,8 +92,7 @@ class GoToResponse_QuickFix_test:
     self._request._response = completer_response
 
     self._request.RunPostCommandActionsIfNeeded()
-
     vim_eval.assert_has_calls( [
-      call( 'setqflist( {0} )'.format( repr( expected_qf_list ) ) ),
-      call( 'youcompleteme#OpenGoToList()' ),
+        call( 'setqflist( {0} )'.format( repr( expected_qf_list ) ) ),
+        call( 'youcompleteme#OpenGoToList()' ),
     ] )

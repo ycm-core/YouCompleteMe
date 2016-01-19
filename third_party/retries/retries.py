@@ -24,6 +24,13 @@
 import sys
 from time import sleep
 
+# support python3
+major, minor = sys.version_info[ 0 : 2 ]
+if major >2:
+    PY3 = True
+else:
+    PY3 = False
+
 # Source: https://gist.github.com/n1ywb/2570004
 
 def example_exc_handler(tries_remaining, exception, delay):
@@ -62,7 +69,12 @@ def retries(max_tries, delay=1, backoff=2, exceptions=(Exception,), hook=None):
         def f2(*args, **kwargs):
             mydelay = delay
             tries = range(max_tries)
-            tries.reverse()
+# support python3
+            if PY3:
+                tries = reversed(tries)
+            else:
+                tries.reverse()
+
             for tries_remaining in tries:
                 try:
                    return func(*args, **kwargs)
