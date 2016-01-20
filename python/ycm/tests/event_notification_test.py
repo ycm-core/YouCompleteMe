@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.test_utils import MockVimModule
+from ycm.test_utils import MockVimModule, ExtendedMock
 MockVimModule()
 
-import contextlib, os
+import contextlib
+import os
 
 from ycm.youcompleteme import YouCompleteMe
 from ycmd import user_options_store
@@ -35,6 +36,7 @@ DEFAULT_CLIENT_OPTIONS = {
   'server_log_level': 'info',
   'extra_conf_vim_data': [],
 }
+
 
 def PostVimMessage_Call( message ):
   """Return a mock.call object for a call to vimsupport.PostVimMesasge with the
@@ -74,7 +76,7 @@ def MockArbitraryBuffer( filetype, native_available = True ):
       raise ValueError( 'Unexpected evaluation' )
 
     # Arbitrary, but valid, cursor position
-    vim_current.window.cursor = (1,2)
+    vim_current.window.cursor = ( 1, 2 )
 
     # Arbitrary, but valid, single buffer open
     current_buffer = MagicMock()
@@ -129,7 +131,7 @@ class EventNotification_test( object ):
 
   def setUp( self ):
     options = dict( user_options_store.DefaultOptions() )
-    options.update ( DEFAULT_CLIENT_OPTIONS )
+    options.update( DEFAULT_CLIENT_OPTIONS )
     user_options_store.SetAll( options )
 
     self.server_state = YouCompleteMe( user_options_store.GetAll() )
@@ -141,7 +143,7 @@ class EventNotification_test( object ):
       self.server_state.OnVimLeave()
 
 
-  @patch( 'vim.command' )
+  @patch( 'vim.command', new_callable = ExtendedMock )
   def FileReadyToParse_NonDiagnostic_Error_test( self, vim_command ):
     # This test validates the behaviour of YouCompleteMe.ValidateParseRequest in
     # combination with YouCompleteMe.OnFileReadyToParse when the completer
@@ -158,13 +160,13 @@ class EventNotification_test( object ):
         self.server_state.ValidateParseRequest()
 
         # The first call raises a warning
-        vim_command.assert_has_calls( [
+        vim_command.assert_has_exact_calls( [
           PostVimMessage_Call( ERROR_TEXT ),
         ] )
 
         # Subsequent calls don't re-raise the warning
         self.server_state.ValidateParseRequest()
-        vim_command.assert_has_calls( [
+        vim_command.assert_has_exact_calls( [
           PostVimMessage_Call( ERROR_TEXT ),
         ] )
 
@@ -172,7 +174,7 @@ class EventNotification_test( object ):
         self.server_state.OnFileReadyToParse()
         assert self.server_state.DiagnosticsForCurrentFileReady()
         self.server_state.ValidateParseRequest()
-        vim_command.assert_has_calls( [
+        vim_command.assert_has_exact_calls( [
           PostVimMessage_Call( ERROR_TEXT ),
           PostVimMessage_Call( ERROR_TEXT ),
         ] )
@@ -187,8 +189,10 @@ class EventNotification_test( object ):
         vim_command.assert_not_called()
 
 
-  @patch( 'ycm.client.event_notification._LoadExtraConfFile' )
-  @patch( 'ycm.client.event_notification._IgnoreExtraConfFile' )
+  @patch( 'ycm.client.event_notification._LoadExtraConfFile',
+          new_callable = ExtendedMock )
+  @patch( 'ycm.client.event_notification._IgnoreExtraConfFile',
+          new_callable = ExtendedMock )
   def FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
       self,
       ignore_extra_conf,
@@ -211,25 +215,26 @@ class EventNotification_test( object ):
 
         # When the user accepts the extra conf, we load it
         with patch( 'ycm.vimsupport.PresentDialog',
-                    return_value = 0 ) as present_dialog:
+                    return_value = 0,
+                    new_callable = ExtendedMock ) as present_dialog:
           self.server_state.OnFileReadyToParse()
           assert self.server_state.DiagnosticsForCurrentFileReady()
           self.server_state.ValidateParseRequest()
 
-          present_dialog.assert_has_calls( [
+          present_dialog.assert_has_exact_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
           ] )
-          load_extra_conf.assert_has_calls( [
+          load_extra_conf.assert_has_exact_calls( [
             call( FILE_NAME ),
           ] )
 
           # Subsequent calls don't re-raise the warning
           self.server_state.ValidateParseRequest()
 
-          present_dialog.assert_has_calls( [
+          present_dialog.assert_has_exact_calls( [
             PresentDialog_Confirm_Call( MESSAGE )
           ] )
-          load_extra_conf.assert_has_calls( [
+          load_extra_conf.assert_has_exact_calls( [
             call( FILE_NAME ),
           ] )
 
@@ -238,36 +243,37 @@ class EventNotification_test( object ):
           assert self.server_state.DiagnosticsForCurrentFileReady()
           self.server_state.ValidateParseRequest()
 
-          present_dialog.assert_has_calls( [
+          present_dialog.assert_has_exact_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
             PresentDialog_Confirm_Call( MESSAGE ),
           ] )
-          load_extra_conf.assert_has_calls( [
+          load_extra_conf.assert_has_exact_calls( [
             call( FILE_NAME ),
             call( FILE_NAME ),
           ] )
 
         # When the user rejects the extra conf, we reject it
         with patch( 'ycm.vimsupport.PresentDialog',
-                    return_value = 1 ) as present_dialog:
+                    return_value = 1,
+                    new_callable = ExtendedMock ) as present_dialog:
           self.server_state.OnFileReadyToParse()
           assert self.server_state.DiagnosticsForCurrentFileReady()
           self.server_state.ValidateParseRequest()
 
-          present_dialog.assert_has_calls( [
+          present_dialog.assert_has_exact_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
           ] )
-          ignore_extra_conf.assert_has_calls( [
+          ignore_extra_conf.assert_has_exact_calls( [
             call( FILE_NAME ),
           ] )
 
           # Subsequent calls don't re-raise the warning
           self.server_state.ValidateParseRequest()
 
-          present_dialog.assert_has_calls( [
+          present_dialog.assert_has_exact_calls( [
             PresentDialog_Confirm_Call( MESSAGE )
           ] )
-          ignore_extra_conf.assert_has_calls( [
+          ignore_extra_conf.assert_has_exact_calls( [
             call( FILE_NAME ),
           ] )
 
@@ -276,11 +282,11 @@ class EventNotification_test( object ):
           assert self.server_state.DiagnosticsForCurrentFileReady()
           self.server_state.ValidateParseRequest()
 
-          present_dialog.assert_has_calls( [
+          present_dialog.assert_has_exact_calls( [
             PresentDialog_Confirm_Call( MESSAGE ),
             PresentDialog_Confirm_Call( MESSAGE ),
           ] )
-          ignore_extra_conf.assert_has_calls( [
+          ignore_extra_conf.assert_has_exact_calls( [
             call( FILE_NAME ),
             call( FILE_NAME ),
           ] )
