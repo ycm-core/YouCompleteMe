@@ -656,7 +656,7 @@ Quick Feature Summary
 * Management of OmniSharp server instance
 * View documentation comments for identifiers (`GetDoc`)
 
-### Python 2
+### Python
 
 * Intelligent auto-completion
 * Go to declaration/definition (`GoTo`, etc.)
@@ -903,6 +903,21 @@ locate it.
 " /usr/local/rust/rustc-1.5.0
 let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
 ```
+
+### Python semantic completion
+
+Completion and GoTo commands should work out of the box with no additional
+configuration. Those feature are provided by the [jedi][] library which support
+a variety of python versions (2.6, 2.7, 3.2, 3.3 or 3.4) as long as it runs
+under such python interpreter. By default YCM runs [jedi][] with the same
+python interpreter used by [ycmd][], so if you would like to use a different
+interpreter to get the feature that [jedi][] can provide use the following
+option specifying the python binary to use.
+
+```viml
+let g:ycm_python_binary_path = '/usr/bin/python3'
+```
+
 
 ### Semantic completion for other languages
 
@@ -1178,7 +1193,7 @@ This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
 locations.
 
-Supported in filetypes: `javascript`
+Supported in filetypes: `javascript, python`
 
 ### The `ClearCompilationFlagCache` subcommand
 
@@ -1320,7 +1335,14 @@ Supported in filetypes: `cs, javascript, go, rust`
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, rust`
+For python an additional argument can be passed to this subcommand specifying a
+python binary to use to restart the python semantic engine.
+
+```viml
+:YcmCompleter RestartServer /usr/bin/python3.4
+```
+
+Supported in filetypes: `cs, rust, python`
 
 ### The `ReloadSolution` subcommand
 
@@ -2192,6 +2214,14 @@ Default: 1000
 ```viml
 let g:ycm_disable_for_files_larger_than_kb = 1000
 ```
+
+### The `g:ycm_python_binary_path` option
+
+This option specify the python interpreter to use to run the [jedi][]
+completion library.  Specify the python interpreter to use to get completions.
+By default the python under which [ycmd][] runs would be used.
+
+Default: `''`
 
 FAQ
 ---
