@@ -47,11 +47,11 @@ def PathToPythonInterpreter():
   python_interpreter = vim.eval( 'g:ycm_path_to_python_interpreter' )
 
   if python_interpreter:
-    if not IsPythonVersionCorrect( python_interpreter ):
-      raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
-                          "does not point to a valid Python 2.6 or 2.7." )
+    if IsPythonVersionCorrect( python_interpreter ):
+      return python_interpreter
 
-    return python_interpreter
+    raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
+                        "does not point to a valid Python 2.6 or 2.7." )
 
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
   # We cannot use sys.executable on Windows because for unknown reasons, it
@@ -60,12 +60,21 @@ def PathToPythonInterpreter():
   python_interpreter = ( WIN_PYTHON_PATH if utils.OnWindows() else
                          sys.executable )
 
-  if not IsPythonVersionCorrect( python_interpreter ):
-    raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
-                        "using the 'g:ycm_path_to_python_interpreter' "
-                        "option." )
+  if IsPythonVersionCorrect( python_interpreter ):
+    return python_interpreter
 
-  return python_interpreter
+  # As a last resort, we search python in the PATH. We check 'python2' before
+  # 'python' because on some distributions (Arch Linux for example), python
+  # refers to python3.
+  python_interpreter = utils.PathToFirstExistingExecutable( [ 'python2',
+                                                              'python' ] )
+
+  if IsPythonVersionCorrect( python_interpreter ):
+    return python_interpreter
+
+  raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
+                      "using the 'g:ycm_path_to_python_interpreter' "
+                      "option." )
 
 
 def EndsWithPython( path ):
