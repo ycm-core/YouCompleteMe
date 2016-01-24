@@ -18,6 +18,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from mock import MagicMock
+from hamcrest import assert_that, equal_to
 import re
 import sys
 
@@ -116,3 +117,10 @@ def MockVimModule():
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK
+
+
+class ExtendedMock( MagicMock ):
+
+  def assert_has_exact_calls( self, calls, any_order = False ):
+    self.assert_has_calls( calls, any_order )
+    assert_that( self.call_count, equal_to( len( calls ) ) )
