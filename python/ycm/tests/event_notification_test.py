@@ -35,6 +35,9 @@ DEFAULT_CLIENT_OPTIONS = {
   'server_log_level': 'info',
   'extra_conf_vim_data': [],
   'show_diagnostics_ui': 1,
+  'enable_diagnostic_signs': 1,
+  'enable_diagnostic_highlighting': 0,
+  'always_populate_location_list': 0,
 }
 
 def PostVimMessage_Call( message ):
@@ -49,6 +52,17 @@ def PresentDialog_Confirm_Call( message ):
   """Return a mock.call object for a call to vimsupport.PresentDialog, as called
   why vimsupport.Confirm with the supplied confirmation message"""
   return call( message, [ 'Ok', 'Cancel' ] )
+
+
+def PlaceSign_Call( sign_id, line_num, buffer_num, is_error ):
+  sign_name = 'YcmError' if is_error else 'YcmWarning'
+  return call( 'sign place {0} line={1} name={2} buffer={3}'
+                  .format( sign_id, line_num, sign_name, buffer_num ) )
+
+
+def UnplaceSign_Call( sign_id, buffer_num ):
+  return call( 'try | exec "sign unplace {0} buffer={1}" |'
+               ' catch /E158/ | endtry'.format( sign_id, buffer_num ) )
 
 
 @contextlib.contextmanager
@@ -72,6 +86,12 @@ def MockArbitraryBuffer( filetype, native_available = True ):
       if value == 'getbufvar(0, "&ft")' or value == '&filetype':
         return filetype
 
+      if value.startswith( 'bufnr(' ):
+        return 0
+
+      if value.startswith( 'bufwinnr(' ):
+        return 0
+
       raise ValueError( 'Unexpected evaluation' )
 
     # Arbitrary, but valid, cursor position
@@ -82,6 +102,7 @@ def MockArbitraryBuffer( filetype, native_available = True ):
     current_buffer.number = 0
     current_buffer.filename = os.path.realpath( 'TEST_BUFFER' )
     current_buffer.name = 'TEST_BUFFER'
+    current_buffer.window = 0
 
     # The rest just mock up the Vim module so that our single arbitrary buffer
     # makes sense to vimsupport module.
@@ -285,3 +306,69 @@ class EventNotification_test( object ):
             call( FILE_NAME ),
             call( FILE_NAME ),
           ] )
+
+
+  @patch( 'vim.command' )
+  def FileReadyToParse_Diagnostic_Error_Native_test( self, vim_command ):
+
+    def FirstDiagnosticResponse( *args ):
+        return [
+                {
+                 'kind': 'ERROR', 'text': 'expected ; after...', 'ranges': [],
+                 'location': { 'line_num': 1, 'column_num': 2,
+                               'filepath': 'TEST_BUFFER' },
+                 'location_extent': {
+                   'start': { 'line_num': 1, 'column_num': 2,
+                              'filepath': 'TEST_BUFFER' },
+                   'end': { 'line_num': 1, 'column_num': 4,
+                            'filepath': 'TEST_BUFFER' },
+                 },
+                 'fixit_available': True,
+                },
+               ]
+
+    def SecondDiagnosticResponse( *args ):
+        return [
+                {
+                 'kind': 'WARNING', 'text': 'cast', 'ranges': [],
+                 'location': { 'line_num': 2, 'column_num': 2,
+                               'filepath': 'TEST_BUFFER' },
+                 'location_extent': {
+                   'start': { 'line_num': 2, 'column_num': 2,
+                              'filepath': 'TEST_BUFFER' },
+                   'end': { 'line_num': 2, 'column_num': 4,
+                            'filepath': 'TEST_BUFFER' },
+                 },
+                 'fixit_available': False,
+                },
+               ]
+
+    with MockArbitraryBuffer( 'cpp' ):
+      with MockEventNotification( FirstDiagnosticResponse ):
+        self.server_state.OnFileReadyToParse()
+        self.server_state.HandleFileParseRequest()
+        vim_command.assert_has_calls( [
+          PlaceSign_Call( 1, 1, 0, True )
+        ] )
+        vim_command.reset_mock()
+        self.server_state.HandleFileParseRequest()
+        vim_command.assert_not_called()
+
+      with MockEventNotification( SecondDiagnosticResponse ):
+        self.server_state.OnFileReadyToParse()
+        self.server_state.HandleFileParseRequest()
+        vim_command.assert_has_calls( [] )
+        vim_command.assert_has_calls( [
+          PlaceSign_Call( 2, 2, 0, False ),
+          UnplaceSign_Call( 1, 0 )
+        ] )
+        vim_command.reset_mock()
+        self.server_state.HandleFileParseRequest()
+        vim_command.assert_not_called()
+
+      with MockEventNotification( MagicMock( return_value = [] ) ):
+        self.server_state.OnFileReadyToParse()
+        self.server_state.HandleFileParseRequest()
+        vim_command.assert_has_calls( [
+          UnplaceSign_Call( 2, 0 )
+        ] )

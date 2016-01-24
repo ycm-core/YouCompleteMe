@@ -18,262 +18,243 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from nose.tools import eq_, ok_, with_setup
+from nose.tools import eq_, ok_
 from mock import MagicMock
 from ycm.test_utils import MockVimModule
 vim_mock = MockVimModule()
 from ycm import base
-from ycm import vimsupport
-import sys
 
-# column is 0-based
-def SetVimCurrentColumnAndLineValue( column, line_value ):
-  vimsupport.CurrentColumn = MagicMock( return_value = column )
-  vimsupport.CurrentLineContents = MagicMock( return_value = line_value )
+class Base_test( object ):
 
+  def __init__( self ):
+    self._vimsupport = MagicMock()
+    self._vimsupport.CurrentFiletypes = MagicMock( return_value = [''] )
+    self._vimsupport.CurrentColumn = MagicMock( return_value = 1 )
+    self._vimsupport.CurrentLineContents = MagicMock( return_value = '' )
+    self._original = None
 
-def Setup():
-  sys.modules[ 'ycm.vimsupport' ] = MagicMock()
-  vimsupport.CurrentFiletypes = MagicMock( return_value = [''] )
-  vimsupport.CurrentColumn = MagicMock( return_value = 1 )
-  vimsupport.CurrentLineContents = MagicMock( return_value = '' )
 
+  def setUp( self ):
+    self._original = base.vimsupport
+    base.vimsupport = self._vimsupport
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_Basic_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
-  eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
+  def tearDown( self ):
+    base.vimsupport = self._original
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_ParenInTextAfterCursor_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar(zoo' )
-  eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
+  # column is 0-based
+  def SetVimCurrentColumnAndLineValue( self, column, line_value ):
+    self._vimsupport.CurrentColumn = MagicMock( return_value = column )
+    self._vimsupport.CurrentLineContents = MagicMock( return_value = line_value )
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_PlusInTextAfterCursor_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar+zoo' )
-  eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
+  def AdjustCandidateInsertionText_Basic_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
+    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_WhitespaceInTextAfterCursor_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar zoo' )
-  eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
+  def AdjustCandidateInsertionText_ParenInTextAfterCursor_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar(zoo' )
+    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_MoreThanWordMatchingAfterCursor_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar.h' )
-  eq_( [ { 'abbr': 'foobar.h', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText( [ 'foobar.h' ] ) )
 
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar(zoo' )
-  eq_( [ { 'abbr': 'foobar(zoo', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText( [ 'foobar(zoo' ] ) )
+  def AdjustCandidateInsertionText_PlusInTextAfterCursor_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar+zoo' )
+    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_NotSuffix_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
-  eq_( [ { 'abbr': 'foofoo', 'word': 'foofoo' } ],
-       base.AdjustCandidateInsertionText( [ 'foofoo' ] ) )
+  def AdjustCandidateInsertionText_WhitespaceInTextAfterCursor_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar zoo' )
+    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText( [ 'foobar' ] ) )
 
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_NothingAfterCursor_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = '' )
-  eq_( [ 'foofoo',
-         'zobar' ],
-       base.AdjustCandidateInsertionText( [ 'foofoo',
-                                            'zobar' ] ) )
+  def AdjustCandidateInsertionText_MoreThanWordMatchingAfterCursor_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar.h' )
+    eq_( [ { 'abbr': 'foobar.h', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText( [ 'foobar.h' ] ) )
 
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar(zoo' )
+    eq_( [ { 'abbr': 'foobar(zoo', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText( [ 'foobar(zoo' ] ) )
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_MultipleStrings_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
-  eq_( [ { 'abbr': 'foobar', 'word': 'foo' },
-         { 'abbr': 'zobar', 'word': 'zo' },
-         { 'abbr': 'qbar', 'word': 'q' },
-         { 'abbr': 'bar', 'word': '' },
-       ],
-       base.AdjustCandidateInsertionText( [ 'foobar',
-                                            'zobar',
-                                            'qbar',
-                                            'bar' ] ) )
 
+  def AdjustCandidateInsertionText_NotSuffix_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
+    eq_( [ { 'abbr': 'foofoo', 'word': 'foofoo' } ],
+         base.AdjustCandidateInsertionText( [ 'foofoo' ] ) )
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_DictInput_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
-  eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText(
-         [ { 'word': 'foobar' } ] ) )
 
+  def AdjustCandidateInsertionText_NothingAfterCursor_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = '' )
+    eq_( [ 'foofoo',
+           'zobar' ],
+         base.AdjustCandidateInsertionText( [ 'foofoo',
+                                              'zobar' ] ) )
 
-@with_setup( Setup )
-def AdjustCandidateInsertionText_DontTouchAbbr_test():
-  vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
-  eq_( [ { 'abbr': '1234', 'word': 'foo' } ],
-       base.AdjustCandidateInsertionText(
-         [ { 'abbr': '1234', 'word': 'foobar' } ] ) )
 
+  def AdjustCandidateInsertionText_MultipleStrings_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
+    eq_( [ { 'abbr': 'foobar', 'word': 'foo' },
+           { 'abbr': 'zobar', 'word': 'zo' },
+           { 'abbr': 'qbar', 'word': 'q' },
+           { 'abbr': 'bar', 'word': '' },
+         ],
+         base.AdjustCandidateInsertionText( [ 'foobar',
+                                              'zobar',
+                                              'qbar',
+                                              'bar' ] ) )
 
-@with_setup( Setup )
-def OverlapLength_Basic_test():
-  eq_( 3, base.OverlapLength( 'foo bar', 'bar zoo' ) )
-  eq_( 3, base.OverlapLength( 'foobar', 'barzoo' ) )
 
+  def AdjustCandidateInsertionText_DictInput_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
+    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText(
+           [ { 'word': 'foobar' } ] ) )
 
-@with_setup( Setup )
-def OverlapLength_BasicWithUnicode_test():
-  eq_( 3, base.OverlapLength( u'bar fäö', u'fäö bar' ) )
-  eq_( 3, base.OverlapLength( u'zoofäö', u'fäözoo' ) )
 
+  def AdjustCandidateInsertionText_DontTouchAbbr_test( self ):
+    self._vimsupport.TextAfterCursor = MagicMock( return_value = 'bar' )
+    eq_( [ { 'abbr': '1234', 'word': 'foo' } ],
+         base.AdjustCandidateInsertionText(
+           [ { 'abbr': '1234', 'word': 'foobar' } ] ) )
 
-@with_setup( Setup )
-def OverlapLength_OneCharOverlap_test():
-  eq_( 1, base.OverlapLength( 'foo b', 'b zoo' ) )
 
+  def OverlapLength_Basic_test( self ):
+    eq_( 3, base.OverlapLength( 'foo bar', 'bar zoo' ) )
+    eq_( 3, base.OverlapLength( 'foobar', 'barzoo' ) )
 
-@with_setup( Setup )
-def OverlapLength_SameStrings_test():
-  eq_( 6, base.OverlapLength( 'foobar', 'foobar' ) )
 
+  def OverlapLength_BasicWithUnicode_test( self ):
+    eq_( 3, base.OverlapLength( u'bar fäö', u'fäö bar' ) )
+    eq_( 3, base.OverlapLength( u'zoofäö', u'fäözoo' ) )
 
-@with_setup( Setup )
-def OverlapLength_Substring_test():
-  eq_( 6, base.OverlapLength( 'foobar', 'foobarzoo' ) )
-  eq_( 6, base.OverlapLength( 'zoofoobar', 'foobar' ) )
 
+  def OverlapLength_OneCharOverlap_test( self ):
+    eq_( 1, base.OverlapLength( 'foo b', 'b zoo' ) )
 
-@with_setup( Setup )
-def OverlapLength_LongestOverlap_test():
-  eq_( 7, base.OverlapLength( 'bar foo foo', 'foo foo bar' ) )
 
+  def OverlapLength_SameStrings_test( self ):
+    eq_( 6, base.OverlapLength( 'foobar', 'foobar' ) )
 
-@with_setup( Setup )
-def OverlapLength_EmptyInput_test():
-  eq_( 0, base.OverlapLength( '', 'goobar' ) )
-  eq_( 0, base.OverlapLength( 'foobar', '' ) )
-  eq_( 0, base.OverlapLength( '', '' ) )
 
+  def OverlapLength_Substring_test( self ):
+    eq_( 6, base.OverlapLength( 'foobar', 'foobarzoo' ) )
+    eq_( 6, base.OverlapLength( 'zoofoobar', 'foobar' ) )
 
-@with_setup( Setup )
-def OverlapLength_NoOverlap_test():
-  eq_( 0, base.OverlapLength( 'foobar', 'goobar' ) )
-  eq_( 0, base.OverlapLength( 'foobar', '(^($@#$#@' ) )
-  eq_( 0, base.OverlapLength( 'foo bar zoo', 'foo zoo bar' ) )
 
+  def OverlapLength_LongestOverlap_test( self ):
+    eq_( 7, base.OverlapLength( 'bar foo foo', 'foo foo bar' ) )
 
-@with_setup( Setup )
-def LastEnteredCharIsIdentifierChar_Basic_test():
-  SetVimCurrentColumnAndLineValue( 3, 'abc' )
-  ok_( base.LastEnteredCharIsIdentifierChar() )
 
-  SetVimCurrentColumnAndLineValue( 2, 'abc' )
-  ok_( base.LastEnteredCharIsIdentifierChar() )
+  def OverlapLength_EmptyInput_test( self ):
+    eq_( 0, base.OverlapLength( '', 'goobar' ) )
+    eq_( 0, base.OverlapLength( 'foobar', '' ) )
+    eq_( 0, base.OverlapLength( '', '' ) )
 
-  SetVimCurrentColumnAndLineValue( 1, 'abc' )
-  ok_( base.LastEnteredCharIsIdentifierChar() )
 
+  def OverlapLength_NoOverlap_test( self ):
+    eq_( 0, base.OverlapLength( 'foobar', 'goobar' ) )
+    eq_( 0, base.OverlapLength( 'foobar', '(^($@#$#@' ) )
+    eq_( 0, base.OverlapLength( 'foo bar zoo', 'foo zoo bar' ) )
 
-@with_setup( Setup )
-def LastEnteredCharIsIdentifierChar_FiletypeHtml_test():
-  SetVimCurrentColumnAndLineValue( 3, 'ab-' )
-  vimsupport.CurrentFiletypes = MagicMock( return_value = ['html'] )
-  ok_( base.LastEnteredCharIsIdentifierChar() )
 
+  def LastEnteredCharIsIdentifierChar_Basic_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 3, 'abc' )
+    ok_( base.LastEnteredCharIsIdentifierChar() )
 
-@with_setup( Setup )
-def LastEnteredCharIsIdentifierChar_ColumnIsZero_test():
-  SetVimCurrentColumnAndLineValue( 0, 'abc' )
-  ok_( not base.LastEnteredCharIsIdentifierChar() )
+    self.SetVimCurrentColumnAndLineValue( 2, 'abc' )
+    ok_( base.LastEnteredCharIsIdentifierChar() )
 
+    self.SetVimCurrentColumnAndLineValue( 1, 'abc' )
+    ok_( base.LastEnteredCharIsIdentifierChar() )
 
-@with_setup( Setup )
-def LastEnteredCharIsIdentifierChar_LineEmpty_test():
-  SetVimCurrentColumnAndLineValue( 3, '' )
-  ok_( not base.LastEnteredCharIsIdentifierChar() )
 
-  SetVimCurrentColumnAndLineValue( 0, '' )
-  ok_( not base.LastEnteredCharIsIdentifierChar() )
+  def LastEnteredCharIsIdentifierChar_FiletypeHtml_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 3, 'ab-' )
+    self._vimsupport.CurrentFiletypes = MagicMock( return_value = ['html'] )
+    ok_( base.LastEnteredCharIsIdentifierChar() )
 
 
-@with_setup( Setup )
-def LastEnteredCharIsIdentifierChar_NotIdentChar_test():
-  SetVimCurrentColumnAndLineValue( 3, 'ab;' )
-  ok_( not base.LastEnteredCharIsIdentifierChar() )
+  def LastEnteredCharIsIdentifierChar_ColumnIsZero_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 0, 'abc' )
+    ok_( not base.LastEnteredCharIsIdentifierChar() )
 
-  SetVimCurrentColumnAndLineValue( 1, ';' )
-  ok_( not base.LastEnteredCharIsIdentifierChar() )
 
-  SetVimCurrentColumnAndLineValue( 3, 'ab-' )
-  ok_( not base.LastEnteredCharIsIdentifierChar() )
+  def LastEnteredCharIsIdentifierChar_LineEmpty_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 3, '' )
+    ok_( not base.LastEnteredCharIsIdentifierChar() )
 
+    self.SetVimCurrentColumnAndLineValue( 0, '' )
+    ok_( not base.LastEnteredCharIsIdentifierChar() )
 
-@with_setup( Setup )
-def CurrentIdentifierFinished_Basic_test():
-  SetVimCurrentColumnAndLineValue( 3, 'ab;' )
-  ok_( base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 2, 'ab;' )
-  ok_( not base.CurrentIdentifierFinished() )
+  def LastEnteredCharIsIdentifierChar_NotIdentChar_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 3, 'ab;' )
+    ok_( not base.LastEnteredCharIsIdentifierChar() )
 
-  SetVimCurrentColumnAndLineValue( 1, 'ab;' )
-  ok_( not base.CurrentIdentifierFinished() )
+    self.SetVimCurrentColumnAndLineValue( 1, ';' )
+    ok_( not base.LastEnteredCharIsIdentifierChar() )
 
+    self.SetVimCurrentColumnAndLineValue( 3, 'ab-' )
+    ok_( not base.LastEnteredCharIsIdentifierChar() )
 
-@with_setup( Setup )
-def CurrentIdentifierFinished_NothingBeforeColumn_test():
-  SetVimCurrentColumnAndLineValue( 0, 'ab;' )
-  ok_( base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 0, '' )
-  ok_( base.CurrentIdentifierFinished() )
+  def CurrentIdentifierFinished_Basic_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 3, 'ab;' )
+    ok_( base.CurrentIdentifierFinished() )
 
+    self.SetVimCurrentColumnAndLineValue( 2, 'ab;' )
+    ok_( not base.CurrentIdentifierFinished() )
 
-@with_setup( Setup )
-def CurrentIdentifierFinished_InvalidColumn_test():
-  SetVimCurrentColumnAndLineValue( 5, '' )
-  ok_( not base.CurrentIdentifierFinished() )
+    self.SetVimCurrentColumnAndLineValue( 1, 'ab;' )
+    ok_( not base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 5, 'abc' )
-  ok_( not base.CurrentIdentifierFinished() )
 
+  def CurrentIdentifierFinished_NothingBeforeColumn_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 0, 'ab;' )
+    ok_( base.CurrentIdentifierFinished() )
 
-@with_setup( Setup )
-def CurrentIdentifierFinished_InMiddleOfLine_test():
-  SetVimCurrentColumnAndLineValue( 4, 'bar.zoo' )
-  ok_( base.CurrentIdentifierFinished() )
+    self.SetVimCurrentColumnAndLineValue( 0, '' )
+    ok_( base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 4, 'bar(zoo' )
-  ok_( base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 4, 'bar-zoo' )
-  ok_( base.CurrentIdentifierFinished() )
+  def CurrentIdentifierFinished_InvalidColumn_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 5, '' )
+    ok_( not base.CurrentIdentifierFinished() )
 
+    self.SetVimCurrentColumnAndLineValue( 5, 'abc' )
+    ok_( not base.CurrentIdentifierFinished() )
 
-@with_setup( Setup )
-def CurrentIdentifierFinished_Html_test():
-  SetVimCurrentColumnAndLineValue( 4, 'bar-zoo' )
-  vimsupport.CurrentFiletypes = MagicMock( return_value = ['html'] )
-  ok_( not base.CurrentIdentifierFinished() )
 
+  def CurrentIdentifierFinished_InMiddleOfLine_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 4, 'bar.zoo' )
+    ok_( base.CurrentIdentifierFinished() )
 
-@with_setup( Setup )
-def CurrentIdentifierFinished_WhitespaceOnly_test():
-  SetVimCurrentColumnAndLineValue( 1, '\n' )
-  ok_( base.CurrentIdentifierFinished() )
+    self.SetVimCurrentColumnAndLineValue( 4, 'bar(zoo' )
+    ok_( base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 3, '\n    ' )
-  ok_( base.CurrentIdentifierFinished() )
+    self.SetVimCurrentColumnAndLineValue( 4, 'bar-zoo' )
+    ok_( base.CurrentIdentifierFinished() )
 
-  SetVimCurrentColumnAndLineValue( 3, '\t\t\t\t' )
-  ok_( base.CurrentIdentifierFinished() )
+
+  def CurrentIdentifierFinished_Html_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 4, 'bar-zoo' )
+    self._vimsupport.CurrentFiletypes = MagicMock( return_value = ['html'] )
+    ok_( not base.CurrentIdentifierFinished() )
+
+
+  def CurrentIdentifierFinished_WhitespaceOnly_test( self ):
+    self.SetVimCurrentColumnAndLineValue( 1, '\n' )
+    ok_( base.CurrentIdentifierFinished() )
+
+    self.SetVimCurrentColumnAndLineValue( 3, '\n    ' )
+    ok_( base.CurrentIdentifierFinished() )
+
+    self.SetVimCurrentColumnAndLineValue( 3, '\t\t\t\t' )
+    ok_( base.CurrentIdentifierFinished() )
 

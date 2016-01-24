@@ -446,15 +446,19 @@ class YouCompleteMe( object ):
       return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
+
   def GetErrorCount( self ):
     return self._diag_interface.GetErrorCount()
+
 
   def GetWarningCount( self ):
     return self._diag_interface.GetWarningCount()
 
+
   def DiagnosticUiSupportedForCurrentFiletype( self ):
     return any( [ x in DIAGNOSTIC_UI_FILETYPES
                   for x in vimsupport.CurrentFiletypes() ] )
+
 
   def ShouldDisplayDiagnostics( self ):
     return bool( self._user_options[ 'show_diagnostics_ui' ] and
@@ -462,7 +466,7 @@ class YouCompleteMe( object ):
 
 
   def PopulateLocationListWithLatestDiagnostics( self ):
-    # do nothing if loc list is already populated by diag_interface
+    # Do nothing if loc list is already populated by diag_interface
     if not self._user_options[ 'always_populate_location_list' ]:
       self._diag_interface.PopulateLocationList( self._latest_diagnostics )
     return bool( self._latest_diagnostics )
