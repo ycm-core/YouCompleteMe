@@ -104,9 +104,21 @@ features plus extra:
 - Supertab
 - neocomplcache
 
-YCM also provides semantic go-to-definition/declaration commands for C-family
-languages & Python. Expect more IDE features powered by the various YCM semantic
-engines in the future.
+### And that's not all...
+
+YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
+number of languages, including:
+
+- semantic go-to-declaration and go-to-definition
+- type information for classes, variables, functions etc.
+- display documentation, type information, etc. in the preview window
+- fix common coding errors, like missing semi-colons, typos, etc.
+- semantic rename of variables across files (JavaScript only)
+
+Features vary by file type, so make sure to check out the [file type feature
+summary](#quick-feature-summary) and the
+[full list of completer subcommands](#ycmcompleter-subcommands) to
+find out what's available for your favourite languages.
 
 You'll also find that YCM has filepath completers (try typing `./` in a file)
 and a completer that integrates with [UltiSnips][].
@@ -682,6 +694,7 @@ Quick Feature Summary
 ### JavaScript
 
 * Intelligent auto-completion
+* Rename of global variables (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -1106,15 +1119,20 @@ purpose.
 
 ### The `:YcmCompleter` command
 
-This command can be used to invoke completer-specific commands.  If the first
+This command gives access to a number of additional [IDE-like
+features](#quick-feature-summary) in YCM, for things like semantic go-to, type
+information, fix-it and refactoring.
+
+Technically the command invokes completer-specific commands.  If the first
 argument is of the form `ft=...` the completer for that file type will be used
 (for example `ft=cpp`), else the native completer of the current buffer will be
 used.
-Call `YcmCompleter` without further arguments for information about the
-commands you can call for the selected completer.
+Call `YcmCompleter` without further arguments for a list of the
+commands you can call for the current (or selected) completer.
 
-See the _YcmCompleter subcommands_ section for more information on the available
-subcommands.
+See the [file type feature summary](#quick-feature-summary) for an overview of
+the features available for each file type. See the _YcmCompleter subcommands_
+section for more information on the available subcommands and their usage.
 
 YcmCompleter subcommands
 ------------------------
@@ -1302,7 +1320,7 @@ Supported in filetypes: `c, cpp, objc, objcpp, cs`
 ### The `GetDoc` subcommand
 
 Displays the preview window populated with quick info about the identifier
-under the cursor. This includes, depending on the language, things like:
+under the cursor. Depending on the file type, this includes things like:
 
 * The type or declaration of identifier
 * Doxygen/javadoc comments
@@ -1311,6 +1329,44 @@ under the cursor. This includes, depending on the language, things like:
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
 javascript`
+
+### The `RefactorRename <new name>` subcommand
+
+In supported file types, this command attempts to perform a semantic rename of
+the identifier under the cursor. This includes renaming declarations,
+definitions and usages of the identifier, or any other language-appropriate
+action. The specific behavior is defined by the semantic engine in use.
+
+Similar to `FixIt`, this command applies automatic modifications to your source
+files. Rename operations may involve changes to multiple files, which may or may
+not be open in Vim buffers at the time. YouCompleteMe handles all of this for
+you. The behavior is described in [the following section](#multi-file-refactor).
+
+Supported in filetypes: `javascript` (variables only)
+
+#### Multi-file Refactor
+
+When the Refactor command touches multiple files, YouCompleteMe attempts to
+apply those modifications to any existing open, visible buffer in the current
+tab. If no such buffer can be found, YouCompleteMe opens the file in a new
+small horizontal split at the top of the current window. A confirmation dialog
+is opened prior to doing this, to remind you that this is about to happen.
+
+Once the modifications have been made, the quickfix list (see `:help quickfix`)
+is opened, populated with the locations of all modifications. This can be used
+to review all automatic changes made.
+
+The buffers are *not* saved automatically. That is, you must save the modified
+buffers manually after reviewing the changes from the quickfix list. Changes
+can be undone using Vim's powerful undo features (see `:help undo`). Note,
+however: Vim's undo is per-buffer, so to undo all changes, the undo
+commands must be applied in each modified buffer separately.
+
+NOTE: While applying modifications, Vim may find files which are already open
+and have a swap file. The Refactor command is aborted if you select Abort or
+Quit to any such prompts. This leaves the Refactor operation partially complete
+and must be manually corrected using Vim's undo features. The quickfix list is
+*not* populated in this case.
 
 ### The `StartServer` subcommand
 
@@ -1896,7 +1952,7 @@ let g:ycm_csharp_server_port = 0
 By default, when YCM inserts a namespace, it will insert the `using` statement
 under the nearest `using` statement. You may prefer that the `using` statement is
 inserted somewhere, for example, to preserve sorting. If so, you can set this
-option to override this behaviour.
+option to override this behavior.
 
 When this option is set, instead of inserting the `using` statement itself, YCM
 will set the global variable `g:ycm_namespace_to_insert` to the namespace to
