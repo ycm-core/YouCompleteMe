@@ -112,11 +112,11 @@ features plus extra:
 YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
 number of languages, including:
 
-- semantic go-to-declaration and go-to-definition
-- type information for classes, variables, functions etc.
-- display documentation, type information, etc. in the preview window
-- fix common coding errors, like missing semi-colons, typos, etc.
-- semantic rename of variables across files (JavaScript only)
+- finding declarations, definitions, usages, etc. of identifiers,
+- displaying type information for classes, variables, functions etc.,
+- displaying documentation for methods, members, etc. in the preview window,
+- fixing common coding errors, like missing semi-colons, typos, etc.,
+- semantic renaming of variables across files (JavaScript only).
 
 Features vary by file type, so make sure to check out the [file type feature
 summary](#quick-feature-summary) and the
@@ -1122,15 +1122,15 @@ logfile is already opened, it will be closed. Only for debugging purpose.
 ### The `:YcmCompleter` command
 
 This command gives access to a number of additional [IDE-like
-features](#quick-feature-summary) in YCM, for things like semantic go-to, type
-information, fix-it and refactoring.
+features](#quick-feature-summary) in YCM, for things like semantic GoTo, type
+information, FixIt and refactoring.
 
 Technically the command invokes completer-specific commands.  If the first
 argument is of the form `ft=...` the completer for that file type will be used
 (for example `ft=cpp`), else the native completer of the current buffer will be
 used.
 Call `YcmCompleter` without further arguments for a list of the
-commands you can call for the current (or selected) completer.
+commands you can call for the current completer.
 
 See the [file type feature summary](#quick-feature-summary) for an overview of
 the features available for each file type. See the _YcmCompleter subcommands_
@@ -1302,9 +1302,9 @@ Supported in filetypes: `c, cpp, objc, objcpp`
 Displays the preview window populated with quick info about the identifier
 under the cursor. Depending on the file type, this includes things like:
 
-* The type or declaration of identifier
-* Doxygen/javadoc comments
-* Python docstrings
+* The type or declaration of identifier,
+* Doxygen/javadoc comments,
+* Python docstrings,
 * etc.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
