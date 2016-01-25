@@ -344,7 +344,8 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` to `install.py`. If the build utility `msbuild` is not in your path, you have to [add it][add-msbuild-to-path].
+- C# support: add `--omnisharp-completer` to `install.py`.
+  Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 - Go support: ensure go is installed and add `--gocode-completer`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -600,7 +601,8 @@ process.
   - C# support: Navigate to
     `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer` and run
     `msbuild` (Windows) or `xbuild` (other platforms, using mono) depending on
-    your platform. If mono is not installed, install it. If the build utility `msbuild` is not in your path, you have to add it.
+    your platform. If mono is not installed, install it.
+    When on windows, be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 
   - Go support: If go is not installed on your system, install it and add it to
     your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
