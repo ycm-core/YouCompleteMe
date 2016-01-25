@@ -2584,18 +2584,25 @@ Be sure to have closed all vim instances before you build YouCompleteMe.
 
 ### When I start vim I get a runtime error saying `R6034 An application has made an attempt to load the C runtime library incorrectly.`
 
-CMake and other things seem to screw up the PATH with their own msvcrXX.dll versions.
-Add the following to the top of your vimrc, assuming that iCLS Client and CMake are causing
-this error. If this does not solve your problem, then other applications may be the cause.
-Follow the steps [described here][identify-R6034-cause] to identify the problematic
-applications and modify the snippet below accordingly.
+[CMake and other things seem to screw up the PATH with their own msvcrXX.dll versions.][identify-R6034-cause]
+Add the following to the very top of your vimrc to remove these entries from the path.
 
 ```python
 python << EOF
-import os
-for forbidden_substring in ['iCLS Client', 'CMake']:
-    os.environ['PATH'] = ''.join([item for item in os.environ['PATH'].split(';')
-                                  if not item.lower().find(forbidden_substring.lower()) >= 0])
+import os, re
+path = os.environ['PATH'].split(';')
+
+def is_problem(folder):
+    try:
+        for item in os.listdir(folder):
+            if re.match(r'msvcr\d\d\.dll', item):
+                return True
+    except:
+        pass
+    return False
+
+path = [folder for folder in path if not is_problem(folder)]
+os.environ['PATH'] = ';'.join(path)
 EOF
 ```
 
@@ -2673,4 +2680,5 @@ This software is licensed under the [GPL v3 license][gpl].
 [rust-install]: https://www.rust-lang.org/
 [rust-src]: https://www.rust-lang.org/downloads.html
 [add-msbuild-to-path]: http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
-[identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022#34696022
+[identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
+
