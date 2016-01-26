@@ -2579,6 +2579,13 @@ If this is still really annoying, and you have a good reason not to have a
 and YCM will stop complaining.
 
 
+Contributor Code of Conduct
+---------------------------
+
+Please note that this project is released with a [Contributor Code of
+Conduct][ccoc]. By participating in this project you agree to abide by its
+terms.
+
 
 Contact
 -------
@@ -2593,6 +2600,7 @@ The latest version of the plugin is available at
 <http://valloric.github.io/YouCompleteMe/>.
 
 The author's homepage is <http://val.markovic.io>.
+
 
 License
 -------
@@ -2653,3 +2661,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [racer]: https://github.com/phildawes/racer
 [rust-install]: https://www.rust-lang.org/
 [rust-src]: https://www.rust-lang.org/downloads.html
+[ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
