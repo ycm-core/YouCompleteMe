@@ -498,7 +498,7 @@ class YouCompleteMe( object ):
         self.UpdateDiagnosticInterface()
       else:
         # YCM client has a hard-coded list of filetypes which are known
-        # to support diagnostics. self.DiagnosticUiSupportedForCurrentFiletype()
+        # to support diagnostics, self.DiagnosticUiSupportedForCurrentFiletype()
         #
         # For filetypes which don't support diagnostics, we just want to check
         # the _latest_file_parse_request for any exception or UnknownExtraConf

@@ -27,6 +27,7 @@ from ycmd import user_options_store
 from ycmd.responses import UnknownExtraConf
 
 from mock import call, MagicMock, patch
+from nose.tools import eq_
 
 
 # The default options which are only relevant to the client, not the server and
@@ -318,59 +319,103 @@ class EventNotification_test( object ):
   def FileReadyToParse_Diagnostic_Error_Native_test( self, vim_command ):
 
     def FirstDiagnosticResponse( *args ):
-        return [
-                {
-                 'kind': 'ERROR', 'text': 'expected ; after...', 'ranges': [],
-                 'location': { 'line_num': 1, 'column_num': 2,
-                               'filepath': 'TEST_BUFFER' },
-                 'location_extent': {
-                   'start': { 'line_num': 1, 'column_num': 2,
-                              'filepath': 'TEST_BUFFER' },
-                   'end': { 'line_num': 1, 'column_num': 4,
-                            'filepath': 'TEST_BUFFER' },
-                 },
-                 'fixit_available': True,
-                },
-               ]
+      #TODO uncomment this and replace return when switching to ycmd#99564b3
+      #start = Location( 1, 2, 'TEST_BUFFER' )
+      #end = Location( 1, 4, 'TEST_BUFFER' )
+      #extent = Range( start, end )
+      #diagnostic = Diagnostic( [], start, extent, 'expected ;', 'ERROR' )
+      #return [ BuildDiagnosticData( diagnostic ) ]
+      return [ {
+        'kind': 'ERROR',
+        'text': 'expected ;',
+        'ranges': [],
+        'location': {
+          'line_num': 1,
+          'column_num': 2,
+          'filepath': 'TEST_BUFFER',
+        },
+        'location_extent': {
+          'start': {
+            'line_num': 1,
+            'column_num': 2,
+            'filepath': 'TEST_BUFFER',
+          },
+          'end': {
+            'line_num': 1,
+            'column_num': 4,
+            'filepath': 'TEST_BUFFER',
+          },
+        },
+      } ]
 
     def SecondDiagnosticResponse( *args ):
-        return [
-                {
-                 'kind': 'WARNING', 'text': 'cast', 'ranges': [],
-                 'location': { 'line_num': 2, 'column_num': 2,
-                               'filepath': 'TEST_BUFFER' },
-                 'location_extent': {
-                   'start': { 'line_num': 2, 'column_num': 2,
-                              'filepath': 'TEST_BUFFER' },
-                   'end': { 'line_num': 2, 'column_num': 4,
-                            'filepath': 'TEST_BUFFER' },
-                 },
-                 'fixit_available': False,
-                },
-               ]
+      #TODO uncomment this and replace return when switching to ycmd#99564b3
+      #start = Location( 2, 2, 'TEST_BUFFER' )
+      #end = Location( 2, 4, 'TEST_BUFFER' )
+      #extent = Range( start, end )
+      #diagnostic = Diagnostic( [], start, extent, 'cast', 'WARNING' )
+      #return [ BuildDiagnosticData( diagnostic ) ]
+      return [ {
+        'kind': 'WARNING',
+        'text': 'cast',
+        'ranges': [],
+        'location': {
+          'line_num': 2,
+          'column_num': 2,
+          'filepath': 'TEST_BUFFER',
+        },
+        'location_extent': {
+          'start': {
+            'line_num': 2,
+            'column_num': 2,
+            'filepath': 'TEST_BUFFER',
+          },
+          'end': {
+            'line_num': 2,
+            'column_num': 4,
+            'filepath': 'TEST_BUFFER',
+          },
+        },
+      } ]
 
+    # Testing Vim sign placement and error/warning count python API
     with MockArbitraryBuffer( 'cpp' ):
       with MockEventNotification( FirstDiagnosticResponse ):
         self.server_state.OnFileReadyToParse()
+        assert self.server_state.FileParseRequestReady()
         self.server_state.HandleFileParseRequest()
         vim_command.assert_has_calls( [
           PlaceSign_Call( 1, 1, 0, True )
         ] )
+        eq_( self.server_state.GetErrorCount(), 1 )
+        eq_( self.server_state.GetWarningCount(), 0 )
+
+        # Consequent calls to HandleFileParseRequest shouldn't mess with
+        # existing diagnostics, when there is no new parse request.
         vim_command.reset_mock()
+        assert not self.server_state.FileParseRequestReady()
         self.server_state.HandleFileParseRequest()
         vim_command.assert_not_called()
+        eq_( self.server_state.GetErrorCount(), 1 )
+        eq_( self.server_state.GetWarningCount(), 0 )
 
       with MockEventNotification( SecondDiagnosticResponse ):
         self.server_state.OnFileReadyToParse()
+        assert self.server_state.FileParseRequestReady()
         self.server_state.HandleFileParseRequest()
-        vim_command.assert_has_calls( [] )
         vim_command.assert_has_calls( [
           PlaceSign_Call( 2, 2, 0, False ),
           UnplaceSign_Call( 1, 0 )
         ] )
+        eq_( self.server_state.GetErrorCount(), 0 )
+        eq_( self.server_state.GetWarningCount(), 1 )
+
         vim_command.reset_mock()
+        assert not self.server_state.FileParseRequestReady()
         self.server_state.HandleFileParseRequest()
         vim_command.assert_not_called()
+        eq_( self.server_state.GetErrorCount(), 0 )
+        eq_( self.server_state.GetWarningCount(), 1 )
 
       with MockEventNotification( MagicMock( return_value = [] ) ):
         self.server_state.OnFileReadyToParse()
@@ -378,3 +423,5 @@ class EventNotification_test( object ):
         vim_command.assert_has_calls( [
           UnplaceSign_Call( 2, 0 )
         ] )
+        eq_( self.server_state.GetErrorCount(), 0 )
+        eq_( self.server_state.GetWarningCount(), 0 )
