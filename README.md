@@ -602,7 +602,7 @@ process.
     `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer` and run
     `msbuild` (Windows) or `xbuild` (other platforms, using mono) depending on
     your platform. If mono is not installed, install it.
-    When on windows, be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
+    When on Windows, be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 
   - Go support: If go is not installed on your system, install it and add it to
     your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
@@ -2591,19 +2591,20 @@ Add the following to the very top of your vimrc to remove these entries from the
 
 ```python
 python << EOF
-import os, re
+import os
+import re
 path = os.environ['PATH'].split(';')
 
-def is_problem(folder):
+def contains_msvcr_lib(folder):
     try:
         for item in os.listdir(folder):
-            if re.match(r'msvcr\d\d\.dll', item):
+            if re.match(r'msvcr\d+\.dll', item):
                 return True
     except:
         pass
     return False
 
-path = [folder for folder in path if not is_problem(folder)]
+path = [folder for folder in path if not contains_msvcr_lib(folder)]
 os.environ['PATH'] = ';'.join(path)
 EOF
 ```
