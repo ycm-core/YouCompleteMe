@@ -30,6 +30,7 @@ YouCompleteMe: a code-completion engine for Vim
     - [YcmCompleter subcommands](#ycmcompleter-subcommands)
 - [Options](#options)
 - [FAQ](#faq)
+- [Contributor Code of Conduct](#contributor-code-of-conduct)
 - [Contact](#contact)
 - [License](#license)
 
@@ -2609,6 +2610,14 @@ os.environ['PATH'] = ';'.join(path)
 EOF
 ```
 
+Contributor Code of Conduct
+---------------------------
+
+Please note that this project is released with a [Contributor Code of
+Conduct][ccoc]. By participating in this project you agree to abide by its
+terms.
+
+
 Contact
 -------
 
@@ -2622,6 +2631,7 @@ The latest version of the plugin is available at
 <http://valloric.github.io/YouCompleteMe/>.
 
 The author's homepage is <http://val.markovic.io>.
+
 
 License
 -------
@@ -2684,4 +2694,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [rust-src]: https://www.rust-lang.org/downloads.html
 [add-msbuild-to-path]: http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
-
+[ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
