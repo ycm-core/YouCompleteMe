@@ -651,7 +651,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
       } ] ) ) ),
   ] )
   vim_command.assert_has_calls( [
-      call( 'copen 5' )
+      call( 'copen 1' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
@@ -743,7 +743,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
     } ] ) ) ),
   ] )
   vim_command.assert_has_calls( [
-    call( 'copen 5' )
+    call( 'copen 1' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
@@ -983,7 +983,7 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
     } ] ) ) ),
   ] )
   vim_command.assert_has_calls( [
-    call( 'copen 5' )
+    call( 'copen 2' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
