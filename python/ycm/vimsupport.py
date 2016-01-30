@@ -242,7 +242,7 @@ def SetQuickFixList( quickfix_list, display=False ):
   vim.eval( 'setqflist( {0} )'.format( json.dumps( quickfix_list ) ) )
 
   if display:
-    vim.command( 'copen 5' )
+    vim.command( 'copen {0}'.format( len( quickfix_list ) ) )
     JumpToPreviousWindow()
 
 
@@ -461,6 +461,7 @@ def EchoTextVimWidth( text ):
   old_ruler = GetIntValue( '&ruler' )
   old_showcmd = GetIntValue( '&showcmd' )
   vim.command( 'set noruler noshowcmd' )
+  vim.command( 'redraw' )
 
   EchoText( truncated_text, False )
 
