@@ -345,14 +345,15 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` to `install.py`
-- Go support: ensure go is installed and add `--gocode-completer`
+- C# support: add `--omnisharp-completer` to `install.py`.
+  Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
+- Go support: ensure go is installed and add `--gocode-completer`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `install.py`
+  `--tern-completer` to `install.py`.
 - Rust support: install [rustc and cargo][rust-install] and add
-  `--racer-completer` to `install.py`
+  `--racer-completer` to `install.py`.
 
 For example, to install with all language features, ensure npm, go, mono, rust,
 and typescript API are installed and in your `%PATH%`, then:
@@ -602,6 +603,7 @@ process.
     `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer` and run
     `msbuild` (Windows) or `xbuild` (other platforms, using mono) depending on
     your platform. If mono is not installed, install it.
+    When on Windows, be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 
   - Go support: If go is not installed on your system, install it and add it to
     your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
@@ -2579,6 +2581,34 @@ If this is still really annoying, and you have a good reason not to have a
 `.tern-project` file, create an empty `.tern-config` file in your home directory
 and YCM will stop complaining.
 
+### When I run install.py I get a LINK error saying `fatal error LNK1104: cannot open file '<path_to_vim_folder>\bundle\YouCompleteMe\third_party\ycmd\ycm_client_support.pyd'`
+
+Be sure to have closed all vim instances before you build YouCompleteMe.
+
+### When I start vim I get a runtime error saying `R6034 An application has made an attempt to load the C runtime library incorrectly.`
+
+[CMake and other things seem to screw up the PATH with their own msvcrXX.dll versions.][identify-R6034-cause]
+Add the following to the very top of your vimrc to remove these entries from the path.
+
+```python
+python << EOF
+import os
+import re
+path = os.environ['PATH'].split(';')
+
+def contains_msvcr_lib(folder):
+    try:
+        for item in os.listdir(folder):
+            if re.match(r'msvcr\d+\.dll', item):
+                return True
+    except:
+        pass
+    return False
+
+path = [folder for folder in path if not contains_msvcr_lib(folder)]
+os.environ['PATH'] = ';'.join(path)
+EOF
+```
 
 Contributor Code of Conduct
 ---------------------------
@@ -2662,4 +2692,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [racer]: https://github.com/phildawes/racer
 [rust-install]: https://www.rust-lang.org/
 [rust-src]: https://www.rust-lang.org/downloads.html
+[add-msbuild-to-path]: http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
+[identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
