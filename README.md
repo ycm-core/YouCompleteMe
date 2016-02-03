@@ -594,7 +594,7 @@ process.
     other flags. **If you compiled LLVM from source, this is the flag you should
     be using.**
 
-    Running the `make` command will also place the `libclang.[so|dylib|dll]` in
+    Running the `cmake` command will also place the `libclang.[so|dylib|dll]` in
     the `YouCompleteMe/third_party/ycmd` folder for you if you compiled with
     clang support (it needs to be there for YCM to work).
 
