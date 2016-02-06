@@ -527,7 +527,9 @@ def ReplaceChunks( chunks ):
   if num_files_to_open > 0:
     if not Confirm( 'The requested operation will apply changes to {0} files '
                     'which are not currently open. This will therefore open '
-                    '{0} new splits in the current window. '
+                    '{0} new files in the hidden windows. The quickfix list '
+                    'can then be used to review the changes. No files will be '
+                    'written to disk. '
                     'Do you wish to continue?'.format(  num_files_to_open ) ):
       return
 
@@ -537,6 +539,7 @@ def ReplaceChunks( chunks ):
 
   for filepath in sorted_file_list:
     buffer_num = GetBufferNumberForFilename( filepath, False )
+    close_window = False
 
     # We only apply changes in the current tab page (i.e. "visible" windows).
     # Applying changes in tabs does not lead to a better user experience, as the
@@ -547,10 +550,15 @@ def ReplaceChunks( chunks ):
       # We open the file with a small, fixed height. This means that we don't
       # make the current buffer the smallest after a series of splits.
       OpenFilename( filepath, {
-        'focus': False,
+        'focus': True,
         'fix': True,
         'size': GetIntValue( '&previewheight' ),
       } )
+
+      # When opening tons of files, we don't want to have a split for each new
+      # file, as this simply does not scale, so we open the window, make the
+      # edits, then hide the window.
+      close_window = True
 
       # OpenFilename returns us to the original cursor location. This is what we
       # want, because we don't want to disorientate the user, but we do need to
@@ -570,6 +578,17 @@ def ReplaceChunks( chunks ):
     ReplaceChunksInBuffer( chunks_by_file[ filepath ],
                            vim.buffers[ buffer_num ],
                            locations )
+
+    if close_window:
+      # Some plugins (I'm looking at you, syntastic) might open a location list
+      # for the window we just opened. We don't want that location list hanging
+      # around, so we close it. lclose is a no-op if there is no location list.
+      vim.command( 'lclose' )
+
+      # Note that this doesn't lose our changes. It simply "hides" the buffer,
+      # which can later be re-accessed via the quickfix list or `:ls`
+      vim.command( 'hide' )
+
 
   # Open the quickfix list, populated with entries for each location we changed.
   if locations:
