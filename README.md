@@ -47,7 +47,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
   "the C-family languages"),
 - a [Jedi][]-based completion engine for Python 2 and 3 (using the [JediHTTP][] wrapper),
 - an [OmniSharp][]-based completion engine for C#,
-- a [Gocode][]-based completion engine for Go,
+- a combination of [Gocode][] and [Godef][] semantic engines for Go,
 - a [TSServer][]-based completion engine for TypeScript,
 - a [Tern][]-based completion engine for JavaScript,
 - a [racer][]-based completion engine for Rust,
@@ -670,6 +670,7 @@ Quick Feature Summary
 ### Go
 
 * Semantic auto-completion
+* Go to definition (`GoTo`)
 * Management of `gocode` server instance
 
 ### TypeScript
@@ -1153,7 +1154,7 @@ Supported in filetypes: `c, cpp, objc, objcpp`
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, python, rust`
 
 ### The `GoToDefinition` subcommand
 
@@ -1164,8 +1165,8 @@ the definition of the symbol is in the current translation unit. A translation
 unit consists of the file you are editing and all the files you are including
 with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs, typescript,
-javascript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python,
+rust, typescript`
 
 ### The `GoTo` subcommand
 
@@ -1176,7 +1177,7 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: `c, cpp, objc, objcpp, python, cs, javascript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python, rust`
 
 ### The `GoToImprecise` subcommand
 
@@ -1240,7 +1241,7 @@ std::cout << *x; // invoking on x returns "const char ** => const char **"
 
 NOTE: Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, typescript, javascript`
+Supported in filetypes: `c, cpp, objc, objcpp, javascript, typescript`
 
 ### The `GetParent` subcommand
 
@@ -1325,14 +1326,14 @@ javascript`
 Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, javascript, go, rust`
+Supported in filetypes: `cs, go, javascript, rust`
 
 ### The `StopServer` subcommand
 
 Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, javascript, go, rust`
+Supported in filetypes: `cs, go, javascript, rust`
 
 ### The `RestartServer` subcommand
 
@@ -1346,7 +1347,7 @@ python binary to use to restart the Python semantic engine.
 :YcmCompleter RestartServer /usr/bin/python3.4
 ```
 
-Supported in filetypes: `cs, rust, python`
+Supported in filetypes: `cs, python, rust`
 
 ### The `ReloadSolution` subcommand
 
@@ -2722,6 +2723,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Options]: https://github.com/Valloric/YouCompleteMe#options
 [ygen]: https://github.com/rdnetto/YCM-Generator
 [Gocode]: https://github.com/nsf/gocode
+[Godef]: https://github.com/Manishearth/godef
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
 [NeoBundle]: https://github.com/Shougo/neobundle.vim
 [vim64-win-download]: https://bintray.com/veegee/generic/vim_x64
