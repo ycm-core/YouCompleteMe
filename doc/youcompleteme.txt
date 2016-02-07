@@ -903,7 +903,7 @@ Go ~
 TypeScript ~
 
 - Semantic auto-completion
-- Go to definition (|GoToDefinition|)
+- Go to definition, find references (|GoToDefinition|, |GoToReferences|)
 - Semantic type information for identifiers (|GetType|)
 - View documentation comments for identifiers (|GetDoc|)
 
@@ -1472,7 +1472,7 @@ This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
 locations.
 
-Supported in filetypes: 'javascript, python'
+Supported in filetypes: 'javascript, python, typescript'
 
 -------------------------------------------------------------------------------
 The *ClearCompilationFlagCache* subcommand
