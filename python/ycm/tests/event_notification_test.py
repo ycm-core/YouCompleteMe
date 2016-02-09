@@ -23,7 +23,8 @@ import os
 
 from ycm.youcompleteme import YouCompleteMe
 from ycmd import user_options_store
-from ycmd.responses import UnknownExtraConf
+from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
+                             UnknownExtraConf )
 
 from mock import call, MagicMock, patch
 from nose.tools import eq_
@@ -318,64 +319,18 @@ class EventNotification_test( object ):
   def FileReadyToParse_Diagnostic_Error_Native_test( self, vim_command ):
 
     def FirstDiagnosticResponse( *args ):
-      #TODO uncomment this and replace return when switching to ycmd#99564b3
-      #start = Location( 1, 2, 'TEST_BUFFER' )
-      #end = Location( 1, 4, 'TEST_BUFFER' )
-      #extent = Range( start, end )
-      #diagnostic = Diagnostic( [], start, extent, 'expected ;', 'ERROR' )
-      #return [ BuildDiagnosticData( diagnostic ) ]
-      return [ {
-        'kind': 'ERROR',
-        'text': 'expected ;',
-        'ranges': [],
-        'location': {
-          'line_num': 1,
-          'column_num': 2,
-          'filepath': 'TEST_BUFFER',
-        },
-        'location_extent': {
-          'start': {
-            'line_num': 1,
-            'column_num': 2,
-            'filepath': 'TEST_BUFFER',
-          },
-          'end': {
-            'line_num': 1,
-            'column_num': 4,
-            'filepath': 'TEST_BUFFER',
-          },
-        },
-      } ]
+      start = Location( 1, 2, 'TEST_BUFFER' )
+      end = Location( 1, 4, 'TEST_BUFFER' )
+      extent = Range( start, end )
+      diagnostic = Diagnostic( [], start, extent, 'expected ;', 'ERROR' )
+      return [ BuildDiagnosticData( diagnostic ) ]
 
     def SecondDiagnosticResponse( *args ):
-      #TODO uncomment this and replace return when switching to ycmd#99564b3
-      #start = Location( 2, 2, 'TEST_BUFFER' )
-      #end = Location( 2, 4, 'TEST_BUFFER' )
-      #extent = Range( start, end )
-      #diagnostic = Diagnostic( [], start, extent, 'cast', 'WARNING' )
-      #return [ BuildDiagnosticData( diagnostic ) ]
-      return [ {
-        'kind': 'WARNING',
-        'text': 'cast',
-        'ranges': [],
-        'location': {
-          'line_num': 2,
-          'column_num': 2,
-          'filepath': 'TEST_BUFFER',
-        },
-        'location_extent': {
-          'start': {
-            'line_num': 2,
-            'column_num': 2,
-            'filepath': 'TEST_BUFFER',
-          },
-          'end': {
-            'line_num': 2,
-            'column_num': 4,
-            'filepath': 'TEST_BUFFER',
-          },
-        },
-      } ]
+      start = Location( 2, 2, 'TEST_BUFFER' )
+      end = Location( 2, 4, 'TEST_BUFFER' )
+      extent = Range( start, end )
+      diagnostic = Diagnostic( [], start, extent, 'cast', 'WARNING' )
+      return [ BuildDiagnosticData( diagnostic ) ]
 
     # Testing Vim sign placement and error/warning count python API
     with MockArbitraryBuffer( 'cpp' ):
