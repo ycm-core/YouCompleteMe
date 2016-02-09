@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (C) 2015 YouCompleteMe Contributors
 #
 # This file is part of YouCompleteMe.

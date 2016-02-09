@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2015 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
