@@ -1315,7 +1315,7 @@ javascript`
 
 These commands make changes to your source code in order to perform refactoring
 or code correction. YouCompleteMe does not perform any action which cannot be
-undone.
+undone, and never saves or writes files to the disk.
 
 #### The `FixIt` subcommand
 
@@ -1370,12 +1370,15 @@ Supported in filetypes: `javascript` (variables only)
 When a Refactor or FixIt command touches multiple files, YouCompleteMe attempts
 to apply those modifications to any existing open, visible buffer in the current
 tab. If no such buffer can be found, YouCompleteMe opens the file in a new
-small horizontal split at the top of the current window. A confirmation dialog
-is opened prior to doing this, to remind you that this is about to happen.
+small horizontal split at the top of the current window, applies the change,
+and then *hides* the window. NOTE: The buffer remains open, and must be
+manually saved.. A confirmation dialog is opened prior to doing this, to remind
+you that this is about to happen.
 
 Once the modifications have been made, the quickfix list (see `:help quickfix`)
 is opened, populated with the locations of all modifications. This can be used
-to review all automatic changes made.
+to review all automatic changes made. Typically, use the `CTRL-W
+<enter>` combination to open the selected file in a new split.
 
 The buffers are *not* saved automatically. That is, you must save the modified
 buffers manually after reviewing the changes from the quickfix list. Changes
@@ -1387,7 +1390,8 @@ NOTE: While applying modifications, Vim may find files which are already open
 and have a swap file. The command is aborted if you select Abort or Quit to any
 such prompts. This leaves the Refactor operation partially complete and must be
 manually corrected using Vim's undo features. The quickfix list is *not*
-populated in this case.
+populated in this case. Inspect `:buffers` or equivalent (see `:help buffers`)
+to see the buffers that were opened by the command.
 
 ### Miscellaneous commands
 
