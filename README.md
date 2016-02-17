@@ -25,7 +25,6 @@ YouCompleteMe: a code-completion engine for Vim
     - [Semantic completion for other languages](#semantic-completion-for-other-languages)
     - [Writing new semantic completers](#writing-new-semantic-completers)
     - [Diagnostic display](#diagnostic-display)
-    - [C# diagnostic support](#c-diagnostic-support)
     - [Diagnostic highlighting groups](#diagnostic-highlighting-groups)
 - [Commands](#commands)
     - [YcmCompleter subcommands](#ycmcompleter-subcommands)
@@ -1018,15 +1017,6 @@ the display of the `locationlist` with a single key mapping is provided by
 another (very small) Vim plugin called [ListToggle][] (which also makes it
 possible to change the height of the `locationlist` window), also written by
 yours truly.
-
-#### C# Diagnostic Support
-Unlike the C-family diagnostic support, the C# diagnostic support is not a full
-compile run. Instead, it is a simple syntax check of the current file _only_.
-The `:YcmForceCompileAndDiagnostics` command also is only a simple syntax check,
-_not_ a compile. This means that only syntax errors will be displayed, and not
-semantic errors. For example, omitting the semicolon at the end of statement
-will be displayed as a diagnostic error, but using a nonexistent class or
-variable will not be.
 
 #### Diagnostic highlighting groups
 
