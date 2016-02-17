@@ -915,9 +915,9 @@ Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the [jedi][] library which
 supports a variety of python versions (2.6, 2.7, 3.2, 3.3 or 3.4) as long as it
 runs in the corresponding python interpreter. By default YCM runs [jedi][] with
-the same python interpreter used by [ycmd][], so if you would like to use a
-different interpreter, use the following option specifying the python binary to
-use. For example, to provide Python 3 completion in your project, set:
+the same python interpreter used by the `ycmd` server, so if you would like to
+use a different interpreter, use the following option specifying the python
+binary to use. For example, to provide Python 3 completion in your project, set:
 
 ```viml
 let g:ycm_python_binary_path = '/usr/bin/python3'
@@ -2223,7 +2223,7 @@ let g:ycm_disable_for_files_larger_than_kb = 1000
 
 This option specifies the Python interpreter to use to run the [jedi][]
 completion library.  Specify the python interpreter to use to get completions.
-By default the python under which [ycmd][] runs is used ([ycmd][] only runs
+By default the python under which `ycmd` runs is used (`ycmd` only runs
 under Python 2.6 or 2.7).
 
 Default: `''`
