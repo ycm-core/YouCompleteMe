@@ -735,9 +735,9 @@ outputs and presents the results to you.
 ### Client-server architecture
 
 YCM has a client-server architecture; the Vim part of YCM is only a thin client
-that talks to the `ycmd` HTTP+JSON server that has the vast majority of YCM
-logic and functionality. The server is started and stopped automatically as you
-start and stop Vim.
+that talks to the [ycmd HTTP+JSON server][ycmd] that has the vast majority of
+YCM logic and functionality. The server is started and stopped automatically as
+you start and stop Vim.
 
 ### Completion string ranking
 
@@ -831,7 +831,7 @@ JavaScript project, you can do one of the following:
 
 - start a new instance of Vim from the new project's directory
 - change Vim's working directory (`:cd /path/to/new/project`) and restart the
-  `ycmd` server (`:YcmRestartServer`)
+  [ycmd server][ycmd] (`:YcmRestartServer`)
 - change Vim's working directory (`:cd /path/to/new/project`), open a JavaScript
   file (or set filetype to JavaScript) and restart the Tern server using YCM
   completer subcommands `:YcmCompleter StopServer` and `:YcmCompleter
@@ -915,9 +915,9 @@ Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the [jedi][] library which
 supports a variety of python versions (2.6, 2.7, 3.2, 3.3 or 3.4) as long as it
 runs in the corresponding python interpreter. By default YCM runs [jedi][] with
-the same python interpreter used by [ycmd][], so if you would like to use a
-different interpreter, use the following option specifying the python binary to
-use. For example, to provide Python 3 completion in your project, set:
+the same python interpreter used by the [ycmd server][ycmd], so if you would like to
+use a different interpreter, use the following option specifying the python
+binary to use. For example, to provide Python 3 completion in your project, set:
 
 ```viml
 let g:ycm_python_binary_path = '/usr/bin/python3'
@@ -1054,8 +1054,8 @@ Commands
 
 ### The `:YcmRestartServer` command
 
-If the `ycmd` completion server suddenly stops for some reason, you can restart
-it with this command.
+If the [ycmd completion server][ycmd] suddenly stops for some reason, you can
+restart it with this command.
 
 ### The `:YcmForceCompileAndDiagnostics` command
 
@@ -1098,10 +1098,11 @@ completion engine.
 ### The `:YcmToggleLogs` command
 
 This command automatically opens in windows the stdout and stderr logfiles
-written by the `ycmd` server. If one or both logfiles are already opened, they
-are automatically closed. `stderr` or `stdout` can be specified as an argument
-of this command to only open the corresponding logfile instead of both. If this
-logfile is already opened, it will be closed. Only for debugging purpose.
+written by the [ycmd server][ycmd]. If one or both logfiles are already opened,
+they are automatically closed. `stderr` or `stdout` can be specified as an
+argument of this command to only open the corresponding logfile instead of both.
+If this logfile is already opened, it will be closed. Only for debugging
+purpose.
 
 ### The `:YcmCompleter` command
 
@@ -1781,7 +1782,7 @@ handy; it's a way of sending data from Vim to your `FlagsForFile` function in
 your `.ycm_extra_conf.py` file.
 
 This option is supposed to be a list of VimScript expression strings that are
-evaluated for every request to the `ycmd` server and then passed to your
+evaluated for every request to the [ycmd server][ycmd] and then passed to your
 `FlagsForFile` function as a `client_data` keyword argument.
 
 For instance, if you set this option to `['v:version']`, your `FlagsForFile`
@@ -1815,7 +1816,7 @@ YCM will by default search for an appropriate Python interpreter on your system.
 You can use this option to override that behavior and force the use of a
 specific interpreter of your choosing.
 
-NOTE: This interpreter is only used for the `ycmd` server. The YCM client
+NOTE: This interpreter is only used for the [ycmd server][ycmd]. The YCM client
 running inside Vim always uses the Python interpreter that's embedded inside
 Vim.
 
@@ -1827,7 +1828,7 @@ let g:ycm_path_to_python_interpreter = ''
 
 ### The `g:ycm_server_keep_logfiles` option
 
-When this option is set to `1`, the `ycmd` completion server will keep the
+When this option is set to `1`, the [ycmd completion server][ycmd] will keep the
 logfiles around after shutting down (they are deleted on shutdown by default).
 
 To see where the logfiles are, call `:YcmDebugInfo`.
@@ -1840,8 +1841,8 @@ let g:ycm_server_keep_logfiles = 0
 
 ### The `g:ycm_server_log_level` option
 
-The logging level that the `ycmd` completion server uses. Valid values are the
-following, from most verbose to least verbose:
+The logging level that the [ycmd completion server][ycmd] uses. Valid values are
+the following, from most verbose to least verbose:
 - `debug`
 - `info`
 - `warning`
@@ -2229,7 +2230,7 @@ FAQ
 ### I used to be able to `import vim` in `.ycm_extra_conf.py`, but now can't
 
 YCM was rewritten to use a client-server architecture where most of the logic is
-in the `ycmd` server. So the magic `vim` module you could have previously
+in the [ycmd server][ycmd]. So the magic `vim` module you could have previously
 imported in your `.ycm_extra_conf.py` files doesn't exist anymore.
 
 To be fair, importing the magic `vim` module in extra conf files was never
@@ -2277,7 +2278,7 @@ the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
 Also, you may want to run the `:YcmDebugInfo` command; it will make YCM spew out
-various debugging information, including the `ycmd` logfile paths and the
+various debugging information, including the [ycmd][] logfile paths and the
 compile flags for the current file if the file is a C-family language file and
 you have compiled in Clang support. Logfiles can be automatically opened in the
 editor using the `:YcmToggleLogs` command.
@@ -2639,9 +2640,9 @@ EOF
 
 ### I hear that YCM only supports Python 2, is that true?
 
-No. The Vim client and the [ycmd][] server only run under Python 2 but if you
-work on a Python 3 project then just set the `g:ycm_python_binary_path` to the
-Python interpreter you use for your project and you will get completions for
+No. The Vim client and the [ycmd server][ycmd] only run under Python 2 but if
+you work on a Python 3 project then just set the `g:ycm_python_binary_path` to
+the Python interpreter you use for your project and you will get completions for
 that version of Python.
 
 Contributor Code of Conduct
@@ -2675,6 +2676,7 @@ This software is licensed under the [GPL v3 license][gpl].
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
+[ycmd]: https://github.com/Valloric/ycmd
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/VundleVim/Vundle.vim#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
