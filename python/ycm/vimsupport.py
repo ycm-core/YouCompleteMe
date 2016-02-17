@@ -513,16 +513,16 @@ def ReplaceChunks( chunks ):
     filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
-  # Make sure the user is prepared to have her screen mutilated by the new
-  # buffers
-  num_files_to_open = 0
-
   # We sort the file list simply to enable repeatable testing
   sorted_file_list = sorted( chunks_by_file.iterkeys() )
 
-  for filepath in sorted_file_list:
-    if not BufferIsVisible( GetBufferNumberForFilename( filepath, False ) ):
-      num_files_to_open += 1
+  # Make sure the user is prepared to have her screen mutilated by the new
+  # buffers
+  num_files_to_open = len(
+      [ f for f in sorted_file_list
+        if not BufferIsVisible(
+          GetBufferNumberForFilename( filepath, False ) ) ]
+  )
 
   if num_files_to_open > 0:
     if not Confirm( 'The requested operation will apply changes to {0} files '
