@@ -527,7 +527,7 @@ def ReplaceChunks( chunks ):
   if num_files_to_open > 0:
     if not Confirm( 'The requested operation will apply changes to {0} files '
                     'which are not currently open. This will therefore open '
-                    '{0} new files in the hidden windows. The quickfix list '
+                    '{0} new files in the hidden buffers. The quickfix list '
                     'can then be used to review the changes. No files will be '
                     'written to disk. '
                     'Do you wish to continue?'.format(  num_files_to_open ) ):

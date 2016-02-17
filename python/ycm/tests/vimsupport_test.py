@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.test_utils import MockVimModule, MockVimCommand
+from ycm.test_utils import ExtendedMock, MockVimModule, MockVimCommand
 MockVimModule()
 
 from ycm import vimsupport
@@ -587,12 +587,16 @@ class MockBuffer( ):
     return self.lines.__setitem__( key, value )
 
 
-@patch( 'ycm.vimsupport.GetBufferNumberForFilename', return_value=1 )
-@patch( 'ycm.vimsupport.BufferIsVisible', return_value=True )
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        return_value=1,
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.BufferIsVisible',
+        return_value=True,
+        new_callable=ExtendedMock )
 @patch( 'ycm.vimsupport.OpenFilename' )
-@patch( 'ycm.vimsupport.EchoTextVimWidth' )
-@patch( 'vim.eval' )
-@patch( 'vim.command' )
+@patch( 'ycm.vimsupport.EchoTextVimWidth', new_callable=ExtendedMock )
+@patch( 'vim.eval', new_callable=ExtendedMock )
+@patch( 'vim.command', new_callable=ExtendedMock )
 def ReplaceChunks_SingleFile_Open_test( vim_command,
                                         vim_eval,
                                         echo_text_vim_width,
@@ -623,13 +627,13 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
   #  - once to the check if we would require opening the file (so that we can
   #    raise a warning)
   #  - once whilst applying the changes
-  get_buffer_number_for_filename.assert_has_calls( [
+  get_buffer_number_for_filename.assert_has_exact_calls( [
       call( 'single_file', False ),
       call( 'single_file', False ),
   ] )
 
   # BufferIsVisible is called twice for the same reasons as above
-  buffer_is_visible.assert_has_calls( [
+  buffer_is_visible.assert_has_exact_calls( [
       call( 1 ),
       call( 1 ),
   ] )
@@ -638,7 +642,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
   open_filename.assert_not_called()
 
   # But we do set the quickfix list
-  vim_eval.assert_has_calls( [
+  vim_eval.assert_has_exact_calls( [
       call( 'setqflist( {0} )'.format( json.dumps( [ {
         'bufnr': 1,
         'filename': 'single_file',
@@ -654,18 +658,25 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
 
   # And it is ReplaceChunks that prints the message showing the number of
   # changes
-  echo_text_vim_width.assert_has_calls( [
+  echo_text_vim_width.assert_has_exact_calls( [
       call( 'Applied 1 changes' ),
   ] )
 
 
-@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[ -1, -1, 1 ] )
-@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[ False, False, True ] )
-@patch( 'ycm.vimsupport.OpenFilename' )
-@patch( 'ycm.vimsupport.EchoTextVimWidth' )
-@patch( 'ycm.vimsupport.Confirm', return_value=True )
-@patch( 'vim.eval', return_value=10 )
-@patch( 'vim.command' )
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        side_effect=[ -1, -1, 1 ],
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.BufferIsVisible',
+        side_effect=[ False, False, True ],
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.OpenFilename',
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.EchoTextVimWidth', new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.Confirm',
+        return_value=True,
+        new_callable=ExtendedMock )
+@patch( 'vim.eval', return_value=10, new_callable=ExtendedMock )
+@patch( 'vim.command', new_callable=ExtendedMock )
 def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
                                            vim_eval,
                                            confirm,
@@ -688,11 +699,12 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
     vimsupport.ReplaceChunks( chunks )
 
   # We checked if it was OK to open the file
-  confirm.assert_has_calls( [
+  confirm.assert_has_exact_calls( [
     call( 'The requested operation will apply changes to 1 files '
           'which are not currently open. This will therefore open '
-          '1 new splits in the current window. '
-          'Do you wish to continue?' )
+          '1 new files in the hidden buffers. The quickfix list '
+          'can then be used to review the changes. No files will be '
+          'written to disk. Do you wish to continue?' )
   ] )
 
   # Ensure that we applied the replacement correctly
@@ -707,7 +719,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   #    raise a warning) (-1 return)
   #  - once whilst applying the changes (-1 return)
   #  - finally after calling OpenFilename (1 return)
-  get_buffer_number_for_filename.assert_has_calls( [
+  get_buffer_number_for_filename.assert_has_exact_calls( [
       call( 'single_file', False ),
       call( 'single_file', False ),
       call( 'single_file', False ),
@@ -715,7 +727,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
 
   # BufferIsVisible is called 3 times for the same reasons as above, with the
   # return of each one
-  buffer_is_visible.assert_has_calls( [
+  buffer_is_visible.assert_has_exact_calls( [
     call( -1 ),
     call( -1 ),
     call( 1 ),
@@ -723,13 +735,21 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
 
   # We open 'single_file' as expected.
   open_filename.assert_called_with( 'single_file', {
-    'focus': False,
+    'focus': True,
     'fix': True,
     'size': 10
   } )
 
+  # And close it again, then show the preview window (note, we don't check exact
+  # calls because there are other calls which are checked elsewhere)
+  vim_command.assert_has_calls( [
+    call( 'lclose' ),
+    call( 'hide' ),
+    call( 'copen 1' ),
+  ] )
+
   # And update the quickfix list
-  vim_eval.assert_has_calls( [
+  vim_eval.assert_has_exact_calls( [
     call( '&previewheight' ),
     call( 'setqflist( {0} )'.format( json.dumps( [ {
       'bufnr': 1,
@@ -740,24 +760,31 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
       'type': 'F'
     } ] ) ) ),
   ] )
-  vim_command.assert_has_calls( [
-    call( 'copen 1' )
-  ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
   # changes
-  echo_text_vim_width.assert_has_calls( [
+  echo_text_vim_width.assert_has_exact_calls( [
     call( 'Applied 1 changes' ),
   ] )
 
 
-@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[ -1, -1, 1 ] )
-@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[ False, False, True ] )
-@patch( 'ycm.vimsupport.OpenFilename' )
-@patch( 'ycm.vimsupport.EchoTextVimWidth' )
-@patch( 'ycm.vimsupport.Confirm', return_value=False )
-@patch( 'vim.eval', return_value=10 )
-@patch( 'vim.command' )
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        side_effect=[ -1, -1, 1 ],
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.BufferIsVisible',
+        side_effect=[ False, False, True ],
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.OpenFilename',
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.EchoTextVimWidth',
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.Confirm',
+        return_value=False,
+        new_callable=ExtendedMock )
+@patch( 'vim.eval',
+        return_value=10,
+        new_callable=ExtendedMock )
+@patch( 'vim.command', new_callable=ExtendedMock )
 def ReplaceChunks_User_Declines_To_Open_File_test(
                                            vim_command,
                                            vim_eval,
@@ -784,11 +811,12 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
     vimsupport.ReplaceChunks( chunks )
 
   # We checked if it was OK to open the file
-  confirm.assert_has_calls( [
+  confirm.assert_has_exact_calls( [
     call( 'The requested operation will apply changes to 1 files '
           'which are not currently open. This will therefore open '
-          '1 new splits in the current window. '
-          'Do you wish to continue?' )
+          '1 new files in the hidden buffers. The quickfix list '
+          'can then be used to review the changes. No files will be '
+          'written to disk. Do you wish to continue?' )
   ] )
 
   # Ensure that buffer is not changed
@@ -802,13 +830,13 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   # the @patch call above:
   #  - once to the check if we would require opening the file (so that we can
   #    raise a warning) (-1 return)
-  get_buffer_number_for_filename.assert_has_calls( [
+  get_buffer_number_for_filename.assert_has_exact_calls( [
       call( 'single_file', False ),
   ] )
 
   # BufferIsVisible is called 3 times for the same reasons as above, with the
   # return of each one
-  buffer_is_visible.assert_has_calls( [
+  buffer_is_visible.assert_has_exact_calls( [
     call( -1 ),
   ] )
 
@@ -820,14 +848,25 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   echo_text_vim_width.assert_not_called()
 
 
-@patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[ -1, -1, 1 ] )
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        side_effect=[ -1, -1, 1 ],
+        new_callable=ExtendedMock )
 # Key difference is here: In the final check, BufferIsVisible returns False
-@patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[ False, False, False ] )
-@patch( 'ycm.vimsupport.OpenFilename' )
-@patch( 'ycm.vimsupport.EchoTextVimWidth' )
-@patch( 'ycm.vimsupport.Confirm', return_value=True )
-@patch( 'vim.eval', return_value=10 )
-@patch( 'vim.command' )
+@patch( 'ycm.vimsupport.BufferIsVisible',
+        side_effect=[ False, False, False ],
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.OpenFilename',
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.EchoTextVimWidth',
+        new_callable=ExtendedMock )
+@patch( 'ycm.vimsupport.Confirm',
+        return_value=True,
+        new_callable=ExtendedMock )
+@patch( 'vim.eval',
+        return_value=10,
+        new_callable=ExtendedMock )
+@patch( 'vim.command',
+        new_callable=ExtendedMock )
 def ReplaceChunks_User_Aborts_Opening_File_test(
                                            vim_command,
                                            vim_eval,
@@ -859,11 +898,12 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
                   'applied changes.' ) )
 
   # We checked if it was OK to open the file
-  confirm.assert_has_calls( [
+  confirm.assert_has_exact_calls( [
     call( 'The requested operation will apply changes to 1 files '
           'which are not currently open. This will therefore open '
-          '1 new splits in the current window. '
-          'Do you wish to continue?' )
+          '1 new files in the hidden buffers. The quickfix list '
+          'can then be used to review the changes. No files will be '
+          'written to disk. Do you wish to continue?' )
   ] )
 
   # Ensure that buffer is not changed
@@ -875,7 +915,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
 
   # We tried to open this file
   open_filename.assert_called_with( "single_file", {
-    'focus': False,
+    'focus': True,
     'fix': True,
     'size': 10
   } )
@@ -891,19 +931,26 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
           22, # first_file (apply)
           -1, # another_file (apply)
           19, # another_file (check after open)
-        ] )
+        ],
+        new_callable=ExtendedMock )
 @patch( 'ycm.vimsupport.BufferIsVisible', side_effect=[
           True,  # first_file (check)
           False, # second_file (check)
           True,  # first_file (apply)
           False, # second_file (apply)
           True,  # side_effect (check after open)
-        ] )
-@patch( 'ycm.vimsupport.OpenFilename' )
-@patch( 'ycm.vimsupport.EchoTextVimWidth' )
-@patch( 'ycm.vimsupport.Confirm', return_value=True )
-@patch( 'vim.eval', return_value=10 )
-@patch( 'vim.command' )
+        ],
+        new_callable=ExtendedMock)
+@patch( 'ycm.vimsupport.OpenFilename',
+        new_callable=ExtendedMock)
+@patch( 'ycm.vimsupport.EchoTextVimWidth',
+        new_callable=ExtendedMock)
+@patch( 'ycm.vimsupport.Confirm', return_value=True,
+        new_callable=ExtendedMock)
+@patch( 'vim.eval', return_value=10,
+        new_callable=ExtendedMock)
+@patch( 'vim.command',
+        new_callable=ExtendedMock)
 def ReplaceChunks_MultiFile_Open_test( vim_command,
                                        vim_eval,
                                        confirm,
@@ -937,11 +984,12 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
     vimsupport.ReplaceChunks( chunks )
 
   # We checked if it was OK to open the file
-  confirm.assert_has_calls( [
+  confirm.assert_has_exact_calls( [
     call( 'The requested operation will apply changes to 1 files '
           'which are not currently open. This will therefore open '
-          '1 new splits in the current window. '
-          'Do you wish to continue?' )
+          '1 new files in the hidden buffers. The quickfix list '
+          'can then be used to review the changes. No files will be '
+          'written to disk. Do you wish to continue?' )
   ] )
 
   # Ensure that buffers are updated
@@ -956,13 +1004,21 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
 
   # We open '2_another_file' as expected.
   open_filename.assert_called_with( '2_another_file', {
-    'focus': False,
+    'focus': True,
     'fix': True,
     'size': 10
   } )
 
+  # And close it again, then show the preview window (note, we don't check exact
+  # calls because there are other calls which are checked elsewhere)
+  vim_command.assert_has_calls( [
+    call( 'lclose' ),
+    call( 'hide' ),
+    call( 'copen 2' ),
+  ] )
+
   # And update the quickfix list with each entry
-  vim_eval.assert_has_calls( [
+  vim_eval.assert_has_exact_calls( [
     call( '&previewheight' ),
     call( 'setqflist( {0} )'.format( json.dumps( [ {
       'bufnr': 22,
@@ -980,13 +1036,10 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
       'type': 'F'
     } ] ) ) ),
   ] )
-  vim_command.assert_has_calls( [
-    call( 'copen 2' )
-  ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
   # changes
-  echo_text_vim_width.assert_has_calls( [
+  echo_text_vim_width.assert_has_exact_calls( [
     call( 'Applied 2 changes' ),
   ] )
 
@@ -1013,14 +1066,14 @@ def _BuildChunk( start_line,
   }
 
 
-@patch( 'vim.command' )
-@patch( 'vim.current' )
+@patch( 'vim.command', new_callable=ExtendedMock )
+@patch( 'vim.current', new_callable=ExtendedMock)
 def WriteToPreviewWindow_test( vim_current, vim_command ):
   vim_current.window.options.__getitem__ = MagicMock( return_value = True )
 
   vimsupport.WriteToPreviewWindow( "test" )
 
-  vim_command.assert_has_calls( [
+  vim_command.assert_has_exact_calls( [
     call( 'silent! pclose!' ),
     call( 'silent! pedit! _TEMP_FILE_' ),
     call( 'silent! wincmd P' ),
@@ -1029,7 +1082,9 @@ def WriteToPreviewWindow_test( vim_current, vim_command ):
   vim_current.buffer.__setitem__.assert_called_with(
       slice( None, None, None ), [ 'test' ] )
 
-  vim_current.buffer.options.__setitem__.assert_has_calls( [
+  vim_current.buffer.options.__setitem__.assert_has_exact_calls( [
+    call( 'modifiable', True ),
+    call( 'readonly', False ),
     call( 'buftype', 'nofile' ),
     call( 'swapfile', False ),
     call( 'modifiable', False ),
@@ -1047,14 +1102,14 @@ def WriteToPreviewWindow_MultiLine_test( vim_current ):
       slice( None, None, None ), [ 'test', 'test2' ] )
 
 
-@patch( 'vim.command' )
-@patch( 'vim.current' )
+@patch( 'vim.command', new_callable=ExtendedMock )
+@patch( 'vim.current', new_callable=ExtendedMock )
 def WriteToPreviewWindow_JumpFail_test( vim_current, vim_command ):
   vim_current.window.options.__getitem__ = MagicMock( return_value = False )
 
   vimsupport.WriteToPreviewWindow( "test" )
 
-  vim_command.assert_has_calls( [
+  vim_command.assert_has_exact_calls( [
     call( 'silent! pclose!' ),
     call( 'silent! pedit! _TEMP_FILE_' ),
     call( 'silent! wincmd P' ),
@@ -1065,15 +1120,15 @@ def WriteToPreviewWindow_JumpFail_test( vim_current, vim_command ):
   vim_current.buffer.options.__setitem__.assert_not_called()
 
 
-@patch( 'vim.command' )
-@patch( 'vim.current' )
+@patch( 'vim.command', new_callable=ExtendedMock )
+@patch( 'vim.current', new_callable=ExtendedMock )
 def WriteToPreviewWindow_JumpFail_MultiLine_test( vim_current, vim_command ):
 
   vim_current.window.options.__getitem__ = MagicMock( return_value = False )
 
   vimsupport.WriteToPreviewWindow( "test\ntest2" )
 
-  vim_command.assert_has_calls( [
+  vim_command.assert_has_exact_calls( [
     call( 'silent! pclose!' ),
     call( 'silent! pedit! _TEMP_FILE_' ),
     call( 'silent! wincmd P' ),
@@ -1120,7 +1175,9 @@ def BufferIsVisibleForFilename_test():
     eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
 
 
-@patch( 'vim.command', side_effect = MockVimCommand )
+@patch( 'vim.command',
+        side_effect = MockVimCommand,
+        new_callable=ExtendedMock )
 def CloseBuffersForFilename_test( vim_command ):
   buffers = [
     {
@@ -1140,14 +1197,14 @@ def CloseBuffersForFilename_test( vim_command ):
   with patch( 'vim.buffers', buffers ):
     vimsupport.CloseBuffersForFilename( 'some_filename' )
 
-  vim_command.assert_has_calls( [
+  vim_command.assert_has_exact_calls( [
     call( 'silent! bwipeout! 2' ),
     call( 'silent! bwipeout! 5' )
   ], any_order = True )
 
 
-@patch( 'vim.command' )
-@patch( 'vim.current' )
+@patch( 'vim.command', new_callable=ExtendedMock )
+@patch( 'vim.current', new_callable=ExtendedMock )
 def OpenFilename_test( vim_current, vim_command ):
   # Options used to open a logfile
   options = {
@@ -1159,7 +1216,7 @@ def OpenFilename_test( vim_current, vim_command ):
 
   vimsupport.OpenFilename( __file__, options )
 
-  vim_command.assert_has_calls( [
+  vim_command.assert_has_exact_calls( [
     call( '12split {0}'.format( __file__ ) ),
     call( "exec "
           "'au BufEnter <buffer> :silent! checktime {0}'".format( __file__ ) ),
@@ -1167,10 +1224,10 @@ def OpenFilename_test( vim_current, vim_command ):
     call( 'silent! wincmd p' )
   ] )
 
-  vim_current.buffer.options.__setitem__.assert_has_calls( [
+  vim_current.buffer.options.__setitem__.assert_has_exact_calls( [
     call( 'autoread', True ),
   ] )
 
-  vim_current.window.options.__setitem__.assert_has_calls( [
+  vim_current.window.options.__setitem__.assert_has_exact_calls( [
     call( 'winfixheight', True )
   ] )
