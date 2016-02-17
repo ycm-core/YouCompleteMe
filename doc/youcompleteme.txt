@@ -38,8 +38,7 @@ Contents ~
   9. Semantic completion for other languages |youcompleteme-semantic-completion-for-other-languages|
   10. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
   11. Diagnostic display                     |youcompleteme-diagnostic-display|
-   1. C# Diagnostic Support                |youcompleteme-c-diagnostic-support|
-   2. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
+   1. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
  6. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
   2. The |:YcmForceCompileAndDiagnostics| command
@@ -188,7 +187,6 @@ Image: Build Status [1] Image: Build status [3]
   - Semantic completion for other languages
   - Writing new semantic completers
   - Diagnostic display
-  - C# diagnostic support
   - Diagnostic highlighting groups
 
 - Commands
@@ -1277,18 +1275,6 @@ the display of the 'locationlist' with a single key mapping is provided by
 another (very small) Vim plugin called ListToggle [44] (which also makes it
 possible to change the height of the 'locationlist' window), also written by
 yours truly.
-
--------------------------------------------------------------------------------
-                                           *youcompleteme-c-diagnostic-support*
-C# Diagnostic Support ~
-
-Unlike the C-family diagnostic support, the C# diagnostic support is not a full
-compile run. Instead, it is a simple syntax check of the current file _only_.
-The |:YcmForceCompileAndDiagnostics| command also is only a simple syntax
-check, _not_ a compile. This means that only syntax errors will be displayed,
-and not semantic errors. For example, omitting the semicolon at the end of
-statement will be displayed as a diagnostic error, but using a nonexistent
-class or variable will not be.
 
 -------------------------------------------------------------------------------
                                  *youcompleteme-diagnostic-highlighting-groups*
