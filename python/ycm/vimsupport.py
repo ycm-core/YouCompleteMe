@@ -20,7 +20,7 @@ import os
 import tempfile
 import json
 import re
-from ycmd.utils import ToUtf8IfNeeded
+from ycmd.utils import ToBytes
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -260,7 +260,7 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
       'lnum'  : line_num,
       'col'   : location[ 'column_num' ],
-      'text'  : ToUtf8IfNeeded( text ),
+      'text'  : ToBytes( text ),
       'type'  : diagnostic[ 'kind' ][ 0 ],
       'valid' : 1
     }
@@ -443,7 +443,7 @@ def EchoText( text, log_as_message = True ):
 # Echos text but truncates it so that it all fits on one line
 def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
-  truncated_text = ToUtf8IfNeeded( text )[ : int( vim_width * 0.9 ) ]
+  truncated_text = ToBytes( text )[ : int( vim_width * 0.9 ) ]
   truncated_text.replace( '\n', ' ' )
 
   old_ruler = GetIntValue( '&ruler' )
