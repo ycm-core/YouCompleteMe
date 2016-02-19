@@ -21,7 +21,7 @@ import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToUtf8IfNeeded
+from ycmd.utils import ToBytes, ToUnicode
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -277,7 +277,7 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
       'lnum'  : line_num,
       'col'   : location[ 'column_num' ],
-      'text'  : ToUtf8IfNeeded( text ),
+      'text'  : ToBytes( text ),
       'type'  : diagnostic[ 'kind' ][ 0 ],
       'valid' : 1
     }
@@ -409,7 +409,7 @@ def NumLinesInBuffer( buffer_object ):
 # or type command to continue" prompt when editing a new C-family file.
 def PostVimMessage( message ):
   vim.command( "redraw | echohl WarningMsg | echom '{0}' | echohl None"
-               .format( EscapeForVim( str( message ) ) ) )
+               .format( EscapeForVim( ToUnicode( message ) ) ) )
 
 
 # Unlike PostVimMesasge, this supports messages with newlines in them because it
@@ -417,7 +417,7 @@ def PostVimMessage( message ):
 # appear in Vim's message log.
 def PostMultiLineNotice( message ):
   vim.command( "echohl WarningMsg | echo '{0}' | echohl None"
-               .format( EscapeForVim( str( message ) ) ) )
+               .format( EscapeForVim( ToUnicode( message ) ) ) )
 
 
 def PresentDialog( message, choices, default_choice_index = 0 ):
@@ -439,8 +439,10 @@ def PresentDialog( message, choices, default_choice_index = 0 ):
     PresentDialog("Is this a nice example?", ["Yes", "No", "May&be"])
       Is this a nice example?
       [Y]es, (N)o, May(b)e:"""
-  to_eval = "confirm('{0}', '{1}', {2})".format( EscapeForVim( message ),
-    EscapeForVim( "\n" .join( choices ) ), default_choice_index + 1 )
+  to_eval = "confirm('{0}', '{1}', {2})".format(
+    EscapeForVim( ToUnicode( message ) ),
+    EscapeForVim( ToUnicode( "\n" .join( choices ) ) ),
+    default_choice_index + 1 )
   return int( vim.eval( to_eval ) ) - 1
 
 
@@ -453,16 +455,17 @@ def Confirm( message ):
 def EchoText( text, log_as_message = True ):
   def EchoLine( text ):
     command = 'echom' if log_as_message else 'echo'
-    vim.command( "{0} '{1}'".format( command, EscapeForVim( text ) ) )
+    vim.command( "{0} '{1}'".format( command,
+                                     EscapeForVim( text ) ) )
 
-  for line in str( text ).split( '\n' ):
+  for line in ToUnicode( text ).split( '\n' ):
     EchoLine( line )
 
 
 # Echos text but truncates it so that it all fits on one line
 def EchoTextVimWidth( text ):
   vim_width = GetIntValue( '&columns' )
-  truncated_text = ToUtf8IfNeeded( text )[ : int( vim_width * 0.9 ) ]
+  truncated_text = ToUnicode( text )[ : int( vim_width * 0.9 ) ]
   truncated_text.replace( '\n', ' ' )
 
   old_ruler = GetIntValue( '&ruler' )
