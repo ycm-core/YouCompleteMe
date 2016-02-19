@@ -141,6 +141,7 @@ function! s:SetUpPython() abort
 python << EOF
 import os
 import sys
+import traceback
 import vim
 
 # Add python sources folder to the system path.
@@ -157,12 +158,16 @@ try:
   from ycm import base, vimsupport
 
   ycm_state = SetUpYCM()
-except ( RuntimeError, ImportError ) as error:
-  # We don't use PostVimMessage from the vimsupport module because importing
-  # this module may fail.
-  error_message = str( error ).replace( "'", "''" )
-  vim.command( "redraw | echohl WarningMsg | echom '{0}' | echohl None"
-               .format( 'YouCompleteMe unavailable: ' + error_message ) )
+except Exception as error:
+  # We don't use PostVimMessage or EchoText from the vimsupport module because
+  # importing this module may fail.
+  vim.command( 'redraw | echohl WarningMsg' )
+  for line in traceback.format_exc().splitlines():
+    vim.command( "echom '{0}'".format( line.replace( "'", "''" ) ) )
+
+  vim.command( "echo 'YouCompleteMe unavailable: {0}'"
+               .format( str( error ).replace( "'", "''" ) ) )
+  vim.command( 'echohl None' )
   vim.command( 'return 0' )
 else:
   vim.command( 'return 1' )
