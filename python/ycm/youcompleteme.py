@@ -115,7 +115,7 @@ class YouCompleteMe( object ):
                '--idle_suicide_seconds={0}'.format(
                   SERVER_IDLE_SUICIDE_SECONDS )]
 
-      filename_format = os.path.join( utils.PathToTempDir(),
+      filename_format = os.path.join( utils.PathToCreatedTempDir(),
                                       'server_{port}_{std}.log' )
 
       self._server_stdout = filename_format.format( port = server_port,
@@ -134,6 +134,7 @@ class YouCompleteMe( object ):
       BaseRequest.hmac_secret = hmac_secret
 
     self._NotifyUserIfServerCrashed()
+
 
   def IsServerAlive( self ):
     returncode = self._server_popen.poll()
