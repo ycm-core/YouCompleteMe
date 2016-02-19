@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycmd.utils import ToUtf8IfNeeded
+from ycmd.utils import ToBytes, ToUnicode
 from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
@@ -69,22 +69,22 @@ def ConvertCompletionDataToVimData( completion_data ):
 
   if ( 'extra_data' in completion_data and
        'doc_string' in completion_data[ 'extra_data' ] ):
-    doc_string = ToUtf8IfNeeded(
-                              completion_data[ 'extra_data' ][ 'doc_string' ] )
+    doc_string = ToBytes( completion_data[ 'extra_data' ][ 'doc_string' ] )
   else:
     doc_string = ""
 
   if 'insertion_text' in completion_data:
-    vim_data[ 'word' ] = ToUtf8IfNeeded( completion_data[ 'insertion_text' ] )
+    vim_data[ 'word' ] = ToBytes( completion_data[ 'insertion_text' ] )
   if 'menu_text' in completion_data:
-    vim_data[ 'abbr' ] = ToUtf8IfNeeded( completion_data[ 'menu_text' ] )
+    vim_data[ 'abbr' ] = ToBytes( completion_data[ 'menu_text' ] )
   if 'extra_menu_info' in completion_data:
-    vim_data[ 'menu' ] = ToUtf8IfNeeded( completion_data[ 'extra_menu_info' ] )
+    vim_data[ 'menu' ] = ToBytes( completion_data[ 'extra_menu_info' ] )
   if 'kind' in completion_data:
-    vim_data[ 'kind' ] = ToUtf8IfNeeded(
-        completion_data[ 'kind' ] )[ 0 ].lower()
+    kind = ToUnicode( completion_data[ 'kind' ] )
+    if kind:
+      vim_data[ 'kind' ] = ToBytes( kind[ 0 ].lower() )
   if 'detailed_info' in completion_data:
-    vim_data[ 'info' ] = ToUtf8IfNeeded( completion_data[ 'detailed_info' ] )
+    vim_data[ 'info' ] = ToBytes( completion_data[ 'detailed_info' ] )
     if doc_string:
       vim_data[ 'info' ] += '\n' + doc_string
   elif doc_string:

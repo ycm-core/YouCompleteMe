@@ -18,7 +18,7 @@
 import vim
 from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
 from ycm import vimsupport
-from ycmd.utils import ToUtf8IfNeeded
+from ycmd.utils import ToUnicode
 
 
 def _EnsureBackwardsCompatibility( arguments ):
@@ -123,9 +123,9 @@ def SendCommandRequest( arguments, completer ):
 def _BuildQfListItem( goto_data_item ):
   qf_item = {}
   if 'filepath' in goto_data_item:
-    qf_item[ 'filename' ] = ToUtf8IfNeeded( goto_data_item[ 'filepath' ] )
+    qf_item[ 'filename' ] = ToUnicode( goto_data_item[ 'filepath' ] )
   if 'description' in goto_data_item:
-    qf_item[ 'text' ] = ToUtf8IfNeeded( goto_data_item[ 'description' ] )
+    qf_item[ 'text' ] = ToUnicode( goto_data_item[ 'description' ] )
   if 'line_num' in goto_data_item:
     qf_item[ 'lnum' ] = goto_data_item[ 'line_num' ]
   if 'column_num' in goto_data_item:
