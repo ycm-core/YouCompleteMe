@@ -139,12 +139,13 @@ import subprocess
 script_folder = vim.eval( 's:script_folder_path' )
 sys.path.insert( 0, os.path.join( script_folder, '../python' ) )
 sys.path.insert( 0, os.path.join( script_folder, '../third_party/ycmd' ) )
-from ycmd import utils
-utils.AddNearestThirdPartyFoldersToSysPath( script_folder )
+from ycmd import server_utils
+server_utils.AddNearestThirdPartyFoldersToSysPath( script_folder )
 
 # We need to import ycmd's third_party folders as well since we import and
 # use ycmd code in the client.
-utils.AddNearestThirdPartyFoldersToSysPath( utils.__file__ )
+server_utils.AddNearestThirdPartyFoldersToSysPath( server_utils.__file__ )
+from ycmd import utils
 from ycm import base
 base.LoadJsonDefaultsIntoVim()
 from ycmd import user_options_store

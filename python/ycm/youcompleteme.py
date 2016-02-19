@@ -117,7 +117,7 @@ class YouCompleteMe( object ):
                '--idle_suicide_seconds={0}'.format(
                   SERVER_IDLE_SUICIDE_SECONDS )]
 
-      filename_format = os.path.join( utils.PathToTempDir(),
+      filename_format = os.path.join( utils.PathToCreatedTempDir(),
                                       'server_{port}_{std}.log' )
 
       self._server_stdout = filename_format.format( port = server_port,
@@ -131,11 +131,12 @@ class YouCompleteMe( object ):
         args.append( '--keep_logfiles' )
 
       self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
-                                            stdout = PIPE, stderr = PIPE)
+                                            stdout = PIPE, stderr = PIPE )
       BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
       BaseRequest.hmac_secret = hmac_secret
 
     self._NotifyUserIfServerCrashed()
+
 
   def IsServerAlive( self ):
     returncode = self._server_popen.poll()
