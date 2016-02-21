@@ -605,7 +605,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
                                         get_buffer_number_for_filename ):
 
   chunks = [
-    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+    _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
   result_buffer = MockBuffer( [
@@ -686,7 +686,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
                                            get_buffer_number_for_filename ):
 
   chunks = [
-    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+    _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
   result_buffer = MockBuffer( [
@@ -700,11 +700,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
 
   # We checked if it was OK to open the file
   confirm.assert_has_exact_calls( [
-    call( 'The requested operation will apply changes to 1 files '
-          'which are not currently open. This will therefore open '
-          '1 new files in the hidden buffers. The quickfix list '
-          'can then be used to review the changes. No files will be '
-          'written to disk. Do you wish to continue?' )
+    call( vimsupport.FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( 1 ) )
   ] )
 
   # Ensure that we applied the replacement correctly
@@ -798,7 +794,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   # allow us to open lots of (ahem, 1) file.
 
   chunks = [
-    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+    _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
   result_buffer = MockBuffer( [
@@ -812,11 +808,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
 
   # We checked if it was OK to open the file
   confirm.assert_has_exact_calls( [
-    call( 'The requested operation will apply changes to 1 files '
-          'which are not currently open. This will therefore open '
-          '1 new files in the hidden buffers. The quickfix list '
-          'can then be used to review the changes. No files will be '
-          'written to disk. Do you wish to continue?' )
+    call( vimsupport.FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( 1 ) )
   ] )
 
   # Ensure that buffer is not changed
@@ -834,8 +826,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
       call( 'single_file', False ),
   ] )
 
-  # BufferIsVisible is called 3 times for the same reasons as above, with the
-  # return of each one
+  # BufferIsVisible is called once for the above file, which wasn't visible.
   buffer_is_visible.assert_has_exact_calls( [
     call( -1 ),
   ] )
@@ -880,7 +871,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
   # "swap-file-found" dialog
 
   chunks = [
-    _BuildChunk( 1,1, 2, 1, 'replacement', 'single_file' )
+    _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
   result_buffer = MockBuffer( [
@@ -899,11 +890,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
 
   # We checked if it was OK to open the file
   confirm.assert_has_exact_calls( [
-    call( 'The requested operation will apply changes to 1 files '
-          'which are not currently open. This will therefore open '
-          '1 new files in the hidden buffers. The quickfix list '
-          'can then be used to review the changes. No files will be '
-          'written to disk. Do you wish to continue?' )
+    call( vimsupport.FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( 1 ) )
   ] )
 
   # Ensure that buffer is not changed
@@ -962,8 +949,8 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
   # Chunks are split across 2 files, one is already open, one isn't
 
   chunks = [
-    _BuildChunk( 1,1, 2, 1, 'first_file_replacement ', '1_first_file' ),
-    _BuildChunk( 2,1, 2, 1, 'second_file_replacement ', '2_another_file' ),
+    _BuildChunk( 1, 1, 2, 1, 'first_file_replacement ', '1_first_file' ),
+    _BuildChunk( 2, 1, 2, 1, 'second_file_replacement ', '2_another_file' ),
   ]
 
   first_file = MockBuffer( [
@@ -983,13 +970,18 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
   with patch( 'vim.buffers', vim_buffers ):
     vimsupport.ReplaceChunks( chunks )
 
+  # We checked for the right file names
+  get_buffer_number_for_filename.assert_has_exact_calls( [
+    call( '1_first_file', False ),
+    call( '2_another_file', False ),
+    call( '1_first_file', False ),
+    call( '2_another_file', False ),
+    call( '2_another_file', False ),
+  ] )
+
   # We checked if it was OK to open the file
   confirm.assert_has_exact_calls( [
-    call( 'The requested operation will apply changes to 1 files '
-          'which are not currently open. This will therefore open '
-          '1 new files in the hidden buffers. The quickfix list '
-          'can then be used to review the changes. No files will be '
-          'written to disk. Do you wish to continue?' )
+    call( vimsupport.FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( 1 ) )
   ] )
 
   # Ensure that buffers are updated

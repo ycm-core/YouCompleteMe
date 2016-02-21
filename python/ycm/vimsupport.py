@@ -29,6 +29,13 @@ BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'vertical-split'   : 'vsplit',
                        'new-tab'          : 'tabedit' }
 
+FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
+    'The requested operation will apply changes to {0} files which are not '
+    'currently open. This will therefore open {0} new files in the hidden '
+    'buffers. The quickfix list can then be used to review the changes. No '
+    'files will be written to disk. Do you wish to continue?' )
+
+
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
   # See the comment in CurrentColumn about the calculation for the line and
@@ -520,17 +527,12 @@ def ReplaceChunks( chunks ):
   # buffers
   num_files_to_open = len(
       [ f for f in sorted_file_list
-        if not BufferIsVisible(
-          GetBufferNumberForFilename( filepath, False ) ) ]
+        if not BufferIsVisible( GetBufferNumberForFilename( f, False ) ) ]
   )
 
   if num_files_to_open > 0:
-    if not Confirm( 'The requested operation will apply changes to {0} files '
-                    'which are not currently open. This will therefore open '
-                    '{0} new files in the hidden buffers. The quickfix list '
-                    'can then be used to review the changes. No files will be '
-                    'written to disk. '
-                    'Do you wish to continue?'.format(  num_files_to_open ) ):
+    if not Confirm(
+            FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( num_files_to_open ) ):
       return
 
   # Store the list of locations where we applied changes. We use this to display
@@ -572,7 +574,7 @@ def ReplaceChunks( chunks ):
         raise RuntimeError(
             'Unable to open file: {0}\nFixIt/Refactor operation '
             'aborted prior to completion. Your files have not been '
-            'fully updated. Please use undo commands to revert the'
+            'fully updated. Please use undo commands to revert the '
             'applied changes.'.format( filepath ) )
 
     ReplaceChunksInBuffer( chunks_by_file[ filepath ],

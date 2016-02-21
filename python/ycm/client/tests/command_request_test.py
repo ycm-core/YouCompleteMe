@@ -20,6 +20,7 @@ MockVimModule()
 
 import json
 from mock import patch, call
+from nose.tools import ok_
 from ycm.client.command_request import CommandRequest
 
 
@@ -239,8 +240,8 @@ class Response_Detection_test:
           request = CommandRequest( [ command ] )
           request._response = response
           request.RunPostCommandActionsIfNeeded()
-          assert set_qf_list.called
-          assert vim_eval.called
+          ok_( set_qf_list.called )
+          ok_( vim_eval.called )
 
     basic_goto = {
       'filepath': 'test',
