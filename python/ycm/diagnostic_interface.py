@@ -50,6 +50,11 @@ class DiagnosticInterface( object ):
     return len( self._FilterDiagnostics( _DiagnosticIsWarning ) )
 
 
+  def PopulateLocationList( self, diags ):
+    vimsupport.SetLocationList(
+      vimsupport.ConvertDiagnosticsToQfList( diags ) )
+
+
   def UpdateWithNewDiagnostics( self, diags ):
     normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
@@ -65,8 +70,7 @@ class DiagnosticInterface( object ):
       _UpdateSquiggles( self._buffer_number_to_line_to_diags )
 
     if self._user_options[ 'always_populate_location_list' ]:
-      vimsupport.SetLocationList(
-        vimsupport.ConvertDiagnosticsToQfList( normalized_diags ) )
+      self.PopulateLocationList( normalized_diags )
 
   def _EchoDiagnosticForLine( self, line_num ):
     buffer_num = vim.current.buffer.number
