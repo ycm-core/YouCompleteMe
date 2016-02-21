@@ -33,10 +33,6 @@ class CommandRequest( BaseRequest ):
     self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._completer_target = ( completer_target if completer_target
                                else 'filetype_default' )
-    self._is_goto_command = (
-        self._arguments and self._arguments[ 0 ].startswith( 'GoTo' ) )
-    self._is_fixit_command = (
-        self._arguments and self._arguments[ 0 ].startswith( 'FixIt' ) )
     self._response = None
 
 
@@ -61,17 +57,14 @@ class CommandRequest( BaseRequest ):
     if not self.Done() or self._response is None:
       return
 
-    if self._is_goto_command:
-      return self._HandleGotoResponse()
-
-    if self._is_fixit_command:
-      return self._HandleFixitResponse()
-
     # If not a dictionary or a list, the response is necessarily a
     # scalar: boolean, number, string, etc. In this case, we print
     # it to the user.
     if not isinstance( self._response, ( dict, list ) ):
       return self._HandleBasicResponse()
+
+    if 'fixits' in self._response:
+      return self._HandleFixitResponse()
 
     if 'message' in self._response:
       return self._HandleMessageResponse()
@@ -79,11 +72,16 @@ class CommandRequest( BaseRequest ):
     if 'detailed_info' in self._response:
       return self._HandleDetailedInfoResponse()
 
+    # The only other type of response we understand is GoTo, and that is the
+    # only one that we can't detect just by inspecting the response (it should
+    # either be a single location or a list)
+    return self._HandleGotoResponse()
+
 
   def _HandleGotoResponse( self ):
     if isinstance( self._response, list ):
-      defs = [ _BuildQfListItem( x ) for x in self._response ]
-      vim.eval( 'setqflist( %s )' % repr( defs ) )
+      vimsupport.SetQuickFixList(
+              [ _BuildQfListItem( x ) for x in self._response ] )
       vim.eval( 'youcompleteme#OpenGoToList()' )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
@@ -96,12 +94,10 @@ class CommandRequest( BaseRequest ):
       vimsupport.EchoText( "No fixits found for current line" )
     else:
       chunks = self._response[ 'fixits' ][ 0 ][ 'chunks' ]
-
-      vimsupport.ReplaceChunksList( chunks )
-
-      vimsupport.EchoTextVimWidth( "FixIt applied "
-                                   + str( len( chunks ) )
-                                   + " changes" )
+      try:
+        vimsupport.ReplaceChunks( chunks )
+      except RuntimeError as e:
+        vimsupport.PostMultiLineNotice( e.message )
 
 
   def _HandleBasicResponse( self ):

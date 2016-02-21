@@ -28,6 +28,9 @@ YouCompleteMe: a code-completion engine for Vim
     - [Diagnostic highlighting groups](#diagnostic-highlighting-groups)
 - [Commands](#commands)
     - [YcmCompleter subcommands](#ycmcompleter-subcommands)
+        - [Go to declaration/definition/etc. commands](#goto-commands)
+        - [Semantic type information and documentation](#semantic-information-commands)
+        - [Refactoring and FixIt commands](#refactoring-and-fixit-commands)
 - [Options](#options)
 - [FAQ](#faq)
 - [Contributor Code of Conduct](#contributor-code-of-conduct)
@@ -104,9 +107,21 @@ features plus extra:
 - Supertab
 - neocomplcache
 
-YCM also provides semantic go-to-definition/declaration commands for C-family
-languages & Python. Expect more IDE features powered by the various YCM semantic
-engines in the future.
+### And that's not all...
+
+YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
+number of languages, including:
+
+- finding declarations, definitions, usages, etc. of identifiers,
+- displaying type information for classes, variables, functions etc.,
+- displaying documentation for methods, members, etc. in the preview window,
+- fixing common coding errors, like missing semi-colons, typos, etc.,
+- semantic renaming of variables across files (JavaScript only).
+
+Features vary by file type, so make sure to check out the [file type feature
+summary](#quick-feature-summary) and the
+[full list of completer subcommands](#ycmcompleter-subcommands) to
+find out what's available for your favourite languages.
 
 You'll also find that YCM has filepath completers (try typing `./` in a file)
 and a completer that integrates with [UltiSnips][].
@@ -682,6 +697,7 @@ Quick Feature Summary
 ### JavaScript
 
 * Intelligent auto-completion
+* Renaming variables (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -1106,20 +1122,25 @@ purpose.
 
 ### The `:YcmCompleter` command
 
-This command can be used to invoke completer-specific commands.  If the first
+This command gives access to a number of additional [IDE-like
+features](#quick-feature-summary) in YCM, for things like semantic GoTo, type
+information, FixIt and refactoring.
+
+Technically the command invokes completer-specific commands.  If the first
 argument is of the form `ft=...` the completer for that file type will be used
 (for example `ft=cpp`), else the native completer of the current buffer will be
 used.
-Call `YcmCompleter` without further arguments for information about the
-commands you can call for the selected completer.
+Call `YcmCompleter` without further arguments for a list of the
+commands you can call for the current completer.
 
-See the _YcmCompleter subcommands_ section for more information on the available
-subcommands.
+See the [file type feature summary](#quick-feature-summary) for an overview of
+the features available for each file type. See the _YcmCompleter subcommands_
+section for more information on the available subcommands and their usage.
 
 YcmCompleter subcommands
 ------------------------
 
-[See the docs for the `YcmCompleter` command before tackling this section.]
+NOTE: See the docs for the `YcmCompleter` command before tackling this section.
 
 The invoked subcommand is automatically routed to the currently active semantic
 completer, so `:YcmCompleter GoToDefinition` will invoke the `GoToDefinition`
@@ -1131,23 +1152,26 @@ You may also want to map the subcommands to something less verbose; for
 instance, `nnoremap <leader>jd :YcmCompleter GoTo<CR>`
 maps the `<leader>jd` sequence to the longer subcommand invocation.
 
-The various `GoTo*` subcommands add entries to Vim's `jumplist` so you can use
+### GoTo commands
+
+These commands are useful for jumping around and exploring code. When moving
+the cursor, the subcommands add entries to Vim's `jumplist` so you can use
 `CTRL-O` to jump back to where you where before invoking the command (and
 `CTRL-I` to jump forward; see `:h jumplist` for details).
 
-### The `GoToInclude` subcommand
+#### The `GoToInclude` subcommand
 
 Looks up the current line for a header and jumps to it.
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
-### The `GoToDeclaration` subcommand
+#### The `GoToDeclaration` subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, go, python, rust`
 
-### The `GoToDefinition` subcommand
+#### The `GoToDefinition` subcommand
 
 Looks up the symbol under the cursor and jumps to its definition.
 
@@ -1159,7 +1183,7 @@ with `#include` directives (directly or indirectly) in that file.
 Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python,
 rust, typescript`
 
-### The `GoTo` subcommand
+#### The `GoTo` subcommand
 
 This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
@@ -1170,7 +1194,7 @@ jump to it. For C#, implementations are also considered and preferred.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python, rust`
 
-### The `GoToImprecise` subcommand
+#### The `GoToImprecise` subcommand
 
 WARNING: This command trades correctness for speed!
 
@@ -1183,7 +1207,7 @@ latency.
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
-### The `GoToReferences` subcommand
+#### The `GoToReferences` subcommand
 
 This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
@@ -1191,19 +1215,28 @@ locations.
 
 Supported in filetypes: `javascript, python, typescript`
 
-### The `ClearCompilationFlagCache` subcommand
+#### The `GoToImplementation` subcommand
 
-YCM caches the flags it gets from the `FlagsForFile` function in your
-`ycm_extra_conf.py` file if you return them with the `do_cache` parameter set to
-`True`. The cache is in memory and is never invalidated (unless you restart Vim
-of course).
+Looks up the symbol under the cursor and jumps to its implementation (i.e.
+non-interface). If there are multiple implementations, instead provides a list
+of implementations to choose from.
 
-This command clears that cache entirely. YCM will then re-query your
-`FlagsForFile` function as needed in the future.
+Supported in filetypes: `cs`
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+#### The `GoToImplementationElseDeclaration` subcommand
 
-### The `GetType` subcommand
+Looks up the symbol under the cursor and jumps to its implementation if one,
+else jump to its declaration. If there are multiple implementations, instead
+provides a list of implementations to choose from.
+
+Supported in filetypes: `cs`
+
+### Semantic information commands
+
+These commands are useful for finding static information about the code, such
+as the types of variables, viewing declarations and documentation strings.
+
+#### The `GetType` subcommand
 
 Echos the type of the variable or method under the cursor, and where it differs,
 the derived type.
@@ -1234,7 +1267,7 @@ NOTE: Causes re-parsing of the current translation unit.
 
 Supported in filetypes: `c, cpp, objc, objcpp, javascript, typescript`
 
-### The `GetParent` subcommand
+#### The `GetParent` subcommand
 
 Echos the semantic parent of the point under the cursor.
 
@@ -1265,7 +1298,26 @@ NOTE: Causes re-parsing of the current translation unit.
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
-### The `FixIt` subcommand
+#### The `GetDoc` subcommand
+
+Displays the preview window populated with quick info about the identifier
+under the cursor. Depending on the file type, this includes things like:
+
+* The type or declaration of identifier,
+* Doxygen/javadoc comments,
+* Python docstrings,
+* etc.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
+javascript`
+
+### Refactoring and FixIt commands
+
+These commands make changes to your source code in order to perform refactoring
+or code correction. YouCompleteMe does not perform any action which cannot be
+undone, and never saves or writes files to the disk.
+
+#### The `FixIt` subcommand
 
 Where available, attempts to make changes to the buffer to correct the
 diagnostic closest to the cursor position.
@@ -1290,8 +1342,8 @@ indication).
 NOTE: Causes re-parsing of the current translation unit.
 
 NOTE: After applying a fix-it, the diagnostics UI is not immediately updated.
-This is due to a technical restriction in vim, and moving the cursor, or issuing
-the the `:YcmForceCompileAndDiagnostics` command will refresh the diagnostics.
+This is due to a technical restriction in Vim. Moving the cursor, or issuing
+the `:YcmForceCompileAndDiagnostics` command will refresh the diagnostics.
 Repeated invocations of the `FixIt` command on a given line, however, _do_ apply
 all diagnostics as expected without requiring refreshing of the diagnostics UI.
 This is particularly useful where there are multiple diagnostics on one line, or
@@ -1299,34 +1351,81 @@ where after fixing one diagnostic, another fix-it is available.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs`
 
-### The `GetDoc` subcommand
+#### The `RefactorRename <new name>` subcommand
 
-Displays the preview window populated with quick info about the identifier
-under the cursor. This includes, depending on the language, things like:
+In supported file types, this command attempts to perform a semantic rename of
+the identifier under the cursor. This includes renaming declarations,
+definitions and usages of the identifier, or any other language-appropriate
+action. The specific behavior is defined by the semantic engine in use.
 
-* The type or declaration of identifier
-* Doxygen/javadoc comments
-* Python docstrings
-* etc.
+Similar to `FixIt`, this command applies automatic modifications to your source
+files. Rename operations may involve changes to multiple files, which may or may
+not be open in Vim buffers at the time. YouCompleteMe handles all of this for
+you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
-javascript`
+Supported in filetypes: `javascript` (variables only)
 
-### The `StartServer` subcommand
+#### Multi-file Refactor
+
+When a Refactor or FixIt command touches multiple files, YouCompleteMe attempts
+to apply those modifications to any existing open, visible buffer in the current
+tab. If no such buffer can be found, YouCompleteMe opens the file in a new
+small horizontal split at the top of the current window, applies the change,
+and then *hides* the window. NOTE: The buffer remains open, and must be
+manually saved. A confirmation dialog is opened prior to doing this to remind
+you that this is about to happen.
+
+Once the modifications have been made, the quickfix list (see `:help quickfix`)
+is opened and populated with the locations of all modifications. This can be
+used to review all automatic changes made. Typically, use the `CTRL-W
+<enter>` combination to open the selected file in a new split.
+
+The buffers are *not* saved automatically. That is, you must save the modified
+buffers manually after reviewing the changes from the quickfix list. Changes
+can be undone using Vim's powerful undo features (see `:help undo`). Note
+that Vim's undo is per-buffer, so to undo all changes, the undo commands must
+be applied in each modified buffer separately.
+
+NOTE: While applying modifications, Vim may find files which are already open
+and have a swap file. The command is aborted if you select Abort or Quit in any
+such prompts. This leaves the Refactor operation partially complete and must be
+manually corrected using Vim's undo features. The quickfix list is *not*
+populated in this case. Inspect `:buffers` or equivalent (see `:help buffers`)
+to see the buffers that were opened by the command.
+
+### Miscellaneous commands
+
+These commands are for general administration, rather than IDE-like features.
+They cover things like the semantic engine server instance and compilation
+flags.
+
+#### The `ClearCompilationFlagCache` subcommand
+
+YCM caches the flags it gets from the `FlagsForFile` function in your
+`ycm_extra_conf.py` file if you return them with the `do_cache` parameter set to
+`True`. The cache is in memory and is never invalidated (unless you restart Vim
+of course).
+
+This command clears that cache entirely. YCM will then re-query your
+`FlagsForFile` function as needed in the future.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
+#### The `StartServer` subcommand
 
 Starts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
 Supported in filetypes: `cs, go, javascript, rust`
 
-### The `StopServer` subcommand
+#### The `StopServer` subcommand
 
 Stops the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
 Supported in filetypes: `cs, go, javascript, rust`
 
-### The `RestartServer` subcommand
+#### The `RestartServer` subcommand
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
@@ -1340,27 +1439,11 @@ python binary to use to restart the Python semantic engine.
 
 Supported in filetypes: `cs, python, rust`
 
-### The `ReloadSolution` subcommand
+#### The `ReloadSolution` subcommand
 
 Instruct the Omnisharp server to clear its cache and reload all files from disk.
 This is useful when files are added, removed, or renamed in the solution, files
 are changed outside of Vim, or whenever Omnisharp cache is out-of-sync.
-
-Supported in filetypes: `cs`
-
-### The `GoToImplementation` subcommand
-
-Looks up the symbol under the cursor and jumps to its implementation (i.e.
-non-interface). If there are multiple implementations, instead provides a list
-of implementations to choose from.
-
-Supported in filetypes: `cs`
-
-### The `GoToImplementationElseDeclaration` subcommand
-
-Looks up the symbol under the cursor and jumps to its implementation if one,
-else jump to its declaration. If there are multiple implementations, instead
-provides a list of implementations to choose from.
 
 Supported in filetypes: `cs`
 
@@ -1896,7 +1979,7 @@ let g:ycm_csharp_server_port = 0
 By default, when YCM inserts a namespace, it will insert the `using` statement
 under the nearest `using` statement. You may prefer that the `using` statement is
 inserted somewhere, for example, to preserve sorting. If so, you can set this
-option to override this behaviour.
+option to override this behavior.
 
 When this option is set, instead of inserting the `using` statement itself, YCM
 will set the global variable `g:ycm_namespace_to_insert` to the namespace to
