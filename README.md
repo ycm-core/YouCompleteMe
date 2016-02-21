@@ -697,7 +697,7 @@ Quick Feature Summary
 ### JavaScript
 
 * Intelligent auto-completion
-* Rename of global variables (`RefactorRename <new name>`)
+* Rename of variables (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)

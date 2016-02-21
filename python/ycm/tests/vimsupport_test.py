@@ -885,7 +885,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
                  raises( RuntimeError,
                   'Unable to open file: single_file\nFixIt/Refactor operation '
                   'aborted prior to completion. Your files have not been '
-                  'fully updated. Please use undo commands to revert the'
+                  'fully updated. Please use undo commands to revert the '
                   'applied changes.' ) )
 
   # We checked if it was OK to open the file
