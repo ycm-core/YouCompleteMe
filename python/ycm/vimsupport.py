@@ -445,7 +445,7 @@ def PresentDialog( message, choices, default_choice_index = 0 ):
 
 
 def Confirm( message ):
-  """Display |message| with Ok/Cancel operations, returns True if the user
+  """Display |message| with Ok/Cancel operations. Returns True if the user
   selects Ok"""
   return bool( PresentDialog( message, [ "Ok", "Cancel" ] ) == 0 )
 
@@ -510,9 +510,10 @@ def GetIntValue( variable ):
   return int( vim.eval( variable ) )
 
 
-def ReplaceChunks( chunks ):
-  """Replace the chunks in chunks file-wise, where chunks may be in any order
-  across any files"""
+def SortChunksByFile( chunks ):
+  """Sort the members of the list |chunks| (which must be a list of dictionaries
+  conforming to ycmd.responses.FixItChunk) by their filepath. Returns a new
+  list in arbitrary order."""
 
   chunks_by_file = defaultdict( list )
 
@@ -520,15 +521,94 @@ def ReplaceChunks( chunks ):
     filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
+  return chunks_by_file
+
+
+def GetNumNonVisibleFiles( file_list ):
+  """Returns the number of file in the iterable list of files |file_list| which
+  are not curerntly open in visible windows"""
+  return len(
+      [ f for f in file_list
+        if not BufferIsVisible( GetBufferNumberForFilename( f, False ) ) ] )
+
+
+def OpenFileInSplitIfNeeded( filepath ):
+  """Ensure that the supplied filepath is open in a visible window, opening a
+  new split if required. Returns the buffer number of the file and an indication
+  of whether or not a new split was opened.
+
+  If the supplied filename is already open in a visible window, return just
+  return its buffer number. If the supplied file is not visible in a window
+  in the current tab, opens it in a new vertical split.
+
+  Returns a tuple of ( buffer_num, split_was_opened ) indicating the buffer
+  number and whether or not this method created a new split. If the user opts
+  not to open a file, or if opening fails, this method raises RuntimeError,
+  otherwise, guarantees to return a visible buffer number in buffer_num."""
+
+  buffer_num = GetBufferNumberForFilename( filepath, False )
+
+  # We only apply changes in the current tab page (i.e. "visible" windows).
+  # Applying changes in tabs does not lead to a better user experience, as the
+  # quickfix list no longer works as you might expect (doesn't jump into other
+  # tabs), and the complexity of choosing where to apply edits is significant.
+  if BufferIsVisible( buffer_num ):
+    # file is already open and visible, just return that buffer number (and an
+    # idicator that we *didn't* open a split)
+    return ( buffer_num, False )
+
+  # The file is not open in a visible window, so we open it in a split.
+  # We open the file with a small, fixed height. This means that we don't
+  # make the current buffer the smallest after a series of splits.
+  OpenFilename( filepath, {
+    'focus': True,
+    'fix': True,
+    'size': GetIntValue( '&previewheight' ),
+  } )
+
+  # OpenFilename returns us to the original cursor location. This is what we
+  # want, because we don't want to disorientate the user, but we do need to
+  # know the (now open) buffer number for the filename
+  buffer_num = GetBufferNumberForFilename( filepath, False )
+  if not BufferIsVisible( buffer_num ):
+    # This happens, for example, if there is a swap file and the user
+    # selects the "Quit" or "Abort" options. We just raise an exception to
+    # make it clear to the user that the abort has left potentially
+    # partially-applied changes.
+    raise RuntimeError(
+        'Unable to open file: {0}\nFixIt/Refactor operation '
+        'aborted prior to completion. Your files have not been '
+        'fully updated. Please use undo commands to revert the '
+        'applied changes.'.format( filepath ) )
+
+  # We opened this file in a split
+  return ( buffer_num, True )
+
+
+def ReplaceChunks( chunks ):
+  """Apply the source file deltas supplied in |chunks| to arbitrary files.
+  |chunks| is a list of changes defined by ycmd.responses.FixItChunk,
+  which may apply arbitrary modifications to arbitrary files.
+
+  If a file specified in a particular chunk is not currently open in a visible
+  buffer (i.e., one in a window visible in the current tab), we:
+    - issue a warning to the user that we're going to open new files (and offer
+      her the option to abort cleanly)
+    - open the file in a new split, make the changes, then hide the buffer.
+
+  If for some reason a file could not be opened or changed, raises RuntimeError.
+  Otherwise, returns no meaningful value."""
+
+  # We apply the edits file-wise for efficiency, and because we must track the
+  # file-wise offset deltas (caused by the modifications to the text).
+  chunks_by_file = SortChunksByFile( chunks )
+
   # We sort the file list simply to enable repeatable testing
   sorted_file_list = sorted( chunks_by_file.iterkeys() )
 
   # Make sure the user is prepared to have her screen mutilated by the new
   # buffers
-  num_files_to_open = len(
-      [ f for f in sorted_file_list
-        if not BufferIsVisible( GetBufferNumberForFilename( f, False ) ) ]
-  )
+  num_files_to_open = GetNumNonVisibleFiles( sorted_file_list )
 
   if num_files_to_open > 0:
     if not Confirm(
@@ -540,47 +620,15 @@ def ReplaceChunks( chunks ):
   locations = []
 
   for filepath in sorted_file_list:
-    buffer_num = GetBufferNumberForFilename( filepath, False )
-    close_window = False
-
-    # We only apply changes in the current tab page (i.e. "visible" windows).
-    # Applying changes in tabs does not lead to a better user experience, as the
-    # quickfix list no longer works as you might expect (doesn't jump into other
-    # tabs), and the complexity of choosing where to apply edits is significant.
-    if not BufferIsVisible( buffer_num ):
-
-      # We open the file with a small, fixed height. This means that we don't
-      # make the current buffer the smallest after a series of splits.
-      OpenFilename( filepath, {
-        'focus': True,
-        'fix': True,
-        'size': GetIntValue( '&previewheight' ),
-      } )
-
-      # When opening tons of files, we don't want to have a split for each new
-      # file, as this simply does not scale, so we open the window, make the
-      # edits, then hide the window.
-      close_window = True
-
-      # OpenFilename returns us to the original cursor location. This is what we
-      # want, because we don't want to disorientate the user, but we do need to
-      # know the (now open) buffer number for the filename
-      buffer_num = GetBufferNumberForFilename( filepath, False )
-      if not BufferIsVisible( buffer_num ):
-        # This happens, for example, if there is a swap file and the user
-        # selects the "Quit" or "Abort" options. We just raise an exception to
-        # make it clear to the user that the abort has left potentially
-        # partially-applied changes.
-        raise RuntimeError(
-            'Unable to open file: {0}\nFixIt/Refactor operation '
-            'aborted prior to completion. Your files have not been '
-            'fully updated. Please use undo commands to revert the '
-            'applied changes.'.format( filepath ) )
+    ( buffer_num, close_window ) = OpenFileInSplitIfNeeded( filepath )
 
     ReplaceChunksInBuffer( chunks_by_file[ filepath ],
                            vim.buffers[ buffer_num ],
                            locations )
 
+    # When opening tons of files, we don't want to have a split for each new
+    # file, as this simply does not scale, so we open the window, make the
+    # edits, then hide the window.
     if close_window:
       # Some plugins (I'm looking at you, syntastic) might open a location list
       # for the window we just opened. We don't want that location list hanging
@@ -590,7 +638,6 @@ def ReplaceChunks( chunks ):
       # Note that this doesn't lose our changes. It simply "hides" the buffer,
       # which can later be re-accessed via the quickfix list or `:ls`
       vim.command( 'hide' )
-
 
   # Open the quickfix list, populated with entries for each location we changed.
   if locations:
@@ -644,7 +691,7 @@ def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
 # returns the delta (in lines and characters) that any position after the end
 # needs to be adjusted by.
 def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
-                  vim_buffer, locations=None ):
+                  vim_buffer, locations = None ):
   # ycmd's results are all 1-based, but vim's/python's are all 0-based
   # (so we do -1 on all of the values)
   start_line = start[ 'line_num' ] - 1 + line_delta
@@ -844,7 +891,7 @@ def OpenFilename( filename, options = {} ):
   CheckFilename( filename )
   try:
     vim.command( '{0}{1} {2}'.format( size, command, filename ) )
-  # When the file we are trying to jump to has a swap file
+  # When the file we are trying to jump to has a swap file,
   # Vim opens swap-exists-choices dialog and throws vim.error with E325 error,
   # or KeyboardInterrupt after user selects one of the options which actually
   # opens the file (Open read-only/Edit anyway).

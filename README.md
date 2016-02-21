@@ -697,7 +697,7 @@ Quick Feature Summary
 ### JavaScript
 
 * Intelligent auto-completion
-* Rename of variables (`RefactorRename <new name>`)
+* Renaming variables (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -1372,22 +1372,22 @@ to apply those modifications to any existing open, visible buffer in the current
 tab. If no such buffer can be found, YouCompleteMe opens the file in a new
 small horizontal split at the top of the current window, applies the change,
 and then *hides* the window. NOTE: The buffer remains open, and must be
-manually saved.. A confirmation dialog is opened prior to doing this, to remind
+manually saved. A confirmation dialog is opened prior to doing this to remind
 you that this is about to happen.
 
 Once the modifications have been made, the quickfix list (see `:help quickfix`)
-is opened, populated with the locations of all modifications. This can be used
-to review all automatic changes made. Typically, use the `CTRL-W
+is opened and populated with the locations of all modifications. This can be
+used to review all automatic changes made. Typically, use the `CTRL-W
 <enter>` combination to open the selected file in a new split.
 
 The buffers are *not* saved automatically. That is, you must save the modified
 buffers manually after reviewing the changes from the quickfix list. Changes
 can be undone using Vim's powerful undo features (see `:help undo`). Note,
-however: Vim's undo is per-buffer, so to undo all changes, the undo
+however that Vim's undo is per-buffer, so to undo all changes, the undo
 commands must be applied in each modified buffer separately.
 
 NOTE: While applying modifications, Vim may find files which are already open
-and have a swap file. The command is aborted if you select Abort or Quit to any
+and have a swap file. The command is aborted if you select Abort or Quit in any
 such prompts. This leaves the Refactor operation partially complete and must be
 manually corrected using Vim's undo features. The quickfix list is *not*
 populated in this case. Inspect `:buffers` or equivalent (see `:help buffers`)
