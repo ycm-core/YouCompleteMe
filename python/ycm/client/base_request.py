@@ -17,13 +17,14 @@
 
 import requests
 import urlparse
+import json
 from base64 import b64decode, b64encode
 from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
-from ycmd.utils import ToUtf8Json
-from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureStringsEqual
+from ycmd.utils import ToBytes
+from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
 from ycmd.responses import ServerError, UnknownExtraConf
 
 _HEADERS = {'content-type': 'application/json'}
@@ -89,7 +90,7 @@ class BaseRequest( object ):
     def SendRequest( data, handler, method, timeout ):
       request_uri = _BuildUri( handler )
       if method == 'POST':
-        sent_data = ToUtf8Json( data )
+        sent_data = _ToUtf8Json( data )
         return BaseRequest.session.post(
             request_uri,
             data = sent_data,
@@ -107,7 +108,7 @@ class BaseRequest( object ):
     def DelayedSendRequest( data, handler, method ):
       request_uri = _BuildUri( handler )
       if method == 'POST':
-        sent_data = ToUtf8Json( data )
+        sent_data = _ToUtf8Json( data )
         return requests.post(
             request_uri,
             data = sent_data,
@@ -182,12 +183,17 @@ def HandleServerException( exception ):
   vimsupport.PostVimMessage( serialized_exception )
 
 
+def _ToUtf8Json( data ):
+  return ToBytes( json.dumps( data ) if data else None )
+
+
 def _ValidateResponseObject( response ):
-  hmac = CreateHmac( response.content, BaseRequest.hmac_secret )
-  if not SecureStringsEqual( hmac,
-                             b64decode( response.headers[ _HMAC_HEADER ] ) ):
+  our_hmac = CreateHmac( response.content, BaseRequest.hmac_secret )
+  their_hmac = ToBytes( b64decode( response.headers[ _HMAC_HEADER ] ) )
+  if not SecureBytesEqual( our_hmac, their_hmac ):
     raise RuntimeError( 'Received invalid HMAC for response!' )
   return True
+
 
 def _BuildUri( handler ):
   return urlparse.urljoin( BaseRequest.server_location, handler )
@@ -215,6 +221,7 @@ def _CheckServerIsHealthyWithCache():
     return SERVER_HEALTHY
   except:
     return False
+
 
 def MakeServerException( data ):
   if data[ 'exception' ][ 'TYPE' ] == UnknownExtraConf.__name__:

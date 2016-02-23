@@ -6,6 +6,11 @@ import sys
 import os.path as p
 import glob
 
+major, minor = sys.version_info[ 0 : 2 ]
+if major != 2 or minor < 6:
+  sys.exit( 'The build script requires Python version >= 2.6 and < 3.0; '
+            'your version of Python is ' + sys.version )
+
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 DIR_OF_OLD_LIBS = p.join( DIR_OF_THIS_SCRIPT, 'python' )
 
