@@ -153,12 +153,9 @@ Contents ~
   28. Install YCM with NeoBundle [55] |youcompleteme-install-ycm-with-neobundle-55|
   29. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |.tern-sub-project|
-  30. When I run install.py I get a LINK error saying "fatal error LNK1104: cannot
-open file '<path_to_vim_folder>\bundle\YouCompleteMe\third_party\ycmd\ycm_clien
-t_support.pyd'" |fatal-error-LNK1104:-cannot-open-file-path_to_vim_folder-bundle-YouCompleteMe-third_party-ycmd-ycm_client_support.pyd|
-  31. When I start vim I get a runtime error saying 'R6034 An application has made an
+  30. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.|
-  32. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+  31. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
  11. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  12. Contact                                            |youcompleteme-contact|
  13. License                                            |youcompleteme-license|
@@ -334,9 +331,8 @@ local binary folder (for example '/usr/local/bin/mvim') and then symlink it:
 Install YouCompleteMe with Vundle [19].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
 **NOTE:** If you want C-family completion, you MUST have the latest Xcode
 installed along with the latest Command Line Tools (they are installed
@@ -405,9 +401,8 @@ from source [24] (don't worry, it's easy).
 Install YouCompleteMe with Vundle [19].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
 Install development tools and CMake: 'sudo apt-get install build-essential
 cmake'
@@ -470,9 +465,8 @@ source [24] (don't worry, it's easy).
 Install YouCompleteMe with Vundle [19].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
 Install development tools and CMake: 'sudo dnf install automake gcc gcc-c++
 kernel-devel cmake'
@@ -539,9 +533,8 @@ recommend using a 64-bit client. Don't worry, a frequently updated copy of
 Install YouCompleteMe with Vundle [19].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
 Download and install the following software:
 
@@ -623,9 +616,8 @@ FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
 Install YouCompleteMe with Vundle [19].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
 Install dependencies and CMake: 'sudo pkg_add llvm boost cmake'
 
@@ -685,9 +677,8 @@ use the right Vim home directory. It should be 'vimfiles' by default instead of
 See the _FAQ_ if you have any issues.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
@@ -737,8 +728,8 @@ process.
    the upstream compiled binaries. Random things may break. Save yourself
    the hassle and use the upstream pre-built libclang.
 
-4. **Compile the 'ycm_support_libs' libraries** that YCM needs. These libs
-   are the C++ engines that YCM uses to get fast completions.
+4. **Compile the 'ycm_core' libraries** that YCM needs. These libs are the
+   C++ engines that YCM uses to get fast completions.
 
    You will need to have 'cmake' installed in order to generate the required
    makefiles. Linux users can install cmake with their package manager
@@ -812,7 +803,7 @@ process.
    Now that configuration files have been generated, compile the libraries
    using this command:
 >
-   cmake --build . --target ycm_support_libs --config Release
+   cmake --build . --target ycm_core --config Release
 <
    The '--config Release' part is specific to Windows and will be ignored on
    a Unix OS.
@@ -2974,15 +2965,6 @@ Take a look at the instructions for using the JavaScript completer.
 If this is still really annoying, and you have a good reason not to have a
 '.tern-project' file, create an empty '.tern-config' file in your home
 directory and YCM will stop complaining.
-
--------------------------------------------------------------------------------
-*fatal-error-LNK1104:-cannot-open-file-path_to_vim_folder-bundle-YouCompleteMe-third_party-ycmd-ycm_client_support.pyd*
-When I run install.py I get a LINK error saying "fatal error LNK1104: cannot ~
-open file ~
-'<path_to_vim_folder>\bundle\YouCompleteMe\third_party\ycmd\ycm_clien ~
-t_support.pyd'" ~
-
-Be sure to have closed all vim instances before you build YouCompleteMe.
 
 -------------------------------------------------------------------------------
 *R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.*

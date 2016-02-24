@@ -47,14 +47,11 @@ let s:python_folder_path = s:script_folder_path . '/../python/'
 let s:ycmd_folder_path = s:script_folder_path . '/../third_party/ycmd/'
 
 function! s:YcmLibsPresentIn( path_prefix )
-  if filereadable(a:path_prefix . 'ycm_client_support.so') &&
-        \ filereadable(a:path_prefix . 'ycm_core.so')
+  if filereadable(a:path_prefix . 'ycm_core.so')
     return 1
-  elseif filereadable(a:path_prefix . 'ycm_client_support.pyd') &&
-        \ filereadable(a:path_prefix . 'ycm_core.pyd')
+  elseif filereadable(a:path_prefix . 'ycm_core.pyd')
     return 1
-  elseif filereadable(a:path_prefix . 'ycm_client_support.dll') &&
-        \ filereadable(a:path_prefix . 'ycm_core.dll')
+  elseif filereadable(a:path_prefix . 'ycm_core.dll')
     return 1
   endif
   return 0
@@ -75,8 +72,7 @@ let g:ycm_check_if_ycm_core_present =
 if g:ycm_check_if_ycm_core_present &&
       \ !s:YcmLibsPresentIn( s:ycmd_folder_path )
   echohl WarningMsg |
-        \ echomsg "ycm_client_support.[so|pyd|dll] and " .
-        \ "ycm_core.[so|pyd|dll] not detected; you need to compile " .
+        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
         \ "YCM before using it. Read the docs!" |
         \ echohl None
   call s:restore_cpo()
@@ -85,11 +81,11 @@ endif
 
 let g:loaded_youcompleteme = 1
 
-" NOTE: Most defaults are in default_settings.json. They are loaded into Vim
-" global with the 'ycm_' prefix if such a key does not already exist; thus, the
-" user can override the defaults.
+" NOTE: Most defaults are in third_party/ycmd/ycmd/default_settings.json. They
+" are loaded into Vim globals with the 'ycm_' prefix if such a key does not
+" already exist; thus, the user can override the defaults.
 " The only defaults that are here are the ones that are only relevant to the YCM
-" Vim client and not the server.
+" Vim client and not the ycmd server.
 
 let g:ycm_allow_changing_updatetime =
       \ get( g:, 'ycm_allow_changing_updatetime', 1 )

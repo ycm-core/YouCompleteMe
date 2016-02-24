@@ -146,7 +146,7 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
+using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
@@ -211,7 +211,7 @@ from source][vim-build] (don't worry, it's easy).
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
+using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
@@ -269,7 +269,7 @@ from source][vim-build] (don't worry, it's easy).
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
+using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
@@ -331,7 +331,7 @@ recommend using a 64-bit client. Don't worry, [a frequently updated copy of
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
+using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
@@ -408,7 +408,7 @@ FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
+using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
@@ -464,7 +464,7 @@ the right Vim home directory. It should be `vimfiles` by default instead of
 See the _FAQ_ if you have any issues.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_support_libs library APIs have changed (happens
+using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
@@ -516,7 +516,7 @@ process.
     the upstream compiled binaries. Random things may break. Save yourself the
     hassle and use the upstream pre-built libclang.
 
-4.  **Compile the `ycm_support_libs` libraries** that YCM needs. These libs
+4.  **Compile the `ycm_core` libraries** that YCM needs. These libs
     are the C++ engines that YCM uses to get fast completions.
 
     You will need to have `cmake` installed in order to generate the required
@@ -589,7 +589,7 @@ process.
     Now that configuration files have been generated, compile the libraries
     using this command:
 
-        cmake --build . --target ycm_support_libs --config Release
+        cmake --build . --target ycm_core --config Release
 
     The `--config Release` part is specific to Windows and will be ignored on a
     Unix OS.
@@ -2691,10 +2691,6 @@ completer](#javascript-semantic-completion).
 If this is still really annoying, and you have a good reason not to have a
 `.tern-project` file, create an empty `.tern-config` file in your home directory
 and YCM will stop complaining.
-
-### When I run install.py I get a LINK error saying `fatal error LNK1104: cannot open file '<path_to_vim_folder>\bundle\YouCompleteMe\third_party\ycmd\ycm_client_support.pyd'`
-
-Be sure to have closed all vim instances before you build YouCompleteMe.
 
 ### When I start vim I get a runtime error saying `R6034 An application has made an attempt to load the C runtime library incorrectly.`
 

@@ -18,6 +18,7 @@
 import vim
 from ycm import vimsupport
 from ycmd.completers.completer import Completer
+from ycm.client.base_request import BaseRequest, ServerError
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
 OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
@@ -92,3 +93,18 @@ class OmniCompleter( Completer ):
 
   def OnFileReadyToParse( self, request_data ):
     self._omnifunc = vim.eval( '&omnifunc' )
+
+
+  def FilterAndSortCandidatesInner( self, candidates, sort_property, query ):
+    request_data = {
+      'candidates': candidates,
+      'sort_property': sort_property,
+      'query': query
+    }
+
+    try:
+      return BaseRequest.PostDataToHandler( request_data,
+                                            'filter_and_sort_candidates' )
+    except ServerError as e:
+      vimsupport.PostMultiLineNotice( e )
+      return candidates
