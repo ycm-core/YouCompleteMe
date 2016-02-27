@@ -15,22 +15,24 @@ YouCompleteMe: a code-completion engine for Vim
 - [Quick Feature Summary](#quick-feature-summary)
 - [User Guide](#user-guide)
     - [General Usage](#general-usage)
-    - [Client-server architecture](#client-server-architecture)
-    - [Completion string ranking](#completion-string-ranking)
-    - [General semantic completion](#general-semantic-completion-engine-usage)
-    - [C-family semantic completion](#c-family-semantic-completion-engine-usage)
-    - [JavaScript semantic completion](#javascript-semantic-completion)
-    - [Rust semantic completion](#rust-semantic-completion)
-    - [Python semantic completion](#python-semantic-completion)
-    - [Semantic completion for other languages](#semantic-completion-for-other-languages)
-    - [Writing new semantic completers](#writing-new-semantic-completers)
-    - [Diagnostic display](#diagnostic-display)
-    - [Diagnostic highlighting groups](#diagnostic-highlighting-groups)
+    - [Client-Server Architecture](#client-server-architecture)
+    - [Completion String Ranking](#completion-string-ranking)
+    - [General Semantic Completion](#general-semantic-completion-engine-usage)
+    - [C-family Semantic Completion](#c-family-semantic-completion-engine-usage)
+    - [JavaScript Semantic Completion](#javascript-semantic-completion)
+    - [Rust Semantic Completion](#rust-semantic-completion)
+    - [Python Semantic Completion](#python-semantic-completion)
+    - [Semantic Completion for Other Languages](#semantic-completion-for-other-languages)
+    - [Writing New Semantic Completers](#writing-new-semantic-completers)
+    - [Diagnostic Display](#diagnostic-display)
+        - [Diagnostic Highlighting Groups](#diagnostic-highlighting-groups)
 - [Commands](#commands)
     - [YcmCompleter subcommands](#ycmcompleter-subcommands)
-        - [Go to declaration/definition/etc. commands](#goto-commands)
-        - [Semantic type information and documentation](#semantic-information-commands)
-        - [Refactoring and FixIt commands](#refactoring-and-fixit-commands)
+        - [GoTo Commands](#goto-commands)
+        - [Semantic Information Commands](#semantic-information-commands)
+        - [Refactoring and FixIt Commands](#refactoring-and-fixit-commands)
+        - [Miscellaneous Commands](#miscellaneous-commands)
+- [Functions](#functions)
 - [Options](#options)
 - [FAQ](#faq)
 - [Contributor Code of Conduct](#contributor-code-of-conduct)
@@ -107,7 +109,7 @@ features plus extra:
 - Supertab
 - neocomplcache
 
-### And that's not all...
+**And that's not all...**
 
 YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
 number of languages, including:
@@ -129,7 +131,7 @@ and a completer that integrates with [UltiSnips][].
 Installation
 ------------
 
-### Mac OS X Installation
+### Mac OS X
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -198,7 +200,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### Ubuntu Linux x64 Installation
+### Ubuntu Linux x64
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -256,7 +258,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### Fedora Linux x64 Installation
+### Fedora Linux x64
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -314,7 +316,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### Windows Installation
+### Windows
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -389,7 +391,7 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### FreeBSD/OpenBSD Installation
+### FreeBSD/OpenBSD
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
@@ -748,14 +750,14 @@ YCM automatically detects which completion engine would be the best in any
 situation. On occasion, it queries several of them at once, merges the
 outputs and presents the results to you.
 
-### Client-server architecture
+### Client-Server Architecture
 
 YCM has a client-server architecture; the Vim part of YCM is only a thin client
 that talks to the [ycmd HTTP+JSON server][ycmd] that has the vast majority of
 YCM logic and functionality. The server is started and stopped automatically as
 you start and stop Vim.
 
-### Completion string ranking
+### Completion String Ranking
 
 The subsequence filter removes any completions that do not match the input, but
 then the sorting system kicks in. It's actually very complicated and uses lots
@@ -767,13 +769,13 @@ matches). A word-boundary character are all capital characters, characters
 preceded by an underscore and the first letter character in the completion
 string.
 
-### General Semantic Completion Engine Usage
+### General Semantic Completion
 
 - You can use Ctrl+Space to trigger the completion suggestions anywhere, even
   without a string prefix. This is useful to see which top-level functions are
   available for use.
 
-### C-family Semantic Completion Engine Usage
+### C-family Semantic Completion
 
 YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file or
 in any directory above it in the hierarchy (recursively); when the file is
@@ -815,7 +817,7 @@ getting fast completions.
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
 
-### JavaScript semantic completion
+### JavaScript Semantic Completion
 
 #### Quick start
 
@@ -862,7 +864,7 @@ should be sought from the [Tern][] project. For example, see the [list of tern
 plugins](http://ternjs.net/doc/manual.html#plugins) for the list of plugins
 which can be enabled in the `plugins` section of the `.tern-project` file.
 
-##### Configuring Tern for node support
+##### Configuring Tern for node support
 
 The following simple example `.tern-project` file enables nodejs support:
 
@@ -909,7 +911,7 @@ define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
 } );
 ```
 
-### Rust semantic completion
+### Rust Semantic Completion
 
 Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
@@ -925,7 +927,7 @@ locate it.
 let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
 ```
 
-### Python semantic completion
+### Python Semantic Completion
 
 Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the [jedi][] library which
@@ -939,7 +941,7 @@ binary to use. For example, to provide Python 3 completion in your project, set:
 let g:ycm_python_binary_path = '/usr/bin/python3'
 ```
 
-### Semantic completion for other languages
+### Semantic Completion for Other Languages
 
 Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
 using the [Jedi][], [Omnisharp][], [Gocode][], [racer][], and [TSServer][]
@@ -987,7 +989,7 @@ complete-functions`. For the Completer API, see [the API docs][completer-api].
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
 
-### Diagnostic display
+### Diagnostic Display
 
 YCM will display diagnostic notifications for C-family and C# languages if you
 compiled YCM with Clang and Omnisharp support, respectively. Since YCM continuously
@@ -1034,7 +1036,7 @@ another (very small) Vim plugin called [ListToggle][] (which also makes it
 possible to change the height of the `locationlist` window), also written by
 yours truly.
 
-#### Diagnostic highlighting groups
+#### Diagnostic Highlighting Groups
 
 You can change the styling for the highlighting groups YCM uses. For the signs
 in the Vim gutter, the relevant groups are:
@@ -1137,7 +1139,7 @@ See the [file type feature summary](#quick-feature-summary) for an overview of
 the features available for each file type. See the _YcmCompleter subcommands_
 section for more information on the available subcommands and their usage.
 
-YcmCompleter subcommands
+YcmCompleter Subcommands
 ------------------------
 
 NOTE: See the docs for the `YcmCompleter` command before tackling this section.
@@ -1152,7 +1154,7 @@ You may also want to map the subcommands to something less verbose; for
 instance, `nnoremap <leader>jd :YcmCompleter GoTo<CR>`
 maps the `<leader>jd` sequence to the longer subcommand invocation.
 
-### GoTo commands
+### GoTo Commands
 
 These commands are useful for jumping around and exploring code. When moving
 the cursor, the subcommands add entries to Vim's `jumplist` so you can use
@@ -1231,7 +1233,7 @@ provides a list of implementations to choose from.
 
 Supported in filetypes: `cs`
 
-### Semantic information commands
+### Semantic Information Commands
 
 These commands are useful for finding static information about the code, such
 as the types of variables, viewing declarations and documentation strings.
@@ -1311,7 +1313,7 @@ under the cursor. Depending on the file type, this includes things like:
 Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
 javascript`
 
-### Refactoring and FixIt commands
+### Refactoring and FixIt Commands
 
 These commands make changes to your source code in order to perform refactoring
 or code correction. YouCompleteMe does not perform any action which cannot be
@@ -1393,7 +1395,7 @@ manually corrected using Vim's undo features. The quickfix list is *not*
 populated in this case. Inspect `:buffers` or equivalent (see `:help buffers`)
 to see the buffers that were opened by the command.
 
-### Miscellaneous commands
+### Miscellaneous Commands
 
 These commands are for general administration, rather than IDE-like features.
 They cover things like the semantic engine server instance and compilation
@@ -2751,7 +2753,7 @@ License
 -------
 
 This software is licensed under the [GPL v3 license][gpl].
-© 2015 YouCompleteMe contributors
+© 2015-2016 YouCompleteMe contributors
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
