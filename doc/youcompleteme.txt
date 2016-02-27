@@ -5,13 +5,12 @@ Contents ~
 
  1. Introduction                                   |youcompleteme-introduction|
  2. Intro                                                 |youcompleteme-intro|
-  1. And that's not all...                     |youcompleteme-thats-not-all...|
  3. Installation                                   |youcompleteme-installation|
-  1. Mac OS X Installation                |youcompleteme-mac-os-x-installation|
-  2. Ubuntu Linux x64 Installation |youcompleteme-ubuntu-linux-x64-installation|
-  3. Fedora Linux x64 Installation |youcompleteme-fedora-linux-x64-installation|
-  4. Windows Installation                  |youcompleteme-windows-installation|
-  5. FreeBSD/OpenBSD Installation  |youcompleteme-freebsd-openbsd-installation|
+  1. Mac OS X                                          |youcompleteme-mac-os-x|
+  2. Ubuntu Linux x64                          |youcompleteme-ubuntu-linux-x64|
+  3. Fedora Linux x64                          |youcompleteme-fedora-linux-x64|
+  4. Windows                                            |youcompleteme-windows|
+  5. FreeBSD/OpenBSD                            |youcompleteme-freebsd-openbsd|
   6. Full Installation Guide            |youcompleteme-full-installation-guide|
  4. Quick Feature Summary                 |youcompleteme-quick-feature-summary|
   1. General (all languages)                            |youcompleteme-general|
@@ -24,22 +23,22 @@ Contents ~
   8. Rust                                                  |youcompleteme-rust|
  5. User Guide                                       |youcompleteme-user-guide|
   1. General Usage                                |youcompleteme-general-usage|
-  2. Client-server architecture      |youcompleteme-client-server-architecture|
-  3. Completion string ranking        |youcompleteme-completion-string-ranking|
-  4. General Semantic Completion Engine Usage |youcompleteme-general-semantic-completion-engine-usage|
-  5. C-family Semantic Completion Engine Usage |youcompleteme-c-family-semantic-completion-engine-usage|
-  6. JavaScript semantic completion |youcompleteme-javascript-semantic-completion|
+  2. Client-Server Architecture      |youcompleteme-client-server-architecture|
+  3. Completion String Ranking        |youcompleteme-completion-string-ranking|
+  4. General Semantic Completion    |youcompleteme-general-semantic-completion|
+  5. C-family Semantic Completion  |youcompleteme-c-family-semantic-completion|
+  6. JavaScript Semantic Completion |youcompleteme-javascript-semantic-completion|
    1. Quick start                                   |youcompleteme-quick-start|
    2. Explanation                                   |youcompleteme-explanation|
    3. Tips and tricks                               |youcompleteme-tips-tricks|
     1. Configuring Tern for node support |youcompleteme-configuring-tern-for-node-support|
     2. Configuring Tern for requirejs support |youcompleteme-configuring-tern-for-requirejs-support|
-  7. Rust semantic completion          |youcompleteme-rust-semantic-completion|
-  8. Python semantic completion      |youcompleteme-python-semantic-completion|
-  9. Semantic completion for other languages |youcompleteme-semantic-completion-for-other-languages|
+  7. Rust Semantic Completion          |youcompleteme-rust-semantic-completion|
+  8. Python Semantic Completion      |youcompleteme-python-semantic-completion|
+  9. Semantic Completion for Other Languages |youcompleteme-semantic-completion-for-other-languages|
   10. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
-  11. Diagnostic display                     |youcompleteme-diagnostic-display|
-   1. Diagnostic highlighting groups |youcompleteme-diagnostic-highlighting-groups|
+  11. Diagnostic Display                     |youcompleteme-diagnostic-display|
+   1. Diagnostic Highlighting Groups |youcompleteme-diagnostic-highlighting-groups|
  6. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
   2. The |:YcmForceCompileAndDiagnostics| command
@@ -48,8 +47,8 @@ Contents ~
   5. The |:YcmDebugInfo| command
   6. The |:YcmToggleLogs| command
   7. The |:YcmCompleter| command
- 7. YcmCompleter subcommands           |youcompleteme-ycmcompleter-subcommands|
-  1. GoTo commands                                |youcompleteme-goto-commands|
+ 7. YcmCompleter Subcommands           |youcompleteme-ycmcompleter-subcommands|
+  1. GoTo Commands                                |youcompleteme-goto-commands|
    1. The |GoToInclude| subcommand
    2. The |GoToDeclaration| subcommand
    3. The |GoToDefinition| subcommand
@@ -58,15 +57,15 @@ Contents ~
    6. The |GoToReferences| subcommand
    7. The |GoToImplementation| subcommand
    8. The |GoToImplementationElseDeclaration| subcommand
-  2. Semantic information commands |youcompleteme-semantic-information-commands|
+  2. Semantic Information Commands |youcompleteme-semantic-information-commands|
    1. The |GetType| subcommand
    2. The |GetParent| subcommand
    3. The |GetDoc| subcommand
-  3. Refactoring and FixIt commands  |youcompleteme-refactoring-fixit-commands|
+  3. Refactoring and FixIt Commands  |youcompleteme-refactoring-fixit-commands|
    1. The |FixIt| subcommand
    2. The 'RefactorRename <new name>' subcommand      |RefactorRename-new-name|
    3. Multi-file Refactor                   |youcompleteme-multi-file-refactor|
-  4. Miscellaneous commands              |youcompleteme-miscellaneous-commands|
+  4. Miscellaneous Commands              |youcompleteme-miscellaneous-commands|
    1. The |ClearCompilationFlagCache| subcommand
    2. The |StartServer| subcommand
    3. The |StopServer| subcommand
@@ -181,26 +180,29 @@ Image: Build Status [1] Image: Build status [3]
 - User Guide
 
   - General Usage
-  - Client-server architecture
-  - Completion string ranking
-  - General semantic completion
-  - C-family semantic completion
-  - JavaScript semantic completion
-  - Rust semantic completion
-  - Python semantic completion
-  - Semantic completion for other languages
-  - Writing new semantic completers
-  - Diagnostic display
-  - Diagnostic highlighting groups
+  - Client-Server Architecture
+  - Completion String Ranking
+  - General Semantic Completion
+  - C-family Semantic Completion
+  - JavaScript Semantic Completion
+  - Rust Semantic Completion
+  - Python Semantic Completion
+  - Semantic Completion for Other Languages
+  - Writing New Semantic Completers
+  - Diagnostic Display
+
+    - Diagnostic Highlighting Groups
 
 - Commands
 
   - YcmCompleter subcommands
 
-    - Go to declaration/definition/etc. commands
-    - Semantic type information and documentation
-    - Refactoring and FixIt commands
+    - GoTo Commands
+    - Semantic Information Commands
+    - Refactoring and FixIt Commands
+    - Miscellaneous Commands
 
+- Functions
 - Options
 - FAQ
 - Contributor Code of Conduct
@@ -288,9 +290,7 @@ features plus extra:
 - Supertab
 - neocomplcache
 
--------------------------------------------------------------------------------
-                                               *youcompleteme-thats-not-all...*
-And that's not all... ~
+**And that's not all...**
 
 YCM also provides semantic IDE-like features in a number of languages,
 including:
@@ -313,8 +313,8 @@ and a completer that integrates with UltiSnips [17].
 Installation ~
 
 -------------------------------------------------------------------------------
-                                          *youcompleteme-mac-os-x-installation*
-Mac OS X Installation ~
+                                                       *youcompleteme-mac-os-x*
+Mac OS X ~
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -387,8 +387,8 @@ look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
 -------------------------------------------------------------------------------
-                                  *youcompleteme-ubuntu-linux-x64-installation*
-Ubuntu Linux x64 Installation ~
+                                               *youcompleteme-ubuntu-linux-x64*
+Ubuntu Linux x64 ~
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -451,8 +451,8 @@ look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
 -------------------------------------------------------------------------------
-                                  *youcompleteme-fedora-linux-x64-installation*
-Fedora Linux x64 Installation ~
+                                               *youcompleteme-fedora-linux-x64*
+Fedora Linux x64 ~
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -515,8 +515,8 @@ look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
 -------------------------------------------------------------------------------
-                                           *youcompleteme-windows-installation*
-Windows Installation ~
+                                                        *youcompleteme-windows*
+Windows ~
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
@@ -596,8 +596,8 @@ look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
 -------------------------------------------------------------------------------
-                                   *youcompleteme-freebsd-openbsd-installation*
-FreeBSD/OpenBSD Installation ~
+                                                *youcompleteme-freebsd-openbsd*
+FreeBSD/OpenBSD ~
 
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
@@ -987,7 +987,7 @@ and presents the results to you.
 
 -------------------------------------------------------------------------------
                                      *youcompleteme-client-server-architecture*
-Client-server architecture ~
+Client-Server Architecture ~
 
 YCM has a client-server architecture; the Vim part of YCM is only a thin client
 that talks to the ycmd HTTP+JSON server [34] that has the vast majority of YCM
@@ -996,7 +996,7 @@ start and stop Vim.
 
 -------------------------------------------------------------------------------
                                       *youcompleteme-completion-string-ranking*
-Completion string ranking ~
+Completion String Ranking ~
 
 The subsequence filter removes any completions that do not match the input, but
 then the sorting system kicks in. It's actually very complicated and uses lots
@@ -1009,16 +1009,16 @@ preceded by an underscore and the first letter character in the completion
 string.
 
 -------------------------------------------------------------------------------
-                       *youcompleteme-general-semantic-completion-engine-usage*
-General Semantic Completion Engine Usage ~
+                                    *youcompleteme-general-semantic-completion*
+General Semantic Completion ~
 
 - You can use Ctrl+Space to trigger the completion suggestions anywhere, even
   without a string prefix. This is useful to see which top-level functions
   are available for use.
 
 -------------------------------------------------------------------------------
-                      *youcompleteme-c-family-semantic-completion-engine-usage*
-C-family Semantic Completion Engine Usage ~
+                                   *youcompleteme-c-family-semantic-completion*
+C-family Semantic Completion ~
 
 YCM looks for a '.ycm_extra_conf.py' file in the directory of the opened file
 or in any directory above it in the hierarchy (recursively); when the file is
@@ -1062,7 +1062,7 @@ your file.
 
 -------------------------------------------------------------------------------
                                  *youcompleteme-javascript-semantic-completion*
-JavaScript semantic completion ~
+JavaScript Semantic Completion ~
 
 -------------------------------------------------------------------------------
                                                     *youcompleteme-quick-start*
@@ -1159,7 +1159,7 @@ Can be used as follows:
 <
 -------------------------------------------------------------------------------
                                        *youcompleteme-rust-semantic-completion*
-Rust semantic completion ~
+Rust Semantic Completion ~
 
 Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
@@ -1174,7 +1174,7 @@ following option so YouCompleteMe can locate it.
 <
 -------------------------------------------------------------------------------
                                      *youcompleteme-python-semantic-completion*
-Python semantic completion ~
+Python Semantic Completion ~
 
 Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the jedi [6] library which
@@ -1189,7 +1189,7 @@ set:
 <
 -------------------------------------------------------------------------------
                         *youcompleteme-semantic-completion-for-other-languages*
-Semantic completion for other languages ~
+Semantic Completion for Other Languages ~
 
 Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
 using the Jedi [6], Omnisharp [8], Gocode [9], racer [13], and TSServer [11]
@@ -1245,7 +1245,7 @@ Completer API.
 
 -------------------------------------------------------------------------------
                                              *youcompleteme-diagnostic-display*
-Diagnostic display ~
+Diagnostic Display ~
 
 YCM will display diagnostic notifications for C-family and C# languages if you
 compiled YCM with Clang and Omnisharp support, respectively. Since YCM
@@ -1295,7 +1295,7 @@ yours truly.
 
 -------------------------------------------------------------------------------
                                  *youcompleteme-diagnostic-highlighting-groups*
-Diagnostic highlighting groups ~
+Diagnostic Highlighting Groups ~
 
 You can change the styling for the highlighting groups YCM uses. For the signs
 in the Vim gutter, the relevant groups are:
@@ -1403,7 +1403,7 @@ on the available subcommands and their usage.
 
 ===============================================================================
                                        *youcompleteme-ycmcompleter-subcommands*
-YcmCompleter subcommands ~
+YcmCompleter Subcommands ~
 
 NOTE: See the docs for the 'YcmCompleter' command before tackling this section.
 
@@ -1419,7 +1419,7 @@ sequence to the longer subcommand invocation.
 
 -------------------------------------------------------------------------------
                                                   *youcompleteme-goto-commands*
-GoTo commands ~
+GoTo Commands ~
 
 These commands are useful for jumping around and exploring code. When moving
 the cursor, the subcommands add entries to Vim's 'jumplist' so you can use
@@ -1509,7 +1509,7 @@ Supported in filetypes: 'cs'
 
 -------------------------------------------------------------------------------
                                   *youcompleteme-semantic-information-commands*
-Semantic information commands ~
+Semantic Information Commands ~
 
 These commands are useful for finding static information about the code, such
 as the types of variables, viewing declarations and documentation strings.
@@ -1588,7 +1588,7 @@ javascript'
 
 -------------------------------------------------------------------------------
                                      *youcompleteme-refactoring-fixit-commands*
-Refactoring and FixIt commands ~
+Refactoring and FixIt Commands ~
 
 These commands make changes to your source code in order to perform refactoring
 or code correction. YouCompleteMe does not perform any action which cannot be
@@ -1678,7 +1678,7 @@ to see the buffers that were opened by the command.
 
 -------------------------------------------------------------------------------
                                          *youcompleteme-miscellaneous-commands*
-Miscellaneous commands ~
+Miscellaneous Commands ~
 
 These commands are for general administration, rather than IDE-like features.
 They cover things like the semantic engine server instance and compilation
@@ -3028,8 +3028,8 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [59]. © 2015 YouCompleteMe
-contributors
+This software is licensed under the GPL v3 license [59]. © 2015-2016
+YouCompleteMe contributors
 
   Image: Bitdeli Badge [60]
 
