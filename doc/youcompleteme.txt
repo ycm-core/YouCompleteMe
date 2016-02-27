@@ -197,9 +197,10 @@ Image: Build Status [1] Image: Build status [3]
 
   - YcmCompleter subcommands
 
-    - Go to declaration/definition/etc. commands
-    - Semantic type information and documentation
+    - GoTo commands
+    - Semantic information commands
     - Refactoring and FixIt commands
+    - Miscellaneous commands
 
 - Options
 - FAQ
