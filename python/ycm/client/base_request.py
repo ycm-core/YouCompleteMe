@@ -42,6 +42,8 @@ _EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )
 _DEFAULT_TIMEOUT_SEC = 30
 _HMAC_HEADER = 'x-ycm-hmac'
 
+YCMD_ERROR_PREFIX = 'ycmd exception: '
+
 class BaseRequest( object ):
   def __init__( self ):
     pass
@@ -189,7 +191,7 @@ def HandleServerException( exception ):
   # up often and isn't something that's actionable by the user.
   if 'already being parsed' in serialized_exception:
     return
-  vimsupport.PostVimMessage( serialized_exception )
+  vimsupport.PostVimMessage( YCMD_ERROR_PREFIX + serialized_exception )
 
 
 def _ToUtf8Json( data ):
