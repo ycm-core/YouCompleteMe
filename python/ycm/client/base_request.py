@@ -26,6 +26,7 @@ from builtins import *  # noqa
 import requests
 import urllib.parse
 import json
+from future.utils import native
 from base64 import b64decode, b64encode
 from retries import retries
 from requests_futures.sessions import FuturesSession
@@ -137,11 +138,11 @@ class BaseRequest( object ):
   @staticmethod
   def _ExtraHeaders( method, request_uri, request_body = None ):
     if not request_body:
-      request_body = ''
+      request_body = bytes( b'' )
     headers = dict( _HEADERS )
     headers[ _HMAC_HEADER ] = b64encode(
-        CreateRequestHmac( method,
-                           urllib.parse.urlparse( request_uri ).path,
+        CreateRequestHmac( ToBytes( method ),
+                           ToBytes( urllib.parse.urlparse( request_uri ).path ),
                            request_body,
                            BaseRequest.hmac_secret ) )
     return headers
@@ -204,7 +205,8 @@ def _ValidateResponseObject( response ):
 
 
 def _BuildUri( handler ):
-  return urllib.parse.urljoin( BaseRequest.server_location, handler )
+  return native( ToBytes( urllib.parse.urljoin( BaseRequest.server_location,
+                                                handler ) ) )
 
 
 SERVER_HEALTHY = False
@@ -216,7 +218,7 @@ def _CheckServerIsHealthyWithCache():
     request_uri = _BuildUri( 'healthy' )
     response = requests.get( request_uri,
                              headers = BaseRequest._ExtraHeaders(
-                                 'GET', request_uri, '' ) )
+                                 'GET', request_uri, bytes( b'' ) ) )
     _ValidateResponseObject( response )
     response.raise_for_status()
     return response.json()
