@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # Copyright (C) 2015 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
@@ -28,8 +30,9 @@ MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
-from hamcrest import assert_that, calling, raises, none
+from hamcrest import assert_that, calling, raises, none, has_entry
 from mock import MagicMock, call, patch
+from ycmd.utils import ToBytes
 import os
 import json
 
@@ -1217,3 +1220,38 @@ def OpenFilename_test( vim_current, vim_command ):
   vim_current.window.options.__setitem__.assert_has_exact_calls( [
     call( 'winfixheight', True )
   ] )
+
+
+@patch( 'ycm.vimsupport.BufferModified', side_effect = [ True ] )
+@patch( 'ycm.vimsupport.FiletypesForBuffer', side_effect = [ [ 'cpp' ] ] )
+def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
+  mock_buffer = MagicMock()
+  mock_buffer.name = os.path.realpath( 'filename' )
+  mock_buffer.number = 1
+  mock_buffer.__iter__.return_value = [ u'abc', ToBytes( u'fДa' ) ]
+
+  with patch( 'vim.buffers', [ mock_buffer ] ):
+    assert_that( vimsupport.GetUnsavedAndCurrentBufferData(),
+                 has_entry( mock_buffer.name,
+                            has_entry( u'contents', u'abc\nfДa\n' ) ) )
+
+
+# NOTE: Vim returns byte offsets for columns, not actual character columns. This
+# makes 'ДД' have 4 columns: column 0, column 2 and column 4.
+@patch( 'vim.current.line', ToBytes( 'ДДaa' ) )
+@patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 4 ] )
+def TextBeforeCursor_EncodedUnicode_test( *args ):
+  eq_( vimsupport.TextBeforeCursor(), u'ДД' )
+
+
+# NOTE: Vim returns byte offsets for columns, not actual character columns. This
+# makes 'ДД' have 4 columns: column 0, column 2 and column 4.
+@patch( 'vim.current.line', ToBytes( 'aaДД' ) )
+@patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 2 ] )
+def TextAfterCursor_EncodedUnicode_test( *args ):
+  eq_( vimsupport.TextAfterCursor(), u'ДД' )
+
+
+@patch( 'vim.current.line', ToBytes( 'fДa' ) )
+def CurrentLineContents_EncodedUnicode_test( *args ):
+  eq_( vimsupport.CurrentLineContents(), u'fДa' )
