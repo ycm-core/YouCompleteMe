@@ -15,6 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
+from future.utils import iteritems
 import os
 import vim
 import tempfile
@@ -303,7 +312,7 @@ class YouCompleteMe( object ):
 
   def GetCompleteDoneHooks( self ):
     filetypes = vimsupport.CurrentFiletypes()
-    for key, value in self._complete_done_hooks.iteritems():
+    for key, value in iteritems( self._complete_done_hooks ):
       if key in filetypes:
         yield value
 

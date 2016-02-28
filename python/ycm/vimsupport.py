@@ -15,13 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
+from future.utils import iterkeys
 import vim
 import os
 import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToBytes, ToUnicode
+from ycmd.utils import ToUnicode
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -277,7 +286,7 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
       'lnum'  : line_num,
       'col'   : location[ 'column_num' ],
-      'text'  : ToBytes( text ),
+      'text'  : text,
       'type'  : diagnostic[ 'kind' ][ 0 ],
       'valid' : 1
     }
@@ -310,7 +319,7 @@ def GetReadOnlyVimGlobals( force_python_objects = False ):
 
 def VimExpressionToPythonType( vim_expression ):
   result = vim.eval( vim_expression )
-  if not isinstance( result, basestring ):
+  if not isinstance( result, str ):
     return result
   try:
     return int( result )
@@ -607,7 +616,7 @@ def ReplaceChunks( chunks ):
   chunks_by_file = _SortChunksByFile( chunks )
 
   # We sort the file list simply to enable repeatable testing
-  sorted_file_list = sorted( chunks_by_file.iterkeys() )
+  sorted_file_list = sorted( iterkeys( chunks_by_file ) )
 
   # Make sure the user is prepared to have her screen mutilated by the new
   # buffers
@@ -885,7 +894,7 @@ def OpenFilename( filename, options = {} ):
 
   # There is no command in Vim to return to the previous tab so we need to
   # remember the current tab if needed.
-  if not focus and command is 'tabedit':
+  if not focus and command == 'tabedit':
     previous_tab = GetIntValue( 'tabpagenr()' )
   else:
     previous_tab = None
@@ -920,7 +929,7 @@ def OpenFilename( filename, options = {} ):
   # focus back (if the focus option is disabled) when opening a new tab or
   # window.
   if not focus:
-    if command is 'tabedit':
+    if command == 'tabedit':
       JumpToTab( previous_tab )
     if command in [ 'split', 'vsplit' ]:
       JumpToPreviousWindow()
@@ -930,9 +939,9 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
   """After opening a buffer, configure it according to the supplied options,
   which are as defined by the OpenFilename method."""
 
-  if command is 'split':
+  if command == 'split':
     vim.current.window.options[ 'winfixheight' ] = fix
-  if command is 'vsplit':
+  if command == 'vsplit':
     vim.current.window.options[ 'winfixwidth' ] = fix
 
   if watch:
@@ -940,6 +949,6 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
     vim.command( "exec 'au BufEnter <buffer> :silent! checktime {0}'"
                  .format( filename ) )
 
-  if position is 'end':
+  if position == 'end':
     vim.command( 'silent! normal G zz' )
 

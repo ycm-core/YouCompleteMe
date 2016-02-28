@@ -15,7 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycmd.utils import ToBytes
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 from ycm.client.completion_request import CompletionRequest
 
 
@@ -46,15 +53,15 @@ def ConvertVimDataToCompletionData( vim_data ):
   completion_data = {}
 
   if 'word' in vim_data:
-    completion_data[ 'insertion_text' ] = ToBytes( vim_data[ 'word' ] )
+    completion_data[ 'insertion_text' ] = vim_data[ 'word' ]
   if 'abbr' in vim_data:
-    completion_data[ 'menu_text' ] = ToBytes( vim_data[ 'abbr' ] )
+    completion_data[ 'menu_text' ] = vim_data[ 'abbr' ]
   if 'menu' in vim_data:
-    completion_data[ 'extra_menu_info' ] = ToBytes( vim_data[ 'menu' ] )
+    completion_data[ 'extra_menu_info' ] = vim_data[ 'menu' ]
   if 'kind' in vim_data:
-    completion_data[ 'kind' ] = [ ToBytes( vim_data[ 'kind' ] ) ]
+    completion_data[ 'kind' ] = [ vim_data[ 'kind' ] ]
   if 'info' in vim_data:
-    completion_data[ 'detailed_info' ] = ToBytes( vim_data[ 'info' ] )
+    completion_data[ 'detailed_info' ] = vim_data[ 'info' ]
 
   return completion_data
 

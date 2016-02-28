@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 from ycm.test_utils import ExtendedMock, MockVimModule, MockVimCommand
 MockVimModule()
 
@@ -565,7 +573,7 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   eq_( expected_buffer, result_buffer )
 
 
-class MockBuffer( ):
+class MockBuffer( object ):
   """An object that looks like a vim.buffer object, enough for ReplaceChunk to
   generate a location list"""
 
@@ -1167,27 +1175,13 @@ def BufferIsVisibleForFilename_test():
     eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
 
 
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        side_effect = [ 2, 5, -1 ] )
 @patch( 'vim.command',
         side_effect = MockVimCommand,
-        new_callable=ExtendedMock )
-def CloseBuffersForFilename_test( vim_command ):
-  buffers = [
-    {
-      'number': 2,
-      'filename': os.path.realpath( 'some_filename' ),
-    },
-    {
-      'number': 5,
-      'filename': os.path.realpath( 'some_filename' ),
-    },
-    {
-      'number': 1,
-      'filename': os.path.realpath( 'another_filename' )
-    }
-  ]
-
-  with patch( 'vim.buffers', buffers ):
-    vimsupport.CloseBuffersForFilename( 'some_filename' )
+        new_callable = ExtendedMock )
+def CloseBuffersForFilename_test( vim_command, *args ):
+  vimsupport.CloseBuffersForFilename( 'some_filename' )
 
   vim_command.assert_has_exact_calls( [
     call( 'silent! bwipeout! 2' ),
@@ -1195,8 +1189,8 @@ def CloseBuffersForFilename_test( vim_command ):
   ], any_order = True )
 
 
-@patch( 'vim.command', new_callable=ExtendedMock )
-@patch( 'vim.current', new_callable=ExtendedMock )
+@patch( 'vim.command', new_callable = ExtendedMock )
+@patch( 'vim.current', new_callable = ExtendedMock )
 def OpenFilename_test( vim_current, vim_command ):
   # Options used to open a logfile
   options = {

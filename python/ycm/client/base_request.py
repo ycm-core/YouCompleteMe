@@ -15,8 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 import requests
-import urlparse
+import urllib.parse
 import json
 from base64 import b64decode, b64encode
 from retries import retries
@@ -133,7 +141,7 @@ class BaseRequest( object ):
     headers = dict( _HEADERS )
     headers[ _HMAC_HEADER ] = b64encode(
         CreateRequestHmac( method,
-                           urlparse.urlparse( request_uri ).path,
+                           urllib.parse.urlparse( request_uri ).path,
                            request_body,
                            BaseRequest.hmac_secret ) )
     return headers
@@ -196,7 +204,7 @@ def _ValidateResponseObject( response ):
 
 
 def _BuildUri( handler ):
-  return urlparse.urljoin( BaseRequest.server_location, handler )
+  return urllib.parse.urljoin( BaseRequest.server_location, handler )
 
 
 SERVER_HEALTHY = False

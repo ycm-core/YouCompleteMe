@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 import vim
 from ycm import vimsupport
 from ycmd.completers.completer import Completer
@@ -84,7 +92,7 @@ class OmniCompleter( Completer ):
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      return filter( bool, items )
+      return list( filter( bool, items ) )
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )
