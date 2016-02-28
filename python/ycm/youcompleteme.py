@@ -104,17 +104,18 @@ class YouCompleteMe( object ):
     self._SetupServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
-      'cs': lambda( self ): self._OnCompleteDone_Csharp()
+      'cs': lambda self: self._OnCompleteDone_Csharp()
     }
 
   def _SetupServer( self ):
     self._available_completers = {}
     server_port = utils.GetUnusedLocalhostPort()
     # The temp options file is deleted by ycmd during startup
-    with tempfile.NamedTemporaryFile( delete = False ) as options_file:
+    with tempfile.NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
       hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
       options_dict = dict( self._user_options )
-      options_dict[ 'hmac_secret' ] = base64.b64encode( hmac_secret )
+      options_dict[ 'hmac_secret' ] = utils.ToUnicode(
+        base64.b64encode( hmac_secret ) )
       json.dump( options_dict, options_file )
       options_file.flush()
 
