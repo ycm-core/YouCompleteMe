@@ -29,10 +29,10 @@ import vim
 import functools
 import re
 
+# Can't import these from setup.py because it makes nosetests go crazy.
 DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
 DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
                             'ycmd' )
-
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
 PYTHON_BINARY_REGEX = re.compile( r'python(2(\.[67])?)?(.exe)?$' )
 
