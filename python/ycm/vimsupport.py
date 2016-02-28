@@ -68,17 +68,17 @@ def CurrentColumn():
 
 
 def CurrentLineContents():
-  return vim.current.line
+  return ToUnicode( vim.current.line )
 
 
 def TextAfterCursor():
   """Returns the text after CurrentColumn."""
-  return vim.current.line[ CurrentColumn(): ]
+  return ToUnicode( vim.current.line[ CurrentColumn(): ] )
 
 
 def TextBeforeCursor():
   """Returns the text before CurrentColumn."""
-  return vim.current.line[ :CurrentColumn() ]
+  return ToUnicode( vim.current.line[ :CurrentColumn() ] )
 
 
 # Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '7.4.301'
@@ -123,7 +123,7 @@ def GetUnsavedAndCurrentBufferData():
 
     buffers_data[ GetBufferFilepath( buffer_object ) ] = {
       # Add a newline to match what gets saved to disk. See #1455 for details.
-      'contents': '\n'.join( buffer_object ) + '\n',
+      'contents': '\n'.join( ToUnicode( x ) for x in buffer_object ) + '\n',
       'filetypes': FiletypesForBuffer( buffer_object )
     }
 
