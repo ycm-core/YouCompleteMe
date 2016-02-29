@@ -489,7 +489,7 @@ def EchoTextVimWidth( text ):
 
 
 def EscapeForVim( text ):
-  return text.replace( "'", "''" )
+  return ToUnicode( text.replace( "'", "''" ) )
 
 
 def CurrentFiletypes():
@@ -861,7 +861,7 @@ def BufferIsVisibleForFilename( filename ):
 def CloseBuffersForFilename( filename ):
   """Close all buffers for a specific file."""
   buffer_number = GetBufferNumberForFilename( filename, False )
-  while buffer_number is not -1:
+  while buffer_number != -1:
     vim.command( 'silent! bwipeout! {0}'.format( buffer_number ) )
     new_buffer_number = GetBufferNumberForFilename( filename, False )
     if buffer_number == new_buffer_number:
