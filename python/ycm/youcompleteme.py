@@ -26,12 +26,12 @@ from builtins import *  # noqa
 from future.utils import iteritems
 import os
 import vim
-import tempfile
 import json
 import re
 import signal
 import base64
 from subprocess import PIPE
+from tempfile import NamedTemporaryFile
 from ycm import paths, vimsupport
 from ycmd import utils
 from ycmd.request_wrap import RequestWrap
@@ -111,7 +111,7 @@ class YouCompleteMe( object ):
     self._available_completers = {}
     server_port = utils.GetUnusedLocalhostPort()
     # The temp options file is deleted by ycmd during startup
-    with tempfile.NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
+    with NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
       hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
       options_dict = dict( self._user_options )
       options_dict[ 'hmac_secret' ] = utils.ToUnicode(
