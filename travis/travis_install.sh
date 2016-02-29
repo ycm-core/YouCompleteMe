@@ -2,30 +2,55 @@
 
 set -ev
 
-YCMD_VENV_DIR=${HOME}/venvs/ycmd_test
+####################
+# OS-specific setup
+####################
 
 # Requirements of OS-specific install:
 #  - install any software which is not installed by Travis configuration
-#  - create (but don't activate) a virtualenv for the python version
-#    ${YCMD_PYTHON_VERSION} in the directory ${YCMD_VENV_DIR}, e.g.
-#    virtualenv -p python${YCMD_PYTHON_VERSION} ${YCMD_VENV_DIR}
+#  - set up everything necessary so that pyenv can build python
 source travis/travis_install.${TRAVIS_OS_NAME}.sh
 
-# virtualenv doesn't copy python-config https://github.com/pypa/virtualenv/issues/169
-# but our build system uses it
-cp /usr/bin/python${YCMD_PYTHON_VERSION}-config ${YCMD_VENV_DIR}/bin/python-config
+#############
+# pyenv setup
+#############
 
-# virtualenv script is noisy, so don't print every command
-set +v
-source ${YCMD_VENV_DIR}/bin/activate
-set -v
+# DON'T exit if error
+set +e
+git clone https://github.com/yyuu/pyenv.git ~/.pyenv
+git fetch --tags
+git checkout v20160202
+# Exit if error
+set -e
+
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
+eval "$(pyenv init -)"
+
+if [ "${YCM_PYTHON_VERSION}" == "2.6" ]; then
+  PYENV_VERSION="2.6.6"
+elif [ "${YCM_PYTHON_VERSION}" == "2.7" ]; then
+  PYENV_VERSION="2.7.6"
+else
+  PYENV_VERSION="3.3.6"
+fi
+
+pyenv install --skip-existing ${PYENV_VERSION}
+pyenv rehash
+pyenv global ${PYENV_VERSION}
 
 # It is quite easy to get the above series of steps wrong. Verify that the
 # version of python actually in the path and used is the version that was
 # requested, and fail the build if we broke the travis setup
-python_version=$(python -c 'import sys; print "{0}.{1}".format( sys.version_info[0], sys.version_info[1] )')
-echo "Checking python version (actual ${python_version} vs expected ${YCMD_PYTHON_VERSION})"
-test ${python_version} == ${YCMD_PYTHON_VERSION}
+python_version=$(python -c 'import sys; print( "{0}.{1}".format( sys.version_info[0], sys.version_info[1] ) )')
+echo "Checking python version (actual ${python_version} vs expected ${YCM_PYTHON_VERSION})"
+test ${python_version} == ${YCM_PYTHON_VERSION}
+
+
+############
+# pip setup
+############
 
 pip install -U pip wheel setuptools
 pip install -r python/test_requirements.txt

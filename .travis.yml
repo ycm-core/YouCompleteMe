@@ -11,18 +11,50 @@ install:
 script: ./run_tests.py
 env:
   matrix:
-    - YCMD_PYTHON_VERSION=2.7
-    - YCMD_PYTHON_VERSION=2.6
+    - YCM_PYTHON_VERSION=2.7
+    - YCM_PYTHON_VERSION=2.6
+    - YCM_PYTHON_VERSION=3.3
+matrix:
+  exclude:
+    - os: osx
+      env: YCM_PYTHON_VERSION=2.6
 addons:
   apt:
     sources:
-     - deadsnakes
+     # The Travis apt source whitelist can be found here:
+     #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
+     - ubuntu-toolchain-r-test  # for new libstdc++
+     - deadsnakes  # for various versions of python
+     - kalakris-cmake # for a more recent version of cmake (needed for ninja-build)
     packages:
-     - python2.6
-     - python2.6-dev
-     - python2.7
-     - python2.7-dev
-     - python-virtualenv
+     - cmake
+     - ninja-build
+     # The confusing part is that on Travis Linux with YCMD_PYTHON_VERSION=3.3,
+     # we build the C++ parts against the below system python3.3, but run
+     # against the pyenv python3.3. This is because stupid cmake 2.8.11 has a
+     # bug preventing it from finding the pyenv pythons (ostensibly; I haven't
+     # checked, but online reports say the issue is gone with cmake 3.4).
+     # Everything still works though, it's just weird.
+     - python3.3
+     - python3.3-dev
+     # Everything below is a Python build dep (though it depends on Python
+     # version). We need them because pyenv builds Python.
+     - libssl-dev
+     - zlib1g-dev
+     - libbz2-dev
+     - libreadline-dev
+     - libsqlite3-dev
+     - wget
+     - curl
+     - llvm
+     - libncurses5-dev
+     - libncursesw5-dev
 cache:
   directories:
-    - $HOME/.cache/pip
+    - $HOME/.cache/pip  # Python packages from pip
+    - $HOME/.npm  # Node packages from npm
+    - $HOME/.multirust  # What multirust downloads
+    - $HOME/.cargo  # Cargo package deps
+    - $HOME/.pyenv  # pyenv
+    - $TRAVIS_BUILD_DIR/clang_archives  # Clang downloads
+    - $TRAVIS_BUILD_DIR/third_party/racerd/target  # Racerd compilation
