@@ -24,7 +24,10 @@ standard_library.install_aliases()
 from builtins import *  # noqa
 
 import vim
-from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
+from ycmd.responses import ServerError
+from ycm.client.base_request import ( BaseRequest, BuildRequestData,
+                                      HandleServerException )
+
 from ycm import vimsupport
 from ycmd.utils import ToUnicode
 
@@ -54,7 +57,7 @@ class CommandRequest( BaseRequest ):
       self._response = self.PostDataToHandler( request_data,
                                                'run_completer_command' )
     except ServerError as e:
-      vimsupport.PostMultiLineNotice( e )
+      HandleServerException( e )
 
 
   def Response( self ):

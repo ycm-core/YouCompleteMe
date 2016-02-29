@@ -25,6 +25,7 @@ from builtins import *  # noqa
 
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       HandleServerException )
+from ycmd.responses import ServerError
 
 class CompleterAvailableRequest( BaseRequest ):
   def __init__( self, filetypes ):
@@ -39,7 +40,7 @@ class CompleterAvailableRequest( BaseRequest ):
     try:
       self._response = self.PostDataToHandler( request_data,
                                                'semantic_completion_available' )
-    except Exception as e:
+    except ServerError as e:
       HandleServerException( e )
 
 
