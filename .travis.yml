@@ -7,7 +7,7 @@ before_install:
   - git submodule update --init --recursive
 install:
   # source because it sets up env vars on some platforms
-  - source travis/travis_install.sh
+  - source ci/travis/travis_install.sh
 script: ./run_tests.py
 env:
   matrix:
