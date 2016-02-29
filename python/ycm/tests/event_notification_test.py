@@ -33,7 +33,7 @@ from ycm.youcompleteme import YouCompleteMe
 from ycm.client.base_request import YCMD_ERROR_PREFIX
 from ycmd import user_options_store
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
-                             UnknownExtraConf )
+                             UnknownExtraConf, ServerError )
 
 from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
@@ -183,7 +183,7 @@ class EventNotification_test( object ):
     ERROR_TEXT = 'Some completer response text'
 
     def ErrorResponse( *args ):
-      raise RuntimeError( ERROR_TEXT )
+      raise ServerError( ERROR_TEXT )
 
     with MockArbitraryBuffer( 'javascript' ):
       with MockEventNotification( ErrorResponse ):

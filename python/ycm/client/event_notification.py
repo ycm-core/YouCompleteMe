@@ -24,7 +24,7 @@ standard_library.install_aliases()
 from builtins import *  # noqa
 
 from ycm import vimsupport
-from ycmd.responses import UnknownExtraConf
+from ycmd.responses import UnknownExtraConf, ServerError
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       JsonFromFuture, HandleServerException )
 
@@ -66,7 +66,7 @@ class EventNotification( BaseRequest ):
             _LoadExtraConfFile( e.extra_conf_file )
           else:
             _IgnoreExtraConfFile( e.extra_conf_file )
-    except Exception as e:
+    except ServerError as e:
       HandleServerException( e )
 
     return self._cached_response if self._cached_response else []

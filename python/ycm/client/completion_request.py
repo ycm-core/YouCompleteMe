@@ -27,6 +27,7 @@ from ycmd.utils import ToUnicode
 from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
+from ycmd.responses import ServerError
 
 TIMEOUT_SECONDS = 0.5
 
@@ -53,12 +54,12 @@ class CompletionRequest( BaseRequest ):
     try:
       response = JsonFromFuture( self._response_future )
 
-      errors = response['errors'] if 'errors' in response else []
+      errors = response[ 'errors' ] if 'errors' in response else []
       for e in errors:
         HandleServerException( MakeServerException( e ) )
 
       return JsonFromFuture( self._response_future )[ 'completions' ]
-    except Exception as e:
+    except ServerError as e:
       HandleServerException( e )
     return []
 
