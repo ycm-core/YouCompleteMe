@@ -30,25 +30,48 @@ from nose.tools import ok_
 from ycm.paths import EndsWithPython
 
 
+def EndsWithPython_Good( path ):
+  ok_( EndsWithPython( path ) )
+
+
+def EndsWithPython_Bad( path ):
+  ok_( not EndsWithPython( path ) )
+
+
 def EndsWithPython_Python2Paths_test():
   python_paths = [
     'python',
+    'python2',
     '/usr/bin/python2.6',
     '/home/user/.pyenv/shims/python2.7',
     r'C:\Python26\python.exe'
   ]
 
   for path in python_paths:
-    ok_( EndsWithPython( path ) )
+    yield EndsWithPython_Good, path
 
 
-def EndsWithPython_NotPython2Paths_test():
+
+def EndsWithPython_Python3Paths_test():
+  python_paths = [
+    'python',
+    'python3',
+    '/usr/bin/python3.3',
+    '/home/user/.pyenv/shims/python3.3',
+    r'C:\Python33\python.exe'
+  ]
+
+  for path in python_paths:
+    yield EndsWithPython_Good, path
+
+
+def EndsWithPython_BadPaths_test():
   not_python_paths = [
     '/opt/local/bin/vim',
     r'C:\Program Files\Vim\vim74\gvim.exe',
-    '/usr/bin/python3',
-    '/home/user/.pyenv/shims/python3',
+    '/usr/bin/python2.5',
+    '/home/user/.pyenv/shims/python3.2',
   ]
 
   for path in not_python_paths:
-    ok_( not EndsWithPython( path ) )
+    yield EndsWithPython_Bad, path
