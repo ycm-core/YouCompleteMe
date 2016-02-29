@@ -34,7 +34,8 @@ DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
 DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
                             'ycmd' )
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
-PYTHON_BINARY_REGEX = re.compile( r'python(2(\.[67])?)?(.exe)?$' )
+PYTHON_BINARY_REGEX = re.compile(
+  r'python((2(\.[67])?)|(3(\.[3456789])?))?(.exe)?$' )
 
 
 def Memoize( obj ):
@@ -60,7 +61,7 @@ def PathToPythonInterpreter():
       return python_interpreter
 
     raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
-                        "does not point to a valid Python 2.6 or 2.7." )
+                        "does not point to a valid Python 2.6+ or 3.3+." )
 
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
   # We cannot use sys.executable on Windows because for unknown reasons, it
@@ -76,23 +77,24 @@ def PathToPythonInterpreter():
   # 'python' because on some distributions (Arch Linux for example), python
   # refers to python3.
   python_interpreter = utils.PathToFirstExistingExecutable( [ 'python2',
-                                                              'python' ] )
+                                                              'python',
+                                                              'python3' ] )
 
   if IsPythonVersionCorrect( python_interpreter ):
     return python_interpreter
 
-  raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
+  raise RuntimeError( "Cannot find Python 2.6+ or 3.3+. You can set its path "
                       "using the 'g:ycm_path_to_python_interpreter' "
                       "option." )
 
 
 def EndsWithPython( path ):
-  """Check if given path ends with a python 2.6 or 2.7 name."""
+  """Check if given path ends with a python 2.6+ or 3.3+ name."""
   return PYTHON_BINARY_REGEX.search( path ) is not None
 
 
 def IsPythonVersionCorrect( path ):
-  """Check if given path is the Python interpreter version 2.6 or 2.7."""
+  """Check if given path is the Python interpreter version 2.6+ or 3.3+."""
   from ycmd import utils
 
   if not EndsWithPython( path ):
@@ -102,7 +104,12 @@ def IsPythonVersionCorrect( path ):
               '-c',
               "import sys;"
               "major, minor = sys.version_info[ :2 ];"
-              "sys.exit( major != 2 or minor < 6)" ]
+              "good_python = ( major == 2 and minor >= 6 ) "
+              "or ( major == 3 and minor >= 3 ) or major > 3;"
+              # If this looks weird, remember that:
+              #   int( True ) == 1
+              #   int( False ) == 0
+              "sys.exit( not good_python )" ]
 
   return utils.SafePopen( command ).wait() == 0
 
