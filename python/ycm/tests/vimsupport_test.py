@@ -1153,7 +1153,7 @@ def CheckFilename_test():
     calling( vimsupport.CheckFilename ).with_args( 'nonexistent_file' ),
     raises( RuntimeError,
             "filename 'nonexistent_file' cannot be opened. "
-            "\[Errno 2\] No such file or directory: 'nonexistent_file'" )
+            "\[Errno 2\] No such file or directory: u?'nonexistent_file'" )
   )
 
   assert_that( vimsupport.CheckFilename( __file__ ), none() )
