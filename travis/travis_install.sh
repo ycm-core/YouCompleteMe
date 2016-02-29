@@ -47,7 +47,6 @@ python_version=$(python -c 'import sys; print( "{0}.{1}".format( sys.version_inf
 echo "Checking python version (actual ${python_version} vs expected ${YCM_PYTHON_VERSION})"
 test ${python_version} == ${YCM_PYTHON_VERSION}
 
-
 ############
 # pip setup
 ############

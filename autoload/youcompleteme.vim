@@ -29,6 +29,7 @@ let s:cursor_moved = 0
 let s:moved_vertically_in_insert_mode = 0
 let s:previous_num_chars_on_current_line = strlen( getline('.') )
 
+
 function! s:UsingPython2()
   " I'm willing to bet quite a bit that sooner or later, somebody will ask us to
   " make it configurable which version of Python we use.
@@ -38,9 +39,11 @@ function! s:UsingPython2()
   return 0
 endfunction
 
+
 let s:using_python2 = s:UsingPython2()
 let s:python_until_eof = s:using_python2 ? "python << EOF" : "python3 << EOF"
 let s:python_command = s:using_python2 ? "py " : "py3 "
+
 
 function! s:Pyeval( eval_string )
   if s:using_python2

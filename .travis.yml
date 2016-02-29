@@ -52,9 +52,4 @@ addons:
 cache:
   directories:
     - $HOME/.cache/pip  # Python packages from pip
-    - $HOME/.npm  # Node packages from npm
-    - $HOME/.multirust  # What multirust downloads
-    - $HOME/.cargo  # Cargo package deps
     - $HOME/.pyenv  # pyenv
-    - $TRAVIS_BUILD_DIR/clang_archives  # Clang downloads
-    - $TRAVIS_BUILD_DIR/third_party/racerd/target  # Racerd compilation

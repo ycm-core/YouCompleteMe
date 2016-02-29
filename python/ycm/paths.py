@@ -35,7 +35,7 @@ DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
                             'ycmd' )
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
 PYTHON_BINARY_REGEX = re.compile(
-  r'python((2(\.[67])?)|(3(\.[3456789])?))?(.exe)?$' )
+  r'python((2(\.[67])?)|(3(\.[3-9])?))?(.exe)?$' )
 
 
 def Memoize( obj ):
@@ -73,9 +73,11 @@ def PathToPythonInterpreter():
   if IsPythonVersionCorrect( python_interpreter ):
     return python_interpreter
 
-  # As a last resort, we search python in the PATH. We check 'python2' before
-  # 'python' because on some distributions (Arch Linux for example), python
-  # refers to python3.
+  # As a last resort, we search python in the PATH. We prefer Python 2 over 3
+  # for the sake of backwards compatibility with ycm_extra_conf.py files out
+  # there; few people wrote theirs to work on py3.
+  # So we check 'python2' before 'python' because on some distributions (Arch
+  # Linux for example), python refers to python3.
   python_interpreter = utils.PathToFirstExistingExecutable( [ 'python2',
                                                               'python',
                                                               'python3' ] )

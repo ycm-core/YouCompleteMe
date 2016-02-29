@@ -12,7 +12,7 @@ REQUIREMENTS="ninja
               pkg-config
               openssl"
 
-# Install node, go, ninja, pyenv and dependencies
+# Install pyenv and dependencies
 for pkg in $REQUIREMENTS; do
   # Install package, or upgrade it if it is already installed
   brew install $pkg || brew outdated $pkg || brew upgrade $pkg
