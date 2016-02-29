@@ -9,7 +9,7 @@ set -ev
 # Requirements of OS-specific install:
 #  - install any software which is not installed by Travis configuration
 #  - set up everything necessary so that pyenv can build python
-source travis/travis_install.${TRAVIS_OS_NAME}.sh
+source ci/travis/travis_install.${TRAVIS_OS_NAME}.sh
 
 #############
 # pyenv setup
