@@ -849,7 +849,8 @@ def CheckFilename( filename ):
     raise RuntimeError( "'{0}' is not a valid filename".format( filename ) )
   except IOError as error:
     raise RuntimeError(
-      "filename '{0}' cannot be opened. {1}".format( filename, error ) )
+      "filename '{0}' cannot be opened. {1}.".format( filename,
+                                                      error.strerror ) )
 
 
 def BufferIsVisibleForFilename( filename ):
