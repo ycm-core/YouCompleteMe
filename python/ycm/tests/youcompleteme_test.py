@@ -27,40 +27,20 @@ from ycm.test_utils import MockVimModule
 MockVimModule()
 
 import sys
-
-from mock import patch
+from mock import MagicMock
 from hamcrest import assert_that, is_in, is_not
 
-from ycm import base
 from ycm.youcompleteme import YouCompleteMe
-from ycmd import user_options_store
 
 
 class YouCompleteMe_test():
 
-  # Minimal options to create the YouCompleteMe object.
-  DEFAULT_OPTIONS = {
-    'ycm_server_log_level': 'info',
-    'ycm_server_keep_logfiles': 0,
-    'ycm_min_num_of_chars_for_completion': 2,
-    'ycm_auto_trigger': 1,
-    'ycm_semantic_triggers': {}
-  }
-
-
   def setUp( self ):
-    with patch( 'vim.eval', side_effect = self.VimEval ):
-      user_options_store.SetAll( base.BuildServerConf() )
-      self.ycm = YouCompleteMe( user_options_store.GetAll() )
+    self.ycm = YouCompleteMe( MagicMock( spec_set = dict ) )
 
 
   def tearDown( self ):
     self.ycm.OnVimLeave()
-
-
-  def VimEval( self, value ):
-    if value == 'g:':
-      return self.DEFAULT_OPTIONS
 
 
   def YcmCoreNotImported_test( self ):
