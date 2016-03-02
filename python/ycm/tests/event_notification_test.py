@@ -30,7 +30,6 @@ import contextlib
 import os
 
 from ycm.youcompleteme import YouCompleteMe
-from ycm.client.base_request import YCMD_ERROR_PREFIX
 from ycmd import user_options_store
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
                              UnknownExtraConf, ServerError )
@@ -56,6 +55,14 @@ def PostVimMessage_Call( message ):
   """Return a mock.call object for a call to vimsupport.PostVimMesasge with the
   supplied message"""
   return call( 'redraw | echohl WarningMsg | echom \''
+               + message +
+               '\' | echohl None' )
+
+
+def PostMultiLineNotice_Call( message ):
+  """Return a mock.call object for a call to vimsupport.PostMultiLineNotice with
+  the supplied message"""
+  return call( 'echohl WarningMsg | echo \''
                + message +
                '\' | echohl None' )
 
@@ -193,13 +200,13 @@ class EventNotification_test( object ):
 
         # The first call raises a warning
         vim_command.assert_has_exact_calls( [
-          PostVimMessage_Call( YCMD_ERROR_PREFIX + ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
         ] )
 
         # Subsequent calls don't re-raise the warning
         self.server_state.HandleFileParseRequest()
         vim_command.assert_has_exact_calls( [
-          PostVimMessage_Call( YCMD_ERROR_PREFIX + ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
         ] )
 
         # But it does if a subsequent event raises again
@@ -207,8 +214,8 @@ class EventNotification_test( object ):
         assert self.server_state.FileParseRequestReady()
         self.server_state.HandleFileParseRequest()
         vim_command.assert_has_exact_calls( [
-          PostVimMessage_Call( YCMD_ERROR_PREFIX + ERROR_TEXT ),
-          PostVimMessage_Call( YCMD_ERROR_PREFIX + ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
         ] )
 
 
