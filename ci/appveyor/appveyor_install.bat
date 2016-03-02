@@ -16,7 +16,7 @@ if %arch% == 32 (
 set PATH=%python_path%;%python_path%\Scripts;%PATH%
 python --version
 
-:: When using Python 3 on AppVeyor, CMake will always pick the 64 bits
+:: When using Python 3 on AppVeyor, CMake will always pick the 64 bit
 :: libraries. We specifically tell CMake the right path to the libraries
 :: according to the architecture.
 if %python% == 35 (

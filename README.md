@@ -324,7 +324,7 @@ that you know how to add an executable to the PATH environment variable.
 
 Make sure you have at least Vim 7.3.598 with python2 or python3 support. You can
 check the version by typing `:version` inside Vim. Take note of the Vim
-architecture, i.e.  32 or 64-bit. It will be important when choosing the python2
+architecture, i.e. 32 or 64-bit. It will be important when choosing the python2
 installer. We recommend using a 64-bit client. Don't worry, [a frequently
 updated copy of 64-bit Vim][vim64-win-download] is available.
 
