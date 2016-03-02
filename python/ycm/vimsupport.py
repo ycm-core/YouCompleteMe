@@ -319,8 +319,8 @@ def GetReadOnlyVimGlobals( force_python_objects = False ):
 
 def VimExpressionToPythonType( vim_expression ):
   result = vim.eval( vim_expression )
-  if not isinstance( result, str ):
-    return result
+  if not isinstance( result, str ) or isinstance( result, bytes ):
+    return ToUnicode( result )
   try:
     return int( result )
   except ValueError:
