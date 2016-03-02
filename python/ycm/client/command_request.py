@@ -108,7 +108,7 @@ class CommandRequest( BaseRequest ):
       try:
         vimsupport.ReplaceChunks( chunks )
       except RuntimeError as e:
-        vimsupport.PostMultiLineNotice( e.message )
+        vimsupport.PostMultiLineNotice( str( e ) )
 
 
   def _HandleBasicResponse( self ):
