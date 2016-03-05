@@ -184,12 +184,12 @@ The following additional language support options are available:
 - Rust support: install [rustc and cargo][rust-install] and add
   `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure npm, go, mono, rust,
-and typescript API are installed and in your PATH, then:
+To simply compile with everything enabled, there's a `--all` flag.  So, to
+install with all language features, ensure `npm`, `go`, `mono`, `rust`,
+and `typescript` API are installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
-        --tern-completer --racer-completer
+    ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -242,12 +242,12 @@ The following additional language support options are available:
 - Rust support: install [rustc and cargo][rust-install] and add
   `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure npm, go, mono, rust,
-and typescript API are installed and in your PATH, then:
+To simply compile with everything enabled, there's a `--all` flag.  So, to
+install with all language features, ensure `npm`, `go`, `mono`, `rust`,
+and `typescript` API are installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
-        --tern-completer --racer-completer
+    ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -300,12 +300,12 @@ The following additional language support options are available:
 - Rust support: install [rustc and cargo][rust-install] and add
   `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure npm, go, mono, rust,
-and typescript API are installed and in your PATH, then:
+To simply compile with everything enabled, there's a `--all` flag.  So, to
+install with all language features, ensure `npm`, `go`, `mono`, `rust`,
+and `typescript` API are installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
-        --tern-completer --racer-completer
+    ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -372,11 +372,12 @@ The following additional language support options are available:
 - Rust support: install [rustc and cargo][rust-install] and add
   `--racer-completer` to `install.py`.
 
-For example, to install with all language features, ensure npm, go, mono, rust,
-and typescript API are installed and in your `%PATH%`, then:
+To simply compile with everything enabled, there's a `--all` flag.  So, to
+install with all language features, ensure `npm`, `go`, `mono`, `rust`,
+and `typescript` API are installed and in your `%PATH%`, then simply run:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
-    python install.py --clang-completer --omnisharp-completer --gocode-completer --tern-completer --racer-completer
+    python install.py --all
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
 option. YCM officially supports MSVC 11 (Visual Studio 2012), 12 (2013), and 14
@@ -437,12 +438,12 @@ The following additional language support options are available:
 - Rust support: install [rustc and cargo][rust-install] and add
   `--racer-completer` to `./install.py`
 
-For example, to install with all language features, ensure npm, go, mono, rust,
-and typescript API are installed and in your PATH, then:
+To simply compile with everything enabled, there's a `--all` flag.  So, to
+install with all language features, ensure `npm`, `go`, `mono`, `rust`,
+and `typescript` API are installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer --omnisharp-completer --gocode-completer \
-        --tern-completer --racer-completer
+    ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
