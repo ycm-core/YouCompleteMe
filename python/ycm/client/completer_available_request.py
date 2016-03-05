@@ -23,6 +23,8 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
+from requests.exceptions import ReadTimeout
+
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       HandleServerException )
 from ycmd.responses import ServerError
@@ -40,7 +42,7 @@ class CompleterAvailableRequest( BaseRequest ):
     try:
       self._response = self.PostDataToHandler( request_data,
                                                'semantic_completion_available' )
-    except ServerError as e:
+    except ( ServerError, ReadTimeout ) as e:
       HandleServerException( e )
 
 
