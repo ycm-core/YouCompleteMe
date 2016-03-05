@@ -1255,3 +1255,39 @@ def TextAfterCursor_EncodedUnicode_test( *args ):
 @patch( 'vim.current.line', ToBytes( 'fДa' ) )
 def CurrentLineContents_EncodedUnicode_test( *args ):
   eq_( vimsupport.CurrentLineContents(), u'fДa' )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_IntAsUnicode_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( '123' ), 123 )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_IntAsBytes_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( ToBytes( '123' ) ), 123 )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_StringAsUnicode_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( 'foo' ), 'foo' )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_StringAsBytes_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( ToBytes( 'foo' ) ), 'foo' )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_ListPassthrough_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( [ 1, 2 ] ), [ 1, 2 ] )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_ObjectPassthrough_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( { 1: 2 } ), { 1: 2 } )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
+  gen = ( x**2 for x in [ 1, 2, 3 ] )
+  eq_( vimsupport.VimExpressionToPythonType( gen ), gen )

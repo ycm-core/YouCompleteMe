@@ -318,13 +318,20 @@ def GetReadOnlyVimGlobals( force_python_objects = False ):
 
 
 def VimExpressionToPythonType( vim_expression ):
+  """Returns a Python type from the return value of the supplied Vim expression.
+  If the expression returns a list, dict or other non-string type, then it is
+  returned unmodified. If the string return can be converted to an
+  integer, returns an integer, otherwise returns the result converted to a
+  Unicode string."""
+
   result = vim.eval( vim_expression )
-  if not isinstance( result, str ) or isinstance( result, bytes ):
-    return ToUnicode( result )
+  if not ( isinstance( result, str ) or isinstance( result, bytes ) ):
+    return result
+
   try:
     return int( result )
   except ValueError:
-    return result
+    return ToUnicode( result )
 
 
 def HiddenEnabled( buffer_object ):
