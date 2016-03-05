@@ -15,18 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 import os
 import sys
 import vim
 import functools
 import re
 
+# Can't import these from setup.py because it makes nosetests go crazy.
 DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
 DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
                             'ycmd' )
-
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
-PYTHON_BINARY_REGEX = re.compile( r'python(2(\.[67])?)?(.exe)?$' )
+PYTHON_BINARY_REGEX = re.compile(
+  r'python((2(\.[67])?)|(3(\.[3-9])?))?(.exe)?$' )
 
 
 def Memoize( obj ):
@@ -52,7 +61,7 @@ def PathToPythonInterpreter():
       return python_interpreter
 
     raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
-                        "does not point to a valid Python 2.6 or 2.7." )
+                        "does not point to a valid Python 2.6+ or 3.3+." )
 
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
   # We cannot use sys.executable on Windows because for unknown reasons, it
@@ -64,27 +73,30 @@ def PathToPythonInterpreter():
   if IsPythonVersionCorrect( python_interpreter ):
     return python_interpreter
 
-  # As a last resort, we search python in the PATH. We check 'python2' before
-  # 'python' because on some distributions (Arch Linux for example), python
-  # refers to python3.
+  # As a last resort, we search python in the PATH. We prefer Python 2 over 3
+  # for the sake of backwards compatibility with ycm_extra_conf.py files out
+  # there; few people wrote theirs to work on py3.
+  # So we check 'python2' before 'python' because on some distributions (Arch
+  # Linux for example), python refers to python3.
   python_interpreter = utils.PathToFirstExistingExecutable( [ 'python2',
-                                                              'python' ] )
+                                                              'python',
+                                                              'python3' ] )
 
   if IsPythonVersionCorrect( python_interpreter ):
     return python_interpreter
 
-  raise RuntimeError( "Cannot find Python 2.6 or 2.7. You can set its path "
+  raise RuntimeError( "Cannot find Python 2.6+ or 3.3+. You can set its path "
                       "using the 'g:ycm_path_to_python_interpreter' "
                       "option." )
 
 
 def EndsWithPython( path ):
-  """Check if given path ends with a python 2.6 or 2.7 name."""
+  """Check if given path ends with a python 2.6+ or 3.3+ name."""
   return PYTHON_BINARY_REGEX.search( path ) is not None
 
 
 def IsPythonVersionCorrect( path ):
-  """Check if given path is the Python interpreter version 2.6 or 2.7."""
+  """Check if given path is the Python interpreter version 2.6+ or 3.3+."""
   from ycmd import utils
 
   if not EndsWithPython( path ):
@@ -94,7 +106,12 @@ def IsPythonVersionCorrect( path ):
               '-c',
               "import sys;"
               "major, minor = sys.version_info[ :2 ];"
-              "sys.exit( major != 2 or minor < 6)" ]
+              "good_python = ( major == 2 and minor >= 6 ) "
+              "or ( major == 3 and minor >= 3 ) or major > 3;"
+              # If this looks weird, remember that:
+              #   int( True ) == 1
+              #   int( False ) == 0
+              "sys.exit( not good_python )" ]
 
   return utils.SafePopen( command ).wait() == 0
 

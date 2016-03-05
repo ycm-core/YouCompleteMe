@@ -15,13 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 from nose.tools import eq_
 from ycm.test_utils import MockVimModule
 vim_mock = MockVimModule()
 
 from .. import completion_request
 
-class ConvertCompletionResponseToVimDatas_test:
+class ConvertCompletionResponseToVimDatas_test( object ):
   """ This class tests the
       completion_request._ConvertCompletionResponseToVimDatas method """
 
@@ -32,10 +40,10 @@ class ConvertCompletionResponseToVimDatas_test:
     try:
       eq_( expected_vim_data, vim_data )
     except:
-      print "Expected:\n'{0}'\nwhen parsing:\n'{1}'\nBut found:\n'{2}'".format(
+      print( "Expected:\n'{0}'\nwhen parsing:\n'{1}'\nBut found:\n'{2}'".format(
           expected_vim_data,
           completion_data,
-          vim_data )
+          vim_data ) )
       raise
 
 

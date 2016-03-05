@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 from ycm.test_utils import MockVimModule, ExtendedMock
 MockVimModule()
 
@@ -24,7 +32,7 @@ import os
 from ycm.youcompleteme import YouCompleteMe
 from ycmd import user_options_store
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
-                             UnknownExtraConf )
+                             UnknownExtraConf, ServerError )
 
 from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
@@ -47,6 +55,14 @@ def PostVimMessage_Call( message ):
   """Return a mock.call object for a call to vimsupport.PostVimMesasge with the
   supplied message"""
   return call( 'redraw | echohl WarningMsg | echom \''
+               + message +
+               '\' | echohl None' )
+
+
+def PostMultiLineNotice_Call( message ):
+  """Return a mock.call object for a call to vimsupport.PostMultiLineNotice with
+  the supplied message"""
+  return call( 'echohl WarningMsg | echo \''
                + message +
                '\' | echohl None' )
 
@@ -174,7 +190,7 @@ class EventNotification_test( object ):
     ERROR_TEXT = 'Some completer response text'
 
     def ErrorResponse( *args ):
-      raise RuntimeError( ERROR_TEXT )
+      raise ServerError( ERROR_TEXT )
 
     with MockArbitraryBuffer( 'javascript' ):
       with MockEventNotification( ErrorResponse ):
@@ -184,13 +200,13 @@ class EventNotification_test( object ):
 
         # The first call raises a warning
         vim_command.assert_has_exact_calls( [
-          PostVimMessage_Call( ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
         ] )
 
         # Subsequent calls don't re-raise the warning
         self.server_state.HandleFileParseRequest()
         vim_command.assert_has_exact_calls( [
-          PostVimMessage_Call( ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
         ] )
 
         # But it does if a subsequent event raises again
@@ -198,8 +214,8 @@ class EventNotification_test( object ):
         assert self.server_state.FileParseRequestReady()
         self.server_state.HandleFileParseRequest()
         vim_command.assert_has_exact_calls( [
-          PostVimMessage_Call( ERROR_TEXT ),
-          PostVimMessage_Call( ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
+          PostMultiLineNotice_Call( ERROR_TEXT ),
         ] )
 
 

@@ -205,10 +205,10 @@ that are conservatively turned off by default that you may want to turn on.
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.598 with python2 support. Ubuntu 14.04 and later have
-a Vim that's recent enough. You can see the version of Vim installed by running
-`vim --version`. If the version is too old, you may need to [compile Vim
-from source][vim-build] (don't worry, it's easy).
+Make sure you have Vim 7.3.598 with python2 or python3 support. Ubuntu 14.04 and
+later have a Vim that's recent enough. You can see the version of Vim installed
+by running `vim --version`. If the version is too old, you may need to [compile
+Vim from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
@@ -219,7 +219,8 @@ process.
 
 Install development tools and CMake: `sudo apt-get install build-essential cmake`
 
-Make sure you have Python headers installed: `sudo apt-get install python-dev`.
+Make sure you have Python headers installed: `sudo apt-get install python-dev
+python3-dev`.
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -263,10 +264,10 @@ that are conservatively turned off by default that you may want to turn on.
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.598 with python2 support. Fedora 21 and later have
-a Vim that's recent enough. You can see the version of Vim installed by running
-`vim --version`. If the version is too old, you may need to [compile Vim
-from source][vim-build] (don't worry, it's easy).
+Make sure you have Vim 7.3.598 with python2 or python3 support. Fedora 21 and
+later have a Vim that's recent enough. You can see the version of Vim installed
+by running `vim --version`. If the version is too old, you may need to [compile
+Vim from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
@@ -277,7 +278,8 @@ process.
 
 Install development tools and CMake: `sudo dnf install automake gcc gcc-c++ kernel-devel cmake`
 
-Make sure you have Python headers installed: `sudo dnf install python-devel`.
+Make sure you have Python headers installed: `sudo dnf install python-devel
+python3-devel`.
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -324,11 +326,11 @@ provided on a best-effort basis and may not work for you.
 **Important:** we assume that you are using the `cmd.exe` command prompt and
 that you know how to add an executable to the PATH environment variable.
 
-Make sure you have at least Vim 7.3.598 with python2 support. You can check the
-version by typing `:version` inside Vim. Take note of the Vim architecture, i.e.
-32 or 64-bit. It will be important when choosing the python2 installer. We
-recommend using a 64-bit client. Don't worry, [a frequently updated copy of
-64-bit Vim][vim64-win-download] is available.
+Make sure you have at least Vim 7.3.598 with python2 or python3 support. You can
+check the version by typing `:version` inside Vim. Take note of the Vim
+architecture, i.e. 32 or 64-bit. It will be important when choosing the python2
+installer. We recommend using a 64-bit client. Don't worry, [a frequently
+updated copy of 64-bit Vim][vim64-win-download] is available.
 
 Install YouCompleteMe with [Vundle][].
 
@@ -339,7 +341,7 @@ process.
 
 Download and install the following software:
 
-- [python2][python-win-download]. Be sure to pick the version corresponding to
+- [python3][python-win-download]. Be sure to pick the version corresponding to
 your Vim architecture. It is _Windows x86-64 MSI installer_ if you are using the
 Vim previously linked.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
@@ -397,7 +399,7 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
 not officially supported platforms by YCM.
 
-Make sure you have Vim 7.3.598 with python2 support.
+Make sure you have Vim 7.3.598 with python2 or python3 support.
 
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
 Vim installed by running `vim --version`.
@@ -473,7 +475,7 @@ process.
 **Please follow the instructions carefully. Read EVERY WORD.**
 
 1.  **Ensure that your version of Vim is _at least_ 7.3.598 _and_ that it has
-    support for python2 scripting**.
+    support for python2 or python3 scripting**.
 
     Inside Vim, type `:version`. Look at the first two to three lines of output;
     it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If
@@ -485,11 +487,11 @@ process.
     from source][vim-build] (don't worry, it's easy).
 
     After you have made sure that you have Vim 7.3.598+, type the following in
-    Vim: `:echo has('python')`. The output should be 1. If it's 0, then get a
-    version of Vim with Python support.
+    Vim: `:echo has('python') || has('python3')`. The output should be 1. If
+    it's 0, then get a version of Vim with Python support.
 
     On Windows, check also if your Vim architecture is 32 or 64-bit. This is
-    critical because it must match the python2 and the YCM libraries
+    critical because it must match the python and the YCM libraries
     architectures. We recommend using a 64-bit Vim.
 
 2.  **Install YCM** with [Vundle][] (or [Pathogen][], but Vundle is a better
@@ -518,8 +520,8 @@ process.
     the upstream compiled binaries. Random things may break. Save yourself the
     hassle and use the upstream pre-built libclang.
 
-4.  **Compile the `ycm_core` libraries** that YCM needs. These libs
-    are the C++ engines that YCM uses to get fast completions.
+4.  **Compile the `ycm_core` library** that YCM needs. This library
+    is the C++ engine that YCM uses to get fast completions.
 
     You will need to have `cmake` installed in order to generate the required
     makefiles. Linux users can install cmake with their package manager (`sudo
@@ -528,10 +530,10 @@ process.
     it through [Homebrew][brew] with `brew install cmake`.
 
     On a Unix OS, you need to make sure you have Python headers installed. On a
-    Debian-like Linux distro, this would be `sudo apt-get install python-dev`.
-    On Mac they should already be present.
+    Debian-like Linux distro, this would be `sudo apt-get install python-dev
+    python3-dev`. On Mac they should already be present.
 
-    On Windows, you need to download and install [python2][python-win-download].
+    On Windows, you need to download and install [python3][python-win-download].
     Pick the version corresponding to your Vim architecture. You will also need
     Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by installing
     [Visual Studio][visual-studio-download]. MSVC 11 (Visual Studio 2012), 12
@@ -931,7 +933,7 @@ let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
 
 Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the [jedi][] library which
-supports a variety of python versions (2.6, 2.7, 3.2, 3.3 or 3.4) as long as it
+supports a variety of python versions (2.6, 2.7, 3.2+) as long as it
 runs in the corresponding python interpreter. By default YCM runs [jedi][] with
 the same python interpreter used by the [ycmd server][ycmd], so if you would like to
 use a different interpreter, use the following option specifying the python
@@ -2300,8 +2302,8 @@ let g:ycm_disable_for_files_larger_than_kb = 1000
 
 This option specifies the Python interpreter to use to run the [jedi][]
 completion library.  Specify the python interpreter to use to get completions.
-By default the python under which [ycmd][] runs is used ([ycmd][] only runs
-under Python 2.6 or 2.7).
+By default the python under which [ycmd][] runs is used ([ycmd][] runs on
+Python 2.6, 2.7 or 3.3+).
 
 Default: `''`
 
@@ -2330,6 +2332,29 @@ option for details.
 
 That's a very rare Vim bug most users never encounter. It's fixed in Vim
 7.4.72. Update to that version (or above) to resolve the issue.
+
+### I get `ImportError` exceptions that mention `PyInit_ycm_core` or
+`initycm_core`
+
+These errors are caused by building the YCM native libraries for Python 2 and
+trying to load them into a Python 3 process (or the other way around).
+
+For instance, if building for Python 2 but loading in Python 3:
+
+```
+ImportError: dynamic module does not define init function (PyInit_ycm_core)
+```
+
+If building for Python 3 but loading in Python 2:
+
+```
+ImportError: dynamic module does not define init function (initycm_core)
+```
+
+Setting the `g:ycm_path_to_python_interpreter` option to force the use of a
+specific Python interpreter for `ycmd` is usually the easiest way to solve the
+problem. Common values for that option are `/usr/bin/python` and
+`/usr/bin/python3`.
 
 ### I get a linker warning regarding `libpython` on Mac when compiling YCM
 
@@ -2721,10 +2746,10 @@ EOF
 
 ### I hear that YCM only supports Python 2, is that true?
 
-No. The Vim client and the [ycmd server][ycmd] only run under Python 2 but if
-you work on a Python 3 project then just set the `g:ycm_python_binary_path` to
-the Python interpreter you use for your project and you will get completions for
-that version of Python.
+**No.** Both the Vim client and the [ycmd server][ycmd] run on Python 2 or 3. If
+you work on a Python 3 project, you may need to set `g:ycm_python_binary_path`
+to the Python interpreter you use for your project to get completions for that
+version of Python.
 
 Contributor Code of Conduct
 ---------------------------

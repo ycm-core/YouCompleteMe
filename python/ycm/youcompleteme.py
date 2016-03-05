@@ -15,14 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
+from future.utils import iteritems
 import os
 import vim
-import tempfile
 import json
 import re
 import signal
 import base64
 from subprocess import PIPE
+from tempfile import NamedTemporaryFile
 from ycm import paths, vimsupport
 from ycmd import utils
 from ycmd.request_wrap import RequestWrap
@@ -95,17 +104,18 @@ class YouCompleteMe( object ):
     self._SetupServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
-      'cs': lambda( self ): self._OnCompleteDone_Csharp()
+      'cs': lambda self: self._OnCompleteDone_Csharp()
     }
 
   def _SetupServer( self ):
     self._available_completers = {}
     server_port = utils.GetUnusedLocalhostPort()
     # The temp options file is deleted by ycmd during startup
-    with tempfile.NamedTemporaryFile( delete = False ) as options_file:
+    with NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
       hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
       options_dict = dict( self._user_options )
-      options_dict[ 'hmac_secret' ] = base64.b64encode( hmac_secret )
+      options_dict[ 'hmac_secret' ] = utils.ToUnicode(
+        base64.b64encode( hmac_secret ) )
       json.dump( options_dict, options_file )
       options_file.flush()
 
@@ -303,7 +313,7 @@ class YouCompleteMe( object ):
 
   def GetCompleteDoneHooks( self ):
     filetypes = vimsupport.CurrentFiletypes()
-    for key, value in self._complete_done_hooks.iteritems():
+    for key, value in iteritems( self._complete_done_hooks ):
       if key in filetypes:
         yield value
 

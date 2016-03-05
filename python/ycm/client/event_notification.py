@@ -15,8 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 from ycm import vimsupport
-from ycmd.responses import UnknownExtraConf
+from ycmd.responses import UnknownExtraConf, ServerError
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       JsonFromFuture, HandleServerException )
 
@@ -58,7 +66,7 @@ class EventNotification( BaseRequest ):
             _LoadExtraConfFile( e.extra_conf_file )
           else:
             _IgnoreExtraConfFile( e.extra_conf_file )
-    except Exception as e:
+    except ServerError as e:
       HandleServerException( e )
 
     return self._cached_response if self._cached_response else []

@@ -15,13 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
+from future.utils import iterkeys
 import vim
 import os
 import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToBytes, ToUnicode
+from ycmd.utils import ToUnicode
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -59,17 +68,17 @@ def CurrentColumn():
 
 
 def CurrentLineContents():
-  return vim.current.line
+  return ToUnicode( vim.current.line )
 
 
 def TextAfterCursor():
   """Returns the text after CurrentColumn."""
-  return vim.current.line[ CurrentColumn(): ]
+  return ToUnicode( vim.current.line[ CurrentColumn(): ] )
 
 
 def TextBeforeCursor():
   """Returns the text before CurrentColumn."""
-  return vim.current.line[ :CurrentColumn() ]
+  return ToUnicode( vim.current.line[ :CurrentColumn() ] )
 
 
 # Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '7.4.301'
@@ -114,7 +123,7 @@ def GetUnsavedAndCurrentBufferData():
 
     buffers_data[ GetBufferFilepath( buffer_object ) ] = {
       # Add a newline to match what gets saved to disk. See #1455 for details.
-      'contents': '\n'.join( buffer_object ) + '\n',
+      'contents': '\n'.join( ToUnicode( x ) for x in buffer_object ) + '\n',
       'filetypes': FiletypesForBuffer( buffer_object )
     }
 
@@ -277,7 +286,7 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'bufnr' : GetBufferNumberForFilename( location[ 'filepath' ] ),
       'lnum'  : line_num,
       'col'   : location[ 'column_num' ],
-      'text'  : ToBytes( text ),
+      'text'  : text,
       'type'  : diagnostic[ 'kind' ][ 0 ],
       'valid' : 1
     }
@@ -309,13 +318,20 @@ def GetReadOnlyVimGlobals( force_python_objects = False ):
 
 
 def VimExpressionToPythonType( vim_expression ):
+  """Returns a Python type from the return value of the supplied Vim expression.
+  If the expression returns a list, dict or other non-string type, then it is
+  returned unmodified. If the string return can be converted to an
+  integer, returns an integer, otherwise returns the result converted to a
+  Unicode string."""
+
   result = vim.eval( vim_expression )
-  if not isinstance( result, basestring ):
+  if not ( isinstance( result, str ) or isinstance( result, bytes ) ):
     return result
+
   try:
     return int( result )
   except ValueError:
-    return result
+    return ToUnicode( result )
 
 
 def HiddenEnabled( buffer_object ):
@@ -480,7 +496,7 @@ def EchoTextVimWidth( text ):
 
 
 def EscapeForVim( text ):
-  return text.replace( "'", "''" )
+  return ToUnicode( text.replace( "'", "''" ) )
 
 
 def CurrentFiletypes():
@@ -607,7 +623,7 @@ def ReplaceChunks( chunks ):
   chunks_by_file = _SortChunksByFile( chunks )
 
   # We sort the file list simply to enable repeatable testing
-  sorted_file_list = sorted( chunks_by_file.iterkeys() )
+  sorted_file_list = sorted( iterkeys( chunks_by_file ) )
 
   # Make sure the user is prepared to have her screen mutilated by the new
   # buffers
@@ -840,7 +856,8 @@ def CheckFilename( filename ):
     raise RuntimeError( "'{0}' is not a valid filename".format( filename ) )
   except IOError as error:
     raise RuntimeError(
-      "filename '{0}' cannot be opened. {1}".format( filename, error ) )
+      "filename '{0}' cannot be opened. {1}.".format( filename,
+                                                      error.strerror ) )
 
 
 def BufferIsVisibleForFilename( filename ):
@@ -852,7 +869,7 @@ def BufferIsVisibleForFilename( filename ):
 def CloseBuffersForFilename( filename ):
   """Close all buffers for a specific file."""
   buffer_number = GetBufferNumberForFilename( filename, False )
-  while buffer_number is not -1:
+  while buffer_number != -1:
     vim.command( 'silent! bwipeout! {0}'.format( buffer_number ) )
     new_buffer_number = GetBufferNumberForFilename( filename, False )
     if buffer_number == new_buffer_number:
@@ -885,7 +902,7 @@ def OpenFilename( filename, options = {} ):
 
   # There is no command in Vim to return to the previous tab so we need to
   # remember the current tab if needed.
-  if not focus and command is 'tabedit':
+  if not focus and command == 'tabedit':
     previous_tab = GetIntValue( 'tabpagenr()' )
   else:
     previous_tab = None
@@ -920,7 +937,7 @@ def OpenFilename( filename, options = {} ):
   # focus back (if the focus option is disabled) when opening a new tab or
   # window.
   if not focus:
-    if command is 'tabedit':
+    if command == 'tabedit':
       JumpToTab( previous_tab )
     if command in [ 'split', 'vsplit' ]:
       JumpToPreviousWindow()
@@ -930,9 +947,9 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
   """After opening a buffer, configure it according to the supplied options,
   which are as defined by the OpenFilename method."""
 
-  if command is 'split':
+  if command == 'split':
     vim.current.window.options[ 'winfixheight' ] = fix
-  if command is 'vsplit':
+  if command == 'vsplit':
     vim.current.window.options[ 'winfixwidth' ] = fix
 
   if watch:
@@ -940,6 +957,6 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
     vim.command( "exec 'au BufEnter <buffer> :silent! checktime {0}'"
                  .format( filename ) )
 
-  if position is 'end':
+  if position == 'end':
     vim.command( 'silent! normal G zz' )
 

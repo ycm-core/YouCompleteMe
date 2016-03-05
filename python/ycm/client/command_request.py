@@ -15,8 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 import vim
-from ycm.client.base_request import BaseRequest, BuildRequestData, ServerError
+from ycmd.responses import ServerError
+from ycm.client.base_request import ( BaseRequest, BuildRequestData,
+                                      HandleServerException )
+
 from ycm import vimsupport
 from ycmd.utils import ToUnicode
 
@@ -46,7 +57,7 @@ class CommandRequest( BaseRequest ):
       self._response = self.PostDataToHandler( request_data,
                                                'run_completer_command' )
     except ServerError as e:
-      vimsupport.PostMultiLineNotice( e )
+      HandleServerException( e )
 
 
   def Response( self ):
@@ -97,7 +108,7 @@ class CommandRequest( BaseRequest ):
       try:
         vimsupport.ReplaceChunks( chunks )
       except RuntimeError as e:
-        vimsupport.PostMultiLineNotice( e.message )
+        vimsupport.PostMultiLineNotice( str( e ) )
 
 
   def _HandleBasicResponse( self ):

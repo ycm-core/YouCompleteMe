@@ -1,3 +1,5 @@
+# coding: utf-8
+#
 # Copyright (C) 2015 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
@@ -15,13 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
 from ycm.test_utils import ExtendedMock, MockVimModule, MockVimCommand
 MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
-from hamcrest import assert_that, calling, raises, none
+from hamcrest import assert_that, calling, raises, none, has_entry
 from mock import MagicMock, call, patch
+from ycmd.utils import ToBytes
 import os
 import json
 
@@ -565,7 +576,7 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   eq_( expected_buffer, result_buffer )
 
 
-class MockBuffer( ):
+class MockBuffer( object ):
   """An object that looks like a vim.buffer object, enough for ReplaceChunk to
   generate a location list"""
 
@@ -1142,7 +1153,7 @@ def CheckFilename_test():
     calling( vimsupport.CheckFilename ).with_args( 'nonexistent_file' ),
     raises( RuntimeError,
             "filename 'nonexistent_file' cannot be opened. "
-            "\[Errno 2\] No such file or directory: 'nonexistent_file'" )
+            "No such file or directory." )
   )
 
   assert_that( vimsupport.CheckFilename( __file__ ), none() )
@@ -1167,27 +1178,13 @@ def BufferIsVisibleForFilename_test():
     eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
 
 
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        side_effect = [ 2, 5, -1 ] )
 @patch( 'vim.command',
         side_effect = MockVimCommand,
-        new_callable=ExtendedMock )
-def CloseBuffersForFilename_test( vim_command ):
-  buffers = [
-    {
-      'number': 2,
-      'filename': os.path.realpath( 'some_filename' ),
-    },
-    {
-      'number': 5,
-      'filename': os.path.realpath( 'some_filename' ),
-    },
-    {
-      'number': 1,
-      'filename': os.path.realpath( 'another_filename' )
-    }
-  ]
-
-  with patch( 'vim.buffers', buffers ):
-    vimsupport.CloseBuffersForFilename( 'some_filename' )
+        new_callable = ExtendedMock )
+def CloseBuffersForFilename_test( vim_command, *args ):
+  vimsupport.CloseBuffersForFilename( 'some_filename' )
 
   vim_command.assert_has_exact_calls( [
     call( 'silent! bwipeout! 2' ),
@@ -1195,8 +1192,8 @@ def CloseBuffersForFilename_test( vim_command ):
   ], any_order = True )
 
 
-@patch( 'vim.command', new_callable=ExtendedMock )
-@patch( 'vim.current', new_callable=ExtendedMock )
+@patch( 'vim.command', new_callable = ExtendedMock )
+@patch( 'vim.current', new_callable = ExtendedMock )
 def OpenFilename_test( vim_current, vim_command ):
   # Options used to open a logfile
   options = {
@@ -1223,3 +1220,74 @@ def OpenFilename_test( vim_current, vim_command ):
   vim_current.window.options.__setitem__.assert_has_exact_calls( [
     call( 'winfixheight', True )
   ] )
+
+
+@patch( 'ycm.vimsupport.BufferModified', side_effect = [ True ] )
+@patch( 'ycm.vimsupport.FiletypesForBuffer', side_effect = [ [ 'cpp' ] ] )
+def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
+  mock_buffer = MagicMock()
+  mock_buffer.name = os.path.realpath( 'filename' )
+  mock_buffer.number = 1
+  mock_buffer.__iter__.return_value = [ u'abc', ToBytes( u'fДa' ) ]
+
+  with patch( 'vim.buffers', [ mock_buffer ] ):
+    assert_that( vimsupport.GetUnsavedAndCurrentBufferData(),
+                 has_entry( mock_buffer.name,
+                            has_entry( u'contents', u'abc\nfДa\n' ) ) )
+
+
+# NOTE: Vim returns byte offsets for columns, not actual character columns. This
+# makes 'ДД' have 4 columns: column 0, column 2 and column 4.
+@patch( 'vim.current.line', ToBytes( 'ДДaa' ) )
+@patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 4 ] )
+def TextBeforeCursor_EncodedUnicode_test( *args ):
+  eq_( vimsupport.TextBeforeCursor(), u'ДД' )
+
+
+# NOTE: Vim returns byte offsets for columns, not actual character columns. This
+# makes 'ДД' have 4 columns: column 0, column 2 and column 4.
+@patch( 'vim.current.line', ToBytes( 'aaДД' ) )
+@patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 2 ] )
+def TextAfterCursor_EncodedUnicode_test( *args ):
+  eq_( vimsupport.TextAfterCursor(), u'ДД' )
+
+
+@patch( 'vim.current.line', ToBytes( 'fДa' ) )
+def CurrentLineContents_EncodedUnicode_test( *args ):
+  eq_( vimsupport.CurrentLineContents(), u'fДa' )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_IntAsUnicode_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( '123' ), 123 )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_IntAsBytes_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( ToBytes( '123' ) ), 123 )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_StringAsUnicode_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( 'foo' ), 'foo' )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_StringAsBytes_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( ToBytes( 'foo' ) ), 'foo' )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_ListPassthrough_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( [ 1, 2 ] ), [ 1, 2 ] )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_ObjectPassthrough_test( *args ):
+  eq_( vimsupport.VimExpressionToPythonType( { 1: 2 } ), { 1: 2 } )
+
+
+@patch( 'vim.eval', side_effect = lambda x: x )
+def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
+  gen = ( x**2 for x in [ 1, 2, 3 ] )
+  eq_( vimsupport.VimExpressionToPythonType( gen ), gen )

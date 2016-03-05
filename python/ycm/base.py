@@ -15,6 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # noqa
+
+from future.utils import iteritems
 from ycm import vimsupport
 from ycmd import user_options_store
 from ycmd import request_wrap
@@ -29,7 +38,7 @@ def BuildServerConf():
 
   vim_globals = vimsupport.GetReadOnlyVimGlobals( force_python_objects = True )
   server_conf = {}
-  for key, value in vim_globals.items():
+  for key, value in iteritems( vim_globals ):
     if not key.startswith( YCM_VAR_PREFIX ):
       continue
     try:
@@ -45,7 +54,7 @@ def BuildServerConf():
 def LoadJsonDefaultsIntoVim():
   defaults = user_options_store.DefaultOptions()
   vim_defaults = {}
-  for key, value in defaults.iteritems():
+  for key, value in iteritems( defaults ):
     vim_defaults[ 'ycm_' + key ] = value
 
   vimsupport.LoadDictIntoVimGlobals( vim_defaults, overwrite = False )
@@ -115,7 +124,7 @@ def AdjustCandidateInsertionText( candidates ):
 
   new_candidates = []
   for candidate in candidates:
-    if type( candidate ) is dict:
+    if isinstance( candidate, dict ):
       new_candidate = candidate.copy()
 
       if not 'abbr' in new_candidate:
@@ -127,7 +136,7 @@ def AdjustCandidateInsertionText( candidates ):
 
       new_candidates.append( new_candidate )
 
-    elif type( candidate ) is str:
+    elif isinstance( candidate, str ) or isinstance( candidate, bytes ):
       new_candidates.append(
         { 'abbr': candidate,
           'word': NewCandidateInsertionText( candidate, text_after_cursor ) } )
