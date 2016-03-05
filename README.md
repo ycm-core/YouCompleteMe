@@ -217,7 +217,8 @@ process.
 
 Install development tools and CMake: `sudo apt-get install build-essential cmake`
 
-Make sure you have Python headers installed: `sudo apt-get install python-dev`.
+Make sure you have Python headers installed: `sudo apt-get install python-dev
+python3-dev`.
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -275,7 +276,8 @@ process.
 
 Install development tools and CMake: `sudo dnf install automake gcc gcc-c++ kernel-devel cmake`
 
-Make sure you have Python headers installed: `sudo dnf install python-devel`.
+Make sure you have Python headers installed: `sudo dnf install python-devel
+python3-devel`.
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -516,8 +518,8 @@ process.
     the upstream compiled binaries. Random things may break. Save yourself the
     hassle and use the upstream pre-built libclang.
 
-4.  **Compile the `ycm_core` libraries** that YCM needs. These libs
-    are the C++ engines that YCM uses to get fast completions.
+4.  **Compile the `ycm_core` library** that YCM needs. This library
+    is the C++ engine that YCM uses to get fast completions.
 
     You will need to have `cmake` installed in order to generate the required
     makefiles. Linux users can install cmake with their package manager (`sudo
@@ -526,8 +528,8 @@ process.
     it through [Homebrew][brew] with `brew install cmake`.
 
     On a Unix OS, you need to make sure you have Python headers installed. On a
-    Debian-like Linux distro, this would be `sudo apt-get install python-dev`.
-    On Mac they should already be present.
+    Debian-like Linux distro, this would be `sudo apt-get install python-dev
+    python3-dev`. On Mac they should already be present.
 
     On Windows, you need to download and install [python3][python-win-download].
     Pick the version corresponding to your Vim architecture. You will also need
@@ -2328,6 +2330,29 @@ option for details.
 
 That's a very rare Vim bug most users never encounter. It's fixed in Vim
 7.4.72. Update to that version (or above) to resolve the issue.
+
+### I get `ImportError` exceptions that mention `PyInit_ycm_core` or
+`initycm_core`
+
+These errors are caused by building the YCM native libraries for Python 2 and
+trying to load them into a Python 3 process (or the other way around).
+
+For instance, if building for Python 2 but loading in Python 3:
+
+```
+ImportError: dynamic module does not define init function (PyInit_ycm_core)
+```
+
+If building for Python 3 but loading in Python 2:
+
+```
+ImportError: dynamic module does not define init function (initycm_core)
+```
+
+Setting the `g:ycm_path_to_python_interpreter` option to force the use of a
+specific Python interpreter for `ycmd` is usually the easiest way to solve the
+problem. Common values for that option are `/usr/bin/python` and
+`/usr/bin/python3`.
 
 ### I get a linker warning regarding `libpython` on Mac when compiling YCM
 
