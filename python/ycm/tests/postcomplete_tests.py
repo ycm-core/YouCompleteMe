@@ -199,18 +199,19 @@ class PostComplete_test():
 
   @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = "   Te" )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_MatchIsReturned_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_MatchIsReturned_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "Test" ) ]
 
-    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
 
     eq_( result, True )
 
 
   @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = "X" )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ShortTextDoesntRaise_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ShortTextDoesntRaise_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "AAA" ) ]
 
@@ -219,22 +220,24 @@ class PostComplete_test():
 
   @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = "Test" )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ExactMatchIsntReturned_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ExactMatchIsntReturned_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "Test" ) ]
 
-    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
 
     eq_( result, False )
 
 
   @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = "   Quote" )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_NonMatchIsntReturned_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_NonMatchIsntReturned_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "A" ) ]
 
-    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
 
     eq_( result, False )
 
@@ -243,11 +246,12 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.GetVariableValue',
           GetVariableValue_CompleteItemIs( "Te") )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = "   Quote" )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_MatchIsReturned_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_MatchIsReturned_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "Test" ) ]
 
-    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
 
     eq_( result, True )
 
@@ -256,7 +260,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.GetVariableValue',
           GetVariableValue_CompleteItemIs( "X") )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = "   Quote" )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ShortTextDoesntRaise_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ShortTextDoesntRaise_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "AAA" ) ]
 
@@ -267,11 +271,12 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.GetVariableValue',
           GetVariableValue_CompleteItemIs( "Test" ) )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ExactMatchIsntReturned_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ExactMatchIsntReturned_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "Test" ) ]
 
-    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
 
     eq_( result, False )
 
@@ -280,11 +285,12 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.GetVariableValue',
           GetVariableValue_CompleteItemIs( "   Quote" ) )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
-  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_NonMatchIsntReturned_test(
+  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_NonMatchIsntReturned_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( "A" ) ]
 
-    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
 
     eq_( result, False )
 
@@ -309,7 +315,7 @@ class PostComplete_test():
       eq_( [], self.ycm.GetCompletionsUserMayHaveCompleted() )
 
 
-  def GetCompletionsUserMayHaveCompleted_ReturnEmptyIfPendingMatches_NewVim_test(
+  def GetCompletionsUserMayHaveCompleted_ReturnEmptyIfPendingMatches_NewVim_test( # noqa
     self ):
     completions = [ BuildCompletion( None ) ]
     with self._SetupForCsharpCompletionDone( completions ):
@@ -319,7 +325,7 @@ class PostComplete_test():
           eq_( [], self.ycm.GetCompletionsUserMayHaveCompleted() )
 
 
-  def GetCompletionsUserMayHaveCompleted_ReturnEmptyIfPendingMatches_OldVim_test(
+  def GetCompletionsUserMayHaveCompleted_ReturnEmptyIfPendingMatches_OldVim_test( # noqa
     self, *args ):
     completions = [ BuildCompletion( None ) ]
     with self._SetupForCsharpCompletionDone( completions ):
@@ -340,7 +346,7 @@ class PostComplete_test():
           eq_( completions, self.ycm.GetCompletionsUserMayHaveCompleted() )
 
 
-  def GetCompletionsUserMayHaveCompleted_ReturnMatchIfExactMatchesEvenIfPartial_NewVim_test(
+  def GetCompletionsUserMayHaveCompleted_ReturnMatchIfExactMatchesEvenIfPartial_NewVim_test( # noqa
     self, *args ):
     info = [ "NS", "Test", "Abbr", "Menu", "Info", "Kind" ]
     completions = [ BuildCompletion( *info ),
@@ -353,7 +359,7 @@ class PostComplete_test():
                self.ycm.GetCompletionsUserMayHaveCompleted() )
 
 
-  def GetCompletionsUserMayHaveCompleted_DontReturnMatchIfNontExactMatchesAndPartial_NewVim_test(
+  def GetCompletionsUserMayHaveCompleted_DontReturnMatchIfNontExactMatchesAndPartial_NewVim_test( # noqa
     self ):
     info = [ "NS", "Test", "Abbr", "Menu", "Info", "Kind" ]
     completions = [ BuildCompletion( insertion_text = info[ 0 ] ),
@@ -391,7 +397,7 @@ class PostComplete_test():
       ok_( not vimsupport.InsertNamespace.called )
 
 
-  def PostCompleteCsharp_ExistingWithoutNamespaceDoesntInsertNamespace_test( 
+  def PostCompleteCsharp_ExistingWithoutNamespaceDoesntInsertNamespace_test(
     self, *args ):
     completions = [ BuildCompletion( None ) ]
     with self._SetupForCsharpCompletionDone( completions ):

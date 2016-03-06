@@ -44,6 +44,7 @@ _HMAC_HEADER = 'x-ycm-hmac'
 
 
 class BaseRequest( object ):
+
   def __init__( self ):
     pass
 
@@ -211,6 +212,7 @@ def _BuildUri( handler ):
 
 
 SERVER_HEALTHY = False
+
 
 def _CheckServerIsHealthyWithCache():
   global SERVER_HEALTHY

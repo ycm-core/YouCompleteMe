@@ -127,7 +127,7 @@ def AdjustCandidateInsertionText( candidates ):
     if isinstance( candidate, dict ):
       new_candidate = candidate.copy()
 
-      if not 'abbr' in new_candidate:
+      if 'abbr' not in new_candidate:
         new_candidate[ 'abbr' ] = new_candidate[ 'word' ]
 
       new_candidate[ 'word' ] = NewCandidateInsertionText(

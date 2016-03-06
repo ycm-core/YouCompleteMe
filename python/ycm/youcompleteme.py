@@ -55,6 +55,7 @@ try:
 except ImportError:
   USE_ULTISNIPS_DATA = False
 
+
 def PatchNoProxy():
   current_value = os.environ.get('no_proxy', '')
   additions = '127.0.0.1,localhost'
@@ -372,7 +373,10 @@ class YouCompleteMe( object ):
       item = ConvertCompletionDataToVimData( completion )
       match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
                       else [ 'word' ] )
-      matcher = lambda key: completed.get( key, "" ) == item.get( key, "" )
+
+      def matcher( key ):
+          return completed.get( key, "" ) == item.get( key, "" )
+
       if all( [ matcher( i ) for i in match_keys ] ):
         yield completion
 
@@ -443,7 +447,7 @@ class YouCompleteMe( object ):
 
     if len( namespaces ) > 1:
       choices = [ "{0} {1}".format( i + 1, n )
-                  for i,n in enumerate( namespaces ) ]
+                  for i, n in enumerate( namespaces ) ]
       choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
       if choice < 0:
         return
@@ -664,6 +668,6 @@ def _AddUltiSnipsDataIfNeeded( extra_data ):
   # UltiSnips_Manager._snips() returns a class instance where:
   # class.trigger - name of snippet trigger word ( e.g. defn or testcase )
   # class.description - description of the snippet
-  extra_data[ 'ultisnips_snippets' ] = [ { 'trigger': x.trigger,
-                                           'description': x.description
-                                         } for x in rawsnips ]
+  extra_data[ 'ultisnips_snippets' ] = [
+    { 'trigger': x.trigger, 'description': x.description } for x in rawsnips
+  ]
