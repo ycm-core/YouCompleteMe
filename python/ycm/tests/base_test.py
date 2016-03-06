@@ -107,8 +107,7 @@ def AdjustCandidateInsertionText_MultipleStrings_test():
     eq_( [ { 'abbr': 'foobar', 'word': 'foo' },
            { 'abbr': 'zobar', 'word': 'zo' },
            { 'abbr': 'qbar', 'word': 'q' },
-           { 'abbr': 'bar', 'word': '' },
-         ],
+           { 'abbr': 'bar', 'word': '' }, ],
          base.AdjustCandidateInsertionText( [ 'foobar',
                                               'zobar',
                                               'qbar',
@@ -269,4 +268,3 @@ def CurrentIdentifierFinished_WhitespaceOnly_test():
 
     with MockCurrentColumnAndLineContents( 3, '\t\t\t\t' ):
       ok_( base.CurrentIdentifierFinished() )
-

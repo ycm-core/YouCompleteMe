@@ -417,4 +417,3 @@ class EventNotification_test( object ):
         ] )
         eq_( self.server_state.GetErrorCount(), 0 )
         eq_( self.server_state.GetWarningCount(), 0 )
-

@@ -222,5 +222,3 @@ def _ExtractKeywordsFromGroup( group ):
           word = word[ :-1 ]
         keywords.append( word )
   return keywords
-
-

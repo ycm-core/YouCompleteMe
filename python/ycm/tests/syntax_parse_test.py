@@ -146,9 +146,7 @@ def KeywordsFromSyntaxListOutput_Basic_test():
        syntax_parse._KeywordsFromSyntaxListOutput( """
 foogroup xxx foo bar
              zoo goo
-             links to Statement"""
-         )
-     )
+             links to Statement""" ) )
 
 
 def KeywordsFromSyntaxListOutput_Function_test():
@@ -156,16 +154,14 @@ def KeywordsFromSyntaxListOutput_Function_test():
        syntax_parse._KeywordsFromSyntaxListOutput( """
 foogroup xxx foo bar
              zoo goo
-             links to Function"""
-         )
-     )
+             links to Function""" ) )
 
 
 def KeywordsFromSyntaxListOutput_ContainedArgAllowed_test():
   assert_that( syntax_parse._KeywordsFromSyntaxListOutput( """
 phpFunctions   xxx contained gzclose yaz_syntax html_entity_decode fbsql_read_blob png2wbmp mssql_init cpdf_set_title gztell fbsql_insert_id empty cpdf_restore mysql_field_type closelog swftext ldap_search curl_errno gmp_div_r mssql_data_seek getmyinode printer_draw_pie mcve_initconn ncurses_getmaxyx defined
                    contained replace_child has_attributes specified insertdocument assign node_name hwstat addshape get_attribute_node html_dump_mem userlist
-                   links to Function""" ),
+                   links to Function""" ), # noqa
               has_items( 'gzclose', 'userlist', 'ldap_search' ) )
 
 
@@ -177,9 +173,7 @@ foogroup xxx foo bar
              zoo goo
              links to Statement
 Spell          cluster=NONE
-NoSpell        cluster=NONE"""
-         )
-     )
+NoSpell        cluster=NONE""" ) )
 
 
 def KeywordsFromSyntaxListOutput_MultipleStatementGroups_test():
@@ -188,9 +182,7 @@ def KeywordsFromSyntaxListOutput_MultipleStatementGroups_test():
 foogroup xxx foo bar
              links to Statement
 bargroup xxx zoo goo
-             links to Statement"""
-         )
-     )
+             links to Statement""" ) )
 
 
 def KeywordsFromSyntaxListOutput_StatementAndTypeGroups_test():
@@ -199,9 +191,7 @@ def KeywordsFromSyntaxListOutput_StatementAndTypeGroups_test():
 foogroup xxx foo bar
              links to Statement
 bargroup xxx zoo goo
-             links to Type"""
-         )
-     )
+             links to Type""" ) )
 
 
 def KeywordsFromSyntaxListOutput_StatementHierarchy_test():
@@ -212,9 +202,7 @@ baa xxx foo bar
 Foo xxx zoo goo
         links to Bar
 Bar xxx qux moo
-        links to Statement"""
-         )
-     )
+        links to Statement""" ) )
 
 
 def KeywordsFromSyntaxListOutput_TypeHierarchy_test():
@@ -225,9 +213,7 @@ baa xxx foo bar
 Foo xxx zoo goo
         links to Bar
 Bar xxx qux moo
-        links to Type"""
-         )
-     )
+        links to Type""" ) )
 
 
 def KeywordsFromSyntaxListOutput_StatementAndTypeHierarchy_test():
@@ -244,9 +230,7 @@ sBaa xxx na bar
 sFoo xxx zoo nb
         links to sBar
 sBar xxx qux nc
-        links to Statement"""
-         )
-     )
+        links to Statement""" ) )
 
 
 def SyntaxGroupsFromOutput_Basic_test():
@@ -263,8 +247,7 @@ def ExtractKeywordsFromGroup_Basic_test():
        syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
          'foo bar',
          'zoo goo',
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_Commas_test():
@@ -272,8 +255,7 @@ def ExtractKeywordsFromGroup_Commas_test():
        syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
          'foo, bar,',
          'zoo goo',
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_WithLinksTo_test():
@@ -282,8 +264,7 @@ def ExtractKeywordsFromGroup_WithLinksTo_test():
          'foo bar',
          'zoo goo',
          'links to Statement'
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_KeywordStarts_test():
@@ -292,8 +273,7 @@ def ExtractKeywordsFromGroup_KeywordStarts_test():
          'foo bar',
          'transparent boo baa',
          'zoo goo',
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_KeywordMiddle_test():
@@ -301,8 +281,7 @@ def ExtractKeywordsFromGroup_KeywordMiddle_test():
        syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
          'foo oneline bar',
          'zoo goo',
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_KeywordAssign_test():
@@ -310,8 +289,7 @@ def ExtractKeywordsFromGroup_KeywordAssign_test():
        syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
          'foo end=zoo((^^//)) bar',
          'zoo goo',
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_KeywordAssignAndMiddle_test():
@@ -319,8 +297,7 @@ def ExtractKeywordsFromGroup_KeywordAssignAndMiddle_test():
        syntax_parse._ExtractKeywordsFromGroup( syntax_parse.SyntaxGroup('', [
          'foo end=zoo((^^//)) transparent bar',
          'zoo goo',
-       ] ) )
-     )
+       ] ) ) )
 
 
 def ExtractKeywordsFromGroup_ContainedSyntaxArgAllowed_test():
@@ -329,5 +306,4 @@ def ExtractKeywordsFromGroup_ContainedSyntaxArgAllowed_test():
          'contained foo zoq',
          'contained bar goo',
          'far',
-       ] ) )
-     )
+       ] ) ) )

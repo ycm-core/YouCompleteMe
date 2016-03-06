@@ -34,12 +34,11 @@ sys.path.insert( 1, p.abspath( p.join( DIR_OF_YCMD_THIRD_PARTY,
 
 import argparse
 
+
 def RunFlake8():
   print( 'Running flake8' )
   subprocess.check_call( [
     'flake8',
-    '--select=F,C9',
-    '--max-complexity=10',
     p.join( DIR_OF_THIS_SCRIPT, 'python' )
   ] )
 

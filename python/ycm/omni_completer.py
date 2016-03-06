@@ -33,6 +33,7 @@ OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
 OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
                      ' list when expected.' )
 
+
 class OmniCompleter( Completer ):
   def __init__( self, user_options ):
     super( OmniCompleter, self ).__init__( user_options )

@@ -177,7 +177,8 @@ def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
                          next_sign_id ):
   new_signs = []
   kept_signs = []
-  for buffer_number, line_to_diags in iteritems( buffer_number_to_line_to_diags ):
+  for buffer_number, line_to_diags in iteritems(
+                                            buffer_number_to_line_to_diags ):
     if not vimsupport.BufferIsVisible( buffer_number ):
       continue
 
@@ -253,8 +254,9 @@ def _NormalizeDiagnostic( diag ):
   return diag
 
 
-class _DiagSignPlacement( namedtuple( "_DiagSignPlacement",
-                                      [ 'id', 'line', 'buffer', 'is_error' ] ) ):
+class _DiagSignPlacement(
+                    namedtuple( "_DiagSignPlacement",
+                                [ 'id', 'line', 'buffer', 'is_error' ] ) ):
   # We want two signs that have different ids but the same location to compare
   # equal. ID doesn't matter.
   def __eq__( self, other ):
