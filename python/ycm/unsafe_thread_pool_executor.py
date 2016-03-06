@@ -47,6 +47,7 @@ class _WorkItem(object):
         else:
             self.future.set_result(result)
 
+
 def _worker(executor_reference, work_queue):
     try:
         while True:
@@ -65,6 +66,7 @@ def _worker(executor_reference, work_queue):
             del executor
     except BaseException:
         _base.LOGGER.critical('Exception in worker', exc_info=True)
+
 
 class UnsafeThreadPoolExecutor(_base.Executor):
     def __init__(self, max_workers):
@@ -116,4 +118,3 @@ class UnsafeThreadPoolExecutor(_base.Executor):
             for t in self._threads:
                 t.join()
     shutdown.__doc__ = _base.Executor.shutdown.__doc__
-

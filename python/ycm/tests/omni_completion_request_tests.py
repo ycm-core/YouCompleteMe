@@ -37,7 +37,7 @@ def BuildOmnicompletionRequest( results ):
   request = OmniCompletionRequest( omni_completer, None )
   request.Start()
 
-  return request;
+  return request
 
 
 def Done_AlwaysTrue_test():

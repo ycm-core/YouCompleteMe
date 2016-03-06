@@ -29,6 +29,7 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       HandleServerException )
 from ycmd.responses import ServerError
 
+
 class CompleterAvailableRequest( BaseRequest ):
   def __init__( self, filetypes ):
     super( CompleterAvailableRequest, self ).__init__()

@@ -29,6 +29,7 @@ vim_mock = MockVimModule()
 
 from .. import completion_request
 
+
 class ConvertCompletionResponseToVimDatas_test( object ):
   """ This class tests the
       completion_request._ConvertCompletionResponseToVimDatas method """
