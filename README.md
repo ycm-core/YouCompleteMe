@@ -2333,8 +2333,7 @@ option for details.
 That's a very rare Vim bug most users never encounter. It's fixed in Vim
 7.4.72. Update to that version (or above) to resolve the issue.
 
-### I get `ImportError` exceptions that mention `PyInit_ycm_core` or
-`initycm_core`
+### I get `ImportError` exceptions that mention `PyInit_ycm_core` or `initycm_core`
 
 These errors are caused by building the YCM native libraries for Python 2 and
 trying to load them into a Python 3 process (or the other way around).
