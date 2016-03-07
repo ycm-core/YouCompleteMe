@@ -89,7 +89,7 @@ def SyntaxKeywordsForCurrentBuffer():
   vim.command( 'redir => b:ycm_syntax' )
   vim.command( 'silent! syntax list' )
   vim.command( 'redir END' )
-  syntax_output = vimsupport.GetVariableValue( 'b:ycm_syntax' )
+  syntax_output = vimsupport.VimExpressionToPythonType( 'b:ycm_syntax' )
   return _KeywordsFromSyntaxListOutput( syntax_output )
 
 
