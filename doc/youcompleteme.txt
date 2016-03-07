@@ -124,37 +124,38 @@ Contents ~
  10. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
-  3. I get a linker warning regarding |libpython| on Mac when compiling YCM
-  4. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
-  5. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
-  6. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
-  7. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
-  8. I get a 'E227: mapping already exists for <blah>' error when I start Vim |E227:-mapping-already-exists-for-blah|
-  9. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |GLIBC_2.XX-not-found()|
-  10. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
-  11. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
-  12. Vim segfaults when I use the semantic completer in Ruby files |youcompleteme-vim-segfaults-when-i-use-semantic-completer-in-ruby-files|
-  13. I get 'LONG_BIT definition appears wrong for platform' when compiling |LONG_BIT-definition-appears-wrong-for-platform|
-  14. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
-  15. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
-  16. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
-  17. 'CTRL-U' in insert mode does not work                        |CTRL-sub-U|
-  18. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  19. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
-  20. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  21. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
-  22. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
-  23. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
-  24. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  25. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
-  26. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
-  27. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  28. Install YCM with NeoBundle [55] |youcompleteme-install-ycm-with-neobundle-55|
-  29. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+  3. I get |ImportError| exceptions that mention 'PyInit_ycm_core' or 'initycm_core'
+  4. I get a linker warning regarding |libpython| on Mac when compiling YCM
+  5. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
+  6. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
+  7. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
+  8. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
+  9. I get a 'E227: mapping already exists for <blah>' error when I start Vim |E227:-mapping-already-exists-for-blah|
+  10. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |GLIBC_2.XX-not-found()|
+  11. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
+  12. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
+  13. Vim segfaults when I use the semantic completer in Ruby files |youcompleteme-vim-segfaults-when-i-use-semantic-completer-in-ruby-files|
+  14. I get 'LONG_BIT definition appears wrong for platform' when compiling |LONG_BIT-definition-appears-wrong-for-platform|
+  15. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
+  16. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
+  17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
+  18. 'CTRL-U' in insert mode does not work                        |CTRL-sub-U|
+  19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
+  20. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
+  21. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
+  22. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
+  23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
+  24. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  25. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  26. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
+  27. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
+  28. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
+  29. Install YCM with NeoBundle [55] |youcompleteme-install-ycm-with-neobundle-55|
+  30. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |.tern-sub-project|
-  30. When I start vim I get a runtime error saying 'R6034 An application has made an
+  31. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.|
-  31. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+  32. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
  11. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  12. Contact                                            |youcompleteme-contact|
  13. License                                            |youcompleteme-license|
@@ -393,10 +394,10 @@ Ubuntu Linux x64 ~
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.598 with python2 support. Ubuntu 14.04 and later
-have a Vim that's recent enough. You can see the version of Vim installed by
-running 'vim --version'. If the version is too old, you may need to compile Vim
-from source [24] (don't worry, it's easy).
+Make sure you have Vim 7.3.598 with python2 or python3 support. Ubuntu 14.04
+and later have a Vim that's recent enough. You can see the version of Vim
+installed by running 'vim --version'. If the version is too old, you may need
+to compile Vim from source [24] (don't worry, it's easy).
 
 Install YouCompleteMe with Vundle [19].
 
@@ -407,7 +408,8 @@ will notify you to recompile it. You should then rerun the install process.
 Install development tools and CMake: 'sudo apt-get install build-essential
 cmake'
 
-Make sure you have Python headers installed: 'sudo apt-get install python-dev'.
+Make sure you have Python headers installed: 'sudo apt-get install python-dev
+python3-dev'.
 
 Compiling YCM **with** semantic support for C-family languages:
 >
@@ -457,10 +459,10 @@ Fedora Linux x64 ~
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.598 with python2 support. Fedora 21 and later have a
-Vim that's recent enough. You can see the version of Vim installed by running
-'vim --version'. If the version is too old, you may need to compile Vim from
-source [24] (don't worry, it's easy).
+Make sure you have Vim 7.3.598 with python2 or python3 support. Fedora 21 and
+later have a Vim that's recent enough. You can see the version of Vim installed
+by running 'vim --version'. If the version is too old, you may need to compile
+Vim from source [24] (don't worry, it's easy).
 
 Install YouCompleteMe with Vundle [19].
 
@@ -471,7 +473,8 @@ will notify you to recompile it. You should then rerun the install process.
 Install development tools and CMake: 'sudo dnf install automake gcc gcc-c++
 kernel-devel cmake'
 
-Make sure you have Python headers installed: 'sudo dnf install python-devel'.
+Make sure you have Python headers installed: 'sudo dnf install python-devel
+python3-devel'.
 
 Compiling YCM **with** semantic support for C-family languages:
 >
@@ -524,11 +527,11 @@ provided on a best-effort basis and may not work for you.
 **Important:** we assume that you are using the 'cmd.exe' command prompt and
 that you know how to add an executable to the PATH environment variable.
 
-Make sure you have at least Vim 7.3.598 with python2 support. You can check the
-version by typing ':version' inside Vim. Take note of the Vim architecture,
-i.e. 32 or 64-bit. It will be important when choosing the python2 installer. We
-recommend using a 64-bit client. Don't worry, a frequently updated copy of
-64-bit Vim [25] is available.
+Make sure you have at least Vim 7.3.598 with python2 or python3 support. You
+can check the version by typing ':version' inside Vim. Take note of the Vim
+architecture, i.e. 32 or 64-bit. It will be important when choosing the python2
+installer. We recommend using a 64-bit client. Don't worry, a frequently
+updated copy of 64-bit Vim [25] is available.
 
 Install YouCompleteMe with Vundle [19].
 
@@ -538,7 +541,7 @@ will notify you to recompile it. You should then rerun the install process.
 
 Download and install the following software:
 
-- python2 [26]. Be sure to pick the version corresponding to your Vim
+- python3 [26]. Be sure to pick the version corresponding to your Vim
   architecture. It is _Windows x86-64 MSI installer_ if you are using the Vim
   previously linked.
 
@@ -604,7 +607,7 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
 not officially supported platforms by YCM.
 
-Make sure you have Vim 7.3.598 with python2 support.
+Make sure you have Vim 7.3.598 with python2 or python3 support.
 
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version
 of Vim installed by running 'vim --version'.
@@ -684,7 +687,7 @@ will notify you to recompile it. You should then rerun the install process.
 **Please follow the instructions carefully. Read EVERY WORD.**
 
 1. **Ensure that your version of Vim is _at least_ 7.3.598 _and_ that it has
-   support for python2 scripting**.
+   support for python2 or python3 scripting**.
 
    Inside Vim, type ':version'. Look at the first two to three lines of
    output; it should say 'Vi IMproved X.Y', where X.Y is the major version
@@ -696,11 +699,11 @@ will notify you to recompile it. You should then rerun the install process.
    from source [24] (don't worry, it's easy).
 
    After you have made sure that you have Vim 7.3.598+, type the following
-   in Vim: ":echo has('python')". The output should be 1. If it's 0, then
-   get a version of Vim with Python support.
+   in Vim: ":echo has('python') || has('python3')". The output should be 1.
+   If it's 0, then get a version of Vim with Python support.
 
    On Windows, check also if your Vim architecture is 32 or 64-bit. This is
-   critical because it must match the python2 and the YCM libraries
+   critical because it must match the python and the YCM libraries
    architectures. We recommend using a 64-bit Vim.
 
 2. **Install YCM** with Vundle [19] (or Pathogen [30], but Vundle is a
@@ -729,8 +732,8 @@ will notify you to recompile it. You should then rerun the install process.
    the upstream compiled binaries. Random things may break. Save yourself
    the hassle and use the upstream pre-built libclang.
 
-4. **Compile the 'ycm_core' libraries** that YCM needs. These libs are the
-   C++ engines that YCM uses to get fast completions.
+4. **Compile the 'ycm_core' library** that YCM needs. This library is the
+   C++ engine that YCM uses to get fast completions.
 
    You will need to have 'cmake' installed in order to generate the required
    makefiles. Linux users can install cmake with their package manager
@@ -740,9 +743,9 @@ will notify you to recompile it. You should then rerun the install process.
 
    On a Unix OS, you need to make sure you have Python headers installed. On
    a Debian-like Linux distro, this would be 'sudo apt-get install python-
-   dev'. On Mac they should already be present.
+   dev python3-dev'. On Mac they should already be present.
 
-   On Windows, you need to download and install python2 [26]. Pick the
+   On Windows, you need to download and install python3 [26]. Pick the
    version corresponding to your Vim architecture. You will also need
    Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by installing
    Visual Studio [27]. MSVC 11 (Visual Studio 2012), 12 (2013), and 14
@@ -1179,10 +1182,10 @@ Python Semantic Completion ~
 
 Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the jedi [6] library which
-supports a variety of python versions (2.6, 2.7, 3.2, 3.3 or 3.4) as long as it
-runs in the corresponding python interpreter. By default YCM runs jedi [6] with
-the same python interpreter used by the ycmd server [34], so if you would like
-to use a different interpreter, use the following option specifying the python
+supports a variety of python versions (2.6, 2.7, 3.2+) as long as it runs in
+the corresponding python interpreter. By default YCM runs jedi [6] with the
+same python interpreter used by the ycmd server [34], so if you would like to
+use a different interpreter, use the following option specifying the python
 binary to use. For example, to provide Python 3 completion in your project,
 set:
 >
@@ -2533,8 +2536,8 @@ The *g:ycm_python_binary_path* option
 
 This option specifies the Python interpreter to use to run the jedi [6]
 completion library. Specify the python interpreter to use to get completions.
-By default the python under which ycmd [34] runs is used (ycmd [34] only runs
-under Python 2.6 or 2.7).
+By default the python under which ycmd [34] runs is used (ycmd [34] runs on
+Python 2.6, 2.7 or 3.3+).
 
 Default: "''"
 >
@@ -2566,6 +2569,25 @@ On very rare occasions Vim crashes when I tab through the completion menu ~
 
 That's a very rare Vim bug most users never encounter. It's fixed in Vim
 7.4.72. Update to that version (or above) to resolve the issue.
+
+-------------------------------------------------------------------------------
+I get *ImportError* exceptions that mention 'PyInit_ycm_core' or 'initycm_core'
+
+These errors are caused by building the YCM native libraries for Python 2 and
+trying to load them into a Python 3 process (or the other way around).
+
+For instance, if building for Python 2 but loading in Python 3:
+>
+  ImportError: dynamic module does not define init function (PyInit_ycm_core)
+<
+If building for Python 3 but loading in Python 2:
+>
+  ImportError: dynamic module does not define init function (initycm_core)
+<
+Setting the |g:ycm_path_to_python_interpreter| option to force the use of a
+specific Python interpreter for 'ycmd' is usually the easiest way to solve the
+problem. Common values for that option are '/usr/bin/python' and
+'/usr/bin/python3'.
 
 -------------------------------------------------------------------------------
 I get a linker warning regarding *libpython* on Mac when compiling YCM
@@ -2998,10 +3020,10 @@ entries from the path.
             *youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true*
 I hear that YCM only supports Python 2, is that true? ~
 
-No. The Vim client and the ycmd server [34] only run under Python 2 but if you
-work on a Python 3 project then just set the |g:ycm_python_binary_path| to the
-Python interpreter you use for your project and you will get completions for
-that version of Python.
+**No.** Both the Vim client and the ycmd server [34] run on Python 2 or 3. If
+you work on a Python 3 project, you may need to set |g:ycm_python_binary_path|
+to the Python interpreter you use for your project to get completions for that
+version of Python.
 
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*
