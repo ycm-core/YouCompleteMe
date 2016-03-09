@@ -256,10 +256,11 @@ class YouCompleteMe( object ):
 
 
   def OnFileReadyToParse( self ):
-    self._omnicomp.OnFileReadyToParse( None )
-
     if not self.IsServerAlive():
       self._NotifyUserIfServerCrashed()
+      return
+
+    self._omnicomp.OnFileReadyToParse( None )
 
     extra_data = {}
     self._AddTagsFilesIfNeeded( extra_data )
