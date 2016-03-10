@@ -500,7 +500,7 @@ def EscapeForVim( text ):
 
 
 def CurrentFiletypes():
-  return vim.eval( "&filetype" ).split( '.' )
+  return VimExpressionToPythonType( "&filetype" ).split( '.' )
 
 
 def FiletypesForBuffer( buffer_object ):
