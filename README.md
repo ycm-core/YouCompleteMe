@@ -180,9 +180,9 @@ The following additional language support options are available:
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `./install.py`
+  `--tern-completer` when calling `./install.py`
 - Rust support: install [rustc and cargo][rust-install] and add
-  `--racer-completer` to `./install.py`
+  `--racer-completer` when calling `./install.py`
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `npm`, `go`, `mono`, `rust`,
@@ -239,9 +239,9 @@ The following additional language support options are available:
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `./install.py`
+  `--tern-completer` when calling `./install.py`
 - Rust support: install [rustc and cargo][rust-install] and add
-  `--racer-completer` to `./install.py`
+  `--racer-completer` when calling `./install.py`
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `npm`, `go`, `mono`, `rust`,
@@ -298,9 +298,9 @@ The following additional language support options are available:
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `./install.py`
+  `--tern-completer` when calling `./install.py`
 - Rust support: install [rustc and cargo][rust-install] and add
-  `--racer-completer` to `./install.py`
+  `--racer-completer` when calling `./install.py`
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `npm`, `go`, `mono`, `rust`,
@@ -370,9 +370,9 @@ The following additional language support options are available:
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `install.py`.
+  `--tern-completer` when calling `install.py`.
 - Rust support: install [rustc and cargo][rust-install] and add
-  `--racer-completer` to `install.py`.
+  `--racer-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `npm`, `go`, `mono`, `rust`,
@@ -436,9 +436,9 @@ The following additional language support options are available:
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [nodejs and npm][npm-install] and add
-  `--tern-completer` to `./install.py`
+  `--tern-completer` when calling `./install.py`
 - Rust support: install [rustc and cargo][rust-install] and add
-  `--racer-completer` to `./install.py`
+  `--racer-completer` when calling `./install.py`
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `npm`, `go`, `mono`, `rust`,
