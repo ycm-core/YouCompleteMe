@@ -61,7 +61,7 @@ def MockGetBufferWindowNumber( buffer_number ):
 def MockVimEval( value ):
   if value == "g:ycm_min_num_of_chars_for_completion":
     return 0
-  if value == "g:ycm_path_to_python_interpreter":
+  if value == "g:ycm_server_python_interpreter":
     return ''
   if value == "tempname()":
     return '_TEMP_FILE_'

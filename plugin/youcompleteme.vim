@@ -126,8 +126,9 @@ let g:ycm_server_keep_logfiles =
 let g:ycm_extra_conf_vim_data =
       \ get( g:, 'ycm_extra_conf_vim_data', [] )
 
-let g:ycm_path_to_python_interpreter =
-      \ get( g:, 'ycm_path_to_python_interpreter', '' )
+let g:ycm_server_python_interpreter =
+      \ get( g:, 'ycm_server_python_interpreter',
+      \ get( g:, 'ycm_path_to_python_interpreter', '' ) )
 
 let g:ycm_show_diagnostics_ui =
       \ get( g:, 'ycm_show_diagnostics_ui',

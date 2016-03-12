@@ -54,13 +54,13 @@ def Memoize( obj ):
 def PathToPythonInterpreter():
   from ycmd import utils
 
-  python_interpreter = vim.eval( 'g:ycm_path_to_python_interpreter' )
+  python_interpreter = vim.eval( 'g:ycm_server_python_interpreter' )
 
   if python_interpreter:
     if IsPythonVersionCorrect( python_interpreter ):
       return python_interpreter
 
-    raise RuntimeError( "Path in 'g:ycm_path_to_python_interpreter' option "
+    raise RuntimeError( "Path in 'g:ycm_server_python_interpreter' option "
                         "does not point to a valid Python 2.6+ or 3.3+." )
 
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
@@ -86,7 +86,7 @@ def PathToPythonInterpreter():
     return python_interpreter
 
   raise RuntimeError( "Cannot find Python 2.6+ or 3.3+. You can set its path "
-                      "using the 'g:ycm_path_to_python_interpreter' "
+                      "using the 'g:ycm_server_python_interpreter' "
                       "option." )
 
 
