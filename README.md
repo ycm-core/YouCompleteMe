@@ -1898,7 +1898,7 @@ Default: `[]`
 let g:ycm_extra_conf_vim_data = []
 ```
 
-### The `g:ycm_path_to_python_interpreter` option
+### The `g:ycm_server_python_interpreter` option
 
 YCM will by default search for an appropriate Python interpreter on your system.
 You can use this option to override that behavior and force the use of a
@@ -1911,7 +1911,7 @@ Vim.
 Default: `''`
 
 ```viml
-let g:ycm_path_to_python_interpreter = ''
+let g:ycm_server_python_interpreter = ''
 ```
 
 ### The `g:ycm_server_keep_logfiles` option
@@ -2351,7 +2351,7 @@ If building for Python 3 but loading in Python 2:
 ImportError: dynamic module does not define init function (initycm_core)
 ```
 
-Setting the `g:ycm_path_to_python_interpreter` option to force the use of a
+Setting the `g:ycm_server_python_interpreter` option to force the use of a
 specific Python interpreter for `ycmd` is usually the easiest way to solve the
 problem. Common values for that option are `/usr/bin/python` and
 `/usr/bin/python3`.

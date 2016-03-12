@@ -96,7 +96,7 @@ Contents ~
   19. The |g:ycm_collect_identifiers_from_tags_files| option
   20. The |g:ycm_seed_identifiers_with_syntax| option
   21. The |g:ycm_extra_conf_vim_data| option
-  22. The |g:ycm_path_to_python_interpreter| option
+  22. The |g:ycm_server_python_interpreter| option
   23. The |g:ycm_server_keep_logfiles| option
   24. The |g:ycm_server_log_level| option
   25. The |g:ycm_auto_start_csharp_server| option
@@ -846,8 +846,8 @@ will notify you to recompile it. You should then rerun the install process.
    -g typescript' after successfully installing nodejs and npm [22].
 
 9. JavaScript support: Install nodejs and npm [22]. Then navigate to
-   'YouCompleteMe/third_party/ycmd/third_party/tern' and run 'npm install
-   --production'
+   'YouCompleteMe/third_party/ycmd/third_party/tern_runtime' and run 'npm
+   install --production'
 
 10. Rust support: Install rustc and cargo [23]. Navigate to
     'YouCompleteMe/third_party/ycmd/third_party/racerd' and run 'cargo
@@ -2159,7 +2159,7 @@ Default: '[]'
   let g:ycm_extra_conf_vim_data = []
 <
 -------------------------------------------------------------------------------
-The *g:ycm_path_to_python_interpreter* option
+The *g:ycm_server_python_interpreter* option
 
 YCM will by default search for an appropriate Python interpreter on your
 system. You can use this option to override that behavior and force the use of
@@ -2171,7 +2171,7 @@ Vim.
 
 Default: "''"
 >
-  let g:ycm_path_to_python_interpreter = ''
+  let g:ycm_server_python_interpreter = ''
 <
 -------------------------------------------------------------------------------
 The *g:ycm_server_keep_logfiles* option
@@ -2584,7 +2584,7 @@ If building for Python 3 but loading in Python 2:
 >
   ImportError: dynamic module does not define init function (initycm_core)
 <
-Setting the |g:ycm_path_to_python_interpreter| option to force the use of a
+Setting the |g:ycm_server_python_interpreter| option to force the use of a
 specific Python interpreter for 'ycmd' is usually the easiest way to solve the
 problem. Common values for that option are '/usr/bin/python' and
 '/usr/bin/python3'.
