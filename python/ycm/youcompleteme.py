@@ -30,6 +30,7 @@ import json
 import re
 import signal
 import base64
+from itertools import islice
 from subprocess import PIPE
 from tempfile import NamedTemporaryFile
 from ycm import paths, vimsupport
@@ -77,13 +78,28 @@ PatchNoProxy()
 signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 HMAC_SECRET_LENGTH = 16
-SERVER_CRASH_MESSAGE_STDERR_FILE = (
-  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
+SERVER_SHUTDOWN_MESSAGE = (
+  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer')." )
+STDERR_FILE_MESSAGE = (
   "Run ':YcmToggleLogs stderr' to check the logs." )
-SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED = (
-  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
+STDERR_FILE_DELETED_MESSAGE = (
   "Logfile was deleted; set 'g:ycm_server_keep_logfiles' to see errors "
   "in the future." )
+CORE_MISSING_MESSAGE = (
+  'YCM core library not detected; you need to compile YCM before using it. '
+  'Read the docs!' )
+CORE_PYTHON2_MESSAGE = (
+  "YCM core library compiled with Python 2 but loaded with Python 3. "
+  "Set the 'g:ycm_server_python_interpreter' option to a Python 2 "
+  "interpreter path." )
+CORE_PYTHON3_MESSAGE = (
+  "YCM core library compiled with Python 3 but loaded with Python 2. "
+  "Set the 'g:ycm_server_python_interpreter' option to a Python 3 "
+  "interpreter path." )
+CORE_OUTDATED_MESSAGE = (
+  'YCM core library too old, PLEASE RECOMPILE.' )
+VIM_HISTORY_MESSAGE = (
+  "Run ':messages' for details." )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
 
@@ -158,12 +174,34 @@ class YouCompleteMe( object ):
   def _NotifyUserIfServerCrashed( self ):
     if self._user_notified_about_crash or self.IsServerAlive():
       return
+
     self._user_notified_about_crash = True
-    try:
-      vimsupport.CheckFilename( self._server_stderr )
-      vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE )
-    except RuntimeError:
-      vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED )
+
+    return_code = self._server_popen.poll()
+    if return_code == 1:
+      try:
+        vimsupport.CheckFilename( self._server_stderr )
+        return vimsupport.PostVimMessage(
+          SERVER_SHUTDOWN_MESSAGE + ' ' + STDERR_FILE_MESSAGE )
+      except RuntimeError:
+        return vimsupport.PostVimMessage(
+          SERVER_SHUTDOWN_MESSAGE + ' ' + STDERR_FILE_DELETED_MESSAGE )
+    if return_code == 3:
+      return vimsupport.PostVimMessage(
+        SERVER_SHUTDOWN_MESSAGE + ' ' + CORE_MISSING_MESSAGE )
+    if return_code == 4:
+      return vimsupport.PostVimMessage(
+        SERVER_SHUTDOWN_MESSAGE + ' ' + CORE_PYTHON2_MESSAGE )
+    if return_code == 5:
+      return vimsupport.PostVimMessage(
+        SERVER_SHUTDOWN_MESSAGE + ' ' + CORE_PYTHON3_MESSAGE )
+    if return_code == 6:
+      return vimsupport.PostVimMessage(
+        SERVER_SHUTDOWN_MESSAGE + ' ' + CORE_OUTDATED_MESSAGE )
+    for line in islice( self._server_popen.stderr, 30 ):
+      vimsupport.PostVimMessage( line.rstrip() )
+    vimsupport.PostVimMessage(
+      SERVER_SHUTDOWN_MESSAGE + ' ' + VIM_HISTORY_MESSAGE )
 
 
   def ServerPid( self ):
