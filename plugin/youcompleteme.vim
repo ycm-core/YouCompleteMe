@@ -42,43 +42,6 @@ elseif !has( 'python' ) && !has( 'python3' )
   finish
 endif
 
-let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
-let s:python_folder_path = s:script_folder_path . '/../python/'
-let s:ycmd_folder_path = s:script_folder_path . '/../third_party/ycmd/'
-
-function! s:YcmLibsPresentIn( path_prefix )
-  if filereadable(a:path_prefix . 'ycm_core.so')
-    return 1
-  elseif filereadable(a:path_prefix . 'ycm_core.pyd')
-    return 1
-  elseif filereadable(a:path_prefix . 'ycm_core.dll')
-    return 1
-  endif
-  return 0
-endfunction
-
-if s:YcmLibsPresentIn( s:python_folder_path )
-  echohl WarningMsg |
-        \ echomsg "YCM libraries found in old YouCompleteMe/python location; " .
-        \ "please RECOMPILE YCM." |
-        \ echohl None
-  call s:restore_cpo()
-  finish
-endif
-
-let g:ycm_check_if_ycm_core_present =
-      \ get( g:, 'ycm_check_if_ycm_core_present', 1 )
-
-if g:ycm_check_if_ycm_core_present &&
-      \ !s:YcmLibsPresentIn( s:ycmd_folder_path )
-  echohl WarningMsg |
-        \ echomsg "ycm_core.[so|pyd|dll] not detected; you need to compile " .
-        \ "YCM before using it. Read the docs!" |
-        \ echohl None
-  call s:restore_cpo()
-  finish
-endif
-
 let g:loaded_youcompleteme = 1
 
 " NOTE: Most defaults are in third_party/ycmd/ycmd/default_settings.json. They
