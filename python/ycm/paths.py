@@ -133,7 +133,3 @@ def IsPythonVersionCorrect( path ):
 
 def PathToServerScript():
   return os.path.join( DIR_OF_YCMD, 'ycmd' )
-
-
-def PathToCheckCoreVersion():
-  return os.path.join( DIR_OF_YCMD, 'check_core_version.py' )
