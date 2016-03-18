@@ -34,7 +34,9 @@ from subprocess import PIPE
 from tempfile import NamedTemporaryFile
 from ycm import paths, vimsupport
 from ycmd import utils
+from ycmd import server_utils
 from ycmd.request_wrap import RequestWrap
+from ycmd.responses import ServerError
 from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
@@ -47,7 +49,6 @@ from ycm.client.completion_request import ( CompletionRequest,
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
-from ycmd.responses import ServerError
 
 try:
   from UltiSnips import UltiSnips_Manager
@@ -77,13 +78,29 @@ PatchNoProxy()
 signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 HMAC_SECRET_LENGTH = 16
-SERVER_CRASH_MESSAGE_STDERR_FILE = (
-  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
+SERVER_SHUTDOWN_MESSAGE = (
+  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer')." )
+STDERR_FILE_MESSAGE = (
   "Run ':YcmToggleLogs stderr' to check the logs." )
-SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED = (
-  "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
+STDERR_FILE_DELETED_MESSAGE = (
   "Logfile was deleted; set 'g:ycm_server_keep_logfiles' to see errors "
   "in the future." )
+CORE_UNEXPECTED_MESSAGE = (
+  'Unexpected error while loading the YCM core library.' )
+CORE_MISSING_MESSAGE = (
+  'YCM core library not detected; you need to compile YCM before using it. '
+  'Follow the instructions in the documentation.' )
+CORE_PYTHON2_MESSAGE = (
+  "YCM core library compiled for Python 2 but loaded in Python 3. "
+  "Set the 'g:ycm_server_python_interpreter' option to a Python 2 "
+  "interpreter path." )
+CORE_PYTHON3_MESSAGE = (
+  "YCM core library compiled for Python 3 but loaded in Python 2. "
+  "Set the 'g:ycm_server_python_interpreter' option to a Python 3 "
+  "interpreter path." )
+CORE_OUTDATED_MESSAGE = (
+  'YCM core library too old; PLEASE RECOMPILE by running the install.py '
+  'script. See the documentation for more details.' )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
 
@@ -159,11 +176,28 @@ class YouCompleteMe( object ):
     if self._user_notified_about_crash or self.IsServerAlive():
       return
     self._user_notified_about_crash = True
+
     try:
       vimsupport.CheckFilename( self._server_stderr )
-      vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE )
+      stderr_message = STDERR_FILE_MESSAGE
     except RuntimeError:
-      vimsupport.PostVimMessage( SERVER_CRASH_MESSAGE_STDERR_FILE_DELETED )
+      stderr_message = STDERR_FILE_DELETED_MESSAGE
+
+    message = SERVER_SHUTDOWN_MESSAGE
+    return_code = self._server_popen.poll()
+    if return_code == server_utils.CORE_UNEXPECTED_STATUS:
+      message += ' ' + CORE_UNEXPECTED_MESSAGE + ' ' + stderr_message
+    elif return_code == server_utils.CORE_MISSING_STATUS:
+      message += ' ' + CORE_MISSING_MESSAGE
+    elif return_code == server_utils.CORE_PYTHON2_STATUS:
+      message += ' ' + CORE_PYTHON2_MESSAGE
+    elif return_code == server_utils.CORE_PYTHON3_STATUS:
+      message += ' ' + CORE_PYTHON3_MESSAGE
+    elif return_code == server_utils.CORE_OUTDATED_STATUS:
+      message += ' ' + CORE_OUTDATED_MESSAGE
+    else:
+      message += ' ' + stderr_message
+    vimsupport.PostVimMessage( message )
 
 
   def ServerPid( self ):
