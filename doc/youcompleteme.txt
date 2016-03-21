@@ -358,18 +358,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to './install.py'
+- C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer'
+- Go support: ensure go is installed and add '--gocode-completer' when
+  calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
   SDK with 'npm install -g typescript'.
 
 - JavaScript support: install nodejs and npm [22] and add '--tern-completer'
-  when calling './install.py'
+  when calling './install.py'.
 
 - Rust support: install rustc and cargo [23] and add '--racer-completer' when
-  calling './install.py'
+  calling './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
 install with all language features, ensure 'npm', 'go', 'mono', 'rust', and
@@ -423,18 +424,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to './install.py'
+- C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer'
+- Go support: ensure go is installed and add '--gocode-completer' when
+  calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
   SDK with 'npm install -g typescript'.
 
 - JavaScript support: install nodejs and npm [22] and add '--tern-completer'
-  when calling './install.py'
+  when calling './install.py'.
 
 - Rust support: install rustc and cargo [23] and add '--racer-completer' when
-  calling './install.py'
+  calling './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
 install with all language features, ensure 'npm', 'go', 'mono', 'rust', and
@@ -488,18 +490,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to './install.py'
+- C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer'
+- Go support: ensure go is installed and add '--gocode-completer' when
+  calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
   SDK with 'npm install -g typescript'.
 
 - JavaScript support: install nodejs and npm [22] and add '--tern-completer'
-  when calling './install.py'
+  when calling './install.py'.
 
 - Rust support: install rustc and cargo [23] and add '--racer-completer' when
-  calling './install.py'
+  calling './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
 install with all language features, ensure 'npm', 'go', 'mono', 'rust', and
@@ -565,10 +568,11 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to 'install.py'. Be sure that the
-  build utility 'msbuild' is in your PATH [29].
+- C# support: add '--omnisharp-completer' when calling 'install.py'. Be sure
+  that the build utility 'msbuild' is in your PATH [29].
 
-- Go support: ensure go is installed and add '--gocode-completer'.
+- Go support: ensure go is installed and add '--gocode-completer' when
+  calling 'install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
   SDK with 'npm install -g typescript'.
@@ -637,18 +641,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' to './install.py'
+- C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer'
+- Go support: ensure go is installed and add '--gocode-completer' when
+  calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
   SDK with 'npm install -g typescript'.
 
 - JavaScript support: install nodejs and npm [22] and add '--tern-completer'
-  when calling './install.py'
+  when calling './install.py'.
 
 - Rust support: install rustc and cargo [23] and add '--racer-completer' when
-  calling './install.py'
+  calling './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
 install with all language features, ensure 'npm', 'go', 'mono', 'rust', and
@@ -846,8 +851,8 @@ will notify you to recompile it. You should then rerun the install process.
    -g typescript' after successfully installing nodejs and npm [22].
 
 9. JavaScript support: Install nodejs and npm [22]. Then navigate to
-   'YouCompleteMe/third_party/ycmd/third_party/tern' and run 'npm install
-   --production'
+   'YouCompleteMe/third_party/ycmd/third_party/tern_runtime' and run 'npm
+   install --production'
 
 10. Rust support: Install rustc and cargo [23]. Navigate to
     'YouCompleteMe/third_party/ycmd/third_party/racerd' and run 'cargo
