@@ -461,7 +461,7 @@ Fedora Linux x64 ~
 Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you.
 
-Make sure you have Vim 7.3.598 with python2 or python3 support. Fedora 21 and
+Make sure you have Vim 7.3.598 with Python 2 or Python 3 support. Fedora 21 and
 later have a Vim that's recent enough. You can see the version of Vim installed
 by running 'vim --version'. If the version is too old, you may need to compile
 Vim from source [24] (don't worry, it's easy).
@@ -530,11 +530,13 @@ provided on a best-effort basis and may not work for you.
 **Important:** we assume that you are using the 'cmd.exe' command prompt and
 that you know how to add an executable to the PATH environment variable.
 
-Make sure you have at least Vim 7.3.598 with python2 or python3 support. You
-can check the version by typing ':version' inside Vim. Take note of the Vim
-architecture, i.e. 32 or 64-bit. It will be important when choosing the python2
-installer. We recommend using a 64-bit client. Don't worry, a frequently
-updated copy of 64-bit Vim [25] is available.
+Make sure you have at least Vim 7.3.598 with Python 2 or Python 3 support. You
+can check the version and which Python is supported by typing ':version' inside
+Vim. Look at the features included: '+python/dyn' for Python 2 and
+'+python3/dyn' for Python 3. Take note of the Vim architecture, i.e. 32 or
+64-bit. It will be important when choosing the Python installer. We recommend
+using a 64-bit client. Daily updated copies of 32-bit and 64-bit Vim with
+Python 2 and Python 3 support [25] are available.
 
 Install YouCompleteMe with Vundle [19].
 
@@ -544,9 +546,9 @@ will notify you to recompile it. You should then rerun the install process.
 
 Download and install the following software:
 
-- python3 [26]. Be sure to pick the version corresponding to your Vim
-  architecture. It is _Windows x86-64 MSI installer_ if you are using the Vim
-  previously linked.
+- Python 2 or Python 3 [26]. Be sure to pick the version corresponding to
+  your Vim architecture. It is _Windows x86_ for a 32-bit Vim and _Windows
+  x86-64_ for a 64-bit Vim. We recommend installing Python 3.
 
 - CMake [21]. Add CMake executable to the PATH environment variable.
 
@@ -611,7 +613,7 @@ Please refer to the full Installation Guide below; the following commands are
 provided on a best-effort basis and may not work for you. OpenBSD / FreeBSD are
 not officially supported platforms by YCM.
 
-Make sure you have Vim 7.3.598 with python2 or python3 support.
+Make sure you have Vim 7.3.598 with Python 2 or Python 3 support.
 
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version
 of Vim installed by running 'vim --version'.
@@ -692,7 +694,7 @@ will notify you to recompile it. You should then rerun the install process.
 **Please follow the instructions carefully. Read EVERY WORD.**
 
 1. **Ensure that your version of Vim is _at least_ 7.3.598 _and_ that it has
-   support for python2 or python3 scripting**.
+   support for Python 2 or Python 3 scripting**.
 
    Inside Vim, type ':version'. Look at the first two to three lines of
    output; it should say 'Vi IMproved X.Y', where X.Y is the major version
@@ -708,7 +710,7 @@ will notify you to recompile it. You should then rerun the install process.
    If it's 0, then get a version of Vim with Python support.
 
    On Windows, check also if your Vim architecture is 32 or 64-bit. This is
-   critical because it must match the python and the YCM libraries
+   critical because it must match the Python and the YCM libraries
    architectures. We recommend using a 64-bit Vim.
 
 2. **Install YCM** with Vundle [19] (or Pathogen [30], but Vundle is a
@@ -750,11 +752,11 @@ will notify you to recompile it. You should then rerun the install process.
    a Debian-like Linux distro, this would be 'sudo apt-get install python-
    dev python3-dev'. On Mac they should already be present.
 
-   On Windows, you need to download and install python3 [26]. Pick the
-   version corresponding to your Vim architecture. You will also need
-   Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by installing
-   Visual Studio [27]. MSVC 11 (Visual Studio 2012), 12 (2013), and 14
-   (2015) are officially supported.
+   On Windows, you need to download and install Python 2 or Python 3 [26].
+   Pick the version corresponding to your Vim architecture. You will also
+   need Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by
+   installing Visual Studio [27]. MSVC 11 (Visual Studio 2012), 12 (2013),
+   and 14 (2015) are officially supported.
 
    Here we'll assume you installed YCM with Vundle. That means that the top-
    level YCM directory is in '~/.vim/bundle/YouCompleteMe'.
@@ -1187,10 +1189,10 @@ Python Semantic Completion ~
 
 Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the jedi [6] library which
-supports a variety of python versions (2.6, 2.7, 3.2+) as long as it runs in
-the corresponding python interpreter. By default YCM runs jedi [6] with the
-same python interpreter used by the ycmd server [34], so if you would like to
-use a different interpreter, use the following option specifying the python
+supports a variety of Python versions (2.6, 2.7, 3.2+) as long as it runs in
+the corresponding Python interpreter. By default YCM runs jedi [6] with the
+same Python interpreter used by the ycmd server [34], so if you would like to
+use a different interpreter, use the following option specifying the Python
 binary to use. For example, to provide Python 3 completion in your project,
 set:
 >
@@ -2540,8 +2542,8 @@ Default: 1000
 The *g:ycm_python_binary_path* option
 
 This option specifies the Python interpreter to use to run the jedi [6]
-completion library. Specify the python interpreter to use to get completions.
-By default the python under which ycmd [34] runs is used (ycmd [34] runs on
+completion library. Specify the Python interpreter to use to get completions.
+By default the Python under which ycmd [34] runs is used (ycmd [34] runs on
 Python 2.6, 2.7 or 3.3+).
 
 Default: "''"
@@ -3089,7 +3091,7 @@ References ~
 [22] https://docs.npmjs.com/getting-started/installing-node
 [23] https://www.rust-lang.org/
 [24] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-[25] https://bintray.com/veegee/generic/vim_x64
+[25] https://bintray.com/micbou/generic/vim
 [26] https://www.python.org/downloads/windows/
 [27] https://www.visualstudio.com/products/free-developer-offers-vs.aspx
 [28] http://www.7-zip.org/download.html
