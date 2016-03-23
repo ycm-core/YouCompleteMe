@@ -1222,13 +1222,14 @@ def OpenFilename_test( vim_current, vim_command ):
   ] )
 
 
+@patch( 'vim.eval', return_value = 'utf8' )
 @patch( 'ycm.vimsupport.BufferModified', side_effect = [ True ] )
 @patch( 'ycm.vimsupport.FiletypesForBuffer', side_effect = [ [ 'cpp' ] ] )
 def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
   mock_buffer = MagicMock()
   mock_buffer.name = os.path.realpath( 'filename' )
   mock_buffer.number = 1
-  mock_buffer.__iter__.return_value = [ u'abc', ToBytes( u'fДa' ) ]
+  mock_buffer.__iter__.return_value = [ ToBytes( u'abc' ), ToBytes( u'fДa' ) ]
 
   with patch( 'vim.buffers', [ mock_buffer ] ):
     assert_that( vimsupport.GetUnsavedAndCurrentBufferData(),
@@ -1236,25 +1237,38 @@ def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
                             has_entry( u'contents', u'abc\nfДa\n' ) ) )
 
 
-# NOTE: Vim returns byte offsets for columns, not actual character columns. This
-# makes 'ДД' have 4 columns: column 0, column 2 and column 4.
+@patch( 'vim.eval', return_value = 'utf8' )
+@patch( 'vim.current.line', ToBytes( 'ДДaa' ) )
+@patch( 'vim.current.window.cursor', [ 1, 4 ] )
+def CurrentColumn_Utf8Encoding_test( *args ):
+  eq_( vimsupport.CurrentColumn(), 2 )
+
+
+@patch( 'vim.eval', return_value = 'latin1' )
+@patch( 'vim.current.line', ToBytes( 'ДДaa' ) ) # Ð”Ð”aa in latin1 encoding
+@patch( 'vim.current.window.cursor', [ 1, 4 ] )
+def CurrentColumn_Latin1Encoding_test( *args ):
+  eq_( vimsupport.CurrentColumn(), 4 )
+
+
+@patch( 'vim.eval', return_value = 'utf8' )
+@patch( 'vim.current.line', ToBytes( 'fДa' ) )
+def CurrentLineContents_EncodedUnicode_test( *args ):
+  eq_( vimsupport.CurrentLineContents(), u'fДa' )
+
+
+@patch( 'vim.eval', return_value = 'utf8' )
 @patch( 'vim.current.line', ToBytes( 'ДДaa' ) )
 @patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 4 ] )
 def TextBeforeCursor_EncodedUnicode_test( *args ):
-  eq_( vimsupport.TextBeforeCursor(), u'ДД' )
+  eq_( vimsupport.TextBeforeCursor(), u'ДДaa' )
 
 
-# NOTE: Vim returns byte offsets for columns, not actual character columns. This
-# makes 'ДД' have 4 columns: column 0, column 2 and column 4.
+@patch( 'vim.eval', return_value = 'utf8' )
 @patch( 'vim.current.line', ToBytes( 'aaДД' ) )
 @patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 2 ] )
 def TextAfterCursor_EncodedUnicode_test( *args ):
   eq_( vimsupport.TextAfterCursor(), u'ДД' )
-
-
-@patch( 'vim.current.line', ToBytes( 'fДa' ) )
-def CurrentLineContents_EncodedUnicode_test( *args ):
-  eq_( vimsupport.CurrentLineContents(), u'fДa' )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
