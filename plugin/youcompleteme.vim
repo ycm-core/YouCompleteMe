@@ -165,10 +165,14 @@ let g:ycm_disable_for_files_larger_than_kb =
 
 " On-demand loading. Let's use the autoload folder and not slow down vim's
 " startup procedure.
-augroup youcompletemeStart
-  autocmd!
-  autocmd VimEnter * call youcompleteme#Enable()
-augroup END
+if has( 'vim_starting' ) " loading at startup
+  augroup youcompletemeStart
+    autocmd!
+    autocmd VimEnter * call youcompleteme#Enable()
+  augroup END
+else " manual loading with :packadd
+  call youcompleteme#Enable()
+endif
 
 " This is basic vim plugin boilerplate
 call s:restore_cpo()
