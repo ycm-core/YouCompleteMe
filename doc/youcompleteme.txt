@@ -138,28 +138,30 @@ Contents ~
   14. I get 'LONG_BIT definition appears wrong for platform' when compiling |LONG_BIT-definition-appears-wrong-for-platform|
   15. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
   16. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
-  17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
-  18. 'CTRL-U' in insert mode does not work                        |CTRL-sub-U|
-  19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  20. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
-  21. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  22. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
-  23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
-  24. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
-  25. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  26. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
-  27. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
-  28. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  29. Install YCM with NeoBundle [55] |youcompleteme-install-ycm-with-neobundle-55|
-  30. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+  17. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |Fatal-Python-error:-PyThreadState_Get:-no-current-thread|
+ 11. |install.py| says python must be compiled with '--enable-framework'. Wat?
+  1. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
+  2. 'CTRL-U' in insert mode does not work                         |CTRL-sub-U|
+  3. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
+  4. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
+  5. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
+  6. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
+  7. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
+  8. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  9. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  10. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
+  11. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
+  12. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
+  13. Install YCM with NeoBundle [55] |youcompleteme-install-ycm-with-neobundle-55|
+  14. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |.tern-sub-project|
-  31. When I start vim I get a runtime error saying 'R6034 An application has made an
+  15. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.|
-  32. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
- 11. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
- 12. Contact                                            |youcompleteme-contact|
- 13. License                                            |youcompleteme-license|
- 14. References                                      |youcompleteme-references|
+  16. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+ 12. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
+ 13. Contact                                            |youcompleteme-contact|
+ 14. License                                            |youcompleteme-license|
+ 15. References                                      |youcompleteme-references|
 
 ===============================================================================
                                                    *youcompleteme-introduction*
@@ -570,20 +572,20 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' when calling 'install.py'. Be sure
+- C# support: add '--omnisharp-completer' when calling |install.py|. Be sure
   that the build utility 'msbuild' is in your PATH [29].
 
 - Go support: ensure go is installed and add '--gocode-completer' when
-  calling 'install.py'.
+  calling |install.py|.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
   SDK with 'npm install -g typescript'.
 
 - JavaScript support: install nodejs and npm [22] and add '--tern-completer'
-  when calling 'install.py'.
+  when calling |install.py|.
 
 - Rust support: install rustc and cargo [23] and add '--racer-completer' when
-  calling 'install.py'.
+  calling |install.py|.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
 install with all language features, ensure 'npm', 'go', 'mono', 'rust', and
@@ -2777,6 +2779,30 @@ CompileCommands API) were added after their cut.
 
 So just go through the installation guide and make sure you are using a correct
 'libclang.so'. I recommend downloading prebuilt binaries from llvm.org.
+
+-------------------------------------------------------------------------------
+                     *Fatal-Python-error:-PyThreadState_Get:-no-current-thread*
+I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup ~
+
+This is caused by linking a static version of |libpython| into ycmd's
+'ycm_core.so'. This leads to multiple copies of the python interpreter loaded
+when 'python' loads 'ycmd_core.so' and this messes up python's global state.
+The details aren't important.
+
+The solution is that the version of Python linked and run against must be built
+with either '--enable-shared' or '--enable-framework' (on OS X). This is
+achieved as follows (NOTE: for Mac, replace '--enable-shared' with '--enable-
+framework'):
+
+- When building python from source: './configure --enable-shared {options}'
+- When building python from pyenv: 'PYTHON_CONFIGURE_OPTS="--enable-shared"
+  pyenv install {version}'
+
+===============================================================================
+*install.py* says python must be compiled with '--enable-framework'. Wat?
+
+See the previous answer for how to ensure your python is built to support
+dynamic modules.
 
 -------------------------------------------------------------------------------
                *youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files*

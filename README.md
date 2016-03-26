@@ -2531,6 +2531,29 @@ CompileCommands API) were added after their cut.
 So just go through the installation guide and make sure you are using a correct
 `libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
 
+
+### I get `Fatal Python error: PyThreadState_Get: no current thread` on startup
+
+This is caused by linking a static version of `libpython` into ycmd's
+`ycm_core.so`.  This leads to multiple copies of the python interpreter loaded
+when `python` loads `ycmd_core.so` and this messes up python's global state.
+The details aren't important.
+
+The solution is that the version of Python linked and run against must be built
+with either `--enable-shared` or `--enable-framework` (on OS X).
+This is achieved as follows (NOTE: for Mac, replace `--enable-shared`
+with `--enable-framework`):
+
+- When building python from source: `./configure --enable-shared {options}`
+- When building python from pyenv:
+  `PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install {version}`
+
+
+## `install.py` says python must be compiled with `--enable-framework`. Wat?
+
+See the previous answer for how to ensure your python is built to support
+dynamic modules.
+
 ### YCM does not read identifiers from my tags files
 
 First, put `let g:ycm_collect_identifiers_from_tags_files = 1` in your vimrc.
