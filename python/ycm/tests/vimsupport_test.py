@@ -32,15 +32,14 @@ from ycm import vimsupport
 from nose.tools import eq_
 from hamcrest import assert_that, calling, raises, none, has_entry
 from mock import MagicMock, call, patch
-from ycmd.utils import ToBytes
+from ycmd.utils import ToBytes, ToUnicode
 import os
 import json
 
 
 def ReplaceChunk_SingleLine_Repl_1_test():
   # Replace with longer range
-  #                  12345678901234567
-  result_buffer = [ "This is a string" ]
+  result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 1, 1, 5 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -49,7 +48,7 @@ def ReplaceChunk_SingleLine_Repl_1_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "How long is a string" ], result_buffer )
+  eq_( [ ToBytes( "How long is a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 4 )
 
@@ -66,7 +65,7 @@ def ReplaceChunk_SingleLine_Repl_1_test():
   line_offset += new_line_offset
   char_offset += new_char_offset
 
-  eq_( [ 'How long is a piece of string' ], result_buffer )
+  eq_( [ ToBytes( 'How long is a piece of string' ) ], result_buffer )
   eq_( new_line_offset, 0 )
   eq_( new_char_offset, 9 )
   eq_( line_offset, 0 )
@@ -86,7 +85,7 @@ def ReplaceChunk_SingleLine_Repl_1_test():
   line_offset += new_line_offset
   char_offset += new_char_offset
 
-  eq_( ['How long is a piece of pie' ], result_buffer )
+  eq_( [ ToBytes( 'How long is a piece of pie' ) ], result_buffer )
   eq_( new_line_offset, 0 )
   eq_( new_char_offset, -3 )
   eq_( line_offset, 0 )
@@ -95,8 +94,7 @@ def ReplaceChunk_SingleLine_Repl_1_test():
 
 def ReplaceChunk_SingleLine_Repl_2_test():
   # Replace with shorter range
-  #                  12345678901234567
-  result_buffer = [ "This is a string" ]
+  result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 11, 1, 17 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -105,15 +103,14 @@ def ReplaceChunk_SingleLine_Repl_2_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This is a test" ], result_buffer )
+  eq_( [ ToBytes( "This is a test" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -2 )
 
 
 def ReplaceChunk_SingleLine_Repl_3_test():
   # Replace with equal range
-  #                  12345678901234567
-  result_buffer = [ "This is a string" ]
+  result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 6, 1, 8 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -122,14 +119,14 @@ def ReplaceChunk_SingleLine_Repl_3_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This be a string" ], result_buffer )
+  eq_( [ ToBytes( "This be a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 0 )
 
 
 def ReplaceChunk_SingleLine_Add_1_test():
   # Insert at start
-  result_buffer = [ "is a string" ]
+  result_buffer = [ ToBytes( "is a string" ) ]
   start, end = _BuildLocations( 1, 1, 1, 1 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -138,14 +135,14 @@ def ReplaceChunk_SingleLine_Add_1_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This is a string" ], result_buffer )
+  eq_( [ ToBytes( "This is a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 5 )
 
 
 def ReplaceChunk_SingleLine_Add_2_test():
   # Insert at end
-  result_buffer = [ "This is a " ]
+  result_buffer = [ ToBytes( "This is a " ) ]
   start, end = _BuildLocations( 1, 11, 1, 11 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -154,14 +151,14 @@ def ReplaceChunk_SingleLine_Add_2_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This is a string" ], result_buffer )
+  eq_( [ ToBytes( "This is a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 6 )
 
 
 def ReplaceChunk_SingleLine_Add_3_test():
   # Insert in the middle
-  result_buffer = [ "This is a string" ]
+  result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 8, 1, 8 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -170,14 +167,14 @@ def ReplaceChunk_SingleLine_Add_3_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This is not a string" ], result_buffer )
+  eq_( [ ToBytes( "This is not a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 4 )
 
 
 def ReplaceChunk_SingleLine_Del_1_test():
   # Delete from start
-  result_buffer = [ "This is a string" ]
+  result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 1, 1, 6 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -186,14 +183,14 @@ def ReplaceChunk_SingleLine_Del_1_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "is a string" ], result_buffer )
+  eq_( [ ToBytes( "is a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -5 )
 
 
 def ReplaceChunk_SingleLine_Del_2_test():
   # Delete from end
-  result_buffer = [ "This is a string" ]
+  result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 10, 1, 18 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -202,14 +199,14 @@ def ReplaceChunk_SingleLine_Del_2_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This is a" ], result_buffer )
+  eq_( [ ToBytes( "This is a" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -8 )
 
 
 def ReplaceChunk_SingleLine_Del_3_test():
   # Delete from middle
-  result_buffer = [ "This is not a string" ]
+  result_buffer = [ ToBytes( "This is not a string" ) ]
   start, end = _BuildLocations( 1, 9, 1, 13 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -218,33 +215,84 @@ def ReplaceChunk_SingleLine_Del_3_test():
                                                           0,
                                                           result_buffer )
 
-  eq_( [ "This is a string" ], result_buffer )
+  eq_( [ ToBytes( "This is a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -4 )
 
 
+def ReplaceChunk_SingleLine_Unicode_ReplaceUnicodeChars_test():
+  # Replace Unicode characters.
+  result_buffer = [ ToBytes( "This Uniçø∂‰ string is in the middle" ) ]
+  start, end = _BuildLocations( 1, 6, 1, 20 )
+  ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
+                                                          end,
+                                                          'Unicode ',
+                                                          0,
+                                                          0,
+                                                          result_buffer )
+
+  eq_( [ ToBytes( "This Unicode string is in the middle" ) ], result_buffer )
+  eq_( line_offset, 0 )
+  eq_( char_offset, -6 )
+
+
+def ReplaceChunk_SingleLine_Unicode_ReplaceAfterUnicode_test():
+  # Replace ASCII characters after Unicode characters in the line.
+  result_buffer = [ ToBytes( "This Uniçø∂‰ string is in the middle" ) ]
+  start, end = _BuildLocations( 1, 30, 1, 43 )
+  ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
+                                                          end,
+                                                          'fåke',
+                                                          0,
+                                                          0,
+                                                          result_buffer )
+
+  eq_( [ ToBytes( "This Uniçø∂‰ string is fåke" ) ], result_buffer )
+  eq_( line_offset, 0 )
+  eq_( char_offset, -8 )
+
+
+def ReplaceChunk_SingleLine_Unicode_Grown_test():
+  # Replace ASCII characters after Unicode characters in the line.
+  result_buffer = [ ToBytes( "a" ) ]
+  start, end = _BuildLocations( 1, 1, 1, 2 )
+  ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
+                                                          end,
+                                                          'å',
+                                                          0,
+                                                          0,
+                                                          result_buffer )
+
+  eq_( [ ToBytes( "å" ) ], result_buffer )
+  eq_( line_offset, 0 )
+  eq_( char_offset, 1 ) # Note: byte difference (a = 1 byte, å = 2 bytes)
+
+
 def ReplaceChunk_RemoveSingleLine_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 1, 3, 1 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, '',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, -1 )
   eq_( char_offset, 0 )
 
 
 def ReplaceChunk_SingleToMultipleLines_test():
-  result_buffer = [ "aAa",
-                    "aBa",
-                    "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 2, 2, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'Eb\nbF',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa",
-                      "aEb",
-                      "bFBa",
-                      "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aEb" ),
+                      ToBytes( "bFBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 1 )
   eq_( char_offset, 1 )
@@ -262,13 +310,16 @@ def ReplaceChunk_SingleToMultipleLines_test():
   line_offset += new_line_offset
   char_offset += new_char_offset
 
-  eq_( [ "aAa", "aEb", "bFBcccc", "aCa" ], result_buffer )
+  eq_( [ ToBytes( "aAa" ),
+         ToBytes( "aEb" ),
+         ToBytes( "bFBcccc" ),
+         ToBytes( "aCa" ) ], result_buffer )
   eq_( line_offset, 1 )
   eq_( char_offset, 4 )
 
 
 def ReplaceChunk_SingleToMultipleLines2_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ), ToBytes( "aBa" ), ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 2, 2, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -276,14 +327,18 @@ def ReplaceChunk_SingleToMultipleLines2_test():
                                                           0,
                                                           0,
                                                           result_buffer )
-  expected_buffer = [ "aAa", "aEb", "bFb", "GBa", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aEb" ),
+                      ToBytes( "bFb" ),
+                      ToBytes( "GBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 2 )
   eq_( char_offset, 0 )
 
 
 def ReplaceChunk_SingleToMultipleLines3_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ), ToBytes( "aBa" ), ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 2, 2, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -291,14 +346,18 @@ def ReplaceChunk_SingleToMultipleLines3_test():
                                                           0,
                                                           0,
                                                           result_buffer )
-  expected_buffer = [ "aAa", "aEb", "bFb", "bGbBa", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aEb" ),
+                      ToBytes( "bFb" ),
+                      ToBytes( "bGbBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 2 )
   eq_( char_offset, 2 )
 
 
 def ReplaceChunk_SingleToMultipleLinesReplace_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ), ToBytes( "aBa" ), ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 1, 2, 1, 4 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -306,16 +365,20 @@ def ReplaceChunk_SingleToMultipleLinesReplace_test():
                                                           0,
                                                           0,
                                                           result_buffer )
-  expected_buffer = [ "aEb", "bFb", "bGb", "aBa", "aCa" ]
+  expected_buffer = [ ToBytes( "aEb" ),
+                      ToBytes( "bFb" ),
+                      ToBytes( "bGb" ),
+                      ToBytes( "aBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 2 )
   eq_( char_offset, 0 )
 
 
 def ReplaceChunk_SingleToMultipleLinesReplace_2_test():
-  result_buffer = [ "aAa",
-                    "aBa",
-                    "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 1, 2, 1, 4 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -323,11 +386,11 @@ def ReplaceChunk_SingleToMultipleLinesReplace_2_test():
                                                           0,
                                                           0,
                                                           result_buffer )
-  expected_buffer = [ "aEb",
-                      "bFb",
-                      "bGb",
-                      "aBa",
-                      "aCa" ]
+  expected_buffer = [ ToBytes( "aEb" ),
+                      ToBytes( "bFb" ),
+                      ToBytes( "bGb" ),
+                      ToBytes( "aBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 2 )
   eq_( char_offset, 0 )
@@ -345,22 +408,22 @@ def ReplaceChunk_SingleToMultipleLinesReplace_2_test():
   line_offset += new_line_offset
   char_offset += new_char_offset
 
-  eq_( [ "aEb",
-         "bFb",
-         "bGbcccc",
-         "aBa",
-         "aCa" ], result_buffer )
+  eq_( [ ToBytes( "aEb" ),
+         ToBytes( "bFb" ),
+         ToBytes( "bGbcccc" ),
+         ToBytes( "aBa" ),
+         ToBytes( "aCa" ) ], result_buffer )
 
   eq_( line_offset, 2 )
   eq_( char_offset, 4 )
 
 
 def ReplaceChunk_MultipleLinesToSingleLine_test():
-  result_buffer = [ "aAa", "aBa", "aCaaaa" ]
+  result_buffer = [ ToBytes( "aAa" ), ToBytes( "aBa" ), ToBytes( "aCaaaa" ) ]
   start, end = _BuildLocations( 2, 2, 3, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'E',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa", "aECaaaa" ]
+  expected_buffer = [ ToBytes( "aAa" ), ToBytes( "aECaaaa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, -1 )
   eq_( char_offset, 1 )
@@ -378,7 +441,8 @@ def ReplaceChunk_MultipleLinesToSingleLine_test():
   line_offset += new_line_offset
   char_offset += new_char_offset
 
-  eq_( [ "aAa", "aECccccaaa" ], result_buffer )
+  eq_( [ ToBytes( "aAa" ),
+         ToBytes( "aECccccaaa" ) ], result_buffer )
   eq_( line_offset, -1 )
   eq_( char_offset, 4 )
 
@@ -395,24 +459,36 @@ def ReplaceChunk_MultipleLinesToSingleLine_test():
   line_offset += new_line_offset
   char_offset += new_char_offset
 
-  eq_( [ "aAa", "aECccccdd", "ddaa" ], result_buffer )
+  eq_( [ ToBytes( "aAa" ),
+         ToBytes( "aECccccdd" ),
+         ToBytes( "ddaa" ) ],
+       result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -2 )
 
 
 def ReplaceChunk_MultipleLinesToSameMultipleLines_test():
-  result_buffer = [ "aAa", "aBa", "aCa", "aDe" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ),
+                    ToBytes( "aDe" ) ]
   start, end = _BuildLocations( 2, 2, 3, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'Eb\nbF',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa", "aEb", "bFCa", "aDe" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aEb" ),
+                      ToBytes( "bFCa" ),
+                      ToBytes( "aDe" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 1 )
 
 
 def ReplaceChunk_MultipleLinesToMoreMultipleLines_test():
-  result_buffer = [ "aAa", "aBa", "aCa", "aDe" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ),
+                    ToBytes( "aDe" ) ]
   start, end = _BuildLocations( 2, 2, 3, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -420,113 +496,153 @@ def ReplaceChunk_MultipleLinesToMoreMultipleLines_test():
                                                           0,
                                                           0,
                                                           result_buffer )
-  expected_buffer = [ "aAa", "aEb", "bFb", "bGCa", "aDe" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aEb" ),
+                      ToBytes( "bFb" ),
+                      ToBytes( "bGCa" ),
+                      ToBytes( "aDe" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 1 )
   eq_( char_offset, 1 )
 
 
 def ReplaceChunk_MultipleLinesToLessMultipleLines_test():
-  result_buffer = [ "aAa", "aBa", "aCa", "aDe" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ),
+                    ToBytes( "aDe" ) ]
   start, end = _BuildLocations( 1, 2, 3, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'Eb\nbF',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aEb", "bFCa", "aDe" ]
+  expected_buffer = [ ToBytes( "aEb" ), ToBytes( "bFCa" ), ToBytes( "aDe" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, -1 )
   eq_( char_offset, 1 )
 
 
 def ReplaceChunk_MultipleLinesToEvenLessMultipleLines_test():
-  result_buffer = [ "aAa", "aBa", "aCa", "aDe" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ),
+                    ToBytes( "aDe" ) ]
   start, end = _BuildLocations( 1, 2, 4, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'Eb\nbF',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aEb", "bFDe" ]
+  expected_buffer = [ ToBytes( "aEb" ), ToBytes( "bFDe" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, -2 )
   eq_( char_offset, 1 )
 
 
 def ReplaceChunk_SpanBufferEdge_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 1, 1, 1, 3 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'bDb',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "bDba", "aBa", "aCa" ]
+  expected_buffer = [ ToBytes( "bDba" ),
+                      ToBytes( "aBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 1 )
 
 
 def ReplaceChunk_DeleteTextInLine_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 2, 2, 3 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, '',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa", "aa", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -1 )
 
 
 def ReplaceChunk_AddTextInLine_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 2, 2, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'bDb',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa", "abDbBa", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "abDbBa" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 3 )
 
 
 def ReplaceChunk_ReplaceTextInLine_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 2, 2, 2, 3 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'bDb',
                                                           0, 0, result_buffer )
-  expected_buffer = [ "aAa", "abDba", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "abDba" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 2 )
 
 
 def ReplaceChunk_SingleLineOffsetWorks_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 1, 1, 1, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'bDb',
                                                           1, 1, result_buffer )
-  expected_buffer = [ "aAa", "abDba", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "abDba" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, 2 )
 
 
 def ReplaceChunk_SingleLineToMultipleLinesOffsetWorks_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 1, 1, 1, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'Db\nE',
                                                           1, 1, result_buffer )
-  expected_buffer = [ "aAa", "aDb", "Ea", "aCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "aDb" ),
+                      ToBytes( "Ea" ),
+                      ToBytes( "aCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 1 )
   eq_( char_offset, -1 )
 
 
 def ReplaceChunk_MultipleLinesToSingleLineOffsetWorks_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 1, 1, 2, 2 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start, end, 'bDb',
                                                           1, 1, result_buffer )
-  expected_buffer = [ "aAa", "abDbCa" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "abDbCa" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, -1 )
   eq_( char_offset, 3 )
 
 
 def ReplaceChunk_MultipleLineOffsetWorks_test():
-  result_buffer = [ "aAa", "aBa", "aCa" ]
+  result_buffer = [ ToBytes( "aAa" ),
+                    ToBytes( "aBa" ),
+                    ToBytes( "aCa" ) ]
   start, end = _BuildLocations( 3, 1, 4, 3 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
                                                           end,
@@ -534,7 +650,10 @@ def ReplaceChunk_MultipleLineOffsetWorks_test():
                                                           -1,
                                                           1,
                                                           result_buffer )
-  expected_buffer = [ "aAa", "abDb", "bEb", "bFba" ]
+  expected_buffer = [ ToBytes( "aAa" ),
+                      ToBytes( "abDb" ),
+                      ToBytes( "bEb" ),
+                      ToBytes( "bFba" ) ]
   eq_( expected_buffer, result_buffer )
   eq_( line_offset, 1 )
   eq_( char_offset, 1 )
@@ -556,10 +675,10 @@ def ReplaceChunksInBuffer_SortedChunks_test():
     _BuildChunk( 1, 11, 1, 11, ')' )
   ]
 
-  result_buffer = [ "CT<10 >> 2> ct" ]
+  result_buffer = [ ToBytes( "CT<10 >> 2> ct" ) ]
   vimsupport.ReplaceChunksInBuffer( chunks, result_buffer, None )
 
-  expected_buffer = [ "CT<(10 >> 2)> ct" ]
+  expected_buffer = [ ToBytes( "CT<(10 >> 2)> ct" ) ]
   eq_( expected_buffer, result_buffer )
 
 
@@ -569,10 +688,10 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
     _BuildChunk( 1, 4, 1, 4, '(' )
   ]
 
-  result_buffer = [ "CT<10 >> 2> ct" ]
+  result_buffer = [ ToBytes( "CT<10 >> 2> ct" ) ]
   vimsupport.ReplaceChunksInBuffer( chunks, result_buffer, None )
 
-  expected_buffer = [ "CT<(10 >> 2)> ct" ]
+  expected_buffer = [ ToBytes( "CT<(10 >> 2)> ct" ) ]
   eq_( expected_buffer, result_buffer )
 
 
@@ -581,12 +700,13 @@ class MockBuffer( object ):
   generate a location list"""
 
   def __init__( self, lines, name, number ):
-    self.lines = lines
+    self.lines = [ ToBytes( x ) for x in lines ]
     self.name = name
     self.number = number
 
 
   def __getitem__( self, index ):
+    """ Return the bytes for a given line at index |index| """
     return self.lines[ index ]
 
 
@@ -596,6 +716,11 @@ class MockBuffer( object ):
 
   def __setitem__( self, key, value ):
     return self.lines.__setitem__( key, value )
+
+
+  def GetLines( self ):
+    """ Return the contents of the buffer as a list of unicode strings"""
+    return [ ToUnicode( x ) for x in self.lines ]
 
 
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
@@ -629,7 +754,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
     vimsupport.ReplaceChunks( chunks )
 
   # Ensure that we applied the replacement correctly
-  eq_( result_buffer.lines, [
+  eq_( result_buffer.GetLines(), [
     'replacementline2',
     'line3',
   ] )
@@ -715,7 +840,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   ] )
 
   # Ensure that we applied the replacement correctly
-  eq_( result_buffer.lines, [
+  eq_( result_buffer.GetLines(), [
     'replacementline2',
     'line3',
   ] )
@@ -823,7 +948,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   ] )
 
   # Ensure that buffer is not changed
-  eq_( result_buffer.lines, [
+  eq_( result_buffer.GetLines(), [
     'line1',
     'line2',
     'line3',
@@ -905,7 +1030,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
   ] )
 
   # Ensure that buffer is not changed
-  eq_( result_buffer.lines, [
+  eq_( result_buffer.GetLines(), [
     'line1',
     'line2',
     'line3',
@@ -996,11 +1121,11 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
   ] )
 
   # Ensure that buffers are updated
-  eq_( another_file.lines, [
+  eq_( another_file.GetLines(), [
     'another line1',
     'second_file_replacement ACME line2',
   ] )
-  eq_( first_file.lines, [
+  eq_( first_file.GetLines(), [
     'first_file_replacement line2',
     'line3',
   ] )

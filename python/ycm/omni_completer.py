@@ -25,6 +25,7 @@ from builtins import *  # noqa
 
 import vim
 from ycm import vimsupport
+from ycmd import utils
 from ycmd.responses import ServerError
 from ycmd.completers.completer import Completer
 from ycm.client.base_request import BaseRequest, HandleServerException
@@ -89,12 +90,14 @@ class OmniCompleter( Completer ):
 
       items = vim.eval( ''.join( omnifunc_call ) )
 
-      if 'words' in items:
+      if hasattr( items, '__getitem__' ) and 'words' in items:
         items = items[ 'words' ]
+
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      return list( filter( bool, items ) )
+      return [ utils.ToUnicode( i ) for i in items if bool( i ) ]
+
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )

@@ -1,3 +1,5 @@
+# encoding: utf-8
+#
 # Copyright (C) 2015 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
@@ -26,6 +28,8 @@ from builtins import *  # noqa
 from ycm.test_utils import MockVimModule
 MockVimModule()
 
+from ycmd.utils import ToBytes
+
 import contextlib
 from hamcrest import assert_that, empty
 from mock import MagicMock, DEFAULT, patch
@@ -40,11 +44,11 @@ def GetVariableValue_CompleteItemIs( word, abbr = None, menu = None,
   def Result( variable ):
     if variable == 'v:completed_item':
       return {
-        'word': word,
-        'abbr': abbr,
-        'menu': menu,
-        'info': info,
-        'kind': kind,
+        'word': ToBytes( word ),
+        'abbr': ToBytes( abbr ),
+        'menu': ToBytes( menu ),
+        'info': ToBytes( info ),
+        'kind': ToBytes( kind ),
       }
     return DEFAULT
   return MagicMock( side_effect = Result )
@@ -115,7 +119,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.GetVariableValue',
           GetVariableValue_CompleteItemIs( 'Test' ) )
   def FilterToCompletedCompletions_NewVim_MatchIsReturned_test( self, *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._FilterToMatchingCompletions( completions, False )
     eq_( list( result ), completions )
 
@@ -125,7 +129,7 @@ class PostComplete_test():
           GetVariableValue_CompleteItemIs( 'A' ) )
   def FilterToCompletedCompletions_NewVim_ShortTextDoesntRaise_test( self,
                                                                      *args ):
-    completions = [ BuildCompletion( 'AAA' ) ]
+    completions = [ BuildCompletion( insertion_text = 'AAA' ) ]
     self.ycm._FilterToMatchingCompletions( completions, False )
 
 
@@ -134,7 +138,7 @@ class PostComplete_test():
           GetVariableValue_CompleteItemIs( 'Test' ) )
   def FilterToCompletedCompletions_NewVim_ExactMatchIsReturned_test( self,
                                                                      *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._FilterToMatchingCompletions( completions, False )
     eq_( list( result ), completions )
 
@@ -144,15 +148,24 @@ class PostComplete_test():
           GetVariableValue_CompleteItemIs( '   Quote' ) )
   def FilterToCompletedCompletions_NewVim_NonMatchIsntReturned_test( self,
                                                                      *args ):
-    completions = [ BuildCompletion( 'A' ) ]
+    completions = [ BuildCompletion( insertion_text = 'A' ) ]
     result = self.ycm._FilterToMatchingCompletions( completions, False )
     assert_that( list( result ), empty() )
+
+
+  @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = True )
+  @patch( 'ycm.vimsupport.GetVariableValue',
+          GetVariableValue_CompleteItemIs( '†es†' ) )
+  def FilterToCompletedCompletions_NewVim_Unicode_test( self, *args ):
+    completions = [ BuildCompletion( insertion_text = '†es†' ) ]
+    result = self.ycm._FilterToMatchingCompletions( completions, False )
+    eq_( list( result ), completions )
 
 
   @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Test' )
   def FilterToCompletedCompletions_OldVim_MatchIsReturned_test( self, *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._FilterToMatchingCompletions( completions, False )
     eq_( list( result ), completions )
 
@@ -161,7 +174,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'X' )
   def FilterToCompletedCompletions_OldVim_ShortTextDoesntRaise_test( self,
                                                                      *args ):
-    completions = [ BuildCompletion( 'AAA' ) ]
+    completions = [ BuildCompletion( insertion_text = 'AAA' ) ]
     self.ycm._FilterToMatchingCompletions( completions, False )
 
 
@@ -169,7 +182,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'Test' )
   def FilterToCompletedCompletions_OldVim_ExactMatchIsReturned_test( self,
                                                                      *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._FilterToMatchingCompletions( completions, False )
     eq_( list( result ), completions )
 
@@ -178,7 +191,15 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
   def FilterToCompletedCompletions_OldVim_NonMatchIsntReturned_test( self,
                                                                      *args ):
-    completions = [ BuildCompletion( 'A' ) ]
+    completions = [ BuildCompletion( insertion_text = 'A' ) ]
+    result = self.ycm._FilterToMatchingCompletions( completions, False )
+    assert_that( list( result ), empty() )
+
+
+  @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
+  @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'Uniçø∂¢' )
+  def FilterToCompletedCompletions_OldVim_Unicode_test( self, *args ):
+    completions = [ BuildCompletion( insertion_text = 'Uniçø∂¢' ) ]
     result = self.ycm._FilterToMatchingCompletions( completions, False )
     assert_that( list( result ), empty() )
 
@@ -187,7 +208,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Te' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_MatchIsReturned_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
                                                                 completions )
     eq_( result, True )
@@ -197,7 +218,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'X' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ShortTextDoesntRaise_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( "AAA" ) ]
+    completions = [ BuildCompletion( insertion_text = "AAA" ) ]
     self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
 
 
@@ -205,7 +226,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'Test' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_ExactMatchIsntReturned_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
                                                                 completions )
     eq_( result, False )
@@ -215,10 +236,20 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_NonMatchIsntReturned_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( 'A' ) ]
+    completions = [ BuildCompletion( insertion_text = 'A' ) ]
     result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
                                                                 completions )
     eq_( result, False )
+
+
+  @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False )
+  @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'Uniç' )
+  def HasCompletionsThatCouldBeCompletedWithMoreText_OldVim_Unicode_test(
+    self, *args ):
+    completions = [ BuildCompletion( insertion_text = 'Uniçø∂¢' ) ]
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
+    eq_( result, True )
 
 
   @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = True )
@@ -227,7 +258,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_MatchIsReturned_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
                                                                 completions )
     eq_( result, True )
@@ -239,7 +270,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ShortTextDoesntRaise_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( 'AAA' ) ]
+    completions = [ BuildCompletion( insertion_text = 'AAA' ) ]
     self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
 
 
@@ -249,7 +280,7 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_ExactMatchIsntReturned_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( 'Test' ) ]
+    completions = [ BuildCompletion( insertion_text = 'Test' ) ]
     result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
                                                                 completions )
     eq_( result, False )
@@ -261,10 +292,22 @@ class PostComplete_test():
   @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Quote' )
   def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_NonMatchIsntReturned_test( # noqa
     self, *args ):
-    completions = [ BuildCompletion( "A" ) ]
+    completions = [ BuildCompletion( insertion_text = "A" ) ]
     result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
                                                                 completions )
     eq_( result, False )
+
+
+  @patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = True )
+  @patch( 'ycm.vimsupport.GetVariableValue',
+          GetVariableValue_CompleteItemIs( 'Uniç' ) )
+  @patch( 'ycm.vimsupport.TextBeforeCursor', return_value = 'Uniç' )
+  def HasCompletionsThatCouldBeCompletedWithMoreText_NewVim_Unicode_test(
+    self, *args ):
+    completions = [ BuildCompletion( insertion_text = "Uniçø∂¢" ) ]
+    result = self.ycm._HasCompletionsThatCouldBeCompletedWithMoreText(
+                                                                completions )
+    eq_( result, True )
 
 
   def GetRequiredNamespaceImport_ReturnNoneForNoExtraData_test( self ):
