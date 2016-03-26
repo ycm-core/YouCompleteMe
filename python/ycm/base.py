@@ -61,10 +61,15 @@ def LoadJsonDefaultsIntoVim():
 
 
 def CompletionStartColumn():
-  return ( request_wrap.CompletionStartColumn(
-      vimsupport.CurrentLineContents(),
+  current_line = vimsupport.CurrentLineContents()
+  start_column = request_wrap.CompletionStartColumn(
+      current_line,
       vimsupport.CurrentColumn() + 1,
-      vimsupport.CurrentFiletypes()[ 0 ] ) - 1 )
+      vimsupport.CurrentFiletypes()[ 0 ] ) - 1
+
+  # start_column is codepoint indexed. We need to return it as a byte index
+  # using Vim encoding.
+  return len( current_line[ :start_column ].encode( vimsupport.GetEncoding() ) )
 
 
 def CurrentIdentifierFinished():

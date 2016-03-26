@@ -92,14 +92,14 @@ def MockArbitraryBuffer( filetype, native_available = True ):
   with patch( 'vim.current' ) as vim_current:
     def VimEval( value ):
       """Local mock of the vim.eval() function, used to ensure we get the
-      correct behvaiour"""
+      correct behavior"""
 
       if value == '&omnifunc':
         # The omnicompleter is not required here
         return ''
 
       if value == 'getbufvar(0, "&mod")':
-        # Ensure that we actually send the even to the server
+        # Ensure that we actually send the event to the server
         return 1
 
       if value == 'getbufvar(0, "&ft")' or value == '&filetype':
@@ -128,7 +128,8 @@ def MockArbitraryBuffer( filetype, native_available = True ):
     with patch( 'vim.buffers', [ current_buffer ] ):
       with patch( 'vim.current.buffer', current_buffer ):
         with patch( 'vim.eval', side_effect=VimEval ):
-          yield
+          with patch( 'ycm.vimsupport.CurrentColumn', return_value = 2 ):
+            yield
 
 
 @contextlib.contextmanager

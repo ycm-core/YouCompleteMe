@@ -49,36 +49,41 @@ def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
   # See the comment in CurrentColumn about the calculation for the line and
   # column number
-  line, column = vim.current.window.cursor
-  line -= 1
-  return line, column
+  return vim.current.window.cursor[ 0 ] - 1, CurrentColumn()
 
 
 def CurrentColumn():
-  """Returns the 0-based current column. Do NOT access the CurrentColumn in
-  vim.current.line. It doesn't exist yet when the cursor is at the end of the
-  line. Only the chars before the current column exist in vim.current.line."""
+  """Returns the 0-based current column as codepoint index."""
 
   # vim's columns are 1-based while vim.current.line columns are 0-based
   # ... but vim.current.window.cursor (which returns a (line, column) tuple)
   # columns are 0-based, while the line from that same tuple is 1-based.
   # vim.buffers buffer objects OTOH have 0-based lines and columns.
   # Pigs have wings and I'm a loopy purple duck. Everything makes sense now.
-  return vim.current.window.cursor[ 1 ]
+  column_bytes = vim.current.window.cursor[ 1 ]
+  return len( ToUnicodeWithVimEncoding( vim.current.line[ : column_bytes ] ) )
+
+
+def GetEncoding():
+  return vim.eval( '&encoding' )
+
+
+def ToUnicodeWithVimEncoding( value ):
+  return str( value, GetEncoding() )
 
 
 def CurrentLineContents():
-  return ToUnicode( vim.current.line )
+  return ToUnicodeWithVimEncoding( vim.current.line )
 
 
 def TextAfterCursor():
   """Returns the text after CurrentColumn."""
-  return ToUnicode( vim.current.line[ CurrentColumn(): ] )
+  return CurrentLineContents()[ CurrentColumn(): ]
 
 
 def TextBeforeCursor():
   """Returns the text before CurrentColumn."""
-  return ToUnicode( vim.current.line[ :CurrentColumn() ] )
+  return CurrentLineContents()[ :CurrentColumn() ]
 
 
 # Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '7.4.301'
@@ -123,7 +128,8 @@ def GetUnsavedAndCurrentBufferData():
 
     buffers_data[ GetBufferFilepath( buffer_object ) ] = {
       # Add a newline to match what gets saved to disk. See #1455 for details.
-      'contents': '\n'.join( ToUnicode( x ) for x in buffer_object ) + '\n',
+      'contents': ( '\n'.join( ToUnicodeWithVimEncoding( x )
+                               for x in buffer_object ) + '\n' ),
       'filetypes': FiletypesForBuffer( buffer_object )
     }
 
