@@ -376,7 +376,8 @@ class YouCompleteMe( object ):
                       else [ 'word' ] )
 
       def matcher( key ):
-          return completed.get( key, "" ) == item.get( key, "" )
+          return ( utils.ToUnicode( completed.get( key, "" ) ) ==
+                   utils.ToUnicode( item.get( key, "" ) ) )
 
       if all( [ matcher( i ) for i in match_keys ] ):
         yield completion
@@ -390,7 +391,7 @@ class YouCompleteMe( object ):
     # No support for multiple line completions
     text = vimsupport.TextBeforeCursor()
     for completion in completions:
-      word = completion[ "insertion_text" ]
+      word = utils.ToUnicode( completion[ "insertion_text" ] )
       # Trim complete-ending character if needed
       text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
       buffer_text = text[ -1 * len( word ) : ]
@@ -404,7 +405,7 @@ class YouCompleteMe( object ):
     if not completed_item:
       return False
 
-    completed_word = completed_item[ 'word' ]
+    completed_word = utils.ToUnicode( completed_item[ 'word' ] )
     if not completed_word:
       return False
 
@@ -417,7 +418,8 @@ class YouCompleteMe( object ):
       completed_word += text[ -1 ]
 
     for completion in completions:
-      word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+      word = utils.ToUnicode(
+          ConvertCompletionDataToVimData( completion )[ 'word' ] )
       if reject_exact_match and word == completed_word:
         continue
       if word.startswith( completed_word ):
@@ -430,7 +432,8 @@ class YouCompleteMe( object ):
     # No support for multiple line completions
     text = vimsupport.TextBeforeCursor()
     for completion in completions:
-      word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+      word = utils.ToUnicode(
+          ConvertCompletionDataToVimData( completion )[ 'word' ] )
       for i in range( 1, len( word ) - 1 ): # Excluding full word
         if text[ -1 * i  : ] == word[ : i ]:
           return True
