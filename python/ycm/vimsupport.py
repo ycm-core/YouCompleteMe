@@ -149,7 +149,7 @@ def BufferIsVisible( buffer_number ):
 
 def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
-    return buffer_object.name
+    return ToUnicode( buffer_object.name )
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that. Also, os.getcwd() throws
   # an exception when the CWD has been deleted so we handle that.
@@ -157,7 +157,7 @@ def GetBufferFilepath( buffer_object ):
     folder_path = os.getcwd()
   except OSError:
     folder_path = tempfile.gettempdir()
-  return os.path.join( folder_path, str( buffer_object.number ) )
+  return ToUnicode( os.path.join( folder_path, str( buffer_object.number ) ) )
 
 
 def UnplaceSignInBuffer( buffer_number, sign_id ):
@@ -352,7 +352,7 @@ def TryJumpLocationInOpenedTab( filename, line, column ):
 
   for tab in vim.tabpages:
     for win in tab.windows:
-      if win.buffer.name == filepath:
+      if ToUnicode( win.buffer.name ) == filepath:
         vim.current.tabpage = tab
         vim.current.window = win
         vim.current.window.cursor = ( line, column - 1 )
