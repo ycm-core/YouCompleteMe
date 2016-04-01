@@ -154,10 +154,10 @@ def GetBufferFilepath( buffer_object ):
   # buffer name so we use the buffer number for that. Also, os.getcwd() throws
   # an exception when the CWD has been deleted so we handle that.
   try:
-    folder_path = os.getcwd()
+    folder_path = ToUnicode( os.getcwd() )
   except OSError:
     folder_path = tempfile.gettempdir()
-  return ToUnicode( os.path.join( folder_path, str( buffer_object.number ) ) )
+  return os.path.join( folder_path, str( buffer_object.number ) )
 
 
 def UnplaceSignInBuffer( buffer_number, sign_id ):
