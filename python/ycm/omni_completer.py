@@ -96,9 +96,7 @@ class OmniCompleter( Completer ):
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      items = list( filter( bool, items ) )
-
-      return [ utils.ToUnicode( i ) for i in items ]
+      return [ utils.ToUnicode( i ) for i in items if bool( i ) ]
 
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
