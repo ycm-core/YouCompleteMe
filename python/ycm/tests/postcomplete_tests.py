@@ -329,9 +329,8 @@ class PostComplete_test():
     self, *args ):
     completions = [ BuildCompletion( None ) ]
     with self._SetupForCsharpCompletionDone( completions ):
-      with patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = True ):
-        with patch( 'ycm.vimsupport.GetVariableValue',
-                    GetVariableValue_CompleteItemIs( 'Te' ) ):
+      with patch( 'ycm.vimsupport.VimVersionAtLeast', return_value = False ):
+        with patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Te' ):
           eq_( [], self.ycm.GetCompletionsUserMayHaveCompleted() )
 
 
