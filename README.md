@@ -703,6 +703,7 @@ Quick Feature Summary
 ### TypeScript
 
 * Semantic auto-completion
+* Renaming symbols (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Semantic type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -1376,7 +1377,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `javascript` (variables only)
+Supported in filetypes: `javascript` (variables only), `typescript`
 
 #### Multi-file Refactor
 
