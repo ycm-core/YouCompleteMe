@@ -2542,6 +2542,15 @@ Default: 1000
   let g:ycm_disable_for_files_larger_than_kb = 1000
 <
 -------------------------------------------------------------------------------
+The g:ycm_goto_list_height option
+
+Defines the height of the quickfix window when 'GoTo*' commands are run.
+
+Default: 3
+>
+  let g:ycm_goto_list_height = 3
+<
+-------------------------------------------------------------------------------
 The *g:ycm_python_binary_path* option
 
 This option specifies the Python interpreter to use to run the jedi [6]
