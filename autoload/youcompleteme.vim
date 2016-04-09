@@ -54,11 +54,6 @@ endfunction
 
 
 function! youcompleteme#Enable()
-  " When vim is in diff mode, don't run
-  if &diff
-    return
-  endif
-
   call s:SetUpBackwardsCompatibility()
 
   " This can be 0 if YCM libs are old or -1 if an exception occured while
