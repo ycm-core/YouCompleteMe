@@ -516,10 +516,10 @@ process.
     **Download the latest version of `libclang`**. Clang is an open-source
     compiler that can compile C/C++/Objective-C/Objective-C++. The `libclang`
     library it provides is used to power the YCM semantic completion engine for
-    those languages. YCM is designed to work with libclang version 3.6 or
-    higher, but can in theory work with any 3.2+ version as well.
+    those languages. YCM is designed to work with libclang version 3.8 or
+    higher.
 
-    You can use the system libclang _only if you are sure it is version 3.3 or
+    You can use the system libclang _only if you are sure it is version 3.8 or
     higher_, otherwise don't. Even if it is, we recommend using the [official
     binaries from llvm.org][clang-download] if at all possible. Make sure you
     download the correct archive file for your OS.
@@ -703,6 +703,7 @@ Quick Feature Summary
 ### TypeScript
 
 * Semantic auto-completion
+* Renaming symbols (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Semantic type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -1376,7 +1377,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `javascript` (variables only)
+Supported in filetypes: `javascript` (variables only), `typescript`
 
 #### Multi-file Refactor
 
@@ -2523,13 +2524,9 @@ undefined symbol: clang_CompileCommands_dispose
 ```
 
 This means that Vim is trying to load a `libclang.so` that is too old. You need
-at least a 3.2 libclang. Some distros ship with a system `libclang.so` that
-identifies itself as 3.2 but is not; it was cut from the upstream sources before
-the official 3.2 release and some API changes (like the addition of the
-CompileCommands API) were added after their cut.
-
-So just go through the installation guide and make sure you are using a correct
-`libclang.so`. I recommend downloading prebuilt binaries from llvm.org.
+at least a 3.8 libclang. Just go through the installation guide and make sure
+you are using a correct `libclang.so`. We recommend downloading prebuilt
+binaries from llvm.org.
 
 
 ### I get `Fatal Python error: PyThreadState_Get: no current thread` on startup
