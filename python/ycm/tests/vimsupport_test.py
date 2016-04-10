@@ -1295,7 +1295,7 @@ def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
 
 def JumpToLocation_1_test():
   class AnBuffer():
-    name = '中/ab.py'.encode( 'utf8' )
+    name = '中/ab.py'.encode( 'utf-8' )
     # name = '中/ab.py'
 
   # UnicodeWarning
@@ -1306,31 +1306,31 @@ def JumpToLocation_1_test():
 def JumpToLocation_2_test():
   class AnBuffer():
     name = None
-    # name = '中/ab.py'
     number = 1
 
   # :enew
   chinese_dir = 'aaa中bbb'
+  # chinese_dir = 'aaabbb'
   if not os.path.isdir( chinese_dir ):
     os.mkdir( chinese_dir )
   os.chdir( chinese_dir )
   try:
     with patch( "vim.current.buffer", AnBuffer ):
-      vimsupport.JumpToLocation( '中/ab.py', 1, 1 )
+      vimsupport.JumpToLocation( os.getcwd().decode( 'utf-8' ) + '/1', 1, 1 )
   finally:
     os.chdir( '..' )
     os.rmdir( chinese_dir )
 
 
 def TryJumpLocationInOpenedTab_test():
-  class Tabs():
+  class Tab():
     class Win():
       class buffer():
-        name = '中/ab.py'.encode( 'utf8' )
+        name = '中/ab.py'.encode( 'utf-8' )
         # name = '中/ab.py'
 
     windows = [ Win ]
 
   # UnicodeWarning
-  with patch( "vim.tabpages", [ Tabs ] ):
+  with patch( "vim.tabpages", [ Tab ] ):
     vimsupport.TryJumpLocationInOpenedTab( '中/ab.py', 1, 1 )
