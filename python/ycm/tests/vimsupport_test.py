@@ -1293,44 +1293,40 @@ def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
   eq_( vimsupport.VimExpressionToPythonType( gen ), gen )
 
 
-def JumpToLocation_1_test():
-  class AnBuffer():
-    name = '中/ab.py'.encode( 'utf-8' )
-    # name = '中/ab.py'
+def JumpToLocation_BufferFilePathContainsUTF8Word_test():
+  mock_buffer = MockBuffer( [
+    'line1',
+    'line2',
+  ], '中/single_file'.encode( 'utf-8' ), 1 )
 
-  # UnicodeWarning
-  with patch( "vim.current.buffer", AnBuffer ):
-    vimsupport.JumpToLocation( '中/ab.py', 1, 1 )
-
-
-def JumpToLocation_2_test():
-  class AnBuffer():
-    name = None
-    number = 1
-
-  # :enew
-  chinese_dir = 'aaa中bbb'
-  # chinese_dir = 'aaabbb'
-  if not os.path.isdir( chinese_dir ):
-    os.mkdir( chinese_dir )
-  os.chdir( chinese_dir )
-  try:
-    with patch( "vim.current.buffer", AnBuffer ):
-      vimsupport.JumpToLocation( os.getcwd().decode( 'utf-8' ) + '/1', 1, 1 )
-  finally:
-    os.chdir( '..' )
-    os.rmdir( chinese_dir )
+  with patch( "vim.current.buffer", mock_buffer ):
+    vimsupport.JumpToLocation( '中/single_file', 1, 1 )
 
 
-def TryJumpLocationInOpenedTab_test():
-  class Tab():
-    class Win():
-      class buffer():
-        name = '中/ab.py'.encode( 'utf-8' )
-        # name = '中/ab.py'
+def JumpToLocation_BufferWithoutNameWhenCWDContainsUTF8Word_test():
+  mock_buffer = MockBuffer( [
+    'line1',
+    'line2',
+  ], '', 1 )
 
-    windows = [ Win ]
+  with patch( "vim.current.buffer", mock_buffer ):
+    with patch( "os.getcwd", new = lambda: 'aa中bb'.encode( 'utf-8' ) ):
+      filename = os.path.join( 'aa中bb', str( mock_buffer.number ) )
+      vimsupport.JumpToLocation( filename, 1, 1 )
 
-  # UnicodeWarning
-  with patch( "vim.tabpages", [ Tab ] ):
-    vimsupport.TryJumpLocationInOpenedTab( '中/ab.py', 1, 1 )
+
+@patch( 'vim.tabpage' )
+@patch( 'vim.window' )
+def TryJumpLocationInOpenedTab_BufferNameContainsUTF8Word_test( vim_window,
+                                                                vim_tabpage ):
+  mock_buffer = MockBuffer( [
+    'line1',
+    'line2',
+  ], '中/single_file'.encode( 'utf-8' ), 1 )
+
+  tabpages = [ vim_tabpage ]
+  vim_tabpage.windows = [ vim_window ]
+  vim_window.buffer = mock_buffer
+
+  with patch( "vim.tabpages", tabpages ):
+    vimsupport.TryJumpLocationInOpenedTab( '中/single_file', 1, 1 )
