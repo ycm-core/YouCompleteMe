@@ -1297,7 +1297,7 @@ def JumpToLocation_BufferFilePathContainsUTF8Word_test():
   mock_buffer = MockBuffer( [
     'line1',
     'line2',
-  ], '中/single_file'.encode( 'utf-8' ), 1 )
+  ], ToBytes( '中/single_file' ), 1 )
 
   with patch( "vim.current.buffer", mock_buffer ):
     vimsupport.JumpToLocation( '中/single_file', 1, 1 )
@@ -1310,7 +1310,7 @@ def JumpToLocation_BufferWithoutNameWhenCWDContainsUTF8Word_test():
   ], '', 1 )
 
   with patch( "vim.current.buffer", mock_buffer ):
-    with patch( "os.getcwd", new = lambda: 'aa中bb'.encode( 'utf-8' ) ):
+    with patch( "os.getcwd", new = lambda: ToBytes( 'aa中bb' ) ):
       filename = os.path.join( 'aa中bb', str( mock_buffer.number ) )
       vimsupport.JumpToLocation( filename, 1, 1 )
 
@@ -1322,7 +1322,7 @@ def TryJumpLocationInOpenedTab_BufferNameContainsUTF8Word_test( vim_window,
   mock_buffer = MockBuffer( [
     'line1',
     'line2',
-  ], '中/single_file'.encode( 'utf-8' ), 1 )
+  ], ToBytes( '中/single_file' ), 1 )
 
   tabpages = [ vim_tabpage ]
   vim_tabpage.windows = [ vim_window ]
