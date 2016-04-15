@@ -15,16 +15,16 @@ source ci/travis/travis_install.${TRAVIS_OS_NAME}.sh
 # pyenv setup
 #############
 
-# DON'T exit if error
-set +e
-git clone https://github.com/yyuu/pyenv.git ~/.pyenv
-git fetch --tags
-git checkout v20160202
-# Exit if error
-set -e
+export PYENV_ROOT="${HOME}/.pyenv"
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
+if [ ! -d "${PYENV_ROOT}" ]; then
+  git clone https://github.com/yyuu/pyenv.git ${PYENV_ROOT}
+fi
+pushd ${PYENV_ROOT}
+git checkout v20160202
+popd
+
+export PATH="${PYENV_ROOT}/bin:${PATH}"
 
 eval "$(pyenv init -)"
 
