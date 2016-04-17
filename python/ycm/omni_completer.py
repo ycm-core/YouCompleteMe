@@ -90,7 +90,7 @@ class OmniCompleter( Completer ):
 
       items = vim.eval( ''.join( omnifunc_call ) )
 
-      if isinstance( items, dict ):
+      if hasattr( items, '__getitem__' ) and 'words' in items:
         items = items[ 'words' ]
 
       if not hasattr( items, '__iter__' ):
