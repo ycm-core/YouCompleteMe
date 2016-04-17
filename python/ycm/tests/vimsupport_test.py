@@ -39,7 +39,6 @@ import json
 
 def ReplaceChunk_SingleLine_Repl_1_test():
   # Replace with longer range
-  #                  12345678901234567
   result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 1, 1, 5 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
@@ -95,7 +94,6 @@ def ReplaceChunk_SingleLine_Repl_1_test():
 
 def ReplaceChunk_SingleLine_Repl_2_test():
   # Replace with shorter range
-  #                  12345678901234567
   result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 11, 1, 17 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
@@ -112,7 +110,6 @@ def ReplaceChunk_SingleLine_Repl_2_test():
 
 def ReplaceChunk_SingleLine_Repl_3_test():
   # Replace with equal range
-  #                  12345678901234567
   result_buffer = [ ToBytes( "This is a string" ) ]
   start, end = _BuildLocations( 1, 6, 1, 8 )
   ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
@@ -221,6 +218,54 @@ def ReplaceChunk_SingleLine_Del_3_test():
   eq_( [ ToBytes( "This is a string" ) ], result_buffer )
   eq_( line_offset, 0 )
   eq_( char_offset, -4 )
+
+
+def ReplaceChunk_SingleLine_Unicode_ReplaceUnicodeChars_test():
+  # Replace Unicode characters.
+  result_buffer = [ ToBytes( "This Uniçø∂‰ string is in the middle" ) ]
+  start, end = _BuildLocations( 1, 6, 1, 20 )
+  ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
+                                                          end,
+                                                          'Unicode ',
+                                                          0,
+                                                          0,
+                                                          result_buffer )
+
+  eq_( [ ToBytes( "This Unicode string is in the middle" ) ], result_buffer )
+  eq_( line_offset, 0 )
+  eq_( char_offset, -6 )
+
+
+def ReplaceChunk_SingleLine_Unicode_ReplaceAfterUnicode_test():
+  # Replace ASCII characters after Unicode characters in the line.
+  result_buffer = [ ToBytes( "This Uniçø∂‰ string is in the middle" ) ]
+  start, end = _BuildLocations( 1, 30, 1, 43 )
+  ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
+                                                          end,
+                                                          'fåke',
+                                                          0,
+                                                          0,
+                                                          result_buffer )
+
+  eq_( [ ToBytes( "This Uniçø∂‰ string is fåke" ) ], result_buffer )
+  eq_( line_offset, 0 )
+  eq_( char_offset, -8 )
+
+
+def ReplaceChunk_SingleLine_Unicode_Grown_test():
+  # Replace ASCII characters after Unicode characters in the line.
+  result_buffer = [ ToBytes( "a" ) ]
+  start, end = _BuildLocations( 1, 1, 1, 2 )
+  ( line_offset, char_offset ) = vimsupport.ReplaceChunk( start,
+                                                          end,
+                                                          'å',
+                                                          0,
+                                                          0,
+                                                          result_buffer )
+
+  eq_( [ ToBytes( "å" ) ], result_buffer )
+  eq_( line_offset, 0 )
+  eq_( char_offset, 1 ) # Note: byte difference (a = 1 byte, å = 2 bytes)
 
 
 def ReplaceChunk_RemoveSingleLine_test():
