@@ -24,19 +24,11 @@ addons:
      # The Travis apt source whitelist can be found here:
      #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
      - ubuntu-toolchain-r-test  # for new libstdc++
-     - deadsnakes  # for various versions of python
-     - kalakris-cmake # for a more recent version of cmake (needed for ninja-build)
+     - george-edison55-precise-backports # for a more recent version of cmake (3.2.3)
     packages:
+     - cmake-data
      - cmake
      - ninja-build
-     # The confusing part is that on Travis Linux with YCMD_PYTHON_VERSION=3.3,
-     # we build the C++ parts against the below system python3.3, but run
-     # against the pyenv python3.3. This is because stupid cmake 2.8.11 has a
-     # bug preventing it from finding the pyenv pythons (ostensibly; I haven't
-     # checked, but online reports say the issue is gone with cmake 3.4).
-     # Everything still works though, it's just weird.
-     - python3.3
-     - python3.3-dev
      # Everything below is a Python build dep (though it depends on Python
      # version). We need them because pyenv builds Python.
      - libssl-dev
