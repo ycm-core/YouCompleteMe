@@ -1,3 +1,5 @@
+# encoding: utf-8
+#
 # Copyright (C) 2016 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
@@ -488,3 +490,250 @@ class OmniCompleter_test( object ):
       # No FilterAndSortCandidates for cache_omnifunc=0 (we expect the omnifunc
       # to do the filtering?)
       eq_( results,  omnifunc_result[ 'words' ] )
+
+
+  def OmniCompleter_GetCompletions_Cache_List_Unicode_test( self ):
+    omni_completer = OmniCompleter( MakeUserOptions( {
+      'cache_omnifunc': 1
+    } ) )
+
+    contents = '†åsty_π.'
+    request_data = BuildRequestWrap( line_num = 1,
+                                     column_num = 13,
+                                     contents = contents )
+
+
+    # Make sure there is an omnifunc set up.
+    with patch( 'vim.eval', return_value = ToBytes( 'test_omnifunc' ) ):
+      omni_completer.OnFileReadyToParse( request_data )
+
+    omnifunc_result = [ ToBytes( '†est' ),
+                        ToBytes( 'å_unicode_identifier' ),
+                        ToBytes( 'πππππππ yummy πie' ) ]
+
+    # And get the completions
+    with patch( 'vim.eval',
+                new_callable = ExtendedMock,
+                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+      results = omni_completer.ComputeCandidates( request_data )
+      vim_eval.assert_has_exact_calls( [
+        call( 'test_omnifunc(1,"")' ),
+        call( "test_omnifunc(0,'')" ),
+      ] )
+
+      eq_( results, omnifunc_result )
+
+
+  def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( self ):
+    omni_completer = OmniCompleter( MakeUserOptions( {
+      'cache_omnifunc': 0
+    } ) )
+
+    contents = '†åsty_π.'
+    request_data = BuildRequestWrap( line_num = 1,
+                                     column_num = 13,
+                                     contents = contents )
+
+
+    # Make sure there is an omnifunc set up.
+    with patch( 'vim.eval', return_value = ToBytes( 'test_omnifunc' ) ):
+      omni_completer.OnFileReadyToParse( request_data )
+
+    omnifunc_result = [ ToBytes( '†est' ),
+                        ToBytes( 'å_unicode_identifier' ),
+                        ToBytes( 'πππππππ yummy πie' ) ]
+
+    # And get the completions
+    with patch( 'vim.eval',
+                new_callable = ExtendedMock,
+                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+      results = omni_completer.ComputeCandidates( request_data )
+      vim_eval.assert_has_exact_calls( [
+        call( 'test_omnifunc(1,"")' ),
+        call( "test_omnifunc(0,'')" ),
+      ] )
+
+      eq_( results, omnifunc_result )
+
+
+  def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( self ):
+    omni_completer = OmniCompleter( MakeUserOptions( {
+      'cache_omnifunc': 1
+    } ) )
+
+    contents = '†åsty_π.ππ'
+    request_data = BuildRequestWrap( line_num = 1,
+                                     column_num = 17,
+                                     contents = contents )
+
+
+    # Make sure there is an omnifunc set up.
+    with patch( 'vim.eval', return_value = ToBytes( 'test_omnifunc' ) ):
+      omni_completer.OnFileReadyToParse( request_data )
+
+    omnifunc_result = [ ToBytes( '†est' ),
+                        ToBytes( 'å_unicode_identifier' ),
+                        ToBytes( 'πππππππ yummy πie' ) ]
+
+    # And get the completions
+    with patch( 'vim.eval',
+                new_callable = ExtendedMock,
+                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+      results = omni_completer.ComputeCandidates( request_data )
+      vim_eval.assert_has_exact_calls( [
+        call( 'test_omnifunc(1,"")' ),
+        call( "test_omnifunc(0,'ππ')" ),
+      ] )
+
+      # Filtering on unicode is not supported
+      eq_( results, [] )
+
+
+  def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( self ):
+    omni_completer = OmniCompleter( MakeUserOptions( {
+      'cache_omnifunc': 0
+    } ) )
+
+    contents = '†åsty_π.ππ'
+    request_data = BuildRequestWrap( line_num = 1,
+                                     column_num = 17,
+                                     contents = contents )
+
+
+    # Make sure there is an omnifunc set up.
+    with patch( 'vim.eval', return_value = ToBytes( 'test_omnifunc' ) ):
+      omni_completer.OnFileReadyToParse( request_data )
+
+    omnifunc_result = [ ToBytes( 'πππππππ yummy πie' ) ]
+
+    # And get the completions
+    with patch( 'vim.eval',
+                new_callable = ExtendedMock,
+                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+      results = omni_completer.ComputeCandidates( request_data )
+      vim_eval.assert_has_exact_calls( [
+        call( 'test_omnifunc(1,"")' ),
+        call( "test_omnifunc(0,'ππ')" ),
+      ] )
+
+      eq_( results, omnifunc_result )
+
+
+  def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( self ):
+    omni_completer = OmniCompleter( MakeUserOptions( {
+      'cache_omnifunc': 1
+    } ) )
+
+    contents = '†åsty_π.ππ'
+    request_data = BuildRequestWrap( line_num = 1,
+                                     column_num = 17,
+                                     contents = contents )
+
+
+    eq_( request_data[ 'query' ], 'ππ' )
+
+    # Make sure there is an omnifunc set up.
+    with patch( 'vim.eval', return_value = ToBytes( 'test_omnifunc' ) ):
+      omni_completer.OnFileReadyToParse( request_data )
+
+    omnifunc_result = [
+      {
+        'word': ToBytes( 'ålpha∫et' ),
+        'abbr': ToBytes( 'å∫∫®'),
+        'menu': ToBytes( 'µ´~¨á' ),
+        'info': ToBytes( '^~fo' ),
+        'kind': ToBytes( '˚' )
+      },
+      {
+        'word': ToBytes( 'π†´ß†π' ),
+        'abbr': ToBytes( 'ÅııÂÊ‰ÍÊ'),
+        'menu': ToBytes( '˜‰ˆËÊ‰ÍÊ' ),
+        'info': ToBytes( 'ÈˆÏØÊ‰ÍÊ' ),
+        'kind': ToBytes( 'Ê' )
+      }
+    ]
+
+    # And get the completions
+    with patch( 'vim.eval',
+                new_callable = ExtendedMock,
+                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+      results = omni_completer.ComputeCandidates( request_data )
+
+      vim_eval.assert_has_exact_calls( [
+        call( 'test_omnifunc(1,"")' ),
+        call( "test_omnifunc(0,'ππ')" ),
+      ] )
+
+      # Filtering on unicode is not supported
+      eq_( results, [] )
+
+
+  def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( self ):
+    omni_completer = OmniCompleter( MakeUserOptions( {
+      'cache_omnifunc': 1
+    } ) )
+
+    contents = '†åsty_π.t'
+    request_data = BuildRequestWrap( line_num = 1,
+                                     column_num = 14,
+                                     contents = contents )
+
+
+    eq_( request_data[ 'query' ], 't' )
+
+    # Make sure there is an omnifunc set up.
+    with patch( 'vim.eval', return_value = ToBytes( 'test_omnifunc' ) ):
+      omni_completer.OnFileReadyToParse( request_data )
+
+    omnifunc_result = {
+      'words': [
+        {
+          'word': ToBytes( 'ålpha∫et' ),
+          'abbr': ToBytes( 'å∫∫®'),
+          'menu': ToBytes( 'µ´~¨á' ),
+          'info': ToBytes( '^~fo' ),
+          'kind': ToBytes( '˚' )
+        },
+        {
+          'word': ToBytes( 'π†´ß†π' ),
+          'abbr': ToBytes( 'ÅııÂÊ‰ÍÊ'),
+          'menu': ToBytes( '˜‰ˆËÊ‰ÍÊ' ),
+          'info': ToBytes( 'ÈˆÏØÊ‰ÍÊ' ),
+          'kind': ToBytes( 'Ê' )
+        },
+        {
+          'word': ToBytes( 'test' ),
+          'abbr': ToBytes( 'ÅııÂÊ‰ÍÊ'),
+          'menu': ToBytes( '˜‰ˆËÊ‰ÍÊ' ),
+          'info': ToBytes( 'ÈˆÏØÊ‰ÍÊ' ),
+          'kind': ToBytes( 'Ê' )
+        }
+      ]
+    }
+
+    # And get the completions
+    with patch( 'vim.eval',
+                new_callable = ExtendedMock,
+                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+      results = omni_completer.ComputeCandidates( request_data )
+
+      vim_eval.assert_has_exact_calls( [
+        call( 'test_omnifunc(1,"")' ),
+        call( "test_omnifunc(0,'t')" ),
+      ] )
+
+      # Note: the filtered result it all unicode objects (not bytes) because it
+      # passed throught the FilterAndSortCandidates machinery (via the server)
+      eq_( results, [ {
+        'word': 'test',
+        'abbr': 'ÅııÂÊ‰ÍÊ',
+        'menu': '˜‰ˆËÊ‰ÍÊ',
+        'info': 'ÈˆÏØÊ‰ÍÊ',
+        'kind': 'Ê'
+      } ] )

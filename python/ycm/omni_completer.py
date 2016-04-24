@@ -66,8 +66,7 @@ class OmniCompleter( Completer ):
 
   def ComputeCandidates( self, request_data ):
     if self.ShouldUseCache():
-      return super( OmniCompleter, self ).ComputeCandidates(
-        request_data )
+      return super( OmniCompleter, self ).ComputeCandidates( request_data )
     else:
       if self.ShouldUseNowInner( request_data ):
         return self.ComputeCandidatesInner( request_data )
@@ -97,7 +96,7 @@ class OmniCompleter( Completer ):
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      return [ i for i in items if bool( i ) ]
+      return list( filter( bool, items ) )
 
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
