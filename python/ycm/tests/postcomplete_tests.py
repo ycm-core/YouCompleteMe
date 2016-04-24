@@ -28,13 +28,12 @@ from builtins import *  # noqa
 from ycm.test_utils import MockVimModule
 MockVimModule()
 
-from ycmd.utils import ToBytes
-
 import contextlib
 from hamcrest import assert_that, empty
 from mock import MagicMock, DEFAULT, patch
 from nose.tools import eq_, ok_
 
+from ycmd.utils import ToBytes
 from ycm import vimsupport
 from ycm.youcompleteme import YouCompleteMe
 

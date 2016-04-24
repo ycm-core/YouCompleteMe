@@ -72,10 +72,8 @@ def NoseTests( extra_args ):
 
 def Main():
   ( parsed_args, extra_args ) = ParseArguments()
-
   if not parsed_args.no_flake8:
     RunFlake8()
-
   BuildYcmdLibs( parsed_args )
   NoseTests( extra_args )
 
