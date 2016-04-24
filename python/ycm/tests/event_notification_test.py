@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import MockVimModule, ExtendedMock
+from ycm.test_utils import MockVimModule, ExtendedMock, DEFAULT_CLIENT_OPTIONS
 MockVimModule()
 
 import contextlib
@@ -36,19 +36,6 @@ from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
 
 from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
-
-
-# The default options which are only relevant to the client, not the server and
-# thus are not part of default_options.json, but are required for a working
-# YouCompleteMe object.
-DEFAULT_CLIENT_OPTIONS = {
-  'server_log_level': 'info',
-  'extra_conf_vim_data': [],
-  'show_diagnostics_ui': 1,
-  'enable_diagnostic_signs': 1,
-  'enable_diagnostic_highlighting': 0,
-  'always_populate_location_list': 0,
-}
 
 
 def PostVimMessage_Call( message ):
