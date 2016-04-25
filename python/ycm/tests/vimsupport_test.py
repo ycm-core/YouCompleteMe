@@ -1293,26 +1293,20 @@ def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
   eq_( vimsupport.VimExpressionToPythonType( gen ), gen )
 
 
-def JumpToLocation_BufferFilePathContainsUTF8Word_test():
+def GetBufferFilepath_ShouldReturnUnicode_test():
   mock_buffer = MockBuffer( [
     'line1',
     'line2',
   ], ToBytes( '中/single_file' ), 1 )
 
-  with patch( "vim.current.buffer", mock_buffer ):
-    vimsupport.JumpToLocation( '中/single_file', 1, 1 )
+  eq_( vimsupport.GetBufferFilepath( mock_buffer ), u'中/single_file' )
 
-
-def JumpToLocation_BufferWithoutNameWhenCWDContainsUTF8Word_test():
-  mock_buffer = MockBuffer( [
-    'line1',
-    'line2',
-  ], '', 1 )
-
-  with patch( "vim.current.buffer", mock_buffer ):
-    with patch( "os.getcwd", new = lambda: ToBytes( 'aa中bb' ) ):
-      filename = os.path.join( 'aa中bb', str( mock_buffer.number ) )
-      vimsupport.JumpToLocation( filename, 1, 1 )
+  mock_buffer.name = ''
+  folder_path = u'aa中bb'
+  with patch( "os.getcwdu", new = lambda: folder_path ):
+    with patch( "os.getcwd", new = lambda: folder_path ):
+      eq_( vimsupport.GetBufferFilepath( mock_buffer ),
+           os.path.join( folder_path, u'1' ) )
 
 
 @patch( 'vim.tabpage' )
@@ -1328,5 +1322,7 @@ def TryJumpLocationInOpenedTab_BufferNameContainsUTF8Word_test( vim_window,
   vim_tabpage.windows = [ vim_window ]
   vim_window.buffer = mock_buffer
 
-  with patch( "vim.tabpages", tabpages ):
-    vimsupport.TryJumpLocationInOpenedTab( '中/single_file', 1, 1 )
+  with patch( 'os.path.realpath', new = lambda x: x ):
+    with patch( "vim.tabpages", tabpages ):
+      eq_( vimsupport.TryJumpLocationInOpenedTab( u'中/single_file', 1, 1 ),
+           True )

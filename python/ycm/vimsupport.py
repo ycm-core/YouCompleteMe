@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from future.utils import iterkeys
+from future.utils import iterkeys, PY2
 import vim
 import os
 import tempfile
@@ -154,7 +154,7 @@ def GetBufferFilepath( buffer_object ):
   # buffer name so we use the buffer number for that. Also, os.getcwd() throws
   # an exception when the CWD has been deleted so we handle that.
   try:
-    folder_path = ToUnicode( os.getcwd() )
+    folder_path = os.getcwdu() if PY2 else os.getcwd()
   except OSError:
     folder_path = tempfile.gettempdir()
   return os.path.join( folder_path, str( buffer_object.number ) )
