@@ -63,6 +63,10 @@ def PathToPythonInterpreter():
     raise RuntimeError( "Path in 'g:ycm_server_python_interpreter' option "
                         "does not point to a valid Python 2.6+ or 3.3+." )
 
+  python_interpreter = _PathToPythonUsedDuringBuild()
+  if IsPythonVersionCorrect( python_interpreter ):
+    return python_interpreter
+
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
   # We cannot use sys.executable on Windows because for unknown reasons, it
   # returns the Vim executable. Instead, we use sys.exec_prefix to deduce the
@@ -90,9 +94,20 @@ def PathToPythonInterpreter():
                       "option." )
 
 
+def _PathToPythonUsedDuringBuild():
+  from ycmd import utils
+
+  try:
+    filepath = os.path.join( DIR_OF_YCMD, 'PYTHON_USED_DURING_BUILDING' )
+    return utils.ReadFile( filepath ).strip()
+  # We need to check for IOError for Python2 and OSError for Python3
+  except ( IOError, OSError ):
+    return None
+
+
 def EndsWithPython( path ):
   """Check if given path ends with a python 2.6+ or 3.3+ name."""
-  return PYTHON_BINARY_REGEX.search( path ) is not None
+  return path and PYTHON_BINARY_REGEX.search( path ) is not None
 
 
 def IsPythonVersionCorrect( path ):
