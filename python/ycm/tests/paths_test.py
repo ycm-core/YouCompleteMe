@@ -66,6 +66,8 @@ def EndsWithPython_Python3Paths_test():
 
 def EndsWithPython_BadPaths_test():
   not_python_paths = [
+    None,
+    '',
     '/opt/local/bin/vim',
     r'C:\Program Files\Vim\vim74\gvim.exe',
     '/usr/bin/python2.5',
