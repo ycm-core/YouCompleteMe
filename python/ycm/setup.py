@@ -42,18 +42,12 @@ def SetUpSystemPaths():
 
 
 def SetUpYCM():
-  from ycm import base, paths
-  from ycmd import user_options_store, utils
+  from ycm import base
+  from ycmd import user_options_store
   from ycm.youcompleteme import YouCompleteMe
 
   base.LoadJsonDefaultsIntoVim()
 
   user_options_store.SetAll( base.BuildServerConf() )
-
-  popen_args = [ paths.PathToPythonInterpreter(),
-                 paths.PathToCheckCoreVersion() ]
-
-  if utils.SafePopen( popen_args ).wait() == 2:
-    raise RuntimeError( 'YCM support libs too old, PLEASE RECOMPILE.' )
 
   return YouCompleteMe( user_options_store.GetAll() )
