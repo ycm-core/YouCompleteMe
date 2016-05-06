@@ -40,7 +40,8 @@ from ycmd.utils import WaitUntilProcessIsTerminated
 # thus are not part of default_options.json, but are required for a working
 # YouCompleteMe object.
 DEFAULT_CLIENT_OPTIONS = {
-  'server_log_level': 'info',
+  'log_level': 'info',
+  'keep_logfiles': 0,
   'extra_conf_vim_data': [],
   'show_diagnostics_ui': 1,
   'enable_diagnostic_signs': 1,
@@ -80,6 +81,14 @@ def _WaitUntilReady( timeout = 5 ):
       time.sleep( 0.1 )
 
 
+def StopServer( ycm ):
+  try:
+    ycm.OnVimLeave()
+    WaitUntilProcessIsTerminated( ycm._server_popen )
+  except Exception:
+    pass
+
+
 def YouCompleteMeInstance( custom_options = {} ):
   """Defines a decorator function for tests that passes a unique YouCompleteMe
   instance as a parameter. This instance is initialized with the default options
@@ -92,8 +101,8 @@ def YouCompleteMeInstance( custom_options = {} ):
 
     from ycm.tests import YouCompleteMeInstance
 
-    @YouCompleteMeInstance( { 'server_log_level': 'debug',
-                              'server_keep_logfiles': 1 } )
+    @YouCompleteMeInstance( { 'log_level': 'debug',
+                              'keep_logfiles': 1 } )
     def Debug_test( ycm ):
         ...
   """
@@ -105,7 +114,6 @@ def YouCompleteMeInstance( custom_options = {} ):
       try:
         test( ycm, *args, **kwargs )
       finally:
-        ycm.OnVimLeave()
-        WaitUntilProcessIsTerminated( ycm._server_popen )
+        StopServer( ycm )
     return Wrapper
   return Decorator
