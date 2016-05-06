@@ -100,8 +100,8 @@ Contents ~
   21. The |g:ycm_seed_identifiers_with_syntax| option
   22. The |g:ycm_extra_conf_vim_data| option
   23. The |g:ycm_server_python_interpreter| option
-  24. The |g:ycm_server_keep_logfiles| option
-  25. The |g:ycm_server_log_level| option
+  24. The |g:ycm_keep_logfiles| option
+  25. The |g:ycm_log_level| option
   26. The |g:ycm_auto_start_csharp_server| option
   27. The |g:ycm_auto_stop_csharp_server| option
   28. The |g:ycm_csharp_server_port| option
@@ -1418,12 +1418,9 @@ semantic completion engine.
 -------------------------------------------------------------------------------
 The *:YcmToggleLogs* command
 
-This command automatically opens in windows the stdout and stderr logfiles
-written by the ycmd server [43]. If one or both logfiles are already opened,
-they are automatically closed. 'stderr' or 'stdout' can be specified as an
-argument of this command to only open the corresponding logfile instead of
-both. If this logfile is already opened, it will be closed. Only for debugging
-purpose.
+This command opens in separate windows the logfiles given as arguments or
+closes them if they are already open in the editor. When no argument is given,
+list the available logfiles. Only for debugging purpose.
 
 -------------------------------------------------------------------------------
 The *:YcmCompleter* command
@@ -2285,29 +2282,30 @@ Default: "''"
   let g:ycm_server_python_interpreter = ''
 <
 -------------------------------------------------------------------------------
-The *g:ycm_server_keep_logfiles* option
+The *g:ycm_keep_logfiles* option
 
-When this option is set to '1', the ycmd completion server [43] will keep the
-logfiles around after shutting down (they are deleted on shutdown by default).
+When this option is set to '1', YCM and the ycmd completion server [43] will
+keep the logfiles around after shutting down (they are deleted on shutdown by
+default).
 
 To see where the logfiles are, call |:YcmDebugInfo|.
 
 Default: '0'
 >
-  let g:ycm_server_keep_logfiles = 0
+  let g:ycm_keep_logfiles = 0
 <
 -------------------------------------------------------------------------------
-The *g:ycm_server_log_level* option
+The *g:ycm_log_level* option
 
-The logging level that the ycmd completion server [43] uses. Valid values are
-the following, from most verbose to least verbose: - 'debug' - 'info' -
-'warning' - 'error' - 'critical'
+The logging level that YCM and the ycmd completion server [43] use. Valid
+values are the following, from most verbose to least verbose: - 'debug' -
+'info' - 'warning' - 'error' - 'critical'
 
 Note that 'debug' is _very_ verbose.
 
 Default: 'info'
 >
-  let g:ycm_server_log_level = 'info'
+  let g:ycm_log_level = 'info'
 <
 -------------------------------------------------------------------------------
 The *g:ycm_auto_start_csharp_server* option
@@ -2741,9 +2739,9 @@ to the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
 Also, you may want to run the |:YcmDebugInfo| command; it will make YCM spew
-out various debugging information, including the ycmd [43] logfile paths and
-the compile flags for the current file if the file is a C-family language file
-and you have compiled in Clang support. Logfiles can be automatically opened in
+out various debugging information, including the YCM and ycmd [43] logfile
+paths and the compile flags for the current file if the file is a C-family
+language file and you have compiled in Clang support. Logfiles can be opened in
 the editor using the |:YcmToggleLogs| command.
 
 -------------------------------------------------------------------------------
