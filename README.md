@@ -1152,12 +1152,9 @@ completion engine.
 
 ### The `:YcmToggleLogs` command
 
-This command automatically opens in windows the stdout and stderr logfiles
-written by the [ycmd server][ycmd]. If one or both logfiles are already opened,
-they are automatically closed. `stderr` or `stdout` can be specified as an
-argument of this command to only open the corresponding logfile instead of both.
-If this logfile is already opened, it will be closed. Only for debugging
-purpose.
+This command opens in separate windows the logfiles given as arguments or closes
+them if they are already open in the editor. When no argument is given, list the
+available logfiles. Only for debugging purpose.
 
 ### The `:YcmCompleter` command
 
@@ -2022,23 +2019,24 @@ Default: `''`
 let g:ycm_server_python_interpreter = ''
 ```
 
-### The `g:ycm_server_keep_logfiles` option
+### The `g:ycm_keep_logfiles` option
 
-When this option is set to `1`, the [ycmd completion server][ycmd] will keep the
-logfiles around after shutting down (they are deleted on shutdown by default).
+When this option is set to `1`, YCM and the [ycmd completion server][ycmd] will
+keep the logfiles around after shutting down (they are deleted on shutdown by
+default).
 
 To see where the logfiles are, call `:YcmDebugInfo`.
 
 Default: `0`
 
 ```viml
-let g:ycm_server_keep_logfiles = 0
+let g:ycm_keep_logfiles = 0
 ```
 
-### The `g:ycm_server_log_level` option
+### The `g:ycm_log_level` option
 
-The logging level that the [ycmd completion server][ycmd] uses. Valid values are
-the following, from most verbose to least verbose:
+The logging level that YCM and the [ycmd completion server][ycmd] use. Valid
+values are the following, from most verbose to least verbose:
 - `debug`
 - `info`
 - `warning`
@@ -2050,7 +2048,7 @@ Note that `debug` is _very_ verbose.
 Default: `info`
 
 ```viml
-let g:ycm_server_log_level = 'info'
+let g:ycm_log_level = 'info'
 ```
 
 ### The `g:ycm_auto_start_csharp_server` option
@@ -2499,10 +2497,10 @@ the message log if it encounters problems. It's likely you misconfigured
 something and YCM is complaining about it.
 
 Also, you may want to run the `:YcmDebugInfo` command; it will make YCM spew out
-various debugging information, including the [ycmd][] logfile paths and the
-compile flags for the current file if the file is a C-family language file and
-you have compiled in Clang support. Logfiles can be automatically opened in the
-editor using the `:YcmToggleLogs` command.
+various debugging information, including the YCM and [ycmd][] logfile paths and
+the compile flags for the current file if the file is a C-family language file
+and you have compiled in Clang support. Logfiles can be opened in the editor
+using [the `:YcmToggleLogs` command](#the-ycmtogglelogs-command).
 
 ### Sometimes it takes much longer to get semantic completions than normal
 

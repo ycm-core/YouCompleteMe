@@ -12,8 +12,8 @@ the brackets) _before_ filing your issue:**
   search.][search])
 - [ ] If filing a bug report, I have included the output of `vim --version`.
 - [ ] If filing a bug report, I have included the output of `:YcmDebugInfo`.
-- [ ] If filing a bug report, I have included the output of
-  `:YcmToggleLogs stderr`.
+- [ ] If filing a bug report, I have attached the contents of the logfiles using
+  the `:YcmToggleLogs` command.
 - [ ] If filing a bug report, I have included which OS (including specific OS
   version) I am using.
 - [ ] If filing a bug report, I have included a minimal test case that reproduces
