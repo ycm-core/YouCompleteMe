@@ -176,7 +176,7 @@ def MockVimCommand( command ):
 
 class VimBuffer( object ):
   """An object that looks like a vim.buffer object:
-   - |name|    : full path of the buffer;
+   - |name|    : full path of the buffer with symbolic links resolved;
    - |number|  : buffer number;
    - |contents|: list of lines representing the buffer contents;
    - |filetype|: buffer filetype. Empty string if no filetype is set;
@@ -191,7 +191,7 @@ class VimBuffer( object ):
                       modified = True,
                       window = None,
                       omnifunc = '' ):
-    self.name = name
+    self.name = os.path.realpath( name ) if name else ''
     self.number = number
     self.contents = contents
     self.filetype = filetype
