@@ -80,11 +80,13 @@ let g:ycm_key_detailed_diagnostics =
 let g:ycm_cache_omnifunc =
       \ get( g:, 'ycm_cache_omnifunc', 1 )
 
-let g:ycm_server_log_level =
-      \ get( g:, 'ycm_server_log_level', 'info' )
+let g:ycm_log_level =
+      \ get( g:, 'ycm_log_level',
+      \ get( g:, 'ycm_server_log_level', 'info' ) )
 
-let g:ycm_server_keep_logfiles =
-      \ get( g:, 'ycm_server_keep_logfiles', 0 )
+let g:ycm_keep_logfiles =
+      \ get( g:, 'ycm_keep_logfiles',
+      \ get( g:, 'ycm_server_keep_logfiles', 0 ) )
 
 let g:ycm_extra_conf_vim_data =
       \ get( g:, 'ycm_extra_conf_vim_data', [] )
