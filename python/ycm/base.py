@@ -35,17 +35,16 @@ YCM_VAR_PREFIX = 'ycm_'
 def BuildServerConf():
   """Builds a dictionary mapping YCM Vim user options to values. Option names
   don't have the 'ycm_' prefix."""
-
-  vim_globals = vimsupport.GetReadOnlyVimGlobals( force_python_objects = True )
+  # We only evaluate the keys of the vim globals and not the whole dictionary
+  # to avoid unicode issues.
+  # See https://github.com/Valloric/YouCompleteMe/pull/2151 for details.
+  keys = vimsupport.GetVimGlobalsKeys()
   server_conf = {}
-  for key, value in iteritems( vim_globals ):
+  for key in keys:
     if not key.startswith( YCM_VAR_PREFIX ):
       continue
-    try:
-      new_value = int( value )
-    except:
-      new_value = value
     new_key = key[ len( YCM_VAR_PREFIX ): ]
+    new_value = vimsupport.VimExpressionToPythonType( 'g:' + key )
     server_conf[ new_key ] = new_value
 
   return server_conf
@@ -53,11 +52,10 @@ def BuildServerConf():
 
 def LoadJsonDefaultsIntoVim():
   defaults = user_options_store.DefaultOptions()
-  vim_defaults = {}
   for key, value in iteritems( defaults ):
-    vim_defaults[ 'ycm_' + key ] = value
-
-  vimsupport.LoadDictIntoVimGlobals( vim_defaults, overwrite = False )
+    new_key = 'g:ycm_' + key
+    if not vimsupport.VariableExists( new_key ):
+      vimsupport.SetVariableValue( new_key, value )
 
 
 def CompletionStartColumn():

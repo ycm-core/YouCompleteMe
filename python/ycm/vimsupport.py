@@ -294,27 +294,8 @@ def ConvertDiagnosticsToQfList( diagnostics ):
   return [ ConvertDiagnosticToQfFormat( x ) for x in diagnostics ]
 
 
-# Given a dict like {'a': 1}, loads it into Vim as if you ran 'let g:a = 1'
-# When |overwrite| is True, overwrites the existing value in Vim.
-def LoadDictIntoVimGlobals( new_globals, overwrite = True ):
-  extend_option = '"force"' if overwrite else '"keep"'
-
-  # We need to use json.dumps because that won't use the 'u' prefix on strings
-  # which Vim would bork on.
-  vim.eval( 'extend( g:, {0}, {1})'.format( json.dumps( new_globals ),
-                                            extend_option ) )
-
-
-# Changing the returned dict will NOT change the value in Vim.
-def GetReadOnlyVimGlobals( force_python_objects = False ):
-  if force_python_objects:
-    return vim.eval( 'g:' )
-
-  try:
-    # vim.vars is fairly new so it might not exist
-    return vim.vars
-  except:
-    return vim.eval( 'g:' )
+def GetVimGlobalsKeys():
+  return vim.eval( 'keys( g: )' )
 
 
 def VimExpressionToPythonType( vim_expression ):
@@ -491,8 +472,8 @@ def EchoTextVimWidth( text ):
 
   EchoText( truncated_text, False )
 
-  vim.command( 'let &ruler = {0}'.format( old_ruler ) )
-  vim.command( 'let &showcmd = {0}'.format( old_showcmd ) )
+  SetVariableValue( '&ruler', old_ruler )
+  SetVariableValue( '&showcmd', old_showcmd )
 
 
 def EscapeForVim( text ):
@@ -514,7 +495,7 @@ def VariableExists( variable ):
 
 
 def SetVariableValue( variable, value ):
-  vim.command( "let {0} = '{1}'".format( variable, EscapeForVim( value ) ) )
+  vim.command( "let {0} = {1}".format( variable, json.dumps( value ) ) )
 
 
 def GetVariableValue( variable ):
