@@ -47,6 +47,8 @@ def ParseArguments():
   parser = argparse.ArgumentParser()
   parser.add_argument( '--skip-build', action = 'store_true',
                        help = 'Do not build ycmd before testing.' )
+  parser.add_argument( '--no-flake8', action = 'store_true',
+                       help = 'Do not run flake8' )
 
   return parser.parse_known_args()
 
@@ -70,7 +72,8 @@ def NoseTests( extra_args ):
 
 def Main():
   ( parsed_args, extra_args ) = ParseArguments()
-  RunFlake8()
+  if not parsed_args.no_flake8:
+    RunFlake8()
   BuildYcmdLibs( parsed_args )
   NoseTests( extra_args )
 

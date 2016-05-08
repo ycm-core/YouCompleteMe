@@ -25,6 +25,7 @@ from builtins import *  # noqa
 
 import vim
 from ycm import vimsupport
+from ycmd import utils
 from ycmd.responses import ServerError
 from ycmd.completers.completer import Completer
 from ycm.client.base_request import BaseRequest, HandleServerException
@@ -65,8 +66,7 @@ class OmniCompleter( Completer ):
 
   def ComputeCandidates( self, request_data ):
     if self.ShouldUseCache():
-      return super( OmniCompleter, self ).ComputeCandidates(
-        request_data )
+      return super( OmniCompleter, self ).ComputeCandidates( request_data )
     else:
       if self.ShouldUseNowInner( request_data ):
         return self.ComputeCandidatesInner( request_data )
@@ -80,6 +80,7 @@ class OmniCompleter( Completer ):
     try:
       return_value = int( vim.eval( self._omnifunc + '(1,"")' ) )
       if return_value < 0:
+        # FIXME: Technically, if the return is -1 we should raise an error
         return []
 
       omnifunc_call = [ self._omnifunc,
@@ -89,12 +90,14 @@ class OmniCompleter( Completer ):
 
       items = vim.eval( ''.join( omnifunc_call ) )
 
-      if 'words' in items:
+      if isinstance( items, dict ) and 'words' in items:
         items = items[ 'words' ]
+
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
       return list( filter( bool, items ) )
+
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )
@@ -102,7 +105,7 @@ class OmniCompleter( Completer ):
 
 
   def OnFileReadyToParse( self, request_data ):
-    self._omnifunc = vim.eval( '&omnifunc' )
+    self._omnifunc = utils.ToUnicode( vim.eval( '&omnifunc' ) )
 
 
   def FilterAndSortCandidatesInner( self, candidates, sort_property, query ):

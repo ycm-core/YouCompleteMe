@@ -30,7 +30,7 @@ import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToUnicode
+from ycmd.utils import ToUnicode, ToBytes
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -232,7 +232,7 @@ def AddDiagnosticSyntaxMatch( line_num,
 
 
 # Clamps the line and column numbers so that they are not past the contents of
-# the buffer. Numbers are 1-based.
+# the buffer. Numbers are 1-based byte offsets.
 def LineAndColumnNumbersClamped( line_num, column_num ):
   new_line_num = line_num
   new_column_num = column_num
@@ -690,6 +690,9 @@ def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
 #
 # returns the delta (in lines and characters) that any position after the end
 # needs to be adjusted by.
+#
+# NOTE: Works exclusively with bytes() instances and byte offsets as returned
+# by ycmd and used within the Vim buffers
 def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
                   vim_buffer, locations = None ):
   # ycmd's results are all 1-based, but vim's/python's are all 0-based
@@ -703,9 +706,11 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
   if source_lines_count == 1:
     end_column += char_delta
 
-  replacement_lines = replacement_text.splitlines( False )
+  # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
+  # so we convert to bytes
+  replacement_lines = ToBytes( replacement_text ).splitlines( False )
   if not replacement_lines:
-    replacement_lines = [ '' ]
+    replacement_lines = [ bytes( b'' ) ]
   replacement_lines_count = len( replacement_lines )
 
   end_existing_text = vim_buffer[ end_line ][ end_column : ]

@@ -400,9 +400,10 @@ class YouCompleteMe( object ):
         self._HasCompletionsThatCouldBeCompletedWithMoreText_OlderVim
 
 
-  def _FilterToMatchingCompletions_NewerVim( self, completions,
+  def _FilterToMatchingCompletions_NewerVim( self,
+                                             completions,
                                              full_match_only ):
-    """ Filter to completions matching the item Vim said was completed """
+    """Filter to completions matching the item Vim said was completed"""
     completed = vimsupport.GetVariableValue( 'v:completed_item' )
     for completion in completions:
       item = ConvertCompletionDataToVimData( completion )
@@ -410,7 +411,8 @@ class YouCompleteMe( object ):
                       else [ 'word' ] )
 
       def matcher( key ):
-          return completed.get( key, "" ) == item.get( key, "" )
+        return ( utils.ToUnicode( completed.get( key, "" ) ) ==
+                 utils.ToUnicode( item.get( key, "" ) ) )
 
       if all( [ matcher( i ) for i in match_keys ] ):
         yield completion
@@ -438,12 +440,12 @@ class YouCompleteMe( object ):
     if not completed_item:
       return False
 
-    completed_word = completed_item[ 'word' ]
+    completed_word = utils.ToUnicode( completed_item[ 'word' ] )
     if not completed_word:
       return False
 
-    # Sometime CompleteDone is called after the next character is inserted
-    # If so, use inserted character to filter possible completions further
+    # Sometimes CompleteDone is called after the next character is inserted.
+    # If so, use inserted character to filter possible completions further.
     text = vimsupport.TextBeforeCursor()
     reject_exact_match = True
     if text and text[ -1 ] != completed_word[ -1 ]:
@@ -451,7 +453,8 @@ class YouCompleteMe( object ):
       completed_word += text[ -1 ]
 
     for completion in completions:
-      word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+      word = utils.ToUnicode(
+          ConvertCompletionDataToVimData( completion )[ 'word' ] )
       if reject_exact_match and word == completed_word:
         continue
       if word.startswith( completed_word ):
@@ -464,12 +467,12 @@ class YouCompleteMe( object ):
     # No support for multiple line completions
     text = vimsupport.TextBeforeCursor()
     for completion in completions:
-      word = ConvertCompletionDataToVimData( completion )[ 'word' ]
+      word = utils.ToUnicode(
+          ConvertCompletionDataToVimData( completion )[ 'word' ] )
       for i in range( 1, len( word ) - 1 ): # Excluding full word
-        if text[ -1 * i  : ] == word[ : i ]:
+        if text[ -1 * i : ] == word[ : i ]:
           return True
     return False
-
 
 
   def _OnCompleteDone_Csharp( self ):
