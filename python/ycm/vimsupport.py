@@ -851,7 +851,9 @@ def WriteToPreviewWindow( message ):
 def CheckFilename( filename ):
   """Check if filename is openable."""
   try:
-    open( filename ).close()
+    # We don't want to check for encoding issues when trying to open the file
+    # so we open it in binary mode.
+    open( filename, mode = 'rb' ).close()
   except TypeError:
     raise RuntimeError( "'{0}' is not a valid filename".format( filename ) )
   except IOError as error:
