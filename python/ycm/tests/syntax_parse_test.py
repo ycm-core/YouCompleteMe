@@ -30,12 +30,13 @@ import os
 from nose.tools import eq_
 from hamcrest import assert_that, has_items
 from ycm import syntax_parse
+from ycmd.utils import ReadFile
 
 
 def ContentsOfTestFile( test_file ):
   dir_of_script = os.path.dirname( os.path.abspath( __file__ ) )
   full_path_to_test_file = os.path.join( dir_of_script, 'testdata', test_file )
-  return open( full_path_to_test_file ).read()
+  return ReadFile( full_path_to_test_file )
 
 
 
