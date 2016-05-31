@@ -33,6 +33,7 @@ YouCompleteMe: a code-completion engine for Vim
         - [Refactoring and FixIt Commands](#refactoring-and-fixit-commands)
         - [Miscellaneous Commands](#miscellaneous-commands)
 - [Functions](#functions)
+- [Autocommands](#autocommands)
 - [Options](#options)
 - [FAQ](#faq)
 - [Contributor Code of Conduct](#contributor-code-of-conduct)
@@ -1178,7 +1179,11 @@ maps the `<leader>jd` sequence to the longer subcommand invocation.
 These commands are useful for jumping around and exploring code. When moving
 the cursor, the subcommands add entries to Vim's `jumplist` so you can use
 `CTRL-O` to jump back to where you where before invoking the command (and
-`CTRL-I` to jump forward; see `:h jumplist` for details).
+`CTRL-I` to jump forward; see `:h jumplist` for details). If there is more
+than one destination, the quickfix list (see `:h quickfix`) is populated with
+the available locations and opened to full width at the bottom of the screen.
+You can change this behavior by using [the `YcmQuickFixOpened`
+autocommand](#the-ycmquickfixopened-autocommand).
 
 #### The `GoToInclude` subcommand
 
@@ -1399,7 +1404,9 @@ you that this is about to happen.
 Once the modifications have been made, the quickfix list (see `:help quickfix`)
 is opened and populated with the locations of all modifications. This can be
 used to review all automatic changes made. Typically, use the `CTRL-W
-<enter>` combination to open the selected file in a new split.
+<enter>` combination to open the selected file in a new split. It is possible
+to customize how the quickfix window is opened by using [the `YcmQuickFixOpened`
+autocommand](#the-ycmquickfixopened-autocommand).
 
 The buffers are *not* saved automatically. That is, you must save the modified
 buffers manually after reviewing the changes from the quickfix list. Changes
@@ -1496,6 +1503,26 @@ For example:
   call youcompleteme#GetWarningCount()
 ```
 
+Autocommands
+------------
+
+### The `YcmQuickFixOpened` autocommand
+
+This `User` autocommand is fired when YCM opens the quickfix window in response
+to the `GoTo*` and `RefactorRename` subcommands. By default, the quickfix window
+is opened to full width at the bottom of the screen and its height is set to fit
+all entries. This behavior can be overridden by using the `YcmQuickFixOpened`
+autocommand. For instance:
+```viml
+function s:CustomizeYcmQuickFixWindow()
+  " Move the window at the top of the screen.
+  execute "wincmd K"
+  " Set the window height to 5.
+  execute "5wincmd _"
+endfunction
+
+autocmd User YcmQuickFixOpened call s:CustomizeYcmQuickFixWindow()
+```
 
 Options
 -------

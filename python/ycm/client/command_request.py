@@ -24,7 +24,6 @@ standard_library.install_aliases()
 from builtins import *  # noqa
 
 from requests.exceptions import ReadTimeout
-import vim
 
 from ycmd.responses import ServerError
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
@@ -93,8 +92,9 @@ class CommandRequest( BaseRequest ):
   def _HandleGotoResponse( self ):
     if isinstance( self._response, list ):
       vimsupport.SetQuickFixList(
-              [ _BuildQfListItem( x ) for x in self._response ] )
-      vim.eval( 'youcompleteme#OpenGoToList()' )
+        [ _BuildQfListItem( x ) for x in self._response ],
+        focus = True,
+        autoclose = True )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
                                  self._response[ 'line_num' ],

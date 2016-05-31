@@ -826,12 +826,10 @@ endfunction
 
 
 function! youcompleteme#OpenGoToList()
-  set lazyredraw
-  cclose
-  execute 'belowright copen 3'
-  set nolazyredraw
-  au WinLeave <buffer> q  " automatically leave, if an option is chosen
-  redraw!
+  exec s:python_command "vimsupport.PostVimMessage("
+    \ "'WARNING: youcompleteme#OpenGoToList function is deprecated."
+    \ "Do NOT use it.')"
+  exec s:python_command "vimsupport.OpenQuickFixList( True, True )"
 endfunction
 
 
