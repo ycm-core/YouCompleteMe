@@ -253,13 +253,39 @@ def SetLocationList( diagnostics ):
   vim.eval( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
 
 
-def SetQuickFixList( quickfix_list, display=False ):
-  """list should be in qflist format: see ":h setqflist" for details"""
+def SetQuickFixList( quickfix_list, focus = False, autoclose = False ):
+  """Populate the quickfix list and open it. List should be in qflist format:
+  see ":h setqflist" for details. When focus is set to True, the quickfix
+  window becomes the active window. When autoclose is set to True, the quickfix
+  window is automatically closed after an entry is selected."""
   vim.eval( 'setqflist( {0} )'.format( json.dumps( quickfix_list ) ) )
+  OpenQuickFixList( focus, autoclose )
 
-  if display:
-    vim.command( 'copen {0}'.format( len( quickfix_list ) ) )
+
+def OpenQuickFixList( focus = False, autoclose = False ):
+  """Open the quickfix list to full width at the bottom of the screen with its
+  height automatically set to fit all entries. This behavior can be overridden
+  by using the YcmQuickFixOpened autocommand.
+  See the SetQuickFixList function for the focus and autoclose options."""
+  vim.command( 'botright copen' )
+
+  SetFittingHeightForCurrentWindow()
+
+  if autoclose:
+    vim.command( 'au WinLeave <buffer> q' )
+
+  vim.command( 'doautocmd User YcmQuickFixOpened' )
+
+  if not focus:
     JumpToPreviousWindow()
+
+
+def SetFittingHeightForCurrentWindow():
+  width = GetIntValue( 'winwidth( 0 )' )
+  height = 0
+  for line in vim.current.buffer:
+    height += len( line ) // width + 1
+  vim.command( '{0}wincmd _'.format( height ) )
 
 
 def ConvertDiagnosticsToQfList( diagnostics ):
@@ -641,7 +667,7 @@ def ReplaceChunks( chunks ):
 
   # Open the quickfix list, populated with entries for each location we changed.
   if locations:
-    SetQuickFixList( locations, True )
+    SetQuickFixList( locations )
 
   EchoTextVimWidth( "Applied " + str( len( chunks ) ) + " changes" )
 
