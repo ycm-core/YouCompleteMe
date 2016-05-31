@@ -253,13 +253,17 @@ def SetLocationList( diagnostics ):
   vim.eval( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
 
 
-def SetQuickFixList( quickfix_list, display=False ):
-  """list should be in qflist format: see ":h setqflist" for details"""
+def SetQuickFixList( quickfix_list, focus = False, autoclose = False ):
+  """Populate the quickfix list and open it. List should be in qflist format:
+  see ":h setqflist" for details. When focus is set to True, the quickfix
+  window becomes the active window. When autoclose is set to True, the quickfix
+  window is automatically closed after an entry is selected."""
   vim.eval( 'setqflist( {0} )'.format( json.dumps( quickfix_list ) ) )
-
-  if display:
-    vim.command( 'copen {0}'.format( len( quickfix_list ) ) )
+  vim.command( 'copen {0}'.format( len( quickfix_list ) ) )
+  if not focus:
     JumpToPreviousWindow()
+  if autoclose:
+    vim.command( 'au WinLeave <buffer> q' )
 
 
 def ConvertDiagnosticsToQfList( diagnostics ):
@@ -641,7 +645,7 @@ def ReplaceChunks( chunks ):
 
   # Open the quickfix list, populated with entries for each location we changed.
   if locations:
-    SetQuickFixList( locations, True )
+    SetQuickFixList( locations )
 
   EchoTextVimWidth( "Applied " + str( len( chunks ) ) + " changes" )
 
