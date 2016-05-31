@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import MockVimModule
+from ycm.test_utils import ExtendedMock, MockVimModule
 MockVimModule()
 
 import json
@@ -88,16 +88,30 @@ class GoToResponse_QuickFix_test( object ):
     } ] )
 
 
-  @patch( 'vim.eval' )
-  def _CheckGoToList( self, completer_response, expected_qf_list, vim_eval ):
+  @patch( 'ycm.vimsupport.VariableExists', return_value = True )
+  @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
+  @patch( 'vim.command', new_callable = ExtendedMock )
+  @patch( 'vim.eval', new_callable = ExtendedMock )
+  def _CheckGoToList( self,
+                      completer_response,
+                      expected_qf_list,
+                      vim_eval,
+                      vim_command,
+                      set_fitting_height,
+                      variable_exists ):
     self._request._response = completer_response
 
     self._request.RunPostCommandActionsIfNeeded()
 
-    vim_eval.assert_has_calls( [
-      call( 'setqflist( {0} )'.format( json.dumps( expected_qf_list ) ) ),
-      call( 'youcompleteme#OpenGoToList()' ),
+    vim_eval.assert_has_exact_calls( [
+      call( 'setqflist( {0} )'.format( json.dumps( expected_qf_list ) ) )
     ] )
+    vim_command.assert_has_exact_calls( [
+      call( 'botright copen' ),
+      call( 'au WinLeave <buffer> q' ),
+      call( 'doautocmd User YcmQuickFixOpened' )
+    ] )
+    set_fitting_height.assert_called_once_with()
 
 
 class Response_Detection_test( object ):
@@ -244,12 +258,10 @@ class Response_Detection_test( object ):
       # GoToResponse_QuickFix_test, so here we just check that the right call is
       # made
       with patch( 'ycm.vimsupport.SetQuickFixList' ) as set_qf_list:
-        with patch( 'vim.eval' ) as vim_eval:
-          request = CommandRequest( [ command ] )
-          request._response = response
-          request.RunPostCommandActionsIfNeeded()
-          ok_( set_qf_list.called )
-          ok_( vim_eval.called )
+        request = CommandRequest( [ command ] )
+        request._response = response
+        request.RunPostCommandActionsIfNeeded()
+        ok_( set_qf_list.called )
 
     basic_goto = {
       'filepath': 'test',
