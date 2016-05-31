@@ -872,12 +872,12 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
     'size': 10
   } )
 
-  # And close it again, then show the preview window (note, we don't check exact
-  # calls because there are other calls which are checked elsewhere)
-  vim_command.assert_has_calls( [
+  # And close it again, then show the quickfix window.
+  vim_command.assert_has_exact_calls( [
     call( 'lclose' ),
     call( 'hide' ),
     call( 'copen 1' ),
+    call( 'silent! wincmd p' )
   ] )
 
   # And update the quickfix list
@@ -1137,12 +1137,12 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
     'size': 10
   } )
 
-  # And close it again, then show the preview window (note, we don't check exact
-  # calls because there are other calls which are checked elsewhere)
-  vim_command.assert_has_calls( [
+  # And close it again, then show the quickfix window.
+  vim_command.assert_has_exact_calls( [
     call( 'lclose' ),
     call( 'hide' ),
     call( 'copen 2' ),
+    call( 'silent! wincmd p' )
   ] )
 
   # And update the quickfix list with each entry
