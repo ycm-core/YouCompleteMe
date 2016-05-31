@@ -723,6 +723,7 @@ class MockBuffer( object ):
     return [ ToUnicode( x ) for x in self.lines ]
 
 
+@patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
         return_value=1,
         new_callable=ExtendedMock )
@@ -738,7 +739,8 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
                                         echo_text_vim_width,
                                         open_filename,
                                         buffer_is_visible,
-                                        get_buffer_number_for_filename ):
+                                        get_buffer_number_for_filename,
+                                        set_fitting_height ):
 
   chunks = [
     _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
@@ -788,8 +790,11 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
         'type': 'F'
       } ] ) ) ),
   ] )
-  vim_command.assert_has_calls( [
-      call( 'copen 1' )
+  set_fitting_height.assert_called_once_with()
+  vim_command.assert_has_exact_calls( [
+      call( 'botright copen' ),
+      call( 'doautocmd User YcmQuickFixOpened' ),
+      call( 'silent! wincmd p' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
@@ -799,6 +804,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
   ] )
 
 
+@patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
         side_effect=[ -1, -1, 1 ],
         new_callable=ExtendedMock )
@@ -819,7 +825,8 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
                                            echo_text_vim_width,
                                            open_filename,
                                            buffer_is_visible,
-                                           get_buffer_number_for_filename ):
+                                           get_buffer_number_for_filename,
+                                           set_fitting_height ):
 
   chunks = [
     _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
@@ -872,13 +879,15 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
     'size': 10
   } )
 
-  # And close it again, then show the preview window (note, we don't check exact
-  # calls because there are other calls which are checked elsewhere)
-  vim_command.assert_has_calls( [
+  # And close it again, then show the quickfix window.
+  vim_command.assert_has_exact_calls( [
     call( 'lclose' ),
     call( 'hide' ),
-    call( 'copen 1' ),
+    call( 'botright copen' ),
+    call( 'doautocmd User YcmQuickFixOpened' ),
+    call( 'silent! wincmd p' )
   ] )
+  set_fitting_height.assert_called_once_with()
 
   # And update the quickfix list
   vim_eval.assert_has_exact_calls( [
@@ -1048,6 +1057,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
   echo_text_vim_width.assert_not_called()
 
 
+@patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect=[
           22, # first_file (check)
           -1, # another_file (check)
@@ -1080,7 +1090,8 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
                                        echo_text_vim_width,
                                        open_filename,
                                        buffer_is_visible,
-                                       get_buffer_number_for_filename ):
+                                       get_buffer_number_for_filename,
+                                       set_fitting_height ):
 
   # Chunks are split across 2 files, one is already open, one isn't
 
@@ -1137,13 +1148,15 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
     'size': 10
   } )
 
-  # And close it again, then show the preview window (note, we don't check exact
-  # calls because there are other calls which are checked elsewhere)
-  vim_command.assert_has_calls( [
+  # And close it again, then show the quickfix window.
+  vim_command.assert_has_exact_calls( [
     call( 'lclose' ),
     call( 'hide' ),
-    call( 'copen 2' ),
+    call( 'botright copen' ),
+    call( 'doautocmd User YcmQuickFixOpened' ),
+    call( 'silent! wincmd p' )
   ] )
+  set_fitting_height.assert_called_once_with()
 
   # And update the quickfix list with each entry
   vim_eval.assert_has_exact_calls( [
