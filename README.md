@@ -236,7 +236,7 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add `--omnisharp-completer` when calling `./install.py`.
-- Go support: ensure go is installed and add `--gocode-completer` when calling
+- Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -296,7 +296,7 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add `--omnisharp-completer` when calling `./install.py`.
-- Go support: ensure go is installed and add `--gocode-completer` when calling
+- Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -371,7 +371,7 @@ The following additional language support options are available:
 
 - C# support: add `--omnisharp-completer` when calling `install.py`.
   Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
-- Go support: ensure go is installed and add `--gocode-completer` when calling
+- Go support: install [go][go-install] and add `--gocode-completer` when calling
   `install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -438,7 +438,7 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add `--omnisharp-completer` when calling `./install.py`.
-- Go support: ensure go is installed and add `--gocode-completer` when calling
+- Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -633,8 +633,8 @@ process.
     your platform. If mono is not installed, install it.
     When on Windows, be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 
-  - Go support: If go is not installed on your system, install it and add it to
-    your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
+  - Go support: If go is not installed on your system, [install it][go-install] 
+    and add it to your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
     and run `go build`.
 
   - TypeScript support: As with the quick installation, simply `npm install -g
