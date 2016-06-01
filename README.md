@@ -176,7 +176,7 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add `--omnisharp-completer` when calling `./install.py`.
-- Go support: ensure go is installed and add `--gocode-completer` when calling
+- Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -2856,6 +2856,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://www.visualstudio.com/products/free-developer-offers-vs.aspx
 [7z-download]: http://www.7-zip.org/download.html
+[go-install]: https://golang.org/doc/install
 [npm-install]: https://docs.npmjs.com/getting-started/installing-node
 [Tern]: http://ternjs.net
 [tern-project]: http://ternjs.net/doc/manual.html#configuration
