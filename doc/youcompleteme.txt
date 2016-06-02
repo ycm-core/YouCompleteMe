@@ -362,7 +362,7 @@ The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer' when
+- Go support: install go [62] and add '--gocode-completer' when
   calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
@@ -428,7 +428,7 @@ The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer' when
+- Go support: install go [62] and add '--gocode-completer' when
   calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
@@ -494,7 +494,7 @@ The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer' when
+- Go support: install go [62] and add '--gocode-completer' when
   calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
@@ -575,7 +575,7 @@ The following additional language support options are available:
 - C# support: add '--omnisharp-completer' when calling |install.py|. Be sure
   that the build utility 'msbuild' is in your PATH [29].
 
-- Go support: ensure go is installed and add '--gocode-completer' when
+- Go support: install go [62] and add '--gocode-completer' when
   calling |install.py|.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
@@ -647,7 +647,7 @@ The following additional language support options are available:
 
 - C# support: add '--omnisharp-completer' when calling './install.py'.
 
-- Go support: ensure go is installed and add '--gocode-completer' when
+- Go support: install go [62] and add '--gocode-completer' when
   calling './install.py'.
 
 - TypeScript support: install nodejs and npm [22] then install the TypeScript
@@ -847,7 +847,7 @@ will notify you to recompile it. You should then rerun the install process.
    on your platform. If mono is not installed, install it. When on Windows,
    be sure that the build utility 'msbuild' is in your PATH [29].
 
-7. Go support: If go is not installed on your system, install it and add it
+7. Go support: If go is not installed on your system, install it [62] and add it
    to your path. Navigate to
    'YouCompleteMe/third_party/ycmd/third_party/gocode' and run 'go build'.
 
@@ -3151,5 +3151,6 @@ References ~
 [59] http://www.gnu.org/copyleft/gpl.html
 [60] https://bitdeli.com/free
 [61] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[62] https://golang.org/doc/install
 
 vim: ft=help
