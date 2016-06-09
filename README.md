@@ -641,7 +641,7 @@ process.
     typescript` after successfully installing [nodejs and npm][npm-install].
 
   - JavaScript support: Install [nodejs and npm][npm-install]. Then navigate to
-    `YouCompleteMe/third_party/ycmd/third_party/tern_runtime` and run `npm install
+    `YouCompleteMe/third_party/ycmd/third_party/tern` and run `npm install
     --production`
 
   - Rust support: Install [rustc and cargo][rust-install]. Navigate to
