@@ -80,6 +80,14 @@ def _WaitUntilReady( timeout = 5 ):
       time.sleep( 0.1 )
 
 
+def StopServer( ycm ):
+  try:
+    ycm.OnVimLeave()
+    WaitUntilProcessIsTerminated( ycm._server_popen )
+  except Exception:
+    pass
+
+
 def YouCompleteMeInstance( custom_options = {} ):
   """Defines a decorator function for tests that passes a unique YouCompleteMe
   instance as a parameter. This instance is initialized with the default options
@@ -105,7 +113,6 @@ def YouCompleteMeInstance( custom_options = {} ):
       try:
         test( ycm, *args, **kwargs )
       finally:
-        ycm.OnVimLeave()
-        WaitUntilProcessIsTerminated( ycm._server_popen )
+        StopServer( ycm )
     return Wrapper
   return Decorator
