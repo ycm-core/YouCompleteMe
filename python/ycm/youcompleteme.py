@@ -1,5 +1,5 @@
 # Copyright (C) 2011-2012 Google Inc.
-#               2016      YouCompleteMe contributors
+#               2016-2017 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -650,11 +650,12 @@ class YouCompleteMe( object ):
     if self.IsServerAlive():
       debug_info += SendDebugInfoRequest()
     else:
-      debug_info += 'Server crashed, no debug info from server'
-    debug_info += '\nServer running at: {0}\n'.format(
-        BaseRequest.server_location )
-    debug_info += 'Server process ID: {0}\n'.format( self._server_popen.pid )
-    if self._server_stderr or self._server_stdout:
+      debug_info += 'Server crashed, no debug info from server\n'
+    debug_info += (
+      'Server running at: {0}\n'
+      'Server process ID: {1}\n'.format( BaseRequest.server_location,
+                                         self._server_popen.pid ) )
+    if self._server_stdout and self._server_stderr:
       debug_info += ( 'Server logfiles:\n'
                       '  {0}\n'
                       '  {1}'.format( self._server_stdout,
