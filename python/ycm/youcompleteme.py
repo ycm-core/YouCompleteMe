@@ -207,6 +207,7 @@ class YouCompleteMe( object ):
 
 
   def _ServerCleanup( self ):
+    self._available_completers = {}
     if self.IsServerAlive():
       self._server_popen.terminate()
 
