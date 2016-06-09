@@ -46,6 +46,8 @@ from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import ( CompletionRequest,
                                             ConvertCompletionDataToVimData )
+from ycm.client.debug_info_request import ( SendDebugInfoRequest,
+                                            FormatDebugInfoResponse )
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
@@ -594,18 +596,17 @@ class YouCompleteMe( object ):
 
   def DebugInfo( self ):
     if self.IsServerAlive():
-      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                  'debug_info' )
+      debug_info = FormatDebugInfoResponse( SendDebugInfoRequest() )
     else:
-      debug_info = 'Server crashed, no debug info from server'
-    debug_info += '\nServer running at: {0}'.format(
+      debug_info = 'Server crashed, no debug info from server\n'
+    debug_info += 'Server running at: {0}\n'.format(
         BaseRequest.server_location )
-    debug_info += '\nServer process ID: {0}'.format( self._server_popen.pid )
-    if self._server_stderr or self._server_stdout:
-      debug_info += '\nServer logfiles:\n  {0}\n  {1}'.format(
-        self._server_stdout,
-        self._server_stderr )
-
+    debug_info += 'Server process ID: {0}\n'.format( self._server_popen.pid )
+    if self._server_stderr and self._server_stdout:
+      debug_info += ( 'Server logfiles:\n'
+                      '  {0}\n'
+                      '  {1}'.format( self._server_stdout,
+                                      self._server_stderr ) )
     return debug_info
 
 

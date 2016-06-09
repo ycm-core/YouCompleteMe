@@ -23,8 +23,10 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from mock import MagicMock
+from mock import MagicMock, patch
 from hamcrest import assert_that, equal_to
+import os
+import contextlib
 import re
 import sys
 import nose
@@ -187,3 +189,50 @@ def ExpectedFailure( reason, *exception_matchers ):
     return Wrapper
 
   return decorator
+
+
+@contextlib.contextmanager
+def MockArbitraryBuffer( filetype, native_available = True ):
+  """Used via the with statement, set up mocked versions of the vim module such
+  that a single buffer is open with an arbitrary name and arbirary contents. Its
+  filetype is set to the supplied filetype"""
+  with patch( 'vim.current' ) as vim_current:
+    def VimEval( value ):
+      """Local mock of the vim.eval() function, used to ensure we get the
+      correct behvaiour"""
+
+      if value == '&omnifunc':
+        # The omnicompleter is not required here
+        return ''
+
+      if value == 'getbufvar(0, "&mod")':
+        # Ensure that we actually send the even to the server
+        return 1
+
+      if value == 'getbufvar(0, "&ft")' or value == '&filetype':
+        return filetype
+
+      if value.startswith( 'bufnr(' ):
+        return 0
+
+      if value.startswith( 'bufwinnr(' ):
+        return 0
+
+      raise ValueError( 'Unexpected evaluation' )
+
+    # Arbitrary, but valid, cursor position
+    vim_current.window.cursor = ( 1, 2 )
+
+    # Arbitrary, but valid, single buffer open
+    current_buffer = MagicMock()
+    current_buffer.number = 0
+    current_buffer.filename = os.path.realpath( 'TEST_BUFFER' )
+    current_buffer.name = 'TEST_BUFFER'
+    current_buffer.window = 0
+
+    # The rest just mock up the Vim module so that our single arbitrary buffer
+    # makes sense to vimsupport module.
+    with patch( 'vim.buffers', [ current_buffer ] ):
+      with patch( 'vim.current.buffer', current_buffer ):
+        with patch( 'vim.eval', side_effect=VimEval ):
+          yield

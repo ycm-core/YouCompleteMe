@@ -27,8 +27,8 @@ from ycm.test_utils import MockVimModule, ExtendedMock
 MockVimModule()
 
 import contextlib
-import os
 
+from ycm.test_utils import MockArbitraryBuffer
 from ycm.tests.server_test import Server_test
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
                              UnknownExtraConf, ServerError )
@@ -52,53 +52,6 @@ def PlaceSign_Call( sign_id, line_num, buffer_num, is_error ):
 def UnplaceSign_Call( sign_id, buffer_num ):
   return call( 'try | exec "sign unplace {0} buffer={1}" |'
                ' catch /E158/ | endtry'.format( sign_id, buffer_num ) )
-
-
-@contextlib.contextmanager
-def MockArbitraryBuffer( filetype, native_available = True ):
-  """Used via the with statement, set up mocked versions of the vim module such
-  that a single buffer is open with an arbitrary name and arbirary contents. Its
-  filetype is set to the supplied filetype"""
-  with patch( 'vim.current' ) as vim_current:
-    def VimEval( value ):
-      """Local mock of the vim.eval() function, used to ensure we get the
-      correct behvaiour"""
-
-      if value == '&omnifunc':
-        # The omnicompleter is not required here
-        return ''
-
-      if value == 'getbufvar(0, "&mod")':
-        # Ensure that we actually send the even to the server
-        return 1
-
-      if value == 'getbufvar(0, "&ft")' or value == '&filetype':
-        return filetype
-
-      if value.startswith( 'bufnr(' ):
-        return 0
-
-      if value.startswith( 'bufwinnr(' ):
-        return 0
-
-      raise ValueError( 'Unexpected evaluation' )
-
-    # Arbitrary, but valid, cursor position
-    vim_current.window.cursor = ( 1, 2 )
-
-    # Arbitrary, but valid, single buffer open
-    current_buffer = MagicMock()
-    current_buffer.number = 0
-    current_buffer.filename = os.path.realpath( 'TEST_BUFFER' )
-    current_buffer.name = 'TEST_BUFFER'
-    current_buffer.window = 0
-
-    # The rest just mock up the Vim module so that our single arbitrary buffer
-    # makes sense to vimsupport module.
-    with patch( 'vim.buffers', [ current_buffer ] ):
-      with patch( 'vim.current.buffer', current_buffer ):
-        with patch( 'vim.eval', side_effect=VimEval ):
-          yield
 
 
 @contextlib.contextmanager
