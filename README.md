@@ -1708,6 +1708,15 @@ Default: `1`
 let g:ycm_enable_diagnostic_signs = 1
 ```
 
+### The `g:ycm_enable_in_command_line_window` option
+
+When this option is set, YCM will perform completion within the Command Line
+window (h: command-line-window).
+
+Default: `0`
+
+    let g:ycm_enable_in_command_line_window = 0
+
 ### The `g:ycm_enable_diagnostic_highlighting` option
 
 When this option is set, YCM will highlight regions of text that are related to

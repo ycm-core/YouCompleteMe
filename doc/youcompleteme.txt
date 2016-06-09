@@ -86,6 +86,7 @@ Contents ~
   9. The |g:ycm_warning_symbol| option
   10. The |g:ycm_enable_diagnostic_signs| option
   11. The |g:ycm_enable_diagnostic_highlighting| option
+  11. The |g:ycm_enable_in_command_line_window | option
   12. The |g:ycm_echo_current_diagnostic| option
   13. The |g:ycm_always_populate_location_list| option
   14. The |g:ycm_open_loclist_on_ycm_diags| option
@@ -1998,6 +1999,16 @@ option before using this option's default.
 Default: '1'
 >
   let g:ycm_enable_diagnostic_highlighting = 1
+<
+-------------------------------------------------------------------------------
+The *g:ycm_enable_in_command_ling_window* option
+
+When this option is set, YCM will perform completion within the Command Line
+window (h: command-line-window).
+
+Default: '0'
+>
+  let g:ycm_enable_in_command_ling_window = 0
 <
 -------------------------------------------------------------------------------
 The *g:ycm_echo_current_diagnostic* option

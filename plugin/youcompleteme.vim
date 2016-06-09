@@ -101,6 +101,9 @@ let g:ycm_enable_diagnostic_signs =
       \ get( g:, 'ycm_enable_diagnostic_signs',
       \ get( g:, 'syntastic_enable_signs', 1 ) )
 
+let g:ycm_enable_in_command_line_window =
+      \ get( g:, 'ycm_enable_in_command_line_window', 0)
+
 let g:ycm_enable_diagnostic_highlighting =
       \ get( g:, 'ycm_enable_diagnostic_highlighting',
       \ get( g:, 'syntastic_enable_highlighting', 1 ) )
