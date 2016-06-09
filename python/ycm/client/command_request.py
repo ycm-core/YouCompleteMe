@@ -48,8 +48,9 @@ class CommandRequest( BaseRequest ):
     self._response = None
 
 
-  def Start( self ):
-    request_data = BuildRequestData()
+  def Start( self, request_data = None ):
+    if request_data is None:
+      request_data = BuildRequestData()
     request_data.update( {
       'completer_target': self._completer_target,
       'command_arguments': self._arguments
@@ -124,11 +125,12 @@ class CommandRequest( BaseRequest ):
     vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
 
 
-def SendCommandRequest( arguments, completer ):
+def SendCommandRequest( arguments, completer, request_data = None, run_post_actions = True ):
   request = CommandRequest( arguments, completer )
   # This is a blocking call.
-  request.Start()
-  request.RunPostCommandActionsIfNeeded()
+  request.Start( request_data )
+  if run_post_actions:
+    request.RunPostCommandActionsIfNeeded()
   return request.Response()
 
 

@@ -114,11 +114,14 @@ def BufferModified( buffer_object ):
   return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
 
-def GetUnsavedAndCurrentBufferData():
+def GetUnsavedAndCurrentBufferData( current_buffer_number = None ):
+  if current_buffer_number is None:
+    current_buffer_number = vim.current.buffer.number
+
   buffers_data = {}
   for buffer_object in vim.buffers:
     if not ( BufferModified( buffer_object ) or
-             buffer_object == vim.current.buffer ):
+             buffer_object.number == current_buffer_number ):
       continue
 
     buffers_data[ GetBufferFilepath( buffer_object ) ] = {
