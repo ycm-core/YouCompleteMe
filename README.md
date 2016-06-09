@@ -348,7 +348,9 @@ Download and install the following software:
 
 - [Python 2 or Python 3][python-win-download]. Be sure to pick the version
 corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim and
-_Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
+_Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3. If you decide
+to use Python 2, avoid version 2.7.11 as there is currently a bug with vim 
+[vim-python2.7.11-bug].
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
 variable.
 - [Visual Studio][visual-studio-download]. Download the community edition.
@@ -2868,3 +2870,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
 [JediHTTP]: https://github.com/vheon/JediHTTP
+[vim-python2.7.11-bug]: https://github.com/vim/vim/issues/717
