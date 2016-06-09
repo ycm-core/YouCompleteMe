@@ -175,8 +175,10 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` when calling `./install.py`.
-- Go support: install [go][go-install] and add `--gocode-completer` when calling
+- C# support: install Mono with [Homebrew][brew] or by downloading the [Mono Mac
+  package][mono-install-osx] and add `--omnisharp-completer` when calling
+  `./install.py`.
+- Go support: install [Go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
@@ -235,7 +237,8 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` when calling `./install.py`.
+- C# support: install [Mono][mono-install-ubuntu] and add `--omnisharp-completer`
+  when calling `./install.py`.
 - Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
@@ -295,7 +298,8 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` when calling `./install.py`.
+- C# support: install [Mono][mono-install-fedora] and add `--omnisharp-completer`
+  when calling `./install.py`.
 - Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
@@ -437,7 +441,8 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` when calling `./install.py`.
+- C# support: install Mono and add `--omnisharp-completer` when calling
+  `./install.py`.
 - Go support: install [go][go-install] and add `--gocode-completer` when calling
   `./install.py`.
 - TypeScript support: install [nodejs and npm][npm-install] then install the
@@ -627,13 +632,13 @@ process.
 
 5. Set up support for additional languages, as desired:
 
-  - C# support: Navigate to
-    `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer` and run
-    `msbuild` (Windows) or `xbuild` (other platforms, using mono) depending on
-    your platform. If mono is not installed, install it.
-    When on Windows, be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
+  - C# support: Install [Mono on non-Windows platforms][mono-install]. Navigate
+    to `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer` and run
+    `msbuild` (Windows) or `xbuild` (other platforms, using Mono) depending on
+    your platform. On Windows, be sure that [the build utility `msbuild` is in
+    your PATH][add-msbuild-to-path].
 
-  - Go support: If go is not installed on your system, [install it][go-install] 
+  - Go support: If go is not installed on your system, [install it][go-install]
     and add it to your path. Navigate to `YouCompleteMe/third_party/ycmd/third_party/gocode`
     and run `go build`.
 
@@ -2863,6 +2868,10 @@ This software is licensed under the [GPL v3 license][gpl].
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://www.visualstudio.com/products/free-developer-offers-vs.aspx
 [7z-download]: http://www.7-zip.org/download.html
+[mono-install-osx]: http://www.mono-project.com/docs/getting-started/install/mac/
+[mono-install-ubuntu]: http://www.mono-project.com/docs/getting-started/install/linux/#debian-ubuntu-and-derivatives
+[mono-install-fedora]: http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives
+[mono-install]: http://www.mono-project.com/docs/getting-started/install/
 [go-install]: https://golang.org/doc/install
 [npm-install]: https://docs.npmjs.com/getting-started/installing-node
 [Tern]: http://ternjs.net
