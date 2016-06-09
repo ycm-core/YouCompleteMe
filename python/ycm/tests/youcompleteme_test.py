@@ -1,4 +1,4 @@
-# Copyright (C) 2016 YouCompleteMe contributors
+# Copyright (C) 2016-2017 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -23,7 +23,6 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.tests import StopServer
 from ycm.tests.test_utils import ( ExtendedMock, MockVimBuffers, MockVimModule,
                                    VimBuffer )
 MockVimModule()
@@ -34,7 +33,7 @@ from hamcrest import ( assert_that, contains, empty, is_in, is_not, has_length,
                        matches_regexp )
 from mock import call, MagicMock, patch
 
-from ycm.tests import YouCompleteMeInstance
+from ycm.tests import StopServer, YouCompleteMeInstance
 from ycmd.responses import ServerError
 
 
@@ -149,8 +148,11 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
       ycm.DebugInfo(),
       matches_regexp(
         'Client logfile: .+\n'
+        'Server Python interpreter: .+\n'
+        'Server Python version: .+\n'
         'Server has Clang support compiled in: (True|False)\n'
-        '(Clang version: .+\n)?'
+        'Clang version: .+\n'
+        'No extra configuration file found\n'
         'Server running at: .+\n'
         'Server process ID: \d+\n'
         'Server logfiles:\n'
