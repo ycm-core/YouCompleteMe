@@ -23,15 +23,53 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.tests.test_utils import MockVimModule
+from ycm.tests.test_utils import MockVimBuffers, MockVimModule, VimBuffer
 MockVimModule()
 
 import sys
-from hamcrest import assert_that, is_in, is_not
+from hamcrest import assert_that, is_in, is_not, matches_regexp
 
-from ycm.tests import YouCompleteMeInstance
+from ycm.tests import StopServer, YouCompleteMeInstance
 
 
 @YouCompleteMeInstance()
 def YouCompleteMe_YcmCoreNotImported_test( ycm ):
   assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
+
+
+@YouCompleteMeInstance()
+def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
+  current_buffer = VimBuffer( 'current_buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    assert_that(
+      ycm.DebugInfo(),
+      matches_regexp(
+        'Server Python interpreter: .+\n'
+        'Server Python version: .+\n'
+        'Server has Clang support compiled in: (True|False)\n'
+        'Clang version: .+\n'
+        'No extra configuration file found\n'
+        'Server running at: .+\n'
+        'Server process ID: \d+\n'
+        'Server logfiles:\n'
+        '  .+\n'
+        '  .+' )
+    )
+
+
+@YouCompleteMeInstance()
+def YouCompleteMe_DebugInfo_ServerNotRunning_test( ycm ):
+  StopServer( ycm )
+
+  current_buffer = VimBuffer( 'current_buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    assert_that(
+      ycm.DebugInfo(),
+      matches_regexp(
+        'Server crashed, no debug info from server\n'
+        'Server running at: .+\n'
+        'Server process ID: \d+\n'
+        'Server logfiles:\n'
+        '  .+\n'
+        '  .+' )
+    )
