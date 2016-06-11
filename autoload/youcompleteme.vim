@@ -828,7 +828,7 @@ endfunction
 function! youcompleteme#OpenGoToList()
   set lazyredraw
   cclose
-  execute 'belowright copen 3'
+  execute 'belowright copen ' . g:ycm_goto_list_height
   set nolazyredraw
   au WinLeave <buffer> q  " automatically leave, if an option is chosen
   redraw!
