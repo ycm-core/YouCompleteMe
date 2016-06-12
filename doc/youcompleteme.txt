@@ -74,7 +74,9 @@ Contents ~
  8. Functions                                         |youcompleteme-functions|
   1. The |youcompleteme#GetErrorCount| function
   2. The |youcompleteme#GetWarningCount| function
- 9. Options                                             |youcompleteme-options|
+ 9. Autocommands                                   |youcompleteme-autocommands|
+  1. The |YcmQuickFixOpened| autocommand
+ 10. Options                                            |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
   3. The |g:ycm_auto_trigger| option
@@ -121,7 +123,7 @@ Contents ~
   44. The |g:ycm_goto_buffer_command| option
   45. The |g:ycm_disable_for_files_larger_than_kb| option
   46. The |g:ycm_python_binary_path| option
- 10. FAQ                                                    |youcompleteme-faq|
+ 11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
   3. I get |ImportError| exceptions that mention 'PyInit_ycm_core' or 'initycm_core'
@@ -139,7 +141,7 @@ Contents ~
   15. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
   16. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
   17. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |Fatal-Python-error:-PyThreadState_Get:-no-current-thread|
- 11. |install.py| says python must be compiled with '--enable-framework'. Wat?
+ 12. |install.py| says python must be compiled with '--enable-framework'. Wat?
   1. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
   2. 'CTRL-U' in insert mode does not work                         |CTRL-sub-U|
   3. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
@@ -160,10 +162,10 @@ attempt to load the C runtime library incorrectly.' |R6034-An-application-has-ma
   16. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
   17. On Windows I get "E887: Sorry, this command is disabled, the Python's site
 module could not be loaded" |E887:-Sorry-this-command-is-disabled-the-Python-s-site-module-could-not-be-loaded|
- 12. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
- 13. Contact                                            |youcompleteme-contact|
- 14. License                                            |youcompleteme-license|
- 15. References                                      |youcompleteme-references|
+ 13. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
+ 14. Contact                                            |youcompleteme-contact|
+ 15. License                                            |youcompleteme-license|
+ 16. References                                      |youcompleteme-references|
 
 ===============================================================================
                                                    *youcompleteme-introduction*
@@ -208,6 +210,7 @@ Image: Build Status [1] Image: Build status [3]
     - Miscellaneous Commands
 
 - Functions
+- Autocommands
 - Options
 - FAQ
 - Contributor Code of Conduct
@@ -1446,7 +1449,10 @@ GoTo Commands ~
 These commands are useful for jumping around and exploring code. When moving
 the cursor, the subcommands add entries to Vim's 'jumplist' so you can use
 'CTRL-O' to jump back to where you where before invoking the command (and
-'CTRL-I' to jump forward; see ':h jumplist' for details).
+'CTRL-I' to jump forward; see ':h jumplist' for details). If there is more than
+one destination, the quickfix list (see ':h quickfix') is populated with the
+available locations and opened to full width at the bottom of the screen. You
+can change this behavior by using the |YcmQuickFixOpened| autocommand.
 
 -------------------------------------------------------------------------------
 The *GoToInclude* subcommand
@@ -1683,7 +1689,9 @@ you that this is about to happen.
 Once the modifications have been made, the quickfix list (see ':help quickfix')
 is opened and populated with the locations of all modifications. This can be
 used to review all automatic changes made. Typically, use the 'CTRL-W <enter>'
-combination to open the selected file in a new split.
+combination to open the selected file in a new split. It is possible to
+customize how the quickfix window is opened by using the |YcmQuickFixOpened|
+autocommand.
 
 The buffers are _not_ saved automatically. That is, you must save the modified
 buffers manually after reviewing the changes from the quickfix list. Changes
@@ -1785,6 +1793,28 @@ function returns 0.
 For example:
 >
   call youcompleteme#GetWarningCount()
+<
+===============================================================================
+                                                   *youcompleteme-autocommands*
+Autocommands ~
+
+-------------------------------------------------------------------------------
+The *YcmQuickFixOpened* autocommand
+
+This 'User' autocommand is fired when YCM opens the quickfix window in response
+to the 'GoTo*' and 'RefactorRename' subcommands. By default, the quickfix
+window is opened to full width at the bottom of the screen and its height is
+set to fit all entries. This behavior can be overridden by using the
+|YcmQuickFixOpened| autocommand. For instance:
+>
+  function s:CustomizeYcmQuickFixWindow()
+    " Move the window at the top of the screen.
+    execute "wincmd K"
+    " Set the window height to 5.
+    execute "5wincmd _"
+  endfunction
+  
+  autocmd User YcmQuickFixOpened call s:CustomizeYcmQuickFixWindow()
 <
 ===============================================================================
                                                         *youcompleteme-options*
