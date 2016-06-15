@@ -162,6 +162,7 @@ attempt to load the C runtime library incorrectly.' |R6034-An-application-has-ma
   16. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
   17. On Windows I get "E887: Sorry, this command is disabled, the Python's site
 module could not be loaded" |E887:-Sorry-this-command-is-disabled-the-Python-s-site-module-could-not-be-loaded|
+  18. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
  13. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  14. Contact                                            |youcompleteme-contact|
  15. License                                            |youcompleteme-license|
@@ -1212,6 +1213,18 @@ set:
 >
   let g:ycm_python_binary_path = '/usr/bin/python3'
 <
+If the value of |g:ycm_python_binary_path| is an absolute path like above it
+will be used as-is, but if it's an executable name it will be searched through
+the PATH. So for example if you set:
+>
+  let g:ycm_python_binary_path = 'python'
+<
+YCM will use the first 'python' executable it finds in the PATH to run jedi
+[6]. This means that if you are in a virtual environment and you start vim in
+that directory, the first 'python' that YCM will find will be the one in the
+virtual environment, so jedi [6] will be able to provide completions for every
+package you have in the virtual environment.
+
 -------------------------------------------------------------------------------
                         *youcompleteme-semantic-completion-for-other-languages*
 Semantic Completion for Other Languages ~
@@ -2589,8 +2602,11 @@ Python 2.6, 2.7 or 3.3+).
 
 Default: "''"
 >
-  let g:ycm_python_binary_path = '/usr/bin/python3'
+  let g:ycm_python_binary_path = 'python'
 <
+NOTE: the settings above will make YCM use the first 'python' executable found
+through the PATH.
+
 ===============================================================================
                                                             *youcompleteme-faq*
 FAQ ~
@@ -3101,6 +3117,18 @@ module could not be loaded" ~
 If you are running vim on Windows with Python 2.7.11, this is likely caused by
 a bug [62]. Follow this workaround [63] or use a different version (Python
 2.7.9 does not suffer from the bug).
+
+-------------------------------------------------------------------------------
+        *youcompleteme-i-cant-complete-python-packages-in-virtual-environment.*
+I can't complete python packages in a virtual environment. ~
+
+This means that the Python used to run JediHTTP [7] is not the Python of the
+virtual environment you're in. To resolve this you either set
+|g:ycm_python_binary_path| to the absolute path of the Python binary in your
+virtual environment or since virtual environment will put that Python
+executable first in your PATH when the virtual environment is active then if
+you set |g:ycm_python_binary_path| to just "'python'" it will be found as the
+first Python and used to run JediHTTP [7].
 
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*

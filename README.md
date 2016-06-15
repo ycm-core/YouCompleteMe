@@ -961,6 +961,20 @@ binary to use. For example, to provide Python 3 completion in your project, set:
 let g:ycm_python_binary_path = '/usr/bin/python3'
 ```
 
+If the value of `g:ycm_python_binary_path` is an absolute path like above it
+will be used as-is, but if it's an executable name it will be searched through
+the PATH. So for example if you set:
+
+```viml
+let g:ycm_python_binary_path = 'python'
+```
+
+YCM will use the first `python` executable it finds in the PATH to run
+[jedi][]. This means that if you are in a virtual environment and you start vim
+in that directory, the first `python` that YCM will find will be the one in the
+virtual environment, so [jedi][] will be able to provide completions for every
+package you have in the virtual environment.
+
 ### Semantic Completion for Other Languages
 
 Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
@@ -2352,8 +2366,11 @@ Python 2.6, 2.7 or 3.3+).
 Default: `''`
 
 ```viml
-let g:ycm_python_binary_path = '/usr/bin/python3'
+let g:ycm_python_binary_path = 'python'
 ```
+
+NOTE: the settings above will make YCM use the first `python` executable
+found through the PATH.
 
 FAQ
 ---
@@ -2819,6 +2836,16 @@ If you are running vim on Windows with Python 2.7.11, this is likely caused by
 a [bug][vim_win-python2.7.11-bug]. Follow this [workaround]
 [vim_win-python2.7.11-bug_workaround] or use a different version (Python 2.7.9 
 does not suffer from the bug).
+
+### I can't complete python packages in a virtual environment.
+
+This means that the Python used to run [JediHTTP][] is not the Python of the
+virtual environment you're in. To resolve this you either set
+`g:ycm_python_binary_path` to the absolute path of the Python binary in your
+virtual environment or since virtual environment will put that Python
+executable first in your PATH when the virtual environment is active then if
+you set `g:ycm_python_binary_path` to just `'python'` it will be found as the
+first Python and used to run [JediHTTP][].
 
 Contributor Code of Conduct
 ---------------------------
