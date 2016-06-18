@@ -2767,28 +2767,6 @@ the list of flags you return from your `FlagsForFile` function in your
 
 See [issue #303][issue-303] for details.
 
-### Install YCM with [NeoBundle][NeoBundle]
-[NeoBundle][NeoBundle] can do the compilation for you; just add the following to your vimrc:
-
-```viml
-NeoBundle 'Valloric/YouCompleteMe', {
-     \ 'build'      : {
-        \ 'mac'     : './install.py',
-        \ 'unix'    : './install.py',
-        \ 'windows' : 'install.py',
-        \ 'cygwin'  : './install.py'
-        \ }
-     \ }
-```
-
-But you could have problems with the time needed to get the sub modules and
-compile the whole thing.
-To increase the Neobundle timeout to 1500 seconds, add the following to your vimrc:
-
-```viml
-let g:neobundle#install_process_timeout = 1500
-```
-
 ### When I open a JavaScript file, I get an annoying warning about `.tern-project` file
 
 Take a look at the [instructions for using the JavaScript
@@ -2800,8 +2778,9 @@ and YCM will stop complaining.
 
 ### When I start vim I get a runtime error saying `R6034 An application has made an attempt to load the C runtime library incorrectly.`
 
-[CMake and other things seem to screw up the PATH with their own msvcrXX.dll versions.][identify-R6034-cause]
-Add the following to the very top of your vimrc to remove these entries from the path.
+[CMake and other things seem to screw up the PATH with their own msvcrXX.dll
+versions.][identify-R6034-cause] Add the following to the very top of your vimrc
+to remove these entries from the path.
 
 ```python
 python << EOF
@@ -2876,8 +2855,6 @@ License
 This software is licensed under the [GPL v3 license][gpl].
 © 2015-2016 YouCompleteMe contributors
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
 [ycmd]: https://github.com/Valloric/ycmd
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/VundleVim/Vundle.vim#about
@@ -2919,7 +2896,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [Gocode]: https://github.com/nsf/gocode
 [Godef]: https://github.com/Manishearth/godef
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
-[NeoBundle]: https://github.com/Shougo/neobundle.vim
 [vim-win-download]: https://bintray.com/micbou/generic/vim
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://www.visualstudio.com/products/free-developer-offers-vs.aspx
