@@ -154,15 +154,14 @@ Contents ~
   10. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
   11. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
   12. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  13. Install YCM with NeoBundle [60] |youcompleteme-install-ycm-with-neobundle-60|
-  14. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+  13. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |.tern-sub-project|
-  15. When I start vim I get a runtime error saying 'R6034 An application has made an
+  14. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.|
-  16. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
-  17. On Windows I get "E887: Sorry, this command is disabled, the Python's site
+  15. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+  16. On Windows I get "E887: Sorry, this command is disabled, the Python's site
 module could not be loaded" |E887:-Sorry-this-command-is-disabled-the-Python-s-site-module-could-not-be-loaded|
-  18. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
+  17. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
  13. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  14. Contact                                            |youcompleteme-contact|
  15. License                                            |youcompleteme-license|
@@ -3041,28 +3040,6 @@ list of flags you return from your 'FlagsForFile' function in your
 See issue #303 [59] for details.
 
 -------------------------------------------------------------------------------
-                                  *youcompleteme-install-ycm-with-neobundle-60*
-Install YCM with NeoBundle [60] ~
-
-NeoBundle [60] can do the compilation for you; just add the following to your
-vimrc:
->
-  NeoBundle 'Valloric/YouCompleteMe', {
-       \ 'build'      : {
-          \ 'mac'     : './install.py',
-          \ 'unix'    : './install.py',
-          \ 'windows' : 'install.py',
-          \ 'cygwin'  : './install.py'
-          \ }
-       \ }
-<
-But you could have problems with the time needed to get the sub modules and
-compile the whole thing. To increase the Neobundle timeout to 1500 seconds, add
-the following to your vimrc:
->
-  let g:neobundle#install_process_timeout = 1500
-<
--------------------------------------------------------------------------------
                                                             *.tern-sub-project*
 When I open a JavaScript file, I get an annoying warning about '.tern- ~
 project' file ~
@@ -3079,7 +3056,7 @@ When I start vim I get a runtime error saying 'R6034 An application has made ~
 an attempt to load the C runtime library incorrectly.' ~
 
 CMake and other things seem to screw up the PATH with their own msvcrXX.dll
-versions. [61] Add the following to the very top of your vimrc to remove these
+versions. [60] Add the following to the very top of your vimrc to remove these
 entries from the path.
 >
   python << EOF
@@ -3115,7 +3092,7 @@ On Windows I get "E887: Sorry, this command is disabled, the Python's site ~
 module could not be loaded" ~
 
 If you are running vim on Windows with Python 2.7.11, this is likely caused by
-a bug [62]. Follow this workaround [63] or use a different version (Python
+a bug [61]. Follow this workaround [62] or use a different version (Python
 2.7.9 does not suffer from the bug).
 
 -------------------------------------------------------------------------------
@@ -3135,7 +3112,7 @@ first Python and used to run JediHTTP [7].
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[64]. By participating in this project you agree to abide by its terms.
+[63]. By participating in this project you agree to abide by its terms.
 
 ===============================================================================
                                                         *youcompleteme-contact*
@@ -3145,7 +3122,7 @@ If you have questions about the plugin or need help, please use the ycm-users
 [57] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[65].
+[64].
 
 The latest version of the plugin is available at
 http://valloric.github.io/YouCompleteMe/.
@@ -3156,10 +3133,8 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [66]. © 2015-2016
+This software is licensed under the GPL v3 license [65]. © 2015-2016
 YouCompleteMe contributors
-
-  Image: Bitdeli Badge [67]
 
 ===============================================================================
                                                      *youcompleteme-references*
@@ -3224,14 +3199,11 @@ References ~
 [57] https://groups.google.com/forum/?hl=en#!forum/ycm-users
 [58] https://github.com/Valloric/YouCompleteMe/issues/593
 [59] https://github.com/Valloric/YouCompleteMe/issues/303
-[60] https://github.com/Shougo/neobundle.vim
-[61] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
-[62] https://github.com/vim/vim/issues/717
-[63] https://github.com/vim/vim-win32-installer/blob/master/appveyor.bat#L90
-[64] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[65] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[66] http://www.gnu.org/copyleft/gpl.html
-[67] https://bitdeli.com/free
-[68] https://d2weczhvl823v0.cloudfront.net/Valloric/youcompleteme/trend.png
+[60] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
+[61] https://github.com/vim/vim/issues/717
+[62] https://github.com/vim/vim-win32-installer/blob/master/appveyor.bat#L90
+[63] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[64] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[65] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
