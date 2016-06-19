@@ -458,6 +458,10 @@ def PresentDialog( message, choices, default_choice_index = 0 ):
   PresentDialog will return a 0-based index into the list
   or -1 if the dialog was dismissed by using <Esc>, Ctrl-C, etc.
 
+  If you are presenting a list of options for the user to choose from, such as
+  a list of imports, or lines to insert (etc.), SelectFromList is a better
+  option.
+
   See also:
     :help confirm() in vim (Note that vim uses 1-based indexes)
 
@@ -476,6 +480,56 @@ def Confirm( message ):
   """Display |message| with Ok/Cancel operations. Returns True if the user
   selects Ok"""
   return bool( PresentDialog( message, [ "Ok", "Cancel" ] ) == 0 )
+
+
+def SelectFromList( prompt, items ):
+  """Ask the user to select an item from the list |items|.
+
+  Presents the user with |prompt| followed by a numbered list of |items|,
+  from which they select one. The user is asked to enter the number of an
+  item or click it.
+
+  |items| should not contain leading ordinals: they are added automatically.
+
+  Returns the 0-based index in the list |items| that the user selected, or a
+  negative number if no valid item was selected.
+
+  See also :help inputlist()."""
+
+  vim_items = [ prompt ]
+  vim_items.extend( [ "{0}: {1}".format( i + 1, item )
+                      for i, item in enumerate( items ) ] )
+
+  # The vim documentation warns not to present lists larger than the number of
+  # lines of display. This is sound advice, but there really isn't any sensible
+  # thing we can do in that scenario. Testing shows that Vim just pages the
+  # message; that behaviour is as good as any, so we don't manipulate the list,
+  # or attempt to page it.
+
+  vim.eval( 'inputsave()' )
+  try:
+    # Vim returns the number the user entered, or the line number the user
+    # clicked. This may be wildly out of range for our list. It might even be
+    # negative.
+    #
+    # The first item is index 0, and this maps to our "prompt", so we subtract 1
+    # from the result and return that, assuming it is within the range of the
+    # supplied list. If not, we return negative.
+    #
+    # See :help input() for explanation of the use of inputsave() and inpput
+    # restore(). It is done in try/finally in case vim.eval ever throws an
+    # exception (such as KeyboardInterrupt)
+    selected = int( vim.eval( "inputlist( "
+                              + json.dumps( vim_items )
+                              + " )" ) ) - 1
+  finally:
+    vim.eval( 'inputrestore()' )
+
+  if selected < 0 or selected >= len( items ):
+    # User selected something outside of the range
+    return -1
+
+  return selected
 
 
 def EchoText( text, log_as_message = True ):

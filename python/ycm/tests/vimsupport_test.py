@@ -1432,3 +1432,49 @@ def VimExpressionToPythonType_ObjectPassthrough_test( *args ):
 def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
   gen = ( x**2 for x in [ 1, 2, 3 ] )
   eq_( vimsupport.VimExpressionToPythonType( gen ), gen )
+
+
+@patch( 'vim.eval',
+        new_callable = ExtendedMock,
+        side_effect = [ None, 2, None ] )
+def SelectFromList_LastItem_test( vim_eval ):
+  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+       1 )
+
+  vim_eval.assert_has_exact_calls( [
+    call( 'inputsave()' ),
+    call( 'inputlist( ["test", "1: a", "2: b"] )' ),
+    call( 'inputrestore()' )
+  ] )
+
+
+@patch( 'vim.eval',
+        new_callable = ExtendedMock,
+        side_effect = [ None, 1, None ] )
+def SelectFromList_FirstItem_test( vim_eval ):
+  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+       0 )
+
+  vim_eval.assert_has_exact_calls( [
+    call( 'inputsave()' ),
+    call( 'inputlist( ["test", "1: a", "2: b"] )' ),
+    call( 'inputrestore()' )
+  ] )
+
+
+@patch( 'vim.eval', side_effect = [ None, 3, None ] )
+def SelectFromList_OutOfRange_test( vim_eval ):
+  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+       -1 )
+
+
+@patch( 'vim.eval', side_effect = [ None, 0, None ] )
+def SelectFromList_SelectPrompt_test( vim_eval ):
+  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+       -1 )
+
+
+@patch( 'vim.eval', side_effect = [ None, -199, None ] )
+def SelectFromList_Negative_test( vim_eval ):
+  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+       -1 )
