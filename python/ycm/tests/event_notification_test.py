@@ -49,7 +49,7 @@ def PostVimMessage_Call( message ):
 def PostMultiLineNotice_Call( message ):
   """Return a mock.call object for a call to vimsupport.PostMultiLineNotice with
   the supplied message"""
-  return call( 'echohl WarningMsg | echo \''
+  return call( 'redraw | echohl WarningMsg | echo \''
                + message +
                '\' | echohl None' )
 
