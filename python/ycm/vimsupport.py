@@ -142,6 +142,10 @@ def GetCurrentBufferFilepath():
   return GetBufferFilepath( vim.current.buffer )
 
 
+def GetCurrentBufferNumber():
+  return vim.current.buffer.number
+
+
 def BufferIsVisible( buffer_number ):
   if buffer_number < 0:
     return False
