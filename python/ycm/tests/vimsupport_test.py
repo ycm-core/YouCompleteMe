@@ -1432,3 +1432,38 @@ def VimExpressionToPythonType_ObjectPassthrough_test( *args ):
 def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
   gen = ( x**2 for x in [ 1, 2, 3 ] )
   eq_( vimsupport.VimExpressionToPythonType( gen ), gen )
+
+
+def GetBufferFilepath_ShouldReturnUnicode_test():
+  mock_buffer = MockBuffer( [
+    'line1',
+    'line2',
+  ], ToBytes( '中/single_file' ), 1 )
+
+  eq_( vimsupport.GetBufferFilepath( mock_buffer ), u'中/single_file' )
+
+  mock_buffer.name = ''
+  folder_path = u'aa中bb'
+  with patch( "os.getcwdu", new = lambda: folder_path ):
+    with patch( "os.getcwd", new = lambda: folder_path ):
+      eq_( vimsupport.GetBufferFilepath( mock_buffer ),
+           os.path.join( folder_path, u'1' ) )
+
+
+@patch( 'vim.tabpage' )
+@patch( 'vim.window' )
+def TryJumpLocationInOpenedTab_BufferNameContainsUTF8Word_test( vim_window,
+                                                                vim_tabpage ):
+  mock_buffer = MockBuffer( [
+    'line1',
+    'line2',
+  ], ToBytes( '中/single_file' ), 1 )
+
+  tabpages = [ vim_tabpage ]
+  vim_tabpage.windows = [ vim_window ]
+  vim_window.buffer = mock_buffer
+
+  with patch( 'os.path.realpath', new = lambda x: x ):
+    with patch( "vim.tabpages", tabpages ):
+      eq_( vimsupport.TryJumpLocationInOpenedTab( u'中/single_file', 1, 1 ),
+           True )

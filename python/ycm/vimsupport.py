@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from future.utils import iterkeys
+from future.utils import iterkeys, PY2
 import vim
 import os
 import tempfile
@@ -149,12 +149,12 @@ def BufferIsVisible( buffer_number ):
 
 def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
-    return buffer_object.name
+    return ToUnicode( buffer_object.name )
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that. Also, os.getcwd() throws
   # an exception when the CWD has been deleted so we handle that.
   try:
-    folder_path = os.getcwd()
+    folder_path = os.getcwdu() if PY2 else os.getcwd()
   except OSError:
     folder_path = tempfile.gettempdir()
   return os.path.join( folder_path, str( buffer_object.number ) )
@@ -362,7 +362,7 @@ def TryJumpLocationInOpenedTab( filename, line, column ):
 
   for tab in vim.tabpages:
     for win in tab.windows:
-      if win.buffer.name == filepath:
+      if ToUnicode( win.buffer.name ) == filepath:
         vim.current.tabpage = tab
         vim.current.window = win
         vim.current.window.cursor = ( line, column - 1 )
