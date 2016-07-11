@@ -1637,8 +1637,11 @@ undone, and never saves or writes files to the disk.
 -------------------------------------------------------------------------------
 The *FixIt* subcommand
 
-Where available, attempts to make changes to the buffer to correct the
-diagnostic closest to the cursor position.
+Where available, attempts to make changes to the buffer to correct diagnostics
+on the current line. Where multiple suggestions are available (such as when
+there are multiple ways to resolve a given warning, or where multiple
+diagnostics are reported for the current line), the options are presented and
+one can be selected.
 
 Completers which provide diagnostics may also provide trivial modifications to
 the source in order to correct the diagnostic. Examples include syntax errors
