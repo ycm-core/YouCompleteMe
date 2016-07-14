@@ -27,21 +27,12 @@ from ycm.test_utils import MockVimModule
 MockVimModule()
 
 import sys
-from mock import MagicMock
 from hamcrest import assert_that, is_in, is_not
 
-from ycm.youcompleteme import YouCompleteMe
+from ycm.tests.server_test import Server_test
 
 
-class YouCompleteMe_test():
-
-  def setUp( self ):
-    self.ycm = YouCompleteMe( MagicMock( spec_set = dict ) )
-
-
-  def tearDown( self ):
-    self.ycm.OnVimLeave()
-
+class YouCompleteMe_test( Server_test ):
 
   def YcmCoreNotImported_test( self ):
     assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )

@@ -33,11 +33,10 @@ from hamcrest import contains_string
 from ycm.test_utils import MockVimModule, ExtendedMock
 MockVimModule()
 
-from ycm.test_utils import DEFAULT_CLIENT_OPTIONS, ExpectedFailure
 from ycm.omni_completer import OmniCompleter
-from ycm.youcompleteme import YouCompleteMe
+from ycm.test_utils import ExpectedFailure
+from ycm.tests.server_test import MakeUserOptions, Server_test
 
-from ycmd import user_options_store
 from ycmd.utils import ToBytes
 from ycmd.request_wrap import RequestWrap
 
@@ -75,23 +74,7 @@ def BuildRequestWrap( line_num, column_num, contents ):
   return RequestWrap( BuildRequest( line_num, column_num, contents ) )
 
 
-def MakeUserOptions( custom_options = {} ):
-  options = dict( user_options_store.DefaultOptions() )
-  options.update( DEFAULT_CLIENT_OPTIONS )
-  options.update( custom_options )
-  return options
-
-
-class OmniCompleter_test( object ):
-
-  def setUp( self ):
-    # We need a server instance for FilterAndSortCandidates
-    self._server_state = YouCompleteMe( MakeUserOptions() )
-
-
-  def tearDown( self ):
-    self._server_state.OnVimLeave()
-
+class OmniCompleter_test( Server_test ):
 
   def OmniCompleter_GetCompletions_Cache_List_test( self ):
     omni_completer = OmniCompleter( MakeUserOptions( {
