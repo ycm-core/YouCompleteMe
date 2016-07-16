@@ -776,7 +776,7 @@ endfunction
 
 
 function! s:StopServer()
-  py ycm_state.StopServer()
+  exec s:python_command "ycm_state.StopServer()"
 endfunction
 
 
