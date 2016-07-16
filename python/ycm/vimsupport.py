@@ -803,8 +803,10 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
     replacement_lines = [ bytes( b'' ) ]
   replacement_lines_count = len( replacement_lines )
 
-  end_existing_text = vim_buffer[ end_line ][ end_column : ]
-  start_existing_text = vim_buffer[ start_line ][ : start_column ]
+  # NOTE: Vim buffers are a list of byte objects on Python 2 but unicode
+  # objects on Python 3.
+  end_existing_text = ToBytes( vim_buffer[ end_line ] )[ end_column : ]
+  start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
 
   new_char_delta = ( len( replacement_lines[ -1 ] )
                      - ( end_column - start_column ) )
