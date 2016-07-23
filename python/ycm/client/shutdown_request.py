@@ -23,16 +23,32 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import MockVimModule
-MockVimModule()
+from requests.exceptions import ReadTimeout
 
-import sys
-from hamcrest import assert_that, is_in, is_not
+from ycm.client.base_request import BaseRequest
 
-from ycm.tests.server_test import Server_test
+TIMEOUT_SECONDS = 0.1
 
 
-class YouCompleteMe_test( Server_test ):
+class ShutdownRequest( BaseRequest ):
+  def __init__( self ):
+    super( BaseRequest, self ).__init__()
 
-  def YcmCoreNotImported_test( self ):
-    assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
+
+  def Start( self ):
+    try:
+      self.PostDataToHandler( {},
+                              'shutdown',
+                              TIMEOUT_SECONDS )
+    except ReadTimeout:
+      pass
+
+
+  def Response( self ):
+    return self._response
+
+
+def SendShutdownRequest():
+  request = ShutdownRequest()
+  # This is a blocking call.
+  request.Start()

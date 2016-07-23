@@ -47,18 +47,6 @@ BWIPEOUT_REGEX = re.compile( r"^(?:silent! )bwipeout!? ([0-9]+)$" )
 # https://github.com/Valloric/YouCompleteMe/pull/1694
 VIM_MOCK = MagicMock()
 
-# The default options which are only relevant to the client, not the server and
-# thus are not part of default_options.json, but are required for a working
-# YouCompleteMe or OmniCompleter object.
-DEFAULT_CLIENT_OPTIONS = {
-  'server_log_level': 'info',
-  'extra_conf_vim_data': [],
-  'show_diagnostics_ui': 1,
-  'enable_diagnostic_signs': 1,
-  'enable_diagnostic_highlighting': 0,
-  'always_populate_location_list': 0,
-}
-
 
 def MockGetBufferNumber( buffer_filename ):
   for buffer in VIM_MOCK.buffers:
