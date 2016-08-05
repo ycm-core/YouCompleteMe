@@ -43,10 +43,10 @@ def KeywordsFromSyntaxListOutput_PythonSyntax_test():
     'bytearray', 'IndexError', 'all', 'help', 'vars', 'SyntaxError', 'global',
     'elif', 'unicode', 'sorted', 'memoryview', 'isinstance', 'except',
     'nonlocal', 'NameError', 'finally', 'BytesWarning', 'dict', 'IOError',
-    'pass', 'oct', 'match', 'bin', 'SystemExit', 'return', 'StandardError',
-    'format', 'TabError', 'break', 'next', 'not', 'UnicodeDecodeError',
-    'False', 'RuntimeWarning', 'list', 'iter', 'try', 'reload', 'Warning',
-    'round', 'dir', 'cmp', 'set', 'bytes', 'UnicodeTranslateError', 'intern',
+    'pass', 'oct', 'bin', 'SystemExit', 'return', 'StandardError', 'format',
+    'TabError', 'break', 'next', 'not', 'UnicodeDecodeError', 'False',
+    'RuntimeWarning', 'list', 'iter', 'try', 'reload', 'Warning', 'round',
+    'dir', 'cmp', 'set', 'bytes', 'UnicodeTranslateError', 'intern',
     'issubclass', 'yield', 'Ellipsis', 'hash', 'locals', 'BufferError',
     'slice', 'for', 'FloatingPointError', 'sum', 'VMSError', 'getattr', 'abs',
     'print', 'import', 'True', 'FutureWarning', 'ImportWarning', 'None',
@@ -77,8 +77,8 @@ def KeywordsFromSyntaxListOutput_PythonSyntax_test():
 def KeywordsFromSyntaxListOutput_CppSyntax_test():
   expected_keywords = (
     'int_fast32_t', 'FILE', 'size_t', 'bitor', 'typedef', 'const', 'struct',
-    'uint8_t', 'fpos_t', 'thread_local', 'unsigned', 'uint_least16_t', 'match',
-    'do', 'intptr_t', 'uint_least64_t', 'return', 'auto', 'void', '_Complex',
+    'uint8_t', 'fpos_t', 'thread_local', 'unsigned', 'uint_least16_t', 'do',
+    'intptr_t', 'uint_least64_t', 'return', 'auto', 'void', '_Complex',
     'break', '_Alignof', 'not', 'using', '_Static_assert', '_Thread_local',
     'public', 'uint_fast16_t', 'this', 'continue', 'char32_t', 'int16_t',
     'intmax_t', 'static', 'clock_t', 'sizeof', 'int_fast64_t', 'mbstate_t',
@@ -108,7 +108,7 @@ def KeywordsFromSyntaxListOutput_JavaSyntax_test():
   expected_keywords = (
     'code', 'text', 'cols', 'datetime', 'disabled', 'shape', 'codetype', 'alt',
     'compact', 'style', 'valuetype', 'short', 'finally', 'continue', 'extends',
-    'valign', 'match', 'bordercolor', 'do', 'return', 'rel', 'rules', 'void',
+    'valign', 'bordercolor', 'do', 'return', 'rel', 'rules', 'void',
     'nohref', 'abbr', 'background', 'scrolling', 'instanceof', 'name',
     'summary', 'try', 'default', 'noshade', 'coords', 'dir', 'frame', 'usemap',
     'ismap', 'static', 'hspace', 'vlink', 'for', 'selected', 'rev', 'vspace',
@@ -273,25 +273,25 @@ def ExtractKeywordsFromGroup_KeywordStarts_test():
   assert_that( syntax_parse._ExtractKeywordsFromGroup(
                  syntax_parse.SyntaxGroup( '', [
                    'foo bar',
-                   'transparent boo baa',
+                   'contained boo baa',
                    'zoo goo',
                  ] ) ),
-               contains_inanyorder( 'foo', 'bar', 'zoo', 'goo' ) )
+               contains_inanyorder( 'foo', 'bar', 'boo', 'baa', 'zoo', 'goo' ) )
 
 
 def ExtractKeywordsFromGroup_KeywordMiddle_test():
   assert_that( syntax_parse._ExtractKeywordsFromGroup(
                  syntax_parse.SyntaxGroup( '', [
-                   'foo oneline bar',
+                   'foo contained bar',
                    'zoo goo'
                  ] ) ),
-               contains_inanyorder( 'foo', 'bar', 'zoo', 'goo' ) )
+               contains_inanyorder( 'foo', 'contained', 'bar', 'zoo', 'goo' ) )
 
 
 def ExtractKeywordsFromGroup_KeywordAssign_test():
   assert_that( syntax_parse._ExtractKeywordsFromGroup(
                  syntax_parse.SyntaxGroup( '', [
-                   'foo end=zoo((^^//)) bar',
+                   'nextgroup=zoo skipwhite foo bar',
                    'zoo goo',
                  ] ) ),
                contains_inanyorder( 'foo', 'bar', 'zoo', 'goo' ) )
@@ -300,10 +300,19 @@ def ExtractKeywordsFromGroup_KeywordAssign_test():
 def ExtractKeywordsFromGroup_KeywordAssignAndMiddle_test():
   assert_that( syntax_parse._ExtractKeywordsFromGroup(
                  syntax_parse.SyntaxGroup( '', [
-                   'foo end=zoo((^^//)) transparent bar',
+                   'nextgroup=zoo foo skipnl bar',
                    'zoo goo',
                  ] ) ),
-               contains_inanyorder( 'foo', 'bar', 'zoo', 'goo' ) )
+               contains_inanyorder( 'foo', 'skipnl', 'bar', 'zoo', 'goo' ) )
+
+
+def ExtractKeywordsFromGroup_KeywordWithoutNextgroup_test():
+  assert_that( syntax_parse._ExtractKeywordsFromGroup(
+                 syntax_parse.SyntaxGroup( '', [
+                   'skipempty foo bar',
+                   'zoo goo',
+                 ] ) ),
+               contains_inanyorder( 'skipempty', 'foo', 'bar', 'zoo', 'goo' ) )
 
 
 def ExtractKeywordsFromGroup_ContainedSyntaxArgAllowed_test():
