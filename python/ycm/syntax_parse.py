@@ -38,43 +38,28 @@ SYNTAX_GROUP_REGEX = re.compile(
       $""",
   re.VERBOSE )
 
-KEYWORD_REGEX = re.compile( r'^[\w,]+$' )
+KEYWORD_REGEX = re.compile( r'^(\w+),?$' )
 
 SYNTAX_ARGUMENT_REGEX = re.compile(
   r"^\w+=.*$" )
 
-SYNTAX_ARGUMENTS = set([
-  'cchar',
-  'conceal',
-  'contained',
-  'containedin',
-  'nextgroup',
-  'skipempty',
-  'skipnl',
+SYNTAX_REGION_ARGUMENT_REGEX = re.compile(
+  r"^(?:matchgroup|start)=.*$")
+
+# See ":h syn-nextgroup".
+SYNTAX_NEXTGROUP_ARGUMENTS = set([
   'skipwhite',
-  'transparent',
-  'concealends',
-  'contains',
-  'display',
-  'extend',
-  'fold',
-  'oneline',
-  'keepend',
-  'excludenl',
+  'skipnl',
+  'skipempty'
 ])
 
-# We want to parse lines starting with these args
-ALLOWED_SYNTAX_ARGUMENTS = set([
-  'contained',
-])
-
-# These are the parent groups from which we want to extract keywords
+# These are the parent groups from which we want to extract keywords.
 ROOT_GROUPS = set([
   'Statement',
   'Boolean',
   'Include',
   'Type',
-  'Identifier',
+  'Identifier'
 ])
 
 
@@ -149,7 +134,7 @@ def _CreateInitialGroupMap():
   type_group       = SyntaxGroup( 'Type' )
   identifier_group = SyntaxGroup( 'Identifier' )
 
-  # See `:h group-name` for details on how the initial group hierarchy is built
+  # See ":h group-name" for details on how the initial group hierarchy is built.
   group_name_to_group = {
     'Statement': statement_group,
     'Type': type_group,
@@ -202,23 +187,49 @@ def _GetAllDescendentats( root_group ):
   return descendants
 
 
+def _ExtractKeywordsFromLine( line ):
+  if line.startswith( 'links to ' ):
+    return []
+
+  # Ignore "syntax match" lines (see ":h syn-match").
+  if line.startswith( 'match ' ):
+    return []
+
+  words = line.split()
+  if not words:
+    return []
+
+  # Ignore "syntax region" lines (see ":h syn-region"). They always start
+  # with matchgroup= or start= in the syntax list.
+  if SYNTAX_REGION_ARGUMENT_REGEX.match( words[ 0 ] ):
+    return []
+
+  # Ignore "nextgroup=" argument in first position and the arguments
+  # "skipwhite", "skipnl", and "skipempty" that immediately come after.
+  nextgroup_at_start = False
+  if words[ 0 ].startswith( 'nextgroup=' ):
+    nextgroup_at_start = True
+    words = words[ 1: ]
+
+  # Ignore "contained" argument in first position.
+  if words[ 0 ] == 'contained':
+    words = words[ 1: ]
+
+  keywords = []
+  for word in words:
+    if nextgroup_at_start and word in SYNTAX_NEXTGROUP_ARGUMENTS:
+      continue
+
+    nextgroup_at_start = False
+
+    keyword_matched = KEYWORD_REGEX.match( word )
+    if keyword_matched:
+      keywords.append( keyword_matched.group( 1 ) )
+  return keywords
+
+
 def _ExtractKeywordsFromGroup( group ):
   keywords = []
   for line in group.lines:
-    if line.startswith( 'links to ' ):
-      continue
-
-    words = line.split()
-    if not words or ( words[ 0 ] in SYNTAX_ARGUMENTS and
-                      words[ 0 ] not in ALLOWED_SYNTAX_ARGUMENTS ):
-      continue
-
-    for word in words:
-      if ( word not in SYNTAX_ARGUMENTS and
-           not SYNTAX_ARGUMENT_REGEX.match( word ) and
-           KEYWORD_REGEX.match( word ) ):
-
-        if word.endswith( ',' ):
-          word = word[ :-1 ]
-        keywords.append( word )
+    keywords.extend( _ExtractKeywordsFromLine( line ) )
   return keywords
