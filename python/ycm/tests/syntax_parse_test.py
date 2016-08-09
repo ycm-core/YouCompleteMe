@@ -140,6 +140,12 @@ def KeywordsFromSyntaxListOutput_PhpSyntax_ContainsFunctions_test():
                has_items( 'array_change_key_case' ) )
 
 
+def KeywordsFromSyntaxListOutput_PhpSyntax_ContainsPreProc_test():
+  assert_that( syntax_parse._KeywordsFromSyntaxListOutput(
+                   ContentsOfTestFile( 'php_syntax' ) ),
+               has_items( 'skip', 'function' ) )
+
+
 def KeywordsFromSyntaxListOutput_Basic_test():
   assert_that( syntax_parse._KeywordsFromSyntaxListOutput( """
 foogroup xxx foo bar
