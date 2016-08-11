@@ -55,11 +55,11 @@ SYNTAX_NEXTGROUP_ARGUMENTS = set([
 
 # These are the parent groups from which we want to extract keywords.
 ROOT_GROUPS = set([
-  'Statement',
   'Boolean',
-  'Include',
-  'Type',
-  'Identifier'
+  'Identifier',
+  'Statement',
+  'PreProc',
+  'Type'
 ])
 
 
@@ -130,18 +130,21 @@ def _CreateInitialGroupMap():
     group_name_to_group[ name ] = new_group
     parent.children.append( new_group )
 
+  identifier_group = SyntaxGroup( 'Identifier' )
   statement_group  = SyntaxGroup( 'Statement' )
   type_group       = SyntaxGroup( 'Type' )
-  identifier_group = SyntaxGroup( 'Identifier' )
+  preproc_group    = SyntaxGroup( 'PreProc' )
 
   # See ":h group-name" for details on how the initial group hierarchy is built.
   group_name_to_group = {
-    'Statement': statement_group,
-    'Type': type_group,
     'Boolean': SyntaxGroup( 'Boolean' ),
-    'Include': SyntaxGroup( 'Include' ),
     'Identifier': identifier_group,
+    'Statement': statement_group,
+    'PreProc': preproc_group,
+    'Type': type_group
   }
+
+  AddToGroupMap( 'Function', identifier_group )
 
   AddToGroupMap( 'Conditional', statement_group )
   AddToGroupMap( 'Repeat'     , statement_group )
@@ -154,7 +157,10 @@ def _CreateInitialGroupMap():
   AddToGroupMap( 'Structure'   , type_group )
   AddToGroupMap( 'Typedef'     , type_group )
 
-  AddToGroupMap( 'Function', identifier_group )
+  AddToGroupMap( 'Include'  , preproc_group )
+  AddToGroupMap( 'Define'   , preproc_group )
+  AddToGroupMap( 'Macro'    , preproc_group )
+  AddToGroupMap( 'PreCondit', preproc_group )
 
   return group_name_to_group
 
