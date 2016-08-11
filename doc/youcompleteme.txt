@@ -3096,7 +3096,7 @@ module could not be loaded" ~
 
 If you are running vim on Windows with Python 2.7.11, this is likely caused by
 a bug [61]. Follow this workaround [62] or use a different version (Python
-2.7.9 does not suffer from the bug).
+2.7.12 does not suffer from the bug).
 
 -------------------------------------------------------------------------------
         *youcompleteme-i-cant-complete-python-packages-in-virtual-environment.*

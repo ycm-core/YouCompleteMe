@@ -2814,9 +2814,9 @@ version of Python.
 
 ### On Windows I get `E887: Sorry, this command is disabled, the Python's site module could not be loaded`
 
-If you are running vim on Windows with Python 2.7.11, this is likely caused by 
+If you are running vim on Windows with Python 2.7.11, this is likely caused by
 a [bug][vim_win-python2.7.11-bug]. Follow this [workaround]
-[vim_win-python2.7.11-bug_workaround] or use a different version (Python 2.7.9 
+[vim_win-python2.7.11-bug_workaround] or use a different version (Python 2.7.12
 does not suffer from the bug).
 
 ### I can't complete python packages in a virtual environment.
