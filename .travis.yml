@@ -8,16 +8,18 @@ before_install:
 install:
   # source because it sets up env vars on some platforms
   - source ci/travis/travis_install.sh
-script: ./run_tests.py
+script:
+  - ci/travis/travis_script.sh
 env:
   matrix:
-    - YCM_PYTHON_VERSION=2.7
-    - YCM_PYTHON_VERSION=2.6
-    - YCM_PYTHON_VERSION=3.3
+    - YCM_PYTHON_VERSION=2.7 YCM_FLAKE8=true
+    # Since 3.0.4, Flake8 is not working anymore on Python 2.6.
+    - YCM_PYTHON_VERSION=2.6 YCM_FLAKE8=false
+    - YCM_PYTHON_VERSION=3.3 YCM_FLAKE8=true
 matrix:
   exclude:
     - os: osx
-      env: YCM_PYTHON_VERSION=2.6
+      env: YCM_PYTHON_VERSION=2.6 YCM_FLAKE8=false
 addons:
   apt:
     sources:
