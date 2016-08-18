@@ -728,23 +728,8 @@ function! s:InvokeCompletion()
 endfunction
 
 
-exec s:python_until_eof
-def GetCompletionsInner():
-  request = ycm_state.GetCurrentCompletionRequest()
-  request.Start()
-  while not request.Done():
-    if bool( int( vim.eval( 'complete_check()' ) ) ):
-      return { 'words' : [], 'refresh' : 'always'}
-
-  results = base.AdjustCandidateInsertionText( request.Response() )
-  return { 'words' : results, 'refresh' : 'always' }
-EOF
-
-
 function! s:GetCompletions()
-  exec s:python_command "results = GetCompletionsInner()"
-  let results = s:Pyeval( 'results' )
-  return results
+  return s:Pyeval( 'ycm_state.GetCompletions()' )
 endfunction
 
 

@@ -32,7 +32,7 @@ import signal
 import base64
 from subprocess import PIPE
 from tempfile import NamedTemporaryFile
-from ycm import paths, vimsupport
+from ycm import base, paths, vimsupport
 from ycmd import utils
 from ycmd import server_utils
 from ycmd.request_wrap import RequestWrap
@@ -232,6 +232,20 @@ class YouCompleteMe( object ):
       request_data[ 'force_semantic' ] = True
     self._latest_completion_request = CompletionRequest( request_data )
     return self._latest_completion_request
+
+
+  def GetCompletions( self ):
+    request = self.GetCurrentCompletionRequest()
+    request.Start()
+    while not request.Done():
+      try:
+        if vimsupport.GetBoolValue( 'complete_check()' ):
+          return { 'words' : [], 'refresh' : 'always' }
+      except KeyboardInterrupt:
+        return { 'words' : [], 'refresh' : 'always' }
+
+    results = base.AdjustCandidateInsertionText( request.Response() )
+    return { 'words' : results, 'refresh' : 'always' }
 
 
   def SendCommandRequest( self, arguments, completer ):

@@ -506,7 +506,10 @@ def PresentDialog( message, choices, default_choice_index = 0 ):
     EscapeForVim( ToUnicode( message ) ),
     EscapeForVim( ToUnicode( "\n" .join( choices ) ) ),
     default_choice_index + 1 )
-  return int( vim.eval( to_eval ) ) - 1
+  try:
+    return GetIntValue( to_eval ) - 1
+  except KeyboardInterrupt:
+    return -1
 
 
 def Confirm( message ):
@@ -554,9 +557,9 @@ def SelectFromList( prompt, items ):
     # See :help input() for explanation of the use of inputsave() and inpput
     # restore(). It is done in try/finally in case vim.eval ever throws an
     # exception (such as KeyboardInterrupt)
-    selected = int( vim.eval( "inputlist( "
-                              + json.dumps( vim_items )
-                              + " )" ) ) - 1
+    selected = GetIntValue( "inputlist( " + json.dumps( vim_items ) + " )" ) - 1
+  except KeyboardInterrupt:
+    selected = -1
   finally:
     vim.eval( 'inputrestore()' )
 
