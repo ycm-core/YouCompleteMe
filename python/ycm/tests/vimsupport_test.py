@@ -681,7 +681,7 @@ def _BuildLocations( start_line, start_column, end_line, end_column ):
 
 def ReplaceChunksInBuffer_SortedChunks_test():
   chunks = [
-    _BuildChunk( 1, 4, 1, 4, '('),
+    _BuildChunk( 1, 4, 1, 4, '(' ),
     _BuildChunk( 1, 11, 1, 11, ')' )
   ]
 
@@ -694,7 +694,7 @@ def ReplaceChunksInBuffer_SortedChunks_test():
 
 def ReplaceChunksInBuffer_UnsortedChunks_test():
   chunks = [
-    _BuildChunk( 1, 11, 1, 11, ')'),
+    _BuildChunk( 1, 11, 1, 11, ')' ),
     _BuildChunk( 1, 4, 1, 4, '(' )
   ]
 
@@ -1218,6 +1218,32 @@ def _BuildChunk( start_line,
     },
     'replacement_text': replacement_text
   }
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock )
+def AddDiagnosticSyntaxMatch_ErrorInMiddleOfLine_test( vim_eval ):
+  current_buffer = MockBuffer( [
+    'Highlight this error please'
+  ], 'some_file', 1 )
+
+  with patch( 'vim.current.buffer', current_buffer ):
+    vimsupport.AddDiagnosticSyntaxMatch( 1, 16, 1, 21 )
+
+  vim_eval.assert_called_once_with(
+    r"matchadd('YcmErrorSection', '\%1l\%16c\_.\{-}\%1l\%21c')" )
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock )
+def AddDiagnosticSyntaxMatch_WarningAtEndOfLine_test( vim_eval ):
+  current_buffer = MockBuffer( [
+    'Highlight this warning'
+  ], 'some_file', 1 )
+
+  with patch( 'vim.current.buffer', current_buffer ):
+    vimsupport.AddDiagnosticSyntaxMatch( 1, 16, 1, 23, is_error = False )
+
+  vim_eval.assert_called_once_with(
+    r"matchadd('YcmWarningSection', '\%1l\%16c\_.\{-}\%1l\%23c')" )
 
 
 @patch( 'vim.command', new_callable=ExtendedMock )
