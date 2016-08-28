@@ -87,7 +87,7 @@ class DiagnosticInterface( object ):
     if not diags:
       if self._diag_message_needs_clearing:
         # Clear any previous diag echo
-        vimsupport.EchoText( '', False )
+        vimsupport.PostVimMessage( '', warning = False )
         self._diag_message_needs_clearing = False
       return
 
@@ -95,7 +95,7 @@ class DiagnosticInterface( object ):
     if diags[ 0 ].get( 'fixit_available', False ):
       text += ' (FixIt)'
 
-    vimsupport.EchoTextVimWidth( text )
+    vimsupport.PostVimMessage( text, warning = False, truncate = True )
     self._diag_message_needs_clearing = True
 
 

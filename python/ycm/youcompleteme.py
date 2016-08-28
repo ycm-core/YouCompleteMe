@@ -578,7 +578,8 @@ class YouCompleteMe( object ):
       debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
                                                   'detailed_diagnostic' )
       if 'message' in debug_info:
-        vimsupport.EchoText( debug_info[ 'message' ] )
+        vimsupport.PostVimMessage( debug_info[ 'message' ],
+                                   warning = False )
     except ServerError as e:
       vimsupport.PostVimMessage( str( e ) )
 
