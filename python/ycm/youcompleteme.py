@@ -311,16 +311,18 @@ class YouCompleteMe( object ):
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
 
-    self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
-                                                          extra_data )
+    self._latest_file_parse_request = EventNotification(
+      'FileReadyToParse', extra_data = extra_data )
     self._latest_file_parse_request.Start()
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
     if not self.IsServerAlive():
       return
-    SendEventNotificationAsync( 'BufferUnload',
-                                { 'unloaded_buffer': deleted_buffer_file } )
+    SendEventNotificationAsync(
+      'BufferUnload',
+      filepath = deleted_buffer_file,
+      extra_data = { 'unloaded_buffer': deleted_buffer_file } )
 
 
   def OnBufferVisit( self ):
@@ -328,7 +330,7 @@ class YouCompleteMe( object ):
       return
     extra_data = {}
     self._AddUltiSnipsDataIfNeeded( extra_data )
-    SendEventNotificationAsync( 'BufferVisit', extra_data )
+    SendEventNotificationAsync( 'BufferVisit', extra_data = extra_data )
 
 
   def OnInsertLeave( self ):

@@ -116,14 +116,14 @@ def BufferModified( buffer_object ):
   return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
 
-def GetUnsavedAndCurrentBufferData():
+def GetUnsavedBufferData( filepath ):
   buffers_data = {}
   for buffer_object in vim.buffers:
-    if not ( BufferModified( buffer_object ) or
-             buffer_object == vim.current.buffer ):
+    buffer_filepath = GetBufferFilepath( buffer_object )
+    if not ( BufferModified( buffer_object ) or buffer_filepath == filepath ):
       continue
 
-    buffers_data[ GetBufferFilepath( buffer_object ) ] = {
+    buffers_data[ buffer_filepath ] = {
       # Add a newline to match what gets saved to disk. See #1455 for details.
       'contents': '\n'.join( ToUnicode( x ) for x in buffer_object ) + '\n',
       'filetypes': FiletypesForBuffer( buffer_object )
