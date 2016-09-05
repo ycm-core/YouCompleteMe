@@ -91,7 +91,7 @@ function! youcompleteme#Enable()
     autocmd BufReadPre * call s:OnBufferReadPre( expand( '<afile>:p' ) )
     autocmd BufRead,FileType * call s:OnBufferRead()
     autocmd BufEnter * call s:OnBufferEnter()
-    autocmd BufUnload * call s:OnBufferUnload( expand( '<afile>:p' ) )
+    autocmd BufUnload * call s:OnBufferUnload()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
@@ -323,10 +323,12 @@ function! s:TurnOffSyntasticForCFamily()
 endfunction
 
 
-function! s:AllowedToCompleteInCurrentBuffer()
-  if empty( &filetype ) ||
-        \ getbufvar( winbufnr( winnr() ), "&buftype" ) ==# 'nofile' ||
-        \ &filetype ==# 'qf'
+function! s:AllowedToCompleteInBuffer( buffer )
+  let buffer_filetype = getbufvar( a:buffer, '&filetype' )
+
+  if empty( buffer_filetype ) ||
+   \ getbufvar( a:buffer, '&buftype' ) ==# 'nofile' ||
+   \ buffer_filetype ==# 'qf'
     return 0
   endif
 
@@ -335,10 +337,15 @@ function! s:AllowedToCompleteInCurrentBuffer()
   endif
 
   let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' ) ||
-        \ has_key( g:ycm_filetype_whitelist, &filetype )
-  let blacklist_allows = !has_key( g:ycm_filetype_blacklist, &filetype )
+        \ has_key( g:ycm_filetype_whitelist, buffer_filetype )
+  let blacklist_allows = !has_key( g:ycm_filetype_blacklist, buffer_filetype )
 
   return whitelist_allows && blacklist_allows
+endfunction
+
+
+function! s:AllowedToCompleteInCurrentBuffer()
+  return s:AllowedToCompleteInBuffer( '%' )
 endfunction
 
 
@@ -471,13 +478,16 @@ function! s:OnBufferEnter()
 endfunction
 
 
-function! s:OnBufferUnload( deleted_buffer_file )
-  if !s:AllowedToCompleteInCurrentBuffer() || empty( a:deleted_buffer_file )
+function! s:OnBufferUnload()
+  " Expanding <abuf> returns the unloaded buffer number as a string but we want
+  " it as a true number for the getbufvar function.
+  if !s:AllowedToCompleteInBuffer( str2nr( expand( '<abuf>' ) ) )
     return
   endif
 
+  let deleted_buffer_file = expand( '<afile>:p' )
   exec s:python_command "ycm_state.OnBufferUnload("
-        \ "vim.eval( 'a:deleted_buffer_file' ) )"
+        \ "vim.eval( 'deleted_buffer_file' ) )"
 endfunction
 
 

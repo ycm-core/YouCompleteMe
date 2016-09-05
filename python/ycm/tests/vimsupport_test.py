@@ -1403,15 +1403,17 @@ def OpenFilename_test( vim_current, vim_command ):
 
 @patch( 'ycm.vimsupport.BufferModified', side_effect = [ True ] )
 @patch( 'ycm.vimsupport.FiletypesForBuffer', side_effect = [ [ 'cpp' ] ] )
-def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
+def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
+  filepath = os.path.realpath( 'filename' )
+
   mock_buffer = MagicMock()
-  mock_buffer.name = os.path.realpath( 'filename' )
+  mock_buffer.name = filepath
   mock_buffer.number = 1
   mock_buffer.__iter__.return_value = [ ToBytes ( u'abc' ), ToBytes( u'fДa' ) ]
 
   with patch( 'vim.buffers', [ mock_buffer ] ):
-    assert_that( vimsupport.GetUnsavedAndCurrentBufferData(),
-                 has_entry( mock_buffer.name,
+    assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( filepath ),
+                 has_entry( filepath,
                             has_entry( u'contents', u'abc\nfДa\n' ) ) )
 
 
