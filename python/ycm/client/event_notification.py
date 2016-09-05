@@ -32,15 +32,16 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
 
 
 class EventNotification( BaseRequest ):
-  def __init__( self, event_name, extra_data = None ):
+  def __init__( self, event_name, filepath = None, extra_data = None ):
     super( EventNotification, self ).__init__()
     self._event_name = event_name
+    self._filepath = filepath
     self._extra_data = extra_data
     self._cached_response = None
 
 
   def Start( self ):
-    request_data = BuildRequestData()
+    request_data = BuildRequestData( self._filepath )
     if self._extra_data:
       request_data.update( self._extra_data )
     request_data[ 'event_name' ] = self._event_name
@@ -74,8 +75,10 @@ class EventNotification( BaseRequest ):
     return self._cached_response if self._cached_response else []
 
 
-def SendEventNotificationAsync( event_name, extra_data = None ):
-  event = EventNotification( event_name, extra_data )
+def SendEventNotificationAsync( event_name,
+                                filepath = None,
+                                extra_data = None ):
+  event = EventNotification( event_name, filepath, extra_data )
   event.Start()
 
 
