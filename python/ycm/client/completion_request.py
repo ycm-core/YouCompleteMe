@@ -62,7 +62,7 @@ class CompletionRequest( BaseRequest ):
 
       return JsonFromFuture( self._response_future )[ 'completions' ]
     except ( ServerError, ReadTimeout ) as e:
-      HandleServerException( e )
+      HandleServerException( e, truncate = True )
     return []
 
 

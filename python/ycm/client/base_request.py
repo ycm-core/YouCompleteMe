@@ -184,14 +184,14 @@ def JsonFromFuture( future ):
   return None
 
 
-def HandleServerException( exception ):
+def HandleServerException( exception, truncate = False ):
   serialized_exception = str( exception )
 
   # We ignore the exception about the file already being parsed since it comes
   # up often and isn't something that's actionable by the user.
   if 'already being parsed' in serialized_exception:
     return
-  vimsupport.PostMultiLineNotice( serialized_exception )
+  vimsupport.PostVimMessage( serialized_exception, truncate = truncate )
 
 
 def _ToUtf8Json( data ):

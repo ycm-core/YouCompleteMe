@@ -37,22 +37,6 @@ from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
 
 
-def PostVimMessage_Call( message ):
-  """Return a mock.call object for a call to vimsupport.PostVimMesasge with the
-  supplied message"""
-  return call( 'redraw | echohl WarningMsg | echom \''
-               + message +
-               '\' | echohl None' )
-
-
-def PostMultiLineNotice_Call( message ):
-  """Return a mock.call object for a call to vimsupport.PostMultiLineNotice with
-  the supplied message"""
-  return call( 'redraw | echohl WarningMsg | echo \''
-               + message +
-               '\' | echohl None' )
-
-
 def PresentDialog_Confirm_Call( message ):
   """Return a mock.call object for a call to vimsupport.PresentDialog, as called
   why vimsupport.Confirm with the supplied confirmation message"""
@@ -154,8 +138,8 @@ def MockEventNotification( response_method, native_filetype_completer = True ):
 
 class EventNotification_test( Server_test ):
 
-  @patch( 'vim.command', new_callable = ExtendedMock )
-  def FileReadyToParse_NonDiagnostic_Error_test( self, vim_command ):
+  @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+  def FileReadyToParse_NonDiagnostic_Error_test( self, post_vim_message ):
     # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest
     # in combination with YouCompleteMe.OnFileReadyToParse when the completer
     # raises an exception handling FileReadyToParse event notification
@@ -171,23 +155,23 @@ class EventNotification_test( Server_test ):
         self._server_state.HandleFileParseRequest()
 
         # The first call raises a warning
-        vim_command.assert_has_exact_calls( [
-          PostMultiLineNotice_Call( ERROR_TEXT ),
+        post_vim_message.assert_has_exact_calls( [
+          call( ERROR_TEXT, truncate = False )
         ] )
 
         # Subsequent calls don't re-raise the warning
         self._server_state.HandleFileParseRequest()
-        vim_command.assert_has_exact_calls( [
-          PostMultiLineNotice_Call( ERROR_TEXT ),
+        post_vim_message.assert_has_exact_calls( [
+          call( ERROR_TEXT, truncate = False )
         ] )
 
         # But it does if a subsequent event raises again
         self._server_state.OnFileReadyToParse()
         assert self._server_state.FileParseRequestReady()
         self._server_state.HandleFileParseRequest()
-        vim_command.assert_has_exact_calls( [
-          PostMultiLineNotice_Call( ERROR_TEXT ),
-          PostMultiLineNotice_Call( ERROR_TEXT ),
+        post_vim_message.assert_has_exact_calls( [
+          call( ERROR_TEXT, truncate = False ),
+          call( ERROR_TEXT, truncate = False )
         ] )
 
 

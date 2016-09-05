@@ -436,22 +436,47 @@ def NumLinesInBuffer( buffer_object ):
 # Calling this function from the non-GUI thread will sometimes crash Vim. At
 # the time of writing, YCM only uses the GUI thread inside Vim (this used to
 # not be the case).
-# We redraw the screen before displaying the message to avoid the "Press ENTER
-# or type command to continue" prompt when editing a new C-family file.
-def PostVimMessage( message ):
-  vim.command( "redraw | echohl WarningMsg | echom '{0}' | echohl None"
-               .format( EscapeForVim( ToUnicode( message ) ) ) )
+def PostVimMessage( message, warning = True, truncate = False ):
+  """Display a message on the Vim status line. By default, the message is
+  highlighted and logged to Vim command-line history (see :h history).
+  Unset the |warning| parameter to disable this behavior. Set the |truncate|
+  parameter to avoid hit-enter prompts (see :h hit-enter) when the message is
+  longer than the window width."""
+  echo_command = 'echom' if warning else 'echo'
 
+  # Displaying a new message while previous ones are still on the status line
+  # might lead to a hit-enter prompt or the message appearing without a
+  # newline so we do a redraw first.
+  vim.command( 'redraw' )
 
-# Unlike PostVimMesasge, this supports messages with newlines in them because it
-# uses 'echo' instead of 'echomsg'. This also means that the message will NOT
-# appear in Vim's message log.
-# Similarly to PostVimMesasge, we do a redraw first to clear any previous
-# messages, which might lead to this message appearing without a newline and/or
-# requring the "Press ENTER or type command to continue".
-def PostMultiLineNotice( message ):
-  vim.command( "redraw | echohl WarningMsg | echo '{0}' | echohl None"
-               .format( EscapeForVim( ToUnicode( message ) ) ) )
+  if warning:
+    vim.command( 'echohl WarningMsg' )
+
+  message = ToUnicode( message )
+
+  if truncate:
+    vim_width = GetIntValue( '&columns' )
+
+    message = message.replace( '\n', ' ' )
+    if len( message ) > vim_width:
+      message = message[ : vim_width - 4 ] + '...'
+
+    old_ruler = GetIntValue( '&ruler' )
+    old_showcmd = GetIntValue( '&showcmd' )
+    vim.command( 'set noruler noshowcmd' )
+
+    vim.command( "{0} '{1}'".format( echo_command,
+                                     EscapeForVim( message ) ) )
+
+    SetVariableValue( '&ruler', old_ruler )
+    SetVariableValue( '&showcmd', old_showcmd )
+  else:
+    for line in message.split( '\n' ):
+      vim.command( "{0} '{1}'".format( echo_command,
+                                       EscapeForVim( line ) ) )
+
+  if warning:
+    vim.command( 'echohl None' )
 
 
 def PresentDialog( message, choices, default_choice_index = 0 ):
@@ -540,33 +565,6 @@ def SelectFromList( prompt, items ):
     raise RuntimeError( NO_SELECTION_MADE_MSG )
 
   return selected
-
-
-def EchoText( text, log_as_message = True ):
-  def EchoLine( text ):
-    command = 'echom' if log_as_message else 'echo'
-    vim.command( "{0} '{1}'".format( command,
-                                     EscapeForVim( text ) ) )
-
-  for line in ToUnicode( text ).split( '\n' ):
-    EchoLine( line )
-
-
-# Echos text but truncates it so that it all fits on one line
-def EchoTextVimWidth( text ):
-  vim_width = GetIntValue( '&columns' )
-  truncated_text = ToUnicode( text )[ : int( vim_width * 0.9 ) ]
-  truncated_text.replace( '\n', ' ' )
-
-  old_ruler = GetIntValue( '&ruler' )
-  old_showcmd = GetIntValue( '&showcmd' )
-  vim.command( 'set noruler noshowcmd' )
-  vim.command( 'redraw' )
-
-  EchoText( truncated_text, False )
-
-  SetVariableValue( '&ruler', old_ruler )
-  SetVariableValue( '&showcmd', old_showcmd )
 
 
 def EscapeForVim( text ):
@@ -736,7 +734,8 @@ def ReplaceChunks( chunks ):
   if locations:
     SetQuickFixList( locations )
 
-  EchoTextVimWidth( "Applied " + str( len( chunks ) ) + " changes" )
+  PostVimMessage( 'Applied {0} changes'.format( len( chunks ) ),
+                  warning = False )
 
 
 def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
@@ -851,7 +850,7 @@ def InsertNamespace( namespace ):
   new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
   replace_pos = { 'line_num': line + 1, 'column_num': 1 }
   ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0 )
-  PostVimMessage( "Add namespace: {0}".format( namespace ) )
+  PostVimMessage( 'Add namespace: {0}'.format( namespace ), warning = False )
 
 
 def SearchInCurrentBuffer( pattern ):
@@ -926,7 +925,7 @@ def WriteToPreviewWindow( message ):
     # We couldn't get to the preview window, but we still want to give the user
     # the information we have. The only remaining option is to echo to the
     # status area.
-    EchoText( message )
+    PostVimMessage( message, warning = False )
 
 
 def CheckFilename( filename ):
