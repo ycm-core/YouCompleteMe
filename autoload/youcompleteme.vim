@@ -90,7 +90,7 @@ function! youcompleteme#Enable()
     " the user does :enew and then :set ft=something, we need to run buf init
     " code again.
     autocmd BufReadPre * call s:OnBufferReadPre( expand( '<afile>:p' ) )
-    autocmd BufRead,BufEnter,FileType * call s:OnBufferVisit()
+    autocmd BufRead,FileType * call s:OnBufferVisit()
     autocmd BufUnload * call s:OnBufferUnload( expand( '<afile>:p' ) )
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
