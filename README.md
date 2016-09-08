@@ -2648,6 +2648,16 @@ g:UltiSnipsJumpForwardTrigger
 g:UltiSnipsJumpBackwardTrigger
 ```
 
+### Snippets added with `:UltiSnipsAddFiletypes` do not appear in the popup menu
+
+For efficiency, YCM only fetches UltiSnips snippets in specific scenarios like
+visiting a buffer or setting its filetype. You can force YCM to retrieve them by
+manually triggering the `FileType` autocommand:
+
+```viml
+:doautocmd FileType
+```
+
 ### Why isn't YCM just written in plain VimScript, FFS?
 
 Because of the identifier completion engine and subsequence-based filtering.
