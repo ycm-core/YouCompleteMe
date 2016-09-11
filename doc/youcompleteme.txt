@@ -145,23 +145,24 @@ Contents ~
   19. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
   20. 'CTRL-U' in insert mode does not work                        |CTRL-sub-U|
   21. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  22. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
-  23. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  24. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
-  25. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
-  26. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
-  27. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  28. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
-  29. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
-  30. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  31. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+  22. Snippets added with |:UltiSnipsAddFiletypes| do not appear in the popup menu
+  23. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
+  24. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
+  25. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
+  26. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
+  27. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  28. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  29. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
+  30. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
+  31. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
+  32. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |.tern-sub-project|
-  32. When I start vim I get a runtime error saying 'R6034 An application has made an
+  33. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.|
-  33. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
-  34. On Windows I get "E887: Sorry, this command is disabled, the Python's site
+  34. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+  35. On Windows I get "E887: Sorry, this command is disabled, the Python's site
 module could not be loaded" |E887:-Sorry-this-command-is-disabled-the-Python-s-site-module-could-not-be-loaded|
-  35. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
+  36. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
  12. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  13. Contact                                            |youcompleteme-contact|
  14. License                                            |youcompleteme-license|
@@ -2903,6 +2904,15 @@ options:
   g:UltiSnipsExpandTrigger
   g:UltiSnipsJumpForwardTrigger
   g:UltiSnipsJumpBackwardTrigger
+<
+-------------------------------------------------------------------------------
+Snippets added with *:UltiSnipsAddFiletypes* do not appear in the popup menu
+
+For efficiency, YCM only fetches UltiSnips snippets in specific scenarios like
+visiting a buffer or setting its filetype. You can force YCM to retrieve them
+by manually triggering the 'FileType' autocommand:
+>
+  :doautocmd FileType
 <
 -------------------------------------------------------------------------------
                *youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs*
