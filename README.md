@@ -2600,7 +2600,7 @@ with `--enable-framework`):
   `PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install {version}`
 
 
-## `install.py` says python must be compiled with `--enable-framework`. Wat?
+### `install.py` says python must be compiled with `--enable-framework`. Wat?
 
 See the previous answer for how to ensure your python is built to support
 dynamic modules.
