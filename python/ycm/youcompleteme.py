@@ -700,6 +700,16 @@ class YouCompleteMe( object ):
 
   def _AddUltiSnipsDataIfNeeded( self, extra_data ):
     # See :h UltiSnips#SnippetsInCurrentScope.
+
+    # Errors when evaluating Vim expressions are not caught by Python
+    # try/except blocks prior to Vim 7.4.107. We check that the UltiSnips
+    # function exists for these versions.
+    # TODO: remove this when bumping version requirement to 7.4.107 or greater.
+    if ( not vimsupport.VimVersionAtLeast( "7.4.107" ) and
+         not vimsupport.GetBoolValue(
+           "exists( '*UltiSnips#SnippetsInCurrentScope' )" ) ):
+      return
+
     try:
       vim.eval( 'UltiSnips#SnippetsInCurrentScope( 1 )' )
     except vim.error:
