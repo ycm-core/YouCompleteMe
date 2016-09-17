@@ -26,7 +26,6 @@ let s:defer_omnifunc = 1
 
 let s:old_cursor_position = []
 let s:cursor_moved = 0
-let s:moved_vertically_in_insert_mode = 0
 let s:previous_allowed_buffer_number = 0
 
 
@@ -595,10 +594,6 @@ endfunction
 function! s:UpdateCursorMoved()
   let current_position = getpos('.')
   let s:cursor_moved = current_position != s:old_cursor_position
-
-  let s:moved_vertically_in_insert_mode = s:old_cursor_position != [] &&
-        \ current_position[ 1 ] != s:old_cursor_position[ 1 ]
-
   let s:old_cursor_position = current_position
 endfunction
 
