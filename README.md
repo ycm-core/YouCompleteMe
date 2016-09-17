@@ -2680,7 +2680,7 @@ fixed, Vim trunk landed the `pyeval()` function which improved YCM performance
 even more since less time was spent serializing and deserializing data between
 Vim and the embedded Python interpreter. A few critical bugfixes for `pyeval()`
 landed in Vim 7.3.584 (and a few commits before that), and given the current
-availability of Vim 7.4.143, which packs improved events for text change
+availability of Vim 7.4.143, which features improved events for text change
 detection, it has been chosen.
 
 ### I get annoying messages in Vim's status area when I type
