@@ -66,11 +66,9 @@ Contents ~
    2. The 'RefactorRename <new name>' subcommand      |RefactorRename-new-name|
    3. Multi-file Refactor                   |youcompleteme-multi-file-refactor|
   4. Miscellaneous Commands              |youcompleteme-miscellaneous-commands|
-   1. The |ClearCompilationFlagCache| subcommand
-   2. The |StartServer| subcommand
-   3. The |StopServer| subcommand
-   4. The |RestartServer| subcommand
-   5. The |ReloadSolution| subcommand
+   1. The |RestartServer| subcommand
+   2. The |ClearCompilationFlagCache| subcommand
+   3. The |ReloadSolution| subcommand
  8. Functions                                         |youcompleteme-functions|
   1. The |youcompleteme#GetErrorCount| function
   2. The |youcompleteme#GetWarningCount| function
@@ -1128,8 +1126,7 @@ project, you can do one of the following:
 
 - change Vim's working directory (':cd /path/to/new/project'), open a
   JavaScript file (or set filetype to JavaScript) and restart the Tern server
-  using YCM completer subcommands ':YcmCompleter StopServer' and
-  ':YcmCompleter StartServer'.
+  using YCM completer subcommand ':YcmCompleter RestartServer'.
 
 -------------------------------------------------------------------------------
                                                     *youcompleteme-tips-tricks*
@@ -1732,6 +1729,19 @@ They cover things like the semantic engine server instance and compilation
 flags.
 
 -------------------------------------------------------------------------------
+The *RestartServer* subcommand
+
+Restarts the semantic-engine-as-localhost-server for those semantic engines
+that work as separate servers that YCM talks to.
+
+An additional optional argument may be supplied for Python, specifying the
+python binary to use to restart the Python semantic engine.
+>
+  :YcmCompleter RestartServer /usr/bin/python3.4
+<
+Supported in filetypes: 'cs, go, javascript, python, rust, typescript'
+
+-------------------------------------------------------------------------------
 The *ClearCompilationFlagCache* subcommand
 
 YCM caches the flags it gets from the 'FlagsForFile' function in your
@@ -1743,35 +1753,6 @@ This command clears that cache entirely. YCM will then re-query your
 'FlagsForFile' function as needed in the future.
 
 Supported in filetypes: 'c, cpp, objc, objcpp'
-
--------------------------------------------------------------------------------
-The *StartServer* subcommand
-
-Starts the semantic-engine-as-localhost-server for those semantic engines that
-work as separate servers that YCM talks to.
-
-Supported in filetypes: 'cs, go, javascript, rust'
-
--------------------------------------------------------------------------------
-The *StopServer* subcommand
-
-Stops the semantic-engine-as-localhost-server for those semantic engines that
-work as separate servers that YCM talks to.
-
-Supported in filetypes: 'cs, go, javascript, rust'
-
--------------------------------------------------------------------------------
-The *RestartServer* subcommand
-
-Restarts the semantic-engine-as-localhost-server for those semantic engines
-that work as separate servers that YCM talks to.
-
-An additional optional argument may be supplied for Python, specifying the
-python binary to use to restart the Python semantic engine.
->
-  :YcmCompleter RestartServer /usr/bin/python3.4
-<
-Supported in filetypes: 'cs, python, rust'
 
 -------------------------------------------------------------------------------
 The *ReloadSolution* subcommand

@@ -872,8 +872,7 @@ JavaScript project, you can do one of the following:
   [ycmd server][ycmd] (`:YcmRestartServer`)
 - change Vim's working directory (`:cd /path/to/new/project`), open a JavaScript
   file (or set filetype to JavaScript) and restart the Tern server using YCM
-  completer subcommands `:YcmCompleter StopServer` and `:YcmCompleter
-  StartServer`.
+  completer subcommand `:YcmCompleter RestartServer`.
 
 #### Tips and tricks
 
@@ -1445,32 +1444,6 @@ These commands are for general administration, rather than IDE-like features.
 They cover things like the semantic engine server instance and compilation
 flags.
 
-#### The `ClearCompilationFlagCache` subcommand
-
-YCM caches the flags it gets from the `FlagsForFile` function in your
-`ycm_extra_conf.py` file if you return them with the `do_cache` parameter set to
-`True`. The cache is in memory and is never invalidated (unless you restart Vim
-of course).
-
-This command clears that cache entirely. YCM will then re-query your
-`FlagsForFile` function as needed in the future.
-
-Supported in filetypes: `c, cpp, objc, objcpp`
-
-#### The `StartServer` subcommand
-
-Starts the semantic-engine-as-localhost-server for those semantic engines that
-work as separate servers that YCM talks to.
-
-Supported in filetypes: `cs, go, javascript, rust`
-
-#### The `StopServer` subcommand
-
-Stops the semantic-engine-as-localhost-server for those semantic engines that
-work as separate servers that YCM talks to.
-
-Supported in filetypes: `cs, go, javascript, rust`
-
 #### The `RestartServer` subcommand
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
@@ -1483,7 +1456,19 @@ python binary to use to restart the Python semantic engine.
 :YcmCompleter RestartServer /usr/bin/python3.4
 ```
 
-Supported in filetypes: `cs, python, rust`
+Supported in filetypes: `cs, go, javascript, python, rust, typescript`
+
+#### The `ClearCompilationFlagCache` subcommand
+
+YCM caches the flags it gets from the `FlagsForFile` function in your
+`ycm_extra_conf.py` file if you return them with the `do_cache` parameter set to
+`True`. The cache is in memory and is never invalidated (unless you restart Vim
+of course).
+
+This command clears that cache entirely. YCM will then re-query your
+`FlagsForFile` function as needed in the future.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
 
 #### The `ReloadSolution` subcommand
 
