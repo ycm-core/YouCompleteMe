@@ -977,15 +977,16 @@ package you have in the virtual environment.
 
 ### Semantic Completion for Other Languages
 
-Python, C#, Go, Rust, and TypeScript are supported natively by YouCompleteMe
-using the [Jedi][], [Omnisharp][], [Gocode][], [racer][], and [TSServer][]
-engines, respectively. Check the [installation](#installation) section for
-instructions to enable these features if desired.
+C-family, C#, Go, JavaScript, Python, Rust, and TypeScript languages are
+supported natively by YouCompleteMe using the [Clang][], [OmniSharp][],
+[Gocode][]/[Godef][], [Tern][], [Jedi][], [racer][], and [TSServer][] engines,
+respectively. Check the [installation](#installation) section for instructions
+to enable these features if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
 file's filetype. Vim comes with okayish omnifuncs for various languages like
-Ruby, PHP etc. It depends on the language.
+Ruby, PHP, etc. It depends on the language.
 
 You can get stellar omnifuncs for Java and Ruby with [Eclim][]. Just make sure
 you have the _latest_ Eclim installed and configured (this means Eclim `>= 2.2.*`
