@@ -32,6 +32,7 @@ import signal
 import base64
 from subprocess import PIPE
 from tempfile import NamedTemporaryFile
+from requests.exceptions import Timeout
 from ycm import base, paths, vimsupport
 from ycmd import utils
 from ycmd import server_utils
@@ -108,6 +109,7 @@ class YouCompleteMe( object ):
     self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
     self._latest_file_parse_request = None
+    self._latest_file_parse_request_bufnr = 0
     self._latest_completion_request = None
     self._latest_diagnostics = []
     self._server_stdout = None
@@ -120,6 +122,7 @@ class YouCompleteMe( object ):
     self._complete_done_hooks = {
       'cs': lambda self: self._OnCompleteDone_Csharp()
     }
+    self._file_parse_ready_callbacks = []
 
   def _SetupServer( self ):
     self._available_completers = {}
@@ -311,6 +314,7 @@ class YouCompleteMe( object ):
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
 
+    self._latest_file_parse_request_bufnr = vimsupport.GetCurrentBufferNumber()
     self._latest_file_parse_request = EventNotification( 'FileReadyToParse',
                                                           extra_data )
     self._latest_file_parse_request.Start()
@@ -567,6 +571,7 @@ class YouCompleteMe( object ):
         # to the user. We ignore any other supplied data.
         self._latest_file_parse_request.Response()
 
+      self.NotifyFileParseReady( self._latest_file_parse_request_bufnr )
       # We set the file parse request to None because we want to prevent
       # repeated issuing of the same warnings/errors/prompts. Setting this to
       # None makes FileParseRequestReady return False until the next
@@ -607,6 +612,64 @@ class YouCompleteMe( object ):
         self._server_stderr )
 
     return debug_info
+
+
+  def RegisterFileParseReadyCallback( self, callback ):
+    self._file_parse_ready_callbacks.append(callback)
+
+
+  def NotifyFileParseReady( self, bufnr ):
+    if self._file_parse_ready_callbacks:
+      for callback in self._file_parse_ready_callbacks:
+        try:
+          callback( bufnr )
+        except:
+          pass
+
+
+  def GetSemanticTokens( self, bufnr, start_line, start_column,
+                         end_line, end_column, timeout = 0.01 ):
+    if not self.IsServerAlive():
+      return []
+    try:
+      buffer = vim.buffers[ bufnr ]
+      request_data = {
+        'filepath': vimsupport.GetBufferFilepath( buffer ),
+        'filetypes': vimsupport.FiletypesForBuffer( buffer ),
+        'start_line': start_line,
+        'start_column': start_column,
+        'end_line': end_line,
+        'end_column': end_column,
+      }
+      return BaseRequest.PostDataToHandler( request_data,
+                                            'semantic_tokens',
+                                            timeout )
+    except ServerError as e:
+      if 'Still parsing' in str( e ):
+        return 'Parsing'
+      return 'Error'
+    except Timeout:
+      return 'Timeout'
+
+
+  def GetSkippedRanges( self, bufnr, timeout = 0.01 ):
+    if not self.IsServerAlive():
+      return []
+    try:
+      buffer = vim.buffers[ bufnr ]
+      request_data = {
+        'filepath': vimsupport.GetBufferFilepath( buffer ),
+        'filetypes': vimsupport.FiletypesForBuffer( buffer ),
+      }
+      return BaseRequest.PostDataToHandler( request_data,
+                                            'skipped_ranges',
+                                            timeout )
+    except ServerError as e:
+      if 'Still parsing' in str( e ):
+        return 'Parsing'
+      return 'Error'
+    except Timeout:
+      return 'Timeout'
 
 
   def _OpenLogs( self, stdout = True, stderr = True ):
