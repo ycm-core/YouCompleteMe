@@ -1307,6 +1307,19 @@ NOTE: Causes re-parsing of the current translation unit.
 
 Supported in filetypes: `c, cpp, objc, objcpp, javascript, typescript`
 
+#### The `GetTypeImprecise` subcommand
+
+WARNING: This command trades correctness for speed!
+
+Same as the `GetType` command except that it doesn't recompile the file with
+libclang before looking up nodes in the AST. This can be very useful when you're
+editing files that take long to compile but you know that you haven't made any
+changes since the last parse that would lead to incorrect type. When you're
+just browsing around your codebase, this command can spare you quite a bit of
+latency.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
+
 #### The `GetParent` subcommand
 
 Echos the semantic parent of the point under the cursor.
@@ -1350,6 +1363,19 @@ under the cursor. Depending on the file type, this includes things like:
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
 javascript`
+
+#### The `GetDocImprecise` subcommand
+
+WARNING: This command trades correctness for speed!
+
+Same as the `GetDoc` command except that it doesn't recompile the file with
+libclang before looking up nodes in the AST. This can be very useful when you're
+editing files that take long to compile but you know that you haven't made any
+changes since the last parse that would lead to incorrect docs. When you're
+just browsing around your codebase, this command can spare you quite a bit of
+latency.
+
+Supported in filetypes: `c, cpp, objc, objcpp`
 
 ### Refactoring and FixIt Commands
 

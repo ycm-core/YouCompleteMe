@@ -11,6 +11,9 @@ install:
 script:
   - ci/travis/travis_script.sh
 env:
+  global:
+    # Travis can run out of RAM, so we need to be careful here.
+    - YCM_CORES=3
   matrix:
     - YCM_PYTHON_VERSION=2.7 YCM_FLAKE8=true
     # Since 3.0.4, Flake8 is not working anymore on Python 2.6.
@@ -30,6 +33,7 @@ addons:
     packages:
      - cmake-data
      - cmake
+     - g++-4.8
      - ninja-build
      # Everything below is a Python build dep (though it depends on Python
      # version). We need them because pyenv builds Python.
