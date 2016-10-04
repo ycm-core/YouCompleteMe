@@ -641,9 +641,10 @@ class YouCompleteMe( object ):
         'end_line': end_line,
         'end_column': end_column,
       }
-      return BaseRequest.PostDataToHandler( request_data,
-                                            'semantic_tokens',
-                                            timeout )
+      response = BaseRequest.PostDataToHandler( request_data,
+                                                'semantic_tokens',
+                                                timeout )
+      return response[ 'tokens' ]
     except ServerError as e:
       if 'Still parsing' in str( e ):
         return 'Parsing'
@@ -661,9 +662,10 @@ class YouCompleteMe( object ):
         'filepath': vimsupport.GetBufferFilepath( buffer ),
         'filetypes': vimsupport.FiletypesForBuffer( buffer ),
       }
-      return BaseRequest.PostDataToHandler( request_data,
-                                            'skipped_ranges',
-                                            timeout )
+      response = BaseRequest.PostDataToHandler( request_data,
+                                                'skipped_ranges',
+                                                timeout )
+      return response[ 'skipped_ranges' ]
     except ServerError as e:
       if 'Still parsing' in str( e ):
         return 'Parsing'
