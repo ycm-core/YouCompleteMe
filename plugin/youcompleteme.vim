@@ -24,20 +24,27 @@ function! s:restore_cpo()
   unlet s:save_cpo
 endfunction
 
+let g:ycm_disable_startup_warning =
+      \ get( g:, 'ycm_disable_startup_warning', 0 )
+
 if exists( "g:loaded_youcompleteme" )
   call s:restore_cpo()
   finish
 elseif v:version < 704 || (v:version == 704 && !has('patch143'))
-  echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.143+" |
-        \ echohl None
+  if g:ycm_disable_startup_warning == 0
+    echohl WarningMsg |
+          \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.143+" |
+          \ echohl None
+  endif
   call s:restore_cpo()
   finish
 elseif !has( 'python' ) && !has( 'python3' )
-  echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
-        \ "Python (2.6+ or 3.3+) support" |
-        \ echohl None
+  if g:ycm_disable_startup_warning == 0
+    echohl WarningMsg |
+          \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
+          \ "Python (2.6+ or 3.3+) support" |
+          \ echohl None
+  endif
   call s:restore_cpo()
   finish
 endif
