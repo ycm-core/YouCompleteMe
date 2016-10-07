@@ -1407,7 +1407,7 @@ def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
   mock_buffer = MagicMock()
   mock_buffer.name = os.path.realpath( 'filename' )
   mock_buffer.number = 1
-  mock_buffer.__iter__.return_value = [ u'abc', ToBytes( u'fДa' ) ]
+  mock_buffer.__iter__.return_value = [ ToBytes ( u'abc' ), ToBytes( u'fДa' ) ]
 
   with patch( 'vim.buffers', [ mock_buffer ] ):
     assert_that( vimsupport.GetUnsavedAndCurrentBufferData(),
