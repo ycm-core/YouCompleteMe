@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import MockVimModule, ExtendedMock
+from ycm.test_utils import ExtendedMock, MockVimModule, VimBuffer
 MockVimModule()
 
 import contextlib
@@ -33,6 +33,7 @@ from ycm.tests.server_test import Server_test
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
                              UnknownExtraConf, ServerError )
 
+from hamcrest import assert_that, contains, has_entries
 from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
 
@@ -59,46 +60,19 @@ def MockArbitraryBuffer( filetype, native_available = True ):
   """Used via the with statement, set up mocked versions of the vim module such
   that a single buffer is open with an arbitrary name and arbirary contents. Its
   filetype is set to the supplied filetype"""
-  with patch( 'vim.current' ) as vim_current:
-    def VimEval( value ):
-      """Local mock of the vim.eval() function, used to ensure we get the
-      correct behvaiour"""
 
-      if value == '&omnifunc':
-        # The omnicompleter is not required here
-        return ''
+  # Arbitrary, but valid, single buffer open.
+  current_buffer = VimBuffer( os.path.realpath( 'TEST_BUFFER' ),
+                              window = 1,
+                              filetype = filetype )
 
-      if value == 'getbufvar(0, "&mod")':
-        # Ensure that we actually send the even to the server
-        return 1
-
-      if value == 'getbufvar(0, "&ft")' or value == '&filetype':
-        return filetype
-
-      if value.startswith( 'bufnr(' ):
-        return 0
-
-      if value.startswith( 'bufwinnr(' ):
-        return 0
-
-      raise ValueError( 'Unexpected evaluation' )
-
-    # Arbitrary, but valid, cursor position
-    vim_current.window.cursor = ( 1, 2 )
-
-    # Arbitrary, but valid, single buffer open
-    current_buffer = MagicMock()
-    current_buffer.number = 0
-    current_buffer.filename = os.path.realpath( 'TEST_BUFFER' )
-    current_buffer.name = 'TEST_BUFFER'
-    current_buffer.window = 0
-
-    # The rest just mock up the Vim module so that our single arbitrary buffer
-    # makes sense to vimsupport module.
-    with patch( 'vim.buffers', [ current_buffer ] ):
-      with patch( 'vim.current.buffer', current_buffer ):
-        with patch( 'vim.eval', side_effect=VimEval ):
-          yield
+  # The rest just mock up the Vim module so that our single arbitrary buffer
+  # makes sense to vimsupport module.
+  with patch( 'vim.buffers', [ current_buffer ] ):
+    with patch( 'vim.current.buffer', current_buffer ):
+      # Arbitrary but valid cursor position.
+      with patch( 'vim.current.window.cursor', ( 1, 2 ) ):
+        yield
 
 
 @contextlib.contextmanager
@@ -310,7 +284,7 @@ class EventNotification_test( Server_test ):
         ok_( self._server_state.FileParseRequestReady() )
         self._server_state.HandleFileParseRequest()
         vim_command.assert_has_calls( [
-          PlaceSign_Call( 1, 1, 0, True )
+          PlaceSign_Call( 1, 1, 1, True )
         ] )
         eq_( self._server_state.GetErrorCount(), 1 )
         eq_( self._server_state.GetWarningCount(), 0 )
@@ -343,8 +317,8 @@ class EventNotification_test( Server_test ):
         ok_( self._server_state.FileParseRequestReady() )
         self._server_state.HandleFileParseRequest()
         vim_command.assert_has_calls( [
-          PlaceSign_Call( 2, 2, 0, False ),
-          UnplaceSign_Call( 1, 0 )
+          PlaceSign_Call( 2, 2, 1, False ),
+          UnplaceSign_Call( 1, 1 )
         ] )
         eq_( self._server_state.GetErrorCount(), 0 )
         eq_( self._server_state.GetWarningCount(), 1 )
@@ -369,7 +343,114 @@ class EventNotification_test( Server_test ):
         self._server_state.OnFileReadyToParse()
         self._server_state.HandleFileParseRequest()
         vim_command.assert_has_calls( [
-          UnplaceSign_Call( 2, 0 )
+          UnplaceSign_Call( 2, 1 )
         ] )
         eq_( self._server_state.GetErrorCount(), 0 )
         eq_( self._server_state.GetWarningCount(), 0 )
+
+
+  @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
+  @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync',
+          new_callable = ExtendedMock )
+  def BufferVisit_BuildRequestForCurrentAndUnsavedBuffers_test(
+      self, post_data_to_handler_async, *args ):
+
+    current_buffer_file = os.path.realpath( 'current_buffer' )
+    current_buffer = VimBuffer( name = current_buffer_file,
+                                number = 1,
+                                contents = [ 'current_buffer_content' ],
+                                filetype = 'some_filetype',
+                                modified = False )
+
+    modified_buffer_file = os.path.realpath( 'modified_buffer' )
+    modified_buffer = VimBuffer( name = modified_buffer_file,
+                                 number = 2,
+                                 contents = [ 'modified_buffer_content' ],
+                                 filetype = 'some_filetype',
+                                 modified = True )
+
+    unmodified_buffer_file = os.path.realpath( 'unmodified_buffer' )
+    unmodified_buffer = VimBuffer( name = unmodified_buffer_file,
+                                   number = 3,
+                                   contents = [ 'unmodified_buffer_content' ],
+                                   filetype = 'some_filetype',
+                                   modified = False )
+
+    with patch( 'vim.buffers', [ current_buffer,
+                                 modified_buffer,
+                                 unmodified_buffer ] ):
+      with patch( 'vim.current.buffer', current_buffer ):
+        with patch( 'vim.current.window.cursor', ( 3, 5 ) ):
+          self._server_state.OnBufferVisit()
+
+    assert_that(
+      # Positional arguments passed to PostDataToHandlerAsync.
+      post_data_to_handler_async.call_args[ 0 ],
+      contains(
+        has_entries( {
+          'filepath': current_buffer_file,
+          'line_num': 3,
+          'column_num': 6,
+          'file_data': has_entries( {
+            current_buffer_file: has_entries( {
+              'contents': 'current_buffer_content\n',
+              'filetypes': [ 'some_filetype' ]
+            } ),
+            modified_buffer_file: has_entries( {
+              'contents': 'modified_buffer_content\n',
+              'filetypes': [ 'some_filetype' ]
+            } )
+          } ),
+          'event_name': 'BufferVisit'
+        } ),
+        'event_notification'
+      )
+    )
+
+
+  @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync',
+          new_callable = ExtendedMock )
+  def BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
+      self, post_data_to_handler_async ):
+
+    current_buffer_file = os.path.realpath( 'current_buffer' )
+    current_buffer = VimBuffer( name = current_buffer_file,
+                                number = 1,
+                                contents = [ 'current_buffer_content' ],
+                                filetype = 'some_filetype',
+                                modified = True )
+
+    deleted_buffer_file = os.path.realpath( 'deleted_buffer' )
+    deleted_buffer = VimBuffer( name = deleted_buffer_file,
+                                number = 2,
+                                contents = [ 'deleted_buffer_content' ],
+                                filetype = 'some_filetype',
+                                modified = False )
+
+    with patch( 'vim.buffers', [ current_buffer, deleted_buffer ] ):
+      with patch( 'vim.current.buffer', current_buffer ):
+        self._server_state.OnBufferUnload( deleted_buffer_file )
+
+    assert_that(
+      # Positional arguments passed to PostDataToHandlerAsync.
+      post_data_to_handler_async.call_args[ 0 ],
+      contains(
+        has_entries( {
+          'filepath': deleted_buffer_file,
+          'line_num': 1,
+          'column_num': 1,
+          'file_data': has_entries( {
+            current_buffer_file: has_entries( {
+              'contents': 'current_buffer_content\n',
+              'filetypes': [ 'some_filetype' ]
+            } ),
+            deleted_buffer_file: has_entries( {
+              'contents': 'deleted_buffer_content\n',
+              'filetypes': [ 'some_filetype' ]
+            } )
+          } ),
+          'event_name': 'BufferUnload'
+        } ),
+        'event_notification'
+      )
+    )
