@@ -30,7 +30,7 @@ import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToUnicode, ToBytes
+from ycmd.utils import ToUnicode, ToBytes, JoinLinesAsUnicode
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -125,7 +125,7 @@ def GetUnsavedAndCurrentBufferData():
 
     buffers_data[ GetBufferFilepath( buffer_object ) ] = {
       # Add a newline to match what gets saved to disk. See #1455 for details.
-      'contents': '\n'.join( ToUnicode( x ) for x in buffer_object ) + '\n',
+      'contents': JoinLinesAsUnicode( buffer_object ) + '\n',
       'filetypes': FiletypesForBuffer( buffer_object )
     }
 
