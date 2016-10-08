@@ -33,9 +33,12 @@ import functools
 from ycmd.utils import ToUnicode
 
 
-BUFNR_REGEX = re.compile( r"^bufnr\('(.+)', ([0-9]+)\)$" )
-BUFWINNR_REGEX = re.compile( r"^bufwinnr\(([0-9]+)\)$" )
-BWIPEOUT_REGEX = re.compile( r"^(?:silent! )bwipeout!? ([0-9]+)$" )
+BUFNR_REGEX = re.compile( '^bufnr\(\'(?P<buffer_filename>.+)\', ([01])\)$' )
+BUFWINNR_REGEX = re.compile( '^bufwinnr\((?P<buffer_number>[0-9]+)\)$' )
+BWIPEOUT_REGEX = re.compile(
+  '^(?:silent! )bwipeout!? (?P<buffer_number>[0-9]+)$' )
+GETBUFVAR_REGEX = re.compile(
+  '^getbufvar\((?P<buffer_number>[0-9]+), "&(?P<option>.+)"\)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -49,46 +52,74 @@ VIM_MOCK = MagicMock()
 
 
 def MockGetBufferNumber( buffer_filename ):
-  for buffer in VIM_MOCK.buffers:
-    if buffer[ 'filename' ] == buffer_filename:
-      return buffer[ 'number' ]
+  for vim_buffer in VIM_MOCK.buffers:
+    if vim_buffer.name == buffer_filename:
+      return vim_buffer.number
   return -1
 
 
 def MockGetBufferWindowNumber( buffer_number ):
-  for buffer in VIM_MOCK.buffers:
-    if buffer[ 'number' ] == buffer_number and 'window' in buffer:
-      return buffer[ 'window' ]
+  for vim_buffer in VIM_MOCK.buffers:
+    if vim_buffer.number == buffer_number and vim_buffer.window:
+      return vim_buffer.window
   return -1
 
 
+def MockGetBufferVariable( buffer_number, option ):
+  for vim_buffer in VIM_MOCK.buffers:
+    if vim_buffer.number == buffer_number:
+      if option == 'mod':
+        return vim_buffer.modified
+      if option == 'ft':
+        return vim_buffer.filetype
+      return ''
+  return ''
+
+
 def MockVimEval( value ):
-  if value == "g:ycm_min_num_of_chars_for_completion":
+  if value == 'g:ycm_min_num_of_chars_for_completion':
     return 0
-  if value == "g:ycm_server_python_interpreter":
+
+  if value == 'g:ycm_server_python_interpreter':
     return ''
-  if value == "tempname()":
+
+  if value == 'tempname()':
     return '_TEMP_FILE_'
-  if value == "&previewheight":
+
+  if value == '&previewheight':
     # Default value from Vim
     return 12
 
+  if value == '&omnifunc':
+    return VIM_MOCK.current.buffer.omnifunc
+
+  if value == '&filetype':
+    return VIM_MOCK.current.buffer.filetype
+
   match = BUFNR_REGEX.search( value )
   if match:
-    return MockGetBufferNumber( match.group( 1 ) )
+    buffer_filename = match.group( 'buffer_filename' )
+    return MockGetBufferNumber( buffer_filename )
 
   match = BUFWINNR_REGEX.search( value )
   if match:
-    return MockGetBufferWindowNumber( int( match.group( 1 ) ) )
+    buffer_number = int( match.group( 'buffer_number' ) )
+    return MockGetBufferWindowNumber( buffer_number )
 
-  raise ValueError( 'Unexpected evaluation: ' + value )
+  match = GETBUFVAR_REGEX.search( value )
+  if match:
+    buffer_number = int( match.group( 'buffer_number' ) )
+    option = match.group( 'option' )
+    return MockGetBufferVariable( buffer_number, option )
+
+  raise ValueError( 'Unexpected evaluation: {0}'.format( value ) )
 
 
 def MockWipeoutBuffer( buffer_number ):
   buffers = VIM_MOCK.buffers
 
   for index, buffer in enumerate( buffers ):
-    if buffer[ 'number' ] == buffer_number:
+    if buffer.number == buffer_number:
       return buffers.pop( index )
 
 
@@ -98,6 +129,50 @@ def MockVimCommand( command ):
     return MockWipeoutBuffer( int( match.group( 1 ) ) )
 
   raise RuntimeError( 'Unexpected command: ' + command )
+
+
+class VimBuffer( object ):
+  """An object that looks like a vim.buffer object:
+   - |name|    : full path of the buffer;
+   - |number|  : buffer number;
+   - |contents|: list of lines representing the buffer contents;
+   - |filetype|: buffer filetype. Empty string if no filetype is set;
+   - |modified|: True if the buffer has unsaved changes, False otherwise;
+   - |window|  : number of the buffer window. None if the buffer is hidden;
+   - |omnifunc|: omni completion function used by the buffer."""
+
+  def __init__( self, name,
+                      number = 1,
+                      contents = [],
+                      filetype = '',
+                      modified = True,
+                      window = None,
+                      omnifunc = '' ):
+    self.name = name
+    self.number = number
+    self.contents = contents
+    self.filetype = filetype
+    self.modified = modified
+    self.window = window
+    self.omnifunc = omnifunc
+
+
+  def __getitem__( self, index ):
+    """Return the bytes for a given line at index |index|."""
+    return self.contents[ index ]
+
+
+  def __len__( self ):
+    return len( self.contents )
+
+
+  def __setitem__( self, key, value ):
+    return self.contents.__setitem__( key, value )
+
+
+  def GetLines( self ):
+    """Return the contents of the buffer as a list of unicode strings."""
+    return [ ToUnicode( x ) for x in self.contents ]
 
 
 def MockVimModule():
