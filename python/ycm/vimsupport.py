@@ -116,7 +116,7 @@ def BufferModified( buffer_object ):
   return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
 
-def GetUnsavedBufferData( including_filepath ):
+def GetUnsavedAndSpecifiedBufferData( including_filepath ):
   """Build part of the request containing the contents and filetypes of all
   dirty buffers as well as the buffer with filepath |including_filepath|."""
   buffers_data = {}

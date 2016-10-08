@@ -165,7 +165,7 @@ def BuildRequestData( filepath = None ):
       'filepath': filepath,
       'line_num': 1,
       'column_num': 1,
-      'file_data': vimsupport.GetUnsavedBufferData( filepath )
+      'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( filepath )
     }
 
   line, column = vimsupport.CurrentLineAndColumn()
@@ -174,7 +174,7 @@ def BuildRequestData( filepath = None ):
     'filepath': current_filepath,
     'line_num': line + 1,
     'column_num': column + 1,
-    'file_data': vimsupport.GetUnsavedBufferData( current_filepath )
+    'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( current_filepath )
   }
 
 
