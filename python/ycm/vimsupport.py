@@ -116,14 +116,17 @@ def BufferModified( buffer_object ):
   return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
 
 
-def GetUnsavedAndCurrentBufferData():
+def GetUnsavedAndSpecifiedBufferData( including_filepath ):
+  """Build part of the request containing the contents and filetypes of all
+  dirty buffers as well as the buffer with filepath |including_filepath|."""
   buffers_data = {}
   for buffer_object in vim.buffers:
+    buffer_filepath = GetBufferFilepath( buffer_object )
     if not ( BufferModified( buffer_object ) or
-             buffer_object == vim.current.buffer ):
+             buffer_filepath == including_filepath ):
       continue
 
-    buffers_data[ GetBufferFilepath( buffer_object ) ] = {
+    buffers_data[ buffer_filepath ] = {
       # Add a newline to match what gets saved to disk. See #1455 for details.
       'contents': JoinLinesAsUnicode( buffer_object ) + '\n',
       'filetypes': FiletypesForBuffer( buffer_object )

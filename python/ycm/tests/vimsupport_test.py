@@ -25,14 +25,15 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import ExtendedMock, MockVimModule, MockVimCommand
+from ycm.test_utils import ( ExtendedMock, MockVimCommand, VimBuffer,
+                             MockVimModule )
 MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
 from hamcrest import assert_that, calling, raises, none, has_entry
 from mock import MagicMock, call, patch
-from ycmd.utils import ToBytes, ToUnicode
+from ycmd.utils import ToBytes
 import os
 import json
 
@@ -705,34 +706,6 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   AssertBuffersAreEqualAsBytes( expected_buffer, result_buffer )
 
 
-class MockBuffer( object ):
-  """An object that looks like a vim.buffer object, enough for ReplaceChunk to
-  generate a location list"""
-
-  def __init__( self, lines, name, number ):
-    self.lines = lines
-    self.name = name
-    self.number = number
-
-
-  def __getitem__( self, index ):
-    """ Return the bytes for a given line at index |index| """
-    return self.lines[ index ]
-
-
-  def __len__( self ):
-    return len( self.lines )
-
-
-  def __setitem__( self, key, value ):
-    return self.lines.__setitem__( key, value )
-
-
-  def GetLines( self ):
-    """ Return the contents of the buffer as a list of unicode strings"""
-    return [ ToUnicode( x ) for x in self.lines ]
-
-
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
 @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
@@ -758,11 +731,14 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
     _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
-  result_buffer = MockBuffer( [
-    'line1',
-    'line2',
-    'line3',
-  ], 'single_file', 1 )
+  result_buffer = VimBuffer(
+    'single_file',
+    contents = [
+      'line1',
+      'line2',
+      'line3'
+    ]
+  )
 
   with patch( 'vim.buffers', [ None, result_buffer, None ] ):
     vimsupport.ReplaceChunks( chunks )
@@ -845,11 +821,14 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
     _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
-  result_buffer = MockBuffer( [
-    'line1',
-    'line2',
-    'line3',
-  ], 'single_file', 1 )
+  result_buffer = VimBuffer(
+    'single_file',
+    contents = [
+      'line1',
+      'line2',
+      'line3'
+    ]
+  )
 
   with patch( 'vim.buffers', [ None, result_buffer, None ] ):
     vimsupport.ReplaceChunks( chunks )
@@ -954,11 +933,14 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
     _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
-  result_buffer = MockBuffer( [
-    'line1',
-    'line2',
-    'line3',
-  ], 'single_file', 1 )
+  result_buffer = VimBuffer(
+    'single_file',
+    contents = [
+      'line1',
+      'line2',
+      'line3'
+    ]
+  )
 
   with patch( 'vim.buffers', [ None, result_buffer, None ] ):
     vimsupport.ReplaceChunks( chunks )
@@ -1031,11 +1013,14 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
     _BuildChunk( 1, 1, 2, 1, 'replacement', 'single_file' )
   ]
 
-  result_buffer = MockBuffer( [
-    'line1',
-    'line2',
-    'line3',
-  ], 'single_file', 1 )
+  result_buffer = VimBuffer(
+    'single_file',
+    contents = [
+      'line1',
+      'line2',
+      'line3'
+    ]
+  )
 
   with patch( 'vim.buffers', [ None, result_buffer, None ] ):
     assert_that( calling( vimsupport.ReplaceChunks ).with_args( chunks ),
@@ -1114,15 +1099,23 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
     _BuildChunk( 2, 1, 2, 1, 'second_file_replacement ', '2_another_file' ),
   ]
 
-  first_file = MockBuffer( [
-    'line1',
-    'line2',
-    'line3',
-  ], '1_first_file', 22 )
-  another_file = MockBuffer( [
-    'another line1',
-    'ACME line2',
-  ], '2_another_file', 19 )
+  first_file = VimBuffer(
+    '1_first_file',
+    number = 22,
+    contents = [
+      'line1',
+      'line2',
+      'line3',
+    ]
+  )
+  another_file = VimBuffer(
+    '2_another_file',
+    number = 19,
+    contents = [
+      'another line1',
+      'ACME line2',
+    ]
+  )
 
   vim_buffers = [ None ] * 23
   vim_buffers[ 22 ] = first_file
@@ -1222,9 +1215,10 @@ def _BuildChunk( start_line,
 
 @patch( 'vim.eval', new_callable = ExtendedMock )
 def AddDiagnosticSyntaxMatch_ErrorInMiddleOfLine_test( vim_eval ):
-  current_buffer = MockBuffer( [
-    'Highlight this error please'
-  ], 'some_file', 1 )
+  current_buffer = VimBuffer(
+    'some_file',
+    contents = [ 'Highlight this error please' ]
+  )
 
   with patch( 'vim.current.buffer', current_buffer ):
     vimsupport.AddDiagnosticSyntaxMatch( 1, 16, 1, 21 )
@@ -1235,9 +1229,10 @@ def AddDiagnosticSyntaxMatch_ErrorInMiddleOfLine_test( vim_eval ):
 
 @patch( 'vim.eval', new_callable = ExtendedMock )
 def AddDiagnosticSyntaxMatch_WarningAtEndOfLine_test( vim_eval ):
-  current_buffer = MockBuffer( [
-    'Highlight this warning'
-  ], 'some_file', 1 )
+  current_buffer = VimBuffer(
+    'some_file',
+    contents = [ 'Highlight this warning' ]
+  )
 
   with patch( 'vim.current.buffer', current_buffer ):
     vimsupport.AddDiagnosticSyntaxMatch( 1, 16, 1, 23, is_error = False )
@@ -1339,31 +1334,42 @@ def CheckFilename_test():
 
 
 def BufferIsVisibleForFilename_test():
-  buffers = [
-    {
-      'number': 1,
-      'filename': os.path.realpath( 'visible_filename' ),
-      'window': 1
-    },
-    {
-      'number': 2,
-      'filename': os.path.realpath( 'hidden_filename' ),
-    }
+  vim_buffers = [
+    VimBuffer(
+      os.path.realpath( 'visible_filename' ),
+      number = 1,
+      window = 1
+    ),
+    VimBuffer(
+      os.path.realpath( 'hidden_filename' ),
+      number = 2,
+      window = None
+    )
   ]
 
-  with patch( 'vim.buffers', buffers ):
+  with patch( 'vim.buffers', vim_buffers ):
     eq_( vimsupport.BufferIsVisibleForFilename( 'visible_filename' ), True )
     eq_( vimsupport.BufferIsVisibleForFilename( 'hidden_filename' ), False )
     eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
 
 
-@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
-        side_effect = [ 2, 5, -1 ] )
 @patch( 'vim.command',
         side_effect = MockVimCommand,
         new_callable = ExtendedMock )
 def CloseBuffersForFilename_test( vim_command, *args ):
-  vimsupport.CloseBuffersForFilename( 'some_filename' )
+  vim_buffers = [
+    VimBuffer(
+      os.path.realpath( 'some_filename' ),
+      number = 2
+    ),
+    VimBuffer(
+      os.path.realpath( 'some_filename' ),
+      number = 5
+    )
+  ]
+
+  with patch( 'vim.buffers', vim_buffers ):
+    vimsupport.CloseBuffersForFilename( 'some_filename' )
 
   vim_command.assert_has_exact_calls( [
     call( 'silent! bwipeout! 2' ),
@@ -1401,17 +1407,14 @@ def OpenFilename_test( vim_current, vim_command ):
   ] )
 
 
-@patch( 'ycm.vimsupport.BufferModified', side_effect = [ True ] )
-@patch( 'ycm.vimsupport.FiletypesForBuffer', side_effect = [ [ 'cpp' ] ] )
-def GetUnsavedAndCurrentBufferData_EncodedUnicodeCharsInBuffers_test( *args ):
-  mock_buffer = MagicMock()
-  mock_buffer.name = os.path.realpath( 'filename' )
-  mock_buffer.number = 1
-  mock_buffer.__iter__.return_value = [ ToBytes ( u'abc' ), ToBytes( u'fДa' ) ]
+def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
+  filepath = os.path.realpath( 'filename' )
+  contents = [ ToBytes( u'abc' ), ToBytes( u'fДa' ) ]
+  vim_buffer = VimBuffer( filepath, contents = contents )
 
-  with patch( 'vim.buffers', [ mock_buffer ] ):
-    assert_that( vimsupport.GetUnsavedAndCurrentBufferData(),
-                 has_entry( mock_buffer.name,
+  with patch( 'vim.buffers', [ vim_buffer ] ):
+    assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( filepath ),
+                 has_entry( filepath,
                             has_entry( u'contents', u'abc\nfДa\n' ) ) )
 
 
