@@ -61,7 +61,7 @@ class DiagnosticFilter( object ):
 
   @staticmethod
   def from_filetype( user_options, filetypes ):
-    base = dict( user_options[ 'quiet_messages' ] )
+    base = dict( user_options.get( 'quiet_messages', {} ) )
 
     for filetype in filetypes:
       type_specific = user_options.get( filetype + '_quiet_messages', {} ) 
