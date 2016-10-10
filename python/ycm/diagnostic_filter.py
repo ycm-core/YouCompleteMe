@@ -100,7 +100,6 @@ def _CompileLevel( level ):
   expected_kind = level.upper()[ : -1 ]
 
   def FilterLevel( diagnostic ):
-    print( diagnostic, 'matches?', expected_kind )
     return diagnostic[ 'kind' ] == expected_kind
 
   return FilterLevel
