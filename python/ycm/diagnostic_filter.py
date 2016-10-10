@@ -1,4 +1,4 @@
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2016  YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -23,11 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from future.utils import itervalues, iteritems
-from collections import defaultdict, namedtuple
-from ycm import vimsupport
 import re
-import vim
 
 
 class DiagnosticFilter( object ):
@@ -35,14 +31,14 @@ class DiagnosticFilter( object ):
     self._filters = []
 
     for filter_type in config.iterkeys():
-      wrapper = lambda x: x
+      wrapper = _AsIs
       actual_filter_type = filter_type
 
       if filter_type[0] == '!':
         wrapper = _Not
         filter_type = filter_type[1:]
       compiler = FILTER_COMPILERS.get( filter_type )
-      
+
       if compiler is not None:
         for filter_config in _ListOf( config[ actual_filter_type ] ):
           fn = wrapper( compiler( filter_config ) )
@@ -56,7 +52,7 @@ class DiagnosticFilter( object ):
       if f( diagnostic ):
         return False
 
-    return True 
+    return True
 
 
   @staticmethod
@@ -64,16 +60,20 @@ class DiagnosticFilter( object ):
     base = dict( user_options.get( 'quiet_messages', {} ) )
 
     for filetype in filetypes:
-      type_specific = user_options.get( filetype + '_quiet_messages', {} ) 
+      type_specific = user_options.get( filetype + '_quiet_messages', {} )
       base.update( type_specific )
     return DiagnosticFilter( base )
 
 
 def _ListOf( config_entry ):
-  if type( config_entry ) == type( [] ):
+  if isinstance( config_entry, list ):
     return config_entry
 
   return [ config_entry ]
+
+
+def _AsIs( fn ):
+  return fn
 
 
 def _Not( fn ):
@@ -93,7 +93,7 @@ def _CompileRegex( raw_regex ):
 
 
 def _CompileLevel( level ):
-  # valid kinds are WARNING and ERROR; 
+  # valid kinds are WARNING and ERROR;
   #  expected input levels are `warnings` and `errors`
   # NB: we don't validate the input...
   expected_kind = level.upper()[:-1]
