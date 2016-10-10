@@ -31,8 +31,11 @@ from hamcrest import assert_that, equal_to
 from ycm.diagnostic_filter import DiagnosticFilter
 
 
-def _assert_accept_equals( filter, text, expected ):
-  assert_that( filter.Accept( { 'text': text } ), equal_to( expected ) )
+def _assert_accept_equals( filter, text_or_obj, expected ):
+  if type( text_or_obj ) is not type( {} ):
+    text_or_obj = { 'text': text_or_obj }
+
+  assert_that( filter.Accept( text_or_obj ), equal_to( expected ) )
 
 def _assert_accepts( filter, text ):
   _assert_accept_equals( filter, text, True )
@@ -95,9 +98,30 @@ class ListOrSingle_test():
 
 
 def Invert_test():
-    opts = { 'quiet_messages' : { '!regex': [ 'taco' ] } }
+    opts = { 'quiet_messages' : { '!regex': 'taco' } }
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
     _assert_accepts( f, 'This is a Taco' )
     _assert_rejects( f, 'This is a Burrito' )
 
+
+class Level_test():
+
+  def Level_warnings_test( self ):
+    opts = { 'quiet_messages' : { 'level': 'warnings' } }
+    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+
+    _assert_rejects( f, { 'text': 'This is an unimportant taco', 
+                          'kind': 'WARNING' } )
+    _assert_accepts( f, { 'text': 'This taco will be shown', 
+                          'kind': 'ERROR' } )
+
+
+  def Level_errors_test( self ):
+    opts = { 'quiet_messages' : { 'level': 'errors' } }
+    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+
+    _assert_accepts( f, { 'text': 'This is an IMPORTANT taco', 
+                          'kind': 'WARNING' } )
+    _assert_rejects( f, { 'text': 'This taco will NOT be shown', 
+                          'kind': 'ERROR' } )
