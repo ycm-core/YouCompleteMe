@@ -86,10 +86,24 @@ def _Not( fn ):
 def _CompileRegex( raw_regex ):
   pattern = re.compile( raw_regex, re.IGNORECASE )
 
-  def Filter( diagnostic ):
+  def FilterRegex( diagnostic ):
     return pattern.search( diagnostic[ 'text' ] ) is not None
 
-  return Filter
+  return FilterRegex
 
 
-FILTER_COMPILERS  = { 'regex'      : _CompileRegex }
+def _CompileLevel( level ):
+  # valid kinds are WARNING and ERROR; 
+  #  expected input levels are `warnings` and `errors`
+  # NB: we don't validate the input...
+  expected_kind = level.upper()[:-1]
+
+  def FilterLevel( diagnostic ):
+    print( diagnostic, 'matches?', expected_kind )
+    return diagnostic[ 'kind' ] == expected_kind
+
+  return FilterLevel
+
+
+FILTER_COMPILERS  = { 'regex'      : _CompileRegex,
+                      'level'      : _CompileLevel }
