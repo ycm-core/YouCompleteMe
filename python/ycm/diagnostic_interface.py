@@ -66,8 +66,11 @@ class DiagnosticInterface( object ):
 
 
   def UpdateWithNewDiagnostics( self, diags ):
-    diag_filter = DiagnosticFilter.from_filetype( self._user_options, vimsupport.CurrentFiletypes() )
-    normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags if diag_filter.Accept(x) ]
+    diag_filter = DiagnosticFilter.from_filetype(
+            self._user_options,
+            vimsupport.CurrentFiletypes() )
+    normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags
+            if diag_filter.Accept(x) ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
         normalized_diags )
 

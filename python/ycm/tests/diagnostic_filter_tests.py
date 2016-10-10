@@ -1,4 +1,4 @@
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2016  YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -26,19 +26,20 @@ from builtins import *  # noqa
 from ycm.test_utils import MockVimModule
 MockVimModule()
 
-import os
 from hamcrest import assert_that, equal_to
 from ycm.diagnostic_filter import DiagnosticFilter
 
 
 def _assert_accept_equals( filter, text_or_obj, expected ):
-  if type( text_or_obj ) is not type( {} ):
+  if not isinstance( text_or_obj, dict ):
     text_or_obj = { 'text': text_or_obj }
 
   assert_that( filter.Accept( text_or_obj ), equal_to( expected ) )
 
+
 def _assert_accepts( filter, text ):
   _assert_accept_equals( filter, text, True )
+
 
 def _assert_rejects( filter, text ):
   _assert_accept_equals( filter, text, False )
@@ -111,9 +112,9 @@ class Level_test():
     opts = { 'quiet_messages' : { 'level': 'warnings' } }
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_rejects( f, { 'text': 'This is an unimportant taco', 
+    _assert_rejects( f, { 'text': 'This is an unimportant taco',
                           'kind': 'WARNING' } )
-    _assert_accepts( f, { 'text': 'This taco will be shown', 
+    _assert_accepts( f, { 'text': 'This taco will be shown',
                           'kind': 'ERROR' } )
 
 
@@ -121,7 +122,7 @@ class Level_test():
     opts = { 'quiet_messages' : { 'level': 'errors' } }
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_accepts( f, { 'text': 'This is an IMPORTANT taco', 
+    _assert_accepts( f, { 'text': 'This is an IMPORTANT taco',
                           'kind': 'WARNING' } )
-    _assert_rejects( f, { 'text': 'This taco will NOT be shown', 
+    _assert_rejects( f, { 'text': 'This taco will NOT be shown',
                           'kind': 'ERROR' } )
