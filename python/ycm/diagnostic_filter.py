@@ -23,6 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
+from future.utils import iterkeys
 import re
 
 
@@ -30,13 +31,13 @@ class DiagnosticFilter( object ):
   def __init__( self, config ):
     self._filters = []
 
-    for filter_type in config.iterkeys():
+    for filter_type in iterkeys( config ):
       wrapper = _AsIs
       actual_filter_type = filter_type
 
-      if filter_type[0] == '!':
+      if filter_type[ 0 ] == '!':
         wrapper = _Not
-        filter_type = filter_type[1:]
+        filter_type = filter_type[ 1 : ]
       compiler = FILTER_COMPILERS.get( filter_type )
 
       if compiler is not None:
@@ -96,7 +97,7 @@ def _CompileLevel( level ):
   # valid kinds are WARNING and ERROR;
   #  expected input levels are `warnings` and `errors`
   # NB: we don't validate the input...
-  expected_kind = level.upper()[:-1]
+  expected_kind = level.upper()[ : -1 ]
 
   def FilterLevel( diagnostic ):
     print( diagnostic, 'matches?', expected_kind )
