@@ -75,6 +75,17 @@ class ConfigPriority_test():
     _assert_accepts( f, 'This is a Burrito' )
 
 
+  def ConfigPriority_FiletypeDisablesGlobal_test( self ):
+    # NB: if the filetype doesn't override the global,
+    #  we would reject burrito and accept taco
+    opts = { 'quiet_messages'      : { 'regex': 'taco'},
+             'java_quiet_messages' : { 'regex': [] } }
+    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+
+    _assert_accepts( f, 'This is a Taco' )
+    _assert_accepts( f, 'This is a Burrito' )
+
+
 class ListOrSingle_test():
   # NB: we already test the single config above
 
