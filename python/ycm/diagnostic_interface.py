@@ -26,6 +26,7 @@ from builtins import *  # noqa
 from future.utils import itervalues, iteritems
 from collections import defaultdict, namedtuple
 from ycm import vimsupport
+from ycm.diagnostic_filter import DiagnosticFilter
 import vim
 
 
@@ -65,7 +66,8 @@ class DiagnosticInterface( object ):
 
 
   def UpdateWithNewDiagnostics( self, diags ):
-    normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags ]
+    diag_filter = DiagnosticFilter.from_filetype( self._user_options, vimsupport.CurrentFiletypes() )
+    normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags if diag_filter.Accept(x) ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
         normalized_diags )
 
