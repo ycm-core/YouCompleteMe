@@ -25,13 +25,14 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.tests.test_utils import ( ExtendedMock, MockVimCommand, VimBuffer,
-                                   MockVimModule )
+from ycm.tests import PathToTestFile
+from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
+                                   MockVimCommand, MockVimModule, VimBuffer )
 MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
-from hamcrest import assert_that, calling, raises, none, has_entry
+from hamcrest import assert_that, calling, equal_to, has_entry, none, raises
 from mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
@@ -1416,6 +1417,14 @@ def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
     assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( filepath ),
                  has_entry( filepath,
                             has_entry( u'contents', u'abc\nfДa\n' ) ) )
+
+
+def GetBufferFilepath_NoBufferName_UnicodeWorkingDirectory_test():
+  vim_buffer = VimBuffer( '', number = 42 )
+  unicode_dir = PathToTestFile( u'uni¢𐍈d€' )
+  with CurrentWorkingDirectory( unicode_dir ):
+    assert_that( vimsupport.GetBufferFilepath( vim_buffer ),
+                 equal_to( os.path.join( unicode_dir, '42' ) ) )
 
 
 # NOTE: Vim returns byte offsets for columns, not actual character columns. This

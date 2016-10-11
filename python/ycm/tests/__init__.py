@@ -27,6 +27,7 @@ from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 import functools
+import os
 import requests
 import time
 
@@ -46,6 +47,11 @@ DEFAULT_CLIENT_OPTIONS = {
   'enable_diagnostic_highlighting': 0,
   'always_populate_location_list': 0,
 }
+
+
+def PathToTestFile( *args ):
+  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
+  return os.path.join( dir_of_current_script, 'testdata', *args )
 
 
 def _MakeUserOptions( custom_options = {} ):
