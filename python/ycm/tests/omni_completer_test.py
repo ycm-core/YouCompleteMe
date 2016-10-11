@@ -33,9 +33,8 @@ from hamcrest import contains_string
 from ycm.test_utils import MockVimModule, ExtendedMock
 MockVimModule()
 
-from ycm.omni_completer import OmniCompleter
 from ycm.test_utils import ExpectedFailure
-from ycm.tests.server_test import MakeUserOptions, Server_test
+from ycm.tests import YouCompleteMeInstance
 
 from ycmd.utils import ToBytes
 from ycmd.request_wrap import RequestWrap
@@ -74,240 +73,309 @@ def BuildRequestWrap( line_num, column_num, contents ):
   return RequestWrap( BuildRequest( line_num, column_num, contents ) )
 
 
-class OmniCompleter_test( Server_test ):
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_List_test( ycm ):
+  contents = 'test.'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 6,
+                                   contents = contents )
 
-  def OmniCompleter_GetCompletions_Cache_List_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    contents = 'test.'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 6,
-                                     contents = contents )
+  omnifunc_result = [ ToBytesOnPY2( 'a' ),
+                      ToBytesOnPY2( 'b' ),
+                      ToBytesOnPY2( 'cdef' ) ]
 
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'')" ),
+    ] )
 
-    omnifunc_result = [ ToBytesOnPY2( 'a' ),
-                        ToBytesOnPY2( 'b' ),
-                        ToBytesOnPY2( 'cdef' ) ]
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'')" ),
-      ] )
-
-      eq_( results, omnifunc_result )
+    eq_( results, omnifunc_result )
 
 
-  def OmniCompleter_GetCompletions_Cache_ListFilter_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_ListFilter_test( ycm ):
+  contents = 'test.t'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 7,
+                                   contents = contents )
 
-    contents = 'test.t'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 7,
-                                     contents = contents )
+  eq_( request_data[ 'query' ], 't' )
 
-    eq_( request_data[ 'query' ], 't' )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  omnifunc_result = [ ToBytesOnPY2( 'a' ),
+                      ToBytesOnPY2( 'b' ),
+                      ToBytesOnPY2( 'cdef' ) ]
 
-    omnifunc_result = [ ToBytesOnPY2( 'a' ),
-                        ToBytesOnPY2( 'b' ),
-                        ToBytesOnPY2( 'cdef' ) ]
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'t')" ),
+    ] )
 
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'t')" ),
-      ] )
-
-      eq_( results, [] )
+    eq_( results, [] )
 
 
-  def OmniCompleter_GetCompletions_NoCache_List_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 0
-    } ) )
-
-    contents = 'test.'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 6,
-                                     contents = contents )
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_List_test( ycm ):
+  contents = 'test.'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 6,
+                                   contents = contents )
 
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    omnifunc_result = [ ToBytesOnPY2( 'a' ),
-                        ToBytesOnPY2( 'b' ),
-                        ToBytesOnPY2( 'cdef' ) ]
+  omnifunc_result = [ ToBytesOnPY2( 'a' ),
+                      ToBytesOnPY2( 'b' ),
+                      ToBytesOnPY2( 'cdef' ) ]
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'')" ),
-      ] )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'')" ),
+    ] )
 
-      eq_( results, omnifunc_result )
-
-
-  def OmniCompleter_GetCompletions_NoCache_ListFilter_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 0
-    } ) )
-
-    contents = 'test.t'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 7,
-                                     contents = contents )
-
-    eq_( request_data[ 'query' ], 't' )
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = [ ToBytesOnPY2( 'a' ),
-                        ToBytesOnPY2( 'b' ),
-                        ToBytesOnPY2( 'cdef' ) ]
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'t')" ),
-      ] )
-
-      # actual result is that the results are not filtered, as we expect the
-      # omniufunc or vim itself to do this filtering
-      eq_( results, omnifunc_result )
+    eq_( results, omnifunc_result )
 
 
-  @ExpectedFailure( 'We ignore the result of the call to findstart and use our '
-                    'own interpretation of where the identifier should be',
-                    contains_string( "test_omnifunc(0,'t')" ) )
-  def OmniCompleter_GetCompletsions_UseFindStart_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
+  contents = 'test.t'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 7,
+                                   contents = contents )
 
-    contents = 'test.t'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 7,
-                                     contents = contents )
+  eq_( request_data[ 'query' ], 't' )
 
-    eq_( request_data[ 'query' ], 't' )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  omnifunc_result = [ ToBytesOnPY2( 'a' ),
+                      ToBytesOnPY2( 'b' ),
+                      ToBytesOnPY2( 'cdef' ) ]
 
-    omnifunc_result = [ ToBytesOnPY2( 'a' ),
-                        ToBytesOnPY2( 'b' ),
-                        ToBytesOnPY2( 'cdef' ) ]
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 1, omnifunc_result ] ) as vim_eval:
-      results = omni_completer.ComputeCandidates( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'t')" ),
+    ] )
 
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-
-        # Fails here: actual result is that the findstart result (1) is ignored
-        # and we use the 't' query as we normally would on the server side
-        call( "test_omnifunc(0,'test.t')" ),
-      ] )
-
-      eq_( results, omnifunc_result )
+    # actual result is that the results are not filtered, as we expect the
+    # omniufunc or vim itself to do this filtering
+    eq_( results, omnifunc_result )
 
 
-  def OmniCompleter_GetCompletions_Cache_Object_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
+@ExpectedFailure( 'We ignore the result of the call to findstart and use our '
+                  'own interpretation of where the identifier should be',
+                  contains_string( "test_omnifunc(0,'t')" ) )
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletsions_UseFindStart_test( ycm ):
+  contents = 'test.t'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 7,
+                                   contents = contents )
 
-    contents = 'test.t'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 7,
-                                     contents = contents )
+  eq_( request_data[ 'query' ], 't' )
 
-    eq_( request_data[ 'query' ], 't' )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  omnifunc_result = [ ToBytesOnPY2( 'a' ),
+                      ToBytesOnPY2( 'b' ),
+                      ToBytesOnPY2( 'cdef' ) ]
 
-    omnifunc_result = {
-      'words': [
-        ToBytesOnPY2( 'a' ),
-        ToBytesOnPY2( 'b' ),
-        ToBytesOnPY2( 'CDtEF' )
-      ]
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 1, omnifunc_result ] ) as vim_eval:
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+
+      # Fails here: actual result is that the findstart result (1) is ignored
+      # and we use the 't' query as we normally would on the server side
+      call( "test_omnifunc(0,'test.t')" ),
+    ] )
+
+    eq_( results, omnifunc_result )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_Object_test( ycm ):
+  contents = 'test.t'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 7,
+                                   contents = contents )
+
+  eq_( request_data[ 'query' ], 't' )
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = {
+    'words': [
+      ToBytesOnPY2( 'a' ),
+      ToBytesOnPY2( 'b' ),
+      ToBytesOnPY2( 'CDtEF' )
+    ]
+  }
+
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'t')" ),
+    ] )
+
+    eq_( results, [ ToBytesOnPY2( 'CDtEF' ) ] )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_ObjectList_test( ycm ):
+  contents = 'test.tt'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 8,
+                                   contents = contents )
+
+  eq_( request_data[ 'query' ], 'tt' )
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = [
+    {
+      'word': ToBytesOnPY2( 'a' ),
+      'abbr': ToBytesOnPY2( 'ABBR'),
+      'menu': ToBytesOnPY2( 'MENU' ),
+      'info': ToBytesOnPY2( 'INFO' ),
+      'kind': ToBytesOnPY2( 'K' )
+    },
+    {
+      'word': ToBytesOnPY2( 'test' ),
+      'abbr': ToBytesOnPY2( 'ABBRTEST'),
+      'menu': ToBytesOnPY2( 'MENUTEST' ),
+      'info': ToBytesOnPY2( 'INFOTEST' ),
+      'kind': ToBytesOnPY2( 'T' )
     }
+  ]
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-      results = omni_completer.ComputeCandidates( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
 
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'t')" ),
-      ] )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'tt')" ),
+    ] )
 
-      eq_( results, [ ToBytesOnPY2( 'CDtEF' ) ] )
+    eq_( results, [ omnifunc_result[ 1 ] ] )
 
 
-  def OmniCompleter_GetCompletions_Cache_ObjectList_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_ObjectList_test( ycm ):
+  contents = 'test.tt'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 8,
+                                   contents = contents )
 
-    contents = 'test.tt'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 8,
-                                     contents = contents )
+  eq_( request_data[ 'query' ], 'tt' )
 
-    eq_( request_data[ 'query' ], 'tt' )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  omnifunc_result = [
+    {
+      'word': ToBytesOnPY2( 'a' ),
+      'abbr': ToBytesOnPY2( 'ABBR'),
+      'menu': ToBytesOnPY2( 'MENU' ),
+      'info': ToBytesOnPY2( 'INFO' ),
+      'kind': ToBytesOnPY2( 'K' )
+    },
+    {
+      'word': ToBytesOnPY2( 'test' ),
+      'abbr': ToBytesOnPY2( 'ABBRTEST'),
+      'menu': ToBytesOnPY2( 'MENUTEST' ),
+      'info': ToBytesOnPY2( 'INFOTEST' ),
+      'kind': ToBytesOnPY2( 'T' )
+    }
+  ]
 
-    omnifunc_result = [
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'tt')" ),
+    ] )
+
+    # We don't filter the result - we expect the omnifunc to do that
+    # based on the query we supplied (Note: that means no fuzzy matching!)
+    eq_( results, omnifunc_result )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_ObjectListObject_test( ycm ):
+  contents = 'test.tt'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 8,
+                                   contents = contents )
+
+  eq_( request_data[ 'query' ], 'tt' )
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = {
+    'words': [
       {
         'word': ToBytesOnPY2( 'a' ),
         'abbr': ToBytesOnPY2( 'ABBR'),
@@ -323,39 +391,38 @@ class OmniCompleter_test( Server_test ):
         'kind': ToBytesOnPY2( 'T' )
       }
     ]
+  }
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-      results = omni_completer.ComputeCandidates( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
 
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'tt')" ),
-      ] )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'tt')" ),
+    ] )
 
-      eq_( results, [ omnifunc_result[ 1 ] ] )
+    eq_( results, [ omnifunc_result[ 'words' ][ 1 ] ] )
 
 
-  def OmniCompleter_GetCompletions_NoCache_ObjectList_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 0
-    } ) )
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
+  contents = 'test.tt'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 8,
+                                   contents = contents )
 
-    contents = 'test.tt'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 8,
-                                     contents = contents )
+  eq_( request_data[ 'query' ], 'tt' )
 
-    eq_( request_data[ 'query' ], 'tt' )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = [
+  omnifunc_result = {
+    'words': [
       {
         'word': ToBytesOnPY2( 'a' ),
         'abbr': ToBytesOnPY2( 'ABBR'),
@@ -371,277 +438,209 @@ class OmniCompleter_test( Server_test ):
         'kind': ToBytesOnPY2( 'T' )
       }
     ]
+  }
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-      results = omni_completer.ComputeCandidates( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
 
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'tt')" ),
-      ] )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'tt')" ),
+    ] )
 
-      # We don't filter the result - we expect the omnifunc to do that
-      # based on the query we supplied (Note: that means no fuzzy matching!)
-      eq_( results, omnifunc_result )
+    # No FilterAndSortCandidates for cache_omnifunc=0 (we expect the omnifunc
+    # to do the filtering?)
+    eq_( results, omnifunc_result[ 'words' ] )
 
 
-  def OmniCompleter_GetCompletions_Cache_ObjectListObject_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
+  contents = '†åsty_π.'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 13,
+                                   contents = contents )
 
-    contents = 'test.tt'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 8,
-                                     contents = contents )
 
-    eq_( request_data[ 'query' ], 'tt' )
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  omnifunc_result = [ ToBytesOnPY2( '†est' ),
+                      ToBytesOnPY2( 'å_unicode_identifier' ),
+                      ToBytesOnPY2( 'πππππππ yummy πie' ) ]
 
-    omnifunc_result = {
-      'words': [
-        {
-          'word': ToBytesOnPY2( 'a' ),
-          'abbr': ToBytesOnPY2( 'ABBR'),
-          'menu': ToBytesOnPY2( 'MENU' ),
-          'info': ToBytesOnPY2( 'INFO' ),
-          'kind': ToBytesOnPY2( 'K' )
-        },
-        {
-          'word': ToBytesOnPY2( 'test' ),
-          'abbr': ToBytesOnPY2( 'ABBRTEST'),
-          'menu': ToBytesOnPY2( 'MENUTEST' ),
-          'info': ToBytesOnPY2( 'INFOTEST' ),
-          'kind': ToBytesOnPY2( 'T' )
-        }
-      ]
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'')" ),
+    ] )
+
+    eq_( results, omnifunc_result )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
+  contents = '†åsty_π.'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 13,
+                                   contents = contents )
+
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = [ ToBytesOnPY2( '†est' ),
+                      ToBytesOnPY2( 'å_unicode_identifier' ),
+                      ToBytesOnPY2( 'πππππππ yummy πie' ) ]
+
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'')" ),
+    ] )
+
+    eq_( results, omnifunc_result )
+
+
+@ExpectedFailure( 'Filtering on unicode is not supported by the server' )
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
+  contents = '†åsty_π.ππ'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 17,
+                                   contents = contents )
+
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = [ ToBytesOnPY2( '†est' ),
+                      ToBytesOnPY2( 'å_unicode_identifier' ),
+                      ToBytesOnPY2( 'πππππππ yummy πie' ) ]
+
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'ππ')" ),
+    ] )
+
+    # Fails here: Filtering on unicode is not supported
+    eq_( results, [ omnifunc_result[ 2 ] ] )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
+  contents = '†åsty_π.ππ'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 17,
+                                   contents = contents )
+
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = [ ToBytesOnPY2( 'πππππππ yummy πie' ) ]
+
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'ππ')" ),
+    ] )
+
+    eq_( results, omnifunc_result )
+
+
+@ExpectedFailure( 'Filtering on unicode is not supported by the server' )
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
+  contents = '†åsty_π.ππ'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 17,
+                                   contents = contents )
+
+
+  eq_( request_data[ 'query' ], 'ππ' )
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = [
+    {
+      'word': ToBytesOnPY2( 'ålpha∫et' ),
+      'abbr': ToBytesOnPY2( 'å∫∫®'),
+      'menu': ToBytesOnPY2( 'µ´~¨á' ),
+      'info': ToBytesOnPY2( '^~fo' ),
+      'kind': ToBytesOnPY2( '˚' )
+    },
+    {
+      'word': ToBytesOnPY2( 'π†´ß†π' ),
+      'abbr': ToBytesOnPY2( 'ÅııÂÊ‰ÍÊ'),
+      'menu': ToBytesOnPY2( '˜‰ˆËÊ‰ÍÊ' ),
+      'info': ToBytesOnPY2( 'ÈˆÏØÊ‰ÍÊ' ),
+      'kind': ToBytesOnPY2( 'Ê' )
     }
+  ]
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-      results = omni_completer.ComputeCandidates( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
 
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'tt')" ),
-      ] )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'ππ')" ),
+    ] )
 
-      eq_( results, [ omnifunc_result[ 'words' ][ 1 ] ] )
-
-
-  def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 0
-    } ) )
-
-    contents = 'test.tt'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 8,
-                                     contents = contents )
-
-    eq_( request_data[ 'query' ], 'tt' )
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = {
-      'words': [
-        {
-          'word': ToBytesOnPY2( 'a' ),
-          'abbr': ToBytesOnPY2( 'ABBR'),
-          'menu': ToBytesOnPY2( 'MENU' ),
-          'info': ToBytesOnPY2( 'INFO' ),
-          'kind': ToBytesOnPY2( 'K' )
-        },
-        {
-          'word': ToBytesOnPY2( 'test' ),
-          'abbr': ToBytesOnPY2( 'ABBRTEST'),
-          'menu': ToBytesOnPY2( 'MENUTEST' ),
-          'info': ToBytesOnPY2( 'INFOTEST' ),
-          'kind': ToBytesOnPY2( 'T' )
-        }
-      ]
-    }
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'tt')" ),
-      ] )
-
-      # No FilterAndSortCandidates for cache_omnifunc=0 (we expect the omnifunc
-      # to do the filtering?)
-      eq_( results, omnifunc_result[ 'words' ] )
+    # Fails here: Filtering on unicode is not supported
+    eq_( results, [ omnifunc_result[ 1 ] ] )
 
 
-  def OmniCompleter_GetCompletions_Cache_List_Unicode_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
-
-    contents = '†åsty_π.'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 13,
-                                     contents = contents )
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
+  contents = '†åsty_π.t'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 14,
+                                   contents = contents )
 
 
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
+  eq_( request_data[ 'query' ], 't' )
 
-    omnifunc_result = [ ToBytesOnPY2( '†est' ),
-                        ToBytesOnPY2( 'å_unicode_identifier' ),
-                        ToBytesOnPY2( 'πππππππ yummy πie' ) ]
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'')" ),
-      ] )
-
-      eq_( results, omnifunc_result )
-
-
-  def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 0
-    } ) )
-
-    contents = '†åsty_π.'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 13,
-                                     contents = contents )
-
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = [ ToBytesOnPY2( '†est' ),
-                        ToBytesOnPY2( 'å_unicode_identifier' ),
-                        ToBytesOnPY2( 'πππππππ yummy πie' ) ]
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'')" ),
-      ] )
-
-      eq_( results, omnifunc_result )
-
-
-  @ExpectedFailure( 'Filtering on unicode is not supported by the server' )
-  def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
-
-    contents = '†åsty_π.ππ'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 17,
-                                     contents = contents )
-
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = [ ToBytesOnPY2( '†est' ),
-                        ToBytesOnPY2( 'å_unicode_identifier' ),
-                        ToBytesOnPY2( 'πππππππ yummy πie' ) ]
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'ππ')" ),
-      ] )
-
-      # Fails here: Filtering on unicode is not supported
-      eq_( results, [ omnifunc_result[ 2 ] ] )
-
-
-  def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 0
-    } ) )
-
-    contents = '†åsty_π.ππ'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 17,
-                                     contents = contents )
-
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = [ ToBytesOnPY2( 'πππππππ yummy πie' ) ]
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'ππ')" ),
-      ] )
-
-      eq_( results, omnifunc_result )
-
-
-  @ExpectedFailure( 'Filtering on unicode is not supported by the server' )
-  def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
-
-    contents = '†åsty_π.ππ'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 17,
-                                     contents = contents )
-
-
-    eq_( request_data[ 'query' ], 'ππ' )
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = [
+  omnifunc_result = {
+    'words': [
       {
         'word': ToBytesOnPY2( 'ålpha∫et' ),
         'abbr': ToBytesOnPY2( 'å∫∫®'),
@@ -655,87 +654,36 @@ class OmniCompleter_test( Server_test ):
         'menu': ToBytesOnPY2( '˜‰ˆËÊ‰ÍÊ' ),
         'info': ToBytesOnPY2( 'ÈˆÏØÊ‰ÍÊ' ),
         'kind': ToBytesOnPY2( 'Ê' )
+      },
+      {
+        'word': ToBytesOnPY2( 'test' ),
+        'abbr': ToBytesOnPY2( 'ÅııÂÊ‰ÍÊ'),
+        'menu': ToBytesOnPY2( '˜‰ˆËÊ‰ÍÊ' ),
+        'info': ToBytesOnPY2( 'ÈˆÏØÊ‰ÍÊ' ),
+        'kind': ToBytesOnPY2( 'Ê' )
       }
     ]
+  }
 
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
 
-      results = omni_completer.ComputeCandidates( request_data )
+    results = ycm._omnicomp.ComputeCandidates( request_data )
 
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'ππ')" ),
-      ] )
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'t')" ),
+    ] )
 
-      # Fails here: Filtering on unicode is not supported
-      eq_( results, [ omnifunc_result[ 1 ] ] )
-
-
-  def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( self ):
-    omni_completer = OmniCompleter( MakeUserOptions( {
-      'cache_omnifunc': 1
-    } ) )
-
-    contents = '†åsty_π.t'
-    request_data = BuildRequestWrap( line_num = 1,
-                                     column_num = 14,
-                                     contents = contents )
-
-
-    eq_( request_data[ 'query' ], 't' )
-
-    # Make sure there is an omnifunc set up.
-    with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
-      omni_completer.OnFileReadyToParse( request_data )
-
-    omnifunc_result = {
-      'words': [
-        {
-          'word': ToBytesOnPY2( 'ålpha∫et' ),
-          'abbr': ToBytesOnPY2( 'å∫∫®'),
-          'menu': ToBytesOnPY2( 'µ´~¨á' ),
-          'info': ToBytesOnPY2( '^~fo' ),
-          'kind': ToBytesOnPY2( '˚' )
-        },
-        {
-          'word': ToBytesOnPY2( 'π†´ß†π' ),
-          'abbr': ToBytesOnPY2( 'ÅııÂÊ‰ÍÊ'),
-          'menu': ToBytesOnPY2( '˜‰ˆËÊ‰ÍÊ' ),
-          'info': ToBytesOnPY2( 'ÈˆÏØÊ‰ÍÊ' ),
-          'kind': ToBytesOnPY2( 'Ê' )
-        },
-        {
-          'word': ToBytesOnPY2( 'test' ),
-          'abbr': ToBytesOnPY2( 'ÅııÂÊ‰ÍÊ'),
-          'menu': ToBytesOnPY2( '˜‰ˆËÊ‰ÍÊ' ),
-          'info': ToBytesOnPY2( 'ÈˆÏØÊ‰ÍÊ' ),
-          'kind': ToBytesOnPY2( 'Ê' )
-        }
-      ]
-    }
-
-    # And get the completions
-    with patch( 'vim.eval',
-                new_callable = ExtendedMock,
-                side_effect = [ 6, omnifunc_result ] ) as vim_eval:
-
-      results = omni_completer.ComputeCandidates( request_data )
-
-      vim_eval.assert_has_exact_calls( [
-        call( 'test_omnifunc(1,"")' ),
-        call( "test_omnifunc(0,'t')" ),
-      ] )
-
-      # Note: the filtered results are all unicode objects (not bytes) because
-      # they are passed through the FilterAndSortCandidates machinery
-      # (via the server)
-      eq_( results, [ {
-        'word': 'test',
-        'abbr': 'ÅııÂÊ‰ÍÊ',
-        'menu': '˜‰ˆËÊ‰ÍÊ',
-        'info': 'ÈˆÏØÊ‰ÍÊ',
-        'kind': 'Ê'
-      } ] )
+    # Note: the filtered results are all unicode objects (not bytes) because
+    # they are passed through the FilterAndSortCandidates machinery
+    # (via the server)
+    eq_( results, [ {
+      'word': 'test',
+      'abbr': 'ÅııÂÊ‰ÍÊ',
+      'menu': '˜‰ˆËÊ‰ÍÊ',
+      'info': 'ÈˆÏØÊ‰ÍÊ',
+      'kind': 'Ê'
+    } ] )
