@@ -46,8 +46,8 @@ class DiagnosticFilter( object ):
           self._filters.append( fn )
 
 
-  def Accept( self, diagnostic ):
-    # NB: we Accept() the diagnostic ONLY if
+  def IsAllowed( self, diagnostic ):
+    # NOTE: a diagnostic IsAllowed() ONLY if
     #  no filters match it
     for f in self._filters:
       if f( diagnostic ):
@@ -105,5 +105,5 @@ def _CompileLevel( level ):
   return FilterLevel
 
 
-FILTER_COMPILERS  = { 'regex'      : _CompileRegex,
-                      'level'      : _CompileLevel }
+FILTER_COMPILERS  = { 'regex' : _CompileRegex,
+                      'level' : _CompileLevel }

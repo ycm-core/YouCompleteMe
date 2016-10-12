@@ -34,7 +34,7 @@ def _assert_accept_equals( filter, text_or_obj, expected ):
   if not isinstance( text_or_obj, dict ):
     text_or_obj = { 'text': text_or_obj }
 
-  assert_that( filter.Accept( text_or_obj ), equal_to( expected ) )
+  assert_that( filter.IsAllowed( text_or_obj ), equal_to( expected ) )
 
 
 def _assert_accepts( filter, text ):
