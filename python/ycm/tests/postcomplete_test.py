@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright (C) 2015 YouCompleteMe contributors
+# Copyright (C) 2015-2016 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
