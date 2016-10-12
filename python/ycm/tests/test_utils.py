@@ -33,7 +33,7 @@ import os
 import re
 import sys
 
-from ycmd.utils import ToUnicode
+from ycmd.utils import GetCurrentDirectory, ToUnicode
 
 
 BUFNR_REGEX = re.compile( '^bufnr\(\'(?P<buffer_filename>.+)\', ([01])\)$' )
@@ -56,7 +56,7 @@ VIM_MOCK = MagicMock()
 
 @contextlib.contextmanager
 def CurrentWorkingDirectory( path ):
-  old_cwd = os.getcwd()
+  old_cwd = GetCurrentDirectory()
   os.chdir( path )
   try:
     yield

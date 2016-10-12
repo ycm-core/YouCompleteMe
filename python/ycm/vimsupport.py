@@ -1,4 +1,5 @@
-# Copyright (C) 2011, 2012  Google Inc.
+# Copyright (C) 2011-2012 Google Inc.
+#               2016      YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -26,11 +27,11 @@ from builtins import *  # noqa
 from future.utils import iterkeys
 import vim
 import os
-import tempfile
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ToUnicode, ToBytes, JoinLinesAsUnicode
+from ycmd.utils import ( GetCurrentDirectory, JoinLinesAsUnicode, ToBytes,
+                         ToUnicode )
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -156,13 +157,8 @@ def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
     return buffer_object.name
   # Buffers that have just been created by a command like :enew don't have any
-  # buffer name so we use the buffer number for that. Also, os.getcwd() throws
-  # an exception when the CWD has been deleted so we handle that.
-  try:
-    folder_path = os.getcwd()
-  except OSError:
-    folder_path = tempfile.gettempdir()
-  return os.path.join( folder_path, str( buffer_object.number ) )
+  # buffer name so we use the buffer number for that.
+  return os.path.join( GetCurrentDirectory(), str( buffer_object.number ) )
 
 
 def UnplaceSignInBuffer( buffer_number, sign_id ):

@@ -1,4 +1,5 @@
-# Copyright (C) 2011, 2012  Google Inc.
+# Copyright (C) 2011-2012 Google Inc.
+#               2016      YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -225,7 +226,7 @@ class YouCompleteMe( object ):
             self._omnicomp, wrapped_request_data )
         return self._latest_completion_request
 
-    request_data[ 'working_dir' ] = os.getcwd()
+    request_data[ 'working_dir' ] = utils.GetCurrentDirectory()
 
     self._AddExtraConfDataIfNeeded( request_data )
     if force_semantic:
@@ -677,12 +678,8 @@ class YouCompleteMe( object ):
   def _AddTagsFilesIfNeeded( self, extra_data ):
     def GetTagFiles():
       tag_files = vim.eval( 'tagfiles()' )
-      # getcwd() throws an exception when the CWD has been deleted.
-      try:
-        current_working_directory = os.getcwd()
-      except OSError:
-        return []
-      return [ os.path.join( current_working_directory, x ) for x in tag_files ]
+      return [ os.path.join( utils.GetCurrentDirectory(), tag_file )
+               for tag_file in tag_files ]
 
     if not self._user_options[ 'collect_identifiers_from_tags_files' ]:
       return
