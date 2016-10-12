@@ -10,10 +10,13 @@ install:
   - source ci/travis/travis_install.sh
 script:
   - ci/travis/travis_script.sh
+after_success:
+  - codecov
 env:
   global:
     # Travis can run out of RAM, so we need to be careful here.
     - YCM_CORES=3
+    - COVERAGE=true
   matrix:
     - YCM_PYTHON_VERSION=2.7 YCM_FLAKE8=true
     # Since 3.0.4, Flake8 is not working anymore on Python 2.6.

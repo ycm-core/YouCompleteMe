@@ -46,11 +46,18 @@ def RunFlake8():
 def ParseArguments():
   parser = argparse.ArgumentParser()
   parser.add_argument( '--skip-build', action = 'store_true',
-                       help = 'Do not build ycmd before testing.' )
+                       help = 'Do not build ycmd before testing' )
+  parser.add_argument( '--coverage', action = 'store_true',
+                       help = 'Enable coverage report' )
   parser.add_argument( '--no-flake8', action = 'store_true',
                        help = 'Do not run flake8' )
 
-  return parser.parse_known_args()
+  parsed_args, nosetests_args = parser.parse_known_args()
+
+  if 'COVERAGE' in os.environ:
+    parsed_args.coverage = ( os.environ[ 'COVERAGE' ] == 'true' )
+
+  return parsed_args, nosetests_args
 
 
 def BuildYcmdLibs( args ):
@@ -61,21 +68,31 @@ def BuildYcmdLibs( args ):
     ] )
 
 
-def NoseTests( extra_args ):
-  subprocess.check_call( [
-    'nosetests',
-    '-v',
-    '-w',
-    p.join( DIR_OF_THIS_SCRIPT, 'python' )
-  ] + extra_args )
+def NoseTests( parsed_args, extra_nosetests_args ):
+  # Always passing --with-id to nosetests enables non-surprising usage of
+  # its --failed flag.
+  nosetests_args = [ '-v', '--with-id' ]
+
+  if parsed_args.coverage:
+    nosetests_args += [ '--with-coverage',
+                        '--cover-erase',
+                        '--cover-package=ycm',
+                        '--cover-html' ]
+
+  if extra_nosetests_args:
+    nosetests_args.extend( extra_nosetests_args )
+  else:
+    nosetests_args.append( p.join( DIR_OF_THIS_SCRIPT, 'python' ) )
+
+  subprocess.check_call( [ 'nosetests' ] + nosetests_args )
 
 
 def Main():
-  ( parsed_args, extra_args ) = ParseArguments()
+  ( parsed_args, nosetests_args ) = ParseArguments()
   if not parsed_args.no_flake8:
     RunFlake8()
   BuildYcmdLibs( parsed_args )
-  NoseTests( extra_args )
+  NoseTests( parsed_args, nosetests_args )
 
 if __name__ == "__main__":
   Main()
