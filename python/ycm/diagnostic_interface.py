@@ -70,7 +70,7 @@ class DiagnosticInterface( object ):
             self._user_options,
             vimsupport.CurrentFiletypes() )
     normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags
-            if diag_filter.Accept(x) ]
+            if diag_filter.IsAllowed( x ) ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
         normalized_diags )
 
