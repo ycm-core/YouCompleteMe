@@ -1919,6 +1919,16 @@ Default: `0`
 let g:ycm_collect_identifiers_from_tags_files = 0
 ```
 
+### The `g:ycm_tags` option
+
+Defines a custom tag file list to autocomplete from. Useful when you want to
+keep the autocomplete dataset small, while still having all the tags at your disposal
+for navigation.
+
+Default: `tagfiles()`
+
+    let g:ycm_tags = ["/path/to/my/tags"]
+
 ### The `g:ycm_seed_identifiers_with_syntax` option
 
 When this option is set to `1`, YCM's identifier completer will seed its

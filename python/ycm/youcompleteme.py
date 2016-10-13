@@ -676,7 +676,7 @@ class YouCompleteMe( object ):
 
   def _AddTagsFilesIfNeeded( self, extra_data ):
     def GetTagFiles():
-      tag_files = vim.eval( 'tagfiles()' )
+      tag_files = vim.eval( 'g:ycm_tags' )
       # getcwd() throws an exception when the CWD has been deleted.
       try:
         current_working_directory = os.getcwd()
