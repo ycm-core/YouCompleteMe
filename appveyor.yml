@@ -12,6 +12,8 @@ install:
   - ci\appveyor\appveyor_install.bat
 build_script:
   - python run_tests.py
+after_build:
+  - codecov
 # Disable automatic tests
 test: off
 cache:
