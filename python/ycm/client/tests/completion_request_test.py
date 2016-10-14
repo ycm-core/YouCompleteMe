@@ -1,4 +1,4 @@
-# Copyright (C) 2015 YouCompleteMe Contributors
+# Copyright (C) 2015-2016 YouCompleteMe Contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -24,7 +24,7 @@ standard_library.install_aliases()
 from builtins import *  # noqa
 
 from nose.tools import eq_
-from ycm.test_utils import MockVimModule
+from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
 
 from .. import completion_request

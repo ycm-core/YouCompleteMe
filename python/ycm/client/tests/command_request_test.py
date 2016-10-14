@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import ExtendedMock, MockVimModule
+from ycm.tests.test_utils import ExtendedMock, MockVimModule
 MockVimModule()
 
 import json

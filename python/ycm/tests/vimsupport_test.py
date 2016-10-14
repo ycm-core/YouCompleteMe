@@ -1,6 +1,6 @@
 # coding: utf-8
 #
-# Copyright (C) 2015 YouCompleteMe contributors
+# Copyright (C) 2015-2016 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -25,8 +25,8 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import ( ExtendedMock, MockVimCommand, VimBuffer,
-                             MockVimModule )
+from ycm.tests.test_utils import ( ExtendedMock, MockVimCommand, VimBuffer,
+                                   MockVimModule )
 MockVimModule()
 
 from ycm import vimsupport

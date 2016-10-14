@@ -1,4 +1,5 @@
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2013 Google Inc.
+#               2016 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -23,7 +24,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import MockVimModule
+from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 import os

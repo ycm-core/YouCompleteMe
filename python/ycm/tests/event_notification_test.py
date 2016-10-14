@@ -1,4 +1,4 @@
-# Copyright (C) 2015 YouCompleteMe contributors
+# Copyright (C) 2015-2016 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import ExtendedMock, MockVimModule, VimBuffer
+from ycm.tests.test_utils import ExtendedMock, MockVimModule, VimBuffer
 MockVimModule()
 
 import contextlib
