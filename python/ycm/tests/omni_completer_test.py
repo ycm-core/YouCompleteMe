@@ -30,10 +30,9 @@ from mock import patch, call
 from nose.tools import eq_
 from hamcrest import contains_string
 
-from ycm.test_utils import MockVimModule, ExtendedMock
+from ycm.tests.test_utils import ExpectedFailure, ExtendedMock, MockVimModule
 MockVimModule()
 
-from ycm.test_utils import ExpectedFailure
 from ycm.tests import YouCompleteMeInstance
 
 from ycmd.utils import ToBytes
@@ -52,9 +51,9 @@ def ToBytesOnPY2( data ):
 
 
 def BuildRequest( line_num, column_num, contents ):
-  # Note: it would be nice to use ycmd.test_utils.BuildRequest directly here,
-  # but we can't import ycmd.test_utils because that in turn imports ycm_core,
-  # which would cause our "ycm_core not imported" test to fail.
+  # Note: it would be nice to use ycmd.tests.test_utils.BuildRequest directly
+  # here, but we can't import ycmd.tests.test_utils because that in turn imports
+  # ycm_core, which would cause our "ycm_core not imported" test to fail.
   return {
     'line_num': line_num,
     'column_num': column_num,

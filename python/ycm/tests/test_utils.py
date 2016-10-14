@@ -1,4 +1,5 @@
-# Copyright (C) 2011, 2012  Google Inc.
+# Copyright (C) 2011-2012 Google Inc.
+#               2016      YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -182,7 +183,7 @@ def MockVimModule():
   mock module, to ensure that the state of the vim mock is returned before the
   next test. That is:
 
-    from ycm.test_utils import MockVimModule
+    from ycm.tests.test_utils import MockVimModule
     from mock import patch
 
     # Do this once
@@ -209,7 +210,7 @@ class ExtendedMock( MagicMock ):
   callable is called with a precise set of calls in a precise order.
 
   Example Usage:
-    from ycm.test_utils import ExtendedMock
+    from ycm.tests.test_utils import ExtendedMock
     @patch( 'test.testing', new_callable = ExtendedMock, ... )
     def my_test( test_testing ):
       ...
