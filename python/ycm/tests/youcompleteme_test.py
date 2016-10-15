@@ -29,10 +29,9 @@ MockVimModule()
 import sys
 from hamcrest import assert_that, is_in, is_not
 
-from ycm.tests.server_test import Server_test
+from ycm.tests import YouCompleteMeInstance
 
 
-class YouCompleteMe_test( Server_test ):
-
-  def YcmCoreNotImported_test( self ):
-    assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
+@YouCompleteMeInstance()
+def YouCompleteMe_YcmCoreNotImported_test( ycm ):
+  assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
