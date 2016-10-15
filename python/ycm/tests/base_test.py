@@ -1,6 +1,7 @@
 # coding: utf-8
 #
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2013 Google Inc.
+#               2016 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -29,7 +30,7 @@ import contextlib
 from nose.tools import eq_, ok_
 from mock import patch
 
-from ycm.test_utils import MockVimModule
+from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
 from ycm import base
 
