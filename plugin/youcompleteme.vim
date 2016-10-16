@@ -121,10 +121,6 @@ let g:ycm_warning_symbol =
       \ get( g:, 'ycm_warning_symbol',
       \ get( g:, 'syntastic_warning_symbol', '>>' ) )
 
-let g:ycm_quiet_messages =
-      \ get( g:, 'ycm_quiet_messages',
-      \ get( g:, 'syntastic_quiet_messages', {} ) )
-
 let g:ycm_goto_buffer_command =
       \ get( g:, 'ycm_goto_buffer_command', 'same-buffer' )
 
