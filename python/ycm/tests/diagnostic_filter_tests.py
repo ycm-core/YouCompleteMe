@@ -45,45 +45,16 @@ def _assert_rejects( filter, text ):
   _assert_accept_equals( filter, text, False )
 
 
-class ConfigPriority_test():
-
-  def ConfigPriority_Global_test( self ):
-    opts = { 'quiet_messages': { 'regex': 'taco' } }
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
-
-    _assert_rejects( f, 'This is a Taco' )
-    _assert_accepts( f, 'This is a Burrito' )
+def _JavaFilter( config ):
+  return { 'filter_diagnostics' : { 'java': config } }
 
 
-  def ConfigPriority_Filetype_test( self ):
-    opts = { 'quiet_messages'      : {},
-             'java_quiet_messages' : { 'regex': 'taco' } }
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+def RegexFilter_test():
+  opts = _JavaFilter( { 'regex' : 'taco' } )
+  f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_rejects( f, 'This is a Taco' )
-    _assert_accepts( f, 'This is a Burrito' )
-
-
-  def ConfigPriority_FiletypeOverridesGlobal_test( self ):
-    # NB: if the filetype doesn't override the global,
-    #  we would reject burrito and accept taco
-    opts = { 'quiet_messages'      : { 'regex': 'burrito'},
-             'java_quiet_messages' : { 'regex': 'taco' } }
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
-
-    _assert_rejects( f, 'This is a Taco' )
-    _assert_accepts( f, 'This is a Burrito' )
-
-
-  def ConfigPriority_FiletypeDisablesGlobal_test( self ):
-    # NB: if the filetype doesn't override the global,
-    #  we would reject burrito and accept taco
-    opts = { 'quiet_messages'      : { 'regex': 'taco'},
-             'java_quiet_messages' : { 'regex': [] } }
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
-
-    _assert_accepts( f, 'This is a Taco' )
-    _assert_accepts( f, 'This is a Burrito' )
+  _assert_rejects( f, 'This is a Taco' )
+  _assert_accepts( f, 'This is a Burrito' )
 
 
 class ListOrSingle_test():
@@ -92,7 +63,7 @@ class ListOrSingle_test():
   def ListOrSingle_SingleList_test( self ):
     # NB: if the filetype doesn't override the global,
     #  we would reject burrito and accept taco
-    opts = { 'quiet_messages' : { 'regex': [ 'taco' ] } }
+    opts = _JavaFilter( { 'regex' : [ 'taco' ] }  )
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
     _assert_rejects( f, 'This is a Taco' )
@@ -102,38 +73,68 @@ class ListOrSingle_test():
   def ListOrSingle_MultiList_test( self ):
     # NB: if the filetype doesn't override the global,
     #  we would reject burrito and accept taco
-    opts = { 'quiet_messages' : { 'regex': [ 'taco', 'burrito' ] } }
+    opts = _JavaFilter( { 'regex' : [ 'taco', 'burrito' ] } )
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
     _assert_rejects( f, 'This is a Taco' )
     _assert_rejects( f, 'This is a Burrito' )
 
 
-def Invert_test():
-    opts = { 'quiet_messages' : { '!regex': 'taco' } }
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
-
-    _assert_accepts( f, 'This is a Taco' )
-    _assert_rejects( f, 'This is a Burrito' )
-
-
 class Level_test():
 
   def Level_warnings_test( self ):
-    opts = { 'quiet_messages' : { 'level': 'warnings' } }
+    opts = _JavaFilter( { 'level' : 'warning' } )
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_rejects( f, { 'text': 'This is an unimportant taco',
-                          'kind': 'WARNING' } )
-    _assert_accepts( f, { 'text': 'This taco will be shown',
-                          'kind': 'ERROR' } )
+    _assert_rejects( f, { 'text' : 'This is an unimportant taco',
+                          'kind' : 'WARNING' } )
+    _assert_accepts( f, { 'text' : 'This taco will be shown',
+                          'kind' : 'ERROR' } )
 
 
   def Level_errors_test( self ):
-    opts = { 'quiet_messages' : { 'level': 'errors' } }
+    opts = _JavaFilter( { 'level' : 'error' } )
     f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_accepts( f, { 'text': 'This is an IMPORTANT taco',
-                          'kind': 'WARNING' } )
-    _assert_rejects( f, { 'text': 'This taco will NOT be shown',
-                          'kind': 'ERROR' } )
+    _assert_accepts( f, { 'text' : 'This is an IMPORTANT taco',
+                          'kind' : 'WARNING' } )
+    _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
+                          'kind' : 'ERROR' } )
+
+
+def MultipleFilterTypesTypeTest_test():
+
+  opts = _JavaFilter( { 'regex' : '.*taco.*',
+                        'level' : 'warning' } )
+  f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+
+  _assert_rejects( f, { 'text' : 'This is an unimportant taco',
+                        'kind' : 'WARNING' } )
+  _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
+                        'kind' : 'ERROR' } )
+  _assert_accepts( f, { 'text' : 'This burrito WILL be shown',
+                        'kind' : 'ERROR' } )
+
+
+def MergeMultipleFiletypes_test():
+
+  opts = { 'filter_diagnostics' : {
+    'java' : { 'regex' : '.*taco.*' },
+    'xml'  : { 'regex' : '.*burrito.*' } } }
+
+  f = DiagnosticFilter.from_filetype( opts, [ 'java', 'xml' ] )
+
+  _assert_rejects( f, 'This is a Taco' )
+  _assert_rejects( f, 'This is a Burrito' )
+  _assert_accepts( f, 'This is some Nachos' )
+
+
+def CommaSeparatedFiletypes_test():
+
+  opts = { 'filter_diagnostics' : {
+    'java,c,cs' : { 'regex' : '.*taco.*' } } }
+
+  f = DiagnosticFilter.from_filetype( opts, [ 'cs' ] )
+
+  _assert_rejects( f, 'This is a Taco' )
+  _assert_accepts( f, 'This is a Burrito' )

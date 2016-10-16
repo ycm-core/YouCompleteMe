@@ -23,7 +23,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from future.utils import iterkeys
+from future.utils import iterkeys, iteritems
 import re
 
 
@@ -32,23 +32,18 @@ class DiagnosticFilter( object ):
     self._filters = []
 
     for filter_type in iterkeys( config ):
-      wrapper = _AsIs
       actual_filter_type = filter_type
-
-      if filter_type[ 0 ] == '!':
-        wrapper = _Not
-        filter_type = filter_type[ 1 : ]
       compiler = FILTER_COMPILERS.get( filter_type )
 
       if compiler is not None:
         for filter_config in _ListOf( config[ actual_filter_type ] ):
-          fn = wrapper( compiler( filter_config ) )
+          fn = compiler( filter_config )
           self._filters.append( fn )
 
 
   def IsAllowed( self, diagnostic ):
     # NOTE: a diagnostic IsAllowed() ONLY if
-    #  no filters match it
+    #  NO filters match it
     for f in self._filters:
       if f( diagnostic ):
         return False
@@ -58,30 +53,34 @@ class DiagnosticFilter( object ):
 
   @staticmethod
   def from_filetype( user_options, filetypes ):
-    base = dict( user_options.get( 'quiet_messages', {} ) )
+    spec = {}
+    all_filters = dict( user_options.get( 'filter_diagnostics', {} ) )
+    for typeSpec, filterValue in iteritems( dict( all_filters ) ):
+      if typeSpec.find(',') != -1:
+        for ft in typeSpec.split(','):
+          all_filters[ ft ] = filterValue
 
     for filetype in filetypes:
-      type_specific = user_options.get( filetype + '_quiet_messages', {} )
-      base.update( type_specific )
-    return DiagnosticFilter( base )
+      type_specific = all_filters.get( filetype, {} )
+      spec = _Merge( spec, type_specific )
+    return DiagnosticFilter( spec )
 
 
 def _ListOf( config_entry ):
   if isinstance( config_entry, list ):
     return config_entry
 
+  if config_entry is None:
+    return []
+
   return [ config_entry ]
 
 
-def _AsIs( fn ):
-  return fn
+def _Merge( into, other ):
+  for k in iterkeys( other ):
+    into[k] = _ListOf( into.get( k ) ) + _ListOf( other[ k ] )
 
-
-def _Not( fn ):
-  def Inverted( diagnostic ):
-    return not fn( diagnostic )
-
-  return Inverted
+  return into
 
 
 def _CompileRegex( raw_regex ):
@@ -95,9 +94,9 @@ def _CompileRegex( raw_regex ):
 
 def _CompileLevel( level ):
   # valid kinds are WARNING and ERROR;
-  #  expected input levels are `warnings` and `errors`
+  #  expected input levels are `warning` and `error`
   # NB: we don't validate the input...
-  expected_kind = level.upper()[ : -1 ]
+  expected_kind = level.upper()
 
   def FilterLevel( diagnostic ):
     return diagnostic[ 'kind' ] == expected_kind
@@ -105,5 +104,5 @@ def _CompileLevel( level ):
   return FilterLevel
 
 
-FILTER_COMPILERS  = { 'regex' : _CompileRegex,
-                      'level' : _CompileLevel }
+FILTER_COMPILERS = { 'regex' : _CompileRegex,
+                     'level' : _CompileLevel }
