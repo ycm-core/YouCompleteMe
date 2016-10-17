@@ -147,7 +147,9 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
     ln -s /usr/local/bin/mvim vim
 
-Install YouCompleteMe with [Vundle][].
+Install YouCompleteMe with [Vundle][]. 
+
+**NOTE:** If you are using a different plugin manager such as [vim-plug][], replace all references to `~/.vim/bundle/...` with `~/.vim/plugged/...` or wherever your default plugin location is.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
@@ -218,6 +220,8 @@ installed by running `vim --version`. If the version is too old, you may need to
 
 Install YouCompleteMe with [Vundle][].
 
+**NOTE:** If you are using a different plugin manager such as [vim-plug][], replace all references to `~/.vim/bundle/...` with `~/.vim/plugged/...` or wherever your default plugin location is.
+
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
@@ -279,6 +283,8 @@ by running `vim --version`. If the version is too old, you may need to [compile
 Vim from source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
+
+**NOTE:** If you are using a different plugin manager such as [vim-plug][], replace all references to `~/.vim/bundle/...` with `~/.vim/plugged/...` or wherever your default plugin location is.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
@@ -347,6 +353,8 @@ using a 64-bit client. [Daily updated copies of 32-bit and 64-bit Vim with
 Python 2 and Python 3 support][vim-win-download] are available.
 
 Install YouCompleteMe with [Vundle][].
+
+**NOTE:** If you are using a different plugin manager such as [vim-plug][], replace all references to `~/.vim/bundle/...` with `~/.vim/plugged/...` or wherever your default plugin location is.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
@@ -426,6 +434,8 @@ FreeBSD 10.x comes with clang compiler but not the libraries needed to install.
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/llvm38/lib/
 
 Install YouCompleteMe with [Vundle][].
+
+**NOTE:** If you are using a different plugin manager such as [vim-plug][], replace all references to `~/.vim/bundle/...` with `~/.vim/plugged/...` or wherever your default plugin location is.
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
@@ -2882,6 +2892,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Clang]: http://clang.llvm.org/
 [vundle]: https://github.com/VundleVim/Vundle.vim#about
 [pathogen]: https://github.com/tpope/vim-pathogen#pathogenvim
+[vim-plug]: https://github.com/junegunn/vim-plug
 [clang-download]: http://llvm.org/releases/download.html
 [brew]: http://brew.sh
 [cmake-download]: https://cmake.org/download/
