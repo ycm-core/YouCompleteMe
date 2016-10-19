@@ -27,7 +27,7 @@ from nose.tools import eq_
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
 
-from .. import completion_request
+from ycm.client import completion_request
 
 
 class ConvertCompletionResponseToVimDatas_test( object ):
