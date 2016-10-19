@@ -91,6 +91,8 @@ def _MockGetBufferVariable( buffer_number, option ):
         return vim_buffer.filetype
       if option == 'changedtick':
         return vim_buffer.changedtick
+      if option == '&hid':
+        return vim_buffer.hidden
       return ''
   return ''
 
@@ -214,6 +216,7 @@ class VimBuffer( object ):
    - |contents|: list of lines representing the buffer contents;
    - |filetype|: buffer filetype. Empty string if no filetype is set;
    - |modified|: True if the buffer has unsaved changes, False otherwise;
+   - |hidden|  : True if the buffer is hidden, False otherwise;
    - |window|  : number of the buffer window. None if the buffer is hidden;
    - |omnifunc|: omni completion function used by the buffer."""
 
@@ -222,6 +225,7 @@ class VimBuffer( object ):
                       contents = [],
                       filetype = '',
                       modified = True,
+                      hidden = False,
                       window = None,
                       omnifunc = '' ):
     self.name = os.path.realpath( name ) if name else ''
@@ -229,7 +233,8 @@ class VimBuffer( object ):
     self.contents = contents
     self.filetype = filetype
     self.modified = modified
-    self.window = window
+    self.hidden = hidden
+    self.window = window if not hidden else None
     self.omnifunc = omnifunc
     self.changedtick = 1
 
@@ -287,7 +292,7 @@ def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
   with patch( 'vim.buffers', buffers ):
     with patch( 'vim.current.buffer', current_buffer ):
       with patch( 'vim.current.window.cursor', cursor_position ):
-        yield
+        yield VIM_MOCK
 
 
 def MockVimModule():
@@ -317,6 +322,16 @@ def MockVimModule():
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK
+
+
+class VimError( Exception ):
+
+  def __init__( self, code ):
+      self.code = code
+
+
+  def __str__( self ):
+      return repr( self.code )
 
 
 class ExtendedMock( MagicMock ):
