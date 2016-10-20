@@ -732,6 +732,7 @@ Quick Feature Summary
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
 * Management of `racer` server instance
+* View documentation comments for identifiers (`GetDoc`)
 
 User Guide
 ----------
@@ -1363,7 +1364,7 @@ under the cursor. Depending on the file type, this includes things like:
 * etc.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
-javascript`
+javascript, rust`
 
 #### The `GetDocImprecise` subcommand
 
