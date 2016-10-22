@@ -33,6 +33,7 @@ import vim
 class DiagnosticInterface( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
+    self._diag_filter = DiagnosticFilter.CreateFromOptions( user_options )
     # Line and column numbers are 1-based
     self._buffer_number_to_line_to_diags = defaultdict(
       lambda: defaultdict( list ) )
@@ -62,15 +63,13 @@ class DiagnosticInterface( object ):
 
   def PopulateLocationList( self, diags ):
     vimsupport.SetLocationList(
-      vimsupport.ConvertDiagnosticsToQfList( diags ) )
+      vimsupport.ConvertDiagnosticsToQfList(
+          self._ApplyDiagnosticFilter( diags ) ) )
 
 
   def UpdateWithNewDiagnostics( self, diags ):
-    diag_filter = DiagnosticFilter.from_filetype(
-            self._user_options,
-            vimsupport.CurrentFiletypes() )
-    normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags
-            if diag_filter.IsAllowed( x ) ]
+    normalized_diags = [ _NormalizeDiagnostic( x ) for x in
+            self._ApplyDiagnosticFilter( diags ) ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
         normalized_diags )
 
@@ -85,6 +84,13 @@ class DiagnosticInterface( object ):
 
     if self._user_options[ 'always_populate_location_list' ]:
       self.PopulateLocationList( normalized_diags )
+
+
+  def _ApplyDiagnosticFilter( self, diags ):
+    filetypes = vimsupport.CurrentFiletypes()
+    diag_filter = self._diag_filter.SubsetForTypes( filetypes )
+    return filter( diag_filter.IsAllowed, diags )
+
 
   def _EchoDiagnosticForLine( self, line_num ):
     buffer_num = vim.current.buffer.number
