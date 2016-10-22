@@ -23,9 +23,6 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.test_utils import MockVimModule
-MockVimModule()
-
 from hamcrest import assert_that, equal_to
 from ycm.diagnostic_filter import DiagnosticFilter
 
@@ -57,49 +54,40 @@ def RegexFilter_test():
   _assert_accepts( f, 'This is a Burrito' )
 
 
-class ListOrSingle_test():
-  # NB: we already test the single config above
+def RegexSingleList_test():
+  opts = _JavaFilter( { 'regex' : [ 'taco' ] }  )
+  f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-  def ListOrSingle_SingleList_test( self ):
-    # NB: if the filetype doesn't override the global,
-    #  we would reject burrito and accept taco
-    opts = _JavaFilter( { 'regex' : [ 'taco' ] }  )
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
-
-    _assert_rejects( f, 'This is a Taco' )
-    _assert_accepts( f, 'This is a Burrito' )
+  _assert_rejects( f, 'This is a Taco' )
+  _assert_accepts( f, 'This is a Burrito' )
 
 
-  def ListOrSingle_MultiList_test( self ):
-    # NB: if the filetype doesn't override the global,
-    #  we would reject burrito and accept taco
-    opts = _JavaFilter( { 'regex' : [ 'taco', 'burrito' ] } )
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+def RegexMultiList_test():
+  opts = _JavaFilter( { 'regex' : [ 'taco', 'burrito' ] } )
+  f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_rejects( f, 'This is a Taco' )
-    _assert_rejects( f, 'This is a Burrito' )
+  _assert_rejects( f, 'This is a Taco' )
+  _assert_rejects( f, 'This is a Burrito' )
 
 
-class Level_test():
+def LevelWarnings_test():
+  opts = _JavaFilter( { 'level' : 'warning' } )
+  f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-  def Level_warnings_test( self ):
-    opts = _JavaFilter( { 'level' : 'warning' } )
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
-
-    _assert_rejects( f, { 'text' : 'This is an unimportant taco',
-                          'kind' : 'WARNING' } )
-    _assert_accepts( f, { 'text' : 'This taco will be shown',
-                          'kind' : 'ERROR' } )
+  _assert_rejects( f, { 'text' : 'This is an unimportant taco',
+                        'kind' : 'WARNING' } )
+  _assert_accepts( f, { 'text' : 'This taco will be shown',
+                        'kind' : 'ERROR' } )
 
 
-  def Level_errors_test( self ):
-    opts = _JavaFilter( { 'level' : 'error' } )
-    f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
+def LevelErrors_test():
+  opts = _JavaFilter( { 'level' : 'error' } )
+  f = DiagnosticFilter.from_filetype( opts, [ 'java' ] )
 
-    _assert_accepts( f, { 'text' : 'This is an IMPORTANT taco',
-                          'kind' : 'WARNING' } )
-    _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
-                          'kind' : 'ERROR' } )
+  _assert_accepts( f, { 'text' : 'This is an IMPORTANT taco',
+                        'kind' : 'WARNING' } )
+  _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
+                        'kind' : 'ERROR' } )
 
 
 def MultipleFilterTypesTypeTest_test():

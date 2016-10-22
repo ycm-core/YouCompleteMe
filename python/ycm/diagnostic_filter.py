@@ -32,20 +32,18 @@ class DiagnosticFilter( object ):
     self._filters = []
 
     for filter_type in iterkeys( config ):
-      actual_filter_type = filter_type
       compiler = FILTER_COMPILERS.get( filter_type )
 
       if compiler is not None:
-        for filter_config in _ListOf( config[ actual_filter_type ] ):
-          fn = compiler( filter_config )
-          self._filters.append( fn )
+        for filter_config in _ListOf( config[ filter_type ] ):
+          compiledFilter = compiler( filter_config )
+          self._filters.append( compiledFilter )
 
 
   def IsAllowed( self, diagnostic ):
-    # NOTE: a diagnostic IsAllowed() ONLY if
-    #  NO filters match it
-    for f in self._filters:
-      if f( diagnostic ):
+    # NOTE: a diagnostic IsAllowed() ONLY if NO filters match it
+    for filterMatches in self._filters:
+      if filterMatches( diagnostic ):
         return False
 
     return True
@@ -57,8 +55,8 @@ class DiagnosticFilter( object ):
     all_filters = dict( user_options.get( 'filter_diagnostics', {} ) )
     for typeSpec, filterValue in iteritems( dict( all_filters ) ):
       if typeSpec.find(',') != -1:
-        for ft in typeSpec.split(','):
-          all_filters[ ft ] = filterValue
+        for filetype in typeSpec.split(','):
+          all_filters[ filetype ] = filterValue
 
     for filetype in filetypes:
       type_specific = all_filters.get( filetype, {} )
@@ -77,8 +75,8 @@ def _ListOf( config_entry ):
 
 
 def _Merge( into, other ):
-  for k in iterkeys( other ):
-    into[k] = _ListOf( into.get( k ) ) + _ListOf( other[ k ] )
+  for key in iterkeys( other ):
+    into[ key ] = _ListOf( into.get( key ) ) + _ListOf( other[ key ] )
 
   return into
 
@@ -95,7 +93,7 @@ def _CompileRegex( raw_regex ):
 def _CompileLevel( level ):
   # valid kinds are WARNING and ERROR;
   #  expected input levels are `warning` and `error`
-  # NB: we don't validate the input...
+  # NOTE: we don't validate the input...
   expected_kind = level.upper()
 
   def FilterLevel( diagnostic ):
