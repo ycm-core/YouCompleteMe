@@ -32,11 +32,9 @@ class DiagnosticFilter( object ):
   def __init__( self, config_or_filters ):
     if isinstance( config_or_filters, list ):
       self._filters = config_or_filters
-      print( 'NewFilter', config_or_filters)
 
     else:
       self._filters = _CompileFilters( config_or_filters )
-      print( 'CompileFilters', config_or_filters)
 
 
   def IsAllowed( self, diagnostic ):
@@ -91,7 +89,7 @@ class _MasterDiagnosticFilter( object ):
     if cached is not None:
       return cached
 
-    # build a new DiagnosticFilter mergin all filters
+    # build a new DiagnosticFilter merging all filters
     #  for the provided filetypes
     spec = []
     for filetype in filetypes:
@@ -113,7 +111,7 @@ def _ListOf( config_entry ):
   return [ config_entry ]
 
 
-def _CompileRegex( raw_regex ):
+def CompileRegex( raw_regex ):
   pattern = re.compile( raw_regex, re.IGNORECASE )
 
   def FilterRegex( diagnostic ):
@@ -122,7 +120,7 @@ def _CompileRegex( raw_regex ):
   return FilterRegex
 
 
-def _CompileLevel( level ):
+def CompileLevel( level ):
   # valid kinds are WARNING and ERROR;
   #  expected input levels are `warning` and `error`
   # NOTE: we don't validate the input...
@@ -134,8 +132,8 @@ def _CompileLevel( level ):
   return FilterLevel
 
 
-FILTER_COMPILERS = { 'regex' : _CompileRegex,
-                     'level' : _CompileLevel }
+FILTER_COMPILERS = { 'regex' : CompileRegex,
+                     'level' : CompileLevel }
 
 
 def _CompileFilters( config ):

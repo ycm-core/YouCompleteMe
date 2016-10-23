@@ -26,7 +26,7 @@ from builtins import *  # noqa
 from future.utils import itervalues, iteritems
 from collections import defaultdict, namedtuple
 from ycm import vimsupport
-from ycm.diagnostic_filter import DiagnosticFilter
+from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
 import vim
 
 
@@ -86,10 +86,17 @@ class DiagnosticInterface( object ):
       self.PopulateLocationList( normalized_diags )
 
 
-  def _ApplyDiagnosticFilter( self, diags ):
+  def _ApplyDiagnosticFilter( self, diags, extra_predicate = None ):
     filetypes = vimsupport.CurrentFiletypes()
     diag_filter = self._diag_filter.SubsetForTypes( filetypes )
-    return filter( diag_filter.IsAllowed, diags )
+    predicate = diag_filter.IsAllowed
+    if extra_predicate is not None:
+      def Filter( diag ):
+        return extra_predicate( diag ) and diag_filter.IsAllowed( diag )
+
+      predicate = Filter
+
+    return filter( predicate, diags )
 
 
   def _EchoDiagnosticForLine( self, line_num ):
@@ -116,7 +123,8 @@ class DiagnosticInterface( object ):
       vim.current.buffer.number ]
 
     for diags in itervalues( line_to_diags ):
-      matched_diags.extend( list( filter( predicate, diags ) ) )
+      matched_diags.extend( list(
+        self._ApplyDiagnosticFilter( diags, predicate ) ) )
     return matched_diags
 
 
@@ -247,12 +255,8 @@ def _ConvertDiagListToDict( diag_list ):
   return buffer_to_line_to_diags
 
 
-def _DiagnosticIsError( diag ):
-  return diag[ 'kind' ] == 'ERROR'
-
-
-def _DiagnosticIsWarning( diag ):
-  return diag[ 'kind' ] == 'WARNING'
+_DiagnosticIsError = CompileLevel( 'error' )
+_DiagnosticIsWarning = CompileLevel( 'warning' )
 
 
 def _NormalizeDiagnostic( diag ):
