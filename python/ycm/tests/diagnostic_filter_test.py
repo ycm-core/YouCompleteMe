@@ -23,11 +23,10 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from hamcrest import assert_that, equal_to
-
-from ycm.test_utils import MockVimModule
+from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
+from hamcrest import assert_that, equal_to
 from ycm.diagnostic_filter import DiagnosticFilter
 
 
