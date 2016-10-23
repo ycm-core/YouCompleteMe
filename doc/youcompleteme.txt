@@ -88,8 +88,8 @@ Contents ~
   9. The |g:ycm_warning_symbol| option
   10. The |g:ycm_enable_diagnostic_signs| option
   11. The |g:ycm_enable_diagnostic_highlighting| option
-  12. The |g:ycm_quiet_messages| option
-  13. The |g:ycm_echo_current_diagnostic| option
+  12. The |g:ycm_echo_current_diagnostic| option
+  13. The |g:ycm_filter_diagnostics| option
   14. The |g:ycm_always_populate_location_list| option
   15. The |g:ycm_open_loclist_on_ycm_diags| option
   16. The |g:ycm_allow_changing_updatetime| option
@@ -2066,33 +2066,6 @@ Default: '1'
   let g:ycm_enable_diagnostic_highlighting = 1
 <
 -------------------------------------------------------------------------------
-The *g:ycm_quiet_messages* option
-
-When this option is set, YCM will suppress any diagnostic items that would
-otherwise be displayed that match any of the rules provided. The value is a 
-dictionary which should be set to something like:
->
-  let g:ycm_quiet_messages = {
-        \ "!level":  "errors",
-        \ "regex":   '\m\[C03\d\d\]' }
-<
-This option is part of the Syntastic compatibility layer; if the option is not
-set, YCM will fall back to the value of the 'g:syntastic_quiet_messages'
-option before using this option's default.
-
-See |syntastic_quiet_messages| for more details, as this option follows that
-one. Currently, only "level" and "regex" rules are supported; unsupported rule 
-types are ignored.
-
-As in Syntastic, there are also filetype-specific variants of this option, which 
-will be used in preference to this if they exist. 
-They are named |'ycm_<filetype>_quiet_messages'|.
-
-Default: '{}'
->
-  let g:ycm_quiet_messages = {}
-<
--------------------------------------------------------------------------------
 The *g:ycm_echo_current_diagnostic* option
 
 When this option is set, YCM will echo the text of the diagnostic present on
@@ -2106,6 +2079,39 @@ option before using this option's default.
 Default: '1'
 >
   let g:ycm_echo_current_diagnostic = 1
+<
+-------------------------------------------------------------------------------
+The *g:ycm_filter_diagnostics* option
+
+This option controls which diagnostics will be rendered by YCM. This option
+holds a dictionary of key-values, where the keys are Vim's filetype strings
+delimited by commas and values are dictionaries describing the filter.
+
+A filter is a dictionary of key-values, where the keys are the type of filter,
+and the value is a list of arguments to that filter. In the case of just a
+single item in the list, you may omit the brackets and just provide the
+argument directly. If any filter matches a diagnostic, it will be dropped and
+YCM will not render it.
+
+The following filter types are supported:
+
+- "regex": Accepts a string regular expression [54]. This type matches when
+  the regex (treated as case-insensitive) is found in the diagnostic text.
+
+- "level": Accepts a string level, either "warning" or "error." This type
+  matches when the diagnostic has the same level.
+
+NOTE: The regex syntax is **NOT** Vim's, it's Python's [54].
+
+Default: '{}'
+>
+  let g:ycm_filter_diagnostics = {
+    \ "java": {
+    \      "regex": [ ".*taco.*", ... ],
+    \      "level": "error",
+    \      ...
+    \    }
+    \ }
 <
 -------------------------------------------------------------------------------
 The *g:ycm_always_populate_location_list* option
@@ -2202,7 +2208,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [54]. The format
+The only supported tag format is the Exuberant Ctags format [55]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the '--
 fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -2569,7 +2575,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-NOTE: The regex syntax is **NOT** Vim's, it's Python's [55].
+NOTE: The regex syntax is **NOT** Vim's, it's Python's [54].
 
 Default: '[see next line]'
 >
@@ -2897,7 +2903,7 @@ YCM does not read identifiers from my tags files ~
 First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
 
 Make sure you are using Exuberant Ctags [57] to produce your tags files since
-the only supported tag format is the Exuberant Ctags format [54]. The format
+the only supported tag format is the Exuberant Ctags format [55]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
 list "Exuberant Ctags".
 
@@ -3240,8 +3246,8 @@ References ~
 [51] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
 [52] https://github.com/Valloric/ListToggle
 [53] https://github.com/itchyny/lightline.vim
-[54] http://ctags.sourceforge.net/FORMAT
-[55] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[54] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[55] http://ctags.sourceforge.net/FORMAT
 [56] https://github.com/Valloric/YouCompleteMe/issues/18
 [57] http://ctags.sourceforge.net/
 [58] https://github.com/Raimondi/delimitMate
