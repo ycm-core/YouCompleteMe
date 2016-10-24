@@ -26,12 +26,14 @@ from builtins import *  # noqa
 from future.utils import itervalues, iteritems
 from collections import defaultdict, namedtuple
 from ycm import vimsupport
+from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
 import vim
 
 
 class DiagnosticInterface( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
+    self._diag_filter = DiagnosticFilter.CreateFromOptions( user_options )
     # Line and column numbers are 1-based
     self._buffer_number_to_line_to_diags = defaultdict(
       lambda: defaultdict( list ) )
@@ -61,11 +63,13 @@ class DiagnosticInterface( object ):
 
   def PopulateLocationList( self, diags ):
     vimsupport.SetLocationList(
-      vimsupport.ConvertDiagnosticsToQfList( diags ) )
+      vimsupport.ConvertDiagnosticsToQfList(
+          self._ApplyDiagnosticFilter( diags ) ) )
 
 
   def UpdateWithNewDiagnostics( self, diags ):
-    normalized_diags = [ _NormalizeDiagnostic( x ) for x in diags ]
+    normalized_diags = [ _NormalizeDiagnostic( x ) for x in
+            self._ApplyDiagnosticFilter( diags ) ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
         normalized_diags )
 
@@ -80,6 +84,20 @@ class DiagnosticInterface( object ):
 
     if self._user_options[ 'always_populate_location_list' ]:
       self.PopulateLocationList( normalized_diags )
+
+
+  def _ApplyDiagnosticFilter( self, diags, extra_predicate = None ):
+    filetypes = vimsupport.CurrentFiletypes()
+    diag_filter = self._diag_filter.SubsetForTypes( filetypes )
+    predicate = diag_filter.IsAllowed
+    if extra_predicate is not None:
+      def Filter( diag ):
+        return extra_predicate( diag ) and diag_filter.IsAllowed( diag )
+
+      predicate = Filter
+
+    return filter( predicate, diags )
+
 
   def _EchoDiagnosticForLine( self, line_num ):
     buffer_num = vim.current.buffer.number
@@ -105,7 +123,8 @@ class DiagnosticInterface( object ):
       vim.current.buffer.number ]
 
     for diags in itervalues( line_to_diags ):
-      matched_diags.extend( list( filter( predicate, diags ) ) )
+      matched_diags.extend( list(
+        self._ApplyDiagnosticFilter( diags, predicate ) ) )
     return matched_diags
 
 
@@ -236,12 +255,8 @@ def _ConvertDiagListToDict( diag_list ):
   return buffer_to_line_to_diags
 
 
-def _DiagnosticIsError( diag ):
-  return diag[ 'kind' ] == 'ERROR'
-
-
-def _DiagnosticIsWarning( diag ):
-  return diag[ 'kind' ] == 'WARNING'
+_DiagnosticIsError = CompileLevel( 'error' )
+_DiagnosticIsWarning = CompileLevel( 'warning' )
 
 
 def _NormalizeDiagnostic( diag ):

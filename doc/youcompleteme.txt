@@ -89,40 +89,41 @@ Contents ~
   10. The |g:ycm_enable_diagnostic_signs| option
   11. The |g:ycm_enable_diagnostic_highlighting| option
   12. The |g:ycm_echo_current_diagnostic| option
-  13. The |g:ycm_always_populate_location_list| option
-  14. The |g:ycm_open_loclist_on_ycm_diags| option
-  15. The |g:ycm_allow_changing_updatetime| option
-  16. The |g:ycm_complete_in_comments| option
-  17. The |g:ycm_complete_in_strings| option
-  18. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  19. The |g:ycm_collect_identifiers_from_tags_files| option
-  20. The |g:ycm_seed_identifiers_with_syntax| option
-  21. The |g:ycm_extra_conf_vim_data| option
-  22. The |g:ycm_server_python_interpreter| option
-  23. The |g:ycm_server_keep_logfiles| option
-  24. The |g:ycm_server_log_level| option
-  25. The |g:ycm_auto_start_csharp_server| option
-  26. The |g:ycm_auto_stop_csharp_server| option
-  27. The |g:ycm_csharp_server_port| option
-  28. The |g:ycm_csharp_insert_namespace_expr| option
-  29. The |g:ycm_add_preview_to_completeopt| option
-  30. The |g:ycm_autoclose_preview_window_after_completion| option
-  31. The |g:ycm_autoclose_preview_window_after_insertion| option
-  32. The |g:ycm_max_diagnostics_to_display| option
-  33. The |g:ycm_key_list_select_completion| option
-  34. The |g:ycm_key_list_previous_completion| option
-  35. The |g:ycm_key_invoke_completion| option
-  36. The |g:ycm_key_detailed_diagnostics| option
-  37. The |g:ycm_global_ycm_extra_conf| option
-  38. The |g:ycm_confirm_extra_conf| option
-  39. The |g:ycm_extra_conf_globlist| option
-  40. The |g:ycm_filepath_completion_use_working_dir| option
-  41. The |g:ycm_semantic_triggers| option
-  42. The |g:ycm_cache_omnifunc| option
-  43. The |g:ycm_use_ultisnips_completer| option
-  44. The |g:ycm_goto_buffer_command| option
-  45. The |g:ycm_disable_for_files_larger_than_kb| option
-  46. The |g:ycm_python_binary_path| option
+  13. The |g:ycm_filter_diagnostics| option
+  14. The |g:ycm_always_populate_location_list| option
+  15. The |g:ycm_open_loclist_on_ycm_diags| option
+  16. The |g:ycm_allow_changing_updatetime| option
+  17. The |g:ycm_complete_in_comments| option
+  18. The |g:ycm_complete_in_strings| option
+  19. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  20. The |g:ycm_collect_identifiers_from_tags_files| option
+  21. The |g:ycm_seed_identifiers_with_syntax| option
+  22. The |g:ycm_extra_conf_vim_data| option
+  23. The |g:ycm_server_python_interpreter| option
+  24. The |g:ycm_server_keep_logfiles| option
+  25. The |g:ycm_server_log_level| option
+  26. The |g:ycm_auto_start_csharp_server| option
+  27. The |g:ycm_auto_stop_csharp_server| option
+  28. The |g:ycm_csharp_server_port| option
+  29. The |g:ycm_csharp_insert_namespace_expr| option
+  30. The |g:ycm_add_preview_to_completeopt| option
+  31. The |g:ycm_autoclose_preview_window_after_completion| option
+  32. The |g:ycm_autoclose_preview_window_after_insertion| option
+  33. The |g:ycm_max_diagnostics_to_display| option
+  34. The |g:ycm_key_list_select_completion| option
+  35. The |g:ycm_key_list_previous_completion| option
+  36. The |g:ycm_key_invoke_completion| option
+  37. The |g:ycm_key_detailed_diagnostics| option
+  38. The |g:ycm_global_ycm_extra_conf| option
+  39. The |g:ycm_confirm_extra_conf| option
+  40. The |g:ycm_extra_conf_globlist| option
+  41. The |g:ycm_filepath_completion_use_working_dir| option
+  42. The |g:ycm_semantic_triggers| option
+  43. The |g:ycm_cache_omnifunc| option
+  44. The |g:ycm_use_ultisnips_completer| option
+  45. The |g:ycm_goto_buffer_command| option
+  46. The |g:ycm_disable_for_files_larger_than_kb| option
+  47. The |g:ycm_python_binary_path| option
  11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
@@ -2080,6 +2081,39 @@ Default: '1'
   let g:ycm_echo_current_diagnostic = 1
 <
 -------------------------------------------------------------------------------
+The *g:ycm_filter_diagnostics* option
+
+This option controls which diagnostics will be rendered by YCM. This option
+holds a dictionary of key-values, where the keys are Vim's filetype strings
+delimited by commas and values are dictionaries describing the filter.
+
+A filter is a dictionary of key-values, where the keys are the type of filter,
+and the value is a list of arguments to that filter. In the case of just a
+single item in the list, you may omit the brackets and just provide the
+argument directly. If any filter matches a diagnostic, it will be dropped and
+YCM will not render it.
+
+The following filter types are supported:
+
+- "regex": Accepts a string regular expression [54]. This type matches when
+  the regex (treated as case-insensitive) is found in the diagnostic text.
+
+- "level": Accepts a string level, either "warning" or "error." This type
+  matches when the diagnostic has the same level.
+
+NOTE: The regex syntax is **NOT** Vim's, it's Python's [54].
+
+Default: '{}'
+>
+  let g:ycm_filter_diagnostics = {
+    \ "java": {
+    \      "regex": [ ".*taco.*", ... ],
+    \      "level": "error",
+    \      ...
+    \    }
+    \ }
+<
+-------------------------------------------------------------------------------
 The *g:ycm_always_populate_location_list* option
 
 When this option is set, YCM will populate the location list automatically
@@ -2174,7 +2208,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [54]. The format
+The only supported tag format is the Exuberant Ctags format [55]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the '--
 fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -2541,7 +2575,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-NOTE: The regex syntax is **NOT** Vim's, it's Python's [55].
+NOTE: The regex syntax is **NOT** Vim's, it's Python's [54].
 
 Default: '[see next line]'
 >
@@ -2869,7 +2903,7 @@ YCM does not read identifiers from my tags files ~
 First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
 
 Make sure you are using Exuberant Ctags [57] to produce your tags files since
-the only supported tag format is the Exuberant Ctags format [54]. The format
+the only supported tag format is the Exuberant Ctags format [55]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
 list "Exuberant Ctags".
 
@@ -3212,8 +3246,8 @@ References ~
 [51] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
 [52] https://github.com/Valloric/ListToggle
 [53] https://github.com/itchyny/lightline.vim
-[54] http://ctags.sourceforge.net/FORMAT
-[55] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[54] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[55] http://ctags.sourceforge.net/FORMAT
 [56] https://github.com/Valloric/YouCompleteMe/issues/18
 [57] http://ctags.sourceforge.net/
 [58] https://github.com/Raimondi/delimitMate
