@@ -28,26 +28,29 @@ let s:cursor_moved = 0
 let s:previous_allowed_buffer_number = 0
 
 
-function! s:UsingPython2()
-  " I'm willing to bet quite a bit that sooner or later, somebody will ask us to
-  " make it configurable which version of Python we use.
-  if has('python')
+" When both versions are available, we prefer Python 3 over Python 2:
+"  - faster startup (no monkey-patching from python-future);
+"  - better Windows support (e.g. temporary paths are not returned in all
+"    lowercase);
+"  - Python 2 support will eventually be dropped.
+function! s:UsingPython3()
+  if has('python3')
     return 1
   endif
   return 0
 endfunction
 
 
-let s:using_python2 = s:UsingPython2()
-let s:python_until_eof = s:using_python2 ? "python << EOF" : "python3 << EOF"
-let s:python_command = s:using_python2 ? "py " : "py3 "
+let s:using_python3 = s:UsingPython3()
+let s:python_until_eof = s:using_python3 ? "python3 << EOF" : "python << EOF"
+let s:python_command = s:using_python3 ? "py3 " : "py "
 
 
 function! s:Pyeval( eval_string )
-  if s:using_python2
-    return pyeval( a:eval_string )
+  if s:using_python3
+    return py3eval( a:eval_string )
   endif
-  return py3eval( a:eval_string )
+  return pyeval( a:eval_string )
 endfunction
 
 
