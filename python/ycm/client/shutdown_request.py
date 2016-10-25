@@ -44,10 +44,6 @@ class ShutdownRequest( BaseRequest ):
       pass
 
 
-  def Response( self ):
-    return self._response
-
-
 def SendShutdownRequest():
   request = ShutdownRequest()
   # This is a blocking call.
