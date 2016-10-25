@@ -318,10 +318,7 @@ class YouCompleteMe( object ):
   def OnBufferUnload( self, deleted_buffer_file ):
     if not self.IsServerAlive():
       return
-    SendEventNotificationAsync(
-      'BufferUnload',
-      filepath = deleted_buffer_file,
-      extra_data = { 'unloaded_buffer': deleted_buffer_file } )
+    SendEventNotificationAsync( 'BufferUnload', filepath = deleted_buffer_file )
 
 
   def OnBufferVisit( self ):
