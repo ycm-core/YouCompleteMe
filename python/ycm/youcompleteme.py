@@ -99,6 +99,7 @@ CORE_OUTDATED_MESSAGE = (
   'script. See the documentation for more details.' )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
+LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
 
 
 class YouCompleteMe( object ):
@@ -143,13 +144,10 @@ class YouCompleteMe( object ):
                '--idle_suicide_seconds={0}'.format(
                   SERVER_IDLE_SUICIDE_SECONDS ) ]
 
-      filename_format = os.path.join( utils.PathToCreatedTempDir(),
-                                      'server_{port}_{std}.log' )
-
-      self._server_stdout = filename_format.format( port = server_port,
-                                                    std = 'stdout' )
-      self._server_stderr = filename_format.format( port = server_port,
-                                                    std = 'stderr' )
+      self._server_stdout = utils.CreateLogfile(
+          LOGFILE_FORMAT.format( port = server_port, std = 'stdout' ) )
+      self._server_stderr = utils.CreateLogfile(
+          LOGFILE_FORMAT.format( port = server_port, std = 'stderr' ) )
       args.append( '--stdout={0}'.format( self._server_stdout ) )
       args.append( '--stderr={0}'.format( self._server_stderr ) )
 
