@@ -30,7 +30,11 @@ def Main():
               'to run:\n\tgit submodule update --init --recursive\n\n' )
 
   python_binary = sys.executable
-  subprocess.check_call( [ python_binary, build_file ] + sys.argv[1:] )
+  try:
+    print("Building ycmd using [%s] with python binary [%s]:" % build_file, python_binary)
+    subprocess.check_call( [ python_binary, build_file ] + sys.argv[1:] )
+  except subprocess.CalledProcessError as processError:
+    print("\nException raised while building ycmd:\n" + str(processError))
 
   # Remove old YCM libs if present so that YCM can start.
   old_libs = (
