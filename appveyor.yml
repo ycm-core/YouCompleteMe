@@ -1,5 +1,6 @@
 version: '{build}'
 environment:
+  COVERAGE: true
   matrix:
   - arch: 32
     python: 35
