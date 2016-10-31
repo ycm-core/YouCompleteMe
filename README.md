@@ -1,6 +1,7 @@
 YouCompleteMe: a code-completion engine for Vim
 ===============================================
 
+[![Gitter Room](https://img.shields.io/gitter/room/Valloric/YouCompleteMe.svg)](https://gitter.im/Valloric/YouCompleteMe)
 [![Build Status](https://travis-ci.org/Valloric/YouCompleteMe.svg?branch=master)](https://travis-ci.org/Valloric/YouCompleteMe)
 [![Build status](https://ci.appveyor.com/api/projects/status/ag9uqwi8s6btwjd8/branch/master?svg=true)](https://ci.appveyor.com/project/Valloric/YouCompleteMe)
 [![Coverage Status](https://codecov.io/gh/Valloric/YouCompleteMe/branch/master/graph/badge.svg)](https://codecov.io/gh/Valloric/YouCompleteMe)
@@ -2894,8 +2895,8 @@ terms.
 Contact
 -------
 
-If you have questions about the plugin or need help, please use the
-[ycm-users][] mailing list.
+If you have questions about the plugin or need help, please join the [Gitter
+room][gitter] or use the [ycm-users][] mailing list.
 
 If you have bug reports or feature suggestions, please use the [issue
 tracker][tracker].
@@ -2975,3 +2976,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [JediHTTP]: https://github.com/vheon/JediHTTP
 [vim_win-python2.7.11-bug]: https://github.com/vim/vim/issues/717
 [vim_win-python2.7.11-bug_workaround]: https://github.com/vim/vim-win32-installer/blob/master/appveyor.bat#L90
+[gitter]: https://gitter.im/Valloric/YouCompleteMe
