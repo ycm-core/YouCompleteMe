@@ -1531,3 +1531,34 @@ def SelectFromList_Negative_test( vim_eval ):
   assert_that( calling( vimsupport.SelectFromList ).with_args( 'test',
                                                                [ 'a', 'b' ] ),
                raises( RuntimeError, vimsupport.NO_SELECTION_MADE_MSG ) )
+
+
+@patch( 'ycm.vimsupport.VariableExists', return_value = False )
+@patch( 'ycm.vimsupport.SearchInCurrentBuffer', return_value = 0 )
+@patch( 'vim.current' )
+def InsertNamespace_insert_test( vim_current, *args ):
+  contents = [ 'var taco = Math' ]
+  vim_current.buffer = VimBuffer( '', contents = contents )
+
+  vimsupport.InsertNamespace( 'System' )
+
+  expected_buffer = [ 'using System;',
+                      'var taco = Math' ]
+  AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
+
+
+@patch( 'ycm.vimsupport.VariableExists', return_value = False )
+@patch( 'ycm.vimsupport.SearchInCurrentBuffer', return_value = 1 )
+@patch( 'vim.current' )
+def InsertNamespace_append_test( vim_current, *args ):
+  contents = [ 'using System;', '', 'var taco;', 'var salad = new List']
+  vim_current.buffer = VimBuffer( '', contents = contents )
+
+  vimsupport.InsertNamespace( 'System.Collections' )
+
+  expected_buffer = [ 'using System;',
+                      'using System.Collections;',
+                      '',
+                      'var taco;',
+                      'var salad = new List' ]
+  AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
