@@ -846,9 +846,11 @@ def InsertNamespace( namespace ):
       return
 
   pattern = '^\s*using\(\s\+[a-zA-Z0-9]\+\s\+=\)\?\s\+[a-zA-Z0-9.]\+\s*;\s*'
+  existing_indent = ''
   line = SearchInCurrentBuffer( pattern )
-  existing_line = LineTextInCurrentBuffer( line )
-  existing_indent = re.sub( r"\S.*", "", existing_line )
+  if line > 0:
+    existing_line = LineTextInCurrentBuffer( line )
+    existing_indent = re.sub( r"\S.*", "", existing_line )
   new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
   replace_pos = { 'line_num': line + 1, 'column_num': 1 }
   ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0, vim.current.buffer )
@@ -856,11 +858,14 @@ def InsertNamespace( namespace ):
 
 
 def SearchInCurrentBuffer( pattern ):
+  """ Returns the 1-indexed line on which the pattern matches
+  (going UP from the current position) or 0 if not found """
   return GetIntValue( "search('{0}', 'Wcnb')".format( EscapeForVim( pattern )))
 
 
 def LineTextInCurrentBuffer( line ):
-  return vim.current.buffer[ line ]
+  """ Returns the text on the 1-indexed line (NOT 0-indexed) """
+  return vim.current.buffer[ line - 1 ]
 
 
 def ClosePreviewWindow():
