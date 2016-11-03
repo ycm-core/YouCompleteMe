@@ -1562,7 +1562,7 @@ def InsertNamespace_append_test( vim_current, *args ):
                '',
                '  class Tasty {',
                '    int taco;',
-               '    List salad = new List']
+               '    List salad = new List' ]
   vim_current.buffer = VimBuffer( '', contents = contents )
 
   vimsupport.InsertNamespace( 'System.Collections' )
@@ -1573,5 +1573,5 @@ def InsertNamespace_append_test( vim_current, *args ):
                       '',
                       '  class Tasty {',
                       '    int taco;',
-                      '    List salad = new List']
+                      '    List salad = new List' ]
   AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
