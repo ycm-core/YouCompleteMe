@@ -1531,3 +1531,47 @@ def SelectFromList_Negative_test( vim_eval ):
   assert_that( calling( vimsupport.SelectFromList ).with_args( 'test',
                                                                [ 'a', 'b' ] ),
                raises( RuntimeError, vimsupport.NO_SELECTION_MADE_MSG ) )
+
+
+@patch( 'ycm.vimsupport.VariableExists', return_value = False )
+@patch( 'ycm.vimsupport.SearchInCurrentBuffer', return_value = 0 )
+@patch( 'vim.current' )
+def InsertNamespace_insert_test( vim_current, *args ):
+  contents = [ '',
+               'namespace Taqueria {',
+               '',
+               '  int taco = Math' ]
+  vim_current.buffer = VimBuffer( '', contents = contents )
+
+  vimsupport.InsertNamespace( 'System' )
+
+  expected_buffer = [ 'using System;',
+                      '',
+                      'namespace Taqueria {',
+                      '',
+                      '  int taco = Math' ]
+  AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
+
+
+@patch( 'ycm.vimsupport.VariableExists', return_value = False )
+@patch( 'ycm.vimsupport.SearchInCurrentBuffer', return_value = 2 )
+@patch( 'vim.current' )
+def InsertNamespace_append_test( vim_current, *args ):
+  contents = [ 'namespace Taqueria {',
+               '  using System;',
+               '',
+               '  class Tasty {',
+               '    int taco;',
+               '    List salad = new List' ]
+  vim_current.buffer = VimBuffer( '', contents = contents )
+
+  vimsupport.InsertNamespace( 'System.Collections' )
+
+  expected_buffer = [ 'namespace Taqueria {',
+                      '  using System;',
+                      '  using System.Collections;',
+                      '',
+                      '  class Tasty {',
+                      '    int taco;',
+                      '    List salad = new List' ]
+  AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
