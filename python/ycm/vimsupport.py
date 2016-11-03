@@ -863,9 +863,9 @@ def SearchInCurrentBuffer( pattern ):
   return GetIntValue( "search('{0}', 'Wcnb')".format( EscapeForVim( pattern )))
 
 
-def LineTextInCurrentBuffer( line ):
+def LineTextInCurrentBuffer( line_number ):
   """ Returns the text on the 1-indexed line (NOT 0-indexed) """
-  return vim.current.buffer[ line - 1 ]
+  return vim.current.buffer[ line_number - 1 ]
 
 
 def ClosePreviewWindow():
