@@ -26,7 +26,6 @@ from builtins import *  # noqa
 import vim
 from ycm import vimsupport
 from ycmd import utils
-from ycmd.responses import ServerError
 from ycmd.completers.completer import Completer
 from ycm.client.base_request import BaseRequest, HandleServerException
 
@@ -115,9 +114,7 @@ class OmniCompleter( Completer ):
       'query': query
     }
 
-    try:
+    with HandleServerException():
       return BaseRequest.PostDataToHandler( request_data,
                                             'filter_and_sort_candidates' )
-    except ServerError as e:
-      HandleServerException( e )
-      return candidates
+    return candidates

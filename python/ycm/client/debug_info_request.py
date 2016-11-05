@@ -23,22 +23,30 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.client.base_request import BaseRequest, HandleServerException
+from ycm.client.base_request import ( BaseRequest, BuildRequestData,
+                                      HandleServerException )
 
-TIMEOUT_SECONDS = 0.1
 
-
-class ShutdownRequest( BaseRequest ):
+class DebugInfoRequest( BaseRequest ):
   def __init__( self ):
-    super( BaseRequest, self ).__init__()
+    super( DebugInfoRequest, self ).__init__()
+    self._response = None
 
 
   def Start( self ):
+    request_data = BuildRequestData()
     with HandleServerException( display = False ):
-      self.PostDataToHandler( {}, 'shutdown', TIMEOUT_SECONDS )
+      self._response = self.PostDataToHandler( request_data, 'debug_info' )
 
 
-def SendShutdownRequest():
-  request = ShutdownRequest()
+  def Response( self ):
+    if not self._response:
+      return 'Server errored, no debug info from server'
+    return self._response
+
+
+def SendDebugInfoRequest():
+  request = DebugInfoRequest()
   # This is a blocking call.
   request.Start()
+  return request.Response()

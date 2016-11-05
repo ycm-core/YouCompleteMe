@@ -38,16 +38,17 @@ from ycm import base, paths, vimsupport
 from ycmd import utils
 from ycmd import server_utils
 from ycmd.request_wrap import RequestWrap
-from ycmd.responses import ServerError
 from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
-from ycm.client.base_request import BaseRequest, BuildRequestData
+from ycm.client.base_request import ( BaseRequest, BuildRequestData,
+                                      HandleServerException )
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import ( CompletionRequest,
                                             ConvertCompletionDataToVimData )
+from ycm.client.debug_info_request import SendDebugInfoRequest
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
@@ -302,13 +303,10 @@ class YouCompleteMe( object ):
 
   def GetDefinedSubcommands( self ):
     if self.IsServerAlive():
-      try:
+      with HandleServerException():
         return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                             'defined_subcommands' )
-      except ServerError:
-        return []
-    else:
-      return []
+                                              'defined_subcommands' )
+    return []
 
 
   def GetCurrentCompletionRequest( self ):
@@ -636,14 +634,13 @@ class YouCompleteMe( object ):
   def ShowDetailedDiagnostic( self ):
     if not self.IsServerAlive():
       return
-    try:
-      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                  'detailed_diagnostic' )
-      if 'message' in debug_info:
-        vimsupport.PostVimMessage( debug_info[ 'message' ],
+    with HandleServerException():
+      detailed_diagnostic = BaseRequest.PostDataToHandler(
+          BuildRequestData(), 'detailed_diagnostic' )
+
+      if 'message' in detailed_diagnostic:
+        vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
                                    warning = False )
-    except ServerError as e:
-      vimsupport.PostVimMessage( str( e ) )
 
 
   def DebugInfo( self ):
@@ -651,8 +648,7 @@ class YouCompleteMe( object ):
     if self._client_logfile:
       debug_info += 'Client logfile: {0}\n'.format( self._client_logfile )
     if self.IsServerAlive():
-      debug_info += BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                   'debug_info' )
+      debug_info += SendDebugInfoRequest()
     else:
       debug_info += 'Server crashed, no debug info from server'
     debug_info += '\nServer running at: {0}\n'.format(
