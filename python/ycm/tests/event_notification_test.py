@@ -159,9 +159,9 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
       vim_command.assert_not_called()
 
 
-@patch( 'ycm.client.event_notification._LoadExtraConfFile',
+@patch( 'ycm.client.base_request._LoadExtraConfFile',
         new_callable = ExtendedMock )
-@patch( 'ycm.client.event_notification._IgnoreExtraConfFile',
+@patch( 'ycm.client.base_request._IgnoreExtraConfFile',
         new_callable = ExtendedMock )
 @YouCompleteMeInstance()
 def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(

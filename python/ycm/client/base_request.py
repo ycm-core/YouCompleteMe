@@ -23,6 +23,8 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
+import contextlib
+import logging
 import requests
 import urllib.parse
 import json
@@ -41,6 +43,7 @@ _EXECUTOR = UnsafeThreadPoolExecutor( max_workers = 30 )
 # Setting this to None seems to screw up the Requests/urllib3 libs.
 _DEFAULT_TIMEOUT_SEC = 30
 _HMAC_HEADER = 'x-ycm-hmac'
+_logger = logging.getLogger( __name__ )
 
 
 class BaseRequest( object ):
@@ -193,7 +196,32 @@ def JsonFromFuture( future ):
   return None
 
 
-def HandleServerException( exception, truncate = False ):
+@contextlib.contextmanager
+def HandleServerException( display = True, truncate = False ):
+  try:
+    yield
+  except UnknownExtraConf as e:
+    if vimsupport.Confirm( str( e ) ):
+      _LoadExtraConfFile( e.extra_conf_file )
+    else:
+      _IgnoreExtraConfFile( e.extra_conf_file )
+  except Exception as e:
+    _logger.exception( 'Error while handling server response' )
+    if display:
+      DisplayServerException( e, truncate )
+
+
+def _LoadExtraConfFile( filepath ):
+  BaseRequest.PostDataToHandler( { 'filepath': filepath },
+                                 'load_extra_conf_file' )
+
+
+def _IgnoreExtraConfFile( filepath ):
+  BaseRequest.PostDataToHandler( { 'filepath': filepath },
+                                 'ignore_extra_conf_file' )
+
+
+def DisplayServerException( exception, truncate = False ):
   serialized_exception = str( exception )
 
   # We ignore the exception about the file already being parsed since it comes
