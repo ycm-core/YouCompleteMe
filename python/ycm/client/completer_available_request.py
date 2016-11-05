@@ -23,11 +23,8 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from requests.exceptions import ReadTimeout
-
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       HandleServerException )
-from ycmd.responses import ServerError
 
 
 class CompleterAvailableRequest( BaseRequest ):
@@ -40,11 +37,9 @@ class CompleterAvailableRequest( BaseRequest ):
   def Start( self ):
     request_data = BuildRequestData()
     request_data.update( { 'filetypes': self.filetypes } )
-    try:
+    with HandleServerException():
       self._response = self.PostDataToHandler( request_data,
                                                'semantic_completion_available' )
-    except ( ServerError, ReadTimeout ) as e:
-      HandleServerException( e )
 
 
   def Response( self ):

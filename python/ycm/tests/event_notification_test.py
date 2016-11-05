@@ -128,13 +128,13 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
 
       # The first call raises a warning
       post_vim_message.assert_has_exact_calls( [
-        call( ERROR_TEXT, truncate = False )
+        call( ERROR_TEXT, truncate = True )
       ] )
 
       # Subsequent calls don't re-raise the warning
       ycm.HandleFileParseRequest()
       post_vim_message.assert_has_exact_calls( [
-        call( ERROR_TEXT, truncate = False )
+        call( ERROR_TEXT, truncate = True )
       ] )
 
       # But it does if a subsequent event raises again
@@ -142,8 +142,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
       ok_( ycm.FileParseRequestReady() )
       ycm.HandleFileParseRequest()
       post_vim_message.assert_has_exact_calls( [
-        call( ERROR_TEXT, truncate = False ),
-        call( ERROR_TEXT, truncate = False )
+        call( ERROR_TEXT, truncate = True ),
+        call( ERROR_TEXT, truncate = True )
       ] )
 
 
@@ -159,9 +159,9 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
       vim_command.assert_not_called()
 
 
-@patch( 'ycm.client.event_notification._LoadExtraConfFile',
+@patch( 'ycm.client.base_request._LoadExtraConfFile',
         new_callable = ExtendedMock )
-@patch( 'ycm.client.event_notification._IgnoreExtraConfFile',
+@patch( 'ycm.client.base_request._IgnoreExtraConfFile',
         new_callable = ExtendedMock )
 @YouCompleteMeInstance()
 def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(

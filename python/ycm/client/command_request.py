@@ -23,9 +23,6 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from requests.exceptions import ReadTimeout
-
-from ycmd.responses import ServerError
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       HandleServerException )
 from ycm import vimsupport
@@ -53,11 +50,9 @@ class CommandRequest( BaseRequest ):
       'completer_target': self._completer_target,
       'command_arguments': self._arguments
     } )
-    try:
+    with HandleServerException():
       self._response = self.PostDataToHandler( request_data,
                                                'run_completer_command' )
-    except ( ServerError, ReadTimeout ) as e:
-      HandleServerException( e )
 
 
   def Response( self ):
