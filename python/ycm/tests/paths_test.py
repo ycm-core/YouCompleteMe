@@ -1,4 +1,4 @@
-# Copyright (C) 2016 YouCompleteMe contributors
+# Copyright (C) 2016-2017 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -26,15 +26,15 @@ from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 from nose.tools import ok_
-from ycm.paths import EndsWithPython
+from ycm.paths import _EndsWithPython
 
 
 def EndsWithPython_Good( path ):
-  ok_( EndsWithPython( path ) )
+  ok_( _EndsWithPython( path ) )
 
 
 def EndsWithPython_Bad( path ):
-  ok_( not EndsWithPython( path ) )
+  ok_( not _EndsWithPython( path ) )
 
 
 def EndsWithPython_Python2Paths_test():
@@ -48,7 +48,6 @@ def EndsWithPython_Python2Paths_test():
 
   for path in python_paths:
     yield EndsWithPython_Good, path
-
 
 
 def EndsWithPython_Python3Paths_test():
