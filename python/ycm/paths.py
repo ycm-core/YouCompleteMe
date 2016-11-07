@@ -25,7 +25,6 @@ from builtins import *  # noqa
 import os
 import sys
 import vim
-import functools
 import re
 
 # Can't import these from setup.py because it makes nosetests go crazy.
@@ -37,19 +36,6 @@ PYTHON_BINARY_REGEX = re.compile(
   r'python((2(\.[67])?)|(3(\.[3-9])?))?(.exe)?$', re.IGNORECASE )
 
 
-def Memoize( obj ):
-  cache = obj.cache = {}
-
-  @functools.wraps( obj )
-  def memoizer( *args, **kwargs ):
-    key = str( args ) + str( kwargs )
-    if key not in cache:
-      cache[ key ] = obj( *args, **kwargs )
-    return cache[ key ]
-  return memoizer
-
-
-@Memoize
 def PathToPythonInterpreter():
   # Not calling the Python interpreter to check its version as it significantly
   # impacts startup time.
