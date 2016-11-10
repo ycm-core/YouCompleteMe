@@ -119,14 +119,16 @@ function! youcompleteme#Enable()
   call s:OnBufferRead()
 endfunction
 
+
 function s:DeferredUntilInsertEnter()
   let s:defer_omnifunc = 0
   autocmd! ycm_defer_omnifunc
 
-  if s:AllowedToCompleteInCurrentFile()
+  if s:AllowedToCompleteInCurrentBuffer()
     call s:SetOmnicompleteFunc()
   endif
 endfunction
+
 
 function! youcompleteme#EnableCursorMovedAutocommands()
   augroup ycmcompletemecursormove
