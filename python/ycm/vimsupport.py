@@ -895,6 +895,15 @@ def OpenFileInPreviewWindow( filename ):
   vim.command( 'silent! pedit! ' + filename )
 
 
+def GetPreviewBuffer():
+  """ Get the preview buffer. Create it if it does not exist. """
+  variable_name = 'g:ycm_preview_buffer_name'
+  if not VariableExists( variable_name ):
+    SetVariableValue( variable_name, vim.eval( 'tempname()' ) )
+
+  return GetVariableValue( variable_name )
+
+
 def WriteToPreviewWindow( message ):
   """ Display the supplied message in the preview window """
 
@@ -907,7 +916,7 @@ def WriteToPreviewWindow( message ):
 
   ClosePreviewWindow()
 
-  OpenFileInPreviewWindow( vim.eval( 'tempname()' ) )
+  OpenFileInPreviewWindow( GetPreviewBuffer() )
 
   if JumpToPreviewWindow():
     # We actually got to the preview window. By default the preview window can't
@@ -922,6 +931,7 @@ def WriteToPreviewWindow( message ):
     vim.current.buffer.options[ 'swapfile' ]   = False
     vim.current.buffer.options[ 'modifiable' ] = False
     vim.current.buffer.options[ 'readonly' ]   = True
+    vim.current.buffer.options[ 'buflisted' ]  = False
 
     # We need to prevent closing the window causing a warning about unsaved
     # file, so we pretend to Vim that the buffer has not been changed.
