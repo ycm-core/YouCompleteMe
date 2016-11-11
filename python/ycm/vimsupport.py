@@ -924,7 +924,6 @@ def WriteToPreviewWindow( message ):
     vim.current.buffer.options[ 'swapfile' ]   = False
     vim.current.buffer.options[ 'modifiable' ] = False
     vim.current.buffer.options[ 'readonly' ]   = True
-    vim.current.buffer.options[ 'buflisted' ]  = False
 
     # We need to prevent closing the window causing a warning about unsaved
     # file, so we pretend to Vim that the buffer has not been changed.
