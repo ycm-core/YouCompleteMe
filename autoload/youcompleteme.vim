@@ -108,9 +108,7 @@ function! youcompleteme#Enable()
   if s:defer_omnifunc
     augroup ycm_defer_omnifunc
       autocmd!
-      autocmd InsertEnter * call s:SetOmnicompleteFunc()
-                        \ | let s:defer_omnifunc = 0
-                        \ | autocmd! ycm_defer_omnifunc
+      autocmd InsertEnter * call s:DeferredUntilInsertEnter()
     augroup END
   endif
 
@@ -119,6 +117,16 @@ function! youcompleteme#Enable()
   " executed in this function!
   call s:OnBufferReadPre( expand( '<afile>:p' ) )
   call s:OnBufferRead()
+endfunction
+
+
+function s:DeferredUntilInsertEnter()
+  let s:defer_omnifunc = 0
+  autocmd! ycm_defer_omnifunc
+
+  if s:AllowedToCompleteInCurrentBuffer()
+    call s:SetOmnicompleteFunc()
+  endif
 endfunction
 
 
