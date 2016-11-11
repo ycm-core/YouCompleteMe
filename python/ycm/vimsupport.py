@@ -928,6 +928,8 @@ def WriteToPreviewWindow( message ):
     vim.current.buffer[:] = message.splitlines()
 
     vim.current.buffer.options[ 'buftype' ]    = 'nofile'
+    vim.current.buffer.options[ 'bufhidden' ]  = 'wipe'
+    vim.current.buffer.options[ 'buflisted' ]  = False
     vim.current.buffer.options[ 'swapfile' ]   = False
     vim.current.buffer.options[ 'modifiable' ] = False
     vim.current.buffer.options[ 'readonly' ]   = True

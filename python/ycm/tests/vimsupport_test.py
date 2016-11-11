@@ -1262,6 +1262,8 @@ def WriteToPreviewWindow_test( vim_current, vim_command ):
     call( 'modifiable', True ),
     call( 'readonly', False ),
     call( 'buftype', 'nofile' ),
+    call( 'bufhidden', 'wipe' ),
+    call( 'buflisted', False ),
     call( 'swapfile', False ),
     call( 'modifiable', False ),
     call( 'modified', False ),
