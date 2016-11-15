@@ -59,6 +59,7 @@ def PatchNoProxy():
   os.environ['no_proxy'] = ( additions if not current_value
                              else current_value + ',' + additions )
 
+
 # We need this so that Requests doesn't end up using the local HTTP proxy when
 # talking to ycmd. Users should actually be setting this themselves when
 # configuring a proxy server on their machine, but most don't know they need to
