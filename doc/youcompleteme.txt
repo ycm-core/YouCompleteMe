@@ -743,10 +743,10 @@ will notify you to recompile it. You should then rerun the install process.
    **Download the latest version of 'libclang'**. Clang is an open-source
    compiler that can compile C/C++/Objective-C/Objective-C++. The 'libclang'
    library it provides is used to power the YCM semantic completion engine
-   for those languages. YCM is designed to work with libclang version 3.8 or
+   for those languages. YCM is designed to work with libclang version 3.9 or
    higher.
 
-   You can use the system libclang _only if you are sure it is version 3.8
+   You can use the system libclang _only if you are sure it is version 3.9
    or higher_, otherwise don't. Even if it is, we recommend using the
    official binaries from llvm.org [40] if at all possible. Make sure you
    download the correct archive file for your OS.
@@ -2870,7 +2870,7 @@ crashes:
   undefined symbol: clang_CompileCommands_dispose
 <
 This means that Vim is trying to load a 'libclang.so' that is too old. You need
-at least a 3.8 libclang. Just go through the installation guide and make sure
+at least a 3.9 libclang. Just go through the installation guide and make sure
 you are using a correct 'libclang.so'. We recommend downloading prebuilt
 binaries from llvm.org.
 
