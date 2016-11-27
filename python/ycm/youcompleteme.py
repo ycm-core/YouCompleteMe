@@ -25,12 +25,13 @@ standard_library.install_aliases()
 from builtins import *  # noqa
 
 from future.utils import iteritems
-import os
-import vim
+import base64
 import json
+import logging
+import os
 import re
 import signal
-import base64
+import vim
 from subprocess import PIPE
 from tempfile import NamedTemporaryFile
 from ycm import base, paths, vimsupport
@@ -77,13 +78,12 @@ signal.signal( signal.SIGINT, signal.SIG_IGN )
 HMAC_SECRET_LENGTH = 16
 SERVER_SHUTDOWN_MESSAGE = (
   "The ycmd server SHUT DOWN (restart with ':YcmRestartServer')." )
-STDERR_FILE_MESSAGE = (
-  "Run ':YcmToggleLogs stderr' to check the logs." )
-STDERR_FILE_DELETED_MESSAGE = (
-  "Logfile was deleted; set 'g:ycm_server_keep_logfiles' to see errors "
-  "in the future." )
+EXIT_CODE_UNEXPECTED_MESSAGE = (
+  "Unexpected exit code {code}. "
+  "Use the ':YcmToggleLogs' command to check the logs." )
 CORE_UNEXPECTED_MESSAGE = (
-  'Unexpected error while loading the YCM core library.' )
+  "Unexpected error while loading the YCM core library. "
+  "Use the ':YcmToggleLogs' command to check the logs." )
 CORE_MISSING_MESSAGE = (
   'YCM core library not detected; you need to compile YCM before using it. '
   'Follow the instructions in the documentation.' )
@@ -100,7 +100,12 @@ CORE_OUTDATED_MESSAGE = (
   'script. See the documentation for more details.' )
 SERVER_IDLE_SUICIDE_SECONDS = 10800  # 3 hours
 DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp' ] )
-LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
+CLIENT_LOGFILE_FORMAT = 'ycm_'
+SERVER_LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
+
+# Flag to set a file handle inheritable by child processes on Windows. See
+# https://msdn.microsoft.com/en-us/library/ms724935.aspx
+HANDLE_FLAG_INHERIT = 0x00000001
 
 
 class YouCompleteMe( object ):
@@ -113,11 +118,14 @@ class YouCompleteMe( object ):
     self._latest_file_parse_request = None
     self._latest_completion_request = None
     self._latest_diagnostics = []
+    self._logger = logging.getLogger( 'ycm' )
+    self._client_logfile = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
     self._filetypes_with_keywords_loaded = set()
     self._ycmd_keepalive = YcmdKeepalive()
+    self._SetupLogging()
     self._SetupServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
@@ -134,6 +142,8 @@ class YouCompleteMe( object ):
       options_dict = dict( self._user_options )
       options_dict[ 'hmac_secret' ] = utils.ToUnicode(
         base64.b64encode( hmac_secret ) )
+      options_dict[ 'server_keep_logfiles' ] = self._user_options[
+        'keep_logfiles' ]
       json.dump( options_dict, options_file )
       options_file.flush()
 
@@ -141,18 +151,18 @@ class YouCompleteMe( object ):
                paths.PathToServerScript(),
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),
-               '--log={0}'.format( self._user_options[ 'server_log_level' ] ),
+               '--log={0}'.format( self._user_options[ 'log_level' ] ),
                '--idle_suicide_seconds={0}'.format(
                   SERVER_IDLE_SUICIDE_SECONDS ) ]
 
       self._server_stdout = utils.CreateLogfile(
-          LOGFILE_FORMAT.format( port = server_port, std = 'stdout' ) )
+          SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stdout' ) )
       self._server_stderr = utils.CreateLogfile(
-          LOGFILE_FORMAT.format( port = server_port, std = 'stderr' ) )
+          SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stderr' ) )
       args.append( '--stdout={0}'.format( self._server_stdout ) )
       args.append( '--stderr={0}'.format( self._server_stderr ) )
 
-      if self._user_options[ 'server_keep_logfiles' ]:
+      if self._user_options[ 'keep_logfiles' ]:
         args.append( '--keep_logfiles' )
 
       self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
@@ -163,10 +173,48 @@ class YouCompleteMe( object ):
     self._NotifyUserIfServerCrashed()
 
 
+  def _SetupLogging( self ):
+    def FreeFileFromOtherProcesses( file_object ):
+      if utils.OnWindows():
+        from ctypes import windll
+        import msvcrt
+
+        file_handle = msvcrt.get_osfhandle( file_object.fileno() )
+        windll.kernel32.SetHandleInformation( file_handle,
+                                              HANDLE_FLAG_INHERIT,
+                                              0 )
+
+    self._client_logfile = utils.CreateLogfile( CLIENT_LOGFILE_FORMAT )
+
+    log_level = self._user_options[ 'log_level' ]
+    numeric_level = getattr( logging, log_level.upper(), None )
+    if not isinstance( numeric_level, int ):
+      raise ValueError( 'Invalid log level: {0}'.format( log_level ) )
+    self._logger.setLevel( numeric_level )
+
+    handler = logging.FileHandler( self._client_logfile )
+
+    # On Windows and Python prior to 3.4, file handles are inherited by child
+    # processes started with at least one replaced standard stream, which is the
+    # case when we start the ycmd server (we are redirecting all standard
+    # outputs into a pipe). These files cannot be removed while the child
+    # processes are still up. This is not desirable for a logfile because we
+    # want to remove it at Vim exit without having to wait for the ycmd server
+    # to be completely shut down. We need to make the logfile handle
+    # non-inheritable. See https://www.python.org/dev/peps/pep-0446 for more
+    # details.
+    FreeFileFromOtherProcesses( handler.stream )
+
+    formatter = logging.Formatter( '%(asctime)s - %(levelname)s - %(message)s' )
+    handler.setFormatter( formatter )
+
+    self._logger.addHandler( handler )
+
+
   def IsServerAlive( self ):
-    returncode = self._server_popen.poll()
+    return_code = self._server_popen.poll()
     # When the process hasn't finished yet, poll() returns None.
-    return returncode is None
+    return return_code is None
 
 
   def _NotifyUserIfServerCrashed( self ):
@@ -174,27 +222,27 @@ class YouCompleteMe( object ):
       return
     self._user_notified_about_crash = True
 
-    try:
-      vimsupport.CheckFilename( self._server_stderr )
-      stderr_message = STDERR_FILE_MESSAGE
-    except RuntimeError:
-      stderr_message = STDERR_FILE_DELETED_MESSAGE
-
-    message = SERVER_SHUTDOWN_MESSAGE
     return_code = self._server_popen.poll()
     if return_code == server_utils.CORE_UNEXPECTED_STATUS:
-      message += ' ' + CORE_UNEXPECTED_MESSAGE + ' ' + stderr_message
+      error_message = CORE_UNEXPECTED_MESSAGE
     elif return_code == server_utils.CORE_MISSING_STATUS:
-      message += ' ' + CORE_MISSING_MESSAGE
+      error_message = CORE_MISSING_MESSAGE
     elif return_code == server_utils.CORE_PYTHON2_STATUS:
-      message += ' ' + CORE_PYTHON2_MESSAGE
+      error_message = CORE_PYTHON2_MESSAGE
     elif return_code == server_utils.CORE_PYTHON3_STATUS:
-      message += ' ' + CORE_PYTHON3_MESSAGE
+      error_message = CORE_PYTHON3_MESSAGE
     elif return_code == server_utils.CORE_OUTDATED_STATUS:
-      message += ' ' + CORE_OUTDATED_MESSAGE
+      error_message = CORE_OUTDATED_MESSAGE
     else:
-      message += ' ' + stderr_message
-    vimsupport.PostVimMessage( message )
+      error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format( code = return_code )
+
+    server_stderr = '\n'.join( self._server_popen.stderr.read().splitlines() )
+    if server_stderr:
+      self._logger.error( server_stderr )
+
+    error_message = SERVER_SHUTDOWN_MESSAGE + ' ' + error_message
+    self._logger.error( error_message )
+    vimsupport.PostVimMessage( error_message )
 
 
   def ServerPid( self ):
@@ -209,7 +257,6 @@ class YouCompleteMe( object ):
 
 
   def RestartServer( self ):
-    self._CloseLogs()
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
     self._ShutdownServer()
     self._SetupServer()
@@ -340,8 +387,16 @@ class YouCompleteMe( object ):
     self._diag_interface.OnCursorMoved()
 
 
+  def _CleanLogfile( self ):
+    logging.shutdown()
+    if not self._user_options[ 'keep_logfiles' ]:
+      if self._client_logfile:
+        utils.RemoveIfExists( self._client_logfile )
+
+
   def OnVimLeave( self ):
     self._ShutdownServer()
+    self._CleanLogfile()
 
 
   def OnCurrentIdentifierFinished( self ):
@@ -592,61 +647,73 @@ class YouCompleteMe( object ):
 
 
   def DebugInfo( self ):
+    debug_info = ''
+    if self._client_logfile:
+      debug_info += 'Client logfile: {0}\n'.format( self._client_logfile )
     if self.IsServerAlive():
-      debug_info = BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                  'debug_info' )
+      debug_info += BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                   'debug_info' )
     else:
-      debug_info = 'Server crashed, no debug info from server'
-    debug_info += '\nServer running at: {0}'.format(
+      debug_info += 'Server crashed, no debug info from server'
+    debug_info += '\nServer running at: {0}\n'.format(
         BaseRequest.server_location )
-    debug_info += '\nServer process ID: {0}'.format( self._server_popen.pid )
+    debug_info += 'Server process ID: {0}\n'.format( self._server_popen.pid )
     if self._server_stderr or self._server_stdout:
-      debug_info += '\nServer logfiles:\n  {0}\n  {1}'.format(
-        self._server_stdout,
-        self._server_stderr )
-
+      debug_info += ( 'Server logfiles:\n'
+                      '  {0}\n'
+                      '  {1}'.format( self._server_stdout,
+                                      self._server_stderr ) )
     return debug_info
 
 
-  def _OpenLogs( self, stdout = True, stderr = True ):
+  def GetLogfiles( self ):
+    logfiles_list = [ self._client_logfile,
+                      self._server_stdout,
+                      self._server_stderr ]
+    logfiles = {}
+    for logfile in logfiles_list:
+      logfiles[ os.path.basename( logfile ) ] = logfile
+    return logfiles
+
+
+  def _OpenLogfile( self, logfile ):
     # Open log files in a horizontal window with the same behavior as the
     # preview window (same height and winfixheight enabled). Automatically
     # watch for changes. Set the cursor position at the end of the file.
     options = {
       'size': vimsupport.GetIntValue( '&previewheight' ),
       'fix': True,
+      'focus': False,
       'watch': True,
       'position': 'end'
     }
 
-    if stdout:
-      vimsupport.OpenFilename( self._server_stdout, options )
-    if stderr:
-      vimsupport.OpenFilename( self._server_stderr, options )
+    vimsupport.OpenFilename( logfile, options )
 
 
-  def _CloseLogs( self, stdout = True, stderr = True ):
-    if stdout:
-      vimsupport.CloseBuffersForFilename( self._server_stdout )
-    if stderr:
-      vimsupport.CloseBuffersForFilename( self._server_stderr )
+  def _CloseLogfile( self, logfile ):
+    vimsupport.CloseBuffersForFilename( logfile )
 
 
-  def ToggleLogs( self, stdout = True, stderr = True ):
-    if ( stdout and
-         vimsupport.BufferIsVisibleForFilename( self._server_stdout ) or
-         stderr and
-         vimsupport.BufferIsVisibleForFilename( self._server_stderr ) ):
-      return self._CloseLogs( stdout = stdout, stderr = stderr )
+  def ToggleLogs( self, *filenames ):
+    logfiles = self.GetLogfiles()
+    if not filenames:
+      vimsupport.PostVimMessage(
+          'Available logfiles are:\n'
+          '{0}'.format( '\n'.join( sorted( list( logfiles ) ) ) ) )
+      return
 
-    # Close hidden logfile buffers if any to keep a clean state
-    self._CloseLogs( stdout = stdout, stderr = stderr )
+    for filename in set( filenames ):
+      if filename not in logfiles:
+        continue
 
-    try:
-      self._OpenLogs( stdout = stdout, stderr = stderr )
-    except RuntimeError as error:
-      vimsupport.PostVimMessage( 'YouCompleteMe encountered an error when '
-                                 'opening logs: {0}.'.format( error ) )
+      logfile = logfiles[ filename ]
+
+      if not vimsupport.BufferIsVisibleForFilename( logfile ):
+        self._OpenLogfile( logfile )
+        continue
+
+      self._CloseLogfile( logfile )
 
 
   def CurrentFiletypeCompletionEnabled( self ):

@@ -374,7 +374,7 @@ function! s:SetUpCommands()
   command! YcmRestartServer call s:RestartServer()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmDebugInfo call s:DebugInfo()
-  command! -nargs=? -complete=custom,youcompleteme#LogsComplete
+  command! -nargs=* -complete=custom,youcompleteme#LogsComplete
     \ YcmToggleLogs call s:ToggleLogs(<f-args>)
   command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
     \ YcmCompleter call s:CompleterCommand(<f-args>)
@@ -453,6 +453,7 @@ function! s:OnBufferReadPre(filename)
     let b:ycm_largefile = 1
   endif
 endfunction
+
 
 function! s:OnBufferRead()
   " We need to do this even when we are not allowed to complete in the current
@@ -787,11 +788,7 @@ endfunction
 
 
 function! s:ToggleLogs(...)
-  let stderr = a:0 == 0 || a:1 !=? 'stdout'
-  let stdout = a:0 == 0 || a:1 !=? 'stderr'
-  exec s:python_command "ycm_state.ToggleLogs("
-        \ "stdout = vimsupport.GetBoolValue( 'l:stdout' ),"
-        \ "stderr = vimsupport.GetBoolValue( 'l:stderr' ) )"
+  exec s:python_command "ycm_state.ToggleLogs( *vim.eval( 'a:000' ) )"
 endfunction
 
 
@@ -827,13 +824,12 @@ endfunction
 
 
 function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
-  return "stdout\nstderr"
+  return join( s:Pyeval( 'list( ycm_state.GetLogfiles() )' ), "\n" )
 endfunction
 
 
 function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
-  return join( s:Pyeval( 'ycm_state.GetDefinedSubcommands()' ),
-    \ "\n")
+  return join( s:Pyeval( 'ycm_state.GetDefinedSubcommands()' ), "\n" )
 endfunction
 
 
