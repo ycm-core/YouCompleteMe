@@ -365,8 +365,6 @@ class YouCompleteMe( object ):
     if not self.IsServerReady():
       return
 
-    self._omnicomp.OnFileReadyToParse( None )
-
     extra_data = {}
     self._AddTagsFilesIfNeeded( extra_data )
     self._AddSyntaxDataIfNeeded( extra_data )
