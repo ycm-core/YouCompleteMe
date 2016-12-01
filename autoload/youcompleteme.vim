@@ -53,6 +53,11 @@ endfunction
 
 
 function! youcompleteme#Enable()
+  augroup youcompletemeStart
+    " Make sure startup autocmd only calls youcompleteme#Enable() once.
+    autocmd!
+  augroup END
+
   call s:SetUpBackwardsCompatibility()
 
   " This can be 0 if YCM libs are old or -1 if an exception occured while
