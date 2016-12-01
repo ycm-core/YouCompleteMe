@@ -96,8 +96,7 @@ let g:ycm_server_python_interpreter =
       \ get( g:, 'ycm_path_to_python_interpreter', '' ) )
 
 let g:ycm_show_diagnostics_ui =
-      \ get( g:, 'ycm_show_diagnostics_ui',
-      \ get( g:, 'ycm_register_as_syntastic_checker', 1 ) )
+      \ get( g:, 'ycm_show_diagnostics_ui', 1 )
 
 let g:ycm_enable_diagnostic_signs =
       \ get( g:, 'ycm_enable_diagnostic_signs',
