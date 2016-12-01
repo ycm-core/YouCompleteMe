@@ -124,6 +124,7 @@ Contents ~
   45. The |g:ycm_goto_buffer_command| option
   46. The |g:ycm_disable_for_files_larger_than_kb| option
   47. The |g:ycm_python_binary_path| option
+  48. The |g:ycm_start_autocmd| option
  11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
   2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
@@ -2655,6 +2656,20 @@ Default: "''"
 NOTE: the settings above will make YCM use the first 'python' executable found
 through the PATH.
 
+-------------------------------------------------------------------------------
+The *g:ycm_start_autocmd* option
+
+YCM attempts to minimize its impact on Vim startup time by deferring most of
+its initialization until the |VimEnter| |autocommand| fires. You can use this
+option to make initialization even lazier by switching to another autocommand,
+or list of autocommands. For example, to wait for the |CursorHold| or
+|CursorHoldI| autocommands (which fire after Vim has been idle for
+|'updatetime'|), you would use a configuration like the following.
+
+Default: VimEnter
+>
+  let g:ycm_start_autocmd = 'CursorHold,CursorHoldI'
+<
 ===============================================================================
                                                             *youcompleteme-faq*
 FAQ ~
