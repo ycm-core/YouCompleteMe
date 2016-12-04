@@ -41,7 +41,7 @@ BUFWINNR_REGEX = re.compile( '^bufwinnr\((?P<buffer_number>[0-9]+)\)$' )
 BWIPEOUT_REGEX = re.compile(
   '^(?:silent! )bwipeout!? (?P<buffer_number>[0-9]+)$' )
 GETBUFVAR_REGEX = re.compile(
-  '^getbufvar\((?P<buffer_number>[0-9]+), "&(?P<option>.+)"\)$' )
+  '^getbufvar\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -81,10 +81,12 @@ def _MockGetBufferWindowNumber( buffer_number ):
 def _MockGetBufferVariable( buffer_number, option ):
   for vim_buffer in VIM_MOCK.buffers:
     if vim_buffer.number == buffer_number:
-      if option == 'mod':
+      if option == '&mod':
         return vim_buffer.modified
-      if option == 'ft':
+      if option == '&ft':
         return vim_buffer.filetype
+      if option == 'changedtick':
+        return vim_buffer.changedtick
       return ''
   return ''
 
@@ -190,7 +192,8 @@ class VimBuffer( object ):
                       filetype = '',
                       modified = True,
                       window = None,
-                      omnifunc = '' ):
+                      omnifunc = '',
+                      changedtick = 1):
     self.name = os.path.realpath( name ) if name else ''
     self.number = number
     self.contents = contents
@@ -198,6 +201,7 @@ class VimBuffer( object ):
     self.modified = modified
     self.window = window
     self.omnifunc = omnifunc
+    self.changedtick = changedtick
 
 
   def __getitem__( self, index ):
@@ -216,6 +220,13 @@ class VimBuffer( object ):
   def GetLines( self ):
     """Returns the contents of the buffer as a list of unicode strings."""
     return [ ToUnicode( x ) for x in self.contents ]
+
+
+def EmulateCurrentBufferChange():
+  buffer_number = VIM_MOCK.current.buffer.number
+  for vim_buffer in VIM_MOCK.buffers:
+    if vim_buffer.number == buffer_number:
+      vim_buffer.changedtick += 1
 
 
 @contextlib.contextmanager
