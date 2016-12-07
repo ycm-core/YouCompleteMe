@@ -38,6 +38,7 @@ class CompletionRequest( BaseRequest ):
   def __init__( self, request_data ):
     super( CompletionRequest, self ).__init__()
     self.request_data = request_data
+    self._response_future = None
 
 
   def Start( self ):
@@ -47,7 +48,7 @@ class CompletionRequest( BaseRequest ):
 
 
   def Done( self ):
-    return self._response_future.done()
+    return bool( self._response_future ) and self._response_future.done()
 
 
   def RawResponse( self ):
