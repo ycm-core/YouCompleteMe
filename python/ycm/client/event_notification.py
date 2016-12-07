@@ -37,6 +37,7 @@ class EventNotification( BaseRequest ):
     self._event_name = event_name
     self._filepath = filepath
     self._extra_data = extra_data
+    self._response_future = None
     self._cached_response = None
 
 
@@ -51,7 +52,10 @@ class EventNotification( BaseRequest ):
 
 
   def Done( self ):
-    return self._response_future.done()
+    try:
+      return self._response_future.done()
+    except AttributeError:
+      return False
 
 
   def Response( self ):
