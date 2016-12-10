@@ -30,10 +30,12 @@ MockVimModule()
 
 import os
 import sys
-from hamcrest import assert_that, is_in, is_not, has_length, matches_regexp
+from hamcrest import ( assert_that, contains, empty, is_in, is_not, has_length,
+                       matches_regexp )
 from mock import call, MagicMock, patch
 
 from ycm.tests import YouCompleteMeInstance
+from ycmd.responses import ServerError
 
 
 @YouCompleteMeInstance()
@@ -234,3 +236,54 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_test( ycm, post_vim_message ):
       'ycmd_\d+_stderr_.+.log\n'
       'ycmd_\d+_stdout_.+.log' )
   )
+
+
+@YouCompleteMeInstance()
+def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test( ycm ):
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.base_request.JsonFromFuture',
+                return_value = [ 'SomeCommand', 'AnotherCommand' ] ):
+      assert_that(
+        ycm.GetDefinedSubcommands(),
+        contains(
+          'SomeCommand',
+          'AnotherCommand'
+        )
+      )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.client.base_request._logger', autospec = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test( ycm,
+                                                              post_vim_message,
+                                                              logger ):
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.base_request.JsonFromFuture',
+                side_effect = ServerError( 'Server error' ) ):
+      result = ycm.GetDefinedSubcommands()
+
+  logger.exception.assert_called_with( 'Error while handling server response' )
+  post_vim_message.assert_has_exact_calls( [
+    call( 'Server error', truncate = False )
+  ] )
+  assert_that( result, empty() )
+
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
+  ycm, post_vim_message ):
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.base_request.JsonFromFuture',
+                return_value = { 'message': 'some_detailed_diagnostic' } ):
+      ycm.ShowDetailedDiagnostic(),
+
+  post_vim_message.assert_has_exact_calls( [
+    call( 'some_detailed_diagnostic', warning = False )
+  ] )
