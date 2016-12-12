@@ -198,6 +198,22 @@ def JsonFromFuture( future ):
 
 @contextlib.contextmanager
 def HandleServerException( display = True, truncate = False ):
+  """Catch any exception raised through server communication. If it is raised
+  because of a unknown .ycm_extra_conf.py file, load the file or ignore it after
+  asking the user. Otherwise, log the exception and display its message to the
+  user on the Vim status line. Unset the |display| parameter to hide the message
+  from the user. Set the |truncate| parameter to avoid hit-enter prompts from
+  this message.
+
+  The GetDataFromHandler, PostDataToHandler, and JsonFromFuture functions should
+  always be wrapped by this function to avoid Python exceptions bubbling up to
+  the user.
+
+  Example usage:
+
+   with HandleServerException():
+     response = BaseRequest.PostDataToHandler( ... )
+  """
   try:
     yield
   except UnknownExtraConf as e:
