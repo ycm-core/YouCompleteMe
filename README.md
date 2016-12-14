@@ -2882,6 +2882,19 @@ executable first in your PATH when the virtual environment is active then if
 you set `g:ycm_python_binary_path` to just `'python'` it will be found as the
 first Python and used to run [JediHTTP][].
 
+### I want to defer loading of YouCompleteMe until after Vim finishes booting
+
+In recent versions of Vim, you can install YCM in a folder under
+`~/.vim/pack/*/opt` and then load it once the user is idle via an autocommand:
+
+```viml
+augroup load_ycm
+  autocmd!
+  autocmd CursorHold, CursorHoldI * :packadd YouCompleteMe
+                                \ | autocmd! load_ycm
+augroup END
+```
+
 Contributor Code of Conduct
 ---------------------------
 
