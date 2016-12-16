@@ -88,7 +88,6 @@ function! youcompleteme#Enable()
     " We also need to trigger buf init code on the FileType event because when
     " the user does :enew and then :set ft=something, we need to run buf init
     " code again.
-    autocmd BufReadPre * call s:OnBufferReadPre( expand( '<afile>:p' ) )
     autocmd BufRead,FileType * call s:OnBufferRead()
     autocmd BufEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
@@ -112,10 +111,9 @@ function! youcompleteme#Enable()
     augroup END
   endif
 
-  " Calling these once solves the problem of BufReadPre/BufRead/BufEnter not
-  " triggering for the first loaded file. This should be the last commands
-  " executed in this function!
-  call s:OnBufferReadPre( expand( '<afile>:p' ) )
+  " Calling this once solves the problem of BufRead/BufEnter not triggering for
+  " the first loaded file. This should be the last command executed in this
+  " function!
   call s:OnBufferRead()
 endfunction
 
@@ -432,17 +430,7 @@ function! s:SetUpYcmChangedTick()
 endfunction
 
 
-function! s:OnVimLeave()
-  exec s:python_command "ycm_state.OnVimLeave()"
-endfunction
-
-
-function! s:OnCompleteDone()
-  exec s:python_command "ycm_state.OnCompleteDone()"
-endfunction
-
-
-function! s:OnBufferReadPre(filename)
+function! s:DisableOnLargeFile( filename )
   let threshold = g:ycm_disable_for_files_larger_than_kb * 1024
 
   if threshold > 0 && getfsize( a:filename ) > threshold
@@ -455,11 +443,23 @@ function! s:OnBufferReadPre(filename)
 endfunction
 
 
+function! s:OnVimLeave()
+  exec s:python_command "ycm_state.OnVimLeave()"
+endfunction
+
+
+function! s:OnCompleteDone()
+  exec s:python_command "ycm_state.OnCompleteDone()"
+endfunction
+
+
 function! s:OnBufferRead()
   " We need to do this even when we are not allowed to complete in the current
   " buffer because we might be allowed to complete in the future! The canonical
   " example is creating a new buffer with :enew and then setting a filetype.
   call s:SetUpYcmChangedTick()
+
+  call s:DisableOnLargeFile( expand( '<afile>:p' ) )
 
   if !s:AllowedToCompleteInCurrentBuffer()
     return
