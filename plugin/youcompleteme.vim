@@ -128,14 +128,15 @@ let g:ycm_goto_buffer_command =
 let g:ycm_disable_for_files_larger_than_kb =
       \ get( g:, 'ycm_disable_for_files_larger_than_kb', 1000 )
 
-" On-demand loading. Let's use the autoload folder and not slow down vim's
-" startup procedure.
-if has( 'vim_starting' ) " loading at startup
+if has( 'vim_starting' ) && has ( 'gui' ) " loading at startup, in gui
+  " We defer loading until after VimEnter to allow the gui to fork (see
+  " `:h gui-fork`) and avoid a deadlock situation, as explained here:
+  " https://github.com/Valloric/YouCompleteMe/pull/2473#issuecomment-267716136
   augroup youcompletemeStart
     autocmd!
     autocmd VimEnter * call youcompleteme#Enable()
   augroup END
-else " manual loading with :packadd
+else " manual loading with :packadd, or not starting the gui
   call youcompleteme#Enable()
 endif
 
