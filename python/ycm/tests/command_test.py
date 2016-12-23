@@ -23,22 +23,22 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
-from ycm.client.base_request import BaseRequest, HandleServerException
+from ycm.tests.test_utils import ( MockVimModule, MockVimBuffers, VimBuffer )
+MockVimModule()
 
-TIMEOUT_SECONDS = 0.1
+from hamcrest import assert_that, equal_to
+from mock import patch
 
-
-class ShutdownRequest( BaseRequest ):
-  def __init__( self ):
-    super( BaseRequest, self ).__init__()
-
-
-  def Start( self ):
-    with HandleServerException( display = False ):
-      self.PostDataToHandler( {}, 'shutdown', TIMEOUT_SECONDS )
+from ycm.tests import YouCompleteMeInstance
 
 
-def SendShutdownRequest():
-  request = ShutdownRequest()
-  # This is a blocking call.
-  request.Start()
+@YouCompleteMeInstance()
+def SendCommandRequest_test( ycm ):
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.base_request.JsonFromFuture',
+                return_value = 'Some response' ):
+      assert_that(
+        ycm.SendCommandRequest( 'GoTo', 'python' ),
+        equal_to( 'Some response' )
+      )
