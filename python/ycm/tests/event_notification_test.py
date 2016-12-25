@@ -280,11 +280,18 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
   # Tests Vim sign placement and error/warning count python API
   # when one error is returned.
   def DiagnosticResponse( *args ):
-    start = Location( 1, 2, 'TEST_BUFFER' )
-    end = Location( 1, 4, 'TEST_BUFFER' )
-    extent = Range( start, end )
-    diagnostic = Diagnostic( [], start, extent, 'expected ;', 'ERROR' )
-    return [ BuildDiagnosticData( diagnostic ) ]
+    warn_start = Location( 1, 2, 'TEST_BUFFER' )
+    warn_end = Location( 1, 5, 'TEST_BUFFER' )
+    warn_extent = Range( warn_start, warn_end )
+    warn_diag = Diagnostic( [], warn_start, warn_extent, '', 'WARNING' )
+
+    err_start = Location( 1, 10, 'TEST_BUFFER' )
+    err_end = Location( 1, 12, 'TEST_BUFFER' )
+    err_extent = Range( err_start, err_end )
+    err_diag = Diagnostic( [], err_start, err_extent, 'expected ;', 'ERROR' )
+
+    return [ BuildDiagnosticData( warn_diag ),
+             BuildDiagnosticData( err_diag ) ]
 
   with MockEventNotification( DiagnosticResponse ):
     ycm.OnFileReadyToParse()
@@ -294,7 +301,7 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
       PlaceSign_Call( 1, 1, 1, True )
     ] )
     eq_( ycm.GetErrorCount(), 1 )
-    eq_( ycm.GetWarningCount(), 0 )
+    eq_( ycm.GetWarningCount(), 1 )
 
     # Consequent calls to HandleFileParseResponse shouldn't mess with
     # existing diagnostics, when there is no new parse request.
@@ -303,7 +310,7 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
     ycm.HandleFileParseResponse()
     vim_command.assert_not_called()
     eq_( ycm.GetErrorCount(), 1 )
-    eq_( ycm.GetWarningCount(), 0 )
+    eq_( ycm.GetWarningCount(), 1 )
 
 
 @patch( 'vim.command' )
@@ -312,22 +319,30 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm, vim_command ):
   # when one warning is returned.
   # Should be called after _Check_FileReadyToParse_Diagnostic_Error
   def DiagnosticResponse( *args ):
-    start = Location( 2, 2, 'TEST_BUFFER' )
-    end = Location( 2, 4, 'TEST_BUFFER' )
-    extent = Range( start, end )
-    diagnostic = Diagnostic( [], start, extent, 'cast', 'WARNING' )
-    return [ BuildDiagnosticData( diagnostic ) ]
+    warn1_start = Location( 1, 2, 'TEST_BUFFER' )
+    warn1_end = Location( 1, 5, 'TEST_BUFFER' )
+    warn1_extent = Range( warn1_start, warn1_end )
+    warn1_diag = Diagnostic( [], warn1_start, warn1_extent, '', 'WARNING' )
+
+    warn2_start = Location( 2, 2, 'TEST_BUFFER' )
+    warn2_end = Location( 2, 4, 'TEST_BUFFER' )
+    warn2_extent = Range( warn2_start, warn2_end )
+    warn2_diag = Diagnostic( [], warn2_start, warn2_extent, 'cast', 'WARNING' )
+
+    return [ BuildDiagnosticData( warn1_diag ),
+             BuildDiagnosticData( warn2_diag ) ]
 
   with MockEventNotification( DiagnosticResponse ):
     ycm.OnFileReadyToParse()
     ok_( ycm.FileParseRequestReady() )
     ycm.HandleFileParseResponse()
     vim_command.assert_has_calls( [
-      PlaceSign_Call( 2, 2, 1, False ),
+      PlaceSign_Call( 2, 1, 1, False ),
+      PlaceSign_Call( 3, 2, 1, False ),
       UnplaceSign_Call( 1, 1 )
     ] )
     eq_( ycm.GetErrorCount(), 0 )
-    eq_( ycm.GetWarningCount(), 1 )
+    eq_( ycm.GetWarningCount(), 2 )
 
     # Consequent calls to HandleFileParseResponse shouldn't mess with
     # existing diagnostics, when there is no new parse request.
@@ -336,7 +351,7 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm, vim_command ):
     ycm.HandleFileParseResponse()
     vim_command.assert_not_called()
     eq_( ycm.GetErrorCount(), 0 )
-    eq_( ycm.GetWarningCount(), 1 )
+    eq_( ycm.GetWarningCount(), 2 )
 
 
 @patch( 'vim.command' )
@@ -348,7 +363,8 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm, vim_command ):
     ycm.OnFileReadyToParse()
     ycm.HandleFileParseResponse()
     vim_command.assert_has_calls( [
-      UnplaceSign_Call( 2, 1 )
+      UnplaceSign_Call( 2, 1 ),
+      UnplaceSign_Call( 3, 1 )
     ] )
     eq_( ycm.GetErrorCount(), 0 )
     eq_( ycm.GetWarningCount(), 0 )

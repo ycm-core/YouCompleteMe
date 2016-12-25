@@ -25,16 +25,17 @@ from builtins import *  # noqa
 
 from ycm import vimsupport
 from ycm.client.event_notification import EventNotification
+from ycm.diagnostic_interface import DiagnosticInterface
 
 
 class Buffer( object ):
 
-  def __init__( self, bufnr ):
+  def __init__( self, bufnr, user_options ):
     self.number = bufnr
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
-    self._diagnostics = []
+    self._diag_interface = DiagnosticInterface( bufnr, user_options )
 
 
   def FileParseRequestReady( self, block = False ):
@@ -52,12 +53,13 @@ class Buffer( object ):
     return self._parse_tick < self._ChangedTick()
 
 
-  def Diagnostics( self ):
-    return self._diagnostics
-
-
   def UpdateDiagnostics( self ):
-    self._diagnostics = self._parse_request.Response()
+    diagnostics = self._parse_request.Response()
+    self._diag_interface.UpdateWithNewDiagnostics( diagnostics )
+
+
+  def PopulateLocationList( self ):
+    return self._diag_interface.PopulateLocationList()
 
 
   def GetResponse( self ):
@@ -72,12 +74,28 @@ class Buffer( object ):
     self._handled_tick = self._parse_tick
 
 
+  def OnCursorMoved( self ):
+    self._diag_interface.OnCursorMoved()
+
+
+  def GetErrorCount( self ):
+    return self._diag_interface.GetErrorCount()
+
+
+  def GetWarningCount( self ):
+    return self._diag_interface.GetWarningCount()
+
+
   def _ChangedTick( self ):
     return vimsupport.GetBufferChangeTick(self.number)
 
 
 class BufferDict( dict ):
 
+  def __init__( self, user_options ):
+    self._user_options = user_options
+
+
   def __missing__( self, key ):
-    value = self[ key ] = Buffer( key )
+    value = self[ key ] = Buffer( key, self._user_options )
     return value
