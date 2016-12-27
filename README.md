@@ -603,6 +603,10 @@ process.
     NOTE: This _only_ works with a _downloaded_ LLVM binary package, not a
     custom-built LLVM! See docs below for `EXTERNAL_LIBCLANG_PATH` when using a
     custom LLVM build.
+    
+    For those who want to use the system version of libclang, you would pass
+    `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
+    `-DPATH_TO_LLVM_ROOT=...` flag.
 
     With that in mind, run the following command in the `ycm_build` directory:
 
@@ -617,10 +621,6 @@ process.
 
     The `--config Release` part is specific to Windows and will be ignored on a
     Unix OS.
-
-    For those who want to use the system version of libclang, you would pass
-    `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
-    `-DPATH_TO_LLVM_ROOT=...` flag.
 
     NOTE: We **STRONGLY recommend AGAINST use** of the system libclang instead
     of the upstream compiled binaries. Random things may break. Save yourself
