@@ -431,13 +431,16 @@ endfunction
 
 
 function! s:DisableOnLargeFile( filename )
+  if exists( 'b:ycm_largefile' )
+    return
+  endif
+
   let threshold = g:ycm_disable_for_files_larger_than_kb * 1024
 
   if threshold > 0 && getfsize( a:filename ) > threshold
-    echohl WarningMsg |
-          \ echomsg "YouCompleteMe is disabled in this buffer; " .
-          \ "the file exceeded the max size (see YCM options)." |
-          \ echohl None
+    exec s:python_command "vimsupport.PostVimMessage("
+      \ "'YouCompleteMe is disabled in this buffer;"
+      \ "the file exceeded the max size (see YCM options).')"
     let b:ycm_largefile = 1
   endif
 endfunction
