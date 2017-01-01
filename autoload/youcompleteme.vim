@@ -333,8 +333,8 @@ function! s:AllowedToCompleteInBuffer( buffer )
   let buffer_filetype = getbufvar( a:buffer, '&filetype' )
 
   if empty( buffer_filetype ) ||
-   \ getbufvar( a:buffer, '&buftype' ) ==# 'nofile' ||
-   \ buffer_filetype ==# 'qf'
+        \ getbufvar( a:buffer, '&buftype' ) ==# 'nofile' ||
+        \ buffer_filetype ==# 'qf'
     return 0
   endif
 
@@ -373,9 +373,9 @@ function! s:SetUpCommands()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmDebugInfo call s:DebugInfo()
   command! -nargs=* -complete=custom,youcompleteme#LogsComplete
-    \ YcmToggleLogs call s:ToggleLogs(<f-args>)
+        \ YcmToggleLogs call s:ToggleLogs(<f-args>)
   command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
-    \ YcmCompleter call s:CompleterCommand(<f-args>)
+        \ YcmCompleter call s:CompleterCommand(<f-args>)
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
   command! YcmDiags call s:ShowDiagnostics()
 endfunction
@@ -438,9 +438,9 @@ function! s:DisableOnLargeFile( filename )
   let threshold = g:ycm_disable_for_files_larger_than_kb * 1024
 
   if threshold > 0 && getfsize( a:filename ) > threshold
-    exec s:python_command "vimsupport.PostVimMessage("
-      \ "'YouCompleteMe is disabled in this buffer;"
-      \ "the file exceeded the max size (see YCM options).')"
+    exec s:python_command "vimsupport.PostVimMessage(" .
+          \ "'YouCompleteMe is disabled in this buffer; " .
+          \ "the file exceeded the max size (see YCM options).' )"
     let b:ycm_largefile = 1
   endif
 endfunction
@@ -498,7 +498,7 @@ function! s:OnBufferUnload()
   endif
 
   let deleted_buffer_file = expand( '<afile>:p' )
-  exec s:python_command "ycm_state.OnBufferUnload("
+  exec s:python_command "ycm_state.OnBufferUnload(" .
         \ "vim.eval( 'deleted_buffer_file' ) )"
 endfunction
 
@@ -757,7 +757,7 @@ function! youcompleteme#OmniComplete( findstart, base )
       return -2
     endif
     let s:omnifunc_mode = 1
-    exec s:python_command "ycm_state.CreateCompletionRequest("
+    exec s:python_command "ycm_state.CreateCompletionRequest(" .
           \ "force_semantic = True )"
     return s:Pyeval( 'base.CompletionStartColumn()' )
   else
@@ -813,15 +813,15 @@ function! s:CompleterCommand(...)
     let arguments = arguments[1:]
   endif
 
-  exec s:python_command "ycm_state.SendCommandRequest("
-        \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) ) "
+  exec s:python_command "ycm_state.SendCommandRequest(" .
+        \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) )"
 endfunction
 
 
 function! youcompleteme#OpenGoToList()
-  exec s:python_command "vimsupport.PostVimMessage("
-    \ "'WARNING: youcompleteme#OpenGoToList function is deprecated."
-    \ "Do NOT use it.')"
+  exec s:python_command "vimsupport.PostVimMessage(" .
+        \ "'WARNING: youcompleteme#OpenGoToList function is deprecated. " .
+        \ "Do NOT use it.' )"
   exec s:python_command "vimsupport.OpenQuickFixList( True, True )"
 endfunction
 
@@ -838,8 +838,8 @@ endfunction
 
 function! s:ForceCompile()
   if !s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
-    echom "Native filetype completion not supported for current file, "
-          \ . "cannot force recompilation."
+    echom "Native filetype completion not supported for current file, " .
+          \ "cannot force recompilation."
     return 0
   endif
 
