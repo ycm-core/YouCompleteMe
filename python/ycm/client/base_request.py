@@ -215,12 +215,13 @@ def HandleServerException( display = True, truncate = False ):
      response = BaseRequest.PostDataToHandler( ... )
   """
   try:
-    yield
-  except UnknownExtraConf as e:
-    if vimsupport.Confirm( str( e ) ):
-      _LoadExtraConfFile( e.extra_conf_file )
-    else:
-      _IgnoreExtraConfFile( e.extra_conf_file )
+    try:
+      yield
+    except UnknownExtraConf as e:
+      if vimsupport.Confirm( str( e ) ):
+        _LoadExtraConfFile( e.extra_conf_file )
+      else:
+        _IgnoreExtraConfFile( e.extra_conf_file )
   except Exception as e:
     _logger.exception( 'Error while handling server response' )
     if display:
