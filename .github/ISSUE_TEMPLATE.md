@@ -17,7 +17,9 @@ the brackets) _before_ filing your issue:**
 - [ ] If filing a bug report, I have included which OS (including specific OS
   version) I am using.
 - [ ] If filing a bug report, I have included a minimal test case that reproduces
-  my issue.
+  my issue, including what I expected to happen and what actually happened.
+- [ ] If filing a installation failure report, I have included the entire output
+  of `install.py` (or `cmake`/`make`/`ninja`) including its invocation
 - [ ] **I understand this is an open-source project staffed by volunteers and
   that any help I receive is a selfless, heartfelt _gift_ of their free time. I
   know I am not entitled to anything and will be polite and courteous.**
@@ -29,11 +31,52 @@ quickly and that neither your nor our time is needlessly wasted.
 
 # Issue Details
 
-[If filing a bug report, please include **a list of steps** that describe how to
-reproduce the bug you are experiencing. Also include test code if relevant.]
+> Provide a clear description of the problem, including the following key
+> questions
+
+* What did you do?
+
+> include steps to reproduce here
+
+> include description of a minimal test case, including any actual code required
+> to reproduce the issue
+
+* What did you expect to happen?
+
+> include description of the expected behaviour
+
+* What actually happened?
+
+> include description of the observed behaviour, including actual output,
+> screenshots, etc.
+
+# Diagnostic data
+
+## Output of `vim --version`
+
+> place the output here
+
+## Output of `YcmDebugInfo`
+
+> place the output here
+
+## Contents of YCM, ycmd and completion engine logfiles
+
+> include links here to [gist][] containing the entire logfiles for ycm, ycmd
+> and any completer logfiles listed by `:YcmToggleLogs`
+
+## OS version, distribution, etc.
+
+> Include system information here
+
+## Output of build/install commands
+
+> Include link to a [gist][] containing the invocation and entire output of
+> `install.py` if reporting an installation issue.
 
 [cont]: https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md
 [code]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
 [readme]: https://github.com/Valloric/YouCompleteMe/blob/master/README.md
 [faq]: https://github.com/Valloric/YouCompleteMe/blob/master/README.md#faq
 [search]: https://www.google.com/search?q=site%3Ahttps%3A%2F%2Fgithub.com%2FValloric%2FYouCompleteMe%2Fissues%20python%20mac
+[gist]: https://gist.github.com/
