@@ -118,6 +118,9 @@ def IsPythonVersionCorrect( path ):
     return False
 
   command = [ path,
+              # Disable site customize. Faster, and less likely to encounter
+              # issues with disconnected mounts (nfs, fuse, etc.)
+              '-S',
               '-c',
               "import sys;"
               "major, minor = sys.version_info[ :2 ];"
