@@ -26,7 +26,7 @@ from builtins import *  # noqa
 from copy import deepcopy
 from hamcrest import assert_that, contains_string, equal_to
 
-from ycm.client.debug_info_request import _FormatDebugInfoResponse
+from ycm.client.debug_info_request import FormatDebugInfoResponse
 
 
 GENERIC_RESPONSE = {
@@ -76,7 +76,7 @@ GENERIC_RESPONSE = {
 
 def FormatDebugInfoResponse_NoResponse_test():
   assert_that(
-    _FormatDebugInfoResponse( None ),
+    FormatDebugInfoResponse( None ),
     equal_to( 'Server errored, no debug info from server\n' )
   )
 
@@ -88,7 +88,7 @@ def FormatDebugInfoResponse_NoExtraConf_test():
     'path': None
   } )
   assert_that(
-    _FormatDebugInfoResponse( response ),
+    FormatDebugInfoResponse( response ),
     contains_string(
       'No extra configuration file found\n'
     )
@@ -102,7 +102,7 @@ def FormatDebugInfoResponse_ExtraConfFoundButNotLoaded_test():
     'path': '/path/to/extra/conf'
   } )
   assert_that(
-    _FormatDebugInfoResponse( response ),
+    FormatDebugInfoResponse( response ),
     contains_string(
       'Extra configuration file found but not loaded\n'
       'Extra configuration path: /path/to/extra/conf\n'
@@ -117,7 +117,7 @@ def FormatDebugInfoResponse_ExtraConfFoundAndLoaded_test():
     'path': '/path/to/extra/conf'
   } )
   assert_that(
-    _FormatDebugInfoResponse( response ),
+    FormatDebugInfoResponse( response ),
     contains_string(
       'Extra configuration file found and loaded\n'
       'Extra configuration path: /path/to/extra/conf\n'
@@ -128,7 +128,7 @@ def FormatDebugInfoResponse_ExtraConfFoundAndLoaded_test():
 def FormatDebugInfoResponse_Completer_ServerRunningWithHost_test():
   response = deepcopy( GENERIC_RESPONSE )
   assert_that(
-    _FormatDebugInfoResponse( response ),
+    FormatDebugInfoResponse( response ),
     contains_string(
       'Completer name completer debug information:\n'
       '  Server name running at: http://127.0.0.1:1234\n'
@@ -150,7 +150,7 @@ def FormatDebugInfoResponse_Completer_ServerRunningWithoutHost_test():
     'port': None
   } )
   assert_that(
-    _FormatDebugInfoResponse( response ),
+    FormatDebugInfoResponse( response ),
     contains_string(
       'Completer name completer debug information:\n'
       '  Server name running\n'
@@ -172,7 +172,7 @@ def FormatDebugInfoResponse_Completer_ServerNotRunningWithNoLogfiles_test():
     'logfiles': []
   } )
   assert_that(
-    _FormatDebugInfoResponse( response ),
+    FormatDebugInfoResponse( response ),
     contains_string(
       'Completer name completer debug information:\n'
       '  Server name not running\n'

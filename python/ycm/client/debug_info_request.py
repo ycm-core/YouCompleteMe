@@ -40,10 +40,10 @@ class DebugInfoRequest( BaseRequest ):
 
 
   def Response( self ):
-    return _FormatDebugInfoResponse( self._response )
+    return self._response
 
 
-def _FormatDebugInfoResponse( response ):
+def FormatDebugInfoResponse( response ):
   if not response:
     return 'Server errored, no debug info from server\n'
   message = _FormatYcmdDebugInfo( response )
