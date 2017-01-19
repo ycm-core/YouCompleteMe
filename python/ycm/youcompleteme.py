@@ -48,7 +48,8 @@ from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import ( CompletionRequest,
                                             ConvertCompletionDataToVimData )
-from ycm.client.debug_info_request import SendDebugInfoRequest
+from ycm.client.debug_info_request import ( SendDebugInfoRequest,
+                                            FormatDebugInfoResponse )
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import ( SendEventNotificationAsync,
                                             EventNotification )
@@ -648,7 +649,7 @@ class YouCompleteMe( object ):
     if self._client_logfile:
       debug_info += 'Client logfile: {0}\n'.format( self._client_logfile )
     if self.IsServerAlive():
-      debug_info += SendDebugInfoRequest()
+      debug_info += FormatDebugInfoResponse( SendDebugInfoRequest() )
     else:
       debug_info += 'Server crashed, no debug info from server\n'
     debug_info += (
@@ -667,6 +668,14 @@ class YouCompleteMe( object ):
     logfiles_list = [ self._client_logfile,
                       self._server_stdout,
                       self._server_stderr ]
+
+    if self.IsServerAlive():
+      debug_info = SendDebugInfoRequest()
+      completer = debug_info[ 'completer' ]
+      if completer:
+        for server in completer[ 'servers' ]:
+          logfiles_list.extend( server[ 'logfiles' ] )
+
     logfiles = {}
     for logfile in logfiles_list:
       logfiles[ os.path.basename( logfile ) ] = logfile
