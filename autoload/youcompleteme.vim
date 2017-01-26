@@ -715,11 +715,6 @@ function! s:InvokeCompletion()
 endfunction
 
 
-function! s:GetCompletions()
-  return s:Pyeval( 'ycm_state.GetCompletions()' )
-endfunction
-
-
 " This is our main entry point. This is what vim calls to get completions.
 function! youcompleteme#Complete( findstart, base )
   " After the user types one character after the call to the omnifunc, the
@@ -746,7 +741,7 @@ function! youcompleteme#Complete( findstart, base )
     exec s:python_command "ycm_state.CreateCompletionRequest()"
     return s:Pyeval( 'base.CompletionStartColumn()' )
   else
-    return s:GetCompletions()
+    return s:Pyeval( 'ycm_state.GetCompletions()' )
   endif
 endfunction
 
@@ -761,7 +756,7 @@ function! youcompleteme#OmniComplete( findstart, base )
           \ "force_semantic = True )"
     return s:Pyeval( 'base.CompletionStartColumn()' )
   else
-    return s:GetCompletions()
+    return s:Pyeval( 'ycm_state.GetCompletions()' )
   endif
 endfunction
 
