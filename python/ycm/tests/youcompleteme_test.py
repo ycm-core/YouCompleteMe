@@ -171,7 +171,7 @@ def YouCompleteMe_DebugInfo_ServerNotRunning_test( ycm ):
       ycm.DebugInfo(),
       matches_regexp(
         'Client logfile: .+\n'
-        'Server crashed, no debug info from server\n'
+        'Server errored, no debug info from server\n'
         'Server running at: .+\n'
         'Server process ID: \d+\n'
         'Server logfiles:\n'

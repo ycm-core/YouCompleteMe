@@ -735,9 +735,6 @@ function! youcompleteme#Complete( findstart, base )
       return -2
     endif
 
-    if !s:Pyeval( 'ycm_state.IsServerAlive()' )
-      return -2
-    endif
     exec s:python_command "ycm_state.CreateCompletionRequest()"
     return s:Pyeval( 'base.CompletionStartColumn()' )
   else
@@ -748,9 +745,6 @@ endfunction
 
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
-    if !s:Pyeval( 'ycm_state.IsServerAlive()' )
-      return -2
-    endif
     let s:omnifunc_mode = 1
     exec s:python_command "ycm_state.CreateCompletionRequest(" .
           \ "force_semantic = True )"
