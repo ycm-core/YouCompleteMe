@@ -223,7 +223,7 @@ def HandleServerException( display = True, truncate = False ):
         _LoadExtraConfFile( e.extra_conf_file )
       else:
         _IgnoreExtraConfFile( e.extra_conf_file )
-  except requests.exceptions.ConnectTimeout:
+  except requests.exceptions.ConnectionError:
     # We don't display this exception to the user since it is likely to happen
     # for each subsequent request (typically if the server crashed) and we
     # don't want to spam the user with it.
