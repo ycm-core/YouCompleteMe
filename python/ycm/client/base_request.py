@@ -30,7 +30,6 @@ import urllib.parse
 import json
 from future.utils import native
 from base64 import b64decode, b64encode
-from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
 from ycm import vimsupport
@@ -102,43 +101,20 @@ class BaseRequest( object ):
                            handler,
                            method,
                            timeout = _READ_TIMEOUT_SEC ):
-    def SendRequest( data, handler, method, timeout ):
-      request_uri = _BuildUri( handler )
-      if method == 'POST':
-        sent_data = _ToUtf8Json( data )
-        return BaseRequest.session.post(
-            request_uri,
-            data = sent_data,
-            headers = BaseRequest._ExtraHeaders( method,
-                                                 request_uri,
-                                                 sent_data ),
-            timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
-      if method == 'GET':
-        return BaseRequest.session.get(
-            request_uri,
-            headers = BaseRequest._ExtraHeaders( method, request_uri ),
-            timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
-
-    @retries( 5, delay = 0.5, backoff = 1.5 )
-    def DelayedSendRequest( data, handler, method ):
-      request_uri = _BuildUri( handler )
-      if method == 'POST':
-        sent_data = _ToUtf8Json( data )
-        return requests.post(
-            request_uri,
-            data = sent_data,
-            headers = BaseRequest._ExtraHeaders( method,
-                                                 request_uri,
-                                                 sent_data ) )
-      if method == 'GET':
-        return requests.get(
-            request_uri,
-            headers = BaseRequest._ExtraHeaders( method, request_uri ) )
-
-    if not _CheckServerIsHealthyWithCache():
-      return _EXECUTOR.submit( DelayedSendRequest, data, handler, method )
-
-    return SendRequest( data, handler, method, timeout )
+    request_uri = _BuildUri( handler )
+    if method == 'POST':
+      sent_data = _ToUtf8Json( data )
+      return BaseRequest.session.post(
+          request_uri,
+          data = sent_data,
+          headers = BaseRequest._ExtraHeaders( method,
+                                               request_uri,
+                                               sent_data ),
+          timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
+    return BaseRequest.session.get(
+        request_uri,
+        headers = BaseRequest._ExtraHeaders( method, request_uri ),
+        timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
 
 
   @staticmethod
@@ -269,31 +245,6 @@ def _ValidateResponseObject( response ):
 def _BuildUri( handler ):
   return native( ToBytes( urllib.parse.urljoin( BaseRequest.server_location,
                                                 handler ) ) )
-
-
-SERVER_HEALTHY = False
-
-
-def _CheckServerIsHealthyWithCache():
-  global SERVER_HEALTHY
-
-  def _ServerIsHealthy():
-    request_uri = _BuildUri( 'healthy' )
-    response = requests.get( request_uri,
-                             headers = BaseRequest._ExtraHeaders(
-                                 'GET', request_uri, bytes( b'' ) ) )
-    _ValidateResponseObject( response )
-    response.raise_for_status()
-    return response.json()
-
-  if SERVER_HEALTHY:
-    return True
-
-  try:
-    SERVER_HEALTHY = _ServerIsHealthy()
-    return SERVER_HEALTHY
-  except:
-    return False
 
 
 def MakeServerException( data ):
