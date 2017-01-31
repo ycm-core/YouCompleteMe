@@ -1374,7 +1374,7 @@ def OpenFilename_test( vim_current, vim_command ):
     call( '12split {0}'.format( __file__ ) ),
     call( "exec "
           "'au BufEnter <buffer> :silent! checktime {0}'".format( __file__ ) ),
-    call( 'silent! normal G zz' ),
+    call( 'silent! normal! Gzz' ),
     call( 'silent! wincmd p' )
   ] )
 
