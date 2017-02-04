@@ -27,8 +27,6 @@ from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
 
-TIMEOUT_SECONDS = 0.5
-
 
 class CompletionRequest( BaseRequest ):
   def __init__( self, request_data ):
@@ -39,8 +37,7 @@ class CompletionRequest( BaseRequest ):
 
   def Start( self ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
-                                                         'completions',
-                                                         TIMEOUT_SECONDS )
+                                                         'completions' )
 
 
   def Done( self ):
@@ -49,7 +46,7 @@ class CompletionRequest( BaseRequest ):
 
   def RawResponse( self ):
     if not self._response_future:
-      return []
+      return { 'completions': [], 'completion_start_column': -1 }
     with HandleServerException( truncate = True ):
       response = JsonFromFuture( self._response_future )
 
@@ -58,12 +55,15 @@ class CompletionRequest( BaseRequest ):
         with HandleServerException( truncate = True ):
           raise MakeServerException( e )
 
-      return response[ 'completions' ]
-    return []
+      return response
+    return { 'completions': [], 'completion_start_column': -1 }
 
 
   def Response( self ):
-    return _ConvertCompletionDatasToVimDatas( self.RawResponse() )
+    response = self.RawResponse()
+    response[ 'completions' ] = _ConvertCompletionDatasToVimDatas(
+        response[ 'completions' ] )
+    return response
 
 
 def ConvertCompletionDataToVimData( completion_data ):
