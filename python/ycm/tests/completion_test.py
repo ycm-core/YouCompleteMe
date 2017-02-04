@@ -36,21 +36,21 @@ from ycmd.responses import ServerError
 
 
 @YouCompleteMeInstance()
-def CreateCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
+def SendCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
   unicode_dir = PathToTestFile( 'uni¢𐍈d€' )
   current_buffer = VimBuffer( PathToTestFile( 'uni¢𐍈d€', 'current_buffer' ) )
 
   with CurrentWorkingDirectory( unicode_dir ):
     with MockVimBuffers( [ current_buffer ], current_buffer ):
-      ycm.CreateCompletionRequest(),
+      ycm.SendCompletionRequest(),
 
-    results = ycm.GetCompletions()
+    response = ycm.GetCompletionResponse()
 
   assert_that(
-    results,
+    response,
     has_entries( {
-      'words': empty(),
-      'refresh': 'always'
+      'completions': empty(),
+      'completion_start_column': 1
     } )
   )
 
@@ -58,12 +58,12 @@ def CreateCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
 @YouCompleteMeInstance()
 @patch( 'ycm.client.base_request._logger', autospec = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def CreateCompletionRequest_ResponseContainingError_test( ycm,
-                                                          post_vim_message,
-                                                          logger ):
+def SendCompletionRequest_ResponseContainingError_test( ycm,
+                                                        post_vim_message,
+                                                        logger ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
-    ycm.CreateCompletionRequest(),
+    ycm.SendCompletionRequest()
 
   response = {
     'completions': [ {
@@ -88,16 +88,16 @@ def CreateCompletionRequest_ResponseContainingError_test( ycm,
 
   with patch( 'ycm.client.completion_request.JsonFromFuture',
               return_value = response ):
-    results = ycm.GetCompletions()
+    response = ycm.GetCompletionResponse()
 
   logger.exception.assert_called_with( 'Error while handling server response' )
   post_vim_message.assert_has_exact_calls( [
     call( 'Exception: message', truncate = True )
   ] )
   assert_that(
-    results,
+    response,
     has_entries( {
-      'words': contains( has_entries( {
+      'completions': contains( has_entries( {
         'word': 'insertion_text',
         'abbr': 'menu_text',
         'menu': 'extra_menu_info',
@@ -106,7 +106,7 @@ def CreateCompletionRequest_ResponseContainingError_test( ycm,
         'dup': 1,
         'empty': 1
       } ) ),
-      'refresh': 'always'
+      'completion_start_column': 3
     } )
   )
 
@@ -114,25 +114,25 @@ def CreateCompletionRequest_ResponseContainingError_test( ycm,
 @YouCompleteMeInstance()
 @patch( 'ycm.client.base_request._logger', autospec = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def CreateCompletionRequest_ErrorFromServer_test( ycm,
-                                                  post_vim_message,
-                                                  logger ):
+def SendCompletionRequest_ErrorFromServer_test( ycm,
+                                                post_vim_message,
+                                                logger ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
-    ycm.CreateCompletionRequest(),
+    ycm.SendCompletionRequest()
 
   with patch( 'ycm.client.completion_request.JsonFromFuture',
               side_effect = ServerError( 'Server error' ) ):
-    results = ycm.GetCompletions()
+    response = ycm.GetCompletionResponse()
 
   logger.exception.assert_called_with( 'Error while handling server response' )
   post_vim_message.assert_has_exact_calls( [
     call( 'Server error', truncate = True )
   ] )
   assert_that(
-    results,
+    response,
     has_entries( {
-      'words': empty(),
-      'refresh': 'always'
+      'completions': empty(),
+      'completion_start_column': -1
     } )
   )
