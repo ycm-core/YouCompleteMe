@@ -277,37 +277,35 @@ class YouCompleteMe( object ):
     self._SetupServer()
 
 
-  def CreateCompletionRequest( self, force_semantic = False ):
+  def SendCompletionRequest( self, force_semantic = False ):
     request_data = BuildRequestData()
+    request_data[ 'force_semantic' ] = force_semantic
     if ( not self.NativeFiletypeCompletionAvailable() and
          self.CurrentFiletypeCompletionEnabled() ):
       wrapped_request_data = RequestWrap( request_data )
       if self._omnicomp.ShouldUseNow( wrapped_request_data ):
         self._latest_completion_request = OmniCompletionRequest(
             self._omnicomp, wrapped_request_data )
-        return self._latest_completion_request
+        self._latest_completion_request.Start()
+        return
 
     request_data[ 'working_dir' ] = utils.GetCurrentDirectory()
 
     self._AddExtraConfDataIfNeeded( request_data )
-    if force_semantic:
-      request_data[ 'force_semantic' ] = True
     self._latest_completion_request = CompletionRequest( request_data )
-    return self._latest_completion_request
+    self._latest_completion_request.Start()
 
 
-  def GetCompletions( self ):
-    request = self.GetCurrentCompletionRequest()
-    request.Start()
-    while not request.Done():
-      try:
-        if vimsupport.GetBoolValue( 'complete_check()' ):
-          return { 'words' : [], 'refresh' : 'always' }
-      except KeyboardInterrupt:
-        return { 'words' : [], 'refresh' : 'always' }
+  def CompletionRequestReady( self ):
+    return bool( self._latest_completion_request and
+                 self._latest_completion_request.Done() )
 
-    results = base.AdjustCandidateInsertionText( request.Response() )
-    return { 'words' : results, 'refresh' : 'always' }
+
+  def GetCompletionResponse( self ):
+    response = self._latest_completion_request.Response()
+    response[ 'completions' ] = base.AdjustCandidateInsertionText(
+        response[ 'completions' ] )
+    return response
 
 
   def SendCommandRequest( self, arguments, completer ):

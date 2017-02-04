@@ -86,15 +86,15 @@ def MockEventNotification( response_method, native_filetype_completer = True ):
               'PostDataToHandlerAsync',
               return_value = MagicMock( return_value=True ) ):
 
-    # We set up a fake a Response (as called by EventNotification.Response)
-    # which calls the supplied callback method. Generally this callback just
-    # raises an apropriate exception, otherwise it would have to return a mock
-    # future object.
+    # We set up a fake response (as called by EventNotification.Response) which
+    # calls the supplied callback method. Generally this callback just raises an
+    # apropriate exception, otherwise it would have to return a mock future
+    # object.
     #
     # Note: JsonFromFuture is actually part of ycm.client.base_request, but we
-    # must patch where an object is looked up, not where it is defined.
-    # See https://docs.python.org/dev/library/unittest.mock.html#where-to-patch
-    # for details.
+    # must patch where an object is looked up, not where it is defined.  See
+    # https://docs.python.org/dev/library/unittest.mock.html#where-to-patch for
+    # details.
     with patch( 'ycm.client.event_notification.JsonFromFuture',
                 side_effect = response_method ):
 

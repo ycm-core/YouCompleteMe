@@ -27,20 +27,18 @@ from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
 
-TIMEOUT_SECONDS = 0.5
-
 
 class CompletionRequest( BaseRequest ):
   def __init__( self, request_data ):
     super( CompletionRequest, self ).__init__()
     self.request_data = request_data
     self._response_future = None
+    self._response = { 'completions': [], 'completion_start_column': -1 }
 
 
   def Start( self ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
-                                                         'completions',
-                                                         TIMEOUT_SECONDS )
+                                                         'completions' )
 
 
   def Done( self ):
@@ -49,21 +47,26 @@ class CompletionRequest( BaseRequest ):
 
   def RawResponse( self ):
     if not self._response_future:
-      return []
-    with HandleServerException( truncate = True ):
-      response = JsonFromFuture( self._response_future )
+      return self._response
 
-      errors = response[ 'errors' ] if 'errors' in response else []
+    with HandleServerException( truncate = True ):
+      self._response = JsonFromFuture( self._response_future )
+
+      # Vim may not be able to convert the 'errors' entry to its internal format
+      # so we remove it from the response.
+      errors = self._response.pop( 'errors', [] )
       for e in errors:
         with HandleServerException( truncate = True ):
           raise MakeServerException( e )
 
-      return response[ 'completions' ]
-    return []
+    return self._response
 
 
   def Response( self ):
-    return _ConvertCompletionDatasToVimDatas( self.RawResponse() )
+    response = self.RawResponse()
+    response[ 'completions' ] = _ConvertCompletionDatasToVimDatas(
+        response[ 'completions' ] )
+    return response
 
 
 def ConvertCompletionDataToVimData( completion_data ):
