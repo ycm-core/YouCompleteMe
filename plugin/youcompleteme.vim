@@ -128,7 +128,7 @@ let g:ycm_goto_buffer_command =
 let g:ycm_disable_for_files_larger_than_kb =
       \ get( g:, 'ycm_disable_for_files_larger_than_kb', 1000 )
 
-if has( 'vim_starting' ) && has ( 'gui' ) " loading at startup, in gui
+if has( 'vim_starting' ) && has( 'gui' ) " loading at startup, in gui
   " We defer loading until after VimEnter to allow the gui to fork (see
   " `:h gui-fork`) and avoid a deadlock situation, as explained here:
   " https://github.com/Valloric/YouCompleteMe/pull/2473#issuecomment-267716136
