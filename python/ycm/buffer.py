@@ -1,4 +1,4 @@
-# Copyright (C) 2016, Davit Samvelyan
+# Copyright (C) 2017, Davit Samvelyan
 #
 # This file is part of YouCompleteMe.
 #
@@ -29,51 +29,72 @@ from ycm.client.event_notification import EventNotification
 
 class Buffer( object ):
 
-  def __init__( self, bufnr ):
-    self.number = bufnr
-    self._parse_tick = 0
+  def __init__( self, buffer_number ):
+    self.number = buffer_number
+    self._last_request_tick = 0
+    self._parsed_tick = 0
     self._handled_tick = 0
-    self._parse_request = None
+    self._parse_requests = []
     self._diagnostics = []
 
 
-  def FileParseRequestReady( self, block = False ):
-    return self._parse_tick == 0 or block or self._parse_request.Done()
-
-
   def SendParseRequest( self, extra_data ):
-    self._parse_request = EventNotification( 'FileReadyToParse',
-                                             extra_data = extra_data )
-    self._parse_request.Start()
-    self._parse_tick = self._ChangedTick()
+    buffer_changedtick = self._ChangedTick()
+    request = EventNotification( 'FileReadyToParse',
+                                 extra_data = extra_data,
+                                 changedtick = buffer_changedtick )
+    self._parse_requests.append( request )
+    self._last_request_tick = buffer_changedtick
+    request.Start()
 
 
   def NeedsReparse( self ):
-    return self._parse_tick < self._ChangedTick()
+    buffer_changedtick = self._ChangedTick()
+    if self._parse_requests:
+      return self._last_request_tick != buffer_changedtick
+    return self._parsed_tick != buffer_changedtick
 
 
   def Diagnostics( self ):
     return self._diagnostics
 
 
-  def UpdateDiagnostics( self ):
-    self._diagnostics = self._parse_request.Response()
+  def ProcessParseRequests( self, block = False ):
+    if not self._parse_requests:
+      return
 
+    successful = None
+    remaining = []
+    for request in self._parse_requests:
+      if block or request.Done():
+        # Call Response to check request for any exception or UnknownExtraConf
+        # response, to allow the server to raise configuration warnings, etc.
+        # to the user. We ignore any other supplied data.
+        request.Response()
+        if not request.ParseRequestIncomplete():
+          successful = request
+          # Ignore not finished requests prior to last successful one.
+          remaining = []
+      else:
+        remaining.append( request )
 
-  def GetResponse( self ):
-    return self._parse_request.Response()
+    if successful:
+      self._parsed_tick = successful.ChangedTick()
+      self._diagnostics = successful.Response()
+
+    self._parse_requests = remaining
 
 
   def IsResponseHandled( self ):
-    return self._handled_tick == self._parse_tick
+    return self._handled_tick == self._parsed_tick
 
 
   def MarkResponseHandled( self ):
-    self._handled_tick = self._parse_tick
+    self._handled_tick = self._parsed_tick
 
 
   def _ChangedTick( self ):
-    return vimsupport.GetBufferChangeTick(self.number)
+    return vimsupport.GetBufferChangedTick( self.number )
 
 
 class BufferDict( dict ):

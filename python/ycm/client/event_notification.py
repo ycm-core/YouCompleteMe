@@ -24,17 +24,22 @@ standard_library.install_aliases()
 from builtins import *  # noqa
 
 from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                      JsonFromFuture, HandleServerException )
+                                      FileParseRequestIncomplete,
+                                      JsonFromFuture,
+                                      HandleFileParseServerException )
 
 
 class EventNotification( BaseRequest ):
-  def __init__( self, event_name, filepath = None, extra_data = None ):
+  def __init__( self, event_name, filepath = None, extra_data = None,
+                changedtick = 0 ):
     super( EventNotification, self ).__init__()
     self._event_name = event_name
     self._filepath = filepath
     self._extra_data = extra_data
     self._response_future = None
     self._cached_response = None
+    self._parse_request_incomplete = False
+    self._changedtick = changedtick
 
 
   def Start( self ):
@@ -52,16 +57,28 @@ class EventNotification( BaseRequest ):
 
 
   def Response( self ):
-    if self._cached_response:
+    if self._cached_response is not None:
       return self._cached_response
 
     if not self._response_future or self._event_name != 'FileReadyToParse':
       return []
 
-    with HandleServerException( truncate = True ):
-      self._cached_response = JsonFromFuture( self._response_future )
+    self._cached_response = []
+    try:
+      with HandleFileParseServerException( truncate = True ):
+        self._cached_response = JsonFromFuture( self._response_future )
+    except FileParseRequestIncomplete:
+      self._parse_request_incomplete = True
 
-    return self._cached_response if self._cached_response else []
+    return self._cached_response
+
+
+  def ChangedTick( self ):
+    return self._changedtick
+
+
+  def ParseRequestIncomplete( self ):
+    return self._parse_request_incomplete
 
 
 def SendEventNotificationAsync( event_name,

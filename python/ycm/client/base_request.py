@@ -224,8 +224,39 @@ def HandleServerException( display = True, truncate = False ):
         _IgnoreExtraConfFile( e.extra_conf_file )
   except Exception as e:
     _logger.exception( 'Error while handling server response' )
-    if display:
-      DisplayServerException( e, truncate )
+    serialized_exception = str( e )
+    if display and 'already being parsed' not in serialized_exception:
+      vimsupport.PostVimMessage( serialized_exception, truncate = truncate )
+
+
+@contextlib.contextmanager
+def HandleFileParseServerException( display = True, truncate = False ):
+  try:
+    try:
+      yield
+    except UnknownExtraConf as e:
+      if vimsupport.Confirm( str( e ) ):
+        _LoadExtraConfFile( e.extra_conf_file )
+      else:
+        _IgnoreExtraConfFile( e.extra_conf_file )
+  except requests.exceptions.ConnectionError:
+    # We don't display this exception to the user since it is likely to happen
+    # for each subsequent request (typically if the server crashed) and we
+    # don't want to spam the user with it.
+    _logger.exception( 'Unable to connect to server' )
+    raise FileParseRequestIncomplete()
+  except Exception as e:
+    _logger.exception( 'Error while handling server response' )
+    serialized_exception = str( e )
+    if 'already being parsed' in serialized_exception:
+      raise FileParseRequestIncomplete()
+    elif display:
+      vimsupport.PostVimMessage( serialized_exception, truncate = truncate )
+
+
+class FileParseRequestIncomplete( Exception ):
+  """Parse request is not handled by server due to connection error,
+     or because server is already parsing that file with older changedtick."""
 
 
 def _LoadExtraConfFile( filepath ):
@@ -236,16 +267,6 @@ def _LoadExtraConfFile( filepath ):
 def _IgnoreExtraConfFile( filepath ):
   BaseRequest.PostDataToHandler( { 'filepath': filepath },
                                  'ignore_extra_conf_file' )
-
-
-def DisplayServerException( exception, truncate = False ):
-  serialized_exception = str( exception )
-
-  # We ignore the exception about the file already being parsed since it comes
-  # up often and isn't something that's actionable by the user.
-  if 'already being parsed' in serialized_exception:
-    return
-  vimsupport.PostVimMessage( serialized_exception, truncate = truncate )
 
 
 def _ToUtf8Json( data ):

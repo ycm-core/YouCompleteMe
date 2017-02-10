@@ -150,7 +150,7 @@ def GetCurrentBufferNumber():
   return vim.current.buffer.number
 
 
-def GetBufferChangeTick( bufnr ):
+def GetBufferChangedTick( bufnr ):
   return GetIntValue( u'getbufvar({0}, "changedtick")'.format( bufnr ) )
 
 

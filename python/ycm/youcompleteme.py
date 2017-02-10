@@ -117,7 +117,6 @@ class YouCompleteMe( object ):
     self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
     self._buffers = BufferDict()
-    self._buffer = None
     self._latest_completion_request = None
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
@@ -356,22 +355,20 @@ class YouCompleteMe( object ):
 
     self._omnicomp.OnFileReadyToParse( None )
 
-    self._buffer = self._GetCurrentBuffer()
-    # Do nothing if previous parse request is not finished
-    # it will return 'already parsing' anyway.
-    if not self._buffer.FileParseRequestReady( block ):
-      return
+    current_buffer = self._GetCurrentBuffer()
 
+    current_buffer.ProcessParseRequests( block )
     self.HandleFileParseResponse()
 
-    if self._buffer.NeedsReparse():
+    if current_buffer.NeedsReparse():
       extra_data = {}
       self._AddTagsFilesIfNeeded( extra_data )
       self._AddSyntaxDataIfNeeded( extra_data )
       self._AddExtraConfDataIfNeeded( extra_data )
 
-      self._buffer.SendParseRequest( extra_data )
+      current_buffer.SendParseRequest( extra_data )
       if block:
+        current_buffer.ProcessParseRequests( block )
         self.HandleFileParseResponse()
 
 
@@ -599,40 +596,27 @@ class YouCompleteMe( object ):
 
   def PopulateLocationListWithLatestDiagnostics( self ):
     # Do nothing if loc list is already populated by diag_interface
+    current_buffer = self._GetCurrentBuffer()
     if not self._user_options[ 'always_populate_location_list' ]:
-      self._diag_interface.PopulateLocationList( self._buffer.Diagnostics() )
-    return bool( self._buffer.Diagnostics() )
+      self._diag_interface.PopulateLocationList( current_buffer.Diagnostics() )
+    return bool( current_buffer.Diagnostics() )
 
 
-  def UpdateDiagnosticInterface( self ):
-    self._diag_interface.UpdateWithNewDiagnostics( self._buffer.Diagnostics() )
-
-
-  # For testing purposes
-  def FileParseRequestReady( self ):
-    return self._buffer.FileParseRequestReady()
-
-
+  # TODO: This function fits better in the buffer.py
   def HandleFileParseResponse( self ):
-    if self._buffer.IsResponseHandled():
+    current_buffer = self._GetCurrentBuffer()
+    if current_buffer.IsResponseHandled():
       return
 
+    # Order is important here:
+    # ShouldDisplayDiagnostics has a low cost, while
     # NativeFiletypeCompletionUsable is a blocking server request
-    if self.NativeFiletypeCompletionUsable():
-      if self.ShouldDisplayDiagnostics():
-        self._buffer.UpdateDiagnostics()
-        self.UpdateDiagnosticInterface()
-      else:
-        # YCM client has a hard-coded list of filetypes which are known
-        # to support diagnostics, self.DiagnosticUiSupportedForCurrentFiletype()
-        #
-        # For filetypes which don't support diagnostics, we just want to check
-        # the _latest_file_parse_request for any exception or UnknownExtraConf
-        # response, to allow the server to raise configuration warnings, etc.
-        # to the user. We ignore any other supplied data.
-        self._buffer.GetResponse()
+    if ( self.ShouldDisplayDiagnostics() and
+         self.NativeFiletypeCompletionUsable() ):
+      self._diag_interface.UpdateWithNewDiagnostics(
+        current_buffer.Diagnostics() )
 
-    self._buffer.MarkResponseHandled()
+    current_buffer.MarkResponseHandled()
 
 
   def ShowDetailedDiagnostic( self ):

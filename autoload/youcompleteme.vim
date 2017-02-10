@@ -460,7 +460,7 @@ function! s:OnBufferRead()
   endif
 
   exec s:python_command "ycm_state.OnBufferVisit()"
-  call s:OnFileReadyToParse()
+  exec s:python_command "ycm_state.OnFileReadyToParse()"
 endfunction
 
 
@@ -470,7 +470,7 @@ function! s:OnBufferEnter()
   endif
 
   exec s:python_command "ycm_state.OnBufferVisit()"
-  call s:OnFileReadyToParse()
+  exec s:python_command "ycm_state.OnFileReadyToParse()"
 endfunction
 
 
@@ -493,11 +493,6 @@ function! s:OnCursorHold()
   endif
 
   call s:SetUpCompleteopt()
-  call s:OnFileReadyToParse()
-endfunction
-
-
-function! s:OnFileReadyToParse()
   exec s:python_command "ycm_state.OnFileReadyToParse()"
 endfunction
 
@@ -554,7 +549,7 @@ function! s:OnCursorMovedNormalMode()
     return
   endif
 
-  call s:OnFileReadyToParse()
+  exec s:python_command "ycm_state.OnFileReadyToParse()"
   exec s:python_command "ycm_state.OnCursorMoved()"
 endfunction
 
@@ -565,7 +560,7 @@ function! s:OnInsertLeave()
   endif
 
   let s:omnifunc_mode = 0
-  call s:OnFileReadyToParse()
+  exec s:python_command "ycm_state.OnFileReadyToParse()"
   exec s:python_command "ycm_state.OnInsertLeave()"
   if g:ycm_autoclose_preview_window_after_completion ||
         \ g:ycm_autoclose_preview_window_after_insertion

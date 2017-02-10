@@ -193,7 +193,7 @@ class VimBuffer( object ):
                       modified = True,
                       window = None,
                       omnifunc = '',
-                      changedtick = 1):
+                      changedtick = 1 ):
     self.name = os.path.realpath( name ) if name else ''
     self.number = number
     self.contents = contents
