@@ -146,6 +146,14 @@ def GetCurrentBufferFilepath():
   return GetBufferFilepath( vim.current.buffer )
 
 
+def GetCurrentBufferNumber():
+  return vim.current.buffer.number
+
+
+def GetBufferChangeTick( bufnr ):
+  return GetIntValue( u'getbufvar({0}, "changedtick")'.format( bufnr ) )
+
+
 def BufferIsVisible( buffer_number ):
   if buffer_number < 0:
     return False
@@ -575,6 +583,11 @@ def EscapeForVim( text ):
 
 def CurrentFiletypes():
   return VimExpressionToPythonType( "&filetype" ).split( '.' )
+
+
+def GetBufferFiletypes( bufnr ):
+  command = 'getbufvar({0}, "&ft")'.format( bufnr )
+  return VimExpressionToPythonType( command ).split( '.' )
 
 
 def FiletypesForBuffer( buffer_object ):
