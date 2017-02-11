@@ -156,6 +156,10 @@ def BufferIsVisible( buffer_number ):
   return window_number != -1
 
 
+def GetFilepathForBufferNumber( num ):
+  return GetBufferFilepath( vim.buffers[ num ] )
+
+
 def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
     return ToUnicode( buffer_object.name )

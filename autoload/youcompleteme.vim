@@ -28,6 +28,9 @@ let s:default_completion = {
       \   'candidates': []
       \ }
 let s:completion = s:default_completion
+
+" Note when setting global state, consider if it needs to be reset when doing
+" s:RestartServer
 let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
@@ -41,8 +44,32 @@ let s:pollers = {
       \   'server_ready': {
       \     'id': -1,
       \     'wait_milliseconds': 100
+      \   },
+      \   'receive_messages': {
+      \     'id': -1,
+      \     'wait_milliseconds': 250
       \   }
       \ }
+
+
+function! s:SuspendTimers()
+  for poller in keys( s:pollers )
+    let info = timer_info( s:pollers[ poller ].id )
+    if len( info ) == 1 && !info[ 0 ].paused
+      call timer_pause( s:pollers[ poller ].id, 1 )
+    endif
+  endfor
+
+endfunction
+
+function! s:ResumeTimers()
+  for poller in keys( s:pollers )
+    let info = timer_info( s:pollers[ poller ].id )
+    if len( info ) == 1 && info[ 0 ].paused
+      call timer_pause( s:pollers[ poller ].id, 0 )
+    endif
+  endfor
+endfunction
 
 
 " When both versions are available, we prefer Python 3 over Python 2:
@@ -68,6 +95,29 @@ function! s:Pyeval( eval_string )
     return py3eval( a:eval_string )
   endif
   return pyeval( a:eval_string )
+endfunction
+
+
+function! s:StartMessagePoll()
+  if s:pollers.receive_messages.id < 0
+    let s:pollers.receive_messages.id = timer_start(
+          \ s:pollers.receive_messages.wait_milliseconds,
+          \ function( 's:ReceiveMessages' ) )
+  endif
+endfunction
+
+
+function! s:ReceiveMessages( timer_id )
+  let poll_again = s:Pyeval( 'ycm_state.OnPeriodicTick()' )
+
+  if poll_again
+    let s:pollers.receive_messages.id = timer_start(
+          \ s:pollers.receive_messages.wait_milliseconds,
+          \ function( 's:ReceiveMessages' ) )
+  else
+    " Don't poll again until we open another buffer
+    let s:pollers.receive_messages.id = -1
+  endif
 endfunction
 
 
@@ -335,6 +385,9 @@ function! s:TurnOffSyntasticForCFamily()
   let g:syntastic_c_checkers = []
   let g:syntastic_objc_checkers = []
   let g:syntastic_objcpp_checkers = []
+
+  " TODO: This doesn't seem to actually work
+  let g:syntastic_java_checkers = []
 endfunction
 
 
@@ -451,6 +504,7 @@ function! s:OnFileTypeSet()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+  call s:StartMessagePoll()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   call s:OnFileReadyToParse( 1 )
@@ -464,6 +518,7 @@ function! s:OnBufferEnter()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+  call s:StartMessagePoll()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   " Last parse may be outdated because of changes from other buffers. Force a
@@ -796,6 +851,12 @@ endfunction
 
 function! s:RestartServer()
   exec s:python_command "ycm_state.RestartServer()"
+
+  let s:previous_allowed_buffer_number = 0
+
+  call timer_stop( s:pollers.receive_messages.id )
+  let s:pollers.receive_messages.id = -1
+
   call timer_stop( s:pollers.server_ready.id )
   let s:pollers.server_ready.id = timer_start(
         \ s:pollers.server_ready.wait_milliseconds,
@@ -823,6 +884,11 @@ endfunction
 
 
 function! s:CompleterCommand(...)
+  " Work around bugs in Vim where the command line is cleared when timers are
+  " running. This is particularly a problem for FixIt which can offer the user
+  " options
+  call s:SuspendTimers()
+
   " CompleterCommand will call the OnUserCommand function of a completer.
   " If the first arguments is of the form "ft=..." it can be used to specify the
   " completer to use (for example "ft=cpp").  Else the native filetype completer
@@ -842,6 +908,8 @@ function! s:CompleterCommand(...)
 
   exec s:python_command "ycm_state.SendCommandRequest(" .
         \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) )"
+
+  call s:ResumeTimers()
 endfunction
 
 
