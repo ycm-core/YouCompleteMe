@@ -295,3 +295,122 @@ def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
   post_vim_message.assert_has_exact_calls( [
     call( 'some_detailed_diagnostic', warning = False )
   ] )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( ycm,
+                                                             post_vim_message ):
+
+  current_buffer = VimBuffer( 'buffer', filetype = 'not_supported' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    ycm.ShowDiagnostics()
+
+  post_vim_message.assert_called_once_with(
+    'Native filetype completion not supported for current file, '
+    'cannot force recompilation.', warning = False )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
+  ycm, set_location_list, post_vim_message, *args ):
+
+  current_buffer = VimBuffer( 'buffer', filetype = 'cpp' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.event_notification.EventNotification.Response',
+                return_value = {} ):
+      ycm.ShowDiagnostics()
+
+  post_vim_message.assert_has_exact_calls( [
+    call( 'Forcing compilation, this will block Vim until done.',
+          warning = False ),
+    call( 'Diagnostics refreshed', warning = False ),
+    call( 'No warnings or errors detected.', warning = False )
+  ] )
+  set_location_list.assert_called_once_with( [] )
+
+
+@YouCompleteMeInstance( { 'log_level': 'debug',
+                          'keep_logfiles': 1,
+                          'open_loclist_on_ycm_diags': 0 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
+  ycm, set_location_list, post_vim_message, *args ):
+
+  diagnostic = {
+    'kind': 'ERROR',
+    'text': 'error text',
+    'location': {
+      'filepath': 'buffer',
+      'column_num': 2,
+      'line_num': 19
+    }
+  }
+
+  current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.event_notification.EventNotification.Response',
+                return_value = [ diagnostic ] ):
+      ycm.ShowDiagnostics()
+
+  post_vim_message.assert_has_exact_calls( [
+    call( 'Forcing compilation, this will block Vim until done.',
+          warning = False ),
+    call( 'Diagnostics refreshed', warning = False )
+  ] )
+  set_location_list.assert_called_once_with( [ {
+      'bufnr': 3,
+      'lnum': 19,
+      'col': 2,
+      'text': 'error text',
+      'type': 'E',
+      'valid': 1
+  } ] )
+
+
+@YouCompleteMeInstance( { 'open_loclist_on_ycm_diags': 1 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.OpenLocationList', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
+  ycm, open_location_list, set_location_list, post_vim_message, *args ):
+
+  diagnostic = {
+    'kind': 'ERROR',
+    'text': 'error text',
+    'location': {
+      'filepath': 'buffer',
+      'column_num': 2,
+      'line_num': 19
+    }
+  }
+
+  current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.event_notification.EventNotification.Response',
+                return_value = [ diagnostic ] ):
+      ycm.ShowDiagnostics()
+
+  post_vim_message.assert_has_exact_calls( [
+    call( 'Forcing compilation, this will block Vim until done.',
+          warning = False ),
+    call( 'Diagnostics refreshed', warning = False )
+  ] )
+  set_location_list.assert_called_once_with( [ {
+      'bufnr': 3,
+      'lnum': 19,
+      'col': 2,
+      'text': 'error text',
+      'type': 'E',
+      'valid': 1
+  } ] )
+  open_location_list.assert_called_once_with( focus = True )

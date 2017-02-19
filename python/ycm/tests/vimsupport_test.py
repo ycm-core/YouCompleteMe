@@ -27,7 +27,8 @@ from builtins import *  # noqa
 
 from ycm.tests import PathToTestFile
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
-                                   MockVimCommand, MockVimModule, VimBuffer )
+                                   MockVimBuffers, MockVimCommand,
+                                   MockVimModule, VimBuffer )
 MockVimModule()
 
 from ycm import vimsupport
@@ -37,6 +38,47 @@ from mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
 import json
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock )
+def SetLocationList_test( vim_eval ):
+  diagnostics = [ {
+    'bufnr': 3,
+    'filename': 'some_filename',
+    'lnum': 5,
+    'col': 22,
+    'type': 'E',
+    'valid': 1
+  } ]
+  vimsupport.SetLocationList( diagnostics )
+  vim_eval.assert_called_once_with(
+    'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+
+
+@patch( 'ycm.vimsupport.VariableExists', return_value = True )
+@patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
+@patch( 'vim.command', new_callable = ExtendedMock )
+def OpenLocationList_test( vim_command, fitting_height, variable_exists ):
+  vimsupport.OpenLocationList( focus = False, autoclose = True )
+  vim_command.assert_has_exact_calls( [
+    call( 'botright lopen' ),
+    call( 'au WinLeave <buffer> q' ),
+    call( 'doautocmd User YcmLocationOpened' ),
+    call( 'silent! wincmd p' )
+  ] )
+  fitting_height.assert_called_once_with()
+  variable_exists.assert_called_once_with( '#User#YcmLocationOpened' )
+
+
+@patch( 'ycm.vimsupport.GetIntValue', return_value = 120 )
+@patch( 'vim.command' )
+def SetFittingHeightForCurrentWindow_test( vim_command, *args ):
+  # Create a buffer with one line that is longer than the window width.
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'a' * 140 ] )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    vimsupport.SetFittingHeightForCurrentWindow()
+  vim_command.assert_called_once_with( '2wincmd _' )
 
 
 def AssertBuffersAreEqualAsBytes( result_buffer, expected_buffer ):
