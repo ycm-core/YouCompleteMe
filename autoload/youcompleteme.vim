@@ -22,7 +22,6 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:omnifunc_mode = 0
-let s:defer_omnifunc = 1
 
 let s:old_cursor_position = []
 let s:cursor_moved = 0
@@ -98,33 +97,10 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
-  " Setting the omnifunc require us to ask the server if it has a Native
-  " Semantic Completer for the current buffer's filetype. When vim first start
-  " this mean that we have to wait for the server to be up and running which
-  " would block vim's GUI. To avoid this we defer setting the omnifunc the
-  " first time to when we enter Insert mode and then update it on every
-  " BufferVisit as normal.
-  if s:defer_omnifunc
-    augroup ycm_defer_omnifunc
-      autocmd!
-      autocmd InsertEnter * call s:DeferredUntilInsertEnter()
-    augroup END
-  endif
-
   " Calling this once solves the problem of BufRead/BufEnter not triggering for
   " the first loaded file. This should be the last command executed in this
   " function!
   call s:OnBufferRead()
-endfunction
-
-
-function s:DeferredUntilInsertEnter()
-  let s:defer_omnifunc = 0
-  autocmd! ycm_defer_omnifunc
-
-  if s:AllowedToCompleteInCurrentBuffer()
-    call s:SetOmnicompleteFunc()
-  endif
 endfunction
 
 
@@ -470,10 +446,7 @@ function! s:OnBufferRead()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
-
-  if !s:defer_omnifunc
-    call s:SetOmnicompleteFunc()
-  endif
+  call s:SetOmnicompleteFunc()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   call s:OnFileReadyToParse()
@@ -514,6 +487,19 @@ endfunction
 
 
 function! s:OnFileReadyToParse()
+  if s:Pyeval( 'ycm_state.ServerBecomesReady()' )
+    " Server was not ready until now and could not parse previous requests for
+    " the current buffer. We need to send them again.
+    exec s:python_command "ycm_state.OnBufferVisit()"
+    exec s:python_command "ycm_state.OnFileReadyToParse()"
+    " Setting the omnifunc requires us to ask the server if it has a native
+    " semantic completer for the current buffer's filetype. Since we only set it
+    " when entering a buffer or changing the filetype, we try to set it again
+    " now that the server is ready.
+    call s:SetOmnicompleteFunc()
+    return
+  endif
+
   " We need to call this just in case there is no b:ycm_changetick; this can
   " happen for special buffers.
   call s:SetUpYcmChangedTick()
@@ -610,6 +596,8 @@ function! s:OnInsertEnter()
   endif
 
   let s:old_cursor_position = []
+
+  call s:OnFileReadyToParse()
 endfunction
 
 

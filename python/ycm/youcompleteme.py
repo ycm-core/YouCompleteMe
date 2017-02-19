@@ -127,6 +127,7 @@ class YouCompleteMe( object ):
     self._server_popen = None
     self._filetypes_with_keywords_loaded = set()
     self._ycmd_keepalive = YcmdKeepalive()
+    self._server_is_ready_with_cache = False
     self._SetupLogging()
     self._SetupServer()
     self._ycmd_keepalive.Start()
@@ -137,6 +138,9 @@ class YouCompleteMe( object ):
   def _SetupServer( self ):
     self._available_completers = {}
     self._user_notified_about_crash = False
+    self._filetypes_with_keywords_loaded = set()
+    self._server_is_ready_with_cache = False
+
     server_port = utils.GetUnusedLocalhostPort()
     # The temp options file is deleted by ycmd during startup
     with NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
@@ -337,6 +341,15 @@ class YouCompleteMe( object ):
   def NativeFiletypeCompletionUsable( self ):
     return ( self.CurrentFiletypeCompletionEnabled() and
              self.NativeFiletypeCompletionAvailable() )
+
+
+  def ServerBecomesReady( self ):
+    if not self._server_is_ready_with_cache:
+      with HandleServerException( display = False ):
+        self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
+            'ready' )
+      return self._server_is_ready_with_cache
+    return False
 
 
   def OnFileReadyToParse( self ):
@@ -720,7 +733,8 @@ class YouCompleteMe( object ):
     if filetype in self._filetypes_with_keywords_loaded:
       return
 
-    self._filetypes_with_keywords_loaded.add( filetype )
+    if self._server_is_ready_with_cache:
+      self._filetypes_with_keywords_loaded.add( filetype )
     extra_data[ 'syntax_keywords' ] = list(
        syntax_parse.SyntaxKeywordsForCurrentBuffer() )
 
