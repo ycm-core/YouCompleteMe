@@ -87,9 +87,8 @@ class CommandRequest( BaseRequest ):
   def _HandleGotoResponse( self ):
     if isinstance( self._response, list ):
       vimsupport.SetQuickFixList(
-        [ _BuildQfListItem( x ) for x in self._response ],
-        focus = True,
-        autoclose = True )
+        [ _BuildQfListItem( x ) for x in self._response ] )
+      vimsupport.OpenQuickFixList( focus = True, autoclose = True )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
                                  self._response[ 'line_num' ],
