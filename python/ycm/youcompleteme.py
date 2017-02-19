@@ -583,7 +583,7 @@ class YouCompleteMe( object ):
                  self.DiagnosticUiSupportedForCurrentFiletype() )
 
 
-  def PopulateLocationListWithLatestDiagnostics( self ):
+  def _PopulateLocationListWithLatestDiagnostics( self ):
     # Do nothing if loc list is already populated by diag_interface
     if not self._user_options[ 'always_populate_location_list' ]:
       self._diag_interface.PopulateLocationList( self._latest_diagnostics )
@@ -629,16 +629,6 @@ class YouCompleteMe( object ):
       # it our responsibility to ensure that we only apply the
       # warning/error/prompt received once (for each event).
       self._latest_file_parse_request = None
-
-
-  def ShowDetailedDiagnostic( self ):
-    with HandleServerException():
-      detailed_diagnostic = BaseRequest.PostDataToHandler(
-          BuildRequestData(), 'detailed_diagnostic' )
-
-      if 'message' in detailed_diagnostic:
-        vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
-                                   warning = False )
 
 
   def DebugInfo( self ):
@@ -724,6 +714,44 @@ class YouCompleteMe( object ):
       return False
     else:
       return not any([ x in filetype_to_disable for x in filetypes ])
+
+
+  def ShowDetailedDiagnostic( self ):
+    with HandleServerException():
+      detailed_diagnostic = BaseRequest.PostDataToHandler(
+          BuildRequestData(), 'detailed_diagnostic' )
+
+      if 'message' in detailed_diagnostic:
+        vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
+                                   warning = False )
+
+
+  def ForceCompileAndDiagnostics( self ):
+    if not self.NativeFiletypeCompletionUsable():
+      vimsupport.PostVimMessage(
+          'Native filetype completion not supported for current file, '
+          'cannot force recompilation.', warning = False )
+      return False
+    vimsupport.PostVimMessage(
+        'Forcing compilation, this will block Vim until done.',
+        warning = False )
+    self.OnFileReadyToParse()
+    self.HandleFileParseRequest( block = True )
+    vimsupport.PostVimMessage( 'Diagnostics refreshed', warning = False )
+    return True
+
+
+  def ShowDiagnostics( self ):
+    if not self.ForceCompileAndDiagnostics():
+      return
+
+    if not self._PopulateLocationListWithLatestDiagnostics():
+      vimsupport.PostVimMessage( 'No warnings or errors detected.',
+                                 warning = False )
+      return
+
+    if self._user_options[ 'open_loclist_on_ycm_diags' ]:
+      vimsupport.OpenLocationList( focus = True )
 
 
   def _AddSyntaxDataIfNeeded( self, extra_data ):

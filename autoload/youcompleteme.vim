@@ -344,19 +344,6 @@ function! s:VisitedBufferRequiresReparse()
 endfunction
 
 
-function! s:SetUpCommands()
-  command! YcmRestartServer call s:RestartServer()
-  command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
-  command! YcmDebugInfo call s:DebugInfo()
-  command! -nargs=* -complete=custom,youcompleteme#LogsComplete
-        \ YcmToggleLogs call s:ToggleLogs(<f-args>)
-  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
-        \ YcmCompleter call s:CompleterCommand(<f-args>)
-  command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
-  command! YcmDiags call s:ShowDiagnostics()
-endfunction
-
-
 function! s:SetUpCpoptions()
   " Without this flag in cpoptions, critical YCM mappings do not work. There's
   " no way to not have this and have YCM working, so force the flag.
@@ -748,13 +735,21 @@ function! youcompleteme#ServerPid()
 endfunction
 
 
-function! s:RestartServer()
-  exec s:python_command "ycm_state.RestartServer()"
+function! s:SetUpCommands()
+  command! YcmRestartServer call s:RestartServer()
+  command! YcmDebugInfo call s:DebugInfo()
+  command! -nargs=* -complete=custom,youcompleteme#LogsComplete
+        \ YcmToggleLogs call s:ToggleLogs(<f-args>)
+  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
+        \ YcmCompleter call s:CompleterCommand(<f-args>)
+  command! YcmDiags call s:ShowDiagnostics()
+  command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
+  command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
 endfunction
 
 
-function! s:ShowDetailedDiagnostic()
-  exec s:python_command "ycm_state.ShowDetailedDiagnostic()"
+function! s:RestartServer()
+  exec s:python_command "ycm_state.RestartServer()"
 endfunction
 
 
@@ -769,6 +764,11 @@ endfunction
 
 function! s:ToggleLogs(...)
   exec s:python_command "ycm_state.ToggleLogs( *vim.eval( 'a:000' ) )"
+endfunction
+
+
+function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
+  return join( s:Pyeval( 'list( ycm_state.GetLogfiles() )' ), "\n" )
 endfunction
 
 
@@ -795,6 +795,11 @@ function! s:CompleterCommand(...)
 endfunction
 
 
+function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
+  return join( s:Pyeval( 'ycm_state.GetDefinedSubcommands()' ), "\n" )
+endfunction
+
+
 function! youcompleteme#OpenGoToList()
   exec s:python_command "vimsupport.PostVimMessage(" .
         \ "'WARNING: youcompleteme#OpenGoToList function is deprecated. " .
@@ -803,53 +808,18 @@ function! youcompleteme#OpenGoToList()
 endfunction
 
 
-function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
-  return join( s:Pyeval( 'list( ycm_state.GetLogfiles() )' ), "\n" )
+function! s:ShowDiagnostics()
+  exec s:python_command "ycm_state.ShowDiagnostics()"
 endfunction
 
 
-function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
-  return join( s:Pyeval( 'ycm_state.GetDefinedSubcommands()' ), "\n" )
-endfunction
-
-
-function! s:ForceCompile()
-  if !s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
-    echom "Native filetype completion not supported for current file, " .
-          \ "cannot force recompilation."
-    return 0
-  endif
-
-  echom "Forcing compilation, this will block Vim until done."
-  exec s:python_command "ycm_state.OnFileReadyToParse()"
-  exec s:python_command "ycm_state.HandleFileParseRequest( True )"
-
-  return 1
+function! s:ShowDetailedDiagnostic()
+  exec s:python_command "ycm_state.ShowDetailedDiagnostic()"
 endfunction
 
 
 function! s:ForceCompileAndDiagnostics()
-  let compilation_succeeded = s:ForceCompile()
-  if !compilation_succeeded
-    return
-  endif
-  echom "Diagnostics refreshed."
-endfunction
-
-
-function! s:ShowDiagnostics()
-  let compilation_succeeded = s:ForceCompile()
-  if !compilation_succeeded
-    return
-  endif
-
-  if s:Pyeval( 'ycm_state.PopulateLocationListWithLatestDiagnostics()' )
-    if g:ycm_open_loclist_on_ycm_diags
-      lopen
-    endif
-  else
-    echom "No warnings or errors detected"
-  endif
+  exec s:python_command "ycm_state.ForceCompileAndDiagnostics()"
 endfunction
 
 
