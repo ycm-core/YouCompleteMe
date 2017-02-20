@@ -267,10 +267,12 @@ class Response_Detection_test( object ):
       # GoToResponse_QuickFix_test, so here we just check that the right call is
       # made
       with patch( 'ycm.vimsupport.SetQuickFixList' ) as set_qf_list:
-        request = CommandRequest( [ command ] )
-        request._response = response
-        request.RunPostCommandActionsIfNeeded()
-        ok_( set_qf_list.called )
+        with patch( 'ycm.vimsupport.OpenQuickFixList' ) as open_qf_list:
+          request = CommandRequest( [ command ] )
+          request._response = response
+          request.RunPostCommandActionsIfNeeded()
+          ok_( set_qf_list.called )
+          ok_( open_qf_list.called )
 
     basic_goto = {
       'filepath': 'test',
