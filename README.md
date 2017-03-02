@@ -528,9 +528,15 @@ process.
     idea). With Vundle, this would mean adding a `Plugin
     'Valloric/YouCompleteMe'` line to your [vimrc][].
 
-    If you don't install YCM with Vundle, make sure you have run
+    If you don't install YCM with Vundle.
+
+    1. Make sure you run
     `git submodule update --init --recursive` after checking out the YCM
     repository (Vundle will do this for you) to fetch YCM's dependencies.
+
+    2. If you are using Tern you also have to change to that directory
+    (`cd third_party/ycmd/third_party/tern_runtime`)
+    and run `npm install`.
 
 3.  [Complete this step ONLY if you care about semantic completion support for
     C-family languages. Otherwise it's not necessary.]
