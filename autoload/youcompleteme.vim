@@ -82,7 +82,7 @@ function! youcompleteme#Enable()
     " Note that these events will NOT trigger for the file vim is started with;
     " so if you do "vim foo.cc", these events will not trigger when that buffer
     " is read. This is because youcompleteme#Enable() is called on VimEnter and
-    " that happens *after" BufRead/BufEnter has already triggered for the
+    " that happens *after* BufRead/FileType has already triggered for the
     " initial file.
     " We also need to trigger buf init code on the FileType event because when
     " the user does :enew and then :set ft=something, we need to run buf init
@@ -97,10 +97,15 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
-  " Calling this once solves the problem of BufRead/BufEnter not triggering for
-  " the first loaded file. This should be the last command executed in this
-  " function!
-  call s:OnBufferRead()
+  " BufRead/FileType events are not triggered for the first loaded file.
+  " However, we don't directly call the s:OnBufferRead function because it would
+  " send requests that can't succeed as the server is not ready yet and would
+  " slow down startup.
+  call s:DisableOnLargeFile( expand( '%' ) )
+
+  if s:AllowedToCompleteInCurrentBuffer()
+    call s:SetCompleteFunc()
+  endif
 endfunction
 
 
