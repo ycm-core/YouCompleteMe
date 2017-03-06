@@ -228,10 +228,13 @@ using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
-Install development tools and CMake: `sudo apt-get install build-essential cmake`
+Install development tools and CMake: 
 
-Make sure you have Python headers installed: `sudo apt-get install python-dev
-python3-dev`.
+    sudo apt-get install build-essential cmake
+
+Make sure you have Python headers installed:
+
+    sudo apt-get install python-dev python3-dev
 
 Compiling YCM **with** semantic support for C-family languages:
 
