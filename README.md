@@ -296,7 +296,7 @@ rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
 Install development tools and CMake:
-    
+
     sudo dnf install automake gcc gcc-c++ kernel-devel cmake
 
 Make sure you have Python headers installed:
