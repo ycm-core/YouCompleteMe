@@ -295,10 +295,13 @@ using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
-Install development tools and CMake: `sudo dnf install automake gcc gcc-c++ kernel-devel cmake`
+Install development tools and CMake:
+    
+    sudo dnf install automake gcc gcc-c++ kernel-devel cmake
 
-Make sure you have Python headers installed: `sudo dnf install python-devel
-python3-devel`.
+Make sure you have Python headers installed:
+
+    sudo dnf install python-devel python3-devel`.
 
 Compiling YCM **with** semantic support for C-family languages:
 
