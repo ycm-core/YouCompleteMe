@@ -242,7 +242,8 @@ class YouCompleteMe( object ):
     else:
       error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format( code = return_code )
 
-    server_stderr = '\n'.join( self._server_popen.stderr.read().splitlines() )
+    server_stderr = '\n'.join(
+        utils.ToUnicode( self._server_popen.stderr.read() ).splitlines() )
     if server_stderr:
       self._logger.error( server_stderr )
 
