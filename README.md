@@ -301,7 +301,7 @@ Install development tools and CMake:
 
 Make sure you have Python headers installed:
 
-    sudo dnf install python-devel python3-devel`.
+    sudo dnf install python-devel python3-devel
 
 Compiling YCM **with** semantic support for C-family languages:
 
