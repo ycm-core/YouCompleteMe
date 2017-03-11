@@ -302,7 +302,9 @@ class YouCompleteMe( object ):
 
 
   def SendCommandRequest( self, arguments, completer ):
-    return SendCommandRequest( arguments, completer )
+    extra_data = {}
+    self._AddExtraConfDataIfNeeded( extra_data )
+    return SendCommandRequest( arguments, completer, extra_data )
 
 
   def GetDefinedSubcommands( self ):
@@ -636,7 +638,9 @@ class YouCompleteMe( object ):
     debug_info = ''
     if self._client_logfile:
       debug_info += 'Client logfile: {0}\n'.format( self._client_logfile )
-    debug_info += FormatDebugInfoResponse( SendDebugInfoRequest() )
+    extra_data = {}
+    self._AddExtraConfDataIfNeeded( extra_data )
+    debug_info += FormatDebugInfoResponse( SendDebugInfoRequest( extra_data ) )
     debug_info += (
       'Server running at: {0}\n'
       'Server process ID: {1}\n'.format( BaseRequest.server_location,
