@@ -160,7 +160,7 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
         '(?P<CLANG>True)?(?(CLANG)|False)\n'
         'Clang version: .+\n'
         'Extra configuration file found and loaded\n'
-        'Extra configuration path: .*/testdata/\\.ycm_extra_conf\\.py\n'
+        'Extra configuration path: .*testdata[/\\\\]\\.ycm_extra_conf\\.py\n'
         '(?(CLANG)C-family completer debug information:\n'
         '  Compilation database path: None\n'
         '  Flags: \\[\'_TEMP_FILE_\'.*\\]\n)'
