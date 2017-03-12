@@ -1,4 +1,5 @@
 version: '{build}'
+image: Visual Studio 2017
 environment:
   COVERAGE: true
   matrix:
