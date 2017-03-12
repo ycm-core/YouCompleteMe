@@ -34,6 +34,7 @@ from hamcrest import ( assert_that, contains, empty, is_in, is_not, has_length,
 from mock import call, MagicMock, patch
 
 from ycm.tests import StopServer, YouCompleteMeInstance
+from ycm.client.base_request import _LoadExtraConfFile
 from ycmd.responses import ServerError
 
 
@@ -145,8 +146,6 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
   dir_of_script = os.path.dirname( os.path.abspath( __file__ ) )
   buf_name = os.path.join( dir_of_script, 'testdata', 'test.cpp' )
   extra_conf = os.path.join( dir_of_script, 'testdata', '.ycm_extra_conf.py' )
-
-  from ycm.client.base_request import _LoadExtraConfFile
   _LoadExtraConfFile( extra_conf )
 
   current_buffer = VimBuffer( buf_name, filetype='cpp' )
