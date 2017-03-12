@@ -576,8 +576,8 @@ Download and install the following software:
 
 - CMake [25]. Add CMake executable to the PATH environment variable.
 
-- Visual Studio [35]. Download the community edition. During setup, choose
-  _Custom_ as the installation type and select the _Visual C++_ component.
+- Visual Studio [35]. Download the community edition. During setup, select
+  _Desktop development with C++_ in _Workloads_.
 
 - 7-zip [36]. Required to build YCM with semantic support for C-family
   languages.
@@ -617,8 +617,8 @@ install with all language features, ensure 'msbuild', 'go', 'tsserver', 'node',
   python install.py --all
 <
 You can specify the Microsoft Visual C++ (MSVC) version using the '--msvc'
-option. YCM officially supports MSVC 11 (Visual Studio 2012), 12 (2013), and 14
-(2015).
+option. YCM officially supports MSVC 12 (Visual Studio 2013), 14 (2015), and 15
+(2017).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -782,8 +782,8 @@ will notify you to recompile it. You should then rerun the install process.
    On Windows, you need to download and install Python 2 or Python 3 [34].
    Pick the version corresponding to your Vim architecture. You will also
    need Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by
-   installing Visual Studio [35]. MSVC 11 (Visual Studio 2012), 12 (2013),
-   and 14 (2015) are officially supported.
+   installing Visual Studio [35]. MSVC 12 (Visual Studio 2013), 14 (2015),
+   and 15 (2017) are officially supported.
 
    Here we'll assume you installed YCM with Vundle. That means that the top-
    level YCM directory is in '~/.vim/bundle/YouCompleteMe'.
@@ -3367,7 +3367,7 @@ References ~
 [32] http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives
 [33] https://bintray.com/micbou/generic/vim
 [34] https://www.python.org/downloads/windows/
-[35] https://www.visualstudio.com/products/free-developer-offers-vs.aspx
+[35] https://www.visualstudio.com/downloads/
 [36] http://www.7-zip.org/download.html
 [37] http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [38] https://github.com/tpope/vim-pathogen#pathogenvim
