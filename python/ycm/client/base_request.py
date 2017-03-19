@@ -25,11 +25,10 @@ from builtins import *  # noqa
 import contextlib
 import logging
 import json
-from future.moves.urllib.parse import urljoin, urlparse
 from future.utils import native
 from base64 import b64decode, b64encode
 from ycm import vimsupport
-from ycmd.utils import ToBytes
+from ycmd.utils import ToBytes, urljoin, urlparse
 from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
 from ycmd.responses import ServerError, UnknownExtraConf
 
