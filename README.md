@@ -729,6 +729,7 @@ Quick Feature Summary
 ### TypeScript
 
 * Semantic auto-completion
+* Real-time diagnostic display
 * Renaming symbols (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Semantic type information for identifiers (`GetType`)
