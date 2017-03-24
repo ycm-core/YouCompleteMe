@@ -729,6 +729,7 @@ Quick Feature Summary
 ### TypeScript
 
 * Semantic auto-completion
+* Real-time diagnostic display
 * Renaming symbols (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Semantic type information for identifiers (`GetType`)
@@ -1131,9 +1132,10 @@ Completer API.
 ### Diagnostic Display
 
 YCM will display diagnostic notifications for C-family and C# languages if you
-compiled YCM with Clang and Omnisharp support, respectively. Since YCM continuously
-recompiles your file as you type, you'll get notified of errors and warnings
-in your file as fast as possible.
+compiled YCM with Clang and Omnisharp support, respectively. Diagnostics will
+also be displayed for TypeScript. Since YCM continuously recompiles your file as
+you type, you'll get notified of errors and warnings in your file as fast as
+possible.
 
 Here are the various pieces of the diagnostic UI:
 
