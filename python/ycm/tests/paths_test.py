@@ -30,11 +30,13 @@ from ycm.paths import _EndsWithPython
 
 
 def EndsWithPython_Good( path ):
-  ok_( _EndsWithPython( path ) )
+  ok_( _EndsWithPython( path ),
+       'Path {0} does not end with a Python name.'.format( path ) )
 
 
 def EndsWithPython_Bad( path ):
-  ok_( not _EndsWithPython( path ) )
+  ok_( not _EndsWithPython( path ),
+       'Path {0} does end with a Python name.'.format( path ) )
 
 
 def EndsWithPython_Python2Paths_test():
@@ -43,7 +45,8 @@ def EndsWithPython_Python2Paths_test():
     'python2',
     '/usr/bin/python2.6',
     '/home/user/.pyenv/shims/python2.7',
-    r'C:\Python26\python.exe'
+    r'C:\Python26\python.exe',
+    '/Contents/MacOS/Python'
   ]
 
   for path in python_paths:
