@@ -175,8 +175,8 @@ def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
     line_num = 1
 
   sign_name = 'YcmError' if is_error else 'YcmWarning'
-  vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
-    sign_id, line_num, sign_name, buffer_num ) )
+  vim.command( 'sign place {0} name={1} line={2} buffer={3}'.format(
+    sign_id, sign_name, line_num, buffer_num ) )
 
 
 def PlaceDummySign( sign_id, buffer_num, line_num ):

@@ -41,6 +41,9 @@ BWIPEOUT_REGEX = re.compile(
   '^(?:silent! )bwipeout!? (?P<buffer_number>[0-9]+)$' )
 GETBUFVAR_REGEX = re.compile(
   '^getbufvar\((?P<buffer_number>[0-9]+), "&(?P<option>.+)"\)$' )
+MATCHADD_REGEX = re.compile(
+  '^matchadd\(\'(?P<group>.+)\', \'(?P<pattern>.+)\'\)$' )
+MATCHDELETE_REGEX = re.compile( '^matchdelete\((?P<id>)\)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -51,6 +54,8 @@ GETBUFVAR_REGEX = re.compile(
 # More explanation is available:
 # https://github.com/Valloric/YouCompleteMe/pull/1694
 VIM_MOCK = MagicMock()
+
+VIM_MATCHES = []
 
 
 @contextlib.contextmanager
@@ -130,6 +135,30 @@ def _MockVimOptionsEval( value ):
   return None
 
 
+def _MockVimMatchEval( value ):
+  if value == 'getmatches()':
+    return VIM_MATCHES
+
+  match = MATCHADD_REGEX.search( value )
+  if match:
+    group = match.group( 'group' )
+    option = match.group( 'pattern' )
+    vim_match = VimMatch( group, option )
+    VIM_MATCHES.append( vim_match )
+    return vim_match.id
+
+  match = MATCHDELETE_REGEX.search( value )
+  if match:
+    identity = match.group( 'id' )
+    for index, vim_match in enumerate( VIM_MATCHES ):
+      if vim_match.id == identity:
+        VIM_MATCHES.pop( index )
+        return -1
+    return 0
+
+  return None
+
+
 def _MockVimEval( value ):
   if value == 'g:ycm_min_num_of_chars_for_completion':
     return 0
@@ -151,6 +180,10 @@ def _MockVimEval( value ):
     return result
 
   result = _MockVimBufferEval( value )
+  if result is not None:
+    return result
+
+  result = _MockVimMatchEval( value )
   if result is not None:
     return result
 
@@ -215,6 +248,23 @@ class VimBuffer( object ):
   def GetLines( self ):
     """Returns the contents of the buffer as a list of unicode strings."""
     return [ ToUnicode( x ) for x in self.contents ]
+
+
+class VimMatch( object ):
+
+  def __init__( self, group, pattern ):
+    self.id = len( VIM_MATCHES )
+    self.group = group
+    self.pattern = pattern
+
+
+  def __eq__( self, other ):
+    return self.group == other.group and self.pattern == other.pattern
+
+
+  def __repr__( self ):
+    return "VimMatch( group = '{0}', pattern = '{1}' )".format( self.group,
+                                                                self.pattern )
 
 
 @contextlib.contextmanager

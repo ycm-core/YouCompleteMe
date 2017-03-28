@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycm.tests.test_utils import ( ExtendedMock, MockVimBuffers, MockVimModule,
-                                   VimBuffer )
+                                   VimBuffer, VimMatch )
 MockVimModule()
 
 import os
@@ -32,7 +32,7 @@ from hamcrest import ( assert_that, contains, empty, is_in, is_not, has_length,
                        matches_regexp )
 from mock import call, MagicMock, patch
 
-from ycm.tests import StopServer, YouCompleteMeInstance
+from ycm.tests import StopServer, test_utils, YouCompleteMeInstance
 from ycmd.responses import ServerError
 
 
@@ -348,8 +348,8 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
     'text': 'error text',
     'location': {
       'filepath': 'buffer',
-      'column_num': 2,
-      'line_num': 19
+      'line_num': 19,
+      'column_num': 2
     }
   }
 
@@ -388,8 +388,8 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
     'text': 'error text',
     'location': {
       'filepath': 'buffer',
-      'column_num': 2,
-      'line_num': 19
+      'line_num': 19,
+      'column_num': 2
     }
   }
 
@@ -413,3 +413,120 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
       'valid': 1
   } ] )
   open_location_list.assert_called_once_with( focus = True )
+
+
+@YouCompleteMeInstance( { 'echo_current_diagnostic': 1,
+                          'enable_diagnostic_signs': 1,
+                          'enable_diagnostic_highlighting': 1 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'vim.command', new_callable = ExtendedMock )
+def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
+  ycm, vim_command, post_vim_message, *args ):
+
+  contents = """int main() {
+  int x, y;
+  x == y
+}"""
+
+  # List of diagnostics returned by ycmd for the above code.
+  diagnostics = [ {
+    'kind': 'ERROR',
+    'text': "expected ';' after expression",
+    'location': {
+      'filepath': 'buffer',
+      'line_num': 3,
+      'column_num': 9
+    },
+    # Looks strange but this is really what ycmd is returning.
+    'location_extent': {
+      'start': {
+        'filepath': '',
+        'line_num': 0,
+        'column_num': 0,
+      },
+      'end': {
+        'filepath': '',
+        'line_num': 0,
+        'column_num': 0,
+      }
+    },
+    'ranges': [],
+    'fixit_available': True
+  }, {
+    'kind': 'WARNING',
+    'text': 'equality comparison result unused',
+    'location': {
+      'filepath': 'buffer',
+      'line_num': 3,
+      'column_num': 7,
+    },
+    'location_extent': {
+      'start': {
+        'filepath': 'buffer',
+        'line_num': 3,
+        'column_num': 5,
+      },
+      'end': {
+        'filepath': 'buffer',
+        'line_num': 3,
+        'column_num': 7,
+      }
+    },
+    'ranges': [ {
+      'start': {
+        'filepath': 'buffer',
+        'line_num': 3,
+        'column_num': 3,
+      },
+      'end': {
+        'filepath': 'buffer',
+        'line_num': 3,
+        'column_num': 9,
+      }
+    } ],
+    'fixit_available': True
+  } ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              filetype = 'c',
+                              contents = contents.splitlines(),
+                              number = 5,
+                              window = 2 )
+
+  test_utils.VIM_MATCHES = []
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ) ):
+    with patch( 'ycm.client.event_notification.EventNotification.Response',
+                return_value = diagnostics ):
+      ycm.OnFileReadyToParse()
+      ycm.HandleFileParseRequest( block = True )
+
+    # Error match is added after warning matches.
+    assert_that(
+      test_utils.VIM_MATCHES,
+      contains(
+        VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
+        VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
+        # FIXME: match should be inserted at the end of line 3 (missing ";").
+        VimMatch( 'YcmErrorSection', '\%0l\%0c' )
+      )
+    )
+
+    # Only the error sign is placed.
+    vim_command.assert_has_exact_calls( [
+      call( 'sign define ycm_dummy_sign' ),
+      call( 'sign place 3 name=ycm_dummy_sign line=3 buffer=5' ),
+      call( 'sign place 1 name=YcmError line=3 buffer=5' ),
+      call( 'sign undefine ycm_dummy_sign' ),
+      call( 'sign unplace 3 buffer=5' )
+    ] )
+
+    # When moving the cursor on the diagnostics, the error is displayed to the
+    # user, not the warning.
+    ycm.OnCursorMoved()
+    post_vim_message.assert_has_exact_calls( [
+      call( "expected ';' after expression (FixIt)",
+            truncate = True, warning = False )
+    ] )
