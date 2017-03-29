@@ -130,44 +130,43 @@ Contents ~
   47. The |g:ycm_python_binary_path| option
  11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant|
-  2. On very rare occasions Vim crashes when I tab through the completion menu |youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu|
-  3. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
-  4. I get a linker warning regarding 'libpython' on Mac when compiling YCM |youcompleteme-i-get-linker-warning-regarding-libpython-on-mac-when-compiling-ycm|
-  5. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
-  6. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
-  7. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
-  8. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
-  9. I get a 'E227: mapping already exists for <blah>' error when I start Vim |youcompleteme-i-get-e227-mapping-already-exists-for-blah-error-when-i-start-vim|
-  10. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |youcompleteme-i-get-glibc_2.xx-not-found-when-starting-vim|
-  11. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
-  12. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
-  13. I get 'LONG_BIT definition appears wrong for platform' when compiling |youcompleteme-i-get-long_bit-definition-appears-wrong-for-platform-when-compiling|
-  14. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |youcompleteme-i-get-libpython2.7.a-...-relocation-r_x86_64_32-when-compiling|
-  15. I get 'Vim: Caught deadly signal SEGV' on Vim startup |youcompleteme-i-get-vim-caught-deadly-signal-segv-on-vim-startup|
-  16. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup|
-  17. 'install.py' says python must be compiled with '--enable-framework'. Wat? |youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat|
-  18. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
-  19. 'CTRL-U' in insert mode does not work |youcompleteme-ctrl-u-in-insert-mode-does-not-work|
-  20. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  21. Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu |youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu|
-  22. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
-  23. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  24. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
-  25. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed|
-  26. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
-  27. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  28. I get weird errors when I press 'Ctrl-C' in Vim |youcompleteme-i-get-weird-errors-when-i-press-ctrl-c-in-vim|
-  29. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
-  30. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  31. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+  2. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
+  3. I get a linker warning regarding 'libpython' on Mac when compiling YCM |youcompleteme-i-get-linker-warning-regarding-libpython-on-mac-when-compiling-ycm|
+  4. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
+  5. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
+  6. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
+  7. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
+  8. I get a 'E227: mapping already exists for <blah>' error when I start Vim |youcompleteme-i-get-e227-mapping-already-exists-for-blah-error-when-i-start-vim|
+  9. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |youcompleteme-i-get-glibc_2.xx-not-found-when-starting-vim|
+  10. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
+  11. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
+  12. I get 'LONG_BIT definition appears wrong for platform' when compiling |youcompleteme-i-get-long_bit-definition-appears-wrong-for-platform-when-compiling|
+  13. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |youcompleteme-i-get-libpython2.7.a-...-relocation-r_x86_64_32-when-compiling|
+  14. I get 'Vim: Caught deadly signal SEGV' on Vim startup |youcompleteme-i-get-vim-caught-deadly-signal-segv-on-vim-startup|
+  15. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup|
+  16. 'install.py' says python must be compiled with '--enable-framework'. Wat? |youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat|
+  17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
+  18. 'CTRL-U' in insert mode does not work |youcompleteme-ctrl-u-in-insert-mode-does-not-work|
+  19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
+  20. Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu |youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu|
+  21. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
+  22. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
+  23. I get annoying messages in Vim's status area when I type |youcompleteme-i-get-annoying-messages-in-vims-status-area-when-i-type|
+  24. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed|
+  25. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  26. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  27. I get weird errors when I press 'Ctrl-C' in Vim |youcompleteme-i-get-weird-errors-when-i-press-ctrl-c-in-vim|
+  28. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
+  29. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
+  30. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |youcompleteme-when-i-open-javascript-file-i-get-an-annoying-warning-about-.tern-project-file|
-  32. When I start vim I get a runtime error saying 'R6034 An application has made an
+  31. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |youcompleteme-when-i-start-vim-i-get-runtime-error-saying-r6034-an-application-has-made-an-attempt-to-load-c-runtime-library-incorrectly.|
-  33. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
-  34. On Windows I get "E887: Sorry, this command is disabled, the Python's site
+  32. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+  33. On Windows I get "E887: Sorry, this command is disabled, the Python's site
 module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-command-is-disabled-pythons-site-module-could-not-be-loaded|
-  35. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
-  36. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
+  34. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
+  35. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
  12. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  13. Contact                                            |youcompleteme-contact|
  14. License                                            |youcompleteme-license|
@@ -424,12 +423,14 @@ Install YouCompleteMe with Vundle [23].
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
 will notify you to recompile it. You should then rerun the install process.
 
-Install development tools and CMake: 'sudo apt-get install build-essential
-cmake'
-
-Make sure you have Python headers installed: 'sudo apt-get install python-dev
-python3-dev'.
-
+Install development tools and CMake:
+>
+  sudo apt-get install build-essential cmake
+<
+Make sure you have Python headers installed:
+>
+  sudo apt-get install python-dev python3-dev
+<
 Compiling YCM **with** semantic support for C-family languages:
 >
   cd ~/.vim/bundle/YouCompleteMe
@@ -493,12 +494,14 @@ Install YouCompleteMe with Vundle [23].
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
 will notify you to recompile it. You should then rerun the install process.
 
-Install development tools and CMake: 'sudo dnf install automake gcc gcc-c++
-kernel-devel cmake'
-
-Make sure you have Python headers installed: 'sudo dnf install python-devel
-python3-devel'.
-
+Install development tools and CMake:
+>
+  sudo dnf install automake gcc gcc-c++ kernel-devel cmake
+<
+Make sure you have Python headers installed:
+>
+  sudo dnf install python-devel python3-devel
+<
 Compiling YCM **with** semantic support for C-family languages:
 >
   cd ~/.vim/bundle/YouCompleteMe
@@ -954,6 +957,7 @@ Go ~
 TypeScript ~
 
 - Semantic auto-completion
+- Real-time diagnostic display
 - Renaming symbols ('RefactorRename <new name>')
 - Go to definition, find references (|GoToDefinition|, |GoToReferences|)
 - Semantic type information for identifiers (|GetType|)
@@ -1389,9 +1393,10 @@ Completer API.
 Diagnostic Display ~
 
 YCM will display diagnostic notifications for C-family and C# languages if you
-compiled YCM with Clang and Omnisharp support, respectively. Since YCM
-continuously recompiles your file as you type, you'll get notified of errors
-and warnings in your file as fast as possible.
+compiled YCM with Clang and Omnisharp support, respectively. Diagnostics will
+also be displayed for TypeScript. Since YCM continuously recompiles your file
+as you type, you'll get notified of errors and warnings in your file as fast as
+possible.
 
 Here are the various pieces of the diagnostic UI:
 
@@ -2796,13 +2801,6 @@ part of the extra conf API.
 But fear not, you should be able to tweak your extra conf files to continue
 working by using the |g:ycm_extra_conf_vim_data| option. See the docs on that
 option for details.
-
--------------------------------------------------------------------------------
-*youcompleteme-on-very-rare-occasions-vim-crashes-when-i-tab-through-completion-menu*
-On very rare occasions Vim crashes when I tab through the completion menu ~
-
-That's a very rare Vim bug most users never encounter. It's fixed in Vim
-7.4.72. Update to that version (or above) to resolve the issue.
 
 -------------------------------------------------------------------------------
 *youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core*
