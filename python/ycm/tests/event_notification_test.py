@@ -48,8 +48,8 @@ def PresentDialog_Confirm_Call( message ):
 
 def PlaceSign_Call( sign_id, line_num, buffer_num, is_error ):
   sign_name = 'YcmError' if is_error else 'YcmWarning'
-  return call( 'sign place {0} line={1} name={2} buffer={3}'
-                  .format( sign_id, line_num, sign_name, buffer_num ) )
+  return call( 'sign place {0} name={1} line={2} buffer={3}'
+                  .format( sign_id, sign_name, line_num, buffer_num ) )
 
 
 def UnplaceSign_Call( sign_id, buffer_num ):

@@ -108,8 +108,9 @@ class DiagnosticInterface( object ):
         self._diag_message_needs_clearing = False
       return
 
-    text = diags[ 0 ][ 'text' ]
-    if diags[ 0 ].get( 'fixit_available', False ):
+    first_diag = diags[ 0 ]
+    text = first_diag[ 'text' ]
+    if first_diag.get( 'fixit_available', False ):
       text += ' (FixIt)'
 
     vimsupport.PostVimMessage( text, warning = False, truncate = True )
@@ -132,7 +133,8 @@ def _UpdateSquiggles( buffer_number_to_line_to_diags ):
   line_to_diags = buffer_number_to_line_to_diags[ vim.current.buffer.number ]
 
   for diags in itervalues( line_to_diags ):
-    for diag in diags:
+    # Insert squiggles in reverse order so that errors overlap warnings.
+    for diag in reversed( diags ):
       location_extent = diag[ 'location_extent' ]
       is_error = _DiagnosticIsError( diag )
 
@@ -201,21 +203,21 @@ def _GetKeptAndNewSigns( placed_signs, buffer_number_to_line_to_diags,
       continue
 
     for line, diags in iteritems( line_to_diags ):
-      for diag in diags:
-        sign = _DiagSignPlacement( next_sign_id,
-                                   line,
-                                   buffer_number,
-                                   _DiagnosticIsError( diag ) )
-        if sign not in placed_signs:
-          new_signs += [ sign ]
-          next_sign_id += 1
-        else:
-          # We use .index here because `sign` contains a new id, but
-          # we need the sign with the old id to unplace it later on.
-          # We won't be placing the new sign.
-          kept_signs += [ placed_signs[ placed_signs.index( sign ) ] ]
+      # Only one sign is visible by line.
+      first_diag = diags[ 0 ]
+      sign = _DiagSignPlacement( next_sign_id,
+                                 line,
+                                 buffer_number,
+                                 _DiagnosticIsError( first_diag ) )
+      if sign not in placed_signs:
+        new_signs.append( sign )
+        next_sign_id += 1
+      else:
+        # We use .index here because `sign` contains a new id, but
+        # we need the sign with the old id to unplace it later on.
+        # We won't be placing the new sign.
+        kept_signs.append( placed_signs[ placed_signs.index( sign ) ] )
   return new_signs, kept_signs, next_sign_id
-
 
 
 def _PlaceNewSigns( kept_signs, new_signs ):
@@ -226,7 +228,7 @@ def _PlaceNewSigns( kept_signs, new_signs ):
     if sign in placed_signs:
       continue
     vimsupport.PlaceSign( sign.id, sign.line, sign.buffer, sign.is_error )
-    placed_signs.append(sign)
+    placed_signs.append( sign )
   return placed_signs
 
 
@@ -247,10 +249,10 @@ def _ConvertDiagListToDict( diag_list ):
 
   for line_to_diags in itervalues( buffer_to_line_to_diags ):
     for diags in itervalues( line_to_diags ):
-      # We also want errors to be listed before warnings so that errors aren't
-      # hidden by the warnings; Vim won't place a sign oven an existing one.
-      diags.sort( key = lambda diag: ( diag[ 'location' ][ 'column_num' ],
-                                       diag[ 'kind' ] ) )
+      # We want errors to be listed before warnings so that errors aren't hidden
+      # by the warnings.
+      diags.sort( key = lambda diag: ( diag[ 'kind' ],
+                                       diag[ 'location' ][ 'column_num' ] ) )
   return buffer_to_line_to_diags
 
 
