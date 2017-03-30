@@ -33,6 +33,7 @@ from hamcrest import ( assert_that, contains, empty, is_in, is_not, has_length,
 from mock import call, MagicMock, patch
 
 from ycm.tests import StopServer, test_utils, YouCompleteMeInstance
+from ycm.client.base_request import _LoadExtraConfFile
 from ycmd.responses import ServerError
 
 
@@ -139,9 +140,14 @@ def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedExitCode_test():
   } )
 
 
-@YouCompleteMeInstance()
+@YouCompleteMeInstance( { 'extra_conf_vim_data': [ 'tempname()' ] } )
 def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
-  current_buffer = VimBuffer( 'current_buffer' )
+  dir_of_script = os.path.dirname( os.path.abspath( __file__ ) )
+  buf_name = os.path.join( dir_of_script, 'testdata', 'test.cpp' )
+  extra_conf = os.path.join( dir_of_script, 'testdata', '.ycm_extra_conf.py' )
+  _LoadExtraConfFile( extra_conf )
+
+  current_buffer = VimBuffer( buf_name, filetype='cpp' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
     assert_that(
       ycm.DebugInfo(),
@@ -149,9 +155,14 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
         'Client logfile: .+\n'
         'Server Python interpreter: .+\n'
         'Server Python version: .+\n'
-        'Server has Clang support compiled in: (True|False)\n'
+        'Server has Clang support compiled in: '
+        '(?P<CLANG>True)?(?(CLANG)|False)\n'
         'Clang version: .+\n'
-        'No extra configuration file found\n'
+        'Extra configuration file found and loaded\n'
+        'Extra configuration path: .*testdata[/\\\\]\\.ycm_extra_conf\\.py\n'
+        '(?(CLANG)C-family completer debug information:\n'
+        '  Compilation database path: None\n'
+        '  Flags: \\[\'_TEMP_FILE_\'.*\\]\n)'
         'Server running at: .+\n'
         'Server process ID: \d+\n'
         'Server logfiles:\n'
