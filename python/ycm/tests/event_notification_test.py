@@ -21,8 +21,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
+# Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
@@ -49,8 +48,8 @@ def PresentDialog_Confirm_Call( message ):
 
 def PlaceSign_Call( sign_id, line_num, buffer_num, is_error ):
   sign_name = 'YcmError' if is_error else 'YcmWarning'
-  return call( 'sign place {0} line={1} name={2} buffer={3}'
-                  .format( sign_id, line_num, sign_name, buffer_num ) )
+  return call( 'sign place {0} name={1} line={2} buffer={3}'
+                  .format( sign_id, sign_name, line_num, buffer_num ) )
 
 
 def UnplaceSign_Call( sign_id, buffer_num ):

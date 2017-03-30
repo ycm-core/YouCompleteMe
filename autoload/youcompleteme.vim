@@ -90,8 +90,7 @@ function! youcompleteme#Enable()
     " We also need to trigger buf init code on the FileType event because when
     " the user does :enew and then :set ft=something, we need to run buf init
     " code again.
-    autocmd BufRead,FileType * call s:OnBufferRead()
-    autocmd BufEnter * call s:OnBufferEnter()
+    autocmd BufRead,BufEnter,FileType * call s:OnBufferVisit()
     autocmd BufUnload * call s:OnBufferUnload()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
@@ -101,11 +100,9 @@ function! youcompleteme#Enable()
   augroup END
 
   " BufRead/FileType events are not triggered for the first loaded file.
-  " However, we don't directly call the s:OnBufferRead function because it would
-  " send requests that can't succeed as the server is not ready yet and would
-  " slow down startup.
-  call s:DisableOnLargeFile( expand( '%' ) )
-
+  " However, we don't directly call the s:OnBufferVisit function because it
+  " would send requests that can't succeed as the server is not ready yet and
+  " would slow down startup.
   if s:AllowedToCompleteInCurrentBuffer()
     call s:SetCompleteFunc()
   endif
@@ -313,6 +310,23 @@ function! s:TurnOffSyntasticForCFamily()
 endfunction
 
 
+function! s:DisableOnLargeFile( buffer )
+  if exists( 'b:ycm_largefile' )
+    return b:ycm_largefile
+  endif
+
+  let threshold = g:ycm_disable_for_files_larger_than_kb * 1024
+  let b:ycm_largefile =
+        \ threshold > 0 && getfsize( expand( a:buffer ) ) > threshold
+  if b:ycm_largefile
+    exec s:python_command "vimsupport.PostVimMessage(" .
+          \ "'YouCompleteMe is disabled in this buffer; " .
+          \ "the file exceeded the max size (see YCM options).' )"
+  endif
+  return b:ycm_largefile
+endfunction
+
+
 function! s:AllowedToCompleteInBuffer( buffer )
   let buffer_filetype = getbufvar( a:buffer, '&filetype' )
 
@@ -322,7 +336,7 @@ function! s:AllowedToCompleteInBuffer( buffer )
     return 0
   endif
 
-  if exists( 'b:ycm_largefile' )
+  if s:DisableOnLargeFile( a:buffer )
     return 0
   endif
 
@@ -401,22 +415,6 @@ function! s:SetUpYcmChangedTick()
 endfunction
 
 
-function! s:DisableOnLargeFile( filename )
-  if exists( 'b:ycm_largefile' )
-    return
-  endif
-
-  let threshold = g:ycm_disable_for_files_larger_than_kb * 1024
-
-  if threshold > 0 && getfsize( a:filename ) > threshold
-    exec s:python_command "vimsupport.PostVimMessage(" .
-          \ "'YouCompleteMe is disabled in this buffer; " .
-          \ "the file exceeded the max size (see YCM options).' )"
-    let b:ycm_largefile = 1
-  endif
-endfunction
-
-
 function! s:OnVimLeave()
   exec s:python_command "ycm_state.OnVimLeave()"
 endfunction
@@ -427,31 +425,19 @@ function! s:OnCompleteDone()
 endfunction
 
 
-function! s:OnBufferRead()
+function! s:OnBufferVisit()
   " We need to do this even when we are not allowed to complete in the current
   " buffer because we might be allowed to complete in the future! The canonical
   " example is creating a new buffer with :enew and then setting a filetype.
   call s:SetUpYcmChangedTick()
 
-  call s:DisableOnLargeFile( expand( '<afile>:p' ) )
-
-  if !s:AllowedToCompleteInCurrentBuffer()
+  if !s:VisitedBufferRequiresReparse()
     return
   endif
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   call s:SetOmnicompleteFunc()
-
-  exec s:python_command "ycm_state.OnBufferVisit()"
-  call s:OnFileReadyToParse()
-endfunction
-
-
-function! s:OnBufferEnter()
-  if !s:VisitedBufferRequiresReparse()
-    return
-  endif
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   call s:OnFileReadyToParse()

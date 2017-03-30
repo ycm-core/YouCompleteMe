@@ -19,18 +19,16 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
+# Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
 import contextlib
 import logging
-import urllib.parse
 import json
 from future.utils import native
 from base64 import b64decode, b64encode
 from ycm import vimsupport
-from ycmd.utils import ToBytes
+from ycmd.utils import ToBytes, urljoin, urlparse
 from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
 from ycmd.responses import ServerError, UnknownExtraConf
 
@@ -120,7 +118,7 @@ class BaseRequest( object ):
     headers = dict( _HEADERS )
     headers[ _HMAC_HEADER ] = b64encode(
         CreateRequestHmac( ToBytes( method ),
-                           ToBytes( urllib.parse.urlparse( request_uri ).path ),
+                           ToBytes( urlparse( request_uri ).path ),
                            request_body,
                            BaseRequest.hmac_secret ) )
     return headers
@@ -263,8 +261,7 @@ def _ValidateResponseObject( response ):
 
 
 def _BuildUri( handler ):
-  return native( ToBytes( urllib.parse.urljoin( BaseRequest.server_location,
-                                                handler ) ) )
+  return native( ToBytes( urljoin( BaseRequest.server_location, handler ) ) )
 
 
 def MakeServerException( data ):

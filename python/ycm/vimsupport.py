@@ -20,8 +20,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
+# Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
 from future.utils import iterkeys
@@ -176,8 +175,8 @@ def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
     line_num = 1
 
   sign_name = 'YcmError' if is_error else 'YcmWarning'
-  vim.command( 'sign place {0} line={1} name={2} buffer={3}'.format(
-    sign_id, line_num, sign_name, buffer_num ) )
+  vim.command( 'sign place {0} name={1} line={2} buffer={3}'.format(
+    sign_id, sign_name, line_num, buffer_num ) )
 
 
 def PlaceDummySign( sign_id, buffer_num, line_num ):

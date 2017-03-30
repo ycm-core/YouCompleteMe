@@ -376,8 +376,7 @@ _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
 variable.
 - [Visual Studio][visual-studio-download]. Download the community edition.
-During setup, choose _Custom_ as the installation type and select the _Visual
-C++_ component.
+During setup, select _Desktop development with C++_ in _Workloads_.
 - [7-zip][7z-download]. Required to build YCM with semantic support for
 C-family languages.
 
@@ -412,8 +411,8 @@ install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
     python install.py --all
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
-option. YCM officially supports MSVC 11 (Visual Studio 2012), 12 (2013), and 14
-(2015).
+option. YCM officially supports MSVC 12 (Visual Studio 2013), 14 (2015), and 15
+(2017).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -573,7 +572,7 @@ process.
     Python 3][python-win-download]. Pick the version corresponding to your Vim
     architecture. You will also need Microsoft Visual C++ (MSVC) to build YCM.
     You can obtain it by installing [Visual Studio][visual-studio-download].
-    MSVC 11 (Visual Studio 2012), 12 (2013), and 14 (2015) are officially
+    MSVC 12 (Visual Studio 2013), 14 (2015), and 15 (2017) are officially
     supported.
 
     Here we'll assume you installed YCM with Vundle. That means that the
@@ -730,6 +729,7 @@ Quick Feature Summary
 ### TypeScript
 
 * Semantic auto-completion
+* Real-time diagnostic display
 * Renaming symbols (`RefactorRename <new name>`)
 * Go to definition, find references (`GoToDefinition`, `GoToReferences`)
 * Semantic type information for identifiers (`GetType`)
@@ -1132,9 +1132,10 @@ Completer API.
 ### Diagnostic Display
 
 YCM will display diagnostic notifications for C-family and C# languages if you
-compiled YCM with Clang and Omnisharp support, respectively. Since YCM continuously
-recompiles your file as you type, you'll get notified of errors and warnings
-in your file as fast as possible.
+compiled YCM with Clang and Omnisharp support, respectively. Diagnostics will
+also be displayed for TypeScript. Since YCM continuously recompiles your file as
+you type, you'll get notified of errors and warnings in your file as fast as
+possible.
 
 Here are the various pieces of the diagnostic UI:
 
@@ -2563,11 +2564,6 @@ But fear not, you should be able to tweak your extra conf files to continue
 working by using the `g:ycm_extra_conf_vim_data` option. See the docs on that
 option for details.
 
-### On very rare occasions Vim crashes when I tab through the completion menu
-
-That's a very rare Vim bug most users never encounter. It's fixed in Vim
-7.4.72. Update to that version (or above) to resolve the issue.
-
 ### I get `ImportError` exceptions that mention `PyInit_ycm_core` or `initycm_core`
 
 These errors are caused by building the YCM native libraries for Python 2 and
@@ -3092,7 +3088,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
 [vim-win-download]: https://bintray.com/micbou/generic/vim
 [python-win-download]: https://www.python.org/downloads/windows/
-[visual-studio-download]: https://www.visualstudio.com/products/free-developer-offers-vs.aspx
+[visual-studio-download]: https://www.visualstudio.com/downloads/
 [7z-download]: http://www.7-zip.org/download.html
 [mono-install-osx]: http://www.mono-project.com/docs/getting-started/install/mac/
 [mono-install-ubuntu]: http://www.mono-project.com/docs/getting-started/install/linux/#debian-ubuntu-and-derivatives
