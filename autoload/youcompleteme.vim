@@ -90,7 +90,8 @@ function! youcompleteme#Enable()
     " We also need to trigger buf init code on the FileType event because when
     " the user does :enew and then :set ft=something, we need to run buf init
     " code again.
-    autocmd BufRead,BufEnter,FileType * call s:OnBufferVisit()
+    autocmd BufRead,FileType * call s:OnBufferRead()
+    autocmd BufEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
@@ -100,7 +101,7 @@ function! youcompleteme#Enable()
   augroup END
 
   " BufRead/FileType events are not triggered for the first loaded file.
-  " However, we don't directly call the s:OnBufferVisit function because it
+  " However, we don't directly call the s:OnBufferRead function because it
   " would send requests that can't succeed as the server is not ready yet and
   " would slow down startup.
   if s:AllowedToCompleteInCurrentBuffer()
@@ -425,12 +426,26 @@ function! s:OnCompleteDone()
 endfunction
 
 
-function! s:OnBufferVisit()
+function! s:OnBufferRead()
   " We need to do this even when we are not allowed to complete in the current
   " buffer because we might be allowed to complete in the future! The canonical
   " example is creating a new buffer with :enew and then setting a filetype.
   call s:SetUpYcmChangedTick()
 
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  call s:SetUpCompleteopt()
+  call s:SetCompleteFunc()
+  call s:SetOmnicompleteFunc()
+
+  exec s:python_command "ycm_state.OnBufferVisit()"
+  call s:OnFileReadyToParse()
+endfunction
+
+
+function! s:OnBufferEnter()
   if !s:VisitedBufferRequiresReparse()
     return
   endif
