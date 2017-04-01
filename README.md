@@ -1690,7 +1690,7 @@ you don't need to change any options. These options can be configured in your
 let g:ycm_min_num_of_chars_for_completion = 1
 ```
 
-Note that after changing an option in your [vimrc script] [vimrc] you have to
+Note that after changing an option in your [vimrc script][vimrc] you have to
 restart Vim for the changes to take effect.
 
 ### The `g:ycm_min_num_of_chars_for_completion` option
@@ -2988,10 +2988,10 @@ version of Python.
 
 ### On Windows I get `E887: Sorry, this command is disabled, the Python's site module could not be loaded`
 
-If you are running vim on Windows with Python 2.7.11, this is likely caused by
-a [bug][vim_win-python2.7.11-bug]. Follow this [workaround]
-[vim_win-python2.7.11-bug_workaround] or use a different version (Python 2.7.12
-does not suffer from the bug).
+If you are running vim on Windows with Python 2.7.11, this is likely caused by a
+[bug][vim_win-python2.7.11-bug]. Follow this
+[workaround][vim_win-python2.7.11-bug_workaround] or use a different version
+(Python 2.7.12 does not suffer from the bug).
 
 ### I can't complete python packages in a virtual environment.
 
@@ -3107,6 +3107,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
 [JediHTTP]: https://github.com/vheon/JediHTTP
 [vim_win-python2.7.11-bug]: https://github.com/vim/vim/issues/717
-[vim_win-python2.7.11-bug_workaround]: https://github.com/vim/vim-win32-installer/blob/master/appveyor.bat#L90
+[vim_win-python2.7.11-bug_workaround]: https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
 [gitter]: https://gitter.im/Valloric/YouCompleteMe
 [ninja-compdb]: https://ninja-build.org/manual.html
