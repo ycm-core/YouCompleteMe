@@ -3397,7 +3397,7 @@ References ~
 [64] https://github.com/Valloric/YouCompleteMe/issues/303
 [65] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [66] https://github.com/vim/vim/issues/717
-[67] https://github.com/vim/vim-win32-installer/blob/master/appveyor.bat#L90
+[67] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
 [68] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
 [69] https://github.com/Valloric/YouCompleteMe/issues?state=open
 [70] http://www.gnu.org/copyleft/gpl.html
