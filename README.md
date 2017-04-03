@@ -947,8 +947,8 @@ your file.
 
 #### Quick start
 
-1. Ensure that you have enabled the Tern completer. See the
-   [installation guide](#installation) for details.
+1. Ensure that you have enabled the Tern completer. See the 
+  javascript section in the [full-installation guide](#full-installation-guide) for details.
 
 2. Create a `.tern-project` file in the root directory of your JavaScript
    project, by following the [instructions][tern-project] in the [Tern][]
