@@ -1,5 +1,3 @@
-Markdown==2.6.5
-beautifulsoup4==4.4.1
-html5lib==0.9999999
-six==1.10.0
-wsgiref==0.1.2
+Markdown       == 2.6.5
+beautifulsoup4 == 4.4.1
+html5lib       == 0.9999999
