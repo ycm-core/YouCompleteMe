@@ -1,12 +1,12 @@
 # Updating `index.html`
 
-1. Check out this branch in a _new repo directory_, or use 
-   [git-new-workdir][git-new-workdir]. You will need the original `README.md` as
-   source for the generation. For example, if your YCM repo is in
-   `./Development/YouCompleteMe`:
+1. Check out this branch in a _new repo directory_, or use [git-worktree][]. You
+   will need the original `README.md` as source for the generation. For example,
+   if you want to create the new working tree in
+   `Development/YouCompleteMe-website`:
 
     ```bash
-        $ git new-workdir Development/YouCompleteMe Development/YouCompleteMe-website
+        $ git worktree add Development/YouCompleteMe-website gh-pages
     ```
 
 2. Install the required Python packages. It is recommended to do this with
@@ -29,5 +29,5 @@
 The command prints nothing if it succeeds. Check the output with `git status`
 (etc.) then submit a PR to the YouCompleteMe project with the generated changes.
 
-[git-new-workdir]: http://nuclearsquid.com/writings/git-new-workdir/
+[git-worktree]: https://git-scm.com/docs/git-worktree
 [virtualenv]: https://virtualenv.readthedocs.org/en/latest/
