@@ -869,25 +869,27 @@ will notify you to recompile it. You should then rerun the install process.
 
 5. Set up support for additional languages, as desired:
 
-6. C# support: install Mono on non-Windows platforms [41]. Navigate to
-   'YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer' and run
-   'msbuild /property:Configuration=Release' on Windows. Replace 'msbuild'
-   by 'xbuild' on other platforms. On Windows, be sure that the build
-   utility 'msbuild' is in your PATH [37].
+   - C# support: install Mono on non-Windows platforms [41]. Navigate to
+     'YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer' and run
+     'msbuild /property:Configuration=Release' on Windows. Replace
+     'msbuild' by 'xbuild' on other platforms. On Windows, be sure that
+     the build utility 'msbuild' is in your PATH [37].
 
-7. Go support: install Go [27] and add it to your path. Navigate to
-   'YouCompleteMe/third_party/ycmd/third_party/gocode' and run 'go build'.
+   - Go support: install Go [27] and add it to your path. Navigate to
+     'YouCompleteMe/third_party/ycmd/third_party/gocode' and run 'go
+     build'.
 
-8. TypeScript support: as with the quick installation, simply 'npm install
-   -g typescript' after successfully installing Node.js and npm [28].
+   - TypeScript support: as with the quick installation, simply 'npm
+     install -g typescript' after successfully installing Node.js and npm
+     [28].
 
-9. JavaScript support: install Node.js and npm [28]. Then navigate to
-   'YouCompleteMe/third_party/ycmd/third_party/tern_runtime' and run 'npm
-   install --production'
+   - JavaScript support: install Node.js and npm [28]. Then navigate to
+     'YouCompleteMe/third_party/ycmd/third_party/tern_runtime' and run
+     'npm install --production'
 
-10. Rust support: install Rust [29]. Navigate to
-    'YouCompleteMe/third_party/ycmd/third_party/racerd' and run 'cargo
-    build --release'.
+   - Rust support: install Rust [29]. Navigate to
+     'YouCompleteMe/third_party/ycmd/third_party/racerd' and run 'cargo
+     build --release'.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
