@@ -26,6 +26,12 @@ let s:omnifunc_mode = 0
 let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:previous_allowed_buffer_number = 0
+let s:timers = {
+      \   'handle_file_parse_request': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
+      \   }
+      \ }
 
 
 " When both versions are available, we prefer Python 3 over Python 2:
@@ -75,10 +81,6 @@ function! youcompleteme#Enable()
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
 
-  if g:ycm_allow_changing_updatetime && &updatetime > 2000
-    set ut=2000
-  endif
-
   call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
     autocmd!
@@ -93,7 +95,6 @@ function! youcompleteme#Enable()
     autocmd BufRead,FileType * call s:OnBufferRead()
     autocmd BufEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
-    autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
     autocmd VimLeave * call s:OnVimLeave()
@@ -114,6 +115,7 @@ function! youcompleteme#EnableCursorMovedAutocommands()
   augroup ycmcompletemecursormove
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode()
   augroup END
 endfunction
@@ -457,16 +459,6 @@ function! s:OnBufferUnload()
 endfunction
 
 
-function! s:OnCursorHold()
-  if !s:AllowedToCompleteInCurrentBuffer()
-    return
-  endif
-
-  call s:SetUpCompleteopt()
-  call s:OnFileReadyToParse()
-endfunction
-
-
 function! s:OnFileReadyToParse( ... )
   " Accepts an optional parameter that is either 0 or 1. If 1, send a
   " FileReadyToParse event notification, whether the buffer has changed or not;
@@ -486,18 +478,30 @@ function! s:OnFileReadyToParse( ... )
     return
   endif
 
-  " Order is important here; we need to extract any information before
-  " reparsing the file again. If we sent the new parse request first, then
-  " the response would always be pending when we called
-  " HandleFileParseRequest.
-  exec s:python_command "ycm_state.HandleFileParseRequest()"
-
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
   if force_parsing || b:changedtick != get( b:, 'ycm_changedtick', -1 )
     exec s:python_command "ycm_state.OnFileReadyToParse()"
+
+    call timer_stop( s:timers.handle_file_parse_request.id )
+    let s:timers.handle_file_parse_request.id = timer_start(
+          \ s:timers.handle_file_parse_request.wait_milliseconds,
+          \ function( 's:HandleFileParseRequest' ) )
+
     let b:ycm_changedtick = b:changedtick
   endif
+endfunction
+
+
+function! s:HandleFileParseRequest( timer_id )
+  if !s:Pyeval( "ycm_state.FileParseRequestReady()" )
+    let s:timers.handle_file_parse_request.id = timer_start(
+          \ s:timers.handle_file_parse_request.wait_milliseconds,
+          \ function( 's:HandleFileParseRequest' ) )
+    return
+  endif
+
+  exec s:python_command "ycm_state.HandleFileParseRequest()"
 endfunction
 
 
@@ -553,8 +557,16 @@ function! s:OnCursorMovedNormalMode()
     return
   endif
 
-  call s:OnFileReadyToParse()
   exec s:python_command "ycm_state.OnCursorMoved()"
+endfunction
+
+
+function! s:OnTextChangedNormalMode()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  call s:OnFileReadyToParse()
 endfunction
 
 
