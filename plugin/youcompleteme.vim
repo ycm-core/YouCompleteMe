@@ -27,9 +27,16 @@ endfunction
 if exists( "g:loaded_youcompleteme" )
   call s:restore_cpo()
   finish
-elseif v:version < 704 || (v:version == 704 && !has('patch143'))
+elseif v:version < 704 || (v:version == 704 && !has( 'patch1578' ))
   echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.143+" |
+        \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.1578+" |
+        \ echohl None
+  call s:restore_cpo()
+  finish
+elseif !has( 'timers' )
+  echohl WarningMsg |
+        \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
+        \ "the timers feature" |
         \ echohl None
   call s:restore_cpo()
   finish
