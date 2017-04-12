@@ -424,7 +424,7 @@ function! s:OnBufferRead()
   call s:SetOmnicompleteFunc()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
-  call s:OnFileReadyToParse()
+  call s:OnFileReadyToParse( 1 )
 endfunction
 
 
@@ -438,7 +438,9 @@ function! s:OnBufferEnter()
   call s:SetOmnicompleteFunc()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
-  call s:OnFileReadyToParse()
+  " Last parse may be outdated because of changes from other buffers. Force a
+  " new parse.
+  call s:OnFileReadyToParse( 1 )
 endfunction
 
 
@@ -465,7 +467,12 @@ function! s:OnCursorHold()
 endfunction
 
 
-function! s:OnFileReadyToParse()
+function! s:OnFileReadyToParse( ... )
+  " Accepts an optional parameter that is either 0 or 1. If 1, send a
+  " FileReadyToParse event notification, whether the buffer has changed or not;
+  " effectively forcing a parse of the buffer. Default is 0.
+  let force_parsing = a:0 > 0 && a:1
+
   if s:Pyeval( 'ycm_state.ServerBecomesReady()' )
     " Server was not ready until now and could not parse previous requests for
     " the current buffer. We need to send them again.
@@ -486,8 +493,8 @@ function! s:OnFileReadyToParse()
   exec s:python_command "ycm_state.HandleFileParseRequest()"
 
   " We only want to send a new FileReadyToParse event notification if the buffer
-  " has changed since the last time we sent one.
-  if b:changedtick != get( b:, 'ycm_changedtick', -1 )
+  " has changed since the last time we sent one, or if forced.
+  if force_parsing || b:changedtick != get( b:, 'ycm_changedtick', -1 )
     exec s:python_command "ycm_state.OnFileReadyToParse()"
     let b:ycm_changedtick = b:changedtick
   endif
