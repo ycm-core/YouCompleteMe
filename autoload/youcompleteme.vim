@@ -641,6 +641,27 @@ function! s:InsideCommentOrStringAndShouldStop()
   return retval
 endfunction
 
+function! s:WordTooShortToComplete()
+  if g:ycm_min_num_of_chars_for_completion == 0
+    return 0
+  end
+
+  let current_col = col('.')
+
+  " handle first char of new word (by searching for end of previous)
+  let [pend_line, pend_col] = searchpos('\>', 'bn', line('.'))
+  if pend_line != 0 && pend_col == current_col - 1
+    return 1
+  end
+
+  " get length of current word (by searching start of current word)
+  let [cstart_line, cstart_col] = searchpos('\<', 'bcn', line('.'))
+  if current_col - cstart_col < g:ycm_min_num_of_chars_for_completion
+    return 1
+  end
+
+  return 0
+endfunction
 
 function! s:OnBlankLine()
   return s:Pyeval( 'not vim.current.line or vim.current.line.isspace()' )
@@ -652,7 +673,7 @@ function! s:InvokeCompletion()
     return
   endif
 
-  if s:InsideCommentOrStringAndShouldStop() || s:OnBlankLine()
+  if s:InsideCommentOrStringAndShouldStop() || s:OnBlankLine() || s:WordTooShortToComplete()
     return
   endif
 
