@@ -22,6 +22,7 @@ set cpo&vim
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
+let s:completion_stopped = 0
 let s:default_completion = {
       \   'start_column': -1,
       \   'candidates': []
@@ -215,11 +216,17 @@ function! s:SetUpKeyMappings()
           \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
   endfor
 
-
   for key in g:ycm_key_list_previous_completion
     " This selects the previous candidate for shift-tab (default)
     exe 'inoremap <expr>' . key .
           \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
+  endfor
+
+  for key in g:ycm_key_list_stop_completion
+    " When selecting a candidate and closing the completion menu with the <C-y>
+    " key, the menu will automatically be reopened because of the TextChangedI
+    " event. We define a command to prevent that.
+    exe 'inoremap <expr>' . key . ' <SID>StopCompletion( "\' . key . '" )'
   endfor
 
   if !empty( g:ycm_key_invoke_completion )
@@ -538,6 +545,16 @@ function! s:OnDeleteChar( key )
 endfunction
 
 
+function! s:StopCompletion( key )
+  call timer_stop( s:pollers.completion.id )
+  if pumvisible()
+    let s:completion_stopped = 1
+    return "\<C-y>"
+  endif
+  return a:key
+endfunction
+
+
 function! s:OnCursorMovedNormalMode()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
@@ -558,6 +575,12 @@ endfunction
 
 function! s:OnTextChangedInsertMode()
   if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  if s:completion_stopped
+    let s:completion_stopped = 0
+    let s:completion = s:default_completion
     return
   endif
 

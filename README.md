@@ -2313,6 +2313,19 @@ Default: `['<S-TAB>', '<Up>']`
 let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>']
 ```
 
+### The `g:ycm_key_list_stop_completion` option
+
+This option controls the key mappings used to close the completion menu. This is
+useful when the menu is blocking the view, when you need to insert the `<TAB>`
+character, or when you want to expand a snippet from [UltiSnips][] and navigate
+through it.
+
+Default: `['<C-y>']`
+
+```viml
+let g:ycm_key_list_stop_completion = ['<C-y>']
+```
+
 ### The `g:ycm_key_invoke_completion` option
 
 This option controls the key mapping used to invoke the completion menu for
