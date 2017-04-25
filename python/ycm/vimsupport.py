@@ -377,8 +377,8 @@ def BufferIsUsable( buffer_object ):
 
 
 def EscapedFilepath( filepath ):
-  return filepath.replace( ' ' , r'\ ' )
-
+  return ( filepath.replace( ' ', r'\ ' )
+                   .replace( '#', r'\#' ) )
 
 # Both |line| and |column| need to be 1-based
 def TryJumpLocationInOpenedTab( filename, line, column ):
