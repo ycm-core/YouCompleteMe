@@ -349,6 +349,7 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
                           'open_loclist_on_ycm_diags': 0 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady', return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
@@ -388,6 +389,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
 @YouCompleteMeInstance( { 'open_loclist_on_ycm_diags': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady', return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.OpenLocationList', new_callable = ExtendedMock )
@@ -431,6 +433,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
                           'enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady', return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
@@ -511,8 +514,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ) ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = diagnostics ):
-      ycm.OnFileReadyToParse()
-      ycm.HandleFileParseRequest( block = True )
+      ycm.OnFileReadyToParse( block = True )
 
     # Error match is added after warning matches.
     assert_that(
