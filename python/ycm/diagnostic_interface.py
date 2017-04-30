@@ -32,6 +32,7 @@ import vim
 class DiagnosticInterface( object ):
   def __init__( self, user_options ):
     self._user_options = user_options
+    self._diagnostics = []
     self._diag_filter = DiagnosticFilter.CreateFromOptions( user_options )
     # Line and column numbers are 1-based
     self._buffer_number_to_line_to_diags = defaultdict(
@@ -60,17 +61,18 @@ class DiagnosticInterface( object ):
     return len( self._FilterDiagnostics( _DiagnosticIsWarning ) )
 
 
-  def PopulateLocationList( self, diags ):
-    vimsupport.SetLocationList(
-      vimsupport.ConvertDiagnosticsToQfList(
-          self._ApplyDiagnosticFilter( diags ) ) )
+  def PopulateLocationList( self ):
+    # Do nothing if loc list is already populated by diag_interface
+    if not self._user_options[ 'always_populate_location_list' ]:
+      self._UpdateLocationList()
+    return bool( self._diagnostics )
 
 
   def UpdateWithNewDiagnostics( self, diags ):
-    normalized_diags = [ _NormalizeDiagnostic( x ) for x in
-            self._ApplyDiagnosticFilter( diags ) ]
+    self._diagnostics = [ _NormalizeDiagnostic( x ) for x in
+                            self._ApplyDiagnosticFilter( diags ) ]
     self._buffer_number_to_line_to_diags = _ConvertDiagListToDict(
-        normalized_diags )
+        self._diagnostics )
 
     if self._user_options[ 'enable_diagnostic_signs' ]:
       self._placed_signs, self._next_sign_id = _UpdateSigns(
@@ -82,7 +84,7 @@ class DiagnosticInterface( object ):
       _UpdateSquiggles( self._buffer_number_to_line_to_diags )
 
     if self._user_options[ 'always_populate_location_list' ]:
-      self.PopulateLocationList( normalized_diags )
+      self._UpdateLocationList()
 
 
   def _ApplyDiagnosticFilter( self, diags, extra_predicate = None ):
@@ -126,6 +128,11 @@ class DiagnosticInterface( object ):
       matched_diags.extend( list(
         self._ApplyDiagnosticFilter( diags, predicate ) ) )
     return matched_diags
+
+
+  def _UpdateLocationList( self ):
+    vimsupport.SetLocationList(
+      vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ) )
 
 
 def _UpdateSquiggles( buffer_number_to_line_to_diags ):
