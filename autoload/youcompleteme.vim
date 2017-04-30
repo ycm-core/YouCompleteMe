@@ -478,19 +478,7 @@ function! s:OnFileReadyToParse()
     call s:SetOmnicompleteFunc()
     return
   endif
-
-  " Order is important here; we need to extract any information before
-  " reparsing the file again. If we sent the new parse request first, then
-  " the response would always be pending when we called
-  " HandleFileParseRequest.
-  exec s:python_command "ycm_state.HandleFileParseRequest()"
-
-  " We only want to send a new FileReadyToParse event notification if the buffer
-  " has changed since the last time we sent one.
-  if b:changedtick != get( b:, 'ycm_changedtick', -1 )
-    exec s:python_command "ycm_state.OnFileReadyToParse()"
-    let b:ycm_changedtick = b:changedtick
-  endif
+  exec s:python_command "ycm_state.OnFileReadyToParse()"
 endfunction
 
 
