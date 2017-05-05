@@ -1652,9 +1652,11 @@ For instance:
 ```viml
 function! s:CustomizeYcmLocationWindow()
   " Move the window to the top of the screen.
-  execute "wincmd K"
+  wincmd K
   " Set the window height to 5.
-  execute "5wincmd _"
+  5wincmd _
+  " Switch back to working window.
+  wincmd p
 endfunction
 
 autocmd User YcmLocationOpened call s:CustomizeYcmLocationWindow()
@@ -1671,9 +1673,9 @@ instance:
 ```viml
 function! s:CustomizeYcmQuickFixWindow()
   " Move the window to the top of the screen.
-  execute "wincmd K"
+  wincmd K
   " Set the window height to 5.
-  execute "5wincmd _"
+  5wincmd _
 endfunction
 
 autocmd User YcmQuickFixOpened call s:CustomizeYcmQuickFixWindow()
