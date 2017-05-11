@@ -3312,7 +3312,7 @@ plugins prevent this event from triggering by exiting Vim through an
 autocommand without using the 'nested' keyword (see ':h autocmd-nested'). One
 of these plugins is vim-nerdtree-tabs [68]. You should identify which plugin is
 responsible for the issue and report it to the plugin author. Note that when
-this happens, ycmd [43] will automatically shut itself down after 3 hours.
+this happens, ycmd [43] will automatically shut itself down after 30 minutes.
 
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*
