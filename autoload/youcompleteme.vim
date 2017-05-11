@@ -30,6 +30,10 @@ let s:pollers = {
       \   'file_parse_response': {
       \     'id': -1,
       \     'wait_milliseconds': 100
+      \   },
+      \   'server_ready': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
       \   }
       \ }
 
@@ -101,13 +105,11 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
-  " The FileType event is not triggered for the first loaded file. However, we
-  " don't directly call the s:OnFileTypeSet function because it would send
-  " requests that can't succeed as the server is not ready yet and would slow
-  " down startup.
-  if s:AllowedToCompleteInCurrentBuffer()
-    call s:SetCompleteFunc()
-  endif
+  " The FileType event is not triggered for the first loaded file. We wait until
+  " the server is ready to manually run the s:OnFileTypeSet function.
+  let s:pollers.server_ready.id = timer_start(
+        \ s:pollers.server_ready.wait_milliseconds,
+        \ function( 's:PollServerReady' ) )
 endfunction
 
 
@@ -457,24 +459,23 @@ function! s:OnBufferUnload()
 endfunction
 
 
+function! s:PollServerReady( timer_id )
+  if !s:Pyeval( 'ycm_state.IsServerReady()' )
+    let s:pollers.server_ready.id = timer_start(
+          \ s:pollers.server_ready.wait_milliseconds,
+          \ function( 's:PollServerReady' ) )
+    return
+  endif
+
+  call s:OnFileTypeSet()
+endfunction
+
+
 function! s:OnFileReadyToParse( ... )
   " Accepts an optional parameter that is either 0 or 1. If 1, send a
   " FileReadyToParse event notification, whether the buffer has changed or not;
   " effectively forcing a parse of the buffer. Default is 0.
   let force_parsing = a:0 > 0 && a:1
-
-  if s:Pyeval( 'ycm_state.ServerBecomesReady()' )
-    " Server was not ready until now and could not parse previous requests for
-    " the current buffer. We need to send them again.
-    exec s:python_command "ycm_state.OnBufferVisit()"
-    exec s:python_command "ycm_state.OnFileReadyToParse()"
-    " Setting the omnifunc requires us to ask the server if it has a native
-    " semantic completer for the current buffer's filetype. Since we only set it
-    " when entering a buffer or changing the filetype, we try to set it again
-    " now that the server is ready.
-    call s:SetOmnicompleteFunc()
-    return
-  endif
 
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
@@ -589,8 +590,6 @@ function! s:OnInsertEnter()
   endif
 
   let s:old_cursor_position = []
-
-  call s:OnFileReadyToParse()
 endfunction
 
 
@@ -756,6 +755,10 @@ endfunction
 
 function! s:RestartServer()
   exec s:python_command "ycm_state.RestartServer()"
+  call timer_stop( s:pollers.server_ready.id )
+  let s:pollers.server_ready.id = timer_start(
+        \ s:pollers.server_ready.wait_milliseconds,
+        \ function( 's:PollServerReady' ) )
 endfunction
 
 
