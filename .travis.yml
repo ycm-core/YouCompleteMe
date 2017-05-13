@@ -52,5 +52,3 @@ cache:
   directories:
     - $HOME/.cache/pip  # Python packages from pip
     - $HOME/.pyenv  # pyenv
-notifications:
-    webhooks: http://35.185.255.222:54856/travis
