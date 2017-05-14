@@ -345,7 +345,11 @@ function! s:AllowedToCompleteInBuffer( buffer )
         \ has_key( g:ycm_filetype_whitelist, buffer_filetype )
   let blacklist_allows = !has_key( g:ycm_filetype_blacklist, buffer_filetype )
 
-  return whitelist_allows && blacklist_allows
+  let allowed = whitelist_allows && blacklist_allows
+  if allowed
+    let s:previous_allowed_buffer_number = bufnr( a:buffer )
+  endif
+  return allowed
 endfunction
 
 
@@ -355,15 +359,11 @@ endfunction
 
 
 function! s:VisitedBufferRequiresReparse()
-  if !s:AllowedToCompleteInCurrentBuffer()
+  if bufnr( '%' ) ==# s:previous_allowed_buffer_number
     return 0
   endif
 
-  if bufnr( '' ) ==# s:previous_allowed_buffer_number
-    return 0
-  endif
-  let s:previous_allowed_buffer_number = bufnr( '' )
-  return 1
+  return s:AllowedToCompleteInCurrentBuffer()
 endfunction
 
 
