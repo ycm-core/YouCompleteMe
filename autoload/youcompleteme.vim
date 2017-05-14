@@ -85,12 +85,8 @@ function! youcompleteme#Enable()
     " Note that these events will NOT trigger for the file vim is started with;
     " so if you do "vim foo.cc", these events will not trigger when that buffer
     " is read. This is because youcompleteme#Enable() is called on VimEnter and
-    " that happens *after* BufRead/FileType has already triggered for the
-    " initial file.
-    " We also need to trigger buf init code on the FileType event because when
-    " the user does :enew and then :set ft=something, we need to run buf init
-    " code again.
-    autocmd BufRead,FileType * call s:OnBufferRead()
+    " that happens *after* FileType has already triggered for the initial file.
+    autocmd FileType * call s:OnFileTypeSet()
     autocmd BufEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
     autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
@@ -100,10 +96,10 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
-  " BufRead/FileType events are not triggered for the first loaded file.
-  " However, we don't directly call the s:OnBufferRead function because it
-  " would send requests that can't succeed as the server is not ready yet and
-  " would slow down startup.
+  " The FileType event is not triggered for the first loaded file. However, we
+  " don't directly call the s:OnFileTypeSet function because it would send
+  " requests that can't succeed as the server is not ready yet and would slow
+  " down startup.
   if s:AllowedToCompleteInCurrentBuffer()
     call s:SetCompleteFunc()
   endif
@@ -414,7 +410,7 @@ function! s:OnCompleteDone()
 endfunction
 
 
-function! s:OnBufferRead()
+function! s:OnFileTypeSet()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
