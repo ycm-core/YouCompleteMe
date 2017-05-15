@@ -268,6 +268,7 @@ class YouCompleteMe( object ):
 
   def _ShutdownServer( self ):
     SendShutdownRequest()
+    utils.CloseStandardStreams( self._server_popen )
 
 
   def RestartServer( self ):
