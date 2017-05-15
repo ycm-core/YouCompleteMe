@@ -35,7 +35,8 @@ from ycm.tests import PathToTestFile, YouCompleteMeInstance
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
                              UnknownExtraConf, ServerError )
 
-from hamcrest import assert_that, contains, has_entries, has_item
+from hamcrest import ( assert_that, contains, has_entries, has_entry, has_item,
+                       has_items, has_key, is_not )
 from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
 
@@ -489,3 +490,72 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
       'event_notification'
     )
   )
+
+
+@patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
+        return_value = [ 'foo', 'bar' ] )
+@YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
+def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
+    ycm, *args ):
+
+  current_buffer = VimBuffer( name = 'current_buffer',
+                              filetype = 'some_filetype' )
+
+  with patch( 'ycm.client.base_request.BaseRequest.'
+              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+    with MockVimBuffers( [ current_buffer ], current_buffer ):
+      ycm.OnFileReadyToParse()
+      assert_that(
+        # Positional arguments passed to PostDataToHandlerAsync.
+        post_data_to_handler_async.call_args[ 0 ],
+        contains(
+          has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
+          'event_notification'
+        )
+      )
+
+      # Do not send again syntax keywords in subsequent requests.
+      ycm.OnFileReadyToParse()
+      assert_that(
+        # Positional arguments passed to PostDataToHandlerAsync.
+        post_data_to_handler_async.call_args[ 0 ],
+        contains(
+          is_not( has_key( 'syntax_keywords' ) ),
+          'event_notification'
+        )
+      )
+
+
+@patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
+        return_value = [ 'foo', 'bar' ] )
+@YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
+def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
+    ycm, *args ):
+
+  current_buffer = VimBuffer( name = 'current_buffer',
+                              filetype = 'some_filetype' )
+
+  with patch( 'ycm.client.base_request.BaseRequest.'
+              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+    with MockVimBuffers( [ current_buffer ], current_buffer ):
+      ycm.OnFileReadyToParse()
+      assert_that(
+        # Positional arguments passed to PostDataToHandlerAsync.
+        post_data_to_handler_async.call_args[ 0 ],
+        contains(
+          has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
+          'event_notification'
+        )
+      )
+
+      # Send again the syntax keywords after restarting the server.
+      ycm.RestartServer()
+      ycm.OnFileReadyToParse()
+      assert_that(
+        # Positional arguments passed to PostDataToHandlerAsync.
+        post_data_to_handler_async.call_args[ 0 ],
+        contains(
+          has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
+          'event_notification'
+        )
+      )
