@@ -167,6 +167,7 @@ attempt to load the C runtime library incorrectly.' |youcompleteme-when-i-start-
 module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-command-is-disabled-pythons-site-module-could-not-be-loaded|
   34. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
   35. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
+  36. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
  12. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  13. Contact                                            |youcompleteme-contact|
  14. License                                            |youcompleteme-license|
@@ -3302,12 +3303,23 @@ In recent versions of Vim, you can install YCM in a folder under
                                   \ | autocmd! load_ycm
   augroup END
 <
+-------------------------------------------------------------------------------
+                         *youcompleteme-ycm-does-not-shut-down-when-i-quit-vim*
+YCM does not shut down when I quit Vim ~
+
+YCM relies on the 'VimLeave' event to shut down the ycmd server [43]. Some
+plugins prevent this event from triggering by exiting Vim through an
+autocommand without using the 'nested' keyword (see ':h autocmd-nested'). One
+of these plugins is vim-nerdtree-tabs [68]. You should identify which plugin is
+responsible for the issue and report it to the plugin author. Note that when
+this happens, ycmd [43] will automatically shut itself down after 30 minutes.
+
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[68]. By participating in this project you agree to abide by its terms.
+[69]. By participating in this project you agree to abide by its terms.
 
 ===============================================================================
                                                         *youcompleteme-contact*
@@ -3317,7 +3329,7 @@ If you have questions about the plugin or need help, please join the Gitter
 room [1] or use the ycm-users [62] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[69].
+[70].
 
 The latest version of the plugin is available at
 http://valloric.github.io/YouCompleteMe/.
@@ -3328,7 +3340,7 @@ The author's homepage is http://val.markovic.io.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [70]. © 2015-2017
+This software is licensed under the GPL v3 license [71]. © 2015-2017
 YouCompleteMe contributors
 
 ===============================================================================
@@ -3402,8 +3414,9 @@ References ~
 [65] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [66] https://github.com/vim/vim/issues/717
 [67] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
-[68] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[69] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[70] http://www.gnu.org/copyleft/gpl.html
+[68] https://github.com/jistr/vim-nerdtree-tabs
+[69] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[70] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[71] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
