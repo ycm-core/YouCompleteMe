@@ -83,19 +83,6 @@ def TextBeforeCursor():
   return ToUnicode( vim.current.line[ :CurrentColumn() ] )
 
 
-# Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '7.4.301'
-def VimVersionAtLeast( version_string ):
-  major, minor, patch = [ int( x ) for x in version_string.split( '.' ) ]
-
-  # For Vim 7.4.301, v:version is '704'
-  actual_major_and_minor = GetIntValue( 'v:version' )
-  matching_major_and_minor = major * 100 + minor
-  if actual_major_and_minor != matching_major_and_minor:
-    return actual_major_and_minor > matching_major_and_minor
-
-  return GetBoolValue( 'has("patch{0}")'.format( patch ) )
-
-
 # Note the difference between buffer OPTIONS and VARIABLES; the two are not
 # the same.
 def GetBufferOption( buffer_object, option ):

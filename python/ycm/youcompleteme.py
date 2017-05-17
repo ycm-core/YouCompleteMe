@@ -28,7 +28,6 @@ import base64
 import json
 import logging
 import os
-import re
 import signal
 import vim
 from subprocess import PIPE
@@ -442,31 +441,6 @@ class YouCompleteMe( object ):
 
 
   def _FilterToMatchingCompletions( self, completions, full_match_only ):
-    self._PatchBasedOnVimVersion()
-    return self._FilterToMatchingCompletions( completions, full_match_only)
-
-
-  def _HasCompletionsThatCouldBeCompletedWithMoreText( self, completions ):
-    self._PatchBasedOnVimVersion()
-    return self._HasCompletionsThatCouldBeCompletedWithMoreText( completions )
-
-
-  def _PatchBasedOnVimVersion( self ):
-    if vimsupport.VimVersionAtLeast( "7.4.774" ):
-      self._HasCompletionsThatCouldBeCompletedWithMoreText = \
-        self._HasCompletionsThatCouldBeCompletedWithMoreText_NewerVim
-      self._FilterToMatchingCompletions = \
-        self._FilterToMatchingCompletions_NewerVim
-    else:
-      self._FilterToMatchingCompletions = \
-        self._FilterToMatchingCompletions_OlderVim
-      self._HasCompletionsThatCouldBeCompletedWithMoreText = \
-        self._HasCompletionsThatCouldBeCompletedWithMoreText_OlderVim
-
-
-  def _FilterToMatchingCompletions_NewerVim( self,
-                                             completions,
-                                             full_match_only ):
     """Filter to completions matching the item Vim said was completed"""
     completed = vimsupport.GetVariableValue( 'v:completed_item' )
     for completion in completions:
@@ -482,24 +456,7 @@ class YouCompleteMe( object ):
         yield completion
 
 
-  def _FilterToMatchingCompletions_OlderVim( self, completions,
-                                             full_match_only ):
-    """ Filter to completions matching the buffer text """
-    if full_match_only:
-      return # Only supported in 7.4.774+
-    # No support for multiple line completions
-    text = vimsupport.TextBeforeCursor()
-    for completion in completions:
-      word = completion[ "insertion_text" ]
-      # Trim complete-ending character if needed
-      text = re.sub( r"[^a-zA-Z0-9_]$", "", text )
-      buffer_text = text[ -1 * len( word ) : ]
-      if buffer_text == word:
-        yield completion
-
-
-  def _HasCompletionsThatCouldBeCompletedWithMoreText_NewerVim( self,
-                                                                completions ):
+  def _HasCompletionsThatCouldBeCompletedWithMoreText( self, completions ):
     completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
     if not completed_item:
       return False
@@ -523,19 +480,6 @@ class YouCompleteMe( object ):
         continue
       if word.startswith( completed_word ):
         return True
-    return False
-
-
-  def _HasCompletionsThatCouldBeCompletedWithMoreText_OlderVim( self,
-                                                                completions ):
-    # No support for multiple line completions
-    text = vimsupport.TextBeforeCursor()
-    for completion in completions:
-      word = utils.ToUnicode(
-          ConvertCompletionDataToVimData( completion )[ 'word' ] )
-      for i in range( 1, len( word ) - 1 ): # Excluding full word
-        if text[ -1 * i : ] == word[ : i ]:
-          return True
     return False
 
 
