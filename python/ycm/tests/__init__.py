@@ -65,7 +65,7 @@ def _IsReady():
   return BaseRequest.GetDataFromHandler( 'ready' )
 
 
-def _WaitUntilReady( timeout = 5 ):
+def WaitUntilReady( timeout = 5 ):
   expiration = time.time() + timeout
   while True:
     try:
@@ -109,7 +109,7 @@ def YouCompleteMeInstance( custom_options = {} ):
     @functools.wraps( test )
     def Wrapper( *args, **kwargs ):
       ycm = YouCompleteMe( _MakeUserOptions( custom_options ) )
-      _WaitUntilReady()
+      WaitUntilReady()
       try:
         test( ycm, *args, **kwargs )
       finally:

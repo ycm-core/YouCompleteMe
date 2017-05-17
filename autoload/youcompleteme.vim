@@ -26,6 +26,16 @@ let s:omnifunc_mode = 0
 let s:old_cursor_position = []
 let s:cursor_moved = 0
 let s:previous_allowed_buffer_number = 0
+let s:pollers = {
+      \   'file_parse_response': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
+      \   },
+      \   'server_ready': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
+      \   }
+      \ }
 
 
 " When both versions are available, we prefer Python 3 over Python 2:
@@ -75,10 +85,6 @@ function! youcompleteme#Enable()
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
 
-  if g:ycm_allow_changing_updatetime && &updatetime > 2000
-    set ut=2000
-  endif
-
   call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
     autocmd!
@@ -93,20 +99,17 @@ function! youcompleteme#Enable()
     autocmd FileType * call s:OnFileTypeSet()
     autocmd BufEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
-    autocmd CursorHold,CursorHoldI * call s:OnCursorHold()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd InsertEnter * call s:OnInsertEnter()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
-  " The FileType event is not triggered for the first loaded file. However, we
-  " don't directly call the s:OnFileTypeSet function because it would send
-  " requests that can't succeed as the server is not ready yet and would slow
-  " down startup.
-  if s:AllowedToCompleteInCurrentBuffer()
-    call s:SetCompleteFunc()
-  endif
+  " The FileType event is not triggered for the first loaded file. We wait until
+  " the server is ready to manually run the s:OnFileTypeSet function.
+  let s:pollers.server_ready.id = timer_start(
+        \ s:pollers.server_ready.wait_milliseconds,
+        \ function( 's:PollServerReady' ) )
 endfunction
 
 
@@ -114,6 +117,7 @@ function! youcompleteme#EnableCursorMovedAutocommands()
   augroup ycmcompletemecursormove
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode()
   augroup END
 endfunction
@@ -373,10 +377,8 @@ function! s:SetUpCpoptions()
   set cpoptions+=B
 
   " This prevents the display of "Pattern not found" & similar messages during
-  " completion. This is only available since Vim 7.4.314
-  if s:Pyeval( 'vimsupport.VimVersionAtLeast("7.4.314")' )
-    set shortmess+=c
-  endif
+  " completion.
+  set shortmess+=c
 endfunction
 
 
@@ -457,13 +459,15 @@ function! s:OnBufferUnload()
 endfunction
 
 
-function! s:OnCursorHold()
-  if !s:AllowedToCompleteInCurrentBuffer()
+function! s:PollServerReady( timer_id )
+  if !s:Pyeval( 'ycm_state.IsServerReady()' )
+    let s:pollers.server_ready.id = timer_start(
+          \ s:pollers.server_ready.wait_milliseconds,
+          \ function( 's:PollServerReady' ) )
     return
   endif
 
-  call s:SetUpCompleteopt()
-  call s:OnFileReadyToParse()
+  call s:OnFileTypeSet()
 endfunction
 
 
@@ -473,31 +477,30 @@ function! s:OnFileReadyToParse( ... )
   " effectively forcing a parse of the buffer. Default is 0.
   let force_parsing = a:0 > 0 && a:1
 
-  if s:Pyeval( 'ycm_state.ServerBecomesReady()' )
-    " Server was not ready until now and could not parse previous requests for
-    " the current buffer. We need to send them again.
-    exec s:python_command "ycm_state.OnBufferVisit()"
-    exec s:python_command "ycm_state.OnFileReadyToParse()"
-    " Setting the omnifunc requires us to ask the server if it has a native
-    " semantic completer for the current buffer's filetype. Since we only set it
-    " when entering a buffer or changing the filetype, we try to set it again
-    " now that the server is ready.
-    call s:SetOmnicompleteFunc()
-    return
-  endif
-
-  " Order is important here; we need to extract any information before
-  " reparsing the file again. If we sent the new parse request first, then
-  " the response would always be pending when we called
-  " HandleFileParseRequest.
-  exec s:python_command "ycm_state.HandleFileParseRequest()"
-
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
   if force_parsing || b:changedtick != get( b:, 'ycm_changedtick', -1 )
     exec s:python_command "ycm_state.OnFileReadyToParse()"
+
+    call timer_stop( s:pollers.file_parse_response.id )
+    let s:pollers.file_parse_response.id = timer_start(
+          \ s:pollers.file_parse_response.wait_milliseconds,
+          \ function( 's:PollFileParseResponse' ) )
+
     let b:ycm_changedtick = b:changedtick
   endif
+endfunction
+
+
+function! s:PollFileParseResponse( ... )
+  if !s:Pyeval( "ycm_state.FileParseRequestReady()" )
+    let s:pollers.file_parse_response.id = timer_start(
+          \ s:pollers.file_parse_response.wait_milliseconds,
+          \ function( 's:PollFileParseResponse' ) )
+    return
+  endif
+
+  exec s:python_command "ycm_state.HandleFileParseRequest()"
 endfunction
 
 
@@ -519,6 +522,24 @@ function! s:SetOmnicompleteFunc()
     let &omnifunc = ''
     let &l:omnifunc = ''
   endif
+endfunction
+
+
+function! s:OnCursorMovedNormalMode()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  exec s:python_command "ycm_state.OnCursorMoved()"
+endfunction
+
+
+function! s:OnTextChangedNormalMode()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  call s:OnFileReadyToParse()
 endfunction
 
 
@@ -548,16 +569,6 @@ function! s:OnTextChangedInsertMode()
 endfunction
 
 
-function! s:OnCursorMovedNormalMode()
-  if !s:AllowedToCompleteInCurrentBuffer()
-    return
-  endif
-
-  call s:OnFileReadyToParse()
-  exec s:python_command "ycm_state.OnCursorMoved()"
-endfunction
-
-
 function! s:OnInsertLeave()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
@@ -579,8 +590,6 @@ function! s:OnInsertEnter()
   endif
 
   let s:old_cursor_position = []
-
-  call s:OnFileReadyToParse()
 endfunction
 
 
@@ -746,6 +755,10 @@ endfunction
 
 function! s:RestartServer()
   exec s:python_command "ycm_state.RestartServer()"
+  call timer_stop( s:pollers.server_ready.id )
+  let s:pollers.server_ready.id = timer_start(
+        \ s:pollers.server_ready.wait_milliseconds,
+        \ function( 's:PollServerReady' ) )
 endfunction
 
 
