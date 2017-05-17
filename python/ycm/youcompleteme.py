@@ -41,8 +41,7 @@ from ycmd.request_wrap import RequestWrap
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
-from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                      HandleServerException )
+from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
@@ -228,10 +227,9 @@ class YouCompleteMe( object ):
 
 
   def CheckIfServerIsReady( self ):
-    if not self._server_is_ready_with_cache:
-      with HandleServerException( display = False ):
-        self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
-            'ready' )
+    if not self._server_is_ready_with_cache and self.IsServerAlive():
+      self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
+          'ready', display_message = False )
     return self._server_is_ready_with_cache
 
 
@@ -332,10 +330,9 @@ class YouCompleteMe( object ):
 
 
   def GetDefinedSubcommands( self ):
-    with HandleServerException():
-      return BaseRequest.PostDataToHandler( BuildRequestData(),
-                                            'defined_subcommands' )
-    return []
+    subcommands = BaseRequest.PostDataToHandler( BuildRequestData(),
+                                                 'defined_subcommands' )
+    return subcommands if subcommands else []
 
 
   def GetCurrentCompletionRequest( self ):
@@ -656,13 +653,12 @@ class YouCompleteMe( object ):
 
 
   def ShowDetailedDiagnostic( self ):
-    with HandleServerException():
-      detailed_diagnostic = BaseRequest.PostDataToHandler(
-          BuildRequestData(), 'detailed_diagnostic' )
+    detailed_diagnostic = BaseRequest.PostDataToHandler(
+        BuildRequestData(), 'detailed_diagnostic' )
 
-      if 'message' in detailed_diagnostic:
-        vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
-                                   warning = False )
+    if 'message' in detailed_diagnostic:
+      vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
+                                 warning = False )
 
 
   def ForceCompileAndDiagnostics( self ):

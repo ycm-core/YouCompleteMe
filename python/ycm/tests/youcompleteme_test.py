@@ -337,7 +337,7 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_NoSelection_test(
 def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test( ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
-    with patch( 'ycm.client.base_request.JsonFromFuture',
+    with patch( 'ycm.client.base_request._JsonFromFuture',
                 return_value = [ 'SomeCommand', 'AnotherCommand' ] ):
       assert_that(
         ycm.GetDefinedSubcommands(),
@@ -356,7 +356,7 @@ def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test( ycm,
                                                               logger ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
-    with patch( 'ycm.client.base_request.JsonFromFuture',
+    with patch( 'ycm.client.base_request._JsonFromFuture',
                 side_effect = ServerError( 'Server error' ) ):
       result = ycm.GetDefinedSubcommands()
 
@@ -374,7 +374,7 @@ def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
 
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
-    with patch( 'ycm.client.base_request.JsonFromFuture',
+    with patch( 'ycm.client.base_request._JsonFromFuture',
                 return_value = { 'message': 'some_detailed_diagnostic' } ):
       ycm.ShowDetailedDiagnostic(),
 
