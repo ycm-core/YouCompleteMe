@@ -26,7 +26,7 @@ import vim
 from ycm import vimsupport
 from ycmd import utils
 from ycmd.completers.completer import Completer
-from ycm.client.base_request import BaseRequest, HandleServerException
+from ycm.client.base_request import BaseRequest
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'
 OMNIFUNC_NOT_LIST = ( 'Omnifunc did not return a list or a dict with a "words" '
@@ -124,7 +124,6 @@ class OmniCompleter( Completer ):
       'query': query
     }
 
-    with HandleServerException():
-      return BaseRequest.PostDataToHandler( request_data,
-                                            'filter_and_sort_candidates' )
-    return candidates
+    response = BaseRequest.PostDataToHandler( request_data,
+                                              'filter_and_sort_candidates' )
+    return response if response is not None else candidates

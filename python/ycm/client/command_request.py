@@ -22,8 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                      HandleServerException )
+from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm import vimsupport
 from ycmd.utils import ToUnicode
 
@@ -53,9 +52,8 @@ class CommandRequest( BaseRequest ):
       'completer_target': self._completer_target,
       'command_arguments': self._arguments
     } )
-    with HandleServerException():
-      self._response = self.PostDataToHandler( request_data,
-                                               'run_completer_command' )
+    self._response = self.PostDataToHandler( request_data,
+                                             'run_completer_command' )
 
 
   def Response( self ):

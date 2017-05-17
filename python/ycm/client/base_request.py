@@ -22,7 +22,6 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-import contextlib
 import logging
 import json
 import vim
@@ -58,28 +57,69 @@ class BaseRequest( object ):
   def Response( self ):
     return {}
 
+
+  @staticmethod
+  def HandleFuture( future, display = True, truncate = False ):
+    """Get the server response from a |future| object and catch any exception
+    while doing so. If an exception is raised because of a unknown
+    .ycm_extra_conf.py file, load the file or ignore it after asking the user.
+    For other exceptions, log the exception and display its message to the user
+    on the Vim status line. Unset the |display| parameter to hide the message
+    from the user. Set the |truncate| parameter to avoid hit-enter prompts from
+    this message."""
+    try:
+      try:
+        return _JsonFromFuture( future )
+      except UnknownExtraConf as e:
+        if vimsupport.Confirm( str( e ) ):
+          _LoadExtraConfFile( e.extra_conf_file )
+        else:
+          _IgnoreExtraConfFile( e.extra_conf_file )
+    except BaseRequest.Requests().exceptions.ConnectionError:
+      # We don't display this exception to the user since it is likely to happen
+      # for each subsequent request (typically if the server crashed) and we
+      # don't want to spam the user with it.
+      _logger.exception( 'Unable to connect to server' )
+    except Exception as e:
+      _logger.exception( 'Error while handling server response' )
+      if display:
+        DisplayServerException( e, truncate )
+
+    return None
+
+
   # This method blocks
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
+  # See the HandleFuture method for the |display| and |truncate| parameters.
   @staticmethod
-  def GetDataFromHandler( handler, timeout = _READ_TIMEOUT_SEC ):
-    return JsonFromFuture( BaseRequest._TalkToHandlerAsync( '',
-                                                            handler,
-                                                            'GET',
-                                                            timeout ) )
+  def GetDataFromHandler( handler,
+                          timeout = _READ_TIMEOUT_SEC,
+                          display = True,
+                          truncate = False ):
+    return BaseRequest.HandleFuture(
+        BaseRequest._TalkToHandlerAsync( '', handler, 'GET', timeout ),
+        display,
+        truncate )
 
 
   # This is the blocking version of the method. See below for async.
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
+  # See the HandleFuture method for the |display| and |truncate| parameters.
   @staticmethod
-  def PostDataToHandler( data, handler, timeout = _READ_TIMEOUT_SEC ):
-    return JsonFromFuture( BaseRequest.PostDataToHandlerAsync( data,
-                                                               handler,
-                                                               timeout ) )
+  def PostDataToHandler( data,
+                         handler,
+                         timeout = _READ_TIMEOUT_SEC,
+                         display = True,
+                         truncate = False ):
+    return BaseRequest.HandleFuture(
+        BaseRequest.PostDataToHandlerAsync( data, handler, timeout ),
+        display,
+        truncate )
 
 
-  # This returns a future! Use JsonFromFuture to get the value.
+  # This returns a future! Use HandleFuture to get the value.
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
   @staticmethod
@@ -87,7 +127,7 @@ class BaseRequest( object ):
     return BaseRequest._TalkToHandlerAsync( data, handler, 'POST', timeout )
 
 
-  # This returns a future! Use JsonFromFuture to get the value.
+  # This returns a future! Use HandleFuture to get the value.
   # |method| is either 'POST' or 'GET'.
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
@@ -185,7 +225,7 @@ def BuildRequestData( buffer_number = None ):
   }
 
 
-def JsonFromFuture( future ):
+def _JsonFromFuture( future ):
   response = future.result()
   _ValidateResponseObject( response )
   if response.status_code == BaseRequest.Requests().codes.server_error:
@@ -198,43 +238,6 @@ def JsonFromFuture( future ):
   if response.text:
     return response.json()
   return None
-
-
-@contextlib.contextmanager
-def HandleServerException( display = True, truncate = False ):
-  """Catch any exception raised through server communication. If it is raised
-  because of a unknown .ycm_extra_conf.py file, load the file or ignore it after
-  asking the user. Otherwise, log the exception and display its message to the
-  user on the Vim status line. Unset the |display| parameter to hide the message
-  from the user. Set the |truncate| parameter to avoid hit-enter prompts from
-  this message.
-
-  The GetDataFromHandler, PostDataToHandler, and JsonFromFuture functions should
-  always be wrapped by this function to avoid Python exceptions bubbling up to
-  the user.
-
-  Example usage:
-
-   with HandleServerException():
-     response = BaseRequest.PostDataToHandler( ... )
-  """
-  try:
-    try:
-      yield
-    except UnknownExtraConf as e:
-      if vimsupport.Confirm( str( e ) ):
-        _LoadExtraConfFile( e.extra_conf_file )
-      else:
-        _IgnoreExtraConfFile( e.extra_conf_file )
-  except BaseRequest.Requests().exceptions.ConnectionError:
-    # We don't display this exception to the user since it is likely to happen
-    # for each subsequent request (typically if the server crashed) and we
-    # don't want to spam the user with it.
-    _logger.exception( 'Unable to connect to server' )
-  except Exception as e:
-    _logger.exception( 'Error while handling server response' )
-    if display:
-      DisplayServerException( e, truncate )
 
 
 def _LoadExtraConfFile( filepath ):
