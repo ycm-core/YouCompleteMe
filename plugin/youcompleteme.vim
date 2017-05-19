@@ -57,9 +57,6 @@ let g:loaded_youcompleteme = 1
 " The only defaults that are here are the ones that are only relevant to the YCM
 " Vim client and not the ycmd server.
 
-let g:ycm_allow_changing_updatetime =
-      \ get( g:, 'ycm_allow_changing_updatetime', 1 )
-
 let g:ycm_open_loclist_on_ycm_diags =
       \ get( g:, 'ycm_open_loclist_on_ycm_diags', 1 )
 
