@@ -38,13 +38,17 @@ class Buffer( object ):
 
 
   def FileParseRequestReady( self, block = False ):
-    return self._parse_tick == 0 or block or self._parse_request.Done()
+    return bool( self._parse_request and
+                 ( block or self._parse_request.Done() ) )
 
 
   def SendParseRequest( self, extra_data ):
     self._parse_request = EventNotification( 'FileReadyToParse',
                                              extra_data = extra_data )
     self._parse_request.Start()
+    # Decrement handled tick to ensure correct handling when we are forcing
+    # reparse on buffer visit and changed tick remains the same.
+    self._handled_tick -= 1
     self._parse_tick = self._ChangedTick()
 
 
@@ -53,8 +57,8 @@ class Buffer( object ):
 
 
   def UpdateDiagnostics( self ):
-    diagnostics = self._parse_request.Response()
-    self._diag_interface.UpdateWithNewDiagnostics( diagnostics )
+    self._diag_interface.UpdateWithNewDiagnostics(
+      self._parse_request.Response() )
 
 
   def PopulateLocationList( self ):

@@ -232,6 +232,10 @@ class YouCompleteMe( object ):
     return self._server_is_ready_with_cache
 
 
+  def IsServerReadyWithCache( self ):
+    return self._server_is_ready_with_cache
+
+
   def _NotifyUserIfServerCrashed( self ):
     if self._user_notified_about_crash or self.IsServerAlive():
       return
@@ -355,28 +359,26 @@ class YouCompleteMe( object ):
              self.NativeFiletypeCompletionAvailable() )
 
 
-  def OnFileReadyToParse( self, block = False, force = False ):
+  def NeedsReparse( self ):
+    return self._GetCurrentBuffer().NeedsReparse()
+
+
+  def OnFileReadyToParse( self ):
     if not self.IsServerAlive():
       self._NotifyUserIfServerCrashed()
       return
 
-    if not self.IsServerReady():
+    if not self.IsServerReadyWithCache():
       return
 
     self._omnicomp.OnFileReadyToParse( None )
 
-    self.HandleFileParseRequest()
+    extra_data = {}
+    self._AddTagsFilesIfNeeded( extra_data )
+    self._AddSyntaxDataIfNeeded( extra_data )
+    self._AddExtraConfDataIfNeeded( extra_data )
 
-    current_buffer = self._GetCurrentBuffer()
-    if force_parsing or current_buffer.NeedsReparse():
-      extra_data = {}
-      self._AddTagsFilesIfNeeded( extra_data )
-      self._AddSyntaxDataIfNeeded( extra_data )
-      self._AddExtraConfDataIfNeeded( extra_data )
-
-      current_buffer.SendParseRequest( extra_data )
-      if block:
-        self.HandleFileParseRequest()
+    self._GetCurrentBuffer().SendParseRequest( extra_data )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -543,21 +545,44 @@ class YouCompleteMe( object ):
 
 
   def FileParseRequestReady( self ):
-    return self._GetCurrentBuffer().FileParseRequestReady()
+    # Return True if server is not ready yet, to stop repeating check timer.
+    return ( not self.IsServerReadyWithCache() or
+             self._GetCurrentBuffer().FileParseRequestReady() )
 
 
-  def HandleFileParseRequest( self ):
-    current_buffer = self._GetCurrentBuffer()
-    if current_buffer.IsResponseHandled():
+  def HandleFileParseRequest( self, block = False ):
+    if not self.IsServerReadyWithCache():
       return
 
+    current_buffer = self._GetCurrentBuffer()
+    # Order is important here:
+    # FileParseRequestReady has a low cost, while
     # NativeFiletypeCompletionUsable is a blocking server request
-    if self.NativeFiletypeCompletionUsable():
-      current_buffer.GetResponse()
+    if ( not current_buffer.IsResponseHandled() and
+         current_buffer.FileParseRequestReady( block ) and
+         self.NativeFiletypeCompletionUsable() ):
+
       if self.ShouldDisplayDiagnostics():
         current_buffer.UpdateDiagnostics()
+      else:
+        # YCM client has a hard-coded list of filetypes which are known
+        # to support diagnostics, self.DiagnosticUiSupportedForCurrentFiletype()
+        #
+        # For filetypes which don't support diagnostics, we just want to check
+        # the _latest_file_parse_request for any exception or UnknownExtraConf
+        # response, to allow the server to raise configuration warnings, etc.
+        # to the user. We ignore any other supplied data.
+        current_buffer.GetResponse()
 
-    current_buffer.MarkResponseHandled()
+      # We set the file parse request as handled because we want to prevent
+      # repeated issuing of the same warnings/errors/prompts. Setting this
+      # makes IsRequestHandled return True until the next request is created.
+      #
+      # Note: it is the server's responsibility to determine the frequency of
+      # error/warning/prompts when receiving a FileReadyToParse event, but
+      # it our responsibility to ensure that we only apply the
+      # warning/error/prompt received once (for each event).
+      current_buffer.MarkResponseHandled()
 
 
   def DebugInfo( self ):
@@ -666,7 +691,8 @@ class YouCompleteMe( object ):
     vimsupport.PostVimMessage(
         'Forcing compilation, this will block Vim until done.',
         warning = False )
-    self.OnFileReadyToParse( block = True )
+    self.OnFileReadyToParse()
+    self.HandleFileParseRequest( block = True )
     vimsupport.PostVimMessage( 'Diagnostics refreshed', warning = False )
     return True
 
@@ -691,7 +717,7 @@ class YouCompleteMe( object ):
     if filetype in self._filetypes_with_keywords_loaded:
       return
 
-    if self.IsServerReady():
+    if self.IsServerReadyWithCache():
       self._filetypes_with_keywords_loaded.add( filetype )
     extra_data[ 'syntax_keywords' ] = list(
        syntax_parse.SyntaxKeywordsForCurrentBuffer() )

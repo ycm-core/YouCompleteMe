@@ -479,15 +479,13 @@ function! s:OnFileReadyToParse( ... )
 
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
-  if force_parsing || b:changedtick != get( b:, 'ycm_changedtick', -1 )
+  if force_parsing || s:Pyeval( "ycm_state.NeedsReparse()" )
     exec s:python_command "ycm_state.OnFileReadyToParse()"
 
     call timer_stop( s:pollers.file_parse_response.id )
     let s:pollers.file_parse_response.id = timer_start(
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
-
-    let b:ycm_changedtick = b:changedtick
   endif
 endfunction
 
