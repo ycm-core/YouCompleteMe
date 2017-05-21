@@ -253,10 +253,6 @@ class VimBuffer( object ):
     return [ ToUnicode( x ) for x in self.contents ]
 
 
-def EmulateCurrentBufferChange():
-  VIM_MOCK.current.buffer.changedtick += 1
-
-
 class VimMatch( object ):
 
   def __init__( self, group, pattern ):

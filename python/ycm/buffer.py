@@ -27,6 +27,10 @@ from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 
 
+# Emulates Vim buffer
+# Used to store buffer related information like diagnostics, latest parse
+# request. Stores buffer change tick at the parse request moment, allowing
+# to effectively determine whether reparse is needed for the buffer.
 class Buffer( object ):
 
   def __init__( self, bufnr, user_options ):
