@@ -105,7 +105,10 @@ def MockEventNotification( response_method, native_filetype_completer = True ):
         'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = native_filetype_completer ):
 
-        yield
+        with patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReadyWithCache',
+                    return_value = True ):
+
+          yield
 
 
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
@@ -293,7 +296,6 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
       # Consequent calls to HandleFileParseRequest shouldn't mess with
       # existing diagnostics, when there is no new parse request.
       vim_command.reset_mock()
-      ok_( not ycm.FileParseRequestReady() )
       ycm.HandleFileParseRequest()
       vim_command.assert_not_called()
       eq_( ycm.GetErrorCount(), 1 )
@@ -327,7 +329,6 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm, vim_command ):
       # Consequent calls to HandleFileParseRequest shouldn't mess with
       # existing diagnostics, when there is no new parse request.
       vim_command.reset_mock()
-      ok_( not ycm.FileParseRequestReady() )
       ycm.HandleFileParseRequest()
       vim_command.assert_not_called()
       eq_( ycm.GetErrorCount(), 0 )
@@ -351,6 +352,8 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm, vim_command ):
 
 
 @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReadyWithCache',
+        return_value = True )
 @YouCompleteMeInstance( { 'collect_identifiers_from_tags_files': 1 } )
 def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
     ycm, *args ):
@@ -495,6 +498,8 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
 
 @patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
         return_value = [ 'foo', 'bar' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReadyWithCache',
+        return_value = True )
 @YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
     ycm, *args ):
@@ -529,6 +534,8 @@ def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
 
 @patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
         return_value = [ 'foo', 'bar' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReadyWithCache',
+        return_value = True )
 @YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
     ycm, *args ):
