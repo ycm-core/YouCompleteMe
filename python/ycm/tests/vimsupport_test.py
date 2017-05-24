@@ -1595,3 +1595,10 @@ def InsertNamespace_append_test( vim_current, *args ):
                       '    int taco;',
                       '    List salad = new List' ]
   AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
+
+
+def EscapedFilepath_test():
+  eq_( vimsupport.EscapedFilepath( '/path/ with /sp ac es' ),
+       '/path/\ with\ /sp\ ac\ es' )
+  eq_( vimsupport.EscapedFilepath( ' relative path/ with / spaces ' ),
+       '\ relative\ path/\ with\ /\ spaces\ ' )
