@@ -592,11 +592,6 @@ def CurrentFiletypes():
   return VimExpressionToPythonType( "&filetype" ).split( '.' )
 
 
-def GetBufferFiletypes( bufnr ):
-  command = 'getbufvar({0}, "&ft")'.format( bufnr )
-  return VimExpressionToPythonType( command ).split( '.' )
-
-
 def FiletypesForBuffer( buffer_object ):
   # NOTE: Getting &ft for other buffers only works when the buffer has been
   # visited by the user at least once, which is true for modified buffers

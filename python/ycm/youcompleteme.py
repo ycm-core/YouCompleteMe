@@ -580,7 +580,7 @@ class YouCompleteMe( object ):
       #
       # Note: it is the server's responsibility to determine the frequency of
       # error/warning/prompts when receiving a FileReadyToParse event, but
-      # it our responsibility to ensure that we only apply the
+      # it is our responsibility to ensure that we only apply the
       # warning/error/prompt received once (for each event).
       current_buffer.MarkResponseHandled()
 

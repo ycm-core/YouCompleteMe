@@ -104,5 +104,6 @@ class BufferDict( dict ):
 
 
   def __missing__( self, key ):
-    value = self[ key ] = Buffer( key, self._user_options )
-    return value
+    # Python does not allow to return assignment operation result directly
+    new_value = self[ key ] = Buffer( key, self._user_options )
+    return new_value
