@@ -383,12 +383,12 @@ C-family languages.
 Compiling YCM **with** semantic support for C-family languages:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
-    install.py --clang-completer
+    python install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
-    install.py
+    python install.py
 
 The following additional language support options are available:
 
