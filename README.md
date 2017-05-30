@@ -171,11 +171,13 @@ for details.
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py
 
 The following additional language support options are available:
@@ -198,6 +200,7 @@ install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
@@ -239,11 +242,13 @@ Make sure you have Python headers installed:
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py
 
 The following additional language support options are available:
@@ -265,6 +270,7 @@ install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
@@ -306,11 +312,13 @@ Make sure you have Python headers installed:
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py
 
 The following additional language support options are available:
@@ -332,6 +340,7 @@ install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
@@ -383,11 +392,13 @@ C-family languages.
 Compiling YCM **with** semantic support for C-family languages:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
+    # with python2:
     install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
+    # with python2:
     install.py
 
 The following additional language support options are available:
@@ -408,6 +419,7 @@ install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
 `npm`, and `cargo` tools are installed and in your `PATH`, then simply run:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
+    # with python2:
     python install.py --all
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
@@ -454,11 +466,13 @@ Install dependencies and CMake: `sudo pkg_add llvm boost cmake`
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --clang-completer --system-libclang --system-boost
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --system-boost
 
 The following additional language support options are available:
@@ -479,6 +493,7 @@ install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 `npm`, and `cargo` tools are installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
+    # with python2:
     ./install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
