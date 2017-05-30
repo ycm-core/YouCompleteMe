@@ -723,7 +723,8 @@ def ReplaceChunks( chunks ):
     ( buffer_num, close_window ) = _OpenFileInSplitIfNeeded( filepath )
 
     ReplaceChunksInBuffer( chunks_by_file[ filepath ],
-                           vim.buffers[ buffer_num ],
+                           [ buf for buf in vim.buffers
+                             if buf.number == buffer_num ][0],
                            locations )
 
     # When opening tons of files, we don't want to have a split for each new
