@@ -1,0 +1,14 @@
+{
+  "name": "tern_for_vim",
+  "license": "MIT",
+  "version": "0.4.0",
+  "author": "Marijn Haverbeke <marijnh@gmail.com>",
+  "description": "Sublime Text package for Vim",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/marijnh/tern_for_vim.git"
+  },
+  "dependencies": {
+    "tern": ">=0.5"
+  }
+}
