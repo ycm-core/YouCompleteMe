@@ -511,7 +511,7 @@ endfunction
 
 
 function! s:SetOmnicompleteFunc()
-  if s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+  if s:AllowedToCompleteInCurrentFile() && s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
 
