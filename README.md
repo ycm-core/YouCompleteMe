@@ -582,11 +582,11 @@ process.
     following:
 
         cd ~
-        mkdir ycm_build
-        cd ycm_build
+        mkdir ycm_temp
+        cd ycm_temp
 
     Now we need to generate the makefiles. If you DON'T care about semantic
-    support for C-family languages, run the following command in the `ycm_build`
+    support for C-family languages, run the following command in the `ycm_temp`
     directory:
 
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
@@ -620,7 +620,7 @@ process.
     custom-built LLVM! See docs below for `EXTERNAL_LIBCLANG_PATH` when using a
     custom LLVM build.
 
-    With that in mind, run the following command in the `ycm_build` directory:
+    With that in mind, run the following command in the `ycm_temp` directory:
 
         cmake -G "<generator>" -DPATH_TO_LLVM_ROOT=~/ycm_temp/llvm_root_dir . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
