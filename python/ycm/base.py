@@ -118,6 +118,9 @@ def AdjustCandidateInsertionText( candidates ):
   text_after_cursor = vimsupport.TextAfterCursor()
   if not text_after_cursor:
     return candidates
+  else:
+    #I am not sure if vimsupport.TextAfterCursor() will return None
+    text_after_cursor = text_after_cursor.decode('utf-8')
 
   new_candidates = []
   for candidate in candidates:
