@@ -115,6 +115,7 @@ class YouCompleteMe( object ):
     self._user_notified_about_crash = False
     self._omnicomp = OmniCompleter( user_options )
     self._buffers = BufferDict( user_options )
+    self._current_buffer = None
     self._latest_completion_request = None
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
@@ -130,10 +131,6 @@ class YouCompleteMe( object ):
     self._complete_done_hooks = {
       'cs': lambda self: self._OnCompleteDone_Csharp()
     }
-
-
-  def _GetCurrentBuffer( self ):
-    return self._buffers[ vimsupport.GetCurrentBufferNumber() ]
 
 
   def _SetupServer( self ):
@@ -224,7 +221,7 @@ class YouCompleteMe( object ):
     return return_code is None
 
 
-  def IsServerReady( self ):
+  def CheckIfServerIsReady( self ):
     if not self._server_is_ready_with_cache and self.IsServerAlive():
       with HandleServerException( display = False ):
         self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
@@ -232,7 +229,7 @@ class YouCompleteMe( object ):
     return self._server_is_ready_with_cache
 
 
-  def IsServerReadyWithCache( self ):
+  def IsServerReady( self ):
     return self._server_is_ready_with_cache
 
 
@@ -360,7 +357,7 @@ class YouCompleteMe( object ):
 
 
   def NeedsReparse( self ):
-    return self._GetCurrentBuffer().NeedsReparse()
+    return self._current_buffer.NeedsReparse()
 
 
   def OnFileReadyToParse( self ):
@@ -368,7 +365,7 @@ class YouCompleteMe( object ):
       self._NotifyUserIfServerCrashed()
       return
 
-    if not self.IsServerReadyWithCache():
+    if not self.IsServerReady():
       return
 
     self._omnicomp.OnFileReadyToParse( None )
@@ -378,7 +375,7 @@ class YouCompleteMe( object ):
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
 
-    self._GetCurrentBuffer().SendParseRequest( extra_data )
+    self._current_buffer.SendParseRequest( extra_data )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -391,12 +388,16 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'BufferVisit', extra_data = extra_data )
 
 
+  def SetCurrentBuffer( self ):
+    self._current_buffer = self._buffers[ vimsupport.GetCurrentBufferNumber() ]
+
+
   def OnInsertLeave( self ):
     SendEventNotificationAsync( 'InsertLeave' )
 
 
   def OnCursorMoved( self ):
-    self._GetCurrentBuffer().OnCursorMoved()
+    self._current_buffer.OnCursorMoved()
 
 
   def _CleanLogfile( self ):
@@ -523,11 +524,11 @@ class YouCompleteMe( object ):
 
 
   def GetErrorCount( self ):
-    return self._GetCurrentBuffer().GetErrorCount()
+    return self._current_buffer.GetErrorCount()
 
 
   def GetWarningCount( self ):
-    return self._GetCurrentBuffer().GetWarningCount()
+    return self._current_buffer.GetWarningCount()
 
 
   def DiagnosticUiSupportedForCurrentFiletype( self ):
@@ -541,20 +542,20 @@ class YouCompleteMe( object ):
 
 
   def _PopulateLocationListWithLatestDiagnostics( self ):
-    return self._GetCurrentBuffer().PopulateLocationList()
+    return self._current_buffer.PopulateLocationList()
 
 
   def FileParseRequestReady( self ):
     # Return True if server is not ready yet, to stop repeating check timer.
-    return ( not self.IsServerReadyWithCache() or
-             self._GetCurrentBuffer().FileParseRequestReady() )
+    return ( not self.IsServerReady() or
+             self._current_buffer.FileParseRequestReady() )
 
 
   def HandleFileParseRequest( self, block = False ):
-    if not self.IsServerReadyWithCache():
+    if not self.IsServerReady():
       return
 
-    current_buffer = self._GetCurrentBuffer()
+    current_buffer = self._current_buffer
     # Order is important here:
     # FileParseRequestReady has a low cost, while
     # NativeFiletypeCompletionUsable is a blocking server request
@@ -717,7 +718,7 @@ class YouCompleteMe( object ):
     if filetype in self._filetypes_with_keywords_loaded:
       return
 
-    if self.IsServerReadyWithCache():
+    if self.IsServerReady():
       self._filetypes_with_keywords_loaded.add( filetype )
     extra_data[ 'syntax_keywords' ] = list(
        syntax_parse.SyntaxKeywordsForCurrentBuffer() )

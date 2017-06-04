@@ -105,6 +105,9 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
+  " The BufEnter event is not triggered for the first loaded file.
+  exec s:python_command "ycm_state.SetCurrentBuffer()"
+
   " The FileType event is not triggered for the first loaded file. We wait until
   " the server is ready to manually run the s:OnFileTypeSet function.
   let s:pollers.server_ready.id = timer_start(
@@ -431,6 +434,8 @@ endfunction
 
 
 function! s:OnBufferEnter()
+  exec s:python_command "ycm_state.SetCurrentBuffer()"
+
   if !s:VisitedBufferRequiresReparse()
     return
   endif
@@ -460,7 +465,7 @@ endfunction
 
 
 function! s:PollServerReady( timer_id )
-  if !s:Pyeval( 'ycm_state.IsServerReady()' )
+  if !s:Pyeval( 'ycm_state.CheckIfServerIsReady()' )
     let s:pollers.server_ready.id = timer_start(
           \ s:pollers.server_ready.wait_milliseconds,
           \ function( 's:PollServerReady' ) )
