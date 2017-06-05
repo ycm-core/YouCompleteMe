@@ -58,3 +58,6 @@ cpp/llvm/tools/clang/www/*
 
 # Exclude auto generated vim doc tags.
 doc/tags
+
+# CMake generated compilation database
+compile_commands.json
