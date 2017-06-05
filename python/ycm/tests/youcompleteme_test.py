@@ -330,7 +330,7 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
   ycm, set_location_list, post_vim_message, *args ):
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp' )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = {} ):
       ycm.ShowDiagnostics()
@@ -349,6 +349,8 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
                           'open_loclist_on_ycm_diags': 0 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
+        return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
@@ -365,7 +367,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
   }
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = [ diagnostic ] ):
       ycm.ShowDiagnostics()
@@ -388,6 +390,8 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
 @YouCompleteMeInstance( { 'open_loclist_on_ycm_diags': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
+        return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.OpenLocationList', new_callable = ExtendedMock )
@@ -405,7 +409,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
   }
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = [ diagnostic ] ):
       ycm.ShowDiagnostics()
@@ -430,6 +434,8 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
                           'enable_diagnostic_signs': 1,
                           'enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'vim.command', new_callable = ExtendedMock )
@@ -508,7 +514,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
 
   test_utils.VIM_MATCHES = []
 
-  with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ) ):
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ), ycm ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = diagnostics ):
       ycm.OnFileReadyToParse()

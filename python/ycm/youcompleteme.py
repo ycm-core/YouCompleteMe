@@ -33,10 +33,10 @@ import vim
 from subprocess import PIPE
 from tempfile import NamedTemporaryFile
 from ycm import base, paths, vimsupport
+from ycm.buffer import BufferDict
 from ycmd import utils
 from ycmd import server_utils
 from ycmd.request_wrap import RequestWrap
-from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
@@ -49,8 +49,7 @@ from ycm.client.completion_request import ( CompletionRequest,
 from ycm.client.debug_info_request import ( SendDebugInfoRequest,
                                             FormatDebugInfoResponse )
 from ycm.client.omni_completion_request import OmniCompletionRequest
-from ycm.client.event_notification import ( SendEventNotificationAsync,
-                                            EventNotification )
+from ycm.client.event_notification import SendEventNotificationAsync
 from ycm.client.shutdown_request import SendShutdownRequest
 
 
@@ -114,11 +113,10 @@ class YouCompleteMe( object ):
     self._available_completers = {}
     self._user_options = user_options
     self._user_notified_about_crash = False
-    self._diag_interface = DiagnosticInterface( user_options )
     self._omnicomp = OmniCompleter( user_options )
-    self._latest_file_parse_request = None
+    self._buffers = BufferDict( user_options )
+    self._current_buffer = None
     self._latest_completion_request = None
-    self._latest_diagnostics = []
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
     self._server_stdout = None
@@ -133,6 +131,7 @@ class YouCompleteMe( object ):
     self._complete_done_hooks = {
       'cs': lambda self: self._OnCompleteDone_Csharp()
     }
+
 
   def _SetupServer( self ):
     self._available_completers = {}
@@ -222,11 +221,15 @@ class YouCompleteMe( object ):
     return return_code is None
 
 
-  def IsServerReady( self ):
+  def CheckIfServerIsReady( self ):
     if not self._server_is_ready_with_cache and self.IsServerAlive():
       with HandleServerException( display = False ):
         self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
             'ready' )
+    return self._server_is_ready_with_cache
+
+
+  def IsServerReady( self ):
     return self._server_is_ready_with_cache
 
 
@@ -353,9 +356,16 @@ class YouCompleteMe( object ):
              self.NativeFiletypeCompletionAvailable() )
 
 
+  def NeedsReparse( self ):
+    return self._current_buffer.NeedsReparse()
+
+
   def OnFileReadyToParse( self ):
     if not self.IsServerAlive():
       self._NotifyUserIfServerCrashed()
+      return
+
+    if not self.IsServerReady():
       return
 
     self._omnicomp.OnFileReadyToParse( None )
@@ -365,9 +375,7 @@ class YouCompleteMe( object ):
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
 
-    self._latest_file_parse_request = EventNotification(
-      'FileReadyToParse', extra_data = extra_data )
-    self._latest_file_parse_request.Start()
+    self._current_buffer.SendParseRequest( extra_data )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -380,12 +388,16 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'BufferVisit', extra_data = extra_data )
 
 
+  def SetCurrentBuffer( self ):
+    self._current_buffer = self._buffers[ vimsupport.GetCurrentBufferNumber() ]
+
+
   def OnInsertLeave( self ):
     SendEventNotificationAsync( 'InsertLeave' )
 
 
   def OnCursorMoved( self ):
-    self._diag_interface.OnCursorMoved()
+    self._current_buffer.OnCursorMoved()
 
 
   def _CleanLogfile( self ):
@@ -512,11 +524,11 @@ class YouCompleteMe( object ):
 
 
   def GetErrorCount( self ):
-    return self._diag_interface.GetErrorCount()
+    return self._current_buffer.GetErrorCount()
 
 
   def GetWarningCount( self ):
-    return self._diag_interface.GetWarningCount()
+    return self._current_buffer.GetWarningCount()
 
 
   def DiagnosticUiSupportedForCurrentFiletype( self ):
@@ -530,31 +542,29 @@ class YouCompleteMe( object ):
 
 
   def _PopulateLocationListWithLatestDiagnostics( self ):
-    # Do nothing if loc list is already populated by diag_interface
-    if not self._user_options[ 'always_populate_location_list' ]:
-      self._diag_interface.PopulateLocationList( self._latest_diagnostics )
-    return bool( self._latest_diagnostics )
+    return self._current_buffer.PopulateLocationList()
 
 
-  def UpdateDiagnosticInterface( self ):
-    self._diag_interface.UpdateWithNewDiagnostics( self._latest_diagnostics )
-
-
-  def FileParseRequestReady( self, block = False ):
-    return bool( self._latest_file_parse_request and
-                 ( block or self._latest_file_parse_request.Done() ) )
+  def FileParseRequestReady( self ):
+    # Return True if server is not ready yet, to stop repeating check timer.
+    return ( not self.IsServerReady() or
+             self._current_buffer.FileParseRequestReady() )
 
 
   def HandleFileParseRequest( self, block = False ):
+    if not self.IsServerReady():
+      return
+
+    current_buffer = self._current_buffer
     # Order is important here:
     # FileParseRequestReady has a low cost, while
     # NativeFiletypeCompletionUsable is a blocking server request
-    if ( self.FileParseRequestReady( block ) and
+    if ( not current_buffer.IsResponseHandled() and
+         current_buffer.FileParseRequestReady( block ) and
          self.NativeFiletypeCompletionUsable() ):
 
       if self.ShouldDisplayDiagnostics():
-        self._latest_diagnostics = self._latest_file_parse_request.Response()
-        self.UpdateDiagnosticInterface()
+        current_buffer.UpdateDiagnostics()
       else:
         # YCM client has a hard-coded list of filetypes which are known
         # to support diagnostics, self.DiagnosticUiSupportedForCurrentFiletype()
@@ -563,18 +573,17 @@ class YouCompleteMe( object ):
         # the _latest_file_parse_request for any exception or UnknownExtraConf
         # response, to allow the server to raise configuration warnings, etc.
         # to the user. We ignore any other supplied data.
-        self._latest_file_parse_request.Response()
+        current_buffer.GetResponse()
 
-      # We set the file parse request to None because we want to prevent
-      # repeated issuing of the same warnings/errors/prompts. Setting this to
-      # None makes FileParseRequestReady return False until the next
-      # request is created.
+      # We set the file parse request as handled because we want to prevent
+      # repeated issuing of the same warnings/errors/prompts. Setting this
+      # makes IsRequestHandled return True until the next request is created.
       #
       # Note: it is the server's responsibility to determine the frequency of
       # error/warning/prompts when receiving a FileReadyToParse event, but
-      # it our responsibility to ensure that we only apply the
+      # it is our responsibility to ensure that we only apply the
       # warning/error/prompt received once (for each event).
-      self._latest_file_parse_request = None
+      current_buffer.MarkResponseHandled()
 
 
   def DebugInfo( self ):

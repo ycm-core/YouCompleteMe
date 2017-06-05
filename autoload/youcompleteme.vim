@@ -105,6 +105,9 @@ function! youcompleteme#Enable()
     autocmd CompleteDone * call s:OnCompleteDone()
   augroup END
 
+  " The BufEnter event is not triggered for the first loaded file.
+  exec s:python_command "ycm_state.SetCurrentBuffer()"
+
   " The FileType event is not triggered for the first loaded file. We wait until
   " the server is ready to manually run the s:OnFileTypeSet function.
   let s:pollers.server_ready.id = timer_start(
@@ -431,6 +434,8 @@ endfunction
 
 
 function! s:OnBufferEnter()
+  exec s:python_command "ycm_state.SetCurrentBuffer()"
+
   if !s:VisitedBufferRequiresReparse()
     return
   endif
@@ -460,7 +465,7 @@ endfunction
 
 
 function! s:PollServerReady( timer_id )
-  if !s:Pyeval( 'ycm_state.IsServerReady()' )
+  if !s:Pyeval( 'ycm_state.CheckIfServerIsReady()' )
     let s:pollers.server_ready.id = timer_start(
           \ s:pollers.server_ready.wait_milliseconds,
           \ function( 's:PollServerReady' ) )
@@ -479,15 +484,13 @@ function! s:OnFileReadyToParse( ... )
 
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
-  if force_parsing || b:changedtick != get( b:, 'ycm_changedtick', -1 )
+  if force_parsing || s:Pyeval( "ycm_state.NeedsReparse()" )
     exec s:python_command "ycm_state.OnFileReadyToParse()"
 
     call timer_stop( s:pollers.file_parse_response.id )
     let s:pollers.file_parse_response.id = timer_start(
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
-
-    let b:ycm_changedtick = b:changedtick
   endif
 endfunction
 

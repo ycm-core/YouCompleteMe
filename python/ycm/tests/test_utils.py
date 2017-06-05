@@ -40,7 +40,7 @@ BUFWINNR_REGEX = re.compile( '^bufwinnr\((?P<buffer_number>[0-9]+)\)$' )
 BWIPEOUT_REGEX = re.compile(
   '^(?:silent! )bwipeout!? (?P<buffer_number>[0-9]+)$' )
 GETBUFVAR_REGEX = re.compile(
-  '^getbufvar\((?P<buffer_number>[0-9]+), "&(?P<option>.+)"\)$' )
+  '^getbufvar\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\)$' )
 MATCHADD_REGEX = re.compile(
   '^matchadd\(\'(?P<group>.+)\', \'(?P<pattern>.+)\'\)$' )
 MATCHDELETE_REGEX = re.compile( '^matchdelete\((?P<id>)\)$' )
@@ -85,10 +85,12 @@ def _MockGetBufferWindowNumber( buffer_number ):
 def _MockGetBufferVariable( buffer_number, option ):
   for vim_buffer in VIM_MOCK.buffers:
     if vim_buffer.number == buffer_number:
-      if option == 'mod':
+      if option == '&mod':
         return vim_buffer.modified
-      if option == 'ft':
+      if option == '&ft':
         return vim_buffer.filetype
+      if option == 'changedtick':
+        return vim_buffer.changedtick
       return ''
   return ''
 
@@ -230,6 +232,7 @@ class VimBuffer( object ):
     self.modified = modified
     self.window = window
     self.omnifunc = omnifunc
+    self.changedtick = 1
 
 
   def __getitem__( self, index ):
@@ -268,7 +271,8 @@ class VimMatch( object ):
 
 
 @contextlib.contextmanager
-def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
+def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ),
+                    ycm_state = None):
   """Simulates the Vim buffers list |buffers| where |current_buffer| is the
   buffer displayed in the current window and |cursor_position| is the current
   cursor position. All buffers are represented by a VimBuffer object."""
@@ -278,6 +282,8 @@ def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
   with patch( 'vim.buffers', buffers ):
     with patch( 'vim.current.buffer', current_buffer ):
       with patch( 'vim.current.window.cursor', cursor_position ):
+        if ycm_state is not None:
+          ycm_state.SetCurrentBuffer()
         yield
 
 
