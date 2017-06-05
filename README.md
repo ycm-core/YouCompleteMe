@@ -656,9 +656,13 @@ process.
 
     - C# support: install [Mono on non-Windows platforms][mono-install].
       Navigate to `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer`
-      and run `msbuild /property:Configuration=Release` on Windows. Replace
-      `msbuild` by `xbuild` on other platforms. On Windows, be sure that [the
-      build utility `msbuild` is in your PATH][add-msbuild-to-path].
+      and run
+
+          msbuild /property:Configuration=Release /property:TargetFrameworkVersion=v4.5
+
+      Replace `msbuild` by `xbuild` if `msbuild` is not available. On Windows,
+      be sure that [the build utility `msbuild` is in your
+      PATH][add-msbuild-to-path].
 
     - Go support: install [Go][go-install] and add it to your path. Navigate to
       `YouCompleteMe/third_party/ycmd/third_party/gocode` and run `go build`.
