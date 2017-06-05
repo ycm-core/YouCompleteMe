@@ -174,26 +174,6 @@ def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
     sign_id, sign_name, line_num, buffer_num ) )
 
 
-def PlaceDummySign( sign_id, buffer_num, line_num ):
-    if buffer_num < 0 or line_num < 0:
-      return
-    vim.command( 'sign define ycm_dummy_sign' )
-    vim.command(
-      'sign place {0} name=ycm_dummy_sign line={1} buffer={2}'.format(
-        sign_id,
-        line_num,
-        buffer_num,
-      )
-    )
-
-
-def UnPlaceDummySign( sign_id, buffer_num ):
-    if buffer_num < 0:
-      return
-    vim.command( 'sign undefine ycm_dummy_sign' )
-    vim.command( 'sign unplace {0} buffer={1}'.format( sign_id, buffer_num ) )
-
-
 def ClearYcmSyntaxMatches():
   matches = VimExpressionToPythonType( 'getmatches()' )
   for match in matches:
@@ -590,6 +570,11 @@ def EscapeForVim( text ):
 
 def CurrentFiletypes():
   return VimExpressionToPythonType( "&filetype" ).split( '.' )
+
+
+def GetBufferFiletypes( bufnr ):
+  command = 'getbufvar({0}, "&ft")'.format( bufnr )
+  return VimExpressionToPythonType( command ).split( '.' )
 
 
 def FiletypesForBuffer( buffer_object ):
