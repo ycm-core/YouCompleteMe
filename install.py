@@ -24,8 +24,12 @@ DIR_OF_OLD_LIBS = p.join( DIR_OF_THIS_SCRIPT, 'python' )
 
 def CheckCall( args, **kwargs ):
   try:
+    python_binary = args[0]
+    build_file = args[1]
+    print("Building ycmd using [%s] with python binary [%s]:" % build_file, python_binary)
     subprocess.check_call( args, **kwargs )
   except subprocess.CalledProcessError as error:
+    print("\nException raised while building ycmd:\n" + str(error))
     sys.exit( error.returncode )
 
 
