@@ -524,9 +524,9 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
     assert_that(
       test_utils.VIM_MATCHES,
       contains(
-        VimMatch( 'YcmErrorSection', '\%3l\%8c' ),
         VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
-        VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' )
+        VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
+        VimMatch( 'YcmErrorSection', '\%3l\%8c' )
       )
     )
 

@@ -139,6 +139,8 @@ def _MockVimOptionsEval( value ):
 
 def _MockVimMatchEval( value ):
   if value == 'getmatches()':
+    # Returning a copy, because ClearYcmSyntaxMatches() gets the result of
+    # getmatches(), iterates over it and removes elements from VIM_MATCHES.
     return list( VIM_MATCHES )
 
   match = MATCHADD_REGEX.search( value )

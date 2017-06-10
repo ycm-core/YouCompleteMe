@@ -420,6 +420,8 @@ endfunction
 
 
 function! s:OnFileTypeSet()
+  exec s:python_command "ycm_state.SetCurrentBuffer()"
+
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif

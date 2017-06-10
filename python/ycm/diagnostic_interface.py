@@ -26,7 +26,6 @@ from future.utils import itervalues, iteritems
 from collections import defaultdict, namedtuple
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
-import vim
 
 
 class DiagnosticInterface( object ):
@@ -120,13 +119,12 @@ class DiagnosticInterface( object ):
 
 
   def _UpdateSquiggles( self ):
-    if self._bufnr != vim.current.buffer.number:
-      return
 
     vimsupport.ClearYcmSyntaxMatches()
 
     for diags in itervalues( self._line_to_diags ):
-      for diag in diags:
+      # Insert squiggles in reverse order so that errors overlap warnings.
+      for diag in reversed( diags ):
         location_extent = diag[ 'location_extent' ]
         is_error = _DiagnosticIsError( diag )
 
@@ -202,7 +200,7 @@ class DiagnosticInterface( object ):
 
     for diags in itervalues( self._line_to_diags ):
       # We also want errors to be listed before warnings so that errors aren't
-      # hidden by the warnings; Vim won't place a sign oven an existing one.
+      # hidden by the warnings; Vim won't place a sign over an existing one.
       diags.sort( key = lambda diag: ( diag[ 'kind' ],
                                        diag[ 'location' ][ 'column_num' ] ) )
 
