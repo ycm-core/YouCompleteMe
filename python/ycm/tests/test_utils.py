@@ -280,8 +280,7 @@ class VimMatch( object ):
 
 
 @contextlib.contextmanager
-def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ),
-                    ycm_state = None):
+def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
   """Simulates the Vim buffers list |buffers| where |current_buffer| is the
   buffer displayed in the current window and |cursor_position| is the current
   cursor position. All buffers are represented by a VimBuffer object."""
@@ -291,8 +290,6 @@ def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ),
   with patch( 'vim.buffers', buffers ):
     with patch( 'vim.current.buffer', current_buffer ):
       with patch( 'vim.current.window.cursor', cursor_position ):
-        if ycm_state is not None:
-          ycm_state.SetCurrentBuffer()
         yield
 
 

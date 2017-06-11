@@ -193,10 +193,9 @@ class DiagnosticInterface( object ):
     for diag in self._diagnostics:
       location = diag[ 'location' ]
       bufnr = vimsupport.GetBufferNumberForFilename( location[ 'filepath' ] )
-      if bufnr != self._bufnr:
-          continue
-      line_number = location[ 'line_num' ]
-      self._line_to_diags[ line_number ].append( diag )
+      if bufnr == self._bufnr:
+        line_number = location[ 'line_num' ]
+        self._line_to_diags[ line_number ].append( diag )
 
     for diags in itervalues( self._line_to_diags ):
       # We also want errors to be listed before warnings so that errors aren't
