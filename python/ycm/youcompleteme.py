@@ -115,7 +115,6 @@ class YouCompleteMe( object ):
     self._user_notified_about_crash = False
     self._omnicomp = OmniCompleter( user_options )
     self._buffers = BufferDict( user_options )
-    self._current_buffer = None
     self._latest_completion_request = None
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
@@ -357,7 +356,7 @@ class YouCompleteMe( object ):
 
 
   def NeedsReparse( self ):
-    return self._current_buffer.NeedsReparse()
+    return self.CurrentBuffer().NeedsReparse()
 
 
   def OnFileReadyToParse( self ):
@@ -375,7 +374,7 @@ class YouCompleteMe( object ):
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
 
-    self._current_buffer.SendParseRequest( extra_data )
+    self.CurrentBuffer().SendParseRequest( extra_data )
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
@@ -388,8 +387,8 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'BufferVisit', extra_data = extra_data )
 
 
-  def SetCurrentBuffer( self ):
-    self._current_buffer = self._buffers[ vimsupport.GetCurrentBufferNumber() ]
+  def CurrentBuffer( self ):
+    return self._buffers[ vimsupport.GetCurrentBufferNumber() ]
 
 
   def OnInsertLeave( self ):
@@ -397,7 +396,7 @@ class YouCompleteMe( object ):
 
 
   def OnCursorMoved( self ):
-    self._current_buffer.OnCursorMoved()
+    self.CurrentBuffer().OnCursorMoved()
 
 
   def _CleanLogfile( self ):
@@ -524,11 +523,11 @@ class YouCompleteMe( object ):
 
 
   def GetErrorCount( self ):
-    return self._current_buffer.GetErrorCount()
+    return self.CurrentBuffer().GetErrorCount()
 
 
   def GetWarningCount( self ):
-    return self._current_buffer.GetWarningCount()
+    return self.CurrentBuffer().GetWarningCount()
 
 
   def DiagnosticUiSupportedForCurrentFiletype( self ):
@@ -542,20 +541,20 @@ class YouCompleteMe( object ):
 
 
   def _PopulateLocationListWithLatestDiagnostics( self ):
-    return self._current_buffer.PopulateLocationList()
+    return self.CurrentBuffer().PopulateLocationList()
 
 
   def FileParseRequestReady( self ):
     # Return True if server is not ready yet, to stop repeating check timer.
     return ( not self.IsServerReady() or
-             self._current_buffer.FileParseRequestReady() )
+             self.CurrentBuffer().FileParseRequestReady() )
 
 
   def HandleFileParseRequest( self, block = False ):
     if not self.IsServerReady():
       return
 
-    current_buffer = self._current_buffer
+    current_buffer = self.CurrentBuffer()
     # Order is important here:
     # FileParseRequestReady has a low cost, while
     # NativeFiletypeCompletionUsable is a blocking server request

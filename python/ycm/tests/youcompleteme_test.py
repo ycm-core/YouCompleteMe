@@ -330,7 +330,7 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
   ycm, set_location_list, post_vim_message, *args ):
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp' )
-  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = {} ):
       ycm.ShowDiagnostics()
@@ -367,7 +367,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
   }
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
-  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = [ diagnostic ] ):
       ycm.ShowDiagnostics()
@@ -409,7 +409,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
   }
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
-  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = [ diagnostic ] ):
       ycm.ShowDiagnostics()
@@ -514,7 +514,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
 
   test_utils.VIM_MATCHES = []
 
-  with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ), ycm ):
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ) ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = diagnostics ):
       ycm.OnFileReadyToParse()
