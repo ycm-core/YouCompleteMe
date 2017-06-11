@@ -194,7 +194,7 @@ class DiagnosticInterface( object ):
       location = diag[ 'location' ]
       bufnr = vimsupport.GetBufferNumberForFilename( location[ 'filepath' ] )
       if bufnr != self._bufnr:
-          continue
+        continue
       line_number = location[ 'line_num' ]
       self._line_to_diags[ line_number ].append( diag )
 
