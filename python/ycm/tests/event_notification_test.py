@@ -59,7 +59,7 @@ def UnplaceSign_Call( sign_id, buffer_num ):
 
 
 @contextlib.contextmanager
-def MockArbitraryBuffer( filetype, ycm ):
+def MockArbitraryBuffer( filetype ):
   """Used via the with statement, set up a single buffer with an arbitrary name
   and no contents. Its filetype is set to the supplied filetype."""
 
@@ -68,7 +68,7 @@ def MockArbitraryBuffer( filetype, ycm ):
                               window = 1,
                               filetype = filetype )
 
-  with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
     yield
 
 
@@ -124,7 +124,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
   def ErrorResponse( *args ):
     raise ServerError( ERROR_TEXT )
 
-  with MockArbitraryBuffer( 'javascript', ycm ):
+  with MockArbitraryBuffer( 'javascript' ):
     with MockEventNotification( ErrorResponse ):
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -156,7 +156,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
 def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
     ycm, vim_command ):
 
-  with MockArbitraryBuffer( 'javascript', ycm ):
+  with MockArbitraryBuffer( 'javascript' ):
     with MockEventNotification( None, False ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest()
@@ -182,7 +182,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
   def UnknownExtraConfResponse( *args ):
     raise UnknownExtraConf( FILE_NAME )
 
-  with MockArbitraryBuffer( 'javascript', ycm ):
+  with MockArbitraryBuffer( 'javascript' ):
     with MockEventNotification( UnknownExtraConfResponse ):
 
       # When the user accepts the extra conf, we load it
@@ -282,7 +282,7 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
     diagnostic = Diagnostic( [], start, extent, 'expected ;', 'ERROR' )
     return [ BuildDiagnosticData( diagnostic ) ]
 
-  with MockArbitraryBuffer( 'cpp', ycm ):
+  with MockArbitraryBuffer( 'cpp' ):
     with MockEventNotification( DiagnosticResponse ):
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -314,7 +314,7 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm, vim_command ):
     diagnostic = Diagnostic( [], start, extent, 'cast', 'WARNING' )
     return [ BuildDiagnosticData( diagnostic ) ]
 
-  with MockArbitraryBuffer( 'cpp', ycm ):
+  with MockArbitraryBuffer( 'cpp' ):
     with MockEventNotification( DiagnosticResponse ):
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -340,7 +340,7 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm, vim_command ):
   # Tests Vim sign unplacement and error/warning count python API
   # when there are no errors/warnings left.
   # Should be called after _Check_FileReadyToParse_Diagnostic_Warning
-  with MockArbitraryBuffer( 'cpp', ycm ):
+  with MockArbitraryBuffer( 'cpp' ):
     with MockEventNotification( MagicMock( return_value = [] ) ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest()
@@ -366,7 +366,7 @@ def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
   with patch( 'ycm.client.event_notification.EventNotification.'
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
     with CurrentWorkingDirectory( unicode_dir ):
-      with MockVimBuffers( [ current_buffer ], current_buffer, ( 6, 5 ), ycm ):
+      with MockVimBuffers( [ current_buffer ], current_buffer, ( 6, 5 ) ):
         ycm.OnFileReadyToParse()
 
     assert_that(
@@ -509,7 +509,7 @@ def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
 
   with patch( 'ycm.client.event_notification.EventNotification.'
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
+    with MockVimBuffers( [ current_buffer ], current_buffer ):
       ycm.OnFileReadyToParse()
       assert_that(
         # Positional arguments passed to PostDataToHandlerAsync.
@@ -545,7 +545,7 @@ def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
 
   with patch( 'ycm.client.event_notification.EventNotification.'
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with MockVimBuffers( [ current_buffer ], current_buffer, ycm_state = ycm ):
+    with MockVimBuffers( [ current_buffer ], current_buffer ):
       ycm.OnFileReadyToParse()
       assert_that(
         # Positional arguments passed to PostDataToHandlerAsync.

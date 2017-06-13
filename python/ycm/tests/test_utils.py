@@ -43,7 +43,7 @@ GETBUFVAR_REGEX = re.compile(
   '^getbufvar\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\)$' )
 MATCHADD_REGEX = re.compile(
   '^matchadd\(\'(?P<group>.+)\', \'(?P<pattern>.+)\'\)$' )
-MATCHDELETE_REGEX = re.compile( '^matchdelete\((?P<id>)\)$' )
+MATCHDELETE_REGEX = re.compile( '^matchdelete\((?P<id>\d+)\)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -139,7 +139,9 @@ def _MockVimOptionsEval( value ):
 
 def _MockVimMatchEval( value ):
   if value == 'getmatches()':
-    return VIM_MATCHES
+    # Returning a copy, because ClearYcmSyntaxMatches() gets the result of
+    # getmatches(), iterates over it and removes elements from VIM_MATCHES.
+    return list( VIM_MATCHES )
 
   match = MATCHADD_REGEX.search( value )
   if match:
@@ -151,7 +153,7 @@ def _MockVimMatchEval( value ):
 
   match = MATCHDELETE_REGEX.search( value )
   if match:
-    identity = match.group( 'id' )
+    identity = int( match.group( 'id' ) )
     for index, vim_match in enumerate( VIM_MATCHES ):
       if vim_match.id == identity:
         VIM_MATCHES.pop( index )
@@ -270,9 +272,15 @@ class VimMatch( object ):
                                                                 self.pattern )
 
 
+  def __getitem__( self, key ):
+    if key == 'group':
+      return self.group
+    elif key == 'id':
+      return self.id
+
+
 @contextlib.contextmanager
-def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ),
-                    ycm_state = None):
+def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
   """Simulates the Vim buffers list |buffers| where |current_buffer| is the
   buffer displayed in the current window and |cursor_position| is the current
   cursor position. All buffers are represented by a VimBuffer object."""
@@ -282,8 +290,6 @@ def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ),
   with patch( 'vim.buffers', buffers ):
     with patch( 'vim.current.buffer', current_buffer ):
       with patch( 'vim.current.window.cursor', cursor_position ):
-        if ycm_state is not None:
-          ycm_state.SetCurrentBuffer()
         yield
 
 

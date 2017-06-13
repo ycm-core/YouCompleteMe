@@ -38,7 +38,7 @@ class Buffer( object ):
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
-    self._diag_interface = DiagnosticInterface( user_options )
+    self._diag_interface = DiagnosticInterface( bufnr, user_options )
 
 
   def FileParseRequestReady( self, block = False ):
