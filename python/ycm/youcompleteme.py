@@ -129,7 +129,8 @@ class YouCompleteMe( object ):
     self._SetUpServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
-      'cs': lambda self: self._OnCompleteDone_Csharp()
+      'cs': lambda self: self._OnCompleteDone_Csharp(),
+      'java': lambda self: self._OnCompleteDone_Java()
     }
 
 
@@ -509,6 +510,7 @@ class YouCompleteMe( object ):
 
     result = self._FilterToMatchingCompletions( completions, True )
     result = list( result )
+
     if result:
       return result
 
@@ -526,10 +528,12 @@ class YouCompleteMe( object ):
   def _FilterToMatchingCompletions( self, completions, full_match_only ):
     """Filter to completions matching the item Vim said was completed"""
     completed = vimsupport.GetVariableValue( 'v:completed_item' )
+
+    match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
+                    else [ 'word' ] )
+
     for completion in completions:
       item = ConvertCompletionDataToVimData( completion )
-      match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
-                      else [ 'word' ] )
 
       def matcher( key ):
         return ( utils.ToUnicode( completed.get( key, "" ) ) ==
@@ -593,6 +597,27 @@ class YouCompleteMe( object ):
       return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
+
+  def _OnCompleteDone_Java( self ):
+    completions = self.GetCompletionsUserMayHaveCompleted()
+    fixit_completions = [ self._GetFixItCompletion( c ) for c in completions ]
+    fixit_completions = [ f for f in fixit_completions if f ]
+    if not fixit_completions:
+      return
+
+    for fixit_completion in fixit_completions:
+      # FIXME: We just  apply them all. If there really are multiple, we might
+      # offer some sort of choice here, like in command_request.py.
+      for fixit in fixit_completion:
+        vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
+
+
+  def _GetFixItCompletion( self, completion ):
+    if ( "extra_data" not in completion
+         or "fixits" not in completion[ "extra_data" ] ):
+      return None
+
+    return completion[ "extra_data" ][ "fixits" ]
 
   def GetErrorCount( self ):
     return self.CurrentBuffer().GetErrorCount()
