@@ -29,8 +29,8 @@ import os
 import json
 import re
 from collections import defaultdict
-from ycmd.utils import ( GetCurrentDirectory, JoinLinesAsUnicode, ToBytes,
-                         ToUnicode )
+from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
+                         JoinLinesAsUnicode, ToBytes, ToUnicode )
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -71,6 +71,17 @@ def CurrentColumn():
 
 def CurrentLineContents():
   return ToUnicode( vim.current.line )
+
+
+def CurrentLineContentsAndCodepointColumn():
+  """Returns the line contents as a unicode string and the 0-based current
+  column as a codepoint offset. If the current column is outside the line,
+  returns the column position at the end of the line."""
+  line = CurrentLineContents()
+  byte_column = CurrentColumn()
+  # ByteOffsetToCodepointOffset expects 1-based offset.
+  column = ByteOffsetToCodepointOffset( line, byte_column + 1 ) - 1
+  return line, column
 
 
 def TextAfterCursor():
