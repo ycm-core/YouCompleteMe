@@ -27,6 +27,7 @@ from ycm import vimsupport
 from ycmd import user_options_store
 from ycmd import request_wrap
 from ycmd import identifier_utils
+from ycmd.utils import ByteOffsetToCodepointOffset
 
 YCM_VAR_PREFIX = 'ycm_'
 
@@ -65,11 +66,12 @@ def CompletionStartColumn():
 
 
 def CurrentIdentifierFinished():
-  current_column = vimsupport.CurrentColumn()
+  line = vimsupport.CurrentLineContents()
+  byte_column = vimsupport.CurrentColumn()
+  current_column = ByteOffsetToCodepointOffset( line, byte_column + 1 ) - 1
   previous_char_index = current_column - 1
   if previous_char_index < 0:
     return True
-  line = vimsupport.CurrentLineContents()
   filetype = vimsupport.CurrentFiletypes()[ 0 ]
   regex = identifier_utils.IdentifierRegexForFiletype( filetype )
 
@@ -82,10 +84,11 @@ def CurrentIdentifierFinished():
 
 
 def LastEnteredCharIsIdentifierChar():
-  current_column = vimsupport.CurrentColumn()
+  line = vimsupport.CurrentLineContents()
+  byte_column = vimsupport.CurrentColumn()
+  current_column = ByteOffsetToCodepointOffset( line, byte_column + 1 ) - 1
   if current_column - 1 < 0:
     return False
-  line = vimsupport.CurrentLineContents()
   filetype = vimsupport.CurrentFiletypes()[ 0 ]
   return (
     identifier_utils.StartOfLongestIdentifierEndingAtIndex(
