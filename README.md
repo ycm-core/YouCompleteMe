@@ -361,6 +361,14 @@ Vim. Look at the features included: `+python/dyn` for Python 2 and
 using a 64-bit client. [Daily updated copies of 32-bit and 64-bit Vim with
 Python 2 and Python 3 support][vim-win-download] are available.
 
+Add the line:
+
+    set encoding=utf-8
+
+to your [vimrc][] if not already present. This option is required by YCM. Note
+that it does not prevent you from editing a file in another encoding than UTF-8.
+You can do that by specifying [the `++enc` argument][++enc] to the `:e` command.
+
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
@@ -3095,3 +3103,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [gitter]: https://gitter.im/Valloric/YouCompleteMe
 [ninja-compdb]: https://ninja-build.org/manual.html
 [vim-nerdtree-tabs]: https://github.com/jistr/vim-nerdtree-tabs
+[++enc]: http://vimdoc.sourceforge.net/htmldoc/editing.html#++enc
