@@ -115,18 +115,19 @@ Contents ~
   32. The |g:ycm_max_diagnostics_to_display| option
   33. The |g:ycm_key_list_select_completion| option
   34. The |g:ycm_key_list_previous_completion| option
-  35. The |g:ycm_key_invoke_completion| option
-  36. The |g:ycm_key_detailed_diagnostics| option
-  37. The |g:ycm_global_ycm_extra_conf| option
-  38. The |g:ycm_confirm_extra_conf| option
-  39. The |g:ycm_extra_conf_globlist| option
-  40. The |g:ycm_filepath_completion_use_working_dir| option
-  41. The |g:ycm_semantic_triggers| option
-  42. The |g:ycm_cache_omnifunc| option
-  43. The |g:ycm_use_ultisnips_completer| option
-  44. The |g:ycm_goto_buffer_command| option
-  45. The |g:ycm_disable_for_files_larger_than_kb| option
-  46. The |g:ycm_python_binary_path| option
+  35. The |g:ycm_key_list_stop_completion| option
+  36. The |g:ycm_key_invoke_completion| option
+  37. The |g:ycm_key_detailed_diagnostics| option
+  38. The |g:ycm_global_ycm_extra_conf| option
+  39. The |g:ycm_confirm_extra_conf| option
+  40. The |g:ycm_extra_conf_globlist| option
+  41. The |g:ycm_filepath_completion_use_working_dir| option
+  42. The |g:ycm_semantic_triggers| option
+  43. The |g:ycm_cache_omnifunc| option
+  44. The |g:ycm_use_ultisnips_completer| option
+  45. The |g:ycm_goto_buffer_command| option
+  46. The |g:ycm_disable_for_files_larger_than_kb| option
+  47. The |g:ycm_python_binary_path| option
  11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant|
   2. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
@@ -2563,6 +2564,18 @@ Vim.
 Default: "['<S-TAB>', '<Up>']"
 >
   let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>']
+<
+-------------------------------------------------------------------------------
+The *g:ycm_key_list_stop_completion* option
+
+This option controls the key mappings used to close the completion menu. This
+is useful when the menu is blocking the view, when you need to insert the
+'<TAB>' character, or when you want to expand a snippet from UltiSnips [21] and
+navigate through it.
+
+Default: "['<C-y>']"
+>
+  let g:ycm_key_list_stop_completion = ['<C-y>']
 <
 -------------------------------------------------------------------------------
 The *g:ycm_key_invoke_completion* option

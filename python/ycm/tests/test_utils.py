@@ -173,9 +173,6 @@ def _MockVimEval( value ):
   if value == 'tempname()':
     return '_TEMP_FILE_'
 
-  if value == 'complete_check()':
-    return 0
-
   if value == 'tagfiles()':
     return [ 'tags' ]
 
