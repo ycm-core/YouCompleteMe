@@ -1062,6 +1062,12 @@ locate it.
 " In this example, the rust source code zip has been extracted to
 " /usr/local/rust/rustc-1.5.0
 let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
+
+" Ensure that you use the absolute path, tilde expansion is not done.
+" E.g. if source code is downloaded through rustup it would be
+let g:ycm_rust_src_path = '/home/[user]/.multirust/toolchains/[your-toolchain]/lib/rustlib/src/rust/src'
+" NOT
+let g:ycm_rust_src_path = '~/.multirust/toolchains/[your-toolchain]/lib/rustlib/src/rust/src'
 ```
 
 ### Python Semantic Completion
