@@ -83,6 +83,13 @@ class OmniCompleter( Completer ):
         # FIXME: Technically, if the return is -1 we should raise an error
         return []
 
+      # Use the start column calculated by the omnifunc, rather than our own
+      # interpretation. This is important for certain languages where our
+      # identifier detection is either incorrect or not compatible with the
+      # behaviour of the omnifunc. Note: do this before calling the omnifunc
+      # because it affects the value returned by 'query'
+      request_data[ 'start_column' ] = return_value + 1
+
       omnifunc_call = [ self._omnifunc,
                         "(0,'",
                         vimsupport.EscapeForVim( request_data[ 'query' ] ),
