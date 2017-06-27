@@ -90,6 +90,12 @@ class OmniCompleter( Completer ):
 
       items = vim.eval( ''.join( omnifunc_call ) )
 
+      # Use the start column calculated by the omnifunc, rather than our own
+      # interpretation. This is important for certain languages where our
+      # identifier detection is either incorrect or not compatible with the
+      # behaviour of the omnifunc.
+      request_data[ 'start_column' ] = return_value + 1
+
       if isinstance( items, dict ) and 'words' in items:
         items = items[ 'words' ]
 
