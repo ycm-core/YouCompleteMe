@@ -524,7 +524,7 @@ process.
     it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If
     your version is greater than 7.4, then you're all set. If your version is
     7.4 then look below that where it says, `Included patches: 1-Z`, where Z
-    will be some number. That number needs to be 143 or higher.
+    will be some number. That number needs to be 1578 or higher.
 
     If your version of Vim is not recent enough, you may need to [compile Vim
     from source][vim-build] (don't worry, it's easy).
