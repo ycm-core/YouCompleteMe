@@ -27,7 +27,6 @@ from builtins import *  # noqa
 from future.utils import PY2
 from mock import patch, call
 from nose.tools import eq_
-from hamcrest import contains_string
 
 from ycm.tests.test_utils import ExpectedFailure, ExtendedMock, MockVimModule
 MockVimModule()
@@ -120,7 +119,7 @@ def OmniCompleter_GetCompletions_Cache_ListFilter_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -150,7 +149,7 @@ def OmniCompleter_GetCompletions_NoCache_List_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -181,7 +180,7 @@ def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -194,11 +193,8 @@ def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
     eq_( results, omnifunc_result )
 
 
-@ExpectedFailure( 'We ignore the result of the call to findstart and use our '
-                  'own interpretation of where the identifier should be',
-                  contains_string( "test_omnifunc(0,'t')" ) )
-@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
-def OmniCompleter_GetCompletsions_UseFindStart_test( ycm ):
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletsions_NoCache_UseFindStart_test( ycm ):
   contents = 'test.t'
   request_data = BuildRequestWrap( line_num = 1,
                                    column_num = 7,
@@ -217,18 +213,48 @@ def OmniCompleter_GetCompletsions_UseFindStart_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 1, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 0, omnifunc_result ] ) as vim_eval:
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
     vim_eval.assert_has_exact_calls( [
       call( 'test_omnifunc(1,"")' ),
-
-      # Fails here: actual result is that the findstart result (1) is ignored
-      # and we use the 't' query as we normally would on the server side
       call( "test_omnifunc(0,'test.t')" ),
     ] )
 
     eq_( results, omnifunc_result )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletsions_Cache_UseFindStart_test( ycm ):
+  contents = 'test.t'
+  request_data = BuildRequestWrap( line_num = 1,
+                                   column_num = 7,
+                                   contents = contents )
+
+  eq_( request_data[ 'query' ], 't' )
+
+  # Make sure there is an omnifunc set up.
+  with patch( 'vim.eval', return_value = ToBytesOnPY2( 'test_omnifunc' ) ):
+    ycm._omnicomp.OnFileReadyToParse( request_data )
+
+  omnifunc_result = [ ToBytesOnPY2( 'a' ),
+                      ToBytesOnPY2( 'b' ),
+                      ToBytesOnPY2( 'cdef' ) ]
+
+  # And get the completions
+  with patch( 'vim.eval',
+              new_callable = ExtendedMock,
+              side_effect = [ 0, omnifunc_result ] ) as vim_eval:
+    results = ycm._omnicomp.ComputeCandidates( request_data )
+
+    vim_eval.assert_has_exact_calls( [
+      call( 'test_omnifunc(1,"")' ),
+      call( "test_omnifunc(0,'test.t')" ),
+    ] )
+
+    # There are no results because the query 'test.t' doesn't match any
+    # candidate (and cache_omnifunc=1, so we FilterAndSortCandidates)
+    eq_( results, [] )
 
 
 @YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
@@ -255,7 +281,7 @@ def OmniCompleter_GetCompletions_Cache_Object_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
@@ -300,7 +326,7 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
@@ -345,7 +371,7 @@ def OmniCompleter_GetCompletions_NoCache_ObjectList_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
@@ -394,7 +420,7 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
@@ -441,7 +467,7 @@ def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 5, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
@@ -474,7 +500,7 @@ def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 12, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -504,7 +530,7 @@ def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 12, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -535,7 +561,7 @@ def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 12, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -564,7 +590,7 @@ def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 12, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
     vim_eval.assert_has_exact_calls( [
@@ -610,7 +636,7 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 12, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
@@ -666,7 +692,7 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
   # And get the completions
   with patch( 'vim.eval',
               new_callable = ExtendedMock,
-              side_effect = [ 6, omnifunc_result ] ) as vim_eval:
+              side_effect = [ 12, omnifunc_result ] ) as vim_eval:
 
     results = ycm._omnicomp.ComputeCandidates( request_data )
 
