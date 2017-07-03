@@ -349,8 +349,6 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
                           'open_loclist_on_ycm_diags': 0 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
-@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
-        return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
@@ -389,8 +387,6 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
 
 @YouCompleteMeInstance( { 'open_loclist_on_ycm_diags': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
-        return_value = True )
-@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
@@ -434,8 +430,6 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
                           'enable_diagnostic_signs': 1,
                           'enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
-        return_value = True )
-@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'vim.command', new_callable = ExtendedMock )

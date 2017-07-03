@@ -110,6 +110,7 @@ def YouCompleteMeInstance( custom_options = {} ):
     def Wrapper( *args, **kwargs ):
       ycm = YouCompleteMe( _MakeUserOptions( custom_options ) )
       WaitUntilReady()
+      ycm.CheckIfServerIsReady()
       try:
         test( ycm, *args, **kwargs )
       finally:
