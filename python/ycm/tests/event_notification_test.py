@@ -105,10 +105,7 @@ def MockEventNotification( response_method, native_filetype_completer = True ):
         'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = native_filetype_completer ):
 
-        with patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
-                    return_value = True ):
-
-          yield
+        yield
 
 
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
@@ -352,8 +349,6 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm, vim_command ):
 
 
 @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
-@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
-        return_value = True )
 @YouCompleteMeInstance( { 'collect_identifiers_from_tags_files': 1 } )
 def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
     ycm, *args ):
@@ -498,8 +493,6 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
 
 @patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
         return_value = [ 'foo', 'bar' ] )
-@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
-        return_value = True )
 @YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
     ycm, *args ):
@@ -534,8 +527,6 @@ def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
 
 @patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
         return_value = [ 'foo', 'bar' ] )
-@patch( 'ycm.youcompleteme.YouCompleteMe.IsServerReady',
-        return_value = True )
 @YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
     ycm, *args ):
