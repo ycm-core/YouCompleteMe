@@ -361,7 +361,7 @@ def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
   with patch( 'ycm.client.event_notification.EventNotification.'
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
     with CurrentWorkingDirectory( unicode_dir ):
-      with MockVimBuffers( [ current_buffer ], current_buffer, ( 6, 5 ) ):
+      with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 5 ) ):
         ycm.OnFileReadyToParse()
 
     assert_that(
@@ -370,7 +370,7 @@ def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
       contains(
         has_entries( {
           'filepath': current_buffer_file,
-          'line_num': 6,
+          'line_num': 1,
           'column_num': 6,
           'file_data': has_entries( {
             current_buffer_file: has_entries( {
@@ -416,7 +416,7 @@ def EventNotification_BufferVisit_BuildRequestForCurrentAndUnsavedBuffers_test(
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
     with MockVimBuffers( [ current_buffer, modified_buffer, unmodified_buffer ],
                          current_buffer,
-                         ( 3, 5 ) ):
+                         ( 1, 5 ) ):
       ycm.OnBufferVisit()
 
     assert_that(
@@ -425,7 +425,7 @@ def EventNotification_BufferVisit_BuildRequestForCurrentAndUnsavedBuffers_test(
       contains(
         has_entries( {
           'filepath': current_buffer_file,
-          'line_num': 3,
+          'line_num': 1,
           'column_num': 6,
           'file_data': has_entries( {
             current_buffer_file: has_entries( {
