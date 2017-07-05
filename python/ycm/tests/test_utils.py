@@ -91,8 +91,8 @@ def _MockGetBufferVariable( buffer_number, option ):
         return vim_buffer.filetype
       if option == 'changedtick':
         return vim_buffer.changedtick
-      if option == '&hid':
-        return vim_buffer.hidden
+      if option == '&bh':
+        return vim_buffer.bufhidden
       return ''
   return ''
 
@@ -135,6 +135,9 @@ def _MockVimOptionsEval( value ):
 
   if value == '&showcmd':
     return 1
+
+  if value == '&hidden':
+    return 0
 
   return None
 
@@ -211,21 +214,21 @@ def MockVimCommand( command ):
 
 class VimBuffer( object ):
   """An object that looks like a vim.buffer object:
-   - |name|    : full path of the buffer with symbolic links resolved;
-   - |number|  : buffer number;
-   - |contents|: list of lines representing the buffer contents;
-   - |filetype|: buffer filetype. Empty string if no filetype is set;
-   - |modified|: True if the buffer has unsaved changes, False otherwise;
-   - |hidden|  : True if the buffer is hidden, False otherwise;
-   - |window|  : number of the buffer window. None if the buffer is hidden;
-   - |omnifunc|: omni completion function used by the buffer."""
+   - |name|     : full path of the buffer with symbolic links resolved;
+   - |number|   : buffer number;
+   - |contents| : list of lines representing the buffer contents;
+   - |filetype| : buffer filetype. Empty string if no filetype is set;
+   - |modified| : True if the buffer has unsaved changes, False otherwise;
+   - |bufhidden|: value of the 'bufhidden' option (see :h bufhidden);
+   - |window|   : number of the buffer window. None if the buffer is hidden;
+   - |omnifunc| : omni completion function used by the buffer."""
 
   def __init__( self, name,
                       number = 1,
                       contents = [],
                       filetype = '',
-                      modified = True,
-                      hidden = False,
+                      modified = False,
+                      bufhidden = '',
                       window = None,
                       omnifunc = '' ):
     self.name = os.path.realpath( name ) if name else ''
@@ -233,8 +236,8 @@ class VimBuffer( object ):
     self.contents = contents
     self.filetype = filetype
     self.modified = modified
-    self.hidden = hidden
-    self.window = window if not hidden else None
+    self.bufhidden = bufhidden
+    self.window = window
     self.omnifunc = omnifunc
     self.changedtick = 1
 

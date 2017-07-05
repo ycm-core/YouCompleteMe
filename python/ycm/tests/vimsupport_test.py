@@ -1624,7 +1624,7 @@ def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
 @patch( 'ycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
-def JumpToLocation_DifferentFile_SameBuffer_NoSwapFile_test( vim_command ):
+def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], current_buffer ) as vim:
     target_name = os.path.realpath( u'different_uni¢𐍈d€' )
@@ -1634,7 +1634,47 @@ def JumpToLocation_DifferentFile_SameBuffer_NoSwapFile_test( vim_command ):
     assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
+      call( u'keepjumps edit {0}'.format( target_name ) ),
+      call( 'normal! zz' )
+    ] )
+
+
+@patch( 'ycmd.user_options_store._USER_OPTIONS',
+        { 'goto_buffer_command': 'same-buffer' } )
+@patch( 'vim.command', new_callable = ExtendedMock )
+def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
+    vim_command ):
+
+  current_buffer = VimBuffer( 'uni¢𐍈d€', modified = True )
+  with MockVimBuffers( [ current_buffer ], current_buffer ) as vim:
+    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+
+    vimsupport.JumpToLocation( target_name, 2, 5 )
+
+    assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
+    vim_command.assert_has_exact_calls( [
+      call( 'normal! m\'' ),
       call( u'keepjumps split {0}'.format( target_name ) ),
+      call( 'normal! zz' )
+    ] )
+
+
+@patch( 'ycmd.user_options_store._USER_OPTIONS',
+        { 'goto_buffer_command': 'same-buffer' } )
+@patch( 'vim.command', new_callable = ExtendedMock )
+def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
+    vim_command ):
+
+  current_buffer = VimBuffer( 'uni¢𐍈d€', modified = True, bufhidden = "hide" )
+  with MockVimBuffers( [ current_buffer ], current_buffer ) as vim:
+    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+
+    vimsupport.JumpToLocation( target_name, 2, 5 )
+
+    assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
+    vim_command.assert_has_exact_calls( [
+      call( 'normal! m\'' ),
+      call( u'keepjumps edit {0}'.format( target_name ) ),
       call( 'normal! zz' )
     ] )
 
@@ -1671,7 +1711,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps split {0}'.format( target_name ) )
+      call( u'keepjumps edit {0}'.format( target_name ) )
     ] )
 
 
@@ -1690,7 +1730,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Abort_test( vim_command ):
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps split {0}'.format( target_name ) )
+      call( u'keepjumps edit {0}'.format( target_name ) )
     ] )
 
 

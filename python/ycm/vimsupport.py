@@ -355,7 +355,9 @@ def VimExpressionToPythonType( vim_expression ):
 
 
 def HiddenEnabled( buffer_object ):
-  return bool( int( GetBufferOption( buffer_object, 'hid' ) ) )
+  if GetBufferOption( buffer_object, 'bh' ) == "hide":
+    return True
+  return GetBoolValue( '&hidden' )
 
 
 def BufferIsUsable( buffer_object ):
