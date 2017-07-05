@@ -486,6 +486,11 @@ endfunction
 
 
 function! s:PollServerReady( timer_id )
+  if !s:Pyeval( 'ycm_state.IsServerAlive()' )
+    " Server crashed. Don't poll it again.
+    return
+  endif
+
   if !s:Pyeval( 'ycm_state.CheckIfServerIsReady()' )
     let s:pollers.server_ready.id = timer_start(
           \ s:pollers.server_ready.wait_milliseconds,
