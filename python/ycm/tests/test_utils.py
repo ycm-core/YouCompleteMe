@@ -91,6 +91,8 @@ def _MockGetBufferVariable( buffer_number, option ):
         return vim_buffer.filetype
       if option == 'changedtick':
         return vim_buffer.changedtick
+      if option == '&bh':
+        return vim_buffer.bufhidden
       return ''
   return ''
 
@@ -133,6 +135,9 @@ def _MockVimOptionsEval( value ):
 
   if value == '&showcmd':
     return 1
+
+  if value == '&hidden':
+    return 0
 
   return None
 
@@ -209,19 +214,21 @@ def MockVimCommand( command ):
 
 class VimBuffer( object ):
   """An object that looks like a vim.buffer object:
-   - |name|    : full path of the buffer with symbolic links resolved;
-   - |number|  : buffer number;
-   - |contents|: list of lines representing the buffer contents;
-   - |filetype|: buffer filetype. Empty string if no filetype is set;
-   - |modified|: True if the buffer has unsaved changes, False otherwise;
-   - |window|  : number of the buffer window. None if the buffer is hidden;
-   - |omnifunc|: omni completion function used by the buffer."""
+   - |name|     : full path of the buffer with symbolic links resolved;
+   - |number|   : buffer number;
+   - |contents| : list of lines representing the buffer contents;
+   - |filetype| : buffer filetype. Empty string if no filetype is set;
+   - |modified| : True if the buffer has unsaved changes, False otherwise;
+   - |bufhidden|: value of the 'bufhidden' option (see :h bufhidden);
+   - |window|   : number of the buffer window. None if the buffer is hidden;
+   - |omnifunc| : omni completion function used by the buffer."""
 
   def __init__( self, name,
                       number = 1,
                       contents = [],
                       filetype = '',
-                      modified = True,
+                      modified = False,
+                      bufhidden = '',
                       window = None,
                       omnifunc = '' ):
     self.name = os.path.realpath( name ) if name else ''
@@ -229,6 +236,7 @@ class VimBuffer( object ):
     self.contents = contents
     self.filetype = filetype
     self.modified = modified
+    self.bufhidden = bufhidden
     self.window = window
     self.omnifunc = omnifunc
     self.changedtick = 1
@@ -287,7 +295,7 @@ def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
   with patch( 'vim.buffers', buffers ):
     with patch( 'vim.current.buffer', current_buffer ):
       with patch( 'vim.current.window.cursor', cursor_position ):
-        yield
+        yield VIM_MOCK
 
 
 def MockVimModule():
@@ -317,6 +325,16 @@ def MockVimModule():
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK
+
+
+class VimError( Exception ):
+
+  def __init__( self, code ):
+      self.code = code
+
+
+  def __str__( self ):
+      return repr( self.code )
 
 
 class ExtendedMock( MagicMock ):

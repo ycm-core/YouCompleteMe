@@ -29,11 +29,12 @@ import functools
 import os
 import requests
 import time
+import warnings
 
 from ycm.client.base_request import BaseRequest
 from ycm.youcompleteme import YouCompleteMe
 from ycmd import user_options_store
-from ycmd.utils import WaitUntilProcessIsTerminated
+from ycmd.utils import CloseStandardStreams, WaitUntilProcessIsTerminated
 
 # The default options which are only relevant to the client, not the server and
 # thus are not part of default_options.json, but are required for a working
@@ -84,8 +85,21 @@ def StopServer( ycm ):
   try:
     ycm.OnVimLeave()
     WaitUntilProcessIsTerminated( ycm._server_popen )
+    CloseStandardStreams( ycm._server_popen )
   except Exception:
     pass
+
+
+def setUpPackage():
+  # We treat warnings as errors in our tests because warnings raised inside Vim
+  # will interrupt user workflow with a traceback and we don't want that.
+  warnings.filterwarnings( 'error' )
+  # We ignore warnings from nose as we are not interested in them.
+  warnings.filterwarnings( 'ignore', module = 'nose' )
+
+
+def tearDownPackage():
+  warnings.resetwarnings()
 
 
 def YouCompleteMeInstance( custom_options = {} ):
