@@ -221,7 +221,7 @@ class YouCompleteMe( object ):
 
 
   def CheckIfServerIsReady( self ):
-    if not self._server_is_ready_with_cache and self.IsServerAlive():
+    if not self._server_is_ready_with_cache:
       with HandleServerException( display = False ):
         self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
             'ready' )
