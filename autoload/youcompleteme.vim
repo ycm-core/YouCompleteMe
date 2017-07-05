@@ -615,8 +615,10 @@ function! s:OnInsertLeave()
     return
   endif
 
+  call timer_stop( s:pollers.completion.id )
   let s:force_semantic = 0
   let s:completion = s:default_completion
+
   call s:OnFileReadyToParse()
   exec s:python_command "ycm_state.OnInsertLeave()"
   if g:ycm_autoclose_preview_window_after_completion ||
