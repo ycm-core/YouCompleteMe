@@ -25,7 +25,8 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
-                                   MockVimBuffers, MockVimModule, VimBuffer )
+                                   MockVimBuffers, MockVimModule, VimBuffer,
+                                   ToBytesOnPY2 )
 MockVimModule()
 
 import contextlib
@@ -447,14 +448,14 @@ def EventNotification_BufferVisit_BuildRequestForCurrentAndUnsavedBuffers_test(
 @YouCompleteMeInstance()
 def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
     ycm ):
-  current_buffer_file = os.path.realpath( 'current_buffer' )
+  current_buffer_file = os.path.realpath( 'current_βuffer' )
   current_buffer = VimBuffer( name = current_buffer_file,
                               number = 1,
                               contents = [ 'current_buffer_contents' ],
                               filetype = 'some_filetype',
                               modified = True )
 
-  deleted_buffer_file = os.path.realpath( 'deleted_buffer' )
+  deleted_buffer_file = os.path.realpath( 'deleted_βuffer' )
   deleted_buffer = VimBuffer( name = deleted_buffer_file,
                               number = 2,
                               contents = [ 'deleted_buffer_contents' ],
@@ -464,7 +465,7 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
   with patch( 'ycm.client.event_notification.EventNotification.'
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
     with MockVimBuffers( [ current_buffer, deleted_buffer ], current_buffer ):
-      ycm.OnBufferUnload( deleted_buffer_file )
+      ycm.OnBufferUnload( ToBytesOnPY2( deleted_buffer_file ) )
 
   assert_that(
     # Positional arguments passed to PostDataToHandlerAsync.
