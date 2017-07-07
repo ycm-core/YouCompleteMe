@@ -610,8 +610,6 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 5 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       vimsupport.CurrentLineAndColumn(),
@@ -622,5 +620,51 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
       has_entries( {
         'completions': ToBytesOnPY2( [ 'length' ] ),
         'completion_start_column': 6
+      } )
+    )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_NoSemanticTrigger_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 0
+    return [ 'test' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'te' ],
+                              filetype = 'java',
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 3 ) ):
+    ycm.SendCompletionRequest()
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': empty(),
+        'completion_start_column': 1
+      } )
+    )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_ForceSemantic_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 0
+    return [ 'test' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'te' ],
+                              filetype = 'java',
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 3 ) ):
+    ycm.SendCompletionRequest( force_semantic = True )
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [ 'test' ] ),
+        'completion_start_column': 1
       } )
     )

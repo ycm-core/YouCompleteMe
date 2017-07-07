@@ -24,6 +24,7 @@ from builtins import *  # noqa
 
 import vim
 from ycm import vimsupport
+from ycmd import utils
 from ycmd.completers.completer import Completer
 from ycm.client.base_request import BaseRequest, HandleServerException
 
@@ -47,7 +48,7 @@ class OmniCompleter( Completer ):
 
 
   def ShouldUseNow( self, request_data ):
-    self._omnifunc = vimsupport.VimExpressionToPythonType( '&omnifunc' )
+    self._omnifunc = utils.ToUnicode( vim.eval( '&omnifunc' ) )
     if not self._omnifunc:
       return False
     if self.ShouldUseCache():
