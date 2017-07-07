@@ -30,6 +30,7 @@ from ycm.tests.test_utils import ( ExpectedFailure, MockVimBuffers,
                                    MockVimModule, ToBytesOnPY2, VimBuffer )
 MockVimModule()
 
+from ycm import vimsupport
 from ycm.tests import YouCompleteMeInstance
 
 
@@ -619,5 +620,41 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
           'kind': 'Ê'
         } ),
         'completion_start_column': 13
+      } )
+    )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
+def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
+  ycm ):
+
+  # This omnifunc moves the cursor to the test definition like
+  # ccomplete#Complete would.
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    vimsupport.SetCurrentLineAndColumn( 0, 0 )
+    return [ 'length' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'String test',
+                                           '',
+                                           'test.' ],
+                              filetype = 'java',
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 5 ) ):
+    # Make sure there is an omnifunc set up.
+    ycm.OnFileReadyToParse()
+    ycm.SendCompletionRequest()
+    assert_that(
+      vimsupport.CurrentLineAndColumn(),
+      contains( 2, 5 )
+    )
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [ 'length' ] ),
+        'completion_start_column': 6
       } )
     )

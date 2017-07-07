@@ -56,6 +56,12 @@ def CurrentLineAndColumn():
   return line, column
 
 
+def SetCurrentLineAndColumn( line, column ):
+  """Sets the cursor position to the 0-based line and 0-based column."""
+  # Line from vim.current.window.cursor is 1-based.
+  vim.current.window.cursor = ( line + 1, column )
+
+
 def CurrentColumn():
   """Returns the 0-based current column. Do NOT access the CurrentColumn in
   vim.current.line. It doesn't exist yet when the cursor is at the end of the
