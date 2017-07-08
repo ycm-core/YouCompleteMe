@@ -47,8 +47,6 @@ def OmniCompleter_GetCompletions_Cache_List_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 5 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -72,8 +70,6 @@ def OmniCompleter_GetCompletions_Cache_ListFilter_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -97,8 +93,6 @@ def OmniCompleter_GetCompletions_NoCache_List_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 5 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -122,8 +116,6 @@ def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     # Actual result is that the results are not filtered, as we expect the
     # omnifunc or vim itself to do this filtering.
@@ -149,8 +141,6 @@ def OmniCompleter_GetCompletions_NoCache_UseFindStart_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     # Actual result is that the results are not filtered, as we expect the
     # omnifunc or vim itself to do this filtering.
@@ -176,8 +166,6 @@ def OmniCompleter_GetCompletions_Cache_UseFindStart_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     # There are no results because the query 'test.t' doesn't match any
     # candidate (and cache_omnifunc=1, so we FilterAndSortCandidates).
@@ -203,8 +191,6 @@ def OmniCompleter_GetCompletions_Cache_Object_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -243,8 +229,6 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 7 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -289,8 +273,6 @@ def OmniCompleter_GetCompletions_NoCache_ObjectList_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 7 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     # We don't filter the result - we expect the omnifunc to do that
     # based on the query we supplied (Note: that means no fuzzy matching!).
@@ -343,8 +325,6 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 7 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -389,8 +369,6 @@ def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 7 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     # No FilterAndSortCandidates for cache_omnifunc=0 (we expect the omnifunc
     # to do the filtering?)
@@ -428,8 +406,6 @@ def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 12 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -455,8 +431,6 @@ def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 12 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -484,8 +458,6 @@ def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 17 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -509,8 +481,6 @@ def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 17 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -551,8 +521,6 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 17 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -606,8 +574,6 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 13 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       ycm.GetCompletionResponse(),
@@ -644,8 +610,6 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
                               omnifunc = Omnifunc )
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 5 ) ):
-    # Make sure there is an omnifunc set up.
-    ycm.OnFileReadyToParse()
     ycm.SendCompletionRequest()
     assert_that(
       vimsupport.CurrentLineAndColumn(),
@@ -656,5 +620,51 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
       has_entries( {
         'completions': ToBytesOnPY2( [ 'length' ] ),
         'completion_start_column': 6
+      } )
+    )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_NoSemanticTrigger_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 0
+    return [ 'test' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'te' ],
+                              filetype = 'java',
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 3 ) ):
+    ycm.SendCompletionRequest()
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': empty(),
+        'completion_start_column': 1
+      } )
+    )
+
+
+@YouCompleteMeInstance( { 'cache_omnifunc': 0 } )
+def OmniCompleter_GetCompletions_NoCache_ForceSemantic_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 0
+    return [ 'test' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'te' ],
+                              filetype = 'java',
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 3 ) ):
+    ycm.SendCompletionRequest( force_semantic = True )
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [ 'test' ] ),
+        'completion_start_column': 1
       } )
     )

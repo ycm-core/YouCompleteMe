@@ -48,17 +48,15 @@ class OmniCompleter( Completer ):
 
 
   def ShouldUseNow( self, request_data ):
+    self._omnifunc = utils.ToUnicode( vim.eval( '&omnifunc' ) )
     if not self._omnifunc:
       return False
-
     if self.ShouldUseCache():
       return super( OmniCompleter, self ).ShouldUseNow( request_data )
     return self.ShouldUseNowInner( request_data )
 
 
   def ShouldUseNowInner( self, request_data ):
-    if not self._omnifunc:
-      return False
     if request_data.get( 'force_semantic', False ):
       return True
     return super( OmniCompleter, self ).ShouldUseNowInner( request_data )
@@ -67,10 +65,9 @@ class OmniCompleter( Completer ):
   def ComputeCandidates( self, request_data ):
     if self.ShouldUseCache():
       return super( OmniCompleter, self ).ComputeCandidates( request_data )
-    else:
-      if self.ShouldUseNowInner( request_data ):
-        return self.ComputeCandidatesInner( request_data )
-      return []
+    if self.ShouldUseNowInner( request_data ):
+      return self.ComputeCandidatesInner( request_data )
+    return []
 
 
   def ComputeCandidatesInner( self, request_data ):
@@ -78,7 +75,7 @@ class OmniCompleter( Completer ):
       return []
 
     try:
-      return_value = int( vim.eval( self._omnifunc + '(1,"")' ) )
+      return_value = vimsupport.GetIntValue( self._omnifunc + '(1,"")' )
       if return_value < 0:
         # FIXME: Technically, if the return is -1 we should raise an error
         return []
@@ -118,10 +115,6 @@ class OmniCompleter( Completer ):
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )
       return []
-
-
-  def OnFileReadyToParse( self, request_data ):
-    self._omnifunc = utils.ToUnicode( vim.eval( '&omnifunc' ) )
 
 
   def FilterAndSortCandidatesInner( self, candidates, sort_property, query ):
