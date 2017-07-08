@@ -374,7 +374,9 @@ class YouCompleteMe( object ):
 
 
   def OnBufferUnload( self, deleted_buffer_file ):
-    SendEventNotificationAsync( 'BufferUnload', filepath = deleted_buffer_file )
+    SendEventNotificationAsync(
+        'BufferUnload',
+        filepath = utils.ToUnicode( deleted_buffer_file ) )
 
 
   def OnBufferVisit( self ):
