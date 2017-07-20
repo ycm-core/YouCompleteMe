@@ -706,10 +706,13 @@ endfunction
 
 
 function! s:InvokeSemanticCompletion()
-  let s:force_semantic = 1
-  exec s:python_command "ycm_state.SendCompletionRequest( True )"
+  if &completefunc == "youcompleteme#CompleteFunc"
+    let s:force_semantic = 1
+    exec s:python_command "ycm_state.SendCompletionRequest( True )"
 
-  call s:PollCompletion()
+    call s:PollCompletion()
+  endif
+
   " Since this function is called in a mapping through the expression register
   " <C-R>=, its return value is inserted (see :h c_CTRL-R_=). We don't want to
   " insert anything so we return an empty string.
