@@ -429,11 +429,6 @@ function! s:SetUpCompleteopt()
 endfunction
 
 
-function! s:SetCompleteFunc()
-  let &completefunc = 'youcompleteme#CompleteFunc'
-endfunction
-
-
 function! s:OnVimLeave()
   exec s:python_command "ycm_state.OnVimLeave()"
 endfunction
@@ -450,7 +445,6 @@ function! s:OnFileTypeSet()
   endif
 
   call s:SetUpCompleteopt()
-  call s:SetCompleteFunc()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   call s:OnFileReadyToParse( 1 )
@@ -463,7 +457,6 @@ function! s:OnBufferEnter()
   endif
 
   call s:SetUpCompleteopt()
-  call s:SetCompleteFunc()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   " Last parse may be outdated because of changes from other buffers. Force a
@@ -598,8 +591,7 @@ function! s:OnTextChangedInsertMode()
     let s:force_semantic = 0
   endif
 
-  if &completefunc == "youcompleteme#CompleteFunc" &&
-        \ ( g:ycm_auto_trigger || s:force_semantic ) &&
+  if ( g:ycm_auto_trigger || s:force_semantic ) &&
         \ !s:InsideCommentOrStringAndShouldStop() &&
         \ !s:OnBlankLine()
     " Immediately call previous completion to avoid flickers.
@@ -735,6 +727,8 @@ endfunction
 
 
 function! s:Complete()
+  let &completefunc = 'youcompleteme#CompleteFunc'
+
   " <c-x><c-u> invokes the user's completion function (which we have set to
   " youcompleteme#CompleteFunc), and <c-p> tells Vim to select the previous
   " completion candidate. This is necessary because by default, Vim selects the
