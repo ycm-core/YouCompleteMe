@@ -31,6 +31,20 @@ elseif v:version < 704 || (v:version == 704 && !has( 'patch1578' ))
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.1578+." |
         \ echohl None
+  if v:version == 704 && has( 'patch8056' )
+    " Very very special case for users of the default Vim on macOS. For some
+    " reason, that version of Vim contains a completely arbitrary (presumably
+    " custom) patch '8056', which fools users (but not our has( 'patch1578' )
+    " check) into thinking they have a sufficiently new Vim. In fact they do
+    " not and YCM fails to initialise. So we give them a more specific warning.
+    echohl WarningMsg
+          \ | echomsg
+          \ "Info: You appear to be running the default system Vim on macOS. "
+          \ . "It reports as patch 8056, but it is really older than 1578. "
+          \ . "Please consider MacVim, homebrew Vim or a self-built Vim that "
+          \ . "satisfies the minimum requirement."
+          \ | echohl None
+  endif
   call s:restore_cpo()
   finish
 elseif !has( 'timers' )
