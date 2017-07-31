@@ -533,10 +533,22 @@ function! s:PollFileParseResponse( ... )
 endfunction
 
 
+function! s:SendKeys( keys )
+  " By default keys are added to the end of the typeahead buffer. If there are
+  " already keys in the buffer, they will be processed first and may change the
+  " state that our keys combination was sent for (e.g. <C-X><C-U><C-P> in normal
+  " mode instead of insert mode or <C-e> outside of completion mode). We avoid
+  " that by inserting the keys at the start of the typeahead buffer with the 'i'
+  " option. Also, we don't want the keys to be remapped to something else so we
+  " add the 'n' option.
+  call feedkeys( a:keys, 'in' )
+endfunction
+
+
 function! s:OnInsertChar()
   call timer_stop( s:pollers.completion.id )
   if pumvisible()
-    call feedkeys( "\<C-e>", 'n' )
+    call s:SendKeys( "\<C-e>" )
   endif
 endfunction
 
@@ -745,7 +757,7 @@ function! s:Complete()
   " automatically replaces the current text with it. Calling <c-p> forces Vim to
   " deselect the first candidate and in turn preserve the user's current text
   " until he explicitly chooses to replace it with a completion.
-  call feedkeys( "\<C-X>\<C-U>\<C-P>", 'n' )
+  call s:SendKeys( "\<C-X>\<C-U>\<C-P>" )
 endfunction
 
 
