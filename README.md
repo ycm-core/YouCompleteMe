@@ -2329,7 +2329,7 @@ let g:ycm_key_list_stop_completion = ['<C-y>']
 ### The `g:ycm_key_invoke_completion` option
 
 This option controls the key mapping used to invoke the completion menu for
-semantic completion. By default, semantic completion is trigged automatically
+semantic completion. By default, semantic completion is triggered automatically
 after typing `.`, `->` and `::` in insert mode (if semantic completion support
 has been compiled in). This key mapping can be used to trigger semantic
 completion anywhere. Useful for searching for top-level functions and classes.
