@@ -739,7 +739,8 @@ will notify you to recompile it. You should then rerun the install process.
    output; it should say 'Vi IMproved X.Y', where X.Y is the major version
    of vim. If your version is greater than 7.4, then you're all set. If your
    version is 7.4 then look below that where it says, 'Included patches:
-   1-Z', where Z will be some number. That number needs to be 1578 or higher.
+   1-Z', where Z will be some number. That number needs to be 1578 or
+   higher.
 
    If your version of Vim is not recent enough, you may need to compile Vim
    from source [30] (don't worry, it's easy).
@@ -2581,7 +2582,7 @@ Default: "['<C-y>']"
 The *g:ycm_key_invoke_completion* option
 
 This option controls the key mapping used to invoke the completion menu for
-semantic completion. By default, semantic completion is trigged automatically
+semantic completion. By default, semantic completion is triggered automatically
 after typing '.', '->' and '::' in insert mode (if semantic completion support
 has been compiled in). This key mapping can be used to trigger semantic
 completion anywhere. Useful for searching for top-level functions and classes.
