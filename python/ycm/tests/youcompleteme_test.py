@@ -50,7 +50,6 @@ def RunNotifyUserIfServerCrashed( ycm, test, post_vim_message ):
   ycm._logger = MagicMock( autospec = True )
   ycm._server_popen = MagicMock( autospec = True )
   ycm._server_popen.poll.return_value = test[ 'return_code' ]
-  ycm._server_popen.stderr.read.return_value = test[ 'stderr_output' ]
 
   ycm._NotifyUserIfServerCrashed()
 
@@ -69,7 +68,6 @@ def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedCore_test():
               "Use the ':YcmToggleLogs' command to check the logs." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 3,
-    'stderr_output' : '',
     'expected_logs': [ message ],
     'expected_vim_message': message
   } )
@@ -81,7 +79,6 @@ def YouCompleteMe_NotifyUserIfServerCrashed_MissingCore_test():
               "using it. Follow the instructions in the documentation." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 4,
-    'stderr_output': '',
     'expected_logs': [ message ],
     'expected_vim_message': message
   } )
@@ -94,7 +91,6 @@ def YouCompleteMe_NotifyUserIfServerCrashed_Python2Core_test():
               "interpreter path." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 5,
-    'stderr_output': '',
     'expected_logs': [ message ],
     'expected_vim_message': message
   } )
@@ -107,7 +103,6 @@ def YouCompleteMe_NotifyUserIfServerCrashed_Python3Core_test():
               "interpreter path." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 6,
-    'stderr_output': '',
     'expected_logs': [ message ],
     'expected_vim_message': message
   } )
@@ -119,7 +114,6 @@ def YouCompleteMe_NotifyUserIfServerCrashed_OutdatedCore_test():
               "install.py script. See the documentation for more details." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 7,
-    'stderr_output': '',
     'expected_logs': [ message ],
     'expected_vim_message': message
   } )
@@ -131,11 +125,7 @@ def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedExitCode_test():
               "check the logs." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 1,
-    'stderr_output': 'First line\r\n'
-                     'Second line',
-    'expected_logs': [ 'First line\n'
-                       'Second line',
-                       message ],
+    'expected_logs': [ message ],
     'expected_vim_message': message
   } )
 
