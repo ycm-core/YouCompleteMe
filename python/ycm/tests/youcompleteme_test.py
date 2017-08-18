@@ -28,7 +28,7 @@ MockVimModule()
 
 import os
 import sys
-from hamcrest import ( assert_that, contains, empty, is_in, is_not, has_length,
+from hamcrest import ( assert_that, contains, empty, equal_to, is_in, is_not,
                        matches_regexp )
 from mock import call, MagicMock, patch
 
@@ -53,23 +53,19 @@ def RunNotifyUserIfServerCrashed( ycm, test, post_vim_message ):
 
   ycm._NotifyUserIfServerCrashed()
 
-  assert_that( ycm._logger.method_calls,
-               has_length( len( test[ 'expected_logs' ] ) ) )
-  ycm._logger.error.assert_has_calls(
-    [ call( log ) for log in test[ 'expected_logs' ] ] )
-  post_vim_message.assert_has_exact_calls( [
-    call( test[ 'expected_vim_message' ] )
-  ] )
+  assert_that( ycm._logger.error.call_args[ 0 ][ 0 ],
+               test[ 'expected_message' ] )
+  assert_that( post_vim_message.call_args[ 0 ][ 0 ],
+               test[ 'expected_message' ] )
 
 
 def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedCore_test():
-  message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
-              "Unexpected error while loading the YCM core library. "
-              "Use the ':YcmToggleLogs' command to check the logs." )
+  message = ( "The ycmd server SHUT DOWN \(restart with ':YcmRestartServer'\). "
+              "Unexpected error while loading the YCM core library. Type "
+              "':YcmToggleLogs ycmd_\d+_stderr_.+.log' to check the logs." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 3,
-    'expected_logs': [ message ],
-    'expected_vim_message': message
+    'expected_message': matches_regexp( message )
   } )
 
 
@@ -79,8 +75,7 @@ def YouCompleteMe_NotifyUserIfServerCrashed_MissingCore_test():
               "using it. Follow the instructions in the documentation." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 4,
-    'expected_logs': [ message ],
-    'expected_vim_message': message
+    'expected_message': equal_to( message )
   } )
 
 
@@ -91,8 +86,7 @@ def YouCompleteMe_NotifyUserIfServerCrashed_Python2Core_test():
               "interpreter path." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 5,
-    'expected_logs': [ message ],
-    'expected_vim_message': message
+    'expected_message': equal_to( message )
   } )
 
 
@@ -103,8 +97,7 @@ def YouCompleteMe_NotifyUserIfServerCrashed_Python3Core_test():
               "interpreter path." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 6,
-    'expected_logs': [ message ],
-    'expected_vim_message': message
+    'expected_message': equal_to( message )
   } )
 
 
@@ -114,19 +107,17 @@ def YouCompleteMe_NotifyUserIfServerCrashed_OutdatedCore_test():
               "install.py script. See the documentation for more details." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 7,
-    'expected_logs': [ message ],
-    'expected_vim_message': message
+    'expected_message': equal_to( message )
   } )
 
 
 def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedExitCode_test():
-  message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
-              "Unexpected exit code 1. Use the ':YcmToggleLogs' command to "
-              "check the logs." )
+  message = ( "The ycmd server SHUT DOWN \(restart with ':YcmRestartServer'\). "
+              "Unexpected exit code 1. Type "
+              "':YcmToggleLogs ycmd_\d+_stderr_.+.log' to check the logs." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 1,
-    'expected_logs': [ message ],
-    'expected_vim_message': message
+    'expected_message': matches_regexp( message )
   } )
 
 
