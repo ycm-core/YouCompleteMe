@@ -251,11 +251,6 @@ class YouCompleteMe( object ):
     else:
       error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format( code = return_code )
 
-    server_stderr = '\n'.join(
-        utils.ToUnicode( self._server_popen.stderr.read() ).splitlines() )
-    if server_stderr:
-      self._logger.error( server_stderr )
-
     error_message = SERVER_SHUTDOWN_MESSAGE + ' ' + error_message
     self._logger.error( error_message )
     vimsupport.PostVimMessage( error_message )
