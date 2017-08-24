@@ -79,10 +79,10 @@ SERVER_SHUTDOWN_MESSAGE = (
   "The ycmd server SHUT DOWN (restart with ':YcmRestartServer')." )
 EXIT_CODE_UNEXPECTED_MESSAGE = (
   "Unexpected exit code {code}. "
-  "Use the ':YcmToggleLogs' command to check the logs." )
+  "Type ':YcmToggleLogs {logfile}' to check the logs." )
 CORE_UNEXPECTED_MESSAGE = (
   "Unexpected error while loading the YCM core library. "
-  "Use the ':YcmToggleLogs' command to check the logs." )
+  "Type ':YcmToggleLogs {logfile}' to check the logs." )
 CORE_MISSING_MESSAGE = (
   'YCM core library not detected; you need to compile YCM before using it. '
   'Follow the instructions in the documentation.' )
@@ -238,8 +238,10 @@ class YouCompleteMe( object ):
     self._user_notified_about_crash = True
 
     return_code = self._server_popen.poll()
+    logfile = os.path.basename( self._server_stderr )
     if return_code == server_utils.CORE_UNEXPECTED_STATUS:
-      error_message = CORE_UNEXPECTED_MESSAGE
+      error_message = CORE_UNEXPECTED_MESSAGE.format(
+          logfile = logfile )
     elif return_code == server_utils.CORE_MISSING_STATUS:
       error_message = CORE_MISSING_MESSAGE
     elif return_code == server_utils.CORE_PYTHON2_STATUS:
@@ -249,7 +251,9 @@ class YouCompleteMe( object ):
     elif return_code == server_utils.CORE_OUTDATED_STATUS:
       error_message = CORE_OUTDATED_MESSAGE
     else:
-      error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format( code = return_code )
+      error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format(
+          code = return_code,
+          logfile = logfile )
 
     error_message = SERVER_SHUTDOWN_MESSAGE + ' ' + error_message
     self._logger.error( error_message )
