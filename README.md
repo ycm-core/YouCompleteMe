@@ -1605,12 +1605,13 @@ Supported in filetypes: `cs, go, javascript, python, rust, typescript`
 #### The `ClearCompilationFlagCache` subcommand
 
 YCM caches the flags it gets from the `FlagsForFile` function in your
-`ycm_extra_conf.py` file if you return them with the `do_cache` parameter set to
-`True`. The cache is in memory and is never invalidated (unless you restart Vim
-of course).
+`ycm_extra_conf.py` file unless you return them with the `do_cache` parameter
+set to `False`. It also caches the flags extracted from the compilation
+database. The cache is in memory and is never invalidated (unless you restart
+the server with the `:YcmRestartServer` command).
 
 This command clears that cache entirely. YCM will then re-query your
-`FlagsForFile` function as needed in the future.
+`FlagsForFile` function or your compilation database as needed in the future.
 
 Supported in filetypes: `c, cpp, objc, objcpp`
 
