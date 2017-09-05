@@ -1742,6 +1742,43 @@ Default: `0`
 let g:ycm_min_num_identifier_candidate_chars = 0
 ```
 
+### The `g:ycm_max_num_candidates` option
+
+This option controls the maximum number of semantic completion suggestions shown
+in the completion menu. This only applies to suggestions from semantic
+completion engines; see [the `g:ycm_max_identifier_candidates`
+option](#the-gycm_max_num_identifier_candidates-option) to limit the number of
+suggestions from the identifier-based engine.
+
+A special value of `0` means there is no limit.
+
+**NOTE:** Setting this option to `0` or to a value greater than `100` is not
+recommended as it will slow down completion when there are a very large number
+of suggestions.
+
+Default: `50`
+
+```viml
+let g:ycm_max_num_candidates = 50
+```
+
+### The `g:ycm_max_num_identifier_candidates` option
+
+This option controls the maximum number of completion suggestions from the
+identifier-based engine shown in the completion menu.
+
+A special value of `0` means there is no limit.
+
+**NOTE:** Setting this option to `0` or to a value greater than `100` is not
+recommended as it will slow down completion when there are a very large number
+of suggestions.
+
+Default: `10`
+
+```viml
+let g:ycm_max_num_identifier_candidates = 10
+```
+
 ### The `g:ycm_auto_trigger` option
 
 When set to `0`, this option turns off YCM's identifier completer (the
