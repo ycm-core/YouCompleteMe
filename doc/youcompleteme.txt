@@ -83,51 +83,53 @@ Contents ~
  10. Options                                            |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
-  3. The |g:ycm_auto_trigger| option
-  4. The |g:ycm_filetype_whitelist| option
-  5. The |g:ycm_filetype_blacklist| option
-  6. The |g:ycm_filetype_specific_completion_to_disable| option
-  7. The |g:ycm_show_diagnostics_ui| option
-  8. The |g:ycm_error_symbol| option
-  9. The |g:ycm_warning_symbol| option
-  10. The |g:ycm_enable_diagnostic_signs| option
-  11. The |g:ycm_enable_diagnostic_highlighting| option
-  12. The |g:ycm_echo_current_diagnostic| option
-  13. The |g:ycm_filter_diagnostics| option
-  14. The |g:ycm_always_populate_location_list| option
-  15. The |g:ycm_open_loclist_on_ycm_diags| option
-  16. The |g:ycm_complete_in_comments| option
-  17. The |g:ycm_complete_in_strings| option
-  18. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  19. The |g:ycm_collect_identifiers_from_tags_files| option
-  20. The |g:ycm_seed_identifiers_with_syntax| option
-  21. The |g:ycm_extra_conf_vim_data| option
-  22. The |g:ycm_server_python_interpreter| option
-  23. The |g:ycm_keep_logfiles| option
-  24. The |g:ycm_log_level| option
-  25. The |g:ycm_auto_start_csharp_server| option
-  26. The |g:ycm_auto_stop_csharp_server| option
-  27. The |g:ycm_csharp_server_port| option
-  28. The |g:ycm_csharp_insert_namespace_expr| option
-  29. The |g:ycm_add_preview_to_completeopt| option
-  30. The |g:ycm_autoclose_preview_window_after_completion| option
-  31. The |g:ycm_autoclose_preview_window_after_insertion| option
-  32. The |g:ycm_max_diagnostics_to_display| option
-  33. The |g:ycm_key_list_select_completion| option
-  34. The |g:ycm_key_list_previous_completion| option
-  35. The |g:ycm_key_list_stop_completion| option
-  36. The |g:ycm_key_invoke_completion| option
-  37. The |g:ycm_key_detailed_diagnostics| option
-  38. The |g:ycm_global_ycm_extra_conf| option
-  39. The |g:ycm_confirm_extra_conf| option
-  40. The |g:ycm_extra_conf_globlist| option
-  41. The |g:ycm_filepath_completion_use_working_dir| option
-  42. The |g:ycm_semantic_triggers| option
-  43. The |g:ycm_cache_omnifunc| option
-  44. The |g:ycm_use_ultisnips_completer| option
-  45. The |g:ycm_goto_buffer_command| option
-  46. The |g:ycm_disable_for_files_larger_than_kb| option
-  47. The |g:ycm_python_binary_path| option
+  3. The |g:ycm_max_num_candidates| option
+  4. The |g:ycm_max_num_identifier_candidates| option
+  5. The |g:ycm_auto_trigger| option
+  6. The |g:ycm_filetype_whitelist| option
+  7. The |g:ycm_filetype_blacklist| option
+  8. The |g:ycm_filetype_specific_completion_to_disable| option
+  9. The |g:ycm_show_diagnostics_ui| option
+  10. The |g:ycm_error_symbol| option
+  11. The |g:ycm_warning_symbol| option
+  12. The |g:ycm_enable_diagnostic_signs| option
+  13. The |g:ycm_enable_diagnostic_highlighting| option
+  14. The |g:ycm_echo_current_diagnostic| option
+  15. The |g:ycm_filter_diagnostics| option
+  16. The |g:ycm_always_populate_location_list| option
+  17. The |g:ycm_open_loclist_on_ycm_diags| option
+  18. The |g:ycm_complete_in_comments| option
+  19. The |g:ycm_complete_in_strings| option
+  20. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  21. The |g:ycm_collect_identifiers_from_tags_files| option
+  22. The |g:ycm_seed_identifiers_with_syntax| option
+  23. The |g:ycm_extra_conf_vim_data| option
+  24. The |g:ycm_server_python_interpreter| option
+  25. The |g:ycm_keep_logfiles| option
+  26. The |g:ycm_log_level| option
+  27. The |g:ycm_auto_start_csharp_server| option
+  28. The |g:ycm_auto_stop_csharp_server| option
+  29. The |g:ycm_csharp_server_port| option
+  30. The |g:ycm_csharp_insert_namespace_expr| option
+  31. The |g:ycm_add_preview_to_completeopt| option
+  32. The |g:ycm_autoclose_preview_window_after_completion| option
+  33. The |g:ycm_autoclose_preview_window_after_insertion| option
+  34. The |g:ycm_max_diagnostics_to_display| option
+  35. The |g:ycm_key_list_select_completion| option
+  36. The |g:ycm_key_list_previous_completion| option
+  37. The |g:ycm_key_list_stop_completion| option
+  38. The |g:ycm_key_invoke_completion| option
+  39. The |g:ycm_key_detailed_diagnostics| option
+  40. The |g:ycm_global_ycm_extra_conf| option
+  41. The |g:ycm_confirm_extra_conf| option
+  42. The |g:ycm_extra_conf_globlist| option
+  43. The |g:ycm_filepath_completion_use_working_dir| option
+  44. The |g:ycm_semantic_triggers| option
+  45. The |g:ycm_cache_omnifunc| option
+  46. The |g:ycm_use_ultisnips_completer| option
+  47. The |g:ycm_goto_buffer_command| option
+  48. The |g:ycm_disable_for_files_larger_than_kb| option
+  49. The |g:ycm_python_binary_path| option
  11. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant|
   2. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
@@ -2032,6 +2034,40 @@ effect on the various semantic completers.
 Default: '0'
 >
   let g:ycm_min_num_identifier_candidate_chars = 0
+<
+-------------------------------------------------------------------------------
+The *g:ycm_max_num_candidates* option
+
+This option controls the maximum number of semantic completion suggestions
+shown in the completion menu. This only applies to suggestions from semantic
+completion engines; see the 'g:ycm_max_identifier_candidates' option to limit
+the number of suggestions from the identifier-based engine.
+
+A special value of '0' means there is no limit.
+
+**NOTE:** Setting this option to '0' or to a value greater than '100' is not
+recommended as it will slow down completion when there are a very large number
+of suggestions.
+
+Default: '50'
+>
+  let g:ycm_max_num_candidates = 50
+<
+-------------------------------------------------------------------------------
+The *g:ycm_max_num_identifier_candidates* option
+
+This option controls the maximum number of completion suggestions from the
+identifier-based engine shown in the completion menu.
+
+A special value of '0' means there is no limit.
+
+**NOTE:** Setting this option to '0' or to a value greater than '100' is not
+recommended as it will slow down completion when there are a very large number
+of suggestions.
+
+Default: '10'
+>
+  let g:ycm_max_num_identifier_candidates = 10
 <
 -------------------------------------------------------------------------------
 The *g:ycm_auto_trigger* option
