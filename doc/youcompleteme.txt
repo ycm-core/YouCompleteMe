@@ -3423,7 +3423,7 @@ References ~
 [44] http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [45] https://ninja-build.org/manual.html
 [46] https://github.com/rizsotto/Bear
-[47] https://raw.githubusercontent.com/Valloric/ycmd/6463774035e61a660ad9150a592b8829eb37fd10/cpp/ycm/.ycm_extra_conf.py
+[47] https://raw.githubusercontent.com/Valloric/ycmd/3ad0300e94edc13799e8bf7b831de8b57153c5aa/cpp/ycm/.ycm_extra_conf.py
 [48] https://github.com/rdnetto/YCM-Generator
 [49] http://ternjs.net/doc/manual.html#configuration
 [50] http://ternjs.net/doc/manual.html#server
