@@ -942,7 +942,7 @@ necessary for your project. That should be enough for 99% of projects.
 You could also consider using [YCM-Generator][ygen] to generate the
 `ycm_extra_conf.py` file.
 
-#### Errors during compilaton
+#### Errors during compilation
 
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions.  When
