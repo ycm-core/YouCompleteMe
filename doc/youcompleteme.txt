@@ -29,7 +29,7 @@ Contents ~
   5. C-family Semantic Completion  |youcompleteme-c-family-semantic-completion|
    1. Option 1: Use a compilation database [44] |youcompleteme-option-1-use-compilation-database-44|
    2. Option 2: Provide the flags manually |youcompleteme-option-2-provide-flags-manually|
-   3. Errors during compilaton         |youcompleteme-errors-during-compilaton|
+   3. Errors during compilation       |youcompleteme-errors-during-compilation|
   6. JavaScript Semantic Completion |youcompleteme-javascript-semantic-completion|
    1. Quick start                                   |youcompleteme-quick-start|
    2. Explanation                                   |youcompleteme-explanation|
@@ -1194,8 +1194,8 @@ You could also consider using YCM-Generator [48] to generate the
 'ycm_extra_conf.py' file.
 
 -------------------------------------------------------------------------------
-                                       *youcompleteme-errors-during-compilaton*
-Errors during compilaton ~
+                                      *youcompleteme-errors-during-compilation*
+Errors during compilation ~
 
 If Clang encounters errors when compiling the header files that your file
 includes, then it's probably going to take a long time to get completions. When
