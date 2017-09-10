@@ -393,6 +393,8 @@ def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
     )
 
 
+@ExpectedFailure( 'Filtering on unicode is not supported by the server',
+                  contains_string( "value for 'completions' was <[]>" ) )
 @YouCompleteMeInstance( { 'cache_omnifunc': 1 } )
 def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
