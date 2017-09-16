@@ -299,8 +299,6 @@ class YouCompleteMe( object ):
         self._latest_completion_request.Start()
         return
 
-    request_data[ 'working_dir' ] = utils.GetCurrentDirectory()
-
     self._AddExtraConfDataIfNeeded( request_data )
     self._latest_completion_request = CompletionRequest( request_data )
     self._latest_completion_request.Start()
