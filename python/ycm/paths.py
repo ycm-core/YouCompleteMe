@@ -46,14 +46,15 @@ def PathToPythonInterpreter():
 
   python_interpreter = vim.eval( 'g:ycm_server_python_interpreter' )
   if python_interpreter:
-    if _EndsWithPython( python_interpreter ):
+    python_interpreter = utils.FindExecutable( python_interpreter )
+    if python_interpreter:
       return python_interpreter
 
     raise RuntimeError( "Path in 'g:ycm_server_python_interpreter' option "
                         "does not point to a valid Python 2.6+ or 3.3+." )
 
   python_interpreter = _PathToPythonUsedDuringBuild()
-  if _EndsWithPython( python_interpreter ):
+  if python_interpreter and utils.GetExecutable( python_interpreter ):
     return python_interpreter
 
   # On UNIX platforms, we use sys.executable as the Python interpreter path.
@@ -76,9 +77,9 @@ def PathToPythonInterpreter():
   if python_interpreter:
     return python_interpreter
 
-  raise RuntimeError( "Cannot find Python 2.6+ or 3.3+. You can set its path "
-                      "using the 'g:ycm_server_python_interpreter' "
-                      "option." )
+  raise RuntimeError( "Cannot find Python 2.6+ or 3.3+. "
+                      "Set the 'g:ycm_server_python_interpreter' option "
+                      "to a Python interpreter path." )
 
 
 def _PathToPythonUsedDuringBuild():

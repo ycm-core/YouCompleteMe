@@ -55,7 +55,7 @@ def PathToTestFile( *args ):
   return os.path.join( dir_of_current_script, 'testdata', *args )
 
 
-def _MakeUserOptions( custom_options = {} ):
+def MakeUserOptions( custom_options = {} ):
   options = dict( user_options_store.DefaultOptions() )
   options.update( DEFAULT_CLIENT_OPTIONS )
   options.update( custom_options )
@@ -122,7 +122,7 @@ def YouCompleteMeInstance( custom_options = {} ):
   def Decorator( test ):
     @functools.wraps( test )
     def Wrapper( *args, **kwargs ):
-      ycm = YouCompleteMe( _MakeUserOptions( custom_options ) )
+      ycm = YouCompleteMe( MakeUserOptions( custom_options ) )
       WaitUntilReady()
       ycm.CheckIfServerIsReady()
       try:
