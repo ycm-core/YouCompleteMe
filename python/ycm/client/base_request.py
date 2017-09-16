@@ -28,7 +28,7 @@ import json
 from future.utils import native
 from base64 import b64decode, b64encode
 from ycm import vimsupport
-from ycmd.utils import ToBytes, urljoin, urlparse
+from ycmd.utils import ToBytes, urljoin, urlparse, GetCurrentDirectory
 from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
 from ycmd.responses import ServerError, UnknownExtraConf
 
@@ -156,6 +156,7 @@ def BuildRequestData( filepath = None ):
   """Build request for the current buffer or the buffer corresponding to
   |filepath| if specified."""
   current_filepath = vimsupport.GetCurrentBufferFilepath()
+  working_dir = GetCurrentDirectory()
 
   if filepath and current_filepath != filepath:
     # Cursor position is irrelevant when filepath is not the current buffer.
@@ -163,6 +164,7 @@ def BuildRequestData( filepath = None ):
       'filepath': filepath,
       'line_num': 1,
       'column_num': 1,
+      'working_dir': working_dir,
       'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( filepath )
     }
 
@@ -172,6 +174,7 @@ def BuildRequestData( filepath = None ):
     'filepath': current_filepath,
     'line_num': line + 1,
     'column_num': column + 1,
+    'working_dir': working_dir,
     'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( current_filepath )
   }
 
