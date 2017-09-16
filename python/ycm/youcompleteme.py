@@ -150,7 +150,20 @@ class YouCompleteMe( object ):
       json.dump( options_dict, options_file )
       options_file.flush()
 
-      args = [ paths.PathToPythonInterpreter(),
+      BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
+      BaseRequest.hmac_secret = hmac_secret
+
+      try:
+        python_interpreter = paths.PathToPythonInterpreter()
+      except RuntimeError as error:
+        error_message = (
+          "Unable to start the ycmd server. {0} and start again the server "
+          "with ':YcmRestartServer'.".format( str( error ).rstrip( '.' ) ) )
+        self._logger.exception( error_message )
+        vimsupport.PostVimMessage( error_message )
+        return
+
+      args = [ python_interpreter,
                paths.PathToServerScript(),
                '--port={0}'.format( server_port ),
                '--options_file={0}'.format( options_file.name ),
@@ -170,8 +183,6 @@ class YouCompleteMe( object ):
 
       self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
                                             stdout = PIPE, stderr = PIPE )
-      BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
-      BaseRequest.hmac_secret = hmac_secret
 
     self._NotifyUserIfServerCrashed()
 
@@ -215,9 +226,8 @@ class YouCompleteMe( object ):
 
 
   def IsServerAlive( self ):
-    return_code = self._server_popen.poll()
     # When the process hasn't finished yet, poll() returns None.
-    return return_code is None
+    return bool( self._server_popen ) and self._server_popen.poll() is None
 
 
   def CheckIfServerIsReady( self ):
@@ -233,7 +243,8 @@ class YouCompleteMe( object ):
 
 
   def _NotifyUserIfServerCrashed( self ):
-    if self._user_notified_about_crash or self.IsServerAlive():
+    if ( not self._server_popen or self._user_notified_about_crash or
+         self.IsServerAlive() ):
       return
     self._user_notified_about_crash = True
 
@@ -589,10 +600,10 @@ class YouCompleteMe( object ):
     extra_data = {}
     self._AddExtraConfDataIfNeeded( extra_data )
     debug_info += FormatDebugInfoResponse( SendDebugInfoRequest( extra_data ) )
-    debug_info += (
-      'Server running at: {0}\n'
-      'Server process ID: {1}\n'.format( BaseRequest.server_location,
-                                         self._server_popen.pid ) )
+    debug_info += 'Server running at: {0}\n'.format(
+      BaseRequest.server_location )
+    if self._server_popen:
+      debug_info += 'Server process ID: {0}\n'.format( self._server_popen.pid )
     if self._server_stdout and self._server_stderr:
       debug_info += ( 'Server logfiles:\n'
                       '  {0}\n'
