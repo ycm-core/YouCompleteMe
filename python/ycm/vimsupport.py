@@ -250,13 +250,13 @@ def SetLocationList( diagnostics ):
 
 
 def OpenLocationList( focus = False, autoclose = False ):
-  """Open the location list to full width at the bottom of the screen with its
+  """Open the location list to the bottom of the current window with its
   height automatically set to fit all entries. This behavior can be overridden
   by using the YcmLocationOpened autocommand. When focus is set to True, the
   location list window becomes the active window. When autoclose is set to True,
   the location list window is automatically closed after an entry is
   selected."""
-  vim.command( 'botright lopen' )
+  vim.command( 'lopen' )
 
   SetFittingHeightForCurrentWindow()
 
