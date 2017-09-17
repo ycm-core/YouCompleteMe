@@ -1690,18 +1690,6 @@ For example:
 <
 Invoking this command on 's' returns 'std::string => std::basic_string<char>'
 
-**NOTE:** Due to limitations of 'libclang', invoking this command on the word
-'auto' typically returns 'auto'. However, invoking it on a usage of the
-variable with inferred type returns the correct type, but typically it is
-repeated due to 'libclang' returning that the types differ.
-
-For example:
->
-  const char *s = "String";
-  auto x = &s; // invoking on x or auto returns "auto";
-               // invoking on s returns "const char *"
-  std::cout << *x; // invoking on x returns "const char ** => const char **"
-<
 **NOTE:** Causes re-parsing of the current translation unit.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, javascript, typescript'
@@ -1813,15 +1801,6 @@ any diagnostics with available fix-its (where the completer can provide this
 indication).
 
 **NOTE:** Causes re-parsing of the current translation unit.
-
-**NOTE:** After applying a fix-it, the diagnostics UI is not immediately
-updated. This is due to a technical restriction in Vim. Moving the cursor, or
-issuing the |:YcmForceCompileAndDiagnostics| command will refresh the
-diagnostics. Repeated invocations of the |FixIt| command on a given line,
-however, _do_ apply all diagnostics as expected without requiring refreshing of
-the diagnostics UI. This is particularly useful where there are multiple
-diagnostics on one line, or where after fixing one diagnostic, another fix-it
-is available.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cs'
 
