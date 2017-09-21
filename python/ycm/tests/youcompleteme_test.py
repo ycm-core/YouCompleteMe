@@ -32,7 +32,10 @@ from hamcrest import ( assert_that, contains, empty, equal_to, is_in, is_not,
                        matches_regexp )
 from mock import call, MagicMock, patch
 
-from ycm.tests import StopServer, test_utils, YouCompleteMeInstance
+from ycm.paths import _PathToPythonUsedDuringBuild
+from ycm.youcompleteme import YouCompleteMe
+from ycm.tests import ( MakeUserOptions, StopServer, test_utils,
+                        WaitUntilReady, YouCompleteMeInstance )
 from ycm.client.base_request import _LoadExtraConfFile
 from ycmd.responses import ServerError
 
@@ -40,6 +43,60 @@ from ycmd.responses import ServerError
 @YouCompleteMeInstance()
 def YouCompleteMe_YcmCoreNotImported_test( ycm ):
   assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
+
+
+@patch( 'ycm.vimsupport.PostVimMessage' )
+def YouCompleteMe_InvalidPythonInterpreterPath_test( post_vim_message ):
+  try:
+    with patch( 'ycm.tests.test_utils.server_python_interpreter',
+                '/invalid/path/to/python' ):
+      ycm = YouCompleteMe( MakeUserOptions() )
+      assert_that( ycm.IsServerAlive(), equal_to( False ) )
+      post_vim_message.assert_called_once_with(
+        "Unable to start the ycmd server. "
+        "Path in 'g:ycm_server_python_interpreter' option does not point "
+        "to a valid Python 2.6+ or 3.3+. "
+        "Correct the error then restart the server with ':YcmRestartServer'." )
+
+    post_vim_message.reset_mock()
+
+    with patch( 'ycm.tests.test_utils.server_python_interpreter',
+                _PathToPythonUsedDuringBuild() ):
+      ycm.RestartServer()
+
+    assert_that( ycm.IsServerAlive(), equal_to( True ) )
+    post_vim_message.assert_called_once_with( 'Restarting ycmd server...' )
+  finally:
+    WaitUntilReady()
+    StopServer( ycm )
+
+
+@patch( 'ycmd.utils.PathToFirstExistingExecutable', return_value = None )
+@patch( 'ycm.paths._EndsWithPython', return_value = False )
+@patch( 'ycm.vimsupport.PostVimMessage' )
+def YouCompleteMe_NoPythonInterpreterFound_test( post_vim_message, *args ):
+  try:
+    with patch( 'ycmd.utils.ReadFile', side_effect = IOError ):
+
+      ycm = YouCompleteMe( MakeUserOptions() )
+      assert_that( ycm.IsServerAlive(), equal_to( False ) )
+      post_vim_message.assert_called_once_with(
+        "Unable to start the ycmd server. Cannot find Python 2.6+ or 3.3+. "
+        "Set the 'g:ycm_server_python_interpreter' option to a Python "
+        "interpreter path. "
+        "Correct the error then restart the server with ':YcmRestartServer'." )
+
+    post_vim_message.reset_mock()
+
+    with patch( 'ycm.tests.test_utils.server_python_interpreter',
+                _PathToPythonUsedDuringBuild() ):
+      ycm.RestartServer()
+
+    assert_that( ycm.IsServerAlive(), equal_to( True ) )
+    post_vim_message.assert_called_once_with( 'Restarting ycmd server...' )
+  finally:
+    WaitUntilReady()
+    StopServer( ycm )
 
 
 @YouCompleteMeInstance()
@@ -269,7 +326,6 @@ def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test( ycm,
     call( 'Server error', truncate = False )
   ] )
   assert_that( result, empty() )
-
 
 
 @YouCompleteMeInstance()
