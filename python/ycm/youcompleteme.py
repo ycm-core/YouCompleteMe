@@ -138,52 +138,53 @@ class YouCompleteMe( object ):
     self._filetypes_with_keywords_loaded = set()
     self._server_is_ready_with_cache = False
 
-    server_port = utils.GetUnusedLocalhostPort()
-    # The temp options file is deleted by ycmd during startup
+    hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
+    options_dict = dict( self._user_options )
+    options_dict[ 'hmac_secret' ] = utils.ToUnicode(
+      base64.b64encode( hmac_secret ) )
+    options_dict[ 'server_keep_logfiles' ] = self._user_options[
+      'keep_logfiles' ]
+
+    # The temp options file is deleted by ycmd during startup.
     with NamedTemporaryFile( delete = False, mode = 'w+' ) as options_file:
-      hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
-      options_dict = dict( self._user_options )
-      options_dict[ 'hmac_secret' ] = utils.ToUnicode(
-        base64.b64encode( hmac_secret ) )
-      options_dict[ 'server_keep_logfiles' ] = self._user_options[
-        'keep_logfiles' ]
       json.dump( options_dict, options_file )
-      options_file.flush()
 
-      BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
-      BaseRequest.hmac_secret = hmac_secret
+    server_port = utils.GetUnusedLocalhostPort()
 
-      try:
-        python_interpreter = paths.PathToPythonInterpreter()
-      except RuntimeError as error:
-        error_message = (
-          "Unable to start the ycmd server. {0}. "
-          "Correct the error then restart the server "
-          "with ':YcmRestartServer'.".format( str( error ).rstrip( '.' ) ) )
-        self._logger.exception( error_message )
-        vimsupport.PostVimMessage( error_message )
-        return
+    BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
+    BaseRequest.hmac_secret = hmac_secret
 
-      args = [ python_interpreter,
-               paths.PathToServerScript(),
-               '--port={0}'.format( server_port ),
-               '--options_file={0}'.format( options_file.name ),
-               '--log={0}'.format( self._user_options[ 'log_level' ] ),
-               '--idle_suicide_seconds={0}'.format(
-                  SERVER_IDLE_SUICIDE_SECONDS ) ]
+    try:
+      python_interpreter = paths.PathToPythonInterpreter()
+    except RuntimeError as error:
+      error_message = (
+        "Unable to start the ycmd server. {0}. "
+        "Correct the error then restart the server "
+        "with ':YcmRestartServer'.".format( str( error ).rstrip( '.' ) ) )
+      self._logger.exception( error_message )
+      vimsupport.PostVimMessage( error_message )
+      return
 
-      self._server_stdout = utils.CreateLogfile(
-          SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stdout' ) )
-      self._server_stderr = utils.CreateLogfile(
-          SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stderr' ) )
-      args.append( '--stdout={0}'.format( self._server_stdout ) )
-      args.append( '--stderr={0}'.format( self._server_stderr ) )
+    args = [ python_interpreter,
+             paths.PathToServerScript(),
+             '--port={0}'.format( server_port ),
+             '--options_file={0}'.format( options_file.name ),
+             '--log={0}'.format( self._user_options[ 'log_level' ] ),
+             '--idle_suicide_seconds={0}'.format(
+                SERVER_IDLE_SUICIDE_SECONDS ) ]
 
-      if self._user_options[ 'keep_logfiles' ]:
-        args.append( '--keep_logfiles' )
+    self._server_stdout = utils.CreateLogfile(
+        SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stdout' ) )
+    self._server_stderr = utils.CreateLogfile(
+        SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stderr' ) )
+    args.append( '--stdout={0}'.format( self._server_stdout ) )
+    args.append( '--stderr={0}'.format( self._server_stderr ) )
 
-      self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
-                                            stdout = PIPE, stderr = PIPE )
+    if self._user_options[ 'keep_logfiles' ]:
+      args.append( '--keep_logfiles' )
+
+    self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
+                                          stdout = PIPE, stderr = PIPE )
 
     self._NotifyUserIfServerCrashed()
 
