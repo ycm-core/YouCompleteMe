@@ -186,8 +186,6 @@ class YouCompleteMe( object ):
     self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
                                           stdout = PIPE, stderr = PIPE )
 
-    self._NotifyUserIfServerCrashed()
-
 
   def _SetupLogging( self ):
     def FreeFileFromOtherProcesses( file_object ):
@@ -244,7 +242,7 @@ class YouCompleteMe( object ):
     return self._server_is_ready_with_cache
 
 
-  def _NotifyUserIfServerCrashed( self ):
+  def NotifyUserIfServerCrashed( self ):
     if ( not self._server_popen or self._user_notified_about_crash or
          self.IsServerAlive() ):
       return
@@ -371,7 +369,7 @@ class YouCompleteMe( object ):
 
   def OnFileReadyToParse( self ):
     if not self.IsServerAlive():
-      self._NotifyUserIfServerCrashed()
+      self.NotifyUserIfServerCrashed()
       return
 
     if not self.IsServerReady():
