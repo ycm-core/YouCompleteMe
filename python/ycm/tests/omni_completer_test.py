@@ -24,10 +24,10 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from hamcrest import assert_that, contains, contains_string, empty, has_entries
+from hamcrest import assert_that, contains, empty, has_entries
 
-from ycm.tests.test_utils import ( ExpectedFailure, MockVimBuffers,
-                                   MockVimModule, ToBytesOnPY2, VimBuffer )
+from ycm.tests.test_utils import ( MockVimBuffers, MockVimModule, ToBytesOnPY2,
+                                   VimBuffer )
 MockVimModule()
 
 from ycm import vimsupport
@@ -398,8 +398,6 @@ def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
     )
 
 
-@ExpectedFailure( 'Filtering on unicode is not supported by the server',
-                  contains_string( "value for 'completions' was <[]>" ) )
 @YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
@@ -417,9 +415,9 @@ def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ '†est',
-                                       'å_unicode_identifier',
-                                       'πππππππ yummy πie' ] ),
+        'completions': [ 'å_unicode_identifier',
+                         'πππππππ yummy πie',
+                         '†est' ],
         'completion_start_column': 13
       } )
     )
@@ -450,8 +448,6 @@ def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
     )
 
 
-@ExpectedFailure( 'Filtering on unicode is not supported by the server',
-                  contains_string( "value for 'completions' was <[]>" ) )
 @YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
@@ -469,7 +465,7 @@ def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'πππππππ yummy πie' ] ),
+        'completions': [ 'πππππππ yummy πie' ],
         'completion_start_column': 13
       } )
     )
@@ -498,8 +494,6 @@ def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
     )
 
 
-@ExpectedFailure( 'Filtering on unicode is not supported by the server',
-                  contains_string( "value for 'completions' was <[]>" ) )
 @YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
@@ -532,13 +526,13 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ {
+        'completions': [ {
           'word': 'π†´ß†π',
           'abbr': 'ÅııÂÊ‰ÍÊ',
           'menu': '˜‰ˆËÊ‰ÍÊ',
           'info': 'ÈˆÏØÊ‰ÍÊ',
           'kind': 'Ê'
-        } ] ),
+        } ],
         'completion_start_column': 13
       } )
     )
@@ -591,6 +585,12 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
           'menu': '˜‰ˆËÊ‰ÍÊ',
           'info': 'ÈˆÏØÊ‰ÍÊ',
           'kind': 'Ê'
+        }, {
+          'word': 'ålpha∫et',
+          'abbr': 'å∫∫®',
+          'menu': 'µ´~¨á',
+          'info': '^~fo',
+          'kind': '˚'
         } ),
         'completion_start_column': 13
       } )
