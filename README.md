@@ -47,10 +47,9 @@ Contents
     - [General Semantic Completion](#general-semantic-completion)
     - [C-family Semantic Completion](#c-family-semantic-completion)
     - [Java Semantic Completion](#java-semantic-completion)
-    - [JavaScript Semantic Completion](#javascript-semantic-completion)
     - [Python Semantic Completion](#python-semantic-completion)
     - [Rust Semantic Completion](#rust-semantic-completion)
-    - [TypeScript Semantic Completion](#typescript-semantic-completion)
+    - [JavaScript and TypeScript Semantic Completion](#javascript-and-typescript-semantic-completion)
     - [Semantic Completion for Other Languages](#semantic-completion-for-other-languages)
     - [Writing New Semantic Completers](#writing-new-semantic-completers)
     - [Diagnostic Display](#diagnostic-display)
@@ -83,8 +82,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [Jedi][]-based completion engine for Python 2 and 3 (using the [JediHTTP][] wrapper),
 - an [OmniSharp][]-based completion engine for C#,
 - a combination of [Gocode][] and [Godef][] semantic engines for Go,
-- a [TSServer][]-based completion engine for TypeScript,
-- a [Tern][]-based completion engine for JavaScript,
+- a [TSServer][]-based completion engine for JavaScript and TypeScript,
 - a [racer][]-based completion engine for Rust,
 - a [jdt.ls][]-based experimental completion engine for Java.
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
@@ -216,10 +214,8 @@ The following additional language support options are available:
   `./install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
+  install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add
   `--rust-completer` when calling `./install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -290,10 +286,8 @@ The following additional language support options are available:
   when calling `./install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
+  install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -359,10 +353,8 @@ The following additional language support options are available:
   when calling `./install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
+  install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -452,10 +444,8 @@ The following additional language support options are available:
   Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `install.py`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
+  install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -526,10 +516,8 @@ The following additional language support options are available:
   `./install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
+  install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -739,12 +727,9 @@ process.
     - Go support: install [Go][go-install] and add it to your path. Navigate to
       `YouCompleteMe/third_party/ycmd/third_party/gocode` and run `go build`.
 
-    - TypeScript support: as with the quick installation, simply `npm install -g
-      typescript` after successfully installing [Node.js and npm][npm-install].
-
-    - JavaScript support: install [Node.js and npm][npm-install]. Then navigate
-      to `YouCompleteMe/third_party/ycmd/third_party/tern_runtime` and run `npm
-      install --production`
+    - JavaScript and TypeScript support: as with the quick installation, simply
+      `npm install -g typescript` after successfully installing [Node.js and
+      npm][npm-install].
 
     - Rust support: install [Rust][rust-install]. Navigate to
       `YouCompleteMe/third_party/ycmd/third_party/racerd` and run `cargo build
@@ -809,7 +794,7 @@ Quick Feature Summary
 * Go to definition (`GoTo`)
 * Management of `gocode` server instance
 
-### TypeScript
+### JavaScript and TypeScript
 
 * Semantic auto-completion with automatic import insertion
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
@@ -824,15 +809,6 @@ Quick Feature Summary
 * Code formatting (`Format`)
 * Organize imports (`OrganizeImports`)
 * Management of `TSServer` server instance
-
-### JavaScript
-
-* Intelligent auto-completion
-* Renaming variables (`RefactorRename <new name>`)
-* Go to definition, find references (`GoToDefinition`, `GoToReferences`)
-* Type information for identifiers (`GetType`)
-* View documentation comments for identifiers (`GetDoc`)
-* Management of `Tern` server instance
 
 ### Rust
 
@@ -1235,97 +1211,6 @@ For anything else, [contact us](#contact). Java support is experimental at
 present so we'd love to hear your feedback! Please do remember to check
 [CONTRIBUTING.md][contributing-md] for the list of diagnostics we'll need.
 
-### JavaScript Semantic Completion
-
-#### JavaScript quick start
-
-1. Ensure that you have enabled the JavaScript completer. See the
-   [installation guide](#installation) for details.
-
-2. Create a `.tern-project` file in the root directory of your JavaScript
-   project, by following the [instructions][tern-project] in the [Tern][]
-   documentation.
-
-3. Edit a file from your project.
-
-#### Explanation
-
-JavaScript completion is based on [Tern][]. This completion engine requires a
-file named [`.tern-project`][tern-project] to exist in the current working
-directory or a directory which is an ancestor of the current working directory
-when the Tern server is started. YCM starts the Tern server the first time a
-JavaScript file is edited and uses its directory as the working directory, so
-the directory of that file at that time needs to be a descendent of the
-directory containing the `.tern-project` file (or that directory itself).
-
-Alternatively, as described in the [Tern documentation][tern-docs], a global
-`.tern-config` file may be used.
-
-Multiple Tern servers are not supported. To switch to a different JavaScript
-project, you need to restart the Tern server using [the `RestartServer`
-subcommand](#the-restartserver-subcommand) while editing a file of that
-project:
-
-```vim
-:YcmCompleter RestartServer
-```
-
-#### Tips and tricks
-
-This section contains some advice for configuring `.tern-project` and working
-with JavaScript files. The canonical reference for correctly configuring Tern is
-the [Tern documentation][tern-docs]. Any issues, improvements, advice, etc.
-should be sought from the [Tern][] project. For example, see the [list of tern
-plugins](http://ternjs.net/doc/manual.html#plugins) for the list of plugins
-which can be enabled in the `plugins` section of the `.tern-project` file.
-
-##### Configuring Tern for node support
-
-The following simple example `.tern-project` file enables nodejs support:
-
-```json
-{
-    "plugins": {
-        "node": {}
-    }
-}
-
-```
-
-##### Configuring Tern for requirejs support
-
-The Tern requirejs plugin requires that all included "libraries" are rooted
-under the same base directory. If that's not the case for your projects, then it
-is possible to make it work with appropriate symbolic links. For example, create
-a directory `ext_lib` within your project and populate it with symlinks to your
-libraries. Then set up the `.tern-project` something like this:
-
-```json
-
-{
-  "plugins": {
-    "requirejs": {
-      "baseURL": "./ext_lib",
-    }
-  }
-}
-```
-
-Then, given the following structure:
-
-```
-./ext_lib/mylib (symlink)
-./ext_lib/anotherlib (symlink)
-```
-
-Can be used as follows:
-
-```javascript
-define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
-    // etc.
-} );
-```
-
 ### Python Semantic Completion
 
 Completion and GoTo commands work out of the box with no additional
@@ -1374,16 +1259,37 @@ extract it somewhere, and set the following option so YCM can locate it:
 let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.20.0/src'
 ```
 
-### TypeScript Semantic Completion
+### JavaScript and TypeScript Semantic Completion
 
-All TypeScript features are provided by the [TSServer][] engine, which is
-included in the TypeScript SDK. To get the SDK, install [Node.js and
+**NOTE:** YCM originally used the [Tern][] engine for JavaScript but due to
+[Tern][] not being maintained anymore by its main author and the [TSServer][]
+engine offering more features, YCM is moving to [TSServer][]. This won't affect
+you if you were already using [Tern][] but you are encouraged to do the switch
+by deleting the `third_party/ycmd/third_party/tern_runtime/node_modules`
+directory in YCM folder. If you are a new user but still want to use [Tern][],
+you should pass the `--js-completer` option to the `install.py` script during
+installation. Further instructions on how to setup YCM with [Tern][] are
+available on [the wiki][tern-instructions].
+
+All JavaScript and TypeScript features are provided by the [TSServer][] engine,
+which is included in the TypeScript SDK. To get the SDK, install [Node.js and
 npm][npm-install] and run the command:
 ```
 npm install -g typescript
 ```
-[TSServer][] relies on [the `tsconfig.json` file][tsconfig.json] to analyze your
+[TSServer][] relies on [the `jsconfig.json` file][jsconfig.json] for JavaScript
+and [the `tsconfig.json` file][tsconfig.json] for TypeScript to analyze your
 project. Ensure the file exists at the root of your project.
+
+To get diagnostics in JavaScript, set the `checkJs` option to `true` in your
+`jsconfig.json` file:
+```json
+{
+    "compilerOptions": {
+        "checkJs": true
+    }
+}
+```
 
 TypeScript 2.8.1 or later is recommended. Some features will be missing on older
 versions. You can check which version you are currently using by looking at the
@@ -1392,11 +1298,11 @@ output of [`:YcmDebugInfo` ](#the-ycmdebuginfo-command). If the version is
 
 ### Semantic Completion for Other Languages
 
-C-family, C#, Go, Java, JavaScript, Python, Rust, and TypeScript languages are
+C-family, C#, Go, Java, Python, Rust, and JavaScript/TypeScript languages are
 supported natively by YouCompleteMe using the [Clang][], [OmniSharp][],
-[Gocode][]/[Godef][], [jdt.ls][], [Tern][], [Jedi][], [racer][], and
-[TSServer][] engines, respectively. Check the [installation](#installation)
-section for instructions to enable these features if desired.
+[Gocode][]/[Godef][], [jdt.ls][], [Jedi][], [racer][], and [TSServer][] engines,
+respectively. Check the [installation](#installation) section for instructions
+to enable these features if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
@@ -1441,11 +1347,10 @@ Completer API.
 
 ### Diagnostic Display
 
-YCM will display diagnostic notifications for C-family and C# languages if you
-compiled YCM with Clang and Omnisharp support, respectively. Diagnostics will
-also be displayed for TypeScript. Since YCM continuously recompiles your file as
-you type, you'll get notified of errors and warnings in your file as fast as
-possible.
+YCM will display diagnostic notifications for the C-family, C#, Java,
+JavaScript, and TypeScript languages. Since YCM continuously recompiles your
+file as you type, you'll get notified of errors and warnings in your file as
+fast as possible.
 
 Here are the various pieces of the diagnostic UI:
 
@@ -1636,8 +1541,8 @@ Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, python, rust,
-typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
+python, rust, typescript`
 
 #### The `GoToDefinition` subcommand
 
@@ -1705,7 +1610,7 @@ Supported in filetypes: `cs`
 Looks up the symbol under the cursor and jumps to the definition of its type
 e.g. if the symbol is an object, go to the definition of its class.
 
-Supported in filetypes: `typescript`
+Supported in filetypes: `javascript, typescript`
 
 ### Semantic Information Commands
 
@@ -1833,7 +1738,8 @@ indication).
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, java, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, java, javascript,
+typescript`
 
 #### The `RefactorRename <new name>` subcommand
 
@@ -1847,7 +1753,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `java, javascript (variables only), typescript`
+Supported in filetypes: `java, javascript, typescript`
 
 #### Multi-file Refactor
 
@@ -1888,7 +1794,7 @@ it in one of Vim's visual modes (see `:h visual-use`) and run the command or
 directly enter the range on the command line, e.g. `:2,5YcmCompleter Format` to
 format it from line 2 to line 5.
 
-Supported in filetypes: `java, typescript`
+Supported in filetypes: `java, javascript, typescript`
 
 #### The `OrganizeImports` subcommand
 
@@ -1896,7 +1802,7 @@ This command removes unused imports and sorts imports in the current file. It
 can also group imports from the same module in TypeScript and resolves imports
 in Java.
 
-Supported in filetypes: `java, typescript`
+Supported in filetypes: `java, javascript, typescript`
 
 ### Miscellaneous Commands
 
@@ -1908,9 +1814,6 @@ flags.
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
-
-Use this subcommand while editing a file from a JavaScript project to switch to
-that project.
 
 An additional optional argument may be supplied for Python, specifying the
 python binary to use to restart the Python semantic engine.
@@ -3334,15 +3237,6 @@ the list of flags you return from your `Settings` function in your
 
 See [issue #303][issue-303] for details.
 
-### When I open a JavaScript file, I get an annoying warning about `.tern-project` file
-
-Take a look at the [instructions for using the JavaScript
-completer](#javascript-semantic-completion).
-
-If this is still really annoying, and you have a good reason not to have a
-`.tern-project` file, create an empty `.tern-config` file in your home directory
-and YCM will stop complaining.
-
 ### When I start vim I get a runtime error saying `R6034 An application has made an attempt to load the C runtime library incorrectly.`
 
 [CMake and other things seem to screw up the PATH with their own msvcrXX.dll
@@ -3498,6 +3392,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Gocode]: https://github.com/nsf/gocode
 [Godef]: https://github.com/Manishearth/godef
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
+[jsconfig.json]: https://code.visualstudio.com/docs/languages/jsconfig
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
 [vim-win-download]: https://bintray.com/micbou/generic/vim
 [python-win-download]: https://www.python.org/downloads/windows/
@@ -3509,9 +3404,8 @@ This software is licensed under the [GPL v3 license][gpl].
 [mono-install]: http://www.mono-project.com/docs/getting-started/install/
 [go-install]: https://golang.org/doc/install
 [npm-install]: https://docs.npmjs.com/getting-started/installing-node
+[tern-instructions]: https://github.com/Valloric/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
 [Tern]: http://ternjs.net
-[tern-project]: http://ternjs.net/doc/manual.html#configuration
-[tern-docs]: http://ternjs.net/doc/manual.html#server
 [racer]: https://github.com/phildawes/racer
 [rust-install]: https://www.rust-lang.org/
 [rust-src]: https://www.rust-lang.org/downloads.html

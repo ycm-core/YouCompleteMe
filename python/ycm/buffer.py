@@ -28,7 +28,7 @@ from ycm.diagnostic_interface import DiagnosticInterface
 
 
 DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
-                            'typescript' }
+                            'javascript', 'typescript' }
 DIAGNOSTIC_UI_ASYNC_FILETYPES = { 'java' }
 
 
