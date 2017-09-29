@@ -231,8 +231,9 @@ process.
 Install development tools and CMake: 
 
     sudo apt-get install build-essential cmake
-    
-**Note:** On older systems (eg. Ubuntu 14.04) you may run into compilation-issues with `cmake`. Therefore, install the following instead:
+
+**Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation 
+issues with `cmake`. Therefore, install the following instead:
 
     sudo apt-get install build-essential cmake3
 
