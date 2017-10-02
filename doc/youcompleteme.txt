@@ -375,18 +375,18 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: install Mono with Homebrew [24] or by downloading the Mono Mac
-  package [26] and add '--omnisharp-completer' when calling './install.py'.
+  package [26] and add '--cs-completer' when calling './install.py'.
 
-- Go support: install Go [27] and add '--gocode-completer' when calling
+- Go support: install Go [27] and add '--go-completer' when calling
   './install.py'.
 
 - TypeScript support: install Node.js and npm [28] then install the
   TypeScript SDK with 'npm install -g typescript'.
 
-- JavaScript support: install Node.js and npm [28] and add '--tern-completer'
+- JavaScript support: install Node.js and npm [28] and add '--js-completer'
   when calling './install.py'.
 
-- Rust support: install Rust [29] and add '--racer-completer' when calling
+- Rust support: install Rust [29] and add '--rust-completer' when calling
   './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
@@ -429,6 +429,11 @@ Install development tools and CMake:
 >
   sudo apt-get install build-essential cmake
 <
+**Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation
+issues with 'cmake'. Therefore, install the following instead:
+>
+  sudo apt-get install build-essential cmake3
+<
 Make sure you have Python headers installed:
 >
   sudo apt-get install python-dev python3-dev
@@ -445,19 +450,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: install Mono [31] and add '--omnisharp-completer' when calling
+- C# support: install Mono [31] and add '--cs-completer' when calling
   './install.py'.
 
-- Go support: install Go [27] and add '--gocode-completer' when calling
+- Go support: install Go [27] and add '--go-completer' when calling
   './install.py'.
 
 - TypeScript support: install Node.js and npm [28] then install the
   TypeScript SDK with 'npm install -g typescript'.
 
-- JavaScript support: install Node.js and npm [28] and add '--tern-completer'
+- JavaScript support: install Node.js and npm [28] and add '--js-completer'
   when calling './install.py'.
 
-- Rust support: install Rust [29] and add '--racer-completer' when calling
+- Rust support: install Rust [29] and add '--rust-completer' when calling
   './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
@@ -516,19 +521,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: install Mono [32] and add '--omnisharp-completer' when calling
+- C# support: install Mono [32] and add '--cs-completer' when calling
   './install.py'.
 
-- Go support: install Go [27] and add '--gocode-completer' when calling
+- Go support: install Go [27] and add '--go-completer' when calling
   './install.py'.
 
 - TypeScript support: install Node.js and npm [28] then install the
   TypeScript SDK with 'npm install -g typescript'.
 
-- JavaScript support: install Node.js and npm [28] and add '--tern-completer'
+- JavaScript support: install Node.js and npm [28] and add '--js-completer'
   when calling './install.py'.
 
-- Rust support: install Rust [29] and add '--racer-completer' when calling
+- Rust support: install Rust [29] and add '--rust-completer' when calling
   './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
@@ -608,19 +613,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--omnisharp-completer' when calling 'install.py'. Be sure
-  that the build utility 'msbuild' is in your PATH [38].
+- C# support: add '--cs-completer' when calling 'install.py'. Be sure that
+  the build utility 'msbuild' is in your PATH [38].
 
-- Go support: install Go [27] and add '--gocode-completer' when calling
+- Go support: install Go [27] and add '--go-completer' when calling
   'install.py'.
 
 - TypeScript support: install Node.js and npm [28] then install the
   TypeScript SDK with 'npm install -g typescript'.
 
-- JavaScript support: install Node.js and npm [28] and add '--tern-completer'
+- JavaScript support: install Node.js and npm [28] and add '--js-completer'
   when calling 'install.py'.
 
-- Rust support: install Rust [29] and add '--racer-completer' when calling
+- Rust support: install Rust [29] and add '--rust-completer' when calling
   'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
@@ -683,19 +688,19 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: install Mono and add '--omnisharp-completer' when calling
+- C# support: install Mono and add '--cs-completer' when calling
   './install.py'.
 
-- Go support: install Go [27] and add '--gocode-completer' when calling
+- Go support: install Go [27] and add '--go-completer' when calling
   './install.py'.
 
 - TypeScript support: install Node.js and npm [28] then install the
   TypeScript SDK with 'npm install -g typescript'.
 
-- JavaScript support: install Node.js and npm [28] and add '--tern-completer'
+- JavaScript support: install Node.js and npm [28] and add '--js-completer'
   when calling './install.py'.
 
-- Rust support: install Rust [29] and add '--racer-completer' when calling
+- Rust support: install Rust [29] and add '--rust-completer' when calling
   './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. So, to
@@ -1312,7 +1317,7 @@ Rust Semantic Completion ~
 
 Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
-built YCM with the '--racer-completer' flag; see the _Installation_ section for
+built YCM with the '--rust-completer' flag; see the _Installation_ section for
 details). For semantic analysis inclusive of the standard library, you must
 have a local copy of the rust source code [52]. You also need to set the
 following option so YouCompleteMe can locate it.

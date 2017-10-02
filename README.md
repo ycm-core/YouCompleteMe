@@ -181,16 +181,16 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: install Mono with [Homebrew][brew] or by downloading the [Mono Mac
-  package][mono-install-osx] and add `--omnisharp-completer` when calling
+  package][mono-install-osx] and add `--cs-completer` when calling
   `./install.py`.
-- Go support: install [Go][go-install] and add `--gocode-completer` when calling
+- Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
 - TypeScript support: install [Node.js and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [Node.js and npm][npm-install] and add
-  `--tern-completer` when calling `./install.py`.
+  `--js-completer` when calling `./install.py`.
 - Rust support: install [Rust][rust-install] and add
-  `--racer-completer` when calling `./install.py`.
+  `--rust-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -253,15 +253,15 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: install [Mono][mono-install-ubuntu] and add `--omnisharp-completer`
+- C# support: install [Mono][mono-install-ubuntu] and add `--cs-completer`
   when calling `./install.py`.
-- Go support: install [Go][go-install] and add `--gocode-completer` when calling
+- Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
 - TypeScript support: install [Node.js and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [Node.js and npm][npm-install] and add
-  `--tern-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add `--racer-completer` when
+  `--js-completer` when calling `./install.py`.
+- Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
@@ -320,15 +320,15 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: install [Mono][mono-install-fedora] and add `--omnisharp-completer`
+- C# support: install [Mono][mono-install-fedora] and add `--cs-completer`
   when calling `./install.py`.
-- Go support: install [Go][go-install] and add `--gocode-completer` when calling
+- Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
 - TypeScript support: install [Node.js and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [Node.js and npm][npm-install] and add
-  `--tern-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add `--racer-completer` when
+  `--js-completer` when calling `./install.py`.
+- Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
@@ -405,15 +405,15 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: add `--omnisharp-completer` when calling `install.py`.
+- C# support: add `--cs-completer` when calling `install.py`.
   Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
-- Go support: install [Go][go-install] and add `--gocode-completer` when calling
+- Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
 - TypeScript support: install [Node.js and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [Node.js and npm][npm-install] and add
-  `--tern-completer` when calling `install.py`.
-- Rust support: install [Rust][rust-install] and add `--racer-completer` when
+  `--js-completer` when calling `install.py`.
+- Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
@@ -476,15 +476,15 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: install Mono and add `--omnisharp-completer` when calling
+- C# support: install Mono and add `--cs-completer` when calling
   `./install.py`.
-- Go support: install [Go][go-install] and add `--gocode-completer` when calling
+- Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
 - TypeScript support: install [Node.js and npm][npm-install] then install the
   TypeScript SDK with `npm install -g typescript`.
 - JavaScript support: install [Node.js and npm][npm-install] and add
-  `--tern-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add `--racer-completer` when
+  `--js-completer` when calling `./install.py`.
+- Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
@@ -1057,7 +1057,7 @@ define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
 
 Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
-built YCM with the `--racer-completer` flag; see the [*Installation*
+built YCM with the `--rust-completer` flag; see the [*Installation*
 section](#installation) for details).  For semantic analysis inclusive of the
 standard library, you must have a local copy of [the rust source
 code][rust-src]. You also need to set the following option so YouCompleteMe can
