@@ -49,6 +49,7 @@ Contents
     - [JavaScript Semantic Completion](#javascript-semantic-completion)
     - [Rust Semantic Completion](#rust-semantic-completion)
     - [Python Semantic Completion](#python-semantic-completion)
+    - [Java Semantic Completion](#java-semantic-completion)
     - [Semantic Completion for Other Languages](#semantic-completion-for-other-languages)
     - [Writing New Semantic Completers](#writing-new-semantic-completers)
     - [Diagnostic Display](#diagnostic-display)
@@ -84,6 +85,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [TSServer][]-based completion engine for TypeScript,
 - a [Tern][]-based completion engine for JavaScript,
 - a [racer][]-based completion engine for Rust,
+- a [jdt.ls][]-based experimental completion engine for Java.
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).
 
@@ -217,6 +219,8 @@ The following additional language support options are available:
   `--js-completer` when calling `./install.py`.
 - Rust support: install [Rust][rust-install] and add
   `--rust-completer` when calling `./install.py`.
+- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+  `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -254,11 +258,11 @@ using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
-Install development tools and CMake: 
+Install development tools and CMake:
 
     sudo apt-get install build-essential cmake
 
-**Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation 
+**Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation
 issues with `cmake`. Therefore, install the following instead:
 
     sudo apt-get install build-essential cmake3
@@ -289,6 +293,8 @@ The following additional language support options are available:
   `--js-completer` when calling `./install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
+- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+  `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -356,6 +362,8 @@ The following additional language support options are available:
   `--js-completer` when calling `./install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
+- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+  `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -410,15 +418,15 @@ process.
 Download and install the following software:
 
 - [Python 2 or Python 3][python-win-download]. Be sure to pick the version
-  corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim 
-  and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3. 
-  Additionally, the version of Python you install must match up exactly with 
+  corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim
+  and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
+  Additionally, the version of Python you install must match up exactly with
   the version of Python that Vim is looking for. Type `:version` and look at the
-  bottom of the page at the list of compiler flags. Look for flags that look 
-  similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and 
-  `-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is 
-  looking for Python 2.7 and the latter indicates that Vim is looking for 
-  Python 3.5. You'll need one or the other installed, matching the version 
+  bottom of the page at the list of compiler flags. Look for flags that look
+  similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and
+  `-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is
+  looking for Python 2.7 and the latter indicates that Vim is looking for
+  Python 3.5. You'll need one or the other installed, matching the version
   number exactly.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
 variable.
@@ -449,6 +457,8 @@ The following additional language support options are available:
   `--js-completer` when calling `install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `install.py`.
+- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+  `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
@@ -520,6 +530,8 @@ The following additional language support options are available:
   `--js-completer` when calling `./install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
+- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+  `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -724,6 +736,13 @@ process.
       `YouCompleteMe/third_party/ycmd/third_party/racerd` and run `cargo build
       --release`.
 
+    - Java support: install [JDK8 (version 8 required)][jdk-install]. Download a
+      [binary release of eclipse.jdt.ls][jdtls-release] and extract it to
+      `YouCompleteMe/third_party/ycmd/third_party/eclipse.jdt.ls/target/repository`.
+      Note: this approach is not recommended for most users and is supported
+      only for advanced users and developers of YCM on a best-efforts basis.
+      Please use `install.py` to enable java support.
+
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
@@ -801,6 +820,23 @@ Quick Feature Summary
   identical)
 * Management of `racer` server instance
 * View documentation comments for identifiers (`GetDoc`)
+
+### Java
+
+**NOTE**: Java support is currently experimental. Please let us know your
+[feedback](#contact).
+
+* Semantic auto-completion
+* Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
+  identical)
+* Reference finding (`GoToReferences`)
+* Real-time diagnostic display
+* Renaming symbols (`RefactorRename <new name>`)
+* View documentation comments for identifiers (`GetDoc`)
+* Type information for identifiers (`GetType`)
+* Automatically fix certain errors (`FixIt`)
+* Detection of java projects
+* Management of `jdt.ls` server instance
 
 User Guide
 ----------
@@ -995,7 +1031,7 @@ your file.
 
 ### JavaScript Semantic Completion
 
-#### Quick start
+#### JavaScript quick start
 
 1. Ensure that you have enabled the JavaScript completer. See the
    [installation guide](#installation) for details.
@@ -1132,29 +1168,162 @@ in that directory, the first `python` that YCM will find will be the one in the
 virtual environment, so [jedi][] will be able to provide completions for every
 package you have in the virtual environment.
 
+### Java Semantic Completion
+
+**NOTE**: Java support is currently experimental. Please let us know your
+[feedback](#contact).
+
+#### Java quick Start
+
+1. Ensure that you have enabled the Java completer. See the
+   [installation guide](#installation) for details.
+
+2. Create a project file (gradle or maven) file in the root directory of your
+   Java project, by following the instructions below.
+
+3. If you previously used Eclim or Syntastic for Java, disable them for Java.
+
+4. Edit a Java file from your project.
+
+#### Java Project Files
+
+In order to provide semantic analysis, the Java completion engine requires
+knowledge of your project structure. In particular it needs to know the class
+path to use, when compiling your code. Fortunately [jdt.ls][]
+supports [eclipse project files][eclipse-project],
+[maven projects][mvn-project] and [gradle projects][gradle-project].
+
+**NOTE:** Our recommendation is to use either maven or gradle projects.
+
+#### Diagnostic display - Syntastic
+
+The native support for Java includes YCM's native realtime diagnostics display.
+This can conflict with other dianostics plugins like Syntastic, so when enabling
+Java support, please **manually disable Syntastic Java diagnostics**.
+
+Add the following to your `vimrc`:
+
+```viml
+let g:syntastic_java_checkers = []
+```
+
+#### Diagnostic display - Eclim
+
+The native support for Java includes YCM's native realtime diagnostics display.
+This can conflict with other dianostics plugins like Eclim, so when enabling
+Java support, please **manually disable Eclim Java diagnostics**.
+
+Add the following to your `vimrc`:
+
+```viml
+let g:EclimFileTypeValidate = 0
+```
+
+**NOTE**: We recommend disabling Eclim entirely when editing Java with YCM's
+native Java support. This can be done temporarily with `:EclimDisable`.
+
+#### Eclipse Projects
+
+Eclipse style projects require two files: [.project][eclipse-dot-project] and
+[.classpath][eclipse-dot-classpath].
+
+If your project already has these files due to previously being set up within
+eclipse, then no setup is required. [jdt.ls][] should load the project just
+fine (it's basically eclipse after all).
+
+However, if not, it is possible (easy in fact) to craft them manually, though it
+is not recommended. You're better off using gradle or maven (see below).
+
+[A simple eclipse style project example][ycmd-eclipse-project] can be found in
+the ycmd test dir. Normally all that is required is to copy these files to the
+root of your project and to edit the `.classpath` to add additional libraries,
+such as:
+
+```xml
+  <classpathentry kind="lib" path="/path/to/external/jar" />
+  <classpathentry kind="lib" path="/path/to/external/java/source" />
+```
+
+It may also be necessary to change the directory in which your source files are
+located (paths are relative to the .project file itself):
+
+```xml
+  <classpathentry kind="src" output="target/classes" path="path/to/src/" />
+```
+
+**NOTE**: The eclipse project and classpath files are not a public interface
+and it is highly recommended to use Maven or Gradle project definitions if you
+don't already use eclipse to manage your projects.
+
+#### Maven Projects
+
+Maven needs a file named [pom.xml][mvn-project] in the root of the project.
+Once again a simple [pom.xml][ycmd-mvn-pom-xml] can be found in ycmd source.
+
+The format of [pom.xml][mvn-project] files is way beyond the scope of this
+document, but we do recommend using the various tools that can generate them for
+you, if you're not familiar with them already.
+
+#### Gradle Projecs
+
+Gradle projects require a [build.gradle][gradle-project]. Again, there is a
+[trivial example in ycmd's tests][ycmd-gradle-project].
+
+The format of [build.gradle][gradle-project] files is way beyond the scope of
+this document, but we do recommend using the various tools that can generate
+them for you, if you're not familiar with them already.
+
+#### Troubleshooting
+
+If you're not getting completions or diagnostics, check the server health:
+
+* The Java completion engine takes a while to start up and parse your project.
+  You should be able to see its progress in the command line, and
+  `:YcmDebugInfo`. Ensure that the following lines are present:
+
+```
+--   jdt.ls Java Language Server running
+--   jdt.ls Java Language Server Startup Status: Ready
+```
+
+* If the above lines don't appear after a few minutes, check the jdt.ls and ycmd
+  log files using [`:YcmToggleLogs` ](#the-ycmtogglelogs-command). The jdt.ls
+  log file is called `.log` (for some reason).
+
+If you get a message about "classpath is incomplete", then make sure you have
+correctly configured the [project files](#java-project-files).
+
+If you get messages about unresolved imports, then make sure you have
+correctly configured the [project files](#java-project-files), in particular
+check that the classpath is set correctly.
+
+For anything else, [contact us](#contact). Java support is experimental at
+present so we'd love to hear your feedback! Please do remember to check
+[CONTRIBUTING.md][contributing-md] for the list of diagnostics we'll need.
+
 ### Semantic Completion for Other Languages
 
-C-family, C#, Go, JavaScript, Python, Rust, and TypeScript languages are
+C-family, C#, Go, Java, JavaScript, Python, Rust, and TypeScript languages are
 supported natively by YouCompleteMe using the [Clang][], [OmniSharp][],
-[Gocode][]/[Godef][], [Tern][], [Jedi][], [racer][], and [TSServer][] engines,
-respectively. Check the [installation](#installation) section for instructions
-to enable these features if desired.
+[Gocode][]/[Godef][], [jdt.ls][], [Tern][], [Jedi][], [racer][], and
+[TSServer][] engines, respectively. Check the [installation](#installation)
+section for instructions to enable these features if desired.
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
 file's filetype. Vim comes with okayish omnifuncs for various languages like
 Ruby, PHP, etc. It depends on the language.
 
-You can get stellar omnifuncs for Java and Ruby with [Eclim][]. Just make sure
-you have the _latest_ Eclim installed and configured (this means Eclim `>= 2.2.*`
-and Eclipse `>= 4.2.*`).
+You can get a stellar omnifunc for Ruby with [Eclim][]. Just make sure you have
+the _latest_ Eclim installed and configured (this means Eclim `>= 2.2.*` and
+Eclipse `>= 4.2.*`).
 
 After installing Eclim remember to create a new Eclipse project within your
-application by typing `:ProjectCreate <path-to-your-project> -n ruby` (or `-n java`)
-inside vim and don't forget to have `let g:EclimCompletionMethod = 'omnifunc'`
-in your vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs
-as the data source for semantic completions and provide the auto-triggering
-and subsequence-based matching (and other YCM features) on top of it.
+application by typing `:ProjectCreate <path-to-your-project> -n ruby` inside vim
+and don't forget to have `let g:EclimCompletionMethod = 'omnifunc'` in your
+vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs as
+the data source for semantic completions and provide the auto-triggering and
+subsequence-based matching (and other YCM features) on top of it.
 
 ### Writing New Semantic Completers
 
@@ -1372,7 +1541,7 @@ Supported in filetypes: `c, cpp, objc, objcpp`
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, python, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, python, rust, java`
 
 #### The `GoToDefinition` subcommand
 
@@ -1384,7 +1553,7 @@ translation unit consists of the file you are editing and all the files you are
 including with `#include` directives (directly or indirectly) in that file.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python,
-rust, typescript`
+rust, typescript, java`
 
 #### The `GoTo` subcommand
 
@@ -1395,7 +1564,8 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python, rust,
+java`
 
 #### The `GoToImprecise` subcommand
 
@@ -1416,7 +1586,7 @@ This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
 locations.
 
-Supported in filetypes: `javascript, python, typescript`
+Supported in filetypes: `javascript, python, typescript, java`
 
 #### The `GoToImplementation` subcommand
 
@@ -1424,7 +1594,7 @@ Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.
 
-Supported in filetypes: `cs`
+Supported in filetypes: `cs, java`
 
 #### The `GoToImplementationElseDeclaration` subcommand
 
@@ -1454,7 +1624,7 @@ Invoking this command on `s` returns `std::string => std::basic_string<char>`
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, javascript, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, javascript, typescript, java`
 
 #### The `GetTypeImprecise` subcommand
 
@@ -1511,7 +1681,7 @@ under the cursor. Depending on the file type, this includes things like:
 * etc.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
-javascript, rust`
+javascript, rust, java`
 
 #### The `GetDocImprecise` subcommand
 
@@ -1559,7 +1729,7 @@ indication).
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, java`
 
 #### The `RefactorRename <new name>` subcommand
 
@@ -1573,7 +1743,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `javascript` (variables only), `typescript`
+Supported in filetypes: `javascript` (variables only), `typescript, java`
 
 #### Multi-file Refactor
 
@@ -1626,7 +1796,7 @@ python binary to use to restart the Python semantic engine.
 :YcmCompleter RestartServer /usr/bin/python3.4
 ```
 
-Supported in filetypes: `cs, go, javascript, python, rust, typescript`
+Supported in filetypes: `cs, go, javascript, python, rust, typescript, java`
 
 #### The `ClearCompilationFlagCache` subcommand
 
@@ -2015,14 +2185,14 @@ delimited by commas and values are dictionaries describing the filter.
 A filter is a dictionary of key-values, where the keys are the type of filter,
 and the value is a list of arguments to that filter. In the case of just a
 single item in the list, you may omit the brackets and just provide the argument
-directly. If any filter matches a diagnostic, it will be dropped and YCM will 
+directly. If any filter matches a diagnostic, it will be dropped and YCM will
 not render it.
 
 The following filter types are supported:
 
 - "regex": Accepts a string [regular expression][python-re]. This type matches
 when the regex (treated as case-insensitive) is found in the diagnostic text.
-- "level": Accepts a string level, either "warning" or "error." This type 
+- "level": Accepts a string level, either "warning" or "error." This type
 matches when the diagnostic has the same level.
 
 **NOTE:** The regex syntax is **NOT** Vim's, it's [Python's][python-re].
@@ -3189,3 +3359,14 @@ This software is licensed under the [GPL v3 license][gpl].
 [++enc]: http://vimdoc.sourceforge.net/htmldoc/editing.html#++enc
 [rustup]: https://www.rustup.rs/
 [contributing-md]: https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md
+[jdt.ls]: https://github.com/eclipse/eclipse.jdt.ls
+[jdk-install]: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+[mvn-project]: https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html
+[eclipse-project]: https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html
+[gradle-project]: https://docs.gradle.org/current/userguide/tutorial_java_projects.html
+[eclipse-dot-project]: https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html
+[eclipse-dot-classpath]: https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html
+[ycmd-eclipse-project]: https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_eclipse_project
+[ycmd-mvn-pom-xml]: https://github.com/Valloric/ycmd/blob/java-language-server/ycmd/tests/java/testdata/simple_maven_project/pom.xml
+[ycmd-gradle-project]: https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_gradle_project
+[jdtls-release]: http://download.eclipse.org/jdtls/milestones
