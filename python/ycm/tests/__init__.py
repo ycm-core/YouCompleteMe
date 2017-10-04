@@ -44,6 +44,7 @@ DEFAULT_CLIENT_OPTIONS = {
   'keep_logfiles': 0,
   'extra_conf_vim_data': [],
   'show_diagnostics_ui': 1,
+  'echo_current_diagnostic': 1,
   'enable_diagnostic_signs': 1,
   'enable_diagnostic_highlighting': 0,
   'always_populate_location_list': 0,

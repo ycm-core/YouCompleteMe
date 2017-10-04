@@ -38,17 +38,15 @@ class DiagnosticInterface( object ):
     self._line_to_diags = defaultdict( list )
     self._placed_signs = []
     self._next_sign_id = 1
-    self._previous_line_number = -1
+    self._previous_diag_line_number = -1
     self._diag_message_needs_clearing = False
 
 
   def OnCursorMoved( self ):
-    line, _ = vimsupport.CurrentLineAndColumn()
-    line += 1  # Convert to 1-based
-    if line != self._previous_line_number:
-      self._previous_line_number = line
-
-      if self._user_options[ 'echo_current_diagnostic' ]:
+    if self._user_options[ 'echo_current_diagnostic' ]:
+      line, _ = vimsupport.CurrentLineAndColumn()
+      line += 1  # Convert to 1-based
+      if line != self._previous_diag_line_number:
         self._EchoDiagnosticForLine( line )
 
 
@@ -72,6 +70,9 @@ class DiagnosticInterface( object ):
                             self._ApplyDiagnosticFilter( diags ) ]
     self._ConvertDiagListToDict()
 
+    if self._user_options[ 'echo_current_diagnostic' ]:
+      self._EchoDiagnostic()
+
     if self._user_options[ 'enable_diagnostic_signs' ]:
       self._UpdateSigns()
 
@@ -88,7 +89,15 @@ class DiagnosticInterface( object ):
     return filter( diag_filter.IsAllowed, diags )
 
 
+  def _EchoDiagnostic( self ):
+    line, _ = vimsupport.CurrentLineAndColumn()
+    line += 1  # Convert to 1-based
+    self._EchoDiagnosticForLine( line )
+
+
   def _EchoDiagnosticForLine( self, line_num ):
+    self._previous_diag_line_number = line_num
+
     diags = self._line_to_diags[ line_num ]
     if not diags:
       if self._diag_message_needs_clearing:
@@ -163,6 +172,9 @@ class DiagnosticInterface( object ):
     new_signs = []
     obsolete_signs = list( self._placed_signs )
     for line, diags in iteritems( self._line_to_diags ):
+      if not diags:
+        continue
+
       # We always go for the first diagnostic on line,
       # because it is sorted giving priority to the Errors.
       diag = diags[ 0 ]
