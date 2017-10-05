@@ -1058,15 +1058,19 @@ define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
 Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
 built YCM with the `--rust-completer` flag; see the [*Installation*
-section](#installation) for details).  For semantic analysis inclusive of the
-standard library, you must have a local copy of [the rust source
-code][rust-src]. You also need to set the following option so YouCompleteMe can
-locate it.
-
+section](#installation) for details). For semantic analysis inclusive of the
+standard library, you must have a local copy of [the Rust source
+code][rust-src]. If using [rustup][], run the following command to download the
+code:
+```
+rustup component add rust-src
+```
+YCM will find its location automatically. Otherwise, download the archive,
+extract it somewhere, and set the following option so YCM can locate it:
 ```viml
-" In this example, the rust source code zip has been extracted to
-" /usr/local/rust/rustc-1.5.0
-let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
+" In this example, the Rust source code archive has been extracted to
+" /usr/local/rust/rustc-1.20.0
+let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.20.0/src'
 ```
 
 ### Python Semantic Completion
@@ -3137,3 +3141,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [ninja-compdb]: https://ninja-build.org/manual.html
 [vim-nerdtree-tabs]: https://github.com/jistr/vim-nerdtree-tabs
 [++enc]: http://vimdoc.sourceforge.net/htmldoc/editing.html#++enc
+[rustup]: https://www.rustup.rs/
