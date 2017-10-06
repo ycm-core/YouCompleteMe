@@ -2825,11 +2825,10 @@ details. If you want to see which tag files YCM will read for a given buffer,
 run `:echo tagfiles()` with the relevant buffer active. Note that that function
 will only list tag files that already exist.
 
-### `CTRL-U` in insert mode does not work
+### `CTRL-U` in insert mode does not work while the completion menu is visible
 
-YCM keeps you in a `completefunc` completion mode when you're typing in insert
-mode and Vim disables `<C-U>` in completion mode as a "feature." Sadly there's
-nothing I can do about this.
+YCM uses `completefunc` completion mode to show suggestions and Vim disables
+`<C-U>` in that mode as a "feature." Sadly there's nothing I can do about this.
 
 ### YCM conflicts with UltiSnips TAB key usage
 
