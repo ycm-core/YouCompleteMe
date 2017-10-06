@@ -108,7 +108,7 @@ def RunNotifyUserIfServerCrashed( ycm, test, post_vim_message ):
   ycm._server_popen = MagicMock( autospec = True )
   ycm._server_popen.poll.return_value = test[ 'return_code' ]
 
-  ycm._NotifyUserIfServerCrashed()
+  ycm.OnFileReadyToParse()
 
   assert_that( ycm._logger.error.call_args[ 0 ][ 0 ],
                test[ 'expected_message' ] )

@@ -487,6 +487,7 @@ endfunction
 
 function! s:PollServerReady( timer_id )
   if !s:Pyeval( 'ycm_state.IsServerAlive()' )
+    exec s:python_command "ycm_state.NotifyUserIfServerCrashed()"
     " Server crashed. Don't poll it again.
     return
   endif
