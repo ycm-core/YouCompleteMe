@@ -1069,6 +1069,13 @@ locate it.
 let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.5.0/src'
 ```
 
+[Rustup][rustup] users (since `0.6.3`) could add `rust-src` component with `rustup component add rust-src` for appropriate toolchains (autoupdated along with `rustc` and `cargo` managed by `rustup`) and use such snippet:
+
+```viml
+" getting `rust-src` rustup component path for current rustc version
+let g:ycm_rust_src_path = substitute(system('rustc --print sysroot'), '\n\+$', '', '') . '/lib/rustlib/src/rust/src'
+```
+
 ### Python Semantic Completion
 
 Completion and GoTo commands work out of the box with no additional
@@ -3127,6 +3134,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [racer]: https://github.com/phildawes/racer
 [rust-install]: https://www.rust-lang.org/
 [rust-src]: https://www.rust-lang.org/downloads.html
+[rustup]: https://github.com/rust-lang-nursery/rustup.rs
 [add-msbuild-to-path]: http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
