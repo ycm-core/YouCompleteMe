@@ -2663,9 +2663,12 @@ cache.
 
 ### YCM auto-inserts completion strings I don't want!
 
-This means you probably have some mappings that interfere with YCM's internal
-ones. Make sure you don't have something mapped to `<C-p>`, `<C-x>` or `<C-u>`
-(in insert mode).
+If this happens when Vim automatically wraps text then it's a Vim bug that has
+been fixed in version 8.0.0127. Update your Vim to this version or later.
+
+This could also be some mappings that interfere with YCM's internal ones. Make
+sure you don't have something mapped to `<C-p>`, `<C-x>` or `<C-u>` (in insert
+mode).
 
 YCM _never_ selects something for you; it just shows you a menu and the user has
 to explicitly select something. If something is being selected automatically,
