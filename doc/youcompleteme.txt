@@ -598,8 +598,8 @@ Download and install the following software:
 - Visual Studio [36]. Download the community edition. During setup, select
   _Desktop development with C++_ in _Workloads_.
 
-- 7-zip [37]. Required to build YCM with semantic support for C-family
-  languages.
+- 7-zip 16.04 or later [37]. Required to build YCM with semantic support for
+  C-family languages.
 
 Compiling YCM **with** semantic support for C-family languages:
 >
@@ -1594,7 +1594,7 @@ GoTo Commands ~
 
 These commands are useful for jumping around and exploring code. When moving
 the cursor, the subcommands add entries to Vim's 'jumplist' so you can use
-'CTRL-O' to jump back to where you where before invoking the command (and
+'CTRL-O' to jump back to where you were before invoking the command (and
 'CTRL-I' to jump forward; see ':h jumplist' for details). If there is more than
 one destination, the quickfix list (see ':h quickfix') is populated with the
 available locations and opened to full width at the bottom of the screen. You
