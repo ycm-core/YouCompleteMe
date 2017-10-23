@@ -39,7 +39,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
 
     try:
       eq_( expected_vim_data, vim_data )
-    except:
+    except Exception:
       print( "Expected:\n'{0}'\nwhen parsing:\n'{1}'\nBut found:\n'{2}'".format(
           expected_vim_data,
           completion_data,
