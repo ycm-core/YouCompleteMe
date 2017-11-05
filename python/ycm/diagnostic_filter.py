@@ -119,14 +119,29 @@ def CompileRegex( raw_regex ):
   return FilterRegex
 
 
+# ycmd can return 4 types of diagnostic kind, but YCM only knows about and
+# supports ERROR and WARNING. So we map them as follows:
+#  - ERROR       (as is)
+#  - WARNING     (as is)
+#  - INFORMATION (mapped to WARNING)
+#  - HINT        (mapped to WARNING)
+DIAGNOSTIC_KIND_TO_VIM_LEVEL = {
+  "INFORMATION": "WARNING",
+  "HINT":        "WARNING"
+}
+
+
+def DiagnosticKindToVimLevel( kind ):
+  return DIAGNOSTIC_KIND_TO_VIM_LEVEL.get( kind, kind )
+
+
 def CompileLevel( level ):
-  # valid kinds are WARNING and ERROR;
-  #  expected input levels are `warning` and `error`
+  # expected input levels are `warning` and `error`
   # NOTE: we don't validate the input...
   expected_kind = level.upper()
 
   def FilterLevel( diagnostic ):
-    return diagnostic[ 'kind' ] == expected_kind
+    return DiagnosticKindToVimLevel( diagnostic[ 'kind' ] ) == expected_kind
 
   return FilterLevel
 
