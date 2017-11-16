@@ -797,8 +797,8 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
   #    raise a warning)
   #  - once whilst applying the changes
   get_buffer_number_for_filename.assert_has_exact_calls( [
-    call( single_buffer_name, False ),
-    call( single_buffer_name, False ),
+    call( single_buffer_name ),
+    call( single_buffer_name ),
   ] )
 
   # BufferIsVisible is called twice for the same reasons as above
@@ -895,9 +895,9 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   #  - once whilst applying the changes (-1 return)
   #  - finally after calling OpenFilename (1 return)
   get_buffer_number_for_filename.assert_has_exact_calls( [
-    call( single_buffer_name, False ),
-    call( single_buffer_name, False ),
-    call( single_buffer_name, False ),
+    call( single_buffer_name ),
+    call( single_buffer_name ),
+    call( single_buffer_name ),
   ] )
 
   # BufferIsVisible is called 3 times for the same reasons as above, with the
@@ -1007,7 +1007,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   #  - once to the check if we would require opening the file (so that we can
   #    raise a warning) (-1 return)
   get_buffer_number_for_filename.assert_has_exact_calls( [
-    call( single_buffer_name, False ),
+    call( single_buffer_name ),
   ] )
 
   # BufferIsVisible is called once for the above file, which wasn't visible.
@@ -1174,11 +1174,11 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
 
   # We checked for the right file names
   get_buffer_number_for_filename.assert_has_exact_calls( [
-    call( first_buffer_name, False ),
-    call( second_buffer_name, False ),
-    call( first_buffer_name, False ),
-    call( second_buffer_name, False ),
-    call( second_buffer_name, False ),
+    call( first_buffer_name ),
+    call( second_buffer_name ),
+    call( first_buffer_name ),
+    call( second_buffer_name ),
+    call( second_buffer_name ),
   ] )
 
   # We checked if it was OK to open the file
