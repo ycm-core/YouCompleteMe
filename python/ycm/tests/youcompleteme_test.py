@@ -600,6 +600,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
 
     # Only the error sign is placed.
     vim_command.assert_has_exact_calls( [
+      call( 'let g:syntastic_c_checkers = []' ),
       call( 'sign place 1 name=YcmError line=3 buffer=5' ),
     ] )
 
@@ -638,6 +639,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
     )
 
     vim_command.assert_has_exact_calls( [
+      call( 'let g:syntastic_c_checkers = []' ),
       call( 'sign place 2 name=YcmWarning line=3 buffer=5' ),
       call( 'try | exec "sign unplace 1 buffer=5" | catch /E158/ | endtry' )
     ] )

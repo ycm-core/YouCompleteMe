@@ -1057,3 +1057,16 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
 
   if position == 'end':
     vim.command( 'silent! normal! Gzz' )
+
+
+def DisableSyntasticForFiletype( filetype ):
+  """Forcefully disable Syntastic diagnostics for the supplied filetype."""
+  # Syntastic and YCM diagnostics conflict. Importantly, there is no mechanism
+  # in Vim to have multiple (simultaneous) location lists in a way that works
+  # for a user. YCM's diagnostics support is superior (obviously), so we disable
+  # syntastic when we're using YCM's dianostics.
+  vim.command( 'let g:syntastic_' + filetype + '_checkers = []' )
+
+
+def DisableSyntasticInCurrentBuffer():
+  vim.command( "if exists( ':SyntasticReset' ) | SyntasticReset | endif" )

@@ -146,10 +146,6 @@ function! youcompleteme#Enable()
   call s:SetUpCompleteopt()
   call s:SetUpKeyMappings()
 
-  if g:ycm_show_diagnostics_ui
-    call s:TurnOffSyntasticForCFamily()
-  endif
-
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
 
@@ -387,15 +383,6 @@ function! s:SetUpBackwardsCompatibility()
   if has_key( g:, 'ycm_filetypes_to_completely_ignore' )
     let g:filetype_blacklist =  g:ycm_filetypes_to_completely_ignore
   endif
-endfunction
-
-
-" Needed so that YCM is used instead of Syntastic
-function! s:TurnOffSyntasticForCFamily()
-  let g:syntastic_cpp_checkers = []
-  let g:syntastic_c_checkers = []
-  let g:syntastic_objc_checkers = []
-  let g:syntastic_objcpp_checkers = []
 endfunction
 
 

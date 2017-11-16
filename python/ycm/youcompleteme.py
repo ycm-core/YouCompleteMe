@@ -412,6 +412,14 @@ class YouCompleteMe( object ):
     return True
 
 
+  def DisableSyntasticForCurrentBufferFiletypes( self ):
+    for filetype in vimsupport.CurrentFiletypes():
+      self._logger.info( 'Disabling syntastic for filetype: ' + filetype )
+      vimsupport.DisableSyntasticForFiletype( filetype )
+
+    vimsupport.DisableSyntasticInCurrentBuffer()
+
+
   def OnFileReadyToParse( self ):
     if not self.IsServerAlive():
       self.NotifyUserIfServerCrashed()
@@ -419,6 +427,17 @@ class YouCompleteMe( object ):
 
     if not self.IsServerReady():
       return
+
+    # TODO: The following involves a synchronous request to the server to check
+    # for the filetype completion being available in the current buffer
+    # filetype(s). This can lead to a startup lag, which is undesirable.
+    #
+    # FIXME: A solution would be to fire the completion available request
+    # asynchronously, and to just check for a response in this request and the
+    # periodic poll.
+    if ( self.DiagnosticUiSupportedForCurrentFiletype() and
+         self.NativeFiletypeCompletionUsable() ):
+      self.DisableSyntasticForCurrentBufferFiletypes()
 
     extra_data = {}
     self._AddTagsFilesIfNeeded( extra_data )
