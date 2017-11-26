@@ -589,18 +589,18 @@ def EscapeForVim( text ):
 
 
 def CurrentFiletypes():
-  return VimExpressionToPythonType( "&filetype" ).split( '.' )
+  return ToUnicode( vim.eval( "&filetype" ) ).split( '.' )
 
 
 def GetBufferFiletypes( bufnr ):
   command = 'getbufvar({0}, "&ft")'.format( bufnr )
-  return VimExpressionToPythonType( command ).split( '.' )
+  return ToUnicode( vim.eval( command ) ).split( '.' )
 
 
 def FiletypesForBuffer( buffer_object ):
   # NOTE: Getting &ft for other buffers only works when the buffer has been
   # visited by the user at least once, which is true for modified buffers
-  return GetBufferOption( buffer_object, 'ft' ).split( '.' )
+  return ToUnicode( GetBufferOption( buffer_object, 'ft' ) ).split( '.' )
 
 
 def VariableExists( variable ):
