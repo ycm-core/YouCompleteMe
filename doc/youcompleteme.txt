@@ -148,7 +148,7 @@ Contents ~
   15. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup|
   16. 'install.py' says python must be compiled with '--enable-framework'. Wat? |youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat|
   17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
-  18. 'CTRL-U' in insert mode does not work |youcompleteme-ctrl-u-in-insert-mode-does-not-work|
+  18. 'CTRL-U' in insert mode does not work while the completion menu is visible |youcompleteme-ctrl-u-in-insert-mode-does-not-work-while-completion-menu-is-visible|
   19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
   20. Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu |youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu|
   21. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
@@ -3087,12 +3087,11 @@ buffer, run ':echo tagfiles()' with the relevant buffer active. Note that that
 function will only list tag files that already exist.
 
 -------------------------------------------------------------------------------
-                            *youcompleteme-ctrl-u-in-insert-mode-does-not-work*
-'CTRL-U' in insert mode does not work ~
+*youcompleteme-ctrl-u-in-insert-mode-does-not-work-while-completion-menu-is-visible*
+'CTRL-U' in insert mode does not work while the completion menu is visible ~
 
-YCM keeps you in a 'completefunc' completion mode when you're typing in insert
-mode and Vim disables '<C-U>' in completion mode as a "feature." Sadly there's
-nothing I can do about this.
+YCM uses 'completefunc' completion mode to show suggestions and Vim disables
+'<C-U>' in that mode as a "feature." Sadly there's nothing I can do about this.
 
 -------------------------------------------------------------------------------
                      *youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage*

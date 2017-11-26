@@ -546,11 +546,16 @@ function! s:SendKeys( keys )
 endfunction
 
 
-function! s:OnInsertChar()
-  call timer_stop( s:pollers.completion.id )
+function! s:CloseCompletionMenu()
   if pumvisible()
     call s:SendKeys( "\<C-e>" )
   endif
+endfunction
+
+
+function! s:OnInsertChar()
+  call timer_stop( s:pollers.completion.id )
+  call s:CloseCompletionMenu()
 endfunction
 
 
@@ -751,25 +756,26 @@ endfunction
 
 
 function! s:Complete()
-  " <c-x><c-u> invokes the user's completion function (which we have set to
-  " youcompleteme#CompleteFunc), and <c-p> tells Vim to select the previous
-  " completion candidate. This is necessary because by default, Vim selects the
-  " first candidate when completion is invoked, and selecting a candidate
-  " automatically replaces the current text with it. Calling <c-p> forces Vim to
-  " deselect the first candidate and in turn preserve the user's current text
-  " until he explicitly chooses to replace it with a completion.
-  call s:SendKeys( "\<C-X>\<C-U>\<C-P>" )
+  " Do not call user's completion function if the start column is after the
+  " current column or if there are no candidates. Close the completion menu
+  " instead. This avoids keeping the user in completion mode.
+  if s:completion.start_column > col( '.' ) || empty( s:completion.candidates )
+    call s:CloseCompletionMenu()
+  else
+    " <c-x><c-u> invokes the user's completion function (which we have set to
+    " youcompleteme#CompleteFunc), and <c-p> tells Vim to select the previous
+    " completion candidate. This is necessary because by default, Vim selects the
+    " first candidate when completion is invoked, and selecting a candidate
+    " automatically replaces the current text with it. Calling <c-p> forces Vim to
+    " deselect the first candidate and in turn preserve the user's current text
+    " until he explicitly chooses to replace it with a completion.
+    call s:SendKeys( "\<C-X>\<C-U>\<C-P>" )
+  endif
 endfunction
 
 
 function! youcompleteme#CompleteFunc( findstart, base )
   if a:findstart
-    if s:completion.start_column > col( '.' ) ||
-          \ empty( s:completion.candidates )
-      " For vim, -2 means not found but don't trigger an error message.
-      " See :h complete-functions.
-      return -2
-    endif
     return s:completion.start_column - 1
   endif
   return s:completion.candidates
