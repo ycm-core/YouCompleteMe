@@ -589,8 +589,11 @@ def EscapeForVim( text ):
 
 
 def CurrentFiletypes():
-  return VimExpressionToPythonType( "&filetype" ).split( '.' )
-
+  maybe_string = VimExpressionToPythonType( "&filetype" )
+  if isinstance(maybe_string, basestring):
+      return maybe_string.split( '.' )
+  else:
+      return unicode(maybe_string)
 
 def GetBufferFiletypes( bufnr ):
   command = 'getbufvar({0}, "&ft")'.format( bufnr )
