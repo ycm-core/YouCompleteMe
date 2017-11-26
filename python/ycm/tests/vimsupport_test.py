@@ -32,7 +32,7 @@ MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
-from hamcrest import assert_that, calling, equal_to, has_entry, raises
+from hamcrest import assert_that, calling, contains, equal_to, has_entry, raises
 from mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
@@ -1551,6 +1551,15 @@ def SelectFromList_Negative_test( vim_eval ):
   assert_that( calling( vimsupport.SelectFromList ).with_args( 'test',
                                                                [ 'a', 'b' ] ),
                raises( RuntimeError, vimsupport.NO_SELECTION_MADE_MSG ) )
+
+
+def Filetypes_IntegerFiletype_test():
+  current_buffer = VimBuffer( 'buffer', number = 1, filetype = '42' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    assert_that( vimsupport.CurrentFiletypes(), contains( '42' ) )
+    assert_that( vimsupport.GetBufferFiletypes( 1 ), contains( '42' ) )
+    assert_that( vimsupport.FiletypesForBuffer( current_buffer ),
+                 contains( '42' ) )
 
 
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
