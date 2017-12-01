@@ -2,6 +2,11 @@
 
 set -ev
 
+# RVM overrides the cd, popd, and pushd shell commands, causing the
+# "shell_session_update: command not found" error on macOS when executing those
+# commands.
+unset -f cd popd pushd
+
 ####################
 # OS-specific setup
 ####################
