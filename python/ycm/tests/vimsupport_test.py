@@ -1606,13 +1606,6 @@ def InsertNamespace_append_test( vim_current, *args ):
   AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
 
 
-def EscapedFilepath_test():
-  eq_( vimsupport.EscapedFilepath( '/path/ with /sp ac es' ),
-       '/path/\ with\ /sp\ ac\ es' )
-  eq_( vimsupport.EscapedFilepath( ' relative path/ with / spaces ' ),
-       '\ relative\ path/\ with\ /\ spaces\ ' )
-
-
 @patch( 'ycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command', new_callable = ExtendedMock )

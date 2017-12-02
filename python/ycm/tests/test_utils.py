@@ -47,6 +47,7 @@ MATCHADD_REGEX = re.compile(
 MATCHDELETE_REGEX = re.compile( '^matchdelete\((?P<id>\d+)\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\)$' )
+FNAMEESCAPE_REGEX = re.compile( '^fnameescape\(\'(?P<filepath>.+)\'\)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -210,6 +211,10 @@ def _MockVimEval( value ):
   result = _MockVimMatchEval( value )
   if result is not None:
     return result
+
+  match = FNAMEESCAPE_REGEX.search( value )
+  if match:
+    return match.group( 'filepath' )
 
   raise ValueError( 'Unexpected evaluation: {0}'.format( value ) )
 
