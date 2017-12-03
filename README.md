@@ -972,38 +972,36 @@ your file.
 
 #### Quick start
 
-1. Ensure that you have enabled the Tern completer. See the
+1. Ensure that you have enabled the JavaScript completer. See the
    [installation guide](#installation) for details.
 
 2. Create a `.tern-project` file in the root directory of your JavaScript
    project, by following the [instructions][tern-project] in the [Tern][]
    documentation.
 
-3. Make sure that Vim's working directory is a descendent of that directory (or
-   that directory itself) when working with JavaScript files.
+3. Edit a file from your project.
 
 #### Explanation
 
 JavaScript completion is based on [Tern][]. This completion engine requires a
 file named [`.tern-project`][tern-project] to exist in the current working
 directory or a directory which is an ancestor of the current working directory
-when the tern server is started. YCM starts the Tern server the first time a
-JavaScript file is edited, so Vim's working directory at that time needs to be a
-descendent of the directory containing the `.tern-project` file (or that
-directory itself).
+when the Tern server is started. YCM starts the Tern server the first time a
+JavaScript file is edited and uses its directory as the working directory, so
+the directory of that file at that time needs to be a descendent of the
+directory containing the `.tern-project` file (or that directory itself).
 
 Alternatively, as described in the [Tern documentation][tern-docs], a global
 `.tern-config` file may be used.
 
-Multiple Tern servers, are not supported. To switch to a different
-JavaScript project, you can do one of the following:
+Multiple Tern servers are not supported. To switch to a different JavaScript
+project, you need to restart the Tern server using [the `RestartServer`
+subcommand](#the-restartserver-subcommand) while editing a file of that
+project:
 
-- start a new instance of Vim from the new project's directory
-- change Vim's working directory (`:cd /path/to/new/project`) and restart the
-  [ycmd server][ycmd] (`:YcmRestartServer`)
-- change Vim's working directory (`:cd /path/to/new/project`), open a JavaScript
-  file (or set filetype to JavaScript) and restart the Tern server using YCM
-  completer subcommand `:YcmCompleter RestartServer`.
+```vim
+:YcmCompleter RestartServer
+```
 
 #### Tips and tricks
 
@@ -1586,6 +1584,9 @@ flags.
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
+
+Use this subcommand while editing a file from a JavaScript project to switch to
+that project.
 
 An additional optional argument may be supplied for Python, specifying the
 python binary to use to restart the Python semantic engine.

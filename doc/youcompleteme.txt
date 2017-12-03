@@ -591,7 +591,15 @@ Download and install the following software:
 
 - Python 2 or Python 3 [35]. Be sure to pick the version corresponding to
   your Vim architecture. It is _Windows x86_ for a 32-bit Vim and _Windows
-  x86-64_ for a 64-bit Vim. We recommend installing Python 3.
+  x86-64_ for a 64-bit Vim. We recommend installing Python 3. Additionally,
+  the version of Python you install must match up exactly with the version of
+  Python that Vim is looking for. Type ':version' and look at the bottom of
+  the page at the list of compiler flags. Look for flags that look similar to
+  '-DDYNAMIC_PYTHON_DLL=\"python27.dll\"' and
+  '-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"'. The former indicates that Vim is
+  looking for Python 2.7 and the latter indicates that Vim is looking for
+  Python 3.5. You'll need one or the other installed, matching the version
+  number exactly.
 
 - CMake [25]. Add CMake executable to the PATH environment variable.
 
@@ -1223,15 +1231,14 @@ JavaScript Semantic Completion ~
                                                     *youcompleteme-quick-start*
 Quick start ~
 
-1. Ensure that you have enabled the Tern completer. See the installation
-   guide for details.
+1. Ensure that you have enabled the JavaScript completer. See the
+   installation guide for details.
 
 2. Create a '.tern-project' file in the root directory of your JavaScript
    project, by following the instructions [49] in the Tern [16]
    documentation.
 
-3. Make sure that Vim's working directory is a descendent of that directory
-   (or that directory itself) when working with JavaScript files.
+3. Edit a file from your project.
 
 -------------------------------------------------------------------------------
                                                     *youcompleteme-explanation*
@@ -1239,26 +1246,21 @@ Explanation ~
 
 JavaScript completion is based on Tern [16]. This completion engine requires a
 file named '.tern-project' [49] to exist in the current working directory or a
-directory which is an ancestor of the current working directory when the tern
+directory which is an ancestor of the current working directory when the Tern
 server is started. YCM starts the Tern server the first time a JavaScript file
-is edited, so Vim's working directory at that time needs to be a descendent of
-the directory containing the '.tern-project' file (or that directory itself).
+is edited and uses its directory as the working directory, so the directory of
+that file at that time needs to be a descendent of the directory containing the
+'.tern-project' file (or that directory itself).
 
 Alternatively, as described in the Tern documentation [50], a global '.tern-
 config' file may be used.
 
-Multiple Tern servers, are not supported. To switch to a different JavaScript
-project, you can do one of the following:
-
-- start a new instance of Vim from the new project's directory
-
-- change Vim's working directory (':cd /path/to/new/project') and restart the
-  ycmd server [43] (|:YcmRestartServer|)
-
-- change Vim's working directory (':cd /path/to/new/project'), open a
-  JavaScript file (or set filetype to JavaScript) and restart the Tern server
-  using YCM completer subcommand ':YcmCompleter RestartServer'.
-
+Multiple Tern servers are not supported. To switch to a different JavaScript
+project, you need to restart the Tern server using the |RestartServer|
+subcommand while editing a file of that project:
+>
+  :YcmCompleter RestartServer
+<
 -------------------------------------------------------------------------------
                                                     *youcompleteme-tips-tricks*
 Tips and tricks ~
@@ -1875,6 +1877,9 @@ The *RestartServer* subcommand
 
 Restarts the semantic-engine-as-localhost-server for those semantic engines
 that work as separate servers that YCM talks to.
+
+Use this subcommand while editing a file from a JavaScript project to switch to
+that project.
 
 An additional optional argument may be supplied for Python, specifying the
 python binary to use to restart the Python semantic engine.
