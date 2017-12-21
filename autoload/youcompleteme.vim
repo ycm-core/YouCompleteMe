@@ -28,6 +28,9 @@ let s:default_completion = {
       \   'candidates': []
       \ }
 let s:completion = s:default_completion
+
+" Note when setting global state, consider if it needs to be reset when doing
+" s:RestartServer
 let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
@@ -851,6 +854,8 @@ endfunction
 
 function! s:RestartServer()
   exec s:python_command "ycm_state.RestartServer()"
+
+  let s:previous_allowed_buffer_number = 0
 
   call timer_stop( s:pollers.receive_messages.id )
   let s:pollers.receive_messages.id = -1
