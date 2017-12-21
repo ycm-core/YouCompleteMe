@@ -235,9 +235,47 @@ def LineAndColumnNumbersClamped( line_num, column_num ):
 
 
 def SetLocationList( diagnostics ):
+  """Set the location list for the current window to the supplied diagnostics"""
+  SetLocationListForWindow( 0, diagnostics )
+
+
+def GetWindowNumberForBufferDiagnostics( buffer_number ):
+  """Return an appropriate window number to use for displaying diagnostics
+  associated with the buffer number supplied. Always returns a valid window
+  number or 0 meaning the current window."""
+
+  # Location lists are associated with _windows_ not _buffers_. This makes a lot
+  # of sense, but YCM associates diagnostics with _buffers_, because it is the
+  # buffer that actually gets parsed.
+  #
+  # The heuristic we use is to determine any open window for a specified buffer,
+  # and set that. If there is no such window on the current tab page, we use the
+  # current window (by passing 0 as the window number)
+
+  if buffer_number == vim.current.buffer.number:
+    return 0
+
+  window_number = GetIntValue( "bufwinnr({0})".format( buffer_number ) )
+
+  if window_number < 0:
+    return 0
+
+  return window_number
+
+
+def SetLocationListForBuffer( buffer_number, diagnostics ):
+  """Populate the location list of an apppropriate window for the supplied
+  buffer number. See SetLocationListForWindow for format of diagnostics."""
+  return SetLocationListForWindow(
+    GetWindowNumberForBufferDiagnostics( buffer_number ),
+    diagnostics )
+
+
+def SetLocationListForWindow( window_number, diagnostics ):
   """Populate the location list with diagnostics. Diagnostics should be in
   qflist format; see ":h setqflist" for details."""
-  vim.eval( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+  vim.eval( 'setloclist( {0}, {1} )'.format( window_number,
+                                             json.dumps( diagnostics ) ) )
 
 
 def OpenLocationList( focus = False, autoclose = False ):
