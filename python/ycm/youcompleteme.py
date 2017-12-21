@@ -123,15 +123,15 @@ class YouCompleteMe( object ):
     self._filetypes_with_keywords_loaded = set()
     self._ycmd_keepalive = YcmdKeepalive()
     self._server_is_ready_with_cache = False
-    self._SetupLogging()
-    self._SetupServer()
+    self._SetUpLogging()
+    self._SetUpServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
       'cs': lambda self: self._OnCompleteDone_Csharp()
     }
 
 
-  def _SetupServer( self ):
+  def _SetUpServer( self ):
     self._available_completers = {}
     self._user_notified_about_crash = False
     self._filetypes_with_keywords_loaded = set()
@@ -186,7 +186,7 @@ class YouCompleteMe( object ):
                                           stdout = PIPE, stderr = PIPE )
 
 
-  def _SetupLogging( self ):
+  def _SetUpLogging( self ):
     def FreeFileFromOtherProcesses( file_object ):
       if utils.OnWindows():
         from ctypes import windll
@@ -283,7 +283,7 @@ class YouCompleteMe( object ):
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
     self._ShutdownServer()
-    self._SetupServer()
+    self._SetUpServer()
 
 
   def SendCompletionRequest( self, force_semantic = False ):
@@ -683,7 +683,7 @@ class YouCompleteMe( object ):
     if '*' in filetype_to_disable:
       return False
     else:
-      return not any([ x in filetype_to_disable for x in filetypes ])
+      return not any( [ x in filetype_to_disable for x in filetypes ] )
 
 
   def ShowDetailedDiagnostic( self ):
