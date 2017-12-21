@@ -27,17 +27,23 @@ from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 
 
+DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp',
+                                 'typescript' ] )
+DIAGNOSTIC_UI_ASYNC_FILETYPES = set( [ 'java' ] )
+
+
 # Emulates Vim buffer
 # Used to store buffer related information like diagnostics, latest parse
 # request. Stores buffer change tick at the parse request moment, allowing
 # to effectively determine whether reparse is needed for the buffer.
 class Buffer( object ):
 
-  def __init__( self, bufnr, user_options ):
+  def __init__( self, bufnr, user_options, async_diags ):
     self.number = bufnr
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
+    self._async_diags = async_diags
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
 
 
@@ -61,8 +67,17 @@ class Buffer( object ):
 
 
   def UpdateDiagnostics( self ):
-    self._diag_interface.UpdateWithNewDiagnostics(
-      self._parse_request.Response() )
+    if not self._async_diags:
+      self.UpdateWithNewDiagnostics( self._parse_request.Response() )
+    else:
+      # We need to call the response method, because it might throw an exception
+      # or require extra config confirmation, even if we don't actually use the
+      # diagnostics.
+      self._parse_request.Response()
+
+
+  def UpdateWithNewDiagnostics( self, diagnostics ):
+    self._diag_interface.UpdateWithNewDiagnostics( diagnostics )
 
 
   def PopulateLocationList( self ):
@@ -105,5 +120,11 @@ class BufferDict( dict ):
 
   def __missing__( self, key ):
     # Python does not allow to return assignment operation result directly
-    new_value = self[ key ] = Buffer( key, self._user_options )
+    new_value = self[ key ] = Buffer(
+      key,
+      self._user_options,
+      any( [ x in DIAGNOSTIC_UI_ASYNC_FILETYPES
+             for x in
+             vimsupport.GetBufferFiletypes( key ) ] ) )
+
     return new_value
