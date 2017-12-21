@@ -41,8 +41,46 @@ let s:pollers = {
       \   'server_ready': {
       \     'id': -1,
       \     'wait_milliseconds': 100
+      \   },
+      \   'receive_messages': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
       \   }
       \ }
+
+
+" Returns 1 if the Vim version supports timer_pause and timer_info, as these are
+" required to avoid/work around Vim quirks with screen redraws when using
+" timers.
+function! s:CanPauseTimers()
+  return exists( '*timer_info' ) && exists( '*timer_pause' )
+endfunction
+
+function! s:SuspendTimers()
+  if !s:CanPauseTimers()
+    return
+  endif
+
+  for poller in keys( s:pollers )
+    let info = timer_info( s:pollers[ poller ].id )
+    if len( info ) == 1 && !info[ 0 ].paused
+      call timer_pause( s:pollers[ poller ].id, 1 )
+    endif
+  endfor
+endfunction
+
+function! s:ResumeTimers()
+  if !s:CanPauseTimers()
+    return
+  endif
+
+  for poller in keys( s:pollers )
+    let info = timer_info( s:pollers[ poller ].id )
+    if len( info ) == 1 && info[ 0 ].paused
+      call timer_pause( s:pollers[ poller ].id, 0 )
+    endif
+  endfor
+endfunction
 
 
 " When both versions are available, we prefer Python 3 over Python 2:
@@ -68,6 +106,29 @@ function! s:Pyeval( eval_string )
     return py3eval( a:eval_string )
   endif
   return pyeval( a:eval_string )
+endfunction
+
+
+function! s:StartMessagePoll()
+  if s:pollers.receive_messages.id < 0
+    let s:pollers.receive_messages.id = timer_start(
+          \ s:pollers.receive_messages.wait_milliseconds,
+          \ function( 's:ReceiveMessages' ) )
+  endif
+endfunction
+
+
+function! s:ReceiveMessages( timer_id )
+  let poll_again = s:Pyeval( 'ycm_state.OnPeriodicTick()' )
+
+  if poll_again
+    let s:pollers.receive_messages.id = timer_start(
+          \ s:pollers.receive_messages.wait_milliseconds,
+          \ function( 's:ReceiveMessages' ) )
+  else
+    " Don't poll again until we open another buffer
+    let s:pollers.receive_messages.id = -1
+  endif
 endfunction
 
 
@@ -451,6 +512,7 @@ function! s:OnFileTypeSet()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+  call s:StartMessagePoll()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   call s:OnFileReadyToParse( 1 )
@@ -464,6 +526,7 @@ function! s:OnBufferEnter()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
+  call s:StartMessagePoll()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   " Last parse may be outdated because of changes from other buffers. Force a
@@ -802,6 +865,10 @@ endfunction
 
 function! s:RestartServer()
   exec s:python_command "ycm_state.RestartServer()"
+
+  call timer_stop( s:pollers.receive_messages.id )
+  let s:pollers.receive_messages.id = -1
+
   call timer_stop( s:pollers.server_ready.id )
   let s:pollers.server_ready.id = timer_start(
         \ s:pollers.server_ready.wait_milliseconds,
@@ -810,11 +877,20 @@ endfunction
 
 
 function! s:DebugInfo()
-  echom "Printing YouCompleteMe debug information..."
-  let debug_info = s:Pyeval( 'ycm_state.DebugInfo()' )
-  for line in split( debug_info, "\n" )
-    echom '-- ' . line
-  endfor
+  " Work around bugs in Vim where the command line is cleared when timers are
+  " running. This is particularly a problem for DebugInfo which the user
+  " probably needs to spend more than 100ms looking at.
+  call s:SuspendTimers()
+
+  try
+    echom "Printing YouCompleteMe debug information..."
+    let debug_info = s:Pyeval( 'ycm_state.DebugInfo()' )
+    for line in split( debug_info, "\n" )
+      echom '-- ' . line
+    endfor
+  finally
+    call s:ResumeTimers()
+  endtry
 endfunction
 
 
@@ -829,25 +905,34 @@ endfunction
 
 
 function! s:CompleterCommand(...)
-  " CompleterCommand will call the OnUserCommand function of a completer.
-  " If the first arguments is of the form "ft=..." it can be used to specify the
-  " completer to use (for example "ft=cpp").  Else the native filetype completer
-  " of the current buffer is used.  If no native filetype completer is found and
-  " no completer was specified this throws an error.  You can use
-  " "ft=ycm:ident" to select the identifier completer.
-  " The remaining arguments will be passed to the completer.
-  let arguments = copy(a:000)
-  let completer = ''
+  " Work around bugs in Vim where the command line is cleared when timers are
+  " running. This is particularly a problem for FixIt which can offer the user
+  " options
+  call s:SuspendTimers()
 
-  if a:0 > 0 && strpart(a:1, 0, 3) == 'ft='
-    if a:1 == 'ft=ycm:ident'
-      let completer = 'identifier'
+  try
+    " CompleterCommand will call the OnUserCommand function of a completer.  If
+    " the first arguments is of the form "ft=..." it can be used to specify the
+    " completer to use (for example "ft=cpp").  Else the native filetype
+    " completer of the current buffer is used.  If no native filetype completer
+    " is found and no completer was specified this throws an error.  You can use
+    " "ft=ycm:ident" to select the identifier completer.
+    " The remaining arguments will be passed to the completer.
+    let arguments = copy(a:000)
+    let completer = ''
+
+    if a:0 > 0 && strpart(a:1, 0, 3) == 'ft='
+      if a:1 == 'ft=ycm:ident'
+        let completer = 'identifier'
+      endif
+      let arguments = arguments[1:]
     endif
-    let arguments = arguments[1:]
-  endif
 
-  exec s:python_command "ycm_state.SendCommandRequest(" .
-        \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) )"
+    exec s:python_command "ycm_state.SendCommandRequest(" .
+          \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) )"
+  finally
+    call s:ResumeTimers()
+  endtry
 endfunction
 
 
@@ -870,7 +955,12 @@ endfunction
 
 
 function! s:ShowDetailedDiagnostic()
-  exec s:python_command "ycm_state.ShowDetailedDiagnostic()"
+  call s:SuspendTimers()
+  try
+    exec s:python_command "ycm_state.ShowDetailedDiagnostic()"
+  finally
+    call s:ResumeTimers()
+  endtry
 endfunction
 
 
