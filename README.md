@@ -1283,9 +1283,15 @@ completion engine.
 
 ### The `:YcmToggleLogs` command
 
-This command opens in separate windows the logfiles given as arguments or closes
-them if they are already open in the editor. When no argument is given, list the
-available logfiles. Only for debugging purpose.
+This command presents the list of logfiles created by YCM, the [ycmd
+server][ycmd], and the semantic engine server for the current filetype, if any.
+One of these logfiles can be opened in the editor (or closed if already open) by
+entering the corresponding number or by clicking on it with the mouse.
+Additionally, this command can take the logfile names as arguments. Use the
+`<TAB>` key (or any other key defined by the `wildchar` option) to complete the
+arguments or to cycle through them (depending on the value of the `wildmode`
+option). Each logfile given as an argument is directly opened (or closed if
+already open) in the editor. Only for debugging purposes.
 
 ### The `:YcmCompleter` command
 

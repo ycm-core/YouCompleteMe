@@ -652,9 +652,20 @@ class YouCompleteMe( object ):
   def ToggleLogs( self, *filenames ):
     logfiles = self.GetLogfiles()
     if not filenames:
-      vimsupport.PostVimMessage(
-          'Available logfiles are:\n'
-          '{0}'.format( '\n'.join( sorted( list( logfiles ) ) ) ) )
+      sorted_logfiles = sorted( list( logfiles ) )
+      try:
+        logfile_index = vimsupport.SelectFromList(
+          'Which logfile do you wish to open (or close if already open)?',
+          sorted_logfiles )
+      except RuntimeError as e:
+        vimsupport.PostVimMessage( str( e ) )
+        return
+
+      logfile = logfiles[ sorted_logfiles[ logfile_index ] ]
+      if not vimsupport.BufferIsVisibleForFilename( logfile ):
+        self._OpenLogfile( logfile )
+      else:
+        self._CloseLogfile( logfile )
       return
 
     for filename in set( filenames ):

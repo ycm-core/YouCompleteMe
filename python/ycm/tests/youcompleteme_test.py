@@ -273,24 +273,56 @@ def YouCompleteMe_ToggleLogs_WithParameters_test( ycm,
 
 
 @YouCompleteMeInstance()
+# Select the second item of the list which is the ycmd stderr logfile.
+@patch( 'ycm.vimsupport.SelectFromList', return_value = 1 )
+@patch( 'ycm.vimsupport.OpenFilename', new_callable = ExtendedMock )
+def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileNotAlreadyOpen_test(
+  ycm, open_filename, *args ):
+
+  current_buffer = VimBuffer( 'current_buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    ycm.ToggleLogs()
+
+  open_filename.assert_has_exact_calls( [
+    call( ycm._server_stderr, { 'size': 12,
+                                'watch': True,
+                                'fix': True,
+                                'focus': False,
+                                'position': 'end' } )
+  ] )
+
+
+@YouCompleteMeInstance()
+# Select the third item of the list which is the ycmd stdout logfile.
+@patch( 'ycm.vimsupport.SelectFromList', return_value = 2 )
+@patch( 'ycm.vimsupport.CloseBuffersForFilename', new_callable = ExtendedMock )
+def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileAlreadyOpen_test(
+  ycm, close_buffers_for_filename, *args ):
+
+  logfile_buffer = VimBuffer( ycm._server_stdout, window = 1 )
+  with MockVimBuffers( [ logfile_buffer ], logfile_buffer ):
+    ycm.ToggleLogs()
+
+  close_buffers_for_filename.assert_has_exact_calls( [
+    call( ycm._server_stdout )
+  ] )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.SelectFromList',
+        side_effect = RuntimeError( 'Error message' ) )
 @patch( 'ycm.vimsupport.PostVimMessage' )
-def YouCompleteMe_ToggleLogs_WithoutParameters_test( ycm, post_vim_message ):
-  # We test on a Python buffer because the Python completer has subserver
-  # logfiles.
-  python_buffer = VimBuffer( 'buffer.py', filetype = 'python' )
-  with MockVimBuffers( [ python_buffer ], python_buffer ):
+def YouCompleteMe_ToggleLogs_WithoutParameters_NoSelection_test(
+  ycm, post_vim_message, *args ):
+
+  current_buffer = VimBuffer( 'current_buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
     ycm.ToggleLogs()
 
   assert_that(
     # Argument passed to PostVimMessage.
     post_vim_message.call_args[ 0 ][ 0 ],
-    matches_regexp(
-      'Available logfiles are:\n'
-      'jedihttp_\d+_stderr_.+.log\n'
-      'jedihttp_\d+_stdout_.+.log\n'
-      'ycm_.+.log\n'
-      'ycmd_\d+_stderr_.+.log\n'
-      'ycmd_\d+_stdout_.+.log' )
+    equal_to( 'Error message' )
   )
 
 
