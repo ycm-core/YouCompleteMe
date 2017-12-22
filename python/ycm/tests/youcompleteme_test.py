@@ -273,24 +273,40 @@ def YouCompleteMe_ToggleLogs_WithParameters_test( ycm,
 
 
 @YouCompleteMeInstance()
+# Select the fourth item of the list which is the ycmd stderr logfile.
+@patch( 'ycm.vimsupport.SelectFromList', return_value = 3 )
+@patch( 'ycm.vimsupport.OpenFilename', new_callable = ExtendedMock )
+def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfile_test(
+  ycm, open_filename, *args ):
+
+  current_buffer = VimBuffer( 'current_buffer', filetype = 'python' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    ycm.ToggleLogs()
+
+  open_filename.assert_has_exact_calls( [
+    call( ycm._server_stderr, { 'size': 12,
+                                'watch': True,
+                                'fix': True,
+                                'focus': False,
+                                'position': 'end' } )
+  ] )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.SelectFromList',
+        side_effect = RuntimeError( 'Error message' ) )
 @patch( 'ycm.vimsupport.PostVimMessage' )
-def YouCompleteMe_ToggleLogs_WithoutParameters_test( ycm, post_vim_message ):
-  # We test on a Python buffer because the Python completer has subserver
-  # logfiles.
-  python_buffer = VimBuffer( 'buffer.py', filetype = 'python' )
-  with MockVimBuffers( [ python_buffer ], python_buffer ):
+def YouCompleteMe_ToggleLogs_WithoutParameters_NoSelection_test(
+  ycm, post_vim_message, *args ):
+
+  current_buffer = VimBuffer( 'current_buffer', filetype = 'python' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
     ycm.ToggleLogs()
 
   assert_that(
     # Argument passed to PostVimMessage.
     post_vim_message.call_args[ 0 ][ 0 ],
-    matches_regexp(
-      'Available logfiles are:\n'
-      'jedihttp_\d+_stderr_.+.log\n'
-      'jedihttp_\d+_stdout_.+.log\n'
-      'ycm_.+.log\n'
-      'ycmd_\d+_stderr_.+.log\n'
-      'ycmd_\d+_stdout_.+.log' )
+    equal_to( 'Error message' )
   )
 
 
