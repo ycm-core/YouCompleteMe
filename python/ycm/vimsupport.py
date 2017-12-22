@@ -542,8 +542,8 @@ def SelectFromList( prompt, items ):
 
   |items| should not contain leading ordinals: they are added automatically.
 
-  Returns the 0-based index in the list |items| that the user selected, or a
-  negative number if no valid item was selected.
+  Returns the 0-based index in the list |items| that the user selected, or an
+  exception if no valid item was selected.
 
   See also :help inputlist()."""
 
