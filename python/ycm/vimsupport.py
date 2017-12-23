@@ -30,7 +30,7 @@ import json
 import re
 from collections import defaultdict
 from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
-                         JoinLinesAsUnicode, ToBytes, ToUnicode )
+                         JoinLinesAsUnicode, ToBytes, ToUnicode, SplitLines )
 from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
@@ -699,7 +699,7 @@ def _OpenFileInSplitIfNeeded( filepath ):
   return ( buffer_num, True )
 
 
-def ReplaceChunks( chunks ):
+def ReplaceChunks( chunks, silent=False ):
   """Apply the source file deltas supplied in |chunks| to arbitrary files.
   |chunks| is a list of changes defined by ycmd.responses.FixItChunk,
   which may apply arbitrary modifications to arbitrary files.
@@ -720,14 +720,15 @@ def ReplaceChunks( chunks ):
   # We sort the file list simply to enable repeatable testing
   sorted_file_list = sorted( iterkeys( chunks_by_file ) )
 
-  # Make sure the user is prepared to have her screen mutilated by the new
-  # buffers
-  num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
+  if not silent:
+    # Make sure the user is prepared to have her screen mutilated by the new
+    # buffers
+    num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
 
-  if num_files_to_open > 0:
-    if not Confirm(
+    if num_files_to_open > 0:
+      if not Confirm(
             FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( num_files_to_open ) ):
-      return
+        return
 
   # Store the list of locations where we applied changes. We use this to display
   # the quickfix window showing the user where we applied changes.
@@ -754,12 +755,13 @@ def ReplaceChunks( chunks ):
       vim.command( 'hide' )
 
   # Open the quickfix list, populated with entries for each location we changed.
-  if locations:
-    SetQuickFixList( locations )
-    OpenQuickFixList()
+  if not silent:
+    if locations:
+      SetQuickFixList( locations )
+      OpenQuickFixList()
 
-  PostVimMessage( 'Applied {0} changes'.format( len( chunks ) ),
-                  warning = False )
+    PostVimMessage( 'Applied {0} changes'.format( len( chunks ) ),
+                    warning = False )
 
 
 def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
@@ -767,7 +769,9 @@ def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
   chunk's start to the list |locations|"""
 
   # We need to track the difference in length, but ensuring we apply fixes
-  # in ascending order of insertion point.
+  # in ascending order of insertion point. Note that chunks with the same start
+  # point are applied in the sequence they appear in the list (python's sort is
+  # guaranteed to be stable).
   chunks.sort( key = lambda chunk: (
     chunk[ 'range' ][ 'start' ][ 'line_num' ],
     chunk[ 'range' ][ 'start' ][ 'column_num' ]
@@ -824,7 +828,8 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
 
   # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
   # so we convert to bytes
-  replacement_lines = ToBytes( replacement_text ).splitlines( False )
+  replacement_lines = [ ToBytes( l ) for l in SplitLines( ToUnicode(
+    replacement_text ) ) ]
   if not replacement_lines:
     replacement_lines = [ bytes( b'' ) ]
   replacement_lines_count = len( replacement_lines )
@@ -873,7 +878,7 @@ def InsertNamespace( namespace ):
   if line:
     existing_line = LineTextInCurrentBuffer( line )
     existing_indent = re.sub( r"\S.*", "", existing_line )
-  new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
+  new_line = "{0}using {1};\n".format( existing_indent, namespace )
   replace_pos = { 'line_num': line + 1, 'column_num': 1 }
   ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0, vim.current.buffer )
   PostVimMessage( 'Add namespace: {0}'.format( namespace ), warning = False )
@@ -1057,3 +1062,16 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
 
   if position == 'end':
     vim.command( 'silent! normal! Gzz' )
+
+
+def DisableSyntasticForFiletype( filetype ):
+  """Forcefully disable Syntastic diagnostics for the supplied filetype."""
+  # Syntastic and YCM diagnostics conflict. Importantly, there is no mechanism
+  # in Vim to have multiple (simultaneous) location lists in a way that works
+  # for a user. YCM's diagnostics support is superior (obviously), so we disable
+  # syntastic when we're using YCM's dianostics.
+  vim.command( 'let g:syntastic_' + filetype + '_checkers = []' )
+
+
+def DisableSyntasticInCurrentBuffer():
+  vim.command( "if exists( ':SyntasticReset' ) | SyntasticReset | endif" )

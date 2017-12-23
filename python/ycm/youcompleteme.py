@@ -33,7 +33,9 @@ import vim
 from subprocess import PIPE
 from tempfile import NamedTemporaryFile
 from ycm import base, paths, vimsupport
-from ycm.buffer import BufferDict
+from ycm.buffer import ( BufferDict,
+                         DIAGNOSTIC_UI_FILETYPES,
+                         DIAGNOSTIC_UI_ASYNC_FILETYPES )
 from ycmd import utils
 from ycmd import server_utils
 from ycmd.request_wrap import RequestWrap
@@ -51,6 +53,7 @@ from ycm.client.debug_info_request import ( SendDebugInfoRequest,
 from ycm.client.omni_completion_request import OmniCompletionRequest
 from ycm.client.event_notification import SendEventNotificationAsync
 from ycm.client.shutdown_request import SendShutdownRequest
+from ycm.client.messages_request import MessagesPoll
 
 
 def PatchNoProxy():
@@ -98,8 +101,6 @@ CORE_OUTDATED_MESSAGE = (
   'YCM core library too old; PLEASE RECOMPILE by running the install.py '
   'script. See the documentation for more details.' )
 SERVER_IDLE_SUICIDE_SECONDS = 1800  # 30 minutes
-DIAGNOSTIC_UI_FILETYPES = set( [ 'cpp', 'cs', 'c', 'objc', 'objcpp',
-                                 'typescript' ] )
 CLIENT_LOGFILE_FORMAT = 'ycm_'
 SERVER_LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
 
@@ -124,19 +125,21 @@ class YouCompleteMe( object ):
     self._filetypes_with_keywords_loaded = set()
     self._ycmd_keepalive = YcmdKeepalive()
     self._server_is_ready_with_cache = False
-    self._SetupLogging()
-    self._SetupServer()
+    self._SetUpLogging()
+    self._SetUpServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
-      'cs': lambda self: self._OnCompleteDone_Csharp()
+      'cs': lambda self: self._OnCompleteDone_Csharp(),
+      'java': lambda self: self._OnCompleteDone_Java()
     }
 
 
-  def _SetupServer( self ):
+  def _SetUpServer( self ):
     self._available_completers = {}
     self._user_notified_about_crash = False
     self._filetypes_with_keywords_loaded = set()
     self._server_is_ready_with_cache = False
+    self._message_poll_request = None
 
     hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
     options_dict = dict( self._user_options )
@@ -187,7 +190,7 @@ class YouCompleteMe( object ):
                                           stdout = PIPE, stderr = PIPE )
 
 
-  def _SetupLogging( self ):
+  def _SetUpLogging( self ):
     def FreeFileFromOtherProcesses( file_object ):
       if utils.OnWindows():
         from ctypes import windll
@@ -284,7 +287,7 @@ class YouCompleteMe( object ):
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
     self._ShutdownServer()
-    self._SetupServer()
+    self._SetUpServer()
 
 
   def SendCompletionRequest( self, force_semantic = False ):
@@ -365,6 +368,59 @@ class YouCompleteMe( object ):
     return self.CurrentBuffer().NeedsReparse()
 
 
+  def UpdateWithNewDiagnosticsForFile( self, filepath, diagnostics ):
+    bufnr = vimsupport.GetBufferNumberForFilename( filepath )
+    if bufnr in self._buffers:
+      self._buffers[ bufnr ].UpdateWithNewDiagnostics( diagnostics )
+    else:
+      # The project contains errors in file "filepath", but that file is not
+      # open in any buffer. This happens for Language Server Protocol-based
+      # completers, as they return diagnostics for the entire "project"
+      # asynchronously (rather than per-file in the response to the parse
+      # request).
+      #
+      # There are a number of possible approaches for
+      # this, but for now we simply ignore them. Other options include:
+      # - Use the QuickFix list to report project errors?
+      # - Use a special buffer for project errors?
+      # - Put them in the location list of whatever the "current" buffer is
+      #
+      # However, none of those options are great, and lead to their own
+      # complexities. So for now, we just ignore these diagnostics for files not
+      # open in any buffer.
+      pass
+
+
+  def OnPeriodicTick( self ):
+    if not self.IsServerAlive():
+      # Server has died. We'll reset when the server is started again.
+      return False
+    elif not self.IsServerReady():
+      # Try again in a jiffy
+      return True
+
+    if not self._message_poll_request:
+      self._message_poll_request = MessagesPoll()
+
+    if not self._message_poll_request.Poll( self ):
+      # Don't poll again until some event which might change the server's mind
+      # about whether to provide messages for the current buffer (e.g. buffer
+      # visit, file ready to parse, etc.)
+      self._message_poll_request = None
+      return False
+
+    # Poll again in a jiffy
+    return True
+
+
+  def DisableSyntasticForCurrentBufferFiletypes( self ):
+    for filetype in vimsupport.CurrentFiletypes():
+      self._logger.info( 'Disabling syntastic for filetype: ' + filetype )
+      vimsupport.DisableSyntasticForFiletype( filetype )
+
+    vimsupport.DisableSyntasticInCurrentBuffer()
+
+
   def OnFileReadyToParse( self ):
     if not self.IsServerAlive():
       self.NotifyUserIfServerCrashed()
@@ -372,6 +428,17 @@ class YouCompleteMe( object ):
 
     if not self.IsServerReady():
       return
+
+    # TODO: The following involves a synchronous request to the server to check
+    # for the filetype completion being available in the current buffer
+    # filetype(s). This can lead to a startup lag, which is undesirable.
+    #
+    # FIXME: A solution would be to fire the completion available request
+    # asynchronously, and to just check for a response in this request and the
+    # periodic poll.
+    if ( self.DiagnosticUiSupportedForCurrentFiletype() and
+         self.NativeFiletypeCompletionUsable() ):
+      self.DisableSyntasticForCurrentBufferFiletypes()
 
     extra_data = {}
     self._AddTagsFilesIfNeeded( extra_data )
@@ -443,6 +510,7 @@ class YouCompleteMe( object ):
 
     result = self._FilterToMatchingCompletions( completions, True )
     result = list( result )
+
     if result:
       return result
 
@@ -460,10 +528,12 @@ class YouCompleteMe( object ):
   def _FilterToMatchingCompletions( self, completions, full_match_only ):
     """Filter to completions matching the item Vim said was completed"""
     completed = vimsupport.GetVariableValue( 'v:completed_item' )
+
+    match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
+                    else [ 'word' ] )
+
     for completion in completions:
       item = ConvertCompletionDataToVimData( completion )
-      match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
-                      else [ 'word' ] )
 
       def matcher( key ):
         return ( utils.ToUnicode( completed.get( key, "" ) ) ==
@@ -528,6 +598,27 @@ class YouCompleteMe( object ):
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
 
+  def _OnCompleteDone_Java( self ):
+    completions = self.GetCompletionsUserMayHaveCompleted()
+    fixit_completions = [ self._GetFixItCompletion( c ) for c in completions ]
+    fixit_completions = [ f for f in fixit_completions if f ]
+    if not fixit_completions:
+      return
+
+    for fixit_completion in fixit_completions:
+      # FIXME: We just  apply them all. If there really are multiple, we might
+      # offer some sort of choice here, like in command_request.py.
+      for fixit in fixit_completion:
+        vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
+
+
+  def _GetFixItCompletion( self, completion ):
+    if ( "extra_data" not in completion
+         or "fixits" not in completion[ "extra_data" ] ):
+      return None
+
+    return completion[ "extra_data" ][ "fixits" ]
+
   def GetErrorCount( self ):
     return self.CurrentBuffer().GetErrorCount()
 
@@ -537,7 +628,8 @@ class YouCompleteMe( object ):
 
 
   def DiagnosticUiSupportedForCurrentFiletype( self ):
-    return any( [ x in DIAGNOSTIC_UI_FILETYPES
+    return any( [ x in DIAGNOSTIC_UI_FILETYPES or
+                  x in DIAGNOSTIC_UI_ASYNC_FILETYPES
                   for x in vimsupport.CurrentFiletypes() ] )
 
 
@@ -686,7 +778,7 @@ class YouCompleteMe( object ):
     if '*' in filetype_to_disable:
       return False
     else:
-      return not any([ x in filetype_to_disable for x in filetypes ])
+      return not any( [ x in filetype_to_disable for x in filetypes ] )
 
 
   def ShowDetailedDiagnostic( self ):
