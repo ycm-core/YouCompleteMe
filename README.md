@@ -679,10 +679,9 @@ process.
       Navigate to `YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer`
       and run
 
-          msbuild /property:Configuration=Release /property:TargetFrameworkVersion=v4.5
+          msbuild /property:Configuration=Release /property:Platform="Any CPU" /property:TargetFrameworkVersion=v4.5
 
-      Replace `msbuild` by `xbuild` if `msbuild` is not available. On Windows,
-      be sure that [the build utility `msbuild` is in your
+      On Windows, be sure that [the build utility `msbuild` is in your
       PATH][add-msbuild-to-path].
 
     - Go support: install [Go][go-install] and add it to your path. Navigate to
