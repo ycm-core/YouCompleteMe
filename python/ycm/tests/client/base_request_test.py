@@ -1,4 +1,4 @@
-# Copyright (C) 2017 YouCompleteMe Contributors
+# Copyright (C) 2017-2018 YouCompleteMe Contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -22,7 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycm.tests.test_utils import MockVimModule
+from ycm.tests.test_utils import MockVimBuffers, MockVimModule, VimBuffer
 MockVimModule()
 
 from hamcrest import assert_that, has_entry
@@ -32,14 +32,16 @@ from ycm.client.base_request import BuildRequestData
 
 @patch( 'ycm.client.base_request.GetCurrentDirectory',
         return_value = '/some/dir' )
-@patch( 'ycm.vimsupport.CurrentLineAndColumn', return_value = ( 1, 1 ) )
 def BuildRequestData_AddWorkingDir_test( *args ):
-  assert_that( BuildRequestData(), has_entry( 'working_dir', '/some/dir' ) )
+  current_buffer = VimBuffer( 'foo' )
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 1 ) ):
+    assert_that( BuildRequestData(), has_entry( 'working_dir', '/some/dir' ) )
 
 
 @patch( 'ycm.client.base_request.GetCurrentDirectory',
         return_value = '/some/dir' )
-@patch( 'ycm.vimsupport.CurrentLineAndColumn', return_value = ( 1, 1 ) )
 def BuildRequestData_AddWorkingDirWithFileName_test( *args ):
-  assert_that( BuildRequestData( 'foo' ),
-               has_entry( 'working_dir', '/some/dir' ) )
+  current_buffer = VimBuffer( 'foo' )
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 1 ) ):
+    assert_that( BuildRequestData( current_buffer.number ),
+                 has_entry( 'working_dir', '/some/dir' ) )

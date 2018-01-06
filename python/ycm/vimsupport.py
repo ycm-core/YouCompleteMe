@@ -1,5 +1,4 @@
-# Copyright (C) 2011-2012 Google Inc.
-#               2016      YouCompleteMe contributors
+# Copyright (C) 2011-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -100,41 +99,33 @@ def TextBeforeCursor():
   return ToUnicode( vim.current.line[ :CurrentColumn() ] )
 
 
-# Note the difference between buffer OPTIONS and VARIABLES; the two are not
-# the same.
-def GetBufferOption( buffer_object, option ):
-  # NOTE: We used to check for the 'options' property on the buffer_object which
-  # is available in recent versions of Vim and would then use:
-  #
-  #   buffer_object.options[ option ]
-  #
-  # to read the value, BUT this caused annoying flickering when the
-  # buffer_object was a hidden buffer (with option = 'ft'). This was all due to
-  # a Vim bug. Until this is fixed, we won't use it.
-
-  to_eval = 'getbufvar({0}, "&{1}")'.format( buffer_object.number, option )
-  return GetVariableValue( to_eval )
-
-
 def BufferModified( buffer_object ):
-  return bool( int( GetBufferOption( buffer_object, 'mod' ) ) )
+  return buffer_object.options[ 'mod' ]
 
 
-def GetUnsavedAndSpecifiedBufferData( including_filepath ):
+def GetBufferData( buffer_object ):
+  return {
+    # Add a newline to match what gets saved to disk. See #1455 for details.
+    'contents': JoinLinesAsUnicode( buffer_object ) + '\n',
+    'filetypes': FiletypesForBuffer( buffer_object )
+  }
+
+
+def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
   """Build part of the request containing the contents and filetypes of all
-  dirty buffers as well as the buffer with filepath |including_filepath|."""
-  buffers_data = {}
+  dirty buffers as well as the buffer |included_buffer| with its filepath
+  |included_filepath|."""
+  buffers_data = { included_filepath: GetBufferData( included_buffer ) }
+
   for buffer_object in vim.buffers:
-    buffer_filepath = GetBufferFilepath( buffer_object )
-    if not ( BufferModified( buffer_object ) or
-             buffer_filepath == including_filepath ):
+    if not BufferModified( buffer_object ):
       continue
 
-    buffers_data[ buffer_filepath ] = {
-      # Add a newline to match what gets saved to disk. See #1455 for details.
-      'contents': JoinLinesAsUnicode( buffer_object ) + '\n',
-      'filetypes': FiletypesForBuffer( buffer_object )
-    }
+    filepath = GetBufferFilepath( buffer_object )
+    if filepath in buffers_data:
+      continue
+
+    buffers_data[ filepath ] = GetBufferData( buffer_object )
 
   return buffers_data
 
@@ -362,7 +353,7 @@ def VimExpressionToPythonType( vim_expression ):
 
 
 def HiddenEnabled( buffer_object ):
-  if GetBufferOption( buffer_object, 'bh' ) == "hide":
+  if buffer_object.options[ 'bh' ] == "hide":
     return True
   return GetBoolValue( '&hidden' )
 
@@ -601,7 +592,14 @@ def GetBufferFiletypes( bufnr ):
 def FiletypesForBuffer( buffer_object ):
   # NOTE: Getting &ft for other buffers only works when the buffer has been
   # visited by the user at least once, which is true for modified buffers
-  return ToUnicode( GetBufferOption( buffer_object, 'ft' ) ).split( '.' )
+
+  # We don't use
+  #
+  #   buffer_object.options[ 'ft' ]
+  #
+  # to get the filetypes because this causes annoying flickering when the buffer
+  # is hidden.
+  return GetBufferFiletypes( buffer_object.number )
 
 
 def VariableExists( variable ):
