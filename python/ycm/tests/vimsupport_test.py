@@ -1,6 +1,6 @@
 # coding: utf-8
 #
-# Copyright (C) 2015-2016 YouCompleteMe contributors
+# Copyright (C) 2015-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -1434,7 +1434,8 @@ def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
   vim_buffer = VimBuffer( filepath, contents = contents )
 
   with patch( 'vim.buffers', [ vim_buffer ] ):
-    assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( filepath ),
+    assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( vim_buffer,
+                                                              filepath ),
                  has_entry( filepath,
                             has_entry( u'contents', u'abc\nfДa\n' ) ) )
 

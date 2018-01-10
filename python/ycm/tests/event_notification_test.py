@@ -1,6 +1,6 @@
 # coding: utf-8
 #
-# Copyright (C) 2015-2016 YouCompleteMe contributors
+# Copyright (C) 2015-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -25,8 +25,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
-                                   MockVimBuffers, MockVimModule, VimBuffer,
-                                   ToBytesOnPY2 )
+                                   MockVimBuffers, MockVimModule, VimBuffer )
 MockVimModule()
 
 import contextlib
@@ -398,7 +397,6 @@ def EventNotification_BufferVisit_BuildRequestForCurrentAndUnsavedBuffers_test(
                               contents = [ 'current_buffer_contents' ],
                               filetype = 'some_filetype',
                               modified = False )
-
   modified_buffer_file = os.path.realpath( 'modified_buffer' )
   modified_buffer = VimBuffer( name = modified_buffer_file,
                                number = 2,
@@ -465,7 +463,7 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
   with patch( 'ycm.client.event_notification.EventNotification.'
               'PostDataToHandlerAsync' ) as post_data_to_handler_async:
     with MockVimBuffers( [ current_buffer, deleted_buffer ], current_buffer ):
-      ycm.OnBufferUnload( ToBytesOnPY2( deleted_buffer_file ) )
+      ycm.OnBufferUnload( deleted_buffer.number )
 
   assert_that(
     # Positional arguments passed to PostDataToHandlerAsync.

@@ -1,4 +1,4 @@
-" Copyright (C) 2011, 2012  Google Inc.
+" Copyright (C) 2011-2018 YouCompleteMe contributors
 "
 " This file is part of YouCompleteMe.
 "
@@ -475,13 +475,12 @@ endfunction
 function! s:OnBufferUnload()
   " Expanding <abuf> returns the unloaded buffer number as a string but we want
   " it as a true number for the getbufvar function.
-  if !s:AllowedToCompleteInBuffer( str2nr( expand( '<abuf>' ) ) )
+  let buffer_number = str2nr( expand( '<abuf>' ) )
+  if !s:AllowedToCompleteInBuffer( buffer_number )
     return
   endif
 
-  let deleted_buffer_file = expand( '<afile>:p' )
-  exec s:python_command "ycm_state.OnBufferUnload(" .
-        \ "vim.eval( 'deleted_buffer_file' ) )"
+  exec s:python_command "ycm_state.OnBufferUnload( " . buffer_number . " )"
 endfunction
 
 

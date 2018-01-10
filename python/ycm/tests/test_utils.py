@@ -1,5 +1,4 @@
-# Copyright (C) 2011-2012 Google Inc.
-#               2016      YouCompleteMe contributors
+# Copyright (C) 2011-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -272,6 +271,10 @@ class VimBuffer( object ):
     self.omnifunc = omnifunc
     self.omnifunc_name = omnifunc.__name__ if omnifunc else ''
     self.changedtick = 1
+    self.options = {
+     'mod': modified,
+     'bh': bufhidden
+    }
 
 
   def __getitem__( self, index ):
@@ -290,6 +293,27 @@ class VimBuffer( object ):
   def GetLines( self ):
     """Returns the contents of the buffer as a list of unicode strings."""
     return [ ToUnicode( x ) for x in self.contents ]
+
+
+class VimBuffers( object ):
+  """An object that looks like a vim.buffers object."""
+
+  def __init__( self, *buffers ):
+    """Arguments are VimBuffer objects."""
+    self._buffers = buffers
+
+
+  def __getitem__( self, number ):
+    """Emulates vim.buffers[ number ]"""
+    for buffer_object in self._buffers:
+      if number == buffer_object.number:
+        return buffer_object
+    raise KeyError( number )
+
+
+  def __iter__( self ):
+    """Emulates for loop on vim.buffers"""
+    return iter( self._buffers )
 
 
 class VimMatch( object ):
@@ -326,7 +350,7 @@ def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
 
   line = current_buffer.contents[ cursor_position[ 0 ] - 1 ]
 
-  with patch( 'vim.buffers', buffers ):
+  with patch( 'vim.buffers', VimBuffers( *buffers ) ):
     with patch( 'vim.current.buffer', current_buffer ):
       with patch( 'vim.current.window.cursor', cursor_position ):
         with patch( 'vim.current.line', line ):

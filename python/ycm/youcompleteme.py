@@ -1,5 +1,4 @@
-# Copyright (C) 2011-2012 Google Inc.
-#               2016-2017 YouCompleteMe contributors
+# Copyright (C) 2011-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -381,10 +380,8 @@ class YouCompleteMe( object ):
     self.CurrentBuffer().SendParseRequest( extra_data )
 
 
-  def OnBufferUnload( self, deleted_buffer_file ):
-    SendEventNotificationAsync(
-        'BufferUnload',
-        filepath = utils.ToUnicode( deleted_buffer_file ) )
+  def OnBufferUnload( self, deleted_buffer_number ):
+    SendEventNotificationAsync( 'BufferUnload', deleted_buffer_number )
 
 
   def OnBufferVisit( self ):

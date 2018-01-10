@@ -1,4 +1,4 @@
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2013-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -27,17 +27,17 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
 
 
 class EventNotification( BaseRequest ):
-  def __init__( self, event_name, filepath = None, extra_data = None ):
+  def __init__( self, event_name, buffer_number = None, extra_data = None ):
     super( EventNotification, self ).__init__()
     self._event_name = event_name
-    self._filepath = filepath
+    self._buffer_number = buffer_number
     self._extra_data = extra_data
     self._response_future = None
     self._cached_response = None
 
 
   def Start( self ):
-    request_data = BuildRequestData( self._filepath )
+    request_data = BuildRequestData( self._buffer_number )
     if self._extra_data:
       request_data.update( self._extra_data )
     request_data[ 'event_name' ] = self._event_name
@@ -64,7 +64,7 @@ class EventNotification( BaseRequest ):
 
 
 def SendEventNotificationAsync( event_name,
-                                filepath = None,
+                                buffer_number = None,
                                 extra_data = None ):
-  event = EventNotification( event_name, filepath, extra_data )
+  event = EventNotification( event_name, buffer_number, extra_data )
   event.Start()
