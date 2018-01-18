@@ -7,18 +7,23 @@ set -ev
 # commands.
 unset -f cd popd pushd
 
-####################
-# OS-specific setup
-####################
+################
+# Compiler setup
+################
 
-# Requirements of OS-specific install:
-#  - install any software which is not installed by Travis configuration
-#  - set up everything necessary so that pyenv can build python
-source ci/travis/travis_install.${TRAVIS_OS_NAME}.sh
+# We can't use sudo, so we have to approximate the behaviour of setting the
+# default system compiler.
 
-#############
-# pyenv setup
-#############
+mkdir -p ${HOME}/bin
+
+ln -s /usr/bin/g++-4.8 ${HOME}/bin/c++
+ln -s /usr/bin/gcc-4.8 ${HOME}/bin/cc
+
+export PATH=${HOME}/bin:${PATH}
+
+##############
+# Python setup
+##############
 
 PYENV_ROOT="${HOME}/.pyenv"
 
@@ -43,6 +48,10 @@ else
   PYENV_VERSION="3.3.6"
 fi
 
+# In order to work with ycmd, python *must* be built as a shared library. This
+# is set via the PYTHON_CONFIGURE_OPTS option.
+export PYTHON_CONFIGURE_OPTS="--enable-shared"
+
 pyenv install --skip-existing ${PYENV_VERSION}
 pyenv rehash
 pyenv global ${PYENV_VERSION}
@@ -53,10 +62,6 @@ pyenv global ${PYENV_VERSION}
 python_version=$(python -c 'import sys; print( "{0}.{1}".format( sys.version_info[0], sys.version_info[1] ) )')
 echo "Checking python version (actual ${python_version} vs expected ${YCM_PYTHON_VERSION})"
 test ${python_version} == ${YCM_PYTHON_VERSION}
-
-############
-# pip setup
-############
 
 pip install -U pip wheel setuptools
 pip install -r python/test_requirements.txt
