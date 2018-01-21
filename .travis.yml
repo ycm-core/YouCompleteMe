@@ -1,7 +1,4 @@
 language: generic
-os:
-  - linux
-  - osx
 sudo: false
 before_install:
   - git submodule update --init --recursive
@@ -20,10 +17,6 @@ env:
     - YCM_PYTHON_VERSION=2.6
     - YCM_PYTHON_VERSION=2.7
     - YCM_PYTHON_VERSION=3.3
-matrix:
-  exclude:
-    - os: osx
-      env: YCM_PYTHON_VERSION=2.6
 addons:
   apt:
     sources:
