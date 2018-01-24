@@ -54,7 +54,7 @@ jobs:
       - *run-tests
       - *upload-coverage
     environment:
-      YCMD_PYTHON_VERSION: 3.3
+      YCMD_PYTHON_VERSION: 3.4
 workflows:
   version: 2
   build:
