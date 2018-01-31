@@ -464,7 +464,7 @@ def PostVimMessage( message, warning = True, truncate = False ):
     vim_width = GetIntValue( '&columns' )
 
     message = message.replace( '\n', ' ' )
-    if len( message ) > vim_width:
+    if len( message ) >= vim_width:
       message = message[ : vim_width - 4 ] + '...'
 
     old_ruler = GetIntValue( '&ruler' )
