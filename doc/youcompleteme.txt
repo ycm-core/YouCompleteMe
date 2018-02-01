@@ -2848,7 +2848,7 @@ The *g:ycm_python_binary_path* option
 This option specifies the Python interpreter to use to run the jedi [12]
 completion library. Specify the Python interpreter to use to get completions.
 By default the Python under which ycmd [45] runs is used (ycmd [45] runs on
-Python 2.6, 2.7 or 3.3+).
+Python 2.7 or 3.4+).
 
 Default: "''"
 >

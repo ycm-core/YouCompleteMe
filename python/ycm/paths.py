@@ -51,7 +51,7 @@ def PathToPythonInterpreter():
       return python_interpreter
 
     raise RuntimeError( "Path in 'g:ycm_server_python_interpreter' option "
-                        "does not point to a valid Python 2.6+ or 3.3+." )
+                        "does not point to a valid Python 2.7 or 3.4+." )
 
   python_interpreter = _PathToPythonUsedDuringBuild()
   if python_interpreter and utils.GetExecutable( python_interpreter ):
@@ -77,7 +77,7 @@ def PathToPythonInterpreter():
   if python_interpreter:
     return python_interpreter
 
-  raise RuntimeError( "Cannot find Python 2.6+ or 3.3+. "
+  raise RuntimeError( "Cannot find Python 2.7 or 3.4+. "
                       "Set the 'g:ycm_server_python_interpreter' option "
                       "to a Python interpreter path." )
 
@@ -94,7 +94,7 @@ def _PathToPythonUsedDuringBuild():
 
 
 def _EndsWithPython( path ):
-  """Check if given path ends with a python 2.6+ or 3.3+ name."""
+  """Check if given path ends with a python 2.7 or 3.4+ name."""
   return path and PYTHON_BINARY_REGEX.search( path ) is not None
 
 

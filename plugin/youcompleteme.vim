@@ -57,7 +57,7 @@ elseif !has( 'timers' )
 elseif !has( 'python' ) && !has( 'python3' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
-        \ "Python (2.6+ or 3.3+) support." |
+        \ "Python (2.7 or 3.4+) support." |
         \ echohl None
   call s:restore_cpo()
   finish
