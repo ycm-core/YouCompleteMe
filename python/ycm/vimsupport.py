@@ -781,8 +781,9 @@ def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
     if chunk[ 'range' ][ 'start' ][ 'line_num' ] != last_line:
       # If this chunk is on a different line than the previous chunk,
       # then ignore previous deltas (as offsets won't have changed).
-      last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
       char_delta = 0
+
+    last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
 
     ( new_line_delta, new_char_delta ) = ReplaceChunk(
       chunk[ 'range' ][ 'start' ],

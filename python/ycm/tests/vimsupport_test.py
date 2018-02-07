@@ -748,6 +748,26 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   AssertBuffersAreEqualAsBytes( expected_buffer, result_buffer )
 
 
+def ReplaceChunksInBuffer_LineOverlappingChunks_test():
+  chunks = [
+    _BuildChunk( 1, 11, 2, 1, '\n    ' ),
+    _BuildChunk( 2, 12, 3, 1, '\n    ' ),
+    _BuildChunk( 3, 11, 4, 1, '\n    ' )
+  ]
+
+  result_buffer = [ 'first line',
+                    'second line',
+                    'third line',
+                    'fourth line' ]
+  vimsupport.ReplaceChunksInBuffer( chunks, result_buffer, None )
+
+  expected_buffer = [ 'first line',
+                      '    second line',
+                      '    third line',
+                      '    fourth line' ]
+  AssertBuffersAreEqualAsBytes( expected_buffer, result_buffer )
+
+
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
 @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
