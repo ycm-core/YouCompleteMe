@@ -38,6 +38,7 @@ class CommandRequest( BaseRequest ):
   def __init__( self, arguments, completer_target = None, extra_data = None ):
     super( CommandRequest, self ).__init__()
     self._arguments = _EnsureBackwardsCompatibility( arguments )
+    self._command = arguments and arguments[ 0 ]
     self._completer_target = ( completer_target if completer_target
                                else 'filetype_default' )
     self._extra_data = extra_data
@@ -114,7 +115,8 @@ class CommandRequest( BaseRequest ):
             [ fixit[ 'text' ] for fixit in self._response[ 'fixits' ] ] )
 
         vimsupport.ReplaceChunks(
-          self._response[ 'fixits' ][ fixit_index ][ 'chunks' ] )
+          self._response[ 'fixits' ][ fixit_index ][ 'chunks' ],
+          silent = self._command == 'Format' )
       except RuntimeError as e:
         vimsupport.PostVimMessage( str( e ) )
 
