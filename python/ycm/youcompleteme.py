@@ -327,8 +327,20 @@ class YouCompleteMe( object ):
     return response
 
 
-  def SendCommandRequest( self, arguments, completer ):
-    extra_data = {}
+  def SendCommandRequest( self,
+                          arguments,
+                          completer,
+                          has_range,
+                          start_line,
+                          end_line ):
+    extra_data = {
+      'options': {
+        'tab_size': vimsupport.GetIntValue( 'shiftwidth()' ),
+        'insert_spaces': vimsupport.GetBoolValue( '&expandtab' )
+      }
+    }
+    if has_range:
+      extra_data.update( vimsupport.BuildRange( start_line, end_line ) )
     self._AddExtraConfDataIfNeeded( extra_data )
     return SendCommandRequest( arguments, completer, extra_data )
 

@@ -820,8 +820,11 @@ function! s:SetUpCommands()
   command! YcmDebugInfo call s:DebugInfo()
   command! -nargs=* -complete=custom,youcompleteme#LogsComplete
         \ YcmToggleLogs call s:ToggleLogs(<f-args>)
-  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
-        \ YcmCompleter call s:CompleterCommand(<f-args>)
+  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range
+        \ YcmCompleter call s:CompleterCommand(<range>,
+        \                                      <line1>,
+        \                                      <line2>,
+        \                                      <f-args>)
   command! YcmDiags call s:ShowDiagnostics()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
@@ -860,14 +863,14 @@ function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
 endfunction
 
 
-function! s:CompleterCommand(...)
-  " CompleterCommand will call the OnUserCommand function of a completer.  If
+function! s:CompleterCommand( range, line1, line2, ... )
+  " CompleterCommand will call the OnUserCommand function of a completer. If
   " the first arguments is of the form "ft=..." it can be used to specify the
-  " completer to use (for example "ft=cpp").  Else the native filetype
-  " completer of the current buffer is used.  If no native filetype completer
-  " is found and no completer was specified this throws an error.  You can use
-  " "ft=ycm:ident" to select the identifier completer.
-  " The remaining arguments will be passed to the completer.
+  " completer to use (for example "ft=cpp"). Else the native filetype completer
+  " of the current buffer is used. If no native filetype completer is found and
+  " no completer was specified this throws an error. You can use "ft=ycm:ident"
+  " to select the identifier completer. The remaining arguments will be passed
+  " to the completer.
   let arguments = copy(a:000)
   let completer = ''
 
@@ -879,7 +882,11 @@ function! s:CompleterCommand(...)
   endif
 
   exec s:python_command "ycm_state.SendCommandRequest(" .
-        \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) )"
+        \ "vim.eval( 'l:arguments' )," .
+        \ "vim.eval( 'l:completer' )," .
+        \ "vimsupport.GetBoolValue( 'a:range' )," .
+        \ "vimsupport.GetIntValue( 'a:line1' )," .
+        \ "vimsupport.GetIntValue( 'a:line2' ) )"
 endfunction
 
 

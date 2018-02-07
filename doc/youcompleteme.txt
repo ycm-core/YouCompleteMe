@@ -78,10 +78,11 @@ Contents ~
    3. The |GetParent| subcommand
    4. The |GetDoc| subcommand
    5. The |GetDocImprecise| subcommand
-  3. Refactoring and FixIt Commands  |youcompleteme-refactoring-fixit-commands|
+  3. Refactoring Commands                  |youcompleteme-refactoring-commands|
    1. The |FixIt| subcommand
    2. The 'RefactorRename <new name>' subcommand      |RefactorRename-new-name|
    3. Multi-file Refactor                   |youcompleteme-multi-file-refactor|
+   4. The |Format| subcommand
   4. Miscellaneous Commands              |youcompleteme-miscellaneous-commands|
    1. The |RestartServer| subcommand
    2. The |ClearCompilationFlagCache| subcommand
@@ -143,41 +144,41 @@ Contents ~
   48. The |g:ycm_disable_for_files_larger_than_kb| option
   49. The |g:ycm_python_binary_path| option
  13. FAQ                                                    |youcompleteme-faq|
-  1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |import-vim|
-  2. I get |ImportError| exceptions that mention 'PyInit_ycm_core' or 'initycm_core'
-  3. I get a linker warning regarding |libpython| on Mac when compiling YCM
+  1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant|
+  2. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
+  3. I get a linker warning regarding 'libpython' on Mac when compiling YCM |youcompleteme-i-get-linker-warning-regarding-libpython-on-mac-when-compiling-ycm|
   4. I get a weird window at the top of my file when I use the semantic engine |youcompleteme-i-get-weird-window-at-top-of-my-file-when-i-use-semantic-engine|
   5. It appears that YCM is not working |youcompleteme-it-appears-that-ycm-is-not-working|
   6. Sometimes it takes much longer to get semantic completions than normal |youcompleteme-sometimes-it-takes-much-longer-to-get-semantic-completions-than-normal|
   7. YCM auto-inserts completion strings I don't want! |youcompleteme-ycm-auto-inserts-completion-strings-i-dont-want|
-  8. I get a 'E227: mapping already exists for <blah>' error when I start Vim |E227:-mapping-already-exists-for-blah|
-  9. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |GLIBC_2.XX-not-found()|
+  8. I get a 'E227: mapping already exists for <blah>' error when I start Vim |youcompleteme-i-get-e227-mapping-already-exists-for-blah-error-when-i-start-vim|
+  9. I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim |youcompleteme-i-get-glibc_2.xx-not-found-when-starting-vim|
   10. I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults |youcompleteme-im-trying-to-use-homebrew-vim-with-ycm-im-getting-segfaults|
   11. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
-  12. I get 'LONG_BIT definition appears wrong for platform' when compiling |LONG_BIT-definition-appears-wrong-for-platform|
-  13. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |libpython2.7.a-...-relocation-R_X86_64_32|
-  14. I get 'Vim: Caught deadly signal SEGV' on Vim startup |Vim:-Caught-deadly-signal-SEGV|
-  15. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |Fatal-Python-error:-PyThreadState_Get:-no-current-thread|
-  16. |install.py| says python must be compiled with '--enable-framework'. Wat?
+  12. I get 'LONG_BIT definition appears wrong for platform' when compiling |youcompleteme-i-get-long_bit-definition-appears-wrong-for-platform-when-compiling|
+  13. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |youcompleteme-i-get-libpython2.7.a-...-relocation-r_x86_64_32-when-compiling|
+  14. I get 'Vim: Caught deadly signal SEGV' on Vim startup |youcompleteme-i-get-vim-caught-deadly-signal-segv-on-vim-startup|
+  15. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup|
+  16. 'install.py' says python must be compiled with '--enable-framework'. Wat? |youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat|
   17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
-  18. 'CTRL-U' in insert mode does not work while the completion menu is visible |CTRL-sub-U|
+  18. 'CTRL-U' in insert mode does not work while the completion menu is visible |youcompleteme-ctrl-u-in-insert-mode-does-not-work-while-completion-menu-is-visible|
   19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  20. Snippets added with |:UltiSnipsAddFiletypes| do not appear in the popup menu
+  20. Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu |youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu|
   21. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
   22. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |vim-sub-autoclose|
+  23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed|
   24. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
   25. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  26. I get weird errors when I press 'Ctrl-C' in Vim              |Ctrl-sub-C|
+  26. I get weird errors when I press 'Ctrl-C' in Vim |youcompleteme-i-get-weird-errors-when-i-press-ctrl-c-in-vim|
   27. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
   28. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
   29. When I open a JavaScript file, I get an annoying warning about '.tern-project'
-file |.tern-sub-project|
+file |youcompleteme-when-i-open-javascript-file-i-get-an-annoying-warning-about-.tern-project-file|
   30. When I start vim I get a runtime error saying 'R6034 An application has made an
-attempt to load the C runtime library incorrectly.' |R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.|
+attempt to load the C runtime library incorrectly.' |youcompleteme-when-i-start-vim-i-get-runtime-error-saying-r6034-an-application-has-made-an-attempt-to-load-c-runtime-library-incorrectly.|
   31. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
   32. On Windows I get "E887: Sorry, this command is disabled, the Python's site
-module could not be loaded" |E887:-Sorry-this-command-is-disabled-the-Python-s-site-module-could-not-be-loaded|
+module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-command-is-disabled-pythons-site-module-could-not-be-loaded|
   33. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
   34. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
   35. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
@@ -200,7 +201,7 @@ Help, Advice, Support ~
 Looking for help, advice or support? Having problems getting YCM to work?
 
 First carefully read the installation instructions for your OS. We recommend
-you use the supplied |install.py|.
+you use the supplied 'install.py'.
 
 Next check the User Guide section on the semantic completer that you are using.
 For C/C++/Objective C, you _must_ read this section.
@@ -363,7 +364,7 @@ Installation ~
                                                        *youcompleteme-mac-os-x*
 Mac OS X ~
 
-These instructions (using |install.py|) are the quickest way to install
+These instructions (using 'install.py') are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the full installation guide.
 
@@ -444,7 +445,7 @@ that are conservatively turned off by default that you may want to turn on.
                                                *youcompleteme-ubuntu-linux-x64*
 Ubuntu Linux x64 ~
 
-These instructions (using |install.py|) are the quickest way to install
+These instructions (using 'install.py') are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the full installation guide.
 
@@ -523,7 +524,7 @@ that are conservatively turned off by default that you may want to turn on.
                                                *youcompleteme-fedora-linux-x64*
 Fedora Linux x64 ~
 
-These instructions (using |install.py|) are the quickest way to install
+These instructions (using 'install.py') are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the full installation guide.
 
@@ -597,7 +598,7 @@ that are conservatively turned off by default that you may want to turn on.
                                                         *youcompleteme-windows*
 Windows ~
 
-These instructions (using |install.py|) are the quickest way to install
+These instructions (using 'install.py') are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the full installation guide.
 
@@ -661,20 +662,20 @@ Compiling YCM **without** semantic support for C-family languages:
 <
 The following additional language support options are available:
 
-- C# support: add '--cs-completer' when calling |install.py|. Be sure that
+- C# support: add '--cs-completer' when calling 'install.py'. Be sure that
   the build utility 'msbuild' is in your PATH [42].
 
 - Go support: install Go [30] and add '--go-completer' when calling
-  |install.py|.
+  'install.py'.
 
 - TypeScript support: install Node.js and npm [31] then install the
   TypeScript SDK with 'npm install -g typescript'.
 
 - JavaScript support: install Node.js and npm [31] and add '--js-completer'
-  when calling |install.py|.
+  when calling 'install.py'.
 
 - Rust support: install Rust [32] and add '--rust-completer' when calling
-  |install.py|.
+  'install.py'.
 
 - Java support: install JDK8 (version 8 required) [33] and add '--java-
   completer' when calling './install.py'.
@@ -703,7 +704,7 @@ that are conservatively turned off by default that you may want to turn on.
                                                 *youcompleteme-freebsd-openbsd*
 FreeBSD/OpenBSD ~
 
-These instructions (using |install.py|) are the quickest way to install
+These instructions (using 'install.py') are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the full installation guide.
 
@@ -970,7 +971,7 @@ will notify you to recompile it. You should then rerun the install process.
      e/third_party/ycmd/third_party/eclipse.jdt.ls/target/repository'.
      Note: this approach is not recommended for most users and is
      supported only for advanced users and developers of YCM on a best-
-     efforts basis. Please use |install.py| to enable java support.
+     efforts basis. Please use 'install.py' to enable java support.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -1083,6 +1084,7 @@ feedback.
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors including code generation (|FixIt|)
+- Code formatting (|Format|)
 - Detection of java projects
 - Management of 'jdt.ls' server instance
 
@@ -1785,8 +1787,15 @@ for things like semantic GoTo, type information, FixIt and refactoring.
 Technically the command invokes completer-specific commands. If the first
 argument is of the form 'ft=...' the completer for that file type will be used
 (for example 'ft=cpp'), else the native completer of the current buffer will be
-used. Call 'YcmCompleter' without further arguments for a list of the commands
-you can call for the current completer.
+used.
+
+This command also accepts a range that can either be specified through a
+selection in one of Vim's visual modes (see ':h visual-use') or on the command
+line. For instance, ':2,5YcmCompleter' will apply the command from line 2 to
+line 5. This is useful for the |Format| subcommand.
+
+Call 'YcmCompleter' without further arguments for a list of the commands you
+can call for the current completer.
 
 See the file type feature summary for an overview of the features available for
 each file type. See the _YcmCompleter subcommands_ section for more information
@@ -1998,8 +2007,8 @@ bit of latency.
 Supported in filetypes: 'c, cpp, objc, objcpp'
 
 -------------------------------------------------------------------------------
-                                     *youcompleteme-refactoring-fixit-commands*
-Refactoring and FixIt Commands ~
+                                           *youcompleteme-refactoring-commands*
+Refactoring Commands ~
 
 These commands make changes to your source code in order to perform refactoring
 or code correction. YouCompleteMe does not perform any action which cannot be
@@ -2082,6 +2091,18 @@ in any such prompts. This leaves the Refactor operation partially complete and
 must be manually corrected using Vim's undo features. The quickfix list is
 _not_ populated in this case. Inspect ':buffers' or equivalent (see ':help
 buffers') to see the buffers that were opened by the command.
+
+-------------------------------------------------------------------------------
+The *Format* subcommand
+
+This commands formats the whole buffer or some part of it according to the
+value of the Vim options 'shiftwidth' and 'expandtab' (see ":h 'sw'" and ':h
+et' respectively). To format a specific part of your document, you can either
+select it in one of Vim's visual modes (see ':h visual-use') and run the
+command or directly enter the range on the command line, e.g. ':2,5YcmCompleter
+Format' to format it from line 2 to line 5.
+
+Supported in filetypes: 'java'
 
 -------------------------------------------------------------------------------
                                          *youcompleteme-miscellaneous-commands*
@@ -3048,7 +3069,7 @@ found through the PATH.
 FAQ ~
 
 -------------------------------------------------------------------------------
-                                                                   *import-vim*
+*youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant*
 I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't ~
 
 YCM was rewritten to use a client-server architecture where most of the logic
@@ -3064,7 +3085,9 @@ working by using the |g:ycm_extra_conf_vim_data| option. See the docs on that
 option for details.
 
 -------------------------------------------------------------------------------
-I get *ImportError* exceptions that mention 'PyInit_ycm_core' or 'initycm_core'
+*youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core*
+I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or ~
+'initycm_core' ~
 
 These errors are caused by building the YCM native libraries for Python 2 and
 trying to load them into a Python 3 process (or the other way around).
@@ -3083,7 +3106,8 @@ problem. Common values for that option are '/usr/bin/python' and
 '/usr/bin/python3'.
 
 -------------------------------------------------------------------------------
-I get a linker warning regarding *libpython* on Mac when compiling YCM
+*youcompleteme-i-get-linker-warning-regarding-libpython-on-mac-when-compiling-ycm*
+I get a linker warning regarding 'libpython' on Mac when compiling YCM ~
 
 If the warning is "ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory", then feel free to ignore it; it's caused by a limitation of
@@ -3154,7 +3178,7 @@ has to explicitly select something. If something is being selected
 automatically, this means there's a bug or a misconfiguration somewhere.
 
 -------------------------------------------------------------------------------
-                                        *E227:-mapping-already-exists-for-blah*
+*youcompleteme-i-get-e227-mapping-already-exists-for-blah-error-when-i-start-vim*
 I get a 'E227: mapping already exists for <blah>' error when I start Vim ~
 
 This means that YCM tried to set up a key mapping but failed because you
@@ -3166,7 +3190,7 @@ with your own. Then change that option value to something else so that the
 conflict goes away.
 
 -------------------------------------------------------------------------------
-                                                       *GLIBC_2.XX-not-found()*
+                   *youcompleteme-i-get-glibc_2.xx-not-found-when-starting-vim*
 I get "'GLIBC_2.XX' not found (required by libclang.so)" when starting Vim ~
 
 Your system is too old for the precompiled binaries from llvm.org. Compile
@@ -3191,7 +3215,7 @@ fixes that should make YCM work with such a configuration. Also rebuild Macvim
 then. If you still get problems with this, see issue #18 [73] for suggestions.
 
 -------------------------------------------------------------------------------
-                               *LONG_BIT-definition-appears-wrong-for-platform*
+*youcompleteme-i-get-long_bit-definition-appears-wrong-for-platform-when-compiling*
 I get 'LONG_BIT definition appears wrong for platform' when compiling ~
 
 Look at the output of your CMake call. There should be a line in it like the
@@ -3224,7 +3248,7 @@ to make sure you use the same version of Python that your Vim binary is built
 against, which is highly likely to be the system's default Python.
 
 -------------------------------------------------------------------------------
-                                    *libpython2.7.a-...-relocation-R_X86_64_32*
+ *youcompleteme-i-get-libpython2.7.a-...-relocation-r_x86_64_32-when-compiling*
 I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling ~
 
 The error is usually encountered when compiling YCM on Centos or RHEL. The full
@@ -3242,7 +3266,7 @@ version of libpython on your machine (for instance,
 to go through the full installation guide by hand.
 
 -------------------------------------------------------------------------------
-                                               *Vim:-Caught-deadly-signal-SEGV*
+             *youcompleteme-i-get-vim-caught-deadly-signal-segv-on-vim-startup*
 I get 'Vim: Caught deadly signal SEGV' on Vim startup ~
 
 This can happen on some Linux distros. If you encounter this situation, run Vim
@@ -3257,10 +3281,10 @@ you are using a correct 'libclang.so'. We recommend downloading prebuilt
 binaries from llvm.org.
 
 -------------------------------------------------------------------------------
-                     *Fatal-Python-error:-PyThreadState_Get:-no-current-thread*
+*youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup*
 I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup ~
 
-This is caused by linking a static version of |libpython| into ycmd's
+This is caused by linking a static version of 'libpython' into ycmd's
 'ycm_core.so'. This leads to multiple copies of the python interpreter loaded
 when 'python' loads 'ycmd_core.so' and this messes up python's global state.
 The details aren't important.
@@ -3275,7 +3299,8 @@ achieved as follows (**NOTE:** for Mac, replace '--enable-shared' with
   pyenv install {version}'
 
 -------------------------------------------------------------------------------
-*install.py* says python must be compiled with '--enable-framework'. Wat?
+*youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat*
+'install.py' says python must be compiled with '--enable-framework'. Wat? ~
 
 See the previous answer for how to ensure your python is built to support
 dynamic modules.
@@ -3307,7 +3332,7 @@ buffer, run ':echo tagfiles()' with the relevant buffer active. Note that that
 function will only list tag files that already exist.
 
 -------------------------------------------------------------------------------
-                                                                   *CTRL-sub-U*
+*youcompleteme-ctrl-u-in-insert-mode-does-not-work-while-completion-menu-is-visible*
 'CTRL-U' in insert mode does not work while the completion menu is visible ~
 
 YCM uses 'completefunc' completion mode to show suggestions and Vim disables
@@ -3327,7 +3352,8 @@ options:
   g:UltiSnipsJumpBackwardTrigger
 <
 -------------------------------------------------------------------------------
-Snippets added with *:UltiSnipsAddFiletypes* do not appear in the popup menu
+*youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu*
+Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu ~
 
 For efficiency, YCM only fetches UltiSnips snippets in specific scenarios like
 visiting a buffer or setting its filetype. You can force YCM to retrieve them
@@ -3359,7 +3385,7 @@ YCM needs a version of Vim with the timers feature to achieve full
 asynchronicity. This feature is available since Vim 7.4.1578.
 
 -------------------------------------------------------------------------------
-                                                            *vim-sub-autoclose*
+     *youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed*
 Nasty bugs happen if I have the 'vim-autoclose' plugin installed ~
 
 Use the delimitMate [75] plugin instead. It does the same thing without
@@ -3385,7 +3411,7 @@ by setting the 'YCM_CORES' environment variable to '1'. Example:
   YCM_CORES=1 ./install.py --clang-completer
 <
 -------------------------------------------------------------------------------
-                                                                   *Ctrl-sub-C*
+                  *youcompleteme-i-get-weird-errors-when-i-press-ctrl-c-in-vim*
 I get weird errors when I press 'Ctrl-C' in Vim ~
 
 _Never_ use 'Ctrl-C' in Vim.
@@ -3463,7 +3489,7 @@ list of flags you return from your 'FlagsForFile' function in your
 See issue #303 [78] for details.
 
 -------------------------------------------------------------------------------
-                                                            *.tern-sub-project*
+*youcompleteme-when-i-open-javascript-file-i-get-an-annoying-warning-about-.tern-project-file*
 When I open a JavaScript file, I get an annoying warning about '.tern- ~
 project' file ~
 
@@ -3474,7 +3500,7 @@ If this is still really annoying, and you have a good reason not to have a
 directory and YCM will stop complaining.
 
 -------------------------------------------------------------------------------
-*R6034-An-application-has-made-an-attempt-to-load-the-C-runtime-library-incorrectly.*
+*youcompleteme-when-i-start-vim-i-get-runtime-error-saying-r6034-an-application-has-made-an-attempt-to-load-c-runtime-library-incorrectly.*
 When I start vim I get a runtime error saying 'R6034 An application has made ~
 an attempt to load the C runtime library incorrectly.' ~
 
@@ -3510,7 +3536,7 @@ to the Python interpreter you use for your project to get completions for that
 version of Python.
 
 -------------------------------------------------------------------------------
-*E887:-Sorry-this-command-is-disabled-the-Python-s-site-module-could-not-be-loaded*
+*youcompleteme-on-windows-i-get-e887-sorry-this-command-is-disabled-pythons-site-module-could-not-be-loaded*
 On Windows I get "E887: Sorry, this command is disabled, the Python's site ~
 module could not be loaded" ~
 

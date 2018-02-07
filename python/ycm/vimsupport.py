@@ -1083,3 +1083,31 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
 
   if position == 'end':
     vim.command( 'silent! normal! Gzz' )
+
+
+def BuildRange( start_line, end_line ):
+  # Vim only returns the starting and ending lines of the range of a command.
+  # Check if those lines correspond to a previous visual selection and if they
+  # do, use the columns of that selection to build the range.
+  start = vim.current.buffer.mark( '<' )
+  end = vim.current.buffer.mark( '>' )
+  if not start or not end or start_line != start[ 0 ] or end_line != end[ 0 ]:
+    start = [ start_line, 0 ]
+    end = [ end_line, len( vim.current.buffer[ end_line - 1 ] ) ]
+  # Vim Python API returns 1-based lines and 0-based columns while ycmd expects
+  # 1-based lines and columns.
+  return {
+    'range': {
+      'start': {
+        'line_num': start[ 0 ],
+        'column_num': start[ 1 ] + 1
+      },
+      'end': {
+        'line_num': end[ 0 ],
+        # Vim returns the maximum 32-bit integer value when a whole line is
+        # selected. Use the end of line instead.
+        'column_num': min( end[ 1 ],
+                           len( vim.current.buffer[ end[ 0 ] - 1 ] ) ) + 1
+      }
+    }
+  }
