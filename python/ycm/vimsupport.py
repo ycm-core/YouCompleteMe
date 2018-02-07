@@ -779,20 +779,35 @@ def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
   line_delta = 0
   for chunk in chunks:
     if chunk[ 'range' ][ 'start' ][ 'line_num' ] != last_line:
-      # If this chunk is on a different line than the previous chunk,
+      # If this chunk starts on a different line than the previous chunk ends,
       # then ignore previous deltas (as offsets won't have changed).
-      last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
       char_delta = 0
 
-    ( new_line_delta, new_char_delta ) = ReplaceChunk(
-      chunk[ 'range' ][ 'start' ],
-      chunk[ 'range' ][ 'end' ],
-      chunk[ 'replacement_text' ],
-      line_delta, char_delta,
-      vim_buffer,
-      locations )
-    line_delta += new_line_delta
-    char_delta += new_char_delta
+    last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
+
+    line_delta, char_delta = ReplaceChunk( chunk[ 'range' ][ 'start' ],
+                                           chunk[ 'range' ][ 'end' ],
+                                           chunk[ 'replacement_text' ],
+                                           line_delta, char_delta,
+                                           vim_buffer,
+                                           locations )
+
+
+def SplitLines( contents ):
+  """Return a list of each of the lines in the byte string |contents|.
+  Behavior is equivalent to str.splitlines with the following exceptions:
+   - empty strings are returned as [ '' ];
+   - a trailing newline is not ignored (i.e. SplitLines( '\n' )
+     returns [ '', '' ], not [ '' ] )."""
+  if contents == b'':
+    return [ b'' ]
+
+  lines = contents.splitlines()
+
+  if contents.endswith( b'\r' ) or contents.endswith( b'\n' ):
+    lines.append( b'' )
+
+  return lines
 
 
 # Replace the chunk of text specified by a contiguous range with the supplied
@@ -822,9 +837,8 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
 
   # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
   # so we convert to bytes
-  replacement_lines = ToBytes( replacement_text ).splitlines( False )
-  if not replacement_lines:
-    replacement_lines = [ bytes( b'' ) ]
+  replacement_lines = [
+    line for line in SplitLines( ToBytes( replacement_text ) ) ]
   replacement_lines_count = len( replacement_lines )
 
   # NOTE: Vim buffers are a list of byte objects on Python 2 but unicode
@@ -832,10 +846,11 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
   end_existing_text = ToBytes( vim_buffer[ end_line ] )[ end_column : ]
   start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
 
-  new_char_delta = ( len( replacement_lines[ -1 ] )
-                     - ( end_column - start_column ) )
-  if replacement_lines_count > 1:
-    new_char_delta -= start_column
+  end_replacement_column = len( replacement_lines[ -1 ] )
+  if replacement_lines_count == 1:
+    char_delta += end_replacement_column - ( end_column - start_column )
+  else:
+    char_delta = end_replacement_column - end_column
 
   replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
   replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
@@ -853,8 +868,8 @@ def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
       'type': 'F',
     } )
 
-  new_line_delta = replacement_lines_count - source_lines_count
-  return ( new_line_delta, new_char_delta )
+  line_delta += replacement_lines_count - source_lines_count
+  return line_delta, char_delta
 
 
 def InsertNamespace( namespace ):
@@ -871,7 +886,7 @@ def InsertNamespace( namespace ):
   if line:
     existing_line = LineTextInCurrentBuffer( line )
     existing_indent = re.sub( r"\S.*", "", existing_line )
-  new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
+  new_line = "{0}using {1};\n".format( existing_indent, namespace )
   replace_pos = { 'line_num': line + 1, 'column_num': 1 }
   ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0, vim.current.buffer )
   PostVimMessage( 'Add namespace: {0}'.format( namespace ), warning = False )
