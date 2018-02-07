@@ -792,7 +792,9 @@ function! s:SetUpCommands()
   command! -nargs=* -complete=custom,youcompleteme#LogsComplete
         \ YcmToggleLogs call s:ToggleLogs(<f-args>)
   command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
-        \ YcmCompleter call s:CompleterCommand(<f-args>)
+        \ YcmCompleter call s:CompleterCommand(0, <f-args>)
+  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range=%
+        \ YcmCompleter call s:CompleterCommand(<range>, <f-args>) |
   command! YcmDiags call s:ShowDiagnostics()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
@@ -827,7 +829,7 @@ function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
 endfunction
 
 
-function! s:CompleterCommand(...)
+function! s:CompleterCommand( visual_mode, ... )
   " CompleterCommand will call the OnUserCommand function of a completer.
   " If the first arguments is of the form "ft=..." it can be used to specify the
   " completer to use (for example "ft=cpp").  Else the native filetype completer
@@ -846,7 +848,9 @@ function! s:CompleterCommand(...)
   endif
 
   exec s:python_command "ycm_state.SendCommandRequest(" .
-        \ "vim.eval( 'l:arguments' ), vim.eval( 'l:completer' ) )"
+        \ "vim.eval( 'l:arguments' )," .
+        \ "vim.eval( 'l:completer' )," .
+        \ "vimsupport.GetBoolValue( 'a:visual_mode' ) )"
 endfunction
 
 
