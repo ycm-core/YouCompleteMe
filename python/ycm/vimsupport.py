@@ -1055,3 +1055,25 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
 
   if position == 'end':
     vim.command( 'silent! normal! Gzz' )
+
+
+def GetVisualRange():
+  start = vim.current.buffer.mark( '<' )
+  end = vim.current.buffer.mark( '>' )
+  # Vim Python API returns 1-based lines and 0-based columns while ycmd expects
+  # 1-based lines and columns.
+  return {
+    'range': {
+      'start': {
+        'line_num': start[ 0 ],
+        'column_num': start[ 1 ] + 1
+      },
+      'end': {
+        'line_num': end[ 0 ],
+        # Vim returns the maximum 32-bit integer value when a whole line is
+        # selected. Use the end of line instead.
+        'column_num': min( end[ 1 ],
+                           len( vim.current.buffer[ end[ 0 ] - 1 ] ) ) + 1
+      }
+    }
+  }

@@ -315,8 +315,16 @@ class YouCompleteMe( object ):
     return response
 
 
-  def SendCommandRequest( self, arguments, completer ):
-    extra_data = {}
+  def SendCommandRequest( self, arguments, completer, visual_mode ):
+    extra_data = {
+      'options': {
+        'tab_size': vimsupport.GetIntValue( 'shiftwidth()' ),
+        'insert_spaces': vimsupport.GetBoolValue( '&expandtab' )
+      }
+    }
+    if visual_mode:
+      extra_data.update( vimsupport.GetVisualRange() )
+    print( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
     return SendCommandRequest( arguments, completer, extra_data )
 
