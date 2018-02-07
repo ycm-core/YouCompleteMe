@@ -152,6 +152,9 @@ def _MockVimOptionsEval( value ):
   if value == '&hidden':
     return 0
 
+  if value == '&expandtab':
+    return 1
+
   return None
 
 
@@ -186,7 +189,7 @@ def _MockVimMatchEval( value ):
 server_python_interpreter = ''
 
 
-def _MockVimEval( value ):
+def MockVimEval( value ):
   if value == 'g:ycm_min_num_of_chars_for_completion':
     return 0
 
@@ -198,6 +201,9 @@ def _MockVimEval( value ):
 
   if value == 'tagfiles()':
     return [ 'tags' ]
+
+  if value == 'shiftwidth()':
+    return 4
 
   result = _MockVimOptionsEval( value )
   if result is not None:
@@ -380,7 +386,7 @@ def MockVimModule():
   tests."""
 
   VIM_MOCK.buffers = {}
-  VIM_MOCK.eval = MagicMock( side_effect = _MockVimEval )
+  VIM_MOCK.eval = MagicMock( side_effect = MockVimEval )
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK

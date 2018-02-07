@@ -1055,3 +1055,24 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
 
   if position == 'end':
     vim.command( 'silent! normal! Gzz' )
+
+
+def GetVisualRange():
+  _, start_line, start_col, _ = vim.eval( 'getpos( "\'<" )' )
+  _, end_line, end_col, _ = vim.eval( 'getpos( "\'>" )' )
+  start_line = int( start_line )
+  start_col = int( start_col )
+  end_line = int( end_line )
+  end_col = min( int( end_col ), len( vim.current.buffer[ end_line - 1 ] ) ) + 1
+  return {
+    'range': {
+      'start': {
+        'line_num': start_line,
+        'column_num': start_col
+      },
+      'end': {
+        'line_num': end_line,
+        'column_num': end_col
+      }
+    }
+  }
