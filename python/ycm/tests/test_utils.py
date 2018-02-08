@@ -215,7 +215,7 @@ def _MockVimEval( value ):
   if match:
     return match.group( 'filepath' )
 
-  raise ValueError( 'Unexpected evaluation: {0}'.format( value ) )
+  raise VimError( 'Unexpected evaluation: {0}'.format( value ) )
 
 
 def _MockWipeoutBuffer( buffer_number ):
@@ -381,6 +381,7 @@ def MockVimModule():
 
   VIM_MOCK.buffers = {}
   VIM_MOCK.eval = MagicMock( side_effect = _MockVimEval )
+  VIM_MOCK.error = VimError
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK

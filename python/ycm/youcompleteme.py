@@ -750,8 +750,13 @@ class YouCompleteMe( object ):
 
   def _AddExtraConfDataIfNeeded( self, extra_data ):
     def BuildExtraConfData( extra_conf_vim_data ):
-      return dict( ( expr, vimsupport.VimExpressionToPythonType( expr ) )
-                   for expr in extra_conf_vim_data )
+      extra_conf_data = {}
+      for expr in extra_conf_vim_data:
+        try:
+          extra_conf_data[ expr ] = vimsupport.VimExpressionToPythonType( expr )
+        except vim.error:
+          self._logger.exception( "Error evaluating Vim expression '%s'", expr )
+      return extra_conf_data
 
     extra_conf_vim_data = self._user_options[ 'extra_conf_vim_data' ]
     if extra_conf_vim_data:
