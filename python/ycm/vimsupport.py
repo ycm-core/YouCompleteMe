@@ -899,6 +899,11 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   start_column = start[ 'column_num' ] - 1
   end_column = end[ 'column_num' ] - 1
 
+  if end_line >= len( vim_buffer ):
+    end_column = len( ToBytes( vim_buffer[ -1 ] ) )
+    end_line = len( vim_buffer ) - 1
+    replacement_text = replacement_text.rstrip()
+
   # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )

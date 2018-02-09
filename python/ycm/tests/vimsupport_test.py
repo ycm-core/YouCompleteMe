@@ -544,6 +544,16 @@ def ReplaceChunk_NewlineChunk_test():
                                   'second line' ], result_buffer )
 
 
+def ReplaceChunk_BeyondEndOfFile_test():
+  result_buffer = VimBuffer( 'buffer', contents = [ 'first line',
+                                                    'second line' ] )
+
+  start, end = _BuildLocations( 1, 11, 3, 1 )
+  vimsupport.ReplaceChunk( start, end, '\n', result_buffer )
+
+  AssertBuffersAreEqualAsBytes( [ 'first line' ], result_buffer )
+
+
 def _BuildLocations( start_line, start_column, end_line, end_column ):
   return {
     'line_num'  : start_line,
