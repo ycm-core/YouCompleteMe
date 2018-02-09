@@ -899,6 +899,17 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   start_column = start[ 'column_num' ] - 1
   end_column = end[ 'column_num' ] - 1
 
+  # When sending a request to the server, a newline is added to the buffer
+  # contents to match what gets saved to disk. If the server generates a chunk
+  # containing that newline, this chunk goes past the Vim buffer contents since
+  # there is actually no new line. When this happens, recompute the end position
+  # of where the chunk is applied and remove all trailing characters in the
+  # chunk.
+  if end_line >= len( vim_buffer ):
+    end_column = len( ToBytes( vim_buffer[ -1 ] ) )
+    end_line = len( vim_buffer ) - 1
+    replacement_text = replacement_text.rstrip()
+
   # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )
