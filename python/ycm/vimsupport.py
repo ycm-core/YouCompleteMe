@@ -735,7 +735,7 @@ def _OpenFileInSplitIfNeeded( filepath ):
   return ( buffer_num, True )
 
 
-def ReplaceChunks( chunks ):
+def ReplaceChunks( chunks, silent=False ):
   """Apply the source file deltas supplied in |chunks| to arbitrary files.
   |chunks| is a list of changes defined by ycmd.responses.FixItChunk,
   which may apply arbitrary modifications to arbitrary files.
@@ -755,14 +755,15 @@ def ReplaceChunks( chunks ):
   # We sort the file list simply to enable repeatable testing.
   sorted_file_list = sorted( iterkeys( chunks_by_file ) )
 
-  # Make sure the user is prepared to have her screen mutilated by the new
-  # buffers.
-  num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
+  if not silent:
+    # Make sure the user is prepared to have her screen mutilated by the new
+    # buffers.
+    num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
 
-  if num_files_to_open > 0:
-    if not Confirm(
+    if num_files_to_open > 0:
+      if not Confirm(
             FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( num_files_to_open ) ):
-      return
+        return
 
   # Store the list of locations where we applied changes. We use this to display
   # the quickfix window showing the user where we applied changes.
@@ -788,12 +789,13 @@ def ReplaceChunks( chunks ):
       vim.command( 'hide' )
 
   # Open the quickfix list, populated with entries for each location we changed.
-  if locations:
-    SetQuickFixList( locations )
-    OpenQuickFixList()
+  if not silent:
+    if locations:
+      SetQuickFixList( locations )
+      OpenQuickFixList()
 
-  PostVimMessage( 'Applied {0} changes'.format( len( chunks ) ),
-                  warning = False )
+    PostVimMessage( 'Applied {0} changes'.format( len( chunks ) ),
+                    warning = False )
 
 
 def ReplaceChunksInBuffer( chunks, vim_buffer ):

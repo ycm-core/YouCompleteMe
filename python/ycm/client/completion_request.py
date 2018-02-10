@@ -69,7 +69,7 @@ class CompletionRequest( BaseRequest ):
     return response
 
 
-def ConvertCompletionDataToVimData( completion_data ):
+def ConvertCompletionDataToVimData( completion_identifier, completion_data ):
   # see :h complete-items for a description of the dictionary fields
   vim_data = {
     'word'  : '',
@@ -100,9 +100,19 @@ def ConvertCompletionDataToVimData( completion_data ):
   elif doc_string:
     vim_data[ 'info' ] = doc_string
 
+  # We store the completion item index as a string in the completion user_data.
+  # This allows us to identify the _exact_ item that was completed in the
+  # CompleteDone handler, by inspecting this item from v:completed_item
+  #
+  # We convert to string because completion user data items must be strings.
+  #
+  # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
+  # the item to the dictionary is harmless in earlier Vims.
+  vim_data[ 'user_data' ] = str( completion_identifier )
+
   return vim_data
 
 
 def _ConvertCompletionDatasToVimDatas( response_data ):
-  return [ ConvertCompletionDataToVimData( x )
-           for x in response_data ]
+  return [ ConvertCompletionDataToVimData( i, x )
+           for i, x in enumerate( response_data ) ]
