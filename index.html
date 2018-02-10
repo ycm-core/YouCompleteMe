@@ -27,10 +27,17 @@
           <span class="credits left">Project maintained by <a href="https://github.com/Valloric">Valloric</a></span>
           <span class="credits right">Hosted on GitHub Pages — Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
-    <div id="markdown-output"><p><a href="https://gitter.im/Valloric/YouCompleteMe"><img alt="Gitter Room" src="https://img.shields.io/gitter/room/Valloric/YouCompleteMe.svg"/></a>
-<a href="https://travis-ci.org/Valloric/YouCompleteMe"><img alt="Build Status" src="https://travis-ci.org/Valloric/YouCompleteMe.svg?branch=master"/></a>
-<a href="https://ci.appveyor.com/project/Valloric/YouCompleteMe"><img alt="Build status" src="https://ci.appveyor.com/api/projects/status/ag9uqwi8s6btwjd8/branch/master?svg=true"/></a>
-<a href="https://codecov.io/gh/Valloric/YouCompleteMe"><img alt="Coverage Status" src="https://codecov.io/gh/Valloric/YouCompleteMe/branch/master/graph/badge.svg"/></a></p><ul>
+    <div id="markdown-output"><p><a href="https://gitter.im/Valloric/YouCompleteMe"><img alt="Gitter room" src="https://img.shields.io/gitter/room/Valloric/YouCompleteMe.svg"/></a>
+<a href="https://travis-ci.org/Valloric/YouCompleteMe"><img alt="Linux build status" src="https://img.shields.io/travis/Valloric/YouCompleteMe/master.svg?label=Linux"/></a>
+<a href="https://circleci.com/gh/Valloric/YouCompleteMe"><img alt="macOS build status" src="https://img.shields.io/circleci/project/github/Valloric/YouCompleteMe/master.svg?label=macOS"/></a>
+<a href="https://ci.appveyor.com/project/Valloric/YouCompleteMe"><img alt="Windows build status" src="https://img.shields.io/appveyor/ci/Valloric/YouCompleteMe/master.svg?label=Windows"/></a>
+<a href="https://codecov.io/gh/Valloric/YouCompleteMe"><img alt="Coverage status" src="https://img.shields.io/codecov/c/github/Valloric/YouCompleteMe/master.svg"/></a></p><h2 id="help-advice-support">Help, Advice, Support</h2><p>Looking for help, advice or support? Having problems getting YCM to work?</p><p>First carefully read the <a href="#installation">installation instructions</a> for your OS.
+We recommend you use the supplied <code>install.py</code>.</p><p>Next check the <a href="#user-guide">User Guide</a> section on the semantic completer that
+you are using. For C/C++/Objective C, you  <em>must</em> read
+<a href="#c-family-semantic-completion">this section</a>.</p><p>Finally, check the <a href="#faq">FAQ</a>.</p><p>If, after reading the installation and user guides, and checking the FAQ, you're
+still having trouble, check the <a href="#contact">contacts</a> section below for how to
+get in touch.</p><p>Please do <strong>NOT</strong> go to #vim on freenode for support. Please contact the
+YouCompleteMe maintainers directly using the <a href="#contact">contact details</a> below.</p><h2 id="contents">Contents</h2><ul>
 <li><a href="#intro">Intro</a></li>
 <li><a href="#installation">Installation</a><ul>
 <li><a href="#mac-os-x">Mac OS X</a></li>
@@ -51,6 +58,7 @@
 <li><a href="#javascript-semantic-completion">JavaScript Semantic Completion</a></li>
 <li><a href="#rust-semantic-completion">Rust Semantic Completion</a></li>
 <li><a href="#python-semantic-completion">Python Semantic Completion</a></li>
+<li><a href="#java-semantic-completion">Java Semantic Completion</a></li>
 <li><a href="#semantic-completion-for-other-languages">Semantic Completion for Other Languages</a></li>
 <li><a href="#writing-new-semantic-completers">Writing New Semantic Completers</a></li>
 <li><a href="#diagnostic-display">Diagnostic Display</a><ul>
@@ -88,6 +96,7 @@
 <li>a <a href="https://github.com/Microsoft/TypeScript/tree/master/src/server">TSServer</a>-based completion engine for TypeScript,</li>
 <li>a <a href="http://ternjs.net">Tern</a>-based completion engine for JavaScript,</li>
 <li>a <a href="https://github.com/phildawes/racer">racer</a>-based completion engine for Rust,</li>
+<li>a <a href="https://github.com/eclipse/eclipse.jdt.ls">jdt.ls</a>-based experimental completion engine for Java.</li>
 <li>and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).</li>
 </ul><p><img alt="YouCompleteMe GIF demo" src="http://i.imgur.com/0OP4ood.gif"/></p><p>Here's an explanation of what happens in the short GIF demo above.</p><p>First, realize that <strong>no keyboard shortcuts had to be pressed</strong> to get the list
@@ -163,6 +172,8 @@ for details.</p><p>Compiling YCM <strong>with</strong> semantic support for C-fa
   <code>--js-completer</code> when calling <code>./install.py</code>.</li>
 <li>Rust support: install <a href="https://www.rust-lang.org/">Rust</a> and add
   <code>--rust-completer</code> when calling <code>./install.py</code>.</li>
+<li>Java support: install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">JDK8 (version 8 required)</a> and add
+  <code>--java-completer</code> when calling <code>./install.py</code>.</li>
 </ul><p>To simply compile with everything enabled, there's a <code>--all</code> flag.  So, to
 install with all language features, ensure <code>xbuild</code>, <code>go</code>, <code>tsserver</code>, <code>node</code>,
 <code>npm</code>, <code>rustc</code>, and <code>cargo</code> tools are installed and in your <code>PATH</code>, then
@@ -182,8 +193,8 @@ installed by running <code>vim --version</code>. If the version is too old, you 
 <a href="https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source">compile Vim from source</a> (don't worry, it's easy).</p><p>Install YouCompleteMe with <a href="https://github.com/VundleVim/Vundle.vim#about">Vundle</a>.</p><p><strong>Remember:</strong> YCM is a plugin with a compiled component. If you <strong>update</strong> YCM
 using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
-process.</p><p>Install development tools and CMake: </p><pre><code>sudo apt-get install build-essential cmake
-</code></pre><p><strong>Note:</strong> On older systems (e.g. Ubuntu 14.04) you may run into compilation 
+process.</p><p>Install development tools and CMake:</p><pre><code>sudo apt-get install build-essential cmake
+</code></pre><p><strong>Note:</strong> On older systems (e.g. Ubuntu 14.04) you may run into compilation
 issues with <code>cmake</code>. Therefore, install the following instead:</p><pre><code>sudo apt-get install build-essential cmake3
 </code></pre><p>Make sure you have Python headers installed:</p><pre><code>sudo apt-get install python-dev python3-dev
 </code></pre><p>Compiling YCM <strong>with</strong> semantic support for C-family languages:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
@@ -201,6 +212,8 @@ issues with <code>cmake</code>. Therefore, install the following instead:</p><pr
   <code>--js-completer</code> when calling <code>./install.py</code>.</li>
 <li>Rust support: install <a href="https://www.rust-lang.org/">Rust</a> and add <code>--rust-completer</code> when
   calling <code>./install.py</code>.</li>
+<li>Java support: install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">JDK8 (version 8 required)</a> and add
+  <code>--java-completer</code> when calling <code>./install.py</code>.</li>
 </ul><p>To simply compile with everything enabled, there's a <code>--all</code> flag.  So, to
 install with all language features, ensure <code>xbuild</code>, <code>go</code>, <code>tsserver</code>, <code>node</code>,
 <code>npm</code>, <code>rustc</code>, and <code>cargo</code> tools are installed and in your <code>PATH</code>, then
@@ -237,6 +250,8 @@ process.</p><p>Install development tools and CMake:</p><pre><code>sudo dnf insta
   <code>--js-completer</code> when calling <code>./install.py</code>.</li>
 <li>Rust support: install <a href="https://www.rust-lang.org/">Rust</a> and add <code>--rust-completer</code> when
   calling <code>./install.py</code>.</li>
+<li>Java support: install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">JDK8 (version 8 required)</a> and add
+  <code>--java-completer</code> when calling <code>./install.py</code>.</li>
 </ul><p>To simply compile with everything enabled, there's a <code>--all</code> flag.  So, to
 install with all language features, ensure <code>xbuild</code>, <code>go</code>, <code>tsserver</code>, <code>node</code>,
 <code>npm</code>, <code>rustc</code>, and <code>cargo</code> tools are installed and in your <code>PATH</code>, then
@@ -265,15 +280,15 @@ using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.</p><p>Download and install the following software:</p><ul>
 <li><a href="https://www.python.org/downloads/windows/">Python 2 or Python 3</a>. Be sure to pick the version
-  corresponding to your Vim architecture. It is <em>Windows x86</em> for a 32-bit Vim 
-  and <em>Windows x86-64</em> for a 64-bit Vim. We recommend installing Python 3. 
-  Additionally, the version of Python you install must match up exactly with 
+  corresponding to your Vim architecture. It is <em>Windows x86</em> for a 32-bit Vim
+  and <em>Windows x86-64</em> for a 64-bit Vim. We recommend installing Python 3.
+  Additionally, the version of Python you install must match up exactly with
   the version of Python that Vim is looking for. Type <code>:version</code> and look at the
-  bottom of the page at the list of compiler flags. Look for flags that look 
-  similar to <code>-DDYNAMIC_PYTHON_DLL=\"python27.dll\"</code> and 
-  <code>-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"</code>. The former indicates that Vim is 
-  looking for Python 2.7 and the latter indicates that Vim is looking for 
-  Python 3.5. You'll need one or the other installed, matching the version 
+  bottom of the page at the list of compiler flags. Look for flags that look
+  similar to <code>-DDYNAMIC_PYTHON_DLL=\"python27.dll\"</code> and
+  <code>-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"</code>. The former indicates that Vim is
+  looking for Python 2.7 and the latter indicates that Vim is looking for
+  Python 3.5. You'll need one or the other installed, matching the version
   number exactly.</li>
 <li><a href="https://cmake.org/download/">CMake</a>. Add CMake executable to the PATH environment
 variable.</li>
@@ -296,6 +311,8 @@ install.py
   <code>--js-completer</code> when calling <code>install.py</code>.</li>
 <li>Rust support: install <a href="https://www.rust-lang.org/">Rust</a> and add <code>--rust-completer</code> when
   calling <code>install.py</code>.</li>
+<li>Java support: install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">JDK8 (version 8 required)</a> and add
+  <code>--java-completer</code> when calling <code>./install.py</code>.</li>
 </ul><p>To simply compile with everything enabled, there's a <code>--all</code> flag.  So, to
 install with all language features, ensure <code>msbuild</code>, <code>go</code>, <code>tsserver</code>, <code>node</code>,
 <code>npm</code>, and <code>cargo</code> tools are installed and in your <code>PATH</code>, then simply run:</p><pre><code>cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
@@ -331,6 +348,8 @@ process.</p><p>Install dependencies and CMake: <code>sudo pkg_add llvm boost cma
   <code>--js-completer</code> when calling <code>./install.py</code>.</li>
 <li>Rust support: install <a href="https://www.rust-lang.org/">Rust</a> and add <code>--rust-completer</code> when
   calling <code>./install.py</code>.</li>
+<li>Java support: install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">JDK8 (version 8 required)</a> and add
+  <code>--java-completer</code> when calling <code>./install.py</code>.</li>
 </ul><p>To simply compile with everything enabled, there's a <code>--all</code> flag.  So, to
 install with all language features, ensure <code>xbuild</code>, <code>go</code>, <code>tsserver</code>, <code>node</code>,
 <code>npm</code>, and <code>cargo</code> tools are installed and in your <code>PATH</code>, then simply run:</p><pre><code>cd ~/.vim/bundle/YouCompleteMe
@@ -475,11 +494,10 @@ clang support (it needs to be there for YCM to work).</p>
 <p>C# support: install <a href="http://www.mono-project.com/docs/getting-started/install/">Mono on non-Windows platforms</a>.
   Navigate to <code>YouCompleteMe/third_party/ycmd/third_party/OmniSharpServer</code>
   and run</p>
-<p>msbuild /property:Configuration=Release /property:TargetFrameworkVersion=v4.5</p>
+<p>msbuild /property:Configuration=Release /property:Platform="Any CPU" /property:TargetFrameworkVersion=v4.5</p>
 </li>
 </ul>
-<p>Replace <code>msbuild</code> by <code>xbuild</code> if <code>msbuild</code> is not available. On Windows,
-  be sure that <a href="http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1">the build utility <code>msbuild</code> is in your
+<p>On Windows, be sure that <a href="http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1">the build utility <code>msbuild</code> is in your
   PATH</a>.</p>
 <ul>
 <li>
@@ -499,6 +517,14 @@ clang support (it needs to be there for YCM to work).</p>
 <p>Rust support: install <a href="https://www.rust-lang.org/">Rust</a>. Navigate to
   <code>YouCompleteMe/third_party/ycmd/third_party/racerd</code> and run <code>cargo build
   --release</code>.</p>
+</li>
+<li>
+<p>Java support: install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">JDK8 (version 8 required)</a>. Download a
+  <a href="http://download.eclipse.org/jdtls/milestones">binary release of eclipse.jdt.ls</a> and extract it to
+  <code>YouCompleteMe/third_party/ycmd/third_party/eclipse.jdt.ls/target/repository</code>.
+  Note: this approach is not recommended for most users and is supported
+  only for advanced users and developers of YCM on a best-efforts basis.
+  Please use <code>install.py</code> to enable java support.</p>
 </li>
 </ul>
 </li>
@@ -557,6 +583,19 @@ that are conservatively turned off by default that you may want to turn on.</p><
   identical)</li>
 <li>Management of <code>racer</code> server instance</li>
 <li>View documentation comments for identifiers (<code>GetDoc</code>)</li>
+</ul><h3 id="java">Java</h3><p><strong>NOTE</strong>: Java support is currently experimental. Please let us know your
+<a href="#contact">feedback</a>.</p><ul>
+<li>Semantic auto-completion</li>
+<li>Go to definition (<code>GoTo</code>, <code>GoToDefinition</code>, and <code>GoToDeclaration</code> are
+  identical)</li>
+<li>Reference finding (<code>GoToReferences</code>)</li>
+<li>Real-time diagnostic display</li>
+<li>Renaming symbols (<code>RefactorRename &lt;new name&gt;</code>)</li>
+<li>View documentation comments for identifiers (<code>GetDoc</code>)</li>
+<li>Type information for identifiers (<code>GetType</code>)</li>
+<li>Automatically fix certain errors (<code>FixIt</code>)</li>
+<li>Detection of java projects</li>
+<li>Management of <code>jdt.ls</code> server instance</li>
 </ul><h2 id="user-guide">User Guide</h2><h3 id="general-usage">General Usage</h3><ul>
 <li>If the offered completions are too broad, keep typing characters; YCM will
   continue refining the offered completions based on your input.</li>
@@ -678,7 +717,7 @@ unrelated completion strings (type/function names that are not actually
 members). This is because Clang fails to build a precompiled preamble for your
 file if there are any errors in the included headers and that preamble is key to
 getting fast completions.</p><p>Call the <code>:YcmDiags</code> command to see if any errors or warnings were detected in
-your file.</p><h3 id="javascript-semantic-completion">JavaScript Semantic Completion</h3><h4 id="quick-start">Quick start</h4><ol>
+your file.</p><h3 id="javascript-semantic-completion">JavaScript Semantic Completion</h3><h4 id="javascript-quick-start">JavaScript quick start</h4><ol>
 <li>
 <p>Ensure that you have enabled the JavaScript completer. See the
    <a href="#installation">installation guide</a> for details.</p>
@@ -755,21 +794,82 @@ the PATH. So for example if you set:</p><pre><code class="viml">let g:ycm_python
 <a href="https://github.com/davidhalter/jedi">jedi</a>. This means that if you are in a virtual environment and you start vim
 in that directory, the first <code>python</code> that YCM will find will be the one in the
 virtual environment, so <a href="https://github.com/davidhalter/jedi">jedi</a> will be able to provide completions for every
-package you have in the virtual environment.</p><h3 id="semantic-completion-for-other-languages">Semantic Completion for Other Languages</h3><p>C-family, C#, Go, JavaScript, Python, Rust, and TypeScript languages are
+package you have in the virtual environment.</p><h3 id="java-semantic-completion">Java Semantic Completion</h3><p><strong>NOTE</strong>: Java support is currently experimental. Please let us know your
+<a href="#contact">feedback</a>.</p><h4 id="java-quick-start">Java quick Start</h4><ol>
+<li>
+<p>Ensure that you have enabled the Java completer. See the
+   <a href="#installation">installation guide</a> for details.</p>
+</li>
+<li>
+<p>Create a project file (gradle or maven) file in the root directory of your
+   Java project, by following the instructions below.</p>
+</li>
+<li>
+<p>If you previously used Eclim or Syntastic for Java, disable them for Java.</p>
+</li>
+<li>
+<p>Edit a Java file from your project.</p>
+</li>
+</ol><h4 id="java-project-files">Java Project Files</h4><p>In order to provide semantic analysis, the Java completion engine requires
+knowledge of your project structure. In particular it needs to know the class
+path to use, when compiling your code. Fortunately <a href="https://github.com/eclipse/eclipse.jdt.ls">jdt.ls</a>
+supports <a href="https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html">eclipse project files</a>,
+<a href="https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">maven projects</a> and <a href="https://docs.gradle.org/current/userguide/tutorial_java_projects.html">gradle projects</a>.</p><p><strong>NOTE:</strong> Our recommendation is to use either maven or gradle projects.</p><h4 id="diagnostic-display---syntastic">Diagnostic display - Syntastic</h4><p>The native support for Java includes YCM's native realtime diagnostics display.
+This can conflict with other dianostics plugins like Syntastic, so when enabling
+Java support, please <strong>manually disable Syntastic Java diagnostics</strong>.</p><p>Add the following to your <code>vimrc</code>:</p><pre><code class="viml">let g:syntastic_java_checkers = []
+</code></pre><h4 id="diagnostic-display---eclim">Diagnostic display - Eclim</h4><p>The native support for Java includes YCM's native realtime diagnostics display.
+This can conflict with other dianostics plugins like Eclim, so when enabling
+Java support, please <strong>manually disable Eclim Java diagnostics</strong>.</p><p>Add the following to your <code>vimrc</code>:</p><pre><code class="viml">let g:EclimFileTypeValidate = 0
+</code></pre><p><strong>NOTE</strong>: We recommend disabling Eclim entirely when editing Java with YCM's
+native Java support. This can be done temporarily with <code>:EclimDisable</code>.</p><h4 id="eclipse-projects">Eclipse Projects</h4><p>Eclipse style projects require two files: <a href="https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html">.project</a> and
+<a href="https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html">.classpath</a>.</p><p>If your project already has these files due to previously being set up within
+eclipse, then no setup is required. <a href="https://github.com/eclipse/eclipse.jdt.ls">jdt.ls</a> should load the project just
+fine (it's basically eclipse after all).</p><p>However, if not, it is possible (easy in fact) to craft them manually, though it
+is not recommended. You're better off using gradle or maven (see below).</p><p><a href="https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_eclipse_project">A simple eclipse style project example</a> can be found in
+the ycmd test dir. Normally all that is required is to copy these files to the
+root of your project and to edit the <code>.classpath</code> to add additional libraries,
+such as:</p><pre><code class="xml">  &lt;classpathentry kind="lib" path="/path/to/external/jar" /&gt;
+  &lt;classpathentry kind="lib" path="/path/to/external/java/source" /&gt;
+</code></pre><p>It may also be necessary to change the directory in which your source files are
+located (paths are relative to the .project file itself):</p><pre><code class="xml">  &lt;classpathentry kind="src" output="target/classes" path="path/to/src/" /&gt;
+</code></pre><p><strong>NOTE</strong>: The eclipse project and classpath files are not a public interface
+and it is highly recommended to use Maven or Gradle project definitions if you
+don't already use eclipse to manage your projects.</p><h4 id="maven-projects">Maven Projects</h4><p>Maven needs a file named <a href="https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">pom.xml</a> in the root of the project.
+Once again a simple <a href="https://github.com/Valloric/ycmd/blob/java-language-server/ycmd/tests/java/testdata/simple_maven_project/pom.xml">pom.xml</a> can be found in ycmd source.</p><p>The format of <a href="https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">pom.xml</a> files is way beyond the scope of this
+document, but we do recommend using the various tools that can generate them for
+you, if you're not familiar with them already.</p><h4 id="gradle-projecs">Gradle Projecs</h4><p>Gradle projects require a <a href="https://docs.gradle.org/current/userguide/tutorial_java_projects.html">build.gradle</a>. Again, there is a
+<a href="https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_gradle_project">trivial example in ycmd's tests</a>.</p><p>The format of <a href="https://docs.gradle.org/current/userguide/tutorial_java_projects.html">build.gradle</a> files is way beyond the scope of
+this document, but we do recommend using the various tools that can generate
+them for you, if you're not familiar with them already.</p><h4 id="troubleshooting">Troubleshooting</h4><p>If you're not getting completions or diagnostics, check the server health:</p><ul>
+<li>The Java completion engine takes a while to start up and parse your project.
+  You should be able to see its progress in the command line, and
+  <code>:YcmDebugInfo</code>. Ensure that the following lines are present:</li>
+</ul><pre><code>--   jdt.ls Java Language Server running
+--   jdt.ls Java Language Server Startup Status: Ready
+</code></pre><ul>
+<li>If the above lines don't appear after a few minutes, check the jdt.ls and ycmd
+  log files using <a href="#the-ycmtogglelogs-command"><code>:YcmToggleLogs</code> </a>. The jdt.ls
+  log file is called <code>.log</code> (for some reason).</li>
+</ul><p>If you get a message about "classpath is incomplete", then make sure you have
+correctly configured the <a href="#java-project-files">project files</a>.</p><p>If you get messages about unresolved imports, then make sure you have
+correctly configured the <a href="#java-project-files">project files</a>, in particular
+check that the classpath is set correctly.</p><p>For anything else, <a href="#contact">contact us</a>. Java support is experimental at
+present so we'd love to hear your feedback! Please do remember to check
+<a href="https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> for the list of diagnostics we'll need.</p><h3 id="semantic-completion-for-other-languages">Semantic Completion for Other Languages</h3><p>C-family, C#, Go, Java, JavaScript, Python, Rust, and TypeScript languages are
 supported natively by YouCompleteMe using the <a href="http://clang.llvm.org/">Clang</a>, <a href="https://github.com/OmniSharp/omnisharp-server">OmniSharp</a>,
-<a href="https://github.com/nsf/gocode">Gocode</a>/<a href="https://github.com/Manishearth/godef">Godef</a>, <a href="http://ternjs.net">Tern</a>, <a href="https://github.com/davidhalter/jedi">Jedi</a>, <a href="https://github.com/phildawes/racer">racer</a>, and <a href="https://github.com/Microsoft/TypeScript/tree/master/src/server">TSServer</a> engines,
-respectively. Check the <a href="#installation">installation</a> section for instructions
-to enable these features if desired.</p><p>YCM will use your <code>omnifunc</code> (see <code>:h omnifunc</code> in Vim) as a source for semantic
+<a href="https://github.com/nsf/gocode">Gocode</a>/<a href="https://github.com/Manishearth/godef">Godef</a>, <a href="https://github.com/eclipse/eclipse.jdt.ls">jdt.ls</a>, <a href="http://ternjs.net">Tern</a>, <a href="https://github.com/davidhalter/jedi">Jedi</a>, <a href="https://github.com/phildawes/racer">racer</a>, and
+<a href="https://github.com/Microsoft/TypeScript/tree/master/src/server">TSServer</a> engines, respectively. Check the <a href="#installation">installation</a>
+section for instructions to enable these features if desired.</p><p>YCM will use your <code>omnifunc</code> (see <code>:h omnifunc</code> in Vim) as a source for semantic
 completions if it does not have a native semantic completion engine for your
 file's filetype. Vim comes with okayish omnifuncs for various languages like
-Ruby, PHP, etc. It depends on the language.</p><p>You can get stellar omnifuncs for Java and Ruby with <a href="http://eclim.org/">Eclim</a>. Just make sure
-you have the <em>latest</em> Eclim installed and configured (this means Eclim <code>&gt;= 2.2.*</code>
-and Eclipse <code>&gt;= 4.2.*</code>).</p><p>After installing Eclim remember to create a new Eclipse project within your
-application by typing <code>:ProjectCreate &lt;path-to-your-project&gt; -n ruby</code> (or <code>-n java</code>)
-inside vim and don't forget to have <code>let g:EclimCompletionMethod = 'omnifunc'</code>
-in your vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs
-as the data source for semantic completions and provide the auto-triggering
-and subsequence-based matching (and other YCM features) on top of it.</p><h3 id="writing-new-semantic-completers">Writing New Semantic Completers</h3><p>You have two options here: writing an <code>omnifunc</code> for Vim's omnicomplete system
+Ruby, PHP, etc. It depends on the language.</p><p>You can get a stellar omnifunc for Ruby with <a href="http://eclim.org/">Eclim</a>. Just make sure you have
+the <em>latest</em> Eclim installed and configured (this means Eclim <code>&gt;= 2.2.*</code> and
+Eclipse <code>&gt;= 4.2.*</code>).</p><p>After installing Eclim remember to create a new Eclipse project within your
+application by typing <code>:ProjectCreate &lt;path-to-your-project&gt; -n ruby</code> inside vim
+and don't forget to have <code>let g:EclimCompletionMethod = 'omnifunc'</code> in your
+vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs as
+the data source for semantic completions and provide the auto-triggering and
+subsequence-based matching (and other YCM features) on top of it.</p><h3 id="writing-new-semantic-completers">Writing New Semantic Completers</h3><p>You have two options here: writing an <code>omnifunc</code> for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for YCM
 using the <a href="https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py">Completer API</a>.</p><p>Here are the differences between the two approaches:</p><ul>
 <li>You have to use VimScript to write the omnifunc, but get to use Python to
@@ -849,9 +949,15 @@ list from opening, but still have it filled with new diagnostic data. See the
 <em>Options</em> section for details.</p><h3 id="the-ycmshowdetaileddiagnostic-command">The <code>:YcmShowDetailedDiagnostic</code> command</h3><p>This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.</p><h3 id="the-ycmdebuginfo-command">The <code>:YcmDebugInfo</code> command</h3><p>This will print out various debug information for the current file. Useful to
 see what compile commands will be used for the file if you're using the semantic
-completion engine.</p><h3 id="the-ycmtogglelogs-command">The <code>:YcmToggleLogs</code> command</h3><p>This command opens in separate windows the logfiles given as arguments or closes
-them if they are already open in the editor. When no argument is given, list the
-available logfiles. Only for debugging purpose.</p><h3 id="the-ycmcompleter-command">The <code>:YcmCompleter</code> command</h3><p>This command gives access to a number of additional <a href="#quick-feature-summary">IDE-like
+completion engine.</p><h3 id="the-ycmtogglelogs-command">The <code>:YcmToggleLogs</code> command</h3><p>This command presents the list of logfiles created by YCM, the <a href="https://github.com/Valloric/ycmd">ycmd
+server</a>, and the semantic engine server for the current filetype, if any.
+One of these logfiles can be opened in the editor (or closed if already open) by
+entering the corresponding number or by clicking on it with the mouse.
+Additionally, this command can take the logfile names as arguments. Use the
+<code>&lt;TAB&gt;</code> key (or any other key defined by the <code>wildchar</code> option) to complete the
+arguments or to cycle through them (depending on the value of the <code>wildmode</code>
+option). Each logfile given as an argument is directly opened (or closed if
+already open) in the editor. Only for debugging purposes.</p><h3 id="the-ycmcompleter-command">The <code>:YcmCompleter</code> command</h3><p>This command gives access to a number of additional <a href="#quick-feature-summary">IDE-like
 features</a> in YCM, for things like semantic GoTo, type
 information, FixIt and refactoring.</p><p>Technically the command invokes completer-specific commands.  If the first
 argument is of the form <code>ft=...</code> the completer for that file type will be used
@@ -874,30 +980,31 @@ the cursor, the subcommands add entries to Vim's <code>jumplist</code> so you ca
 than one destination, the quickfix list (see <code>:h quickfix</code>) is populated with
 the available locations and opened to full width at the bottom of the screen.
 You can change this behavior by using <a href="#the-ycmquickfixopened-autocommand">the <code>YcmQuickFixOpened</code>
-autocommand</a>.</p><h4 id="the-gotoinclude-subcommand">The <code>GoToInclude</code> subcommand</h4><p>Looks up the current line for a header and jumps to it.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h4 id="the-gotodeclaration-subcommand">The <code>GoToDeclaration</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, go, python, rust</code></p><h4 id="the-gotodefinition-subcommand">The <code>GoToDefinition</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its definition.</p><p><strong>NOTE:</strong> For C-family languages <strong>this only works in certain situations</strong>,
+autocommand</a>.</p><h4 id="the-gotoinclude-subcommand">The <code>GoToInclude</code> subcommand</h4><p>Looks up the current line for a header and jumps to it.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h4 id="the-gotodeclaration-subcommand">The <code>GoToDeclaration</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its declaration.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, go, python, rust, java</code></p><h4 id="the-gotodefinition-subcommand">The <code>GoToDefinition</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its definition.</p><p><strong>NOTE:</strong> For C-family languages <strong>this only works in certain situations</strong>,
 namely when the definition of the symbol is in the current translation unit. A
 translation unit consists of the file you are editing and all the files you are
 including with <code>#include</code> directives (directly or indirectly) in that file.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, go, javascript, python,
-rust, typescript</code></p><h4 id="the-goto-subcommand">The <code>GoTo</code> subcommand</h4><p>This command tries to perform the "most sensible" GoTo operation it can.
+rust, typescript, java</code></p><h4 id="the-goto-subcommand">The <code>GoTo</code> subcommand</h4><p>This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
 jumps to its definition if possible; if the definition is not accessible from
 the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
-jump to it. For C#, implementations are also considered and preferred.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, go, javascript, python, rust</code></p><h4 id="the-gotoimprecise-subcommand">The <code>GoToImprecise</code> subcommand</h4><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GoTo</code> command except that it doesn't recompile the file with
+jump to it. For C#, implementations are also considered and preferred.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, go, javascript, python, rust,
+java</code></p><h4 id="the-gotoimprecise-subcommand">The <code>GoToImprecise</code> subcommand</h4><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GoTo</code> command except that it doesn't recompile the file with
 libclang before looking up nodes in the AST. This can be very useful when you're
 editing files that take long to compile but you know that you haven't made any
 changes since the last parse that would lead to incorrect jumps. When you're
 just browsing around your codebase, this command can spare you quite a bit of
 latency.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp</code></p><h4 id="the-gotoreferences-subcommand">The <code>GoToReferences</code> subcommand</h4><p>This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
-locations.</p><p>Supported in filetypes: <code>javascript, python, typescript</code></p><h4 id="the-gotoimplementation-subcommand">The <code>GoToImplementation</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its implementation (i.e.
+locations.</p><p>Supported in filetypes: <code>javascript, python, typescript, java</code></p><h4 id="the-gotoimplementation-subcommand">The <code>GoToImplementation</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
-of implementations to choose from.</p><p>Supported in filetypes: <code>cs</code></p><h4 id="the-gotoimplementationelsedeclaration-subcommand">The <code>GoToImplementationElseDeclaration</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its implementation if one,
+of implementations to choose from.</p><p>Supported in filetypes: <code>cs, java</code></p><h4 id="the-gotoimplementationelsedeclaration-subcommand">The <code>GoToImplementationElseDeclaration</code> subcommand</h4><p>Looks up the symbol under the cursor and jumps to its implementation if one,
 else jump to its declaration. If there are multiple implementations, instead
 provides a list of implementations to choose from.</p><p>Supported in filetypes: <code>cs</code></p><h3 id="semantic-information-commands">Semantic Information Commands</h3><p>These commands are useful for finding static information about the code, such
 as the types of variables, viewing declarations and documentation strings.</p><h4 id="the-gettype-subcommand">The <code>GetType</code> subcommand</h4><p>Echos the type of the variable or method under the cursor, and where it differs,
 the derived type.</p><p>For example:</p><pre><code class="c++">    std::string s;
-</code></pre><p>Invoking this command on <code>s</code> returns <code>std::string =&gt; std::basic_string&lt;char&gt;</code></p><p><strong>NOTE:</strong> Causes re-parsing of the current translation unit.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, javascript, typescript</code></p><h4 id="the-gettypeimprecise-subcommand">The <code>GetTypeImprecise</code> subcommand</h4><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GetType</code> command except that it doesn't recompile the file with
+</code></pre><p>Invoking this command on <code>s</code> returns <code>std::string =&gt; std::basic_string&lt;char&gt;</code></p><p><strong>NOTE:</strong> Causes re-parsing of the current translation unit.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, javascript, typescript, java</code></p><h4 id="the-gettypeimprecise-subcommand">The <code>GetTypeImprecise</code> subcommand</h4><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GetType</code> command except that it doesn't recompile the file with
 libclang before looking up nodes in the AST. This can be very useful when you're
 editing files that take long to compile but you know that you haven't made any
 changes since the last parse that would lead to incorrect type. When you're
@@ -919,7 +1026,7 @@ under the cursor. Depending on the file type, this includes things like:</p><ul>
 <li>Python docstrings,</li>
 <li>etc.</li>
 </ul><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, python, typescript,
-javascript, rust</code></p><h4 id="the-getdocimprecise-subcommand">The <code>GetDocImprecise</code> subcommand</h4><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GetDoc</code> command except that it doesn't recompile the file with
+javascript, rust, java</code></p><h4 id="the-getdocimprecise-subcommand">The <code>GetDocImprecise</code> subcommand</h4><p>WARNING: This command trades correctness for speed!</p><p>Same as the <code>GetDoc</code> command except that it doesn't recompile the file with
 libclang before looking up nodes in the AST. This can be very useful when you're
 editing files that take long to compile but you know that you haven't made any
 changes since the last parse that would lead to incorrect docs. When you're
@@ -941,13 +1048,13 @@ then the text <code>(FixIt)</code> is appended to the echo'd diagnostic when the
 completer is able to add this indication. The text <code>(FixIt available)</code> is
 also appended to the diagnostic text in the output of the <code>:YcmDiags</code> command
 for any diagnostics with available fix-its (where the completer can provide this
-indication).</p><p><strong>NOTE:</strong> Causes re-parsing of the current translation unit.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs</code></p><h4 id="the-refactorrename-new-name-subcommand">The <code>RefactorRename &lt;new name&gt;</code> subcommand</h4><p>In supported file types, this command attempts to perform a semantic rename of
+indication).</p><p><strong>NOTE:</strong> Causes re-parsing of the current translation unit.</p><p>Supported in filetypes: <code>c, cpp, objc, objcpp, cs, java</code></p><h4 id="the-refactorrename-new-name-subcommand">The <code>RefactorRename &lt;new name&gt;</code> subcommand</h4><p>In supported file types, this command attempts to perform a semantic rename of
 the identifier under the cursor. This includes renaming declarations,
 definitions and usages of the identifier, or any other language-appropriate
 action. The specific behavior is defined by the semantic engine in use.</p><p>Similar to <code>FixIt</code>, this command applies automatic modifications to your source
 files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
-you. The behavior is described in <a href="#multi-file-refactor">the following section</a>.</p><p>Supported in filetypes: <code>javascript</code> (variables only), <code>typescript</code></p><h4 id="multi-file-refactor">Multi-file Refactor</h4><p>When a Refactor or FixIt command touches multiple files, YouCompleteMe attempts
+you. The behavior is described in <a href="#multi-file-refactor">the following section</a>.</p><p>Supported in filetypes: <code>javascript</code> (variables only), <code>typescript, java</code></p><h4 id="multi-file-refactor">Multi-file Refactor</h4><p>When a Refactor or FixIt command touches multiple files, YouCompleteMe attempts
 to apply those modifications to any existing open, visible buffer in the current
 tab. If no such buffer can be found, YouCompleteMe opens the file in a new
 small horizontal split at the top of the current window, applies the change,
@@ -973,7 +1080,7 @@ flags.</p><h4 id="the-restartserver-subcommand">The <code>RestartServer</code> s
 work as separate servers that YCM talks to.</p><p>Use this subcommand while editing a file from a JavaScript project to switch to
 that project.</p><p>An additional optional argument may be supplied for Python, specifying the
 python binary to use to restart the Python semantic engine.</p><pre><code class="viml">:YcmCompleter RestartServer /usr/bin/python3.4
-</code></pre><p>Supported in filetypes: <code>cs, go, javascript, python, rust, typescript</code></p><h4 id="the-clearcompilationflagcache-subcommand">The <code>ClearCompilationFlagCache</code> subcommand</h4><p>YCM caches the flags it gets from the <code>FlagsForFile</code> function in your
+</code></pre><p>Supported in filetypes: <code>cs, go, javascript, python, rust, typescript, java</code></p><h4 id="the-clearcompilationflagcache-subcommand">The <code>ClearCompilationFlagCache</code> subcommand</h4><p>YCM caches the flags it gets from the <code>FlagsForFile</code> function in your
 <code>ycm_extra_conf.py</code> file unless you return them with the <code>do_cache</code> parameter
 set to <code>False</code>. It also caches the flags extracted from the compilation
 database. The cache is in memory and is never invalidated (unless you restart
@@ -1120,11 +1227,11 @@ holds a dictionary of key-values, where the keys are Vim's filetype strings
 delimited by commas and values are dictionaries describing the filter.</p><p>A filter is a dictionary of key-values, where the keys are the type of filter,
 and the value is a list of arguments to that filter. In the case of just a
 single item in the list, you may omit the brackets and just provide the argument
-directly. If any filter matches a diagnostic, it will be dropped and YCM will 
+directly. If any filter matches a diagnostic, it will be dropped and YCM will
 not render it.</p><p>The following filter types are supported:</p><ul>
 <li>"regex": Accepts a string <a href="https://docs.python.org/2/library/re.html#regular-expression-syntax">regular expression</a>. This type matches
 when the regex (treated as case-insensitive) is found in the diagnostic text.</li>
-<li>"level": Accepts a string level, either "warning" or "error." This type 
+<li>"level": Accepts a string level, either "warning" or "error." This type
 matches when the diagnostic has the same level.</li>
 </ul><p><strong>NOTE:</strong> The regex syntax is <strong>NOT</strong> Vim's, it's <a href="https://docs.python.org/2/library/re.html#regular-expression-syntax">Python's</a>.</p><p>Default: <code>{}</code></p><pre><code class="viml">let g:ycm_filter_diagnostics = {
   \ "java": {
@@ -1327,7 +1434,7 @@ option is set to 0 then no check is made on the size of the file you're opening.
 </code></pre><h3 id="the-gycm_python_binary_path-option">The <code>g:ycm_python_binary_path</code> option</h3><p>This option specifies the Python interpreter to use to run the <a href="https://github.com/davidhalter/jedi">jedi</a>
 completion library.  Specify the Python interpreter to use to get completions.
 By default the Python under which <a href="https://github.com/Valloric/ycmd">ycmd</a> runs is used (<a href="https://github.com/Valloric/ycmd">ycmd</a> runs on
-Python 2.6, 2.7 or 3.3+).</p><p>Default: <code>''</code></p><pre><code class="viml">let g:ycm_python_binary_path = 'python'
+Python 2.7 or 3.4+).</p><p>Default: <code>''</code></p><pre><code class="viml">let g:ycm_python_binary_path = 'python'
 </code></pre><p><strong>NOTE:</strong> the settings above will make YCM use the first <code>python</code> executable
 found through the PATH.</p><h2 id="faq">FAQ</h2><h3 id="i-used-to-be-able-to-import-vim-in-ycm_extra_confpy-but-now-cant">I used to be able to <code>import vim</code> in <code>.ycm_extra_conf.py</code>, but now can't</h3><p>YCM was rewritten to use a client-server architecture where most of the logic is
 in the <a href="https://github.com/Valloric/ycmd">ycmd server</a>. So the magic <code>vim</code> module you could have previously
@@ -1541,8 +1648,11 @@ this happens, <a href="https://github.com/Valloric/ycmd">ycmd</a> will automatic
 Conduct</a>. By participating in this project you agree to abide by its
 terms.</p><h2 id="contact">Contact</h2><p>If you have questions about the plugin or need help, please join the <a href="https://gitter.im/Valloric/YouCompleteMe">Gitter
 room</a> or use the <a href="https://groups.google.com/forum/?hl=en#!forum/ycm-users">ycm-users</a> mailing list.</p><p>If you have bug reports or feature suggestions, please use the <a href="https://github.com/Valloric/YouCompleteMe/issues?state=open">issue
-tracker</a>.</p><p>The latest version of the plugin is available at
-<a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><h2 id="license">License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
+tracker</a>. Before you do, please carefully read
+<a href="https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> as this asks for important diagnostics which
+the team will use to help get you going.</p><p>The latest version of the plugin is available at
+<a href="http://valloric.github.io/YouCompleteMe/">http://valloric.github.io/YouCompleteMe/</a>.</p><p>The author's homepage is <a href="http://val.markovic.io">http://val.markovic.io</a>.</p><p>Please do <strong>NOT</strong> go to #vim on freenode for support. Please contact the
+YouCompleteMe maintainers directly using the <a href="#contact">contact details</a> below.</p><h2 id="license">License</h2><p>This software is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 license</a>.
 © 2015-2017 YouCompleteMe contributors</p></div>
       </section>
 
