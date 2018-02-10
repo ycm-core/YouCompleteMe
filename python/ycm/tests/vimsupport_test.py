@@ -1684,7 +1684,6 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
 
 @patch( 'ycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
-@patch( 'vim.error', VimError )
 @patch( 'vim.command',
         side_effect = [ None, VimError( 'Unknown code' ), None ] )
 def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
@@ -1701,7 +1700,6 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
 
 @patch( 'ycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
-@patch( 'vim.error', VimError )
 @patch( 'vim.command',
         new_callable = ExtendedMock,
         side_effect = [ None, VimError( 'E325' ), None ] )
@@ -1720,7 +1718,6 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
 
 @patch( 'ycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
-@patch( 'vim.error', VimError )
 @patch( 'vim.command',
         new_callable = ExtendedMock,
         side_effect = [ None, KeyboardInterrupt, None ] )

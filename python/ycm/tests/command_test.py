@@ -22,7 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycm.tests.test_utils import ( MockVimModule, MockVimBuffers, VimBuffer )
+from ycm.tests.test_utils import MockVimModule, MockVimBuffers, VimBuffer
 MockVimModule()
 
 from hamcrest import assert_that, equal_to
@@ -32,7 +32,7 @@ from ycm.tests import YouCompleteMeInstance
 
 
 @YouCompleteMeInstance( { 'extra_conf_vim_data': [ 'tempname()' ] } )
-def SendCommandRequest_test( ycm ):
+def SendCommandRequest_ExtraConfData_Works_test( ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
@@ -40,6 +40,23 @@ def SendCommandRequest_test( ycm ):
       send_request.assert_called_once_with(
         [ 'GoTo' ], 'python', { 'extra_conf_data': {
           'tempname()': '_TEMP_FILE_' } }
+      )
+    with patch( 'ycm.client.base_request.JsonFromFuture',
+                return_value = 'Some response' ):
+      assert_that(
+        ycm.SendCommandRequest( [ 'GoTo' ], 'python' ),
+        equal_to( 'Some response' )
+      )
+
+
+@YouCompleteMeInstance( { 'extra_conf_vim_data': [ 'undefined_value' ] } )
+def SendCommandRequest_ExtraConfData_UndefinedValue_test( ycm ):
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+      ycm.SendCommandRequest( [ 'GoTo' ], 'python' )
+      send_request.assert_called_once_with(
+        [ 'GoTo' ], 'python', { 'extra_conf_data': {} }
       )
     with patch( 'ycm.client.base_request.JsonFromFuture',
                 return_value = 'Some response' ):

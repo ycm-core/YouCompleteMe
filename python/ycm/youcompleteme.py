@@ -750,8 +750,17 @@ class YouCompleteMe( object ):
 
   def _AddExtraConfDataIfNeeded( self, extra_data ):
     def BuildExtraConfData( extra_conf_vim_data ):
-      return dict( ( expr, vimsupport.VimExpressionToPythonType( expr ) )
-                   for expr in extra_conf_vim_data )
+      extra_conf_data = {}
+      for expr in extra_conf_vim_data:
+        try:
+          extra_conf_data[ expr ] = vimsupport.VimExpressionToPythonType( expr )
+        except vim.error:
+          message = (
+            "Error evaluating '{expr}' in the 'g:ycm_extra_conf_vim_data' "
+            "option.".format( expr = expr ) )
+          vimsupport.PostVimMessage( message, truncate = True )
+          self._logger.exception( message )
+      return extra_conf_data
 
     extra_conf_vim_data = self._user_options[ 'extra_conf_vim_data' ]
     if extra_conf_vim_data:
