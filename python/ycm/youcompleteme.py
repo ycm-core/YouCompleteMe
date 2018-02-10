@@ -108,6 +108,15 @@ SERVER_LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
 HANDLE_FLAG_INHERIT = 0x00000001
 
 
+# The following two methods exist for testability only
+def _CompleteDoneHook_CSharp( ycm ):
+  ycm._OnCompleteDone_Csharp()
+
+
+def _CompleteDoneHook_Java( ycm ):
+  ycm._OnCompleteDone_Java()
+
+
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._available_completers = {}
@@ -128,7 +137,8 @@ class YouCompleteMe( object ):
     self._SetUpServer()
     self._ycmd_keepalive.Start()
     self._complete_done_hooks = {
-      'cs': lambda self: self._OnCompleteDone_Csharp()
+      'cs': _CompleteDoneHook_CSharp,
+      'java': _CompleteDoneHook_Java,
     }
 
 
@@ -491,42 +501,63 @@ class YouCompleteMe( object ):
     if not latest_completion_request or not latest_completion_request.Done():
       return []
 
-    completions = latest_completion_request.RawResponse()
+    completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
+    completions = latest_completion_request.RawResponse()[ 'completions' ]
 
-    result = self._FilterToMatchingCompletions( completions, True )
+    if 'user_data' in completed_item and completed_item[ 'user_data' ] != '':
+      # Vim supports user_data (8.0.1493) or later, so we actually know the
+      # _exact_ element that was selected, having put its index in the user_data
+      # field.
+      return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
+
+    # Otherwise, we have to guess by matching the values in the completed item
+    # and the list of completions. Sometimes this returns multiple
+    # possibilities, which is essentially unresolvable.
+
+    result = self._FilterToMatchingCompletions( completed_item,
+                                                completions,
+                                                True )
     result = list( result )
+
     if result:
       return result
 
-    if self._HasCompletionsThatCouldBeCompletedWithMoreText( completions ):
+    if self._HasCompletionsThatCouldBeCompletedWithMoreText( completed_item,
+                                                             completions ):
       # Since the way that YCM works leads to CompleteDone called on every
       # character, return blank if the completion might not be done. This won't
       # match if the completion is ended with typing a non-keyword character.
       return []
 
-    result = self._FilterToMatchingCompletions( completions, False )
+    result = self._FilterToMatchingCompletions( completed_item,
+                                                completions,
+                                                False )
 
     return list( result )
 
 
-  def _FilterToMatchingCompletions( self, completions, full_match_only ):
+  def _FilterToMatchingCompletions( self,
+                                    completed_item,
+                                    completions,
+                                    full_match_only ):
     """Filter to completions matching the item Vim said was completed"""
-    completed = vimsupport.GetVariableValue( 'v:completed_item' )
-    for completion in completions:
-      item = ConvertCompletionDataToVimData( completion )
-      match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
-                      else [ 'word' ] )
+    match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
+                    else [ 'word' ] )
+
+    for index, completion in enumerate( completions ):
+      item = ConvertCompletionDataToVimData( index, completion )
 
       def matcher( key ):
-        return ( utils.ToUnicode( completed.get( key, "" ) ) ==
+        return ( utils.ToUnicode( completed_item.get( key, "" ) ) ==
                  utils.ToUnicode( item.get( key, "" ) ) )
 
       if all( [ matcher( i ) for i in match_keys ] ):
         yield completion
 
 
-  def _HasCompletionsThatCouldBeCompletedWithMoreText( self, completions ):
-    completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
+  def _HasCompletionsThatCouldBeCompletedWithMoreText( self,
+                                                       completed_item,
+                                                       completions ):
     if not completed_item:
       return False
 
@@ -542,9 +573,9 @@ class YouCompleteMe( object ):
       reject_exact_match = False
       completed_word += text[ -1 ]
 
-    for completion in completions:
+    for index, completion in enumerate( completions ):
       word = utils.ToUnicode(
-          ConvertCompletionDataToVimData( completion )[ 'word' ] )
+          ConvertCompletionDataToVimData( index, completion )[ 'word' ] )
       if reject_exact_match and word == completed_word:
         continue
       if word.startswith( completed_word ):
@@ -579,6 +610,33 @@ class YouCompleteMe( object ):
       return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
 
+
+  def _OnCompleteDone_Java( self ):
+    completions = self.GetCompletionsUserMayHaveCompleted()
+    fixit_completions = [ self._GetFixItCompletion( c ) for c in completions ]
+    fixit_completions = [ f for f in fixit_completions if f ]
+    if not fixit_completions:
+      return
+
+    # If we have user_data in completions (8.0.1493 or later), then we would
+    # only ever return max. 1 completion here. However, if we had to guess, it
+    # is possible that we matched multiple completion items (e.g. for overloads,
+    # or similar classes in multiple packages). In any case, rather than
+    # prompting the user and disturbing her workflow, we just apply the first
+    # one. This might be wrong, but the solution is to use a (very) new version
+    # of Vim which supports user_data on completion items
+    fixit_completion = fixit_completions[ 0 ]
+
+    for fixit in fixit_completion:
+      vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
+
+
+  def _GetFixItCompletion( self, completion ):
+    if ( "extra_data" not in completion
+         or "fixits" not in completion[ "extra_data" ] ):
+      return None
+
+    return completion[ "extra_data" ][ "fixits" ]
 
   def GetErrorCount( self ):
     return self.CurrentBuffer().GetErrorCount()

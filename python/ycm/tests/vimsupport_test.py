@@ -841,6 +841,103 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   ] )
 
 
+@patch( 'ycm.vimsupport.VariableExists', return_value = False )
+@patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
+@patch( 'ycm.vimsupport.GetBufferNumberForFilename',
+        side_effect = [ -1, 1 ],
+        new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.BufferIsVisible',
+        side_effect = [ False, True ],
+        new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.OpenFilename',
+        new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.Confirm',
+        return_value = True,
+        new_callable = ExtendedMock )
+@patch( 'vim.eval', return_value = 10, new_callable = ExtendedMock )
+@patch( 'vim.command', new_callable = ExtendedMock )
+def ReplaceChunks_SingleFile_NotOpen_Silent_test(
+  vim_command,
+  vim_eval,
+  confirm,
+  post_vim_message,
+  open_filename,
+  buffer_is_visible,
+  get_buffer_number_for_filename,
+  set_fitting_height,
+  variable_exists ):
+
+  # This test is the same as ReplaceChunks_SingleFile_NotOpen_test, but we pass
+  # the silent flag, as used by post-complete actions, and shows the stuff we
+  # _don't_ call in that case.
+
+  single_buffer_name = os.path.realpath( 'single_file' )
+
+  chunks = [
+    _BuildChunk( 1, 1, 2, 1, 'replacement', single_buffer_name )
+  ]
+
+  result_buffer = VimBuffer(
+    single_buffer_name,
+    contents = [
+      'line1',
+      'line2',
+      'line3'
+    ]
+  )
+
+  with patch( 'vim.buffers', [ None, result_buffer, None ] ):
+    vimsupport.ReplaceChunks( chunks, silent=True )
+
+  # We didn't check if it was OK to open the file (silent)
+  confirm.assert_not_called()
+
+  # Ensure that we applied the replacement correctly
+  eq_( result_buffer.GetLines(), [
+    'replacementline2',
+    'line3',
+  ] )
+
+  # GetBufferNumberForFilename is called 2 times. The return values are set in
+  # the @patch call above:
+  #  - once whilst applying the changes (-1 return)
+  #  - finally after calling OpenFilename (1 return)
+  get_buffer_number_for_filename.assert_has_exact_calls( [
+    call( single_buffer_name ),
+    call( single_buffer_name ),
+  ] )
+
+  # BufferIsVisible is called 2 times for the same reasons as above, with the
+  # return of each one
+  buffer_is_visible.assert_has_exact_calls( [
+    call( -1 ),
+    call( 1 ),
+  ] )
+
+  # We open 'single_file' as expected.
+  open_filename.assert_called_with( single_buffer_name, {
+    'focus': True,
+    'fix': True,
+    'size': 10
+  } )
+
+  # And close it again, but don't show the quickfix window
+  vim_command.assert_has_exact_calls( [
+    call( 'lclose' ),
+    call( 'hide' ),
+  ] )
+  set_fitting_height.assert_not_called()
+
+  # But we _don't_ update the QuickFix list
+  vim_eval.assert_has_exact_calls( [
+    call( '&previewheight' ),
+  ] )
+
+  # And we don't print a message either
+  post_vim_message.assert_not_called()
+
+
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
         side_effect = [ -1, -1, 1 ],
         new_callable = ExtendedMock )
