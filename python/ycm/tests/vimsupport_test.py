@@ -40,6 +40,74 @@ import json
 
 
 @patch( 'vim.eval', new_callable = ExtendedMock )
+def SetLocationListForBuffer_Current_test( vim_eval ):
+  diagnostics = [ {
+    'bufnr': 3,
+    'filename': 'some_filename',
+    'lnum': 5,
+    'col': 22,
+    'type': 'E',
+    'valid': 1
+  } ]
+  current_buffer = VimBuffer( '/test', number = 3, window = 7 )
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 1 ) ):
+    vimsupport.SetLocationListForBuffer( 3, diagnostics )
+
+  # We asked for the buffer which is current, so we use winnr 0
+  vim_eval.assert_has_exact_calls( [
+    call( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+  ] )
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock, side_effect = [ 8, 1 ] )
+def SetLocationListForBuffer_NotCurrent_test( vim_eval ):
+  diagnostics = [ {
+    'bufnr': 3,
+    'filename': 'some_filename',
+    'lnum': 5,
+    'col': 22,
+    'type': 'E',
+    'valid': 1
+  } ]
+  current_buffer = VimBuffer( '/test', number = 3, window = 7 )
+  other_buffer = VimBuffer( '/notcurrent', number = 1, window = 8 )
+  with MockVimBuffers( [ current_buffer, other_buffer ],
+                       current_buffer,
+                       ( 1, 1 ) ):
+    vimsupport.SetLocationListForBuffer( 1, diagnostics )
+
+  # We asked for a buffer which is not current, so we find the window
+  vim_eval.assert_has_exact_calls( [
+    call( 'bufwinnr(1)' ), # returns 8 due to side_effect
+    call( 'setloclist( 8, {0} )'.format( json.dumps( diagnostics ) ) )
+  ] )
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock, side_effect = [ -1, 1 ] )
+def SetLocationListForBuffer_NotVisible_test( vim_eval ):
+  diagnostics = [ {
+    'bufnr': 3,
+    'filename': 'some_filename',
+    'lnum': 5,
+    'col': 22,
+    'type': 'E',
+    'valid': 1
+  } ]
+  current_buffer = VimBuffer( '/test', number = 3, window = 7 )
+  other_buffer = VimBuffer( '/notcurrent', number = 1, window = 8 )
+  with MockVimBuffers( [ current_buffer, other_buffer ],
+                       current_buffer,
+                       ( 1, 1 ) ):
+    vimsupport.SetLocationListForBuffer( 1, diagnostics )
+
+  # We asked for a buffer which is not current, so we find the window
+  vim_eval.assert_has_exact_calls( [
+    call( 'bufwinnr(1)' ), # returns -1 due to side_effect
+    call( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+  ] )
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock )
 def SetLocationList_test( vim_eval ):
   diagnostics = [ {
     'bufnr': 3,
@@ -49,9 +117,36 @@ def SetLocationList_test( vim_eval ):
     'type': 'E',
     'valid': 1
   } ]
-  vimsupport.SetLocationList( diagnostics )
-  vim_eval.assert_called_once_with(
-    'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) )
+  current_buffer = VimBuffer( '/test', number = 3, window = 7 )
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 1 ) ):
+    vimsupport.SetLocationList( diagnostics )
+
+  vim_eval.assert_has_calls( [
+    call( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) ),
+  ] )
+
+
+@patch( 'vim.eval', new_callable = ExtendedMock )
+def SetLocationList_NotCurrent_test( vim_eval ):
+  diagnostics = [ {
+    'bufnr': 3,
+    'filename': 'some_filename',
+    'lnum': 5,
+    'col': 22,
+    'type': 'E',
+    'valid': 1
+  } ]
+  current_buffer = VimBuffer( '/test', number = 3, window = 7 )
+  other_buffer = VimBuffer( '/notcurrent', number = 1, window = 8 )
+  with MockVimBuffers( [ current_buffer, other_buffer ],
+                       current_buffer,
+                       ( 1, 1 ) ):
+    vimsupport.SetLocationList( diagnostics )
+
+  # This version does not check the current buffer and just sets the current win
+  vim_eval.assert_has_exact_calls( [
+    call( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) ),
+  ] )
 
 
 @patch( 'ycm.vimsupport.VariableExists', return_value = True )

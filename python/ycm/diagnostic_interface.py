@@ -123,7 +123,8 @@ class DiagnosticInterface( object ):
 
 
   def _UpdateLocationList( self ):
-    vimsupport.SetLocationList(
+    vimsupport.SetLocationListForBuffer(
+      self._bufnr,
       vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ) )
 
 

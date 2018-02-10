@@ -38,6 +38,12 @@ from ycm.tests import ( MakeUserOptions, StopServer, test_utils,
                         WaitUntilReady, YouCompleteMeInstance )
 from ycm.client.base_request import _LoadExtraConfFile
 from ycmd.responses import ServerError
+from ycm.tests.mock_utils import ( MockAsyncServerResponseDone,
+                                   MockAsyncServerResponseInProgress,
+                                   MockAsyncServerResponseException )
+
+
+from ycm import buffer as ycm_buffer_module
 
 
 @YouCompleteMeInstance()
@@ -394,11 +400,11 @@ def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( ycm,
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-@patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
-  ycm, set_location_list, post_vim_message, *args ):
+  ycm, set_location_list_for_window, post_vim_message, *args ):
 
-  current_buffer = VimBuffer( 'buffer', filetype = 'cpp' )
+  current_buffer = VimBuffer( 'buffer', filetype = 'cpp', window = 99 )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = {} ):
@@ -410,7 +416,7 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
     call( 'Diagnostics refreshed', warning = False ),
     call( 'No warnings or errors detected.', warning = False )
   ] )
-  set_location_list.assert_called_once_with( [] )
+  set_location_list_for_window.assert_called_once_with( 0, [] )
 
 
 @YouCompleteMeInstance( { 'log_level': 'debug',
@@ -419,9 +425,9 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-@patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
-  ycm, set_location_list, post_vim_message, *args ):
+  ycm, set_location_list_for_window, post_vim_message, *args ):
 
   diagnostic = {
     'kind': 'ERROR',
@@ -433,7 +439,10 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
     }
   }
 
-  current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
+  current_buffer = VimBuffer( 'buffer',
+                              filetype = 'cpp',
+                              number = 3,
+                              window = 99 )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = [ diagnostic ] ):
@@ -444,7 +453,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
           warning = False ),
     call( 'Diagnostics refreshed', warning = False )
   ] )
-  set_location_list.assert_called_once_with( [ {
+  set_location_list_for_window.assert_called_once_with( 0, [ {
       'bufnr': 3,
       'lnum': 19,
       'col': 2,
@@ -458,10 +467,14 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-@patch( 'ycm.vimsupport.SetLocationList', new_callable = ExtendedMock )
+@patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.OpenLocationList', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
-  ycm, open_location_list, set_location_list, post_vim_message, *args ):
+  ycm,
+  open_location_list,
+  set_location_list_for_window,
+  post_vim_message,
+  *args ):
 
   diagnostic = {
     'kind': 'ERROR',
@@ -473,7 +486,10 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
     }
   }
 
-  current_buffer = VimBuffer( 'buffer', filetype = 'cpp', number = 3 )
+  current_buffer = VimBuffer( 'buffer',
+                              filetype = 'cpp',
+                              number = 3,
+                              window = 99 )
   with MockVimBuffers( [ current_buffer ], current_buffer ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = [ diagnostic ] ):
@@ -484,7 +500,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
           warning = False ),
     call( 'Diagnostics refreshed', warning = False )
   ] )
-  set_location_list.assert_called_once_with( [ {
+  set_location_list_for_window.assert_called_once_with( 0, [ {
       'bufnr': 3,
       'lnum': 19,
       'col': 2,
@@ -641,3 +657,361 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
       call( 'sign place 2 name=YcmWarning line=3 buffer=5' ),
       call( 'try | exec "sign unplace 1 buffer=5" | catch /E158/ | endtry' )
     ] )
+
+
+@YouCompleteMeInstance( { 'echo_current_diagnostic': 1,
+                          'always_populate_location_list': 1 } )
+@patch.object( ycm_buffer_module,
+               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
+               [ 'ycmtest' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
+                                                         post_vim_message,
+                                                         *args  ):
+
+  # This test simulates asynchronous diagnostic updates associated with a single
+  # file (e.g. Translation Unit), but where the actual errors refer to other
+  # open files and other non-open files. This is not strictly invalid, nor is it
+  # completely normal, but it is supported and does work.
+
+  # Contrast with the next test which sends the diagnostics filewise, which is
+  # what the language server protocol will do.
+
+  diagnostics = [
+    {
+      'kind': 'ERROR',
+      'text': 'error text in current buffer',
+      'location': {
+        'filepath': '/current',
+        'line_num': 1,
+        'column_num': 1
+      },
+    },
+    {
+      'kind': 'ERROR',
+      'text': 'error text in hidden buffer',
+      'location': {
+        'filepath': '/has_diags',
+        'line_num': 4,
+        'column_num': 2
+      },
+    },
+    {
+      'kind': 'ERROR',
+      'text': 'error text in buffer not open in Vim',
+      'location': {
+        'filepath': '/not_open',
+        'line_num': 8,
+        'column_num': 4
+      },
+    },
+  ]
+
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              number = 1,
+                              window = 10 )
+  buffers = [
+    current_buffer,
+    VimBuffer( '/no_diags',
+               filetype = 'ycmtest',
+               number = 2,
+               window = 9 ),
+    VimBuffer( '/has_diags',
+               filetype = 'ycmtest',
+               number = 3,
+               window = 8 ),
+  ]
+
+  # Register each buffer internally with YCM
+  for current in buffers:
+    with MockVimBuffers( buffers, current, ( 1, 1 ) ):
+      ycm.OnFileReadyToParse()
+
+  with patch( 'ycm.vimsupport.SetLocationListForWindow',
+              new_callable = ExtendedMock ) as set_location_list_for_window:
+    with MockVimBuffers( buffers, current_buffer, ( 1, 1 ) ):
+      ycm.UpdateWithNewDiagnosticsForFile( '/current', diagnostics )
+
+    # We update the diagnostic on the current cursor position
+    post_vim_message.assert_has_exact_calls( [
+      call( "error text in current buffer", truncate = True, warning = False ),
+    ] )
+
+    # Ensure we included all the diags though
+    set_location_list_for_window.assert_has_exact_calls( [
+      call( 0, [
+        {
+          'lnum': 1,
+          'col': 1,
+          'bufnr': 1,
+          'valid': 1,
+          'type': 'E',
+          'text': 'error text in current buffer',
+        },
+        {
+          'lnum': 4,
+          'col': 2,
+          'bufnr': 3,
+          'valid': 1,
+          'type': 'E',
+          'text': 'error text in hidden buffer',
+        },
+        {
+          'lnum': 8,
+          'col': 4,
+          'bufnr': -1, # sic: Our mocked bufnr function actually returns -1,
+                       # even though YCM is passing "create if needed".
+                       # FIXME? we shouldn't do that, and we should pass
+                       # filename instead
+          'valid': 1,
+          'type': 'E',
+          'text': 'error text in buffer not open in Vim'
+        }
+      ] )
+    ] )
+
+
+@YouCompleteMeInstance( { 'echo_current_diagnostic': 1,
+                          'always_populate_location_list': 1 } )
+@patch.object( ycm_buffer_module,
+               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
+               [ 'ycmtest' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
+                                                      post_vim_message,
+                                                      *args  ):
+
+  # This test simulates asynchronous diagnostic updates which are delivered per
+  # file, including files which are open and files which are not.
+
+  # Ordered to ensure that the calls to update are deterministic
+  diagnostics_per_file = [
+    ( '/current', [ {
+      'kind': 'ERROR',
+      'text': 'error text in current buffer',
+      'location': {
+        'filepath': '/current',
+        'line_num': 1,
+        'column_num': 1
+      }, }, ] ),
+    ( '/has_diags', [ {
+      'kind': 'ERROR',
+      'text': 'error text in hidden buffer',
+      'location': {
+        'filepath': '/has_diags',
+        'line_num': 4,
+        'column_num': 2
+      }, }, ] ),
+    ( '/not_open', [ {
+      'kind': 'ERROR',
+      'text': 'error text in buffer not open in Vim',
+      'location': {
+        'filepath': '/not_open',
+        'line_num': 8,
+        'column_num': 4
+      }, }, ] )
+  ]
+
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              number = 1,
+                              window = 10 )
+  buffers = [
+    current_buffer,
+    VimBuffer( '/no_diags',
+               filetype = 'ycmtest',
+               number = 2,
+               window = 9 ),
+    VimBuffer( '/has_diags',
+               filetype = 'ycmtest',
+               number = 3,
+               window = 8 ),
+  ]
+
+  # Register each buffer internally with YCM
+  for current in buffers:
+    with MockVimBuffers( buffers, current, ( 1, 1 ) ):
+      ycm.OnFileReadyToParse()
+
+  with patch( 'ycm.vimsupport.SetLocationListForWindow',
+              new_callable = ExtendedMock ) as set_location_list_for_window:
+    with MockVimBuffers( buffers, current_buffer, ( 1, 1 ) ):
+      for filename, diagnostics in diagnostics_per_file:
+        ycm.UpdateWithNewDiagnosticsForFile( filename, diagnostics )
+
+    # We update the diagnostic on the current cursor position
+    post_vim_message.assert_has_exact_calls( [
+      call( "error text in current buffer", truncate = True, warning = False ),
+    ] )
+
+    # Ensure we included all the diags though
+    set_location_list_for_window.assert_has_exact_calls( [
+      call( 0, [
+        {
+          'lnum': 1,
+          'col': 1,
+          'bufnr': 1,
+          'valid': 1,
+          'type': 'E',
+          'text': 'error text in current buffer',
+        },
+      ] ),
+
+      call( 8, [
+        {
+          'lnum': 4,
+          'col': 2,
+          'bufnr': 3,
+          'valid': 1,
+          'type': 'E',
+          'text': 'error text in hidden buffer',
+        },
+      ] )
+    ] )
+
+
+@YouCompleteMeInstance()
+def YouCompleteMe_OnPeriodicTick_ServerNotRunning_test( ycm, *args  ):
+  with patch.object( ycm, 'IsServerAlive', return_value = False ):
+    assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
+
+
+@YouCompleteMeInstance()
+def YouCompleteMe_OnPeriodicTick_ServerNotReady_test( ycm, *args ):
+  with patch.object( ycm, 'IsServerAlive', return_value = True ):
+    with patch.object( ycm, 'IsServerReady', return_value = False ):
+      assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+
+
+@YouCompleteMeInstance()
+@patch.object( ycm_buffer_module,
+               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
+               [ 'ycmtest' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
+@patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
+def YouCompelteMe_OnPeriodicTick_DontRetry_test( ycm,
+                                                 post_data_to_handler_async,
+                                                 *args ):
+
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              number = 1,
+                              window = 10 )
+  buffers = [ current_buffer ]
+
+  # Create the request and make the first poll; we expect no response
+  with MockVimBuffers( buffers, current_buffer, ( 1, 1 ) ):
+      assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+      post_data_to_handler_async.assert_called()
+
+  assert ycm._message_poll_request is not None
+  post_data_to_handler_async.reset_mock()
+
+  # OK that sent the request, now poll to check if it is complete (say it is
+  # not)
+  with patch.object( ycm._message_poll_request,
+                     '_response_future',
+                     new = MockAsyncServerResponseInProgress() ) as mock_future:
+    poll_again = ycm.OnPeriodicTick()
+    mock_future.done.assert_called()
+    mock_future.result.assert_not_called()
+    assert_that( poll_again, equal_to( True ) )
+
+  # Poll again, but return a response (telling us to stop polling)
+  with patch.object( ycm._message_poll_request,
+                     '_response_future',
+                     new = MockAsyncServerResponseDone( False ) ) \
+      as mock_future:
+    poll_again = ycm.OnPeriodicTick()
+    mock_future.done.assert_called()
+    mock_future.result.assert_called()
+    post_data_to_handler_async.assert_not_called()
+    # We reset and don't poll anymore
+    assert_that( ycm._message_poll_request is None )
+    assert_that( poll_again, equal_to( False ) )
+
+
+
+@YouCompleteMeInstance()
+@patch.object( ycm_buffer_module,
+               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
+               [ 'ycmtest' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
+@patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
+def YouCompelteMe_OnPeriodicTick_Exception_test( ycm,
+                                                 post_data_to_handler_async,
+                                                 *args ):
+
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              number = 1,
+                              window = 10 )
+  buffers = [ current_buffer ]
+
+  # Create the request and make the first poll; we expect no response
+  with MockVimBuffers( buffers, current_buffer, ( 1, 1 ) ):
+    assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+    post_data_to_handler_async.assert_called()
+
+  post_data_to_handler_async.reset_mock()
+
+  # Poll again, but return an exception response
+  mock_response = MockAsyncServerResponseException( RuntimeError( 'test' ) )
+  with patch.object( ycm._message_poll_request,
+                     '_response_future',
+                     new = mock_response ) as mock_future:
+    assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
+    mock_future.done.assert_called()
+    mock_future.result.assert_called()
+    post_data_to_handler_async.assert_not_called()
+    # We reset and don't poll anymore
+    assert_that( ycm._message_poll_request is None )
+
+
+@YouCompleteMeInstance()
+@patch.object( ycm_buffer_module,
+               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
+               [ 'ycmtest' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
+@patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
+@patch( 'ycm.client.messages_request._HandlePollResponse' )
+def YouCompelteMe_OnPeriodicTick_ValidResponse_test( ycm,
+                                                     handle_poll_response,
+                                                     post_data_to_handler_async,
+                                                     *args ):
+
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              number = 1,
+                              window = 10 )
+  buffers = [ current_buffer ]
+
+  # Create the request and make the first poll; we expect no response
+  with MockVimBuffers( buffers, current_buffer, ( 1, 1 ) ):
+    assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+    post_data_to_handler_async.assert_called()
+
+  post_data_to_handler_async.reset_mock()
+
+  # Poll again, and return a _proper_ response (finally!).
+  # Note, _HandlePollResponse is tested independently (for simplicity)
+  with patch.object( ycm._message_poll_request,
+                     '_response_future',
+                     new = MockAsyncServerResponseDone( [] ) ) as mock_future:
+    assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+    handle_poll_response.assert_called()
+    mock_future.done.assert_called()
+    mock_future.result.assert_called()
+    post_data_to_handler_async.assert_called() # Poll again!
+    assert_that( ycm._message_poll_request is not None )
