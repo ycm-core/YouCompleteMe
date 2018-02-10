@@ -749,15 +749,14 @@ def ReplaceChunks( chunks ):
   If for some reason a file could not be opened or changed, raises RuntimeError.
   Otherwise, returns no meaningful value."""
 
-  # We apply the edits file-wise for efficiency, and because we must track the
-  # file-wise offset deltas (caused by the modifications to the text).
+  # We apply the edits file-wise for efficiency.
   chunks_by_file = _SortChunksByFile( chunks )
 
-  # We sort the file list simply to enable repeatable testing
+  # We sort the file list simply to enable repeatable testing.
   sorted_file_list = sorted( iterkeys( chunks_by_file ) )
 
   # Make sure the user is prepared to have her screen mutilated by the new
-  # buffers
+  # buffers.
   num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
 
   if num_files_to_open > 0:
@@ -770,11 +769,10 @@ def ReplaceChunks( chunks ):
   locations = []
 
   for filepath in sorted_file_list:
-    ( buffer_num, close_window ) = _OpenFileInSplitIfNeeded( filepath )
+    buffer_num, close_window = _OpenFileInSplitIfNeeded( filepath )
 
-    ReplaceChunksInBuffer( chunks_by_file[ filepath ],
-                           vim.buffers[ buffer_num ],
-                           locations )
+    locations.extend( ReplaceChunksInBuffer( chunks_by_file[ filepath ],
+                                             vim.buffers[ buffer_num ] ) )
 
     # When opening tons of files, we don't want to have a split for each new
     # file, as this simply does not scale, so we open the window, make the
@@ -798,101 +796,91 @@ def ReplaceChunks( chunks ):
                   warning = False )
 
 
-def ReplaceChunksInBuffer( chunks, vim_buffer, locations ):
-  """Apply changes in |chunks| to the buffer-like object |buffer|. Append each
-  chunk's start to the list |locations|"""
+def ReplaceChunksInBuffer( chunks, vim_buffer ):
+  """Apply changes in |chunks| to the buffer-like object |buffer| and return the
+  locations for that buffer."""
 
-  # We need to track the difference in length, but ensuring we apply fixes
-  # in ascending order of insertion point.
+  # We apply the chunks from the bottom to the top of the buffer so that we
+  # don't need to adjust the position of the remaining chunks due to text
+  # changes. This assumes that chunks are not overlapping. However, we still
+  # allow multiple chunks to share the same starting position (because of the
+  # language server protocol specs). These chunks must be applied in their order
+  # of appareance. Since Python sorting is stable, if we sort the whole list in
+  # reverse order of location, these chunks will be reversed. Therefore, we
+  # need to fully reverse the list then sort it on the starting position in
+  # reverse order.
+  chunks.reverse()
   chunks.sort( key = lambda chunk: (
     chunk[ 'range' ][ 'start' ][ 'line_num' ],
     chunk[ 'range' ][ 'start' ][ 'column_num' ]
-  ) )
+  ), reverse = True )
 
-  # Remember the line number we're processing. Negative line number means we
-  # haven't processed any lines yet (by nature of being not equal to any
-  # real line number).
-  last_line = -1
+  # However, we still want to display the locations from the top of the buffer
+  # to its bottom.
+  return reversed( [ ReplaceChunk( chunk[ 'range' ][ 'start' ],
+                                   chunk[ 'range' ][ 'end' ],
+                                   chunk[ 'replacement_text' ],
+                                   vim_buffer )
+                     for chunk in chunks ] )
 
-  line_delta = 0
-  for chunk in chunks:
-    if chunk[ 'range' ][ 'start' ][ 'line_num' ] != last_line:
-      # If this chunk is on a different line than the previous chunk,
-      # then ignore previous deltas (as offsets won't have changed).
-      last_line = chunk[ 'range' ][ 'end' ][ 'line_num' ]
-      char_delta = 0
 
-    ( new_line_delta, new_char_delta ) = ReplaceChunk(
-      chunk[ 'range' ][ 'start' ],
-      chunk[ 'range' ][ 'end' ],
-      chunk[ 'replacement_text' ],
-      line_delta, char_delta,
-      vim_buffer,
-      locations )
-    line_delta += new_line_delta
-    char_delta += new_char_delta
+def SplitLines( contents ):
+  """Return a list of each of the lines in the byte string |contents|.
+  Behavior is equivalent to str.splitlines with the following exceptions:
+   - empty strings are returned as [ '' ];
+   - a trailing newline is not ignored (i.e. SplitLines( '\n' )
+     returns [ '', '' ], not [ '' ] )."""
+  if contents == b'':
+    return [ b'' ]
+
+  lines = contents.splitlines()
+
+  if contents.endswith( b'\r' ) or contents.endswith( b'\n' ):
+    lines.append( b'' )
+
+  return lines
 
 
 # Replace the chunk of text specified by a contiguous range with the supplied
-# text.
+# text and return the location.
 # * start and end are objects with line_num and column_num properties
 # * the range is inclusive
 # * indices are all 1-based
-# * the returned character delta is the delta for the last line
-#
-# returns the delta (in lines and characters) that any position after the end
-# needs to be adjusted by.
 #
 # NOTE: Works exclusively with bytes() instances and byte offsets as returned
 # by ycmd and used within the Vim buffers
-def ReplaceChunk( start, end, replacement_text, line_delta, char_delta,
-                  vim_buffer, locations = None ):
+def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # ycmd's results are all 1-based, but vim's/python's are all 0-based
   # (so we do -1 on all of the values)
-  start_line = start[ 'line_num' ] - 1 + line_delta
-  end_line = end[ 'line_num' ] - 1 + line_delta
+  start_line = start[ 'line_num' ] - 1
+  end_line = end[ 'line_num' ] - 1
 
-  source_lines_count = end_line - start_line + 1
-  start_column = start[ 'column_num' ] - 1 + char_delta
+  start_column = start[ 'column_num' ] - 1
   end_column = end[ 'column_num' ] - 1
-  if source_lines_count == 1:
-    end_column += char_delta
 
   # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
   # so we convert to bytes
-  replacement_lines = ToBytes( replacement_text ).splitlines( False )
-  if not replacement_lines:
-    replacement_lines = [ bytes( b'' ) ]
-  replacement_lines_count = len( replacement_lines )
+  replacement_lines = SplitLines( ToBytes( replacement_text ) )
 
   # NOTE: Vim buffers are a list of byte objects on Python 2 but unicode
   # objects on Python 3.
-  end_existing_text = ToBytes( vim_buffer[ end_line ] )[ end_column : ]
   start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
-
-  new_char_delta = ( len( replacement_lines[ -1 ] )
-                     - ( end_column - start_column ) )
-  if replacement_lines_count > 1:
-    new_char_delta -= start_column
+  end_existing_text = ToBytes( vim_buffer[ end_line ] )[ end_column : ]
 
   replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
   replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
 
   vim_buffer[ start_line : end_line + 1 ] = replacement_lines[:]
 
-  if locations is not None:
-    locations.append( {
-      'bufnr': vim_buffer.number,
-      'filename': vim_buffer.name,
-      # line and column numbers are 1-based in qflist
-      'lnum': start_line + 1,
-      'col': start_column + 1,
-      'text': replacement_text,
-      'type': 'F',
-    } )
-
-  new_line_delta = replacement_lines_count - source_lines_count
-  return ( new_line_delta, new_char_delta )
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': vim_buffer.name,
+    # line and column numbers are 1-based in qflist
+    'lnum': start_line + 1,
+    'col': start_column + 1,
+    'text': replacement_text,
+    'type': 'F',
+  }
 
 
 def InsertNamespace( namespace ):
@@ -909,9 +897,9 @@ def InsertNamespace( namespace ):
   if line:
     existing_line = LineTextInCurrentBuffer( line )
     existing_indent = re.sub( r"\S.*", "", existing_line )
-  new_line = "{0}using {1};\n\n".format( existing_indent, namespace )
+  new_line = "{0}using {1};\n".format( existing_indent, namespace )
   replace_pos = { 'line_num': line + 1, 'column_num': 1 }
-  ReplaceChunk( replace_pos, replace_pos, new_line, 0, 0, vim.current.buffer )
+  ReplaceChunk( replace_pos, replace_pos, new_line, vim.current.buffer )
   PostVimMessage( 'Add namespace: {0}'.format( namespace ), warning = False )
 
 
