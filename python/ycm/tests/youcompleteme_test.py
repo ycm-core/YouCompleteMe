@@ -253,16 +253,19 @@ def YouCompleteMe_ToggleLogs_WithParameters_test( open_filename,
                                                   ycm ):
   logfile_buffer = VimBuffer( ycm._client_logfile )
   with MockVimBuffers( [ logfile_buffer ], [ logfile_buffer ] ):
-    ycm.ToggleLogs( os.path.basename( ycm._client_logfile ),
+    ycm.ToggleLogs( 90,
+                    'botright vertical',
+                    os.path.basename( ycm._client_logfile ),
                     'nonexisting_logfile',
                     os.path.basename( ycm._server_stdout ) )
 
     open_filename.assert_has_exact_calls( [
-      call( ycm._server_stdout, { 'size': 12,
+      call( ycm._server_stdout, { 'size': 90,
                                   'watch': True,
                                   'fix': True,
                                   'focus': False,
-                                  'position': 'end' } )
+                                  'position': 'end',
+                                  'mods': 'botright vertical' } )
     ] )
     close_buffers_for_filename.assert_has_exact_calls( [
       call( ycm._client_logfile )
@@ -278,14 +281,15 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileNotAlreadyOpen_test(
 
   current_buffer = VimBuffer( 'current_buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    ycm.ToggleLogs()
+    ycm.ToggleLogs( 0, '' )
 
   open_filename.assert_has_exact_calls( [
     call( ycm._server_stderr, { 'size': 12,
                                 'watch': True,
                                 'fix': True,
                                 'focus': False,
-                                'position': 'end' } )
+                                'position': 'end',
+                                'mods': '' } )
   ] )
 
 
@@ -298,7 +302,7 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileAlreadyOpen_test(
 
   logfile_buffer = VimBuffer( ycm._server_stdout )
   with MockVimBuffers( [ logfile_buffer ], [ logfile_buffer ] ):
-    ycm.ToggleLogs()
+    ycm.ToggleLogs( 0, '' )
 
   close_buffers_for_filename.assert_has_exact_calls( [
     call( ycm._server_stdout )
@@ -314,7 +318,7 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_NoSelection_test(
 
   current_buffer = VimBuffer( 'current_buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    ycm.ToggleLogs()
+    ycm.ToggleLogs( 0, '' )
 
   assert_that(
     # Argument passed to PostVimMessage.
