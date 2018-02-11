@@ -826,7 +826,7 @@ Quick Feature Summary
 **NOTE**: Java support is currently experimental. Please let us know your
 [feedback](#contact).
 
-* Semantic auto-completion
+* Semantic auto-completion with automatic import insertion
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
 * Reference finding (`GoToReferences`)
@@ -834,7 +834,7 @@ Quick Feature Summary
 * Renaming symbols (`RefactorRename <new name>`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
-* Automatically fix certain errors (`FixIt`)
+* Automatically fix certain errors including code generation  (`FixIt`)
 * Detection of java projects
 * Management of `jdt.ls` server instance
 
@@ -1184,6 +1184,9 @@ package you have in the virtual environment.
 3. If you previously used Eclim or Syntastic for Java, disable them for Java.
 
 4. Edit a Java file from your project.
+
+For the best experience, we highly recommend at least Vim 8.0.1493 when using
+Java support with YouCompleteMe.
 
 #### Java Project Files
 
