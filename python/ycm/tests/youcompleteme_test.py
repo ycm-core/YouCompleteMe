@@ -896,7 +896,7 @@ def YouCompleteMe_OnPeriodicTick_ServerNotReady_test( ycm, *args ):
         return_value = True )
 @patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
 @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
-def YouCompelteMe_OnPeriodicTick_DontRetry_test( ycm,
+def YouCompleteMe_OnPeriodicTick_DontRetry_test( ycm,
                                                  post_data_to_handler_async,
                                                  *args ):
 
@@ -947,7 +947,7 @@ def YouCompelteMe_OnPeriodicTick_DontRetry_test( ycm,
         return_value = True )
 @patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
 @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
-def YouCompelteMe_OnPeriodicTick_Exception_test( ycm,
+def YouCompleteMe_OnPeriodicTick_Exception_test( ycm,
                                                  post_data_to_handler_async,
                                                  *args ):
 
@@ -986,7 +986,7 @@ def YouCompelteMe_OnPeriodicTick_Exception_test( ycm,
 @patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
 @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
 @patch( 'ycm.client.messages_request._HandlePollResponse' )
-def YouCompelteMe_OnPeriodicTick_ValidResponse_test( ycm,
+def YouCompleteMe_OnPeriodicTick_ValidResponse_test( ycm,
                                                      handle_poll_response,
                                                      post_data_to_handler_async,
                                                      *args ):
