@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycm.tests.test_utils import ( ExtendedMock, MockVimBuffers, MockVimModule,
-                                   VimBuffer, VimMatch )
+                                   VimBuffer, VimMatch, VimSign )
 MockVimModule()
 
 import os
@@ -33,6 +33,7 @@ from hamcrest import ( assert_that, contains, empty, equal_to, is_in, is_not,
 from mock import call, MagicMock, patch
 
 from ycm.paths import _PathToPythonUsedDuringBuild
+from ycm.vimsupport import SIGN_BUFFER_ID_INITIAL_VALUE
 from ycm.youcompleteme import YouCompleteMe
 from ycm.tests import ( MakeUserOptions, StopServer, test_utils,
                         WaitUntilReady, YouCompleteMeInstance )
@@ -517,9 +518,8 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-@patch( 'vim.command', new_callable = ExtendedMock )
 def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
-  ycm, vim_command, post_vim_message, *args ):
+  ycm, post_vim_message, *args ):
 
   contents = """int main() {
   int x, y;
@@ -592,6 +592,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
                               window = 2 )
 
   test_utils.VIM_MATCHES = []
+  test_utils.VIM_SIGNS = []
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ) ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
@@ -615,9 +616,12 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
     )
 
     # Only the error sign is placed.
-    vim_command.assert_has_exact_calls( [
-      call( 'sign place 1 name=YcmError line=3 buffer=5' ),
-    ] )
+    assert_that(
+      test_utils.VIM_SIGNS,
+      contains(
+        VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 3, 'YcmError', 5 )
+      )
+    )
 
   # The error is not echoed again when moving the cursor along the line.
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 2 ) ):
@@ -639,7 +643,6 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
       "expected ';' after expression (FixIt)",
       truncate = True, warning = False )
 
-    vim_command.reset_mock()
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = diagnostics[ 1 : ] ):
       ycm.OnFileReadyToParse()
@@ -653,10 +656,12 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
       )
     )
 
-    vim_command.assert_has_exact_calls( [
-      call( 'sign place 2 name=YcmWarning line=3 buffer=5' ),
-      call( 'try | exec "sign unplace 1 buffer=5" | catch /E158/ | endtry' )
-    ] )
+    assert_that(
+      test_utils.VIM_SIGNS,
+      contains(
+        VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 3, 'YcmWarning', 5 )
+      )
+    )
 
 
 @YouCompleteMeInstance( { 'echo_current_diagnostic': 1,

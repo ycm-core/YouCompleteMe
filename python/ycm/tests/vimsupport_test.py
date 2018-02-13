@@ -26,13 +26,14 @@ from builtins import *  # noqa
 
 from ycm.tests import PathToTestFile
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
-                                   MockVimBuffers, MockVimCommand,
-                                   MockVimModule, VimBuffer, VimError )
+                                   MockVimBuffers, MockVimModule, VimBuffer,
+                                   VimError )
 MockVimModule()
 
 from ycm import vimsupport
 from nose.tools import eq_
-from hamcrest import assert_that, calling, contains, equal_to, has_entry, raises
+from hamcrest import ( assert_that, calling, contains, empty, equal_to,
+                       has_entry, raises )
 from mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
@@ -1373,22 +1374,16 @@ def BufferIsVisibleForFilename_test():
     eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
 
 
-@patch( 'vim.command',
-        side_effect = MockVimCommand,
-        new_callable = ExtendedMock )
-def CloseBuffersForFilename_test( vim_command, *args ):
+def CloseBuffersForFilename_test():
   vim_buffers = [
     VimBuffer( 'some_filename', number = 2 ),
     VimBuffer( 'some_filename', number = 5 )
   ]
 
-  with patch( 'vim.buffers', vim_buffers ):
+  with MockVimBuffers( vim_buffers, vim_buffers[ 0 ] ) as vim:
     vimsupport.CloseBuffersForFilename( 'some_filename' )
 
-  vim_command.assert_has_exact_calls( [
-    call( 'silent! bwipeout! 2' ),
-    call( 'silent! bwipeout! 5' )
-  ], any_order = True )
+  assert_that( vim.buffers, empty() )
 
 
 @patch( 'vim.command', new_callable = ExtendedMock )
