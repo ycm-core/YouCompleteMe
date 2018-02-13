@@ -27,7 +27,7 @@ import vim
 import os
 import json
 import re
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
                          JoinLinesAsUnicode, ToBytes, ToUnicode )
 from ycmd import user_options_store
@@ -44,6 +44,14 @@ FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
     'files will be written to disk. Do you wish to continue?' )
 
 NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
+
+# This is the starting value assigned to the sign's id of each buffer. This
+# value is then incremented for each new sign. This should prevent conflicts
+# with other plugins using signs.
+SIGN_BUFFER_ID_INITIAL_VALUE = 100000000
+
+SIGN_PLACE_REGEX = re.compile(
+  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)$" )
 
 
 def CurrentLineAndColumn():
@@ -163,23 +171,41 @@ def GetBufferChangedTick( bufnr ):
   return GetIntValue( 'getbufvar({0}, "changedtick")'.format( bufnr ) )
 
 
-def UnplaceSignInBuffer( buffer_number, sign_id ):
-  if buffer_number < 0:
-    return
-  vim.command(
-    'try | exec "sign unplace {0} buffer={1}" | catch /E158/ | endtry'.format(
-        sign_id, buffer_number ) )
+class DiagnosticSign( namedtuple( 'DiagnosticSign',
+                                  [ 'id', 'line', 'name', 'buffer_number' ] ) ):
+  # We want two signs that have different ids but the same location to compare
+  # equal. ID doesn't matter.
+  def __eq__( self, other ):
+    return ( self.line == other.line and
+             self.name == other.name and
+             self.buffer_number == other.buffer_number )
 
 
-def PlaceSign( sign_id, line_num, buffer_num, is_error = True ):
-  # libclang can give us diagnostics that point "outside" the file; Vim borks
-  # on these.
-  if line_num < 1:
-    line_num = 1
+def GetSignsInBuffer( buffer_number ):
+  vim.command( 'redir => b:ycm_sign' )
+  vim.command( 'silent sign place buffer={}'.format( buffer_number ) )
+  vim.command( 'redir END' )
+  sign_output = vim.eval( 'b:ycm_sign' )
+  vim.command( 'unlet b:ycm_sign' )
+  signs = []
+  for line in sign_output.split( '\n' ):
+    match = SIGN_PLACE_REGEX.search( line )
+    if match:
+      signs.append( DiagnosticSign( int( match.group( 'id' ) ),
+                                    int( match.group( 'line' ) ),
+                                    match.group( 'name' ),
+                                    buffer_number ) )
+  return signs
 
-  sign_name = 'YcmError' if is_error else 'YcmWarning'
+
+def UnplaceSign( sign ):
+  vim.command( 'sign unplace {0} buffer={1}'.format( sign.id,
+                                                     sign.buffer_number ) )
+
+
+def PlaceSign( sign ):
   vim.command( 'sign place {0} name={1} line={2} buffer={3}'.format(
-    sign_id, sign_name, line_num, buffer_num ) )
+    sign.id, sign.name, sign.line, sign.buffer_number ) )
 
 
 def ClearYcmSyntaxMatches():
