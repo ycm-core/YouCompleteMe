@@ -47,6 +47,15 @@ MATCHDELETE_REGEX = re.compile( '^matchdelete\((?P<id>\d+)\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\)$' )
 FNAMEESCAPE_REGEX = re.compile( '^fnameescape\(\'(?P<filepath>.+)\'\)$' )
+SIGN_LIST_REGEX = re.compile(
+  "^silent sign place buffer=(?P<bufnr>\d+)$" )
+SIGN_PLACE_REGEX = re.compile(
+  '^sign place (?P<id>\d+) name=(?P<name>\w+) line=(?P<line>\d+) '
+  'buffer=(?P<bufnr>\d+)$' )
+SIGN_UNPLACE_REGEX = re.compile(
+  '^sign unplace (?P<id>\d+) buffer=(?P<bufnr>\d+)$' )
+REDIR_START_REGEX = re.compile( '^redir => (?P<variable>[\w:]+)$' )
+REDIR_END_REGEX = re.compile( '^redir END$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -59,6 +68,13 @@ FNAMEESCAPE_REGEX = re.compile( '^fnameescape\(\'(?P<filepath>.+)\'\)$' )
 VIM_MOCK = MagicMock()
 
 VIM_MATCHES = []
+VIM_SIGNS = []
+
+REDIR = {
+  'status': False,
+  'variable': '',
+  'output': ''
+}
 
 
 @contextlib.contextmanager
@@ -158,6 +174,19 @@ def _MockVimOptionsEval( value ):
   return None
 
 
+def _MockVimFunctionsEval( value ):
+  if value == 'tempname()':
+    return '_TEMP_FILE_'
+
+  if value == 'tagfiles()':
+    return [ 'tags' ]
+
+  if value == 'shiftwidth()':
+    return 2
+
+  return None
+
+
 def _MockVimMatchEval( value ):
   if value == 'getmatches()':
     # Returning a copy, because ClearYcmSyntaxMatches() gets the result of
@@ -196,14 +225,9 @@ def _MockVimEval( value ):
   if value == 'g:ycm_server_python_interpreter':
     return server_python_interpreter
 
-  if value == 'tempname()':
-    return '_TEMP_FILE_'
-
-  if value == 'tagfiles()':
-    return [ 'tags' ]
-
-  if value == 'shiftwidth()':
-    return 2
+  result = _MockVimFunctionsEval( value )
+  if result is not None:
+    return result
 
   result = _MockVimOptionsEval( value )
   if result is not None:
@@ -221,6 +245,9 @@ def _MockVimEval( value ):
   if match:
     return match.group( 'filepath' )
 
+  if value == REDIR[ 'variable' ]:
+    return REDIR[ 'output' ]
+
   raise VimError( 'Unexpected evaluation: {0}'.format( value ) )
 
 
@@ -232,10 +259,59 @@ def _MockWipeoutBuffer( buffer_number ):
       return buffers.pop( index )
 
 
+def _MockSignCommand( command ):
+  match = SIGN_LIST_REGEX.search( command )
+  if match and REDIR[ 'status' ]:
+    bufnr = int( match.group( 'bufnr' ) )
+    REDIR[ 'output' ] = ( '--- Signs ---\n'
+                          'Signs for foo:\n' )
+    for sign in VIM_SIGNS:
+      if sign.bufnr == bufnr:
+        REDIR[ 'output' ] += (
+          '    line={0}  id={1}  name={2}'.format( sign.line,
+                                                   sign.id,
+                                                   sign.name ) )
+    return True
+
+  match = SIGN_PLACE_REGEX.search( command )
+  if match:
+    VIM_SIGNS.append( VimSign( int( match.group( 'id' ) ),
+                               int( match.group( 'line' ) ),
+                               match.group( 'name' ),
+                               int( match.group( 'bufnr' ) ) ) )
+    return True
+
+  match = SIGN_UNPLACE_REGEX.search( command )
+  if match:
+    sign_id = int( match.group( 'id' ) )
+    bufnr = int( match.group( 'bufnr' ) )
+    for sign in VIM_SIGNS:
+      if sign.id == sign_id and sign.bufnr == bufnr:
+        VIM_SIGNS.remove( sign )
+        return True
+
+  return False
+
+
 def MockVimCommand( command ):
   match = BWIPEOUT_REGEX.search( command )
   if match:
     return _MockWipeoutBuffer( int( match.group( 1 ) ) )
+
+  match = REDIR_START_REGEX.search( command )
+  if match:
+    REDIR[ 'status' ] = True
+    REDIR[ 'variable' ] = match.group( 'variable' )
+    return
+
+  match = REDIR_END_REGEX.search( command )
+  if match:
+    REDIR[ 'status' ] = False
+    return
+
+  result = _MockSignCommand( command )
+  if result:
+    return
 
   raise RuntimeError( 'Unexpected command: ' + command )
 
@@ -349,6 +425,37 @@ class VimMatch( object ):
   def __repr__( self ):
     return "VimMatch( group = '{0}', pattern = '{1}' )".format( self.group,
                                                                 self.pattern )
+
+
+  def __getitem__( self, key ):
+    if key == 'group':
+      return self.group
+    elif key == 'id':
+      return self.id
+
+
+class VimSign( object ):
+
+  def __init__( self, sign_id, line, name, bufnr ):
+    self.id = sign_id
+    self.line = line
+    self.name = name
+    self.bufnr = bufnr
+
+
+  def __eq__( self, other ):
+    return ( self.id == other.id and
+             self.line == other.line and
+             self.name == other.name and
+             self.bufnr == other.bufnr )
+
+
+  def __repr__( self ):
+    return ( "VimSign( id = {0}, line = {1}, "
+                      "name = '{2}', bufnr = {3} )".format( self.id,
+                                                            self.line,
+                                                            self.name,
+                                                            self.bufnr ) )
 
 
   def __getitem__( self, key ):
