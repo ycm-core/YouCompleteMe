@@ -75,8 +75,7 @@ class DiagnosticInterface( object ):
     if self._user_options[ 'enable_diagnostic_signs' ]:
       self._UpdateSigns()
 
-    if self._user_options[ 'enable_diagnostic_highlighting' ]:
-      self._UpdateSquiggles()
+    self.UpdateMatches()
 
     if self._user_options[ 'always_populate_location_list' ]:
       self._UpdateLocationList()
@@ -127,37 +126,50 @@ class DiagnosticInterface( object ):
       vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ) )
 
 
-  def _UpdateSquiggles( self ):
+  def UpdateMatches( self ):
+    if not self._user_options[ 'enable_diagnostic_highlighting' ]:
+      return
 
-    vimsupport.ClearYcmSyntaxMatches()
+    matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
 
     for diags in itervalues( self._line_to_diags ):
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
-        location_extent = diag[ 'location_extent' ]
-        is_error = _DiagnosticIsError( diag )
+        patterns = []
 
+        group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
+                  'YcmWarningSection' )
+
+        location_extent = diag[ 'location_extent' ]
         if location_extent[ 'start' ][ 'line_num' ] <= 0:
           location = diag[ 'location' ]
-          vimsupport.AddDiagnosticSyntaxMatch(
-              location[ 'line_num' ],
-              location[ 'column_num' ],
-              is_error = is_error )
+          patterns.append( vimsupport.GetDiagnosticMatchPattern(
+            location[ 'line_num' ],
+            location[ 'column_num' ] ) )
         else:
-          vimsupport.AddDiagnosticSyntaxMatch(
+          patterns.append( vimsupport.GetDiagnosticMatchPattern(
             location_extent[ 'start' ][ 'line_num' ],
             location_extent[ 'start' ][ 'column_num' ],
             location_extent[ 'end' ][ 'line_num' ],
-            location_extent[ 'end' ][ 'column_num' ],
-            is_error = is_error )
+            location_extent[ 'end' ][ 'column_num' ] ) )
 
         for diag_range in diag[ 'ranges' ]:
-          vimsupport.AddDiagnosticSyntaxMatch(
+          patterns.append( vimsupport.GetDiagnosticMatchPattern(
             diag_range[ 'start' ][ 'line_num' ],
             diag_range[ 'start' ][ 'column_num' ],
             diag_range[ 'end' ][ 'line_num' ],
-            diag_range[ 'end' ][ 'column_num' ],
-            is_error = is_error )
+            diag_range[ 'end' ][ 'column_num' ] ) )
+
+        for pattern in patterns:
+          # The id doesn't matter for matches that we may add.
+          match = vimsupport.DiagnosticMatch( 0, group, pattern )
+          try:
+            matches_to_remove.remove( match )
+          except ValueError:
+            vimsupport.AddDiagnosticMatch( match )
+
+    for match in matches_to_remove:
+      vimsupport.RemoveDiagnosticMatch( match )
 
 
   def _UpdateSigns( self ):

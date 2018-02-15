@@ -664,6 +664,25 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
     )
 
 
+@YouCompleteMeInstance( { 'enable_diagnostic_highlighting': 1 } )
+def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
+  current_buffer = VimBuffer( 'buffer',
+                              filetype = 'c',
+                              number = 5,
+                              window = 2 )
+
+  test_utils.VIM_MATCHES = [
+    VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
+    VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
+    VimMatch( 'YcmErrorSection', '\%3l\%8c' )
+  ]
+
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    ycm.UpdateMatches()
+
+    assert_that( test_utils.VIM_MATCHES, empty() )
+
+
 @YouCompleteMeInstance( { 'echo_current_diagnostic': 1,
                           'always_populate_location_list': 1 } )
 @patch.object( ycm_buffer_module,
