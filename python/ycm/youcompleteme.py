@@ -461,6 +461,10 @@ class YouCompleteMe( object ):
     SendEventNotificationAsync( 'BufferUnload', deleted_buffer_number )
 
 
+  def UpdateMatches( self ):
+    self.CurrentBuffer().UpdateMatches()
+
+
   def OnBufferVisit( self ):
     extra_data = {}
     self._AddUltiSnipsDataIfNeeded( extra_data )

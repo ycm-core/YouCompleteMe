@@ -208,39 +208,47 @@ def PlaceSign( sign ):
     sign.id, sign.name, sign.line, sign.buffer_number ) )
 
 
-def ClearYcmSyntaxMatches():
-  matches = VimExpressionToPythonType( 'getmatches()' )
-  for match in matches:
-    if match[ 'group' ].startswith( 'Ycm' ):
-      vim.eval( 'matchdelete({0})'.format( match[ 'id' ] ) )
+class DiagnosticMatch( namedtuple( 'DiagnosticMatch',
+                                   [ 'id', 'group', 'pattern' ] ) ):
+  def __eq__( self, other ):
+    return ( self.group == other.group and
+             self.pattern == other.pattern )
 
 
-def AddDiagnosticSyntaxMatch( line_num,
-                              column_num,
-                              line_end_num = None,
-                              column_end_num = None,
-                              is_error = True ):
-  """Highlight a range in the current window starting from
-  (|line_num|, |column_num|) included to (|line_end_num|, |column_end_num|)
-  excluded. If |line_end_num| or |column_end_num| are not given, highlight the
-  character at (|line_num|, |column_num|). Both line and column numbers are
-  1-based. Return the ID of the newly added match."""
-  group = 'YcmErrorSection' if is_error else 'YcmWarningSection'
+def GetDiagnosticMatchesInCurrentWindow():
+  vim_matches = vim.eval( 'getmatches()' )
+  return [ DiagnosticMatch( match[ 'id' ],
+                            match[ 'group' ],
+                            match[ 'pattern' ] )
+           for match in vim_matches if match[ 'group' ].startswith( 'Ycm' ) ]
 
+
+def AddDiagnosticMatch( match ):
+  return GetIntValue( "matchadd('{}', '{}')".format( match.group,
+                                                     match.pattern ) )
+
+
+def RemoveDiagnosticMatch( match ):
+  return GetIntValue( "matchdelete({})".format( match.id ) )
+
+
+def GetDiagnosticMatchPattern( line_num,
+                               column_num,
+                               line_end_num = None,
+                               column_end_num = None ):
   line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
 
   if not line_end_num or not column_end_num:
-    return GetIntValue(
-      "matchadd('{0}', '\%{1}l\%{2}c')".format( group, line_num, column_num ) )
+    return '\%{}l\%{}c'.format( line_num, column_num )
 
   # -1 and then +1 to account for column end not included in the range.
   line_end_num, column_end_num = LineAndColumnNumbersClamped(
       line_end_num, column_end_num - 1 )
   column_end_num += 1
-
-  return GetIntValue(
-    "matchadd('{0}', '\%{1}l\%{2}c\_.\\{{-}}\%{3}l\%{4}c')".format(
-      group, line_num, column_num, line_end_num, column_end_num ) )
+  return '\%{}l\%{}c\_.\\{{-}}\%{}l\%{}c'.format( line_num,
+                                                  column_num,
+                                                  line_end_num,
+                                                  column_end_num )
 
 
 # Clamps the line and column numbers so that they are not past the contents of

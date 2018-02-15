@@ -80,6 +80,10 @@ class Buffer( object ):
     self._diag_interface.UpdateWithNewDiagnostics( diagnostics )
 
 
+  def UpdateMatches( self ):
+    self._diag_interface.UpdateMatches()
+
+
   def PopulateLocationList( self ):
     return self._diag_interface.PopulateLocationList()
 

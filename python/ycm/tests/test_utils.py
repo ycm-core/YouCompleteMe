@@ -203,9 +203,9 @@ def _MockVimMatchEval( value ):
 
   match = MATCHDELETE_REGEX.search( value )
   if match:
-    identity = int( match.group( 'id' ) )
+    match_id = int( match.group( 'id' ) )
     for index, vim_match in enumerate( VIM_MATCHES ):
-      if vim_match.id == identity:
+      if vim_match.id == match_id:
         VIM_MATCHES.pop( index )
         return -1
     return 0
@@ -421,7 +421,7 @@ class VimBuffers( object ):
 class VimMatch( object ):
 
   def __init__( self, group, pattern ):
-    self.id = len( VIM_MATCHES )
+    self.id = len( VIM_MATCHES ) + 1
     self.group = group
     self.pattern = pattern
 

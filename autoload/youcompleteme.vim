@@ -136,6 +136,7 @@ function! youcompleteme#Enable()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
+    autocmd BufEnter,WinEnter * call s:UpdateMatches()
   augroup END
 
   " The FileType event is not triggered for the first loaded file. We wait until
@@ -510,6 +511,11 @@ function! s:OnBufferUnload()
   endif
 
   exec s:python_command "ycm_state.OnBufferUnload( " . buffer_number . " )"
+endfunction
+
+
+function! s:UpdateMatches()
+  exec s:python_command "ycm_state.UpdateMatches()"
 endfunction
 
 
