@@ -25,18 +25,21 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
-                                   MockVimBuffers, MockVimModule, VimBuffer )
+                                   MockVimBuffers, MockVimModule, VimBuffer,
+                                   VimSign )
 MockVimModule()
 
 import contextlib
 import os
 
-from ycm.tests import PathToTestFile, YouCompleteMeInstance, WaitUntilReady
+from ycm.tests import ( PathToTestFile, test_utils, YouCompleteMeInstance,
+                        WaitUntilReady )
+from ycm.vimsupport import SIGN_BUFFER_ID_INITIAL_VALUE
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
                              UnknownExtraConf, ServerError )
 
-from hamcrest import ( assert_that, contains, has_entries, has_entry, has_item,
-                       has_items, has_key, is_not )
+from hamcrest import ( assert_that, contains, empty, has_entries, has_entry,
+                       has_item, has_items, has_key, is_not )
 from mock import call, MagicMock, patch
 from nose.tools import eq_, ok_
 
@@ -45,17 +48,6 @@ def PresentDialog_Confirm_Call( message ):
   """Return a mock.call object for a call to vimsupport.PresentDialog, as called
   why vimsupport.Confirm with the supplied confirmation message"""
   return call( message, [ 'Ok', 'Cancel' ] )
-
-
-def PlaceSign_Call( sign_id, line_num, buffer_num, is_error ):
-  sign_name = 'YcmError' if is_error else 'YcmWarning'
-  return call( 'sign place {0} name={1} line={2} buffer={3}'
-                  .format( sign_id, sign_name, line_num, buffer_num ) )
-
-
-def UnplaceSign_Call( sign_id, buffer_num ):
-  return call( 'try | exec "sign unplace {0} buffer={1}" |'
-               ' catch /E158/ | endtry'.format( sign_id, buffer_num ) )
 
 
 @contextlib.contextmanager
@@ -148,16 +140,25 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
       ] )
 
 
-@patch( 'vim.command' )
 @YouCompleteMeInstance()
 def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
-    ycm, vim_command ):
+  ycm ):
+
+  test_utils.VIM_MATCHES = []
+  test_utils.VIM_SIGNS = []
 
   with MockArbitraryBuffer( 'javascript' ):
     with MockEventNotification( None, False ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest()
-      vim_command.assert_not_called()
+      assert_that(
+        test_utils.VIM_MATCHES,
+        contains()
+      )
+      assert_that(
+        test_utils.VIM_SIGNS,
+        contains()
+      )
 
 
 @patch( 'ycm.client.base_request._LoadExtraConfFile',
@@ -263,13 +264,14 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
 
 @YouCompleteMeInstance()
 def EventNotification_FileReadyToParse_Diagnostic_Error_Native_test( ycm ):
+  test_utils.VIM_SIGNS = []
+
   _Check_FileReadyToParse_Diagnostic_Error( ycm )
   _Check_FileReadyToParse_Diagnostic_Warning( ycm )
   _Check_FileReadyToParse_Diagnostic_Clean( ycm )
 
 
-@patch( 'vim.command' )
-def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
+def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
   # Tests Vim sign placement and error/warning count python API
   # when one error is returned.
   def DiagnosticResponse( *args ):
@@ -284,23 +286,42 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm, vim_command ):
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
       ycm.HandleFileParseRequest()
-      vim_command.assert_has_calls( [
-        PlaceSign_Call( 1, 1, 1, True )
-      ] )
+      assert_that(
+        test_utils.VIM_SIGNS,
+        contains(
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 1, 'YcmError', 1 )
+        )
+      )
       eq_( ycm.GetErrorCount(), 1 )
       eq_( ycm.GetWarningCount(), 0 )
 
       # Consequent calls to HandleFileParseRequest shouldn't mess with
       # existing diagnostics, when there is no new parse request.
-      vim_command.reset_mock()
       ycm.HandleFileParseRequest()
-      vim_command.assert_not_called()
+      assert_that(
+        test_utils.VIM_SIGNS,
+        contains(
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 1, 'YcmError', 1 )
+        )
+      )
+      eq_( ycm.GetErrorCount(), 1 )
+      eq_( ycm.GetWarningCount(), 0 )
+
+      # New identical requests should result in the same diagnostics.
+      ycm.OnFileReadyToParse()
+      ok_( ycm.FileParseRequestReady() )
+      ycm.HandleFileParseRequest()
+      assert_that(
+        test_utils.VIM_SIGNS,
+        contains(
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 1, 'YcmError', 1 )
+        )
+      )
       eq_( ycm.GetErrorCount(), 1 )
       eq_( ycm.GetWarningCount(), 0 )
 
 
-@patch( 'vim.command' )
-def _Check_FileReadyToParse_Diagnostic_Warning( ycm, vim_command ):
+def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
   # Tests Vim sign placement/unplacement and error/warning count python API
   # when one warning is returned.
   # Should be called after _Check_FileReadyToParse_Diagnostic_Error
@@ -316,24 +337,29 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm, vim_command ):
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
       ycm.HandleFileParseRequest()
-      vim_command.assert_has_calls( [
-        PlaceSign_Call( 2, 2, 1, False ),
-        UnplaceSign_Call( 1, 1 )
-      ] )
+      assert_that(
+        test_utils.VIM_SIGNS,
+        contains(
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 2, 'YcmWarning', 1 )
+        )
+      )
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 1 )
 
       # Consequent calls to HandleFileParseRequest shouldn't mess with
       # existing diagnostics, when there is no new parse request.
-      vim_command.reset_mock()
       ycm.HandleFileParseRequest()
-      vim_command.assert_not_called()
+      assert_that(
+        test_utils.VIM_SIGNS,
+        contains(
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 2, 'YcmWarning', 1 )
+        )
+      )
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 1 )
 
 
-@patch( 'vim.command' )
-def _Check_FileReadyToParse_Diagnostic_Clean( ycm, vim_command ):
+def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
   # Tests Vim sign unplacement and error/warning count python API
   # when there are no errors/warnings left.
   # Should be called after _Check_FileReadyToParse_Diagnostic_Warning
@@ -341,9 +367,10 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm, vim_command ):
     with MockEventNotification( MagicMock( return_value = [] ) ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest()
-      vim_command.assert_has_calls( [
-        UnplaceSign_Call( 2, 1 )
-      ] )
+      assert_that(
+        test_utils.VIM_SIGNS,
+        empty()
+      )
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 0 )
 

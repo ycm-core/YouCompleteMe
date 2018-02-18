@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from future.utils import itervalues, iteritems
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
 
@@ -36,8 +36,7 @@ class DiagnosticInterface( object ):
     self._diag_filter = DiagnosticFilter.CreateFromOptions( user_options )
     # Line and column numbers are 1-based
     self._line_to_diags = defaultdict( list )
-    self._placed_signs = []
-    self._next_sign_id = 1
+    self._next_sign_id = vimsupport.SIGN_BUFFER_ID_INITIAL_VALUE
     self._previous_diag_line_number = -1
     self._diag_message_needs_clearing = False
 
@@ -162,43 +161,29 @@ class DiagnosticInterface( object ):
 
 
   def _UpdateSigns( self ):
-    new_signs, obsolete_signs = self._GetNewAndObsoleteSigns()
+    signs_to_unplace = vimsupport.GetSignsInBuffer( self._bufnr )
 
-    self._PlaceNewSigns( new_signs )
-
-    self._UnplaceObsoleteSigns( obsolete_signs )
-
-
-  def _GetNewAndObsoleteSigns( self ):
-    new_signs = []
-    obsolete_signs = list( self._placed_signs )
     for line, diags in iteritems( self._line_to_diags ):
       if not diags:
         continue
 
-      # We always go for the first diagnostic on line,
-      # because it is sorted giving priority to the Errors.
-      diag = diags[ 0 ]
-      sign = _DiagSignPlacement( self._next_sign_id,
-                                 line, _DiagnosticIsError( diag ) )
+      # We always go for the first diagnostic on the line because diagnostics
+      # are sorted by errors in priority and Vim can only display one sign by
+      # line.
+      name = 'YcmError' if _DiagnosticIsError( diags[ 0 ] ) else 'YcmWarning'
+      sign = vimsupport.DiagnosticSign( self._next_sign_id,
+                                        line,
+                                        name,
+                                        self._bufnr )
+
       try:
-        obsolete_signs.remove( sign )
+        signs_to_unplace.remove( sign )
       except ValueError:
-        new_signs.append( sign )
+        vimsupport.PlaceSign( sign )
         self._next_sign_id += 1
-    return new_signs, obsolete_signs
 
-
-  def _PlaceNewSigns( self, new_signs ):
-    for sign in new_signs:
-      vimsupport.PlaceSign( sign.id, sign.line, self._bufnr, sign.is_error )
-      self._placed_signs.append( sign )
-
-
-  def _UnplaceObsoleteSigns( self, obsolete_signs ):
-    for sign in obsolete_signs:
-      self._placed_signs.remove( sign )
-      vimsupport.UnplaceSignInBuffer( self._bufnr, sign.id )
+    for sign in signs_to_unplace:
+      vimsupport.UnplaceSign( sign )
 
 
   def _ConvertDiagListToDict( self ):
@@ -229,12 +214,3 @@ def _NormalizeDiagnostic( diag ):
   location[ 'column_num' ] = ClampToOne( location[ 'column_num' ] )
   location[ 'line_num' ] = ClampToOne( location[ 'line_num' ] )
   return diag
-
-
-class _DiagSignPlacement( namedtuple( "_DiagSignPlacement",
-                                      [ 'id', 'line', 'is_error' ] ) ):
-  # We want two signs that have different ids but the same location to compare
-  # equal. ID doesn't matter.
-  def __eq__( self, other ):
-    return ( self.line == other.line and
-             self.is_error == other.is_error )
