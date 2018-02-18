@@ -171,6 +171,15 @@ def GetBufferChangedTick( bufnr ):
   return GetIntValue( 'getbufvar({0}, "changedtick")'.format( bufnr ) )
 
 
+def CaptureVimCommand( command ):
+  vim.command( 'redir => b:ycm_command' )
+  vim.command( 'silent! {}'.format( command ) )
+  vim.command( 'redir END' )
+  output = vim.eval( 'b:ycm_command' )
+  vim.command( 'unlet b:ycm_command' )
+  return output
+
+
 class DiagnosticSign( namedtuple( 'DiagnosticSign',
                                   [ 'id', 'line', 'name', 'buffer_number' ] ) ):
   # We want two signs that have different ids but the same location to compare
@@ -182,11 +191,8 @@ class DiagnosticSign( namedtuple( 'DiagnosticSign',
 
 
 def GetSignsInBuffer( buffer_number ):
-  vim.command( 'redir => b:ycm_sign' )
-  vim.command( 'silent sign place buffer={}'.format( buffer_number ) )
-  vim.command( 'redir END' )
-  sign_output = vim.eval( 'b:ycm_sign' )
-  vim.command( 'unlet b:ycm_sign' )
+  sign_output = CaptureVimCommand(
+    'sign place buffer={}'.format( buffer_number ) )
   signs = []
   for line in sign_output.split( '\n' ):
     match = SIGN_PLACE_REGEX.search( line )

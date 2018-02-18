@@ -517,8 +517,9 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
   )
 
 
-@patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
-        return_value = [ 'foo', 'bar' ] )
+@patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
+fooGroup xxx foo bar
+             links to Statement""" )
 @YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
     ycm, *args ):
@@ -551,8 +552,9 @@ def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
       )
 
 
-@patch( 'ycm.syntax_parse.SyntaxKeywordsForCurrentBuffer',
-        return_value = [ 'foo', 'bar' ] )
+@patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
+fooGroup xxx foo bar
+             links to Statement""" )
 @YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
     ycm, *args ):

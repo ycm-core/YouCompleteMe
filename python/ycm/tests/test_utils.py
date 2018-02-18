@@ -48,7 +48,7 @@ OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\)$' )
 FNAMEESCAPE_REGEX = re.compile( '^fnameescape\(\'(?P<filepath>.+)\'\)$' )
 SIGN_LIST_REGEX = re.compile(
-  "^silent sign place buffer=(?P<bufnr>\d+)$" )
+  "^silent! sign place buffer=(?P<bufnr>\d+)$" )
 SIGN_PLACE_REGEX = re.compile(
   '^sign place (?P<id>\d+) name=(?P<name>\w+) line=(?P<line>\d+) '
   'buffer=(?P<bufnr>\d+)$' )
