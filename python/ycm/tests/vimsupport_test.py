@@ -1256,32 +1256,30 @@ def _BuildChunk( start_line,
   }
 
 
-@patch( 'vim.eval', new_callable = ExtendedMock )
-def AddDiagnosticSyntaxMatch_ErrorInMiddleOfLine_test( vim_eval ):
+def GetDiagnosticMatchPattern_ErrorInMiddleOfLine_test():
   current_buffer = VimBuffer(
     'some_file',
     contents = [ 'Highlight this error please' ]
   )
 
   with patch( 'vim.current.buffer', current_buffer ):
-    vimsupport.AddDiagnosticSyntaxMatch( 1, 16, 1, 21 )
+    assert_that(
+      vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 21 ),
+      equal_to( '\%1l\%16c\_.\{-}\%1l\%21c' )
+    )
 
-  vim_eval.assert_called_once_with(
-    r"matchadd('YcmErrorSection', '\%1l\%16c\_.\{-}\%1l\%21c')" )
 
-
-@patch( 'vim.eval', new_callable = ExtendedMock )
-def AddDiagnosticSyntaxMatch_WarningAtEndOfLine_test( vim_eval ):
+def AddDiagnosticSyntaxMatch_WarningAtEndOfLine_test():
   current_buffer = VimBuffer(
     'some_file',
     contents = [ 'Highlight this warning' ]
   )
 
   with patch( 'vim.current.buffer', current_buffer ):
-    vimsupport.AddDiagnosticSyntaxMatch( 1, 16, 1, 23, is_error = False )
-
-  vim_eval.assert_called_once_with(
-    r"matchadd('YcmWarningSection', '\%1l\%16c\_.\{-}\%1l\%23c')" )
+    assert_that(
+      vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 23 ),
+      equal_to( '\%1l\%16c\_.\{-}\%1l\%23c' )
+    )
 
 
 @patch( 'vim.command', new_callable=ExtendedMock )
