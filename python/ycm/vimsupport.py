@@ -175,7 +175,7 @@ def CaptureVimCommand( command ):
   vim.command( 'redir => b:ycm_command' )
   vim.command( 'silent! {}'.format( command ) )
   vim.command( 'redir END' )
-  output = vim.eval( 'b:ycm_command' )
+  output = ToUnicode( vim.eval( 'b:ycm_command' ) )
   vim.command( 'unlet b:ycm_command' )
   return output
 
