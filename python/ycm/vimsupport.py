@@ -832,7 +832,6 @@ def ReplaceChunks( chunks, silent=False ):
   if not silent:
     if locations:
       SetQuickFixList( locations )
-      OpenQuickFixList()
 
     PostVimMessage( 'Applied {0} changes'.format( len( chunks ) ),
                     warning = False )

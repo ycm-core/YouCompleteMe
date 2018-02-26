@@ -1766,10 +1766,10 @@ manually saved. A confirmation dialog is opened prior to doing this to remind
 you that this is about to happen.
 
 Once the modifications have been made, the quickfix list (see `:help quickfix`)
-is opened and populated with the locations of all modifications. This can be
-used to review all automatic changes made. Typically, use the `CTRL-W
-<enter>` combination to open the selected file in a new split. It is possible
-to customize how the quickfix window is opened by using [the `YcmQuickFixOpened`
+is populated with the locations of all modifications. This can be used to review
+all automatic changes made by using `:copen`. Typically, use the `CTRL-W
+<enter>` combination to open the selected file in a new split. It is possible to
+customize how the quickfix window is opened by using [the `YcmQuickFixOpened`
 autocommand](#the-ycmquickfixopened-autocommand).
 
 The buffers are *not* saved automatically. That is, you must save the modified

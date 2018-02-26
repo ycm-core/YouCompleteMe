@@ -719,11 +719,6 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
       'type': 'F'
     } ] ) ) ),
   ] )
-  vim_command.assert_has_exact_calls( [
-    call( 'botright copen' ),
-    call( 'silent! wincmd p' )
-  ] )
-  set_fitting_height.assert_called_once_with()
 
   # And it is ReplaceChunks that prints the message showing the number of
   # changes
@@ -817,10 +812,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   vim_command.assert_has_exact_calls( [
     call( 'lclose' ),
     call( 'hide' ),
-    call( 'botright copen' ),
-    call( 'silent! wincmd p' )
   ] )
-  set_fitting_height.assert_called_once_with()
 
   # And update the quickfix list
   vim_eval.assert_has_exact_calls( [
@@ -1202,10 +1194,7 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
   vim_command.assert_has_exact_calls( [
     call( 'lclose' ),
     call( 'hide' ),
-    call( 'botright copen' ),
-    call( 'silent! wincmd p' )
   ] )
-  set_fitting_height.assert_called_once_with()
 
   # And update the quickfix list with each entry
   vim_eval.assert_has_exact_calls( [
