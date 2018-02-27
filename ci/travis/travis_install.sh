@@ -41,9 +41,11 @@ export PATH="${PYENV_ROOT}/bin:${PATH}"
 eval "$(pyenv init -)"
 
 if [ "${YCM_PYTHON_VERSION}" == "2.7" ]; then
-  PYENV_VERSION="2.7.14"
+  # Tests are failing on Python 2.7.0 with the exception
+  # "TypeError: argument can't be <type 'unicode'>"
+  PYENV_VERSION="2.7.1"
 else
-  PYENV_VERSION="3.4.7"
+  PYENV_VERSION="3.4.0"
 fi
 
 # In order to work with ycmd, python *must* be built as a shared library. This
