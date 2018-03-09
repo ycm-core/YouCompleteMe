@@ -647,9 +647,6 @@ Download and install the following software:
 - Visual Studio [40]. Download the community edition. During setup, select
   _Desktop development with C++_ in _Workloads_.
 
-- 7-zip 16.04 or later [41]. Required to build YCM with semantic support for
-  C-family languages.
-
 Compiling YCM **with** semantic support for C-family languages:
 >
   cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
@@ -663,7 +660,7 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: add '--cs-completer' when calling 'install.py'. Be sure that
-  the build utility 'msbuild' is in your PATH [42].
+  the build utility 'msbuild' is in your PATH [41].
 
 - Go support: install Go [30] and add '--go-completer' when calling
   'install.py'.
@@ -815,7 +812,7 @@ will notify you to recompile it. You should then rerun the install process.
    critical because it must match the Python and the YCM libraries
    architectures. We recommend using a 64-bit Vim.
 
-2. **Install YCM** with Vundle [26] (or Pathogen [43], but Vundle is a
+2. **Install YCM** with Vundle [26] (or Pathogen [42], but Vundle is a
    better idea). With Vundle, this would mean adding a "Plugin
    'Valloric/YouCompleteMe'" line to your vimrc [38].
 
@@ -834,7 +831,7 @@ will notify you to recompile it. You should then rerun the install process.
 
    You can use the system libclang _only if you are sure it is version 3.9
    or higher_, otherwise don't. Even if it is, we recommend using the
-   official binaries from llvm.org [44] if at all possible. Make sure you
+   official binaries from llvm.org [43] if at all possible. Make sure you
    download the correct archive file for your OS.
 
    We **STRONGLY recommend AGAINST use** of the system libclang instead of
@@ -900,7 +897,7 @@ will notify you to recompile it. You should then rerun the install process.
    extracted the archive file to folder '~/ycm_temp/llvm_root_dir' (with
    'bin', 'lib', 'include' etc. folders right inside that folder). On
    Windows, you can extract the files from the LLVM+Clang installer using
-   7-zip [41].
+   7-zip [44].
 
    **NOTE:** This _only_ works with a _downloaded_ LLVM binary package, not
    a custom-built LLVM! See docs below for 'EXTERNAL_LIBCLANG_PATH' when
@@ -948,7 +945,7 @@ will notify you to recompile it. You should then rerun the install process.
      /property:TargetFrameworkVersion=v4.5
 
    On Windows, be sure that the build utility 'msbuild' is in your PATH
-   [42].
+   [41].
 
    - Go support: install Go [30] and add it to your path. Navigate to
      'YouCompleteMe/third_party/ycmd/third_party/gocode' and run 'go
@@ -2073,10 +2070,10 @@ must be manually saved. A confirmation dialog is opened prior to doing this to
 remind you that this is about to happen.
 
 Once the modifications have been made, the quickfix list (see ':help quickfix')
-is opened and populated with the locations of all modifications. This can be
-used to review all automatic changes made. Typically, use the 'CTRL-W <enter>'
-combination to open the selected file in a new split. It is possible to
-customize how the quickfix window is opened by using the |YcmQuickFixOpened|
+is populated with the locations of all modifications. This can be used to
+review all automatic changes made by using ':copen'. Typically, use the 'CTRL-W
+<enter>' combination to open the selected file in a new split. It is possible
+to customize how the quickfix window is opened by using the |YcmQuickFixOpened|
 autocommand.
 
 The buffers are _not_ saved automatically. That is, you must save the modified
@@ -3657,10 +3654,10 @@ References ~
 [38] http://vimhelp.appspot.com/starting.txt.html#vimrc
 [39] https://www.python.org/downloads/windows/
 [40] https://www.visualstudio.com/downloads/
-[41] http://www.7-zip.org/download.html
-[42] http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
-[43] https://github.com/tpope/vim-pathogen#pathogenvim
-[44] http://llvm.org/releases/download.html
+[41] http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
+[42] https://github.com/tpope/vim-pathogen#pathogenvim
+[43] http://llvm.org/releases/download.html
+[44] http://www.7-zip.org/download.html
 [45] http://www.mono-project.com/docs/getting-started/install/
 [46] http://download.eclipse.org/jdtls/milestones
 [47] https://github.com/Valloric/YouCompleteMe#options
