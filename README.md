@@ -432,8 +432,6 @@ Download and install the following software:
 variable.
 - [Visual Studio][visual-studio-download]. Download the community edition.
 During setup, select _Desktop development with C++_ in _Workloads_.
-- [7-zip 16.04 or later][7z-download]. Required to build YCM with semantic
-support for C-family languages.
 
 Compiling YCM **with** semantic support for C-family languages:
 
