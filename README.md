@@ -3059,6 +3059,14 @@ will only list tag files that already exist.
 YCM uses `completefunc` completion mode to show suggestions and Vim disables
 `<C-U>` in that mode as a "feature." Sadly there's nothing I can do about this.
 
+### My `CTRL-R` mapping does not work while the completion menu is visible
+
+Vim prevents remapping of the `<C-R>` key in all `<C-X>` completion modes
+(except the `<C-X><C-N>`/`<C-X><C-P>` mode which operates in the same mode as
+`<C-N>`/`<C-P>`) and YCM uses the `<C-X><C-U>` (`completefunc`) mode for
+completions. This means that adding `<C-R>` to any of the `g:ycm_key_list_*`
+options has no effect. You need to use another key.
+
 ### YCM conflicts with UltiSnips TAB key usage
 
 YCM comes with support for UltiSnips (snippet suggestions in the popup menu),
