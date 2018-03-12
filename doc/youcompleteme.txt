@@ -162,26 +162,27 @@ Contents ~
   16. 'install.py' says python must be compiled with '--enable-framework'. Wat? |youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat|
   17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
   18. 'CTRL-U' in insert mode does not work while the completion menu is visible |youcompleteme-ctrl-u-in-insert-mode-does-not-work-while-completion-menu-is-visible|
-  19. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
-  20. Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu |youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu|
-  21. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
-  22. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
-  23. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed|
-  24. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
-  25. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
-  26. I get weird errors when I press 'Ctrl-C' in Vim |youcompleteme-i-get-weird-errors-when-i-press-ctrl-c-in-vim|
-  27. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
-  28. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
-  29. When I open a JavaScript file, I get an annoying warning about '.tern-project'
+  19. My 'CTRL-R' mapping does not work while the completion menu is visible |youcompleteme-my-ctrl-r-mapping-does-not-work-while-completion-menu-is-visible|
+  20. YCM conflicts with UltiSnips TAB key usage |youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage|
+  21. Snippets added with ':UltiSnipsAddFiletypes' do not appear in the popup menu |youcompleteme-snippets-added-with-ultisnipsaddfiletypes-do-not-appear-in-popup-menu|
+  22. Why isn't YCM just written in plain VimScript, FFS? |youcompleteme-why-isnt-ycm-just-written-in-plain-vimscript-ffs|
+  23. Why does YCM demand such a recent version of Vim? |youcompleteme-why-does-ycm-demand-such-recent-version-of-vim|
+  24. Nasty bugs happen if I have the 'vim-autoclose' plugin installed |youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed|
+  25. Is there some sort of YCM mailing list? I have questions |youcompleteme-is-there-sort-of-ycm-mailing-list-i-have-questions|
+  26. I get an internal compiler error when installing |youcompleteme-i-get-an-internal-compiler-error-when-installing|
+  27. I get weird errors when I press 'Ctrl-C' in Vim |youcompleteme-i-get-weird-errors-when-i-press-ctrl-c-in-vim|
+  28. Why did YCM stop using Syntastic for diagnostics display? |youcompleteme-why-did-ycm-stop-using-syntastic-for-diagnostics-display|
+  29. Completion doesn't work with the C++ standard library headers |youcompleteme-completion-doesnt-work-with-c-standard-library-headers|
+  30. When I open a JavaScript file, I get an annoying warning about '.tern-project'
 file |youcompleteme-when-i-open-javascript-file-i-get-an-annoying-warning-about-.tern-project-file|
-  30. When I start vim I get a runtime error saying 'R6034 An application has made an
+  31. When I start vim I get a runtime error saying 'R6034 An application has made an
 attempt to load the C runtime library incorrectly.' |youcompleteme-when-i-start-vim-i-get-runtime-error-saying-r6034-an-application-has-made-an-attempt-to-load-c-runtime-library-incorrectly.|
-  31. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
-  32. On Windows I get "E887: Sorry, this command is disabled, the Python's site
+  32. I hear that YCM only supports Python 2, is that true? |youcompleteme-i-hear-that-ycm-only-supports-python-2-is-that-true|
+  33. On Windows I get "E887: Sorry, this command is disabled, the Python's site
 module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-command-is-disabled-pythons-site-module-could-not-be-loaded|
-  33. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
-  34. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
-  35. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
+  34. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
+  35. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
+  36. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
  14. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  15. Contact                                            |youcompleteme-contact|
  16. License                                            |youcompleteme-license|
@@ -3334,6 +3335,16 @@ function will only list tag files that already exist.
 
 YCM uses 'completefunc' completion mode to show suggestions and Vim disables
 '<C-U>' in that mode as a "feature." Sadly there's nothing I can do about this.
+
+-------------------------------------------------------------------------------
+*youcompleteme-my-ctrl-r-mapping-does-not-work-while-completion-menu-is-visible*
+My 'CTRL-R' mapping does not work while the completion menu is visible ~
+
+Vim prevents remapping of the '<C-R>' key in all '<C-X>' completion modes
+(except the '<C-X><C-N>'/'<C-X><C-P>' mode which operates in the same mode as
+'<C-N>'/'<C-P>') and YCM uses the '<C-X><C-U>' ('completefunc') mode for
+completions. This means that adding '<C-R>' to any of the 'g:ycm_key_list_*'
+options has no effect. You need to use another key.
 
 -------------------------------------------------------------------------------
                      *youcompleteme-ycm-conflicts-with-ultisnips-tab-key-usage*
