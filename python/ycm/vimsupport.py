@@ -267,7 +267,9 @@ def LineAndColumnNumbersClamped( line_num, column_num ):
   if line_num and line_num > max_line:
     new_line_num = max_line
 
-  max_column = len( vim.current.buffer[ new_line_num - 1 ] )
+  # Vim buffers are a list of byte objects on Python 2 but Unicode objects on
+  # Python 3.
+  max_column = len( ToBytes( vim.current.buffer[ new_line_num - 1 ] ) )
   if column_num and column_num > max_column:
     new_column_num = max_column
 
