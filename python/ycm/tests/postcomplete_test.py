@@ -140,7 +140,14 @@ def GetCompleteDoneHooks_ResultOnCsharp_test( *args ):
 def GetCompleteDoneHooks_ResultOnJava_test( *args ):
   request = CompletionRequest( None )
   result = list( request._GetCompleteDoneHooks() )
-  eq_( result, [ request._OnCompleteDone_Java ] )
+  eq_( result, [ request._OnCompleteDone_FixIt ] )
+
+
+@patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'typescript' ] )
+def GetCompleteDoneHooks_ResultOnTypeScript_test( *args ):
+  request = CompletionRequest( None )
+  result = list( request._GetCompleteDoneHooks() )
+  eq_( result, [ request._OnCompleteDone_FixIt ] )
 
 
 @patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'ycmtest' ] )
@@ -165,10 +172,10 @@ def OnCompleteDone_NoActionNoError_test( *args ):
   request = CompletionRequest( None )
   request.Done = MagicMock( return_value = True )
   request._OnCompleteDone_Csharp = MagicMock()
-  request._OnCompleteDone_Java = MagicMock()
+  request._OnCompleteDone_FixIt = MagicMock()
   request.OnCompleteDone()
   request._OnCompleteDone_Csharp.assert_not_called()
-  request._OnCompleteDone_Java.assert_not_called()
+  request._OnCompleteDone_FixIt.assert_not_called()
 
 
 @patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'ycmtest' ] )
@@ -356,73 +363,74 @@ def PostCompleteCsharp_InsertSecondNamespaceIfSelected_test( *args ):
 @patch( 'ycm.vimsupport.GetVariableValue',
         GetVariableValue_CompleteItemIs( 'Test' ) )
 @patch( 'ycm.vimsupport.ReplaceChunks' )
-def PostCompleteJava_ApplyFixIt_NoFixIts_test( replace_chunks, *args ):
+def PostCompleteFixIt_ApplyFixIt_NoFixIts_test( replace_chunks, *args ):
   completions = [
     BuildCompletionFixIt( [] )
   ]
   with _SetUpCompleteDone( completions ) as request:
-    request._OnCompleteDone_Java()
+    request._OnCompleteDone_FixIt()
     replace_chunks.assert_not_called()
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
         GetVariableValue_CompleteItemIs( 'Test' ) )
 @patch( 'ycm.vimsupport.ReplaceChunks' )
-def PostCompleteJava_ApplyFixIt_EmptyFixIt_test( replace_chunks, *args ):
+def PostCompleteFixIt_ApplyFixIt_EmptyFixIt_test( replace_chunks, *args ):
   completions = [
     BuildCompletionFixIt( [ { 'chunks': [] } ] )
   ]
   with _SetUpCompleteDone( completions ) as request:
-    request._OnCompleteDone_Java()
+    request._OnCompleteDone_FixIt()
     replace_chunks.assert_called_once_with( [], silent = True )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
         GetVariableValue_CompleteItemIs( 'Test' ) )
 @patch( 'ycm.vimsupport.ReplaceChunks' )
-def PostCompleteJava_ApplyFixIt_NoFixIt_test( replace_chunks, *args ):
+def PostCompleteFixIt_ApplyFixIt_NoFixIt_test( replace_chunks, *args ):
   completions = [
     BuildCompletion( )
   ]
   with _SetUpCompleteDone( completions ) as request:
-    request._OnCompleteDone_Java()
+    request._OnCompleteDone_FixIt()
     replace_chunks.assert_not_called()
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
         GetVariableValue_CompleteItemIs( 'Test' ) )
 @patch( 'ycm.vimsupport.ReplaceChunks' )
-def PostCompleteJava_ApplyFixIt_PickFirst_test( replace_chunks, *args ):
+def PostCompleteFixIt_ApplyFixIt_PickFirst_test( replace_chunks, *args ):
   completions = [
     BuildCompletionFixIt( [ { 'chunks': 'one' } ] ),
     BuildCompletionFixIt( [ { 'chunks': 'two' } ] ),
   ]
   with _SetUpCompleteDone( completions ) as request:
-    request._OnCompleteDone_Java()
+    request._OnCompleteDone_FixIt()
     replace_chunks.assert_called_once_with( 'one', silent = True )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
         GetVariableValue_CompleteItemIs( 'Test', user_data='0' ) )
 @patch( 'ycm.vimsupport.ReplaceChunks' )
-def PostCompleteJava_ApplyFixIt_PickFirstUserData_test( replace_chunks, *args ):
+def PostCompleteFixIt_ApplyFixIt_PickFirstUserData_test( replace_chunks,
+                                                         *args ):
   completions = [
     BuildCompletionFixIt( [ { 'chunks': 'one' } ] ),
     BuildCompletionFixIt( [ { 'chunks': 'two' } ] ),
   ]
   with _SetUpCompleteDone( completions ) as request:
-    request._OnCompleteDone_Java()
+    request._OnCompleteDone_FixIt()
     replace_chunks.assert_called_once_with( 'one', silent = True )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
         GetVariableValue_CompleteItemIs( 'Test', user_data='1' ) )
 @patch( 'ycm.vimsupport.ReplaceChunks' )
-def PostCompleteJava_ApplyFixIt_PickSecond_test( replace_chunks, *args ):
+def PostCompleteFixIt_ApplyFixIt_PickSecond_test( replace_chunks, *args ):
   completions = [
     BuildCompletionFixIt( [ { 'chunks': 'one' } ] ),
     BuildCompletionFixIt( [ { 'chunks': 'two' } ] ),
   ]
   with _SetUpCompleteDone( completions ) as request:
-    request._OnCompleteDone_Java()
+    request._OnCompleteDone_FixIt()
     replace_chunks.assert_called_once_with( 'two', silent = True )
