@@ -301,8 +301,7 @@ class YouCompleteMe( object ):
   def SendCompletionRequest( self, force_semantic = False ):
     request_data = BuildRequestData()
     request_data[ 'force_semantic' ] = force_semantic
-    if ( not self.NativeFiletypeCompletionAvailable() and
-         self.CurrentFiletypeCompletionEnabled() ):
+    if not self.NativeFiletypeCompletionUsable():
       wrapped_request_data = RequestWrap( request_data )
       if self._omnicomp.ShouldUseNow( wrapped_request_data ):
         self._latest_completion_request = OmniCompletionRequest(
@@ -814,8 +813,7 @@ class YouCompleteMe( object ):
       'filetype_specific_completion_to_disable' ]
     if '*' in filetype_to_disable:
       return False
-    else:
-      return not any( [ x in filetype_to_disable for x in filetypes ] )
+    return not any( [ x in filetype_to_disable for x in filetypes ] )
 
 
   def ShowDetailedDiagnostic( self ):
