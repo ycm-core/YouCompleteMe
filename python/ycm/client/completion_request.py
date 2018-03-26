@@ -39,7 +39,8 @@ class CompletionRequest( BaseRequest ):
     self._response_future = None
     self._complete_done_hooks = {
       'cs': self._OnCompleteDone_Csharp,
-      'java': self._OnCompleteDone_Java,
+      'java': self._OnCompleteDone_FixIt,
+      'typescript': self._OnCompleteDone_FixIt,
     }
 
 
@@ -134,7 +135,7 @@ class CompletionRequest( BaseRequest ):
     vimsupport.InsertNamespace( namespace )
 
 
-  def _OnCompleteDone_Java( self ):
+  def _OnCompleteDone_FixIt( self ):
     completions = self._GetCompletionsUserMayHaveCompleted()
     fixit_completions = [ _GetFixItCompletion( c ) for c in completions ]
     fixit_completions = [ f for f in fixit_completions if f ]
