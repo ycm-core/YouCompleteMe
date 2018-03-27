@@ -22,10 +22,12 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+from future.utils import iteritems
 from ycmd.utils import ToUnicode
 from ycm.client.base_request import ( BaseRequest, JsonFromFuture,
                                       HandleServerException,
                                       MakeServerException )
+from ycm import vimsupport
 
 
 class CompletionRequest( BaseRequest ):
@@ -34,6 +36,10 @@ class CompletionRequest( BaseRequest ):
     self.request_data = request_data
     self._response_future = None
     self._response = { 'completions': [], 'completion_start_column': -1 }
+    self._complete_done_hooks = {
+      'cs': self._OnCompleteDone_Csharp,
+      'java': self._OnCompleteDone_Java,
+    }
 
 
   def Start( self ):
@@ -69,7 +75,155 @@ class CompletionRequest( BaseRequest ):
     return response
 
 
-def ConvertCompletionDataToVimData( completion_identifier, completion_data ):
+  def OnCompleteDone( self ):
+    if not self.Done():
+      return
+
+    complete_done_actions = self._GetCompleteDoneHooks()
+    for action in complete_done_actions:
+      action()
+
+
+  def _GetCompleteDoneHooks( self ):
+    filetypes = vimsupport.CurrentFiletypes()
+    for key, value in iteritems( self._complete_done_hooks ):
+      if key in filetypes:
+        yield value
+
+
+  def _GetCompletionsUserMayHaveCompleted( self ):
+    completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
+    completions = self.RawResponse()[ 'completions' ]
+
+    if 'user_data' in completed_item and completed_item[ 'user_data' ]:
+      # Vim supports user_data (8.0.1493) or later, so we actually know the
+      # _exact_ element that was selected, having put its index in the
+      # user_data field.
+      return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
+
+    # Otherwise, we have to guess by matching the values in the completed item
+    # and the list of completions. Sometimes this returns multiple
+    # possibilities, which is essentially unresolvable.
+
+    result = _FilterToMatchingCompletions( completed_item, completions, True )
+    result = list( result )
+
+    if result:
+      return result
+
+    if _HasCompletionsThatCouldBeCompletedWithMoreText( completed_item,
+                                                        completions ):
+      # Since the way that YCM works leads to CompleteDone called on every
+      # character, return blank if the completion might not be done. This won't
+      # match if the completion is ended with typing a non-keyword character.
+      return []
+
+    result = _FilterToMatchingCompletions( completed_item, completions, False )
+
+    return list( result )
+
+
+  def _OnCompleteDone_Csharp( self ):
+    completions = self._GetCompletionsUserMayHaveCompleted()
+    namespaces = [ _GetRequiredNamespaceImport( c ) for c in completions ]
+    namespaces = [ n for n in namespaces if n ]
+    if not namespaces:
+      return
+
+    if len( namespaces ) > 1:
+      choices = [ "{0} {1}".format( i + 1, n )
+                  for i, n in enumerate( namespaces ) ]
+      choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
+      if choice < 0:
+        return
+      namespace = namespaces[ choice ]
+    else:
+      namespace = namespaces[ 0 ]
+
+    vimsupport.InsertNamespace( namespace )
+
+
+  def _OnCompleteDone_Java( self ):
+    completions = self._GetCompletionsUserMayHaveCompleted()
+    fixit_completions = [ _GetFixItCompletion( c ) for c in completions ]
+    fixit_completions = [ f for f in fixit_completions if f ]
+    if not fixit_completions:
+      return
+
+    # If we have user_data in completions (8.0.1493 or later), then we would
+    # only ever return max. 1 completion here. However, if we had to guess, it
+    # is possible that we matched multiple completion items (e.g. for overloads,
+    # or similar classes in multiple packages). In any case, rather than
+    # prompting the user and disturbing her workflow, we just apply the first
+    # one. This might be wrong, but the solution is to use a (very) new version
+    # of Vim which supports user_data on completion items
+    fixit_completion = fixit_completions[ 0 ]
+
+    for fixit in fixit_completion:
+      vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
+
+
+def _GetRequiredNamespaceImport( completion ):
+  if ( 'extra_data' not in completion
+       or 'required_namespace_import' not in completion[ 'extra_data' ] ):
+    return None
+  return completion[ 'extra_data' ][ 'required_namespace_import' ]
+
+
+def _GetFixItCompletion( completion ):
+  if ( 'extra_data' not in completion
+       or 'fixits' not in completion[ 'extra_data' ] ):
+    return None
+
+  return completion[ 'extra_data' ][ 'fixits' ]
+
+
+def _FilterToMatchingCompletions( completed_item,
+                                  completions,
+                                  full_match_only ):
+  """Filter to completions matching the item Vim said was completed"""
+  match_keys = ( [ 'word', 'abbr', 'menu', 'info' ] if full_match_only
+                  else [ 'word' ] )
+
+  for index, completion in enumerate( completions ):
+    item = _ConvertCompletionDataToVimData( index, completion )
+
+    def matcher( key ):
+      return ( ToUnicode( completed_item.get( key, "" ) ) ==
+               ToUnicode( item.get( key, "" ) ) )
+
+    if all( [ matcher( i ) for i in match_keys ] ):
+      yield completion
+
+
+def _HasCompletionsThatCouldBeCompletedWithMoreText( completed_item,
+                                                     completions ):
+  if not completed_item:
+    return False
+
+  completed_word = ToUnicode( completed_item[ 'word' ] )
+  if not completed_word:
+    return False
+
+  # Sometimes CompleteDone is called after the next character is inserted.
+  # If so, use inserted character to filter possible completions further.
+  text = vimsupport.TextBeforeCursor()
+  reject_exact_match = True
+  if text and text[ -1 ] != completed_word[ -1 ]:
+    reject_exact_match = False
+    completed_word += text[ -1 ]
+
+  for index, completion in enumerate( completions ):
+    word = ToUnicode(
+        _ConvertCompletionDataToVimData( index, completion )[ 'word' ] )
+    if reject_exact_match and word == completed_word:
+      continue
+    if word.startswith( completed_word ):
+      return True
+  return False
+
+
+def _ConvertCompletionDataToVimData( completion_identifier, completion_data ):
   # see :h complete-items for a description of the dictionary fields
   vim_data = {
     'word'  : '',
@@ -114,5 +268,5 @@ def ConvertCompletionDataToVimData( completion_identifier, completion_data ):
 
 
 def _ConvertCompletionDatasToVimDatas( response_data ):
-  return [ ConvertCompletionDataToVimData( i, x )
+  return [ _ConvertCompletionDataToVimData( i, x )
            for i, x in enumerate( response_data ) ]
