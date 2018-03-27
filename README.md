@@ -58,7 +58,7 @@ Contents
     - [YcmCompleter subcommands](#ycmcompleter-subcommands)
         - [GoTo Commands](#goto-commands)
         - [Semantic Information Commands](#semantic-information-commands)
-        - [Refactoring and FixIt Commands](#refactoring-and-fixit-commands)
+        - [Refactoring Commands](#refactoring-commands)
         - [Miscellaneous Commands](#miscellaneous-commands)
 - [Functions](#functions)
 - [Autocommands](#autocommands)

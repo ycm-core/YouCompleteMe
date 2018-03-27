@@ -254,7 +254,7 @@ Contents ~
 
     - GoTo Commands
     - Semantic Information Commands
-    - Refactoring and FixIt Commands
+    - Refactoring Commands
     - Miscellaneous Commands
 
 - Functions
