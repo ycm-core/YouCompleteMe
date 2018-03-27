@@ -1,4 +1,4 @@
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2013-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -93,34 +93,21 @@ class CompletionRequest( BaseRequest ):
 
   def _GetCompletionsUserMayHaveCompleted( self ):
     completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
-    completions = self.RawResponse()[ 'completions' ]
 
-    if 'user_data' in completed_item and completed_item[ 'user_data' ]:
-      # Vim supports user_data (8.0.1493) or later, so we actually know the
-      # _exact_ element that was selected, having put its index in the
-      # user_data field.
+    # If Vim supports user_data (8.0.1493 or later), we actually know the
+    # _exact_ element that was selected, having put its index in the
+    # user_data field. Otherwise, we have to guess by matching the values in the
+    # completed item and the list of completions. Sometimes this returns
+    # multiple possibilities, which is essentially unresolvable.
+    if 'user_data' not in completed_item:
+      completions = self.RawResponse()[ 'completions' ]
+      return _FilterToMatchingCompletions( completed_item, completions )
+
+    if completed_item[ 'user_data' ]:
+      completions = self.RawResponse()[ 'completions' ]
       return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
 
-    # Otherwise, we have to guess by matching the values in the completed item
-    # and the list of completions. Sometimes this returns multiple
-    # possibilities, which is essentially unresolvable.
-
-    result = _FilterToMatchingCompletions( completed_item, completions, True )
-    result = list( result )
-
-    if result:
-      return result
-
-    if _HasCompletionsThatCouldBeCompletedWithMoreText( completed_item,
-                                                        completions ):
-      # Since the way that YCM works leads to CompleteDone called on every
-      # character, return blank if the completion might not be done. This won't
-      # match if the completion is ended with typing a non-keyword character.
-      return []
-
-    result = _FilterToMatchingCompletions( completed_item, completions, False )
-
-    return list( result )
+    return []
 
 
   def _OnCompleteDone_Csharp( self ):
@@ -178,13 +165,10 @@ def _GetFixItCompletion( completion ):
   return completion[ 'extra_data' ][ 'fixits' ]
 
 
-def _FilterToMatchingCompletions( completed_item,
-                                  completions,
-                                  full_match_only ):
+def _FilterToMatchingCompletions( completed_item, completions ):
   """Filter to completions matching the item Vim said was completed"""
-  match_keys = ( [ 'word', 'abbr', 'menu', 'info' ] if full_match_only
-                  else [ 'word' ] )
-
+  match_keys = [ 'word', 'abbr', 'menu', 'info' ]
+  matched_completions = []
   for index, completion in enumerate( completions ):
     item = _ConvertCompletionDataToVimData( index, completion )
 
@@ -193,34 +177,8 @@ def _FilterToMatchingCompletions( completed_item,
                ToUnicode( item.get( key, "" ) ) )
 
     if all( [ matcher( i ) for i in match_keys ] ):
-      yield completion
-
-
-def _HasCompletionsThatCouldBeCompletedWithMoreText( completed_item,
-                                                     completions ):
-  if not completed_item:
-    return False
-
-  completed_word = ToUnicode( completed_item[ 'word' ] )
-  if not completed_word:
-    return False
-
-  # Sometimes CompleteDone is called after the next character is inserted.
-  # If so, use inserted character to filter possible completions further.
-  text = vimsupport.TextBeforeCursor()
-  reject_exact_match = True
-  if text and text[ -1 ] != completed_word[ -1 ]:
-    reject_exact_match = False
-    completed_word += text[ -1 ]
-
-  for index, completion in enumerate( completions ):
-    word = ToUnicode(
-        _ConvertCompletionDataToVimData( index, completion )[ 'word' ] )
-    if reject_exact_match and word == completed_word:
-      continue
-    if word.startswith( completed_word ):
-      return True
-  return False
+      matched_completions.append( completion )
+  return matched_completions
 
 
 def _ConvertCompletionDataToVimData( completion_identifier, completion_data ):
