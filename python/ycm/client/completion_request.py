@@ -95,11 +95,13 @@ class CompletionRequest( BaseRequest ):
     completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
     completions = self.RawResponse()[ 'completions' ]
 
-    if 'user_data' in completed_item and completed_item[ 'user_data' ]:
+    if 'user_data' in completed_item:
       # Vim supports user_data (8.0.1493) or later, so we actually know the
       # _exact_ element that was selected, having put its index in the
       # user_data field.
-      return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
+      if completed_item[ 'user_data' ]:
+        return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
+      return []
 
     # Otherwise, we have to guess by matching the values in the completed item
     # and the list of completions. Sometimes this returns multiple
