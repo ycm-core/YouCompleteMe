@@ -83,11 +83,11 @@ class BaseRequest( object ):
         else:
           _IgnoreExtraConfFile( e.extra_conf_file )
         self._should_resend = True
-    except BaseRequest.Requests().exceptions.ConnectionError:
+    except BaseRequest.Requests().exceptions.ConnectionError as e:
       # We don't display this exception to the user since it is likely to happen
       # for each subsequent request (typically if the server crashed) and we
       # don't want to spam the user with it.
-      _logger.exception( 'Unable to connect to server' )
+      _logger.error( e )
     except Exception as e:
       _logger.exception( 'Error while handling server response' )
       if display_message:
