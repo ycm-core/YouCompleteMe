@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2017 YouCompleteMe contributors
+# Copyright (C) 2016-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -1039,3 +1039,22 @@ def YouCompleteMe_OnPeriodicTick_ValidResponse_test( ycm,
     mock_future.result.assert_called()
     post_data_to_handler_async.assert_called() # Poll again!
     assert_that( ycm._message_poll_request is not None )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.client.completion_request.CompletionRequest.OnCompleteDone' )
+def YouCompleteMe_OnCompleteDone_CompletionRequest_test( ycm,
+                                                         on_complete_done ):
+  current_buffer = VimBuffer( 'current_buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 1 ) ):
+    ycm.SendCompletionRequest()
+  ycm.OnCompleteDone()
+  on_complete_done.assert_called()
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.client.completion_request.CompletionRequest.OnCompleteDone' )
+def YouCompleteMe_OnCompleteDone_NoCompletionRequest_test( ycm,
+                                                           on_complete_done ):
+  ycm.OnCompleteDone()
+  on_complete_done.assert_not_called()

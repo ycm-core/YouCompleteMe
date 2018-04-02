@@ -45,8 +45,7 @@ from ycm.client.base_request import ( BaseRequest, BuildRequestData,
                                       HandleServerException )
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
-from ycm.client.completion_request import ( CompletionRequest,
-                                            ConvertCompletionDataToVimData )
+from ycm.client.completion_request import CompletionRequest
 from ycm.client.debug_info_request import ( SendDebugInfoRequest,
                                             FormatDebugInfoResponse )
 from ycm.client.omni_completion_request import OmniCompletionRequest
@@ -108,15 +107,6 @@ SERVER_LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
 HANDLE_FLAG_INHERIT = 0x00000001
 
 
-# The following two methods exist for testability only
-def _CompleteDoneHook_CSharp( ycm ):
-  ycm._OnCompleteDone_Csharp()
-
-
-def _CompleteDoneHook_Java( ycm ):
-  ycm._OnCompleteDone_Java()
-
-
 class YouCompleteMe( object ):
   def __init__( self, user_options ):
     self._available_completers = {}
@@ -136,10 +126,6 @@ class YouCompleteMe( object ):
     self._SetUpLogging()
     self._SetUpServer()
     self._ycmd_keepalive.Start()
-    self._complete_done_hooks = {
-      'cs': _CompleteDoneHook_CSharp,
-      'java': _CompleteDoneHook_Java,
-    }
 
 
   def _SetUpServer( self ):
@@ -500,159 +486,10 @@ class YouCompleteMe( object ):
 
 
   def OnCompleteDone( self ):
-    complete_done_actions = self.GetCompleteDoneHooks()
-    for action in complete_done_actions:
-      action(self)
+    completion_request = self.GetCurrentCompletionRequest()
+    if completion_request:
+      completion_request.OnCompleteDone()
 
-
-  def GetCompleteDoneHooks( self ):
-    filetypes = vimsupport.CurrentFiletypes()
-    for key, value in iteritems( self._complete_done_hooks ):
-      if key in filetypes:
-        yield value
-
-
-  def GetCompletionsUserMayHaveCompleted( self ):
-    latest_completion_request = self.GetCurrentCompletionRequest()
-    if not latest_completion_request or not latest_completion_request.Done():
-      return []
-
-    completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
-    completions = latest_completion_request.RawResponse()[ 'completions' ]
-
-    if 'user_data' in completed_item and completed_item[ 'user_data' ] != '':
-      # Vim supports user_data (8.0.1493) or later, so we actually know the
-      # _exact_ element that was selected, having put its index in the user_data
-      # field.
-      return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
-
-    # Otherwise, we have to guess by matching the values in the completed item
-    # and the list of completions. Sometimes this returns multiple
-    # possibilities, which is essentially unresolvable.
-
-    result = self._FilterToMatchingCompletions( completed_item,
-                                                completions,
-                                                True )
-    result = list( result )
-
-    if result:
-      return result
-
-    if self._HasCompletionsThatCouldBeCompletedWithMoreText( completed_item,
-                                                             completions ):
-      # Since the way that YCM works leads to CompleteDone called on every
-      # character, return blank if the completion might not be done. This won't
-      # match if the completion is ended with typing a non-keyword character.
-      return []
-
-    result = self._FilterToMatchingCompletions( completed_item,
-                                                completions,
-                                                False )
-
-    return list( result )
-
-
-  def _FilterToMatchingCompletions( self,
-                                    completed_item,
-                                    completions,
-                                    full_match_only ):
-    """Filter to completions matching the item Vim said was completed"""
-    match_keys = ( [ "word", "abbr", "menu", "info" ] if full_match_only
-                    else [ 'word' ] )
-
-    for index, completion in enumerate( completions ):
-      item = ConvertCompletionDataToVimData( index, completion )
-
-      def matcher( key ):
-        return ( utils.ToUnicode( completed_item.get( key, "" ) ) ==
-                 utils.ToUnicode( item.get( key, "" ) ) )
-
-      if all( [ matcher( i ) for i in match_keys ] ):
-        yield completion
-
-
-  def _HasCompletionsThatCouldBeCompletedWithMoreText( self,
-                                                       completed_item,
-                                                       completions ):
-    if not completed_item:
-      return False
-
-    completed_word = utils.ToUnicode( completed_item[ 'word' ] )
-    if not completed_word:
-      return False
-
-    # Sometimes CompleteDone is called after the next character is inserted.
-    # If so, use inserted character to filter possible completions further.
-    text = vimsupport.TextBeforeCursor()
-    reject_exact_match = True
-    if text and text[ -1 ] != completed_word[ -1 ]:
-      reject_exact_match = False
-      completed_word += text[ -1 ]
-
-    for index, completion in enumerate( completions ):
-      word = utils.ToUnicode(
-          ConvertCompletionDataToVimData( index, completion )[ 'word' ] )
-      if reject_exact_match and word == completed_word:
-        continue
-      if word.startswith( completed_word ):
-        return True
-    return False
-
-
-  def _OnCompleteDone_Csharp( self ):
-    completions = self.GetCompletionsUserMayHaveCompleted()
-    namespaces = [ self._GetRequiredNamespaceImport( c )
-                   for c in completions ]
-    namespaces = [ n for n in namespaces if n ]
-    if not namespaces:
-      return
-
-    if len( namespaces ) > 1:
-      choices = [ "{0} {1}".format( i + 1, n )
-                  for i, n in enumerate( namespaces ) ]
-      choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
-      if choice < 0:
-        return
-      namespace = namespaces[ choice ]
-    else:
-      namespace = namespaces[ 0 ]
-
-    vimsupport.InsertNamespace( namespace )
-
-
-  def _GetRequiredNamespaceImport( self, completion ):
-    if ( "extra_data" not in completion
-         or "required_namespace_import" not in completion[ "extra_data" ] ):
-      return None
-    return completion[ "extra_data" ][ "required_namespace_import" ]
-
-
-  def _OnCompleteDone_Java( self ):
-    completions = self.GetCompletionsUserMayHaveCompleted()
-    fixit_completions = [ self._GetFixItCompletion( c ) for c in completions ]
-    fixit_completions = [ f for f in fixit_completions if f ]
-    if not fixit_completions:
-      return
-
-    # If we have user_data in completions (8.0.1493 or later), then we would
-    # only ever return max. 1 completion here. However, if we had to guess, it
-    # is possible that we matched multiple completion items (e.g. for overloads,
-    # or similar classes in multiple packages). In any case, rather than
-    # prompting the user and disturbing her workflow, we just apply the first
-    # one. This might be wrong, but the solution is to use a (very) new version
-    # of Vim which supports user_data on completion items
-    fixit_completion = fixit_completions[ 0 ]
-
-    for fixit in fixit_completion:
-      vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
-
-
-  def _GetFixItCompletion( self, completion ):
-    if ( "extra_data" not in completion
-         or "fixits" not in completion[ "extra_data" ] ):
-      return None
-
-    return completion[ "extra_data" ][ "fixits" ]
 
   def GetErrorCount( self ):
     return self.CurrentBuffer().GetErrorCount()
