@@ -588,12 +588,20 @@ endfunction
 
 
 function! s:OnInsertChar()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
   call timer_stop( s:pollers.completion.id )
   call s:CloseCompletionMenu()
 endfunction
 
 
 function! s:OnDeleteChar( key )
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return a:key
+  endif
+
   call timer_stop( s:pollers.completion.id )
   if pumvisible()
     return "\<C-y>" . a:key
