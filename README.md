@@ -3037,7 +3037,8 @@ First, put `let g:ycm_collect_identifiers_from_tags_files = 1` in your vimrc.
 Make sure you are using [Exuberant Ctags][exuberant-ctags] to produce your tags
 files since the only supported tag format is the [Exuberant Ctags
 format][ctags-format]. The format from "plain" ctags is NOT supported. The
-output of `ctags --version` should list "Exuberant Ctags".
+output of `ctags --version` should list "Exuberant Ctags". See [Universal
+Ctags][universal-ctags] for a maintained version.
 
 Ctags needs to be called with the `--fields=+l` (that's a lowercase `L`, not a
 one) option because YCM needs the `language:<lang>` field in the tags output.
@@ -3343,6 +3344,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [jedi]: https://github.com/davidhalter/jedi
 [ultisnips]: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 [exuberant-ctags]: http://ctags.sourceforge.net/
+[universal-ctags]: https://github.com/universal-ctags/ctags
 [ctags-format]: http://ctags.sourceforge.net/FORMAT
 [vundle-bug]: https://github.com/VundleVim/Vundle.vim/issues/48
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
