@@ -947,12 +947,23 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # NOTE: Vim buffers are a list of byte objects on Python 2 but unicode
   # objects on Python 3.
   start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
-  end_existing_text = ToBytes( vim_buffer[ end_line ] )[ end_column : ]
+  end_line_text = ToBytes( vim_buffer[ end_line ] )
+  end_existing_text = end_line_text[ end_column : ]
 
   replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
   replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
 
+  cursor_line, cursor_column = CurrentLineAndColumn()
+
   vim_buffer[ start_line : end_line + 1 ] = replacement_lines[ : ]
+
+  # Vim doesn't move the cursor accordingly when its position is on the last
+  # line of the replaced area after its ending column because the whole line is
+  # replaced. The cursor must be manually moved in that case.
+  if cursor_line == end_line and cursor_column >= end_column:
+    cursor_line = start_line + len( replacement_lines ) - 1
+    cursor_column += len( replacement_lines[ - 1 ] ) - len( end_line_text )
+    SetCurrentLineAndColumn( cursor_line, cursor_column )
 
   return {
     'bufnr': vim_buffer.number,
