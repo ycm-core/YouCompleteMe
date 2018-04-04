@@ -190,6 +190,7 @@ def AssertBuffersAreEqualAsBytes( result_buffer, expected_buffer ):
     eq_( ToBytes( result_line ), ToBytes( expected_line ) )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Repl_1_test():
   # Replace with longer range
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a string' ] )
@@ -212,6 +213,7 @@ def ReplaceChunk_SingleLine_Repl_1_test():
                                 result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Repl_2_test():
   # Replace with shorter range
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a string' ] )
@@ -221,6 +223,7 @@ def ReplaceChunk_SingleLine_Repl_2_test():
   AssertBuffersAreEqualAsBytes( [ 'This is a test' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Repl_3_test():
   # Replace with equal range
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a string' ] )
@@ -230,6 +233,7 @@ def ReplaceChunk_SingleLine_Repl_3_test():
   AssertBuffersAreEqualAsBytes( [ 'This be a string' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Add_1_test():
   # Insert at start
   result_buffer = VimBuffer( 'buffer', contents = [ 'is a string' ] )
@@ -239,6 +243,7 @@ def ReplaceChunk_SingleLine_Add_1_test():
   AssertBuffersAreEqualAsBytes( [ 'This is a string' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Add_2_test():
   # Insert at end
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a ' ] )
@@ -248,6 +253,7 @@ def ReplaceChunk_SingleLine_Add_2_test():
   AssertBuffersAreEqualAsBytes( [ 'This is a string' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Add_3_test():
   # Insert in the middle
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a string' ] )
@@ -257,6 +263,7 @@ def ReplaceChunk_SingleLine_Add_3_test():
   AssertBuffersAreEqualAsBytes( [ 'This is not a string' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Del_1_test():
   # Delete from start
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a string' ] )
@@ -266,6 +273,7 @@ def ReplaceChunk_SingleLine_Del_1_test():
   AssertBuffersAreEqualAsBytes( [ 'is a string' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Del_2_test():
   # Delete from end
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is a string' ] )
@@ -275,6 +283,7 @@ def ReplaceChunk_SingleLine_Del_2_test():
   AssertBuffersAreEqualAsBytes( [ 'This is a' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Del_3_test():
   # Delete from middle
   result_buffer = VimBuffer( 'buffer', contents = [ 'This is not a string' ] )
@@ -284,6 +293,7 @@ def ReplaceChunk_SingleLine_Del_3_test():
   AssertBuffersAreEqualAsBytes( [ 'This is a string' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Unicode_ReplaceUnicodeChars_test():
   # Replace Unicode characters.
   result_buffer = VimBuffer(
@@ -295,6 +305,7 @@ def ReplaceChunk_SingleLine_Unicode_ReplaceUnicodeChars_test():
                                  result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Unicode_ReplaceAfterUnicode_test():
   # Replace ASCII characters after Unicode characters in the line.
   result_buffer = VimBuffer(
@@ -306,6 +317,7 @@ def ReplaceChunk_SingleLine_Unicode_ReplaceAfterUnicode_test():
                                  result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleLine_Unicode_Grown_test():
   # Replace ASCII characters after Unicode characters in the line.
   result_buffer = VimBuffer( 'buffer', contents = [ 'a' ] )
@@ -315,6 +327,7 @@ def ReplaceChunk_SingleLine_Unicode_Grown_test():
   AssertBuffersAreEqualAsBytes( [ 'å' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_RemoveSingleLine_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -326,6 +339,7 @@ def ReplaceChunk_RemoveSingleLine_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleToMultipleLines_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -347,6 +361,7 @@ def ReplaceChunk_SingleToMultipleLines_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleToMultipleLines2_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -361,6 +376,7 @@ def ReplaceChunk_SingleToMultipleLines2_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleToMultipleLines3_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -375,6 +391,7 @@ def ReplaceChunk_SingleToMultipleLines3_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleToMultipleLinesReplace_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -389,6 +406,7 @@ def ReplaceChunk_SingleToMultipleLinesReplace_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SingleToMultipleLinesReplace_2_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -411,6 +429,7 @@ def ReplaceChunk_SingleToMultipleLinesReplace_2_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_MultipleLinesToSingleLine_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -441,6 +460,7 @@ def ReplaceChunk_MultipleLinesToSingleLine_test():
                                   'ddaa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_MultipleLinesToSameMultipleLines_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -455,6 +475,7 @@ def ReplaceChunk_MultipleLinesToSameMultipleLines_test():
                                   'aDe' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_MultipleLinesToMoreMultipleLines_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -470,6 +491,7 @@ def ReplaceChunk_MultipleLinesToMoreMultipleLines_test():
                                   'aDe' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_MultipleLinesToLessMultipleLines_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -483,6 +505,7 @@ def ReplaceChunk_MultipleLinesToLessMultipleLines_test():
                                   'aDe' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_MultipleLinesToEvenLessMultipleLines_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -495,6 +518,7 @@ def ReplaceChunk_MultipleLinesToEvenLessMultipleLines_test():
                                   'bFDe' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_SpanBufferEdge_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -507,6 +531,7 @@ def ReplaceChunk_SpanBufferEdge_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_DeleteTextInLine_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -518,6 +543,7 @@ def ReplaceChunk_DeleteTextInLine_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_AddTextInLine_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -530,6 +556,7 @@ def ReplaceChunk_AddTextInLine_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_ReplaceTextInLine_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                     'aBa',
@@ -542,6 +569,7 @@ def ReplaceChunk_ReplaceTextInLine_test():
                                   'aCa' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_NewlineChunk_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'first line',
                                                     'second line' ] )
@@ -552,14 +580,28 @@ def ReplaceChunk_NewlineChunk_test():
                                   'second line' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunk_BeyondEndOfFile_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'first line',
                                                     'second line' ] )
-
   start, end = _BuildLocations( 1, 11, 3, 1 )
   vimsupport.ReplaceChunk( start, end, '\n', result_buffer )
 
   AssertBuffersAreEqualAsBytes( [ 'first line' ], result_buffer )
+
+
+@patch( 'vim.current.window.cursor', ( 1, 3 ) )
+def ReplaceChunk_CursorPosition_test():
+  result_buffer = VimBuffer( 'buffer', contents = [ 'bar' ] )
+  start, end = _BuildLocations( 1, 1, 1, 1 )
+  vimsupport.ReplaceChunk( start,
+                           end,
+                           'xyz\nfoo',
+                           result_buffer )
+
+  AssertBuffersAreEqualAsBytes( [ 'xyz', 'foobar' ], result_buffer )
+  # Cursor line is 0-based.
+  assert_that( vimsupport.CurrentLineAndColumn(), contains( 1, 6 ) )
 
 
 def _BuildLocations( start_line, start_column, end_line, end_column ):
@@ -572,6 +614,7 @@ def _BuildLocations( start_line, start_column, end_line, end_column ):
   }
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunksInBuffer_SortedChunks_test():
   chunks = [
     _BuildChunk( 1, 4, 1, 4, '(' ),
@@ -584,6 +627,7 @@ def ReplaceChunksInBuffer_SortedChunks_test():
   AssertBuffersAreEqualAsBytes( [ 'CT<(10 >> 2)> ct' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunksInBuffer_UnsortedChunks_test():
   chunks = [
     _BuildChunk( 1, 11, 1, 11, ')' ),
@@ -596,6 +640,7 @@ def ReplaceChunksInBuffer_UnsortedChunks_test():
   AssertBuffersAreEqualAsBytes( [ 'CT<(10 >> 2)> ct' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunksInBuffer_LineOverlappingChunks_test():
   chunks = [
     _BuildChunk( 1, 11, 2, 1, '\n    ' ),
@@ -615,6 +660,7 @@ def ReplaceChunksInBuffer_LineOverlappingChunks_test():
                                   '    fourth line' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunksInBuffer_OutdentChunks_test():
   chunks = [
     _BuildChunk( 1,  1, 1, 5, '  ' ),
@@ -632,6 +678,7 @@ def ReplaceChunksInBuffer_OutdentChunks_test():
                                   '  third line' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunksInBuffer_OneLineIndentingChunks_test():
   chunks = [
     _BuildChunk( 1,  8, 2,  1, '\n ' ),
@@ -651,6 +698,7 @@ def ReplaceChunksInBuffer_OneLineIndentingChunks_test():
                                   '}' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 def ReplaceChunksInBuffer_SameLocation_test():
   chunks = [
     _BuildChunk( 1, 1, 1, 1, 'this ' ),
@@ -664,6 +712,7 @@ def ReplaceChunksInBuffer_SameLocation_test():
   AssertBuffersAreEqualAsBytes( [ 'this is pure folly' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
 @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
@@ -745,6 +794,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
   ] )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
 @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
@@ -852,6 +902,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   ] )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
 @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
@@ -949,6 +1000,7 @@ def ReplaceChunks_SingleFile_NotOpen_Silent_test(
   post_vim_message.assert_not_called()
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
         side_effect = [ -1, -1, 1 ],
         new_callable = ExtendedMock )
@@ -1028,6 +1080,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   post_vim_message.assert_not_called()
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename',
         side_effect = [ -1, -1, 1 ],
         new_callable = ExtendedMock )
@@ -1105,6 +1158,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
   post_vim_message.assert_not_called()
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
 @patch( 'ycm.vimsupport.SetFittingHeightForCurrentWindow' )
 @patch( 'ycm.vimsupport.GetBufferNumberForFilename', side_effect = [
@@ -1576,6 +1630,7 @@ def InsertNamespace_insert_test( vim_current, *args ):
                '',
                '  int taco = Math' ]
   vim_current.buffer = VimBuffer( '', contents = contents )
+  vim_current.window.cursor = ( 1, 1 )
 
   vimsupport.InsertNamespace( 'System' )
 
@@ -1598,6 +1653,7 @@ def InsertNamespace_append_test( vim_current, *args ):
                '    int taco;',
                '    List salad = new List' ]
   vim_current.buffer = VimBuffer( '', contents = contents )
+  vim_current.window.cursor = ( 1, 1 )
 
   vimsupport.InsertNamespace( 'System.Collections' )
 
