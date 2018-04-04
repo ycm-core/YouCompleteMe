@@ -3312,7 +3312,7 @@ First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
 Make sure you are using Exuberant Ctags [74] to produce your tags files since
 the only supported tag format is the Exuberant Ctags format [72]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
-list "Exuberant Ctags".
+list "Exuberant Ctags". See Universal Ctags [75] for a maintained version.
 
 Ctags needs to be called with the '--fields=+l' (that's a lowercase 'L', not a
 one) option because YCM needs the 'language:<lang>' field in the tags output.
@@ -3396,7 +3396,7 @@ asynchronicity. This feature is available since Vim 7.4.1578.
      *youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed*
 Nasty bugs happen if I have the 'vim-autoclose' plugin installed ~
 
-Use the delimitMate [75] plugin instead. It does the same thing without
+Use the delimitMate [76] plugin instead. It does the same thing without
 conflicting with YCM.
 
 -------------------------------------------------------------------------------
@@ -3404,7 +3404,7 @@ conflicting with YCM.
 Is there some sort of YCM mailing list? I have questions ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[76] mailing list, _don't_ create issues on the tracker. The tracker is for bug
+[77] mailing list, _don't_ create issues on the tracker. The tracker is for bug
 reports and feature requests.
 
 -------------------------------------------------------------------------------
@@ -3458,7 +3458,7 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions (issue #593 [77]) and other problems, like random
+Syntastic-Vim interactions (issue #593 [78]) and other problems, like random
 Vim flickering. Attempts were made to resolve these issues in Syntastic, but
 ultimately some of them failed (for various reasons).
 
@@ -3494,7 +3494,7 @@ paths, prepend '-isystem' to each individual path and append them all to the
 list of flags you return from your 'FlagsForFile' function in your
 '.ycm_extra_conf.py' file.
 
-See issue #303 [78] for details.
+See issue #303 [79] for details.
 
 -------------------------------------------------------------------------------
 *youcompleteme-when-i-open-javascript-file-i-get-an-annoying-warning-about-.tern-project-file*
@@ -3513,7 +3513,7 @@ When I start vim I get a runtime error saying 'R6034 An application has made ~
 an attempt to load the C runtime library incorrectly.' ~
 
 CMake and other things seem to screw up the PATH with their own msvcrXX.dll
-versions. [79] Add the following to the very top of your vimrc to remove these
+versions. [80] Add the following to the very top of your vimrc to remove these
 entries from the path.
 >
   python << EOF
@@ -3549,7 +3549,7 @@ On Windows I get "E887: Sorry, this command is disabled, the Python's site ~
 module could not be loaded" ~
 
 If you are running vim on Windows with Python 2.7.11, this is likely caused by
-a bug [80]. Follow this workaround [81] or use a different version (Python
+a bug [81]. Follow this workaround [82] or use a different version (Python
 2.7.12 does not suffer from the bug).
 
 -------------------------------------------------------------------------------
@@ -3584,7 +3584,7 @@ YCM does not shut down when I quit Vim ~
 YCM relies on the 'VimLeave' event to shut down the ycmd server [48]. Some
 plugins prevent this event from triggering by exiting Vim through an
 autocommand without using the 'nested' keyword (see ':h autocmd-nested'). One
-of these plugins is vim-nerdtree-tabs [82]. You should identify which plugin is
+of these plugins is vim-nerdtree-tabs [83]. You should identify which plugin is
 responsible for the issue and report it to the plugin author. Note that when
 this happens, ycmd [48] will automatically shut itself down after 30 minutes.
 
@@ -3593,17 +3593,17 @@ this happens, ycmd [48] will automatically shut itself down after 30 minutes.
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[83]. By participating in this project you agree to abide by its terms.
+[84]. By participating in this project you agree to abide by its terms.
 
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please join the Gitter
-room [1] or use the ycm-users [76] mailing list.
+room [1] or use the ycm-users [77] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[84]. Before you do, please carefully read CONTRIBUTING.md [66] as this asks
+[85]. Before you do, please carefully read CONTRIBUTING.md [66] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -3618,7 +3618,7 @@ YouCompleteMe maintainers directly using the contact details below.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [85]. © 2015-2017
+This software is licensed under the GPL v3 license [86]. © 2015-2017
 YouCompleteMe contributors
 
 ===============================================================================
@@ -3699,16 +3699,17 @@ References ~
 [72] http://ctags.sourceforge.net/FORMAT
 [73] https://github.com/Valloric/YouCompleteMe/issues/18
 [74] http://ctags.sourceforge.net/
-[75] https://github.com/Raimondi/delimitMate
-[76] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[77] https://github.com/Valloric/YouCompleteMe/issues/593
-[78] https://github.com/Valloric/YouCompleteMe/issues/303
-[79] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
-[80] https://github.com/vim/vim/issues/717
-[81] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
-[82] https://github.com/jistr/vim-nerdtree-tabs
-[83] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[84] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[85] http://www.gnu.org/copyleft/gpl.html
+[75] https://github.com/universal-ctags/ctags
+[76] https://github.com/Raimondi/delimitMate
+[77] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[78] https://github.com/Valloric/YouCompleteMe/issues/593
+[79] https://github.com/Valloric/YouCompleteMe/issues/303
+[80] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
+[81] https://github.com/vim/vim/issues/717
+[82] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
+[83] https://github.com/jistr/vim-nerdtree-tabs
+[84] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[85] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[86] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
