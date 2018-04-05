@@ -64,7 +64,7 @@ def MakeUserOptions( custom_options = {} ):
 
 
 def _IsReady():
-  return BaseRequest.GetDataFromHandler( 'ready' )
+  return BaseRequest().GetDataFromHandler( 'ready' )
 
 
 def WaitUntilReady( timeout = 5 ):

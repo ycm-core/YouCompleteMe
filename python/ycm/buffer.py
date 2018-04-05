@@ -66,6 +66,10 @@ class Buffer( object ):
     return self._parse_tick != self._ChangedTick()
 
 
+  def ShouldResendParseRequest( self ):
+    return self._parse_request.ShouldResend()
+
+
   def UpdateDiagnostics( self, force=False ):
     if force or not self._async_diags:
       self.UpdateWithNewDiagnostics( self._parse_request.Response() )
