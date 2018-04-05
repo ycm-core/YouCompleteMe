@@ -228,7 +228,7 @@ class YouCompleteMe( object ):
 
   def CheckIfServerIsReady( self ):
     if not self._server_is_ready_with_cache and self.IsServerAlive():
-      self._server_is_ready_with_cache = BaseRequest.GetDataFromHandler(
+      self._server_is_ready_with_cache = BaseRequest().GetDataFromHandler(
           'ready', display_message = False )
     return self._server_is_ready_with_cache
 
@@ -329,8 +329,8 @@ class YouCompleteMe( object ):
 
 
   def GetDefinedSubcommands( self ):
-    subcommands = BaseRequest.PostDataToHandler( BuildRequestData(),
-                                                 'defined_subcommands' )
+    subcommands = BaseRequest().PostDataToHandler( BuildRequestData(),
+                                                   'defined_subcommands' )
     return subcommands if subcommands else []
 
 
@@ -555,6 +555,10 @@ class YouCompleteMe( object ):
       current_buffer.MarkResponseHandled()
 
 
+  def ShouldResendFileParseRequest( self ):
+    return self.CurrentBuffer().ShouldResendParseRequest()
+
+
   def DebugInfo( self ):
     debug_info = ''
     if self._client_logfile:
@@ -644,7 +648,7 @@ class YouCompleteMe( object ):
 
 
   def ShowDetailedDiagnostic( self ):
-    detailed_diagnostic = BaseRequest.PostDataToHandler(
+    detailed_diagnostic = BaseRequest().PostDataToHandler(
         BuildRequestData(), 'detailed_diagnostic' )
 
     if 'message' in detailed_diagnostic:

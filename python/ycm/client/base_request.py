@@ -43,7 +43,7 @@ _logger = logging.getLogger( __name__ )
 class BaseRequest( object ):
 
   def __init__( self ):
-    pass
+    self._should_resend = False
 
 
   def Start( self ):
@@ -58,15 +58,22 @@ class BaseRequest( object ):
     return {}
 
 
-  @staticmethod
-  def HandleFuture( future, display_message = True, truncate_message = False ):
+  def ShouldResend( self ):
+    return self._should_resend
+
+
+  def HandleFuture( self,
+                    future,
+                    display_message = True,
+                    truncate_message = False ):
     """Get the server response from a |future| object and catch any exception
     while doing so. If an exception is raised because of a unknown
     .ycm_extra_conf.py file, load the file or ignore it after asking the user.
-    For other exceptions, log the exception and display its message to the user
-    on the Vim status line. Unset the |display_message| parameter to hide the
-    message from the user. Set the |truncate_message| parameter to avoid
-    hit-enter prompts from this message."""
+    An identical request should be sent again to the server. For other
+    exceptions, log the exception and display its message to the user on the Vim
+    status line. Unset the |display_message| parameter to hide the message from
+    the user. Set the |truncate_message| parameter to avoid hit-enter prompts
+    from this message."""
     try:
       try:
         return _JsonFromFuture( future )
@@ -75,6 +82,7 @@ class BaseRequest( object ):
           _LoadExtraConfFile( e.extra_conf_file )
         else:
           _IgnoreExtraConfFile( e.extra_conf_file )
+        self._should_resend = True
     except BaseRequest.Requests().exceptions.ConnectionError:
       # We don't display this exception to the user since it is likely to happen
       # for each subsequent request (typically if the server crashed) and we
@@ -93,13 +101,13 @@ class BaseRequest( object ):
   # up; see Requests docs for details (we just pass the param along).
   # See the HandleFuture method for the |display_message| and |truncate_message|
   # parameters.
-  @staticmethod
-  def GetDataFromHandler( handler,
+  def GetDataFromHandler( self,
+                          handler,
                           timeout = _READ_TIMEOUT_SEC,
                           display_message = True,
                           truncate_message = False ):
-    return BaseRequest.HandleFuture(
-        BaseRequest._TalkToHandlerAsync( '', handler, 'GET', timeout ),
+    return self.HandleFuture(
+        self._TalkToHandlerAsync( '', handler, 'GET', timeout ),
         display_message,
         truncate_message )
 
@@ -109,14 +117,14 @@ class BaseRequest( object ):
   # up; see Requests docs for details (we just pass the param along).
   # See the HandleFuture method for the |display_message| and |truncate_message|
   # parameters.
-  @staticmethod
-  def PostDataToHandler( data,
+  def PostDataToHandler( self,
+                         data,
                          handler,
                          timeout = _READ_TIMEOUT_SEC,
                          display_message = True,
                          truncate_message = False ):
-    return BaseRequest.HandleFuture(
-        BaseRequest.PostDataToHandlerAsync( data, handler, timeout ),
+    return self.HandleFuture(
+        self.PostDataToHandlerAsync( data, handler, timeout ),
         display_message,
         truncate_message )
 
@@ -124,38 +132,37 @@ class BaseRequest( object ):
   # This returns a future! Use HandleFuture to get the value.
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
-  @staticmethod
-  def PostDataToHandlerAsync( data, handler, timeout = _READ_TIMEOUT_SEC ):
-    return BaseRequest._TalkToHandlerAsync( data, handler, 'POST', timeout )
+  def PostDataToHandlerAsync( self,
+                              data,
+                              handler,
+                              timeout = _READ_TIMEOUT_SEC ):
+    return self._TalkToHandlerAsync( data, handler, 'POST', timeout )
 
 
   # This returns a future! Use HandleFuture to get the value.
   # |method| is either 'POST' or 'GET'.
   # |timeout| is num seconds to tolerate no response from server before giving
   # up; see Requests docs for details (we just pass the param along).
-  @staticmethod
-  def _TalkToHandlerAsync( data,
+  def _TalkToHandlerAsync( self,
+                           data,
                            handler,
                            method,
                            timeout = _READ_TIMEOUT_SEC ):
     request_uri = _BuildUri( handler )
     if method == 'POST':
       sent_data = _ToUtf8Json( data )
-      return BaseRequest.Session().post(
+      return self.Session().post(
           request_uri,
           data = sent_data,
-          headers = BaseRequest._ExtraHeaders( method,
-                                               request_uri,
-                                               sent_data ),
+          headers = self._ExtraHeaders( method, request_uri, sent_data ),
           timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
-    return BaseRequest.Session().get(
+    return self.Session().get(
         request_uri,
-        headers = BaseRequest._ExtraHeaders( method, request_uri ),
+        headers = self._ExtraHeaders( method, request_uri ),
         timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
 
 
-  @staticmethod
-  def _ExtraHeaders( method, request_uri, request_body = None ):
+  def _ExtraHeaders( self, method, request_uri, request_body = None ):
     if not request_body:
       request_body = bytes( b'' )
     headers = dict( _HEADERS )
@@ -163,7 +170,7 @@ class BaseRequest( object ):
         CreateRequestHmac( ToBytes( method ),
                            ToBytes( urlparse( request_uri ).path ),
                            request_body,
-                           BaseRequest.hmac_secret ) )
+                           self.hmac_secret ) )
     return headers
 
 
@@ -243,13 +250,13 @@ def _JsonFromFuture( future ):
 
 
 def _LoadExtraConfFile( filepath ):
-  BaseRequest.PostDataToHandler( { 'filepath': filepath },
-                                 'load_extra_conf_file' )
+  BaseRequest().PostDataToHandler( { 'filepath': filepath },
+                                   'load_extra_conf_file' )
 
 
 def _IgnoreExtraConfFile( filepath ):
-  BaseRequest.PostDataToHandler( { 'filepath': filepath },
-                                 'ignore_extra_conf_file' )
+  BaseRequest().PostDataToHandler( { 'filepath': filepath },
+                                   'ignore_extra_conf_file' )
 
 
 def DisplayServerException( exception, truncate_message = False ):

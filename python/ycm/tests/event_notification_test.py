@@ -125,6 +125,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
         call( ERROR_TEXT, truncate = True )
       ] )
 
+      ok_( not ycm.ShouldResendFileParseRequest() )
+
       # But it does if a subsequent event raises again
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -133,6 +135,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
         call( ERROR_TEXT, truncate = True ),
         call( ERROR_TEXT, truncate = True )
       ] )
+
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 @YouCompleteMeInstance()
@@ -154,6 +158,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
         test_utils.VIM_SIGNS,
         contains()
       )
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 @patch( 'ycm.client.base_request._LoadExtraConfFile',
@@ -203,6 +208,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
           call( FILE_NAME ),
         ] )
 
+        ok_( ycm.ShouldResendFileParseRequest() )
+
         # But it does if a subsequent event raises again
         ycm.OnFileReadyToParse()
         ok_( ycm.FileParseRequestReady() )
@@ -216,6 +223,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
           call( FILE_NAME ),
           call( FILE_NAME ),
         ] )
+
+        ok_( ycm.ShouldResendFileParseRequest() )
 
       # When the user rejects the extra conf, we reject it
       with patch( 'ycm.vimsupport.PresentDialog',
@@ -242,6 +251,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
           call( FILE_NAME ),
         ] )
 
+        ok_( ycm.ShouldResendFileParseRequest() )
+
         # But it does if a subsequent event raises again
         ycm.OnFileReadyToParse()
         ok_( ycm.FileParseRequestReady() )
@@ -255,6 +266,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
           call( FILE_NAME ),
           call( FILE_NAME ),
         ] )
+
+        ok_( ycm.ShouldResendFileParseRequest() )
 
 
 @YouCompleteMeInstance()
@@ -302,6 +315,8 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       eq_( ycm.GetErrorCount(), 1 )
       eq_( ycm.GetWarningCount(), 0 )
 
+      ok_( not ycm.ShouldResendFileParseRequest() )
+
       # New identical requests should result in the same diagnostics.
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -314,6 +329,8 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       )
       eq_( ycm.GetErrorCount(), 1 )
       eq_( ycm.GetWarningCount(), 0 )
+
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
@@ -353,6 +370,8 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 1 )
 
+      ok_( not ycm.ShouldResendFileParseRequest() )
+
 
 def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
   # Tests Vim sign unplacement and error/warning count python API
@@ -368,6 +387,7 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
       )
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 0 )
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
