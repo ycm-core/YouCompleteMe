@@ -565,6 +565,9 @@ function! s:PollFileParseResponse( ... )
   endif
 
   exec s:python_command "ycm_state.HandleFileParseRequest()"
+  if s:Pyeval( "ycm_state.ShouldResendFileParseRequest()" )
+    call s:OnFileReadyToParse( 1 )
+  endif
 endfunction
 
 

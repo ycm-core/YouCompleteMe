@@ -45,4 +45,4 @@ class YcmdKeepalive( object ):
     while True:
       time.sleep( self._ping_interval_seconds )
 
-      BaseRequest.GetDataFromHandler( 'healthy', display_message = False )
+      BaseRequest().GetDataFromHandler( 'healthy', display_message = False )
