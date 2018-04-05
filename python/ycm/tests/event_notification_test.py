@@ -125,6 +125,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
         call( ERROR_TEXT, truncate = True )
       ] )
 
+      ok_( not ycm.ShouldResendFileParseRequest() )
+
       # But it does if a subsequent event raises again
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -133,6 +135,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
         call( ERROR_TEXT, truncate = True ),
         call( ERROR_TEXT, truncate = True )
       ] )
+
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 @YouCompleteMeInstance()
@@ -154,20 +158,16 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
         test_utils.VIM_SIGNS,
         contains()
       )
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
-@patch( 'ycm.client.base_request._LoadExtraConfFile',
-        new_callable = ExtendedMock )
-@patch( 'ycm.client.base_request._IgnoreExtraConfFile',
-        new_callable = ExtendedMock )
 @YouCompleteMeInstance()
 def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
-    ycm, ignore_extra_conf, load_extra_conf ):
+    ycm ):
 
   # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest
   # in combination with YouCompleteMe.OnFileReadyToParse when the completer
   # raises the (special) UnknownExtraConf exception
-
   FILE_NAME = 'a_file'
   MESSAGE = ( 'Found ' + FILE_NAME + '. Load? \n\n(Question can be '
               'turned off with options, see YCM docs)' )
@@ -175,86 +175,98 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
   def UnknownExtraConfResponse( *args ):
     raise UnknownExtraConf( FILE_NAME )
 
-  with MockArbitraryBuffer( 'javascript' ):
-    with MockEventNotification( UnknownExtraConfResponse ):
+  with patch( 'ycm.client.base_request.BaseRequest.PostDataToHandler',
+              new_callable = ExtendedMock ) as post_data_to_handler:
+    with MockArbitraryBuffer( 'javascript' ):
+      with MockEventNotification( UnknownExtraConfResponse ):
 
-      # When the user accepts the extra conf, we load it
-      with patch( 'ycm.vimsupport.PresentDialog',
-                  return_value = 0,
-                  new_callable = ExtendedMock ) as present_dialog:
-        ycm.OnFileReadyToParse()
-        ok_( ycm.FileParseRequestReady() )
-        ycm.HandleFileParseRequest()
+        # When the user accepts the extra conf, we load it
+        with patch( 'ycm.vimsupport.PresentDialog',
+                    return_value = 0,
+                    new_callable = ExtendedMock ) as present_dialog:
+          ycm.OnFileReadyToParse()
+          ok_( ycm.FileParseRequestReady() )
+          ycm.HandleFileParseRequest()
 
-        present_dialog.assert_has_exact_calls( [
-          PresentDialog_Confirm_Call( MESSAGE ),
-        ] )
-        load_extra_conf.assert_has_exact_calls( [
-          call( FILE_NAME ),
-        ] )
+          present_dialog.assert_has_exact_calls( [
+            PresentDialog_Confirm_Call( MESSAGE ),
+          ] )
+          post_data_to_handler.assert_has_exact_calls( [
+            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
+          ] )
 
-        # Subsequent calls don't re-raise the warning
-        ycm.HandleFileParseRequest()
+          # Subsequent calls don't re-raise the warning
+          ycm.HandleFileParseRequest()
 
-        present_dialog.assert_has_exact_calls( [
-          PresentDialog_Confirm_Call( MESSAGE )
-        ] )
-        load_extra_conf.assert_has_exact_calls( [
-          call( FILE_NAME ),
-        ] )
+          present_dialog.assert_has_exact_calls( [
+            PresentDialog_Confirm_Call( MESSAGE )
+          ] )
+          post_data_to_handler.assert_has_exact_calls( [
+            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
+          ] )
 
-        # But it does if a subsequent event raises again
-        ycm.OnFileReadyToParse()
-        ok_( ycm.FileParseRequestReady() )
-        ycm.HandleFileParseRequest()
+          ok_( ycm.ShouldResendFileParseRequest() )
 
-        present_dialog.assert_has_exact_calls( [
-          PresentDialog_Confirm_Call( MESSAGE ),
-          PresentDialog_Confirm_Call( MESSAGE ),
-        ] )
-        load_extra_conf.assert_has_exact_calls( [
-          call( FILE_NAME ),
-          call( FILE_NAME ),
-        ] )
+          # But it does if a subsequent event raises again
+          ycm.OnFileReadyToParse()
+          ok_( ycm.FileParseRequestReady() )
+          ycm.HandleFileParseRequest()
 
-      # When the user rejects the extra conf, we reject it
-      with patch( 'ycm.vimsupport.PresentDialog',
-                  return_value = 1,
-                  new_callable = ExtendedMock ) as present_dialog:
-        ycm.OnFileReadyToParse()
-        ok_( ycm.FileParseRequestReady() )
-        ycm.HandleFileParseRequest()
+          present_dialog.assert_has_exact_calls( [
+            PresentDialog_Confirm_Call( MESSAGE ),
+            PresentDialog_Confirm_Call( MESSAGE ),
+          ] )
+          post_data_to_handler.assert_has_exact_calls( [
+            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' ),
+            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
+          ] )
 
-        present_dialog.assert_has_exact_calls( [
-          PresentDialog_Confirm_Call( MESSAGE ),
-        ] )
-        ignore_extra_conf.assert_has_exact_calls( [
-          call( FILE_NAME ),
-        ] )
+          ok_( ycm.ShouldResendFileParseRequest() )
 
-        # Subsequent calls don't re-raise the warning
-        ycm.HandleFileParseRequest()
+        post_data_to_handler.reset_mock()
 
-        present_dialog.assert_has_exact_calls( [
-          PresentDialog_Confirm_Call( MESSAGE )
-        ] )
-        ignore_extra_conf.assert_has_exact_calls( [
-          call( FILE_NAME ),
-        ] )
+        # When the user rejects the extra conf, we reject it
+        with patch( 'ycm.vimsupport.PresentDialog',
+                    return_value = 1,
+                    new_callable = ExtendedMock ) as present_dialog:
+          ycm.OnFileReadyToParse()
+          ok_( ycm.FileParseRequestReady() )
+          ycm.HandleFileParseRequest()
 
-        # But it does if a subsequent event raises again
-        ycm.OnFileReadyToParse()
-        ok_( ycm.FileParseRequestReady() )
-        ycm.HandleFileParseRequest()
+          present_dialog.assert_has_exact_calls( [
+            PresentDialog_Confirm_Call( MESSAGE ),
+          ] )
+          post_data_to_handler.assert_has_exact_calls( [
+            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
+          ] )
 
-        present_dialog.assert_has_exact_calls( [
-          PresentDialog_Confirm_Call( MESSAGE ),
-          PresentDialog_Confirm_Call( MESSAGE ),
-        ] )
-        ignore_extra_conf.assert_has_exact_calls( [
-          call( FILE_NAME ),
-          call( FILE_NAME ),
-        ] )
+          # Subsequent calls don't re-raise the warning
+          ycm.HandleFileParseRequest()
+
+          present_dialog.assert_has_exact_calls( [
+            PresentDialog_Confirm_Call( MESSAGE )
+          ] )
+          post_data_to_handler.assert_has_exact_calls( [
+            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
+          ] )
+
+          ok_( ycm.ShouldResendFileParseRequest() )
+
+          # But it does if a subsequent event raises again
+          ycm.OnFileReadyToParse()
+          ok_( ycm.FileParseRequestReady() )
+          ycm.HandleFileParseRequest()
+
+          present_dialog.assert_has_exact_calls( [
+            PresentDialog_Confirm_Call( MESSAGE ),
+            PresentDialog_Confirm_Call( MESSAGE ),
+          ] )
+          post_data_to_handler.assert_has_exact_calls( [
+            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' ),
+            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
+          ] )
+
+          ok_( ycm.ShouldResendFileParseRequest() )
 
 
 @YouCompleteMeInstance()
@@ -302,6 +314,8 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       eq_( ycm.GetErrorCount(), 1 )
       eq_( ycm.GetWarningCount(), 0 )
 
+      ok_( not ycm.ShouldResendFileParseRequest() )
+
       # New identical requests should result in the same diagnostics.
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -314,6 +328,8 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       )
       eq_( ycm.GetErrorCount(), 1 )
       eq_( ycm.GetWarningCount(), 0 )
+
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
@@ -353,6 +369,8 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 1 )
 
+      ok_( not ycm.ShouldResendFileParseRequest() )
+
 
 def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
   # Tests Vim sign unplacement and error/warning count python API
@@ -368,6 +386,7 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
       )
       eq_( ycm.GetErrorCount(), 0 )
       eq_( ycm.GetWarningCount(), 0 )
+      ok_( not ycm.ShouldResendFileParseRequest() )
 
 
 @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
