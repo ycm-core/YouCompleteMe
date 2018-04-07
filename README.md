@@ -856,11 +856,19 @@ User Guide
 If the offered completions are too broad, keep typing characters; YCM will
 continue refining the offered completions based on your input.
 
-Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
-then it's case-insensitive. If your input contains uppercase letters, then the
-uppercase letters in your query must match uppercase letters in the completion
-strings (the lowercase letters still match both). So, "foo" matches "Foo" and
-"foo", "Foo" matches "Foo" and "FOO" but not "foo".
+Filtering is "smart-case" and "smart-[diacritic][]" sensitive; if you are
+typing only lowercase letters, then it's case-insensitive. If your input
+contains uppercase letters, then the uppercase letters in your query must
+match uppercase letters in the completion strings (the lowercase letters still
+match both). On top of that, a letter with no diacritic marks will match that
+letter with or without marks:
+
+| matches | foo | føo | fOo | fØo |
+|---------|-----|-----|-----|-----|
+| **foo** |  ✔️  |  ✔️  |  ✔️  |  ✔️  |
+| **føo** |  ❌ |  ✔️  |  ❌ |  ✔️  |
+| **fOo** |  ❌ |  ❌ |  ✔️  |  ✔️  |
+| **fØo** |  ❌ |  ❌ |  ❌ |  ✔️  |
 
 Use the TAB key to accept a completion and continue pressing TAB to cycle
 through the completions. Use Shift-TAB to cycle backwards. Note that if you're
@@ -3444,3 +3452,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [ycmd-mvn-pom-xml]: https://github.com/Valloric/ycmd/blob/java-language-server/ycmd/tests/java/testdata/simple_maven_project/pom.xml
 [ycmd-gradle-project]: https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_gradle_project
 [jdtls-release]: http://download.eclipse.org/jdtls/milestones
+[diacritic]: https://www.unicode.org/glossary/#diacritic
