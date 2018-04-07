@@ -1602,7 +1602,7 @@ Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.
 
-Supported in filetypes: `cs, java`
+Supported in filetypes: `cs`
 
 #### The `GoToImplementationElseDeclaration` subcommand
 
