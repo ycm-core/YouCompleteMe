@@ -72,6 +72,7 @@ Contents ~
    6. The |GoToReferences| subcommand
    7. The |GoToImplementation| subcommand
    8. The |GoToImplementationElseDeclaration| subcommand
+   9. The |GoToType| subcommand
   2. Semantic Information Commands |youcompleteme-semantic-information-commands|
    1. The |GetType| subcommand
    2. The |GetTypeImprecise| subcommand
@@ -1908,6 +1909,14 @@ else jump to its declaration. If there are multiple implementations, instead
 provides a list of implementations to choose from.
 
 Supported in filetypes: 'cs'
+
+-------------------------------------------------------------------------------
+The *GoToType* subcommand
+
+Looks up the symbol under the cursor and jumps to the definition of its type
+e.g. if the symbol is an object, go to the definition of its class.
+
+Supported in filetypes: 'typescript'
 
 -------------------------------------------------------------------------------
                                   *youcompleteme-semantic-information-commands*
