@@ -285,8 +285,7 @@ class YouCompleteMe( object ):
   def SendCompletionRequest( self, force_semantic = False ):
     request_data = BuildRequestData()
     request_data[ 'force_semantic' ] = force_semantic
-    if ( not self.NativeFiletypeCompletionAvailable() and
-         self.CurrentFiletypeCompletionEnabled() ):
+    if not self.NativeFiletypeCompletionUsable():
       wrapped_request_data = RequestWrap( request_data )
       if self._omnicomp.ShouldUseNow( wrapped_request_data ):
         self._latest_completion_request = OmniCompletionRequest(
@@ -363,7 +362,9 @@ class YouCompleteMe( object ):
 
 
   def NativeFiletypeCompletionUsable( self ):
-    return ( self.CurrentFiletypeCompletionEnabled() and
+    disabled_filetypes = self._user_options[
+      'filetype_specific_completion_to_disable' ]
+    return ( vimsupport.CurrentFiletypesEnabled( disabled_filetypes ) and
              self.NativeFiletypeCompletionAvailable() )
 
 
@@ -640,16 +641,6 @@ class YouCompleteMe( object ):
         continue
 
       self._CloseLogfile( logfile )
-
-
-  def CurrentFiletypeCompletionEnabled( self ):
-    filetypes = vimsupport.CurrentFiletypes()
-    filetype_to_disable = self._user_options[
-      'filetype_specific_completion_to_disable' ]
-    if '*' in filetype_to_disable:
-      return False
-    else:
-      return not any( [ x in filetype_to_disable for x in filetypes ] )
 
 
   def ShowDetailedDiagnostic( self ):

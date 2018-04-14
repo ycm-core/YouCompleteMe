@@ -675,3 +675,109 @@ def OmniCompleter_GetCompletions_NoCache_ForceSemantic_test( ycm ):
         'completion_start_column': 1
       } )
     )
+
+
+@YouCompleteMeInstance( {
+  'cache_omnifunc': 0,
+  'filetype_specific_completion_to_disable': { FILETYPE: 1 },
+  'semantic_triggers': TRIGGERS } )
+def OmniCompleter_GetCompletions_FiletypeDisabled_SemanticTrigger_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    return [ 'a', 'b', 'cdef' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'test.' ],
+                              filetype = FILETYPE,
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
+    ycm.SendCompletionRequest()
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': empty(),
+        'completion_start_column': 6
+      } )
+    )
+
+
+@YouCompleteMeInstance( {
+  'cache_omnifunc': 0,
+  'filetype_specific_completion_to_disable': { '*': 1 },
+  'semantic_triggers': TRIGGERS } )
+def OmniCompleter_GetCompletions_AllFiletypesDisabled_SemanticTrigger_test(
+  ycm ):
+
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    return [ 'a', 'b', 'cdef' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'test.' ],
+                              filetype = FILETYPE,
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
+    ycm.SendCompletionRequest()
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': empty(),
+        'completion_start_column': 6
+      } )
+    )
+
+
+@YouCompleteMeInstance( {
+  'cache_omnifunc': 0,
+  'filetype_specific_completion_to_disable': { FILETYPE: 1 },
+  'semantic_triggers': TRIGGERS } )
+def OmniCompleter_GetCompletions_FiletypeDisabled_ForceSemantic_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    return [ 'a', 'b', 'cdef' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'test.' ],
+                              filetype = FILETYPE,
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
+    ycm.SendCompletionRequest( force_semantic = True )
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completion_start_column': 6
+      } )
+    )
+
+
+@YouCompleteMeInstance( {
+  'cache_omnifunc': 0,
+  'filetype_specific_completion_to_disable': { '*': 1 },
+  'semantic_triggers': TRIGGERS } )
+def OmniCompleter_GetCompletions_AllFiletypesDisabled_ForceSemantic_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    return [ 'a', 'b', 'cdef' ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'test.' ],
+                              filetype = FILETYPE,
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], current_buffer, ( 1, 6 ) ):
+    ycm.SendCompletionRequest( force_semantic = True )
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completion_start_column': 6
+      } )
+    )

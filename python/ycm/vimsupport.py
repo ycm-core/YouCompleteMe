@@ -664,6 +664,15 @@ def CurrentFiletypes():
   return ToUnicode( vim.eval( "&filetype" ) ).split( '.' )
 
 
+def CurrentFiletypesEnabled( disabled_filetypes ):
+  """Return False if one of the current filetypes is disabled, True otherwise.
+  |disabled_filetypes| must be a dictionary where keys are the disabled
+  filetypes and values are unimportant. The special key '*' matches all
+  filetypes."""
+  return ( '*' not in disabled_filetypes and
+           not any( [ x in disabled_filetypes for x in CurrentFiletypes() ] ) )
+
+
 def GetBufferFiletypes( bufnr ):
   command = 'getbufvar({0}, "&ft")'.format( bufnr )
   return ToUnicode( vim.eval( command ) ).split( '.' )

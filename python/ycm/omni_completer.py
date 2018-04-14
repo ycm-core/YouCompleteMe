@@ -57,8 +57,12 @@ class OmniCompleter( Completer ):
 
 
   def ShouldUseNowInner( self, request_data ):
-    if request_data.get( 'force_semantic', False ):
+    if request_data[ 'force_semantic' ]:
       return True
+    disabled_filetypes = self.user_options[
+      'filetype_specific_completion_to_disable' ]
+    if not vimsupport.CurrentFiletypesEnabled( disabled_filetypes ):
+      return False
     return super( OmniCompleter, self ).ShouldUseNowInner( request_data )
 
 
