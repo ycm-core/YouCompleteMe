@@ -22,10 +22,8 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.vimsupport import PostVimMessage
-
-from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                      JsonFromFuture, HandleServerException )
 
 import logging
 
@@ -65,13 +63,16 @@ class MessagesPoll( BaseRequest ):
       # Nothing yet...
       return True
 
-    with HandleServerException( display = False ):
-      response = JsonFromFuture( self._response_future )
+    response = self.HandleFuture( self._response_future,
+                                  display_message = False )
+    if response is None:
+      # Server returned an exception.
+      return False
 
-      poll_again = _HandlePollResponse( response, diagnostics_handler )
-      if poll_again:
-        self._SendRequest()
-        return True
+    poll_again = _HandlePollResponse( response, diagnostics_handler )
+    if poll_again:
+      self._SendRequest()
+      return True
 
     return False
 

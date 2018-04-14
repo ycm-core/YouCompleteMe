@@ -22,8 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycm.client.base_request import ( BaseRequest, BuildRequestData,
-                                      JsonFromFuture, HandleServerException )
+from ycm.client.base_request import BaseRequest, BuildRequestData
 
 
 class EventNotification( BaseRequest ):
@@ -57,8 +56,8 @@ class EventNotification( BaseRequest ):
     if not self._response_future or self._event_name != 'FileReadyToParse':
       return []
 
-    with HandleServerException( truncate = True ):
-      self._cached_response = JsonFromFuture( self._response_future )
+    self._cached_response = self.HandleFuture( self._response_future,
+                                               truncate_message = True )
 
     return self._cached_response if self._cached_response else []
 
