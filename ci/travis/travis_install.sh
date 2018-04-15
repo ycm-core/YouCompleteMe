@@ -63,7 +63,6 @@ python_version=$(python -c 'import sys; print( "{0}.{1}".format( sys.version_inf
 echo "Checking python version (actual ${python_version} vs expected ${YCM_PYTHON_VERSION})"
 test ${python_version} == ${YCM_PYTHON_VERSION}
 
-pip install -U pip wheel setuptools
 pip install -r python/test_requirements.txt
 
 # The build infrastructure prints a lot of spam after this script runs, so make
