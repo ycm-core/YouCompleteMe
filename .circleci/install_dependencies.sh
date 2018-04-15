@@ -73,7 +73,6 @@ if [ -z \"\${PYENV_LOADING}\" ]; then
   unset PYENV_LOADING
 fi" >> $BASH_ENV
 
-pip install -U pip wheel setuptools
 pip install -r python/test_requirements.txt
 
 set +e
