@@ -3671,7 +3671,7 @@ YouCompleteMe maintainers directly using the contact details below.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [87]. © 2015-2017
+This software is licensed under the GPL v3 license [87]. © 2015-2018
 YouCompleteMe contributors
 
 ===============================================================================

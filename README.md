@@ -3367,7 +3367,7 @@ License
 -------
 
 This software is licensed under the [GPL v3 license][gpl].
-© 2015-2017 YouCompleteMe contributors
+© 2015-2018 YouCompleteMe contributors
 
 [ycmd]: https://github.com/Valloric/ycmd
 [Clang]: http://clang.llvm.org/
