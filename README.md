@@ -1614,6 +1614,13 @@ provides a list of implementations to choose from.
 
 Supported in filetypes: `cs`
 
+#### The `GoToType` subcommand
+
+Looks up the symbol under the cursor and jumps to the definition of its type
+e.g. if the symbol is an object, go to the definition of its class.
+
+Supported in filetypes: `typescript`
+
 ### Semantic Information Commands
 
 These commands are useful for finding static information about the code, such
