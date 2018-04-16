@@ -469,8 +469,7 @@ install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
     python install.py --all
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
-option. YCM officially supports MSVC 12 (Visual Studio 2013), 14 (2015), and 15
-(2017).
+option. YCM officially supports MSVC 14 (Visual Studio 2015) and 15 (2017).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -632,8 +631,7 @@ process.
     Python 3][python-win-download]. Pick the version corresponding to your Vim
     architecture. You will also need Microsoft Visual C++ (MSVC) to build YCM.
     You can obtain it by installing [Visual Studio][visual-studio-download].
-    MSVC 12 (Visual Studio 2013), 14 (2015), and 15 (2017) are officially
-    supported.
+    MSVC 14 (Visual Studio 2015) and 15 (2017) are officially supported.
 
     Here we'll assume you installed YCM with Vundle. That means that the
     top-level YCM directory is in `~/.vim/bundle/YouCompleteMe`.
