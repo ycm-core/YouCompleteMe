@@ -25,7 +25,7 @@ aliases:
       key: v1-ycm-{{ .Environment.CIRCLE_JOB }}
       paths:
         - ~/Library/Caches/Homebrew
-        - ~/.cache/pip
+        - ~/Library/Caches/pip
         - ~/.pyenv
   restore-cache: &restore-cache
     restore_cache:
