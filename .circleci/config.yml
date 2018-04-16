@@ -22,14 +22,14 @@ aliases:
   # Increase the version key to clear the cache.
   save-cache: &save-cache
     save_cache:
-      key: v1-ycm-{{ .Environment.CIRCLE_JOB }}
+      key: v2-ycm-{{ .Environment.CIRCLE_JOB }}
       paths:
         - ~/Library/Caches/Homebrew
-        - ~/.cache/pip
+        - ~/Library/Caches/pip
         - ~/.pyenv
   restore-cache: &restore-cache
     restore_cache:
-      key: v1-ycm-{{ .Environment.CIRCLE_JOB }}
+      key: v2-ycm-{{ .Environment.CIRCLE_JOB }}
 jobs:
   python2:
     <<: *common
