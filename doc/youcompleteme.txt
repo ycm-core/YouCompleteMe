@@ -3648,7 +3648,7 @@ References ~
 [13] https://github.com/vheon/JediHTTP
 [14] https://github.com/OmniSharp/omnisharp-server
 [15] https://github.com/nsf/gocode
-[16] https://github.com/Manishearth/godef
+[16] https://github.com/rogpeppe/godef
 [17] https://github.com/Microsoft/TypeScript/tree/master/src/server
 [18] http://ternjs.net
 [19] https://github.com/phildawes/racer
