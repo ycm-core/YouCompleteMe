@@ -130,4 +130,4 @@ class OmniCompleter( Completer ):
 
     response = BaseRequest.PostDataToHandler( request_data,
                                               'filter_and_sort_candidates' )
-    return response if response is not None else candidates
+    return response if response is not None else []
