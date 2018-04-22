@@ -128,6 +128,6 @@ class OmniCompleter( Completer ):
       'query': query
     }
 
-    response = BaseRequest.PostDataToHandler( request_data,
-                                              'filter_and_sort_candidates' )
+    response = BaseRequest().PostDataToHandler( request_data,
+                                                'filter_and_sort_candidates' )
     return response if response is not None else []
