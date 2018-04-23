@@ -67,7 +67,7 @@ class Buffer( object ):
 
 
   def ShouldResendParseRequest( self ):
-    return self._parse_request.ShouldResend()
+    return bool( self._parse_request and self._parse_request.ShouldResend() )
 
 
   def UpdateDiagnostics( self, force=False ):
