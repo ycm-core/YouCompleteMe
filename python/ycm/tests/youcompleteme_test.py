@@ -1058,3 +1058,10 @@ def YouCompleteMe_OnCompleteDone_NoCompletionRequest_test( ycm,
                                                            on_complete_done ):
   ycm.OnCompleteDone()
   on_complete_done.assert_not_called()
+
+
+@YouCompleteMeInstance()
+def YouCompleteMe_ShouldResendFileParseRequest_NoParseRequest_test( ycm ):
+  current_buffer = VimBuffer( 'current_buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    assert_that( ycm.ShouldResendFileParseRequest(), equal_to( False ) )
