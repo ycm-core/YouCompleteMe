@@ -3366,7 +3366,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Bear]: https://github.com/rizsotto/Bear
 [ygen]: https://github.com/rdnetto/YCM-Generator
 [Gocode]: https://github.com/nsf/gocode
-[Godef]: https://github.com/Manishearth/godef
+[Godef]: https://github.com/rogpeppe/godef
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
 [vim-win-download]: https://bintray.com/micbou/generic/vim
 [python-win-download]: https://www.python.org/downloads/windows/

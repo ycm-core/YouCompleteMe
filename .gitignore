@@ -1,3 +1,7 @@
+# Nodejs
+package-lock.json
+node_modules
+
 # Compiled Object files
 *.slo
 *.lo
@@ -22,6 +26,7 @@ install_manifest.txt
 
 # Python
 *.py[cod]
+.ropeproject
 
 # Installer logs
 pip-log.txt
