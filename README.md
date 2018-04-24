@@ -2805,7 +2805,7 @@ let g:ycm_disable_for_files_larger_than_kb = 1000
 This option specifies the Python interpreter to use to run the [jedi][]
 completion library.  Specify the Python interpreter to use to get completions.
 By default the Python under which [ycmd][] runs is used ([ycmd][] runs on
-Python 2.7 or 3.4+).
+Python 2.7.1+ or 3.4+).
 
 Default: `''`
 
