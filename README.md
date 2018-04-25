@@ -46,10 +46,11 @@ Contents
     - [Completion String Ranking](#completion-string-ranking)
     - [General Semantic Completion](#general-semantic-completion)
     - [C-family Semantic Completion](#c-family-semantic-completion)
-    - [JavaScript Semantic Completion](#javascript-semantic-completion)
-    - [Rust Semantic Completion](#rust-semantic-completion)
-    - [Python Semantic Completion](#python-semantic-completion)
     - [Java Semantic Completion](#java-semantic-completion)
+    - [JavaScript Semantic Completion](#javascript-semantic-completion)
+    - [Python Semantic Completion](#python-semantic-completion)
+    - [Rust Semantic Completion](#rust-semantic-completion)
+    - [TypeScript Semantic Completion](#typescript-semantic-completion)
     - [Semantic Completion for Other Languages](#semantic-completion-for-other-languages)
     - [Writing New Semantic Completers](#writing-new-semantic-completers)
     - [Diagnostic Display](#diagnostic-display)
@@ -149,7 +150,9 @@ number of languages, including:
 - displaying type information for classes, variables, functions etc.,
 - displaying documentation for methods, members, etc. in the preview window,
 - fixing common coding errors, like missing semi-colons, typos, etc.,
-- semantic renaming of variables across files (JavaScript only).
+- semantic renaming of variables across files,
+- formatting code,
+- removing unused imports, sorting imports, etc.
 
 Features vary by file type, so make sure to check out the [file type feature
 summary](#quick-feature-summary) and the
@@ -466,8 +469,7 @@ install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
     python install.py --all
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
-option. YCM officially supports MSVC 12 (Visual Studio 2013), 14 (2015), and 15
-(2017).
+option. YCM officially supports MSVC 14 (Visual Studio 2015) and 15 (2017).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -629,8 +631,7 @@ process.
     Python 3][python-win-download]. Pick the version corresponding to your Vim
     architecture. You will also need Microsoft Visual C++ (MSVC) to build YCM.
     You can obtain it by installing [Visual Studio][visual-studio-download].
-    MSVC 12 (Visual Studio 2013), 14 (2015), and 15 (2017) are officially
-    supported.
+    MSVC 14 (Visual Studio 2015) and 15 (2017) are officially supported.
 
     Here we'll assume you installed YCM with Vundle. That means that the
     top-level YCM directory is in `~/.vim/bundle/YouCompleteMe`.
@@ -795,12 +796,19 @@ Quick Feature Summary
 
 ### TypeScript
 
-* Semantic auto-completion
+* Semantic auto-completion with automatic import insertion
+* Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
+  identical)
+* Go to type definition (`GoToType`)
+* Reference finding (`GoToReferences`)
 * Real-time diagnostic display
 * Renaming symbols (`RefactorRename <new name>`)
-* Go to definition, find references (`GoToDefinition`, `GoToReferences`)
-* Semantic type information for identifiers (`GetType`)
 * View documentation comments for identifiers (`GetDoc`)
+* Type information for identifiers (`GetType`)
+* Automatically fix certain errors (`FixIt`)
+* Code formatting (`Format`)
+* Organize imports (`OrganizeImports`)
+* Management of `TSServer` server instance
 
 ### JavaScript
 
@@ -834,6 +842,7 @@ Quick Feature Summary
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors including code generation  (`FixIt`)
 * Code formatting (`Format`)
+* Organize imports (`OrganizeImports`)
 * Detection of java projects
 * Management of `jdt.ls` server instance
 
@@ -845,11 +854,19 @@ User Guide
 If the offered completions are too broad, keep typing characters; YCM will
 continue refining the offered completions based on your input.
 
-Filtering is "smart-case" sensitive; if you are typing only lowercase letters,
-then it's case-insensitive. If your input contains uppercase letters, then the
-uppercase letters in your query must match uppercase letters in the completion
-strings (the lowercase letters still match both). So, "foo" matches "Foo" and
-"foo", "Foo" matches "Foo" and "FOO" but not "foo".
+Filtering is "smart-case" and "smart-[diacritic][]" sensitive; if you are
+typing only lowercase letters, then it's case-insensitive. If your input
+contains uppercase letters, then the uppercase letters in your query must
+match uppercase letters in the completion strings (the lowercase letters still
+match both). On top of that, a letter with no diacritic marks will match that
+letter with or without marks:
+
+| matches | foo | føo | fOo | fØo |
+|---------|-----|-----|-----|-----|
+| **foo** |  ✔️  |  ✔️  |  ✔️  |  ✔️  |
+| **føo** |  ❌ |  ✔️  |  ❌ |  ✔️  |
+| **fOo** |  ❌ |  ❌ |  ✔️  |  ✔️  |
+| **fØo** |  ❌ |  ❌ |  ❌ |  ✔️  |
 
 Use the TAB key to accept a completion and continue pressing TAB to cycle
 through the completions. Use Shift-TAB to cycle backwards. Note that if you're
@@ -1030,145 +1047,6 @@ getting fast completions.
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
 
-### JavaScript Semantic Completion
-
-#### JavaScript quick start
-
-1. Ensure that you have enabled the JavaScript completer. See the
-   [installation guide](#installation) for details.
-
-2. Create a `.tern-project` file in the root directory of your JavaScript
-   project, by following the [instructions][tern-project] in the [Tern][]
-   documentation.
-
-3. Edit a file from your project.
-
-#### Explanation
-
-JavaScript completion is based on [Tern][]. This completion engine requires a
-file named [`.tern-project`][tern-project] to exist in the current working
-directory or a directory which is an ancestor of the current working directory
-when the Tern server is started. YCM starts the Tern server the first time a
-JavaScript file is edited and uses its directory as the working directory, so
-the directory of that file at that time needs to be a descendent of the
-directory containing the `.tern-project` file (or that directory itself).
-
-Alternatively, as described in the [Tern documentation][tern-docs], a global
-`.tern-config` file may be used.
-
-Multiple Tern servers are not supported. To switch to a different JavaScript
-project, you need to restart the Tern server using [the `RestartServer`
-subcommand](#the-restartserver-subcommand) while editing a file of that
-project:
-
-```vim
-:YcmCompleter RestartServer
-```
-
-#### Tips and tricks
-
-This section contains some advice for configuring `.tern-project` and working
-with JavaScript files. The canonical reference for correctly configuring Tern is
-the [Tern documentation][tern-docs]. Any issues, improvements, advice, etc.
-should be sought from the [Tern][] project. For example, see the [list of tern
-plugins](http://ternjs.net/doc/manual.html#plugins) for the list of plugins
-which can be enabled in the `plugins` section of the `.tern-project` file.
-
-##### Configuring Tern for node support
-
-The following simple example `.tern-project` file enables nodejs support:
-
-```json
-{
-    "plugins": {
-        "node": {}
-    }
-}
-
-```
-
-##### Configuring Tern for requirejs support
-
-The Tern requirejs plugin requires that all included "libraries" are rooted
-under the same base directory. If that's not the case for your projects, then it
-is possible to make it work with appropriate symbolic links. For example, create
-a directory `ext_lib` within your project and populate it with symlinks to your
-libraries. Then set up the `.tern-project` something like this:
-
-```json
-
-{
-  "plugins": {
-    "requirejs": {
-      "baseURL": "./ext_lib",
-    }
-  }
-}
-```
-
-Then, given the following structure:
-
-```
-./ext_lib/mylib (symlink)
-./ext_lib/anotherlib (symlink)
-```
-
-Can be used as follows:
-
-```javascript
-define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
-    // etc.
-} );
-```
-
-### Rust Semantic Completion
-
-Completions and GoTo commands within the current crate and its dependencies
-should work out of the box with no additional configuration (provided that you
-built YCM with the `--rust-completer` flag; see the [*Installation*
-section](#installation) for details). For semantic analysis inclusive of the
-standard library, you must have a local copy of [the Rust source
-code][rust-src]. If using [rustup][], run the following command to download the
-code:
-```
-rustup component add rust-src
-```
-YCM will find its location automatically. Otherwise, download the archive,
-extract it somewhere, and set the following option so YCM can locate it:
-```viml
-" In this example, the Rust source code archive has been extracted to
-" /usr/local/rust/rustc-1.20.0
-let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.20.0/src'
-```
-
-### Python Semantic Completion
-
-Completion and GoTo commands work out of the box with no additional
-configuration. Those features are provided by the [jedi][] library which
-supports a variety of Python versions (2.6, 2.7, 3.2+) as long as it
-runs in the corresponding Python interpreter. By default YCM runs [jedi][] with
-the same Python interpreter used by the [ycmd server][ycmd], so if you would like to
-use a different interpreter, use the following option specifying the Python
-binary to use. For example, to provide Python 3 completion in your project, set:
-
-```viml
-let g:ycm_python_binary_path = '/usr/bin/python3'
-```
-
-If the value of `g:ycm_python_binary_path` is an absolute path like above it
-will be used as-is, but if it's an executable name it will be searched through
-the PATH. So for example if you set:
-
-```viml
-let g:ycm_python_binary_path = 'python'
-```
-
-YCM will use the first `python` executable it finds in the PATH to run
-[jedi][]. This means that if you are in a virtual environment and you start vim
-in that directory, the first `python` that YCM will find will be the one in the
-virtual environment, so [jedi][] will be able to provide completions for every
-package you have in the virtual environment.
-
 ### Java Semantic Completion
 
 **NOTE**: Java support is currently experimental. Please let us know your
@@ -1304,6 +1182,161 @@ check that the classpath is set correctly.
 For anything else, [contact us](#contact). Java support is experimental at
 present so we'd love to hear your feedback! Please do remember to check
 [CONTRIBUTING.md][contributing-md] for the list of diagnostics we'll need.
+
+### JavaScript Semantic Completion
+
+#### JavaScript quick start
+
+1. Ensure that you have enabled the JavaScript completer. See the
+   [installation guide](#installation) for details.
+
+2. Create a `.tern-project` file in the root directory of your JavaScript
+   project, by following the [instructions][tern-project] in the [Tern][]
+   documentation.
+
+3. Edit a file from your project.
+
+#### Explanation
+
+JavaScript completion is based on [Tern][]. This completion engine requires a
+file named [`.tern-project`][tern-project] to exist in the current working
+directory or a directory which is an ancestor of the current working directory
+when the Tern server is started. YCM starts the Tern server the first time a
+JavaScript file is edited and uses its directory as the working directory, so
+the directory of that file at that time needs to be a descendent of the
+directory containing the `.tern-project` file (or that directory itself).
+
+Alternatively, as described in the [Tern documentation][tern-docs], a global
+`.tern-config` file may be used.
+
+Multiple Tern servers are not supported. To switch to a different JavaScript
+project, you need to restart the Tern server using [the `RestartServer`
+subcommand](#the-restartserver-subcommand) while editing a file of that
+project:
+
+```vim
+:YcmCompleter RestartServer
+```
+
+#### Tips and tricks
+
+This section contains some advice for configuring `.tern-project` and working
+with JavaScript files. The canonical reference for correctly configuring Tern is
+the [Tern documentation][tern-docs]. Any issues, improvements, advice, etc.
+should be sought from the [Tern][] project. For example, see the [list of tern
+plugins](http://ternjs.net/doc/manual.html#plugins) for the list of plugins
+which can be enabled in the `plugins` section of the `.tern-project` file.
+
+##### Configuring Tern for node support
+
+The following simple example `.tern-project` file enables nodejs support:
+
+```json
+{
+    "plugins": {
+        "node": {}
+    }
+}
+
+```
+
+##### Configuring Tern for requirejs support
+
+The Tern requirejs plugin requires that all included "libraries" are rooted
+under the same base directory. If that's not the case for your projects, then it
+is possible to make it work with appropriate symbolic links. For example, create
+a directory `ext_lib` within your project and populate it with symlinks to your
+libraries. Then set up the `.tern-project` something like this:
+
+```json
+
+{
+  "plugins": {
+    "requirejs": {
+      "baseURL": "./ext_lib",
+    }
+  }
+}
+```
+
+Then, given the following structure:
+
+```
+./ext_lib/mylib (symlink)
+./ext_lib/anotherlib (symlink)
+```
+
+Can be used as follows:
+
+```javascript
+define( [ 'mylib/file1', 'anotherlib/anotherfile' ], function( f1, f2 ) {
+    // etc.
+} );
+```
+
+### Python Semantic Completion
+
+Completion and GoTo commands work out of the box with no additional
+configuration. Those features are provided by the [jedi][] library which
+supports a variety of Python versions (2.6, 2.7, 3.2+) as long as it
+runs in the corresponding Python interpreter. By default YCM runs [jedi][] with
+the same Python interpreter used by the [ycmd server][ycmd], so if you would like to
+use a different interpreter, use the following option specifying the Python
+binary to use. For example, to provide Python 3 completion in your project, set:
+
+```viml
+let g:ycm_python_binary_path = '/usr/bin/python3'
+```
+
+If the value of `g:ycm_python_binary_path` is an absolute path like above it
+will be used as-is, but if it's an executable name it will be searched through
+the PATH. So for example if you set:
+
+```viml
+let g:ycm_python_binary_path = 'python'
+```
+
+YCM will use the first `python` executable it finds in the PATH to run
+[jedi][]. This means that if you are in a virtual environment and you start vim
+in that directory, the first `python` that YCM will find will be the one in the
+virtual environment, so [jedi][] will be able to provide completions for every
+package you have in the virtual environment.
+
+### Rust Semantic Completion
+
+Completions and GoTo commands within the current crate and its dependencies
+should work out of the box with no additional configuration (provided that you
+built YCM with the `--rust-completer` flag; see the [*Installation*
+section](#installation) for details). For semantic analysis inclusive of the
+standard library, you must have a local copy of [the Rust source
+code][rust-src]. If using [rustup][], run the following command to download the
+code:
+```
+rustup component add rust-src
+```
+YCM will find its location automatically. Otherwise, download the archive,
+extract it somewhere, and set the following option so YCM can locate it:
+```viml
+" In this example, the Rust source code archive has been extracted to
+" /usr/local/rust/rustc-1.20.0
+let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.20.0/src'
+```
+
+### TypeScript Semantic Completion
+
+All TypeScript features are provided by the [TSServer][] engine, which is
+included in the TypeScript SDK. To get the SDK, install [Node.js and
+npm][npm-install] and run the command:
+```
+npm install -g typescript
+```
+[TSServer][] relies on [the `tsconfig.json` file][tsconfig.json] to analyze your
+project. Ensure the file exists at the root of your project.
+
+TypeScript 2.8.1 or later is recommended. Some features will be missing on older
+versions. You can check which version you are currently using by looking at the
+output of [`:YcmDebugInfo` ](#the-ycmdebuginfo-command). If the version is
+`None`, your TypeScript is too old and should be updated.
 
 ### Semantic Completion for Other Languages
 
@@ -1551,7 +1584,8 @@ Supported in filetypes: `c, cpp, objc, objcpp`
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, python, rust, java`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, java, python, rust,
+typescript`
 
 #### The `GoToDefinition` subcommand
 
@@ -1562,8 +1596,8 @@ namely when the definition of the symbol is in the current translation unit. A
 translation unit consists of the file you are editing and all the files you are
 including with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python,
-rust, typescript, java`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, java, javascript, python,
+rust, typescript`
 
 #### The `GoTo` subcommand
 
@@ -1574,8 +1608,8 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, javascript, python, rust,
-java`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, go, java, javascript, python,
+rust, typescript`
 
 #### The `GoToImprecise` subcommand
 
@@ -1596,7 +1630,7 @@ This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
 locations.
 
-Supported in filetypes: `javascript, python, typescript, java`
+Supported in filetypes: `java, javascript, python, typescript`
 
 #### The `GoToImplementation` subcommand
 
@@ -1641,7 +1675,7 @@ Invoking this command on `s` returns `std::string => std::basic_string<char>`
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, javascript, typescript, java`
+Supported in filetypes: `c, cpp, objc, objcpp, java, javascript, typescript`
 
 #### The `GetTypeImprecise` subcommand
 
@@ -1697,8 +1731,8 @@ under the cursor. Depending on the file type, this includes things like:
 * Python docstrings,
 * etc.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, python, typescript,
-javascript, rust, java`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, java, javascript, python,
+typescript, rust`
 
 #### The `GetDocImprecise` subcommand
 
@@ -1746,7 +1780,7 @@ indication).
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, java`
+Supported in filetypes: `c, cpp, objc, objcpp, cs, java, typescript`
 
 #### The `RefactorRename <new name>` subcommand
 
@@ -1760,7 +1794,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `javascript` (variables only), `typescript, java`
+Supported in filetypes: `java, javascript (variables only), typescript`
 
 #### Multi-file Refactor
 
@@ -1794,14 +1828,22 @@ to see the buffers that were opened by the command.
 
 #### The `Format` subcommand
 
-This commands formats the whole buffer or some part of it according to the value
+This command formats the whole buffer or some part of it according to the value
 of the Vim options `shiftwidth` and `expandtab` (see `:h 'sw'` and `:h et`
 respectively). To format a specific part of your document, you can either select
 it in one of Vim's visual modes (see `:h visual-use`) and run the command or
 directly enter the range on the command line, e.g. `:2,5YcmCompleter Format` to
 format it from line 2 to line 5.
 
-Supported in filetypes: `java`
+Supported in filetypes: `java, typescript`
+
+#### The `OrganizeImports` subcommand
+
+This command removes unused imports and sorts imports in the current file. It
+can also group imports from the same module in TypeScript and resolves imports
+in Java.
+
+Supported in filetypes: `java, typescript`
 
 ### Miscellaneous Commands
 
@@ -1824,7 +1866,7 @@ python binary to use to restart the Python semantic engine.
 :YcmCompleter RestartServer /usr/bin/python3.4
 ```
 
-Supported in filetypes: `cs, go, javascript, python, rust, typescript, java`
+Supported in filetypes: `cs, go, java, javascript, python, rust, typescript`
 
 #### The `ClearCompilationFlagCache` subcommand
 
@@ -3325,7 +3367,7 @@ License
 -------
 
 This software is licensed under the [GPL v3 license][gpl].
-© 2015-2017 YouCompleteMe contributors
+© 2015-2018 YouCompleteMe contributors
 
 [ycmd]: https://github.com/Valloric/ycmd
 [Clang]: http://clang.llvm.org/
@@ -3368,6 +3410,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Gocode]: https://github.com/nsf/gocode
 [Godef]: https://github.com/Manishearth/godef
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
+[tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
 [vim-win-download]: https://bintray.com/micbou/generic/vim
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://www.visualstudio.com/downloads/
@@ -3407,3 +3450,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [ycmd-mvn-pom-xml]: https://github.com/Valloric/ycmd/blob/java-language-server/ycmd/tests/java/testdata/simple_maven_project/pom.xml
 [ycmd-gradle-project]: https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_gradle_project
 [jdtls-release]: http://download.eclipse.org/jdtls/milestones
+[diacritic]: https://www.unicode.org/glossary/#diacritic
