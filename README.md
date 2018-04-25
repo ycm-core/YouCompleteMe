@@ -861,12 +861,45 @@ match uppercase letters in the completion strings (the lowercase letters still
 match both). On top of that, a letter with no diacritic marks will match that
 letter with or without marks:
 
-| matches | foo | føo | fOo | fØo |
-|---------|-----|-----|-----|-----|
-| **foo** |  ✔️  |  ✔️  |  ✔️  |  ✔️  |
-| **føo** |  ❌ |  ✔️  |  ❌ |  ✔️  |
-| **fOo** |  ❌ |  ❌ |  ✔️  |  ✔️  |
-| **fØo** |  ❌ |  ❌ |  ❌ |  ✔️  |
+<table>
+<tbody>
+<tr>
+  <td>matches</td>
+  <td>foo</td>
+  <td>føo</td>
+  <td>fOo</td>
+  <td>fØo</td>
+</tr>
+<tr>
+  <td>foo</td>
+  <td>✔️</td>
+  <td>✔️</td>
+  <td>✔️</td>
+  <td>✔️</td>
+</tr>
+<tr>
+  <td>føo</td>
+  <td>❌</td>
+  <td>✔️</td>
+  <td>❌</td>
+  <td>✔️</td>
+</tr>
+<tr>
+  <td>fOo</td>
+  <td>❌</td>
+  <td>❌</td>
+  <td>✔️</td>
+  <td>✔️</td>
+</tr>
+<tr>
+  <td>fØo</td>
+  <td>❌</td>
+  <td>❌</td>
+  <td>❌</td>
+  <td>✔️</td>
+</tr>
+</tbody>
+</table>
 
 Use the TAB key to accept a completion and continue pressing TAB to cycle
 through the completions. Use Shift-TAB to cycle backwards. Note that if you're
