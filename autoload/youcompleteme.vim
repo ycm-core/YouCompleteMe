@@ -722,20 +722,39 @@ function! s:IdentifierFinishedOperations()
 endfunction
 
 
-" Returns 1 when inside comment and 2 when inside string
-function! s:InsideCommentOrString()
-  " Has to be col('.') -1 because col('.') doesn't exist at this point. We are
-  " in insert mode when this func is called.
-  let syntax_group = synIDattr(
-        \ synIDtrans( synID( line( '.' ), col( '.' ) - 1, 1 ) ), 'name')
-
-  if stridx(syntax_group, 'Comment') > -1
+" Returns 1 if syntax group is a comment and 2 if it is a string
+function! s:IsCommentOrString( syntax_group )
+  if stridx( a:syntax_group, 'Comment' ) > -1
     return 1
   endif
 
-  if stridx(syntax_group, 'String') > -1
+  if stridx( a:syntax_group, 'String' ) > -1
     return 2
   endif
+
+  return 0
+endfunction
+
+
+" Returns 1 when inside comment and 2 when inside string
+function! s:InsideCommentOrString()
+  " Has to be col('.') - 1 because col('.') doesn't exist at this point. We are
+  " in insert mode when this function is called.
+  for syntax_id in synstack( line( '.' ), col( '.' ) - 1 )
+    " We check the highlight group before the syntax item itself since its name
+    " is more likely to contain Comment or String.
+    let syntax_group = synIDattr( synIDtrans( syntax_id ), 'name' )
+    let retval = s:IsCommentOrString( syntax_group )
+    if retval
+      return retval
+    endif
+
+    let syntax_group = synIDattr( syntax_id, 'name' )
+    let retval = s:IsCommentOrString( syntax_group )
+    if retval
+      return retval
+    endif
+  endfor
 
   return 0
 endfunction
