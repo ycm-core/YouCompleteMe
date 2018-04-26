@@ -29,7 +29,7 @@ TIMEOUT_SECONDS = 0.1
 
 class ShutdownRequest( BaseRequest ):
   def __init__( self ):
-    super( BaseRequest, self ).__init__()
+    super( ShutdownRequest, self ).__init__()
 
 
   def Start( self ):
