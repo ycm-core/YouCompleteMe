@@ -29,7 +29,6 @@ addons:
      # 4.8 is the first version of GCC with good enough C++11 support to build
      # ycmd.
      - g++-4.8
-     - ninja-build
      # Everything below is a Python build dep (though it depends on Python
      # version). We need them because pyenv builds Python.
      - libssl-dev

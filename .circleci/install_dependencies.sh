@@ -12,16 +12,15 @@ set -e
 brew update || brew update
 
 # List of homebrew formulae to install in the order they appear.
-# We require CMake and Ninja for our build and tests, and all the others are
-# dependencies of pyenv.
+# We require CMake for our build and tests, and all the others are dependencies
+# of pyenv.
 REQUIREMENTS="cmake
-              ninja
               readline
               autoconf
               pkg-config
               openssl"
 
-# Install CMake, Ninja, and pyenv dependencies.
+# Install CMake and pyenv dependencies.
 for pkg in $REQUIREMENTS; do
   # Install package, or upgrade it if it is already installed.
   brew install $pkg || brew outdated $pkg || brew upgrade $pkg
