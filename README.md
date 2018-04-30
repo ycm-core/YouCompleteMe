@@ -866,9 +866,9 @@ letter with or without marks:
 <tr>
   <th>matches</th>
   <th>foo</th>
-  <th>føo</th>
+  <th>fôo</th>
   <th>fOo</th>
-  <th>fØo</th>
+  <th>fÔo</th>
 </tr>
 <tr>
   <th>foo</th>
@@ -878,7 +878,7 @@ letter with or without marks:
   <td>✔️</td>
 </tr>
 <tr>
-  <th>føo</th>
+  <th>fôo</th>
   <td>❌</td>
   <td>✔️</td>
   <td>❌</td>
@@ -892,7 +892,7 @@ letter with or without marks:
   <td>✔️</td>
 </tr>
 <tr>
-  <th>fØo</th>
+  <th>fÔo</th>
   <td>❌</td>
   <td>❌</td>
   <td>❌</td>
