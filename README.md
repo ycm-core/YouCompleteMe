@@ -272,7 +272,7 @@ issues with `cmake`. Therefore, install the following instead:
 
 Make sure you have Python headers installed:
 
-    sudo apt-get install python-dev python3-dev
+    sudo apt-get install python-dev python3-dev python-pip
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -341,7 +341,7 @@ Install development tools and CMake:
 
 Make sure you have Python headers installed:
 
-    sudo dnf install python-devel python3-devel
+    sudo dnf install python-devel python3-devel python-pip
 
 Compiling YCM **with** semantic support for C-family languages:
 
