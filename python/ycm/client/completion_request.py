@@ -181,7 +181,7 @@ def _FilterToMatchingCompletions( completed_item, completions ):
       return ( ToUnicode( completed_item.get( key, "" ) ) ==
                ToUnicode( item.get( key, "" ) ) )
 
-    if all( [ matcher( i ) for i in match_keys ] ):
+    if all( matcher( i ) for i in match_keys ):
       matched_completions.append( completion )
   return matched_completions
 
