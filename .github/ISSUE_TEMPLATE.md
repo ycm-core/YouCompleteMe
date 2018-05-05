@@ -62,8 +62,9 @@ quickly and that neither your nor our time is needlessly wasted.
 
 ## Contents of YCM, ycmd and completion engine logfiles
 
-> Include link here to a [gist][] containing the entire logfiles for ycm, ycmd
-> and any completer logfiles listed by `:YcmToggleLogs`.
+> Add `let g:ycm_log_level = 'debug'` to vimrc, restart Vim, reproduce the
+> issue, and include link here to a [gist][] containing the entire logfiles for
+> ycm, ycmd and any completer logfiles listed by `:YcmToggleLogs`.
 
 ## OS version, distribution, etc.
 
