@@ -3383,6 +3383,16 @@ plugins is [vim-nerdtree-tabs][]. You should identify which plugin is
 responsible for the issue and report it to the plugin author. Note that when
 this happens, [ycmd][] will automatically shut itself down after 30 minutes.
 
+### YCM does not work with my Anaconda Python setup
+
+Anaconda sometimes breaks YCM because of the ever-changing libraries.
+For that reason Anaconda is not officially supported. Your best bet is
+to compile YCM with your system's Python, instead of Anaconda's Python.
+
+This should not prevent YCM from working on Anaconda projects,
+because one can choose [which interpreter to use](#python-semantic-completion)
+for the Python completer.
+
 Contributor Code of Conduct
 ---------------------------
 
