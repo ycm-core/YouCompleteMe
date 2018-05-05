@@ -670,7 +670,7 @@ def CurrentFiletypesEnabled( disabled_filetypes ):
   filetypes and values are unimportant. The special key '*' matches all
   filetypes."""
   return ( '*' not in disabled_filetypes and
-           not any( [ x in disabled_filetypes for x in CurrentFiletypes() ] ) )
+           not any( x in disabled_filetypes for x in CurrentFiletypes() ) )
 
 
 def GetBufferFiletypes( bufnr ):

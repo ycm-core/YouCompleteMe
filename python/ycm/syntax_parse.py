@@ -45,20 +45,20 @@ SYNTAX_REGION_ARGUMENT_REGEX = re.compile(
   r"^(?:matchgroup|start)=.*$")
 
 # See ":h syn-nextgroup".
-SYNTAX_NEXTGROUP_ARGUMENTS = set([
+SYNTAX_NEXTGROUP_ARGUMENTS = {
   'skipwhite',
   'skipnl',
   'skipempty'
-])
+}
 
 # These are the parent groups from which we want to extract keywords.
-ROOT_GROUPS = set([
+ROOT_GROUPS = {
   'Boolean',
   'Identifier',
   'Statement',
   'PreProc',
   'Type'
-])
+}
 
 
 class SyntaxGroup( object ):

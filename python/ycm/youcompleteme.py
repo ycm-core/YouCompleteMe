@@ -357,8 +357,8 @@ class YouCompleteMe( object ):
 
 
   def NativeFiletypeCompletionAvailable( self ):
-    return any( [ self.FiletypeCompleterExistsForFiletype( x ) for x in
-                  vimsupport.CurrentFiletypes() ] )
+    return any( self.FiletypeCompleterExistsForFiletype( x ) for x in
+                vimsupport.CurrentFiletypes() )
 
 
   def NativeFiletypeCompletionUsable( self ):
@@ -498,9 +498,9 @@ class YouCompleteMe( object ):
 
 
   def DiagnosticUiSupportedForCurrentFiletype( self ):
-    return any( [ x in DIAGNOSTIC_UI_FILETYPES or
-                  x in DIAGNOSTIC_UI_ASYNC_FILETYPES
-                  for x in vimsupport.CurrentFiletypes() ] )
+    return any( x in DIAGNOSTIC_UI_FILETYPES or
+                x in DIAGNOSTIC_UI_ASYNC_FILETYPES
+                for x in vimsupport.CurrentFiletypes() )
 
 
   def ShouldDisplayDiagnostics( self ):
