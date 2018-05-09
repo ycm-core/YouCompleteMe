@@ -494,9 +494,9 @@ Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support.
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
 Vim installed by running `vim --version`.
 
-FreeBSD 11.x comes with clang compiler but not the libraries needed to install.
+For FreeBSD 11.x, the requirements are clang, LLVM, boost and cmake :
 
-    pkg install llvm38 boost-all clang38 
+    pkg install llvm38 boost-all clang38 cmake
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/llvm38/lib/
 
 Install YouCompleteMe with [Vundle][].
@@ -505,10 +505,6 @@ Install YouCompleteMe with [Vundle][].
 using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
-
-Install CMake: `sudo pkg install cmake`
-For this install, we use python 3. `pip` must also be installed: For example :
-`sudo pkg install py36-pip`
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -522,6 +518,10 @@ Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --system-boost
+
+or,, if you need to specify the version of Python:
+
+    python3 install.py --system-boost
 
 The following additional language support options are available:
 
