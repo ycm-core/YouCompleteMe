@@ -31,6 +31,7 @@ from collections import defaultdict, namedtuple
 from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
                          JoinLinesAsUnicode, ToBytes, ToUnicode )
 from ycmd import user_options_store
+from ycmd.responses import IsJdtContentUri
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'horizontal-split' : 'split',
@@ -159,6 +160,8 @@ def BufferIsVisible( buffer_number ):
 
 def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
+    if IsJdtContentUri( buffer_object.name ):
+      return buffer_object.name
     return os.path.normpath( ToUnicode( buffer_object.name ) )
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that.
@@ -1053,6 +1056,11 @@ def WriteToPreviewWindow( message ):
     # the information we have. The only remaining option is to echo to the
     # status area.
     PostVimMessage( message, warning = False )
+
+
+def WriteToJDTBuffer( filecontent ):
+  vim.command( 'setlocal buftype=nofile' )
+  vim.current.buffer[:] = filecontent.splitlines()
 
 
 def BufferIsVisibleForFilename( filename ):
