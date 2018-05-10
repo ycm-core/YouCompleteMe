@@ -509,9 +509,6 @@ process.
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-
-Edit the header of `install.py` to replace `python` by `python3` if needed. Then:
-
     ./install.py --clang-completer --system-libclang --system-boost
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -519,9 +516,9 @@ Compiling YCM **without** semantic support for C-family languages:
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --system-boost
 
-or,, if you need to specify the version of Python:
+If the python executable is not present, or the default python is not the one that should be compiled against, specify the python interpreter explicitly:
 
-    python3 install.py --system-boost
+    python3 install.py --clang-completer --system-libclang --system-boost
 
 The following additional language support options are available:
 
