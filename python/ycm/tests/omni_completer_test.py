@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright (C) 2016 YouCompleteMe contributors
+# Copyright (C) 2016-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -39,7 +39,8 @@ TRIGGERS = {
 }
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_List_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -62,7 +63,8 @@ def OmniCompleter_GetCompletions_Cache_List_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_ListFilter_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -85,7 +87,8 @@ def OmniCompleter_GetCompletions_Cache_ListFilter_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_List_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -108,7 +111,8 @@ def OmniCompleter_GetCompletions_NoCache_List_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -133,7 +137,8 @@ def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_UseFindStart_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -158,7 +163,8 @@ def OmniCompleter_GetCompletions_NoCache_UseFindStart_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_UseFindStart_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -183,7 +189,8 @@ def OmniCompleter_GetCompletions_Cache_UseFindStart_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_Object_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -206,7 +213,8 @@ def OmniCompleter_GetCompletions_Cache_Object_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_ObjectList_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -250,7 +258,8 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_ObjectList_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -302,7 +311,8 @@ def OmniCompleter_GetCompletions_NoCache_ObjectList_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_ObjectListObject_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -346,7 +356,8 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -398,7 +409,8 @@ def OmniCompleter_GetCompletions_NoCache_ObjectListObject_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -423,7 +435,8 @@ def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -448,7 +461,8 @@ def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -471,7 +485,8 @@ def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -494,7 +509,8 @@ def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -538,7 +554,8 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_Unicode_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -597,7 +614,8 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 1, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
   ycm ):
 
@@ -631,7 +649,8 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_NoSemanticTrigger_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -654,7 +673,8 @@ def OmniCompleter_GetCompletions_NoCache_NoSemanticTrigger_test( ycm ):
     )
 
 
-@YouCompleteMeInstance( { 'cache_omnifunc': 0, 'semantic_triggers': TRIGGERS } )
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_ForceSemantic_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -678,9 +698,9 @@ def OmniCompleter_GetCompletions_NoCache_ForceSemantic_test( ycm ):
 
 
 @YouCompleteMeInstance( {
-  'cache_omnifunc': 0,
-  'filetype_specific_completion_to_disable': { FILETYPE: 1 },
-  'semantic_triggers': TRIGGERS } )
+  'g:ycm_cache_omnifunc': 0,
+  'g:ycm_filetype_specific_completion_to_disable': { FILETYPE: 1 },
+  'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_FiletypeDisabled_SemanticTrigger_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -704,9 +724,9 @@ def OmniCompleter_GetCompletions_FiletypeDisabled_SemanticTrigger_test( ycm ):
 
 
 @YouCompleteMeInstance( {
-  'cache_omnifunc': 0,
-  'filetype_specific_completion_to_disable': { '*': 1 },
-  'semantic_triggers': TRIGGERS } )
+  'g:ycm_cache_omnifunc': 0,
+  'g:ycm_filetype_specific_completion_to_disable': { '*': 1 },
+  'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_AllFiletypesDisabled_SemanticTrigger_test(
   ycm ):
 
@@ -732,9 +752,9 @@ def OmniCompleter_GetCompletions_AllFiletypesDisabled_SemanticTrigger_test(
 
 
 @YouCompleteMeInstance( {
-  'cache_omnifunc': 0,
-  'filetype_specific_completion_to_disable': { FILETYPE: 1 },
-  'semantic_triggers': TRIGGERS } )
+  'g:ycm_cache_omnifunc': 0,
+  'g:ycm_filetype_specific_completion_to_disable': { FILETYPE: 1 },
+  'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_FiletypeDisabled_ForceSemantic_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:
@@ -758,9 +778,9 @@ def OmniCompleter_GetCompletions_FiletypeDisabled_ForceSemantic_test( ycm ):
 
 
 @YouCompleteMeInstance( {
-  'cache_omnifunc': 0,
-  'filetype_specific_completion_to_disable': { '*': 1 },
-  'semantic_triggers': TRIGGERS } )
+  'g:ycm_cache_omnifunc': 0,
+  'g:ycm_filetype_specific_completion_to_disable': { '*': 1 },
+  'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_AllFiletypesDisabled_ForceSemantic_test( ycm ):
   def Omnifunc( findstart, base ):
     if findstart:

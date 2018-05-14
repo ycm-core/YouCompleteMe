@@ -1,4 +1,4 @@
-# Copyright (C) 2013  Google Inc.
+# Copyright (C) 2013-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -36,7 +36,6 @@ class DiagnosticInterface( object ):
     self._diag_filter = DiagnosticFilter.CreateFromOptions( user_options )
     # Line and column numbers are 1-based
     self._line_to_diags = defaultdict( list )
-    self._next_sign_id = vimsupport.SIGN_BUFFER_ID_INITIAL_VALUE
     self._previous_diag_line_number = -1
     self._diag_message_needs_clearing = False
 
@@ -183,16 +182,12 @@ class DiagnosticInterface( object ):
       # are sorted by errors in priority and Vim can only display one sign by
       # line.
       name = 'YcmError' if _DiagnosticIsError( diags[ 0 ] ) else 'YcmWarning'
-      sign = vimsupport.DiagnosticSign( self._next_sign_id,
-                                        line,
-                                        name,
-                                        self._bufnr )
+      sign = vimsupport.CreateSign( line, name, self._bufnr )
 
       try:
         signs_to_unplace.remove( sign )
       except ValueError:
         vimsupport.PlaceSign( sign )
-        self._next_sign_id += 1
 
     for sign in signs_to_unplace:
       vimsupport.UnplaceSign( sign )

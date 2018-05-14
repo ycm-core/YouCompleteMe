@@ -351,7 +351,7 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 2, 'YcmWarning', 1 )
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 2, 2, 'YcmWarning', 1 )
         )
       )
       eq_( ycm.GetErrorCount(), 0 )
@@ -363,7 +363,7 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 2, 'YcmWarning', 1 )
+          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 2, 2, 'YcmWarning', 1 )
         )
       )
       eq_( ycm.GetErrorCount(), 0 )
@@ -390,7 +390,7 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
 
 
 @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
-@YouCompleteMeInstance( { 'collect_identifiers_from_tags_files': 1 } )
+@YouCompleteMeInstance( { 'g:ycm_collect_identifiers_from_tags_files': 1 } )
 def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
     ycm, *args ):
   unicode_dir = PathToTestFile( 'uni¢𐍈d€' )
@@ -534,7 +534,7 @@ def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
 @patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
 fooGroup xxx foo bar
              links to Statement""" )
-@YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
+@YouCompleteMeInstance( { 'g:ycm_seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
     ycm, *args ):
 
@@ -569,7 +569,7 @@ def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
 @patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
 fooGroup xxx foo bar
              links to Statement""" )
-@YouCompleteMeInstance( { 'seed_identifiers_with_syntax': 1 } )
+@YouCompleteMeInstance( { 'g:ycm_seed_identifiers_with_syntax': 1 } )
 def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
     ycm, *args ):
 
