@@ -1,4 +1,4 @@
-# Copyright (C) 2016 YouCompleteMe contributors
+# Copyright (C) 2016-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -32,6 +32,7 @@ import time
 import warnings
 
 from ycm.client.base_request import BaseRequest
+from ycm.tests import test_utils
 from ycm.youcompleteme import YouCompleteMe
 from ycmd import user_options_store
 from ycmd.utils import CloseStandardStreams, WaitUntilProcessIsTerminated
@@ -40,14 +41,15 @@ from ycmd.utils import CloseStandardStreams, WaitUntilProcessIsTerminated
 # thus are not part of default_options.json, but are required for a working
 # YouCompleteMe object.
 DEFAULT_CLIENT_OPTIONS = {
-  'log_level': 'info',
-  'keep_logfiles': 0,
-  'extra_conf_vim_data': [],
-  'show_diagnostics_ui': 1,
-  'echo_current_diagnostic': 1,
-  'enable_diagnostic_signs': 1,
-  'enable_diagnostic_highlighting': 0,
-  'always_populate_location_list': 0,
+  'g:ycm_server_python_interpreter': '',
+  'g:ycm_log_level': 'info',
+  'g:ycm_keep_logfiles': 0,
+  'g:ycm_extra_conf_vim_data': [],
+  'g:ycm_show_diagnostics_ui': 1,
+  'g:ycm_echo_current_diagnostic': 1,
+  'g:ycm_enable_diagnostic_signs': 1,
+  'g:ycm_enable_diagnostic_highlighting': 0,
+  'g:ycm_always_populate_location_list': 0,
 }
 
 
@@ -123,12 +125,16 @@ def YouCompleteMeInstance( custom_options = {} ):
   def Decorator( test ):
     @functools.wraps( test )
     def Wrapper( *args, **kwargs ):
-      ycm = YouCompleteMe( MakeUserOptions( custom_options ) )
+      old_options = test_utils.VIM_OPTIONS.copy()
+      test_utils.VIM_OPTIONS.update( DEFAULT_CLIENT_OPTIONS )
+      test_utils.VIM_OPTIONS.update( custom_options )
+      ycm = YouCompleteMe()
       WaitUntilReady()
       ycm.CheckIfServerIsReady()
       try:
         test( ycm, *args, **kwargs )
       finally:
         StopServer( ycm )
+        test_utils.VIM_OPTIONS = old_options
     return Wrapper
   return Decorator
