@@ -31,7 +31,7 @@ from mock import patch
 from ycm.tests import YouCompleteMeInstance
 
 
-@YouCompleteMeInstance( { 'extra_conf_vim_data': [ 'tempname()' ] } )
+@YouCompleteMeInstance( { 'g:ycm_extra_conf_vim_data': [ 'tempname()' ] } )
 def SendCommandRequest_ExtraConfVimData_Works_test( ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], current_buffer ):

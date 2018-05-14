@@ -22,11 +22,12 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from future.utils import PY2
+from future.utils import iteritems, PY2
 from mock import DEFAULT, MagicMock, patch
 from hamcrest import assert_that, equal_to
 import contextlib
 import functools
+import json
 import nose
 import os
 import re
@@ -56,6 +57,8 @@ SIGN_UNPLACE_REGEX = re.compile(
   '^sign unplace (?P<id>\d+) buffer=(?P<bufnr>\d+)$' )
 REDIR_START_REGEX = re.compile( '^redir => (?P<variable>[\w:]+)$' )
 REDIR_END_REGEX = re.compile( '^redir END$' )
+EXISTS_REGEX = re.compile( '^exists\( \'(?P<option>[\w:]+)\' \)$' )
+LET_REGEX = re.compile( '^let (?P<option>[\w:]+) = (?P<value>.*)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -69,6 +72,15 @@ VIM_MOCK = MagicMock()
 
 VIM_MATCHES = []
 VIM_SIGNS = []
+
+VIM_OPTIONS = {
+  '&previewheight': 12,
+  '&columns': 80,
+  '&ruler': 0,
+  '&showcmd': 1,
+  '&hidden': 0,
+  '&expandtab': 1
+}
 
 REDIR = {
   'status': False,
@@ -153,23 +165,21 @@ def _MockVimBufferEval( value ):
 
 
 def _MockVimOptionsEval( value ):
-  if value == '&previewheight':
-    return 12
+  result = VIM_OPTIONS.get( value )
+  if result is not None:
+    return result
 
-  if value == '&columns':
-    return 80
+  if value == 'keys( g: )':
+    global_options = {}
+    for key, value in iteritems( VIM_OPTIONS ):
+      if key.startswith( 'g:' ):
+        global_options[ key[ 2: ] ] = value
+    return global_options
 
-  if value == '&ruler':
-    return 0
-
-  if value == '&showcmd':
-    return 1
-
-  if value == '&hidden':
-    return 0
-
-  if value == '&expandtab':
-    return 1
+  match = EXISTS_REGEX.search( value )
+  if match:
+    option = match.group( 'option' )
+    return option in VIM_OPTIONS
 
   return None
 
@@ -213,23 +223,12 @@ def _MockVimMatchEval( value ):
   return None
 
 
-# This variable exists to easily mock the 'g:ycm_server_python_interpreter'
-# option in tests.
-server_python_interpreter = ''
-
-
 def _MockVimEval( value ):
-  if value == 'g:ycm_min_num_of_chars_for_completion':
-    return 0
-
-  if value == 'g:ycm_server_python_interpreter':
-    return server_python_interpreter
-
-  result = _MockVimFunctionsEval( value )
+  result = _MockVimOptionsEval( value )
   if result is not None:
     return result
 
-  result = _MockVimOptionsEval( value )
+  result = _MockVimFunctionsEval( value )
   if result is not None:
     return result
 
@@ -315,6 +314,13 @@ def _MockVimCommand( command ):
 
   result = _MockSignCommand( command )
   if result:
+    return
+
+  match = LET_REGEX.search( command )
+  if match:
+    option = match.group( 'option' )
+    value = json.loads( match.group( 'value' ) )
+    VIM_OPTIONS[ option ] = value
     return
 
   return DEFAULT
