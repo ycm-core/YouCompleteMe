@@ -98,15 +98,7 @@ function! s:ReceiveMessages( timer_id )
 endfunction
 
 
-function! youcompleteme#Enable()
-  call s:SetUpBackwardsCompatibility()
-
-  " This can be 0 if YCM libs are old or -1 if an exception occured while
-  " executing the function.
-  if s:SetUpPython() != 1
-    return
-  endif
-
+function! s:SetUpOptions()
   call s:SetUpCommands()
   call s:SetUpCpoptions()
   call s:SetUpCompleteopt()
@@ -118,6 +110,17 @@ function! youcompleteme#Enable()
 
   call s:SetUpSigns()
   call s:SetUpSyntaxHighlighting()
+endfunction
+
+
+function! youcompleteme#Enable()
+  call s:SetUpBackwardsCompatibility()
+
+  if !s:SetUpPython()
+    return
+  endif
+
+  call s:SetUpOptions()
 
   call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
@@ -191,17 +194,20 @@ import vim
 # Add python sources folder to the system path.
 script_folder = vim.eval( 's:script_folder_path' )
 sys.path.insert( 0, os.path.join( script_folder, '..', 'python' ) )
-
-from ycm.setup import SetUpSystemPaths, SetUpYCM
+sys.path.insert( 0, os.path.join( script_folder, '..', 'third_party', 'ycmd' ) )
 
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
-  SetUpSystemPaths()
+  from ycmd import server_utils as su
+  su.AddNearestThirdPartyFoldersToSysPath( script_folder )
+  # We need to import ycmd's third_party folders as well since we import and
+  # use ycmd code in the client.
+  su.AddNearestThirdPartyFoldersToSysPath( su.__file__ )
 
   # Import the modules used in this file.
-  from ycm import base, vimsupport
+  from ycm import base, vimsupport, youcompleteme
 
-  ycm_state = SetUpYCM()
+  ycm_state = youcompleteme.YouCompleteMe()
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -849,6 +855,8 @@ endfunction
 
 
 function! s:RestartServer()
+  call s:SetUpOptions()
+
   exec s:python_command "ycm_state.RestartServer()"
 
   call timer_stop( s:pollers.receive_messages.id )

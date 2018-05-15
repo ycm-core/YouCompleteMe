@@ -49,6 +49,8 @@ NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
 # value is then incremented for each new sign. This should prevent conflicts
 # with other plugins using signs.
 SIGN_BUFFER_ID_INITIAL_VALUE = 100000000
+# This holds the next sign's id to assign for each buffer.
+SIGN_ID_FOR_BUFFER = defaultdict( lambda: SIGN_BUFFER_ID_INITIAL_VALUE )
 
 SIGN_PLACE_REGEX = re.compile(
   r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)$" )
@@ -202,6 +204,12 @@ def GetSignsInBuffer( buffer_number ):
                                     match.group( 'name' ),
                                     buffer_number ) )
   return signs
+
+
+def CreateSign( line, name, buffer_number ):
+  sign_id = SIGN_ID_FOR_BUFFER[ buffer_number ]
+  SIGN_ID_FOR_BUFFER[ buffer_number ] += 1
+  return DiagnosticSign( sign_id, line, name, buffer_number )
 
 
 def UnplaceSign( sign ):

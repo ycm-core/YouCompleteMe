@@ -2021,7 +2021,8 @@ let g:ycm_min_num_of_chars_for_completion = 1
 ```
 
 Note that after changing an option in your [vimrc script][vimrc] you have to
-restart Vim for the changes to take effect.
+restart [ycmd][] with the `:YcmRestartServer` command for the changes to take
+effect.
 
 ### The `g:ycm_min_num_of_chars_for_completion` option
 
