@@ -129,37 +129,20 @@ class DiagnosticInterface( object ):
     if not self._user_options[ 'enable_diagnostic_highlighting' ]:
       return
 
+    # Vim doesn't provide a way to update the matches for a different window
+    # than the current one (which is a view of the current buffer).
+    if vimsupport.GetCurrentBufferNumber() != self._bufnr:
+      return
+
     matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
 
     for diags in itervalues( self._line_to_diags ):
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
-        patterns = []
-
         group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
                   'YcmWarningSection' )
 
-        location_extent = diag[ 'location_extent' ]
-        if location_extent[ 'start' ][ 'line_num' ] <= 0:
-          location = diag[ 'location' ]
-          patterns.append( vimsupport.GetDiagnosticMatchPattern(
-            location[ 'line_num' ],
-            location[ 'column_num' ] ) )
-        else:
-          patterns.append( vimsupport.GetDiagnosticMatchPattern(
-            location_extent[ 'start' ][ 'line_num' ],
-            location_extent[ 'start' ][ 'column_num' ],
-            location_extent[ 'end' ][ 'line_num' ],
-            location_extent[ 'end' ][ 'column_num' ] ) )
-
-        for diag_range in diag[ 'ranges' ]:
-          patterns.append( vimsupport.GetDiagnosticMatchPattern(
-            diag_range[ 'start' ][ 'line_num' ],
-            diag_range[ 'start' ][ 'column_num' ],
-            diag_range[ 'end' ][ 'line_num' ],
-            diag_range[ 'end' ][ 'column_num' ] ) )
-
-        for pattern in patterns:
+        for pattern in _ConvertDiagnosticToMatchPatterns( diag ):
           # The id doesn't matter for matches that we may add.
           match = vimsupport.DiagnosticMatch( 0, group, pattern )
           try:
@@ -221,3 +204,29 @@ def _NormalizeDiagnostic( diag ):
   location[ 'column_num' ] = ClampToOne( location[ 'column_num' ] )
   location[ 'line_num' ] = ClampToOne( location[ 'line_num' ] )
   return diag
+
+
+def _ConvertDiagnosticToMatchPatterns( diagnostic ):
+  patterns = []
+
+  location_extent = diagnostic[ 'location_extent' ]
+  if location_extent[ 'start' ][ 'line_num' ] <= 0:
+    location = diagnostic[ 'location' ]
+    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+      location[ 'line_num' ],
+      location[ 'column_num' ] ) )
+  else:
+    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+      location_extent[ 'start' ][ 'line_num' ],
+      location_extent[ 'start' ][ 'column_num' ],
+      location_extent[ 'end' ][ 'line_num' ],
+      location_extent[ 'end' ][ 'column_num' ] ) )
+
+  for diagnostic_range in diagnostic[ 'ranges' ]:
+    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+      diagnostic_range[ 'start' ][ 'line_num' ],
+      diagnostic_range[ 'start' ][ 'column_num' ],
+      diagnostic_range[ 'end' ][ 'line_num' ],
+      diagnostic_range[ 'end' ][ 'column_num' ] ) )
+
+  return patterns
