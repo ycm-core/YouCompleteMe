@@ -385,7 +385,7 @@ class YouCompleteMe( object ):
     bufnr = vimsupport.GetBufferNumberForFilename( filepath )
     if bufnr in self._buffers and vimsupport.BufferIsVisible( bufnr ):
       # Note: We only update location lists, etc. for visible buffers, because
-      # otherwise we defualt to using the curren location list and the results
+      # otherwise we default to using the current location list and the results
       # are that non-visible buffer errors clobber visible ones.
       self._buffers[ bufnr ].UpdateWithNewDiagnostics( diagnostics )
     else:
