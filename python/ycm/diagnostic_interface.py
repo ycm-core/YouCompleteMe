@@ -59,7 +59,7 @@ class DiagnosticInterface( object ):
   def PopulateLocationList( self ):
     # Do nothing if loc list is already populated by diag_interface
     if not self._user_options[ 'always_populate_location_list' ]:
-      self._UpdateLocationList()
+      self._UpdateLocationLists()
     return bool( self._diagnostics )
 
 
@@ -77,7 +77,7 @@ class DiagnosticInterface( object ):
     self.UpdateMatches()
 
     if self._user_options[ 'always_populate_location_list' ]:
-      self._UpdateLocationList()
+      self._UpdateLocationLists()
 
 
   def _ApplyDiagnosticFilter( self, diags ):
@@ -119,8 +119,8 @@ class DiagnosticInterface( object ):
     return count
 
 
-  def _UpdateLocationList( self ):
-    vimsupport.SetLocationListForBuffer(
+  def _UpdateLocationLists( self ):
+    vimsupport.SetLocationListsForBuffer(
       self._bufnr,
       vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ) )
 
@@ -129,46 +129,28 @@ class DiagnosticInterface( object ):
     if not self._user_options[ 'enable_diagnostic_highlighting' ]:
       return
 
-    matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
+    with vimsupport.CurrentWindow():
+      for window in vimsupport.GetWindowsForBufferNumber( self._bufnr ):
+        vimsupport.SwitchWindow( window )
 
-    for diags in itervalues( self._line_to_diags ):
-      # Insert squiggles in reverse order so that errors overlap warnings.
-      for diag in reversed( diags ):
-        patterns = []
+        matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
 
-        group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
-                  'YcmWarningSection' )
+        for diags in itervalues( self._line_to_diags ):
+          # Insert squiggles in reverse order so that errors overlap warnings.
+          for diag in reversed( diags ):
+            group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
+                      'YcmWarningSection' )
 
-        location_extent = diag[ 'location_extent' ]
-        if location_extent[ 'start' ][ 'line_num' ] <= 0:
-          location = diag[ 'location' ]
-          patterns.append( vimsupport.GetDiagnosticMatchPattern(
-            location[ 'line_num' ],
-            location[ 'column_num' ] ) )
-        else:
-          patterns.append( vimsupport.GetDiagnosticMatchPattern(
-            location_extent[ 'start' ][ 'line_num' ],
-            location_extent[ 'start' ][ 'column_num' ],
-            location_extent[ 'end' ][ 'line_num' ],
-            location_extent[ 'end' ][ 'column_num' ] ) )
+            for pattern in _ConvertDiagnosticToMatchPatterns( diag ):
+              # The id doesn't matter for matches that we may add.
+              match = vimsupport.DiagnosticMatch( 0, group, pattern )
+              try:
+                matches_to_remove.remove( match )
+              except ValueError:
+                vimsupport.AddDiagnosticMatch( match )
 
-        for diag_range in diag[ 'ranges' ]:
-          patterns.append( vimsupport.GetDiagnosticMatchPattern(
-            diag_range[ 'start' ][ 'line_num' ],
-            diag_range[ 'start' ][ 'column_num' ],
-            diag_range[ 'end' ][ 'line_num' ],
-            diag_range[ 'end' ][ 'column_num' ] ) )
-
-        for pattern in patterns:
-          # The id doesn't matter for matches that we may add.
-          match = vimsupport.DiagnosticMatch( 0, group, pattern )
-          try:
-            matches_to_remove.remove( match )
-          except ValueError:
-            vimsupport.AddDiagnosticMatch( match )
-
-    for match in matches_to_remove:
-      vimsupport.RemoveDiagnosticMatch( match )
+        for match in matches_to_remove:
+          vimsupport.RemoveDiagnosticMatch( match )
 
 
   def _UpdateSigns( self ):
@@ -221,3 +203,29 @@ def _NormalizeDiagnostic( diag ):
   location[ 'column_num' ] = ClampToOne( location[ 'column_num' ] )
   location[ 'line_num' ] = ClampToOne( location[ 'line_num' ] )
   return diag
+
+
+def _ConvertDiagnosticToMatchPatterns( diagnostic ):
+  patterns = []
+
+  location_extent = diagnostic[ 'location_extent' ]
+  if location_extent[ 'start' ][ 'line_num' ] <= 0:
+    location = diagnostic[ 'location' ]
+    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+      location[ 'line_num' ],
+      location[ 'column_num' ] ) )
+  else:
+    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+      location_extent[ 'start' ][ 'line_num' ],
+      location_extent[ 'start' ][ 'column_num' ],
+      location_extent[ 'end' ][ 'line_num' ],
+      location_extent[ 'end' ][ 'column_num' ] ) )
+
+  for diagnostic_range in diagnostic[ 'ranges' ]:
+    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+      diagnostic_range[ 'start' ][ 'line_num' ],
+      diagnostic_range[ 'start' ][ 'column_num' ],
+      diagnostic_range[ 'end' ][ 'line_num' ],
+      diagnostic_range[ 'end' ][ 'column_num' ] ) )
+
+  return patterns

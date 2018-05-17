@@ -22,6 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+from collections import defaultdict
 from future.utils import iteritems, PY2
 from mock import DEFAULT, MagicMock, patch
 from hamcrest import assert_that, equal_to
@@ -70,7 +71,7 @@ LET_REGEX = re.compile( '^let (?P<option>[\w:]+) = (?P<value>.*)$' )
 # https://github.com/Valloric/YouCompleteMe/pull/1694
 VIM_MOCK = MagicMock()
 
-VIM_MATCHES = []
+VIM_MATCHES_FOR_WINDOW = defaultdict( list )
 VIM_SIGNS = []
 
 VIM_OPTIONS = {
@@ -107,9 +108,9 @@ def _MockGetBufferNumber( buffer_filename ):
 
 
 def _MockGetBufferWindowNumber( buffer_number ):
-  for vim_buffer in VIM_MOCK.buffers:
-    if vim_buffer.number == buffer_number and vim_buffer.window:
-      return vim_buffer.window
+  for window in VIM_MOCK.windows:
+    if window.buffer.number == buffer_number:
+      return window.number
   return -1
 
 
@@ -198,25 +199,26 @@ def _MockVimFunctionsEval( value ):
 
 
 def _MockVimMatchEval( value ):
+  current_window = VIM_MOCK.current.window.number
+
   if value == 'getmatches()':
-    # Returning a copy, because ClearYcmSyntaxMatches() gets the result of
-    # getmatches(), iterates over it and removes elements from VIM_MATCHES.
-    return list( VIM_MATCHES )
+    return VIM_MATCHES_FOR_WINDOW[ current_window ]
 
   match = MATCHADD_REGEX.search( value )
   if match:
     group = match.group( 'group' )
     option = match.group( 'pattern' )
     vim_match = VimMatch( group, option )
-    VIM_MATCHES.append( vim_match )
+    VIM_MATCHES_FOR_WINDOW[ current_window ].append( vim_match )
     return vim_match.id
 
   match = MATCHDELETE_REGEX.search( value )
   if match:
     match_id = int( match.group( 'id' ) )
-    for index, vim_match in enumerate( VIM_MATCHES ):
+    vim_matches = VIM_MATCHES_FOR_WINDOW[ current_window ]
+    for index, vim_match in enumerate( vim_matches ):
       if vim_match.id == match_id:
-        VIM_MATCHES.pop( index )
+        vim_matches.pop( index )
         return -1
     return 0
 
@@ -334,7 +336,6 @@ class VimBuffer( object ):
    - |filetype| : buffer filetype. Empty string if no filetype is set;
    - |modified| : True if the buffer has unsaved changes, False otherwise;
    - |bufhidden|: value of the 'bufhidden' option (see :h bufhidden);
-   - |window|   : number of the buffer window. None if the buffer is hidden;
    - |omnifunc| : omni completion function used by the buffer. Must be a Python
                   function that takes the same arguments and returns the same
                   values as a Vim completion function (:h complete-functions).
@@ -351,7 +352,6 @@ class VimBuffer( object ):
                       filetype = '',
                       modified = False,
                       bufhidden = '',
-                      window = None,
                       omnifunc = None,
                       visual_start = None,
                       visual_end = None ):
@@ -361,7 +361,6 @@ class VimBuffer( object ):
     self.filetype = filetype
     self.modified = modified
     self.bufhidden = bufhidden
-    self.window = window
     self.omnifunc = omnifunc
     self.omnifunc_name = omnifunc.__name__ if omnifunc else ''
     self.changedtick = 1
@@ -402,9 +401,9 @@ class VimBuffer( object ):
 class VimBuffers( object ):
   """An object that looks like a vim.buffers object."""
 
-  def __init__( self, *buffers ):
-    """Arguments are VimBuffer objects."""
-    self._buffers = list( buffers )
+  def __init__( self, buffers ):
+    """|buffers| is a list of VimBuffer objects."""
+    self._buffers = buffers
 
 
   def __getitem__( self, number ):
@@ -424,10 +423,61 @@ class VimBuffers( object ):
     return self._buffers.pop( index )
 
 
+class VimWindow( object ):
+  """An object that looks like a vim.window object:
+    - |number|: number of the window;
+    - |buffer_object|: a VimBuffer object representing the buffer inside the
+      window;
+    - |cursor|: a tuple corresponding to the cursor position."""
+
+  def __init__( self, number, buffer_object, cursor = None ):
+    self.number = number
+    self.buffer = buffer_object
+    self.cursor = cursor
+
+
+class VimWindows( object ):
+  """An object that looks like a vim.windows object."""
+
+  def __init__( self, buffers, cursor ):
+    """|buffers| is a list of VimBuffer objects corresponding to the window
+    layout. The first element of that list is assumed to be the current window.
+    |cursor| is the cursor position of that window."""
+    windows = []
+    windows.append( VimWindow( 1, buffers[ 0 ], cursor ) )
+    for window_number in range( 1, len( buffers ) ):
+      windows.append( VimWindow( window_number + 1, buffers[ window_number ] ) )
+    self._windows = windows
+
+
+  def __getitem__( self, number ):
+    """Emulates vim.windows[ number ]"""
+    for window in self._windows:
+      if number == window.number:
+        return window
+    raise KeyError( number )
+
+
+  def __iter__( self ):
+    """Emulates for loop on vim.windows"""
+    return iter( self._windows )
+
+
+class VimCurrent( object ):
+  """An object that looks like a vim.current object. |current_window| must be a
+  VimWindow object."""
+
+  def __init__( self, current_window ):
+    self.buffer = current_window.buffer
+    self.window = current_window
+    self.line = self.buffer.contents[ current_window.cursor[ 0 ] - 1 ]
+
+
 class VimMatch( object ):
 
   def __init__( self, group, pattern ):
-    self.id = len( VIM_MATCHES ) + 1
+    current_window = VIM_MOCK.current.window.number
+    self.id = len( VIM_MATCHES_FOR_WINDOW[ current_window ] ) + 1
     self.group = group
     self.pattern = pattern
 
@@ -480,20 +530,26 @@ class VimSign( object ):
 
 
 @contextlib.contextmanager
-def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
+def MockVimBuffers( buffers, window_buffers, cursor_position = ( 1, 1 ) ):
   """Simulates the Vim buffers list |buffers| where |current_buffer| is the
   buffer displayed in the current window and |cursor_position| is the current
   cursor position. All buffers are represented by a VimBuffer object."""
-  if current_buffer not in buffers:
-    raise RuntimeError( 'Current buffer must be part of the buffers list.' )
+  if ( not isinstance( buffers, list ) or
+       not all( isinstance( buf, VimBuffer ) for buf in buffers ) ):
+    raise RuntimeError( 'First parameter must be a list of VimBuffer objects.' )
+  if ( not isinstance( window_buffers, list ) or
+       not all( isinstance( buf, VimBuffer ) for buf in window_buffers ) ):
+    raise RuntimeError( 'Second parameter must be a list of VimBuffer objects '
+                        'representing the window layout.' )
+  if len( window_buffers ) < 1:
+    raise RuntimeError( 'Second parameter must contain at least one element '
+                        'which corresponds to the current window.' )
 
-  line = current_buffer.contents[ cursor_position[ 0 ] - 1 ]
-
-  with patch( 'vim.buffers', VimBuffers( *buffers ) ):
-    with patch( 'vim.current.buffer', current_buffer ):
-      with patch( 'vim.current.window.cursor', cursor_position ):
-        with patch( 'vim.current.line', line ):
-          yield VIM_MOCK
+  with patch( 'vim.buffers', VimBuffers( buffers ) ):
+    with patch( 'vim.windows', VimWindows( window_buffers,
+                                           cursor_position ) ) as windows:
+      with patch( 'vim.current', VimCurrent( windows[ 1 ] ) ):
+        yield VIM_MOCK
 
 
 def MockVimModule():
@@ -518,7 +574,6 @@ def MockVimModule():
   Failure to use this approach may lead to unexpected failures in other
   tests."""
 
-  VIM_MOCK.buffers = {}
   VIM_MOCK.command = MagicMock( side_effect = _MockVimCommand )
   VIM_MOCK.eval = MagicMock( side_effect = _MockVimEval )
   VIM_MOCK.error = VimError
