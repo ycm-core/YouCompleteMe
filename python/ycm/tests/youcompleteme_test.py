@@ -28,8 +28,8 @@ MockVimModule()
 
 import os
 import sys
-from hamcrest import ( assert_that, contains, empty, equal_to, is_in, is_not,
-                       matches_regexp )
+from hamcrest import ( assert_that, contains, empty, equal_to, has_entries,
+                       is_in, is_not, matches_regexp )
 from mock import call, MagicMock, patch
 
 from ycm.paths import _PathToPythonUsedDuringBuild
@@ -420,7 +420,7 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
     call( 'Diagnostics refreshed', warning = False ),
     call( 'No warnings or errors detected.', warning = False )
   ] )
-  set_location_list_for_window.assert_called_once_with( 0, [] )
+  set_location_list_for_window.assert_called_once_with( 99, [] )
 
 
 @YouCompleteMeInstance( { 'g:ycm_log_level': 'debug',
@@ -457,7 +457,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
           warning = False ),
     call( 'Diagnostics refreshed', warning = False )
   ] )
-  set_location_list_for_window.assert_called_once_with( 0, [ {
+  set_location_list_for_window.assert_called_once_with( 99, [ {
       'bufnr': 3,
       'lnum': 19,
       'col': 2,
@@ -504,7 +504,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
           warning = False ),
     call( 'Diagnostics refreshed', warning = False )
   ] )
-  set_location_list_for_window.assert_called_once_with( 0, [ {
+  set_location_list_for_window.assert_called_once_with( 99, [ {
       'bufnr': 3,
       'lnum': 19,
       'col': 2,
@@ -594,7 +594,7 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
                               number = 5,
                               window = 2 )
 
-  test_utils.VIM_MATCHES = []
+  test_utils.VIM_MATCHES_FOR_WINDOW.clear()
   test_utils.VIM_SIGNS = []
 
   with MockVimBuffers( [ current_buffer ], current_buffer, ( 3, 1 ) ):
@@ -610,12 +610,14 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
 
     # Error match is added after warning matches.
     assert_that(
-      test_utils.VIM_MATCHES,
-      contains(
-        VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
-        VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
-        VimMatch( 'YcmErrorSection', '\%3l\%8c' )
-      )
+      test_utils.VIM_MATCHES_FOR_WINDOW,
+      has_entries( {
+        2: contains(
+          VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
+          VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
+          VimMatch( 'YcmErrorSection', '\%3l\%8c' )
+        )
+      } )
     )
 
     # Only the error sign is placed.
@@ -652,11 +654,13 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
       ycm.HandleFileParseRequest( block = True )
 
     assert_that(
-      test_utils.VIM_MATCHES,
-      contains(
-        VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
-        VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' )
-      )
+      test_utils.VIM_MATCHES_FOR_WINDOW,
+      has_entries( {
+        2: contains(
+          VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
+          VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' )
+        )
+      } )
     )
 
     assert_that(
@@ -674,7 +678,8 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
                               number = 5,
                               window = 2 )
 
-  test_utils.VIM_MATCHES = [
+  test_utils.VIM_MATCHES_FOR_WINDOW.clear()
+  test_utils.VIM_MATCHES_FOR_WINDOW[ 2 ] = [
     VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
     VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
     VimMatch( 'YcmErrorSection', '\%3l\%8c' )
@@ -683,11 +688,41 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
   with MockVimBuffers( [ current_buffer ], current_buffer ):
     ycm.UpdateMatches()
 
-    assert_that( test_utils.VIM_MATCHES, empty() )
+  assert_that( test_utils.VIM_MATCHES_FOR_WINDOW,
+               has_entries( { 2: empty() } ) )
+
+
+@YouCompleteMeInstance( { 'g:ycm_enable_diagnostic_highlighting': 1 } )
+def YouCompleteMe_UpdateMatches_IgnoreHiddenBuffer_test( ycm ):
+  current_buffer = VimBuffer( 'buffer',
+                              filetype = 'c',
+                              number = 5 )
+
+  test_utils.VIM_MATCHES_FOR_WINDOW.clear()
+  test_utils.VIM_MATCHES_FOR_WINDOW[ 2 ] = [
+    VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
+    VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
+    VimMatch( 'YcmErrorSection', '\%3l\%8c' )
+  ]
+
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    ycm.UpdateMatches()
+
+  assert_that(
+    test_utils.VIM_MATCHES_FOR_WINDOW,
+    has_entries( {
+      2: contains(
+           VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
+           VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
+           VimMatch( 'YcmErrorSection', '\%3l\%8c' )
+         )
+    } )
+  )
 
 
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
-                          'g:ycm_always_populate_location_list': 1 } )
+                          'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch.object( ycm_buffer_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
@@ -715,6 +750,19 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
         'line_num': 1,
         'column_num': 1
       },
+      'location_extent': {
+        'start': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        },
+        'end': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        }
+      },
+      'ranges': []
     },
     {
       'kind': 'ERROR',
@@ -724,6 +772,19 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
         'line_num': 4,
         'column_num': 2
       },
+      'location_extent': {
+        'start': {
+          'filepath': '/has_diags',
+          'line_num': 4,
+          'column_num': 2,
+        },
+        'end': {
+          'filepath': '/has_diags',
+          'line_num': 4,
+          'column_num': 2,
+        }
+      },
+      'ranges': []
     },
     {
       'kind': 'ERROR',
@@ -733,21 +794,37 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
         'line_num': 8,
         'column_num': 4
       },
-    },
+      'location_extent': {
+        'start': {
+          'filepath': '/not_open',
+          'line_num': 8,
+          'column_num': 4,
+        },
+        'end': {
+          'filepath': '/not_open',
+          'line_num': 8,
+          'column_num': 4,
+        }
+      },
+      'ranges': []
+    }
   ]
 
   current_buffer = VimBuffer( '/current',
                               filetype = 'ycmtest',
+                              contents = [ 'current' ] * 10,
                               number = 1,
                               window = 10 )
   buffers = [
     current_buffer,
     VimBuffer( '/no_diags',
                filetype = 'ycmtest',
+               contents = [ 'nodiags' ] * 10,
                number = 2,
                window = 9 ),
     VimBuffer( '/has_diags',
                filetype = 'ycmtest',
+               contents = [ 'hasdiags' ] * 10,
                number = 3,
                window = 8 ),
   ]
@@ -769,7 +846,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
 
     # Ensure we included all the diags though
     set_location_list_for_window.assert_has_exact_calls( [
-      call( 0, [
+      call( 10, [
         {
           'lnum': 1,
           'col': 1,
@@ -800,9 +877,19 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
       ] )
     ] )
 
+    assert_that(
+      test_utils.VIM_MATCHES_FOR_WINDOW,
+      has_entries( {
+        10: contains(
+          VimMatch( 'YcmErrorSection', '\%1l\%1c\_.\{-}\%1l\%1c' )
+        )
+      } )
+    )
+
 
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
-                          'g:ycm_always_populate_location_list': 1 } )
+                          'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch.object( ycm_buffer_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
@@ -819,45 +906,116 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
   # Ordered to ensure that the calls to update are deterministic
   diagnostics_per_file = [
     ( '/current', [ {
-      'kind': 'ERROR',
-      'text': 'error text in current buffer',
-      'location': {
-        'filepath': '/current',
-        'line_num': 1,
-        'column_num': 1
-      }, }, ] ),
-    ( '/has_diags', [ {
-      'kind': 'ERROR',
-      'text': 'error text in hidden buffer',
-      'location': {
-        'filepath': '/has_diags',
-        'line_num': 4,
-        'column_num': 2
-      }, }, ] ),
+        'kind': 'ERROR',
+        'text': 'error text in current buffer',
+        'location': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1
+        },
+        'location_extent': {
+          'start': {
+            'filepath': '/current',
+            'line_num': 1,
+            'column_num': 1,
+          },
+          'end': {
+            'filepath': '/current',
+            'line_num': 1,
+            'column_num': 1,
+          }
+        },
+        'ranges': [],
+      } ] ),
+    ( '/separate_window', [ {
+        'kind': 'ERROR',
+        'text': 'error text in a buffer open in a separate window',
+        'location': {
+          'filepath': '/separate_window',
+          'line_num': 3,
+          'column_num': 3
+        },
+        'location_extent': {
+          'start': {
+            'filepath': '/separate_window',
+            'line_num': 3,
+            'column_num': 3,
+          },
+          'end': {
+            'filepath': '/separate_window',
+            'line_num': 3,
+            'column_num': 3,
+          }
+        },
+        'ranges': []
+      } ] ),
+    ( '/hidden', [ {
+        'kind': 'ERROR',
+        'text': 'error text in hidden buffer',
+        'location': {
+          'filepath': '/hidden',
+          'line_num': 4,
+          'column_num': 2
+        },
+        'location_extent': {
+          'start': {
+            'filepath': '/hidden',
+            'line_num': 4,
+            'column_num': 2,
+          },
+          'end': {
+            'filepath': '/hidden',
+            'line_num': 4,
+            'column_num': 2,
+          }
+        },
+        'ranges': []
+      } ] ),
     ( '/not_open', [ {
-      'kind': 'ERROR',
-      'text': 'error text in buffer not open in Vim',
-      'location': {
-        'filepath': '/not_open',
-        'line_num': 8,
-        'column_num': 4
-      }, }, ] )
+        'kind': 'ERROR',
+        'text': 'error text in buffer not open in Vim',
+        'location': {
+          'filepath': '/not_open',
+          'line_num': 8,
+          'column_num': 4
+        },
+        'location_extent': {
+          'start': {
+            'filepath': '/not_open',
+            'line_num': 8,
+            'column_num': 4,
+          },
+          'end': {
+            'filepath': '/not_open',
+            'line_num': 8,
+            'column_num': 4,
+          }
+        },
+        'ranges': []
+      } ] )
   ]
 
   current_buffer = VimBuffer( '/current',
                               filetype = 'ycmtest',
+                              contents = [ 'current' ] * 10,
                               number = 1,
                               window = 10 )
   buffers = [
     current_buffer,
     VimBuffer( '/no_diags',
                filetype = 'ycmtest',
+               contents = [ 'no_diags' ] * 10,
                number = 2,
                window = 9 ),
-    VimBuffer( '/has_diags',
+    VimBuffer( '/separate_window',
                filetype = 'ycmtest',
+               contents = [ 'separate_window' ] * 10,
                number = 3,
                window = 8 ),
+    VimBuffer( '/hidden',
+               filetype = 'ycmtest',
+               contents = [ 'hidden' ] * 10,
+               number = 4 ),
   ]
 
   # Register each buffer internally with YCM
@@ -878,7 +1036,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
 
     # Ensure we included all the diags though
     set_location_list_for_window.assert_has_exact_calls( [
-      call( 0, [
+      call( 10, [
         {
           'lnum': 1,
           'col': 1,
@@ -891,15 +1049,27 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
 
       call( 8, [
         {
-          'lnum': 4,
-          'col': 2,
+          'lnum': 3,
+          'col': 3,
           'bufnr': 3,
           'valid': 1,
           'type': 'E',
-          'text': 'error text in hidden buffer',
+          'text': 'error text in a buffer open in a separate window',
         },
       ] )
     ] )
+
+    assert_that(
+      test_utils.VIM_MATCHES_FOR_WINDOW,
+      has_entries( {
+        8: contains(
+          VimMatch( 'YcmErrorSection', '\%3l\%3c\_.\{-}\%3l\%3c' )
+        ),
+        10: contains(
+          VimMatch( 'YcmErrorSection', '\%1l\%1c\_.\{-}\%1l\%1c' )
+        )
+      } )
+    )
 
 
 @YouCompleteMeInstance()
