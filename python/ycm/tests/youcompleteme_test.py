@@ -209,7 +209,7 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
         'Extra configuration path: .*testdata[/\\\\]\\.ycm_extra_conf\\.py\n'
         '(?(CLANG)C-family completer debug information:\n'
         '  Compilation database path: None\n'
-        '  Flags: \\[\'_TEMP_FILE_\'.*\\]\n'
+        '  Flags: \\[u?\'_TEMP_FILE_\'.*\\]\n'
         '  Translation unit: .+\n)'
         'Server running at: .+\n'
         'Server process ID: \d+\n'
