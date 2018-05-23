@@ -34,7 +34,7 @@ from ycm.tests import YouCompleteMeInstance
 @YouCompleteMeInstance( { 'g:ycm_extra_conf_vim_data': [ 'tempname()' ] } )
 def SendCommandRequest_ExtraConfVimData_Works_test( ycm ):
   current_buffer = VimBuffer( 'buffer' )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
       ycm.SendCommandRequest( [ 'GoTo' ], 'python', False, 1, 1 )
       assert_that(
@@ -59,7 +59,7 @@ def SendCommandRequest_ExtraConfVimData_Works_test( ycm ):
 @YouCompleteMeInstance( { 'g:ycm_extra_conf_vim_data': [ 'undefined_value' ] } )
 def SendCommandRequest_ExtraConfData_UndefinedValue_test( ycm ):
   current_buffer = VimBuffer( 'buffer' )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
       ycm.SendCommandRequest( [ 'GoTo' ], 'python', False, 1, 1 )
       assert_that(
@@ -82,7 +82,7 @@ def SendCommandRequest_ExtraConfData_UndefinedValue_test( ycm ):
 def SendCommandRequest_BuildRange_NoVisualMarks_test( ycm, *args ):
   current_buffer = VimBuffer( 'buffer', contents = [ 'first line',
                                                      'second line' ] )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
       ycm.SendCommandRequest( [ 'GoTo' ], 'python', True, 1, 2 )
       send_request.assert_called_once_with(
@@ -114,7 +114,7 @@ def SendCommandRequest_BuildRange_VisualMarks_test( ycm, *args ):
                                            'second line' ],
                               visual_start = [ 1, 4 ],
                               visual_end = [ 2, 8 ] )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
       ycm.SendCommandRequest( [ 'GoTo' ], 'python', True, 1, 2 )
       send_request.assert_called_once_with(

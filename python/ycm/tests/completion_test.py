@@ -66,7 +66,7 @@ def SendCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
     return { 'completions': [], 'completion_start_column': 1 }
 
   with CurrentWorkingDirectory( unicode_dir ):
-    with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
       with MockCompletionRequest( ServerResponse ):
         ycm.SendCompletionRequest()
         ok_( ycm.CompletionRequestReady() )
@@ -106,7 +106,7 @@ def SendCompletionRequest_ResponseContainingError_test( ycm, post_vim_message ):
       } ]
     }
 
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with MockCompletionRequest( ServerResponse ):
       ycm.SendCompletionRequest()
       ok_( ycm.CompletionRequestReady() )
@@ -138,7 +138,7 @@ def SendCompletionRequest_ErrorFromServer_test( ycm,
                                                 post_vim_message,
                                                 logger ):
   current_buffer = VimBuffer( 'buffer' )
-  with MockVimBuffers( [ current_buffer ], current_buffer ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with MockCompletionRequest( ServerError( 'Server error' ) ):
       ycm.SendCompletionRequest()
       ok_( ycm.CompletionRequestReady() )

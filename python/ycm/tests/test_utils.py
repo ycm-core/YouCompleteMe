@@ -108,9 +108,9 @@ def _MockGetBufferNumber( buffer_filename ):
 
 
 def _MockGetBufferWindowNumber( buffer_number ):
-  for vim_buffer in VIM_MOCK.buffers:
-    if vim_buffer.number == buffer_number and vim_buffer.window:
-      return vim_buffer.window
+  for window in VIM_MOCK.windows:
+    if window.buffer.number == buffer_number:
+      return window.number
   return -1
 
 
@@ -337,7 +337,6 @@ class VimBuffer( object ):
    - |filetype| : buffer filetype. Empty string if no filetype is set;
    - |modified| : True if the buffer has unsaved changes, False otherwise;
    - |bufhidden|: value of the 'bufhidden' option (see :h bufhidden);
-   - |window|   : number of the buffer window. None if the buffer is hidden;
    - |omnifunc| : omni completion function used by the buffer. Must be a Python
                   function that takes the same arguments and returns the same
                   values as a Vim completion function (:h complete-functions).
@@ -354,7 +353,6 @@ class VimBuffer( object ):
                       filetype = '',
                       modified = False,
                       bufhidden = '',
-                      window = None,
                       omnifunc = None,
                       visual_start = None,
                       visual_end = None ):
@@ -364,7 +362,6 @@ class VimBuffer( object ):
     self.filetype = filetype
     self.modified = modified
     self.bufhidden = bufhidden
-    self.window = window
     self.omnifunc = omnifunc
     self.omnifunc_name = omnifunc.__name__ if omnifunc else ''
     self.changedtick = 1
@@ -405,9 +402,9 @@ class VimBuffer( object ):
 class VimBuffers( object ):
   """An object that looks like a vim.buffers object."""
 
-  def __init__( self, *buffers ):
-    """Arguments are VimBuffer objects."""
-    self._buffers = list( buffers )
+  def __init__( self, buffers ):
+    """|buffers| is a list of VimBuffer objects."""
+    self._buffers = buffers
 
 
   def __getitem__( self, number ):
@@ -429,25 +426,28 @@ class VimBuffers( object ):
 
 class VimWindow( object ):
   """An object that looks like a vim.window object:
+    - |number|: number of the window;
     - |buffer_object|: a VimBuffer object representing the buffer inside the
       window;
     - |cursor|: a tuple corresponding to the cursor position."""
 
-  def __init__( self, buffer_object, cursor = None ):
+  def __init__( self, number, buffer_object, cursor = None ):
+    self.number = number
     self.buffer = buffer_object
-    self.number = buffer_object.window
     self.cursor = cursor
 
 
 class VimWindows( object ):
   """An object that looks like a vim.windows object."""
 
-  def __init__( self, *buffers ):
-    """Arguments are VimBuffer objects."""
+  def __init__( self, buffers, cursor ):
+    """|buffers| is a list of VimBuffer objects corresponding to the window
+    layout. The first element of that list is assumed to be the current window.
+    |cursor| is the cursor position of that window."""
     windows = []
-    for buffer_object in buffers:
-      if buffer_object.window:
-        windows.append( VimWindow( buffer_object ) )
+    windows.append( VimWindow( 1, buffers[ 0 ], cursor ) )
+    for window_number in range( 1, len( buffers ) ):
+      windows.append( VimWindow( window_number + 1, buffers[ window_number ] ) )
     self._windows = windows
 
 
@@ -477,7 +477,7 @@ class VimCurrent( object ):
 class VimMatch( object ):
 
   def __init__( self, group, pattern ):
-    current_window = VIM_MOCK.current.buffer.window
+    current_window = VIM_MOCK.current.window.number
     self.id = len( VIM_MATCHES_FOR_WINDOW[ current_window ] ) + 1
     self.group = group
     self.pattern = pattern
@@ -531,17 +531,25 @@ class VimSign( object ):
 
 
 @contextlib.contextmanager
-def MockVimBuffers( buffers, current_buffer, cursor_position = ( 1, 1 ) ):
+def MockVimBuffers( buffers, window_buffers, cursor_position = ( 1, 1 ) ):
   """Simulates the Vim buffers list |buffers| where |current_buffer| is the
   buffer displayed in the current window and |cursor_position| is the current
   cursor position. All buffers are represented by a VimBuffer object."""
-  if current_buffer not in buffers:
-    raise RuntimeError( 'Current buffer must be part of the buffers list.' )
+  if ( not isinstance( buffers, list ) or
+       not all( isinstance( buf, VimBuffer ) for buf in buffers ) ):
+    raise RuntimeError( 'First parameter must be a list of VimBuffer objects.' )
+  if ( not isinstance( window_buffers, list ) or
+       not all( isinstance( buf, VimBuffer ) for buf in window_buffers ) ):
+    raise RuntimeError( 'Second parameter must be a list of VimBuffer objects'
+                        'representing the window layout.' )
+  if len( window_buffers ) < 1:
+    raise RuntimeError( 'Second parameter must contain at least one element '
+                        'which corresponds to the current window.' )
 
-  with patch( 'vim.buffers', VimBuffers( *buffers ) ):
-    with patch( 'vim.windows', VimWindows( *buffers ) ):
-      current_window = VimWindow( current_buffer, cursor_position )
-      with patch( 'vim.current', VimCurrent( current_window ) ):
+  with patch( 'vim.buffers', VimBuffers( buffers ) ):
+    with patch( 'vim.windows', VimWindows( window_buffers,
+                                           cursor_position ) ) as windows:
+      with patch( 'vim.current', VimCurrent( windows[ 1 ] ) ):
         yield VIM_MOCK
 
 
