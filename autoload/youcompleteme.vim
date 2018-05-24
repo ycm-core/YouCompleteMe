@@ -369,6 +369,7 @@ function! s:TurnOffSyntasticForCFamily()
   let g:syntastic_c_checkers = []
   let g:syntastic_objc_checkers = []
   let g:syntastic_objcpp_checkers = []
+  let g:syntastic_cuda_checkers = []
 endfunction
 
 
