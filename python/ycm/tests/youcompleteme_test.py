@@ -27,6 +27,7 @@ from ycm.tests.test_utils import ( ExtendedMock, MockVimBuffers, MockVimModule,
 MockVimModule()
 
 import os
+import requests
 import sys
 from hamcrest import ( assert_that, contains, empty, equal_to, is_in, is_not,
                        matches_regexp )
@@ -384,6 +385,20 @@ def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
   post_vim_message.assert_has_exact_calls( [
     call( 'some_detailed_diagnostic', warning = False )
   ] )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDetailedDiagnostic_ConnectionError_test(
+  ycm, post_vim_message ):
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.base_request._JsonFromFuture',
+                side_effect = requests.exceptions.ConnectionError ):
+      ycm.ShowDetailedDiagnostic(),
+
+  post_vim_message.assert_not_called()
 
 
 @YouCompleteMeInstance()
