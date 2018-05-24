@@ -1051,7 +1051,8 @@ to Clang.
 
 **NOTE**: It is highly recommended to include `-x <language>` flag to libclang.
 This is so that the correct language is detected, particularly for header files.
-Common values are `-x c` for C, `-x c++` for C++ and `-x objc` for Objective-C.
+Common values are `-x c` for C, `-x c++` for C++, `-x objc` for Objective-C, and
+`-x cuda` for CUDA.
 
 To give you an impression, if your c++ project is trivial, and your usual
 compilation command is: `g++ -Wall -Wextra -Werror -o FILE.o FILE.cc`, then the
@@ -1627,13 +1628,13 @@ autocommand](#the-ycmquickfixopened-autocommand).
 
 Looks up the current line for a header and jumps to it.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 #### The `GoToDeclaration` subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, java, python, rust,
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, python, rust,
 typescript`
 
 #### The `GoToDefinition` subcommand
@@ -1645,8 +1646,8 @@ namely when the definition of the symbol is in the current translation unit. A
 translation unit consists of the file you are editing and all the files you are
 including with `#include` directives (directly or indirectly) in that file.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, java, javascript, python,
-rust, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
+python, rust, typescript`
 
 #### The `GoTo` subcommand
 
@@ -1657,8 +1658,8 @@ the current translation unit, jumps to the symbol's declaration. For
 C/C++/Objective-C, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, go, java, javascript, python,
-rust, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
+python, rust, typescript`
 
 #### The `GoToImprecise` subcommand
 
@@ -1671,7 +1672,7 @@ changes since the last parse that would lead to incorrect jumps. When you're
 just browsing around your codebase, this command can spare you quite a bit of
 latency.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 #### The `GoToReferences` subcommand
 
@@ -1724,7 +1725,8 @@ Invoking this command on `s` returns `std::string => std::basic_string<char>`
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, java, javascript, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript,
+typescript`
 
 #### The `GetTypeImprecise` subcommand
 
@@ -1737,7 +1739,7 @@ changes since the last parse that would lead to incorrect type. When you're
 just browsing around your codebase, this command can spare you quite a bit of
 latency.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 #### The `GetParent` subcommand
 
@@ -1768,7 +1770,7 @@ For global declarations, the semantic parent is the translation unit.
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 #### The `GetDoc` subcommand
 
@@ -1780,8 +1782,8 @@ under the cursor. Depending on the file type, this includes things like:
 * Python docstrings,
 * etc.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, java, javascript, python,
-typescript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, java, javascript,
+python, typescript, rust`
 
 #### The `GetDocImprecise` subcommand
 
@@ -1794,7 +1796,7 @@ changes since the last parse that would lead to incorrect docs. When you're
 just browsing around your codebase, this command can spare you quite a bit of
 latency.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 ### Refactoring Commands
 
@@ -1829,7 +1831,7 @@ indication).
 
 **NOTE:** Causes re-parsing of the current translation unit.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cs, java, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, java, typescript`
 
 #### The `RefactorRename <new name>` subcommand
 
@@ -1928,7 +1930,7 @@ the server with the `:YcmRestartServer` command).
 This command clears that cache entirely. YCM will then re-query your
 `FlagsForFile` function or your compilation database as needed in the future.
 
-Supported in filetypes: `c, cpp, objc, objcpp`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
 #### The `ReloadSolution` subcommand
 
@@ -2206,8 +2208,8 @@ or off. See the other options below for details.
 Note that YCM's diagnostics UI is only supported for C-family languages.
 
 When set, this option also makes YCM remove all Syntastic checkers set for the
-`c`, `cpp`, `objc` and `objcpp` filetypes since this would conflict with YCM's
-own diagnostics UI.
+`c`, `cpp`, `objc`, `objcpp`, and `cuda` filetypes since this would conflict
+with YCM's own diagnostics UI.
 
 If you're using YCM's identifier completer in C-family languages but cannot use
 the clang-based semantic completer for those languages _and_ want to use the GCC
@@ -2830,7 +2832,7 @@ let g:ycm_semantic_triggers =  {
   \   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
   \             're!\[.*\]\s'],
   \   'ocaml' : ['.', '#'],
-  \   'cpp,objcpp' : ['->', '.', '::'],
+  \   'cpp,cuda,objcpp' : ['->', '.', '::'],
   \   'perl' : ['->'],
   \   'php' : ['->', '::'],
   \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
