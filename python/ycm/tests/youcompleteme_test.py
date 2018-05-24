@@ -388,6 +388,22 @@ def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
 
 @YouCompleteMeInstance()
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_ShowDetailedDiagnostic_Exception_test(
+  ycm, post_vim_message ):
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], current_buffer ):
+    with patch( 'ycm.client.base_request._JsonFromFuture',
+                side_effect = RuntimeError( 'Some exception' ) ):
+      ycm.ShowDetailedDiagnostic(),
+
+  post_vim_message.assert_has_exact_calls( [
+    call( 'Some exception', truncate = False )
+  ] )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( ycm,
                                                              post_vim_message ):
 
