@@ -35,7 +35,7 @@ from nose.tools import eq_
 from hamcrest import ( assert_that, calling, contains, empty, equal_to,
                        has_entry, raises )
 from mock import MagicMock, call, patch
-from ycmd.utils import ToBytes
+from protoycmd.utils import ToBytes
 import os
 import json
 

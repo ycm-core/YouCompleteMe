@@ -198,7 +198,7 @@ third_party_folder = p.join( root_folder, 'third_party' )
 # Add dependencies to Python path.
 dependencies = [ p.join( root_folder, 'python' ),
                  p.join( third_party_folder, 'requests-futures' ),
-                 p.join( third_party_folder, 'ycmd' ),
+                 p.join( third_party_folder, 'protoycmd' ),
                  p.join( third_party_folder, 'requests_deps', 'idna' ),
                  p.join( third_party_folder, 'requests_deps', 'chardet' ),
                  p.join( third_party_folder,

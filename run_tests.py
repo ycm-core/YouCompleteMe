@@ -27,7 +27,7 @@ python_path = [ p.join( DIR_OF_THIRD_PARTY, 'pythonfutures' ),
                 p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'idna' ),
                 p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'requests' ),
                 p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'urllib3', 'src' ),
-                p.join( DIR_OF_THIRD_PARTY, 'ycmd' ) ]
+                p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ) ]
 if os.environ.get( 'PYTHONPATH' ):
   python_path.append( os.environ[ 'PYTHONPATH' ] )
 os.environ[ 'PYTHONPATH' ] = os.pathsep.join( python_path )

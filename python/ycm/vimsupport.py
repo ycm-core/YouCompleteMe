@@ -28,8 +28,8 @@ import os
 import json
 import re
 from collections import defaultdict, namedtuple
-from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
-                         JoinLinesAsUnicode, ToBytes, ToUnicode )
+from protoycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
+                              JoinLinesAsUnicode, ToBytes, ToUnicode )
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'split'            : 'split',
@@ -753,7 +753,7 @@ def GetIntValue( variable ):
 
 def _SortChunksByFile( chunks ):
   """Sort the members of the list |chunks| (which must be a list of dictionaries
-  conforming to ycmd.responses.FixItChunk) by their filepath. Returns a new
+  conforming to protoycmd.responses.FixItChunk) by their filepath. Returns a new
   list in arbitrary order."""
 
   chunks_by_file = defaultdict( list )
@@ -828,7 +828,7 @@ def _OpenFileInSplitIfNeeded( filepath ):
 
 def ReplaceChunks( chunks, silent=False ):
   """Apply the source file deltas supplied in |chunks| to arbitrary files.
-  |chunks| is a list of changes defined by ycmd.responses.FixItChunk,
+  |chunks| is a list of changes defined by protoycmd.responses.FixItChunk,
   which may apply arbitrary modifications to arbitrary files.
 
   If a file specified in a particular chunk is not currently open in a visible

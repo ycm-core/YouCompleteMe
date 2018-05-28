@@ -47,7 +47,7 @@ def PythonSysPath( **kwargs ):
 
   dependencies = [ p.join( DIR_OF_THIS_SCRIPT, 'python' ),
                    p.join( DIR_OF_THIRD_PARTY, 'requests-futures' ),
-                   p.join( DIR_OF_THIRD_PARTY, 'ycmd' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ),
                    p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'idna' ),
                    p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'chardet' ),
                    p.join( DIR_OF_THIRD_PARTY,

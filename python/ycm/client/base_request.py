@@ -28,9 +28,11 @@ import vim
 from future.utils import native
 from base64 import b64decode, b64encode
 from ycm import vimsupport
-from ycmd.utils import ToBytes, urljoin, urlparse, GetCurrentDirectory
-from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
-from ycmd.responses import ServerError, UnknownExtraConf
+from protoycmd.utils import ToBytes, urljoin, urlparse, GetCurrentDirectory
+from protoycmd.hmac_utils import ( CreateRequestHmac,
+                                   CreateHmac,
+                                   SecureBytesEqual )
+from protoycmd.responses import ServerError, UnknownExtraConf
 
 _HEADERS = { 'content-type': 'application/json' }
 _CONNECT_TIMEOUT_SEC = 0.01

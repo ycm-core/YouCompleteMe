@@ -22,3 +22,6 @@
 [submodule "third_party/python-future"]
 	path = third_party/python-future
 	url = https://github.com/PythonCharmers/python-future
+[submodule "third_party/protoycmd"]
+	path = third_party/protoycmd
+	url = https://github.com/bstaletic/protoycmd
