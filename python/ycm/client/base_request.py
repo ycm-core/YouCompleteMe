@@ -32,7 +32,7 @@ from ycmd.utils import ToBytes, urljoin, urlparse, GetCurrentDirectory
 from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
 from ycmd.responses import ServerError, UnknownExtraConf
 
-_HEADERS = {'content-type': 'application/json'}
+_HEADERS = { 'content-type': 'application/json' }
 _CONNECT_TIMEOUT_SEC = 0.01
 # Setting this to None seems to screw up the Requests/urllib3 libs.
 _READ_TIMEOUT_SEC = 30

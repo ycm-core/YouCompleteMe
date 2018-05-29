@@ -64,8 +64,8 @@ def RawResponse_ConvertedFromOmniCompleter_test():
       "kind": "KIND", "info": "INFO" },
     { "word": "WORD2", "abbr": "ABBR2", "menu": "MENU2",
       "kind": "KIND2", "info": "INFO" },
-    { "word": "WORD", "abbr": "ABBR",  },
-    {  },
+    { "word": "WORD", "abbr": "ABBR", },
+    {},
   ]
   expected_results = [
     has_entries( { "insertion_text": "WORD", "menu_text": "ABBR",
@@ -74,8 +74,8 @@ def RawResponse_ConvertedFromOmniCompleter_test():
     has_entries( { "insertion_text": "WORD2", "menu_text": "ABBR2",
                    "extra_menu_info": "MENU2", "kind": [ "KIND2" ],
                    "detailed_info": "INFO" } ),
-    has_entries( { "insertion_text": "WORD", "menu_text": "ABBR",  } ),
-    has_entries( {  } ),
+    has_entries( { "insertion_text": "WORD", "menu_text": "ABBR", } ),
+    has_entries( {} ),
   ]
   request = BuildOmnicompletionRequest( vim_results )
 

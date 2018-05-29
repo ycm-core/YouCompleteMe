@@ -61,7 +61,7 @@ def RegexFilter_test():
 
 
 def RegexSingleList_test():
-  opts = _JavaFilter( { 'regex' : [ 'taco' ] }  )
+  opts = _JavaFilter( { 'regex' : [ 'taco' ] } )
   f = _CreateFilterForTypes( opts, [ 'java' ] )
 
   _assert_rejects( f, 'This is a Taco' )

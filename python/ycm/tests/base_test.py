@@ -35,7 +35,7 @@ from ycm import base
 
 
 @contextlib.contextmanager
-def MockCurrentFiletypes( filetypes = [''] ):
+def MockCurrentFiletypes( filetypes = [ '' ] ):
   with patch( 'ycm.vimsupport.CurrentFiletypes', return_value = filetypes ):
     yield
 
@@ -180,7 +180,7 @@ def LastEnteredCharIsIdentifierChar_Basic_test():
 
 
 def LastEnteredCharIsIdentifierChar_FiletypeHtml_test():
-  with MockCurrentFiletypes( ['html'] ):
+  with MockCurrentFiletypes( [ 'html' ] ):
     with MockCurrentColumnAndLineContents( 3, 'ab-' ):
       ok_( base.LastEnteredCharIsIdentifierChar() )
 
@@ -272,7 +272,7 @@ def CurrentIdentifierFinished_InMiddleOfLine_test():
 
 
 def CurrentIdentifierFinished_Html_test():
-  with MockCurrentFiletypes( ['html'] ):
+  with MockCurrentFiletypes( [ 'html' ] ):
     with MockCurrentColumnAndLineContents( 4, 'bar-zoo' ):
       ok_( not base.CurrentIdentifierFinished() )
 

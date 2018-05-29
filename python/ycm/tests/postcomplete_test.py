@@ -389,7 +389,7 @@ def PostCompleteFixIt_ApplyFixIt_EmptyFixIt_test( replace_chunks, *args ):
 @patch( 'ycm.vimsupport.ReplaceChunks' )
 def PostCompleteFixIt_ApplyFixIt_NoFixIt_test( replace_chunks, *args ):
   completions = [
-    BuildCompletion( )
+    BuildCompletion()
   ]
   with _SetUpCompleteDone( completions ) as request:
     request._OnCompleteDone_FixIt()

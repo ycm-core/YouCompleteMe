@@ -53,10 +53,10 @@ from ycm.client.messages_request import MessagesPoll
 
 
 def PatchNoProxy():
-  current_value = os.environ.get('no_proxy', '')
+  current_value = os.environ.get( 'no_proxy', '' )
   additions = '127.0.0.1,localhost'
-  os.environ['no_proxy'] = ( additions if not current_value
-                             else current_value + ',' + additions )
+  os.environ[ 'no_proxy' ] = ( additions if not current_value
+                               else current_value + ',' + additions )
 
 
 # We need this so that Requests doesn't end up using the local HTTP proxy when

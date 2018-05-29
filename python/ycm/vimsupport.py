@@ -941,7 +941,7 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
   replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
 
-  vim_buffer[ start_line : end_line + 1 ] = replacement_lines[:]
+  vim_buffer[ start_line : end_line + 1 ] = replacement_lines[ : ]
 
   return {
     'bufnr': vim_buffer.number,
@@ -977,7 +977,8 @@ def InsertNamespace( namespace ):
 def SearchInCurrentBuffer( pattern ):
   """ Returns the 1-indexed line on which the pattern matches
   (going UP from the current position) or 0 if not found """
-  return GetIntValue( "search('{0}', 'Wcnb')".format( EscapeForVim( pattern )))
+  return GetIntValue(
+    "search('{0}', 'Wcnb')".format( EscapeForVim( pattern ) ) )
 
 
 def LineTextInCurrentBuffer( line_number ):
@@ -1033,7 +1034,7 @@ def WriteToPreviewWindow( message ):
     vim.current.buffer.options[ 'modifiable' ] = True
     vim.current.buffer.options[ 'readonly' ]   = False
 
-    vim.current.buffer[:] = message.splitlines()
+    vim.current.buffer[ : ] = message.splitlines()
 
     vim.current.buffer.options[ 'buftype' ]    = 'nofile'
     vim.current.buffer.options[ 'bufhidden' ]  = 'wipe'

@@ -94,7 +94,7 @@ def _FormatCompleterDebugInfo( completer ):
       message += '  {0} process ID: {1}\n'.format( name, server[ 'pid' ] )
     else:
       message += '  {0} not running\n'.format( name )
-    message += '  {0} executable: {1}\n'.format( name, server[ 'executable'] )
+    message += '  {0} executable: {1}\n'.format( name, server[ 'executable' ] )
     logfiles = server[ 'logfiles' ]
     if logfiles:
       message += '  {0} logfiles:\n'.format( name )

@@ -1114,17 +1114,17 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
           False, # second_file (apply)
           True,  # side_effect (check after open)
         ],
-        new_callable = ExtendedMock)
+        new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.OpenFilename',
-        new_callable = ExtendedMock)
+        new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.PostVimMessage',
-        new_callable = ExtendedMock)
+        new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.Confirm', return_value = True,
-        new_callable = ExtendedMock)
+        new_callable = ExtendedMock )
 @patch( 'vim.eval', return_value = 10,
-        new_callable = ExtendedMock)
+        new_callable = ExtendedMock )
 @patch( 'vim.command',
-        new_callable = ExtendedMock)
+        new_callable = ExtendedMock )
 def ReplaceChunks_MultiFile_Open_test( vim_command,
                                        vim_eval,
                                        confirm,
@@ -1295,7 +1295,7 @@ def AddDiagnosticSyntaxMatch_UnicodeAtEndOfLine_test():
 
 
 @patch( 'vim.command', new_callable=ExtendedMock )
-@patch( 'vim.current', new_callable=ExtendedMock)
+@patch( 'vim.current', new_callable=ExtendedMock )
 def WriteToPreviewWindow_test( vim_current, vim_command ):
   vim_current.window.options.__getitem__ = MagicMock( return_value = True )
 
@@ -1534,8 +1534,8 @@ def SelectFromList_FirstItem_test( vim_eval ):
 
 @patch( 'vim.eval', side_effect = [ None, 3, None ] )
 def SelectFromList_OutOfRange_test( vim_eval ):
-  assert_that( calling( vimsupport.SelectFromList).with_args( 'test',
-                                                              [ 'a', 'b' ] ),
+  assert_that( calling( vimsupport.SelectFromList ).with_args( 'test',
+                                                               [ 'a', 'b' ] ),
                raises( RuntimeError, vimsupport.NO_SELECTION_MADE_MSG ) )
 
 
