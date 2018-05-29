@@ -385,6 +385,76 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
+### Arch Linux x64
+
+These instructions (using `install.py`) are the quickest way to install
+YouCompleteMe, however they may not work for everyone. If the following
+instructions don't work for you, check out the [full installation
+guide](#full-installation-guide).
+
+Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. You can see
+the version of Vim installed by running `vim --version`. If the version is too
+old, you may need to [compile Vim from source][vim-build] (don't worry, it's
+easy).
+
+Install YouCompleteMe with [Vundle][].
+
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_core library APIs have changed (happens
+rarely), YCM will notify you to recompile it. You should then rerun the install
+process.
+
+Install development tools and CMake:
+
+    sudo pacman -S automake gcc linux-headers cmake
+
+Since Arch Linux keeps it's packages updated with the latest ABIs (see issue
+[#778][issue778]), you'll need to install the AUR package [`ncurses5-compat-libs`][aur-ncurses5-package]
+
+Python Headers should be installed along with the `python` package.
+
+Compiling YCM **with** semantic support for C-family languages:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clang-completer
+
+Compiling YCM **without** semantic support for C-family languages:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py
+
+The following additional language support options are available:
+
+- C# support: install [Mono][mono-install-fedora] and add `--cs-completer`
+  when calling `./install.py`.
+- Go support: install [Go][go-install] and add `--go-completer` when calling
+  `./install.py`.
+- TypeScript support: install [Node.js and npm][npm-install] then install the
+  TypeScript SDK with `sudo pacman -S typescript`.
+- JavaScript support: install [Node.js and npm][npm-install] and add
+  `--js-completer` when calling `./install.py`.
+- Rust support: install [Rust][rust-install] and add `--rust-completer` when
+  calling `./install.py`.
+- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+  `--java-completer` when calling `./install.py`.
+
+To simply compile with everything enabled, there's a `--all` flag.  So, to
+install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
+`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
+simply run:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --all
+
+That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
+Don't forget that if you want the C-family semantic completion engine to work,
+you will need to provide the compilation flags for your project to YCM. It's all
+in the User Guide.
+
+YCM comes with sane defaults for its options, but you still may want to take a
+look at what's available for configuration. There are a few interesting options
+that are conservatively turned off by default that you may want to turn on.
+
 ### Windows
 
 These instructions (using `install.py`) are the quickest way to install
@@ -3439,6 +3509,8 @@ This software is licensed under the [GPL v3 license][gpl].
 [subsequence]: https://en.wikipedia.org/wiki/Subsequence
 [listtoggle]: https://github.com/Valloric/ListToggle
 [vim-build]: https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+[aur-ncurses5-package]: https://aur.archlinux.org/package/ncurses5-compat-libs
+[issue778]: https://github.com/Valloric/YouCompleteMe/issues/778
 [tracker]: https://github.com/Valloric/YouCompleteMe/issues?state=open
 [issue18]: https://github.com/Valloric/YouCompleteMe/issues/18
 [delimitMate]: https://github.com/Raimondi/delimitMate
