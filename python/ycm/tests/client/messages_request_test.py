@@ -98,10 +98,10 @@ def HandlePollResponse_MultipleDiagnostics_test():
   assert_that( _HandlePollResponse( messages, diagnostics_handler ),
                equal_to( True ) )
   diagnostics_handler.UpdateWithNewDiagnosticsForFile.assert_has_exact_calls( [
-    call ( 'foo', [ 'PLACEHOLDER1' ] ),
-    call ( 'bar', [ 'PLACEHOLDER2' ] ),
-    call ( 'baz', [ 'PLACEHOLDER3' ] ),
-    call ( 'foo', [ 'PLACEHOLDER4' ] )
+    call( 'foo', [ 'PLACEHOLDER1' ] ),
+    call( 'bar', [ 'PLACEHOLDER2' ] ),
+    call( 'baz', [ 'PLACEHOLDER3' ] ),
+    call( 'foo', [ 'PLACEHOLDER4' ] )
   ] )
 
 
@@ -122,10 +122,10 @@ def HandlePollResponse_MultipleMessagesAndDiagnostics_test( post_vim_message ):
   assert_that( _HandlePollResponse( messages, diagnostics_handler ),
                equal_to( True ) )
   diagnostics_handler.UpdateWithNewDiagnosticsForFile.assert_has_exact_calls( [
-    call ( 'foo', [ 'PLACEHOLDER1' ] ),
-    call ( 'bar', [ 'PLACEHOLDER2' ] ),
-    call ( 'baz', [ 'PLACEHOLDER3' ] ),
-    call ( 'foo', [ 'PLACEHOLDER4' ] )
+    call( 'foo', [ 'PLACEHOLDER1' ] ),
+    call( 'bar', [ 'PLACEHOLDER2' ] ),
+    call( 'baz', [ 'PLACEHOLDER3' ] ),
+    call( 'foo', [ 'PLACEHOLDER4' ] )
   ] )
 
   post_vim_message.assert_has_exact_calls( [
