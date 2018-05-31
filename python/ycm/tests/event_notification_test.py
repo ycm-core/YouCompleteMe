@@ -35,8 +35,9 @@ import os
 from ycm.tests import ( PathToTestFile, test_utils, YouCompleteMeInstance,
                         WaitUntilReady )
 from ycm.vimsupport import SIGN_BUFFER_ID_INITIAL_VALUE
-from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
-                             UnknownExtraConf, ServerError )
+from protoycmd.responses import ( BuildDiagnosticData, Diagnostic,
+                                  Location, Range,
+                                  UnknownExtraConf, ServerError )
 
 from hamcrest import ( assert_that, contains, empty, has_entries, has_entry,
                        has_item, has_items, has_key, is_not )

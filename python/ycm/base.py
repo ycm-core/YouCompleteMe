@@ -24,8 +24,8 @@ from builtins import *  # noqa
 
 from future.utils import iteritems
 from ycm import vimsupport
-from ycmd import user_options_store
-from ycmd import identifier_utils
+from protoycmd import user_options_store
+from protoycmd import identifier_utils
 
 YCM_VAR_PREFIX = 'ycm_'
 

@@ -72,7 +72,7 @@ endif
 
 let g:loaded_youcompleteme = 1
 
-" NOTE: Most defaults are in third_party/ycmd/ycmd/default_settings.json. They
+" NOTE: Most defaults are in python/ycm/protoycmd/default_settings.json. They
 " are loaded into Vim globals with the 'ycm_' prefix if such a key does not
 " already exist; thus, the user can override the defaults.
 " The only defaults that are here are the ones that are only relevant to the YCM

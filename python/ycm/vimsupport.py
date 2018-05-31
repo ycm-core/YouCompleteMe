@@ -29,9 +29,12 @@ import os
 import json
 import re
 from collections import defaultdict, namedtuple
-from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
-                         JoinLinesAsUnicode, ToBytes, ToUnicode )
-from ycmd import user_options_store
+from protoycmd.utils import ( ByteOffsetToCodepointOffset,
+                              GetCurrentDirectory,
+                              JoinLinesAsUnicode,
+                              ToBytes,
+                              ToUnicode )
+from protoycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'split'            : 'split',

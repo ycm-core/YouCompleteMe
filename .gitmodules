@@ -4,3 +4,15 @@
 [submodule "third_party/ycmd"]
 	path = third_party/ycmd
 	url = https://github.com/Valloric/ycmd
+[submodule "third_party/protoycmd"]
+	path = third_party/protoycmd
+	url = https://github.com/bstaletic/protoycmd
+[submodule "third_party/requests"]
+	path = third_party/requests
+	url = https://github.com/requests/requests/
+[submodule "third_party/frozendict"]
+	path = third_party/frozendict
+	url = https://github.com/slezica/python-frozendict/
+[submodule "third_party/python-future"]
+	path = third_party/python-future
+	url = https://github.com/PythonCharmers/python-future

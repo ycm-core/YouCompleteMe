@@ -35,8 +35,8 @@ from ycm import base, paths, vimsupport
 from ycm.buffer import ( BufferDict,
                          DIAGNOSTIC_UI_FILETYPES,
                          DIAGNOSTIC_UI_ASYNC_FILETYPES )
-from ycmd import server_utils, user_options_store, utils
-from ycmd.request_wrap import RequestWrap
+from protoycmd import server_utils, user_options_store, utils
+from protoycmd.request_wrap import RequestWrap
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive

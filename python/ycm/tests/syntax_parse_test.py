@@ -29,7 +29,7 @@ MockVimModule()
 import os
 from hamcrest import assert_that, contains_inanyorder, has_item, has_items
 from ycm import syntax_parse
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 def ContentsOfTestFile( test_file ):

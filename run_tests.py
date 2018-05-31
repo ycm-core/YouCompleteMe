@@ -7,12 +7,9 @@ import sys
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
-DIR_OF_YCMD_THIRD_PARTY = p.join( DIR_OF_THIRD_PARTY, 'ycmd', 'third_party' )
 
 python_path = []
 for folder in os.listdir( DIR_OF_THIRD_PARTY ):
-  python_path.append( p.abspath( p.join( DIR_OF_THIRD_PARTY, folder ) ) )
-for folder in os.listdir( DIR_OF_YCMD_THIRD_PARTY ):
   # We skip python-future because it needs to be inserted in sys.path AFTER
   # the standard library imports but we can't do that with PYTHONPATH because
   # the std lib paths are always appended to PYTHONPATH. We do it correctly in
@@ -24,13 +21,11 @@ for folder in os.listdir( DIR_OF_YCMD_THIRD_PARTY ):
   # sys.path the path is.
   if folder == 'python-future':
     continue
-  python_path.append( p.abspath( p.join( DIR_OF_YCMD_THIRD_PARTY, folder ) ) )
+  python_path.append(
+      p.abspath( p.join( DIR_OF_THIRD_PARTY, folder ) ) )
 if os.environ.get( 'PYTHONPATH' ):
   python_path.append( os.environ[ 'PYTHONPATH' ] )
 os.environ[ 'PYTHONPATH' ] = os.pathsep.join( python_path )
-
-sys.path.insert( 1, p.abspath( p.join( DIR_OF_YCMD_THIRD_PARTY,
-                                       'argparse' ) ) )
 
 import argparse
 
