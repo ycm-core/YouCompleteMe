@@ -660,7 +660,7 @@ class YouCompleteMe( object ):
     detailed_diagnostic = BaseRequest().PostDataToHandler(
         BuildRequestData(), 'detailed_diagnostic' )
 
-    if 'message' in detailed_diagnostic:
+    if detailed_diagnostic and 'message' in detailed_diagnostic:
       vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
                                  warning = False )
 

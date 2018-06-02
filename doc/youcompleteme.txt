@@ -1900,8 +1900,8 @@ The *GoToDeclaration* subcommand
 
 Looks up the symbol under the cursor and jumps to its declaration.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, go, java, python, rust,
-typescript'
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, go, java, python,
+rust, typescript'
 
 -------------------------------------------------------------------------------
 The *GoToDefinition* subcommand
