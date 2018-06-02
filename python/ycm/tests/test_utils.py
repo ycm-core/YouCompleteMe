@@ -530,11 +530,11 @@ def MockVimModule():
 class VimError( Exception ):
 
   def __init__( self, code ):
-      self.code = code
+    self.code = code
 
 
   def __str__( self ):
-      return repr( self.code )
+    return repr( self.code )
 
 
 class ExtendedMock( MagicMock ):

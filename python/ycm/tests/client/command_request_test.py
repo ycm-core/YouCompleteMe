@@ -203,7 +203,7 @@ class Response_Detection_test( object ):
       [ 'and8434fd andy garbag!',
         basic_fixit,  basic_fixit_chunks,        0, False ],
       [ 'Format',
-        basic_fixit,  basic_fixit_chunks,        0, True  ],
+        basic_fixit,  basic_fixit_chunks,        0, True ],
       [ 'select from multiple 1',
         multi_fixit,  multi_fixit_first_chunks,  0, False ],
       [ 'select from multiple 2',
@@ -293,7 +293,7 @@ class Response_Detection_test( object ):
       [ GoToTest,     'FindAThing',      basic_goto ],
       [ GoToTest,     'FixItGoto',       basic_goto ],
       [ GoToListTest, 'AnythingYouLike', [ basic_goto ] ],
-      [ GoToListTest, 'GoTo',            []  ],
+      [ GoToListTest, 'GoTo',            [] ],
       [ GoToListTest, 'FixItGoto',       [ basic_goto, basic_goto ] ],
     ]
 

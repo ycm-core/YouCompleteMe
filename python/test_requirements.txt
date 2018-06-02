@@ -1,5 +1,6 @@
 flake8                >= 3.0.0
 flake8-comprehensions >= 1.4.1
+flake8-ycm            >= 0.1.0
 mock                  >= 1.0.1
 nose                  >= 1.3.7
 PyHamcrest            >= 1.8.0
