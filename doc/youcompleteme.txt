@@ -40,7 +40,7 @@ Contents ~
    4. Diagnostic display - Eclim       |youcompleteme-diagnostic-display-eclim|
    5. Eclipse Projects                         |youcompleteme-eclipse-projects|
    6. Maven Projects                             |youcompleteme-maven-projects|
-   7. Gradle Projecs                             |youcompleteme-gradle-projecs|
+   7. Gradle Projects                           |youcompleteme-gradle-projects|
    8. Troubleshooting                           |youcompleteme-troubleshooting|
   7. JavaScript Semantic Completion |youcompleteme-javascript-semantic-completion|
    1. JavaScript quick start             |youcompleteme-javascript-quick-start|
@@ -186,6 +186,7 @@ module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-comm
   34. I can't complete python packages in a virtual environment. |youcompleteme-i-cant-complete-python-packages-in-virtual-environment.|
   35. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
   36. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
+  37. YCM does not work with my Anaconda Python setup |youcompleteme-ycm-does-not-work-with-my-anaconda-python-setup|
  14. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  15. Contact                                            |youcompleteme-contact|
  16. License                                            |youcompleteme-license|
@@ -1271,7 +1272,7 @@ Every c-family project is different. It is not possible for YCM to guess what
 compiler flags to supply for your project. Fortunately, YCM provides a
 mechanism for you to generate the flags for a particular file with _arbitrary
 complexity_. This is achieved by requiring you to provide a Python module which
-implements a trival function which, given the file name as argument, returns a
+implements a trivial function which, given the file name as argument, returns a
 list of compiler flags to use to compile that file.
 
 YCM looks for a '.ycm_extra_conf.py' file in the directory of the opened file
@@ -1377,7 +1378,7 @@ project files [55], maven projects [56] and gradle projects [57].
 Diagnostic display - Syntastic ~
 
 The native support for Java includes YCM's native realtime diagnostics display.
-This can conflict with other dianostics plugins like Syntastic, so when
+This can conflict with other diagnostics plugins like Syntastic, so when
 enabling Java support, please **manually disable Syntastic Java diagnostics**.
 
 Add the following to your 'vimrc':
@@ -1389,7 +1390,7 @@ Add the following to your 'vimrc':
 Diagnostic display - Eclim ~
 
 The native support for Java includes YCM's native realtime diagnostics display.
-This can conflict with other dianostics plugins like Eclim, so when enabling
+This can conflict with other diagnostics plugins like Eclim, so when enabling
 Java support, please **manually disable Eclim Java diagnostics**.
 
 Add the following to your 'vimrc':
@@ -1412,9 +1413,9 @@ fine (it's basically eclipse after all).
 However, if not, it is possible (easy in fact) to craft them manually, though
 it is not recommended. You're better off using gradle or maven (see below).
 
-A simple eclipse style project example [59] can be found in the ycmd test dir.
-Normally all that is required is to copy these files to the root of your
-project and to edit the '.classpath' to add additional libraries, such as:
+A simple eclipse style project example [59] can be found in the ycmd test
+directory. Normally all that is required is to copy these files to the root of
+your project and to edit the '.classpath' to add additional libraries, such as:
 >
   <classpathentry kind="lib" path="/path/to/external/jar" />
   <classpathentry kind="lib" path="/path/to/external/java/source" />
@@ -1440,8 +1441,8 @@ we do recommend using the various tools that can generate them for you, if
 you're not familiar with them already.
 
 -------------------------------------------------------------------------------
-                                                 *youcompleteme-gradle-projecs*
-Gradle Projecs ~
+                                                *youcompleteme-gradle-projects*
+Gradle Projects ~
 
 Gradle projects require a build.gradle [57]. Again, there is a trivial example
 in ycmd's tests [61].
@@ -1800,7 +1801,7 @@ can be fixed by a call to ':YcmCompleter FixIt', then '(FixIt available)' is
 appended to the error or warning text. See the |FixIt| completer subcommand for
 more information.
 
-**NOTE:** The absense of '(FixIt available)' does not strictly imply a fix-it
+**NOTE:** The absence of '(FixIt available)' does not strictly imply a fix-it
 is not available as not all completers are able to provide this indication. For
 example, the c-sharp completer provides many fix-its but does not add this
 additional indication.
@@ -3666,6 +3667,17 @@ autocommand without using the 'nested' keyword (see ':h autocmd-nested'). One
 of these plugins is vim-nerdtree-tabs [85]. You should identify which plugin is
 responsible for the issue and report it to the plugin author. Note that when
 this happens, ycmd [49] will automatically shut itself down after 30 minutes.
+
+-------------------------------------------------------------------------------
+                *youcompleteme-ycm-does-not-work-with-my-anaconda-python-setup*
+YCM does not work with my Anaconda Python setup ~
+
+Anaconda is often incompatible with the pre-built libclang used by YCM and
+therefore is not supported. The recommended way to solve this is to run
+'/path/to/real/python install.py' (for example '/usr/bin/python install.py').
+
+If you want completion in Anaconda projects, set |g:ycm_python_binary_path| to
+point to the full path of your Anaconda python.
 
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*
