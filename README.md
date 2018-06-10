@@ -1031,7 +1031,7 @@ Every c-family project is different. It is not possible for YCM to guess what
 compiler flags to supply for your project. Fortunately, YCM provides a mechanism
 for you to generate the flags for a particular file with _arbitrary complexity_.
 This is achieved by requiring you to provide a Python module which implements a
-trival function which, given the file name as argument, returns a list of
+trivial function which, given the file name as argument, returns a list of
 compiler flags to use to compile that file.
 
 YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file or
@@ -1129,8 +1129,8 @@ supports [eclipse project files][eclipse-project],
 #### Diagnostic display - Syntastic
 
 The native support for Java includes YCM's native realtime diagnostics display.
-This can conflict with other dianostics plugins like Syntastic, so when enabling
-Java support, please **manually disable Syntastic Java diagnostics**.
+This can conflict with other diagnostics plugins like Syntastic, so when
+enabling Java support, please **manually disable Syntastic Java diagnostics**.
 
 Add the following to your `vimrc`:
 
@@ -1141,7 +1141,7 @@ let g:syntastic_java_checkers = []
 #### Diagnostic display - Eclim
 
 The native support for Java includes YCM's native realtime diagnostics display.
-This can conflict with other dianostics plugins like Eclim, so when enabling
+This can conflict with other diagnostics plugins like Eclim, so when enabling
 Java support, please **manually disable Eclim Java diagnostics**.
 
 Add the following to your `vimrc`:
@@ -1166,9 +1166,9 @@ However, if not, it is possible (easy in fact) to craft them manually, though it
 is not recommended. You're better off using gradle or maven (see below).
 
 [A simple eclipse style project example][ycmd-eclipse-project] can be found in
-the ycmd test dir. Normally all that is required is to copy these files to the
-root of your project and to edit the `.classpath` to add additional libraries,
-such as:
+the ycmd test directory. Normally all that is required is to copy these files to
+the root of your project and to edit the `.classpath` to add additional
+libraries, such as:
 
 ```xml
   <classpathentry kind="lib" path="/path/to/external/jar" />
@@ -1195,7 +1195,7 @@ The format of [pom.xml][mvn-project] files is way beyond the scope of this
 document, but we do recommend using the various tools that can generate them for
 you, if you're not familiar with them already.
 
-#### Gradle Projecs
+#### Gradle Projects
 
 Gradle projects require a [build.gradle][gradle-project]. Again, there is a
 [trivial example in ycmd's tests][ycmd-gradle-project].
@@ -1541,7 +1541,7 @@ be fixed by a call to `:YcmCompleter FixIt`, then ` (FixIt available)` is
 appended to the error or warning text. See the `FixIt` completer subcommand for
 more information.
 
-**NOTE:** The absense of ` (FixIt available)` does not strictly imply a fix-it
+**NOTE:** The absence of ` (FixIt available)` does not strictly imply a fix-it
 is not available as not all completers are able to provide this indication. For
 example, the c-sharp completer provides many fix-its but does not add this
 additional indication.
