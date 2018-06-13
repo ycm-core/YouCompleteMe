@@ -913,18 +913,18 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
         'text': 'error text in a buffer open in a separate window',
         'location': {
           'filepath': '/separate_window',
-          'line_num': 3,
+          'line_num': 1,
           'column_num': 3
         },
         'location_extent': {
           'start': {
             'filepath': '/separate_window',
-            'line_num': 3,
+            'line_num': 1,
             'column_num': 3,
           },
           'end': {
             'filepath': '/separate_window',
-            'line_num': 3,
+            'line_num': 1,
             'column_num': 3,
           }
         },
@@ -1035,7 +1035,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
 
     call( 3, [
       {
-        'lnum': 3,
+        'lnum': 1,
         'col': 3,
         'bufnr': 3,
         'valid': 1,
@@ -1052,7 +1052,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
         VimMatch( 'YcmErrorSection', '\%1l\%1c\_.\{-}\%1l\%1c' )
       ),
       3: contains(
-        VimMatch( 'YcmErrorSection', '\%3l\%3c\_.\{-}\%3l\%3c' )
+        VimMatch( 'YcmErrorSection', '\%1l\%3c\_.\{-}\%1l\%3c' )
       )
     } )
   )

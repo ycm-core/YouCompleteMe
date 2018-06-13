@@ -87,9 +87,10 @@ class DiagnosticInterface( object ):
 
 
   def _EchoDiagnostic( self ):
-    line, _ = vimsupport.CurrentLineAndColumn()
-    line += 1  # Convert to 1-based
-    self._EchoDiagnosticForLine( line )
+    if self._bufnr == vimsupport.GetCurrentBufferNumber():
+      line, _ = vimsupport.CurrentLineAndColumn()
+      line += 1  # Convert to 1-based
+      self._EchoDiagnosticForLine( line )
 
 
   def _EchoDiagnosticForLine( self, line_num ):
