@@ -232,7 +232,7 @@ different distributions. Use the proper package manager for your distribution.
 
 - Ubuntu: `build-essential` `cmake`
 - Older Ubuntu (e.g. Ubuntu 14.04): `build-essential` `cmake3`
-* Arch Linux: `cmake` `base-devel`
+* Arch Linux: `cmake` `base-devel` AUR: [ncurses5-compat-libs][aur-ncurses5-compat-libs] (see [#778][issue-778])
 * Fedora: `automake` `gcc` `gcc-c++` `kernel-devel` `cmake`
 
 ###### Windows
@@ -3275,6 +3275,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [issue-303]: https://github.com/Valloric/YouCompleteMe/issues/303
 [issue-593]: https://github.com/Valloric/YouCompleteMe/issues/593
 [issue-669]: https://github.com/Valloric/YouCompleteMe/issues/669
+[issue-778]: https://github.com/Valloric/YouCompleteMe/issues/778
 [status-mes]: https://groups.google.com/forum/#!topic/vim_dev/WeBBjkXE8H8
 [python-re]: https://docs.python.org/2/library/re.html#regular-expression-syntax
 [Bear]: https://github.com/rizsotto/Bear
@@ -3324,3 +3325,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [jdtls-release]: http://download.eclipse.org/jdtls/milestones
 [diacritic]: https://www.unicode.org/glossary/#diacritic
 [regex]: https://pypi.org/project/regex/
+[aur-ncurses5-compat-libs]: https://aur.archlinux.org/packages/ncurses5-compat-libs/
