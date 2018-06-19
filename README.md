@@ -165,12 +165,17 @@ and a completer that integrates with [UltiSnips][].
 Installation
 ------------
 
-### Mac OS X
+### TL;DR
 
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
+**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
+
+#### Requirements
+
+##### Compatible Vim
+
+###### Mac OS X
 
 Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
 
@@ -181,216 +186,18 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
     ln -s /usr/local/bin/mvim vim
 
-Install YouCompleteMe with [Vundle][].
-
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
-
-**NOTE:** If you want C-family completion, you MUST have the latest Xcode
-installed along with the latest Command Line Tools (they are installed
-automatically when you run `clang` for the first time, or manually by running
-`xcode-select --install`)
-
-Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
-CMake installer][cmake-download].
-
-_If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
+_If_ you have installed a Homebrew MacVim, see this
+[_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
 for details.
 
-Compiling YCM **with** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
-
-Compiling YCM **without** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
-
-The following additional language support options are available:
-
-- C# support: install Mono with [Homebrew][brew] or by downloading the [Mono Mac
-  package][mono-install-osx] and add `--cs-completer` when calling
-  `./install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add
-  `--rust-completer` when calling `./install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
-
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
-simply run:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
-
-That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
-Don't forget that if you want the C-family semantic completion engine to work,
-you will need to provide the compilation flags for your project to YCM. It's all
-in the User Guide.
-
-YCM comes with sane defaults for its options, but you still may want to take a
-look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.
-
-### Ubuntu Linux x64
-
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
+###### Unix
 
 Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Ubuntu 16.04
 and later have a Vim that's recent enough. You can see the version of Vim
 installed by running `vim --version`. If the version is too old, you may need to
 [compile Vim from source][vim-build] (don't worry, it's easy).
 
-Install YouCompleteMe with [Vundle][].
-
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
-
-Install development tools and CMake:
-
-    sudo apt-get install build-essential cmake
-
-**Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation
-issues with `cmake`. Therefore, install the following instead:
-
-    sudo apt-get install build-essential cmake3
-
-Make sure you have Python headers installed:
-
-    sudo apt-get install python-dev python3-dev
-
-Compiling YCM **with** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
-
-Compiling YCM **without** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
-
-The following additional language support options are available:
-
-- C# support: install [Mono][mono-install-ubuntu] and add `--cs-completer`
-  when calling `./install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add `--rust-completer` when
-  calling `./install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
-
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
-simply run:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
-
-That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
-Don't forget that if you want the C-family semantic completion engine to work,
-you will need to provide the compilation flags for your project to YCM. It's all
-in the User Guide.
-
-YCM comes with sane defaults for its options, but you still may want to take a
-look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.
-
-### Fedora Linux x64
-
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
-
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Fedora 21 and
-later have a Vim that's recent enough. You can see the version of Vim installed
-by running `vim --version`. If the version is too old, you may need to [compile
-Vim from source][vim-build] (don't worry, it's easy).
-
-Install YouCompleteMe with [Vundle][].
-
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
-
-Install development tools and CMake:
-
-    sudo dnf install automake gcc gcc-c++ kernel-devel cmake
-
-Make sure you have Python headers installed:
-
-    sudo dnf install python-devel python3-devel
-
-Compiling YCM **with** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
-
-Compiling YCM **without** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
-
-The following additional language support options are available:
-
-- C# support: install [Mono][mono-install-fedora] and add `--cs-completer`
-  when calling `./install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add `--rust-completer` when
-  calling `./install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
-
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
-simply run:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
-
-That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
-Don't forget that if you want the C-family semantic completion engine to work,
-you will need to provide the compilation flags for your project to YCM. It's all
-in the User Guide.
-
-YCM comes with sane defaults for its options, but you still may want to take a
-look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.
-
-### Windows
-
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
+###### Windows
 
 **Important:** we assume that you are using the `cmd.exe` command prompt and
 that you know how to add an executable to the PATH environment variable.
@@ -411,45 +218,107 @@ to your [vimrc][] if not already present. This option is required by YCM. Note
 that it does not prevent you from editing a file in another encoding than UTF-8.
 You can do that by specifying [the `++enc` argument][++enc] to the `:e` command.
 
-Install YouCompleteMe with [Vundle][].
+##### Build Tools
 
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+###### Mac OS X
 
-Download and install the following software:
+Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
+CMake installer][cmake-download].
 
-- [Python 2 or Python 3][python-win-download]. Be sure to pick the version
-  corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim
-  and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
-  Additionally, the version of Python you install must match up exactly with
-  the version of Python that Vim is looking for. Type `:version` and look at the
-  bottom of the page at the list of compiler flags. Look for flags that look
-  similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and
-  `-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is
-  looking for Python 2.7 and the latter indicates that Vim is looking for
-  Python 3.5. You'll need one or the other installed, matching the version
-  number exactly.
-- [CMake][cmake-download]. Add CMake executable to the PATH environment
+###### Unix
+
+Here we'll list the packages you need to install as they are named under the
+different distributions. Use the proper package manager for your distribution.
+
+- Ubuntu: `build-essential` `cmake`
+- Older Ubuntu (e.g. Ubuntu 14.04): `build-essential` `cmake3`
+* Arch Linux: `cmake` `base-devel`
+* Fedora: `automake` `gcc` `gcc-c++` `kernel-devel` `cmake`
+
+###### Windows
+
+Install [CMake][cmake-download]. Add CMake executable to the PATH environment
 variable.
-- [Visual Studio][visual-studio-download]. Download the community edition.
+
+Install [Visual Studio][visual-studio-download]. Download the community edition.
 During setup, select _Desktop development with C++_ in _Workloads_.
+
+##### Python
+
+###### Windows
+
+[Python 2 or Python 3][python-win-download]. Be sure to pick the version
+corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim
+and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
+Additionally, the version of Python you install must match up exactly with
+the version of Python that Vim is looking for. Type `:version` and look at the
+bottom of the page at the list of compiler flags. Look for flags that look
+similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and
+`-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is
+looking for Python 2.7 and the latter indicates that Vim is looking for
+Python 3.5. You'll need one or the other installed, matching the version
+number exactly.
+
+###### Mac OS X
+
+_If_ you have installed a Homebrew Python, see this
+[_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
+for details.
+
+###### Unix
+
+Here we'll list the packages you need to install as they are named under the
+different distributions. Use the proper package manager for your distribution.
+
+- Ubuntu: `python-dev` `python3-dev`
+- Fedora: `python-devel` `python3-devel`
+* Arch Linux: `python`
+
+##### C-family completion support requirements
+
+###### Mac OS X only
+
+For all C languages, completion support on Mac OS X requires the latest Xcode
+installed along with the latest Command Line Tools (they are installed
+automatically when you run `clang` for the first time, or manually by running
+`xcode-select --install`).
+
+###### Unix
+
+For all C languages, support is enabled automatically during compilation,
+except for C# completion support for which you'll need to install
+[Mono][mono-install-linux].
+
+###### Windows
+
+For all C languages, support is enabled automatically during compilation,
+except for C# completion support for which you'll need to install
+[Mono][mono-install-windows]. Be sure that [the build utility `msbuild` is in
+your PATH][add-msbuild-to-path].
+
+#### Installation - using `install.py`
+
+Install YouCompleteMe with [Vundle][] or any other Vim plugin manager of your
+choice.
+
+Inside the `YouCompleteMe` directory, there is a python script called
+`install.py`, it will be found on the following locations for the following
+OSs:
+
+- Mac OS X / Unix: `~/.vim/bundle/YouCompleteMe`
+- Windows: `%USERPROFILE%/vimfiles/bundle/YouCompleteMe`
 
 Compiling YCM **with** semantic support for C-family languages:
 
-    cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     python install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
-    cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     python install.py
 
 The following additional language support options are available:
 
 - C# support: add `--cs-completer` when calling `install.py`.
-  Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
 - TypeScript support: install [Node.js and npm][npm-install] then install the
@@ -462,85 +331,17 @@ The following additional language support options are available:
   `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
+install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 `npm`, and `cargo` tools are installed and in your `PATH`, then simply run:
 
-    cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     python install.py --all
+
+##### Windows specific options
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
 option. YCM officially supports MSVC 14 (Visual Studio 2015) and 15 (2017).
 
-That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
-Don't forget that if you want the C-family semantic completion engine to work,
-you will need to provide the compilation flags for your project to YCM. It's all
-in the User Guide.
-
-YCM comes with sane defaults for its options, but you still may want to take a
-look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.
-
-### FreeBSD/OpenBSD
-
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
-
-**NOTE:** OpenBSD / FreeBSD are not officially supported platforms by YCM.
-
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support.
-
-OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
-Vim installed by running `vim --version`.
-
-For FreeBSD 11.x, the requirement is cmake:
-
-    pkg install cmake
-
-Install YouCompleteMe with [Vundle][].
-
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
-
-Compiling YCM **with** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
-
-Compiling YCM **without** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
-
-If the `python` executable is not present, or the default `python` is not the
-one that should be compiled against, specify the python interpreter explicitly:
-
-    python3 install.py --clang-completer
-
-The following additional language support options are available:
-
-- C# support: install Mono and add `--cs-completer` when calling
-  `./install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
-- TypeScript support: install [Node.js and npm][npm-install] then install the
-  TypeScript SDK with `npm install -g typescript`.
-- JavaScript support: install [Node.js and npm][npm-install] and add
-  `--js-completer` when calling `./install.py`.
-- Rust support: install [Rust][rust-install] and add `--rust-completer` when
-  calling `./install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
-
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, and `cargo` tools are installed and in your `PATH`, then simply run:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
+#### Final notes
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -620,18 +421,21 @@ process.
     is the C++ engine that YCM uses to get fast completions.
 
     You will need to have `cmake` installed in order to generate the required
-    makefiles. Linux users can install cmake with their package manager (`sudo
-    apt-get install cmake` for Ubuntu) whereas other users can [download and
-    install][cmake-download] cmake from its project site. Mac users can also get
-    it through [Homebrew][brew] with `brew install cmake`.
+    makefiles.
+    - Linux users can install cmake with their package manager (usually the package is just called `cmake` on most distributions).
+    - Mac OS X users can get it through [Homebrew][brew] with `brew install
+    cmake`
+    - Windows users and everyone else can can [download and install][
+    cmake-download] cmake from its project site.
 
-    On a Unix OS, you need to make sure you have Python headers installed. On a
-    Debian-like Linux distro, this would be `sudo apt-get install python-dev
-    python3-dev`. On Mac they should already be present.
-
-    On Windows, you need to download and install [Python 2 or
-    Python 3][python-win-download]. Pick the version corresponding to your Vim
-    architecture. You will also need Microsoft Visual C++ (MSVC) to build YCM.
+    In addition, you need to make sure you have Python headers installed.
+    - On Debian-like Linux distros, you'll install them with be `sudo apt-get
+    install python-dev python3-dev`.
+    - On Mac OS X, they are usually already installed.
+    - On Windows, you need to download and install [Python 2 or
+    Python 3][python-win-download].
+    
+    On windows only, you'll also need Microsoft Visual C++ (MSVC) to build YCM.
     You can obtain it by installing [Visual Studio][visual-studio-download].
     MSVC 14 (Visual Studio 2015) and 15 (2017) are officially supported.
 
@@ -651,11 +455,19 @@ process.
 
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
-    where `<generator>` is `Unix Makefiles` on Unix systems and one of the
-    following Visual Studio generators on Windows:
+    The `<generator>` is different for different OSs:
 
-    - `Visual Studio 14 Win64`
-    - `Visual Studio 15 Win64`
+    - For Linux and Mac OS X:
+
+        cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
+
+    - For 65 bit Windows with Visual Studio 14:
+
+        cmake -G "Visual Studio 14 Win64" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
+
+    - For 64 bit Windows with Visual Studio 15:
+
+        cmake -G "Visual Studio 14 Win64" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
     Remove the `Win64` part in these generators if your Vim architecture is
     32-bit.
@@ -723,7 +535,7 @@ process.
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/cregex
         cmake --build . --target _regex --config Release
 
-    where `<generator>` is the same generator used in the previous step.
+    where `<generator>` is the same generator used in the previous steps.
 
 6.  Set up support for additional languages, as desired:
 
