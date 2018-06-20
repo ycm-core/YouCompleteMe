@@ -23,6 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from future.utils import iterkeys
+import contextlib
 import vim
 import os
 import json
@@ -289,36 +290,18 @@ def SetLocationList( diagnostics ):
   SetLocationListForWindow( 0, diagnostics )
 
 
-def GetWindowNumberForBufferDiagnostics( buffer_number ):
-  """Return an appropriate window number to use for displaying diagnostics
-  associated with the buffer number supplied. Always returns a valid window
-  number or 0 meaning the current window."""
-
-  # Location lists are associated with _windows_ not _buffers_. This makes a lot
-  # of sense, but YCM associates diagnostics with _buffers_, because it is the
-  # buffer that actually gets parsed.
-  #
-  # The heuristic we use is to determine any open window for a specified buffer,
-  # and set that. If there is no such window on the current tab page, we use the
-  # current window (by passing 0 as the window number)
-
-  if buffer_number == vim.current.buffer.number:
-    return 0
-
-  window_number = GetIntValue( "bufwinnr({0})".format( buffer_number ) )
-
-  if window_number < 0:
-    return 0
-
-  return window_number
+def GetWindowsForBufferNumber( buffer_number ):
+  """Return the list of windows containing the buffer with number
+  |buffer_number| for the current tab page."""
+  return [ window for window in vim.windows
+           if window.buffer.number == buffer_number ]
 
 
-def SetLocationListForBuffer( buffer_number, diagnostics ):
-  """Populate the location list of an apppropriate window for the supplied
-  buffer number. See SetLocationListForWindow for format of diagnostics."""
-  return SetLocationListForWindow(
-    GetWindowNumberForBufferDiagnostics( buffer_number ),
-    diagnostics )
+def SetLocationListsForBuffer( buffer_number, diagnostics ):
+  """Populate location lists for all windows containing the buffer with number
+  |buffer_number|. See SetLocationListForWindow for format of diagnostics."""
+  for window in GetWindowsForBufferNumber( buffer_number ):
+    SetLocationListForWindow( window.number, diagnostics )
 
 
 def SetLocationListForWindow( window_number, diagnostics ):
@@ -1181,3 +1164,39 @@ def BuildRange( start_line, end_line ):
       }
     }
   }
+
+
+@contextlib.contextmanager
+def AutocommandEventsIgnored( events = [ 'all' ] ):
+  """Context manager to perform operations without triggering autocommand
+  events. |events| is a list of events to ignore. By default, all events are
+  ignored."""
+  old_eventignore = vim.options[ 'eventignore' ]
+  ignored_events = {
+    event for event in ToUnicode( old_eventignore ).split( ',' ) if event }
+  ignored_events.update( events )
+  vim.options[ 'eventignore' ] = ','.join( ignored_events )
+  try:
+    yield
+  finally:
+    vim.options[ 'eventignore' ] = old_eventignore
+
+
+@contextlib.contextmanager
+def CurrentWindow():
+  """Context manager to perform operations on other windows than the current one
+  without triggering autocommands related to window movement. Use the
+  SwitchWindow function to move to other windows while under the context."""
+  current_window = vim.current.window
+  with AutocommandEventsIgnored( [ 'WinEnter', 'Winleave' ] ):
+    try:
+      yield
+    finally:
+      vim.current.window = current_window
+
+
+def SwitchWindow( window ):
+  """Move to the window object |window|. This function should be called under
+  the CurrentWindow context if you are going to switch back to the original
+  window."""
+  vim.current.window = window
