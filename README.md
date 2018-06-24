@@ -165,7 +165,7 @@ and a completer that integrates with [UltiSnips][].
 Installation
 ------------
 
-### TL;DR
+### Quick Installation Guide
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
