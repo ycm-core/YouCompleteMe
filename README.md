@@ -290,8 +290,8 @@ automatically when you run `clang` for the first time, or manually by running
 
 ###### Unix
 
-For all C languages, support is enabled automatically during compilation,
-except for C# completion support for which you'll need to install
+For all C languages except for C#, support is enabled automatically during
+compilation. For C# completion support, you'll need to install
 [Mono][mono-install-linux].
 
 ###### Windows
