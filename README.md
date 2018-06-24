@@ -173,6 +173,11 @@ will notify you to recompile it. You should then rerun the install process.
 
 #### Requirements
 
+- [Compatible Vim](#compatible-vim)
+- [Build Tools](#build-tools)
+- [Python](#python)
+- [C-family completion support requirements](#c-family-completion-support-requirements)
+
 ##### Compatible Vim
 
 ###### Mac OS X
