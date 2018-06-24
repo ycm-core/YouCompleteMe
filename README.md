@@ -33,11 +33,7 @@ Contents
 
 - [Intro](#intro)
 - [Installation](#installation)
-    - [Mac OS X](#mac-os-x)
-    - [Ubuntu Linux x64](#ubuntu-linux-x64)
-    - [Fedora Linux x64](#fedora-linux-x64)
-    - [Windows](#windows)
-    - [FreeBSD/OpenBSD](#freebsdopenbsd)
+    - [Quick Installation Guide](#quick-installation-guide)
     - [Full Installation Guide](#full-installation-guide)
 - [Quick Feature Summary](#quick-feature-summary)
 - [User Guide](#user-guide)
