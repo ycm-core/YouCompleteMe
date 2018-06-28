@@ -167,6 +167,10 @@ Installation
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
 will notify you to recompile it. You should then rerun the install process.
 
+**Important note for Windows users:** we assume that you are using the
+`cmd.exe` command prompt and that you know how to add an executable to the PATH
+environment variable.
+
 #### Requirements
 
 - [Compatible Vim](#compatible-vim)
@@ -199,9 +203,6 @@ installed by running `vim --version`. If the version is too old, you may need to
 [compile Vim from source][vim-build] (don't worry, it's easy).
 
 ###### Windows
-
-**Important:** we assume that you are using the `cmd.exe` command prompt and
-that you know how to add an executable to the PATH environment variable.
 
 Make sure you have at least Vim 7.4.1578 with Python 2 or Python 3 support. You
 can check the version and which Python is supported by typing `:version` inside
