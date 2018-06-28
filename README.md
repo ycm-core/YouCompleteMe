@@ -247,20 +247,6 @@ During setup, select _Desktop development with C++_ in _Workloads_.
 
 ##### Python
 
-###### Windows
-
-[Python 2 or Python 3][python-win-download]. Be sure to pick the version
-corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim
-and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
-Additionally, the version of Python you install must match up exactly with
-the version of Python that Vim is looking for. Type `:version` and look at the
-bottom of the page at the list of compiler flags. Look for flags that look
-similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and
-`-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is
-looking for Python 2.7 and the latter indicates that Vim is looking for
-Python 3.5. You'll need one or the other installed, matching the version
-number exactly.
-
 ###### macOS
 
 _If_ you have installed a Homebrew Python, see this
@@ -275,6 +261,20 @@ different distributions. Use the proper package manager for your distribution.
 - Ubuntu: `python-dev` `python3-dev`
 - Fedora: `python-devel` `python3-devel`
 - Arch Linux: `python`
+
+###### Windows
+
+[Python 2 or Python 3][python-win-download]. Be sure to pick the version
+corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim
+and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
+Additionally, the version of Python you install must match up exactly with
+the version of Python that Vim is looking for. Type `:version` and look at the
+bottom of the page at the list of compiler flags. Look for flags that look
+similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and
+`-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is
+looking for Python 2.7 and the latter indicates that Vim is looking for
+Python 3.5. You'll need one or the other installed, matching the version
+number exactly.
 
 ##### C-family completion support requirements (macOS only)
 
