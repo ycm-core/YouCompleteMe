@@ -436,7 +436,7 @@ process.
     - On Windows, you need to download and install [Python 2 or
     Python 3][python-win-download].
 
-    On windows only, you'll also need Microsoft Visual C++ (MSVC) to build YCM.
+    On Windows only, you'll also need Microsoft Visual C++ (MSVC) to build YCM.
     You can obtain it by installing [Visual Studio][visual-studio-download].
     MSVC 14 (Visual Studio 2015) and 15 (2017) are officially supported.
 
