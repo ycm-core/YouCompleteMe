@@ -176,7 +176,7 @@ will notify you to recompile it. You should then rerun the install process.
 
 ##### Compatible Vim
 
-###### Mac OS X
+###### macOS
 
 Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
 
@@ -191,7 +191,7 @@ _If_ you have installed a Homebrew MacVim, see this
 [_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
 for details.
 
-###### Unix
+###### Linux
 
 Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Ubuntu 16.04
 and later have a Vim that's recent enough. You can see the version of Vim
@@ -221,12 +221,12 @@ You can do that by specifying [the `++enc` argument][++enc] to the `:e` command.
 
 ##### Build Tools
 
-###### Mac OS X
+###### macOS
 
 Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
 CMake installer][cmake-download].
 
-###### Unix
+###### Linux
 
 Here we'll list the packages you need to install as they are named under the
 different distributions. Use the proper package manager for your distribution.
@@ -260,13 +260,13 @@ looking for Python 2.7 and the latter indicates that Vim is looking for
 Python 3.5. You'll need one or the other installed, matching the version
 number exactly.
 
-###### Mac OS X
+###### macOS
 
 _If_ you have installed a Homebrew Python, see this
 [_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
 for details.
 
-###### Unix
+###### Linux
 
 Here we'll list the packages you need to install as they are named under the
 different distributions. Use the proper package manager for your distribution.
@@ -277,14 +277,14 @@ different distributions. Use the proper package manager for your distribution.
 
 ##### C-family completion support requirements
 
-###### Mac OS X only
+###### macOS
 
-For all C languages, completion support on Mac OS X requires the latest Xcode
+For all C languages, completion support on macOS requires the latest Xcode
 installed along with the latest Command Line Tools (they are installed
 automatically when you run `clang` for the first time, or manually by running
 `xcode-select --install`).
 
-###### Unix
+###### Linux
 
 For all C languages except for C#, support is enabled automatically during
 compilation. For C# completion support, you'll need to install
@@ -306,7 +306,7 @@ Inside the `YouCompleteMe` directory, there is a python script called
 `install.py`, it will be found on the following locations for the following
 OSs:
 
-- Mac OS X / Unix: `~/.vim/bundle/YouCompleteMe`
+- macOS / Linux: `~/.vim/bundle/YouCompleteMe`
 - Windows: `%USERPROFILE%/vimfiles/bundle/YouCompleteMe`
 
 Compiling YCM **with** semantic support for C-family languages:
@@ -355,7 +355,7 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Full Installation Guide
 
-These are the steps necessary to get YCM working on a Unix OS and on Windows.
+These are the steps necessary to get YCM working on a Linux, macOS and on Windows.
 
 **Note to Windows users:** we assume that you are running the `cmd.exe` command
 prompt and that the needed executables are in the PATH environment variable. Do
@@ -424,7 +424,7 @@ process.
     You will need to have `cmake` installed in order to generate the required
     makefiles.
     - Linux users can install cmake with their package manager (usually the package is just called `cmake` on most distributions).
-    - Mac OS X users can get it through [Homebrew][brew] with `brew install
+    - macOS users can get it through [Homebrew][brew] with `brew install
     cmake`
     - Windows users and everyone else can can [download and install][
     cmake-download] cmake from its project site.
@@ -432,7 +432,7 @@ process.
     In addition, you need to make sure you have Python headers installed.
     - On Debian-like Linux distros, you'll install them with be `sudo apt-get
     install python-dev python3-dev`.
-    - On Mac OS X, they are usually already installed.
+    - On macOS, they are usually already installed.
     - On Windows, you need to download and install [Python 2 or
     Python 3][python-win-download].
 
@@ -458,7 +458,7 @@ process.
 
     The `<generator>` is different for different OSs:
 
-    - For Linux and Mac OS X:
+    - For Linux and macOS:
 
         cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
@@ -504,7 +504,7 @@ process.
         cmake --build . --target ycm_core --config Release
 
     The `--config Release` part is specific to Windows and will be ignored on a
-    Unix OS.
+    Linux OS.
 
     For those who want to use the system version of libclang, you would pass
     `-DUSE_SYSTEM_LIBCLANG=ON` to cmake _instead of_ the
@@ -2962,7 +2962,7 @@ one) option because YCM needs the `language:<lang>` field in the tags output.
 `*.h` files as `C++`. If you have C (not C++) project, consider giving parameter
 `--langmap=c:.c.h` to ctags to see tags from `*.h` files.
 
-**NOTE:** Mac OS X comes with "plain" ctags installed by default. `brew install
+**NOTE:** macOS comes with "plain" ctags installed by default. `brew install
 ctags` will get you the Exuberant Ctags version.
 
 Also make sure that your Vim `tags` option is set correctly. See `:h 'tags'` for
@@ -3107,7 +3107,7 @@ This is caused by an issue with libclang that only affects some operating
 systems. Compiling with `clang` the binary will use the correct default header
 search paths but compiling with `libclang.so` (which YCM uses) does not.
 
-Mac OS X is normally affected, but there's a workaround in YCM for that specific
+macOS is normally affected, but there's a workaround in YCM for that specific
 OS. If you're not running that OS but still have the same problem, continue
 reading.
 
