@@ -429,9 +429,9 @@ process.
     cmake-download] cmake from its project site.
 
     In addition, you need to make sure you have Python headers installed.
-    - On Debian-like Linux distros, you'll install them with be `sudo apt-get
+    - On Debian-like Linux distros, you'll install them with `sudo apt-get
     install python-dev python3-dev`.
-    - On macOS, they are usually already installed.
+    - On macOS, they are already installed.
     - On Windows, you need to download and install [Python 2 or
     Python 3][python-win-download].
 
@@ -535,7 +535,7 @@ process.
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/cregex
         cmake --build . --target _regex --config Release
 
-    where `<generator>` is the same generator used in the previous steps.
+    where `<generator>` is the same generator used in the previous step.
 
 6.  Set up support for additional languages, as desired:
 
