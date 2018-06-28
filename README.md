@@ -425,7 +425,7 @@ process.
     - Linux users can install cmake with their package manager (usually the package is just called `cmake` on most distributions).
     - macOS users can get it through [Homebrew][brew] with `brew install
     cmake`
-    - Windows users and everyone else can can [download and install][
+    - Windows users and everyone else can [download and install][
     cmake-download] cmake from its project site.
 
     In addition, you need to make sure you have Python headers installed.
