@@ -460,19 +460,11 @@ process.
 
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
-    The `<generator>` is different for different OSs:
+    where `<generator>` is `Unix Makefiles` on Unix systems and one of the
+    following Visual Studio generators on Windows:
 
-    - For Linux and macOS:
-
-        cmake -G "Unix Makefiles" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
-
-    - For 65 bit Windows with Visual Studio 14:
-
-        cmake -G "Visual Studio 14 Win64" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
-
-    - For 64 bit Windows with Visual Studio 15:
-
-        cmake -G "Visual Studio 14 Win64" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
+    - `Visual Studio 14 Win64`
+    - `Visual Studio 15 Win64`
 
     Remove the `Win64` part in these generators if your Vim architecture is
     32-bit.
