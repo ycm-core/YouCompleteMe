@@ -76,7 +76,8 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [Clang][]-based engine that provides native semantic code
   completion for C/C++/Objective-C/Objective-C++ (from now on referred to as
   "the C-family languages"),
-- a [Jedi][]-based completion engine for Python 2 and 3 (using the [JediHTTP][] wrapper),
+- a [Jedi][]-based completion engine for Python 2 and 3 (using the [JediHTTP][]
+  wrapper),
 - an [OmniSharp][]-based completion engine for C#,
 - a combination of [Gocode][] and [Godef][] semantic engines for Go,
 - a [TSServer][]-based completion engine for TypeScript,
@@ -234,7 +235,8 @@ different distributions. Use the proper package manager for your distribution.
 
 - Ubuntu: `build-essential` `cmake`
 - Older Ubuntu (e.g. Ubuntu 14.04): `build-essential` `cmake3`
-- Arch Linux: `cmake` `base-devel` AUR: [ncurses5-compat-libs][aur-ncurses5-compat-libs] (see [#778][issue-778])
+* Arch Linux: `cmake` `base-devel` AUR: [ncurses5-compat-libs]
+  [aur-ncurses5-compat-libs] (see [#778][issue-778])
 - Fedora: `automake` `gcc` `gcc-c++` `kernel-devel` `cmake`
 
 ###### Windows
@@ -355,7 +357,8 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Full Installation Guide
 
-These are the steps necessary to get YCM working on a Linux, macOS and on Windows.
+These are the steps necessary to get YCM working on a Linux, macOS and on
+Windows.
 
 **Note to Windows users:** we assume that you are running the `cmd.exe` command
 prompt and that the needed executables are in the PATH environment variable. Do
@@ -423,11 +426,12 @@ process.
 
     You will need to have `cmake` installed in order to generate the required
     makefiles.
-    - Linux users can install cmake with their package manager (usually the package is just called `cmake` on most distributions).
+    - Linux users can install cmake with their package manager (usually the
+      package is just called `cmake` on most distributions).
     - macOS users can get it through [Homebrew][brew] with `brew install
     cmake`
     - Windows users and everyone else can [download and install][
-    cmake-download] cmake from its project site.
+      cmake-download] cmake from its project site.
 
     In addition, you need to make sure you have Python headers installed.
     - On Debian-like Linux distros, you'll install them with `sudo apt-get
@@ -1142,9 +1146,10 @@ Completion and GoTo commands work out of the box with no additional
 configuration. Those features are provided by the [jedi][] library which
 supports a variety of Python versions (2.6, 2.7, 3.2+) as long as it
 runs in the corresponding Python interpreter. By default YCM runs [jedi][] with
-the same Python interpreter used by the [ycmd server][ycmd], so if you would like to
-use a different interpreter, use the following option specifying the Python
-binary to use. For example, to provide Python 3 completion in your project, set:
+the same Python interpreter used by the [ycmd server][ycmd], so if you would
+like to use a different interpreter, use the following option specifying the
+Python binary to use. For example, to provide Python 3 completion in your
+project, set:
 
 ```viml
 let g:ycm_python_binary_path = '/usr/bin/python3'
@@ -1159,7 +1164,7 @@ let g:ycm_python_binary_path = 'python'
 ```
 
 YCM will use the first `python` executable it finds in the PATH to run
-[jedi][]. This means that if you are in a virtual environment and you start vim
+[jedi][]. This means that if you are in a virtual environment and you start Vim
 in that directory, the first `python` that YCM will find will be the one in the
 virtual environment, so [jedi][] will be able to provide completions for every
 package you have in the virtual environment.
