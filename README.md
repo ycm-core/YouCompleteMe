@@ -235,7 +235,7 @@ different distributions. Use the proper package manager for your distribution.
 - Ubuntu: `build-essential` `cmake`
 - Older Ubuntu (e.g. Ubuntu 14.04): `build-essential` `cmake3`
 - Arch Linux: `cmake` `base-devel` AUR: [ncurses5-compat-libs][aur-ncurses5-compat-libs] (see [#778][issue-778])
-* Fedora: `automake` `gcc` `gcc-c++` `kernel-devel` `cmake`
+- Fedora: `automake` `gcc` `gcc-c++` `kernel-devel` `cmake`
 
 ###### Windows
 
