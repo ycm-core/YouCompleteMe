@@ -275,14 +275,14 @@ different distributions. Use the proper package manager for your distribution.
 - Fedora: `python-devel` `python3-devel`
 * Arch Linux: `python`
 
-##### C-family completion support requirements
-
-###### macOS
+##### C-family completion support requirements (macOS only)
 
 For all C languages, completion support on macOS requires the latest Xcode
 installed along with the latest Command Line Tools (they are installed
 automatically when you run `clang` for the first time, or manually by running
 `xcode-select --install`).
+
+##### C# completion support requirements
 
 ###### Linux
 
