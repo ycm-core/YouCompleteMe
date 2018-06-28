@@ -302,18 +302,17 @@ your PATH][add-msbuild-to-path].
 Install YouCompleteMe with [Vundle][] or any other Vim plugin manager of your
 choice.
 
-Inside the `YouCompleteMe` directory, there is a python script called
-`install.py`, it will be found on the following locations for the following
-OSs:
+Navigate to the YouCompleteMe directory: 
 
-- macOS / Linux: `~/.vim/bundle/YouCompleteMe`
-- Windows: `%USERPROFILE%/vimfiles/bundle/YouCompleteMe`
+- on UNIX platforms, `cd ~/.vim/bundle/YouCompleteMe`
+- on Windows, `cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe`
 
-Compiling YCM **with** semantic support for C-family languages:
+
+Compile YCM **with** semantic support for C-family languages:
 
     python install.py --clang-completer
 
-Compiling YCM **without** semantic support for C-family languages:
+Compile YCM **without** semantic support for C-family languages:
 
     python install.py
 
