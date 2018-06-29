@@ -182,11 +182,20 @@ environment variable.
 
 ##### Compatible Vim
 
+Make sure you have at least Vim 7.4.1578 with Python 2 or Python 3 support. You
+can check the version and which Python is supported by typing `:version` inside
+Vim. Look at the features included: `+python/dyn` for Python 2 and
+`+python3/dyn` for Python 3. If the version is too old, you may need to
+[compile Vim from source][vim-build] (don't worry, it's easy).
+
+If using macOS or Windows, refer to the following additional instructions:
+
 ###### macOS
 
-Either install MacVim with Homebrew using `brew install macvim
---with-override-system-vim`. _If_ you have installed a Homebrew MacVim, see
-[this _FAQ_ entry](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
+If you'd prefer not to compile Vim from source, on macOS you can install MacVim
+with Homebrew using `brew install macvim --with-override-system-vim`. _If_ you
+have installed a Homebrew MacVim, see [this _FAQ_
+entry](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
 for details.
 
 If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
@@ -196,22 +205,12 @@ local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
     ln -s /usr/local/bin/mvim vim
 
-###### Linux
-
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Ubuntu 16.04
-and later have a Vim that's recent enough. You can see the version of Vim
-installed by running `vim --version`. If the version is too old, you may need to
-[compile Vim from source][vim-build] (don't worry, it's easy).
-
 ###### Windows
 
-Make sure you have at least Vim 7.4.1578 with Python 2 or Python 3 support. You
-can check the version and which Python is supported by typing `:version` inside
-Vim. Look at the features included: `+python/dyn` for Python 2 and
-`+python3/dyn` for Python 3. Take note of the Vim architecture, i.e. 32 or
-64-bit. It will be important when choosing the Python installer. We recommend
-using a 64-bit client. [Daily updated copies of 32-bit and 64-bit Vim with
-Python 2 and Python 3 support][vim-win-download] are available.
+Take note of your Vim architecture, i.e. 32 or 64-bit. It will be important
+when choosing the Python installer. We recommend using a 64-bit client. [Daily
+updated copies of 32-bit and 64-bit Vim with Python 2 and Python
+3 support][vim-win-download] are available.
 
 Add the line:
 
