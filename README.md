@@ -184,7 +184,10 @@ environment variable.
 
 ###### macOS
 
-Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
+Either install MacVim with Homebrew using `brew install macvim
+--with-override-system-vim`. _If_ you have installed a Homebrew MacVim, see
+[this _FAQ_ entry](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
+for details.
 
 If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
 inside the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`). To ensure it
@@ -192,10 +195,6 @@ works correctly copy the `mvim` script from the [MacVim][] download to your
 local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
 
     ln -s /usr/local/bin/mvim vim
-
-_If_ you have installed a Homebrew MacVim, see this
-[_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
-for details.
 
 ###### Linux
 
