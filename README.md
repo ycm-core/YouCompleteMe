@@ -250,7 +250,8 @@ During setup, select _Desktop development with C++_ in _Workloads_.
 
 ###### macOS
 
-_If_ you have installed a Homebrew Python, see this
+YouCompleteMe is supported using system python on macOS, so no installation is
+required. However, _If_ you have installed a Homebrew Python, see this
 [_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
 for details.
 
