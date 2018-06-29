@@ -177,7 +177,8 @@ environment variable.
 - [Compatible Vim](#compatible-vim)
 - [Build Tools](#build-tools)
 - [Python](#python)
-- [C-family completion support requirements](#c-family-completion-support-requirements)
+- [C-family completion support requirements (macOS only)](#c-family-completion-support-requirements-macos-only)
+- [C# completion support requirements](c#-completion-support-requirements)
 
 ##### Compatible Vim
 
