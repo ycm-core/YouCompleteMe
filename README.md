@@ -310,6 +310,9 @@ Navigate to the YouCompleteMe directory:
 - on UNIX platforms, `cd ~/.vim/bundle/YouCompleteMe`
 - on Windows, `cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe`
 
+If you are not using [Vundle][], remember to recursively update the submodules
+with `git submodule update --init --recursive`.
+
 When running `install.py`, follow these instructions for adding support for
 these languages:
 
