@@ -300,7 +300,7 @@ except for C# completion support for which you'll need to install
 [Mono][mono-install-windows]. Be sure that [the build utility `msbuild` is in
 your PATH][add-msbuild-to-path].
 
-#### Installation - using `install.py`
+#### Installation
 
 Install YouCompleteMe with [Vundle][] or any other Vim plugin manager of your
 choice.
