@@ -549,7 +549,7 @@ will notify you to recompile it. You should then rerun the install process.
 
 Install development tools and CMake:
 >
-  sudo dnf install automake gcc gcc-c++ kernel-devel cmake
+  sudo dnf install automake gcc gcc-c++ kernel-devel make cmake
 <
 Make sure you have Python headers installed:
 >
