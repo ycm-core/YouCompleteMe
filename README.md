@@ -256,7 +256,7 @@ required. However, _If_ you have installed a Homebrew Python, see this
 [_FAQ_](#i-have-a-homebrew-python-andor-macvim-cant-compilesigabrt-when-starting)
 for details.
 
-###### Linux
+<h6 id="python-headers-on-different-linux-distros-installation">Linux</h6>
 
 Here we'll list the packages you need to install as they are named under the
 different distributions. Use the proper package manager for your distribution.
@@ -431,7 +431,8 @@ process.
       cmake-download] cmake from its project site.
 
     In addition, you need to make sure you have Python headers installed.
-    - On Debian-like Linux distros, you'll install them with `sudo apt-get
+    - If on Linux, refer to the [quick installation instructions for python
+      headers](#python-headers-on-different-linux-distros-installation)
     install python-dev python3-dev`.
     - On macOS, they are already installed.
     - On Windows, you need to download and install [Python 2 or
