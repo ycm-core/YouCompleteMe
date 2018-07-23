@@ -998,9 +998,8 @@ documentation][compdb]. In short:
   [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) below.
 
 If no [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) is found,
-and no [`ycm_global_ycm_extra_conf`](#the-gycm_global_ycm_extra_conf-option) is
-configured, YouCompleteMe automatically tries to load a compilation database if
-one is found.
+YouCompleteMe automatically tries to load a compilation database if there is
+one.
 
 YCM looks for a file named `compile_commands.json` in the directory of the
 opened file or in any directory above it in the hierarchy (recursively); when
@@ -1027,7 +1026,7 @@ directory.
 If you don't have a compilation database, or aren't able to generate one,
 you have to tell YouCompleteMe how to compile your code some other way.
 
-Every c-family project is different. It is not possible for YCM to guess what
+Every C-family project is different. It is not possible for YCM to guess what
 compiler flags to supply for your project. Fortunately, YCM provides a mechanism
 for you to generate the flags for a particular file with _arbitrary complexity_.
 This is achieved by requiring you to provide a Python module which implements a
@@ -1036,13 +1035,17 @@ compiler flags to use to compile that file.
 
 YCM looks for a `.ycm_extra_conf.py` file in the directory of the opened file or
 in any directory above it in the hierarchy (recursively); when the file is
-found, it is loaded (only once!) as a Python module. YCM calls a `FlagsForFile`
+found, it is loaded (only once!) as a Python module. YCM calls a `Settings`
 method in that module which should provide it with the information necessary to
-compile the current file. You can also provide a path to a global
-`.ycm_extra_conf.py` file, which will be used as a fallback. To prevent the
-execution of malicious code from a file you didn't write YCM will ask you once
-per `.ycm_extra_conf.py` if it is safe to load. This can be disabled and you can
-white-/blacklist files. See the _Options_ section for more details.
+compile the current file. You can also provide a path to a global configuration
+file with the
+[`g:ycm_global_ycm_extra_conf`](#the-gycm_global_ycm_extra_conf-option) option,
+which will be used as a fallback. To prevent the execution of malicious code
+from a file you didn't write YCM will ask you once per `.ycm_extra_conf.py` if
+it is safe to load. This can be disabled and you can white-/blacklist files. See
+the [`g:ycm_confirm_extra_conf`](#the-gycm_confirm_extra_conf-option) and
+[`g:ycm_extra_conf_globlist`](#the-gycm_extra_conf_globlist-option) options
+respectively.
 
 This system was designed this way so that the user can perform any arbitrary
 sequence of operations to produce a list of compilation flags YCM should hand
@@ -1053,25 +1056,25 @@ This is so that the correct language is detected, particularly for header files.
 Common values are `-x c` for C, `-x c++` for C++, `-x objc` for Objective-C, and
 `-x cuda` for CUDA.
 
-To give you an impression, if your c++ project is trivial, and your usual
+To give you an impression, if your C++ project is trivial, and your usual
 compilation command is: `g++ -Wall -Wextra -Werror -o FILE.o FILE.cc`, then the
 following `.ycm_extra_conf.py` is enough to get semantic analysis from
 YouCompleteMe:
 
 ```python
-def FlagsForFile( filename, **kwargs ):
+def Settings( **kwargs ):
   return {
     'flags': [ '-x', 'c++', '-Wall', '-Wextra', '-Werror' ],
   }
 ```
 
-As you can see from the trivial example, YCM calls the `FlagsForFile` method,
-passing it the file name. The `**kwargs` is for advanced users and can usually
-be ignored. The `FlagsForFile` function returns a dictionary with a single
-element `'flags'`. This element is a `list` of compiler flags to pass to
-libclang for the file `filename`. That's it! This is actually enough for most
-projects, but for complex projects it is not uncommon to integrate directly with
-an existing build system using the full power of the Python language.
+As you can see from the trivial example, YCM calls the `Settings` method which
+returns a dictionary with a single element `'flags'`. This element is a `list`
+of compiler flags to pass to libclang for the current file. The absolute path of
+that file is accessible under the `filename` key of the `kwargs` dictionary.
+That's it! This is actually enough for most projects, but for complex projects
+it is not uncommon to integrate directly with an existing build system using the
+full power of the Python language.
 
 For a more elaborate example,
 [see YCM's own `.ycm_extra_conf.py`][flags_example]. You should be able to use
@@ -1920,14 +1923,14 @@ Supported in filetypes: `cs, go, java, javascript, python, rust, typescript`
 
 #### The `ClearCompilationFlagCache` subcommand
 
-YCM caches the flags it gets from the `FlagsForFile` function in your
-`ycm_extra_conf.py` file unless you return them with the `do_cache` parameter
+YCM caches the flags it gets from the `Settings` function in your
+`.ycm_extra_conf.py` file unless you return them with the `do_cache` parameter
 set to `False`. It also caches the flags extracted from the compilation
 database. The cache is in memory and is never invalidated (unless you restart
 the server with the `:YcmRestartServer` command).
 
 This command clears that cache entirely. YCM will then re-query your
-`FlagsForFile` function or your compilation database as needed in the future.
+`Settings` function or your compilation database as needed in the future.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda`
 
@@ -2471,28 +2474,28 @@ let g:ycm_seed_identifiers_with_syntax = 0
 ### The `g:ycm_extra_conf_vim_data` option
 
 If you're using semantic completion for C-family files, this option might come
-handy; it's a way of sending data from Vim to your `FlagsForFile` function in
+handy; it's a way of sending data from Vim to your `Settings` function in
 your `.ycm_extra_conf.py` file.
 
 This option is supposed to be a list of VimScript expression strings that are
 evaluated for every request to the [ycmd server][ycmd] and then passed to your
-`FlagsForFile` function as a `client_data` keyword argument.
+`Settings` function as a `client_data` keyword argument.
 
-For instance, if you set this option to `['v:version']`, your `FlagsForFile`
+For instance, if you set this option to `['v:version']`, your `Settings`
 function will be called like this:
 
 ```python
-# The '704' value is of course contingent on Vim 7.4; in 7.3 it would be '703'
-FlagsForFile(filename, client_data = {'v:version': 704})
+# The '801' value is of course contingent on Vim 8.1; in 8.0 it would be '800'
+Settings( ..., client_data = { 'v:version': 801 } )
 ```
 
 So the `client_data` parameter is a dictionary mapping Vim expression strings to
 their values at the time of the request.
 
-The correct way to define parameters for your `FlagsForFile` function:
+The correct way to define parameters for your `Settings` function:
 
 ```python
-def FlagsForFile(filename, **kwargs):
+def Settings( **kwargs ):
 ```
 
 You can then get to `client_data` with `kwargs['client_data']`.
@@ -3326,7 +3329,7 @@ reading.
 The workaround is to call `echo | clang -v -E -x c++ -` and look at the
 paths under the `#include <...> search starts here:` heading. You should take
 those paths, prepend `-isystem` to each individual path and append them all to
-the list of flags you return from your `FlagsForFile` function in your
+the list of flags you return from your `Settings` function in your
 `.ycm_extra_conf.py` file.
 
 See [issue #303][issue-303] for details.
@@ -3467,7 +3470,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [vim]: http://www.vim.org/
 [syntastic]: https://github.com/scrooloose/syntastic
 [lightline]: https://github.com/itchyny/lightline.vim
-[flags_example]: https://raw.githubusercontent.com/Valloric/ycmd/3ad0300e94edc13799e8bf7b831de8b57153c5aa/cpp/ycm/.ycm_extra_conf.py
+[flags_example]: https://raw.githubusercontent.com/Valloric/ycmd/66030cd94299114ae316796f3cad181cac8a007c/.ycm_extra_conf.py
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [subsequence]: https://en.wikipedia.org/wiki/Subsequence
 [listtoggle]: https://github.com/Valloric/ListToggle
