@@ -4,12 +4,12 @@ environment:
   COVERAGE: true
   matrix:
   - arch: 32
-    python: 36
+    python: 37
   # We only test Python 2.7 on 64 bits.
   - arch: 64
     python: 27
   - arch: 64
-    python: 36
+    python: 37
 install:
   - ci\appveyor\appveyor_install.bat
 build_script:
