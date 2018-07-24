@@ -2868,13 +2868,30 @@ let g:ycm_use_ultisnips_completer = 1
 
 ### The `g:ycm_goto_buffer_command` option
 
-Defines where `GoTo*` commands result should be opened.
-Can take one of the following values:
-`[ 'same-buffer', 'horizontal-split', 'vertical-split', 'new-tab',
-  'new-or-existing-tab' ]`
+Defines where `GoTo*` commands result should be opened. Can take one of the
+following values:
+`[ 'same-buffer', 'split', 'split-or-existing-window' ]`
 If this option is set to the `'same-buffer'` but current buffer can not
 be switched (when buffer is modified and `nohidden` option is set),
-then result will be opened in horizontal split.
+then result will be opened in a split. When the option is set to
+`'split-or-existing-window'`, if the result is already open in a window of the
+current tab page (or any tab pages with the `:tab` modifier; see below), it
+will jump to that window. Otherwise, the result will be opened in a split as if
+the option was set to `'split'`.
+
+To customize the way a new window is split, prefix the `GoTo*` command with one
+of the following modifiers: `:aboveleft`, `:belowright`, `:botright`,
+`:leftabove`, `:rightbelow`, `:topleft`, and `:vertical`. For instance, to
+split vertically to the right of the current window, run the command:
+```viml
+:rightbelow vertical YcmCompleter GoTo
+```
+
+To open in a new tab page, use the `:tab` modifier with the `'split'` or
+`'split-or-existing-window'` options e.g.:
+```viml
+:tab YcmCompleter GoTo
+```
 
 Default: `'same-buffer'`
 
