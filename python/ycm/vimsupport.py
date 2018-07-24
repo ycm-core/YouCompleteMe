@@ -33,10 +33,14 @@ from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
                          JoinLinesAsUnicode, ToBytes, ToUnicode )
 from ycmd import user_options_store
 
-BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
-                       'horizontal-split' : 'split',
-                       'vertical-split'   : 'vsplit',
-                       'new-tab'          : 'tabedit' }
+BUFFER_COMMAND_MAP = { 'same-buffer'             : 'edit',
+                       'horizontal-split'        : 'split',
+                       'horizontal-split-top'    : 'topleft split',
+                       'horizontal-split-bottom' : 'botright split',
+                       'vertical-split'          : 'vsplit',
+                       'vertical-split-left'     : 'topleft vsplit',
+                       'vertical-split-right'    : 'botright vsplit',
+                       'new-tab'                 : 'tabedit' }
 
 FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
     'The requested operation will apply changes to {0} files which are not '
