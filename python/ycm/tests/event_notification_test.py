@@ -107,7 +107,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
   def ErrorResponse( *args ):
     raise ServerError( ERROR_TEXT )
 
-  with MockArbitraryBuffer( 'javascript' ):
+  with MockArbitraryBuffer( 'some_filetype' ):
     with MockEventNotification( ErrorResponse ):
       ycm.OnFileReadyToParse()
       ok_( ycm.FileParseRequestReady() )
@@ -145,7 +145,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
   test_utils.VIM_MATCHES = []
   test_utils.VIM_SIGNS = []
 
-  with MockArbitraryBuffer( 'javascript' ):
+  with MockArbitraryBuffer( 'some_filetype' ):
     with MockEventNotification( None, False ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest()
@@ -176,7 +176,7 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
 
   with patch( 'ycm.client.base_request.BaseRequest.PostDataToHandler',
               new_callable = ExtendedMock ) as post_data_to_handler:
-    with MockArbitraryBuffer( 'javascript' ):
+    with MockArbitraryBuffer( 'some_filetype' ):
       with MockEventNotification( UnknownExtraConfResponse ):
 
         # When the user accepts the extra conf, we load it

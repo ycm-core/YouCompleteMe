@@ -40,6 +40,7 @@ class CompletionRequest( BaseRequest ):
     self._complete_done_hooks = {
       'cs': self._OnCompleteDone_Csharp,
       'java': self._OnCompleteDone_FixIt,
+      'javascript': self._OnCompleteDone_FixIt,
       'typescript': self._OnCompleteDone_FixIt,
     }
 
