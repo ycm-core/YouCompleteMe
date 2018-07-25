@@ -100,7 +100,7 @@ class GoToResponse_QuickFix_test( object ):
                       variable_exists ):
     self._request._response = completer_response
 
-    self._request.RunPostCommandActionsIfNeeded()
+    self._request.RunPostCommandActionsIfNeeded( 'aboveleft' )
 
     vim_eval.assert_has_exact_calls( [
       call( 'setqflist( {0} )'.format( json.dumps( expected_qf_list ) ) )
@@ -120,7 +120,7 @@ class Response_Detection_test( object ):
       with patch( 'vim.command' ) as vim_command:
         request = CommandRequest( [ command ] )
         request._response = response
-        request.RunPostCommandActionsIfNeeded()
+        request.RunPostCommandActionsIfNeeded( 'belowright' )
         vim_command.assert_called_with( "echo '{0}'".format( response ) )
 
     tests = [
@@ -144,7 +144,7 @@ class Response_Detection_test( object ):
           request._response = {
             'fixits': []
           }
-          request.RunPostCommandActionsIfNeeded()
+          request.RunPostCommandActionsIfNeeded( 'botright' )
 
           post_vim_message.assert_called_with(
             'No fixits found for current line', warning = False )
@@ -163,7 +163,7 @@ class Response_Detection_test( object ):
                       return_value = selection ):
             request = CommandRequest( [ command ] )
             request._response = response
-            request.RunPostCommandActionsIfNeeded()
+            request.RunPostCommandActionsIfNeeded( 'leftabove' )
 
             replace_chunks.assert_called_with( chunks, silent = silent )
             post_vim_message.assert_not_called()
@@ -222,7 +222,7 @@ class Response_Detection_test( object ):
       with patch( 'ycm.vimsupport.PostVimMessage' ) as post_vim_message:
         request = CommandRequest( [ command ] )
         request._response = { 'message': message }
-        request.RunPostCommandActionsIfNeeded()
+        request.RunPostCommandActionsIfNeeded( 'rightbelow' )
         post_vim_message.assert_called_with( message, warning = False )
 
     tests = [
@@ -243,7 +243,7 @@ class Response_Detection_test( object ):
       with patch( 'ycm.vimsupport.WriteToPreviewWindow' ) as write_to_preview:
         request = CommandRequest( [ command ] )
         request._response = { 'detailed_info': info }
-        request.RunPostCommandActionsIfNeeded()
+        request.RunPostCommandActionsIfNeeded( 'topleft' )
         write_to_preview.assert_called_with( info )
 
     tests = [
@@ -263,11 +263,12 @@ class Response_Detection_test( object ):
       with patch( 'ycm.vimsupport.JumpToLocation' ) as jump_to_location:
         request = CommandRequest( [ command ] )
         request._response = response
-        request.RunPostCommandActionsIfNeeded()
+        request.RunPostCommandActionsIfNeeded( 'rightbelow' )
         jump_to_location.assert_called_with(
             response[ 'filepath' ],
             response[ 'line_num' ],
-            response[ 'column_num' ] )
+            response[ 'column_num' ],
+            'rightbelow' )
 
     def GoToListTest( command, response ):
       # Note: the detail of these called are tested by
@@ -277,7 +278,7 @@ class Response_Detection_test( object ):
         with patch( 'ycm.vimsupport.OpenQuickFixList' ) as open_qf_list:
           request = CommandRequest( [ command ] )
           request._response = response
-          request.RunPostCommandActionsIfNeeded()
+          request.RunPostCommandActionsIfNeeded( 'tab' )
           ok_( set_qf_list.called )
           ok_( open_qf_list.called )
 
