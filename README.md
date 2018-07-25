@@ -2117,8 +2117,8 @@ let g:ycm_auto_trigger = 1
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
 turned on. The option value should be a Vim dictionary with keys being filetype
-strings (like `python`, `cpp` etc) and values being unimportant (the dictionary
-is used like a hash set, meaning that only the keys matter).
+strings (like `python`, `cpp`, etc.) and values being unimportant (the
+dictionary is used like a hash set, meaning that only the keys matter).
 
 The `*` key is special and matches all filetypes. By default, the whitelist
 contains only this `*` key.
@@ -2149,8 +2149,8 @@ let g:ycm_filetype_whitelist = { '*': 1 }
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
 turned off. The option value should be a Vim dictionary with keys being filetype
-strings (like `python`, `cpp` etc) and values being unimportant (the dictionary
-is used like a hash set, meaning that only the keys matter).
+strings (like `python`, `cpp`, etc.) and values being unimportant (the
+dictionary is used like a hash set, meaning that only the keys matter).
 
 See the `g:ycm_filetype_whitelist` option for more details on how this works.
 
@@ -2175,7 +2175,7 @@ let g:ycm_filetype_blacklist = {
 
 This option controls for which Vim filetypes (see `:h filetype`) should the YCM
 semantic completion engine be turned off. The option value should be a Vim
-dictionary with keys being filetype strings (like `python`, `cpp` etc) and
+dictionary with keys being filetype strings (like `python`, `cpp`, etc.) and
 values being unimportant (the dictionary is used like a hash set, meaning that
 only the keys matter). The listed filetypes will be ignored by the YCM semantic
 completion engine, but the identifier-based completion engine will still trigger
@@ -2192,6 +2192,31 @@ Default: `[see next line]`
 ```viml
 let g:ycm_filetype_specific_completion_to_disable = {
       \ 'gitcommit': 1
+      \}
+```
+
+### The `g:ycm_filepath_blacklist` option
+
+This option controls for which Vim filetypes (see `:h filetype`) should filepath
+completion be disabled. The option value should be a Vim dictionary with keys
+being filetype strings (like `python`, `cpp`, etc.) and values being unimportant
+(the dictionary is used like a hash set, meaning that only the keys matter).
+
+The `*` key is special and matches all filetypes. Use this key if you want to
+completely disable filepath completion:
+```viml
+let g:ycm_filepath_blacklist = { '*': 1 }
+```
+
+You can get the filetype of the current file in Vim with `:set ft?`.
+
+Default: `[see next line]`
+
+```viml
+let g:ycm_filepath_blacklist = {
+      \ 'html' : 1,
+      \ 'jsx' : 1,
+      \ 'xml' : 1,
       \}
 ```
 

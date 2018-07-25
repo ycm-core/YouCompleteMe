@@ -105,47 +105,48 @@ Contents ~
   6. The |g:ycm_filetype_whitelist| option
   7. The |g:ycm_filetype_blacklist| option
   8. The |g:ycm_filetype_specific_completion_to_disable| option
-  9. The |g:ycm_show_diagnostics_ui| option
-  10. The |g:ycm_error_symbol| option
-  11. The |g:ycm_warning_symbol| option
-  12. The |g:ycm_enable_diagnostic_signs| option
-  13. The |g:ycm_enable_diagnostic_highlighting| option
-  14. The |g:ycm_echo_current_diagnostic| option
-  15. The |g:ycm_filter_diagnostics| option
-  16. The |g:ycm_always_populate_location_list| option
-  17. The |g:ycm_open_loclist_on_ycm_diags| option
-  18. The |g:ycm_complete_in_comments| option
-  19. The |g:ycm_complete_in_strings| option
-  20. The |g:ycm_collect_identifiers_from_comments_and_strings| option
-  21. The |g:ycm_collect_identifiers_from_tags_files| option
-  22. The |g:ycm_seed_identifiers_with_syntax| option
-  23. The |g:ycm_extra_conf_vim_data| option
-  24. The |g:ycm_server_python_interpreter| option
-  25. The |g:ycm_keep_logfiles| option
-  26. The |g:ycm_log_level| option
-  27. The |g:ycm_auto_start_csharp_server| option
-  28. The |g:ycm_auto_stop_csharp_server| option
-  29. The |g:ycm_csharp_server_port| option
-  30. The |g:ycm_csharp_insert_namespace_expr| option
-  31. The |g:ycm_add_preview_to_completeopt| option
-  32. The |g:ycm_autoclose_preview_window_after_completion| option
-  33. The |g:ycm_autoclose_preview_window_after_insertion| option
-  34. The |g:ycm_max_diagnostics_to_display| option
-  35. The |g:ycm_key_list_select_completion| option
-  36. The |g:ycm_key_list_previous_completion| option
-  37. The |g:ycm_key_list_stop_completion| option
-  38. The |g:ycm_key_invoke_completion| option
-  39. The |g:ycm_key_detailed_diagnostics| option
-  40. The |g:ycm_global_ycm_extra_conf| option
-  41. The |g:ycm_confirm_extra_conf| option
-  42. The |g:ycm_extra_conf_globlist| option
-  43. The |g:ycm_filepath_completion_use_working_dir| option
-  44. The |g:ycm_semantic_triggers| option
-  45. The |g:ycm_cache_omnifunc| option
-  46. The |g:ycm_use_ultisnips_completer| option
-  47. The |g:ycm_goto_buffer_command| option
-  48. The |g:ycm_disable_for_files_larger_than_kb| option
-  49. The |g:ycm_python_binary_path| option
+  9. The |g:ycm_filepath_blacklist| option
+  10. The |g:ycm_show_diagnostics_ui| option
+  11. The |g:ycm_error_symbol| option
+  12. The |g:ycm_warning_symbol| option
+  13. The |g:ycm_enable_diagnostic_signs| option
+  14. The |g:ycm_enable_diagnostic_highlighting| option
+  15. The |g:ycm_echo_current_diagnostic| option
+  16. The |g:ycm_filter_diagnostics| option
+  17. The |g:ycm_always_populate_location_list| option
+  18. The |g:ycm_open_loclist_on_ycm_diags| option
+  19. The |g:ycm_complete_in_comments| option
+  20. The |g:ycm_complete_in_strings| option
+  21. The |g:ycm_collect_identifiers_from_comments_and_strings| option
+  22. The |g:ycm_collect_identifiers_from_tags_files| option
+  23. The |g:ycm_seed_identifiers_with_syntax| option
+  24. The |g:ycm_extra_conf_vim_data| option
+  25. The |g:ycm_server_python_interpreter| option
+  26. The |g:ycm_keep_logfiles| option
+  27. The |g:ycm_log_level| option
+  28. The |g:ycm_auto_start_csharp_server| option
+  29. The |g:ycm_auto_stop_csharp_server| option
+  30. The |g:ycm_csharp_server_port| option
+  31. The |g:ycm_csharp_insert_namespace_expr| option
+  32. The |g:ycm_add_preview_to_completeopt| option
+  33. The |g:ycm_autoclose_preview_window_after_completion| option
+  34. The |g:ycm_autoclose_preview_window_after_insertion| option
+  35. The |g:ycm_max_diagnostics_to_display| option
+  36. The |g:ycm_key_list_select_completion| option
+  37. The |g:ycm_key_list_previous_completion| option
+  38. The |g:ycm_key_list_stop_completion| option
+  39. The |g:ycm_key_invoke_completion| option
+  40. The |g:ycm_key_detailed_diagnostics| option
+  41. The |g:ycm_global_ycm_extra_conf| option
+  42. The |g:ycm_confirm_extra_conf| option
+  43. The |g:ycm_extra_conf_globlist| option
+  44. The |g:ycm_filepath_completion_use_working_dir| option
+  45. The |g:ycm_semantic_triggers| option
+  46. The |g:ycm_cache_omnifunc| option
+  47. The |g:ycm_use_ultisnips_completer| option
+  48. The |g:ycm_goto_buffer_command| option
+  49. The |g:ycm_disable_for_files_larger_than_kb| option
+  50. The |g:ycm_python_binary_path| option
  13. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant|
   2. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
@@ -2402,8 +2403,8 @@ The *g:ycm_filetype_whitelist* option
 
 This option controls for which Vim filetypes (see ':h filetype') should YCM be
 turned on. The option value should be a Vim dictionary with keys being filetype
-strings (like 'python', 'cpp' etc) and values being unimportant (the dictionary
-is used like a hash set, meaning that only the keys matter).
+strings (like 'python', 'cpp', etc.) and values being unimportant (the
+dictionary is used like a hash set, meaning that only the keys matter).
 
 The '*' key is special and matches all filetypes. By default, the whitelist
 contains only this '*' key.
@@ -2433,7 +2434,7 @@ The *g:ycm_filetype_blacklist* option
 
 This option controls for which Vim filetypes (see ':h filetype') should YCM be
 turned off. The option value should be a Vim dictionary with keys being
-filetype strings (like 'python', 'cpp' etc) and values being unimportant (the
+filetype strings (like 'python', 'cpp', etc.) and values being unimportant (the
 dictionary is used like a hash set, meaning that only the keys matter).
 
 See the |g:ycm_filetype_whitelist| option for more details on how this works.
@@ -2458,7 +2459,7 @@ The *g:ycm_filetype_specific_completion_to_disable* option
 
 This option controls for which Vim filetypes (see ':h filetype') should the YCM
 semantic completion engine be turned off. The option value should be a Vim
-dictionary with keys being filetype strings (like 'python', 'cpp' etc) and
+dictionary with keys being filetype strings (like 'python', 'cpp', etc.) and
 values being unimportant (the dictionary is used like a hash set, meaning that
 only the keys matter). The listed filetypes will be ignored by the YCM semantic
 completion engine, but the identifier-based completion engine will still
@@ -2474,6 +2475,30 @@ Default: '[see next line]'
 >
   let g:ycm_filetype_specific_completion_to_disable = {
         \ 'gitcommit': 1
+        \}
+<
+-------------------------------------------------------------------------------
+The *g:ycm_filepath_blacklist* option
+
+This option controls for which Vim filetypes (see ':h filetype') should
+filepath completion be disabled. The option value should be a Vim dictionary
+with keys being filetype strings (like 'python', 'cpp', etc.) and values being
+unimportant (the dictionary is used like a hash set, meaning that only the keys
+matter).
+
+The '*' key is special and matches all filetypes. Use this key if you want to
+completely disable filepath completion:
+>
+  let g:ycm_filepath_blacklist = { '*': 1 }
+<
+You can get the filetype of the current file in Vim with ':set ft?'.
+
+Default: '[see next line]'
+>
+  let g:ycm_filepath_blacklist = {
+        \ 'html' : 1,
+        \ 'jsx' : 1,
+        \ 'xml' : 1,
         \}
 <
 -------------------------------------------------------------------------------
