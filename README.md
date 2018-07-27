@@ -183,7 +183,7 @@ Install YouCompleteMe with [Vundle][].
   
 <details><summary>Vundle's README.md instructions</summary>
 <p>
-    1. Introduction:
+1. Introduction:
 
    Installation requires [Git] and triggers [`git clone`] for each configured repository to `~/.vim/bundle/` by default.
    Curl is required for search.
@@ -255,13 +255,8 @@ Install YouCompleteMe with [Vundle][].
    Launch `vim` and run `:PluginInstall`
 
    To install from command line: `vim +PluginInstall +qall`  
-   
-   
-</p>  
-
-  
+</p>
 </details>  
-   
   
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
