@@ -123,7 +123,14 @@ class OmniCompleter( Completer ):
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      return list( filter( bool, items ) )
+      # Vim allows each item of the list to be either a string or a dictionary
+      # but ycmd only supports lists where items are all strings or all
+      # dictionaries. Convert all strings into dictionaries.
+      for index, item in enumerate( items ):
+        if not isinstance( item, dict ):
+          items[ index ] = { 'word': item }
+
+      return items
 
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
