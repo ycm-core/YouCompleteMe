@@ -123,7 +123,10 @@ class OmniCompleter( Completer ):
       if not hasattr( items, '__iter__' ):
         raise TypeError( OMNIFUNC_NOT_LIST )
 
-      return list( filter( bool, items ) )
+      # Vim allows each item of the list to be either a string or a dictionary
+      # but ycmd only supports lists where items are all strings or all
+      # dictionaries. Convert all strings into dictionaries.
+      return _ConvertCompletionItemsToDictionaries( items )
 
     except ( TypeError, ValueError, vim.error ) as error:
       vimsupport.PostVimMessage(
@@ -144,3 +147,16 @@ class OmniCompleter( Completer ):
     response = BaseRequest().PostDataToHandler( request_data,
                                                 'filter_and_sort_candidates' )
     return response if response is not None else []
+
+
+def _ConvertCompletionItemsToDictionaries( items ):
+  candidates = []
+  for item in items:
+    if not item:
+      continue
+
+    if not isinstance( item, dict ):
+      item = { 'word': item }
+
+    candidates.append( item )
+  return candidates
