@@ -27,9 +27,9 @@ endfunction
 if exists( "g:loaded_youcompleteme" )
   call s:restore_cpo()
   finish
-elseif v:version < 704 || (v:version == 704 && !has( 'patch1578' ))
+elseif v:version < 704 || (v:version == 704 && !has( 'patch1898' ))
   echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.1578+." |
+        \ echomsg "YouCompleteMe unavailable: requires Vim 7.4.1898+." |
         \ echohl None
   if v:version == 704 && has( 'patch8056' )
     " Very very special case for users of the default Vim on macOS. For some
@@ -40,7 +40,7 @@ elseif v:version < 704 || (v:version == 704 && !has( 'patch1578' ))
     echohl WarningMsg
           \ | echomsg
           \ "Info: You appear to be running the default system Vim on macOS. "
-          \ . "It reports as patch 8056, but it is really older than 1578. "
+          \ . "It reports as patch 8056, but it is really older than 1898. "
           \ . "Please consider MacVim, homebrew Vim or a self-built Vim that "
           \ . "satisfies the minimum requirement."
           \ | echohl None
