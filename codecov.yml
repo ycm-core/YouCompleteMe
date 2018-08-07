@@ -13,6 +13,10 @@ coverage:
     patch: true
     changes: true
 
+  # We don't want statistics for the tests themselves.
+  ignore:
+  - .*/tests/.*
+
 comment:
   layout: "header, diff, changes, uncovered"
   behavior: default  # update if exists else create new
