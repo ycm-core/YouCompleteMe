@@ -245,7 +245,7 @@ YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Ubuntu 16.04
+Make sure you have Vim 7.4.1898 with Python 2 or Python 3 support. Ubuntu 18.04
 and later have a Vim that's recent enough. You can see the version of Vim
 installed by running `vim --version`. If the version is too old, you may need to
 [compile Vim from source][vim-build] (don't worry, it's easy).
@@ -259,39 +259,39 @@ process.
 
 Install development tools and CMake:
 
-    sudo apt-get install build-essential cmake
+    sudo apt install build-essential cmake
 
 **Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation
 issues with `cmake`. Therefore, install the following instead:
 
-    sudo apt-get install build-essential cmake3
+    sudo apt install build-essential cmake3
 
 Make sure you have Python headers installed:
 
-    sudo apt-get install python-dev python3-dev
+    sudo apt install python3-dev
 
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
+    python3 install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
+    python3 install.py
 
 The following additional language support options are available:
 
 - C# support: install [Mono][mono-install-ubuntu] and add `--cs-completer`
-  when calling `./install.py`.
+  when calling `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
+  `install.py`.
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
   install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
-  calling `./install.py`.
+  calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
+  `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -299,7 +299,7 @@ install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
+    python3 install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -317,7 +317,7 @@ YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Fedora 21 and
+Make sure you have Vim 7.4.1898 with Python 2 or Python 3 support. Fedora 27 and
 later have a Vim that's recent enough. You can see the version of Vim installed
 by running `vim --version`. If the version is too old, you may need to [compile
 Vim from source][vim-build] (don't worry, it's easy).
@@ -387,7 +387,7 @@ guide](#full-installation-guide).
 **Important:** we assume that you are using the `cmd.exe` command prompt and
 that you know how to add an executable to the PATH environment variable.
 
-Make sure you have at least Vim 7.4.1578 with Python 2 or Python 3 support. You
+Make sure you have at least Vim 7.4.1898 with Python 2 or Python 3 support. You
 can check the version and which Python is supported by typing `:version` inside
 Vim. Look at the features included: `+python/dyn` for Python 2 and
 `+python3/dyn` for Python 3. Take note of the Vim architecture, i.e. 32 or
@@ -479,7 +479,7 @@ guide](#full-installation-guide).
 
 **NOTE:** OpenBSD / FreeBSD are not officially supported platforms by YCM.
 
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support.
+Make sure you have Vim 7.4.1898 with Python 2 or Python 3 support.
 
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
 Vim installed by running `vim --version`.
@@ -558,7 +558,7 @@ process.
 
 **Please follow the instructions carefully. Read EVERY WORD.**
 
-1.  **Ensure that your version of Vim is _at least_ 7.4.1578 _and_ that it has
+1.  **Ensure that your version of Vim is _at least_ 7.4.1898 _and_ that it has
     support for Python 2 or Python 3 scripting**.
 
     Inside Vim, type `:version`. Look at the first two to three lines of output;
@@ -570,7 +570,7 @@ process.
     If your version of Vim is not recent enough, you may need to [compile Vim
     from source][vim-build] (don't worry, it's easy).
 
-    After you have made sure that you have Vim 7.4.1578+, type the following in
+    After you have made sure that you have Vim 7.4.1898+, type the following in
     Vim: `:echo has('python') || has('python3')`. The output should be 1. If
     it's 0, then get a version of Vim with Python support.
 
@@ -3157,8 +3157,8 @@ current file and simple prefix-based filtering.
 
 ### Why does YCM demand such a recent version of Vim?
 
-YCM needs a version of Vim with the timers feature to achieve full
-asynchronicity. This feature is available since Vim 7.4.1578.
+YCM needs a version of Vim that support command modifiers (see `h <mods>`). This
+feature is available since Vim 7.4.1898.
 
 ### Nasty bugs happen if I have the `vim-autoclose` plugin installed
 
