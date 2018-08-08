@@ -3335,6 +3335,11 @@ and therefore is not supported. The recommended way to solve this is to run
 If you want completion in Anaconda projects, set
 `g:ycm_python_binary_path` to point to the full path of your Anaconda python.
 
+### Automatic import insertion after selecting a completion breaks undo
+
+This is a Vim bug fixed in version 8.1.0256. Update your Vim to this version or
+later.
+
 Contributor Code of Conduct
 ---------------------------
 
