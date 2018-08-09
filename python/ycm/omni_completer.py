@@ -79,17 +79,18 @@ class OmniCompleter( Completer ):
       return []
 
     try:
-      return_value = vimsupport.GetIntValue( self._omnifunc + '(1,"")' )
-      if return_value < 0:
-        # FIXME: Technically, if the return is -1 we should raise an error
+      start_column = vimsupport.GetIntValue( self._omnifunc + '(1,"")' )
+      if start_column < 0:
+        # FIXME: Technically, if the returned value is -1 we should raise an
+        # error.
         return []
 
       # Use the start column calculated by the omnifunc, rather than our own
       # interpretation. This is important for certain languages where our
       # identifier detection is either incorrect or not compatible with the
       # behaviour of the omnifunc. Note: do this before calling the omnifunc
-      # because it affects the value returned by 'query'
-      request_data[ 'start_column' ] = return_value + 1
+      # because it affects the value returned by 'query'.
+      request_data[ 'start_column' ] = start_column + 1
 
       # Calling directly the omnifunc may move the cursor position. This is the
       # case with the default Vim omnifunc for C-family languages
@@ -98,6 +99,12 @@ class OmniCompleter( Completer ):
       # doesn't when called through the omni completion mapping (CTRL-X CTRL-O).
       # So, we restore the cursor position after calling the omnifunc.
       line, column = vimsupport.CurrentLineAndColumn()
+
+      # Vim internally moves the cursor to the start column before calling again
+      # the omnifunc. Some omnifuncs like the one defined by the
+      # LanguageClient-neovim plugin depend on this behavior to compute the list
+      # of candidates.
+      vimsupport.SetCurrentLineAndColumn( line, start_column )
 
       omnifunc_call = [ self._omnifunc,
                         "(0,'",
