@@ -78,6 +78,14 @@ class OmniCompleter( Completer ):
     if not self._omnifunc:
       return []
 
+    # Calling directly the omnifunc may move the cursor position. This is the
+    # case with the default Vim omnifunc for C-family languages
+    # (ccomplete#Complete) which calls searchdecl to find a declaration. This
+    # function is supposed to move the cursor to the found declaration but it
+    # doesn't when called through the omni completion mapping (CTRL-X CTRL-O).
+    # So, we restore the cursor position after the omnifunc calls.
+    line, column = vimsupport.CurrentLineAndColumn()
+
     try:
       return_value = vimsupport.GetIntValue( self._omnifunc + '(1,"")' )
       if return_value < 0:
@@ -91,21 +99,11 @@ class OmniCompleter( Completer ):
       # because it affects the value returned by 'query'
       request_data[ 'start_column' ] = return_value + 1
 
-      # Calling directly the omnifunc may move the cursor position. This is the
-      # case with the default Vim omnifunc for C-family languages
-      # (ccomplete#Complete) which calls searchdecl to find a declaration. This
-      # function is supposed to move the cursor to the found declaration but it
-      # doesn't when called through the omni completion mapping (CTRL-X CTRL-O).
-      # So, we restore the cursor position after calling the omnifunc.
-      line, column = vimsupport.CurrentLineAndColumn()
-
       omnifunc_call = [ self._omnifunc,
                         "(0,'",
                         vimsupport.EscapeForVim( request_data[ 'query' ] ),
                         "')" ]
       items = vim.eval( ''.join( omnifunc_call ) )
-
-      vimsupport.SetCurrentLineAndColumn( line, column )
 
       if isinstance( items, dict ) and 'words' in items:
         items = items[ 'words' ]
@@ -119,6 +117,9 @@ class OmniCompleter( Completer ):
       vimsupport.PostVimMessage(
         OMNIFUNC_RETURNED_BAD_VALUE + ' ' + str( error ) )
       return []
+
+    finally:
+      vimsupport.SetCurrentLineAndColumn( line, column )
 
 
   def FilterAndSortCandidatesInner( self, candidates, sort_property, query ):

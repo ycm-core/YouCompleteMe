@@ -622,9 +622,9 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
   # This omnifunc moves the cursor to the test definition like
   # ccomplete#Complete would.
   def Omnifunc( findstart, base ):
+    vimsupport.SetCurrentLineAndColumn( 0, 0 )
     if findstart:
       return 5
-    vimsupport.SetCurrentLineAndColumn( 0, 0 )
     return [ 'length' ]
 
   current_buffer = VimBuffer( 'buffer',
