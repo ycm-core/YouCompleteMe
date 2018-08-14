@@ -26,8 +26,8 @@ from builtins import *  # noqa
 
 from ycm.tests import PathToTestFile
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
-                                   MockVimBuffers, MockVimModule, VimBuffer,
-                                   VimError )
+                                   MockVimBuffers, MockVimModule, Version,
+                                   VimBuffer, VimError )
 MockVimModule()
 
 from ycm import vimsupport
@@ -1879,3 +1879,12 @@ def JumpToLocation_DifferentFile_NewOrExistingTab_AlreadyOpened_test(
         call( 'normal! m\'' ),
         call( 'normal! zz' )
       ] )
+
+
+@patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 7, 4, 1578 ) )
+def VimVersionAtLeast_test():
+  assert_that( vimsupport.VimVersionAtLeast( '7.3.414' ) )
+  assert_that( vimsupport.VimVersionAtLeast( '7.4.1578' ) )
+  assert_that( not vimsupport.VimVersionAtLeast( '7.4.1579' ) )
+  assert_that( not vimsupport.VimVersionAtLeast( '7.4.1898' ) )
+  assert_that( not vimsupport.VimVersionAtLeast( '8.1.278' ) )
