@@ -22,7 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from future.utils import iteritems, PY2
 from mock import DEFAULT, MagicMock, patch
 from hamcrest import assert_that, equal_to
@@ -60,6 +60,7 @@ REDIR_START_REGEX = re.compile( '^redir => (?P<variable>[\w:]+)$' )
 REDIR_END_REGEX = re.compile( '^redir END$' )
 EXISTS_REGEX = re.compile( '^exists\( \'(?P<option>[\w:]+)\' \)$' )
 LET_REGEX = re.compile( '^let (?P<option>[\w:]+) = (?P<value>.*)$' )
+HAS_PATCH_REGEX = re.compile( '^has\( \'patch(?P<patch>\d+)\' \)$' )
 
 # One-and only instance of mocked Vim object. The first 'import vim' that is
 # executed binds the vim module to the instance of MagicMock that is created,
@@ -83,11 +84,23 @@ VIM_OPTIONS = {
   '&expandtab': 1
 }
 
+# This variable must be patched with a Version object for tests depending on the
+# Vim version. Example:
+#
+#   @patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 7, 4, 1578 ) )
+#   def ThisTestDependsOnTheVimVersion_test():
+#     ...
+#
+VIM_VERSION = None
+
 REDIR = {
   'status': False,
   'variable': '',
   'output': ''
 }
+
+
+Version = namedtuple( 'Version', [ 'major', 'minor', 'patch' ] )
 
 
 @contextlib.contextmanager
@@ -225,6 +238,21 @@ def _MockVimMatchEval( value ):
   return None
 
 
+def _MockVimVersionEval( value ):
+  match = HAS_PATCH_REGEX.search( value )
+  if match:
+    if not isinstance( VIM_VERSION, Version ):
+      raise RuntimeError( 'Vim version is not set.' )
+    return VIM_VERSION.patch >= int( match.group( 'patch' ) )
+
+  if value == 'v:version':
+    if not isinstance( VIM_VERSION, Version ):
+      raise RuntimeError( 'Vim version is not set.' )
+    return VIM_VERSION.major * 100 + VIM_VERSION.minor
+
+  return None
+
+
 def _MockVimEval( value ):
   result = _MockVimOptionsEval( value )
   if result is not None:
@@ -239,6 +267,10 @@ def _MockVimEval( value ):
     return result
 
   result = _MockVimMatchEval( value )
+  if result is not None:
+    return result
+
+  result = _MockVimVersionEval( value )
   if result is not None:
     return result
 

@@ -844,12 +844,21 @@ function! s:SetUpCommands()
   command! YcmDebugInfo call s:DebugInfo()
   command! -nargs=* -complete=custom,youcompleteme#LogsComplete
         \ YcmToggleLogs call s:ToggleLogs(<f-args>)
-  command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range
-        \ YcmCompleter call s:CompleterCommand(<q-mods>,
-        \                                      <count>,
-        \                                      <line1>,
-        \                                      <line2>,
-        \                                      <f-args>)
+  if s:Pyeval( 'vimsupport.VimVersionAtLeast( "7.4.1898" )' )
+    command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range
+          \ YcmCompleter call s:CompleterCommand(<q-mods>,
+          \                                      <count>,
+          \                                      <line1>,
+          \                                      <line2>,
+          \                                      <f-args>)
+  else
+    command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range
+          \ YcmCompleter call s:CompleterCommand('',
+          \                                      <count>,
+          \                                      <line1>,
+          \                                      <line2>,
+          \                                      <f-args>)
+  endif
   command! YcmDiags call s:ShowDiagnostics()
   command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()

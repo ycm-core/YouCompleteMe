@@ -1228,3 +1228,16 @@ def SwitchWindow( window ):
   the CurrentWindow context if you are going to switch back to the original
   window."""
   vim.current.window = window
+
+
+# Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '8.1.278'
+def VimVersionAtLeast( version_string ):
+  major, minor, patch = ( int( x ) for x in version_string.split( '.' ) )
+
+  # For Vim 8.1.278, v:version is '801'
+  actual_major_and_minor = GetIntValue( 'v:version' )
+  matching_major_and_minor = major * 100 + minor
+  if actual_major_and_minor != matching_major_and_minor:
+    return actual_major_and_minor > matching_major_and_minor
+
+  return GetBoolValue( "has( 'patch{0}' )".format( patch ) )
