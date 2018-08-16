@@ -88,10 +88,15 @@ class OmniCompleter( Completer ):
 
     try:
       start_column = vimsupport.GetIntValue( self._omnifunc + '(1,"")' )
-      if start_column < 0:
-        # FIXME: Technically, if the returned value is -1 we should raise an
-        # error.
+
+      # Vim only stops completion if the value returned by the omnifunc is -3 or
+      # -2. In other cases, if the value is negative or greater than the current
+      # column, the start column is set to the current column; otherwise, the
+      # value is used as the start column.
+      if start_column in ( -3, -2 ):
         return []
+      if start_column < 0 or start_column > column:
+        start_column = column
 
       # Use the start column calculated by the omnifunc, rather than our own
       # interpretation. This is important for certain languages where our
