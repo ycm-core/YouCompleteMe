@@ -23,7 +23,6 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 import logging
-from future.utils import iteritems
 from ycmd.utils import ToUnicode
 from ycm.client.base_request import ( BaseRequest, DisplayServerException,
                                       MakeServerException )
@@ -38,12 +37,6 @@ class CompletionRequest( BaseRequest ):
     super( CompletionRequest, self ).__init__()
     self.request_data = request_data
     self._response_future = None
-    self._complete_done_hooks = {
-      'cs': self._OnCompleteDone_Csharp,
-      'java': self._OnCompleteDone_FixIt,
-      'javascript': self._OnCompleteDone_FixIt,
-      'typescript': self._OnCompleteDone_FixIt,
-    }
 
 
   def Start( self ):
@@ -88,16 +81,10 @@ class CompletionRequest( BaseRequest ):
     if not self.Done():
       return
 
-    complete_done_actions = self._GetCompleteDoneHooks()
-    for action in complete_done_actions:
-      action()
-
-
-  def _GetCompleteDoneHooks( self ):
-    filetypes = vimsupport.CurrentFiletypes()
-    for key, value in iteritems( self._complete_done_hooks ):
-      if key in filetypes:
-        yield value
+    if 'cs' in vimsupport.CurrentFiletypes():
+      self._OnCompleteDone_Csharp()
+    else:
+      self._OnCompleteDone_FixIt()
 
 
   def _GetCompletionsUserMayHaveCompleted( self ):

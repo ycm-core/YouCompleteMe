@@ -920,7 +920,7 @@ General (all languages) ~
                                              *youcompleteme-c-family-languages*
 C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 
-- Semantic auto-completion
+- Semantic auto-completion with automatic fixes
 - Real-time diagnostic display
 - Go to include/declaration/definition (|GoTo|, etc.)
 - Semantic type information for identifiers (|GetType|)
@@ -3630,7 +3630,7 @@ http://valloric.github.io/YouCompleteMe/.
 The author's homepage is http://val.markovic.io.
 
 Please do **NOT** go to #vim on freenode for support. Please contact the
-YouCompleteMe maintainers directly using the contact details below.
+YouCompleteMe maintainers directly using the contact details.
 
 ===============================================================================
                                                         *youcompleteme-license*
