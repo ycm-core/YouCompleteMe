@@ -696,7 +696,7 @@ Quick Feature Summary
 
 ### C-family languages (C, C++, Objective C, Objective C++, CUDA)
 
-* Semantic auto-completion
+* Semantic auto-completion with automatic fixes
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
 * Semantic type information for identifiers (`GetType`)

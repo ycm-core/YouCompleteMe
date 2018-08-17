@@ -39,6 +39,11 @@ class CompletionRequest( BaseRequest ):
     self.request_data = request_data
     self._response_future = None
     self._complete_done_hooks = {
+      'c': self._OnCompleteDone_FixIt,
+      'cpp': self._OnCompleteDone_FixIt,
+      'objc': self._OnCompleteDone_FixIt,
+      'objcpp': self._OnCompleteDone_FixIt,
+      'cuda': self._OnCompleteDone_FixIt,
       'cs': self._OnCompleteDone_Csharp,
       'java': self._OnCompleteDone_FixIt,
       'javascript': self._OnCompleteDone_FixIt,
