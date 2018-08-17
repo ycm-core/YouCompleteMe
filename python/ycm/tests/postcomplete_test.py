@@ -28,6 +28,7 @@ from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 import contextlib
+from hamcrest import assert_that, contains, empty
 from mock import MagicMock, DEFAULT, patch
 from nose.tools import eq_, ok_
 
@@ -130,31 +131,36 @@ def _SetUpCompleteDone( completions ):
 
 
 @patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'cs' ] )
-def GetCompleteDoneHooks_ResultOnCsharp_test( *args ):
+def GetCompleteDoneHooks_CsharpAction_test( *args ):
   request = CompletionRequest( None )
-  result = list( request._GetCompleteDoneHooks() )
-  eq_( result, [ request._OnCompleteDone_Csharp ] )
+  result = request._GetCompleteDoneHooks()
+  assert_that( result, contains( request._OnCompleteDone_Csharp ) )
 
 
-@patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'java' ] )
-def GetCompleteDoneHooks_ResultOnJava_test( *args ):
-  request = CompletionRequest( None )
-  result = list( request._GetCompleteDoneHooks() )
-  eq_( result, [ request._OnCompleteDone_FixIt ] )
+def GetCompleteDoneHooks_FixItAction_test( *args ):
+  def ExpectFixItAction( filetype ):
+    with patch( 'ycm.vimsupport.CurrentFiletypes',
+                return_value = [ filetype ] ):
+      request = CompletionRequest( None )
+      result = request._GetCompleteDoneHooks()
+      assert_that( result, contains( request._OnCompleteDone_FixIt ) )
 
-
-@patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'typescript' ] )
-def GetCompleteDoneHooks_ResultOnTypeScript_test( *args ):
-  request = CompletionRequest( None )
-  result = list( request._GetCompleteDoneHooks() )
-  eq_( result, [ request._OnCompleteDone_FixIt ] )
+  for filetype in [ 'c',
+                    'cpp',
+                    'objc',
+                    'objcpp',
+                    'cuda',
+                    'java',
+                    'javascript',
+                    'typescript' ]:
+    yield ExpectFixItAction, filetype
 
 
 @patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'ycmtest' ] )
-def GetCompleteDoneHooks_EmptyOnOtherFiletype_test( *args ):
+def GetCompleteDoneHooks_NoActionForUnsupportedFiletype_test( *args ):
   request = CompletionRequest( None )
-  result = request._GetCompleteDoneHooks()
-  eq_( len( list( result ) ), 0 )
+  result = list( request._GetCompleteDoneHooks() )
+  assert_that( result, empty() )
 
 
 @patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'ycmtest' ] )
