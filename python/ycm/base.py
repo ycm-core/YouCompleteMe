@@ -111,22 +111,16 @@ def AdjustCandidateInsertionText( candidates ):
 
   new_candidates = []
   for candidate in candidates:
-    if isinstance( candidate, dict ):
-      new_candidate = candidate.copy()
+    new_candidate = candidate.copy()
 
-      if 'abbr' not in new_candidate:
-        new_candidate[ 'abbr' ] = new_candidate[ 'word' ]
+    if 'abbr' not in new_candidate:
+      new_candidate[ 'abbr' ] = new_candidate[ 'word' ]
 
-      new_candidate[ 'word' ] = NewCandidateInsertionText(
-        new_candidate[ 'word' ],
-        text_after_cursor )
+    new_candidate[ 'word' ] = NewCandidateInsertionText(
+      new_candidate[ 'word' ],
+      text_after_cursor )
 
-      new_candidates.append( new_candidate )
-
-    elif isinstance( candidate, str ) or isinstance( candidate, bytes ):
-      new_candidates.append(
-        { 'abbr': candidate,
-          'word': NewCandidateInsertionText( candidate, text_after_cursor ) } )
+    new_candidates.append( new_candidate )
   return new_candidates
 
 
