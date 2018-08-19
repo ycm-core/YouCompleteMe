@@ -3098,8 +3098,8 @@ Default: '1'
 The *g:ycm_goto_buffer_command* option
 
 Defines where 'GoTo*' commands result should be opened. Can take one of the
-following values: "[ 'same-buffer', 'split', 'split-or-existing-window' ]" If
-this option is set to the "'same-buffer'" but current buffer can not be
+following values: "'same-buffer'", "'split'", or "'split-or-existing-window'".
+If this option is set to the "'same-buffer'" but current buffer can not be
 switched (when buffer is modified and 'nohidden' option is set), then result
 will be opened in a split. When the option is set to "'split-or-existing-
 window'", if the result is already open in a window of the current tab page (or
@@ -3119,6 +3119,10 @@ To open in a new tab page, use the ':tab' modifier with the "'split'" or
 >
   :tab YcmCompleter GoTo
 <
+**NOTE:** command modifiers were added in Vim 7.4.1898. If you are using an
+older version, you can still configure this by setting the option to one of the
+deprecated values: "'vertical-split'", "'new-tab'", or "'new-or-existing-tab'".
+
 Default: "'same-buffer'"
 >
   let g:ycm_goto_buffer_command = 'same-buffer'
