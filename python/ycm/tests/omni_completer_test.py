@@ -649,6 +649,41 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
     )
 
 
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
+def OmniCompleter_GetCompletions_MoveCursorPositionAtStartColumn_test( ycm ):
+  # This omnifunc relies on the cursor being moved at the start column when
+  # called the second time like LanguageClient#complete from the
+  # LanguageClient-neovim plugin.
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    if vimsupport.CurrentColumn() == 5:
+      return [ 'length' ]
+    return []
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'String test',
+                                           '',
+                                           'test.le' ],
+                              filetype = FILETYPE,
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 3, 7 ) ):
+    ycm.SendCompletionRequest()
+    assert_that(
+      vimsupport.CurrentLineAndColumn(),
+      contains( 2, 7 )
+    )
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [ 'length' ] ),
+        'completion_start_column': 6
+      } )
+    )
+
+
 @YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
                           'g:ycm_semantic_triggers': TRIGGERS } )
 def OmniCompleter_GetCompletions_NoCache_NoSemanticTrigger_test( ycm ):
