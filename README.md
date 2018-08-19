@@ -79,7 +79,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [Clang][]-based engine that provides native semantic code
   completion for C/C++/Objective-C/Objective-C++ (from now on referred to as
   "the C-family languages"),
-- a [Jedi][]-based completion engine for Python 2 and 3 (using the [JediHTTP][] wrapper),
+- a [Jedi][]-based completion engine for Python 2 and 3,
 - an [OmniSharp][]-based completion engine for C#,
 - a combination of [Gocode][] and [Godef][] semantic engines for Go,
 - a [TSServer][]-based completion engine for JavaScript and TypeScript,
@@ -784,9 +784,9 @@ Quick Feature Summary
 ### Python
 
 * Intelligent auto-completion
-* Go to declaration/definition, find references (`GoTo`, `GoToReferences`)
+* Go to definition (`GoTo`)
+* Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
-* Restart [JediHTTP][] server using a different Python interpreter
 
 ### Go
 
@@ -1053,8 +1053,8 @@ it is not uncommon to integrate directly with an existing build system using the
 full power of the Python language.
 
 For a more elaborate example,
-[see YCM's own `.ycm_extra_conf.py`][flags_example]. You should be able to use
-it _as a starting point_. **Don't** just copy/paste that file somewhere and
+[see ycmd's own `.ycm_extra_conf.py`][ycmd_flags_example]. You should be able to
+use it _as a starting point_. **Don't** just copy/paste that file somewhere and
 expect things to magically work; **your project needs different flags**. Hint:
 just replace the strings in the `flags` variable with compilation flags
 necessary for your project. That should be enough for 99% of projects.
@@ -1213,31 +1213,117 @@ present so we'd love to hear your feedback! Please do remember to check
 
 ### Python Semantic Completion
 
-Completion and GoTo commands work out of the box with no additional
-configuration. Those features are provided by the [jedi][] library which
-supports a variety of Python versions (2.6, 2.7, 3.2+) as long as it
-runs in the corresponding Python interpreter. By default YCM runs [jedi][] with
-the same Python interpreter used by the [ycmd server][ycmd], so if you would like to
-use a different interpreter, use the following option specifying the Python
-binary to use. For example, to provide Python 3 completion in your project, set:
+YCM relies on the [Jedi][] engine to provide completion and code navigation. By
+default, it will pick the latest version of Python available on your system and
+use its default `sys.path`. While this is fine for simple projects, this needs
+to be configurable when working with virtual environments or in a project with
+third-party packages. The next sections explain how to do that.
 
-```viml
-let g:ycm_python_binary_path = '/usr/bin/python3'
+#### Working with virtual environments
+
+A common practice when working on a Python project is to install its
+dependencies in a virtual environment and develop the project inside that
+environment. To support this, YCM needs to know the interpreter path of the
+virtual environment. You can specify it by creating a `.ycm_extra_conf.py` file
+at the root of your project with the following contents:
+
+```python
+def Settings( **kwargs ):
+  return {
+    'interpreter_path': '/path/to/virtual/environment/python'
+  }
 ```
 
-If the value of `g:ycm_python_binary_path` is an absolute path like above it
-will be used as-is, but if it's an executable name it will be searched through
-the PATH. So for example if you set:
+where `/path/to/virtual/environment/python` is the path to the Python used
+by the virtual environment you are working in. Typically, the executable can be
+found in the `Scripts` folder of the virtual environment directory on Windows
+and in the `bin` folder on other platforms.
 
-```viml
-let g:ycm_python_binary_path = 'python'
+If you don't like having to create a `.ycm_extra_conf.py` file at the root of
+your project and would prefer to specify the interpreter path with a Vim option,
+read the [Configuring through Vim options](#configuring-through-vim-options)
+section.
+
+#### Working with third-party packages
+
+Another common practice is to put the dependencies directly into the project and
+add their paths to `sys.path` at runtime in order to import them. YCM needs to
+be told about this path manipulation to support those dependencies. This can be
+done by creating a `.ycm_extra_conf.py` file at the root of the project. This
+file must define a `Settings( **kwargs )` function returning a dictionary with
+the list of paths to prepend to `sys.path` under the `sys_path` key. For
+instance, the following `.ycm_extra_conf.py`
+
+```python
+def Settings( **kwargs ):
+  return {
+    'sys_path': [
+      '/path/to/some/third_party/package',
+      '/path/to/another/third_party/package'
+    ]
+  }
 ```
 
-YCM will use the first `python` executable it finds in the PATH to run
-[jedi][]. This means that if you are in a virtual environment and you start vim
-in that directory, the first `python` that YCM will find will be the one in the
-virtual environment, so [jedi][] will be able to provide completions for every
-package you have in the virtual environment.
+adds the paths `/path/to/some/third_party/package` and
+`/path/to/another/third_party/package` at the start of `sys.path`.
+
+If you would rather prepend paths to `sys.path` with a Vim option, read the
+[Configuring through Vim options](#configuring-through-vim-options) section.
+
+If you need further control on how to add paths to `sys.path`, you should define
+the `PythonSysPath( **kwargs )` function in the `.ycm_extra_conf.py` file. Its
+keyword arguments are `sys_path` which contains the default `sys.path`, and
+`interpreter_path` which is the path to the Python interpreter. Here's a trivial
+example that insert the `/path/to/third_party/package` path at the second
+position of `sys.path`:
+
+```python
+def PythonSysPath( **kwargs ):
+  sys_path = kwargs[ 'sys_path' ]
+  sys_path.insert( 1, '/path/to/third_party/package' )
+  return sys_path
+```
+
+A more advanced example can be found in [YCM's own
+`.ycm_extra_conf.py`][ycm_flags_example].
+
+#### Configuring through Vim options
+
+You may find inconvenient to have to create a `.ycm_extra_conf.py` file at the
+root of each one of your projects in order to set the path to the Python
+interpreter and/or add paths to `sys.path` and would prefer to be able to
+configure those through Vim options. Don't worry, this is possible by using the
+[`g:ycm_extra_conf_vim_data`](#the-gycm_extra_conf_vim_data-option) option and
+creating a global extra configuration file. Let's take an example. Suppose that
+you want to set the interpreter path with the `g:ycm_python_interpreter_path`
+option and prepend paths to `sys.path` with the `g:ycm_python_sys_path` option.
+Suppose also that you want to name the global extra configuration file
+`global_extra_conf.py` and that you want to put it in your HOME folder. You
+should then add the following lines to your vimrc:
+
+```viml
+let g:ycm_python_interpreter_path = ''
+let g:ycm_python_sys_path = []
+let g:ycm_extra_conf_vim_data = [
+  \  'g:ycm_python_interpreter_path',
+  \  'g:ycm_python_sys_path'
+  \]
+let g:ycm_global_ycm_extra_conf = '~/global_extra_conf.py'
+```
+
+and create the `~/global_extra_conf.py` file with the following contents:
+
+```python
+def Settings( **kwargs ):
+  client_data = kwargs[ 'client_data' ]
+  return {
+    'interpreter_path': client_data[ 'g:ycm_python_interpreter_path' ],
+    'sys_path': client_data[ 'g:ycm_python_sys_path' ]
+  }
+```
+
+That's it. You are done. Note that you don't need to restart the server when
+setting one of the options. YCM will automatically pick the new values.
 
 ### Rust Semantic Completion
 
@@ -1815,14 +1901,7 @@ flags.
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-An additional optional argument may be supplied for Python, specifying the
-python binary to use to restart the Python semantic engine.
-
-```viml
-:YcmCompleter RestartServer /usr/bin/python3.4
-```
-
-Supported in filetypes: `cs, go, java, javascript, python, rust, typescript`
+Supported in filetypes: `cs, go, java, javascript, rust, typescript`
 
 #### The `ClearCompilationFlagCache` subcommand
 
@@ -2841,22 +2920,6 @@ Default: 1000
 let g:ycm_disable_for_files_larger_than_kb = 1000
 ```
 
-### The `g:ycm_python_binary_path` option
-
-This option specifies the Python interpreter to use to run the [jedi][]
-completion library.  Specify the Python interpreter to use to get completions.
-By default the Python under which [ycmd][] runs is used ([ycmd][] runs on
-Python 2.7.1+ or 3.4+).
-
-Default: `''`
-
-```viml
-let g:ycm_python_binary_path = 'python'
-```
-
-**NOTE:** the settings above will make YCM use the first `python` executable
-found through the PATH.
-
 FAQ
 ---
 
@@ -3283,9 +3346,9 @@ EOF
 ### I hear that YCM only supports Python 2, is that true?
 
 **No.** Both the Vim client and the [ycmd server][ycmd] run on Python 2 or 3. If
-you work on a Python 3 project, you may need to set `g:ycm_python_binary_path`
-to the Python interpreter you use for your project to get completions for that
-version of Python.
+you are talking about code completion in a project, you can configure the Python
+used for your project through a `.ycm_extra_conf.py` file. See [the Python
+Semantic Completion section](#python-semantic-completion) for more details.
 
 ### On Windows I get `E887: Sorry, this command is disabled, the Python's site module could not be loaded`
 
@@ -3294,15 +3357,22 @@ If you are running vim on Windows with Python 2.7.11, this is likely caused by a
 [workaround][vim_win-python2.7.11-bug_workaround] or use a different version
 (Python 2.7.12 does not suffer from the bug).
 
-### I can't complete python packages in a virtual environment.
+### I can't complete Python packages in a virtual environment.
 
-This means that the Python used to run [JediHTTP][] is not the Python of the
-virtual environment you're in. To resolve this you either set
-`g:ycm_python_binary_path` to the absolute path of the Python binary in your
-virtual environment or since virtual environment will put that Python
-executable first in your PATH when the virtual environment is active then if
-you set `g:ycm_python_binary_path` to just `'python'` it will be found as the
-first Python and used to run [JediHTTP][].
+This means that the Python used to run [Jedi][] is not the Python of the virtual
+environment you're in. To resolve this you should create a `.ycm_extra_conf.py`
+file at the root of your project that sets the `interpreter_path` option to the
+Python of your virtual environment, e.g.
+
+```python
+def Settings(**kwargs):
+  return {
+    'interpreter_path': '/path/to/virtual/env/bin/python'
+  }
+```
+
+See [the Python Semantic Completion section](#python-semantic-completion) for
+more details.
 
 ### I want to defer loading of YouCompleteMe until after Vim finishes booting
 
@@ -3332,8 +3402,18 @@ Anaconda is often incompatible with the pre-built libclang used by YCM
 and therefore is not supported. The recommended way to solve this is to run
 `/path/to/real/python install.py` (for example `/usr/bin/python install.py`).
 
-If you want completion in Anaconda projects, set
-`g:ycm_python_binary_path` to point to the full path of your Anaconda python.
+If you want completion in Anaconda projects, point the `interpreter_path` option
+in your `.ycm_extra_conf.py` file to the path of your Anaconda Python e.g.
+
+```python
+def Settings(**kwargs):
+  return {
+    'interpreter_path': '/path/to/anaconda/python'
+  }
+```
+
+See [the Python Semantic Completion section](#python-semantic-completion) for
+more details.
 
 ### Automatic import insertion after selecting a completion breaks undo
 
@@ -3386,7 +3466,8 @@ This software is licensed under the [GPL v3 license][gpl].
 [vim]: http://www.vim.org/
 [syntastic]: https://github.com/scrooloose/syntastic
 [lightline]: https://github.com/itchyny/lightline.vim
-[flags_example]: https://raw.githubusercontent.com/Valloric/ycmd/66030cd94299114ae316796f3cad181cac8a007c/.ycm_extra_conf.py
+[ycm_flags_example]: https://github.com/Valloric/YouCompleteMe/blob/master/.ycm_extra_conf.py
+[ycmd_flags_example]: https://raw.githubusercontent.com/Valloric/ycmd/66030cd94299114ae316796f3cad181cac8a007c/.ycm_extra_conf.py
 [compdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [subsequence]: https://en.wikipedia.org/wiki/Subsequence
 [listtoggle]: https://github.com/Valloric/ListToggle
@@ -3434,7 +3515,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [add-msbuild-to-path]: http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[JediHTTP]: https://github.com/vheon/JediHTTP
 [vim_win-python2.7.11-bug]: https://github.com/vim/vim/issues/717
 [vim_win-python2.7.11-bug_workaround]: https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
 [gitter]: https://gitter.im/Valloric/YouCompleteMe
