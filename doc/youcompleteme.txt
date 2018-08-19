@@ -179,6 +179,7 @@ module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-comm
   34. I want to defer loading of YouCompleteMe until after Vim finishes booting |i-want-to-defer-loading-of-youcompleteme-until-after-vim-finishes-booting|
   35. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
   36. YCM does not work with my Anaconda Python setup |youcompleteme-ycm-does-not-work-with-my-anaconda-python-setup|
+  37. Automatic import insertion after selecting a completion breaks undo |youcompleteme-automatic-import-insertion-after-selecting-completion-breaks-undo|
  14. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  15. Contact                                            |youcompleteme-contact|
  16. License                                            |youcompleteme-license|
@@ -3603,6 +3604,13 @@ therefore is not supported. The recommended way to solve this is to run
 
 If you want completion in Anaconda projects, set |g:ycm_python_binary_path| to
 point to the full path of your Anaconda python.
+
+-------------------------------------------------------------------------------
+*youcompleteme-automatic-import-insertion-after-selecting-completion-breaks-undo*
+Automatic import insertion after selecting a completion breaks undo ~
+
+This is a Vim bug fixed in version 8.1.0256. Update your Vim to this version or
+later.
 
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*
