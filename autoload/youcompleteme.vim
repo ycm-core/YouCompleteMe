@@ -113,10 +113,27 @@ function! s:SetUpOptions()
 endfunction
 
 
+function! s:ValidateConfigurationVariables()
+  if type(g:ycm_filetype_blacklist) != type({})
+    echohl WarningMsg |
+          \ echomsg "YouCompleteMe improperly configured g:ycm_filetype_blacklist " .
+          \ "variable must be a dictionary." |
+          \ echohl None
+    return 0
+  endif
+
+  return 1
+endfunction
+
+
 function! youcompleteme#Enable()
   call s:SetUpBackwardsCompatibility()
 
   if !s:SetUpPython()
+    return
+  endif
+
+  if !s:ValidateConfigurationVariables()
     return
   endif
 
