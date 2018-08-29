@@ -364,12 +364,20 @@ def OpenQuickFixList( focus = False, autoclose = False ):
     JumpToPreviousWindow()
 
 
-def SetFittingHeightForCurrentWindow():
-  window_width = GetIntValue( 'winwidth( 0 )' )
+def ComputeFittingHeightForCurrentWindow():
+  current_window = vim.current.window
+  if not current_window.options[ 'wrap' ]:
+    return len( vim.current.buffer )
+
+  window_width = current_window.width
   fitting_height = 0
   for line in vim.current.buffer:
     fitting_height += len( line ) // window_width + 1
-  vim.command( '{0}wincmd _'.format( fitting_height ) )
+  return fitting_height
+
+
+def SetFittingHeightForCurrentWindow():
+  vim.command( '{0}wincmd _'.format( ComputeFittingHeightForCurrentWindow() ) )
 
 
 def ConvertDiagnosticsToQfList( diagnostics ):

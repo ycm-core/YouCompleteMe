@@ -173,13 +173,26 @@ def OpenLocationList_test( vim_command, fitting_height, variable_exists ):
   variable_exists.assert_called_once_with( '#User#YcmLocationOpened' )
 
 
-@patch( 'ycm.vimsupport.GetIntValue', return_value = 120 )
 @patch( 'vim.command' )
-def SetFittingHeightForCurrentWindow_test( vim_command, *args ):
-  # Create a buffer with one line that is longer than the window width.
+def SetFittingHeightForCurrentWindow_LineWrapOn_test( vim_command, *args ):
+  # Create a two lines buffer whose first line is longer than the window width.
   current_buffer = VimBuffer( 'buffer',
-                              contents = [ 'a' * 140 ] )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+                              contents = [ 'a' * 140, 'b' * 80 ] )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+    vim.current.window.width = 120
+    vim.current.window.options[ 'wrap' ] = True
+    vimsupport.SetFittingHeightForCurrentWindow()
+  vim_command.assert_called_once_with( '3wincmd _' )
+
+
+@patch( 'vim.command' )
+def SetFittingHeightForCurrentWindow_LineWrapOff_test( vim_command, *args ):
+  # Create a two lines buffer whose first line is longer than the window width.
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'a' * 140, 'b' * 80 ] )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+    vim.current.window.width = 120
+    vim.current.window.options[ 'wrap' ] = False
     vimsupport.SetFittingHeightForCurrentWindow()
   vim_command.assert_called_once_with( '2wincmd _' )
 

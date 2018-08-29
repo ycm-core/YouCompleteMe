@@ -466,6 +466,7 @@ class VimWindow( object ):
     self.number = number
     self.buffer = buffer_object
     self.cursor = cursor
+    self.options = {}
 
 
 class VimWindows( object ):
