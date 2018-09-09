@@ -16,7 +16,7 @@ Contents ~
   6. Full Installation Guide            |youcompleteme-full-installation-guide|
  6. Quick Feature Summary                 |youcompleteme-quick-feature-summary|
   1. General (all languages)                            |youcompleteme-general|
-  2. C-family languages (C, C++, Objective C, Objective C++) |youcompleteme-c-family-languages|
+  2. C-family languages (C, C++, Objective C, Objective C++, CUDA) |youcompleteme-c-family-languages|
   3. C♯                                                       |youcompleteme-c|
   4. Python                                              |youcompleteme-python|
   5. Go                                                      |youcompleteme-go|
@@ -204,7 +204,7 @@ First carefully read the installation instructions for your OS. We recommend
 you use the supplied 'install.py'.
 
 Next check the User Guide section on the semantic completer that you are using.
-For C/C++/Objective C, you _must_ read this section.
+For C/C++/Objective-C/Objective-C++/CUDA, you _must_ read this section.
 
 Finally, check the FAQ.
 
@@ -273,8 +273,8 @@ Vim. It has several completion engines:
 
 - an identifier-based engine that works with every programming language,
 - a Clang [11]-based engine that provides native semantic code completion for
-  C/C++/Objective-C/Objective-C++ (from now on referred to as "the C-family
-  languages"),
+  C/C++/Objective-C/Objective-C++/CUDA (from now on referred to as "the
+  C-family languages"),
 - a Jedi [12]-based completion engine for Python 2 and 3,
 - an OmniSharp [13]-based completion engine for C#,
 - a combination of Gocode [14] and Godef [15] semantic engines for Go,
@@ -810,10 +810,9 @@ will notify you to recompile it. You should then rerun the install process.
    for C-family languages. Otherwise it's not necessary._
 
    **Download the latest version of 'libclang'**. Clang is an open-source
-   compiler that can compile C/C++/Objective-C/Objective-C++. The 'libclang'
-   library it provides is used to power the YCM semantic completion engine
-   for those languages. YCM is designed to work with libclang version 3.9 or
-   higher.
+   compiler that can compile C-family languages. The 'libclang' library it
+   provides is used to power the YCM semantic completion engine for those
+   languages. YCM is designed to work with libclang version 3.9 or higher.
 
    You can use the system libclang _only if you are sure it is version 3.9
    or higher_, otherwise don't. Even if it is, we recommend using the
@@ -990,7 +989,7 @@ General (all languages) ~
 
 -------------------------------------------------------------------------------
                                              *youcompleteme-c-family-languages*
-C-family languages (C, C++, Objective C, Objective C++) ~
+C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 
 - Semantic auto-completion
 - Real-time diagnostic display
@@ -1844,7 +1843,7 @@ The invoked subcommand is automatically routed to the currently active semantic
 completer, so ':YcmCompleter GoToDefinition' will invoke the |GoToDefinition|
 subcommand on the Python semantic completer if the currently active file is a
 Python one and on the Clang completer if the currently active file is a
-C/C++/Objective-C one.
+C-family language one.
 
 You may also want to map the subcommands to something less verbose; for
 instance, 'nnoremap <leader>jd :YcmCompleter GoTo<CR>' maps the '<leader>jd'
@@ -1896,9 +1895,9 @@ The *GoTo* subcommand
 This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
 jumps to its definition if possible; if the definition is not accessible from
-the current translation unit, jumps to the symbol's declaration. For
-C/C++/Objective-C, it first tries to look up the current line for a header and
-jump to it. For C#, implementations are also considered and preferred.
+the current translation unit, jumps to the symbol's declaration. For C-family
+languages, it first tries to look up the current line for a header and jump to
+it. For C#, implementations are also considered and preferred.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
 python, rust, typescript'

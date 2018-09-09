@@ -16,8 +16,8 @@ First carefully read the [installation instructions](#installation) for your OS.
 We recommend you use the supplied `install.py`.
 
 Next check the [User Guide](#user-guide) section on the semantic completer that
-you are using. For C/C++/Objective C, you  _must_ read
-[this section](#c-family-semantic-completion).
+you are using. For C/C++/Objective-C/Objective-C++/CUDA, you  _must_ read [this
+section](#c-family-semantic-completion).
 
 Finally, check the [FAQ](#faq).
 
@@ -77,8 +77,8 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 
 - an identifier-based engine that works with every programming language,
 - a [Clang][]-based engine that provides native semantic code
-  completion for C/C++/Objective-C/Objective-C++ (from now on referred to as
-  "the C-family languages"),
+  completion for C/C++/Objective-C/Objective-C++/CUDA (from now on referred to
+  as "the C-family languages"),
 - a [Jedi][]-based completion engine for Python 2 and 3,
 - an [OmniSharp][]-based completion engine for C#,
 - a combination of [Gocode][] and [Godef][] semantic engines for Go,
@@ -590,10 +590,9 @@ process.
     C-family languages. Otherwise it's not necessary.*
 
     **Download the latest version of `libclang`**. Clang is an open-source
-    compiler that can compile C/C++/Objective-C/Objective-C++. The `libclang`
-    library it provides is used to power the YCM semantic completion engine for
-    those languages. YCM is designed to work with libclang version 3.9 or
-    higher.
+    compiler that can compile C-family languages. The `libclang` library it
+    provides is used to power the YCM semantic completion engine for those
+    languages. YCM is designed to work with libclang version 3.9 or higher.
 
     You can use the system libclang _only if you are sure it is version 3.9 or
     higher_, otherwise don't. Even if it is, we recommend using the [official
@@ -762,7 +761,7 @@ Quick Feature Summary
 * Suggestions from Vim's OmniFunc
 * UltiSnips snippet suggestions
 
-### C-family languages (C, C++, Objective C, Objective C++)
+### C-family languages (C, C++, Objective C, Objective C++, CUDA)
 
 * Semantic auto-completion
 * Real-time diagnostic display
@@ -1599,8 +1598,8 @@ section.
 The invoked subcommand is automatically routed to the currently active semantic
 completer, so `:YcmCompleter GoToDefinition` will invoke the `GoToDefinition`
 subcommand on the Python semantic completer if the currently active file is a
-Python one and on the Clang completer if the currently active file is a
-C/C++/Objective-C one.
+Python one and on the Clang completer if the currently active file is a C-family
+language one.
 
 You may also want to map the subcommands to something less verbose; for
 instance, `nnoremap <leader>jd :YcmCompleter GoTo<CR>`
@@ -1648,7 +1647,7 @@ This command tries to perform the "most sensible" GoTo operation it can.
 Currently, this means that it tries to look up the symbol under the cursor and
 jumps to its definition if possible; if the definition is not accessible from
 the current translation unit, jumps to the symbol's declaration. For
-C/C++/Objective-C, it first tries to look up the current line for a header and
+C-family languages, it first tries to look up the current line for a header and
 jump to it. For C#, implementations are also considered and preferred.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
