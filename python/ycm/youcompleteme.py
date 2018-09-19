@@ -593,7 +593,9 @@ class YouCompleteMe( object ):
                       self._server_stdout,
                       self._server_stderr ]
 
-    debug_info = SendDebugInfoRequest()
+    extra_data = {}
+    self._AddExtraConfDataIfNeeded( extra_data )
+    debug_info = SendDebugInfoRequest( extra_data )
     if debug_info:
       completer = debug_info[ 'completer' ]
       if completer:
