@@ -3705,9 +3705,9 @@ References ~
 [53] https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html
 [54] https://docs.gradle.org/current/userguide/tutorial_java_projects.html
 [55] https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html
-[56] https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_eclipse_project
-[57] https://github.com/Valloric/ycmd/blob/java-language-server/ycmd/tests/java/testdata/simple_maven_project/pom.xml
-[58] https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_gradle_project
+[56] https://github.com/Valloric/ycmd/tree/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_eclipse_project
+[57] https://github.com/Valloric/ycmd/blob/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_maven_project/pom.xml
+[58] https://github.com/Valloric/ycmd/tree/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_gradle_project
 [59] https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md
 [60] https://github.com/Valloric/YouCompleteMe/blob/master/.ycm_extra_conf.py
 [61] https://www.rust-lang.org/downloads.html

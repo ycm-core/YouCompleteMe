@@ -3466,9 +3466,9 @@ This software is licensed under the [GPL v3 license][gpl].
 [gradle-project]: https://docs.gradle.org/current/userguide/tutorial_java_projects.html
 [eclipse-dot-project]: https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html
 [eclipse-dot-classpath]: https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html
-[ycmd-eclipse-project]: https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_eclipse_project
-[ycmd-mvn-pom-xml]: https://github.com/Valloric/ycmd/blob/java-language-server/ycmd/tests/java/testdata/simple_maven_project/pom.xml
-[ycmd-gradle-project]: https://github.com/Valloric/ycmd/tree/master/ycmd/tests/java/testdata/simple_gradle_project
+[ycmd-eclipse-project]: https://github.com/Valloric/ycmd/tree/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_eclipse_project
+[ycmd-mvn-pom-xml]: https://github.com/Valloric/ycmd/blob/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_maven_project/pom.xml
+[ycmd-gradle-project]: https://github.com/Valloric/ycmd/tree/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_gradle_project
 [jdtls-release]: http://download.eclipse.org/jdtls/milestones
 [diacritic]: https://www.unicode.org/glossary/#diacritic
 [regex]: https://pypi.org/project/regex/
