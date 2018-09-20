@@ -34,8 +34,7 @@ Contents
 - [Intro](#intro)
 - [Installation](#installation)
     - [Mac OS X](#mac-os-x)
-    - [Ubuntu Linux x64](#ubuntu-linux-x64)
-    - [Fedora Linux x64](#fedora-linux-x64)
+    - [Linux 64-bit](#linux-64-bit)
     - [Windows](#windows)
     - [FreeBSD/OpenBSD](#freebsdopenbsd)
     - [Full Installation Guide](#full-installation-guide)
@@ -211,15 +210,15 @@ The following additional language support options are available:
 
 - C# support: install Mono with [Homebrew][brew] or by downloading the [Mono Mac
   package][mono-install-osx] and add `--cs-completer` when calling
-  `./install.py`.
+  `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
+  `install.py`.
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
   install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add
-  `--rust-completer` when calling `./install.py`.
+  `--rust-completer` when calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
+  `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -238,60 +237,63 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### Ubuntu Linux x64
+### Linux 64-bit
 
 These instructions (using `install.py`) are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Ubuntu 16.04
-and later have a Vim that's recent enough. You can see the version of Vim
-installed by running `vim --version`. If the version is too old, you may need to
-[compile Vim from source][vim-build] (don't worry, it's easy).
+Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. The Vim
+package on Fedora 27 and later and the pre-installed Vim on Ubuntu 16.04 and
+later are recent enough. You can see the version of Vim installed by running
+`vim --version`. If the version is too old, you may need to [compile Vim from
+source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
+using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
+will notify you to recompile it. You should then rerun the install process.
 
-Install development tools and CMake:
+Install development tools, CMake, and Python headers:
 
-    sudo apt-get install build-essential cmake
+- Fedora 27 and later:
 
-**Note:** On older systems (e.g. Ubuntu 14.04) you may run into compilation
-issues with `cmake`. Therefore, install the following instead:
+      sudo dnf install cmake gcc-c++ make ncurses-compat-libs python3-devel
 
-    sudo apt-get install build-essential cmake3
+  `ncurses-compat-libs` is only required for C-family languages support.
 
-Make sure you have Python headers installed:
+- Ubuntu 14.04:
 
-    sudo apt-get install python-dev python3-dev
+      sudo apt install build-essential cmake3 python3-dev
+
+- Ubuntu 16.04 and later:
+
+      sudo apt install build-essential cmake python3-dev
 
 Compiling YCM **with** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
+    python3 install.py --clang-completer
 
 Compiling YCM **without** semantic support for C-family languages:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
+    python3 install.py
 
 The following additional language support options are available:
 
-- C# support: install [Mono][mono-install-ubuntu] and add `--cs-completer`
-  when calling `./install.py`.
+- C# support: install [Mono][mono-install-linux] and add `--cs-completer`
+  when calling `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
+  `install.py`.
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
   install the TypeScript SDK with `npm install -g typescript`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
-  calling `./install.py`.
+  calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
+  `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
@@ -299,74 +301,7 @@ install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
 simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
-
-That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
-Don't forget that if you want the C-family semantic completion engine to work,
-you will need to provide the compilation flags for your project to YCM. It's all
-in the User Guide.
-
-YCM comes with sane defaults for its options, but you still may want to take a
-look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.
-
-### Fedora Linux x64
-
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
-
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. Fedora 21 and
-later have a Vim that's recent enough. You can see the version of Vim installed
-by running `vim --version`. If the version is too old, you may need to [compile
-Vim from source][vim-build] (don't worry, it's easy).
-
-Install YouCompleteMe with [Vundle][].
-
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the ycm_core library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
-
-Install development tools and CMake:
-
-    sudo dnf install automake gcc gcc-c++ kernel-devel cmake
-
-Make sure you have Python headers installed:
-
-    sudo dnf install python-devel python3-devel
-
-Compiling YCM **with** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
-
-Compiling YCM **without** semantic support for C-family languages:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py
-
-The following additional language support options are available:
-
-- C# support: install [Mono][mono-install-fedora] and add `--cs-completer`
-  when calling `./install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
-- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
-  install the TypeScript SDK with `npm install -g typescript`.
-- Rust support: install [Rust][rust-install] and add `--rust-completer` when
-  calling `./install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
-
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
-simply run:
-
-    cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --all
+    python3 install.py --all
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -424,9 +359,9 @@ Download and install the following software:
   Python 3.5. You'll need one or the other installed, matching the version
   number exactly.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
-variable.
+  variable.
 - [Visual Studio][visual-studio-download]. Download the community edition.
-During setup, select _Desktop development with C++_ in _Workloads_.
+  During setup, select _Desktop development with C++_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages:
 
@@ -449,7 +384,7 @@ The following additional language support options are available:
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
+  `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag.  So, to
 install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
@@ -3504,11 +3439,10 @@ This software is licensed under the [GPL v3 license][gpl].
 [visual-studio-download]: https://www.visualstudio.com/downloads/
 [7z-download]: http://www.7-zip.org/download.html
 [mono-install-osx]: http://www.mono-project.com/docs/getting-started/install/mac/
-[mono-install-ubuntu]: http://www.mono-project.com/docs/getting-started/install/linux/#debian-ubuntu-and-derivatives
-[mono-install-fedora]: http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives
+[mono-install-linux]: https://www.mono-project.com/download/stable/#download-lin
 [mono-install]: http://www.mono-project.com/docs/getting-started/install/
 [go-install]: https://golang.org/doc/install
-[npm-install]: https://docs.npmjs.com/getting-started/installing-node
+[npm-install]: https://docs.npmjs.com/getting-started/installing-node#1-install-nodejs--npm
 [tern-instructions]: https://github.com/Valloric/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
 [Tern]: http://ternjs.net
 [racer]: https://github.com/phildawes/racer
