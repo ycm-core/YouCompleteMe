@@ -1236,7 +1236,10 @@ def CurrentWindow():
   without triggering autocommands related to window movement. Use the
   SwitchWindow function to move to other windows while under the context."""
   current_window = vim.current.window
-  with AutocommandEventsIgnored( [ 'WinEnter', 'Winleave' ] ):
+  with AutocommandEventsIgnored( [ 'BufEnter',
+                                   'BufLeave',
+                                   'WinEnter',
+                                   'Winleave' ] ):
     try:
       yield
     finally:
