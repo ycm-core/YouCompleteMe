@@ -281,13 +281,13 @@ class YouCompleteMe( object ):
     return self._server_popen.pid
 
 
-  def _ShutdownServer( self ):
+  def ShutdownServer( self ):
     SendShutdownRequest()
 
 
   def RestartServer( self ):
     vimsupport.PostVimMessage( 'Restarting ycmd server...' )
-    self._ShutdownServer()
+    self.ShutdownServer()
     self._SetUpServer()
 
 
@@ -485,7 +485,7 @@ class YouCompleteMe( object ):
 
 
   def OnVimLeave( self ):
-    self._ShutdownServer()
+    self.ShutdownServer()
     self._CleanLogfile()
 
 

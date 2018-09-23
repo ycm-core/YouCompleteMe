@@ -841,6 +841,7 @@ endfunction
 
 function! s:SetUpCommands()
   command! YcmRestartServer call s:RestartServer()
+  command! YcmShutdownServer call s:ShutdownServer()
   command! YcmDebugInfo call s:DebugInfo()
   command! -nargs=* -complete=custom,youcompleteme#LogsComplete
         \ YcmToggleLogs call s:ToggleLogs(<f-args>)
@@ -879,6 +880,11 @@ function! s:RestartServer()
         \ function( 's:PollServerReady' ) )
 endfunction
 
+function! s:ShutdownServer()
+  call s:SetUpOptions()
+
+  exec s:python_command "ycm_state.ShutdownServer()"
+endfunction
 
 function! s:DebugInfo()
   echom "Printing YouCompleteMe debug information..."
