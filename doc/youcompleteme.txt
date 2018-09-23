@@ -52,12 +52,13 @@ Contents ~
    1. Diagnostic Highlighting Groups |youcompleteme-diagnostic-highlighting-groups|
  8. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
-  2. The |:YcmForceCompileAndDiagnostics| command
-  3. The |:YcmDiags| command
-  4. The |:YcmShowDetailedDiagnostic| command
-  5. The |:YcmDebugInfo| command
-  6. The |:YcmToggleLogs| command
-  7. The |:YcmCompleter| command
+  2. The |:YcmShutdownServer| command
+  3. The |:YcmForceCompileAndDiagnostics| command
+  4. The |:YcmDiags| command
+  5. The |:YcmShowDetailedDiagnostic| command
+  6. The |:YcmDebugInfo| command
+  7. The |:YcmToggleLogs| command
+  8. The |:YcmCompleter| command
  9. YcmCompleter Subcommands           |youcompleteme-ycmcompleter-subcommands|
   1. GoTo Commands                                |youcompleteme-goto-commands|
    1. The |GoToInclude| subcommand
@@ -1685,6 +1686,13 @@ The *:YcmRestartServer* command
 
 If the ycmd completion server [46] suddenly stops for some reason, you can
 restart it with this command.
+
+-------------------------------------------------------------------------------
+The *:YcmShutdownServer* command
+
+Usefull when you would like to shutdown the ycmd completion server so it's
+process won't stay when you know you'll might kill vim through a parent
+process group - like a terminal emulator.
 
 -------------------------------------------------------------------------------
 The *:YcmForceCompileAndDiagnostics* command
