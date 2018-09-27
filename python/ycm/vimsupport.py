@@ -485,7 +485,7 @@ def JumpToFile( filename, command, modifiers ):
   vim_command = GetVimCommand( command )
   try:
     escaped_filename = EscapeFilepathForVimCommand( filename )
-    vim.command( 'keepjumps {} {} {}'.format( modifiers,
+    vim.command( 'keepjumps {} {} {}'.format( ' '.join( modifiers ),
                                               vim_command,
                                               escaped_filename ) )
   # When the file we are trying to jump to has a swap file

@@ -42,7 +42,7 @@ def SendCommandRequest_ExtraConfVimData_Works_test( ycm ):
         send_request.call_args[ 0 ],
         contains(
           contains( 'GoTo' ),
-          'aboveleft',
+          contains( 'aboveleft' ),
           has_entries( {
             'options': has_entries( {
               'tab_size': 2,
@@ -67,7 +67,7 @@ def SendCommandRequest_ExtraConfData_UndefinedValue_test( ycm ):
         send_request.call_args[ 0 ],
         contains(
           contains( 'GoTo' ),
-          'belowright',
+          contains( 'belowright' ),
           has_entries( {
             'options': has_entries( {
               'tab_size': 2,
@@ -87,7 +87,7 @@ def SendCommandRequest_BuildRange_NoVisualMarks_test( ycm, *args ):
       ycm.SendCommandRequest( [ 'GoTo' ], '', True, 1, 2 )
       send_request.assert_called_once_with(
         [ 'GoTo' ],
-        '',
+        [],
         {
           'options': {
             'tab_size': 2,
@@ -119,7 +119,7 @@ def SendCommandRequest_BuildRange_VisualMarks_test( ycm, *args ):
       ycm.SendCommandRequest( [ 'GoTo' ], 'tab', True, 1, 2 )
       send_request.assert_called_once_with(
         [ 'GoTo' ],
-        'tab',
+        [ 'tab' ],
         {
           'options': {
             'tab_size': 2,
@@ -145,7 +145,7 @@ def SendCommandRequest_IgnoreFileTypeOption_test( ycm, *args ):
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     expected_args = (
       [ 'GoTo' ],
-      '',
+      [],
       {
         'options': {
           'tab_size': 2,
@@ -161,3 +161,28 @@ def SendCommandRequest_IgnoreFileTypeOption_test( ycm, *args ):
     with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
       ycm.SendCommandRequest( [ 'GoTo', 'ft=python' ], '', False, 1, 1 )
       send_request.assert_called_once_with( *expected_args )
+
+
+@YouCompleteMeInstance()
+def SendCommandRequest_SupportModsOption_test( ycm, *args ):
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+      ycm.SendCommandRequest( [ 'mods=rightbelow', 'GoTo' ],
+                              'vertical',
+                              False,
+                              1,
+                              1 )
+      send_request.assert_called_once_with(
+        [ 'GoTo' ],
+        [ 'vertical', 'rightbelow' ],
+        { 'options': { 'tab_size': 2, 'insert_spaces': True } }
+      )
+
+    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+      ycm.SendCommandRequest( [ 'GoTo', 'mods=tab' ], 'tab', False, 1, 1 )
+      send_request.assert_called_once_with(
+        [ 'GoTo' ],
+        [ 'tab' ],
+        { 'options': { 'tab_size': 2, 'insert_spaces': True } }
+      )

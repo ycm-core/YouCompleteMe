@@ -325,12 +325,18 @@ class YouCompleteMe( object ):
                           has_range,
                           start_line,
                           end_line ):
+    modifiers = modifiers.split( ' ' ) if modifiers else []
     final_arguments = []
     for argument in arguments:
       # The ft= option which specifies the completer when running a command is
       # ignored because it has not been working for a long time. The option is
       # still parsed to not break users that rely on it.
       if argument.startswith( 'ft=' ):
+        continue
+      if argument.startswith( 'mods=' ):
+        for modifier in argument[ 5: ].split( ',' ):
+          if modifier not in modifiers:
+            modifiers.append( modifier )
         continue
       final_arguments.append( argument )
 
