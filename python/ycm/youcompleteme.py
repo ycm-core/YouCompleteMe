@@ -321,11 +321,19 @@ class YouCompleteMe( object ):
 
   def SendCommandRequest( self,
                           arguments,
-                          completer,
                           modifiers,
                           has_range,
                           start_line,
                           end_line ):
+    final_arguments = []
+    for argument in arguments:
+      # The ft= option which specifies the completer when running a command is
+      # ignored because it has not been working for a long time. The option is
+      # still parsed to not break users that rely on it.
+      if argument.startswith( 'ft=' ):
+        continue
+      final_arguments.append( argument )
+
     extra_data = {
       'options': {
         'tab_size': vimsupport.GetIntValue( 'shiftwidth()' ),
@@ -335,7 +343,8 @@ class YouCompleteMe( object ):
     if has_range:
       extra_data.update( vimsupport.BuildRange( start_line, end_line ) )
     self._AddExtraConfDataIfNeeded( extra_data )
-    return SendCommandRequest( arguments, completer, modifiers, extra_data )
+
+    return SendCommandRequest( final_arguments, modifiers, extra_data )
 
 
   def GetDefinedSubcommands( self ):

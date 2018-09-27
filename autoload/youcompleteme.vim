@@ -900,26 +900,8 @@ endfunction
 
 
 function! s:CompleterCommand( mods, count, line1, line2, ... )
-  " CompleterCommand will call the OnUserCommand function of a completer. If
-  " the first arguments is of the form "ft=..." it can be used to specify the
-  " completer to use (for example "ft=cpp"). Else the native filetype completer
-  " of the current buffer is used. If no native filetype completer is found and
-  " no completer was specified this throws an error. You can use "ft=ycm:ident"
-  " to select the identifier completer. The remaining arguments will be passed
-  " to the completer.
-  let arguments = copy(a:000)
-  let completer = ''
-
-  if a:0 > 0 && strpart(a:1, 0, 3) == 'ft='
-    if a:1 == 'ft=ycm:ident'
-      let completer = 'identifier'
-    endif
-    let arguments = arguments[1:]
-  endif
-
   exec s:python_command "ycm_state.SendCommandRequest(" .
-        \ "vim.eval( 'l:arguments' )," .
-        \ "vim.eval( 'l:completer' )," .
+        \ "vim.eval( 'a:000' )," .
         \ "vim.eval( 'a:mods' )," .
         \ "vimsupport.GetBoolValue( 'a:count != -1' )," .
         \ "vimsupport.GetIntValue( 'a:line1' )," .
