@@ -260,9 +260,7 @@ Install development tools, CMake, and Python headers:
 
 - Fedora 27 and later:
 
-      sudo dnf install cmake gcc-c++ make ncurses-compat-libs python3-devel
-
-  `ncurses-compat-libs` is only required for C-family languages support.
+      sudo dnf install cmake gcc-c++ make python3-devel
 
 - Ubuntu 14.04:
 
