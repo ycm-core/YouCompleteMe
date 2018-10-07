@@ -1505,18 +1505,13 @@ This command gives access to a number of additional [IDE-like
 features](#quick-feature-summary) in YCM, for things like semantic GoTo, type
 information, FixIt and refactoring.
 
-Technically the command invokes completer-specific commands.  If the first
-argument is of the form `ft=...` the completer for that file type will be used
-(for example `ft=cpp`), else the native completer of the current buffer will be
-used.
+This command accepts a range that can either be specified through a selection in
+one of Vim's visual modes (see `:h visual-use`) or on the command line. For
+instance, `:2,5YcmCompleter` will apply the command from line 2 to line 5. This
+is useful for [the `Format` subcommand](#the-format-subcommand).
 
-This command also accepts a range that can either be specified through a
-selection in one of Vim's visual modes (see `:h visual-use`) or on the command
-line. For instance, `:2,5YcmCompleter` will apply the command from line 2 to
-line 5. This is useful for [the `Format` subcommand](#the-format-subcommand).
-
-Call `YcmCompleter` without further arguments for a list of the
-commands you can call for the current completer.
+Call `YcmCompleter` without further arguments for a list of the commands you can
+call for the current completer.
 
 See the [file type feature summary](#quick-feature-summary) for an overview of
 the features available for each file type. See the _YcmCompleter subcommands_
