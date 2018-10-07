@@ -260,9 +260,7 @@ Install development tools, CMake, and Python headers:
 
 - Fedora 27 and later:
 
-      sudo dnf install cmake gcc-c++ make ncurses-compat-libs python3-devel
-
-  `ncurses-compat-libs` is only required for C-family languages support.
+      sudo dnf install cmake gcc-c++ make python3-devel
 
 - Ubuntu 14.04:
 
@@ -2058,10 +2056,10 @@ semantic engine will operate in them.
 
 You can get the filetype of the current file in Vim with `:set ft?`.
 
-Default: `{'*' : 1}`
+Default: `{'*': 1}`
 
 ```viml
-let g:ycm_filetype_whitelist = { '*': 1 }
+let g:ycm_filetype_whitelist = {'*': 1}
 ```
 
 ### The `g:ycm_filetype_blacklist` option
@@ -2077,16 +2075,16 @@ Default: `[see next line]`
 
 ```viml
 let g:ycm_filetype_blacklist = {
-      \ 'tagbar' : 1,
-      \ 'qf' : 1,
-      \ 'notes' : 1,
-      \ 'markdown' : 1,
-      \ 'unite' : 1,
-      \ 'text' : 1,
-      \ 'vimwiki' : 1,
-      \ 'pandoc' : 1,
-      \ 'infolog' : 1,
-      \ 'mail' : 1
+      \ 'tagbar': 1,
+      \ 'qf': 1,
+      \ 'notes': 1,
+      \ 'markdown': 1,
+      \ 'unite': 1,
+      \ 'text': 1,
+      \ 'vimwiki': 1,
+      \ 'pandoc': 1,
+      \ 'infolog': 1,
+      \ 'mail': 1
       \}
 ```
 
@@ -2124,7 +2122,7 @@ being filetype strings (like `python`, `cpp`, etc.) and values being unimportant
 The `*` key is special and matches all filetypes. Use this key if you want to
 completely disable filepath completion:
 ```viml
-let g:ycm_filepath_blacklist = { '*': 1 }
+let g:ycm_filepath_blacklist = {'*': 1}
 ```
 
 You can get the filetype of the current file in Vim with `:set ft?`.
@@ -2133,9 +2131,9 @@ Default: `[see next line]`
 
 ```viml
 let g:ycm_filepath_blacklist = {
-      \ 'html' : 1,
-      \ 'jsx' : 1,
-      \ 'xml' : 1,
+      \ 'html': 1,
+      \ 'jsx': 1,
+      \ 'xml': 1,
       \}
 ```
 
@@ -2771,17 +2769,17 @@ Default: `[see next line]`
 
 ```viml
 let g:ycm_semantic_triggers =  {
-  \   'c' : ['->', '.'],
-  \   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
-  \             're!\[.*\]\s'],
-  \   'ocaml' : ['.', '#'],
-  \   'cpp,cuda,objcpp' : ['->', '.', '::'],
-  \   'perl' : ['->'],
-  \   'php' : ['->', '::'],
-  \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-  \   'ruby' : ['.', '::'],
-  \   'lua' : ['.', ':'],
-  \   'erlang' : [':'],
+  \   'c': ['->', '.'],
+  \   'objc': ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+  \            're!\[.*\]\s'],
+  \   'ocaml': ['.', '#'],
+  \   'cpp,cuda,objcpp': ['->', '.', '::'],
+  \   'perl': ['->'],
+  \   'php': ['->', '::'],
+  \   'cs,d,elixir,go,groovy,java,javascript,julia,perl6,python,scala,typescript,vb': ['.'],
+  \   'ruby,rust': ['.', '::'],
+  \   'lua': ['.', ':'],
+  \   'erlang': [':'],
   \ }
 ```
 
