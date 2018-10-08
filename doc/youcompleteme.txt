@@ -1375,10 +1375,10 @@ for the list of diagnostics we'll need.
 Python Semantic Completion ~
 
 YCM relies on the Jedi [12] engine to provide completion and code navigation.
-By default, it will pick the latest version of Python available on your system
-and use its default 'sys.path'. While this is fine for simple projects, this
-needs to be configurable when working with virtual environments or in a project
-with third-party packages. The next sections explain how to do that.
+By default, it will pick the version of Python running the ycmd server [46] and
+use its 'sys.path'. While this is fine for simple projects, this needs to be
+configurable when working with virtual environments or in a project with third-
+party packages. The next sections explain how to do that.
 
 -------------------------------------------------------------------------------
                               *youcompleteme-working-with-virtual-environments*

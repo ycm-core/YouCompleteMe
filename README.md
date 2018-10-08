@@ -1146,9 +1146,9 @@ present so we'd love to hear your feedback! Please do remember to check
 ### Python Semantic Completion
 
 YCM relies on the [Jedi][] engine to provide completion and code navigation. By
-default, it will pick the latest version of Python available on your system and
-use its default `sys.path`. While this is fine for simple projects, this needs
-to be configurable when working with virtual environments or in a project with
+default, it will pick the version of Python running the [ycmd server][ycmd] and
+use its `sys.path`. While this is fine for simple projects, this needs to be
+configurable when working with virtual environments or in a project with
 third-party packages. The next sections explain how to do that.
 
 #### Working with virtual environments
