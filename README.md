@@ -211,7 +211,7 @@ The following additional language support options are available:
 - C# support: install Mono with [Homebrew][brew] or by downloading the [Mono Mac
   package][mono-install-osx] and add `--cs-completer` when calling
   `install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
+- Go support: install [Go][go-install] and add `--gocode-completer` when calling
   `install.py`.
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
   install the TypeScript SDK with `npm install -g typescript`.
