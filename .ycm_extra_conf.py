@@ -29,6 +29,7 @@
 # For more information, please refer to <http://unlicense.org/>
 
 import os
+import subprocess
 
 DIR_OF_THIS_SCRIPT = os.path.abspath( os.path.dirname( __file__ ) )
 DIR_OF_THIRD_PARTY = os.path.join( DIR_OF_THIS_SCRIPT, 'third_party' )
@@ -46,19 +47,23 @@ def GetStandardLibraryIndexInSysPath( sys_path ):
 def PythonSysPath( **kwargs ):
   sys_path = kwargs[ 'sys_path' ]
 
-  for folder in os.listdir( DIR_OF_THIRD_PARTY ):
-    sys_path.insert( 0, os.path.realpath( os.path.join( DIR_OF_THIRD_PARTY,
-                                                        folder ) ) )
+  dependencies = [ os.path.join( DIR_OF_THIS_SCRIPT, 'python' ),
+                   os.path.join( DIR_OF_THIRD_PARTY, 'requests-futures' ),
+                   os.path.join( DIR_OF_THIRD_PARTY, 'ycmd' ),
+                   os.path.join( DIR_OF_YCMD_THIRD_PARTY, 'frozendict' ),
+                   os.path.join( DIR_OF_YCMD_THIRD_PARTY, 'requests' ) ]
 
-  for folder in os.listdir( DIR_OF_YCMD_THIRD_PARTY ):
-    if folder == 'python-future':
-      folder = os.path.join( folder, 'src' )
-      sys_path.insert( GetStandardLibraryIndexInSysPath( sys_path ) + 1,
-                       os.path.realpath( os.path.join( DIR_OF_YCMD_THIRD_PARTY,
-                                                       folder ) ) )
-      continue
+  # The concurrent.futures module is part of the standard library on Python 3.
+  interpreter_path = kwargs[ 'interpreter_path' ]
+  major_version = int( subprocess.check_output( [
+    interpreter_path, '-c', 'import sys; print( sys.version_info[ 0 ] )' ]
+  ).rstrip().decode( 'utf8' ) )
+  if major_version == 2:
+    dependencies.append( os.path.join( DIR_OF_THIRD_PARTY, 'pythonfutures' ) )
 
-    sys_path.insert( 0, os.path.realpath( os.path.join( DIR_OF_YCMD_THIRD_PARTY,
-                                                        folder ) ) )
+  sys_path[ 0:0 ] = dependencies
+  sys_path.insert( GetStandardLibraryIndexInSysPath( sys_path ) + 1,
+                   os.path.join( DIR_OF_YCMD_THIRD_PARTY, 'python-future',
+                                 'src' ) )
 
   return sys_path

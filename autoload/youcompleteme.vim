@@ -186,23 +186,34 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
-import os
+import os.path as p
 import sys
 import traceback
 import vim
 
-# Add python sources folder to the system path.
-script_folder = vim.eval( 's:script_folder_path' )
-sys.path.insert( 0, os.path.join( script_folder, '..', 'python' ) )
-sys.path.insert( 0, os.path.join( script_folder, '..', 'third_party', 'ycmd' ) )
+root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
+third_party_folder = p.join( root_folder, 'third_party' )
+ycmd_third_party_folder = p.join( third_party_folder, 'ycmd', 'third_party' )
+
+# Add dependencies to Python path.
+dependencies = [ p.join( root_folder, 'python' ),
+                 p.join( third_party_folder, 'requests-futures' ),
+                 p.join( third_party_folder, 'ycmd' ),
+                 p.join( ycmd_third_party_folder, 'frozendict' ),
+                 p.join( ycmd_third_party_folder, 'requests' ) ]
+
+# The concurrent.futures module is part of the standard library on Python 3.
+if sys.version_info[ 0 ] == 2:
+  dependencies.append( p.join( third_party_folder, 'pythonfutures' ) )
+
+sys.path[ 0:0 ] = dependencies
 
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
-  from ycmd import server_utils as su
-  su.AddNearestThirdPartyFoldersToSysPath( script_folder )
-  # We need to import ycmd's third_party folders as well since we import and
-  # use ycmd code in the client.
-  su.AddNearestThirdPartyFoldersToSysPath( su.__file__ )
+  # The python-future module must be inserted after the standard library path.
+  from ycmd.server_utils import GetStandardLibraryIndexInSysPath
+  sys.path.insert( GetStandardLibraryIndexInSysPath() + 1,
+                   p.join( ycmd_third_party_folder, 'python-future', 'src' ) )
 
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
