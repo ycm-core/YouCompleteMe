@@ -57,7 +57,11 @@ def OmniCompleter_GetCompletions_Cache_List_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' },
+          { 'word': 'cdef' }
+        ] ),
         'completion_start_column': 6
       } )
     )
@@ -105,7 +109,11 @@ def OmniCompleter_GetCompletions_NoCache_List_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' },
+          { 'word': 'cdef' }
+        ] ),
         'completion_start_column': 6
       } )
     )
@@ -131,7 +139,11 @@ def OmniCompleter_GetCompletions_NoCache_ListFilter_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' },
+          { 'word': 'cdef' }
+        ] ),
         'completion_start_column': 6
       } )
     )
@@ -157,7 +169,11 @@ def OmniCompleter_GetCompletions_NoCache_UseFindStart_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' },
+          { 'word': 'cdef' }
+        ] ),
         'completion_start_column': 1
       } )
     )
@@ -207,7 +223,7 @@ def OmniCompleter_GetCompletions_Cache_Object_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': [ 'CDtEF' ],
+        'completions': [ { 'word': 'CDtEF' } ],
         'completion_start_column': 6
       } )
     )
@@ -427,9 +443,11 @@ def OmniCompleter_GetCompletions_Cache_List_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': [ 'å_unicode_identifier',
-                         'πππππππ yummy πie',
-                         '†est' ],
+        'completions': [
+          { 'word': 'å_unicode_identifier' },
+          { 'word': 'πππππππ yummy πie' },
+          { 'word': '†est' }
+        ],
         'completion_start_column': 13
       } )
     )
@@ -453,9 +471,11 @@ def OmniCompleter_GetCompletions_NoCache_List_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ '†est',
-                                       'å_unicode_identifier',
-                                       'πππππππ yummy πie' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': '†est' },
+          { 'word': 'å_unicode_identifier' },
+          { 'word': 'πππππππ yummy πie' }
+        ] ),
         'completion_start_column': 13
       } )
     )
@@ -479,7 +499,7 @@ def OmniCompleter_GetCompletions_Cache_List_Filter_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': [ 'πππππππ yummy πie' ],
+        'completions': [ { 'word': 'πππππππ yummy πie' } ],
         'completion_start_column': 13
       } )
     )
@@ -503,7 +523,7 @@ def OmniCompleter_GetCompletions_NoCache_List_Filter_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'πππππππ yummy πie' ] ),
+        'completions': ToBytesOnPY2( [ { 'word': 'πππππππ yummy πie' } ] ),
         'completion_start_column': 13
       } )
     )
@@ -643,7 +663,7 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'length' ] ),
+        'completions': ToBytesOnPY2( [ { 'word': 'length' } ] ),
         'completion_start_column': 6
       } )
     )
@@ -678,7 +698,7 @@ def OmniCompleter_GetCompletions_MoveCursorPositionAtStartColumn_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'length' ] ),
+        'completions': ToBytesOnPY2( [ { 'word': 'length' } ] ),
         'completion_start_column': 6
       } )
     )
@@ -711,14 +731,14 @@ def StartColumnCompliance( ycm,
 
 
 def OmniCompleter_GetCompletions_StartColumnCompliance_test():
-  yield StartColumnCompliance, -4, [ 'foo' ], 3
+  yield StartColumnCompliance, -4, [ { 'word': 'foo' } ], 3
   yield StartColumnCompliance, -3, [],        1
   yield StartColumnCompliance, -2, [],        1
-  yield StartColumnCompliance, -1, [ 'foo' ], 3
-  yield StartColumnCompliance,  0, [ 'foo' ], 1
-  yield StartColumnCompliance,  1, [ 'foo' ], 2
-  yield StartColumnCompliance,  2, [ 'foo' ], 3
-  yield StartColumnCompliance,  3, [ 'foo' ], 3
+  yield StartColumnCompliance, -1, [ { 'word': 'foo' } ], 3
+  yield StartColumnCompliance,  0, [ { 'word': 'foo' } ], 1
+  yield StartColumnCompliance,  1, [ { 'word': 'foo' } ], 2
+  yield StartColumnCompliance,  2, [ { 'word': 'foo' } ], 3
+  yield StartColumnCompliance,  3, [ { 'word': 'foo' } ], 3
 
 
 @YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 0,
@@ -763,8 +783,38 @@ def OmniCompleter_GetCompletions_NoCache_ForceSemantic_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'test' ] ),
+        'completions': ToBytesOnPY2( [ { 'word': 'test' } ] ),
         'completion_start_column': 1
+      } )
+    )
+
+
+@YouCompleteMeInstance( { 'g:ycm_cache_omnifunc': 1,
+                          'g:ycm_semantic_triggers': TRIGGERS } )
+def OmniCompleter_GetCompletions_ConvertStringsToDictionaries_test( ycm ):
+  def Omnifunc( findstart, base ):
+    if findstart:
+      return 5
+    return [
+      { 'word': 'a' },
+      'b'
+    ]
+
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'test.' ],
+                              filetype = FILETYPE,
+                              omnifunc = Omnifunc )
+
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 7 ) ):
+    ycm.SendCompletionRequest()
+    assert_that(
+      ycm.GetCompletionResponse(),
+      has_entries( {
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' }
+        ] ),
+        'completion_start_column': 6
       } )
     )
 
@@ -843,7 +893,11 @@ def OmniCompleter_GetCompletions_FiletypeDisabled_ForceSemantic_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' },
+          { 'word': 'cdef' }
+        ] ),
         'completion_start_column': 6
       } )
     )
@@ -869,7 +923,11 @@ def OmniCompleter_GetCompletions_AllFiletypesDisabled_ForceSemantic_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': ToBytesOnPY2( [ 'a', 'b', 'cdef' ] ),
+        'completions': ToBytesOnPY2( [
+          { 'word': 'a' },
+          { 'word': 'b' },
+          { 'word': 'cdef' }
+        ] ),
         'completion_start_column': 6
       } )
     )
