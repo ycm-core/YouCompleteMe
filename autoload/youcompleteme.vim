@@ -414,9 +414,11 @@ function! s:AllowedToCompleteInBuffer( buffer )
     return 0
   endif
 
-  let whitelist_allows = has_key( g:ycm_filetype_whitelist, '*' ) ||
+  let whitelist_allows = type( g:ycm_filetype_whitelist ) != type( {} ) ||
+        \ has_key( g:ycm_filetype_whitelist, '*' ) ||
         \ has_key( g:ycm_filetype_whitelist, buffer_filetype )
-  let blacklist_allows = !has_key( g:ycm_filetype_blacklist, buffer_filetype )
+  let blacklist_allows = type( g:ycm_filetype_blacklist ) != type( {} ) ||
+        \ !has_key( g:ycm_filetype_blacklist, buffer_filetype )
 
   let allowed = whitelist_allows && blacklist_allows
   if allowed
