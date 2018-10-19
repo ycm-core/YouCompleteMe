@@ -31,6 +31,13 @@ from ycm import vimsupport
 
 _logger = logging.getLogger( __name__ )
 
+NO_COMPLETIONS = {
+  'line': -1,
+  'column': -1,
+  'completion_start_column': -1,
+  'completions': []
+}
+
 
 class CompletionRequest( BaseRequest ):
   def __init__( self, request_data ):
@@ -56,12 +63,12 @@ class CompletionRequest( BaseRequest ):
 
   def RawResponse( self ):
     if not self._response_future:
-      return { 'completions': [], 'completion_start_column': -1 }
+      return NO_COMPLETIONS
 
     response = self.HandleFuture( self._response_future,
                                   truncate_message = True )
     if not response:
-      return { 'completions': [], 'completion_start_column': -1 }
+      return NO_COMPLETIONS
 
     # Vim may not be able to convert the 'errors' entry to its internal format
     # so we remove it from the response.
@@ -71,6 +78,8 @@ class CompletionRequest( BaseRequest ):
       _logger.error( exception )
       DisplayServerException( exception, truncate_message = True )
 
+    response[ 'line' ] = self.request_data[ 'line_num' ]
+    response[ 'column' ] = self.request_data[ 'column_num' ]
     return response
 
 
