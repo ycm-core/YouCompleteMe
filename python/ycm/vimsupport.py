@@ -59,6 +59,13 @@ SIGN_ID_FOR_BUFFER = defaultdict( lambda: SIGN_BUFFER_ID_INITIAL_VALUE )
 SIGN_PLACE_REGEX = re.compile(
   r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)$" )
 
+NO_COMPLETIONS = {
+  'line': -1,
+  'column': -1,
+  'completion_start_column': -1,
+  'completions': []
+}
+
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""

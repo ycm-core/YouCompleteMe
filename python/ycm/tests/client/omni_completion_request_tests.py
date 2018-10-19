@@ -34,6 +34,8 @@ def BuildOmnicompletionRequest( results, start_column = 1 ):
   omni_completer.ComputeCandidates = MagicMock( return_value = results )
 
   request_data = {
+    'line_num': 1,
+    'column_num': 1,
     'start_column': start_column
   }
   request = OmniCompletionRequest( omni_completer, request_data )
@@ -53,8 +55,10 @@ def Response_FromOmniCompleter_test():
   request = BuildOmnicompletionRequest( results )
 
   eq_( request.Response(), {
-    'completions': results,
-    'completion_start_column': 1
+    'line': 1,
+    'column': 1,
+    'completion_start_column': 1,
+    'completions': results
   } )
 
 
