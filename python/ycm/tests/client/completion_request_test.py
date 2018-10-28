@@ -123,6 +123,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'abbr'     : 'MENU TEXT',
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
+      'info'     : '',
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
@@ -169,25 +170,4 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
-    } )
-
-
-  def No_Insertion_Text_test( self ):
-    self._Check( 0, {
-      'menu_text':       'MENU TEXT',
-      'extra_menu_info': 'EXTRA MENU INFO',
-      'kind':            'K',
-      'detailed_info':   'DETAILED INFO',
-      'extra_data': {
-        'doc_string':    'DOC STRING',
-      },
-    }, {
-      'word'     : '',
-      'abbr'     : 'MENU TEXT',
-      'menu'     : 'EXTRA MENU INFO',
-      'kind'     : 'k',
-      'info'     : 'DETAILED INFO\nDOC STRING',
-      'dup'      : 1,
-      'empty'    : 1,
-      'user_data': '0'
     } )
