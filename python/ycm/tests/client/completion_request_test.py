@@ -48,7 +48,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       raise
 
 
-  def All_Fields_test( self ):
+  def AllFields_test( self ):
     self._Check( 0, {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -70,7 +70,22 @@ class ConvertCompletionResponseToVimDatas_test( object ):
     } )
 
 
-  def Just_Detailed_Info_test( self ):
+  def OnlyInsertionTextField_test( self ):
+    self._Check( 17, {
+      'insertion_text':  'INSERTION TEXT'
+    }, {
+      'word'     : 'INSERTION TEXT',
+      'abbr'     : '',
+      'menu'     : '',
+      'kind'     : '',
+      'info'     : '',
+      'dup'      : 1,
+      'empty'    : 1,
+      'user_data': '17',
+    } )
+
+
+  def JustDetailedInfo_test( self ):
     self._Check( 9999999999, {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -89,7 +104,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
     } )
 
 
-  def Just_Doc_String_test( self ):
+  def JustDocString_test( self ):
     self._Check( 'not_an_int', {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -110,7 +125,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
     } )
 
 
-  def Extra_Info_No_Doc_String_test( self ):
+  def ExtraInfoNoDocString_test( self ):
     self._Check( 0, {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -123,13 +138,36 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'abbr'     : 'MENU TEXT',
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
+      'info'     : '',
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
     } )
 
 
-  def Extra_Info_No_Doc_String_With_Detailed_Info_test( self ):
+  def NullCharactersInExtraInfoAndDocString_test( self ):
+    self._Check( '0', {
+      'insertion_text':  'INSERTION TEXT',
+      'menu_text':       'MENU TEXT',
+      'extra_menu_info': 'EXTRA MENU INFO',
+      'kind':            'K',
+      'detailed_info':   'DETAILED\x00INFO',
+      'extra_data': {
+        'doc_string': 'DOC\x00STRING'
+      },
+    }, {
+      'word'     : 'INSERTION TEXT',
+      'abbr'     : 'MENU TEXT',
+      'menu'     : 'EXTRA MENU INFO',
+      'kind'     : 'k',
+      'info'     : 'DETAILEDINFO\nDOCSTRING',
+      'dup'      : 1,
+      'empty'    : 1,
+      'user_data': '0',
+    } )
+
+
+  def ExtraInfoNoDocStringWithDetailedInfo_test( self ):
     self._Check( '0', {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -150,7 +188,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
     } )
 
 
-  def Empty_Insertion_Text_test( self ):
+  def EmptyInsertionText_test( self ):
     self._Check( 0, {
       'insertion_text':  '',
       'menu_text':       'MENU TEXT',
@@ -169,25 +207,4 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
-    } )
-
-
-  def No_Insertion_Text_test( self ):
-    self._Check( 0, {
-      'menu_text':       'MENU TEXT',
-      'extra_menu_info': 'EXTRA MENU INFO',
-      'kind':            'K',
-      'detailed_info':   'DETAILED INFO',
-      'extra_data': {
-        'doc_string':    'DOC STRING',
-      },
-    }, {
-      'word'     : '',
-      'abbr'     : 'MENU TEXT',
-      'menu'     : 'EXTRA MENU INFO',
-      'kind'     : 'k',
-      'info'     : 'DETAILED INFO\nDOC STRING',
-      'dup'      : 1,
-      'empty'    : 1,
-      'user_data': '0'
     } )
