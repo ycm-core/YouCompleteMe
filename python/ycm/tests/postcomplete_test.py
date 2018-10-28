@@ -66,17 +66,21 @@ def BuildCompletion( insertion_text = 'Test',
                      detailed_info = None,
                      kind = None,
                      extra_data = None ):
-  if extra_data is None:
-    extra_data = {}
-
-  return {
-    'extra_data': extra_data,
-    'insertion_text': insertion_text,
-    'menu_text': menu_text,
-    'extra_menu_info': extra_menu_info,
-    'kind': kind,
-    'detailed_info': detailed_info,
+  completion = {
+    'insertion_text': insertion_text
   }
+
+  if extra_menu_info:
+    completion[ 'extra_menu_info' ] = extra_menu_info
+  if menu_text:
+    completion[ 'menu_text' ] = menu_text
+  if detailed_info:
+    completion[ 'detailed_info' ] = detailed_info
+  if kind:
+    completion[ 'kind' ] = kind
+  if extra_data:
+    completion[ 'extra_data' ] = extra_data
+  return completion
 
 
 def BuildCompletionNamespace( namespace = None,
