@@ -3375,7 +3375,7 @@ The latest version of the plugin is available at
 The author's homepage is <http://val.markovic.io>.
 
 Please do **NOT** go to #vim on freenode for support. Please contact the
-YouCompleteMe maintainers directly using the [contact details](#contact) below.
+YouCompleteMe maintainers directly using the [contact details](#contact).
 
 License
 -------
