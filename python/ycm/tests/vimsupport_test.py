@@ -1339,7 +1339,7 @@ def GetDiagnosticMatchPattern_ErrorInMiddleOfLine_test():
   with patch( 'vim.current.buffer', current_buffer ):
     assert_that(
       vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 21 ),
-      equal_to( '\%1l\%16c\_.\{-}\%1l\%21c' )
+      equal_to( '\\%1l\\%16c\\_.\\{-}\\%1l\\%21c' )
     )
 
 
@@ -1352,7 +1352,7 @@ def AddDiagnosticSyntaxMatch_WarningAtEndOfLine_test():
   with patch( 'vim.current.buffer', current_buffer ):
     assert_that(
       vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 23 ),
-      equal_to( '\%1l\%16c\_.\{-}\%1l\%23c' )
+      equal_to( '\\%1l\\%16c\\_.\\{-}\\%1l\\%23c' )
     )
 
 
@@ -1365,7 +1365,7 @@ def AddDiagnosticSyntaxMatch_UnicodeAtEndOfLine_test():
   with patch( 'vim.current.buffer', current_buffer ):
     assert_that(
       vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 19 ),
-      equal_to( '\%1l\%16c\_.\{-}\%1l\%19c' )
+      equal_to( '\\%1l\\%16c\\_.\\{-}\\%1l\\%19c' )
     )
 
 

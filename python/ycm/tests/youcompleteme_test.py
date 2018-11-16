@@ -126,9 +126,10 @@ def RunNotifyUserIfServerCrashed( ycm, test, post_vim_message ):
 
 
 def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedCore_test():
-  message = ( "The ycmd server SHUT DOWN \(restart with ':YcmRestartServer'\). "
-              "Unexpected error while loading the YCM core library. Type "
-              "':YcmToggleLogs ycmd_\d+_stderr_.+.log' to check the logs." )
+  message = (
+    "The ycmd server SHUT DOWN \\(restart with ':YcmRestartServer'\\). "
+    "Unexpected error while loading the YCM core library. Type "
+    "':YcmToggleLogs ycmd_\\d+_stderr_.+.log' to check the logs." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 3,
     'expected_message': matches_regexp( message )
@@ -178,9 +179,10 @@ def YouCompleteMe_NotifyUserIfServerCrashed_OutdatedCore_test():
 
 
 def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedExitCode_test():
-  message = ( "The ycmd server SHUT DOWN \(restart with ':YcmRestartServer'\). "
-              "Unexpected exit code 1. Type "
-              "':YcmToggleLogs ycmd_\d+_stderr_.+.log' to check the logs." )
+  message = (
+    "The ycmd server SHUT DOWN \\(restart with ':YcmRestartServer'\\). "
+    "Unexpected exit code 1. Type "
+    "':YcmToggleLogs ycmd_\\d+_stderr_.+.log' to check the logs." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 1,
     'expected_message': matches_regexp( message )
@@ -212,7 +214,7 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
         '  Flags: \\[u?\'_TEMP_FILE_\'.*\\]\n'
         '  Translation unit: .+\n)'
         'Server running at: .+\n'
-        'Server process ID: \d+\n'
+        'Server process ID: \\d+\n'
         'Server logfiles:\n'
         '  .+\n'
         '  .+' )
@@ -231,7 +233,7 @@ def YouCompleteMe_DebugInfo_ServerNotRunning_test( ycm ):
         'Client logfile: .+\n'
         'Server errored, no debug info from server\n'
         'Server running at: .+\n'
-        'Server process ID: \d+\n'
+        'Server process ID: \\d+\n'
         'Server logfiles:\n'
         '  .+\n'
         '  .+' )
@@ -626,9 +628,9 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
       test_utils.VIM_MATCHES_FOR_WINDOW,
       has_entries( {
         1: contains(
-          VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
-          VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
-          VimMatch( 'YcmErrorSection', '\%3l\%8c' )
+          VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
+          VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
+          VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
         )
       } )
     )
@@ -670,8 +672,8 @@ def YouCompleteMe_UpdateDiagnosticInterface_PrioritizeErrorsOverWarnings_test(
       test_utils.VIM_MATCHES_FOR_WINDOW,
       has_entries( {
         1: contains(
-          VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
-          VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' )
+          VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
+          VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' )
         )
       } )
     )
@@ -692,9 +694,9 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
 
   test_utils.VIM_MATCHES_FOR_WINDOW.clear()
   test_utils.VIM_MATCHES_FOR_WINDOW[ 1 ] = [
-    VimMatch( 'YcmWarningSection', '\%3l\%5c\_.\{-}\%3l\%7c' ),
-    VimMatch( 'YcmWarningSection', '\%3l\%3c\_.\{-}\%3l\%9c' ),
-    VimMatch( 'YcmErrorSection', '\%3l\%8c' )
+    VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
+    VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
+    VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
   ]
 
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -862,7 +864,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
     test_utils.VIM_MATCHES_FOR_WINDOW,
     has_entries( {
       1: contains(
-        VimMatch( 'YcmErrorSection', '\%1l\%1c\_.\{-}\%1l\%1c' )
+        VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
       )
     } )
   )
@@ -1049,10 +1051,10 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
     test_utils.VIM_MATCHES_FOR_WINDOW,
     has_entries( {
       1: contains(
-        VimMatch( 'YcmErrorSection', '\%1l\%1c\_.\{-}\%1l\%1c' )
+        VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
       ),
       3: contains(
-        VimMatch( 'YcmErrorSection', '\%3l\%3c\_.\{-}\%3l\%3c' )
+        VimMatch( 'YcmErrorSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%3c' )
       )
     } )
   )
