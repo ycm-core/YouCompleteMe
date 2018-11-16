@@ -1230,16 +1230,23 @@ def AutocommandEventsIgnored( events = [ 'all' ] ):
     vim.options[ 'eventignore' ] = old_eventignore
 
 
+def GetPreviousWindowNumber():
+  return GetIntValue( 'winnr("#")' ) - 1
+
+
 @contextlib.contextmanager
 def CurrentWindow():
   """Context manager to perform operations on other windows than the current one
   without triggering autocommands related to window movement. Use the
   SwitchWindow function to move to other windows while under the context."""
+  previous_window = vim.windows[ GetPreviousWindowNumber() ]
   current_window = vim.current.window
   with AutocommandEventsIgnored( [ 'WinEnter', 'Winleave' ] ):
     try:
       yield
     finally:
+      # Ensure <c-w>p still go to the previous window.
+      vim.current.window = previous_window
       vim.current.window = current_window
 
 
