@@ -178,6 +178,14 @@ def _MockVimBufferEval( value ):
   return None
 
 
+def _MockVimWindowEval( value ):
+  if value == 'winnr("#")':
+    # For simplicity, we always assume there is no previous window.
+    return 0
+
+  return None
+
+
 def _MockVimOptionsEval( value ):
   result = VIM_OPTIONS.get( value )
   if result is not None:
@@ -263,6 +271,10 @@ def _MockVimEval( value ):
     return result
 
   result = _MockVimBufferEval( value )
+  if result is not None:
+    return result
+
+  result = _MockVimWindowEval( value )
   if result is not None:
     return result
 
@@ -485,10 +497,10 @@ class VimWindows( object ):
 
   def __getitem__( self, number ):
     """Emulates vim.windows[ number ]"""
-    for window in self._windows:
-      if number == window.number:
-        return window
-    raise KeyError( number )
+    try:
+      return self._windows[ number ]
+    except IndexError:
+      raise IndexError( 'no such window' )
 
 
   def __iter__( self ):
@@ -581,7 +593,7 @@ def MockVimBuffers( buffers, window_buffers, cursor_position = ( 1, 1 ) ):
   with patch( 'vim.buffers', VimBuffers( buffers ) ):
     with patch( 'vim.windows', VimWindows( window_buffers,
                                            cursor_position ) ) as windows:
-      with patch( 'vim.current', VimCurrent( windows[ 1 ] ) ):
+      with patch( 'vim.current', VimCurrent( windows[ 0 ] ) ):
         yield VIM_MOCK
 
 
