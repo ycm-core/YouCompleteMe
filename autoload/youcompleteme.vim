@@ -23,11 +23,9 @@ set cpo&vim
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
 let s:completion_stopped = 0
-let s:default_completion = {
-      \   'start_column': -1,
-      \   'candidates': []
-      \ }
-let s:completion = s:default_completion
+" These two variables are initialized in youcompleteme#Enable.
+let s:default_completion = {}
+let s:completion = {}
 let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
@@ -147,6 +145,9 @@ function! youcompleteme#Enable()
   let s:pollers.server_ready.id = timer_start(
         \ s:pollers.server_ready.wait_milliseconds,
         \ function( 's:PollServerReady' ) )
+
+  let s:default_completion = s:Pyeval( 'vimsupport.NO_COMPLETIONS' )
+  let s:completion = s:default_completion
 endfunction
 
 
@@ -811,11 +812,7 @@ function! s:PollCompletion( ... )
     return
   endif
 
-  let response = s:Pyeval( 'ycm_state.GetCompletionResponse()' )
-  let s:completion = {
-        \   'start_column': response.completion_start_column,
-        \   'candidates': response.completions
-        \ }
+  let s:completion = s:Pyeval( 'ycm_state.GetCompletionResponse()' )
   call s:Complete()
 endfunction
 
@@ -824,16 +821,17 @@ function! s:Complete()
   " Do not call user's completion function if the start column is after the
   " current column or if there are no candidates. Close the completion menu
   " instead. This avoids keeping the user in completion mode.
-  if s:completion.start_column > col( '.' ) || empty( s:completion.candidates )
+  if s:completion.completion_start_column > s:completion.column ||
+        \ empty( s:completion.completions )
     call s:CloseCompletionMenu()
   else
     " <c-x><c-u> invokes the user's completion function (which we have set to
     " youcompleteme#CompleteFunc), and <c-p> tells Vim to select the previous
-    " completion candidate. This is necessary because by default, Vim selects the
-    " first candidate when completion is invoked, and selecting a candidate
-    " automatically replaces the current text with it. Calling <c-p> forces Vim to
-    " deselect the first candidate and in turn preserve the user's current text
-    " until he explicitly chooses to replace it with a completion.
+    " completion candidate. This is necessary because by default, Vim selects
+    " the first candidate when completion is invoked, and selecting a candidate
+    " automatically replaces the current text with it. Calling <c-p> forces Vim
+    " to deselect the first candidate and in turn preserve the user's current
+    " text until he explicitly chooses to replace it with a completion.
     call s:SendKeys( "\<C-X>\<C-U>\<C-P>" )
   endif
 endfunction
@@ -841,9 +839,25 @@ endfunction
 
 function! youcompleteme#CompleteFunc( findstart, base )
   if a:findstart
-    return s:completion.start_column - 1
+    " When auto-wrapping is enabled, Vim wraps the current line after the
+    " completion request is sent but before calling this function. The starting
+    " column returned by the server is invalid in that case and must be
+    " recomputed.
+    if s:completion.line != line( '.' )
+      " Given
+      "   scb: column where the completion starts before auto-wrapping
+      "   cb: cursor column before auto-wrapping
+      "   sca: column where the completion starts after auto-wrapping
+      "   ca: cursor column after auto-wrapping
+      " we have
+      "   ca - sca = cb - scb
+      "   sca = scb + ca - cb
+      let s:completion.completion_start_column +=
+            \ col( '.' ) - s:completion.column
+    endif
+    return s:completion.completion_start_column - 1
   endif
-  return s:completion.candidates
+  return s:completion.completions
 endfunction
 
 
