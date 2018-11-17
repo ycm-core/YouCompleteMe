@@ -190,48 +190,42 @@ def _FilterToMatchingCompletions( completed_item, completions ):
   return matched_completions
 
 
+def _GetCompletionInfoField( completion_data ):
+  info = completion_data.get( 'detailed_info', '' )
+
+  if 'extra_data' in completion_data:
+    docstring = completion_data[ 'extra_data' ].get( 'doc_string', '' )
+    if docstring:
+      if info:
+        info += '\n' + docstring
+      else:
+        info = docstring
+
+  # This field may contain null characters e.g. \x00 in Python docstrings. Vim
+  # cannot evaluate such characters so they are removed.
+  return info.replace( '\x00', '' )
+
+
 def _ConvertCompletionDataToVimData( completion_identifier, completion_data ):
-  # see :h complete-items for a description of the dictionary fields
-  vim_data = {
-    'word'  : '',
-    'dup'   : 1,
-    'empty' : 1,
+  # See :h complete-items for a description of the dictionary fields.
+  return {
+    'word'     : completion_data[ 'insertion_text' ],
+    'abbr'     : completion_data.get( 'menu_text', '' ),
+    'menu'     : completion_data.get( 'extra_menu_info', '' ),
+    'info'     : _GetCompletionInfoField( completion_data ),
+    'kind'     : ToUnicode( completion_data.get( 'kind', '' ) )[ :1 ].lower(),
+    'dup'      : 1,
+    'empty'    : 1,
+    # We store the completion item index as a string in the completion
+    # user_data. This allows us to identify the _exact_ item that was completed
+    # in the CompleteDone handler, by inspecting this item from v:completed_item
+    #
+    # We convert to string because completion user data items must be strings.
+    #
+    # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
+    # the item to the dictionary is harmless in earlier Vims.
+    'user_data': str( completion_identifier )
   }
-
-  if ( 'extra_data' in completion_data and
-       'doc_string' in completion_data[ 'extra_data' ] ):
-    doc_string = completion_data[ 'extra_data' ][ 'doc_string' ]
-  else:
-    doc_string = ""
-
-  if 'insertion_text' in completion_data:
-    vim_data[ 'word' ] = completion_data[ 'insertion_text' ]
-  if 'menu_text' in completion_data:
-    vim_data[ 'abbr' ] = completion_data[ 'menu_text' ]
-  if 'extra_menu_info' in completion_data:
-    vim_data[ 'menu' ] = completion_data[ 'extra_menu_info' ]
-  if 'kind' in completion_data:
-    kind = ToUnicode( completion_data[ 'kind' ] )
-    if kind:
-      vim_data[ 'kind' ] = kind[ 0 ].lower()
-  if 'detailed_info' in completion_data:
-    vim_data[ 'info' ] = completion_data[ 'detailed_info' ]
-    if doc_string:
-      vim_data[ 'info' ] += '\n' + doc_string
-  elif doc_string:
-    vim_data[ 'info' ] = doc_string
-
-  # We store the completion item index as a string in the completion user_data.
-  # This allows us to identify the _exact_ item that was completed in the
-  # CompleteDone handler, by inspecting this item from v:completed_item
-  #
-  # We convert to string because completion user data items must be strings.
-  #
-  # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
-  # the item to the dictionary is harmless in earlier Vims.
-  vim_data[ 'user_data' ] = str( completion_identifier )
-
-  return vim_data
 
 
 def _ConvertCompletionDatasToVimDatas( response_data ):
