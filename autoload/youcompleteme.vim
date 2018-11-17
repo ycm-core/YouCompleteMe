@@ -194,14 +194,13 @@ import vim
 
 root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
 third_party_folder = p.join( root_folder, 'third_party' )
-ycmd_third_party_folder = p.join( third_party_folder, 'ycmd', 'third_party' )
 
 # Add dependencies to Python path.
 dependencies = [ p.join( root_folder, 'python' ),
                  p.join( third_party_folder, 'requests-futures' ),
-                 p.join( third_party_folder, 'ycmd' ),
-                 p.join( ycmd_third_party_folder, 'frozendict' ),
-                 p.join( ycmd_third_party_folder, 'requests' ) ]
+                 p.join( third_party_folder, 'protoycmd' ),
+                 p.join( third_party_folder, 'frozendict' ),
+                 p.join( third_party_folder, 'requests' ) ]
 
 # The concurrent.futures module is part of the standard library on Python 3.
 if sys.version_info[ 0 ] == 2:
@@ -212,9 +211,9 @@ sys.path[ 0:0 ] = dependencies
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
   # The python-future module must be inserted after the standard library path.
-  from ycmd.server_utils import GetStandardLibraryIndexInSysPath
+  from protoycmd.server_utils import GetStandardLibraryIndexInSysPath
   sys.path.insert( GetStandardLibraryIndexInSysPath() + 1,
-                   p.join( ycmd_third_party_folder, 'python-future', 'src' ) )
+                   p.join( third_party_folder, 'python-future', 'src' ) )
 
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme

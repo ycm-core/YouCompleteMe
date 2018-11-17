@@ -24,8 +24,8 @@ from builtins import *  # noqa
 
 import vim
 from ycm import vimsupport
-from ycmd import utils
-from ycmd.completers.completer import Completer
+from protoycmd import utils
+from protoycmd.completers.completer import Completer
 from ycm.client.base_request import BaseRequest
 
 OMNIFUNC_RETURNED_BAD_VALUE = 'Omnifunc returned bad value to YCM!'

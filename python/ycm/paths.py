@@ -42,7 +42,7 @@ PYTHON_BINARY_REGEX = re.compile(
 def PathToPythonInterpreter():
   # Not calling the Python interpreter to check its version as it significantly
   # impacts startup time.
-  from ycmd import utils
+  from protoycmd import utils
 
   python_interpreter = vim.eval( 'g:ycm_server_python_interpreter' )
   if python_interpreter:
@@ -83,7 +83,7 @@ def PathToPythonInterpreter():
 
 
 def _PathToPythonUsedDuringBuild():
-  from ycmd import utils
+  from protoycmd import utils
 
   try:
     filepath = os.path.join( DIR_OF_YCMD, 'PYTHON_USED_DURING_BUILDING' )

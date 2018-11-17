@@ -35,7 +35,7 @@ import warnings
 from ycm.client.base_request import BaseRequest
 from ycm.tests import test_utils
 from ycm.youcompleteme import YouCompleteMe
-from ycmd.utils import CloseStandardStreams, WaitUntilProcessIsTerminated
+from protoycmd.utils import CloseStandardStreams, WaitUntilProcessIsTerminated
 
 # The default options which are only relevant to the client, not the server and
 # thus are not part of default_options.json, but are required for a working

@@ -35,7 +35,7 @@ from nose.tools import eq_
 from hamcrest import ( assert_that, calling, contains, empty, equal_to,
                        has_entry, raises )
 from mock import MagicMock, call, patch
-from ycmd.utils import ToBytes
+from protoycmd.utils import ToBytes
 import os
 import json
 
@@ -1680,7 +1680,7 @@ def InsertNamespace_append_test( vim_current, *args ):
   AssertBuffersAreEqualAsBytes( expected_buffer, vim_current.buffer )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
@@ -1700,7 +1700,7 @@ def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
@@ -1718,7 +1718,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
@@ -1738,7 +1738,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
@@ -1758,7 +1758,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command',
         side_effect = [ None, VimError( 'Unknown code' ), None ] )
@@ -1774,7 +1774,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
     )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command',
         new_callable = ExtendedMock,
@@ -1792,7 +1792,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'same-buffer' } )
 @patch( 'vim.command',
         new_callable = ExtendedMock,
@@ -1810,7 +1810,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Abort_test( vim_command ):
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'split-or-existing-window' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_Split_CurrentTab_NotAlreadyOpened_test(
@@ -1833,7 +1833,7 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_NotAlreadyOpened_test(
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'split-or-existing-window' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
@@ -1860,7 +1860,7 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'split-or-existing-window' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
@@ -1879,7 +1879,7 @@ def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'split-or-existing-window' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_Split_AllTabs_AlreadyOpened_test(
@@ -1905,7 +1905,7 @@ def JumpToLocation_DifferentFile_Split_AllTabs_AlreadyOpened_test(
       ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'new-or-existing-tab' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_NewOrExistingTab_NotAlreadyOpened_test(
@@ -1924,7 +1924,7 @@ def JumpToLocation_DifferentFile_NewOrExistingTab_NotAlreadyOpened_test(
     ] )
 
 
-@patch( 'ycmd.user_options_store._USER_OPTIONS',
+@patch( 'protoycmd.user_options_store._USER_OPTIONS',
         { 'goto_buffer_command': 'new-or-existing-tab' } )
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_NewOrExistingTab_AlreadyOpened_test(

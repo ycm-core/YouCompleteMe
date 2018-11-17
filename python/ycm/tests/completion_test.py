@@ -34,7 +34,7 @@ from mock import call, MagicMock, patch
 from nose.tools import ok_
 
 from ycm.tests import PathToTestFile, YouCompleteMeInstance
-from ycmd.responses import ServerError
+from protoycmd.responses import ServerError
 
 
 @contextlib.contextmanager
