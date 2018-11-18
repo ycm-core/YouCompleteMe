@@ -213,8 +213,8 @@ The following additional language support options are available:
   `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
-- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
-  install the TypeScript SDK with `npm install -g typescript`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
+  add `--ts-completer` when calling `install.py`.
 - Rust support: install [Rust][rust-install] and add
   `--rust-completer` when calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -286,8 +286,8 @@ The following additional language support options are available:
   when calling `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
-- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
-  install the TypeScript SDK with `npm install -g typescript`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
+  add `--ts-completer` when calling `install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -377,8 +377,8 @@ The following additional language support options are available:
   Be sure that [the build utility `msbuild` is in your PATH][add-msbuild-to-path].
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
-- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
-  install the TypeScript SDK with `npm install -g typescript`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
+  add `--ts-completer` when calling `install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -449,8 +449,8 @@ The following additional language support options are available:
   `./install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `./install.py`.
-- JavaScript and TypeScript support: install [Node.js and npm][npm-install] then
-  install the TypeScript SDK with `npm install -g typescript`.
+- JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
+  add `--ts-completer` when calling `install.py`.
 - Rust support: install [Rust][rust-install] and add `--rust-completer` when
   calling `./install.py`.
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
@@ -659,9 +659,9 @@ process.
     - Go support: install [Go][go-install] and add it to your path. Navigate to
       `YouCompleteMe/third_party/ycmd/third_party/gocode` and run `go build`.
 
-    - JavaScript and TypeScript support: as with the quick installation, simply
-      `npm install -g typescript` after successfully installing [Node.js and
-      npm][npm-install].
+    - JavaScript and TypeScript support: install [Node.js and npm][npm-install],
+      navigate to `YouCompleteMe/third_party/ycmd` and run
+      `npm install -g --prefix third_party/tsserver typescript`.
 
     - Rust support: install [Rust][rust-install]. Navigate to
       `YouCompleteMe/third_party/ycmd/third_party/racerd` and run `cargo build
@@ -696,7 +696,7 @@ Quick Feature Summary
 
 ### C-family languages (C, C++, Objective C, Objective C++, CUDA)
 
-* Semantic auto-completion
+* Semantic auto-completion with automatic fixes
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
 * Semantic type information for identifiers (`GetType`)
@@ -1290,11 +1290,10 @@ installation. Further instructions on how to setup YCM with [Tern][] are
 available on [the wiki][tern-instructions].
 
 All JavaScript and TypeScript features are provided by the [TSServer][] engine,
-which is included in the TypeScript SDK. To get the SDK, install [Node.js and
-npm][npm-install] and run the command:
-```
-npm install -g typescript
-```
+which is included in the TypeScript SDK. To enable these features, install
+[Node.js and npm][npm-install] and call the `install.py` script with the
+`--ts-completer` flag.
+
 [TSServer][] relies on [the `jsconfig.json` file][jsconfig.json] for JavaScript
 and [the `tsconfig.json` file][tsconfig.json] for TypeScript to analyze your
 project. Ensure the file exists at the root of your project.
@@ -1308,11 +1307,6 @@ To get diagnostics in JavaScript, set the `checkJs` option to `true` in your
     }
 }
 ```
-
-TypeScript 2.8.1 or later is recommended. Some features will be missing on older
-versions. You can check which version you are currently using by looking at the
-output of [`:YcmDebugInfo` ](#the-ycmdebuginfo-command). If the version is
-`None`, your TypeScript is too old and should be updated.
 
 ### Semantic Completion for Other Languages
 
