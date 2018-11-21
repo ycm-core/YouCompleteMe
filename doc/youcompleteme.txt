@@ -741,9 +741,9 @@ will notify you to recompile it. You should then rerun the install process.
    **Download the latest version of 'libclang'**. Clang is an open-source
    compiler that can compile C-family languages. The 'libclang' library it
    provides is used to power the YCM semantic completion engine for those
-   languages. YCM is designed to work with libclang version 3.9 or higher.
+   languages. YCM is designed to work with libclang version 7.0.0 or higher.
 
-   You can use the system libclang _only if you are sure it is version 3.9
+   You can use the system libclang _only if you are sure it is version 7.0.0
    or higher_, otherwise don't. Even if it is, we recommend using the
    official binaries from llvm.org [40] if at all possible. Make sure you
    download the correct archive file for your OS.
