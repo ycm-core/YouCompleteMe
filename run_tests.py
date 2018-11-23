@@ -3,6 +3,7 @@
 import os
 import subprocess
 import os.path as p
+import glob
 import sys
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
@@ -37,9 +38,13 @@ import argparse
 
 def RunFlake8():
   print( 'Running flake8' )
-  subprocess.check_call( [
-    sys.executable, '-m', 'flake8', p.join( DIR_OF_THIS_SCRIPT, 'python' )
-  ] )
+  args = [ sys.executable,
+           '-m',
+           'flake8',
+           p.join( DIR_OF_THIS_SCRIPT, 'python' ) ]
+  root_dir_scripts = glob.glob( p.join( DIR_OF_THIS_SCRIPT, '*.py' ) )
+  args.extend( root_dir_scripts )
+  subprocess.check_call( args )
 
 
 def ParseArguments():
@@ -92,6 +97,7 @@ def Main():
     RunFlake8()
   BuildYcmdLibs( parsed_args )
   NoseTests( parsed_args, nosetests_args )
+
 
 if __name__ == "__main__":
   Main()

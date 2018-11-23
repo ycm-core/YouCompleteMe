@@ -19,4 +19,5 @@ python --version
 appveyor DownloadFile https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 pip install -r python\test_requirements.txt
+del get-pip.py
 if %errorlevel% neq 0 exit /b %errorlevel%
