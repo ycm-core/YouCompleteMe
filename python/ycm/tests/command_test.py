@@ -43,6 +43,7 @@ def SendCommandRequest_ExtraConfVimData_Works_test( ycm ):
         contains(
           contains( 'GoTo' ),
           'aboveleft',
+          'same-buffer',
           has_entries( {
             'options': has_entries( {
               'tab_size': 2,
@@ -68,6 +69,7 @@ def SendCommandRequest_ExtraConfData_UndefinedValue_test( ycm ):
         contains(
           contains( 'GoTo' ),
           'belowright',
+          'same-buffer',
           has_entries( {
             'options': has_entries( {
               'tab_size': 2,
@@ -88,6 +90,7 @@ def SendCommandRequest_BuildRange_NoVisualMarks_test( ycm, *args ):
       send_request.assert_called_once_with(
         [ 'GoTo' ],
         '',
+        'same-buffer',
         {
           'options': {
             'tab_size': 2,
@@ -120,6 +123,7 @@ def SendCommandRequest_BuildRange_VisualMarks_test( ycm, *args ):
       send_request.assert_called_once_with(
         [ 'GoTo' ],
         'tab',
+        'same-buffer',
         {
           'options': {
             'tab_size': 2,
@@ -146,6 +150,7 @@ def SendCommandRequest_IgnoreFileTypeOption_test( ycm, *args ):
     expected_args = (
       [ 'GoTo' ],
       '',
+      'same-buffer',
       {
         'options': {
           'tab_size': 2,

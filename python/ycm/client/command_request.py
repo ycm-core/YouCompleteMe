@@ -34,10 +34,14 @@ def _EnsureBackwardsCompatibility( arguments ):
 
 
 class CommandRequest( BaseRequest ):
-  def __init__( self, arguments, extra_data = None ):
+  def __init__( self,
+                arguments,
+                buffer_command = 'same-buffer',
+                extra_data = None ):
     super( CommandRequest, self ).__init__()
     self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._command = arguments and arguments[ 0 ]
+    self._buffer_command = buffer_command
     self._extra_data = extra_data
     self._response = None
 
@@ -91,7 +95,8 @@ class CommandRequest( BaseRequest ):
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
                                  self._response[ 'line_num' ],
                                  self._response[ 'column_num' ],
-                                 modifiers )
+                                 modifiers,
+                                 self._buffer_command )
 
 
   def _HandleFixitResponse( self ):
@@ -129,8 +134,11 @@ class CommandRequest( BaseRequest ):
     vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
 
 
-def SendCommandRequest( arguments, modifiers, extra_data = None ):
-  request = CommandRequest( arguments, extra_data )
+def SendCommandRequest( arguments,
+                        modifiers,
+                        buffer_command,
+                        extra_data = None ):
+  request = CommandRequest( arguments, buffer_command, extra_data )
   # This is a blocking call.
   request.Start()
   request.RunPostCommandActionsIfNeeded( modifiers )

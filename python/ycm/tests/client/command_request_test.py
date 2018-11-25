@@ -268,7 +268,8 @@ class Response_Detection_test( object ):
             response[ 'filepath' ],
             response[ 'line_num' ],
             response[ 'column_num' ],
-            'rightbelow' )
+            'rightbelow',
+            'same-buffer' )
 
     def GoToListTest( command, response ):
       # Note: the detail of these called are tested by
