@@ -72,11 +72,26 @@ endif
 
 let g:loaded_youcompleteme = 1
 
-" NOTE: Most defaults are in third_party/ycmd/ycmd/default_settings.json. They
-" are loaded into Vim globals with the 'ycm_' prefix if such a key does not
-" already exist; thus, the user can override the defaults.
-" The only defaults that are here are the ones that are only relevant to the YCM
-" Vim client and not the ycmd server.
+"
+" List of YCM options.
+"
+let g:ycm_filetype_whitelist =
+      \ get( g:, 'ycm_filetype_whitelist', { "*": 1 } )
+
+let g:ycm_filetype_blacklist =
+      \ get( g:, 'ycm_filetype_blacklist', {
+      \   'tagbar': 1,
+      \   'qf': 1,
+      \   'notes': 1,
+      \   'markdown': 1,
+      \   'netrw': 1,
+      \   'unite': 1,
+      \   'text': 1,
+      \   'vimwiki': 1,
+      \   'pandoc': 1,
+      \   'infolog': 1,
+      \   'mail': 1
+      \ } )
 
 let g:ycm_open_loclist_on_ycm_diags =
       \ get( g:, 'ycm_open_loclist_on_ycm_diags', 1 )
@@ -150,11 +165,105 @@ let g:ycm_warning_symbol =
       \ get( g:, 'ycm_warning_symbol',
       \ get( g:, 'syntastic_warning_symbol', '>>' ) )
 
+let g:ycm_complete_in_comments =
+      \ get( g:, 'ycm_complete_in_comments', 0 )
+
+let g:ycm_complete_in_strings =
+      \ get( g:, 'ycm_complete_in_strings', 1 )
+
+let g:ycm_collect_identifiers_from_tags_files =
+      \ get( g:, 'ycm_collect_identifiers_from_tags_files', 0 )
+
+let g:ycm_seed_identifiers_with_syntax =
+      \ get( g:, 'ycm_seed_identifiers_with_syntax', 0 )
+
 let g:ycm_goto_buffer_command =
       \ get( g:, 'ycm_goto_buffer_command', 'same-buffer' )
 
 let g:ycm_disable_for_files_larger_than_kb =
       \ get( g:, 'ycm_disable_for_files_larger_than_kb', 1000 )
+
+"
+" List of ycmd options.
+"
+let g:ycm_filepath_completion_use_working_dir =
+      \ get( g:, 'ycm_filepath_completion_use_working_dir', 0 )
+
+let g:ycm_auto_trigger =
+      \ get( g:, 'ycm_auto_trigger', 1 )
+
+let g:ycm_min_num_of_chars_for_completion =
+      \ get( g:, 'ycm_min_num_of_chars_for_completion', 2 )
+
+let g:ycm_min_identifier_candidate_chars =
+      \ get( g:, 'ycm_min_num_identifier_candidate_chars', 0 )
+
+let g:ycm_semantic_triggers =
+      \ get( g:, 'ycm_semantic_triggers', {} )
+
+let g:ycm_filetype_specific_completion_to_disable =
+      \ get( g:, 'ycm_filetype_specific_completion_to_disable',
+      \      { 'gitcommit': 1 } )
+
+let g:ycm_collect_identifiers_from_comments_and_strings =
+      \ get( g:, 'ycm_collect_identifiers_from_comments_and_strings', 0 )
+
+let g:ycm_max_num_identifier_candidates =
+      \ get( g:, 'ycm_max_num_identifier_candidates', 10 )
+
+let g:ycm_max_num_candidates =
+      \ get( g:, 'ycm_max_num_candidates', 50 )
+
+let g:ycm_extra_conf_globlist =
+      \ get( g:, 'ycm_extra_conf_globlist', [] )
+
+let g:ycm_global_ycm_extra_conf =
+      \ get( g:, 'ycm_global_ycm_extra_conf', '' )
+
+let g:ycm_confirm_extra_conf =
+      \ get( g:, 'ycm_confirm_extra_conf', 1 )
+
+let g:ycm_max_diagnostics_to_display =
+      \ get( g:, 'ycm_max_diagnostics_to_display', 30 )
+
+let g:ycm_filepath_blacklist =
+      \ get( g:, 'ycm_filepath_blacklist', {
+      \   'html': 1,
+      \   'jsx': 1,
+      \   'xml': 1
+      \ } )
+
+let g:ycm_auto_start_csharp_server =
+      \ get( g:, 'ycm_auto_start_csharp_server', 1 )
+
+let g:ycm_auto_stop_csharp_server =
+      \ get( g:, 'ycm_auto_stop_csharp_server', 1 )
+
+let g:ycm_use_ultisnips_completer =
+      \ get( g:, 'ycm_use_ultisnips_completer', 1 )
+
+let g:ycm_csharp_server_port =
+      \ get( g:, 'ycm_csharp_server_port', 0 )
+
+" These options are not documented.
+let g:ycm_gocode_binary_path =
+      \ get( g:, 'ycm_gocode_binary_path', '' )
+
+let g:ycm_godef_binary_path =
+      \ get( g:, 'ycm_godef_binary_path', '' )
+
+let g:ycm_rust_src_path =
+      \ get( g:, 'ycm_rust_src_path', '' )
+
+let g:ycm_racerd_binary_path =
+      \ get( g:, 'ycm_racerd_binary_path', '' )
+
+let g:ycm_java_jdtls_use_clean_workspace =
+      \ get( g:, 'ycm_java_jdtls_use_clean_workspace', 1 )
+
+" This option is deprecated.
+let g:ycm_python_binary_path =
+      \ get( g:, 'ycm_python_binary_path', '' )
 
 if has( 'vim_starting' ) " Loading at startup.
   " We defer loading until after VimEnter to allow the gui to fork (see

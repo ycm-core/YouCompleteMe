@@ -31,7 +31,6 @@ import re
 from collections import defaultdict, namedtuple
 from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
                          JoinLinesAsUnicode, ToBytes, ToUnicode )
-from ycmd import user_options_store
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'split'            : 'split',
@@ -511,7 +510,7 @@ def JumpToFile( filename, command, modifiers ):
 
 
 # Both |line| and |column| need to be 1-based
-def JumpToLocation( filename, line, column, modifiers ):
+def JumpToLocation( filename, line, column, modifiers, command ):
   # Add an entry to the jumplist
   vim.command( "normal! m'" )
 
@@ -522,24 +521,22 @@ def JumpToLocation( filename, line, column, modifiers ):
     # location, not to the start of the newly opened file.
     # Sadly this fails on random occasions and the undesired jump remains in the
     # jumplist.
-    user_command = user_options_store.Value( 'goto_buffer_command' )
-
-    if user_command == 'split-or-existing-window':
+    if command == 'split-or-existing-window':
       if 'tab' in modifiers:
         if TryJumpLocationInTabs( filename, line, column ):
           return
       elif TryJumpLocationInTab( vim.current.tabpage, filename, line, column ):
         return
-      user_command = 'split'
+      command = 'split'
 
     # This command is kept for backward compatibility. :tab should be used with
     # the 'split-or-existing-window' command instead.
-    if user_command == 'new-or-existing-tab':
+    if command == 'new-or-existing-tab':
       if TryJumpLocationInTabs( filename, line, column ):
         return
-      user_command = 'new-tab'
+      command = 'new-tab'
 
-    if not JumpToFile( filename, user_command, modifiers ):
+    if not JumpToFile( filename, command, modifiers ):
       return
 
   vim.current.window.cursor = ( line, column - 1 )

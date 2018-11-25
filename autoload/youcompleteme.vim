@@ -200,7 +200,6 @@ ycmd_third_party_folder = p.join( third_party_folder, 'ycmd', 'third_party' )
 dependencies = [ p.join( root_folder, 'python' ),
                  p.join( third_party_folder, 'requests-futures' ),
                  p.join( third_party_folder, 'ycmd' ),
-                 p.join( ycmd_third_party_folder, 'frozendict' ),
                  p.join( ycmd_third_party_folder, 'requests' ) ]
 
 # The concurrent.futures module is part of the standard library on Python 3.
