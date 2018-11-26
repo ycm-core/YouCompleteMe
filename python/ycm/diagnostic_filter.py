@@ -53,9 +53,9 @@ class DiagnosticFilter( object ):
 
   @staticmethod
   def CreateFromOptions( user_options ):
-    all_filters = dict( user_options.get( 'filter_diagnostics', {} ) )
+    all_filters = user_options[ 'filter_diagnostics' ]
     compiled_by_type = {}
-    for type_spec, filter_value in iteritems( dict( all_filters ) ):
+    for type_spec, filter_value in iteritems( all_filters ):
       filetypes = [ type_spec ]
       if type_spec.find( ',' ) != -1:
         filetypes = type_spec.split( ',' )
