@@ -43,9 +43,10 @@ def Main():
   old_libs = (
     glob.glob( p.join( DIR_OF_OLD_LIBS, '*ycm_core.*' ) ) +
     glob.glob( p.join( DIR_OF_OLD_LIBS, '*ycm_client_support.*' ) ) +
-    glob.glob( p.join( DIR_OF_OLD_LIBS, '*clang*.*') ) )
+    glob.glob( p.join( DIR_OF_OLD_LIBS, '*clang*.*' ) ) )
   for lib in old_libs:
     os.remove( lib )
+
 
 if __name__ == "__main__":
   Main()
