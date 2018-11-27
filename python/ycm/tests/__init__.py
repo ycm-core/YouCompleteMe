@@ -37,19 +37,29 @@ from ycm.tests import test_utils
 from ycm.youcompleteme import YouCompleteMe
 from ycmd.utils import CloseStandardStreams, WaitUntilProcessIsTerminated
 
-# The default options which are only relevant to the client, not the server and
-# thus are not part of default_options.json, but are required for a working
-# YouCompleteMe object.
+# The default options which are required for a working YouCompleteMe object.
 DEFAULT_CLIENT_OPTIONS = {
-  'g:ycm_server_python_interpreter': '',
+  # YCM options
   'g:ycm_log_level': 'info',
   'g:ycm_keep_logfiles': 0,
   'g:ycm_extra_conf_vim_data': [],
+  'g:ycm_server_python_interpreter': '',
   'g:ycm_show_diagnostics_ui': 1,
-  'g:ycm_echo_current_diagnostic': 1,
   'g:ycm_enable_diagnostic_signs': 1,
   'g:ycm_enable_diagnostic_highlighting': 0,
+  'g:ycm_echo_current_diagnostic': 1,
+  'g:ycm_filter_diagnostics': {},
   'g:ycm_always_populate_location_list': 0,
+  'g:ycm_collect_identifiers_from_tags_files': 0,
+  'g:ycm_seed_identifiers_with_syntax': 0,
+  'g:ycm_goto_buffer_command': 'same-buffer',
+  # ycmd options
+  'g:ycm_auto_trigger': 1,
+  'g:ycm_min_num_of_chars_for_completion': 2,
+  'g:ycm_semantic_triggers': {},
+  'g:ycm_filetype_specific_completion_to_disable': { 'gitcommit': 1 },
+  'g:ycm_max_num_candidates': 50,
+  'g:ycm_max_diagnostics_to_display': 30
 }
 
 
