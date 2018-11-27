@@ -129,28 +129,29 @@ class DiagnosticInterface( object ):
     if not self._user_options[ 'enable_diagnostic_highlighting' ]:
       return
 
-    with vimsupport.CurrentWindow():
-      for window in vimsupport.GetWindowsForBufferNumber( self._bufnr ):
-        vimsupport.SwitchWindow( window )
+    # Vim doesn't provide a way to update the matches for a different window
+    # than the current one (which is a view of the current buffer).
+    if vimsupport.GetCurrentBufferNumber() != self._bufnr:
+      return
 
-        matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
+    matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
 
-        for diags in itervalues( self._line_to_diags ):
-          # Insert squiggles in reverse order so that errors overlap warnings.
-          for diag in reversed( diags ):
-            group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
-                      'YcmWarningSection' )
+    for diags in itervalues( self._line_to_diags ):
+      # Insert squiggles in reverse order so that errors overlap warnings.
+      for diag in reversed( diags ):
+        group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
+                  'YcmWarningSection' )
 
-            for pattern in _ConvertDiagnosticToMatchPatterns( diag ):
-              # The id doesn't matter for matches that we may add.
-              match = vimsupport.DiagnosticMatch( 0, group, pattern )
-              try:
-                matches_to_remove.remove( match )
-              except ValueError:
-                vimsupport.AddDiagnosticMatch( match )
+        for pattern in _ConvertDiagnosticToMatchPatterns( diag ):
+          # The id doesn't matter for matches that we may add.
+          match = vimsupport.DiagnosticMatch( 0, group, pattern )
+          try:
+            matches_to_remove.remove( match )
+          except ValueError:
+            vimsupport.AddDiagnosticMatch( match )
 
-        for match in matches_to_remove:
-          vimsupport.RemoveDiagnosticMatch( match )
+    for match in matches_to_remove:
+      vimsupport.RemoveDiagnosticMatch( match )
 
 
   def _UpdateSigns( self ):

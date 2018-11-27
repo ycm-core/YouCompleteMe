@@ -23,7 +23,6 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from future.utils import iterkeys
-import contextlib
 import vim
 import os
 import json
@@ -1216,49 +1215,6 @@ def BuildRange( start_line, end_line ):
       }
     }
   }
-
-
-@contextlib.contextmanager
-def AutocommandEventsIgnored( events = [ 'all' ] ):
-  """Context manager to perform operations without triggering autocommand
-  events. |events| is a list of events to ignore. By default, all events are
-  ignored."""
-  old_eventignore = vim.options[ 'eventignore' ]
-  ignored_events = {
-    event for event in ToUnicode( old_eventignore ).split( ',' ) if event }
-  ignored_events.update( events )
-  vim.options[ 'eventignore' ] = ','.join( ignored_events )
-  try:
-    yield
-  finally:
-    vim.options[ 'eventignore' ] = old_eventignore
-
-
-def GetPreviousWindowNumber():
-  return GetIntValue( 'winnr("#")' ) - 1
-
-
-@contextlib.contextmanager
-def CurrentWindow():
-  """Context manager to perform operations on other windows than the current one
-  without triggering autocommands related to window movement. Use the
-  SwitchWindow function to move to other windows while under the context."""
-  previous_window = vim.windows[ GetPreviousWindowNumber() ]
-  current_window = vim.current.window
-  with AutocommandEventsIgnored( [ 'WinEnter', 'Winleave' ] ):
-    try:
-      yield
-    finally:
-      # Ensure <c-w>p still go to the previous window.
-      vim.current.window = previous_window
-      vim.current.window = current_window
-
-
-def SwitchWindow( window ):
-  """Move to the window object |window|. This function should be called under
-  the CurrentWindow context if you are going to switch back to the original
-  window."""
-  vim.current.window = window
 
 
 # Expects version_string in 'MAJOR.MINOR.PATCH' format, e.g. '8.1.278'
