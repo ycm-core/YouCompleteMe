@@ -200,7 +200,11 @@ ycmd_third_party_folder = p.join( third_party_folder, 'ycmd', 'third_party' )
 dependencies = [ p.join( root_folder, 'python' ),
                  p.join( third_party_folder, 'requests-futures' ),
                  p.join( third_party_folder, 'ycmd' ),
-                 p.join( ycmd_third_party_folder, 'requests' ) ]
+                 p.join( ycmd_third_party_folder, 'requests_deps', 'idna' ),
+                 p.join( ycmd_third_party_folder, 'requests_deps', 'chardet' ),
+                 p.join( ycmd_third_party_folder, 'requests_deps', 'urllib3', 'src' ),
+                 p.join( ycmd_third_party_folder, 'requests_deps', 'certifi' ),
+                 p.join( ycmd_third_party_folder, 'requests_deps', 'requests' ) ]
 
 # The concurrent.futures module is part of the standard library on Python 3.
 if sys.version_info[ 0 ] == 2:
