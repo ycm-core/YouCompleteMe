@@ -56,75 +56,78 @@ def MockTextAfterCursor( text ):
 
 def AdjustCandidateInsertionText_Basic_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar' } ] ) )
+    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar', 'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_ParenInTextAfterCursor_test():
   with MockTextAfterCursor( 'bar(zoo' ):
-    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar' } ] ) )
+    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar', 'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_PlusInTextAfterCursor_test():
   with MockTextAfterCursor( 'bar+zoo' ):
-    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar' } ] ) )
+    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar', 'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_WhitespaceInTextAfterCursor_test():
   with MockTextAfterCursor( 'bar zoo' ):
-    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar' } ] ) )
+    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar', 'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_MoreThanWordMatchingAfterCursor_test():
   with MockTextAfterCursor( 'bar.h' ):
-    eq_( [ { 'abbr': 'foobar.h', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar.h' } ] ) )
+    eq_( [ { 'word': 'foo',      'abbr': 'foobar.h' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar.h', 'abbr': '' } ] ) )
 
   with MockTextAfterCursor( 'bar(zoo' ):
-    eq_( [ { 'abbr': 'foobar(zoo', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar(zoo' } ] ) )
+    eq_( [ { 'word': 'foo',        'abbr': 'foobar(zoo' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar(zoo', 'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_NotSuffix_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'abbr': 'foofoo', 'word': 'foofoo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foofoo' } ] ) )
+    eq_( [ { 'word': 'foofoo', 'abbr': 'foofoo' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foofoo', 'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_NothingAfterCursor_test():
   with MockTextAfterCursor( '' ):
-    eq_( [ { 'word': 'foofoo' },
-           { 'word': 'zobar' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foofoo' },
-                                              { 'word': 'zobar' } ] ) )
+    eq_( [ { 'word': 'foofoo', 'abbr': '' },
+           { 'word': 'zobar',  'abbr': '' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foofoo', 'abbr': '' },
+           { 'word': 'zobar',  'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_MultipleStrings_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'abbr': 'foobar', 'word': 'foo' },
-           { 'abbr': 'zobar', 'word': 'zo' },
-           { 'abbr': 'qbar', 'word': 'q' },
-           { 'abbr': 'bar', 'word': '' }, ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar' },
-                                              { 'word': 'zobar' },
-                                              { 'word': 'qbar' },
-                                              { 'word': 'bar' } ] ) )
-
-
-def AdjustCandidateInsertionText_DictInput_test():
-  with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'abbr': 'foobar', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText( [ { 'word': 'foobar' } ] ) )
+    eq_( [ { 'word': 'foo',    'abbr': 'foobar' },
+           { 'word': 'zo',     'abbr': 'zobar' },
+           { 'word': 'q',      'abbr': 'qbar' },
+           { 'word': '',       'abbr': 'bar' }, ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar', 'abbr': '' },
+           { 'word': 'zobar',  'abbr': '' },
+           { 'word': 'qbar',   'abbr': '' },
+           { 'word': 'bar',    'abbr': '' } ] ) )
 
 
 def AdjustCandidateInsertionText_DontTouchAbbr_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'abbr': '1234', 'word': 'foo' } ],
-         base.AdjustCandidateInsertionText(
-           [ { 'abbr': '1234', 'word': 'foobar' } ] ) )
+    eq_( [ { 'word': 'foo',    'abbr': '1234' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar', 'abbr': '1234' } ] ) )
 
 
 def OverlapLength_Basic_test():
