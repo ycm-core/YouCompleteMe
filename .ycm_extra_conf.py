@@ -28,18 +28,16 @@
 #
 # For more information, please refer to <http://unlicense.org/>
 
-import os
+import os.path as p
 import subprocess
 
-DIR_OF_THIS_SCRIPT = os.path.abspath( os.path.dirname( __file__ ) )
-DIR_OF_THIRD_PARTY = os.path.join( DIR_OF_THIS_SCRIPT, 'third_party' )
-DIR_OF_YCMD_THIRD_PARTY = os.path.join( DIR_OF_THIRD_PARTY,
-                                        'ycmd', 'third_party' )
+DIR_OF_THIS_SCRIPT = p.abspath( p.dirname( __file__ ) )
+DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
 
 
 def GetStandardLibraryIndexInSysPath( sys_path ):
   for index, path in enumerate( sys_path ):
-    if os.path.isfile( os.path.join( path, 'os.py' ) ):
+    if p.isfile( p.join( path, 'os.py' ) ):
       return index
   raise RuntimeError( 'Could not find standard library path in Python path.' )
 
@@ -47,11 +45,17 @@ def GetStandardLibraryIndexInSysPath( sys_path ):
 def PythonSysPath( **kwargs ):
   sys_path = kwargs[ 'sys_path' ]
 
-  dependencies = [ os.path.join( DIR_OF_THIS_SCRIPT, 'python' ),
-                   os.path.join( DIR_OF_THIRD_PARTY, 'requests-futures' ),
-                   os.path.join( DIR_OF_THIRD_PARTY, 'ycmd' ),
-                   os.path.join( DIR_OF_YCMD_THIRD_PARTY, 'frozendict' ),
-                   os.path.join( DIR_OF_YCMD_THIRD_PARTY, 'requests' ) ]
+  dependencies = [ p.join( DIR_OF_THIS_SCRIPT, 'python' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'requests-futures' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'ycmd' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'idna' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'chardet' ),
+                   p.join( DIR_OF_THIRD_PARTY,
+                           'requests_deps',
+                           'urllib3',
+                           'src' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'certifi' ),
+                   p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'requests' ) ]
 
   # The concurrent.futures module is part of the standard library on Python 3.
   interpreter_path = kwargs[ 'interpreter_path' ]
@@ -59,11 +63,10 @@ def PythonSysPath( **kwargs ):
     interpreter_path, '-c', 'import sys; print( sys.version_info[ 0 ] )' ]
   ).rstrip().decode( 'utf8' ) )
   if major_version == 2:
-    dependencies.append( os.path.join( DIR_OF_THIRD_PARTY, 'pythonfutures' ) )
+    dependencies.append( p.join( DIR_OF_THIRD_PARTY, 'pythonfutures' ) )
 
   sys_path[ 0:0 ] = dependencies
   sys_path.insert( GetStandardLibraryIndexInSysPath( sys_path ) + 1,
-                   os.path.join( DIR_OF_YCMD_THIRD_PARTY, 'python-future',
-                                 'src' ) )
+                   p.join( DIR_OF_THIRD_PARTY, 'python-future', 'src' ) )
 
   return sys_path
