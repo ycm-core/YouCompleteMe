@@ -3029,21 +3029,13 @@ version of libpython on your machine (for instance,
 `-DPYTHON_LIBRARY=/usr/lib/libpython2.7.so`). Naturally, this means you'll have
 to go through the full installation guide by hand.
 
-### I get `Vim: Caught deadly signal SEGV` on Vim startup
+### I see `undefined symbol: clang_getCompletionFixIt` in the server logs.
 
-This can happen on some Linux distros. If you encounter this situation, run Vim
-under `gdb`. You'll probably see something like this in the output when Vim
-crashes:
-
-```
-undefined symbol: clang_CompileCommands_dispose
-```
-
-This means that Vim is trying to load a `libclang.so` that is too old. You need
-at least a 3.9 libclang. Just go through the installation guide and make sure
-you are using a correct `libclang.so`. We recommend downloading prebuilt
-binaries from llvm.org.
-
+This means that the server is trying to load a version of libclang that is too
+old. You need at least libclang 7.0.0. We recommend running the `install.py`
+script without `--system-libclang` or downloading the [latest prebuilt binaries
+from llvm.org][clang-download] when going through the [full installation
+guide](#full-installation-guide).
 
 ### I get `Fatal Python error: PyThreadState_Get: no current thread` on startup
 
