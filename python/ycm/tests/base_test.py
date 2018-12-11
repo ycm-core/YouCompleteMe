@@ -130,6 +130,13 @@ def AdjustCandidateInsertionText_DontTouchAbbr_test():
            { 'word': 'foobar', 'abbr': '1234' } ] ) )
 
 
+def AdjustCandidateInsertionText_NoAbbr_test():
+  with MockTextAfterCursor( 'bar' ):
+    eq_( [ { 'word': 'foo', 'abbr': 'foobar' } ],
+         base.AdjustCandidateInsertionText( [
+           { 'word': 'foobar' } ] ) )
+
+
 def OverlapLength_Basic_test():
   eq_( 3, base.OverlapLength( 'foo bar', 'bar zoo' ) )
   eq_( 3, base.OverlapLength( 'foobar', 'barzoo' ) )
