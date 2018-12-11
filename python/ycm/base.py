@@ -103,7 +103,7 @@ def AdjustCandidateInsertionText( candidates ):
   for candidate in candidates:
     new_candidate = candidate.copy()
 
-    if not new_candidate[ 'abbr' ]:
+    if not new_candidate.get( 'abbr' ):
       new_candidate[ 'abbr' ] = new_candidate[ 'word' ]
 
     new_candidate[ 'word' ] = NewCandidateInsertionText(
