@@ -155,7 +155,7 @@ Contents ~
   11. I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting |youcompleteme-i-have-homebrew-python-and-or-macvim-cant-compile-sigabrt-when-starting|
   12. I get 'LONG_BIT definition appears wrong for platform' when compiling |youcompleteme-i-get-long_bit-definition-appears-wrong-for-platform-when-compiling|
   13. I get 'libpython2.7.a [...] relocation R_X86_64_32' when compiling |youcompleteme-i-get-libpython2.7.a-...-relocation-r_x86_64_32-when-compiling|
-  14. I get 'Vim: Caught deadly signal SEGV' on Vim startup |youcompleteme-i-get-vim-caught-deadly-signal-segv-on-vim-startup|
+  14. I see 'undefined symbol: clang_getCompletionFixIt' in the server logs. |youcompleteme-i-see-undefined-symbol-clang_getcompletionfixit-in-server-logs.|
   15. I get 'Fatal Python error: PyThreadState_Get: no current thread' on startup |youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup|
   16. 'install.py' says python must be compiled with '--enable-framework'. Wat? |youcompleteme-install.py-says-python-must-be-compiled-with-enable-framework-.-wat|
   17. YCM does not read identifiers from my tags files |youcompleteme-ycm-does-not-read-identifiers-from-my-tags-files|
@@ -3257,19 +3257,13 @@ version of libpython on your machine (for instance,
 to go through the full installation guide by hand.
 
 -------------------------------------------------------------------------------
-             *youcompleteme-i-get-vim-caught-deadly-signal-segv-on-vim-startup*
-I get 'Vim: Caught deadly signal SEGV' on Vim startup ~
+*youcompleteme-i-see-undefined-symbol-clang_getcompletionfixit-in-server-logs.*
+I see 'undefined symbol: clang_getCompletionFixIt' in the server logs. ~
 
-This can happen on some Linux distros. If you encounter this situation, run Vim
-under 'gdb'. You'll probably see something like this in the output when Vim
-crashes:
->
-  undefined symbol: clang_CompileCommands_dispose
-<
-This means that Vim is trying to load a 'libclang.so' that is too old. You need
-at least a 3.9 libclang. Just go through the installation guide and make sure
-you are using a correct 'libclang.so'. We recommend downloading prebuilt
-binaries from llvm.org.
+This means that the server is trying to load a version of libclang that is too
+old. You need at least libclang 7.0.0. We recommend running the 'install.py'
+script without '--system-libclang' or downloading the latest prebuilt binaries
+from llvm.org [40] when going through the full installation guide.
 
 -------------------------------------------------------------------------------
 *youcompleteme-i-get-fatal-python-error-pythreadstate_get-no-current-thread-on-startup*
