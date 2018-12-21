@@ -325,7 +325,7 @@ can check the version and which Python is supported by typing `:version` inside
 Vim. Look at the features included: `+python/dyn` for Python 2 and
 `+python3/dyn` for Python 3. Take note of the Vim architecture, i.e. 32 or
 64-bit. It will be important when choosing the Python installer. We recommend
-using a 64-bit client. [Daily updated copies of 32-bit and 64-bit Vim with
+using a 64-bit client. [Daily updated installers of 32-bit and 64-bit Vim with
 Python 2 and Python 3 support][vim-win-download] are available.
 
 Add the line:
@@ -3413,7 +3413,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
 [jsconfig.json]: https://code.visualstudio.com/docs/languages/jsconfig
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-[vim-win-download]: https://bintray.com/micbou/generic/vim
+[vim-win-download]: https://github.com/vim/vim-win32-installer/releases
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://www.visualstudio.com/downloads/
 [7z-download]: http://www.7-zip.org/download.html
