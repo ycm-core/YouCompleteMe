@@ -57,6 +57,10 @@ class OmniCompletionRequest( CompletionRequest ):
     }
 
 
+  def OnCompleteDone( self ):
+    pass
+
+
 def ConvertVimDataToCompletionData( vim_data ):
   # see :h complete-items for a description of the dictionary fields
   completion_data = {}
