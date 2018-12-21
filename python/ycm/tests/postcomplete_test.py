@@ -36,6 +36,7 @@ from ycmd.utils import ToBytes
 from ycm.client.completion_request import ( CompletionRequest,
                                             _FilterToMatchingCompletions,
                                             _GetRequiredNamespaceImport )
+from ycm.client.omni_completion_request import OmniCompletionRequest
 
 
 def CompleteItemIs( word, abbr = None, menu = None,
@@ -127,7 +128,7 @@ def _SetUpCompleteDone( completions ):
   with patch( 'ycm.vimsupport.TextBeforeCursor', return_value = '   Test' ):
     request = CompletionRequest( None )
     request.Done = MagicMock( return_value = True )
-    request.RawResponse = MagicMock( return_value = {
+    request._RawResponse = MagicMock( return_value = {
       'completions': completions
     } )
     yield request
@@ -159,6 +160,17 @@ def OnCompleteDone_CsharpFixIt_test( *args ):
 def OnCompleteDone_NoFixItIfNotDone_test( *args ):
   request = CompletionRequest( None )
   request.Done = MagicMock( return_value = False )
+  request._OnCompleteDone_Csharp = MagicMock()
+  request._OnCompleteDone_FixIt = MagicMock()
+  request.OnCompleteDone()
+  request._OnCompleteDone_Csharp.assert_not_called()
+  request._OnCompleteDone_FixIt.assert_not_called()
+
+
+@patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'ycmtest' ] )
+def OnCompleteDone_NoFixItForOmnifunc_test( *args ):
+  request = OmniCompletionRequest( 'omnifunc', None )
+  request.Done = MagicMock( return_value = True )
   request._OnCompleteDone_Csharp = MagicMock()
   request._OnCompleteDone_FixIt = MagicMock()
   request.OnCompleteDone()

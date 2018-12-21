@@ -24,7 +24,6 @@ from builtins import *  # noqa
 
 from mock import MagicMock
 from nose.tools import eq_
-from hamcrest import assert_that, has_entries
 
 from ycm.client.omni_completion_request import OmniCompletionRequest
 
@@ -60,31 +59,3 @@ def Response_FromOmniCompleter_test():
     'completion_start_column': 1,
     'completions': results
   } )
-
-
-def RawResponse_ConvertedFromOmniCompleter_test():
-  vim_results = [
-    { "word": "WORD", "abbr": "ABBR", "menu": "MENU",
-      "kind": "KIND", "info": "INFO" },
-    { "word": "WORD2", "abbr": "ABBR2", "menu": "MENU2",
-      "kind": "KIND2", "info": "INFO" },
-    { "word": "WORD", "abbr": "ABBR", },
-    {},
-  ]
-  expected_results = [
-    has_entries( { "insertion_text": "WORD", "menu_text": "ABBR",
-                   "extra_menu_info": "MENU", "kind": [ "KIND" ],
-                   "detailed_info": "INFO" } ),
-    has_entries( { "insertion_text": "WORD2", "menu_text": "ABBR2",
-                   "extra_menu_info": "MENU2", "kind": [ "KIND2" ],
-                   "detailed_info": "INFO" } ),
-    has_entries( { "insertion_text": "WORD", "menu_text": "ABBR", } ),
-    has_entries( {} ),
-  ]
-  request = BuildOmnicompletionRequest( vim_results )
-
-  results = request.RawResponse()[ 'completions' ]
-
-  eq_( len( results ), len( expected_results ) )
-  for result, expected_result in zip( results, expected_results ):
-    assert_that( result, expected_result )

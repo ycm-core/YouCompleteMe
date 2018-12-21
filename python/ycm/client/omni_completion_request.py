@@ -39,15 +39,6 @@ class OmniCompletionRequest( CompletionRequest ):
     return True
 
 
-  def RawResponse( self ):
-    return {
-      'line': self.request_data[ 'line_num' ],
-      'column': self.request_data[ 'column_num' ],
-      'completion_start_column': self.request_data[ 'start_column' ],
-      'completions': _ConvertVimDatasToCompletionDatas( self._results )
-    }
-
-
   def Response( self ):
     return {
       'line': self.request_data[ 'line_num' ],
@@ -57,24 +48,5 @@ class OmniCompletionRequest( CompletionRequest ):
     }
 
 
-def ConvertVimDataToCompletionData( vim_data ):
-  # see :h complete-items for a description of the dictionary fields
-  completion_data = {}
-
-  if 'word' in vim_data:
-    completion_data[ 'insertion_text' ] = vim_data[ 'word' ]
-  if 'abbr' in vim_data:
-    completion_data[ 'menu_text' ] = vim_data[ 'abbr' ]
-  if 'menu' in vim_data:
-    completion_data[ 'extra_menu_info' ] = vim_data[ 'menu' ]
-  if 'kind' in vim_data:
-    completion_data[ 'kind' ] = [ vim_data[ 'kind' ] ]
-  if 'info' in vim_data:
-    completion_data[ 'detailed_info' ] = vim_data[ 'info' ]
-
-  return completion_data
-
-
-def _ConvertVimDatasToCompletionDatas( response_data ):
-  return [ ConvertVimDataToCompletionData( x )
-           for x in response_data ]
+  def OnCompleteDone( self ):
+    pass
