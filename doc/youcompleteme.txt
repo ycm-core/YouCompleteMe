@@ -530,7 +530,7 @@ can check the version and which Python is supported by typing ':version' inside
 Vim. Look at the features included: '+python/dyn' for Python 2 and
 '+python3/dyn' for Python 3. Take note of the Vim architecture, i.e. 32 or
 64-bit. It will be important when choosing the Python installer. We recommend
-using a 64-bit client. Daily updated copies of 32-bit and 64-bit Vim with
+using a 64-bit client. Daily updated installers of 32-bit and 64-bit Vim with
 Python 2 and Python 3 support [34] are available.
 
 Add the line:
@@ -3664,7 +3664,7 @@ References ~
 [31] http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 [32] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
 [33] https://www.mono-project.com/download/stable/#download-lin
-[34] https://bintray.com/micbou/generic/vim
+[34] https://github.com/vim/vim-win32-installer/releases
 [35] http://vimhelp.appspot.com/starting.txt.html#vimrc
 [36] https://www.python.org/downloads/windows/
 [37] https://www.visualstudio.com/downloads/
