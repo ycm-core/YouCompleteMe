@@ -3563,10 +3563,10 @@ YCM does not shut down when I quit Vim ~
 
 YCM relies on the 'VimLeave' event to shut down the ycmd server [46]. Some
 plugins prevent this event from triggering by exiting Vim through an
-autocommand without using the 'nested' keyword (see ':h autocmd-nested'). One
-of these plugins is vim-nerdtree-tabs [83]. You should identify which plugin is
-responsible for the issue and report it to the plugin author. Note that when
-this happens, ycmd [46] will automatically shut itself down after 30 minutes.
+autocommand without using the 'nested' keyword (see ':h autocmd-nested'). You
+should identify which plugin is responsible for the issue and report it to the
+plugin author. Note that when this happens, ycmd [46] will automatically shut
+itself down after 30 minutes.
 
 -------------------------------------------------------------------------------
                 *youcompleteme-ycm-does-not-work-with-my-anaconda-python-setup*
@@ -3599,7 +3599,7 @@ later.
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[84]. By participating in this project you agree to abide by its terms.
+[83]. By participating in this project you agree to abide by its terms.
 
 ===============================================================================
                                                         *youcompleteme-contact*
@@ -3609,7 +3609,7 @@ If you have questions about the plugin or need help, please join the Gitter
 room [1] or use the ycm-users [77] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[85]. Before you do, please carefully read CONTRIBUTING.md [59] as this asks
+[84]. Before you do, please carefully read CONTRIBUTING.md [59] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -3624,7 +3624,7 @@ YouCompleteMe maintainers directly using the contact details.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [86]. © 2015-2018
+This software is licensed under the GPL v3 license [85]. © 2015-2018
 YouCompleteMe contributors
 
 ===============================================================================
@@ -3713,9 +3713,8 @@ References ~
 [80] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [81] https://github.com/vim/vim/issues/717
 [82] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
-[83] https://github.com/jistr/vim-nerdtree-tabs
-[84] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[85] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[86] http://www.gnu.org/copyleft/gpl.html
+[83] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[84] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[85] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
