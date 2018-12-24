@@ -54,8 +54,18 @@ SIGN_BUFFER_ID_INITIAL_VALUE = 100000000
 # This holds the next sign's id to assign for each buffer.
 SIGN_ID_FOR_BUFFER = defaultdict( lambda: SIGN_BUFFER_ID_INITIAL_VALUE )
 
+# The ":sign place" command ouputs each sign on one line in the format
+#
+#    line=<line> id=<id> name=<name> priority=<priority>
+#
+# where the words "line", "id", "name", and "priority" are localized. On
+# versions older than Vim 8.1.0614, the "priority" property doesn't exist and
+# the output is
+#
+#    line=<line> id=<id> name=<name>
+#
 SIGN_PLACE_REGEX = re.compile(
-  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)$" )
+  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)" )
 
 NO_COMPLETIONS = {
   'line': -1,
@@ -222,12 +232,12 @@ def CreateSign( line, name, buffer_number ):
 
 
 def UnplaceSign( sign ):
-  vim.command( 'sign unplace {0} buffer={1}'.format( sign.id,
-                                                     sign.buffer_number ) )
+  vim.command( 'sign unplace {} buffer={}'.format( sign.id,
+                                                   sign.buffer_number ) )
 
 
 def PlaceSign( sign ):
-  vim.command( 'sign place {0} name={1} line={2} buffer={3}'.format(
+  vim.command( 'sign place {} name={} line={} buffer={}'.format(
     sign.id, sign.name, sign.line, sign.buffer_number ) )
 
 
