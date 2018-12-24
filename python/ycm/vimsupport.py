@@ -54,8 +54,9 @@ SIGN_BUFFER_ID_INITIAL_VALUE = 100000000
 # This holds the next sign's id to assign for each buffer.
 SIGN_ID_FOR_BUFFER = defaultdict( lambda: SIGN_BUFFER_ID_INITIAL_VALUE )
 
+# Vim 8.1.0614 added a new field for the sign priority. We ignore that field.
 SIGN_PLACE_REGEX = re.compile(
-  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)$" )
+  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)(.*=\d+)?$" )
 
 NO_COMPLETIONS = {
   'line': -1,
@@ -222,12 +223,12 @@ def CreateSign( line, name, buffer_number ):
 
 
 def UnplaceSign( sign ):
-  vim.command( 'sign unplace {0} buffer={1}'.format( sign.id,
-                                                     sign.buffer_number ) )
+  vim.command( 'sign unplace {} buffer={}'.format( sign.id,
+                                                   sign.buffer_number ) )
 
 
 def PlaceSign( sign ):
-  vim.command( 'sign place {0} name={1} line={2} buffer={3}'.format(
+  vim.command( 'sign place {} name={} line={} buffer={}'.format(
     sign.id, sign.name, sign.line, sign.buffer_number ) )
 
 

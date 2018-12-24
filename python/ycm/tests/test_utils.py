@@ -84,23 +84,23 @@ VIM_OPTIONS = {
   '&expandtab': 1
 }
 
-# This variable must be patched with a Version object for tests depending on the
-# Vim version. Example:
+Version = namedtuple( 'Version', [ 'major', 'minor', 'patch' ] )
+
+# This variable must be patched with a Version object for tests depending on a
+# recent Vim version. Example:
 #
-#   @patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 7, 4, 1578 ) )
+#   @patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 8, 1, 614 ) )
 #   def ThisTestDependsOnTheVimVersion_test():
 #     ...
 #
-VIM_VERSION = None
+# Default is the oldest supported version.
+VIM_VERSION = Version( 7, 4, 1578 )
 
 REDIR = {
   'status': False,
   'variable': '',
   'output': ''
 }
-
-
-Version = namedtuple( 'Version', [ 'major', 'minor', 'patch' ] )
 
 
 @contextlib.contextmanager
@@ -312,10 +312,12 @@ def _MockSignCommand( command ):
                           'Signs for foo:\n' )
     for sign in VIM_SIGNS:
       if sign.bufnr == bufnr:
-        REDIR[ 'output' ] += (
-          '    line={0}  id={1}  name={2}'.format( sign.line,
-                                                   sign.id,
-                                                   sign.name ) )
+        if VIM_VERSION >= Version( 8, 1, 614 ):
+          # 10 is the default priority.
+          line_output = '    line={}  id={}  name={} priority=10'
+        else:
+          line_output = '    line={}  id={}  name={}'
+        REDIR[ 'output' ] += line_output.format( sign.line, sign.id, sign.name )
     return True
 
   match = SIGN_PLACE_REGEX.search( command )
