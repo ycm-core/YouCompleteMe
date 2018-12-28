@@ -216,8 +216,13 @@ sys.path[ 0:0 ] = dependencies
 
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
+  def GetStandardLibraryIndexInSysPath():
+    for index, path in enumerate( sys.path ):
+      if p.isfile( p.join( path, 'os.py' ) ):
+        return index
+    raise RuntimeError( 'Could not find standard library path in Python path.' )
+
   # The python-future module must be inserted after the standard library path.
-  from ycmd.server_utils import GetStandardLibraryIndexInSysPath
   sys.path.insert( GetStandardLibraryIndexInSysPath() + 1,
                    p.join( third_party_folder, 'python-future', 'src' ) )
 

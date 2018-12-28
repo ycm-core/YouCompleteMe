@@ -35,7 +35,7 @@ from ycm import base, paths, vimsupport
 from ycm.buffer import ( BufferDict,
                          DIAGNOSTIC_UI_FILETYPES,
                          DIAGNOSTIC_UI_ASYNC_FILETYPES )
-from ycmd import server_utils, utils
+from ycmd import utils
 from ycmd.request_wrap import RequestWrap
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
@@ -252,21 +252,21 @@ class YouCompleteMe( object ):
 
     return_code = self._server_popen.poll()
     logfile = os.path.basename( self._server_stderr )
-    if return_code == server_utils.CORE_UNEXPECTED_STATUS:
-      error_message = CORE_UNEXPECTED_MESSAGE.format(
-          logfile = logfile )
-    elif return_code == server_utils.CORE_MISSING_STATUS:
+    # See https://github.com/Valloric/ycmd#exit-codes for the list of exit
+    # codes.
+    if return_code == 3:
+      error_message = CORE_UNEXPECTED_MESSAGE.format( logfile = logfile )
+    elif return_code == 4:
       error_message = CORE_MISSING_MESSAGE
-    elif return_code == server_utils.CORE_PYTHON2_STATUS:
+    elif return_code == 5:
       error_message = CORE_PYTHON2_MESSAGE
-    elif return_code == server_utils.CORE_PYTHON3_STATUS:
+    elif return_code == 6:
       error_message = CORE_PYTHON3_MESSAGE
-    elif return_code == server_utils.CORE_OUTDATED_STATUS:
+    elif return_code == 7:
       error_message = CORE_OUTDATED_MESSAGE
     else:
-      error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format(
-          code = return_code,
-          logfile = logfile )
+      error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format( code = return_code,
+                                                           logfile = logfile )
 
     error_message = SERVER_SHUTDOWN_MESSAGE + ' ' + error_message
     self._logger.error( error_message )
