@@ -188,12 +188,33 @@ from __future__ import division
 from __future__ import absolute_import
 
 import os.path as p
+import re
 import sys
 import traceback
 import vim
 
 root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
 third_party_folder = p.join( root_folder, 'third_party' )
+python_stdlib_zip_regex = re.compile( 'python[23][0-9]\\.zip' )
+
+
+def IsStandardLibraryFolder( path ):
+  return ( ( p.isfile( path )
+             and python_stdlib_zip_regex.match( p.basename( path ) ) )
+           or p.isfile( p.join( path, 'os.py' ) ) )
+
+
+def IsVirtualEnvLibraryFolder( path ):
+  return p.isfile( p.join( path, 'orig-prefix.txt' ) )
+
+
+def GetStandardLibraryIndexInSysPath():
+  for index, path in enumerate( sys.path ):
+    if ( IsStandardLibraryFolder( path ) and
+         not IsVirtualEnvLibraryFolder( path ) ):
+      return index
+  raise RuntimeError( 'Could not find standard library path in Python path.' )
+
 
 # Add dependencies to Python path.
 dependencies = [ p.join( root_folder, 'python' ),
@@ -216,12 +237,6 @@ sys.path[ 0:0 ] = dependencies
 
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
-  def GetStandardLibraryIndexInSysPath():
-    for index, path in enumerate( sys.path ):
-      if p.isfile( p.join( path, 'os.py' ) ):
-        return index
-    raise RuntimeError( 'Could not find standard library path in Python path.' )
-
   # The python-future module must be inserted after the standard library path.
   sys.path.insert( GetStandardLibraryIndexInSysPath() + 1,
                    p.join( third_party_folder, 'python-future', 'src' ) )
