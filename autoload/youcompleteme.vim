@@ -509,6 +509,11 @@ endfunction
 
 
 function! s:OnVimLeave()
+  " Workaround a NeoVim issue - not shutting down timers correctly
+  " https://github.com/neovim/neovim/issues/6840
+  for poller in values( s:pollers )
+    call timer_stop( poller.id )
+  endfor
   exec s:python_command "ycm_state.OnVimLeave()"
 endfunction
 
