@@ -509,6 +509,10 @@ endfunction
 
 
 function! s:OnVimLeave()
+  for poller in [ 'completion', 'file_parse_response',
+                \ 'server_ready', 'receive_messages' ]
+    call timer_stop(s:pollers[poller].id)
+  endfor
   exec s:python_command "ycm_state.OnVimLeave()"
 endfunction
 
