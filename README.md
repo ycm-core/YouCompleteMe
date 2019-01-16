@@ -78,6 +78,8 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [Clang][]-based engine that provides native semantic code
   completion for C/C++/Objective-C/Objective-C++/CUDA (from now on referred to
   as "the C-family languages"),
+- a [clangd][]-based **experimental** completion engine for the C-family
+  languages.
 - a [Jedi][]-based completion engine for Python 2 and 3,
 - an [OmniSharp][]-based completion engine for C#,
 - a combination of [Gocode][] and [Godef][] semantic engines for Go,
@@ -125,10 +127,10 @@ with a keyboard shortcut; see the rest of the docs).
 
 The last thing that you can see in the demo is YCM's diagnostic display features
 (the little red X that shows up in the left gutter; inspired by [Syntastic][])
-if you are editing a C-family file. As Clang compiles your file and detects
-warnings or errors, they will be presented in various ways. You don't need to
-save your file or press any keyboard shortcut to trigger this, it "just happens"
-in the background.
+if you are editing a C-family file. As the completer engine compiles your file
+and detects warnings or errors, they will be presented in various ways. You
+don't need to save your file or press any keyboard shortcut to trigger this, it
+"just happens" in the background.
 
 In essence, YCM obsoletes the following Vim plugins because it has all of their
 features plus extra:
@@ -196,10 +198,25 @@ CMake installer][cmake-download].
 _If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
 for details.
 
-Compiling YCM **with** semantic support for C-family languages:
+Compiling YCM **with** semantic support for C-family languages through
+**libclang**:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --clang-completer
+
+Compiling YCM **with** semantic support for C-family languages through
+**experimental clangd**:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clangd-completer
+
+Note that you can install YCM with both **libclang** and **clangd** enabled. In
+that case **clangd** will be preferred unless you have the following in your
+`vimrc`:
+
+```viml
+let g:ycm_use_clangd = "Never"
+```
 
 Compiling YCM **without** semantic support for C-family languages:
 
@@ -220,10 +237,11 @@ The following additional language support options are available:
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
-simply run:
+To simply compile with everything enabled, there's a `--all` flag. Note that
+this flag does **not** install **clangd**. You need to specify it manually by
+adding `--clangd-completer`. So, to install with all language features, ensure
+`xbuild`, `go`, `tsserver`, `node`, `npm`, `rustc`, and `cargo` tools are
+installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --all
@@ -270,10 +288,25 @@ Install development tools, CMake, and Python headers:
 
       sudo apt install build-essential cmake python3-dev
 
-Compiling YCM **with** semantic support for C-family languages:
+Compiling YCM **with** semantic support for C-family languages through
+**libclang**:
 
     cd ~/.vim/bundle/YouCompleteMe
-    python3 install.py --clang-completer
+    ./install.py --clang-completer
+
+Compiling YCM **with** semantic support for C-family languages through
+**experimental clangd**:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clangd-completer
+
+Note that you can install YCM with both **libclang** and **clangd** enabled. In
+that case **clangd** will be preferred unless you have the following in your
+`vimrc`:
+
+```viml
+let g:ycm_use_clangd = "Never"
+```
 
 Compiling YCM **without** semantic support for C-family languages:
 
@@ -293,10 +326,11 @@ The following additional language support options are available:
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, `rustc`, and `cargo` tools are installed and in your `PATH`, then
-simply run:
+To simply compile with everything enabled, there's a `--all` flag. Note that
+this flag does **not** install **clangd**. You need to specify it manually by
+adding `--clangd-completer`. So, to install with all language features, ensure
+`xbuild`, `go`, `tsserver`, `node`, `npm`, `rustc`, and `cargo` tools are
+installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --all
@@ -361,10 +395,25 @@ Download and install the following software:
 - [Visual Studio][visual-studio-download]. Download the community edition.
   During setup, select _Desktop development with C++_ in _Workloads_.
 
-Compiling YCM **with** semantic support for C-family languages:
+Compiling YCM **with** semantic support for C-family languages through
+**libclang**:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     python install.py --clang-completer
+
+Compiling YCM **with** semantic support for C-family languages through
+**experimental clangd**:
+
+    cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
+    python install.py --clangd-completer
+
+Note that you can install YCM with both **libclang** and **clangd** enabled. In
+that case **clangd** will be preferred unless you have the following in your
+`vimrc`:
+
+```viml
+let g:ycm_use_clangd = "Never"
+```
 
 Compiling YCM **without** semantic support for C-family languages:
 
@@ -384,9 +433,11 @@ The following additional language support options are available:
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `msbuild`, `go`, `tsserver`, `node`,
-`npm`, and `cargo` tools are installed and in your `PATH`, then simply run:
+To simply compile with everything enabled, there's a `--all` flag. Note that
+this flag does **not** install **clangd**. You need to specify it manually by
+adding `--clangd-completer`. So, to install with all language features, ensure
+`msbuild`, `go`, `tsserver`, `node`, `npm`, and `cargo` tools are installed and
+in your `PATH`, then simply run:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     python install.py --all
@@ -428,10 +479,25 @@ using Vundle and the ycm_core library APIs have changed (happens
 rarely), YCM will notify you to recompile it. You should then rerun the install
 process.
 
-Compiling YCM **with** semantic support for C-family languages:
+Compiling YCM **with** semantic support for C-family languages through
+**libclang**:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --clang-completer
+
+Compiling YCM **with** semantic support for C-family languages through
+**experimental clangd**:
+
+    cd ~/.vim/bundle/YouCompleteMe
+    ./install.py --clangd-completer
+
+Note that you can install YCM with both **libclang** and **clangd** enabled. In
+that case **clangd** will be preferred unless you have the following in your
+`vimrc`:
+
+```viml
+let g:ycm_use_clangd = "Never"
+```
 
 Compiling YCM **without** semantic support for C-family languages:
 
@@ -456,9 +522,11 @@ The following additional language support options are available:
 - Java support: install [JDK8 (version 8 required)][jdk-install] and add
   `--java-completer` when calling `./install.py`.
 
-To simply compile with everything enabled, there's a `--all` flag.  So, to
-install with all language features, ensure `xbuild`, `go`, `tsserver`, `node`,
-`npm`, and `cargo` tools are installed and in your `PATH`, then simply run:
+To simply compile with everything enabled, there's a `--all` flag. Note that
+this flag does **not** install **clangd**. You need to specify it manually by
+adding `--clangd-completer`. So, to install with all language features, ensure
+`xbuild`, `go`, `tsserver`, `node`, `npm`, `rustc`, and `cargo` tools are
+installed and in your `PATH`, then simply run:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --all
@@ -527,14 +595,20 @@ process.
     provides is used to power the YCM semantic completion engine for those
     languages. YCM is designed to work with libclang version 7.0.0 or higher.
 
-    You can use the system libclang _only if you are sure it is version 7.0.0 or
-    higher_, otherwise don't. Even if it is, we recommend using the [official
-    binaries from llvm.org][clang-download] if at all possible. Make sure you
-    download the correct archive file for your OS.
+    In addition to `libclang`, YCM also supports an **experimental**
+    [clangd][]-based completer. You can download the latest version of [clangd]
+    [] from [llvm.org releases][clang-download]. Follow Step 4 to learn how to
+    tell YCM where to find clangd binary. Please note that YCM is designed to
+    work with [clangd][] version 7.0.0 or higher.
 
-    We **STRONGLY recommend AGAINST use** of the system libclang instead of
-    the upstream compiled binaries. Random things may break. Save yourself the
-    hassle and use the upstream pre-built libclang.
+    You can use the system libclang or clangd _only if you are sure it is
+    version 7.0.0 or higher_, otherwise don't. Even if it is, we recommend using
+    the [official binaries from llvm.org][clang-download] if at all possible.
+    Make sure you download the correct archive file for your OS.
+
+    We **STRONGLY recommend AGAINST use** of the system libclang or clangd
+    instead of the upstream compiled binaries. Random things may break. Save
+    yourself the hassle and use the upstream pre-built libclang or clangd.
 
 4.  **Compile the `ycm_core` library** that YCM needs. This library
     is the C++ engine that YCM uses to get fast completions.
@@ -566,8 +640,8 @@ process.
         cd ycm_build
 
     Now we need to generate the makefiles. If you DON'T care about semantic
-    support for C-family languages, run the following command in the `ycm_build`
-    directory:
+    support for C-family languages or plan to use **experimental** [clangd][]-
+    based completer, run the following command in the `ycm_build` directory:
 
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
 
@@ -588,12 +662,14 @@ process.
     of the bundled version of boost. Random things may break. Save yourself
     the hassle and use the bundled version of boost.
 
-    If you DO care about semantic support for C-family languages, then your
-    `cmake` call will be a bit more complicated.  We'll assume you downloaded a
-    binary distribution of LLVM+Clang from llvm.org in step 3 and that you
-    extracted the archive file to folder `~/ycm_temp/llvm_root_dir` (with `bin`,
-    `lib`, `include` etc. folders right inside that folder). On Windows, you can
-    extract the files from the LLVM+Clang installer using [7-zip][7z-download].
+    If you DO care about semantic support for C-family languages, and want to
+    use libclang as the provider instead of **experimental** [clangd][]-based
+    completer then your `cmake` call will be a bit more complicated. We'll
+    assume you downloaded a binary distribution of LLVM+Clang from llvm.org in
+    step 3 and that you extracted the archive file to folder
+    `~/ycm_temp/llvm_root_dir` (with `bin`, `lib`, `include` etc. folders right
+    inside that folder). On Windows, you can extract the files from the
+    LLVM+Clang installer using [7-zip][7z-download].
 
     **NOTE:** This _only_ works with a _downloaded_ LLVM binary package, not a
     custom-built LLVM! See docs below for `EXTERNAL_LIBCLANG_PATH` when using a
@@ -630,6 +706,17 @@ process.
     Running the `cmake` command will also place the `libclang.[so|dylib|dll]` in
     the `YouCompleteMe/third_party/ycmd` folder for you if you compiled with
     clang support (it needs to be there for YCM to work).
+
+    If you DO care about semantic support for C-family languages, and want to
+    use **experimental** [clangd][]-based completer then you need to add
+    following lines to your `vimrc`:
+    ```viml
+    let g:ycm_use_clangd = "Always"
+    let g:ycm_clangd_binary_path = "/path/to/clangd"
+    ```
+    You need to change /path/to/clangd with the path of binary you downloaded in
+    step 3.
+
 
 5.  *This step is optional.*
 
@@ -836,10 +923,10 @@ of the identifiers in the current file and other files you visit (and your tags
 files) and searches them when you type (identifiers are put into per-filetype
 groups).
 
-There are also several semantic engines in YCM. There's a libclang-based
-completer that provides semantic completion for C-family languages.  There's a
-Jedi-based completer for semantic completion for Python. There's also an
-omnifunc-based completer that uses data from Vim's omnicomplete system to
+There are also several semantic engines in YCM. There are libclang-based and
+clangd-based completers that provide semantic completion for C-family languages.
+There's a Jedi-based completer for semantic completion for Python. There's also
+an omnifunc-based completer that uses data from Vim's omnicomplete system to
 provide semantic completions when no native completer exists for that language
 in YCM.
 
@@ -878,13 +965,13 @@ available for use.
 ### C-family Semantic Completion
 
 In order to perform semantic analysis such as code completion, `GoTo` and
-diagnostics, YouCompleteMe uses `libclang`. This is the library version of the
+diagnostics, YouCompleteMe uses `libclang` or `clangd`. Both of them make use of
 clang compiler, sometimes also referred to as llvm. Like any compiler,
-`libclang` requires a set of compile flags in order to parse your code. Simply
-put: If `libclang` can't parse your code, YouCompleteMe can't provide semantic
+clang also requires a set of compile flags in order to parse your code. Simply
+put: If clang can't parse your code, YouCompleteMe can't provide semantic
 analysis.
 
-There are 2 methods which can be used to provide compile flags to `libclang`:
+There are 2 methods which can be used to provide compile flags to clang:
 
 #### Option 1: Use a [compilation database][compdb]
 
@@ -903,7 +990,9 @@ documentation][compdb]. In short:
   [docs][ninja-compdb].
 - If using GNU make, check out [Bear][].
 - For other build systems, check out
-  [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) below.
+  [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) below. Note that
+  **experimental** [clangd][]-based completer doesn't support this option. So it
+  (and anything after this point) only applies to `libclang`-based completer.
 
 If no [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) is found,
 YouCompleteMe automatically tries to load a compilation database if there is
@@ -930,6 +1019,9 @@ paths. This ensures that compilation can be performed from any Vim working
 directory.
 
 #### Option 2: Provide the flags manually
+
+_Note that this option doesn't work with **experimental** [clangd][]-based
+completer. You can use a [compile_flags.txt][fixedcdb] file instead_
 
 If you don't have a compilation database, or aren't able to generate one,
 you have to tell YouCompleteMe how to compile your code some other way.
@@ -1006,6 +1098,49 @@ getting fast completions.
 
 Call the `:YcmDiags` command to see if any errors or warnings were detected in
 your file.
+
+
+#### Selecting a C-family completion engine
+
+Currently YCM supports two completion engines for C-family semantic completion.
+One libclang-based and an **experimental** [clangd]-based completer. When in
+doubt we recommend using the libclang-based engine. Here is a quick comparison
+of the two completer engines:
+
+-   **ycm_extra_conf.py**: Currently clangd does not support `ycm_extra_conf.py`
+    therefore you must have a compilation database, whereas libclang can work
+    with both.
+-   **Project wide indexing**: Clangd has both dynamic and static index support.
+    The dynamic index stores up-to-date symbols coming from any files you are
+    currently editing, whereas static index contains project-wide symbol
+    information. This symbol information is used for code completion and code
+    navigation. Whereas libclang is limited to the current translation unit(TU).
+-   **GoTo* **: Clangd provides all the GoTo requests libclang provides and it
+    improves those using the above mentioned index information to contain
+    project-wide information rather than just the current TU.
+-   **Rename**: Clangd can perform semantic rename operations on the current
+    file, whereas libclang doesn’t support such functionality.
+-   **Code Completion**: Clangd can perform code completions at a lower latency
+    than libclang; also, it has information about all the symbols in your
+    project so it can suggest items outside your current TU and also provides
+    proper `#include` insertions for those items.
+-   **Format Code**: Clangd provides code formatting either for the selected
+    lines or the whole file, whereas libclang doesn’t have such functionality.
+-   **Performance**: Clangd has faster reparse and code completion times
+    compared to libclang.
+
+Note that for clangd to have some of the above mentioned functionality, you need
+to provide a static index. For details on how to do that please have a look at
+[clangd-indexing][].
+
+To enable:
+
+- libclang-based completer pass `--clang-completer`
+- [clangd][]-based completer pass `--clangd-completer`
+
+to `install.py` while following the [installation guide](#installation). As
+mentioned before, pass `--clang-completer` when in doubt, since the
+[clangd][]-based completer is still experimental.
 
 ### Java Semantic Completion
 
@@ -2844,6 +2979,60 @@ Default: 1000
 let g:ycm_disable_for_files_larger_than_kb = 1000
 ```
 
+### The `g:ycm_use_clangd` option
+
+This option controls whether **clangd** should be used as completion engine for
+C-family languages. Can take one of the following values: `'Always'`, `'Auto'`
+or `'Never'`, with meanings:
+
+- `'Always'`: YCM will use clangd completer directly.
+- `'Auto'`: YCM will use clangd only if clangd binary exists in third party or
+  it was provided with `ycm_clangd_binary_path` option.
+- `'Never'`: YCM will never use clangd completer.
+
+Default: `'Auto'`
+
+```viml
+let g:ycm_use_clangd = 'Auto'
+```
+
+### The `g:ycm_clangd_binary_path` option
+
+When `ycm_use_clangd` option is set to `'Always'`, this option sets the path to
+**clangd** binary. If `ycm_use_clangd` option is set to `'Auto'` this option
+sets the fallback path in case the clangd binary in third party doesn't exist.
+
+Default: `''`
+
+```viml
+let g:ycm_clangd_binary_path = ''
+```
+
+### The `g:ycm_clangd_args` option
+
+This option controls the command line arguments passed to the clangd binary. It
+appends new options and overrides the existing ones.
+
+Default: `[]`
+
+```viml
+let g:ycm_clangd_args = []
+```
+
+### The `g:ycm_clangd_uses_ycmd_caching` option
+
+This option controls which ranking and filtering algorithm to use for completion
+items. It can take values:
+
+- `1`: Uses ycmd's caching and filtering logic.
+- `0`: Uses clangd's caching and filtering logic.
+
+Default: `1`
+
+```viml
+let g:ycm_clangd_uses_ycmd_caching = 1
+```
+
 FAQ
 ---
 
@@ -3450,3 +3639,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [jdtls-release]: http://download.eclipse.org/jdtls/milestones
 [diacritic]: https://www.unicode.org/glossary/#diacritic
 [regex]: https://pypi.org/project/regex/
+[clangd]: https://clang.llvm.org/extra/clangd.html
+[fixedcdb]: https://clang.llvm.org/docs/JSONCompilationDatabase.html#alternatives
+[clangd-indexing]: https://clang.llvm.org/extra/clangd.html#project-wide-indexing
