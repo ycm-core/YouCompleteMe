@@ -519,6 +519,10 @@ endfunction
 
 
 function! s:OnCompleteDone()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
   exec s:python_command "ycm_state.OnCompleteDone()"
 endfunction
 
