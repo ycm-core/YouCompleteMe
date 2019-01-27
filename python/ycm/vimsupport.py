@@ -1005,7 +1005,7 @@ def _OpenFileInSplitIfNeeded( filepath ):
   return ( buffer_num, True )
 
 
-def ReplaceChunks( chunks, silent=False ):
+def ReplaceChunks( chunks, silent=False, cursor_position = None ):
   """Apply the source file deltas supplied in |chunks| to arbitrary files.
   |chunks| is a list of changes defined by ycmd.responses.FixItChunk,
   which may apply arbitrary modifications to arbitrary files.
@@ -1017,7 +1017,10 @@ def ReplaceChunks( chunks, silent=False ):
     - open the file in a new split, make the changes, then hide the buffer.
 
   If for some reason a file could not be opened or changed, raises RuntimeError.
-  Otherwise, returns no meaningful value."""
+  Otherwise, returns no meaningful value.
+
+  If cursor_position is 'end' the cursor is moved to the end of the last
+  insertion in the current buffer."""
 
   # We apply the edits file-wise for efficiency.
   chunks_by_file = _SortChunksByFile( chunks )
@@ -1042,8 +1045,13 @@ def ReplaceChunks( chunks, silent=False ):
   for filepath in sorted_file_list:
     buffer_num, close_window = _OpenFileInSplitIfNeeded( filepath )
 
+    buffer_cursor_position = None
+    if filepath == GetCurrentBufferFilepath():
+      buffer_cursor_position = cursor_position
+
     locations.extend( ReplaceChunksInBuffer( chunks_by_file[ filepath ],
-                                             vim.buffers[ buffer_num ] ) )
+                                             vim.buffers[ buffer_num ],
+                                             buffer_cursor_position ) )
 
     # When opening tons of files, we don't want to have a split for each new
     # file, as this simply does not scale, so we open the window, make the
@@ -1066,7 +1074,7 @@ def ReplaceChunks( chunks, silent=False ):
     PostVimMessage( f'Applied { len( chunks ) } changes', warning = False )
 
 
-def ReplaceChunksInBuffer( chunks, vim_buffer ):
+def ReplaceChunksInBuffer( chunks, vim_buffer, cursor_position = None ):
   """Apply changes in |chunks| to the buffer-like object |buffer| and return the
   locations for that buffer."""
 
@@ -1087,11 +1095,20 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
 
   # However, we still want to display the locations from the top of the buffer
   # to its bottom.
-  return reversed( [ ReplaceChunk( chunk[ 'range' ][ 'start' ],
-                                   chunk[ 'range' ][ 'end' ],
-                                   chunk[ 'replacement_text' ],
-                                   vim_buffer )
-                     for chunk in chunks ] )
+
+  locations = []
+  for index, chunk in enumerate( chunks ):
+    chunk_cursor_position = None
+    if index == len( chunks ) - 1 and cursor_position == 'end':
+      chunk_cursor_position = 'end'
+    locations.append( ReplaceChunk( chunk[ 'range' ][ 'start' ],
+                                    chunk[ 'range' ][ 'end' ],
+                                    chunk[ 'replacement_text' ],
+                                    vim_buffer,
+                                    chunk_cursor_position ) )
+
+
+  return reversed( locations )
 
 
 def SplitLines( contents ):
@@ -1119,7 +1136,11 @@ def SplitLines( contents ):
 #
 # NOTE: Works exclusively with bytes() instances and byte offsets as returned
 # by ycmd and used within the Vim buffers
-def ReplaceChunk( start, end, replacement_text, vim_buffer ):
+def ReplaceChunk( start,
+                  end,
+                  replacement_text,
+                  vim_buffer,
+                  cursor_position = None ):
   # ycmd's results are all 1-based, but vim's/python's are all 0-based
   # (so we do -1 on all of the values)
   start_line = start[ 'line_num' ] - 1
@@ -1159,7 +1180,8 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # up somewhere after the end of the new text, we need to reset the cursor
   # position. This is because Vim doesn't know where to put it, and guesses
   # badly. We put it at the end of the new text.
-  if cursor_line == end_line and cursor_column >= end_column:
+  if ( cursor_position == 'end'
+       or ( cursor_line == end_line and cursor_column >= end_column ) ):
     cursor_line = start_line + len( replacement_lines ) - 1
     cursor_column += len( replacement_lines[ - 1 ] ) - len( end_line_text )
     SetCurrentLineAndColumn( cursor_line, cursor_column )
