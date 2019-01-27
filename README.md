@@ -1420,8 +1420,15 @@ You can also style the line that has the warning/error with these groups:
 - `YcmWarningLine`, which falls back to group `SyntasticWarningLine` if it
   exists
 
-Note that the line highlighting groups only work when gutter signs are turned
-on.
+Note that the line highlighting groups only work when the
+[`g:ycm_enable_diagnostic_signs`](#the-gycm_enable_diagnostic_signs-option)
+option is set. If you want highlighted lines but no signs in the Vim gutter,
+ensure that your Vim version is 7.4.2201 or later and set the `signcolumn`
+option to `off` in your vimrc:
+
+```viml
+set signcolumn=off
+```
 
 The syntax groups used to highlight regions of text with errors/warnings:
 - `YcmErrorSection`, which falls back to group `SyntasticError` if it exists and
