@@ -84,7 +84,20 @@ class CompletionRequest( BaseRequest ):
     if 'cs' in vimsupport.CurrentFiletypes():
       self._OnCompleteDone_Csharp()
     else:
-      self._OnCompleteDone_FixIt()
+      completions = self._GetCompletionsUserMayHaveCompleted()
+      if not completions:
+        return
+
+      # If we have user_data in completions (8.0.1493 or later), then we would
+      # only ever return max. 1 completion here. However, if we had to guess, it
+      # is possible that we matched multiple completion items (e.g. for
+      # overloads, or similar classes in multiple packages). In any case, rather
+      # than prompting the user and disturbing her workflow, we just apply the
+      # first one. This might be wrong, but the solution is to use a newer
+      # version of Vim which supports user_data on completion items
+      completion = completions[ 0 ]
+
+      self._OnCompleteDone_FixIt( completion )
 
 
   def _GetCompletionsUserMayHaveCompleted( self ):
@@ -126,24 +139,18 @@ class CompletionRequest( BaseRequest ):
     vimsupport.InsertNamespace( namespace )
 
 
-  def _OnCompleteDone_FixIt( self ):
-    completions = self._GetCompletionsUserMayHaveCompleted()
-    fixit_completions = [ _GetFixItCompletion( c ) for c in completions ]
-    fixit_completions = [ f for f in fixit_completions if f ]
-    if not fixit_completions:
+  def _OnCompleteDone_FixIt( self, completion ):
+    try:
+      fixits = completion[ 'extra_data' ][ 'fixits' ] or []
+    except KeyError:
       return
 
-    # If we have user_data in completions (8.0.1493 or later), then we would
-    # only ever return max. 1 completion here. However, if we had to guess, it
-    # is possible that we matched multiple completion items (e.g. for overloads,
-    # or similar classes in multiple packages). In any case, rather than
-    # prompting the user and disturbing her workflow, we just apply the first
-    # one. This might be wrong, but the solution is to use a (very) new version
-    # of Vim which supports user_data on completion items
-    fixit_completion = fixit_completions[ 0 ]
+    for fixit in fixits:
+      cursor_position = 'end' if fixit.get( 'is_completion', False ) else None
+      vimsupport.ReplaceChunks( fixit[ 'chunks' ],
+                                silent = True,
+                                cursor_position = cursor_position )
 
-    for fixit in fixit_completion:
-      vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
 
 
 def _GetRequiredNamespaceImport( completion ):
@@ -151,14 +158,6 @@ def _GetRequiredNamespaceImport( completion ):
        or 'required_namespace_import' not in completion[ 'extra_data' ] ):
     return None
   return completion[ 'extra_data' ][ 'required_namespace_import' ]
-
-
-def _GetFixItCompletion( completion ):
-  if ( 'extra_data' not in completion
-       or 'fixits' not in completion[ 'extra_data' ] ):
-    return None
-
-  return completion[ 'extra_data' ][ 'fixits' ]
 
 
 def _FilterToMatchingCompletions( completed_item, completions ):
