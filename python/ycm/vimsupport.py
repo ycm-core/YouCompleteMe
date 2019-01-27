@@ -1530,3 +1530,11 @@ def BuildQfListItem( goto_data_item ):
     qf_item[ 'col' ] = goto_data_item[ 'column_num' ]
 
   return qf_item
+
+
+def ExpandSnippet( snippet, trigger_string ):
+  if vim.eval( 'exists( "+UltiSnips#Anon" )' ):
+    vim.eval( f"UltiSnips#Anon( '{ EscapeForVim( snippet ) }',"
+              f"                '{ EscapeForVim( trigger_string )  }',"
+               "                'unused description',"
+               "                'i' )" )
