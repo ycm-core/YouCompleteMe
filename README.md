@@ -699,26 +699,27 @@ Quick Feature Summary
 * Semantic auto-completion with automatic fixes
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
-* Semantic type information for identifiers (`GetType`)
-* Automatically fix certain errors (`FixIt`)
 * View documentation comments for identifiers (`GetDoc`)
+* Type information for identifiers (`GetType`)
+* Automatically fix certain errors (`FixIt`)
 
 ### C♯
 
 * Semantic auto-completion
 * Real-time diagnostic display
 * Go to declaration/definition (`GoTo`, etc.)
-* Semantic type information for identifiers (`GetType`)
+* View documentation comments for identifiers (`GetDoc`)
+* Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
 * Management of OmniSharp server instance
-* View documentation comments for identifiers (`GetDoc`)
 
 ### Python
 
-* Intelligent auto-completion
+* Semantic auto-completion
 * Go to definition (`GoTo`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
+* Type information for identifiers (`GetType`)
 
 ### Go
 
@@ -729,15 +730,15 @@ Quick Feature Summary
 ### JavaScript and TypeScript
 
 * Semantic auto-completion with automatic import insertion
+* Real-time diagnostic display
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
 * Go to type definition (`GoToType`)
 * Reference finding (`GoToReferences`)
-* Real-time diagnostic display
-* Renaming symbols (`RefactorRename <new name>`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
+* Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
 * Organize imports (`OrganizeImports`)
 * Management of `TSServer` server instance
@@ -747,8 +748,8 @@ Quick Feature Summary
 * Semantic auto-completion
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
-* Management of `racer` server instance
 * View documentation comments for identifiers (`GetDoc`)
+* Management of `racer` server instance
 
 ### Java
 
@@ -756,14 +757,14 @@ Quick Feature Summary
 [feedback](#contact).
 
 * Semantic auto-completion with automatic import insertion
+* Real-time diagnostic display
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
 * Reference finding (`GoToReferences`)
-* Real-time diagnostic display
-* Renaming symbols (`RefactorRename <new name>`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
-* Automatically fix certain errors including code generation  (`FixIt`)
+* Automatically fix certain errors including code generation (`FixIt`)
+* Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
 * Organize imports (`OrganizeImports`)
 * Detection of java projects
@@ -1647,7 +1648,7 @@ Invoking this command on `s` returns `std::string => std::basic_string<char>`
 **NOTE:** Causes re-parsing of the current translation unit.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript,
-typescript`
+python, typescript`
 
 #### The `GetTypeImprecise` subcommand
 
