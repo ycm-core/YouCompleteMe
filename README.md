@@ -662,6 +662,10 @@ process.
 
           GOPATH=$(realpath ../../../..) go build
 
+      On Windows, first set `GOPATH` to the absolute path of
+      `YouCompleteMe/third_party/ycmd/third_party/go` then run `go build` in the two
+      directories above.
+
     - JavaScript and TypeScript support: install [Node.js and npm][npm-install],
       navigate to `YouCompleteMe/third_party/ycmd` and run
       `npm install -g --prefix third_party/tsserver typescript`.

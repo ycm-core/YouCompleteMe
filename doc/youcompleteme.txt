@@ -875,12 +875,16 @@ will notify you to recompile it. You should then rerun the install process.
    [38].
 
    - Go support: install Go [28] and add it to your path. In both
-   'YouCompleteMe/third_party/ycmd/third_party/go/src/github.com/mdempsky/gocode'
-   and
-   'YouCompleteMe/third_party/ycmd/third_party/go/src/github.com/rogpeppe/godef'
-   run
+     'YouCompleteMe/third_party/ycmd/third_party/go/src/github.com/mdempsky/gocode'
+     and
+     'YouCompleteMe/third_party/ycmd/third_party/go/src/github.com/rogpeppe/godef'
+     run
 
      GOPATH=$(realpath ../../../..) go build
+
+     On Windows, first set GOPATH to the absolute path of
+     'YouCompleteMe/third_party/ycmd/third_party/go' then run 'go build' in
+     the two directories above.
 
    - JavaScript and TypeScript support: install Node.js and npm [29],
      navigate to 'YouCompleteMe/third_party/ycmd' and run 'npm install -g
