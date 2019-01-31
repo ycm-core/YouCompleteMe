@@ -324,6 +324,8 @@ function! s:SetUpKeyMappings()
     silent! exe 'inoremap <unique> <expr> ' . key .
           \ ' <SID>OnDeleteChar( "\' . key . '" )'
   endfor
+  silent! inoremap <silent> <Plug>YcmFilepathCompletion
+        \ <C-R>=<SID>InvokeFilepathCompletion()<CR>
 endfunction
 
 
@@ -812,8 +814,11 @@ endfunction
 
 
 function! s:InvokeCompletion()
-  exec s:python_command "ycm_state.SendCompletionRequest(" .
-        \ "vimsupport.GetBoolValue( 's:force_semantic' ) )"
+  if s:force_semantic == 1
+    exec s:python_command "ycm_state.SendCompletionRequest( 'semantic' )"
+  else
+    exec s:python_command "ycm_state.SendCompletionRequest()"
+  endif
 
   call s:PollCompletion()
 endfunction
@@ -822,7 +827,22 @@ endfunction
 function! s:InvokeSemanticCompletion()
   if &completefunc == "youcompleteme#CompleteFunc"
     let s:force_semantic = 1
-    exec s:python_command "ycm_state.SendCompletionRequest( True )"
+    exec s:python_command "ycm_state.SendCompletionRequest( 'semantic' )"
+
+    call s:PollCompletion()
+  endif
+
+  " Since this function is called in a mapping through the expression register
+  " <C-R>=, its return value is inserted (see :h c_CTRL-R_=). We don't want to
+  " insert anything so we return an empty string.
+  return ''
+endfunction
+
+
+function! s:InvokeFilepathCompletion()
+  if &completefunc == "youcompleteme#CompleteFunc"
+    let s:force_semantic = 0
+    exec s:python_command "ycm_state.SendCompletionRequest( 'filepath' )"
 
     call s:PollCompletion()
   endif

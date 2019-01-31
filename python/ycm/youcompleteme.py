@@ -289,9 +289,10 @@ class YouCompleteMe( object ):
     self._SetUpServer()
 
 
-  def SendCompletionRequest( self, force_semantic = False ):
+  def SendCompletionRequest( self, force = None ):
     request_data = BuildRequestData()
-    request_data[ 'force_semantic' ] = force_semantic
+    if force:
+      request_data[ 'force' ] = force
     if not self.NativeFiletypeCompletionUsable():
       wrapped_request_data = RequestWrap( request_data )
       if self._omnicomp.ShouldUseNow( wrapped_request_data ):
