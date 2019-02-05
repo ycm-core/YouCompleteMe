@@ -181,6 +181,7 @@ module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-comm
   35. YCM does not shut down when I quit Vim |youcompleteme-ycm-does-not-shut-down-when-i-quit-vim|
   36. YCM does not work with my Anaconda Python setup |youcompleteme-ycm-does-not-work-with-my-anaconda-python-setup|
   37. Automatic import insertion after selecting a completion breaks undo |youcompleteme-automatic-import-insertion-after-selecting-completion-breaks-undo|
+  38. 'TAB' is already mapped to trigger completion in the command-line window |youcompleteme-tab-is-already-mapped-to-trigger-completion-in-command-line-window|
  14. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  15. Contact                                            |youcompleteme-contact|
  16. License                                            |youcompleteme-license|
@@ -2331,9 +2332,9 @@ Default: '[see next line]'
 >
   let g:ycm_filetype_blacklist = {
         \ 'tagbar': 1,
-        \ 'qf': 1,
         \ 'notes': 1,
         \ 'markdown': 1,
+        \ 'netrw': 1,
         \ 'unite': 1,
         \ 'text': 1,
         \ 'vimwiki': 1,
@@ -3601,6 +3602,18 @@ Automatic import insertion after selecting a completion breaks undo ~
 This is a Vim bug fixed in version 8.1.0256. Update your Vim to this version or
 later.
 
+-------------------------------------------------------------------------------
+*youcompleteme-tab-is-already-mapped-to-trigger-completion-in-command-line-window*
+'TAB' is already mapped to trigger completion in the command-line window ~
+
+Vim automatically maps the key set by the 'wildchar' option, which is 'TAB' by
+default, to complete commands in the command-line window. If you would prefer
+using this key to cycle through YCM's suggestions without changing the value of
+'wildchar', add the following to your vimrc:
+>
+  autocmd CmdwinEnter * inoremap <expr><buffer> <TAB>
+        \ pumvisible() ? "\<C-n>" : "\<TAB>"
+<
 ===============================================================================
                                     *youcompleteme-contributor-code-of-conduct*
 Contributor Code of Conduct ~
