@@ -22,12 +22,17 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycm.tests.test_utils import ExtendedMock, MockVimModule
+from ycm.tests.test_utils import ( ExtendedMock,
+                                   MockVimModule,
+                                   MockVimBuffers,
+                                   VimBuffer )
 MockVimModule()
 
 import json
+from hamcrest import assert_that, contains, has_entry, has_items
 from mock import patch, call
 from nose.tools import ok_
+
 from ycm.client.command_request import CommandRequest
 
 
@@ -301,3 +306,31 @@ class Response_Detection_test( object ):
 
     for test in tests:
       yield test[ 0 ], test[ 1 ], test[ 2 ]
+
+
+@patch( 'ycm.client.command_request.CommandRequest.'
+        'PostDataToHandler', return_value = [ 'GoTo' ] )
+def CommandRequest_RemapGoToCommands_test( post_data ):
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+    request = CommandRequest( [ 'GoToDefinitionElseDeclaration' ] )
+    request.Start()
+    assert_that(
+      # Positional arguments passed to last call of PostDataToHandler.
+      post_data.call_args[ 0 ],
+      has_items(
+        has_entry( 'command_arguments', contains( 'GoTo' ) ),
+        'run_completer_command'
+      )
+    )
+
+    request = CommandRequest( [ 'GoToImprecise' ] )
+    request.Start()
+    assert_that(
+      # Positional arguments passed to last call of PostDataToHandler.
+      post_data.call_args[ 0 ],
+      has_items(
+        has_entry( 'command_arguments', contains( 'GoTo' ) ),
+        'run_completer_command'
+      )
+    )

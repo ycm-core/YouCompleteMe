@@ -27,10 +27,10 @@ from ycm import vimsupport
 from ycmd.utils import ToUnicode
 
 
-def _EnsureBackwardsCompatibility( arguments ):
-  if arguments and arguments[ 0 ] == 'GoToDefinitionElseDeclaration':
-    arguments[ 0 ] = 'GoTo'
-  return arguments
+GOTO_COMMANDS_TO_REMAP = [
+  'GoToDefinitionElseDeclaration',
+  'GoToImprecise'
+]
 
 
 class CommandRequest( BaseRequest ):
@@ -39,7 +39,7 @@ class CommandRequest( BaseRequest ):
                 buffer_command = 'same-buffer',
                 extra_data = None ):
     super( CommandRequest, self ).__init__()
-    self._arguments = _EnsureBackwardsCompatibility( arguments )
+    self._arguments = arguments
     self._command = arguments and arguments[ 0 ]
     self._buffer_command = buffer_command
     self._extra_data = extra_data
@@ -50,6 +50,15 @@ class CommandRequest( BaseRequest ):
     request_data = BuildRequestData()
     if self._extra_data:
       request_data.update( self._extra_data )
+
+    # Remap GoTo* commands that are not defined by the completer to GoTo.
+    if self._command:
+      supported_commands = self.PostDataToHandler( request_data,
+                                                   'defined_subcommands' )
+      if ( self._command not in supported_commands and
+           self._command in GOTO_COMMANDS_TO_REMAP ):
+        self._arguments[ 0 ] = 'GoTo'
+
     request_data.update( {
       'command_arguments': self._arguments
     } )

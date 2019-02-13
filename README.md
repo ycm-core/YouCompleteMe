@@ -1594,7 +1594,10 @@ changes since the last parse that would lead to incorrect jumps. When you're
 just browsing around your codebase, this command can spare you quite a bit of
 latency.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda`
+**NOTE:** this command is identical to `GoTo` for other languages.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
+python, rust, typescript`
 
 #### The `GoToReferences` subcommand
 
