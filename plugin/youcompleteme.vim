@@ -274,6 +274,18 @@ let g:ycm_racerd_binary_path =
 let g:ycm_java_jdtls_use_clean_workspace =
       \ get( g:, 'ycm_java_jdtls_use_clean_workspace', 1 )
 
+let g:ycm_use_clangd =
+      \ get( g:, 'ycm_use_clangd', 'Auto' )
+
+let g:ycm_clangd_binary_path =
+      \ get( g:, 'ycm_clangd_binary_path', '' )
+
+let g:ycm_clangd_args =
+      \ get( g:, 'ycm_clangd_args', [] )
+
+let g:ycm_clangd_uses_ycmd_caching =
+      \ get( g:, 'ycm_clangd_uses_ycmd_caching', 1 )
+
 " This option is deprecated.
 let g:ycm_python_binary_path =
       \ get( g:, 'ycm_python_binary_path', '' )
