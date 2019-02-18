@@ -275,7 +275,7 @@ let g:ycm_java_jdtls_use_clean_workspace =
       \ get( g:, 'ycm_java_jdtls_use_clean_workspace', 1 )
 
 let g:ycm_use_clangd =
-      \ get( g:, 'ycm_use_clangd', 'Auto' )
+      \ get( g:, 'ycm_use_clangd', 1 )
 
 let g:ycm_clangd_binary_path =
       \ get( g:, 'ycm_clangd_binary_path', '' )

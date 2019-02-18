@@ -215,7 +215,7 @@ that case **clangd** will be preferred unless you have the following in your
 `vimrc`:
 
 ```viml
-let g:ycm_use_clangd = "Never"
+let g:ycm_use_clangd = 0
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -305,7 +305,7 @@ that case **clangd** will be preferred unless you have the following in your
 `vimrc`:
 
 ```viml
-let g:ycm_use_clangd = "Never"
+let g:ycm_use_clangd = 0
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -412,7 +412,7 @@ that case **clangd** will be preferred unless you have the following in your
 `vimrc`:
 
 ```viml
-let g:ycm_use_clangd = "Never"
+let g:ycm_use_clangd = 0
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -496,7 +496,7 @@ that case **clangd** will be preferred unless you have the following in your
 `vimrc`:
 
 ```viml
-let g:ycm_use_clangd = "Never"
+let g:ycm_use_clangd = 0
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -709,9 +709,8 @@ process.
 
     If you DO care about semantic support for C-family languages, and want to
     use **experimental** [clangd][]-based completer then you need to add
-    following lines to your `vimrc`:
+    following line to your `vimrc`:
     ```viml
-    let g:ycm_use_clangd = "Always"
     let g:ycm_clangd_binary_path = "/path/to/clangd"
     ```
     You need to change /path/to/clangd with the path of binary you downloaded in
@@ -2992,25 +2991,23 @@ let g:ycm_disable_for_files_larger_than_kb = 1000
 ### The `g:ycm_use_clangd` option
 
 This option controls whether **clangd** should be used as completion engine for
-C-family languages. Can take one of the following values: `'Always'`, `'Auto'`
-or `'Never'`, with meanings:
+C-family languages. Can take one of the following values: `1`, `0`, with
+meanings:
 
-- `'Always'`: YCM will use clangd completer directly.
-- `'Auto'`: YCM will use clangd only if clangd binary exists in third party or
-  it was provided with `ycm_clangd_binary_path` option.
-- `'Never'`: YCM will never use clangd completer.
+- `1`: YCM will use clangd if clangd binary exists in third party or it was
+provided with `ycm_clangd_binary_path` option.
+- `0`: YCM will never use clangd completer.
 
-Default: `'Auto'`
+Default: `1`
 
 ```viml
-let g:ycm_use_clangd = 'Auto'
+let g:ycm_use_clangd = 1
 ```
 
 ### The `g:ycm_clangd_binary_path` option
 
-When `ycm_use_clangd` option is set to `'Always'`, this option sets the path to
-**clangd** binary. If `ycm_use_clangd` option is set to `'Auto'` this option
-sets the fallback path in case the clangd binary in third party doesn't exist.
+When `ycm_use_clangd` option is set to `1`, this option sets the path to
+**clangd** binary.
 
 Default: `''`
 
