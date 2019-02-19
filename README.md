@@ -656,9 +656,9 @@ process.
       On Windows, be sure that [the build utility `msbuild` is in your
       PATH][add-msbuild-to-path].
 
-    - Go support: install [Go][go-install] and add it to your path. In **both**
-      `YouCompleteMe/third_party/ycmd/third_party/go/src/github.com/mdempsky/gocode` and
-      `YouCompleteMe/third_party/ycmd/third_party/go/src/github.com/rogpeppe/godef` run
+    - Go support: install [Go][go-install] and add it to your path. Navigate to
+      `YouCompleteMe/third_party/ycmd/third_party/go` and in **both**
+      `src/github.com/mdempsky/gocode` and `src/github.com/rogpeppe/godef` run
 
           GOPATH=$(realpath ../../../..) go build
 
