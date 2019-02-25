@@ -744,7 +744,14 @@ process.
       PATH][add-msbuild-to-path].
 
     - Go support: install [Go][go-install] and add it to your path. Navigate to
-      `YouCompleteMe/third_party/ycmd/third_party/gocode` and run `go build`.
+      `YouCompleteMe/third_party/ycmd/third_party/go` and in **both**
+      `src/github.com/mdempsky/gocode` and `src/github.com/rogpeppe/godef` run
+
+          GOPATH=$(realpath ../../../..) go build
+
+      On Windows, first set `GOPATH` to the absolute path of
+      `YouCompleteMe/third_party/ycmd/third_party/go` then run `go build` in the two
+      directories above.
 
     - JavaScript and TypeScript support: install [Node.js and npm][npm-install],
       navigate to `YouCompleteMe/third_party/ycmd` and run
