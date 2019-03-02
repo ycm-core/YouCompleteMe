@@ -165,7 +165,11 @@ def OpenLocationList_test( vim_command, fitting_height, variable_exists ):
   vimsupport.OpenLocationList( focus = False, autoclose = True )
   vim_command.assert_has_exact_calls( [
     call( 'lopen' ),
-    call( 'au WinLeave <buffer> q' ),
+    call( 'augroup ycmlocation' ),
+    call( 'autocmd! * <buffer>' ),
+    call( 'autocmd WinLeave <buffer> '
+          'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif' ),
+    call( 'augroup END' ),
     call( 'doautocmd User YcmLocationOpened' ),
     call( 'silent! wincmd p' )
   ] )
