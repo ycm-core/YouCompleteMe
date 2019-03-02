@@ -107,7 +107,10 @@ class GoToResponse_QuickFix_test( object ):
     ] )
     vim_command.assert_has_exact_calls( [
       call( 'botright copen' ),
-      call( 'au WinLeave <buffer> q' ),
+      call( 'augroup ycmquickfix' ),
+      call( 'autocmd! * <buffer>' ),
+      call( 'autocmd WinLeave <buffer> q' ),
+      call( 'augroup END' ),
       call( 'doautocmd User YcmQuickFixOpened' )
     ] )
     set_fitting_height.assert_called_once_with()

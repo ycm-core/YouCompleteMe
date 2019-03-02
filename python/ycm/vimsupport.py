@@ -341,9 +341,11 @@ def OpenLocationList( focus = False, autoclose = False ):
   SetFittingHeightForCurrentWindow()
 
   if autoclose:
-    # This autocommand is automatically removed when the location list window is
-    # closed.
-    vim.command( 'au WinLeave <buffer> q' )
+    # Ensure only the location list window is closed.
+    vim.command( 'augroup ycmlocation' )
+    vim.command( 'autocmd! * <buffer>' )
+    vim.command( 'autocmd WinLeave <buffer> q' )
+    vim.command( 'augroup END' )
 
   if VariableExists( '#User#YcmLocationOpened' ):
     vim.command( 'doautocmd User YcmLocationOpened' )
@@ -368,9 +370,11 @@ def OpenQuickFixList( focus = False, autoclose = False ):
   SetFittingHeightForCurrentWindow()
 
   if autoclose:
-    # This autocommand is automatically removed when the quickfix window is
-    # closed.
-    vim.command( 'au WinLeave <buffer> q' )
+    # Ensure only the quickfix window is closed.
+    vim.command( 'augroup ycmquickfix' )
+    vim.command( 'autocmd! * <buffer>' )
+    vim.command( 'autocmd WinLeave <buffer> q' )
+    vim.command( 'augroup END' )
 
   if VariableExists( '#User#YcmQuickFixOpened' ):
     vim.command( 'doautocmd User YcmQuickFixOpened' )
