@@ -2215,9 +2215,9 @@ Default: `[see next line]`
 ```viml
 let g:ycm_filetype_blacklist = {
       \ 'tagbar': 1,
-      \ 'qf': 1,
       \ 'notes': 1,
       \ 'markdown': 1,
+      \ 'netrw': 1,
       \ 'unite': 1,
       \ 'text': 1,
       \ 'vimwiki': 1,
@@ -3541,6 +3541,18 @@ more details.
 
 This is a Vim bug fixed in version 8.1.0256. Update your Vim to this version or
 later.
+
+### `TAB` is already mapped to trigger completion in the command-line window
+
+Vim automatically maps the key set by the `wildchar` option, which is `TAB` by
+default, to complete commands in the command-line window. If you would prefer
+using this key to cycle through YCM's suggestions without changing the value of
+`wildchar`, add the following to your vimrc:
+
+```viml
+autocmd CmdwinEnter * inoremap <expr><buffer> <TAB>
+      \ pumvisible() ? "\<C-n>" : "\<TAB>"
+```
 
 Contributor Code of Conduct
 ---------------------------
