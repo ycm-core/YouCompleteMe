@@ -73,7 +73,7 @@ def YouCompleteMe_InvalidPythonInterpreterPath_test( post_vim_message ):
       post_vim_message.assert_called_once_with(
         "Unable to start the ycmd server. "
         "Path in 'g:ycm_server_python_interpreter' option does not point "
-        "to a valid Python 2.7 or 3.4+. "
+        "to a valid Python 2.7 or 3.5+. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
 
       post_vim_message.reset_mock()
@@ -100,7 +100,7 @@ def YouCompleteMe_NoPythonInterpreterFound_test( post_vim_message, *args ):
 
       assert_that( ycm.IsServerAlive(), equal_to( False ) )
       post_vim_message.assert_called_once_with(
-        "Unable to start the ycmd server. Cannot find Python 2.7 or 3.4+. "
+        "Unable to start the ycmd server. Cannot find Python 2.7 or 3.5+. "
         "Set the 'g:ycm_server_python_interpreter' option to a Python "
         "interpreter path. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
