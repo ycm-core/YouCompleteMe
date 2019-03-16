@@ -33,7 +33,7 @@ DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
                             'ycmd' )
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
 PYTHON_BINARY_REGEX = re.compile(
-  r'python((2(\.[67])?)|(3(\.[3-9])?))?(.exe)?$', re.IGNORECASE )
+  r'python((2(\.7)?)|(3(\.[5-9])?))?(.exe)?$', re.IGNORECASE )
 
 
 # Not caching the result of this function; users shouldn't have to restart Vim
@@ -51,7 +51,7 @@ def PathToPythonInterpreter():
       return python_interpreter
 
     raise RuntimeError( "Path in 'g:ycm_server_python_interpreter' option "
-                        "does not point to a valid Python 2.7 or 3.4+." )
+                        "does not point to a valid Python 2.7 or 3.5+." )
 
   python_interpreter = _PathToPythonUsedDuringBuild()
   if python_interpreter and utils.GetExecutable( python_interpreter ):
@@ -77,7 +77,7 @@ def PathToPythonInterpreter():
   if python_interpreter:
     return python_interpreter
 
-  raise RuntimeError( "Cannot find Python 2.7 or 3.4+. "
+  raise RuntimeError( "Cannot find Python 2.7 or 3.5+. "
                       "Set the 'g:ycm_server_python_interpreter' option "
                       "to a Python interpreter path." )
 
@@ -94,7 +94,7 @@ def _PathToPythonUsedDuringBuild():
 
 
 def _EndsWithPython( path ):
-  """Check if given path ends with a python 2.7 or 3.4+ name."""
+  """Check if given path ends with a python 2.7 or 3.5+ name."""
   return path and PYTHON_BINARY_REGEX.search( path ) is not None
 
 
