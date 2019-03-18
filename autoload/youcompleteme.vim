@@ -709,6 +709,17 @@ endfunction
 
 
 function! s:OnTextChangedInsertMode()
+  if !g:ycm_async_completionrequest_dispatch
+    return s:OnTextChangedInsertModeCB()
+  endif
+  if has("nvim")
+    call jobstart(['true'], {'on_exit':function("s:OnTextChangedInsertModeCB")})
+  else
+    call job_start('true', {'exit_cb':function("s:OnTextChangedInsertModeCB")})
+  endif
+endfunction
+
+function! s:OnTextChangedInsertModeCB(...)
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
