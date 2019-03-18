@@ -709,6 +709,10 @@ endfunction
 
 
 function! s:OnTextChangedInsertMode()
+  call timer_start(0, function('s:OnTextChangedInsertModeCB'))
+endfunction
+
+function! s:OnTextChangedInsertModeCB(...)
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
