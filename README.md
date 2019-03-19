@@ -596,10 +596,10 @@ process.
     languages. YCM is designed to work with libclang version 7.0.0 or higher.
 
     In addition to `libclang`, YCM also supports an **experimental**
-    [clangd][]-based completer. You can download the latest version of [clangd]
-    [] from [llvm.org releases][clang-download]. Follow Step 4 to learn how to
-    tell YCM where to find clangd binary. Please note that YCM is designed to
-    work with [clangd][] version 7.0.0 or higher.
+    [clangd][]-based completer. You can download the latest version of
+    [clangd][] from [llvm.org releases][clang-download]. Follow Step 4 to learn
+    how to tell YCM where to find clangd binary. Please note that YCM is
+    designed to work with [clangd][] version 7.0.0 or higher.
 
     You can use the system libclang or clangd _only if you are sure it is
     version 7.0.0 or higher_, otherwise don't. Even if it is, we recommend using
@@ -640,7 +640,7 @@ process.
         cd ycm_build
 
     Now we need to generate the makefiles. If you DON'T care about semantic
-    support for C-family languages or plan to use **experimental** [clangd][]-
+    support for C-family languages or plan to use **experimental** [clangd][]
     based completer, run the following command in the `ycm_build` directory:
 
         cmake -G "<generator>" . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
@@ -713,9 +713,8 @@ process.
     ```viml
     let g:ycm_clangd_binary_path = "/path/to/clangd"
     ```
-    You need to change /path/to/clangd with the path of binary you downloaded in
-    step 3.
-
+    You need to change `/path/to/clangd` with the path of binary you downloaded
+    in step 3.
 
 5.  *This step is optional.*
 
@@ -1028,7 +1027,7 @@ directory.
 #### Option 2: Provide the flags manually
 
 _Note that this option doesn't work with **experimental** [clangd][]-based
-completer. You can use a [compile_flags.txt][fixedcdb] file instead_
+completer. You can use a [compile_flags.txt][fixedcdb] file instead._
 
 If you don't have a compilation database, or aren't able to generate one,
 you have to tell YouCompleteMe how to compile your code some other way.
