@@ -709,6 +709,9 @@ endfunction
 
 
 function! s:OnTextChangedInsertMode()
+  if !g:ycm_async_completionrequest_dispatch
+    return s:OnTextChangedInsertModeCB()
+  endif
   call timer_start(0, function('s:OnTextChangedInsertModeCB'))
 endfunction
 

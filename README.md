@@ -2994,6 +2994,26 @@ Default: 1000
 let g:ycm_disable_for_files_larger_than_kb = 1000
 ```
 
+### The `g:ycm_async_completionrequest_dispatch` option
+
+Defines if requests are dispatched asynchronously. **experimental**
+Handling completion requests is done asynchronously by ycmd, but dispatching the
+request is not. This is done on every keystroke and thus increases input latency
+in most cases. With this option enabled the dispatching of the request is off-
+loaded into a callback triggered by a timer (without delay) to run asynchronous.
+Using an asynchronous dispatch improves input latency a lot but it is currently
+unknown if it introduces subtile errors in completion, due to dispatching not
+in the "right" state. Therefore this is **experimental**.
+
+- `1`: YCM will use a timer to dispatch request asynchronously.
+- `0`: YCM will dispatch the right when handling the TextChange-trigger
+
+Default: 0
+
+```viml
+let g:ycm_async_completionrequest_dispatch = 0
+```
+
 ### The `g:ycm_use_clangd` option
 
 This option controls whether **clangd** should be used as completion engine for
