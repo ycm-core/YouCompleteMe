@@ -288,13 +288,13 @@ function! s:SetUpKeyMappings()
     " With this command, when the completion window is visible, the tab key
     " (default) will select the next candidate in the window. In vim, this also
     " changes the typed-in text to that of the candidate completion.
-    exe 'inoremap <expr>' . key .
+    exe 'imap <expr>' . key .
           \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
   endfor
 
   for key in g:ycm_key_list_previous_completion
     " This selects the previous candidate for shift-tab (default)
-    exe 'inoremap <expr>' . key .
+    exe 'imap <expr>' . key .
           \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
   endfor
 
@@ -302,7 +302,7 @@ function! s:SetUpKeyMappings()
     " When selecting a candidate and closing the completion menu with the <C-y>
     " key, the menu will automatically be reopened because of the TextChangedI
     " event. We define a command to prevent that.
-    exe 'inoremap <expr>' . key . ' <SID>StopCompletion( "\' . key . '" )'
+    exe 'imap <expr>' . key . ' <SID>StopCompletion( "\' . key . '" )'
   endfor
 
   if !empty( g:ycm_key_invoke_completion )
@@ -313,12 +313,12 @@ function! s:SetUpKeyMappings()
       imap <Nul> <C-Space>
     endif
 
-    silent! exe 'inoremap <unique> <silent> ' . invoke_key .
+    silent! exe 'imap <unique> <silent> ' . invoke_key .
           \ ' <C-R>=<SID>InvokeSemanticCompletion()<CR>'
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
-    silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+    silent! exe 'nmap <unique> ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<CR>'
   endif
 
@@ -326,7 +326,7 @@ function! s:SetUpKeyMappings()
   " completion menu is open. We handle this by closing the completion menu on
   " the keys that delete a character in insert mode.
   for key in [ "<BS>", "<C-h>" ]
-    silent! exe 'inoremap <unique> <expr> ' . key .
+    silent! exe 'imap <unique> <expr> ' . key .
           \ ' <SID>OnDeleteChar( "\' . key . '" )'
   endfor
 endfunction
