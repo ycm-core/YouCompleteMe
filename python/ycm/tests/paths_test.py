@@ -56,9 +56,9 @@ def EndsWithPython_Python2Paths_test():
 def EndsWithPython_Python3Paths_test():
   python_paths = [
     'python3',
-    '/usr/bin/python3.4',
-    '/home/user/.pyenv/shims/python3.4',
-    r'C:\Python34\python.exe'
+    '/usr/bin/python3.5',
+    '/home/user/.pyenv/shims/python3.5',
+    r'C:\Python35\python.exe'
   ]
 
   for path in python_paths:
