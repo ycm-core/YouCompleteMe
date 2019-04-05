@@ -1121,7 +1121,7 @@ of the two completer engines:
     currently editing, whereas static index contains project-wide symbol
     information. This symbol information is used for code completion and code
     navigation. Whereas libclang is limited to the current translation unit(TU).
--   **GoTo* **: Clangd provides all the GoTo requests libclang provides and it
+-   **Code navigation**: Clangd provides all the GoTo requests libclang provides and it
     improves those using the above mentioned index information to contain
     project-wide information rather than just the current TU.
 -   **Rename**: Clangd can perform semantic rename operations on the current
