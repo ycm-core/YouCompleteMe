@@ -437,8 +437,8 @@ The following additional language support options are available:
 - Rust support: install Rust [31] and add '--rust-completer' when calling
   'install.py'.
 
-- Java support: install JDK8 (version 8 required) [32] and add '--java-
-  completer' when calling 'install.py'.
+- Java support: install JDK8 (version 8 required) [32] and add
+  '--java-completer' when calling 'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
 this flag does **not** install **clangd**. You need to specify it manually by
@@ -529,8 +529,8 @@ The following additional language support options are available:
 - Rust support: install Rust [31] and add '--rust-completer' when calling
   'install.py'.
 
-- Java support: install JDK8 (version 8 required) [32] and add '--java-
-  completer' when calling 'install.py'.
+- Java support: install JDK8 (version 8 required) [32] and add
+  '--java-completer' when calling 'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
 this flag does **not** install **clangd**. You need to specify it manually by
@@ -640,8 +640,8 @@ The following additional language support options are available:
 - Rust support: install Rust [31] and add '--rust-completer' when calling
   'install.py'.
 
-- Java support: install JDK8 (version 8 required) [32] and add '--java-
-  completer' when calling 'install.py'.
+- Java support: install JDK8 (version 8 required) [32] and add
+  '--java-completer' when calling 'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
 this flag does **not** install **clangd**. You need to specify it manually by
@@ -731,8 +731,8 @@ The following additional language support options are available:
 - Rust support: install Rust [31] and add '--rust-completer' when calling
   './install.py'.
 
-- Java support: install JDK8 (version 8 required) [32] and add '--java-
-  completer' when calling './install.py'.
+- Java support: install JDK8 (version 8 required) [32] and add
+  '--java-completer' when calling './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
 this flag does **not** install **clangd**. You need to specify it manually by
@@ -834,8 +834,8 @@ will notify you to recompile it. You should then rerun the install process.
    get it through Homebrew [26] with 'brew install cmake'.
 
    On a Unix OS, you need to make sure you have Python headers installed. On
-   a Debian-like Linux distro, this would be 'sudo apt-get install python-
-   dev python3-dev'. On Mac they should already be present.
+   a Debian-like Linux distro, this would be 'sudo apt-get install
+   python-dev python3-dev'. On Mac they should already be present.
 
    On Windows, you need to download and install Python 2 or Python 3 [37].
    Pick the version corresponding to your Vim architecture. You will also
@@ -843,8 +843,8 @@ will notify you to recompile it. You should then rerun the install process.
    installing Visual Studio [38]. MSVC 14 (Visual Studio 2015) and 15 (2017)
    are officially supported.
 
-   Here we'll assume you installed YCM with Vundle. That means that the top-
-   level YCM directory is in '~/.vim/bundle/YouCompleteMe'.
+   Here we'll assume you installed YCM with Vundle. That means that the
+   top-level YCM directory is in '~/.vim/bundle/YouCompleteMe'.
 
    We'll create a new folder where build files will be placed. Run the
    following:
@@ -980,8 +980,8 @@ will notify you to recompile it. You should then rerun the install process.
      binary release of eclipse.jdt.ls [45] and extract it to 'YouCompleteM
      e/third_party/ycmd/third_party/eclipse.jdt.ls/target/repository'.
      Note: this approach is not recommended for most users and is
-     supported only for advanced users and developers of YCM on a best-
-     efforts basis. Please use 'install.py' to enable java support.
+     supported only for advanced users and developers of YCM on a
+     best-efforts basis. Please use 'install.py' to enable java support.
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -1347,9 +1347,9 @@ of the two completer engines:
   code navigation. Whereas libclang is limited to the current translation
   unit(TU).
 
-- **GoTo***: Clangd provides all the GoTo requests libclang provides and it
-  improves those using the above mentioned index information to contain
-  project-wide information rather than just the current TU.
+- **Code navigation**: Clangd provides all the GoTo requests libclang
+  provides and it improves those using the above mentioned index information
+  to contain project-wide information rather than just the current TU.
 
 - **Rename**: Clangd can perform semantic rename operations on the current
   file, whereas libclang doesn’t support such functionality.
@@ -1527,8 +1527,8 @@ Python Semantic Completion ~
 YCM relies on the Jedi [13] engine to provide completion and code navigation.
 By default, it will pick the version of Python running the ycmd server [47] and
 use its 'sys.path'. While this is fine for simple projects, this needs to be
-configurable when working with virtual environments or in a project with third-
-party packages. The next sections explain how to do that.
+configurable when working with virtual environments or in a project with
+third-party packages. The next sections explain how to do that.
 
 -------------------------------------------------------------------------------
                               *youcompleteme-working-with-virtual-environments*
@@ -1665,8 +1665,8 @@ available on the wiki [67].
 
 All JavaScript and TypeScript features are provided by the TSServer [17]
 engine, which is included in the TypeScript SDK. To enable these features,
-install Node.js and npm [30] and call the 'install.py' script with the '--ts-
-completer' flag.
+install Node.js and npm [30] and call the 'install.py' script with the
+'--ts-completer' flag.
 
 TSServer [17] relies on the 'jsconfig.json' file [68] for JavaScript and the
 'tsconfig.json' file [69] for TypeScript to analyze your project. Ensure the
@@ -2000,9 +2000,9 @@ Supported in filetypes: 'java, javascript, python, typescript'
 -------------------------------------------------------------------------------
 The *GoToImplementation* subcommand
 
-Looks up the symbol under the cursor and jumps to its implementation (i.e. non-
-interface). If there are multiple implementations, instead provides a list of
-implementations to choose from.
+Looks up the symbol under the cursor and jumps to its implementation (i.e.
+non-interface). If there are multiple implementations, instead provides a list
+of implementations to choose from.
 
 Supported in filetypes: 'cs'
 
@@ -2422,10 +2422,10 @@ Default: '10'
 -------------------------------------------------------------------------------
 The *g:ycm_auto_trigger* option
 
-When set to '0', this option turns off YCM's identifier completer (the as-you-
-type popup) _and_ the semantic triggers (the popup you'd get after typing '.'
-or '->' in say C++). You can still force semantic completion with the
-'<C-Space>' shortcut.
+When set to '0', this option turns off YCM's identifier completer (the
+as-you-type popup) _and_ the semantic triggers (the popup you'd get after
+typing '.' or '->' in say C++). You can still force semantic completion with
+the '<C-Space>' shortcut.
 
 If you want to just turn off the identifier completer but keep the semantic
 triggers, you should set |g:ycm_min_num_of_chars_for_completion| to a high
@@ -2745,8 +2745,8 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 YCM will re-index your tags files if it detects that they have been modified.
 
 The only supported tag format is the Exuberant Ctags format [75]. The format
-from "plain" ctags is NOT supported. Ctags needs to be called with the '--
-fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
+from "plain" ctags is NOT supported. Ctags needs to be called with the
+'--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
 
 See the _FAQ_ for pointers if YCM does not appear to read your tag files.
@@ -3174,11 +3174,11 @@ Defines where 'GoTo*' commands result should be opened. Can take one of the
 following values: "'same-buffer'", "'split'", or "'split-or-existing-window'".
 If this option is set to the "'same-buffer'" but current buffer can not be
 switched (when buffer is modified and 'nohidden' option is set), then result
-will be opened in a split. When the option is set to "'split-or-existing-
-window'", if the result is already open in a window of the current tab page (or
-any tab pages with the ':tab' modifier; see below), it will jump to that
-window. Otherwise, the result will be opened in a split as if the option was
-set to "'split'".
+will be opened in a split. When the option is set to
+"'split-or-existing-window'", if the result is already open in a window of the
+current tab page (or any tab pages with the ':tab' modifier; see below), it
+will jump to that window. Otherwise, the result will be opened in a split as if
+the option was set to "'split'".
 
 To customize the way a new window is split, prefix the 'GoTo*' command with one
 of the following modifiers: ':aboveleft', ':belowright', ':botright',
@@ -3509,8 +3509,8 @@ Ctags needs to be called with the '--fields=+l' (that's a lowercase 'L', not a
 one) option because YCM needs the 'language:<lang>' field in the tags output.
 
 **NOTE:** Exuberant Ctags [77] by default sets language tag for '*.h' files as
-'C++'. If you have C (not C++) project, consider giving parameter '--
-langmap=c:.c.h' to ctags to see tags from '*.h' files.
+'C++'. If you have C (not C++) project, consider giving parameter
+'--langmap=c:.c.h' to ctags to see tags from '*.h' files.
 
 **NOTE:** Mac OS X comes with "plain" ctags installed by default. 'brew install
 ctags' will get you the Exuberant Ctags version.
