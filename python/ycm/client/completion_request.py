@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 YouCompleteMe contributors
+# Copyright (C) 2013-2019 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -201,6 +201,8 @@ def _ConvertCompletionDataToVimData( completion_identifier, completion_data ):
     'menu'     : completion_data.get( 'extra_menu_info', '' ),
     'info'     : _GetCompletionInfoField( completion_data ),
     'kind'     : ToUnicode( completion_data.get( 'kind', '' ) )[ :1 ].lower(),
+    # Disable Vim filtering.
+    'equal'    : 1,
     'dup'      : 1,
     'empty'    : 1,
     # We store the completion item index as a string in the completion

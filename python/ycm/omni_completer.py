@@ -1,4 +1,4 @@
-# Copyright (C) 2011, 2012, 2013  Google Inc.
+# Copyright (C) 2011-2019 ycmd contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -127,8 +127,14 @@ class OmniCompleter( Completer ):
       # but ycmd only supports lists where items are all strings or all
       # dictionaries. Convert all strings into dictionaries.
       for index, item in enumerate( items ):
+        # Set the 'equal' field to 1 to disable Vim filtering.
         if not isinstance( item, dict ):
-          items[ index ] = { 'word': item }
+          items[ index ] = {
+            'word': item,
+            'equal': 1
+          }
+        else:
+          item[ 'equal' ] = 1
 
       return items
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2016 YouCompleteMe Contributors
+# Copyright (C) 2015-2019 YouCompleteMe Contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -41,7 +41,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
     try:
       eq_( expected_vim_data, vim_data )
     except Exception:
-      print( "Expected:\n'{0}'\nwhen parsing:\n'{1}'\nBut found:\n'{2}'".format(
+      print( "Expected:\n'{}'\nwhen parsing:\n'{}'\nBut found:\n'{}'".format(
           expected_vim_data,
           completion_data,
           vim_data ) )
@@ -64,6 +64,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DETAILED INFO\nDOC STRING',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
@@ -79,6 +80,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : '',
       'kind'     : '',
       'info'     : '',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '17',
@@ -98,6 +100,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DETAILED INFO',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '9999999999',
@@ -119,6 +122,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DOC STRING',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': 'not_an_int',
@@ -139,6 +143,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : '',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
@@ -161,6 +166,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DETAILEDINFO\nDOCSTRING',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
@@ -182,6 +188,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DETAILED INFO',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
@@ -204,6 +211,7 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DETAILED INFO\nDOC STRING',
+      'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
       'user_data': '0',
