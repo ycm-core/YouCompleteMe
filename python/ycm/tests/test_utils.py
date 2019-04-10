@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2018 YouCompleteMe contributors
+# Copyright (C) 2011-2019 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -707,6 +707,8 @@ def ToBytesOnPY2( data ):
   if not PY2:
     return data
 
+  if isinstance( data, int ):
+    return data
   if isinstance( data, list ):
     return [ ToBytesOnPY2( item ) for item in data ]
   if isinstance( data, dict ):
