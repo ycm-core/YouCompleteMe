@@ -7,8 +7,5 @@ PyHamcrest            >= 1.8.0
 # This needs to be kept in sync with submodule checkout in
 # third_party/ycmd/third_party
 future                == 0.15.2
-# coverage.py 4.4 removed the path from the filename attribute in its reports.
-# This leads to incorrect coverage from codecov as it relies on this attribute
-# to find the source file.
-coverage              <  4.4
+coverage              >= 4.2
 codecov               >= 2.0.5
