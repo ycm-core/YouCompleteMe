@@ -600,8 +600,8 @@ Download and install the following software:
 
 - CMake [27]. Add CMake executable to the PATH environment variable.
 
-- Visual Studio [38]. Download the community edition. During setup, select
-  _Desktop development with C++_ in _Workloads_.
+- Visual Studio Build Tools 2017 [38]. During setup, select _Visual C++ build
+  tools_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages through
 **libclang**:
@@ -840,8 +840,8 @@ will notify you to recompile it. You should then rerun the install process.
    On Windows, you need to download and install Python 2 or Python 3 [37].
    Pick the version corresponding to your Vim architecture. You will also
    need Microsoft Visual C++ (MSVC) to build YCM. You can obtain it by
-   installing Visual Studio [38]. MSVC 14 (Visual Studio 2015) and 15 (2017)
-   are officially supported.
+   installing Visual Studio Build Tools [38]. MSVC 14 (Visual Studio 2015)
+   and 15 (2017) are officially supported.
 
    Here we'll assume you installed YCM with Vundle. That means that the
    top-level YCM directory is in '~/.vim/bundle/YouCompleteMe'.
@@ -3884,7 +3884,7 @@ References ~
 [35] https://github.com/vim/vim-win32-installer/releases
 [36] http://vimhelp.appspot.com/starting.txt.html#vimrc
 [37] https://www.python.org/downloads/windows/
-[38] https://www.visualstudio.com/downloads/
+[38] https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15
 [39] http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [40] https://github.com/tpope/vim-pathogen#pathogenvim
 [41] http://llvm.org/releases/download.html
