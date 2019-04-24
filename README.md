@@ -392,8 +392,8 @@ Download and install the following software:
   number exactly.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
   variable.
-- [Visual Studio][visual-studio-download]. Download the community edition.
-  During setup, select _Desktop development with C++_ in _Workloads_.
+- [Visual Studio Build Tools 2017][visual-studio-download]. During setup,
+  select _Visual C++ build tools_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages through
 **libclang**:
@@ -626,8 +626,9 @@ process.
     On Windows, you need to download and install [Python 2 or
     Python 3][python-win-download]. Pick the version corresponding to your Vim
     architecture. You will also need Microsoft Visual C++ (MSVC) to build YCM.
-    You can obtain it by installing [Visual Studio][visual-studio-download].
-    MSVC 14 (Visual Studio 2015) and 15 (2017) are officially supported.
+    You can obtain it by installing [Visual Studio Build
+    Tools][visual-studio-download]. MSVC 14 (Visual Studio 2015) and 15 (2017)
+    are officially supported.
 
     Here we'll assume you installed YCM with Vundle. That means that the
     top-level YCM directory is in `~/.vim/bundle/YouCompleteMe`.
@@ -3629,7 +3630,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
 [vim-win-download]: https://github.com/vim/vim-win32-installer/releases
 [python-win-download]: https://www.python.org/downloads/windows/
-[visual-studio-download]: https://www.visualstudio.com/downloads/
+[visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15
 [7z-download]: http://www.7-zip.org/download.html
 [mono-install-osx]: http://www.mono-project.com/docs/getting-started/install/mac/
 [mono-install-linux]: https://www.mono-project.com/download/stable/#download-lin
