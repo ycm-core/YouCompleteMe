@@ -275,14 +275,16 @@ def GetDiagnosticMatchPattern( line_num,
                                line_end_num = None,
                                column_end_num = None ):
   line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
+  column_num = max( column_num, 1 )
 
-  if not line_end_num or not column_end_num:
+  if line_end_num is None or column_end_num is None:
     return '\\%{}l\\%{}c'.format( line_num, column_num )
 
   # -1 and then +1 to account for column end not included in the range.
   line_end_num, column_end_num = LineAndColumnNumbersClamped(
       line_end_num, column_end_num - 1 )
-  column_end_num += 1
+  column_end_num = max( column_end_num + 1, 1 )
+
   return '\\%{}l\\%{}c\\_.\\{{-}}\\%{}l\\%{}c'.format( line_num,
                                                        column_num,
                                                        line_end_num,
@@ -292,20 +294,13 @@ def GetDiagnosticMatchPattern( line_num,
 # Clamps the line and column numbers so that they are not past the contents of
 # the buffer. Numbers are 1-based byte offsets.
 def LineAndColumnNumbersClamped( line_num, column_num ):
-  new_line_num = line_num
-  new_column_num = column_num
-
-  max_line = len( vim.current.buffer )
-  if line_num and line_num > max_line:
-    new_line_num = max_line
+  line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
 
   # Vim buffers are a list of byte objects on Python 2 but Unicode objects on
   # Python 3.
-  max_column = len( ToBytes( vim.current.buffer[ new_line_num - 1 ] ) )
-  if column_num and column_num > max_column:
-    new_column_num = max_column
+  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
 
-  return new_line_num, new_column_num
+  return line_num, min( column_num, max_column )
 
 
 def SetLocationList( diagnostics ):
