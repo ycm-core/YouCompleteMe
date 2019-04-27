@@ -593,16 +593,16 @@ process.
     **Download the latest version of `libclang`**. Clang is an open-source
     compiler that can compile C-family languages. The `libclang` library it
     provides is used to power the YCM semantic completion engine for those
-    languages. YCM is designed to work with libclang version 7.0.0 or higher.
+    languages. YCM is designed to work with libclang version 8.0.0 or higher.
 
     In addition to `libclang`, YCM also supports an **experimental**
     [clangd][]-based completer. You can download the latest version of
     [clangd][] from [llvm.org releases][clang-download]. Follow Step 4 to learn
     how to tell YCM where to find clangd binary. Please note that YCM is
-    designed to work with [clangd][] version 7.0.0 or higher.
+    designed to work with [clangd][] version 8.0.0 or higher.
 
     You can use the system libclang or clangd _only if you are sure it is
-    version 7.0.0 or higher_, otherwise don't. Even if it is, we recommend using
+    version 8.0.0 or higher_, otherwise don't. Even if it is, we recommend using
     the [official binaries from llvm.org][clang-download] if at all possible.
     Make sure you download the correct archive file for your OS.
 
@@ -3237,7 +3237,7 @@ to go through the full installation guide by hand.
 ### I see `undefined symbol: clang_getCompletionFixIt` in the server logs.
 
 This means that the server is trying to load a version of libclang that is too
-old. You need at least libclang 7.0.0. We recommend running the `install.py`
+old. You need at least libclang 8.0.0. We recommend running the `install.py`
 script without `--system-libclang` or downloading the [latest prebuilt binaries
 from llvm.org][clang-download] when going through the [full installation
 guide](#full-installation-guide).
