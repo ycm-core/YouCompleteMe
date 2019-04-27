@@ -853,6 +853,8 @@ Quick Feature Summary
 * Real-time diagnostic display
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
+* Go to type definition (`GoToType`)
+* Go to implementation (`GoToImplementation`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -1751,7 +1753,7 @@ Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.
 
-Supported in filetypes: `cs`
+Supported in filetypes: `cs, java`
 
 #### The `GoToImplementationElseDeclaration` subcommand
 
@@ -1766,7 +1768,7 @@ Supported in filetypes: `cs`
 Looks up the symbol under the cursor and jumps to the definition of its type
 e.g. if the symbol is an object, go to the definition of its class.
 
-Supported in filetypes: `javascript, typescript`
+Supported in filetypes: `java, javascript, typescript`
 
 ### Semantic Information Commands
 
