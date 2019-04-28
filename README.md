@@ -2,9 +2,7 @@ YouCompleteMe: a code-completion engine for Vim
 ===============================================
 
 [![Gitter room](https://img.shields.io/gitter/room/Valloric/YouCompleteMe.svg)](https://gitter.im/Valloric/YouCompleteMe)
-[![Linux build status](https://img.shields.io/travis/Valloric/YouCompleteMe/master.svg?label=Linux)](https://travis-ci.org/Valloric/YouCompleteMe)
-[![macOS build status](https://img.shields.io/circleci/project/github/Valloric/YouCompleteMe/master.svg?label=macOS)](https://circleci.com/gh/Valloric/YouCompleteMe)
-[![Windows build status](https://img.shields.io/appveyor/ci/Valloric/YouCompleteMe/master.svg?label=Windows)](https://ci.appveyor.com/project/Valloric/YouCompleteMe)
+[![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/Valloric.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build/latest?definitionId=1&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/Valloric/YouCompleteMe/master.svg)](https://codecov.io/gh/Valloric/YouCompleteMe)
 
 Help, Advice, Support
