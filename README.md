@@ -164,23 +164,18 @@ and a completer that integrates with [UltiSnips][].
 Installation
 ------------
 
-### Mac OS X
+### macOS
 
 These instructions (using `install.py`) are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
+[MacVim][] is required. YCM won't work with the pre-installed Vim from Apple as
+its Python support is broken. If you don't already use [MacVim][], install it
+with [Homebrew][brew]. Install CMake as well:
 
-If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
-inside the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`). To ensure it
-works correctly copy the `mvim` script from the [MacVim][] download to your
-local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
-
-    ln -s /usr/local/bin/mvim vim
-
-Install YouCompleteMe with [Vundle][].
+    brew install cmake macvim
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
@@ -191,12 +186,6 @@ process.
 installed along with the latest Command Line Tools (they are installed
 automatically when you run `clang` for the first time, or manually by running
 `xcode-select --install`)
-
-Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
-CMake installer][cmake-download].
-
-_If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
-for details.
 
 Compiling YCM **with** semantic support for C-family languages through
 **libclang**:
@@ -3593,7 +3582,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [clang-download]: http://llvm.org/releases/download.html
 [brew]: http://brew.sh
 [cmake-download]: https://cmake.org/download/
-[macvim]: https://github.com/macvim-dev/macvim/releases
+[macvim]: https://macvim-dev.github.io/macvim/
 [vimrc]: http://vimhelp.appspot.com/starting.txt.html#vimrc
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [vim]: http://www.vim.org/
