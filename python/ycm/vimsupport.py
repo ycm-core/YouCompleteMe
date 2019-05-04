@@ -460,10 +460,14 @@ def EscapeFilepathForVimCommand( filepath ):
   return GetVariableValue( to_eval )
 
 
+def ComparePaths( path1, path2 ):
+  return os.path.normcase( path1 ) == os.path.normcase( path2 )
+
+
 # Both |line| and |column| need to be 1-based
 def TryJumpLocationInTab( tab, filename, line, column ):
   for win in tab.windows:
-    if GetBufferFilepath( win.buffer ) == filename:
+    if ComparePaths( GetBufferFilepath( win.buffer ), filename ):
       vim.current.tabpage = tab
       vim.current.window = win
       vim.current.window.cursor = ( line, column - 1 )
