@@ -27,7 +27,7 @@ from builtins import *  # noqa
 from ycm.tests import PathToTestFile
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
                                    MockVimBuffers, MockVimModule, Version,
-                                   VimBuffer, VimError )
+                                   VimBuffer, VimError, WindowsAndMacOnly )
 MockVimModule()
 
 from ycm import vimsupport
@@ -1852,6 +1852,35 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
     assert_that( vim.current.tabpage, equal_to( current_tab ) )
     assert_that( vim.current.window, equal_to( different_window ) )
     assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
+    vim_command.assert_has_exact_calls( [
+      call( 'normal! m\'' ),
+      call( 'normal! zz' )
+    ] )
+
+
+@WindowsAndMacOnly
+@patch( 'vim.command', new_callable = ExtendedMock )
+def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_Case_test(
+    vim_command ):
+
+  current_buffer = VimBuffer( 'current_buffer' )
+  different_buffer = VimBuffer( 'AnotHer_buFfeR' )
+  current_window = MagicMock( buffer = current_buffer )
+  different_window = MagicMock( buffer = different_buffer )
+  current_tab = MagicMock( windows = [ current_window, different_window ] )
+  with MockVimBuffers( [ current_buffer, different_buffer ],
+                       [ current_buffer ] ) as vim:
+    vim.current.tabpage = current_tab
+
+    vimsupport.JumpToLocation( os.path.realpath( 'anOther_BuffEr' ),
+                               4,
+                               1,
+                               'belowright',
+                               'split-or-existing-window' )
+
+    assert_that( vim.current.tabpage, equal_to( current_tab ) )
+    assert_that( vim.current.window, equal_to( different_window ) )
+    assert_that( vim.current.window.cursor, equal_to( ( 4, 0 ) ) )
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
       call( 'normal! zz' )

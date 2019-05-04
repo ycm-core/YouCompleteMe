@@ -28,8 +28,13 @@ import os
 import json
 import re
 from collections import defaultdict, namedtuple
-from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
-                         JoinLinesAsUnicode, ToBytes, ToUnicode )
+from ycmd.utils import ( ByteOffsetToCodepointOffset,
+                         GetCurrentDirectory,
+                         JoinLinesAsUnicode,
+                         OnMac,
+                         OnWindows,
+                         ToBytes,
+                         ToUnicode )
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'split'            : 'split',
@@ -460,10 +465,21 @@ def EscapeFilepathForVimCommand( filepath ):
   return GetVariableValue( to_eval )
 
 
+def ComparePaths( path1, path2 ):
+  # Assume that the file system is case-insensitive on Windows and macOS and
+  # case-sensitive on other platforms. While this is not necessarily true, being
+  # completely correct here is not worth the trouble as this assumption
+  # represents the overwhelming use case and detecting the case sensitivity of a
+  # file system is tricky.
+  if OnWindows() or OnMac():
+    return path1.lower() == path2.lower()
+  return path1 == path2
+
+
 # Both |line| and |column| need to be 1-based
 def TryJumpLocationInTab( tab, filename, line, column ):
   for win in tab.windows:
-    if GetBufferFilepath( win.buffer ) == filename:
+    if ComparePaths( GetBufferFilepath( win.buffer ), filename ):
       vim.current.tabpage = tab
       vim.current.window = win
       vim.current.window.cursor = ( line, column - 1 )

@@ -34,7 +34,12 @@ import os
 import re
 import sys
 
-from ycmd.utils import GetCurrentDirectory, ToBytes, ToUnicode
+try:
+  from unittest import skipIf
+except ImportError:
+  from unittest2 import skipIf
+
+from ycmd.utils import GetCurrentDirectory, OnMac, OnWindows, ToBytes, ToUnicode
 
 
 BUFNR_REGEX = re.compile( '^bufnr\\(\'(?P<buffer_filename>.+)\', ([01])\\)$' )
@@ -101,6 +106,9 @@ REDIR = {
   'variable': '',
   'output': ''
 }
+
+WindowsAndMacOnly = skipIf( not OnWindows() or not OnMac(),
+                            'Windows and macOS only' )
 
 
 @contextlib.contextmanager
@@ -293,7 +301,7 @@ def _MockVimEval( value ):
   if value == REDIR[ 'variable' ]:
     return REDIR[ 'output' ]
 
-  raise VimError( 'Unexpected evaluation: {0}'.format( value ) )
+  raise VimError( 'Unexpected evaluation: {}'.format( value ) )
 
 
 def _MockWipeoutBuffer( buffer_number ):
@@ -444,6 +452,11 @@ class VimBuffer( object ):
     raise ValueError( 'Unexpected mark: {name}'.format( name = name ) )
 
 
+  def __repr__( self ):
+    return "VimBuffer( name = '{}', number = {} )".format( self.name,
+                                                           self.number )
+
+
 class VimBuffers( object ):
   """An object that looks like a vim.buffers object."""
 
@@ -481,6 +494,13 @@ class VimWindow( object ):
     self.buffer = buffer_object
     self.cursor = cursor
     self.options = {}
+
+
+  def __repr__( self ):
+    return "VimWindow( number = {}, buffer = {}, cursor = {} )".format(
+      self.number,
+      self.buffer,
+      self.cursor )
 
 
 class VimWindows( object ):
@@ -534,8 +554,8 @@ class VimMatch( object ):
 
 
   def __repr__( self ):
-    return "VimMatch( group = '{0}', pattern = '{1}' )".format( self.group,
-                                                                self.pattern )
+    return "VimMatch( group = '{}', pattern = '{}' )".format( self.group,
+                                                              self.pattern )
 
 
   def __getitem__( self, key ):
@@ -562,11 +582,11 @@ class VimSign( object ):
 
 
   def __repr__( self ):
-    return ( "VimSign( id = {0}, line = {1}, "
-                      "name = '{2}', bufnr = {3} )".format( self.id,
-                                                            self.line,
-                                                            self.name,
-                                                            self.bufnr ) )
+    return ( "VimSign( id = {}, line = {}, "
+                      "name = '{}', bufnr = {} )".format( self.id,
+                                                          self.line,
+                                                          self.name,
+                                                          self.bufnr ) )
 
 
   def __getitem__( self, key ):
@@ -692,7 +712,7 @@ def ExpectedFailure( reason, *exception_matchers ):
         # Failed for the right reason
         raise nose.SkipTest( reason )
       else:
-        raise AssertionError( 'Test was expected to fail: {0}'.format(
+        raise AssertionError( 'Test was expected to fail: {}'.format(
           reason ) )
     return Wrapper
 
