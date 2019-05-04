@@ -173,12 +173,18 @@ guide](#full-installation-guide).
 
 Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
 
-If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
-inside the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`). To ensure it
-works correctly copy the `mvim` script from the [MacVim][] download to your
-local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
-
-    ln -s /usr/local/bin/mvim vim
+If you want to start Vim and MacVim from a terminal using the commands `vim` and
+`mvim` respectively, create the symlinks
+```
+ln -s /Applications/MacVim.app/Contents/bin/vim /usr/local/bin
+ln -s /Applications/MacVim.app/Contents/bin/mvim /usr/local/bin
+```
+then refresh the executable paths with
+```
+hash -r
+```
+to ensure the Vim from MacVim is started and not the pre-installed one from
+Apple.
 
 Install YouCompleteMe with [Vundle][].
 
@@ -3593,7 +3599,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [clang-download]: http://llvm.org/releases/download.html
 [brew]: http://brew.sh
 [cmake-download]: https://cmake.org/download/
-[macvim]: https://github.com/macvim-dev/macvim/releases
+[macvim]: https://macvim-dev.github.io/macvim/
 [vimrc]: http://vimhelp.appspot.com/starting.txt.html#vimrc
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [vim]: http://www.vim.org/
