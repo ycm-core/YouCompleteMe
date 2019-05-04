@@ -33,7 +33,7 @@ Contents
 
 - [Intro](#intro)
 - [Installation](#installation)
-    - [Mac OS X](#mac-os-x)
+    - [macOS](#macos)
     - [Linux 64-bit](#linux-64-bit)
     - [Windows](#windows)
     - [FreeBSD/OpenBSD](#freebsdopenbsd)
@@ -164,23 +164,18 @@ and a completer that integrates with [UltiSnips][].
 Installation
 ------------
 
-### Mac OS X
+### macOS
 
 These instructions (using `install.py`) are the quickest way to install
 YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Install the latest version of [MacVim][]. Yes, MacVim. And yes, the _latest_.
+[MacVim][] is required. YCM won't work with the pre-installed Vim from Apple as
+its Python support is broken. If you don't already use [MacVim][], install it
+with [Homebrew][brew]. Install CMake as well:
 
-If you don't use the MacVim GUI, it is recommended to use the Vim binary that is
-inside the MacVim.app package (`MacVim.app/Contents/MacOS/Vim`). To ensure it
-works correctly copy the `mvim` script from the [MacVim][] download to your
-local binary folder (for example `/usr/local/bin/mvim`) and then symlink it:
-
-    ln -s /usr/local/bin/mvim vim
-
-Install YouCompleteMe with [Vundle][].
+    brew install cmake macvim
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens
@@ -191,12 +186,6 @@ process.
 installed along with the latest Command Line Tools (they are installed
 automatically when you run `clang` for the first time, or manually by running
 `xcode-select --install`)
-
-Install CMake. Preferably with [Homebrew][brew], but here's the [stand-alone
-CMake installer][cmake-download].
-
-_If_ you have installed a Homebrew Python and/or Homebrew MacVim, see the _FAQ_
-for details.
 
 Compiling YCM **with** semantic support for C-family languages through
 **libclang**:
@@ -225,8 +214,8 @@ Compiling YCM **without** semantic support for C-family languages:
 
 The following additional language support options are available:
 
-- C# support: install Mono with [Homebrew][brew] or by downloading the [Mono Mac
-  package][mono-install-osx] and add `--cs-completer` when calling
+- C# support: install Mono with [Homebrew][brew] or by downloading the [Mono
+  macOS package][mono-install-macos] and add `--cs-completer` when calling
   `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
@@ -616,12 +605,12 @@ process.
     You will need to have `cmake` installed in order to generate the required
     makefiles. Linux users can install cmake with their package manager (`sudo
     apt-get install cmake` for Ubuntu) whereas other users can [download and
-    install][cmake-download] cmake from its project site. Mac users can also get
-    it through [Homebrew][brew] with `brew install cmake`.
+    install][cmake-download] cmake from its project site. macOS users can also
+    get it through [Homebrew][brew] with `brew install cmake`.
 
     On a Unix OS, you need to make sure you have Python headers installed. On a
     Debian-like Linux distro, this would be `sudo apt-get install python-dev
-    python3-dev`. On Mac they should already be present.
+    python3-dev`. On macOS they should already be present.
 
     On Windows, you need to download and install [Python 2 or
     Python 3][python-win-download]. Pick the version corresponding to your Vim
@@ -700,7 +689,7 @@ process.
 
     You could also force the use of a custom libclang library with
     `-DEXTERNAL_LIBCLANG_PATH=/path/to/libclang.so` flag (the library would end
-    with `.dylib` on a Mac). Again, this flag would be used _instead of_ the
+    with `.dylib` on macOS). Again, this flag would be used _instead of_ the
     other flags. **If you compiled LLVM from source, this is the flag you should
     be using.**
 
@@ -3088,7 +3077,7 @@ specific Python interpreter for `ycmd` is usually the easiest way to solve the
 problem. Common values for that option are `/usr/bin/python` and
 `/usr/bin/python3`.
 
-### I get a linker warning regarding `libpython` on Mac when compiling YCM
+### I get a linker warning regarding `libpython` on macOS when compiling YCM
 
 If the warning is `ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
 not a directory`, then feel free to ignore it; it's caused by a limitation of
@@ -3165,24 +3154,10 @@ Your system is too old for the precompiled binaries from llvm.org. Compile
 Clang on your machine and then link against the `libclang.so` you just produced.
 See the full installation guide for help.
 
-### I'm trying to use a Homebrew Vim with YCM and I'm getting segfaults
-
-Something (I don't know what) is wrong with the way that Homebrew configures and
-builds Vim. I recommend using [MacVim][]. Even if you don't like the MacVim GUI,
-you can use the Vim binary that is inside the MacVim.app package (it's
-`MacVim.app/Contents/MacOS/Vim`) and get the Vim console experience.
-
-### I have a Homebrew Python and/or MacVim; can't compile/SIGABRT when starting
-
-You should probably run `brew rm python; brew install python` to get the latest
-fixes that should make YCM work with such a configuration. Also rebuild Macvim
-then. If you still get problems with this, see [issue #18][issue18] for
-suggestions.
-
 ### I get `LONG_BIT definition appears wrong for platform` when compiling
 
 Look at the output of your CMake call. There should be a line in it like the
-following (with `.dylib` in place of `.so` on a Mac):
+following (with `.dylib` in place of `.so` on macOS):
 
 ```
 -- Found PythonLibs: /usr/lib/libpython2.7.so (Required is at least version "2.5")
@@ -3205,7 +3180,7 @@ version for the library. This is wrong. It can happen when you have multiple
 versions of Python installed on your machine.
 
 You should probably add the following flags to your cmake call (again, `dylib`
-instead of `so` on a Mac):
+instead of `so` on macOS):
 
 ```
 -DPYTHON_INCLUDE_DIR=/usr/include/python2.7 -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so
@@ -3251,7 +3226,7 @@ The details aren't important.
 
 The solution is that the version of Python linked and run against must be built
 with either `--enable-shared` or `--enable-framework` (on OS X).
-This is achieved as follows (**NOTE:** for Mac, replace `--enable-shared`
+This is achieved as follows (**NOTE:** for macOS, replace `--enable-shared`
 with `--enable-framework`):
 
 - When building python from source: `./configure --enable-shared {options}`
@@ -3281,7 +3256,7 @@ one) option because YCM needs the `language:<lang>` field in the tags output.
 `*.h` files as `C++`. If you have C (not C++) project, consider giving parameter
 `--langmap=c:.c.h` to ctags to see tags from `*.h` files.
 
-**NOTE:** Mac OS X comes with "plain" ctags installed by default. `brew install
+**NOTE:** macOS comes with "plain" ctags installed by default. `brew install
 ctags` will get you the Exuberant Ctags version.
 
 Also make sure that your Vim `tags` option is set correctly. See `:h 'tags'` for
@@ -3426,7 +3401,7 @@ This is caused by an issue with libclang that only affects some operating
 systems. Compiling with `clang` the binary will use the correct default header
 search paths but compiling with `libclang.so` (which YCM uses) does not.
 
-Mac OS X is normally affected, but there's a workaround in YCM for that specific
+macOS is normally affected, but there's a workaround in YCM for that specific
 OS. If you're not running that OS but still have the same problem, continue
 reading.
 
@@ -3593,7 +3568,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [clang-download]: http://llvm.org/releases/download.html
 [brew]: http://brew.sh
 [cmake-download]: https://cmake.org/download/
-[macvim]: https://github.com/macvim-dev/macvim/releases
+[macvim]: https://macvim-dev.github.io/macvim/
 [vimrc]: http://vimhelp.appspot.com/starting.txt.html#vimrc
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [vim]: http://www.vim.org/
@@ -3634,7 +3609,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15
 [7z-download]: http://www.7-zip.org/download.html
-[mono-install-osx]: http://www.mono-project.com/docs/getting-started/install/mac/
+[mono-install-macos]: http://www.mono-project.com/docs/getting-started/install/mac/
 [mono-install-linux]: https://www.mono-project.com/download/stable/#download-lin
 [mono-install]: http://www.mono-project.com/docs/getting-started/install/
 [go-install]: https://golang.org/doc/install
