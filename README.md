@@ -281,13 +281,13 @@ Compiling YCM **with** semantic support for C-family languages through
 **libclang**:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clang-completer
+    python3 install.py --clang-completer
 
 Compiling YCM **with** semantic support for C-family languages through
 **experimental clangd**:
 
     cd ~/.vim/bundle/YouCompleteMe
-    ./install.py --clangd-completer
+    python3 install.py --clangd-completer
 
 Note that you can install YCM with both **libclang** and **clangd** enabled. In
 that case **clangd** will be preferred unless you have the following in your
