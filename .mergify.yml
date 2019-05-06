@@ -1,0 +1,10 @@
+pull_request_rules:
+  - name: Automatic merge on Azure Pipelines and Reviewable successes
+    conditions:
+      - base=master
+      - status-success=Valloric.YouCompleteMe
+      - status-success=code-review/reviewable
+    actions:
+      merge:
+        method: merge
+        strict: smart
