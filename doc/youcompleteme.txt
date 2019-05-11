@@ -377,6 +377,8 @@ it with Homebrew [21]. Install CMake as well:
 >
   brew install cmake macvim
 <
+Install YouCompleteMe with Vundle [22].
+
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
 will notify you to recompile it. You should then rerun the install process.
@@ -412,18 +414,18 @@ Compiling YCM **without** semantic support for C-family languages:
 The following additional language support options are available:
 
 - C# support: install Mono with Homebrew [21] or by downloading the Mono
-  macOS package [22] and add '--cs-completer' when calling 'install.py'.
+  macOS package [23] and add '--cs-completer' when calling 'install.py'.
 
-- Go support: install Go [23] and add '--go-completer' when calling
+- Go support: install Go [24] and add '--go-completer' when calling
   'install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [24] and add
+- JavaScript and TypeScript support: install Node.js and npm [25] and add
   '--ts-completer' when calling 'install.py'.
 
-- Rust support: install Rust [25] and add '--rust-completer' when calling
+- Rust support: install Rust [26] and add '--rust-completer' when calling
   'install.py'.
 
-- Java support: install JDK8 (version 8 required) [26] and add
+- Java support: install JDK8 (version 8 required) [27] and add
   '--java-completer' when calling 'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
@@ -456,9 +458,9 @@ Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. The Vim
 package on Fedora 27 and later and the pre-installed Vim on Ubuntu 16.04 and
 later are recent enough. You can see the version of Vim installed by running
 'vim --version'. If the version is too old, you may need to compile Vim from
-source [27] (don't worry, it's easy).
+source [28] (don't worry, it's easy).
 
-Install YouCompleteMe with Vundle [28].
+Install YouCompleteMe with Vundle [22].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
@@ -482,13 +484,13 @@ Compiling YCM **with** semantic support for C-family languages through
 **libclang**:
 >
   cd ~/.vim/bundle/YouCompleteMe
-  ./install.py --clang-completer
+  python3 install.py --clang-completer
 <
 Compiling YCM **with** semantic support for C-family languages through
 **experimental clangd**:
 >
   cd ~/.vim/bundle/YouCompleteMe
-  ./install.py --clangd-completer
+  python3 install.py --clangd-completer
 <
 Note that you can install YCM with both **libclang** and **clangd** enabled. In
 that case **clangd** will be preferred unless you have the following in your
@@ -506,16 +508,16 @@ The following additional language support options are available:
 - C# support: install Mono [29] and add '--cs-completer' when calling
   'install.py'.
 
-- Go support: install Go [23] and add '--go-completer' when calling
+- Go support: install Go [24] and add '--go-completer' when calling
   'install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [24] and add
+- JavaScript and TypeScript support: install Node.js and npm [25] and add
   '--ts-completer' when calling 'install.py'.
 
-- Rust support: install Rust [25] and add '--rust-completer' when calling
+- Rust support: install Rust [26] and add '--rust-completer' when calling
   'install.py'.
 
-- Java support: install JDK8 (version 8 required) [26] and add
+- Java support: install JDK8 (version 8 required) [27] and add
   '--java-completer' when calling 'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
@@ -564,7 +566,7 @@ that it does not prevent you from editing a file in another encoding than
 UTF-8. You can do that by specifying the '|++enc|' argument to the ':e'
 command.
 
-Install YouCompleteMe with Vundle [28].
+Install YouCompleteMe with Vundle [22].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
@@ -617,16 +619,16 @@ The following additional language support options are available:
 - C# support: add '--cs-completer' when calling 'install.py'. Be sure that
   the build utility 'msbuild' is in your PATH [35].
 
-- Go support: install Go [23] and add '--go-completer' when calling
+- Go support: install Go [24] and add '--go-completer' when calling
   'install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [24] and add
+- JavaScript and TypeScript support: install Node.js and npm [25] and add
   '--ts-completer' when calling 'install.py'.
 
-- Rust support: install Rust [25] and add '--rust-completer' when calling
+- Rust support: install Rust [26] and add '--rust-completer' when calling
   'install.py'.
 
-- Java support: install JDK8 (version 8 required) [26] and add
+- Java support: install JDK8 (version 8 required) [27] and add
   '--java-completer' when calling 'install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
@@ -669,7 +671,7 @@ For FreeBSD 11.x, the requirement is cmake:
 >
   pkg install cmake
 <
-Install YouCompleteMe with Vundle [28].
+Install YouCompleteMe with Vundle [22].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
 using Vundle and the ycm_core library APIs have changed (happens rarely), YCM
@@ -708,16 +710,16 @@ The following additional language support options are available:
 - C# support: install Mono and add '--cs-completer' when calling
   './install.py'.
 
-- Go support: install Go [23] and add '--go-completer' when calling
+- Go support: install Go [24] and add '--go-completer' when calling
   './install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [24] and add
+- JavaScript and TypeScript support: install Node.js and npm [25] and add
   '--ts-completer' when calling 'install.py'.
 
-- Rust support: install Rust [25] and add '--rust-completer' when calling
+- Rust support: install Rust [26] and add '--rust-completer' when calling
   './install.py'.
 
-- Java support: install JDK8 (version 8 required) [26] and add
+- Java support: install JDK8 (version 8 required) [27] and add
   '--java-completer' when calling './install.py'.
 
 To simply compile with everything enabled, there's a '--all' flag. Note that
@@ -769,7 +771,7 @@ will notify you to recompile it. You should then rerun the install process.
    higher.
 
    If your version of Vim is not recent enough, you may need to compile Vim
-   from source [27] (don't worry, it's easy).
+   from source [28] (don't worry, it's easy).
 
    After you have made sure that you have Vim 7.4.1578+, type the following
    in Vim: ":echo has('python') || has('python3')". The output should be 1.
@@ -779,7 +781,7 @@ will notify you to recompile it. You should then rerun the install process.
    critical because it must match the Python and the YCM libraries
    architectures. We recommend using a 64-bit Vim.
 
-2. **Install YCM** with Vundle [28] (or Pathogen [36], but Vundle is a
+2. **Install YCM** with Vundle [22] (or Pathogen [36], but Vundle is a
    better idea). With Vundle, this would mean adding a "Plugin
    'Valloric/YouCompleteMe'" line to your vimrc [31].
 
@@ -942,7 +944,7 @@ will notify you to recompile it. You should then rerun the install process.
    On Windows, be sure that the build utility 'msbuild' is in your PATH
    [35].
 
-   - Go support: install Go [23] and add it to your path. Navigate to
+   - Go support: install Go [24] and add it to your path. Navigate to
      'YouCompleteMe/third_party/ycmd/third_party/go' and in **both**
      'src/github.com/mdempsky/gocode' and 'src/github.com/rogpeppe/godef'
      run
@@ -953,15 +955,15 @@ will notify you to recompile it. You should then rerun the install process.
    'YouCompleteMe/third_party/ycmd/third_party/go' then run 'go build' in
    the two directories above.
 
-   - JavaScript and TypeScript support: install Node.js and npm [24],
+   - JavaScript and TypeScript support: install Node.js and npm [25],
      navigate to 'YouCompleteMe/third_party/ycmd' and run 'npm install -g
      --prefix third_party/tsserver typescript'.
 
-   - Rust support: install Rust [25]. Navigate to
+   - Rust support: install Rust [26]. Navigate to
      'YouCompleteMe/third_party/ycmd/third_party/racerd' and run 'cargo
      build --release'.
 
-   - Java support: install JDK8 (version 8 required) [26]. Download a
+   - Java support: install JDK8 (version 8 required) [27]. Download a
      binary release of eclipse.jdt.ls [41] and extract it to 'YouCompleteM
      e/third_party/ycmd/third_party/eclipse.jdt.ls/target/repository'.
      Note: this approach is not recommended for most users and is
@@ -1652,7 +1654,7 @@ available on the wiki [63].
 
 All JavaScript and TypeScript features are provided by the TSServer [13]
 engine, which is included in the TypeScript SDK. To enable these features,
-install Node.js and npm [24] and call the 'install.py' script with the
+install Node.js and npm [25] and call the 'install.py' script with the
 '--ts-completer' flag.
 
 TSServer [13] relies on the 'jsconfig.json' file [64] for JavaScript and the
@@ -3838,13 +3840,13 @@ References ~
 [19] https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 [20] https://macvim-dev.github.io/macvim/
 [21] http://brew.sh
-[22] http://www.mono-project.com/docs/getting-started/install/mac/
-[23] https://golang.org/doc/install
-[24] https://docs.npmjs.com/getting-started/installing-node#1-install-nodejs--npm
-[25] https://www.rust-lang.org/
-[26] http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-[27] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-[28] https://github.com/VundleVim/Vundle.vim#about
+[22] https://github.com/VundleVim/Vundle.vim#about
+[23] http://www.mono-project.com/docs/getting-started/install/mac/
+[24] https://golang.org/doc/install
+[25] https://docs.npmjs.com/getting-started/installing-node#1-install-nodejs--npm
+[26] https://www.rust-lang.org/
+[27] http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+[28] https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
 [29] https://www.mono-project.com/download/stable/#download-lin
 [30] https://github.com/vim/vim-win32-installer/releases
 [31] http://vimhelp.appspot.com/starting.txt.html#vimrc
