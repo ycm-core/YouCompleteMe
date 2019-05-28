@@ -76,7 +76,9 @@ class BaseRequest( object ):
     from this message."""
     try:
       try:
-        return _JsonFromFuture( future )
+        result = _JsonFromFuture( future )
+        _logger.debug( 'RX: %s', result )
+        return result
       except UnknownExtraConf as e:
         if vimsupport.Confirm( str( e ) ):
           _LoadExtraConfFile( e.extra_conf_file )
@@ -149,17 +151,25 @@ class BaseRequest( object ):
     request_uri = _BuildUri( handler )
     if method == 'POST':
       sent_data = _ToUtf8Json( data )
+      headers = BaseRequest._ExtraHeaders( method,
+                                           request_uri,
+                                           sent_data )
+      _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
+
       return BaseRequest.Session().post(
-          request_uri,
-          data = sent_data,
-          headers = BaseRequest._ExtraHeaders( method,
-                                               request_uri,
-                                               sent_data ),
-          timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
-    return BaseRequest.Session().get(
         request_uri,
-        headers = BaseRequest._ExtraHeaders( method, request_uri ),
+        data = sent_data,
+        headers = headers,
         timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
+
+    headers = BaseRequest._ExtraHeaders( method, request_uri )
+
+    _logger.debug( 'GET %s\n%s', request_uri, headers )
+
+    return BaseRequest.Session().get(
+      request_uri,
+      headers = headers,
+      timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
 
 
   @staticmethod
