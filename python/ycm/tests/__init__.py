@@ -59,7 +59,8 @@ DEFAULT_CLIENT_OPTIONS = {
   'g:ycm_semantic_triggers': {},
   'g:ycm_filetype_specific_completion_to_disable': { 'gitcommit': 1 },
   'g:ycm_max_num_candidates': 50,
-  'g:ycm_max_diagnostics_to_display': 30
+  'g:ycm_max_diagnostics_to_display': 30,
+  'g:ycm_disable_signature_help': 0,
 }
 
 
