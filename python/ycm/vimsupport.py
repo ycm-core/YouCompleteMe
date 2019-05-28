@@ -1258,3 +1258,31 @@ def AutoCloseOnCurrentBuffer( name ):
                'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif '
                '| autocmd! {}'.format( name ) )
   vim.command( 'augroup END' )
+
+
+def VimSupportsPopupWindows():
+  return VimHasFunctions( 'popup_create',
+                          'popup_move',
+                          'popup_hide',
+                          'popup_settext',
+                          'popup_show',
+                          'popup_close',
+                          'prop_add',
+                          'prop_type_add' )
+
+
+def VimHasFunctions( *functions ):
+  return all( ( bool( GetIntValue( vim.eval( 'exists( "*{}" )'.format( f ) ) ) )
+                for f in functions ) )
+
+
+def WinIDForWindow( window ):
+  return GetIntValue( 'win_getid( {}, {} )'.format( window.number,
+                                                    window.tabpage.number ) )
+
+
+def ScreenPositionForLineColumnInWindow( window, line, column ):
+  return vim.eval( 'screenpos( {}, {}, {} )'.format(
+      WinIDForWindow( window ),
+      line,
+      column ) )
