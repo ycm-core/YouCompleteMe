@@ -113,6 +113,7 @@ class YouCompleteMe( object ):
     self._omnicomp = None
     self._buffers = None
     self._latest_completion_request = None
+    self._signature_help = vimsupport.SignatureHelpState()
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
     self._server_stdout = None
@@ -292,6 +293,8 @@ class YouCompleteMe( object ):
   def SendCompletionRequest( self, force_semantic = False ):
     request_data = BuildRequestData()
     request_data[ 'force_semantic' ] = force_semantic
+    request_data[ 'signature_help_state' ] = self._signature_help.state
+
     if not self.NativeFiletypeCompletionUsable():
       wrapped_request_data = RequestWrap( request_data )
       if self._omnicomp.ShouldUseNow( wrapped_request_data ):
@@ -315,6 +318,11 @@ class YouCompleteMe( object ):
     response[ 'completions' ] = base.AdjustCandidateInsertionText(
         response[ 'completions' ] )
     return response
+
+
+  def UpdateSignatureHelp( self, signature_info ):
+    self._signature_help = vimsupport.UpdateSignatureHelp( self._signature_help,
+                                                           signature_info )
 
 
   def SendCommandRequest( self,
