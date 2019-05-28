@@ -1288,21 +1288,63 @@ def SetUpPopupWindow( popup_win_id, buf_lines ):
   vim.eval( 'setwinvar( {}, "&wrap", 0 )'.format( popup_win_id ) )
   vim.eval( 'setwinvar( {}, "&signcolumn", "no" )'.format( popup_win_id ) )
 
-  bufnr = GetIntValue( vim.eval( 'winbufnr( {} )'.format( popup_win_id ) ) )
-  buf = vim.buffers[ bufnr ]
-  buf[:] = buf_lines
-
 
 def _SupportsPopupWindows():
   for required_method in [ 'popup_create',
                            'popup_move',
                            'popup_hide',
                            'popup_show',
-                           'popup_close' ]:
+                           'popup_close',
+                           'prop_add',
+                           'prop_type_add' ]:
     if not GetIntValue( vim.eval( 'exists( "*{}" )'.format(
       required_method ) ) ):
       return False
   return True
+
+
+def _MakeSignatureHelpBuffer( signature_info ):
+  active_signature = int( signature_info.get( 'activeSignature', 0 ) )
+  active_parameter = int( signature_info.get( 'activeParameter', 0 ) )
+
+  lines = []
+  signatures = ( signature_info.get( 'signatures' ) or [] )
+
+  for sig_index, signature in enumerate( signatures ):
+    props = []
+
+    sig_label = signature[ 'label' ]
+    # if index == active_signature:
+    #   props.append( {
+    #     'col': 1,
+    #     'length': len( sig_label ),
+    #     'type': 'YCM-signature-help-current-signature'
+    #   } )
+    # else:
+    #   props.append( {
+    #     'col': 1,
+    #     'length': len( sig_label ),
+    #     'type': 'YCM-signature-help-signature'
+    #   } )
+
+    parameters = ( signature.get( 'parameters' ) or [] )
+    cur_param_idx = -1
+    for param_index, parameter in enumerate( parameters ):
+      param_label = parameter[ 'label' ]
+      cur_param_idx = sig_label.find( param_label, cur_param_idx + 1 )
+      if param_index == active_parameter:
+        props.append( {
+          'col': cur_param_idx + 1, # 1-based
+          'length': len( param_label ),
+          'type': 'YCM-signature-help-current-argument'
+        } )
+
+    lines.append( {
+      'text': sig_label,
+      'props': props
+    } )
+
+  return lines
 
 
 def UpdateSignatureHelp( state, signature_info ):
@@ -1331,7 +1373,7 @@ def UpdateSignatureHelp( state, signature_info ):
   # FIXME: Remove this
 
   # Generate the buffer as a list of lines
-  buf_lines = [ s[ 'label' ] for s in signatures ]
+  buf_lines = _MakeSignatureHelpBuffer( signature_info )
 
   # Anchor within the window
   row = state.anchor[ 0 ] - len( buf_lines )

@@ -153,6 +153,13 @@ function! youcompleteme#Enable()
 
   let s:default_completion = s:Pyeval( 'vimsupport.NO_COMPLETIONS' )
   let s:completion = s:default_completion
+
+  if exists( '*prop_type_add' )
+    call prop_type_add( 'YCM-signature-help-current-argument', {
+          \   'highlight': 'PMenuSel',
+          \   'priority':   50,
+          \ } )
+  endif
 endfunction
 
 
