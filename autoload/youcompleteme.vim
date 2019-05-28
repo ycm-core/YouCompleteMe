@@ -760,6 +760,8 @@ function! s:OnInsertLeave()
         \ g:ycm_autoclose_preview_window_after_insertion
     call s:ClosePreviewWindowIfNeeded()
   endif
+
+  call s:ClearSignatureHelp()
 endfunction
 
 
@@ -860,6 +862,7 @@ function! s:PollCompletion( ... )
 
   let s:completion = s:Pyeval( 'ycm_state.GetCompletionResponse()' )
   call s:Complete()
+  call s:UpdateSignatureHelp()
 endfunction
 
 
@@ -904,6 +907,18 @@ function! youcompleteme#CompleteFunc( findstart, base )
     return s:completion.completion_start_column - 1
   endif
   return s:completion.completions
+endfunction
+
+
+function! s:UpdateSignatureHelp()
+  let s:signature_info = get( s:completion, 'signature_info', {} )
+  call s:Pyeval(
+        \ 'ycm_state.UpdateSignatureHelp( vim.eval( "s:signature_info" ) )' )
+endfunction
+
+
+function! s:ClearSignatureHelp()
+  call s:Pyeval( 'ycm_state.UpdateSignatureHelp( {} )' )
 endfunction
 
 
