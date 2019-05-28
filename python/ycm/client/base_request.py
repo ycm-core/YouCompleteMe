@@ -107,11 +107,20 @@ class BaseRequest( object ):
                           handler,
                           timeout = _READ_TIMEOUT_SEC,
                           display_message = True,
-                          truncate_message = False ):
+                          truncate_message = False,
+                          payload = None ):
     return self.HandleFuture(
-        BaseRequest._TalkToHandlerAsync( '', handler, 'GET', timeout ),
+        self.GetDataFromHandlerAsync( handler, timeout, payload ),
         display_message,
         truncate_message )
+
+
+  def GetDataFromHandlerAsync( self,
+                               handler,
+                               timeout = _READ_TIMEOUT_SEC,
+                               payload = None ):
+    return BaseRequest._TalkToHandlerAsync(
+        '', handler, 'GET', timeout, payload )
 
 
   # This is the blocking version of the method. See below for async.
@@ -147,7 +156,8 @@ class BaseRequest( object ):
   def _TalkToHandlerAsync( data,
                            handler,
                            method,
-                           timeout = _READ_TIMEOUT_SEC ):
+                           timeout = _READ_TIMEOUT_SEC,
+                           payload = None ):
     request_uri = _BuildUri( handler )
     if method == 'POST':
       sent_data = _ToUtf8Json( data )
@@ -169,7 +179,8 @@ class BaseRequest( object ):
     return BaseRequest.Session().get(
       request_uri,
       headers = headers,
-      timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
+      timeout = ( _CONNECT_TIMEOUT_SEC, timeout ),
+      params = payload )
 
 
   @staticmethod

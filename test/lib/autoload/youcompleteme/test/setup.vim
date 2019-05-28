@@ -1,7 +1,12 @@
 
-function! youcompleteme#test#setup#SetUp( setup_f ) abort
+function! youcompleteme#test#setup#SetUp() abort
   if exists ( 'g:loaded_youcompleteme' )
     unlet g:loaded_youcompleteme
+  endif
+
+  if pyxeval( "'ycm_state' in globals()" )
+    pyx ycm_state.OnVimLeave()
+    pyx del ycm_state
   endif
 
   source $PWD/vimrc
@@ -20,13 +25,6 @@ function! youcompleteme#test#setup#SetUp( setup_f ) abort
 endfunction
 
 function! youcompleteme#test#setup#CleanUp() abort
-  pyx <<EOF
-
-if 'ycm_state' in globals():
-  ycm_state.OnVimLeave()
-  del ycm_state
-
-EOF
 endfunction
 
 function! youcompleteme#test#setup#OpenFile( f ) abort
@@ -40,7 +38,9 @@ function! youcompleteme#test#setup#OpenFile( f ) abort
         \ } )
 
   " Need to wait for the server to be ready. The best way to do this is to
-  " force compile and diagnostics
+  " force compile and diagnostics, though this only works for the c-based
+  " completers. For python and others, we actually need to parse the debug info
+  " to check the server state.
   YcmForceCompileAndDiagnostics
 
   " Sometimes, that's just not enough to ensure stuff works
