@@ -70,9 +70,11 @@ let s:python_until_eof = s:using_python3 ? "python3 << EOF" : "python << EOF"
 let s:python_command = s:using_python3 ? "py3 " : "py "
 let s:autocmd_pattern = ' *'
 let s:mapping_pattern = ''
+let s:command_pattern = ''
 if !g:ycm_global_settings
   let s:autocmd_pattern = ' <buffer>'
   let s:mapping_pattern = ' <buffer>'
+  let s:command_pattern = ' -buffer'
 endif
 
 
@@ -936,28 +938,28 @@ endfunction
 
 
 function! s:SetUpCommands()
-  command! YcmRestartServer call s:RestartServer()
-  command! YcmDebugInfo call s:DebugInfo()
-  command! -nargs=* -complete=custom,youcompleteme#LogsComplete
-        \ YcmToggleLogs call s:ToggleLogs(<f-args>)
+  exe 'command!'.s:command_pattern.' YcmRestartServer call s:RestartServer()'
+  exe 'command!'.s:command_pattern.' YcmDebugInfo call s:DebugInfo()'
+  exe 'command!'.s:command_pattern.' -nargs=* -complete=custom,youcompleteme#LogsComplete '.
+        \ 'YcmToggleLogs call s:ToggleLogs(<f-args>)'
   if s:Pyeval( 'vimsupport.VimVersionAtLeast( "7.4.1898" )' )
-    command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range
-          \ YcmCompleter call s:CompleterCommand(<q-mods>,
-          \                                      <count>,
-          \                                      <line1>,
-          \                                      <line2>,
-          \                                      <f-args>)
+    exe 'command!'.s:command_pattern.' -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range '.
+          \ 'YcmCompleter call s:CompleterCommand(<q-mods>,'.
+          \                                      '<count>,'.
+          \                                      '<line1>,'.
+          \                                      '<line2>,'.
+          \                                      '<f-args>)'
   else
-    command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range
-          \ YcmCompleter call s:CompleterCommand('',
-          \                                      <count>,
-          \                                      <line1>,
-          \                                      <line2>,
-          \                                      <f-args>)
+    exe 'command!'.s:command_pattern.' -nargs=* -complete=custom,youcompleteme#SubCommandsComplete -range '.
+          \ 'YcmCompleter call s:CompleterCommand("",'.
+          \                                      '<count>,'.
+          \                                      '<line1>,'.
+          \                                      '<line2>,'.
+          \                                      '<f-args>)'
   endif
-  command! YcmDiags call s:ShowDiagnostics()
-  command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
-  command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
+  exe 'command!'.s:command_pattern.' YcmDiags call s:ShowDiagnostics()'
+  exe 'command!'.s:command_pattern.' YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()'
+  exe 'command!'.s:command_pattern.' YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()'
 endfunction
 
 
