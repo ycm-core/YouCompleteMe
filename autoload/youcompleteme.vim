@@ -69,8 +69,10 @@ let s:using_python3 = s:UsingPython3()
 let s:python_until_eof = s:using_python3 ? "python3 << EOF" : "python << EOF"
 let s:python_command = s:using_python3 ? "py3 " : "py "
 let s:autocmd_pattern = ' *'
+let s:mapping_pattern = ''
 if !g:ycm_global_settings
   let s:autocmd_pattern = ' <buffer>'
+  let s:mapping_pattern = ' <buffer>'
 endif
 
 
@@ -309,13 +311,13 @@ function! s:SetUpKeyMappings()
     " With this command, when the completion window is visible, the tab key
     " (default) will select the next candidate in the window. In vim, this also
     " changes the typed-in text to that of the candidate completion.
-    exe 'inoremap <expr>' . key .
+    exe 'inoremap <expr>' . s:mapping_pattern . key .
           \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
   endfor
 
   for key in g:ycm_key_list_previous_completion
     " This selects the previous candidate for shift-tab (default)
-    exe 'inoremap <expr>' . key .
+    exe 'inoremap <expr>' . s:mapping_pattern . key .
           \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
   endfor
 
@@ -323,7 +325,7 @@ function! s:SetUpKeyMappings()
     " When selecting a candidate and closing the completion menu with the <C-y>
     " key, the menu will automatically be reopened because of the TextChangedI
     " event. We define a command to prevent that.
-    exe 'inoremap <expr>' . key . ' <SID>StopCompletion( "\' . key . '" )'
+    exe 'inoremap <expr>' . s:mapping_pattern . key . ' <SID>StopCompletion( "\' . key . '" )'
   endfor
 
   if !empty( g:ycm_key_invoke_completion )
@@ -331,7 +333,7 @@ function! s:SetUpKeyMappings()
 
     " Inside the console, <C-Space> is passed as <Nul> to Vim
     if invoke_key ==# '<C-Space>'
-      imap <Nul> <C-Space>
+      exe 'imap' . s:mapping_pattern . ' <Nul> <C-Space>'
     endif
 
     silent! exe 'inoremap <unique> <silent> ' . invoke_key .
@@ -339,7 +341,7 @@ function! s:SetUpKeyMappings()
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
-    silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+    silent! exe 'nnoremap <unique>' . s:mapping_pattern . ' ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<CR>'
   endif
 
