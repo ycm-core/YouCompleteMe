@@ -102,6 +102,8 @@ let g:ycm_filetype_blacklist =
       \   'mail': 1
       \ } )
 
+let g:ycm_global_settings = type( g:ycm_filetype_whitelist ) != type( {} ) ||
+        \ has_key( g:ycm_filetype_whitelist, '*' )
 let g:ycm_open_loclist_on_ycm_diags =
       \ get( g:, 'ycm_open_loclist_on_ycm_diags', 1 )
 

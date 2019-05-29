@@ -68,6 +68,10 @@ endfunction
 let s:using_python3 = s:UsingPython3()
 let s:python_until_eof = s:using_python3 ? "python3 << EOF" : "python << EOF"
 let s:python_command = s:using_python3 ? "py3 " : "py "
+let s:autocmd_pattern = ' *'
+if !g:ycm_global_settings
+  let s:autocmd_pattern = ' <buffer>'
+endif
 
 
 function! s:Pyeval( eval_string )
@@ -123,9 +127,11 @@ function! youcompleteme#Enable()
     return
   endif
 
-  call s:SetUpOptions()
+  if g:ycm_global_settings
+    call s:SetUpOptions()
+    call youcompleteme#EnableCursorMovedAutocommands()
+  endif
 
-  call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
     autocmd!
     " Note that these events will NOT trigger for the file vim is started with;
@@ -136,13 +142,16 @@ function! youcompleteme#Enable()
     " useful if the buffer filetype is set (we ignore the buffer if there is no
     " filetype) and if so, the FileType event has triggered before and thus the
     " buffer is already parsed.
-    autocmd FileType * call s:OnFileTypeSet()
-    autocmd BufEnter,CmdwinEnter * call s:OnBufferEnter()
-    autocmd BufUnload * call s:OnBufferUnload()
-    autocmd InsertLeave * call s:OnInsertLeave()
-    autocmd VimLeave * call s:OnVimLeave()
-    autocmd CompleteDone * call s:OnCompleteDone()
-    autocmd BufEnter,WinEnter * call s:UpdateMatches()
+    if g:ycm_global_settings
+      autocmd FileType * call s:OnFileTypeSet()
+      call youcompleteme#GeneralAutocommands()
+    else
+      exe 'autocmd FileType '. join(keys(g:ycm_filetype_whitelist), ',').' '.
+            \ 'call s:SetUpOptions() |'.
+            \ 'call youcompleteme#EnableCursorMovedAutocommands() |'.
+            \ 'call s:OnFileTypeSet() |'.
+            \ 'call youcompleteme#GeneralAutocommands()'
+    endif
   augroup END
 
   " The FileType event is not triggered for the first loaded file. We wait until
@@ -155,17 +164,29 @@ function! youcompleteme#Enable()
   let s:completion = s:default_completion
 endfunction
 
+function! youcompleteme#GeneralAutocommands()
+  augroup youcompleteme
+    exe 'autocmd BufEnter,CmdwinEnter'.s:autocmd_pattern.' call s:OnBufferEnter()'
+    exe 'autocmd BufUnload'.s:autocmd_pattern.' call s:OnBufferUnload()'
+    exe 'autocmd InsertLeave'.s:autocmd_pattern.' call s:OnInsertLeave()'
+    exe 'autocmd CompleteDone'.s:autocmd_pattern.' call s:OnCompleteDone()'
+    exe 'autocmd BufEnter,WinEnter'.s:autocmd_pattern.' call s:UpdateMatches()'
+    " VimLeave autocmd isn't buffer specific; clean to avoid multiple instances
+    autocmd! VimLeave
+    autocmd VimLeave * call s:OnVimLeave()
+  augroup END
+endfunction
 
 function! youcompleteme#EnableCursorMovedAutocommands()
   augroup ycmcompletemecursormove
     autocmd!
-    autocmd CursorMoved * call s:OnCursorMovedNormalMode()
-    autocmd TextChanged * call s:OnTextChangedNormalMode()
-    autocmd TextChangedI * call s:OnTextChangedInsertMode()
+    exe 'autocmd CursorMoved'.s:autocmd_pattern.' call s:OnCursorMovedNormalMode()'
+    exe 'autocmd TextChanged'.s:autocmd_pattern.' call s:OnTextChangedNormalMode()'
+    exe 'autocmd TextChangedI'.s:autocmd_pattern.' call s:OnTextChangedInsertMode()'
     " The TextChangedI event is not triggered when inserting a character while
     " the completion menu is open. We handle this by closing the completion menu
     " just before inserting a character.
-    autocmd InsertCharPre * call s:OnInsertChar()
+    exe 'autocmd InsertCharPre'.s:autocmd_pattern.' call s:OnInsertChar()'
   augroup END
 endfunction
 
