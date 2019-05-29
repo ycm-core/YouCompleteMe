@@ -26,7 +26,6 @@ from future.utils import iterkeys
 import vim
 import os
 import json
-import logging
 import re
 from collections import defaultdict, namedtuple
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
@@ -80,7 +79,6 @@ NO_COMPLETIONS = {
   'completions': []
 }
 
-LOGGER = logging.getLogger( 'ycm' )
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -1257,151 +1255,3 @@ def AutoCloseOnCurrentBuffer( name ):
   vim.command( 'autocmd WinLeave <buffer> '
                'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif' )
   vim.command( 'augroup END' )
-
-
-class SignatureHelpState( object ):
-  ACTIVE = 'ACTIVE'
-  INACTIVE = 'INACTIVE'
-
-  def __init__( self,
-                popup_win_id = None,
-                state = INACTIVE ):
-    self.popup_win_id = popup_win_id
-    self.state = state
-    self.SetAnchor()
-
-
-  def SetAnchor( self ):
-    zero_based_line_and_col = CurrentLineAndColumn()
-    self.anchor = ( zero_based_line_and_col[ 0 ] + 1,
-                    zero_based_line_and_col[ 1 ] + 1 )
-
-
-
-def SetUpPopupWindow( popup_win_id, buf_lines ):
-  # FIXME: For some reason the below does not seem to work.
-  #
-  # win = vim.windows[ GetIntValue( 'win_id2win( {} )'.format( popup_win_id ) ) ]
-  # win.options[ 'signcolumn' ] = 'no'
-  # win.options[ 'wrap' ] = False
-
-  vim.eval( 'setwinvar( {}, "&wrap", 0 )'.format( popup_win_id ) )
-  vim.eval( 'setwinvar( {}, "&signcolumn", "no" )'.format( popup_win_id ) )
-
-
-def _SupportsPopupWindows():
-  for required_method in [ 'popup_create',
-                           'popup_move',
-                           'popup_hide',
-                           'popup_show',
-                           'popup_close',
-                           'prop_add',
-                           'prop_type_add' ]:
-    if not GetIntValue( vim.eval( 'exists( "*{}" )'.format(
-      required_method ) ) ):
-      return False
-  return True
-
-
-def _MakeSignatureHelpBuffer( signature_info ):
-  active_signature = int( signature_info.get( 'activeSignature', 0 ) )
-  active_parameter = int( signature_info.get( 'activeParameter', 0 ) )
-
-  lines = []
-  signatures = ( signature_info.get( 'signatures' ) or [] )
-
-  for sig_index, signature in enumerate( signatures ):
-    props = []
-
-    sig_label = signature[ 'label' ]
-    # if index == active_signature:
-    #   props.append( {
-    #     'col': 1,
-    #     'length': len( sig_label ),
-    #     'type': 'YCM-signature-help-current-signature'
-    #   } )
-    # else:
-    #   props.append( {
-    #     'col': 1,
-    #     'length': len( sig_label ),
-    #     'type': 'YCM-signature-help-signature'
-    #   } )
-
-    parameters = ( signature.get( 'parameters' ) or [] )
-    cur_param_idx = -1
-    for param_index, parameter in enumerate( parameters ):
-      param_label = parameter[ 'label' ]
-      cur_param_idx = sig_label.find( param_label, cur_param_idx + 1 )
-      if param_index == active_parameter:
-        props.append( {
-          'col': cur_param_idx + 1, # 1-based
-          'length': len( param_label ),
-          'type': 'YCM-signature-help-current-argument'
-        } )
-
-    lines.append( {
-      'text': sig_label,
-      'props': props
-    } )
-
-  return lines
-
-
-def UpdateSignatureHelp( state, signature_info ):
-  if not _SupportsPopupWindows():
-    return state
-
-  LOGGER.info( 'UpdateSignatureHelp: LINE: %s', vim.current.line )
-  LOGGER.info( 'UpdateSignatureHelp: %s', signature_info )
-
-  signatures = signature_info.get( 'signatures' ) or []
-
-  if not signatures:
-    if state.popup_win_id:
-      vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
-    return SignatureHelpState( None, SignatureHelpState.INACTIVE )
-
-  if state.state != SignatureHelpState.ACTIVE:
-    state.SetAnchor()
-  state.state = SignatureHelpState.ACTIVE
-
-  # FIXME: Remove this
-  # For now, there is no resize for the popup, so we have to re-create it
-  if state.popup_win_id:
-    vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
-    state.popup_win_id = None
-  # FIXME: Remove this
-
-  # Generate the buffer as a list of lines
-  buf_lines = _MakeSignatureHelpBuffer( signature_info )
-
-  # Anchor within the window
-  row = state.anchor[ 0 ] - len( buf_lines )
-  col = state.anchor[ 1 ]
-
-  # Offset to a screen position
-  win_pos = vim.eval( 'win_screenpos( winnr() )' )
-  row += int( win_pos[ 0 ] ) - 1
-  col += int( win_pos[ 1 ] )
-
-  options = {
-    "line": row,
-    "col":  col,
-    "pos": "botleft",
-    "flip": 1
-  }
-
-  if not state.popup_win_id:
-    state.popup_win_id = GetIntValue( vim.eval( "popup_create( {}, {} )".format(
-      json.dumps( buf_lines ),
-      json.dumps( options ) ) ) )
-
-  SetUpPopupWindow( state.popup_win_id, buf_lines )
-
-  # Should do nothing if already visible
-  # FIXME: Reinstate this
-  # vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
-  #                                          json.dumps( options ) ) )
-  # vim.eval( 'popup_show( {} )'.format( state.popup_win_id ) )
-
-  return state
