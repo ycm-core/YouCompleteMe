@@ -146,14 +146,13 @@ def UpdateSignatureHelp( state, signature_info ):
   # Find the buffer position of the anchor and calculate it as an offset from
   # the cursor position.
   cur_pos = vimsupport.CurrentLineAndColumn()
-  delta = tuple( map( sub, cur_pos, state.anchor ) ) # subtract each elem
 
   # Use the cursor offset to find the actual screen position. It's surprisingly
   # difficult to calculate the real screen position of a mark, or other buffer
   # position.
   options = {
-    "line": 'cursor-{}'.format( delta[ 0 ] + 1 ),
-    "col":  'cursor-{}'.format( delta[ 1 ] ),
+    "line": 'cursor{:+d}'.format( state.anchor[ 0 ] - cur_pos[ 0 ] - 1 ),
+    "col":  'cursor{:+d}'.format( state.anchor[ 1 ] - cur_pos[ 1 ] ),
     "pos": "botleft",
     "flip": 1
   }
