@@ -25,6 +25,7 @@ from builtins import *  # noqa
 import vim
 import json
 import logging
+from operator import sub
 from ycm import vimsupport
 from ycm.vimsupport import GetIntValue
 
@@ -40,6 +41,7 @@ class SignatureHelpState( object ):
                 state = INACTIVE ):
     self.popup_win_id = popup_win_id
     self.state = state
+    self.anchor = None
 
 
 def SetUpPopupWindow( popup_win_id, buf_lines ):
@@ -126,6 +128,9 @@ def UpdateSignatureHelp( state, signature_info ):
       vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
+  if state.state != SignatureHelpState.ACTIVE:
+    state.anchor = vimsupport.CurrentLineAndColumn()
+
   state.state = SignatureHelpState.ACTIVE
 
   # FIXME: Remove this
@@ -138,9 +143,17 @@ def UpdateSignatureHelp( state, signature_info ):
   # Generate the buffer as a list of lines
   buf_lines = _MakeSignatureHelpBuffer( signature_info )
 
+  # Find the buffer position of the anchor and calculate it as an offset from
+  # the cursor position.
+  cur_pos = vimsupport.CurrentLineAndColumn()
+  delta = tuple( map( sub, cur_pos, state.anchor ) ) # subtract each elem
+
+  # Use the cursor offset to find the actual screen position. It's surprisingly
+  # difficult to calculate the real screen position of a mark, or other buffer
+  # position.
   options = {
-    "line": 'cursor-1',
-    "col":  'cursor',
+    "line": 'cursor-{}'.format( delta[ 0 ] + 1 ),
+    "col":  'cursor-{}'.format( delta[ 1 ] ),
     "pos": "botleft",
     "flip": 1
   }
