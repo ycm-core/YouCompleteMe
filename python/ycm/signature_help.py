@@ -40,13 +40,6 @@ class SignatureHelpState( object ):
                 state = INACTIVE ):
     self.popup_win_id = popup_win_id
     self.state = state
-    self.SetAnchor()
-
-
-  def SetAnchor( self ):
-    self.anchor = ( GetIntValue( vim.eval( 'screenrow()' ) ),
-                    GetIntValue( vim.eval( 'screencol()' ) ) )
-
 
 
 def SetUpPopupWindow( popup_win_id, buf_lines ):
@@ -79,7 +72,7 @@ def _MakeSignatureHelpBuffer( signature_info ):
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )
   active_parameter = int( signature_info.get( 'activeParameter', 0 ) )
 
-  lines = [ { 'text': 'Signature Help', 'props': [] } ]
+  lines = []
   signatures = ( signature_info.get( 'signatures' ) or [] )
 
   for sig_index, signature in enumerate( signatures ):
@@ -133,8 +126,6 @@ def UpdateSignatureHelp( state, signature_info ):
       vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
-  if state.state != SignatureHelpState.ACTIVE:
-    state.SetAnchor()
   state.state = SignatureHelpState.ACTIVE
 
   # FIXME: Remove this
@@ -147,18 +138,9 @@ def UpdateSignatureHelp( state, signature_info ):
   # Generate the buffer as a list of lines
   buf_lines = _MakeSignatureHelpBuffer( signature_info )
 
-  # Anchor within the window
-  row = state.anchor[ 0 ] - len( buf_lines )
-  col = state.anchor[ 1 ]
-
-  # Offset to a screen position
-  win_pos = vim.eval( 'win_screenpos( winnr() )' )
-  row += int( win_pos[ 0 ] ) - 1
-  col += int( win_pos[ 1 ] )
-
   options = {
-    "line": row,
-    "col":  col,
+    "line": 'cursor-1',
+    "col":  'cursor',
     "pos": "botleft",
     "flip": 1
   }

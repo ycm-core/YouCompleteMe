@@ -156,12 +156,12 @@ function! youcompleteme#Enable()
 
   if exists( '*prop_type_add' )
     call prop_type_add( 'YCM-signature-help-current-argument', {
-          \   'highlight': 'PMenu',
+          \   'highlight': 'PMenuSel',
           \   'combine':   0,
           \   'priority':  50,
           \ } )
     call prop_type_add( 'YCM-signature-help-current-signature', {
-          \   'highlight': 'PMenuSel',
+          \   'highlight': 'PMenu',
           \   'combine':   0,
           \   'priority':  40,
           \ } )
