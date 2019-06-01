@@ -50,9 +50,7 @@ def SetUpPopupWindow( popup_win_id, buf_lines ):
   # win = vim.windows[ GetIntValue( 'win_id2win( {} )'.format(
   #   popup_win_id ) ) ]
   # win.options[ 'signcolumn' ] = 'no'
-  # win.options[ 'wrap' ] = False
 
-  vim.eval( 'setwinvar( {}, "&wrap", 0 )'.format( popup_win_id ) )
   vim.eval( 'setwinvar( {}, "&signcolumn", "no" )'.format( popup_win_id ) )
 
 
@@ -147,13 +145,17 @@ def UpdateSignatureHelp( state, signature_info ):
   # the cursor position.
   cur_pos = vimsupport.CurrentLineAndColumn()
 
+  cursor_relative_pos = [ state.anchor[ 0 ] - cur_pos[ 0 ] - 1 ,
+                          state.anchor[ 1 ] - cur_pos[ 1 ] ]
+
   # Use the cursor offset to find the actual screen position. It's surprisingly
   # difficult to calculate the real screen position of a mark, or other buffer
   # position.
   options = {
-    "line": 'cursor{:+d}'.format( state.anchor[ 0 ] - cur_pos[ 0 ] - 1 ),
-    "col":  'cursor{:+d}'.format( state.anchor[ 1 ] - cur_pos[ 1 ] ),
+    "line": 'cursor{:+d}'.format( cursor_relative_pos[ 0 ] ),
+    "col":  'cursor{:+d}'.format( cursor_relative_pos[ 1 ] ),
     "pos": "botleft",
+    "wrap": 0,
     "flip": 1
   }
 
