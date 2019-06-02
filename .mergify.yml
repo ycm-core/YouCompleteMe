@@ -8,3 +8,20 @@ pull_request_rules:
       merge:
         method: merge
         strict: smart
+      comment:
+        message: Thanks for sending a PR!
+  - name: Manual merge on Azure Pipelines and Maintainer Override
+    conditions:
+      - base=master
+      - status-success=Valloric.YouCompleteMe
+
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+
+      - label="Ship It!"
+    actions:
+      merge:
+        method: merge
+        strict: smart
+      comment:
+        message: Thanks for sending a PR!
