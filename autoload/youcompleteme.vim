@@ -25,10 +25,16 @@ let s:force_semantic = 0
 let s:completion_stopped = 0
 " These two variables are initialized in youcompleteme#Enable.
 let s:default_completion = {}
-let s:completion = {}
+let s:completion = s:default_completion
+let s:default_signature_help = {}
+let s:signature_help = s:default_completion
 let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
+      \     'id': -1,
+      \     'wait_milliseconds': 10
+      \   },
+      \   'signature_help': {
       \     'id': -1,
       \     'wait_milliseconds': 10
       \   },
@@ -682,6 +688,8 @@ function! s:OnInsertChar()
 
   call timer_stop( s:pollers.completion.id )
   call s:CloseCompletionMenu()
+
+  call timer_stop( s:pollers.signature_help.id )
 endfunction
 
 
@@ -691,6 +699,7 @@ function! s:OnDeleteChar( key )
   endif
 
   call timer_stop( s:pollers.completion.id )
+  call timer_stop( s:pollers.signature_help.id )
   if pumvisible()
     return "\<C-y>" . a:key
   endif
@@ -700,6 +709,9 @@ endfunction
 
 function! s:StopCompletion( key )
   call timer_stop( s:pollers.completion.id )
+
+  call s:ClearSignatureHelp()
+
   if pumvisible()
     let s:completion_stopped = 1
     return "\<C-y>"
@@ -753,6 +765,9 @@ function! s:OnTextChangedInsertMode()
     " Immediately call previous completion to avoid flickers.
     call s:Complete()
     call s:RequestCompletion()
+
+    call s:UpdateSignatureHelp()
+    call s:RequestSignatureHelp()
   endif
 
   exec s:python_command "ycm_state.OnCursorMoved()"
@@ -880,6 +895,24 @@ function! s:PollCompletion( ... )
 
   let s:completion = s:Pyeval( 'ycm_state.GetCompletionResponse()' )
   call s:Complete()
+endfunction
+
+
+function! s:RequestSignatureHelp()
+  exec s:python_command "ycm_state.SendSignatureHelpRequest()"
+  call s:PollSignatureHelp()
+endfunction
+
+
+function! s:PollSignatureHelp( ... )
+  if !s:Pyeval( 'ycm_state.SignatureHelpRequestReady()' )
+    let s:pollers.signature_help.id = timer_start(
+          \ s:pollers.signature_help.wait_milliseconds,
+          \ function( 's:PollSignatureHelp' ) )
+    return
+  endif
+
+  let s:signature_help = s:Pyeval( 'ycm_state.GetSignatureHelpResponse()' )
   call s:UpdateSignatureHelp()
 endfunction
 
@@ -929,13 +962,14 @@ endfunction
 
 
 function! s:UpdateSignatureHelp()
-  let s:signature_info = get( s:completion, 'signature_info', {} )
   call s:Pyeval(
-        \ 'ycm_state.UpdateSignatureHelp( vim.eval( "s:signature_info" ) )' )
+        \ 'ycm_state.UpdateSignatureHelp( vim.eval( "s:signature_help" ) )' )
 endfunction
 
 
 function! s:ClearSignatureHelp()
+  call timer_stop( s:pollers.signature_help.id )
+  let s:signature_help = s:default_signature_help
   call s:Pyeval( 'ycm_state.UpdateSignatureHelp( {} )' )
 endfunction
 
@@ -978,6 +1012,8 @@ function! s:RestartServer()
 
   call timer_stop( s:pollers.receive_messages.id )
   let s:pollers.receive_messages.id = -1
+
+  call s:ClearSignatureHelp()
 
   call timer_stop( s:pollers.server_ready.id )
   let s:pollers.server_ready.id = timer_start(
