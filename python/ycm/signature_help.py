@@ -153,10 +153,11 @@ def UpdateSignatureHelp( state, signature_info ):
   # position.
   options = {
     "line": 'cursor{:+d}'.format( cursor_relative_pos[ 0 ] ),
-    "col":  'cursor{:+d}'.format( cursor_relative_pos[ 1 ] ),
+    "col":  'cursor{:+d}'.format( cursor_relative_pos[ 1 ] - 1 ), # 1 for border
     "pos": "botleft",
     "wrap": 0,
-    "flip": 1
+    "flip": 1,
+    "padding": [ 0, 1, 0, 1 ], # Pad 1 char in X axis to match completion menu
   }
 
   if not state.popup_win_id:
