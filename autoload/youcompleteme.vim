@@ -625,7 +625,11 @@ function! s:PollServerReady( timer_id )
     return
   endif
 
-  call s:OnFileTypeSet()
+  if g:ycm_global_settings
+    call s:OnFileTypeSet()
+  else
+    doautoall youcompleteme FileType
+  endif
 endfunction
 
 
