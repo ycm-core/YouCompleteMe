@@ -338,7 +338,7 @@ function! s:SetUpKeyMappings()
       exe 'imap' . s:mapping_pattern . ' <Nul> <C-Space>'
     endif
 
-    silent! exe 'inoremap <unique> <silent> ' . invoke_key .
+    silent! exe 'inoremap <unique> <silent>' . s:mapping_pattern . ' '. invoke_key .
           \ ' <C-R>=<SID>InvokeSemanticCompletion()<CR>'
   endif
 
@@ -351,7 +351,7 @@ function! s:SetUpKeyMappings()
   " completion menu is open. We handle this by closing the completion menu on
   " the keys that delete a character in insert mode.
   for key in [ "<BS>", "<C-h>" ]
-    silent! exe 'inoremap <unique> <expr> ' . key .
+    silent! exe 'inoremap <unique> <expr>' . s:mapping_pattern . ' ' . key .
           \ ' <SID>OnDeleteChar( "\' . key . '" )'
   endfor
 endfunction
