@@ -114,6 +114,7 @@ class YouCompleteMe( object ):
     self._omnicomp = None
     self._buffers = None
     self._latest_completion_request = None
+    self._latest_signature_help_request = None
     self._signature_help_state = signature_help.SignatureHelpState()
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
