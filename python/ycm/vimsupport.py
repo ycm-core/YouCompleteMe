@@ -1255,3 +1255,17 @@ def AutoCloseOnCurrentBuffer( name ):
   vim.command( 'autocmd WinLeave <buffer> '
                'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif' )
   vim.command( 'augroup END' )
+
+
+def VimSupportsPopupWindows():
+  for required_method in [ 'popup_create',
+                           'popup_move',
+                           'popup_hide',
+                           'popup_show',
+                           'popup_close',
+                           'prop_add',
+                           'prop_type_add' ]:
+    if not GetIntValue( vim.eval( 'exists( "*{}" )'.format(
+      required_method ) ) ):
+      return False
+  return True

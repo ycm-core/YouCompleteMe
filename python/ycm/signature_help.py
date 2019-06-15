@@ -25,7 +25,6 @@ from builtins import *  # noqa
 import vim
 import json
 import logging
-from operator import sub
 from ycm import vimsupport
 from ycm.vimsupport import GetIntValue
 
@@ -52,20 +51,6 @@ def SetUpPopupWindow( popup_win_id, buf_lines ):
   # win.options[ 'signcolumn' ] = 'no'
 
   vim.eval( 'setwinvar( {}, "&signcolumn", "no" )'.format( popup_win_id ) )
-
-
-def _SupportsPopupWindows():
-  for required_method in [ 'popup_create',
-                           'popup_move',
-                           'popup_hide',
-                           'popup_show',
-                           'popup_close',
-                           'prop_add',
-                           'prop_type_add' ]:
-    if not GetIntValue( vim.eval( 'exists( "*{}" )'.format(
-      required_method ) ) ):
-      return False
-  return True
 
 
 def _MakeSignatureHelpBuffer( signature_info ):
@@ -113,7 +98,7 @@ def _MakeSignatureHelpBuffer( signature_info ):
 
 
 def UpdateSignatureHelp( state, signature_info ):
-  if not _SupportsPopupWindows():
+  if not vimsupport.VimSupportsPopupWindows():
     return state
 
   LOGGER.info( 'UpdateSignatureHelp: LINE: %s', vim.current.line )
@@ -131,8 +116,12 @@ def UpdateSignatureHelp( state, signature_info ):
 
   state.state = SignatureHelpState.ACTIVE
 
+  # For now, we re-create the entire popup each call, because this allows us to
+  # set the buffer contents and text properties in one call. We could/should
+  # re-use a popup to avoid churning through buffer numbers (and probably for
+  # efficiency), but right now setting up the buffer contents and text props is
+  # just a bit of a pain.
   # FIXME: Remove this
-  # For now, there is no resize for the popup, so we have to re-create it
   if state.popup_win_id:
     vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
     state.popup_win_id = None
@@ -168,8 +157,8 @@ def UpdateSignatureHelp( state, signature_info ):
   SetUpPopupWindow( state.popup_win_id, buf_lines )
 
   # Should do nothing if already visible
-  # FIXME: Reinstate this, and/or find a way to update the buffer from the text
-  # prop dicts.
+  # FIXME: Reinstate this, and find a way to update the buffer contents from the
+  # text prop dicts without writing tons of code.
   # vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
   #                                          json.dumps( options ) ) )
   # vim.eval( 'popup_show( {} )'.format( state.popup_win_id ) )
