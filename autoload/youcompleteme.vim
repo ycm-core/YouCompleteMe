@@ -637,6 +637,9 @@ function! s:OnFileReadyToParse( ... )
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
   if force_parsing || s:Pyeval( "ycm_state.NeedsReparse()" )
+    " We switched buffers or somethuing, so claer.
+    " FIXME: sig hekp should be buffer local?
+    call s:ClearSignatureHelp()
     exec s:python_command "ycm_state.OnFileReadyToParse()"
 
     call timer_stop( s:pollers.file_parse_response.id )
