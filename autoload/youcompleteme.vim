@@ -88,6 +88,10 @@ endfunction
 
 
 function! s:ReceiveMessages( timer_id )
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
   let poll_again = s:Pyeval( 'ycm_state.OnPeriodicTick()' )
 
   if poll_again
