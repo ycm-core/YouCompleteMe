@@ -901,13 +901,26 @@ function! s:PollCompletion( ... )
 endfunction
 
 
+function! s:ShouldUseSignatureHelp()
+  return s:Pyeval( 'vimsupport.VimSupportsPopupWindows()' )
+endfunction
+
+
 function! s:RequestSignatureHelp()
+  if !s:ShouldUseSignatureHelp()
+    return
+  endif
+
   exec s:python_command "ycm_state.SendSignatureHelpRequest()"
   call s:PollSignatureHelp()
 endfunction
 
 
 function! s:PollSignatureHelp( ... )
+  if !s:ShouldUseSignatureHelp()
+    return
+  endif
+
   if !s:Pyeval( 'ycm_state.SignatureHelpRequestReady()' )
     let s:pollers.signature_help.id = timer_start(
           \ s:pollers.signature_help.wait_milliseconds,
@@ -965,12 +978,20 @@ endfunction
 
 
 function! s:UpdateSignatureHelp()
+  if !s:ShouldUseSignatureHelp()
+    return
+  endif
+
   call s:Pyeval(
         \ 'ycm_state.UpdateSignatureHelp( vim.eval( "s:signature_help" ) )' )
 endfunction
 
 
 function! s:ClearSignatureHelp()
+  if !s:ShouldUseSignatureHelp()
+    return
+  endif
+
   call timer_stop( s:pollers.signature_help.id )
   let s:signature_help = s:default_signature_help
   call s:Pyeval( 'ycm_state.UpdateSignatureHelp( {} )' )
