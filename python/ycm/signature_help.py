@@ -44,13 +44,8 @@ class SignatureHelpState( object ):
 
 
 def SetUpPopupWindow( popup_win_id, buf_lines ):
-  # FIXME: For some reason the below does not seem to work.
-  #
-  # win = vim.windows[ GetIntValue( 'win_id2win( {} )'.format(
-  #   popup_win_id ) ) ]
-  # win.options[ 'signcolumn' ] = 'no'
-
-  vim.eval( 'setwinvar( {}, "&signcolumn", "no" )'.format( popup_win_id ) )
+  win = vim.windows[ GetIntValue( 'win_id2win( {} )'.format( popup_win_id ) ) ]
+  win.options[ 'signcolumn' ] = 'no'
 
 
 def _MakeSignatureHelpBuffer( signature_info ):
@@ -116,17 +111,6 @@ def UpdateSignatureHelp( state, signature_info ):
 
   state.state = SignatureHelpState.ACTIVE
 
-  # For now, we re-create the entire popup each call, because this allows us to
-  # set the buffer contents and text properties in one call. We could/should
-  # re-use a popup to avoid churning through buffer numbers (and probably for
-  # efficiency), but right now setting up the buffer contents and text props is
-  # just a bit of a pain.
-  # FIXME: Remove this
-  if state.popup_win_id:
-    vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
-    state.popup_win_id = None
-  # FIXME: Remove this
-
   # Generate the buffer as a list of lines
   buf_lines = _MakeSignatureHelpBuffer( signature_info )
 
@@ -153,14 +137,16 @@ def UpdateSignatureHelp( state, signature_info ):
     state.popup_win_id = GetIntValue( vim.eval( "popup_create( {}, {} )".format(
       json.dumps( buf_lines ),
       json.dumps( options ) ) ) )
+  else:
+    vim.eval( 'popup_settext( {}, {} )'.format(
+      state.popup_win_id,
+      json.dumps( buf_lines ) ) )
 
   SetUpPopupWindow( state.popup_win_id, buf_lines )
 
   # Should do nothing if already visible
-  # FIXME: Reinstate this, and find a way to update the buffer contents from the
-  # text prop dicts without writing tons of code.
-  # vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
-  #                                          json.dumps( options ) ) )
-  # vim.eval( 'popup_show( {} )'.format( state.popup_win_id ) )
+  vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
+                                           json.dumps( options ) ) )
+  vim.eval( 'popup_show( {} )'.format( state.popup_win_id ) )
 
   return state
