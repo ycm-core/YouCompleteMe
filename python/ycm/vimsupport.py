@@ -1261,6 +1261,7 @@ def VimSupportsPopupWindows():
   for required_method in [ 'popup_create',
                            'popup_move',
                            'popup_hide',
+                           'popup_settext',
                            'popup_show',
                            'popup_close',
                            'prop_add',
