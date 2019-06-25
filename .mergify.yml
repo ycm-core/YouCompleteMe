@@ -2,7 +2,7 @@ pull_request_rules:
   - name: Automatic merge on Azure Pipelines and Reviewable successes
     conditions:
       - base=master
-      - status-success=Valloric.YouCompleteMe
+      - status-success=ycm-core.YouCompleteMe
       - status-success=code-review/reviewable
     actions:
       merge:
@@ -13,7 +13,7 @@ pull_request_rules:
   - name: Manual merge on Azure Pipelines and Maintainer Override
     conditions:
       - base=master
-      - status-success=Valloric.YouCompleteMe
+      - status-success=ycm-core.YouCompleteMe
 
       - "#approved-reviews-by>=1"
       - "#changes-requested-reviews-by=0"
