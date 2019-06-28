@@ -64,7 +64,7 @@ jobs:
   pool:
     # List of available software on this image:
     # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/win/Vs2017-Server2016-Readme.md
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   strategy:
     matrix:
       # We only test Python 2.7 on 64-bit.
