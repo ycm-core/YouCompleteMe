@@ -15,7 +15,8 @@ changes to the YCM codebase, then the issue is likely to be closed.
 [ycm-users][] Google group**. Rule of thumb: if you're not sure whether your
 problem is a real bug, ask on the room or the group. 
 
-Don't go to `#vim` on freenode for support. See the [readme][] for further help.
+Don't go to `#vim` on freenode for support. See the 
+[readme][help-advice-support] for further help.
 
 ### Installation problem - read the docs
 
@@ -156,6 +157,6 @@ Creating good pull requests
 [build-bots]: https://dev.azure.com/YouCompleteMe/YCM/_build/latest?definitionId=1&branchName=master
 [ycm-users]: https://groups.google.com/forum/?hl=en#!forum/ycm-users
 [gitter]: https://gitter.im/Valloric/YouCompleteMe
-[readme]: https://github.com/ycm-core/YouCompleteMe
+[help-advice-support]: https://github.com/ycm-core/YouCompleteMe#help-advice-support
 [ycm-debug-info-command]: https://github.com/ycm-core/YouCompleteMe#the-ycmdebuginfo-command
 [ycm-toggle-logs-command]: https://github.com/ycm-core/YouCompleteMe#the-ycmtogglelogs-command
