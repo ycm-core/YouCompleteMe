@@ -495,6 +495,10 @@ function! s:SetUpCompleteopt()
   set completeopt-=menu
   set completeopt+=menuone
 
+  " Instead of making vim deselect the first completion item with <C-p>, we
+  " `noselect` makes vim do that on its own.
+  set completeopt+=noselect
+
   " This is unnecessary with our features. People use this option to insert
   " the common prefix of all the matches and then add more differentiating chars
   " so that they can select a more specific match. With our features, they
@@ -872,13 +876,8 @@ function! s:Complete()
     call s:CloseCompletionMenu()
   else
     " <c-x><c-u> invokes the user's completion function (which we have set to
-    " youcompleteme#CompleteFunc), and <c-p> tells Vim to select the previous
-    " completion candidate. This is necessary because by default, Vim selects
-    " the first candidate when completion is invoked, and selecting a candidate
-    " automatically replaces the current text with it. Calling <c-p> forces Vim
-    " to deselect the first candidate and in turn preserve the user's current
-    " text until he explicitly chooses to replace it with a completion.
-    call s:SendKeys( "\<C-X>\<C-U>\<C-P>" )
+    " youcompleteme#CompleteFunc).
+    call s:SendKeys( "\<C-X>\<C-U>" )
   endif
 endfunction
 
