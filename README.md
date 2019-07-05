@@ -1481,16 +1481,19 @@ of [`g:ycm_language_server`](#the-gycm_language_server-option) option. An
 example of a value of this option would be:
 
 ```viml
-let g:ycm_language_server = [ {
-  'name': 'yaml',
-  'cmdline': [ '/path/to/yaml/server/yaml-language-server', '--stdio' ],
-  'filetypes': [ 'yaml' ]
-  },
-{
-  'name': 'php',
-  'cmdline': [ '/path/to/php', '/path/to/php/server/php-language-server.php' ],
-  'filetypes': [ 'php' ]
-} ]
+let g:ycm_language_server = 
+  \ [ 
+  \   {
+  \     'name': 'yaml',
+  \     'cmdline': [ '/path/to/yaml/server/yaml-language-server', '--stdio' ],
+  \     'filetypes': [ 'yaml' ]
+  \   },
+  \   {
+  \     'name': 'php',
+  \     'cmdline': [ '/path/to/php', '/path/to/php/server/php-language-server.php' ],
+  \     'filetypes': [ 'php' ]
+  \   }
+  \ ]
 ```
 
 When [configuring a LSP server](#lsp-configuration) the value of the `name` key
