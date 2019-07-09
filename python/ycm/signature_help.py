@@ -108,21 +108,36 @@ def UpdateSignatureHelp( state, signature_info ):
 
   # Generate the buffer as a list of lines
   buf_lines = _MakeSignatureHelpBuffer( signature_info )
+  screen_pos = vimsupport.ScreenPositionForLineColumnInWindow(
+    vim.current.window,
+    state.anchor[ 0 ] + 1,  # 0-based
+    state.anchor[ 1 ] + 1 ) # 0-based
 
-  # Find the buffer position of the anchor and calculate it as an offset from
-  # the cursor position.
-  cur_pos = vimsupport.CurrentLineAndColumn()
+  # Simulate 'flip' at the screen boundaries by using screenpos.
+  #
+  # TODO: revert to cursor-relative positioning and the 'flip' option when that
+  # is implemented.
+  if int( screen_pos[ 'row' ] ) <= 1:
+    line = 2
+    pos = "topleft"
+  else:
+    line = int( screen_pos[ 'row' ] ) - 1 # -1 to display above the cur line
+    pos = "botleft"
 
-  cursor_relative_pos = [ state.anchor[ 0 ] - cur_pos[ 0 ] - 1 ,
-                          state.anchor[ 1 ] - cur_pos[ 1 ] ]
+  if int( screen_pos[ 'curscol' ] ) <= 1:
+    col = 1
+  else:
+    # -1 for padding,
+    # -1 for the trigger character inserted (the anchor is set _after_ the
+    # character is inserted, so we remove it).
+    # FIXME: multi-byte characters would be wrong. Need to set anchor before
+    # inserting the char ?
+    col = int( screen_pos[ 'curscol' ] ) - 2
 
-  # Use the cursor offset to find the actual screen position. It's surprisingly
-  # difficult to calculate the real screen position of a mark, or other buffer
-  # position.
   options = {
-    "line": 'cursor{:+d}'.format( cursor_relative_pos[ 0 ] ),
-    "col":  'cursor{:+d}'.format( cursor_relative_pos[ 1 ] - 1 ), # 1 for border
-    "pos": "botleft",
+    "line": line,
+    "col": col,
+    "pos": pos,
     "wrap": 0,
     "flip": 1,
     "padding": [ 0, 1, 0, 1 ], # Pad 1 char in X axis to match completion menu
