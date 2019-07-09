@@ -43,11 +43,6 @@ class SignatureHelpState( object ):
     self.anchor = None
 
 
-def SetUpPopupWindow( popup_win_id, buf_lines ):
-  win = vim.windows[ GetIntValue( 'win_id2win( {} )'.format( popup_win_id ) ) ]
-  win.options[ 'signcolumn' ] = 'no'
-
-
 def _MakeSignatureHelpBuffer( signature_info ):
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )
   active_parameter = int( signature_info.get( 'activeParameter', 0 ) )
@@ -141,8 +136,6 @@ def UpdateSignatureHelp( state, signature_info ):
     vim.eval( 'popup_settext( {}, {} )'.format(
       state.popup_win_id,
       json.dumps( buf_lines ) ) )
-
-  SetUpPopupWindow( state.popup_win_id, buf_lines )
 
   # Should do nothing if already visible
   vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
