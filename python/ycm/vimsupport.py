@@ -1265,8 +1265,21 @@ def VimSupportsPopupWindows():
                            'popup_show',
                            'popup_close',
                            'prop_add',
-                           'prop_type_add' ]:
+                           'prop_type_add',
+                           'screenpos' ]:
     if not GetIntValue( vim.eval( 'exists( "*{}" )'.format(
       required_method ) ) ):
       return False
   return True
+
+
+def WinIDForWindow( window ):
+  return GetIntValue( 'win_getid( {}, {} )'.format( window.number,
+                                                    window.tabpage.number ) )
+
+
+def ScreenPositionForLineColumnInWindow( window, line, column ):
+  return vim.eval( 'screenpos( {}, {}, {} )'.format(
+      WinIDForWindow( vim.current.window ),
+      line,
+      column ) )
