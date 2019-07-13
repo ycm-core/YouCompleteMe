@@ -22,3 +22,6 @@
 [submodule "third_party/python-future"]
 	path = third_party/python-future
 	url = https://github.com/PythonCharmers/python-future
+[submodule "third_party/vim-themis"]
+	path = third_party/vim-themis
+	url = https://github.com/thinca/vim-themis

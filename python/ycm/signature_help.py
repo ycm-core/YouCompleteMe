@@ -113,16 +113,35 @@ def UpdateSignatureHelp( state, signature_info ):
     state.anchor[ 0 ] + 1,  # 0-based
     state.anchor[ 1 ] + 1 ) # 0-based
 
-  # Simulate 'flip' at the screen boundaries by using screenpos.
+  # Simulate 'flip' at the screen boundaries by using screenpos and hiding the
+  # signature help menu if it _might_ overlap the completion popup (pum).
   #
-  # TODO: revert to cursor-relative positioning and the 'flip' option when that
-  # is implemented.
-  if int( screen_pos[ 'row' ] ) <= 1:
-    line = 2
-    pos = "topleft"
-  else:
-    line = int( screen_pos[ 'row' ] ) - 1 # -1 to display above the cur line
-    pos = "botleft"
+  # FIXME: revert to cursor-relative positioning and the 'flip' option when that
+  # is implemented (if that is indeed better).
+
+  # By default display above the anchor
+  line = int( screen_pos[ 'row' ] ) - 1 # -1 to display above the cur line
+  pos = "botleft"
+
+  if int( screen_pos[ 'row' ] ) <= len( buf_lines ):
+    # No room at the top, display below
+    if GetIntValue( 'pumvisible()' ):
+      # Don't display; it might overlap the pum
+      line = 0
+    else:
+      line = int( screen_pos[ 'row' ] ) + 1
+      pos = "topleft"
+  elif int( screen_pos[ 'row' ] ) > vim.options[ 'lines' ] - len( buf_lines ):
+    # No room at the bottom, check if we should display
+    if GetIntValue( 'pumvisible()' ):
+      # Don't display; it might overlap the pum
+      line = 0
+
+  if line <= 0:
+    # Nowhere to put it so hide it
+    if state.popup_win_id:
+      vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
+    return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
   if int( screen_pos[ 'curscol' ] ) <= 1:
     col = 1
