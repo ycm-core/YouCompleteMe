@@ -28,6 +28,7 @@ from hamcrest import ( assert_that,
                        empty )
 from ycm import signature_help as sh
 
+
 def MakeSignatureHelpBuffer_Empty_test():
   assert_that( sh._MakeSignatureHelpBuffer( {} ), empty() )
   assert_that( sh._MakeSignatureHelpBuffer( {
