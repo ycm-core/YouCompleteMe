@@ -160,7 +160,11 @@ function! youcompleteme#Enable()
   let s:default_completion = s:Pyeval( 'vimsupport.NO_COMPLETIONS' )
   let s:completion = s:default_completion
 
-  if exists( '*prop_type_add' )
+  if exists( '*prop_type_add' ) && exists( '*prop_type_delete' )
+    call prop_type_delete( 'YCM-signature-help-current-argument' )
+    call prop_type_delete( 'YCM-signature-help-current-signature' )
+    call prop_type_delete( 'YCM-signature-help-signature' )
+
     call prop_type_add( 'YCM-signature-help-current-argument', {
           \   'highlight': 'PMenuSel',
           \   'combine':   0,
@@ -272,6 +276,11 @@ try:
 
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
+
+  if 'ycm_state' in globals():
+    # If re-initializing, pretend that we shut down
+    ycm_state.OnVimLeave()
+    del ycm_state
 
   ycm_state = youcompleteme.YouCompleteMe()
 except Exception as error:
