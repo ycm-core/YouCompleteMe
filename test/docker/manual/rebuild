@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$1" = "--continue" ]; then
+  OPTS=""
+else
+  OPTS="--no-cache"
+fi
+
+docker build ${OPTS} -t youcompleteme/ycm-vim-py2:manual \
+                     --build-arg YCM_PYTHON=py2 \
+                     image/
+docker build ${OPTS} -t youcompleteme/ycm-vim-py3:manual \
+                     --build-arg YCM_PYTHON=py3 \
+                     image/
