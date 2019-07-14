@@ -701,6 +701,7 @@ function! s:OnInsertChar()
   call timer_stop( s:pollers.completion.id )
   call s:CloseCompletionMenu()
 
+  " TODO: Do we really need this here?
   call timer_stop( s:pollers.signature_help.id )
 endfunction
 
@@ -711,6 +712,8 @@ function! s:OnDeleteChar( key )
   endif
 
   call timer_stop( s:pollers.completion.id )
+  "
+  " TODO: Do we really need this here?
   call timer_stop( s:pollers.signature_help.id )
   if pumvisible()
     return "\<C-y>" . a:key
