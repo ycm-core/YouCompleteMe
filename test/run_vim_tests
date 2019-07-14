@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+RUN_VIM="vim --clean --not-a-term"
+RUN_TEST="${RUN_VIM} -S lib/run_test.vim"
+
+pushd $(dirname $0) > /dev/null
+
+echo "Running YouCompleteMe Vim tests"
+
+RESULT=0
+
+TESTS="$@"
+
+if [ -z "$TESTS" ]; then
+  TESTS=*.test.vim
+fi
+
+for t in ${TESTS}; do
+  echo ""
+  echo "%RUN: $t"
+  rm -f messages debuglog
+
+  # split on : into fileName and testName
+  IFS=: read -s t T <<< "$t"
+
+  if ${RUN_TEST} --cmd 'au SwapExists * let v:swapchoice = "e"' $t $T; then
+    echo "%PASS: $t PASSED"
+  else
+    cat messages
+    echo "%FAIL: $t FAILED"
+    RESULT=1
+  fi
+done
+
+popd > /dev/null
+
+echo ""
+echo "All done."
+
+exit $RESULT
