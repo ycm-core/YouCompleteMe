@@ -52,7 +52,7 @@ jobs:
     submodules: recursive
   - script: ./azure/linux/install_dependencies.sh
     displayName: Install dependencies
-  - script: ./azure/build_vim.sh
+  - script: ./azure/linux/build_vim.sh
     displayName: Build vim and ycmd
   - script: ./test/run_vim_tests
     displayName: Run vim tests
