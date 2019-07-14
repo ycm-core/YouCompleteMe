@@ -17,7 +17,7 @@ pushd vim
               --enable-fail-if-missing \
               ${YCM_VIM_PYTHON}
   make -j 4
-  make install
+  sudo make install
 popd
 
 # Also build ycmd
