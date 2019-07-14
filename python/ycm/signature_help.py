@@ -91,8 +91,7 @@ def UpdateSignatureHelp( state, signature_info ):
   if not vimsupport.VimSupportsPopupWindows():
     return state
 
-  LOGGER.info( 'UpdateSignatureHelp: LINE: %s', vim.current.line )
-  LOGGER.info( 'UpdateSignatureHelp: %s', signature_info )
+  LOGGER.debug( 'UpdateSignatureHelp: %s', signature_info )
 
   signatures = signature_info.get( 'signatures' ) or []
 
@@ -146,6 +145,7 @@ def UpdateSignatureHelp( state, signature_info ):
 
   if line <= 0:
     # Nowhere to put it so hide it
+    LOGGER.debug( 'Nowhere to put the popup' )
     if state.popup_win_id:
       vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
