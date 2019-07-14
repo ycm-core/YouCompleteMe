@@ -13,13 +13,6 @@
 *.la
 *.a
 
-# CMake
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-install_manifest.txt
-
 # Python
 *.py[cod]
 
@@ -58,3 +51,8 @@ cpp/llvm/tools/clang/www/*
 
 # Exclude auto generated vim doc tags.
 doc/tags
+
+# Coverage files
+.coverage
+.coverage.*
+coverage.xml
