@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+PY=py3
+
+if [ "$1" == '--py' ]; then
+  PY=py${2}
+  shift
+  shift
+fi
+
+CONTAINER=youcompleteme/ycm-vim-${PY}:manual
+
+pushd $(dirname $0)
+  docker run --mount src="$(pwd)/../../../",target=/home/dev/YouCompleteMe,type=bind \
+             -it ${CONTAINER} \
+             "$@"
+popd

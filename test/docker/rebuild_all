@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+for d in ci manual; do
+  pushd $(dirname $0)/$d
+    ./rebuild "$@"
+    ./push
+  popd
+done
