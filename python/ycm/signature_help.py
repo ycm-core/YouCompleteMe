@@ -87,7 +87,7 @@ def _MakeSignatureHelpBuffer( signature_info ):
   return lines
 
 
-def UpdateSignatureHelp( state, signature_info ):
+def UpdateSignatureHelp( state, signature_info ): # noqa
   if not vimsupport.VimSupportsPopupWindows():
     return state
 
