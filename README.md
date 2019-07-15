@@ -86,6 +86,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [TSServer][]-based completion engine for JavaScript and TypeScript,
 - a [rls][]-based completion engine for Rust,
 - a [jdt.ls][]-based experimental completion engine for Java.
+- a [generic Language Server Protocol implementation for any language](#plugging-an-arbitrary-lsp-server)
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).
 
@@ -1498,6 +1499,9 @@ let g:ycm_language_server =
 
 When [configuring a LSP server](#lsp-configuration) the value of the `name` key
 will be used as the `kwargs[ 'language' ]`.
+
+See [the LSP Examples](https://github.com/ycm-core/lsp-examples) project for more
+examples of configuring the likes of PHP, Ruby, Kotlin, and D.
 
 #### Using `omnifunc` for semantic completion
 
