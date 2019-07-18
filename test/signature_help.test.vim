@@ -121,6 +121,56 @@ function! Test_Signatures_After_Trigger()
   call feedkeys( 'cl(', 'ntx!' )
   call assert_false( pumvisible(), 'pumvisible()' )
 
+  call WaitForAssert( {->
+        \   assert_true(
+        \     pyxeval(
+        \       'ycm_state._signature_help_state.popup_win_id is None'
+        \     ),
+        \     'popup_win_id'
+        \   )
+        \ } )
+
   call test_override( 'ALL', 0 )
   %bwipeout!
-endfunctio
+endfunction
+
+function! Test_Placement_Simple()
+  20split
+  80vsplit
+
+  for i in range( 0, 20 )
+    call append( line('$'), 'line' . string( i ) )
+  endfor
+
+  " Delete the blank line that is always added to a buffer
+  0delete
+
+  pythonx from ycm import signature_help as sh
+  pythonx _sh_state = sh.SignatureHelpState()
+  pythonx sh.UpdateSignatureHelp( _sh_state, {} )
+  call assert_true( pyxeval( '_sh_state.popup_win_id is None' ),
+        \ 'win id none with emtpy' )
+
+  " When displayed in the middle with plenty of space
+  call setpos( '.', [ 0, 10, 3 ] )
+  call assert_equal( 'line9', getline( '.' ) )
+  pythonx _new_sh_state = sh.UpdateSignatureHelp( _sh_state,
+        \ { 'activeSignature': 0, 'activeParameter': 0, 'signatures': [
+        \   { 'label': 'test function', 'parameters': [] }
+        \ ] } )
+
+  call assert_true( pyxeval( '_new_sh_state.popup_win_id is not None' ),
+        \ 'win id not none after sig retured' )
+  call assert_equal( 9, pyxeval( '_new_sh_state.anchor[ 0 ]' ),
+        \ 'anchor line (0 based)' )
+  call assert_equal( 2, pyxeval( '_new_sh_state.anchor[ 1 ]' ),
+        \ 'anchor col (0 based)' )
+  let winid = pyxeval( '_new_sh_state.popup_win_id' )
+  let pos = popup_getpos( winid )
+  call assert_equal( 9, pos.line, string( pos ) )
+
+  call popup_clear()
+  %bwipeout!
+endfunction
+
+
