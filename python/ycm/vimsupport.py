@@ -1280,6 +1280,6 @@ def WinIDForWindow( window ):
 
 def ScreenPositionForLineColumnInWindow( window, line, column ):
   return vim.eval( 'screenpos( {}, {}, {} )'.format(
-      WinIDForWindow( vim.current.window ),
+      WinIDForWindow( window ),
       line,
       column ) )
