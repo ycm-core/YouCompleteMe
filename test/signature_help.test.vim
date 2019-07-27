@@ -1,3 +1,9 @@
+function! _ClearSigHelp()
+  pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state, {} )
+  call assert_true( pyxeval( '_sh_state.popup_win_id is None' ),
+        \ 'win id none with emtpy' )
+endfunction
+
 function! SetUp()
   let g:ycm_use_clangd = 1
   let g:ycm_confirm_extra_conf = 0
@@ -6,9 +12,12 @@ function! SetUp()
   let g:ycm_log_level = 'DEBUG'
 
   call youcompleteme#test#setup#SetUp( v:none )
+  pythonx from ycm import signature_help as sh
+  pythonx _sh_state = sh.SignatureHelpState()
 endfunction
 
 function! ClearDown()
+  call _ClearSigHelp()
   call youcompleteme#test#setup#CleanUp()
 endfunction
 
@@ -35,38 +44,6 @@ endfunction
 "   call delete('XtestPopup')
 "   %bwipeout!
 " endfunction
-
-function! Test_Compl_After_Trigger()
-  call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp' )
-
-  call setpos( '.', [ 0, 11, 6 ] )
-
-  " Required to trigger TextChangedI
-  " https://github.com/vim/vim/issues/4665#event-2480928194
-  call test_override( 'char_avail', 1 )
-
-  " Must do the checks in a timer callback because we need to stay in insert
-  " mode until done.
-  function! Check( id ) closure
-    call WaitForAssert( {->
-          \ assert_true( pyxeval( 'ycm_state.GetCurrentCompletionRequest() is not None' ) )
-          \ } )
-    call WaitForAssert( {->
-          \ assert_true( pyxeval( 'ycm_state.CompletionRequestReady()' ) )
-          \ } )
-    call assert_true( pumvisible(), 'pumvisible()' )
-    call feedkeys( "\<ESC>" )
-  endfunction
-
-  call timer_start( 100, funcref( 'Check' ) )
-  call feedkeys( 'cl.', 'ntx!' )
-  " Checks run in insert mode, then exit insert mode.
-  call assert_false( pumvisible(), 'pumvisible()' )
-
-  call test_override( 'ALL', 0 )
-  %bwipeout!
-endfunctio
 
 function! Test_Signatures_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
@@ -134,41 +111,189 @@ function! Test_Signatures_After_Trigger()
   %bwipeout!
 endfunction
 
+function! _CheckPopupPosition( winid, pos )
+  let actual_pos = popup_getpos( a:winid )
+  let ret = 0
+  for c in [ 'line', 'col', 'width', 'height' ]
+    if has_key( a:pos, c )
+      let ret += assert_equal( a:pos[ c ], actual_pos[ c ], c )
+    endif
+  endfor
+  return ret
+endfunction
+
+function! _CheckSigHelpAtPos( sh, cursor, pos )
+  call setpos( '.', [ 0 ] + a:cursor )
+  redraw
+  pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state,
+                                            \ vim.eval( 'a:sh' ) )
+  redraw
+  sleep 1000m
+  let winid = pyxeval( '_sh_state.popup_win_id' )
+  call _CheckPopupPosition( winid, a:pos )
+endfunction
+
 function! Test_Placement_Simple()
-  for i in range( 0, 20 )
-    call append( line('$'), 'line' . string( i ) )
+  call assert_true( &lines >= 25, "Enough rows" )
+  call assert_true( &columns >= 25, "Enough columns" )
+
+  let X = join( map( range( 0, &columns - 1 ), {->'X'} ), '' )
+
+  for i in range( 0, &lines )
+    call append( line('$'), X )
   endfor
 
   " Delete the blank line that is always added to a buffer
   0delete
 
-  pythonx from ycm import signature_help as sh
-  pythonx _sh_state = sh.SignatureHelpState()
-  pythonx sh.UpdateSignatureHelp( _sh_state, {} )
-  call assert_true( pyxeval( '_sh_state.popup_win_id is None' ),
-        \ 'win id none with emtpy' )
+  call _ClearSigHelp()
+
+  let v_sh = {
+        \   'activeSignature': 0,
+        \   'activeParameter': 0,
+        \   'signatures': [
+        \     { 'label': 'test function', 'parameters': [] }
+        \   ]
+        \ }
 
   " When displayed in the middle with plenty of space
-  call setpos( '.', [ 0, 10, 3 ] )
-  redraw
-  call assert_equal( 'line9', getline( '.' ) )
-  pythonx _new_sh_state = sh.UpdateSignatureHelp( _sh_state,
-        \ { 'activeSignature': 0, 'activeParameter': 0, 'signatures': [
-        \   { 'label': 'test function', 'parameters': [] }
-        \ ] } )
+  call _CheckSigHelpAtPos( v_sh, [ 10, 3 ], {
+        \ 'line': 9,
+        \ 'col': 1
+        \ } )
+  " Confirm that anchoring works (i.e. it doesn't move!)
+  call _CheckSigHelpAtPos( v_sh, [ 20, 10 ], {
+        \ 'line': 9,
+        \ 'col': 1
+        \ } )
+  call _ClearSigHelp()
 
-  call assert_true( pyxeval( '_new_sh_state.popup_win_id is not None' ),
-        \ 'win id not none after sig retured' )
-  call assert_equal( 9, pyxeval( '_new_sh_state.anchor[ 0 ]' ),
-        \ 'anchor line (0 based)' )
-  call assert_equal( 2, pyxeval( '_new_sh_state.anchor[ 1 ]' ),
-        \ 'anchor col (0 based)' )
-  let winid = pyxeval( '_new_sh_state.popup_win_id' )
-  let pos = popup_getpos( winid )
-  call assert_equal( 9, pos.line, string( pos ) )
+  " Window slides from left of screen
+  call _CheckSigHelpAtPos( v_sh, [ 10, 2 ], {
+        \ 'line': 9,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Window slides from left of screen
+  call _CheckSigHelpAtPos( v_sh, [ 10, 1 ], {
+        \ 'line': 9,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Cursor at top-left of window
+  call _CheckSigHelpAtPos( v_sh, [ 1, 1 ], {
+        \ 'line': 2,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Cursor at top-right of window
+  call _CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
+        \ 'line': 2,
+        \ 'col': &columns - len( "test function" ),
+        \ } )
+  call _ClearSigHelp()
+
+  " Bottom-left of window
+  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, 1 ], {
+        \ 'line': &lines - 2,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Bottom-right of window
+  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
+        \ 'line': &lines - 2,
+        \ 'col': &columns - len( "test function" ),
+        \ } )
+  call _ClearSigHelp()
 
   call popup_clear()
   %bwipeout!
 endfunction
 
+function! Test_Placement_MultiLine()
+  call assert_true( &lines >= 25, "Enough rows" )
+  call assert_true( &columns >= 25, "Enough columns" )
 
+  let X = join( map( range( 0, &columns - 1 ), {->'X'} ), '' )
+
+  for i in range( 0, &lines )
+    call append( line('$'), X )
+  endfor
+
+  " Delete the blank line that is always added to a buffer
+  0delete
+
+  call _ClearSigHelp()
+
+  let v_sh = {
+        \   'activeSignature': 0,
+        \   'activeParameter': 0,
+        \   'signatures': [
+        \     { 'label': 'test function', 'parameters': [] },
+        \     { 'label': 'toast function', 'parameters': [
+        \         { 'label': 'toast!' }
+        \     ] },
+        \   ]
+        \ }
+
+  " When displayed in the middle with plenty of space
+  call _CheckSigHelpAtPos( v_sh, [ 10, 3 ], {
+        \ 'line': 8,
+        \ 'col': 1
+        \ } )
+  " Confirm that anchoring works (i.e. it doesn't move!)
+  call _CheckSigHelpAtPos( v_sh, [ 20, 10 ], {
+        \ 'line': 8,
+        \ 'col': 1
+        \ } )
+  call _ClearSigHelp()
+
+  " Window slides from left of screen
+  call _CheckSigHelpAtPos( v_sh, [ 10, 2 ], {
+        \ 'line': 8,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Window slides from left of screen
+  call _CheckSigHelpAtPos( v_sh, [ 10, 1 ], {
+        \ 'line': 8,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Cursor at top-left of window
+  call _CheckSigHelpAtPos( v_sh, [ 1, 1 ], {
+        \ 'line': 2,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Cursor at top-right of window
+  call _CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
+        \ 'line': 2,
+        \ 'col': &columns - len( "toast function" ),
+        \ } )
+  call _ClearSigHelp()
+
+  " Bottom-left of window
+  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, 1 ], {
+        \ 'line': &lines - 3,
+        \ 'col': 1,
+        \ } )
+  call _ClearSigHelp()
+
+  " Bottom-right of window
+  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
+        \ 'line': &lines - 3,
+        \ 'col': &columns - len( "toast function" ),
+        \ } )
+  call _ClearSigHelp()
+
+  call popup_clear()
+  %bwipeout!
+endfunction
