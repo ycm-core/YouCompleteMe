@@ -54,8 +54,19 @@ set shellslash
 
 func s:TestFailed()
   if pyxeval( '"ycm_state" in globals()' )
-    call add(v:errors, "Log files:" )
-    call extend(v:errors, values( pyxeval( 'ycm_state.GetLogfiles()' ) ) )
+    let logs =  pyxeval( 'ycm_state.GetLogfiles()' )
+    for log_name in sort( keys( logs ) )
+      let log = readfile( logs[ log_name ] )
+      let logfile = s:testid_filesafe . '_' . log_name
+      call writefile( log, logfile, 's' )
+      call add( s:messages,
+              \ 'Wrote '
+              \ . log_name
+              \ . ' log for failed test: '
+              \ . logfile )
+      call add( s:messages, '**** LOG FILE ' . log_name . ' ****' )
+      call extend( s:messages, log )
+    endfor
   endif
 endfunc
 
@@ -123,6 +134,13 @@ func RunTheTest(test)
     try
       let s:test = a:test
       let s:testid = g:testpath . ':' . a:test
+
+      let test_filesafe = substitute( a:test, ')', '_', 'g' )
+      let test_filesafe = substitute( test_filesafe, '(', '_', 'g' )
+      let test_filesafe = substitute( test_filesafe, ',', '_', 'g' )
+      let test_filesafe = substitute( test_filesafe, ':', '_', 'g' )
+      let s:testid_filesafe = g:testpath . '_' . test_filesafe
+
       au VimLeavePre * call EarlyExit(s:test)
       exe 'call ' . a:test
       au! VimLeavePre
@@ -211,6 +229,7 @@ func AfterTheTest()
     call add(s:errors, 'Found errors in ' . s:testid . ':')
     call extend(s:errors, v:errors)
     let v:errors = []
+
   endif
 endfunc
 
@@ -316,52 +335,8 @@ endif
 for s:test in sort(s:tests)
   " Silence, please!
   set belloff=all
-  let prev_error = ''
-  let total_errors = []
-  let run_nr = 1
 
   call RunTheTest(s:test)
-
-  " Repeat a flaky test.  Give up when:
-  " - it fails again with the same message
-  " - it fails five times (with a different mesage)
-  if len(v:errors) > 0
-        \ && (index(s:flaky_tests, s:test) >= 0
-        \      || v:errors[0] =~ s:flaky_errors_re)
-    while 1
-      call s:TestFailed()
-      call add(s:messages, 'Found errors in ' . s:testid . ':')
-      call extend(s:messages, v:errors)
-
-      call add(total_errors, 'Run ' . run_nr . ':')
-      call extend(total_errors, v:errors)
-
-      if run_nr == 5 || prev_error == v:errors[0]
-        call add(total_errors, 'Flaky test failed too often, giving up')
-        let v:errors = total_errors
-        break
-      endif
-
-      call add(s:messages, 'Flaky test failed, running it again')
-
-      " Flakiness is often caused by the system being very busy.  Sleep a
-      " couple of seconds to have a higher chance of succeeding the second
-      " time.
-      sleep 2
-
-      let prev_error = v:errors[0]
-      let v:errors = []
-      let run_nr += 1
-
-      call RunTheTest(s:test)
-
-      if len(v:errors) == 0
-        " Test passed on rerun.
-        break
-      endif
-    endwhile
-  endif
-
   call AfterTheTest()
 endfor
 
