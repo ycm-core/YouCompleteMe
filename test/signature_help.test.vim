@@ -135,9 +135,6 @@ function! Test_Signatures_After_Trigger()
 endfunction
 
 function! Test_Placement_Simple()
-  20split
-  80vsplit
-
   for i in range( 0, 20 )
     call append( line('$'), 'line' . string( i ) )
   endfor
@@ -153,6 +150,7 @@ function! Test_Placement_Simple()
 
   " When displayed in the middle with plenty of space
   call setpos( '.', [ 0, 10, 3 ] )
+  redraw
   call assert_equal( 'line9', getline( '.' ) )
   pythonx _new_sh_state = sh.UpdateSignatureHelp( _sh_state,
         \ { 'activeSignature': 0, 'activeParameter': 0, 'signatures': [

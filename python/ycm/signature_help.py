@@ -123,6 +123,8 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   pos = "botleft"
 
   cursor_line = vimsupport.CurrentLineAndColumn()[ 0 ] + 1
+  LOGGER.debug( 'UpdateSignatureHelp: cursor_line: %s', cursor_line )
+  LOGGER.debug( 'UpdateSignatureHelp: screen_pos: %s', screen_pos )
   if int( screen_pos[ 'row' ] ) <= len( buf_lines ):
     # No room at the top, display below
     if GetIntValue( 'pumvisible()' ):
@@ -160,6 +162,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # inserting the char ?
     col = int( screen_pos[ 'curscol' ] ) - 2
 
+  LOGGER.debug( 'UpdateSignatureHelp: pos: %s,%s,%s', line, col, pos )
   options = {
     "line": line,
     "col": col,
