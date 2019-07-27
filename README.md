@@ -1011,7 +1011,7 @@ documentation][compdb]. In short:
   symlink the generated database to the root of your project.
 - If using Ninja, check out the `compdb` tool (`-t compdb`) in its
   [docs][ninja-compdb].
-- If using GNU make, check out [Bear][].
+- If using GNU make, check out [compiledb][] or [Bear][].
 - For other build systems, check out
   [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) below. Note that
   **experimental** [clangd][]-based completer doesn't support this option. So it
@@ -3747,3 +3747,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [clangd-indexing]: https://clang.llvm.org/extra/clangd.html#project-wide-indexing
 [vimspector]: https://github.com/puremourning/vimspector
 [roslyn-releases]: https://github.com/OmniSharp/omnisharp-roslyn/releases
+[compiledb]: https://pypi.org/project/compiledb/
