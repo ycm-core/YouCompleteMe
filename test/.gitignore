@@ -3,3 +3,4 @@ debuglog
 messages
 test.log
 *.res
+*.log
