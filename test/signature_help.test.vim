@@ -1,4 +1,4 @@
-function! _ClearSigHelp()
+function! s:_ClearSigHelp()
   pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state, {} )
   call assert_true( pyxeval( '_sh_state.popup_win_id is None' ),
         \ 'win id none with emtpy' )
@@ -17,7 +17,7 @@ function! SetUp()
 endfunction
 
 function! ClearDown()
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
   call youcompleteme#test#setup#CleanUp()
 endfunction
 
@@ -111,7 +111,7 @@ function! Test_Signatures_After_Trigger()
   %bwipeout!
 endfunction
 
-function! _CheckPopupPosition( winid, pos )
+function! s:_CheckPopupPosition( winid, pos )
   let actual_pos = popup_getpos( a:winid )
   let ret = 0
   for c in [ 'line', 'col', 'width', 'height' ]
@@ -122,7 +122,7 @@ function! _CheckPopupPosition( winid, pos )
   return ret
 endfunction
 
-function! _CheckSigHelpAtPos( sh, cursor, pos )
+function! s:_CheckSigHelpAtPos( sh, cursor, pos )
   call setpos( '.', [ 0 ] + a:cursor )
   redraw
   pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state,
@@ -130,7 +130,7 @@ function! _CheckSigHelpAtPos( sh, cursor, pos )
   redraw
   sleep 1000m
   let winid = pyxeval( '_sh_state.popup_win_id' )
-  call _CheckPopupPosition( winid, a:pos )
+  call s:_CheckPopupPosition( winid, a:pos )
 endfunction
 
 function! Test_Placement_Simple()
@@ -146,7 +146,7 @@ function! Test_Placement_Simple()
   " Delete the blank line that is always added to a buffer
   0delete
 
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   let v_sh = {
         \   'activeSignature': 0,
@@ -157,58 +157,58 @@ function! Test_Placement_Simple()
         \ }
 
   " When displayed in the middle with plenty of space
-  call _CheckSigHelpAtPos( v_sh, [ 10, 3 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 10, 3 ], {
         \ 'line': 9,
         \ 'col': 1
         \ } )
   " Confirm that anchoring works (i.e. it doesn't move!)
-  call _CheckSigHelpAtPos( v_sh, [ 20, 10 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 20, 10 ], {
         \ 'line': 9,
         \ 'col': 1
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Window slides from left of screen
-  call _CheckSigHelpAtPos( v_sh, [ 10, 2 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 10, 2 ], {
         \ 'line': 9,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Window slides from left of screen
-  call _CheckSigHelpAtPos( v_sh, [ 10, 1 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 10, 1 ], {
         \ 'line': 9,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Cursor at top-left of window
-  call _CheckSigHelpAtPos( v_sh, [ 1, 1 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 1, 1 ], {
         \ 'line': 2,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Cursor at top-right of window
-  call _CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
         \ 'line': 2,
         \ 'col': &columns - len( "test function" ),
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Bottom-left of window
-  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, 1 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ &lines + 1, 1 ], {
         \ 'line': &lines - 2,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Bottom-right of window
-  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
         \ 'line': &lines - 2,
         \ 'col': &columns - len( "test function" ),
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   call popup_clear()
   %bwipeout!
@@ -227,7 +227,7 @@ function! Test_Placement_MultiLine()
   " Delete the blank line that is always added to a buffer
   0delete
 
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   let v_sh = {
         \   'activeSignature': 0,
@@ -241,58 +241,58 @@ function! Test_Placement_MultiLine()
         \ }
 
   " When displayed in the middle with plenty of space
-  call _CheckSigHelpAtPos( v_sh, [ 10, 3 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 10, 3 ], {
         \ 'line': 8,
         \ 'col': 1
         \ } )
   " Confirm that anchoring works (i.e. it doesn't move!)
-  call _CheckSigHelpAtPos( v_sh, [ 20, 10 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 20, 10 ], {
         \ 'line': 8,
         \ 'col': 1
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Window slides from left of screen
-  call _CheckSigHelpAtPos( v_sh, [ 10, 2 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 10, 2 ], {
         \ 'line': 8,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Window slides from left of screen
-  call _CheckSigHelpAtPos( v_sh, [ 10, 1 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 10, 1 ], {
         \ 'line': 8,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Cursor at top-left of window
-  call _CheckSigHelpAtPos( v_sh, [ 1, 1 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 1, 1 ], {
         \ 'line': 2,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Cursor at top-right of window
-  call _CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
         \ 'line': 2,
         \ 'col': &columns - len( "toast function" ),
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Bottom-left of window
-  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, 1 ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ &lines + 1, 1 ], {
         \ 'line': &lines - 3,
         \ 'col': 1,
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   " Bottom-right of window
-  call _CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
+  call s:_CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
         \ 'line': &lines - 3,
         \ 'col': &columns - len( "toast function" ),
         \ } )
-  call _ClearSigHelp()
+  call s:_ClearSigHelp()
 
   call popup_clear()
   %bwipeout!
