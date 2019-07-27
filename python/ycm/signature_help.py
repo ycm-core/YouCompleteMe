@@ -162,6 +162,9 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # inserting the char ?
     col = int( screen_pos[ 'curscol' ] ) - 2
 
+  if col <= 0:
+    col = 1
+
   LOGGER.debug( 'UpdateSignatureHelp: pos: %s,%s,%s', line, col, pos )
   options = {
     "line": line,
