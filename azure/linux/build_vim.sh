@@ -9,7 +9,8 @@ if [ -d ~/vim ]; then
   rm -rf ~/vim
 fi
 
-git clone --depth=1 https://github.com/vim/vim
+git clone --depth=1 --no-tags --branch ${YCM_VIM_VERSION}\
+          https://github.com/vim/vim
 pushd vim
   ./configure --with-features=huge \
               --enable-terminal \
