@@ -290,7 +290,6 @@ func FinishTesting()
   if exists( '$COVERAGE' )
     pyx _cov.stop()
     pyx _cov.save()
-    pyx _cov.html_report()
   endif
 
   if s:fail > 0
@@ -337,45 +336,17 @@ if argc() > 1
 endif
 
 pyx <<EOF
-import os
 def _InitCoverage():
-  if 'VIRTUAL_ENV' in os.environ:
-    activate = os.path.join( os.environ[ 'VIRTUAL_ENV' ],
-                             'bin',
-                             'activate_this.py' )
-    if os.path.exists( activate ):
-      with open( activate ) as f:
-        exec( f.read(), dict( __file__ = activate ) )
-    else:
-      # Sadly activate_this.py doesn't exist in pyenv venv
-      import site
-      base = os.path.dirname( os.path.dirname( os.path.abspath (activate ) ) )
-      IS_WIN = sys.platform == "win32"
-      if IS_WIN:
-        site_packages = os.path.join( base, "Lib", "site-packages" )
-      else:
-        site_packages = os.path.join(
-          base,
-          "lib",
-          "python{}.{}".format( *sys.version_info ),
-          "site-packages" )
-
-      prev = set( sys.path )
-      site.addsitedir( site_packages )
-      new = list( sys.path )
-      sys.path[:] = [ i for i in new if i not in prev ] + [ i for i in new if i in prev ]
-
-
-  print( sys.path )
-  for p in sys.path:
-    print( p )
-    for l in os.listdir( p ):
-      print( '  - ' + l )
+  sys.path.insert( 1, os.path.join( os.getcwd(),
+                                    'lib',
+                                    'third_party',
+                                    'coveragepy' ) )
   import coverage
   cov = coverage.Coverage()
   cov.start()
   return cov
 
+import os
 if 'COVERAGE' in os.environ:
   _cov = _InitCoverage()
 EOF
