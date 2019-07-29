@@ -59,6 +59,11 @@ jobs:
     displayName: Build vim and ycmd
   - script: ./azure/linux/run_vim_tests.sh
     displayName: Run vim tests
+  - script: ./azure/send_coverage.sh test/
+    displayName: Send coverage
+    env:
+      CODECOV_TOKEN: $(CODECOV_TOKEN)
+      CODECOV_JOB_NAME: '$(Agent.JobName)'
 - job: macos
   displayName: 'macOS'
   pool:
