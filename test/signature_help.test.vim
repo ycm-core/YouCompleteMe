@@ -128,7 +128,6 @@ function! s:_CheckSigHelpAtPos( sh, cursor, pos )
   pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state,
                                             \ vim.eval( 'a:sh' ) )
   redraw
-  sleep 1000m
   let winid = pyxeval( '_sh_state.popup_win_id' )
   call s:_CheckPopupPosition( winid, a:pos )
 endfunction

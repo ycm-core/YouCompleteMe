@@ -1,3 +1,6 @@
+[run]
+source = python/ycm
+
 [report]
 omit =
     */tests/*

@@ -229,7 +229,6 @@ func AfterTheTest()
     call add(s:errors, 'Found errors in ' . s:testid . ':')
     call extend(s:errors, v:errors)
     let v:errors = []
-
   endif
 endfunc
 
@@ -288,6 +287,12 @@ func FinishTesting()
   call append(line('$'), s:messages)
   write
 
+  if exists( '$COVERAGE' )
+    pyx _cov.stop()
+    pyx _cov.save()
+    pyx _cov.html_report()
+  endif
+
   if s:fail > 0
     cquit!
   else
@@ -330,6 +335,45 @@ let s:tests = split(substitute(@q, 'function \(\k*()\)', '\1', 'g'))
 if argc() > 1
   let s:tests = filter(s:tests, 'v:val =~ argv(1)')
 endif
+
+pyx <<EOF
+import os
+def _InitCoverage():
+  if 'VIRTUAL_ENV' in os.environ:
+    activate = os.path.join( os.environ[ 'VIRTUAL_ENV' ],
+                             'bin',
+                             'activate_this.py' )
+    if os.path.exists( activate ):
+      with open( activate ) as f:
+        exec( f.read(), dict( __file__ = activate ) )
+    else:
+      # Sadly activate_this.py doesn't exist in pyenv venv
+      import site
+      base = os.path.dirname( os.path.dirname( os.path.abspath (activate ) ) )
+      IS_WIN = sys.platform == "win32"
+      if IS_WIN:
+        site_packages = os.path.join( base, "Lib", "site-packages" )
+      else:
+        site_packages = os.path.join(
+          base,
+          "lib",
+          "python{}.{}".format( *sys.version_info ),
+          "site-packages" )
+
+      prev = set( sys.path )
+      site.addsitedir( site_packages )
+      new = list( sys.path )
+      sys.path[:] = [ i for i in new if i not in prev ] + [ i for i in new if i in prev ]
+
+
+  import coverage
+  cov = coverage.Coverage()
+  cov.start()
+  return cov
+
+if 'COVERAGE' in os.environ:
+  _cov = _InitCoverage()
+EOF
 
 " Execute the tests in alphabetical order.
 for s:test in sort(s:tests)

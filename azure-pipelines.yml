@@ -43,12 +43,13 @@ jobs:
         # -lSystemStubs"
         YCM_PYTHON_VERSION: '2.7.2'
         YCM_VIM_PYTHON: '-enable-pythoninterp'
-        YCM_VIM_VERSION: 'v8.1.1757'
       'Python 3.5':
         YCM_PYTHON_VERSION: '3.5.1'
         YCM_VIM_PYTHON: '-enable-python3interp'
-        YCM_VIM_VERSION: 'v8.1.1757'
     maxParallel: 2
+  variables:
+    COVERAGE: true
+    YCM_VIM_VERSION: 'v8.1.1757'
   steps:
   - checkout: self
     submodules: recursive
