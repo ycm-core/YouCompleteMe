@@ -366,6 +366,11 @@ def _InitCoverage():
       sys.path[:] = [ i for i in new if i not in prev ] + [ i for i in new if i in prev ]
 
 
+  print( sys.path )
+  for p in sys.path:
+    print( p )
+    for l in os.listdir( p ):
+      print( '  - ' + l )
   import coverage
   cov = coverage.Coverage()
   cov.start()
