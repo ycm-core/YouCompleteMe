@@ -4,5 +4,7 @@ messages
 test.log
 *.res
 *.log
-.coverage*
+.coverage
+.coverage.*
+coverage.xml
 .vim_profile

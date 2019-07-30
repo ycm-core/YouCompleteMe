@@ -9,5 +9,7 @@ clean:
 	rm -f debuglog
 	rm -f messages
 	rm -f Xtest*
-	rm -f .coverage*
+	rm -f .coverage
+	rm -f .coverage.*
+	rm -f coverage.xml
 	rm -f .vim_profile
