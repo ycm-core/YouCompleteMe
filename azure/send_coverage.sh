@@ -11,7 +11,7 @@ if [ -n "$1" ]; then
   pushd $1
 fi
 
-codecov --name "${CODECOV_JOB_NAME}"
+codecov --name "${CODECOV_JOB_NAME}" --file=.coverage
 
 if [ -n "$1" ]; then
   popd
