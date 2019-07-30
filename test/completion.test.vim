@@ -34,7 +34,7 @@ function! Test_Compl_After_Trigger()
     redraw
     call WaitForAssert( {->
           \ assert_true( pumvisible(), 'pumvisible()' )
-          \ } )
+          \ }, 10000 )
     call feedkeys( "\<ESC>" )
   endfunction
 
