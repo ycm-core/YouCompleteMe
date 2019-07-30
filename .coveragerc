@@ -1,6 +1,8 @@
 [run]
-source = python/ycm
+plugins = covimerage
 
 [report]
 omit =
     */tests/*
+    */test/*
+    */third_party/*
