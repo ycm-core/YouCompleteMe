@@ -32,9 +32,20 @@ for t in ${TESTS}; do
   fi
 done
 
+if [ -n "${COVERAGE}" ]; then
+  covimerage write_coverage --source $(pwd)/.. --data-file .coverage.vim \
+             .vim_profile
+  rm -f .coverage
+  echo "Vimscript coverage"
+  coverage combine -a --rcfile=../.coveragerc .coverage.vim
+  echo "Python coverage"
+  coverage combine -a  --rcfile=../.coveragerc .coverage.python
+fi
+
 popd > /dev/null
 
 echo ""
 echo "All done."
+
 
 exit $RESULT

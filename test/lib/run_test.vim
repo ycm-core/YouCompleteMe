@@ -342,7 +342,7 @@ def _InitCoverage():
                                     'third_party',
                                     'coveragepy' ) )
   import coverage
-  cov = coverage.Coverage()
+  cov = coverage.Coverage( data_file='.coverage.python' )
   cov.start()
   return cov
 
@@ -350,6 +350,12 @@ import os
 if 'COVERAGE' in os.environ:
   _cov = _InitCoverage()
 EOF
+
+" Init covimerage
+if exists( '$COVERAGE' )
+  profile start .vim_profile
+  exe 'profile! file */youcompleteme.vim'
+endif
 
 " Execute the tests in alphabetical order.
 for s:test in sort(s:tests)
