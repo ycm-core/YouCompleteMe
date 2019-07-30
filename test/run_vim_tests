@@ -35,11 +35,8 @@ done
 if [ -n "${COVERAGE}" ]; then
   covimerage write_coverage --source $(pwd)/.. --data-file .coverage.vim \
              .vim_profile
-  rm -f .coverage
-  echo "Combine coverage"
-  coverage combine -a --rcfile=../.coveragerc .coverage.vim .coverage.python
-  echo "Generate xml"
-  coverage xml --rcfile=../.coveragerc
+
+  mv .coverage.* ../
 fi
 
 popd > /dev/null
