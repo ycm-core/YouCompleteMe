@@ -7,18 +7,6 @@ eval "$(pyenv init -)"
 
 pyenv global ${YCM_PYTHON_VERSION}
 
-if [ -n "$1" ]; then
-  pushd $1
-fi
-
-if [ -f "coverage.xml" ]; then
-  codecov --name "${CODECOV_JOB_NAME}" --file=coverage.xml
-else
-  codecov --name "${CODECOV_JOB_NAME}"
-fi
-
-if [ -n "$1" ]; then
-  popd
-fi
+codecov --name "${CODECOV_JOB_NAME}"
 
 set +e
