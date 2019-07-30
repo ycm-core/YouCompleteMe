@@ -31,7 +31,10 @@ function! Test_Compl_After_Trigger()
     call WaitForAssert( {->
           \ assert_true( pyxeval( 'ycm_state.CompletionRequestReady()' ) )
           \ } )
-    call assert_true( pumvisible(), 'pumvisible()' )
+    redraw
+    call WaitForAssert( {->
+          \ assert_true( pumvisible(), 'pumvisible()' )
+          \ } )
     call feedkeys( "\<ESC>" )
   endfunction
 
