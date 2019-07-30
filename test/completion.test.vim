@@ -38,7 +38,7 @@ function! Test_Compl_After_Trigger()
     call feedkeys( "\<ESC>" )
   endfunction
 
-  call timer_start( 100, funcref( 'Check' ) )
+  call timer_start( 500, funcref( 'Check' ) )
   call feedkeys( 'cl.', 'ntx!' )
   " Checks run in insert mode, then exit insert mode.
   call assert_false( pumvisible(), 'pumvisible()' )
