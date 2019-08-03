@@ -3647,7 +3647,7 @@ tracker][tracker]. Before you do, please carefully read
 the team will use to help get you going.
 
 The latest version of the plugin is available at
-<http://valloric.github.io/YouCompleteMe/>.
+<http://ycm-core.github.io/YouCompleteMe/>.
 
 The author's homepage is <http://val.markovic.io>.
 
