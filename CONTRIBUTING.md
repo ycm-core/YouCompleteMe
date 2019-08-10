@@ -13,7 +13,7 @@
    [virtualenv][]:
 
     ```bash
-        $ virtualenv ~/Virtualenvs/ycm-website
+        $ virtualenv -p python3 ~/Virtualenvs/ycm-website
         $ source ~/Virtualenvs/ycm-website/bin/activate
         (ycm-website)$ pip install -r requirements.txt
     ```
