@@ -11,12 +11,12 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
 
-  call youcompleteme#test#setup#SetUp( v:none )
+  call youcompleteme#test#setup#SetUp()
   pythonx from ycm import signature_help as sh
   pythonx _sh_state = sh.SignatureHelpState()
 endfunction
 
-function! ClearDown()
+function! TearDown()
   call s:_ClearSigHelp()
   call youcompleteme#test#setup#CleanUp()
 endfunction

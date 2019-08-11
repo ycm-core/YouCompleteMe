@@ -5,10 +5,10 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
 
-  call youcompleteme#test#setup#SetUp( v:none )
+  call youcompleteme#test#setup#SetUp()
 endfunction
 
-function! ClearDown()
+function! TearDown()
   call youcompleteme#test#setup#CleanUp()
 endfunction
 

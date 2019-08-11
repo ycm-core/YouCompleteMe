@@ -1,5 +1,5 @@
 
-function! youcompleteme#test#setup#SetUp( setup_f ) abort
+function! youcompleteme#test#setup#SetUp() abort
   if exists ( 'g:loaded_youcompleteme' )
     unlet g:loaded_youcompleteme
   endif
