@@ -26,7 +26,7 @@ all of the test functions. This is done as follows :
 vim --clean --not-a-term -S lib/run_test.vim <test script>.test.vim
 ```
 
-The important thing to know is that `run_test.vim` is sourced and it in tern
+The important thing to know is that `run_test.vim` is sourced and it in turn
 sources the test script, which contains the test functions, which are named
 `Test_*`.
 
