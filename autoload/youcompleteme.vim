@@ -976,6 +976,8 @@ function! s:Complete()
     " text until he explicitly chooses to replace it with a completion.
     call s:SendKeys( "\<C-X>\<C-U>\<C-P>" )
   endif
+  " Displaying or hiding the PUM might mean we need to hide the sig help
+  call s:UpdateSignatureHelp()
 endfunction
 
 
