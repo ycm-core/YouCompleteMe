@@ -262,6 +262,8 @@ def GetDiagnosticMatchesInCurrentWindow():
 
 
 def AddDiagnosticMatch( match ):
+  # TODO: Use matchaddpos which is much faster given that we always are using a
+  # location rather than an actual pattern
   return GetIntValue( "matchadd('{}', '{}')".format( match.group,
                                                      match.pattern ) )
 
