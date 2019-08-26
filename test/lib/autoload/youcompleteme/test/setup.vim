@@ -4,6 +4,11 @@ function! youcompleteme#test#setup#SetUp() abort
     unlet g:loaded_youcompleteme
   endif
 
+  if pyxeval( "'ycm_state' in globals()" )
+    pyx ycm_state.OnVimLeave()
+    pyx del ycm_state
+  endif
+
   source $PWD/vimrc
 
   " This is a bit of a hack
@@ -20,13 +25,6 @@ function! youcompleteme#test#setup#SetUp() abort
 endfunction
 
 function! youcompleteme#test#setup#CleanUp() abort
-  pyx <<EOF
-
-if 'ycm_state' in globals():
-  ycm_state.OnVimLeave()
-  del ycm_state
-
-EOF
 endfunction
 
 function! youcompleteme#test#setup#OpenFile( f ) abort
