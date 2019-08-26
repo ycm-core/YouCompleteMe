@@ -148,6 +148,10 @@ function! youcompleteme#Enable()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
+    if exists( '##CompleteChanged' )
+      " TODO: Check min vim patch for CompleteChanged
+      autocmd CompleteChanged * call s:OnCompleteChanged()
+    endif
     autocmd BufEnter,WinEnter * call s:UpdateMatches()
   augroup END
 
@@ -562,6 +566,16 @@ function! s:OnCompleteDone()
   endif
 
   exec s:python_command "ycm_state.OnCompleteDone()"
+  call s:UpdateSignatureHelp()
+endfunction
+
+
+function! s:OnCompleteChanged()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  call s:UpdateSignatureHelp()
 endfunction
 
 

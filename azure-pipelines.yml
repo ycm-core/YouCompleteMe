@@ -49,7 +49,7 @@ jobs:
     maxParallel: 2
   variables:
     COVERAGE: true
-    YCM_VIM_VERSION: 'v8.1.1757'
+    YCM_VIM_VERSION: 'v8.1.1875'
   steps:
   - checkout: self
     submodules: recursive

@@ -1258,19 +1258,19 @@ def AutoCloseOnCurrentBuffer( name ):
 
 
 def VimSupportsPopupWindows():
-  for required_method in [ 'popup_create',
-                           'popup_move',
-                           'popup_hide',
-                           'popup_settext',
-                           'popup_show',
-                           'popup_close',
-                           'prop_add',
-                           'prop_type_add',
-                           'screenpos' ]:
-    if not GetIntValue( vim.eval( 'exists( "*{}" )'.format(
-      required_method ) ) ):
-      return False
-  return True
+  return VimHasFunctions( 'popup_create',
+                          'popup_move',
+                          'popup_hide',
+                          'popup_settext',
+                          'popup_show',
+                          'popup_close',
+                          'prop_add',
+                          'prop_type_add' )
+
+
+def VimHasFunctions( *functions ):
+  return all( ( bool( GetIntValue( vim.eval( 'exists( "*{}" )'.format( f ) ) ) )
+                for f in functions ) )
 
 
 def WinIDForWindow( window ):

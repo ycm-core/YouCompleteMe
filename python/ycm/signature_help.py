@@ -87,8 +87,13 @@ def _MakeSignatureHelpBuffer( signature_info ):
   return lines
 
 
+def ShouldUseSignatureHelp():
+  return ( vimsupport.VimHasFunctions( 'screenpos', 'pum_getpos' ) and
+           vimsupport.VimSupportsPopupWindows() )
+
+
 def UpdateSignatureHelp( state, signature_info ): # noqa
-  if not vimsupport.VimSupportsPopupWindows():
+  if not ShouldUseSignatureHelp():
     return state
 
   LOGGER.debug( 'UpdateSignatureHelp: %s', signature_info )
@@ -97,6 +102,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   if not signatures:
     if state.popup_win_id:
+      # TODO/FIXME: Should we use popup_hide() instead ?
       vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
@@ -113,7 +119,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     state.anchor[ 1 ] + 1 ) # 0-based
 
   # Simulate 'flip' at the screen boundaries by using screenpos and hiding the
-  # signature help menu if it _might_ overlap the completion popup (pum).
+  # signature help menu if it overlaps the completion popup (pum).
   #
   # FIXME: revert to cursor-relative positioning and the 'flip' option when that
   # is implemented (if that is indeed better).
@@ -127,17 +133,8 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   LOGGER.debug( 'UpdateSignatureHelp: screen_pos: %s', screen_pos )
   if int( screen_pos[ 'row' ] ) <= len( buf_lines ):
     # No room at the top, display below
-    if GetIntValue( 'pumvisible()' ):
-      # Don't display; it might overlap the pum
-      line = 0
-    else:
-      line = int( screen_pos[ 'row' ] ) + 1
-      pos = "topleft"
-  elif int( screen_pos[ 'row' ] ) > vim.options[ 'lines' ] - len( buf_lines ):
-    # No room at the bottom, check if we should display
-    if GetIntValue( 'pumvisible()' ):
-      # Don't display; it might overlap the pum
-      line = 0
+    line = int( screen_pos[ 'row' ] ) + 1
+    pos = "topleft"
 
   # Don't allow the popup to overlap the cursor
   if ( pos == 'topleft' and
@@ -145,10 +142,24 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
        line + len( buf_lines ) >= cursor_line ):
     line = 0
 
+  # Don't allow the popup to overlap the pum
+  if line > 0 and GetIntValue( 'pumvisible()' ):
+    pum_line = GetIntValue( vim.eval( 'pum_getpos().row' ) ) + 1
+    LOGGER.debug( 'UpdateSignatureHelp: pum_line: %s', pum_line )
+    if pos == 'botleft' and pum_line <= line:
+      line = 0
+    elif ( pos == 'topleft' and
+           pum_line >= line and
+           pum_line < ( line + len( buf_lines ) ) ):
+      line = 0
+  else:
+    LOGGER.debug( 'UpdateSignatureHelp: pum not visible' )
+
   if line <= 0:
     # Nowhere to put it so hide it
     LOGGER.debug( 'Nowhere to put the popup' )
     if state.popup_win_id:
+      # TODO/FIXME: Should we use popup_hide() instead ?
       vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
