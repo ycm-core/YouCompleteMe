@@ -115,8 +115,8 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   buf_lines = _MakeSignatureHelpBuffer( signature_info )
   screen_pos = vimsupport.ScreenPositionForLineColumnInWindow(
     vim.current.window,
-    state.anchor[ 0 ] + 1,  # 0-based
-    state.anchor[ 1 ] + 1 ) # 0-based
+    state.anchor[ 0 ] + 1,  # anchor 0-based
+    state.anchor[ 1 ] + 1 ) # anchor 0-based
 
   # Simulate 'flip' at the screen boundaries by using screenpos and hiding the
   # signature help menu if it overlaps the completion popup (pum).

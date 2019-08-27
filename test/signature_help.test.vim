@@ -6,9 +6,6 @@ function! s:_ClearSigHelp()
 endfunction
 
 function s:_GetSigHelpWinID()
-  if exists( 's:popup_win_id' )
-    return s:popup_win_id
-  endif
   call WaitForAssert( {->
         \   assert_true(
         \     pyxeval(
@@ -27,6 +24,42 @@ function s:_GetSigHelpWinID()
         \ } )
   let s:popup_win_id = pyxeval( 'ycm_state._signature_help_state.popup_win_id' )
   return s:popup_win_id
+endfunction
+
+function! s:_CheckPopupPosition( winid, pos )
+  redraw
+  let actual_pos = popup_getpos( a:winid )
+  let ret = 0
+  if a:pos->empty()
+    return assert_true( actual_pos->empty(), 'popup pos empty' )
+  endif
+  for c in keys( a:pos )
+    if !has_key( actual_pos, c )
+      let ret += 1
+      call assert_report( 'popup with ID '
+                        \ . string( a:winid )
+                        \ . ' has no '
+                        \ . c
+                        \ . ' in: '
+                        \ . string( actual_pos ) )
+    else
+      let ret += assert_equal( a:pos[ c ],
+                             \ actual_pos[ c ],
+                             \ c . ' in: ' . string( actual_pos ) )
+    endif
+  endfor
+  return ret
+endfunction
+
+function! s:_CheckSigHelpAtPos( sh, cursor, pos )
+  call setpos( '.', [ 0 ] + a:cursor )
+  redraw
+  pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state,
+                                            \ vim.eval( 'a:sh' ) )
+  redraw
+  sleep 250m
+  let winid = pyxeval( '_sh_state.popup_win_id' )
+  call s:_CheckPopupPosition( winid, a:pos )
 endfunction
 
 function! SetUp()
@@ -82,9 +115,9 @@ function! Test_Signatures_After_Trigger()
   call test_override( 'char_avail', 1 )
 
   " Must do the checks in a timer callback because we need to stay in insert
-  " mode until done.
+  " mode until done. Use a func because it's big enough (a lambda is a little
+  " neater in many contexts).
   function! Check( id ) closure
-    redraw
     call WaitForAssert( {->
           \   assert_true(
           \     pyxeval(
@@ -134,19 +167,16 @@ function! Test_Signatures_After_Trigger()
 
   call test_override( 'ALL', 0 )
   %bwipeout!
+  delfunc! Check
 endfunction
 
-function Signature_With_PUM_CheckPopupVisible()
-  call WaitForAssert( {-> assert_true( pumvisible() ) } )
-  call WaitForAssert( {-> assert_notequal( [], complete_info().items ) } )
-  call assert_equal( 7, pum_getpos().row )
-  return ""
-endfunction
-
-function! Test_Signatures_With_PUM()
+function! Test_Signatures_With_PUM_NoSigns()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
         \ . '/make_drink.cc' )
+
+  " Make sure that error signs don't shift the window
+  setlocal signcolumn=no
 
   call setpos( '.', [ 0, 7, 13 ] )
 
@@ -154,10 +184,29 @@ function! Test_Signatures_With_PUM()
   " https://github.com/vim/vim/issues/4665#event-2480928194
   call test_override( 'char_avail', 1 )
 
+  function Check2( id ) closure
+    call WaitForAssert( {-> assert_true( pumvisible() ) } )
+    call WaitForAssert( {-> assert_notequal( [], complete_info().items ) } )
+    call assert_equal( 7, pum_getpos().row )
+    redraw
+    sleep 250m
+
+    " NOTE: anchor is 0-based
+    call assert_equal( 6,
+                     \ pyxeval( 'ycm_state._signature_help_state.anchor[0]' ) )
+    call assert_equal( 13,
+                     \ pyxeval( 'ycm_state._signature_help_state.anchor[1]' ) )
+
+
+    call s:_CheckPopupPosition( s:_GetSigHelpWinID(),
+                              \ { 'line': 5, 'col': 12 } )
+
+    call feedkeys( "\<ESC>", 't' )
+  endfunction
+
   " Must do the checks in a timer callback because we need to stay in insert
   " mode until done.
   function! Check( id ) closure
-    redraw
     call WaitForAssert( {->
           \   assert_true(
           \     pyxeval(
@@ -166,10 +215,11 @@ function! Test_Signatures_With_PUM()
           \     'popup_win_id'
           \   )
           \ } )
+    call s:_CheckPopupPosition( s:_GetSigHelpWinID(),
+                              \ { 'line': 5, 'col': 12 } )
 
-    " More hacks to execute scripts in insert mode
-    inoremap <F5> <C-R>=Signature_With_PUM_CheckPopupVisible()<CR>
-    call feedkeys( " TypeOfD\<C-N>\<F5>\<ESC>" )
+    call timer_start( 500, funcref( 'Check2' ) )
+    call feedkeys( ' TypeOfD', 't' )
   endfunction
 
   call assert_false( pyxeval( 'ycm_state.SignatureHelpRequestReady()' ) )
@@ -187,42 +237,80 @@ function! Test_Signatures_With_PUM()
 
   call test_override( 'ALL', 0 )
   %bwipeout!
+  delfunc! Check
+  delfunc! Check2
 endfunction
 
-function! s:_CheckPopupPosition( winid, pos )
-  redraw
-  let actual_pos = popup_getpos( a:winid )
-  let ret = 0
-  if a:pos->empty()
-    return assert_true( actual_pos->empty(), 'popup pos empty' )
-  endif
-  for c in keys( a:pos )
-    if !has_key( actual_pos, c )
-      let ret += 1
-      call assert_report( 'popup with ID '
-                        \ . string( a:winid )
-                        \ . ' has no '
-                        \ . c
-                        \ . ' in: '
-                        \ . string( actual_pos ) )
-    else
-      let ret += assert_equal( a:pos[ c ],
-                             \ actual_pos[ c ],
-                             \ c . ' in: ' . string( actual_pos ) )
-    endif
-  endfor
-  return ret
-endfunction
+function! Test_Signatures_With_PUM_Signs()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
+        \ . '/make_drink.cc' )
 
-function! s:_CheckSigHelpAtPos( sh, cursor, pos )
-  call setpos( '.', [ 0 ] + a:cursor )
-  redraw
-  pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state,
-                                            \ vim.eval( 'a:sh' ) )
-  redraw
-  sleep 250m
-  let winid = pyxeval( '_sh_state.popup_win_id' )
-  call s:_CheckPopupPosition( winid, a:pos )
+  " Make sure that sign causes the popup to shift
+  setlocal signcolumn=auto
+
+  call setpos( '.', [ 0, 7, 13 ] )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function Check2( id ) closure
+    call WaitForAssert( {-> assert_true( pumvisible() ) } )
+    call WaitForAssert( {-> assert_notequal( [], complete_info().items ) } )
+    call assert_equal( 7, pum_getpos().row )
+    redraw
+    sleep 250m
+
+    " NOTE: anchor is 0-based
+    call assert_equal( 6,
+                     \ pyxeval( 'ycm_state._signature_help_state.anchor[0]' ) )
+    call assert_equal( 13,
+                     \ pyxeval( 'ycm_state._signature_help_state.anchor[1]' ) )
+
+
+    " Sign column is shown, popup shifts to the right 2 screen columns
+    call s:_CheckPopupPosition( s:_GetSigHelpWinID(),
+                              \ { 'line': 5, 'col': 14 } )
+
+    call feedkeys( "\<ESC>", 't' )
+  endfunction
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call WaitForAssert( {->
+          \   assert_true(
+          \     pyxeval(
+          \       'ycm_state._signature_help_state.popup_win_id is not None'
+          \     ),
+          \     'popup_win_id'
+          \   )
+          \ } )
+    call s:_CheckPopupPosition( s:_GetSigHelpWinID(),
+                              \ { 'line': 5, 'col': 12 } )
+
+    call timer_start( 500, funcref( 'Check2' ) )
+    call feedkeys( ' TypeOfD', 't' )
+  endfunction
+
+  call assert_false( pyxeval( 'ycm_state.SignatureHelpRequestReady()' ) )
+  call timer_start( 500, funcref( 'Check' ) )
+  call feedkeys( 'C(', 'ntx!' )
+
+  call WaitForAssert( {->
+        \   assert_true(
+        \     pyxeval(
+        \       'ycm_state._signature_help_state.popup_win_id is None'
+        \     ),
+        \     'popup_win_id'
+        \   )
+        \ } )
+
+  call test_override( 'ALL', 0 )
+  %bwipeout!
+  delfunc! Check
+  delfunc! Check2
 endfunction
 
 function! Test_Placement_Simple()
@@ -396,7 +484,6 @@ function! Test_Signatures_TopLine()
   call test_override( 'char_avail', 1 )
 
   function! Check( id ) closure
-    " Popup placed below the cursor
     call s:_CheckPopupPosition( s:_GetSigHelpWinID(), { 'line': 2, 'col': 23 } )
     call feedkeys( "\<ESC>" )
   endfunction
@@ -406,6 +493,7 @@ function! Test_Signatures_TopLine()
 
   call test_override( 'ALL', 0 )
   %bwipeout!
+  delfun! Check
 endfunction
 
 function! Test_Signatures_TopLineWithPUM()
@@ -437,7 +525,7 @@ function! Test_Signatures_TopLineWithPUM()
           \     'popup_win_id'
           \   )
           \ } )
-    call s:_CheckPopupPosition( s:_GetSigHelpWinID(), {} )
+    call s:_CheckPopupPosition( s:popup_win_id, {} )
 
     " We're done in in sert mode now.
     call feedkeys( "\<ESC>", 't' )
