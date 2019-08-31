@@ -851,6 +851,7 @@ Quick Feature Summary
 * Go to implementation (`GoToImplementation`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
+* Automatically fix certain errors (`FixIt`)
 * Type information for identifiers (`GetType`)
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
@@ -1490,12 +1491,15 @@ let g:ycm_language_server =
   \     'filetypes': [ 'yaml' ]
   \   },
   \   {
-  \     'name': 'php',
-  \     'cmdline': [ '/path/to/php', '/path/to/php/server/php-language-server.php' ],
-  \     'filetypes': [ 'php' ]
+  \     'name': 'rust',
+  \     'cmdline': [ 'ra_lsp_server' ],
+  \     'filetypes': [ 'rust' ],
+  \     'project_root_files': [ 'Cargo.toml' ]
   \   }
   \ ]
 ```
+
+`project_root_files` is an optional key, since not all servers need it.
 
 When [configuring a LSP server](#lsp-configuration) the value of the `name` key
 will be used as the `kwargs[ 'language' ]`.
@@ -1958,7 +1962,7 @@ indication).
 **NOTE:** Causes re-parsing of the current translation unit.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
-typescript`
+rust, typescript`
 
 #### The `RefactorRename <new name>` subcommand
 
