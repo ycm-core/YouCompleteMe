@@ -190,7 +190,27 @@ def _GetCompletionInfoField( completion_data ):
 
   # This field may contain null characters e.g. \x00 in Python docstrings. Vim
   # cannot evaluate such characters so they are removed.
-  return info.replace( '\x00', '' )
+  info = info.replace( '\x00', '' )
+
+
+  vf_strdisplaywidth = vimsupport.vim.Function('strdisplaywidth')
+  vf_winwidth = vimsupport.vim.Function('winwidth')
+
+  # Get the width of the current window
+  winwidth = vf_winwidth(0)
+
+  num_additional_line = 0
+  for line in info.splitlines():
+    if vf_strdisplaywidth(line) > winwidth:
+      num_additional_line += vf_strdisplaywidth(line) // winwidth
+
+  footer = ''
+  if num_additional_line > 0:
+    # The empty line at the end is ignored, so this one is not effective.
+    footer = '\n'
+    for i in range(num_additional_line):
+      footer += '\n'
+  return info + footer
 
 
 def _ConvertCompletionDataToVimData( completion_identifier, completion_data ):
