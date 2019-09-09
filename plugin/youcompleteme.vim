@@ -54,7 +54,8 @@ elseif !has( 'timers' )
         \ echohl None
   call s:restore_cpo()
   finish
-elseif ( v:version > 800 || ( v:version == 800 && has( 'patch1436' ) ) ) &&
+elseif !has( 'nvim' ) &&
+     \ ( v:version > 800 || ( v:version == 800 && has( 'patch1436' ) ) ) &&
      \ !has( 'python_compiled' ) && !has( 'python3_compiled' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
