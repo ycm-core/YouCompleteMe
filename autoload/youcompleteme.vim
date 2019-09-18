@@ -314,7 +314,7 @@ function! s:SetUpKeyMappings()
     endif
 
     silent! exe 'inoremap <unique> <silent> ' . invoke_key .
-          \ ' <C-R>=<SID>InvokeSemanticCompletion()<CR>'
+          \ ' <C-R>=<SID>RequestSemanticCompletion()<CR>'
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
@@ -734,7 +734,7 @@ function! s:OnTextChangedInsertMode()
         \ !s:OnBlankLine()
     " Immediately call previous completion to avoid flickers.
     call s:Complete()
-    call s:InvokeCompletion()
+    call s:RequestCompletion()
   endif
 
   exec s:python_command "ycm_state.OnCursorMoved()"
@@ -827,7 +827,7 @@ function! s:OnBlankLine()
 endfunction
 
 
-function! s:InvokeCompletion()
+function! s:RequestCompletion()
   exec s:python_command "ycm_state.SendCompletionRequest(" .
         \ "vimsupport.GetBoolValue( 's:force_semantic' ) )"
 
@@ -835,7 +835,7 @@ function! s:InvokeCompletion()
 endfunction
 
 
-function! s:InvokeSemanticCompletion()
+function! s:RequestSemanticCompletion()
   if &completefunc == "youcompleteme#CompleteFunc"
     let s:force_semantic = 1
     exec s:python_command "ycm_state.SendCompletionRequest( True )"
