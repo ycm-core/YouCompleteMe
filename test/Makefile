@@ -11,3 +11,4 @@ clean:
 	rm -f Xtest*
 	rm -f .coverage.*
 	rm -f .vim_profile
+	rm -rf logs/

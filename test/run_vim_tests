@@ -18,18 +18,36 @@ fi
 for t in ${TESTS}; do
   echo ""
   echo "%RUN: $t"
-  rm -f messages debuglog
+  TESTLOGDIR=$(pwd)/logs/$t
 
   # split on : into fileName and testName
   IFS=: read -s t T <<< "$t"
 
-  if ${RUN_TEST} --cmd 'au SwapExists * let v:swapchoice = "e"' $t $T; then
+  if ${RUN_TEST} --cmd 'au SwapExists * let v:swapchoice = "e"' $t $T \
+     && [ -f $t.res ];  then
     echo "%PASS: $t PASSED"
   else
-    cat messages
-    echo "%FAIL: $t FAILED"
+    echo "%FAIL: $t FAILED - see $TESTLOGDIR"
     RESULT=1
   fi
+
+  rm -rf $TESTLOGDIR
+  mkdir -p $TESTLOGDIR
+  for l in messages debuglog test.log *.testlog; do
+    # In CI we can't view the output files, so we just have to cat them
+    if [ -f $l ]; then
+      if [ "$YCM_TEST_STDOUT" ]; then
+        echo ""
+        echo ""
+        echo "*** START: $l ***"
+        cat $l
+        echo "*** END: $l ***"
+      fi
+      mv $l $TESTLOGDIR
+    fi
+  done
+
+  rm -f $t.res
 done
 
 if [ -n "${COVERAGE}" ]; then

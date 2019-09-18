@@ -57,7 +57,7 @@ func s:TestFailed()
     let logs =  pyxeval( 'ycm_state.GetLogfiles()' )
     for log_name in sort( keys( logs ) )
       let log = readfile( logs[ log_name ] )
-      let logfile = s:testid_filesafe . '_' . log_name
+      let logfile = s:testid_filesafe . '_' . log_name . '.testlog'
       call writefile( log, logfile, 's' )
       call add( s:messages,
               \ 'Wrote '
@@ -250,17 +250,19 @@ func FinishTesting()
 
   if s:fail == 0
     " Success, create the .res file so that make knows it's done.
-    exe 'split ' . fnamemodify(g:testname, ':r') . '.res'
-    write
+    call writefile( [], g:testname . '.res', 's' )
   endif
 
   if len(s:errors) > 0
     " Append errors to test.log
-    split test.log
-    call append(line('$'), '')
-    call append(line('$'), 'From ' . g:testpath . ':')
-    call append(line('$'), s:errors)
-    write
+    let l = []
+    if filereadable( 'test.log' )
+      let l = readfile( 'test.log' )
+    endif
+    call writefile( l->extend( [ '', 'From ' . g:testpath . ':' ] )
+                  \  ->extend( s:errors ),
+                  \ 'test.log',
+                  \ 's' )
   endif
 
   if s:done == 0
@@ -281,11 +283,14 @@ func FinishTesting()
   call extend(s:messages, s:skipped)
 
   " Append messages to the file "messages"
-  split messages
-  call append(line('$'), '')
-  call append(line('$'), 'From ' . g:testpath . ':')
-  call append(line('$'), s:messages)
-  write
+  let l = []
+  if filereadable( 'messages' )
+    let l = readfile( 'messages' )
+  endif
+  call writefile( l->extend( [ '', 'From ' . g:testpath . ':' ] )
+                \  ->extend( s:messages ),
+                \ 'messages',
+                \ 's' )
 
   if exists( '$COVERAGE' )
     pyx _cov.stop()

@@ -50,6 +50,8 @@ jobs:
   variables:
     COVERAGE: true
     YCM_VIM_VERSION: 'v8.1.1875'
+    # we need to cat all the logs to stdout so that debugging in CI is plausible
+    YCM_TEST_STDOUT: true
   steps:
   - checkout: self
     submodules: recursive
