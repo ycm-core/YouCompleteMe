@@ -1253,5 +1253,5 @@ def AutoCloseOnCurrentBuffer( name ):
   vim.command( 'augroup {}'.format( name ) )
   vim.command( 'autocmd! * <buffer>' )
   vim.command( 'autocmd WinLeave <buffer> '
-               'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif' )
+               'if bufnr( "%" ) == expand( "<abuf>" ) | bw! | endif' )
   vim.command( 'augroup END' )

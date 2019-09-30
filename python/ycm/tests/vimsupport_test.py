@@ -168,7 +168,7 @@ def OpenLocationList_test( vim_command, fitting_height, variable_exists ):
     call( 'augroup ycmlocation' ),
     call( 'autocmd! * <buffer>' ),
     call( 'autocmd WinLeave <buffer> '
-          'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif' ),
+          'if bufnr( "%" ) == expand( "<abuf>" ) | bw! | endif' ),
     call( 'augroup END' ),
     call( 'doautocmd User YcmLocationOpened' ),
     call( 'silent! wincmd p' )
