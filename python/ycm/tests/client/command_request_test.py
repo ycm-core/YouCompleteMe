@@ -110,7 +110,8 @@ class GoToResponse_QuickFix_test( object ):
       call( 'augroup ycmquickfix' ),
       call( 'autocmd! * <buffer>' ),
       call( 'autocmd WinLeave <buffer> '
-            'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif' ),
+            'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif '
+            '| autocmd! ycmquickfix' ),
       call( 'augroup END' ),
       call( 'doautocmd User YcmQuickFixOpened' )
     ] )
