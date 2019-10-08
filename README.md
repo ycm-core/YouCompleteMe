@@ -861,6 +861,7 @@ Quick Feature Summary
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to type definition (`GoToType`)
 * Automatically fix certain errors (`FixIt`)
+* View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Code formatting (`Format`)
 * Management of `gopls` server instance
@@ -868,6 +869,7 @@ Quick Feature Summary
 ### JavaScript and TypeScript
 
 * Semantic auto-completion with automatic import insertion
+* Signature help
 * Real-time diagnostic display
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
@@ -1982,7 +1984,7 @@ under the cursor. Depending on the file type, this includes things like:
 * Python docstrings,
 * etc.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, java, javascript,
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
 python, typescript, rust`
 
 #### The `GetDocImprecise` subcommand

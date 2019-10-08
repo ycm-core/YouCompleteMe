@@ -697,7 +697,7 @@ class YouCompleteMe( object ):
   def ToggleLogs( self, *filenames ):
     logfiles = self.GetLogfiles()
     if not filenames:
-      sorted_logfiles = sorted( list( logfiles ) )
+      sorted_logfiles = sorted( logfiles )
       try:
         logfile_index = vimsupport.SelectFromList(
           'Which logfile do you wish to open (or close if already open)?',
