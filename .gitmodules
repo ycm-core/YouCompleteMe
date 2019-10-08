@@ -13,6 +13,7 @@
 [submodule "third_party/requests_deps/chardet"]
 	path = third_party/requests_deps/chardet
 	url = https://github.com/chardet/chardet
+	branch = stable
 [submodule "third_party/requests_deps/urllib3"]
 	path = third_party/requests_deps/urllib3
 	url = https://github.com/urllib3/urllib3
