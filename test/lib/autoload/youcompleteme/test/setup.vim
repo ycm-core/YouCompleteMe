@@ -46,7 +46,7 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
   endif
 
   " Sometimes, that's just not enough to ensure stuff works
-  sleep 1000m
+  sleep 7
 
   " FIXME: We need a much more robust way to wait for the server to be ready
 endfunction

@@ -23,6 +23,7 @@ RUN apt-get update && \
                      python-pip \
                      python3-dev \
                      python3-pip \
+                     openjdk-11-jdk-headless \
                      zlib1g-dev && \
   apt-get -y autoremove
 
