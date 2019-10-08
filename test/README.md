@@ -14,7 +14,7 @@ your machine.
   `$HOME/YouCompleteMe`
 * Run the following setup:
   * `cd YouCompleteMe`
-  * `python3 install.py --clangd-completer`
+  * `python3 install.py --clangd-completer --java-completer`
   * `sudo -H pip3 install -r python/test_requirements.txt`
 * Run the tests:
   * `./test/run_vim_tests`
@@ -31,7 +31,7 @@ in which you can run the tests.
 * Ensure you have at least the Vim vresion in YCM_VIM_VERSION (in
   `test/docker/ci/image/Dockerfile`)
 * Ensure ycmd is compiled ***with python3*** and clangd is enabled
-  `python3 install.py --clangd-completer`
+  `python3 install.py --clangd-completer --java-completer`
 * Install the test python deps (`pip install -r python/test_requirements.txt`)
 * Run `./run_vim_tests`
 
