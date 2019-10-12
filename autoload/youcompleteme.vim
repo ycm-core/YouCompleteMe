@@ -249,6 +249,11 @@ try:
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
 
+  if 'ycm_state' in globals():
+    # If re-initializing, pretend that we shut down
+    ycm_state.OnVimLeave()
+    del ycm_state
+
   ycm_state = youcompleteme.YouCompleteMe()
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
