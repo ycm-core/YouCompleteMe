@@ -1147,10 +1147,10 @@ of the two completer engines:
 -   **Performance**: Clangd has faster reparse and code completion times
     compared to libclang.
 
-Note that for clangd to have some of the above mentioned functionality, you need
+Note that for older versions of clangd to have some of the above mentioned functionality, you need
 to enable clangd indexing by adding `-background-index` to
-[g:ycm_clangd_args](#the-gycm_clangd_args-option). Clangd will automatically
-enable indexing in version 9.
+[g:ycm_clangd_args](#the-gycm_clangd_args-option). Clangd automatically
+enabled indexing by default in clangd version 9.
 
 To enable:
 
