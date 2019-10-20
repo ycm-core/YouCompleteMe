@@ -9,7 +9,7 @@ if [ "$1" == "--help" ]; then
   exit 0
 fi
 
-RUN_VIM="vim --clean --not-a-term"
+RUN_VIM="vim --clean --not-a-term -T dumb"
 RUN_TEST="${RUN_VIM} -S lib/run_test.vim"
 
 pushd $(dirname $0) > /dev/null
