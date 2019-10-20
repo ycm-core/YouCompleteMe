@@ -156,6 +156,7 @@ function! Test_Signatures_After_Trigger()
     call assert_false( pos == [ 0, 0 ] )
 
     " Exit insert mode to ensure the test continues
+    call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>" )
   endfunction
 
@@ -209,6 +210,7 @@ function! Test_Signatures_With_PUM_NoSigns()
     call s:_CheckPopupPosition( s:_GetSigHelpWinID(),
                               \ { 'line': 5, 'col': 5 } )
 
+    call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>", 't' )
   endfunction
 
@@ -284,6 +286,7 @@ function! Test_Signatures_With_PUM_Signs()
     call s:_CheckPopupPosition( s:_GetSigHelpWinID(),
                               \ { 'line': 5, 'col': 5 } )
 
+    call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>", 't' )
   endfunction
 
@@ -497,6 +500,7 @@ function! Test_Signatures_TopLine()
 
   function! Check( id ) closure
     call s:_CheckPopupPosition( s:_GetSigHelpWinID(), { 'line': 2, 'col': 23 } )
+    call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>" )
   endfunction
 
@@ -546,6 +550,7 @@ function! Test_Signatures_TopLineWithPUM()
     call s:_CheckPopupPosition( s:popup_win_id, {} )
 
     " We're done in insert mode now.
+    call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>", 't' )
   endfunction
 
