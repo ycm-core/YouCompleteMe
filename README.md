@@ -78,8 +78,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - a [Clang][]-based engine that provides native semantic code
   completion for C/C++/Objective-C/Objective-C++/CUDA (from now on referred to
   as "the C-family languages"),
-- a [clangd][]-based **experimental** completion engine for the C-family
-  languages.
+- a powerful [clangd][]-based completion engine for the C-family languages.
 - a [Jedi][]-based completion engine for Python 2 and 3,
 - an [OmniSharp-Roslyn][]-based completion engine for C#,
 - a [Gopls][]-based completion engine for Go,
@@ -146,6 +145,8 @@ features plus extra:
 YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
 number of languages, including:
 
+- displaying signature help (argument hints) when entering the arguments to a
+  function call
 - finding declarations, definitions, usages, etc. of identifiers,
 - displaying type information for classes, variables, functions etc.,
 - displaying documentation for methods, members, etc. in the preview window,
@@ -153,6 +154,10 @@ number of languages, including:
 - semantic renaming of variables across files,
 - formatting code,
 - removing unused imports, sorting imports, etc.
+
+For example, here's a demo of signature help:
+
+![Signature Help Early Demo](https://user-images.githubusercontent.com/10584846/58738348-5060da80-83fd-11e9-9537-d07fdbf4554c.gif)
 
 Features vary by file type, so make sure to check out the [file type feature
 summary](#quick-feature-summary) and the
@@ -197,7 +202,7 @@ Compiling YCM **with** semantic support for C-family languages through
     ./install.py --clang-completer
 
 Compiling YCM **with** semantic support for C-family languages through
-**experimental clangd**:
+**clangd**:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --clangd-completer
@@ -261,6 +266,8 @@ later are recent enough. You can see the version of Vim installed by running
 `vim --version`. If the version is too old, you may need to [compile Vim from
 source][vim-build] (don't worry, it's easy).
 
+**NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
+
 Install YouCompleteMe with [Vundle][].
 
 **Remember:** YCM is a plugin with a compiled component. If you **update** YCM
@@ -288,7 +295,7 @@ Compiling YCM **with** semantic support for C-family languages through
     python3 install.py --clang-completer
 
 Compiling YCM **with** semantic support for C-family languages through
-**experimental clangd**:
+**clangd**:
 
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --clangd-completer
@@ -356,6 +363,8 @@ Vim. Look at the features included: `+python/dyn` for Python 2 and
 using a 64-bit client. [Daily updated installers of 32-bit and 64-bit Vim with
 Python 2 and Python 3 support][vim-win-download] are available.
 
+**NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
+
 Add the line:
 
     set encoding=utf-8
@@ -396,7 +405,7 @@ Compiling YCM **with** semantic support for C-family languages through
     python install.py --clang-completer
 
 Compiling YCM **with** semantic support for C-family languages through
-**experimental clangd**:
+**clangd**:
 
     cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
     python install.py --clangd-completer
@@ -460,6 +469,8 @@ guide](#full-installation-guide).
 
 Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support.
 
+**NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
+
 OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
 Vim installed by running `vim --version`.
 
@@ -481,7 +492,7 @@ Compiling YCM **with** semantic support for C-family languages through
     ./install.py --clang-completer
 
 Compiling YCM **with** semantic support for C-family languages through
-**experimental clangd**:
+**clangd**:
 
     cd ~/.vim/bundle/YouCompleteMe
     ./install.py --clangd-completer
@@ -571,6 +582,9 @@ process.
     Vim: `:echo has('python') || has('python3')`. The output should be 1. If
     it's 0, then get a version of Vim with Python support.
 
+    **NOTE**: For all features, such as signature help, use Vim 8.1.1875 or
+    later.
+
     On Windows, check also if your Vim architecture is 32 or 64-bit. This is
     critical because it must match the Python and the YCM libraries
     architectures. We recommend using a 64-bit Vim.
@@ -589,16 +603,16 @@ process.
     **Download the latest version of `libclang`**. Clang is an open-source
     compiler that can compile C-family languages. The `libclang` library it
     provides is used to power the YCM semantic completion engine for those
-    languages. YCM is designed to work with libclang version 8.0.0 or higher.
+    languages. YCM is designed to work with libclang version 9.0.0 or higher.
 
-    In addition to `libclang`, YCM also supports an **experimental**
-    [clangd][]-based completer. You can download the latest version of
-    [clangd][] from [llvm.org releases][clang-download]. Follow Step 4 to learn
-    how to tell YCM where to find clangd binary. Please note that YCM is
-    designed to work with [clangd][] version 8.0.0 or higher.
+    In addition to `libclang`, YCM also supports a [clangd][]-based completer.
+    You can download the latest version of [clangd][] from [llvm.org
+    releases][clang-download]. Follow Step 4 to learn how to tell YCM where to
+    find clangd binary. Please note that YCM is designed to work with [clangd][]
+    version 9.0.0 or higher.
 
     You can use the system libclang or clangd _only if you are sure it is
-    version 8.0.0 or higher_, otherwise don't. Even if it is, we recommend using
+    version 9.0.0 or higher_, otherwise don't. Even if it is, we recommend using
     the [official binaries from llvm.org][clang-download] if at all possible.
     Make sure you download the correct archive file for your OS.
 
@@ -791,6 +805,7 @@ Quick Feature Summary
 ### C-family languages (C, C++, Objective C, Objective C++, CUDA)
 
 * Semantic auto-completion with automatic fixes
+* Signature help (when [using clangd](#selecting-a-c-family-completion-engine))
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
 * View documentation comments for identifiers (`GetDoc`)
@@ -811,6 +826,7 @@ Quick Feature Summary
 ### Python
 
 * Semantic auto-completion
+* Signature help
 * Go to definition (`GoTo`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
@@ -819,6 +835,7 @@ Quick Feature Summary
 ### Go
 
 * Semantic auto-completion
+* Signature help
 * Real-time diagnostic display
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to type definition (`GoToType`)
@@ -860,10 +877,8 @@ Quick Feature Summary
 
 ### Java
 
-**NOTE**: Java support is currently experimental. Please let us know your
-[feedback](#contact).
-
 * Semantic auto-completion with automatic import insertion
+* Signature help
 * Real-time diagnostic display
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
@@ -980,6 +995,21 @@ matches). A word-boundary character are all capital characters, characters
 preceded by an underscore and the first letter character in the completion
 string.
 
+### Signature Help
+
+Signature help is an **experimental** feature for which we value your feedback.
+Valid signatures are displayed in a second popup menu and the current signature
+is highlighed along with the current arguemnt.
+
+Signature help is triggered in insert mode automatically when
+`g:ycm_auto_trigger` is enabled and is not supported when it is not enabled.
+
+The signatures popup is hidden when there are no matching signatures or when you
+leave insert mode. There is no key binding to clear the popup.
+
+For more details on this feature and a few demos, check out the
+[PR that proposed it][signature-help-pr].
+
 ### General Semantic Completion
 
 You can use Ctrl+Space to trigger the completion suggestions anywhere, even
@@ -1014,9 +1044,7 @@ documentation][compdb]. In short:
   [docs][ninja-compdb].
 - If using GNU make, check out [compiledb][] or [Bear][].
 - For other build systems, check out
-  [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) below. Note that
-  **experimental** [clangd][]-based completer doesn't support this option. So it
-  (and anything after this point) only applies to `libclang`-based completer.
+  [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) below.
 
 If no [`.ycm_extra_conf.py`](#option-2-provide-the-flags-manually) is found,
 YouCompleteMe automatically tries to load a compilation database if there is
@@ -1124,33 +1152,30 @@ your file.
 #### Selecting a C-family completion engine
 
 Currently YCM supports two completion engines for C-family semantic completion.
-One libclang-based and an **experimental** [clangd]-based completer. When in
-doubt we recommend using the libclang-based engine. Here is a quick comparison
-of the two completer engines:
+One libclang-based and an [clangd]-based completer. When in doubt we recommend
+using the libclang-based engine. Here is a quick comparison of the two completer
+engines:
 
--   **Project wide indexing**: Clangd has both dynamic and static index support.
-    The dynamic index stores up-to-date symbols coming from any files you are
-    currently editing, whereas static index contains project-wide symbol
-    information. This symbol information is used for code completion and code
-    navigation. Whereas libclang is limited to the current translation unit(TU).
--   **Code navigation**: Clangd provides all the GoTo requests libclang provides and it
-    improves those using the above mentioned index information to contain
-    project-wide information rather than just the current TU.
--   **Rename**: Clangd can perform semantic rename operations on the current
-    file, whereas libclang doesn’t support such functionality.
--   **Code Completion**: Clangd can perform code completions at a lower latency
-    than libclang; also, it has information about all the symbols in your
-    project so it can suggest items outside your current TU and also provides
-    proper `#include` insertions for those items.
--   **Format Code**: Clangd provides code formatting either for the selected
-    lines or the whole file, whereas libclang doesn’t have such functionality.
--   **Performance**: Clangd has faster reparse and code completion times
-    compared to libclang.
-
-Note that for clangd to have some of the above mentioned functionality, you need
-to enable clangd indexing by adding `-background-index` to
-[g:ycm_clangd_args](#the-gycm_clangd_args-option). Clangd will automatically
-enable indexing in version 9.
+- **Project wide indexing**: Clangd has both dynamic and static index support.
+  The dynamic index stores up-to-date symbols coming from any files you are
+  currently editing, whereas static index contains project-wide symbol
+  information. This symbol information is used for code completion and code
+  navigation. Whereas libclang is limited to the current translation unit(TU).
+- **Code navigation**: Clangd provides all the GoTo requests libclang provides and it
+  improves those using the above mentioned index information to contain
+  project-wide information rather than just the current TU.
+- **Rename**: Clangd can perform semantic rename operations on the current
+  file, whereas libclang doesn’t support such functionality.
+- **Code Completion**: Clangd can perform code completions at a lower latency
+  than libclang; also, it has information about all the symbols in your
+  project so it can suggest items outside your current TU and also provides
+  proper `#include` insertions for those items.
+- **Signature help**: Clangd provides signature help so that you can see the
+  names and types of arguments when calling functions.
+- **Format Code**: Clangd provides code formatting either for the selected
+  lines or the whole file, whereas libclang doesn’t have such functionality.
+- **Performance**: Clangd has faster reparse and code completion times
+  compared to libclang.
 
 To enable:
 
@@ -1159,12 +1184,9 @@ To enable:
 
 to `install.py` while following the [installation guide](#installation). As
 mentioned before, pass `--clang-completer` when in doubt, since the
-[clangd][]-based completer is still experimental.
+[clangd][]-based completer is still in heavy development.
 
 ### Java Semantic Completion
-
-**NOTE**: Java support is currently experimental. Please let us know your
-[feedback](#contact).
 
 #### Java quick Start
 
@@ -1181,7 +1203,7 @@ mentioned before, pass `--clang-completer` when in doubt, since the
 
 5. Edit a Java file from your project.
 
-For the best experience, we highly recommend at least Vim 8.0.1493 when using
+For the best experience, we highly recommend at least Vim 8.1.1875 when using
 Java support with YouCompleteMe.
 
 #### Java Project Files
@@ -3141,6 +3163,20 @@ Default: `[]`
 let g:ycm_language_server = []
 ```
 
+### The `g:ycm_disable_signature_help` option
+
+This option allows you to disable all signature help for all completion engines.
+There is no way to disable it per-completer. This option is _reserved_, meaning
+that while signature help support remains experimental, its values and meaning
+may change and it may be removed in a future version.
+
+Default: `0`
+
+```viml
+" Disable signature help
+let g:ycm_disable_signature_help = 1
+```
+
 FAQ
 ---
 
@@ -3315,7 +3351,7 @@ to go through the full installation guide by hand.
 ### I see `undefined symbol: clang_getCompletionFixIt` in the server logs.
 
 This means that the server is trying to load a version of libclang that is too
-old. You need at least libclang 8.0.0. We recommend running the `install.py`
+old. You need at least libclang 9.0.0. We recommend running the `install.py`
 script without `--system-libclang` or downloading the [latest prebuilt binaries
 from llvm.org][clang-download] when going through the [full installation
 guide](#full-installation-guide).
@@ -3421,6 +3457,10 @@ current file and simple prefix-based filtering.
 
 YCM needs a version of Vim with the timers feature to achieve full
 asynchronicity. This feature is available since Vim 7.4.1578.
+
+YCM provides powerful new functionality like signature help by using new
+features in Vim such as popup windows, and new APIs such as `pum_getpos`. This
+requires Vim 8.1.1875 and we strongly recommend using this version or later.
 
 ### Nasty bugs happen if I have the `vim-autoclose` plugin installed
 
@@ -3752,3 +3792,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [vimspector]: https://github.com/puremourning/vimspector
 [roslyn-releases]: https://github.com/OmniSharp/omnisharp-roslyn/releases
 [compiledb]: https://pypi.org/project/compiledb/
+[signature-help-pr]: https://github.com/ycm-core/ycmd/pull/1255
