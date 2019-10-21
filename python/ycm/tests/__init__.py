@@ -145,6 +145,7 @@ def YouCompleteMeInstance( custom_options = {} ):
         WaitUntilReady()
         ycm.CheckIfServerIsReady()
         try:
+          test_utils.VIM_MATCHES_FOR_WINDOW.clear()
           test( ycm, *args, **kwargs )
         finally:
           StopServer( ycm )

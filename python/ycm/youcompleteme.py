@@ -451,6 +451,9 @@ class YouCompleteMe( object ):
 
 
   def UpdateWithNewDiagnosticsForFile( self, filepath, diagnostics ):
+    if not self.ShouldDisplayDiagnostics():
+      return
+
     bufnr = vimsupport.GetBufferNumberForFilename( filepath )
     if bufnr in self._buffers and vimsupport.BufferIsVisible( bufnr ):
       # Note: We only update location lists, etc. for visible buffers, because
