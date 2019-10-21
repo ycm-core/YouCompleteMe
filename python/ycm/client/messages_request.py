@@ -22,12 +22,14 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+from ycm import base
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.vimsupport import PostVimMessage
 
 import logging
 
 _logger = logging.getLogger( __name__ )
+_user_options = base.GetUserOptions()
 
 # Looooong poll
 TIMEOUT_SECONDS = 60
@@ -84,7 +86,7 @@ def _HandlePollResponse( response, diagnostics_handler ):
         PostVimMessage( notification[ 'message' ],
                         warning = False,
                         truncate = True )
-      elif 'diagnostics' in notification:
+      elif 'diagnostics' in notification and _DiagnosticUpdateAllowed():
         diagnostics_handler.UpdateWithNewDiagnosticsForFile(
           notification[ 'filepath' ],
           notification[ 'diagnostics' ] )
@@ -96,3 +98,7 @@ def _HandlePollResponse( response, diagnostics_handler ):
 
   # Start the next poll (only if the last poll didn't raise an exception)
   return True
+
+
+def _DiagnosticUpdateAllowed():
+  return _user_options[ 'show_diagnostics_ui' ]
