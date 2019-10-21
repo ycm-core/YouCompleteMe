@@ -54,7 +54,7 @@ from ycm.tests.mock_utils import ( MockAsyncServerResponseDone,
                                    MockAsyncServerResponseException )
 
 
-from ycm import buffer as ycm_buffer_module
+import ycm.youcompleteme as ycm_module
 
 
 @YouCompleteMeInstance()
@@ -725,7 +725,192 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_always_populate_location_list': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch.object( ycm_buffer_module,
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_AsyncDiagnosticUpdate_NotAvailableForFIletype_test(
+    ycm, post_vim_message, *args ):
+  diagnostics = [
+    {
+      'kind': 'ERROR',
+      'text': 'error text in current buffer',
+      'location': {
+        'filepath': '/current',
+        'line_num': 1,
+        'column_num': 1
+      },
+      'location_extent': {
+        'start': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        },
+        'end': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        }
+      },
+      'ranges': []
+    },
+  ]
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              contents = [ 'current' ] * 10,
+                              number = 1 )
+  buffers = [ current_buffer ]
+  windows = [ current_buffer ]
+
+  # Register each buffer internally with YCM
+  for current in buffers:
+    with MockVimBuffers( buffers, [ current ] ):
+      ycm.OnFileReadyToParse()
+  with patch( 'ycm.vimsupport.SetLocationListForWindow',
+              new_callable = ExtendedMock ) as set_location_list_for_window:
+    with MockVimBuffers( buffers, windows ):
+      ycm.UpdateWithNewDiagnosticsForFile( '/current', diagnostics )
+
+  post_vim_message.assert_has_exact_calls( [] )
+  set_location_list_for_window.assert_has_exact_calls( [] )
+
+  assert_that(
+    test_utils.VIM_MATCHES_FOR_WINDOW,
+    empty()
+  )
+
+
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_show_diagnostics_ui': 0,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch.object( ycm_module,
+               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
+               [ 'ycmtest' ] )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabled_test( ycm,
+                                                           post_vim_message,
+                                                           *args ):
+  diagnostics = [
+    {
+      'kind': 'ERROR',
+      'text': 'error text in current buffer',
+      'location': {
+        'filepath': '/current',
+        'line_num': 1,
+        'column_num': 1
+      },
+      'location_extent': {
+        'start': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        },
+        'end': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        }
+      },
+      'ranges': []
+    },
+  ]
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              contents = [ 'current' ] * 10,
+                              number = 1 )
+  buffers = [ current_buffer ]
+  windows = [ current_buffer ]
+
+  # Register each buffer internally with YCM
+  for current in buffers:
+    with MockVimBuffers( buffers, [ current ] ):
+      ycm.OnFileReadyToParse()
+  with patch( 'ycm.vimsupport.SetLocationListForWindow',
+              new_callable = ExtendedMock ) as set_location_list_for_window:
+    with MockVimBuffers( buffers, windows ):
+      ycm.UpdateWithNewDiagnosticsForFile( '/current', diagnostics )
+
+  post_vim_message.assert_has_exact_calls( [] )
+  set_location_list_for_window.assert_has_exact_calls( [] )
+
+  assert_that(
+    test_utils.VIM_MATCHES_FOR_WINDOW,
+    has_entries( {
+      1: contains(
+        VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+      )
+    } )
+  )
+
+
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_show_diagnostics_ui': 0,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabledAndNoFiletypeSupport_test(
+    ycm, post_vim_message, *args ):
+  diagnostics = [
+    {
+      'kind': 'ERROR',
+      'text': 'error text in current buffer',
+      'location': {
+        'filepath': '/current',
+        'line_num': 1,
+        'column_num': 1
+      },
+      'location_extent': {
+        'start': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        },
+        'end': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        }
+      },
+      'ranges': []
+    },
+  ]
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              contents = [ 'current' ] * 10,
+                              number = 1 )
+  buffers = [ current_buffer ]
+  windows = [ current_buffer ]
+
+  # Register each buffer internally with YCM
+  for current in buffers:
+    with MockVimBuffers( buffers, [ current ] ):
+      ycm.OnFileReadyToParse()
+  with patch( 'ycm.vimsupport.SetLocationListForWindow',
+              new_callable = ExtendedMock ) as set_location_list_for_window:
+    with MockVimBuffers( buffers, windows ):
+      ycm.UpdateWithNewDiagnosticsForFile( '/current', diagnostics )
+
+  post_vim_message.assert_has_exact_calls( [] )
+  set_location_list_for_window.assert_has_exact_calls( [] )
+
+  assert_that(
+    test_utils.VIM_MATCHES_FOR_WINDOW,
+    has_entries( {
+      1: contains(
+        VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+      )
+    } )
+  )
+
+
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch.object( ycm_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
@@ -889,10 +1074,12 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_always_populate_location_list': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch.object( ycm_buffer_module,
+@patch.object( ycm_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.youcompleteme.YouCompleteMe.DiagnosticUiSupportedForCurrentFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
@@ -1089,7 +1276,7 @@ def YouCompleteMe_OnPeriodicTick_ServerNotReady_test( ycm, *args ):
 
 
 @YouCompleteMeInstance()
-@patch.object( ycm_buffer_module,
+@patch.object( ycm_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
@@ -1138,7 +1325,7 @@ def YouCompleteMe_OnPeriodicTick_DontRetry_test( ycm,
 
 
 @YouCompleteMeInstance()
-@patch.object( ycm_buffer_module,
+@patch.object( ycm_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
@@ -1174,7 +1361,7 @@ def YouCompleteMe_OnPeriodicTick_Exception_test( ycm,
 
 
 @YouCompleteMeInstance()
-@patch.object( ycm_buffer_module,
+@patch.object( ycm_module,
                'DIAGNOSTIC_UI_ASYNC_FILETYPES',
                [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
