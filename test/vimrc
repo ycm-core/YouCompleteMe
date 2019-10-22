@@ -1,0 +1,17 @@
+runtime defaults.vim
+let g:ycm_test_plugin_dir = expand( '<sfile>:p:h:h' )
+set mouse=a
+set lines=30
+set columns=80
+
+let g:ycm_confirm_extra_conf=0
+
+augroup YCMTest
+  au!
+  au SwapExists * let v:swapchoice = 'e'
+augroup END
+
+let &runtimepath = g:ycm_test_plugin_dir . ',' . &runtimepath
+
+filetype plugin indent on
+syntax enable

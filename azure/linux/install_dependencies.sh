@@ -14,9 +14,10 @@ eval "$(pyenv init -)"
 PYTHON_CONFIGURE_OPTS="--enable-shared" \
 CFLAGS="-I$(brew --prefix openssl@1.0)/include" \
 LDFLAGS="-L$(brew --prefix openssl@1.0)/lib" \
-pyenv install ${YCM_PYTHON_VERSION}
+  pyenv install ${YCM_PYTHON_VERSION}
 pyenv global ${YCM_PYTHON_VERSION}
-
 pip install -r python/test_requirements.txt
 
 set +e
+
+# vim: ft=bash

@@ -82,6 +82,16 @@ endif
 
 let g:loaded_youcompleteme = 1
 
+let s:default_options = {}
+if exists( '*json_decode' )
+  let s:script_folder_path = expand( '<sfile>:p:h' )
+  let s:option_file = s:script_folder_path .
+        \ '/../third_party/ycmd/ycmd/default_settings.json'
+  if filereadable( s:option_file )
+    let s:default_options = json_decode( join( readfile( s:option_file ) ) )
+  endif
+endif
+
 "
 " List of YCM options.
 "
@@ -282,6 +292,16 @@ let g:ycm_java_jdtls_workspace_root_path =
 " This option is deprecated.
 let g:ycm_python_binary_path =
       \ get( g:, 'ycm_python_binary_path', '' )
+
+" Populate any other (undocumented) options set in the ycmd
+" default_settings.json. This ensures that any part of ycm that uses ycmd code
+" will have the default set. I'm looking at you, Omni-completer.
+for key in keys( s:default_options )
+  if ! has_key( g:, 'ycm_' . key )
+    let g:[ 'ycm_' . key ] = s:default_options[ key ]
+  endif
+endfor
+unlet key
 
 if has( 'vim_starting' ) " Loading at startup.
   " We defer loading until after VimEnter to allow the gui to fork (see

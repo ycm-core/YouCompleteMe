@@ -1,3 +1,8 @@
+[run]
+plugins = covimerage
+
 [report]
 omit =
     */tests/*
+    */test/*
+    */third_party/*

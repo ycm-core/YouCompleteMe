@@ -76,7 +76,9 @@ class BaseRequest( object ):
     from this message."""
     try:
       try:
-        return _JsonFromFuture( future )
+        result = _JsonFromFuture( future )
+        _logger.debug( 'RX: %s', result )
+        return result
       except UnknownExtraConf as e:
         if vimsupport.Confirm( str( e ) ):
           _LoadExtraConfFile( e.extra_conf_file )
@@ -105,11 +107,20 @@ class BaseRequest( object ):
                           handler,
                           timeout = _READ_TIMEOUT_SEC,
                           display_message = True,
-                          truncate_message = False ):
+                          truncate_message = False,
+                          payload = None ):
     return self.HandleFuture(
-        BaseRequest._TalkToHandlerAsync( '', handler, 'GET', timeout ),
+        self.GetDataFromHandlerAsync( handler, timeout, payload ),
         display_message,
         truncate_message )
+
+
+  def GetDataFromHandlerAsync( self,
+                               handler,
+                               timeout = _READ_TIMEOUT_SEC,
+                               payload = None ):
+    return BaseRequest._TalkToHandlerAsync(
+        '', handler, 'GET', timeout, payload )
 
 
   # This is the blocking version of the method. See below for async.
@@ -145,21 +156,31 @@ class BaseRequest( object ):
   def _TalkToHandlerAsync( data,
                            handler,
                            method,
-                           timeout = _READ_TIMEOUT_SEC ):
+                           timeout = _READ_TIMEOUT_SEC,
+                           payload = None ):
     request_uri = _BuildUri( handler )
     if method == 'POST':
       sent_data = _ToUtf8Json( data )
+      headers = BaseRequest._ExtraHeaders( method,
+                                           request_uri,
+                                           sent_data )
+      _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
+
       return BaseRequest.Session().post(
-          request_uri,
-          data = sent_data,
-          headers = BaseRequest._ExtraHeaders( method,
-                                               request_uri,
-                                               sent_data ),
-          timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
-    return BaseRequest.Session().get(
         request_uri,
-        headers = BaseRequest._ExtraHeaders( method, request_uri ),
+        data = sent_data,
+        headers = headers,
         timeout = ( _CONNECT_TIMEOUT_SEC, timeout ) )
+
+    headers = BaseRequest._ExtraHeaders( method, request_uri )
+
+    _logger.debug( 'GET %s\n%s', request_uri, headers )
+
+    return BaseRequest.Session().get(
+      request_uri,
+      headers = headers,
+      timeout = ( _CONNECT_TIMEOUT_SEC, timeout ),
+      params = payload )
 
 
   @staticmethod
