@@ -1322,6 +1322,33 @@ For anything else, [contact us](#contact). Java support is experimental at
 present so we'd love to hear your feedback! Please do remember to check
 [CONTRIBUTING.md][contributing-md] for the list of diagnostics we'll need.
 
+### C# Semantic Completion
+
+YCM relies on [OmniSharp-Roslyn][] to provide completion and code navigation.
+OmniSharp-Roslyn needs a solution file for a C# project and there are two ways
+of letting YCM know about your solution files.
+
+#### Automaticly discovered solution files
+
+YCM will scan all parent directories of the file currently being edited and look
+for file with `.sln` extension.
+
+#### Manually specified solution files
+
+If YCM loads `.ycm_extra_conf.py` which contains `CSharpSolutionFile` function,
+YCM will try to use that to determine the solution file. This is useful when one
+wants to override the default behaviour and specify a solution file that is not
+in any of the parent directories of the currently edited file. Example:
+
+```python
+def CSharpSolutionFile( filepath ):
+  # `filepath` is the path of the file user is editing
+  return '/path/to/solution/file' # Can be relative to the `.ycm_extra_conf.py`
+```
+
+If the path returned by `CSharpSolutionFile` is not an actual file, YCM will
+fall back to the other way of finding the file.
+
 ### Python Semantic Completion
 
 YCM relies on the [Jedi][] engine to provide completion and code navigation. By
