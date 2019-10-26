@@ -94,7 +94,11 @@ endfunction
 
 
 function! s:ReceiveMessages( timer_id )
-  let poll_again = s:Pyeval( 'ycm_state.OnPeriodicTick()' )
+  let poll_again = v:false
+  if s:AllowedToCompleteInCurrentBuffer()
+    let poll_again = s:Pyeval( 'ycm_state.OnPeriodicTick()' )
+  endif
+
 
   if poll_again
     let s:pollers.receive_messages.id = timer_start(
