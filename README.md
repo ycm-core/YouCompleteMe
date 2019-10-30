@@ -1473,8 +1473,8 @@ installing [the Rust source code][rust-src], so no configuration is necessary.
 In case you are running Python 2.7.8 and older, you will need to manually
 install [rustup][].
 
-To [configure RLS](#lsp-configuration) look up [rls configuration options][
-rls-preferences]
+To [configure RLS](#lsp-configuration) look up
+[rls configuration options][rls-preferences].
 
 ### Go Semantic Completion
 
@@ -1483,8 +1483,8 @@ built YCM with the `--go-completer` flag; see the [*Installation*
 section](#installation) for details). The server only works for projects with
 the "canonical" layout.
 
-While YCM can configure [a LSP server](#lsp-configuration), currently `gopls`
-doesn't implement [the required notification][gopls-preferences].
+To [configure `gopls`](#lsp-configuration) look up
+[its configuration options][gopls-options].
 
 ### JavaScript and TypeScript Semantic Completion
 
@@ -3771,7 +3771,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Bear]: https://github.com/rizsotto/Bear
 [ygen]: https://github.com/rdnetto/YCM-Generator
 [Gopls]: https://github.com/golang/go/wiki/gopls
-[gopls-preferences]: https://github.com/golang/tools/blob/master/internal/lsp/server.go#L120
+[gopls-options]: https://github.com/golang/tools/blob/master/internal/lsp/source/options.go
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
 [jsconfig.json]: https://code.visualstudio.com/docs/languages/jsconfig
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html

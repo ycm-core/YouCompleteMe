@@ -1717,7 +1717,7 @@ details). The install script takes care of installing the Rust source code
 [62], so no configuration is necessary. In case you are running Python 2.7.8
 and older, you will need to manually install rustup [26].
 
-To configure RLS look up [rls configuration options][ rls-preferences]
+To configure RLS look up rls configuration options [63].
 
 -------------------------------------------------------------------------------
                                          *youcompleteme-go-semantic-completion*
@@ -1727,30 +1727,29 @@ Completions and GoTo commands should work out of the box (provided that you
 built YCM with the '--go-completer' flag; see the _Installation_ section for
 details). The server only works for projects with the "canonical" layout.
 
-While YCM can configure a LSP server, currently 'gopls' doesn't implement the
-required notification [63].
+To configure 'gopls' look up its configuration options [64].
 
 -------------------------------------------------------------------------------
                       *youcompleteme-javascript-typescript-semantic-completion*
 JavaScript and TypeScript Semantic Completion ~
 
-**NOTE:** YCM originally used the Tern [64] engine for JavaScript but due to
-Tern [64] not being maintained anymore by its main author and the TSServer [12]
+**NOTE:** YCM originally used the Tern [65] engine for JavaScript but due to
+Tern [65] not being maintained anymore by its main author and the TSServer [12]
 engine offering more features, YCM is moving to TSServer [12]. This won't
-affect you if you were already using Tern [64] but you are encouraged to do the
+affect you if you were already using Tern [65] but you are encouraged to do the
 switch by deleting the 'third_party/ycmd/third_party/tern_runtime/node_modules'
-directory in YCM folder. If you are a new user but still want to use Tern [64],
+directory in YCM folder. If you are a new user but still want to use Tern [65],
 you should pass the '--js-completer' option to the 'install.py' script during
-installation. Further instructions on how to setup YCM with Tern [64] are
-available on the wiki [65].
+installation. Further instructions on how to setup YCM with Tern [65] are
+available on the wiki [66].
 
 All JavaScript and TypeScript features are provided by the TSServer [12]
 engine, which is included in the TypeScript SDK. To enable these features,
 install Node.js and npm [25] and call the 'install.py' script with the
 '--ts-completer' flag.
 
-TSServer [12] relies on the 'jsconfig.json' file [66] for JavaScript and the
-'tsconfig.json' file [67] for TypeScript to analyze your project. Ensure the
+TSServer [12] relies on the 'jsconfig.json' file [67] for JavaScript and the
+'tsconfig.json' file [68] for TypeScript to analyze your project. Ensure the
 file exists at the root of your project.
 
 To get diagnostics in JavaScript, set the 'checkJs' option to 'true' in your
@@ -1800,7 +1799,7 @@ be:
 When configuring a LSP server the value of the 'name' key will be used as the
 "kwargs[ 'language' ]".
 
-See the LSP Examples [68] project for more examples of configuring the likes of
+See the LSP Examples [69] project for more examples of configuring the likes of
 PHP, Ruby, Kotlin, and D.
 
 -------------------------------------------------------------------------------
@@ -1812,7 +1811,7 @@ semantic completions if it does not have a native semantic completion engine
 for your file's filetype. Vim comes with okayish omnifuncs for various
 languages like Ruby, PHP, etc. It depends on the language.
 
-You can get a stellar omnifunc for Ruby with Eclim [69]. Just make sure you
+You can get a stellar omnifunc for Ruby with Eclim [70]. Just make sure you
 have the _latest_ Eclim installed and configured (this means Eclim '>= 2.2.*'
 and Eclipse '>= 4.2.*').
 
@@ -1845,7 +1844,7 @@ Writing New Semantic Completers ~
 
 You have two options here: writing an 'omnifunc' for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for
-YCM using the Completer API [70].
+YCM using the Completer API [71].
 
 Here are the differences between the two approaches:
 
@@ -1864,7 +1863,7 @@ Here are the differences between the two approaches:
   than VimScript.
 
 If you want to use the 'omnifunc' system, see the relevant Vim docs with ':h
-complete-functions'. For the Completer API, see the API docs [70].
+complete-functions'. For the Completer API, see the API docs [71].
 
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
@@ -1915,7 +1914,7 @@ current file in Vim's 'locationlist', which can be opened with the ':lopen' and
 ':lclose' commands (make sure you have set 'let
 g:ycm_always_populate_location_list = 1' in your vimrc). A good way to toggle
 the display of the 'locationlist' with a single key mapping is provided by
-another (very small) Vim plugin called ListToggle [71] (which also makes it
+another (very small) Vim plugin called ListToggle [72] (which also makes it
 possible to change the height of the 'locationlist' window), also written by
 yours truly.
 
@@ -2377,7 +2376,7 @@ documentations to find out what commands are supported and which arguments are
 expected.
 
 The support for 'ExecuteCommand' was implemented to support plugins like
-vimspector [72] to debug java, but isn't limited to that specific use case.
+vimspector [73] to debug java, but isn't limited to that specific use case.
 
 -------------------------------------------------------------------------------
 The *RestartServer* subcommand
@@ -2426,7 +2425,7 @@ For example:
   call youcompleteme#GetErrorCount()
 <
 Both this function and |youcompleteme#GetWarningCount| can be useful when
-integrating YCM with other Vim plugins. For example, a lightline [73] user
+integrating YCM with other Vim plugins. For example, a lightline [74] user
 could add a diagnostics section to their statusline which would display the
 number of errors and warnings.
 
@@ -2794,13 +2793,13 @@ YCM will not render it.
 
 The following filter types are supported:
 
-- "regex": Accepts a string regular expression [74]. This type matches when
+- "regex": Accepts a string regular expression [75]. This type matches when
   the regex (treated as case-insensitive) is found in the diagnostic text.
 
 - "level": Accepts a string level, either "warning" or "error." This type
   matches when the diagnostic has the same level.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [74].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [75].
 
 Default: '{}'
 >
@@ -2889,7 +2888,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [75]. The format
+The only supported tag format is the Exuberant Ctags format [76]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the
 '--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -3271,7 +3270,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [74].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [75].
 
 Default: '[see next line]'
 >
@@ -3656,15 +3655,15 @@ YCM does not read identifiers from my tags files ~
 
 First, put 'let g:ycm_collect_identifiers_from_tags_files = 1' in your vimrc.
 
-Make sure you are using Exuberant Ctags [76] to produce your tags files since
-the only supported tag format is the Exuberant Ctags format [75]. The format
+Make sure you are using Exuberant Ctags [77] to produce your tags files since
+the only supported tag format is the Exuberant Ctags format [76]. The format
 from "plain" ctags is NOT supported. The output of 'ctags --version' should
-list "Exuberant Ctags". See Universal Ctags [77] for a maintained version.
+list "Exuberant Ctags". See Universal Ctags [78] for a maintained version.
 
 Ctags needs to be called with the '--fields=+l' (that's a lowercase 'L', not a
 one) option because YCM needs the 'language:<lang>' field in the tags output.
 
-**NOTE:** Exuberant Ctags [76] by default sets language tag for '*.h' files as
+**NOTE:** Exuberant Ctags [77] by default sets language tag for '*.h' files as
 'C++'. If you have C (not C++) project, consider giving parameter
 '--langmap=c:.c.h' to ctags to see tags from '*.h' files.
 
@@ -3747,7 +3746,7 @@ requires Vim 8.1.1875 and we strongly recommend using this version or later.
      *youcompleteme-nasty-bugs-happen-if-i-have-vim-autoclose-plugin-installed*
 Nasty bugs happen if I have the 'vim-autoclose' plugin installed ~
 
-Use the delimitMate [78] plugin instead. It does the same thing without
+Use the delimitMate [79] plugin instead. It does the same thing without
 conflicting with YCM.
 
 -------------------------------------------------------------------------------
@@ -3755,7 +3754,7 @@ conflicting with YCM.
 Is there some sort of YCM mailing list? I have questions ~
 
 If you have questions about the plugin or need help, please use the ycm-users
-[79] mailing list, _don't_ create issues on the tracker. The tracker is for bug
+[80] mailing list, _don't_ create issues on the tracker. The tracker is for bug
 reports and feature requests.
 
 -------------------------------------------------------------------------------
@@ -3809,7 +3808,7 @@ mismatch in assumptions causes performance problems since Syntastic code isn't
 optimized for this use case of constant diagnostic refreshing.
 
 Poor support for this use case also led to crash bugs in Vim caused by
-Syntastic-Vim interactions (issue #593 [80]) and other problems, like random
+Syntastic-Vim interactions (issue #593 [81]) and other problems, like random
 Vim flickering. Attempts were made to resolve these issues in Syntastic, but
 ultimately some of them failed (for various reasons).
 
@@ -3845,7 +3844,7 @@ paths, prepend '-isystem' to each individual path and append them all to the
 list of flags you return from your 'Settings' function in your
 '.ycm_extra_conf.py' file.
 
-See issue #303 [81] for details.
+See issue #303 [82] for details.
 
 -------------------------------------------------------------------------------
 *youcompleteme-when-i-start-vim-i-get-runtime-error-saying-r6034-an-application-has-made-an-attempt-to-load-c-runtime-library-incorrectly.*
@@ -3853,7 +3852,7 @@ When I start vim I get a runtime error saying 'R6034 An application has made ~
 an attempt to load the C runtime library incorrectly.' ~
 
 CMake and other things seem to screw up the PATH with their own msvcrXX.dll
-versions. [82] Add the following to the very top of your vimrc to remove these
+versions. [83] Add the following to the very top of your vimrc to remove these
 entries from the path.
 >
   python << EOF
@@ -3889,7 +3888,7 @@ On Windows I get "E887: Sorry, this command is disabled, the Python's site ~
 module could not be loaded" ~
 
 If you are running vim on Windows with Python 2.7.11, this is likely caused by
-a bug [83]. Follow this workaround [84] or use a different version (Python
+a bug [84]. Follow this workaround [85] or use a different version (Python
 2.7.12 does not suffer from the bug).
 
 -------------------------------------------------------------------------------
@@ -3975,17 +3974,17 @@ using this key to cycle through YCM's suggestions without changing the value of
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[85]. By participating in this project you agree to abide by its terms.
+[86]. By participating in this project you agree to abide by its terms.
 
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please join the Gitter
-room [1] or use the ycm-users [79] mailing list.
+room [1] or use the ycm-users [80] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[86]. Before you do, please carefully read CONTRIBUTING.md [60] as this asks
+[87]. Before you do, please carefully read CONTRIBUTING.md [60] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -4000,7 +3999,7 @@ YouCompleteMe maintainers directly using the contact details.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [87]. © 2015-2018
+This software is licensed under the GPL v3 license [88]. © 2015-2018
 YouCompleteMe contributors
 
 ===============================================================================
@@ -4069,30 +4068,31 @@ References ~
 [60] https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md
 [61] https://github.com/Valloric/YouCompleteMe/blob/master/.ycm_extra_conf.py
 [62] https://www.rust-lang.org/downloads.html
-[63] https://github.com/golang/tools/blob/master/internal/lsp/server.go#L120
-[64] http://ternjs.net
-[65] https://github.com/Valloric/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
-[66] https://code.visualstudio.com/docs/languages/jsconfig
-[67] https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-[68] https://github.com/ycm-core/lsp-examples
-[69] http://eclim.org/
-[70] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
-[71] https://github.com/Valloric/ListToggle
-[72] https://github.com/puremourning/vimspector
-[73] https://github.com/itchyny/lightline.vim
-[74] https://docs.python.org/2/library/re.html#regular-expression-syntax
-[75] http://ctags.sourceforge.net/FORMAT
-[76] http://ctags.sourceforge.net/
-[77] https://github.com/universal-ctags/ctags
-[78] https://github.com/Raimondi/delimitMate
-[79] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[80] https://github.com/Valloric/YouCompleteMe/issues/593
-[81] https://github.com/Valloric/YouCompleteMe/issues/303
-[82] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
-[83] https://github.com/vim/vim/issues/717
-[84] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
-[85] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[86] https://github.com/Valloric/YouCompleteMe/issues?state=open
-[87] http://www.gnu.org/copyleft/gpl.html
+[63] https://github.com/rust-lang/rls#configuration
+[64] https://github.com/golang/tools/blob/master/internal/lsp/source/options.go
+[65] http://ternjs.net
+[66] https://github.com/Valloric/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
+[67] https://code.visualstudio.com/docs/languages/jsconfig
+[68] https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
+[69] https://github.com/ycm-core/lsp-examples
+[70] http://eclim.org/
+[71] https://github.com/Valloric/ycmd/blob/master/ycmd/completers/completer.py
+[72] https://github.com/Valloric/ListToggle
+[73] https://github.com/puremourning/vimspector
+[74] https://github.com/itchyny/lightline.vim
+[75] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[76] http://ctags.sourceforge.net/FORMAT
+[77] http://ctags.sourceforge.net/
+[78] https://github.com/universal-ctags/ctags
+[79] https://github.com/Raimondi/delimitMate
+[80] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[81] https://github.com/Valloric/YouCompleteMe/issues/593
+[82] https://github.com/Valloric/YouCompleteMe/issues/303
+[83] http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
+[84] https://github.com/vim/vim/issues/717
+[85] https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
+[86] https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[87] https://github.com/Valloric/YouCompleteMe/issues?state=open
+[88] http://www.gnu.org/copyleft/gpl.html
 
 vim: ft=help
