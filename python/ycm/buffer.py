@@ -27,24 +27,19 @@ from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 
 
-DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
-                            'javascript', 'typescript' }
-DIAGNOSTIC_UI_ASYNC_FILETYPES = { 'java' }
-
-
 # Emulates Vim buffer
 # Used to store buffer related information like diagnostics, latest parse
 # request. Stores buffer change tick at the parse request moment, allowing
 # to effectively determine whether reparse is needed for the buffer.
 class Buffer( object ):
 
-  def __init__( self, bufnr, user_options, async_diags ):
-    self.number = bufnr
+  def __init__( self, bufnr, user_options ):
+    self._number = bufnr
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
-    self._async_diags = async_diags
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
+    self._filetypes = vimsupport.GetBufferFiletypes( bufnr )
 
 
   def FileParseRequestReady( self, block = False ):
@@ -70,14 +65,8 @@ class Buffer( object ):
     return bool( self._parse_request and self._parse_request.ShouldResend() )
 
 
-  def UpdateDiagnostics( self, force=False ):
-    if force or not self._async_diags:
-      self.UpdateWithNewDiagnostics( self._parse_request.Response() )
-    else:
-      # We need to call the response method, because it might throw an exception
-      # or require extra config confirmation, even if we don't actually use the
-      # diagnostics.
-      self._parse_request.Response()
+  def UpdateDiagnostics( self ):
+    self.UpdateWithNewDiagnostics( self._parse_request.Response() )
 
 
   def UpdateWithNewDiagnostics( self, diagnostics ):
@@ -117,7 +106,7 @@ class Buffer( object ):
 
 
   def _ChangedTick( self ):
-    return vimsupport.GetBufferChangedTick( self.number )
+    return vimsupport.GetBufferChangedTick( self._number )
 
 
 class BufferDict( dict ):
@@ -130,8 +119,6 @@ class BufferDict( dict ):
     # Python does not allow to return assignment operation result directly
     new_value = self[ key ] = Buffer(
       key,
-      self._user_options,
-      any( x in DIAGNOSTIC_UI_ASYNC_FILETYPES
-           for x in vimsupport.GetBufferFiletypes( key ) ) )
+      self._user_options )
 
     return new_value
