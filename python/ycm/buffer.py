@@ -26,10 +26,8 @@ from ycm import vimsupport
 from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 
-
 DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
                             'javascript', 'typescript' }
-DIAGNOSTIC_UI_ASYNC_FILETYPES = { 'java' }
 
 
 # Emulates Vim buffer
@@ -39,7 +37,7 @@ DIAGNOSTIC_UI_ASYNC_FILETYPES = { 'java' }
 class Buffer( object ):
 
   def __init__( self, bufnr, user_options, async_diags ):
-    self.number = bufnr
+    self._number = bufnr
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
@@ -70,7 +68,7 @@ class Buffer( object ):
     return bool( self._parse_request and self._parse_request.ShouldResend() )
 
 
-  def UpdateDiagnostics( self, force=False ):
+  def UpdateDiagnostics( self, force = False ):
     if force or not self._async_diags:
       self.UpdateWithNewDiagnostics( self._parse_request.Response() )
     else:
@@ -117,7 +115,7 @@ class Buffer( object ):
 
 
   def _ChangedTick( self ):
-    return vimsupport.GetBufferChangedTick( self.number )
+    return vimsupport.GetBufferChangedTick( self._number )
 
 
 class BufferDict( dict ):
@@ -131,7 +129,7 @@ class BufferDict( dict ):
     new_value = self[ key ] = Buffer(
       key,
       self._user_options,
-      any( x in DIAGNOSTIC_UI_ASYNC_FILETYPES
-           for x in vimsupport.GetBufferFiletypes( key ) ) )
+      not any( x in DIAGNOSTIC_UI_FILETYPES
+               for x in vimsupport.GetBufferFiletypes( key ) ) )
 
     return new_value
