@@ -5,6 +5,27 @@ YouCompleteMe: a code-completion engine for Vim
 [![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/ycm-core.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build?definitionId=3&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
+Early Warning: Dropping support for Python 2 in 2020
+====
+
+In early 2020, YCM will drop support for Python 2. But we will maintain
+criticial fixes on a branch (name TBA) of YCM for a period of 1 year.
+
+Why?
+
+Over the past decade, YouCompleteMe has had an at times fractious, 
+but ultimately very successful relationship with Python 2. However, more
+recently it has been carrying on a simultaneous relationship with Python 3.
+Indeed all of YCM and ycmd code is Python 3 code, with a lot of gubbins
+to make it work also on Python 2. This makes the code more complex,
+requires double testing of everything, and restricts the developers from using
+certain new langauge features, ultimately restricting the features we can
+deliver to users.
+
+On 1st January 2020, Python 2 will be officially end of life. And therefore, so
+will its relationship with YouCompleteMe and ycmd.
+
+
 Help, Advice, Support
 ---------------------
 
