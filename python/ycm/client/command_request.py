@@ -133,11 +133,15 @@ class CommandRequest( BaseRequest ):
 
 
   def _HandleBasicResponse( self ):
-    vimsupport.PostVimMessage( self._response, warning = False )
+    vimsupport.PostVimMessage( self._response,
+                               warning = False,
+                               popup = True )
 
 
   def _HandleMessageResponse( self ):
-    vimsupport.PostVimMessage( self._response[ 'message' ], warning = False )
+    vimsupport.PostVimMessage( self._response[ 'message' ],
+                               warning = False,
+                               popup = True )
 
 
   def _HandleDetailedInfoResponse( self ):
