@@ -591,10 +591,6 @@ def NumLinesInBuffer( buffer_object ):
   return len( buffer_object )
 
 
-def VimSupportsPopupWindows():
-  return vim.eval( 'exists( "*popup_notification" )' )
-
-
 # Calling this function from the non-GUI thread will sometimes crash Vim. At
 # the time of writing, YCM only uses the GUI thread inside Vim (this used to
 # not be the case).
