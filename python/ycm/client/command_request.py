@@ -41,10 +41,10 @@ class CommandRequest( BaseRequest ):
     super( CommandRequest, self ).__init__()
     self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._command = arguments and arguments[ 0 ]
-    self._buffer_command = buffer_command
     self._extra_data = extra_data
     self._response = None
     self._request_data = None
+    self._response_future = None
 
 
   def Start( self ):
@@ -54,16 +54,35 @@ class CommandRequest( BaseRequest ):
     self._request_data.update( {
       'command_arguments': self._arguments
     } )
-    self._response = self.PostDataToHandler( self._request_data,
-                                             'run_completer_command' )
+    self._response_future = self.PostDataToHandlerAsync(
+      self._request_data,
+      'run_completer_command' )
+    return self._response_future
+
+
+  def Done( self ):
+    return bool( self._response_future ) and self._response_future.done()
 
 
   def Response( self ):
+    if self._response is None and self._response_future is not None:
+      # Block
+      self._response = self.HandleFuture( self._response_future )
+      self._response_future = None
+
     return self._response
 
 
-  def RunPostCommandActionsIfNeeded( self, modifiers ):
-    if not self.Done() or self._response is None:
+  def RunPostCommandActionsIfNeeded( self,
+                                     buffer_command,
+                                     modifiers ):
+
+    if self._response is None and self._response_future is not None:
+      # This is a blocking call if not Done()
+      self.Response()
+
+    if self._response is None:
+      # An exception was raised and handled.
       return
 
     # If not a dictionary or a list, the response is necessarily a
@@ -84,10 +103,10 @@ class CommandRequest( BaseRequest ):
     # The only other type of response we understand is GoTo, and that is the
     # only one that we can't detect just by inspecting the response (it should
     # either be a single location or a list)
-    return self._HandleGotoResponse( modifiers )
+    return self._HandleGotoResponse( buffer_command, modifiers )
 
 
-  def _HandleGotoResponse( self, modifiers ):
+  def _HandleGotoResponse( self, buffer_command, modifiers ):
     if isinstance( self._response, list ):
       vimsupport.SetQuickFixList(
         [ _BuildQfListItem( x ) for x in self._response ] )
@@ -97,7 +116,7 @@ class CommandRequest( BaseRequest ):
                                  self._response[ 'line_num' ],
                                  self._response[ 'column_num' ],
                                  modifiers,
-                                 self._buffer_command )
+                                 buffer_command )
 
 
   def _HandleFixitResponse( self ):
@@ -148,14 +167,21 @@ class CommandRequest( BaseRequest ):
     vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
 
 
+def SendCommandRequestAsync( arguments, extra_data = None ):
+  request = CommandRequest( arguments, extra_data )
+  request.Start()
+  # Don't block
+  return request
+
+
 def SendCommandRequest( arguments,
                         modifiers,
                         buffer_command,
                         extra_data = None ):
-  request = CommandRequest( arguments, buffer_command, extra_data )
-  # This is a blocking call.
+  request = CommandRequest( arguments, extra_data )
   request.Start()
-  request.RunPostCommandActionsIfNeeded( modifiers )
+  # Block here to get the response
+  request.RunPostCommandActionsIfNeeded( buffer_command, modifiers )
   return request.Response()
 
 
