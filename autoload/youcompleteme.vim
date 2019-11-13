@@ -598,7 +598,7 @@ function! s:OnFileTypeSet()
   call s:SetCompleteFunc()
   call s:StartMessagePoll()
 
-  exec s:python_command "ycm_state.OnBufferVisit()"
+  exec s:python_command "ycm_state.OnFileTypeSet()"
   call s:OnFileReadyToParse( 1 )
 endfunction
 
