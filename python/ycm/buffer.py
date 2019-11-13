@@ -114,6 +114,11 @@ class Buffer( object ):
     return self._diag_interface.GetWarningCount()
 
 
+  def UpdateFromFileTypes( self, filetypes ):
+    self._async_diags = not any( x in DIAGNOSTIC_UI_FILETYPES
+      for x in filetypes )
+
+
   def _ChangedTick( self ):
     return vimsupport.GetBufferChangedTick( self._number )
 
