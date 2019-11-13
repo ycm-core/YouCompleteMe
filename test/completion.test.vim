@@ -14,7 +14,7 @@ endfunction
 
 function! Test_Compl_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp' )
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
 
   call setpos( '.', [ 0, 11, 6 ] )
 
