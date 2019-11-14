@@ -27,21 +27,23 @@ endfunction
 function! youcompleteme#test#setup#CleanUp() abort
 endfunction
 
-function! youcompleteme#test#setup#OpenFile( f ) abort
+function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
   execute 'edit '
         \ . g:ycm_test_plugin_dir
         \ . '/'
         \ . a:f
 
-  call WaitForAssert( {->
-        \ assert_true( pyxeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) )
-        \ } )
-
-  " Need to wait for the server to be ready. The best way to do this is to
-  " force compile and diagnostics, though this only works for the c-based
-  " completers. For python and others, we actually need to parse the debug info
-  " to check the server state.
-  YcmForceCompileAndDiagnostics
+  if get( a:kwargs, 'native_ft', 1 )
+    call WaitForAssert( {->
+  	\ assert_true( pyxeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) )
+  	\ } )
+  
+    " Need to wait for the server to be ready. The best way to do this is to
+    " force compile and diagnostics, though this only works for the c-based
+    " completers. For python and others, we actually need to parse the debug info
+    " to check the server state.
+    YcmForceCompileAndDiagnostics
+  endif
 
   " Sometimes, that's just not enough to ensure stuff works
   sleep 1000m

@@ -528,6 +528,13 @@ class YouCompleteMe( object ):
     self.CurrentBuffer().UpdateMatches()
 
 
+  def OnFileTypeSet( self ):
+    buffer_number = vimsupport.GetCurrentBufferNumber()
+    filetypes = vimsupport.CurrentFiletypes()
+    self._buffers[ buffer_number ].UpdateFromFileTypes( filetypes )
+    self.OnBufferVisit()
+
+
   def OnBufferVisit( self ):
     filetype = vimsupport.CurrentFiletypes()[ 0 ]
     # The constructor of dictionary values starts the request,

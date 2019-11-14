@@ -36,13 +36,13 @@ DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
 # to effectively determine whether reparse is needed for the buffer.
 class Buffer( object ):
 
-  def __init__( self, bufnr, user_options, async_diags ):
+  def __init__( self, bufnr, user_options, filetypes ):
     self._number = bufnr
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
-    self._async_diags = async_diags
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
+    self.UpdateFromFileTypes( filetypes )
 
 
   def FileParseRequestReady( self, block = False ):
@@ -114,6 +114,12 @@ class Buffer( object ):
     return self._diag_interface.GetWarningCount()
 
 
+  def UpdateFromFileTypes( self, filetypes ):
+    self._filetypes = filetypes
+    self._async_diags = not any( x in DIAGNOSTIC_UI_FILETYPES
+      for x in filetypes )
+
+
   def _ChangedTick( self ):
     return vimsupport.GetBufferChangedTick( self._number )
 
@@ -129,7 +135,6 @@ class BufferDict( dict ):
     new_value = self[ key ] = Buffer(
       key,
       self._user_options,
-      not any( x in DIAGNOSTIC_UI_FILETYPES
-               for x in vimsupport.GetBufferFiletypes( key ) ) )
+      vimsupport.GetBufferFiletypes( key ) )
 
     return new_value
