@@ -33,7 +33,7 @@ endfunc
 "
 " Return zero for success, one for failure (like the assert function).
 func WaitForAssert(assert, ...)
-  let timeout = get(a:000, 0, 5000)
+  let timeout = get(a:000, 0, 50000)
   if s:WaitForCommon(v:null, a:assert, timeout) < 0
     return 1
   endif
