@@ -832,6 +832,9 @@ Quick Feature Summary
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
+* Reference finding (`GoToReferences`)
+* Renaming symbols (`RefactorRename <new name>`)
+* Code formatting (`Format`)
 
 ### C♯
 
@@ -1882,7 +1885,7 @@ This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
 locations.
 
-Supported in filetypes: `java, javascript, python, typescript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, python, typescript, rust`
 
 #### The `GoToImplementation` subcommand
 
@@ -2048,7 +2051,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `java, javascript, typescript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, typescript, rust`
 
 #### Multi-file Refactor
 
@@ -2089,7 +2092,7 @@ it in one of Vim's visual modes (see `:h visual-use`) and run the command or
 directly enter the range on the command line, e.g. `:2,5YcmCompleter Format` to
 format it from line 2 to line 5.
 
-Supported in filetypes: `java, javascript, go, typescript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, go, typescript, rust`
 
 #### The `OrganizeImports` subcommand
 
@@ -2120,7 +2123,7 @@ The support for `ExecuteCommand` was implemented to support plugins like
 Restarts the semantic-engine-as-localhost-server for those semantic engines that
 work as separate servers that YCM talks to.
 
-Supported in filetypes: `cs, go, java, javascript, rust, typescript`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, go, java, javascript, rust, typescript`
 
 #### The `ClearCompilationFlagCache` subcommand
 
