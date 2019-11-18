@@ -65,7 +65,7 @@ jobs:
     submodules: recursive
   - bash: sudo -H $(PIP) install -r python/test_requirements.txt
     displayName: Install dependencies
-  - bash: python3 ./install.py --clangd-completer
+  - bash: python3 ./install.py --clangd-completer --java-completer
     displayName: Build ycmd
   - script: ./test/run_vim_tests
     displayName: Run vim tests
