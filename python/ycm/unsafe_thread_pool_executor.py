@@ -6,7 +6,6 @@
 #   (the Python Software Foundation License).
 
 
-from __future__ import with_statement
 import threading
 import weakref
 import sys
@@ -28,7 +27,7 @@ except ImportError:
 # only send network requests). The YCM workload is one of those workloads where
 # it's safe (the aforementioned network requests case).
 
-class _WorkItem( object ):
+class _WorkItem:
   def __init__( self, future, fn, args, kwargs ):
     self.future = future
     self.fn = fn

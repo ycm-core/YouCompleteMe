@@ -18,10 +18,6 @@ jobs:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
-      'Python 2.7':
-        # Tests are failing on Python 2.7.0 with the exception
-        # "TypeError: argument can't be <type 'unicode'>"
-        YCM_PYTHON_VERSION: '2.7.13'
       'Python 3.5':
         YCM_PYTHON_VERSION: '3.5.3'
     maxParallel: 2
@@ -49,9 +45,6 @@ jobs:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
-      'Python 2.7':
-        IMAGE: ycm-vim-py2
-        PIP: pip
       'Python 3.5':
         IMAGE: ycm-vim-py3
         PIP: pip3
@@ -82,8 +75,6 @@ jobs:
     vmImage: 'macOS-10.13'
   strategy:
     matrix:
-      'Python 2.7':
-        YCM_PYTHON_VERSION: '2.7.13'
       'Python 3.5':
         YCM_PYTHON_VERSION: '3.5.3'
     maxParallel: 2
@@ -109,10 +100,6 @@ jobs:
     vmImage: 'windows-2019'
   strategy:
     matrix:
-      # We only test Python 2.7 on 64-bit.
-      'Python 2.7 64-bit':
-        YCM_PYTHON_VERSION: '2.7'
-        YCM_ARCH: x64
       'Python 3.7 32-bit':
         YCM_PYTHON_VERSION: '3.7'
         YCM_ARCH: x86

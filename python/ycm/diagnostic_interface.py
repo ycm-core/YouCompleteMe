@@ -15,20 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import itervalues, iteritems
 from collections import defaultdict
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
 
 
-class DiagnosticInterface( object ):
+class DiagnosticInterface:
   def __init__( self, bufnr, user_options ):
     self._bufnr = bufnr
     self._user_options = user_options
@@ -114,7 +106,7 @@ class DiagnosticInterface( object ):
 
   def _DiagnosticsCount( self, predicate ):
     count = 0
-    for diags in itervalues( self._line_to_diags ):
+    for diags in self._line_to_diags.values():
       count += sum( 1 for d in diags if predicate( d ) )
     return count
 
@@ -136,7 +128,7 @@ class DiagnosticInterface( object ):
 
     matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
 
-    for diags in itervalues( self._line_to_diags ):
+    for diags in self._line_to_diags.values():
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
         group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
@@ -157,7 +149,7 @@ class DiagnosticInterface( object ):
   def _UpdateSigns( self ):
     signs_to_unplace = vimsupport.GetSignsInBuffer( self._bufnr )
 
-    for line, diags in iteritems( self._line_to_diags ):
+    for line, diags in self._line_to_diags.items():
       if not diags:
         continue
 
@@ -185,7 +177,7 @@ class DiagnosticInterface( object ):
         line_number = location[ 'line_num' ]
         self._line_to_diags[ line_number ].append( diag )
 
-    for diags in itervalues( self._line_to_diags ):
+    for diags in self._line_to_diags.values():
       # We also want errors to be listed before warnings so that errors aren't
       # hidden by the warnings; Vim won't place a sign over an existing one.
       diags.sort( key = lambda diag: ( diag[ 'kind' ],
