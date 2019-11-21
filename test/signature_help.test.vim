@@ -113,10 +113,11 @@ endfunction
 
 function! Test_Signatures_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
-        \ . '/make_drink.cc', {} )
+        \ '/test/testdata/vim/mixed_filetype.vim',
+        \ { 'native_ft': 0 } )
 
-  call setpos( '.', [ 0, 7, 13 ] )
+  setf vim.python
+  call setpos( '.', [ 0, 3, 17 ] )
 
   " Required to trigger TextChangedI
   " https://github.com/vim/vim/issues/4665#event-2480928194
