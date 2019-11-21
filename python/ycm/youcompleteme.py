@@ -321,15 +321,21 @@ class YouCompleteMe( object ):
     return response
 
 
-  def SendSignatureHelpRequest( self ):
-    filetype = vimsupport.CurrentFiletypes()[ 0 ]
+  def SendSignatureHelpRequest( self, filetype_index = 0 ):
+    filetypes = vimsupport.CurrentFiletypes()
+    if len( filetypes ) - 1 < filetype_index:
+      return
+
+    filetype = filetypes[ filetype_index ]
+
     if not self._signature_help_available_requests[ filetype ].Done():
       return
 
     sig_help_available = self._signature_help_available_requests[
         filetype ].Response()
+
     if sig_help_available == 'NO':
-      return
+      self.SendSignatureHelpRequest( filetype_index + 1 )
 
     if sig_help_available == 'PENDING':
       # Send another /signature_help_available request
