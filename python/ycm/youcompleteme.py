@@ -322,34 +322,33 @@ class YouCompleteMe( object ):
 
 
   def SendSignatureHelpRequest( self ):
-    filetype = vimsupport.CurrentFiletypes()[ 0 ]
-    if not self._signature_help_available_requests[ filetype ].Done():
-      return
-
-    sig_help_available = self._signature_help_available_requests[
-        filetype ].Response()
-    if sig_help_available == 'NO':
-      return
-
-    if sig_help_available == 'PENDING':
-      # Send another /signature_help_available request
-      self._signature_help_available_requests[ filetype ].Start( filetype )
-      return
-
     if not self.NativeFiletypeCompletionUsable():
       return
 
     if not self._latest_completion_request:
       return
 
-    request_data = self._latest_completion_request.request_data.copy()
-    request_data[ 'signature_help_state' ] = self._signature_help_state.state
+    for filetype in vimsupport.CurrentFiletypes():
+      if not self._signature_help_available_requests[ filetype ].Done():
+        continue
 
-    self._AddExtraConfDataIfNeeded( request_data )
+      sig_help_available = self._signature_help_available_requests[
+          filetype ].Response()
+      if sig_help_available == 'NO':
+        continue
 
-    self._latest_signature_help_request = SignatureHelpRequest(
-      request_data )
-    self._latest_signature_help_request.Start()
+      if sig_help_available == 'PENDING':
+        # Send another /signature_help_available request
+        self._signature_help_available_requests[ filetype ].Start( filetype )
+        return
+
+      request_data = self._latest_completion_request.request_data.copy()
+      request_data[ 'signature_help_state' ] = self._signature_help_state.state
+
+      self._AddExtraConfDataIfNeeded( request_data )
+
+      self._latest_signature_help_request = SignatureHelpRequest( request_data )
+      self._latest_signature_help_request.Start()
 
 
   def SignatureHelpRequestReady( self ):
