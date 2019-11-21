@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm import vimsupport
 from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
@@ -34,7 +27,7 @@ DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
 # Used to store buffer related information like diagnostics, latest parse
 # request. Stores buffer change tick at the parse request moment, allowing
 # to effectively determine whether reparse is needed for the buffer.
-class Buffer( object ):
+class Buffer:
 
   def __init__( self, bufnr, user_options, filetypes ):
     self._number = bufnr

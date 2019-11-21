@@ -2,5 +2,4 @@
 
 set -e
 
-docker push youcompleteme/ycm-vim-py2:manual
 docker push youcompleteme/ycm-vim-py3:manual

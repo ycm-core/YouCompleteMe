@@ -15,14 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import iterkeys
 import vim
 import os
 import json
@@ -321,8 +313,7 @@ def GetDiagnosticMatchPattern( line_num,
 def LineAndColumnNumbersClamped( line_num, column_num ):
   line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
 
-  # Vim buffers are a list of byte objects on Python 2 but Unicode objects on
-  # Python 3.
+  # Vim buffers are a list of Unicode objects on Python 3.
   max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
 
   return line_num, min( column_num, max_column )
@@ -876,7 +867,7 @@ def ReplaceChunks( chunks, silent=False ):
   chunks_by_file = _SortChunksByFile( chunks )
 
   # We sort the file list simply to enable repeatable testing.
-  sorted_file_list = sorted( iterkeys( chunks_by_file ) )
+  sorted_file_list = sorted( chunks_by_file.keys() )
 
   if not silent:
     # Make sure the user is prepared to have her screen mutilated by the new
@@ -997,8 +988,7 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )
 
-  # NOTE: Vim buffers are a list of byte objects on Python 2 but unicode
-  # objects on Python 3.
+  # NOTE: Vim buffers are a list of unicode objects on Python 3.
   start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
   end_line_text = ToBytes( vim_buffer[ end_line ] )
   end_existing_text = end_line_text[ end_column : ]
