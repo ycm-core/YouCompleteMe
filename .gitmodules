@@ -19,6 +19,3 @@
 [submodule "third_party/requests_deps/requests"]
 	path = third_party/requests_deps/requests
 	url = https://github.com/requests/requests
-[submodule "third_party/python-future"]
-	path = third_party/python-future
-	url = https://github.com/PythonCharmers/python-future

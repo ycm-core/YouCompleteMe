@@ -1,7 +1,5 @@
-# coding: utf-8
-#
 # Copyright (C) 2013 Google Inc.
-#               2016 YouCompleteMe contributors
+#               2020 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -17,13 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
 import contextlib
 from nose.tools import eq_, ok_

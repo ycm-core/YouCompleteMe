@@ -8,8 +8,6 @@ your machine.
 
 * Make sure you have docker installed (duh)
 * Run `./docker/manual/run`.
-  * This will use a Vim build with python 3
-  * If you want python2, run `./docker/manual/run --py 2`
 * You should now be in the container. Your YCM checkout is now mounted in
   `$HOME/YouCompleteMe`
 * Run the following setup:
@@ -248,15 +246,13 @@ To get a local summary:
 
 # Docker
 
-We generate and push 4 containers:
+We generate and push 2 containers:
 
 * `youcompleteme/ycm-vim-py3:test` and `youcompleteme/ycm-vim-py3:manual`
-* `youcompleteme/ycm-vim-py2:test` and `youcompleteme/ycm-vim-py2:manual`
 
 The `:test` tags are the containers that are used by Azure pipelines to run the
 tests and contains essentially Ubuntu LTS + the YCM dependencies and a build of
-Vim at a specific version built with either python3 (`-py3`) or python 2
-(`-py2`) support.. 
+Vim at a specific version built with python3 (`-py3`) support.
 
 The `:manual` tags extend the `:test` tags with a user account that largely
 matches the one created by Azure to run our tests. It also installs a basic

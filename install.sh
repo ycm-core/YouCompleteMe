@@ -10,8 +10,5 @@ command_exists() {
 }
 
 PYTHON_BINARY=python
-if command_exists python2; then
-  PYTHON_BINARY=python2
-fi
 
 $PYTHON_BINARY "$SCRIPT_DIR/install.py" "$@" || exit $?

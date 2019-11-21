@@ -15,14 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import iteritems, itervalues
 import base64
 import json
 import logging
@@ -85,14 +77,6 @@ CORE_UNEXPECTED_MESSAGE = (
 CORE_MISSING_MESSAGE = (
   'YCM core library not detected; you need to compile YCM before using it. '
   'Follow the instructions in the documentation.' )
-CORE_PYTHON2_MESSAGE = (
-  "YCM core library compiled for Python 2 but loaded in Python 3. "
-  "Set the 'g:ycm_server_python_interpreter' option to a Python 2 "
-  "interpreter path." )
-CORE_PYTHON3_MESSAGE = (
-  "YCM core library compiled for Python 3 but loaded in Python 2. "
-  "Set the 'g:ycm_server_python_interpreter' option to a Python 3 "
-  "interpreter path." )
 CORE_OUTDATED_MESSAGE = (
   'YCM core library too old; PLEASE RECOMPILE by running the install.py '
   'script. See the documentation for more details.' )
@@ -105,7 +89,7 @@ SERVER_LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
 HANDLE_FLAG_INHERIT = 0x00000001
 
 
-class YouCompleteMe( object ):
+class YouCompleteMe:
   def __init__( self ):
     self._available_completers = {}
     self._user_options = None
@@ -261,10 +245,6 @@ class YouCompleteMe( object ):
       error_message = CORE_UNEXPECTED_MESSAGE.format( logfile = logfile )
     elif return_code == 4:
       error_message = CORE_MISSING_MESSAGE
-    elif return_code == 5:
-      error_message = CORE_PYTHON2_MESSAGE
-    elif return_code == 6:
-      error_message = CORE_PYTHON3_MESSAGE
     elif return_code == 7:
       error_message = CORE_OUTDATED_MESSAGE
     else:
@@ -502,7 +482,7 @@ class YouCompleteMe( object ):
              not self._message_poll_requests[ filetype ].Poll( self ) ):
           self._message_poll_requests[ filetype ] = None
 
-    return any( itervalues( self._message_poll_requests ) )
+    return any( self._message_poll_requests.values() )
 
 
   def OnFileReadyToParse( self ):
@@ -819,5 +799,5 @@ class YouCompleteMe( object ):
     extra_data[ 'ultisnips_snippets' ] = [
       { 'trigger': trigger,
         'description': snippet[ 'description' ] }
-      for trigger, snippet in iteritems( snippets )
+      for trigger, snippet in snippets.items()
     ]

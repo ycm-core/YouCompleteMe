@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm.tests.test_utils import ExtendedMock, MockVimModule
 MockVimModule()
 
@@ -31,7 +24,7 @@ from nose.tools import ok_
 from ycm.client.command_request import CommandRequest
 
 
-class GoToResponse_QuickFix_test( object ):
+class GoToResponse_QuickFix_test:
   """This class tests the generation of QuickFix lists for GoTo responses which
   return multiple locations, such as the Python completer and JavaScript
   completer. It mostly proves that we use 1-based indexing for the column
@@ -118,7 +111,7 @@ class GoToResponse_QuickFix_test( object ):
     set_fitting_height.assert_called_once_with()
 
 
-class Response_Detection_test( object ):
+class Response_Detection_test:
 
   def BasicResponse_test( self ):
     def _BasicResponseTest( command, response ):
