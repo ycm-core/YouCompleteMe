@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm.client.messages_request import MessagesPoll
 from ycm.tests.test_utils import ( ExtendedMock,
                                    MockVimBuffers,
@@ -71,7 +64,7 @@ def YouCompleteMe_InvalidPythonInterpreterPath_test( post_vim_message ):
       post_vim_message.assert_called_once_with(
         "Unable to start the ycmd server. "
         "Path in 'g:ycm_server_python_interpreter' option does not point "
-        "to a valid Python 2.7 or 3.5+. "
+        "to a valid Python 3.5+. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
 
       post_vim_message.reset_mock()
@@ -98,7 +91,7 @@ def YouCompleteMe_NoPythonInterpreterFound_test( post_vim_message, *args ):
 
       assert_that( ycm.IsServerAlive(), equal_to( False ) )
       post_vim_message.assert_called_once_with(
-        "Unable to start the ycmd server. Cannot find Python 2.7 or 3.5+. "
+        "Unable to start the ycmd server. Cannot find Python 3.5+. "
         "Set the 'g:ycm_server_python_interpreter' option to a Python "
         "interpreter path. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
@@ -150,28 +143,6 @@ def YouCompleteMe_NotifyUserIfServerCrashed_MissingCore_test():
               "using it. Follow the instructions in the documentation." )
   RunNotifyUserIfServerCrashed( {
     'return_code': 4,
-    'expected_message': equal_to( message )
-  } )
-
-
-def YouCompleteMe_NotifyUserIfServerCrashed_Python2Core_test():
-  message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
-              "YCM core library compiled for Python 2 but loaded in Python 3. "
-              "Set the 'g:ycm_server_python_interpreter' option to a Python 2 "
-              "interpreter path." )
-  RunNotifyUserIfServerCrashed( {
-    'return_code': 5,
-    'expected_message': equal_to( message )
-  } )
-
-
-def YouCompleteMe_NotifyUserIfServerCrashed_Python3Core_test():
-  message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
-              "YCM core library compiled for Python 3 but loaded in Python 2. "
-              "Set the 'g:ycm_server_python_interpreter' option to a Python 3 "
-              "interpreter path." )
-  RunNotifyUserIfServerCrashed( {
-    'return_code': 6,
     'expected_message': equal_to( message )
   } )
 

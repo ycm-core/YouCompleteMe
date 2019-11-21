@@ -15,19 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import iterkeys, iteritems
 from ycm import vimsupport
 import re
 
 
-class DiagnosticFilter( object ):
+class DiagnosticFilter:
   def __init__( self, config_or_filters ):
     if isinstance( config_or_filters, list ):
       self._filters = config_or_filters
@@ -55,7 +47,7 @@ class DiagnosticFilter( object ):
   def CreateFromOptions( user_options ):
     all_filters = user_options[ 'filter_diagnostics' ]
     compiled_by_type = {}
-    for type_spec, filter_value in iteritems( all_filters ):
+    for type_spec, filter_value in all_filters.items():
       filetypes = [ type_spec ]
       if type_spec.find( ',' ) != -1:
         filetypes = type_spec.split( ',' )
@@ -65,7 +57,7 @@ class DiagnosticFilter( object ):
     return _MasterDiagnosticFilter( compiled_by_type )
 
 
-class _MasterDiagnosticFilter( object ):
+class _MasterDiagnosticFilter:
 
   def __init__( self, all_filters ):
     self._all_filters = all_filters
@@ -139,7 +131,7 @@ def _CompileFilters( config ):
   """Given a filter config dictionary, return a list of compiled filters"""
   filters = []
 
-  for filter_type in iterkeys( config ):
+  for filter_type in config.keys():
     compiler = FILTER_COMPILERS.get( filter_type )
 
     if compiler is not None:

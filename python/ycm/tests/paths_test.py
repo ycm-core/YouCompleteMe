@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
@@ -37,20 +30,6 @@ def EndsWithPython_Good( path ):
 def EndsWithPython_Bad( path ):
   ok_( not _EndsWithPython( path ),
        'Path {0} does end with a Python name.'.format( path ) )
-
-
-def EndsWithPython_Python2Paths_test():
-  python_paths = [
-    'python',
-    'python2',
-    '/usr/bin/python2.7',
-    '/home/user/.pyenv/shims/python2.7',
-    r'C:\Python27\python.exe',
-    '/Contents/MacOS/Python'
-  ]
-
-  for path in python_paths:
-    yield EndsWithPython_Good, path
 
 
 def EndsWithPython_Python3Paths_test():
@@ -71,7 +50,7 @@ def EndsWithPython_BadPaths_test():
     '',
     '/opt/local/bin/vim',
     r'C:\Program Files\Vim\vim74\gvim.exe',
-    '/usr/bin/python2.5',
+    '/usr/bin/python2.7',
     '/home/user/.pyenv/shims/python3.2',
   ]
 

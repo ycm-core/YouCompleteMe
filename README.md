@@ -5,11 +5,12 @@ YouCompleteMe: a code-completion engine for Vim
 [![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/ycm-core.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build?definitionId=3&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
-Early Warning: Dropping support for Python 2 in 2020
+Warning: Support for Python 2 has been dropped
 ----
 
-In early 2020, YCM will drop support for Python 2. But we will maintain
-critical fixes on a branch (name TBA) of YCM for a period of 1 year.
+In early 2020, YCM has dropped support for Python 2. But we will maintain
+critical fixes on a branch (name: [`legacy-py2`][]) of YCM
+for a period of 1 year.
 
 Why?
 
@@ -281,7 +282,7 @@ YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support. The Vim
+Make sure you have Vim 7.4.1578 with Python 3 support. The Vim
 package on Fedora 27 and later and the pre-installed Vim on Ubuntu 16.04 and
 later are recent enough. You can see the version of Vim installed by running
 `vim --version`. If the version is too old, you may need to [compile Vim from
@@ -376,13 +377,13 @@ guide](#full-installation-guide).
 **Important:** we assume that you are using the `cmd.exe` command prompt and
 that you know how to add an executable to the PATH environment variable.
 
-Make sure you have at least Vim 7.4.1578 with Python 2 or Python 3 support. You
+Make sure you have at least Vim 7.4.1578 with Python 3 support. You
 can check the version and which Python is supported by typing `:version` inside
-Vim. Look at the features included: `+python/dyn` for Python 2 and
-`+python3/dyn` for Python 3. Take note of the Vim architecture, i.e. 32 or
+Vim. Look at the features included: `+python3/dyn` for Python 3.
+Take note of the Vim architecture, i.e. 32 or
 64-bit. It will be important when choosing the Python installer. We recommend
 using a 64-bit client. [Daily updated installers of 32-bit and 64-bit Vim with
-Python 2 and Python 3 support][vim-win-download] are available.
+Python 3 support][vim-win-download] are available.
 
 **NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
 
@@ -403,17 +404,15 @@ process.
 
 Download and install the following software:
 
-- [Python 2 or Python 3][python-win-download]. Be sure to pick the version
+- [Python 3][python-win-download]. Be sure to pick the version
   corresponding to your Vim architecture. It is _Windows x86_ for a 32-bit Vim
   and _Windows x86-64_ for a 64-bit Vim. We recommend installing Python 3.
   Additionally, the version of Python you install must match up exactly with
   the version of Python that Vim is looking for. Type `:version` and look at the
   bottom of the page at the list of compiler flags. Look for flags that look
-  similar to `-DDYNAMIC_PYTHON_DLL=\"python27.dll\"` and
-  `-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. The former indicates that Vim is
-  looking for Python 2.7 and the latter indicates that Vim is looking for
-  Python 3.5. You'll need one or the other installed, matching the version
-  number exactly.
+  similar to `-DDYNAMIC_PYTHON3_DLL=\"python35.dll\"`. This indicates
+  that Vim is looking for Python 3.5. You'll need one or the other installed,
+  matching the version number exactly.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
   variable.
 - [Visual Studio Build Tools 2017][visual-studio-download]. During setup,
@@ -488,7 +487,7 @@ guide](#full-installation-guide).
 
 **NOTE:** OpenBSD / FreeBSD are not officially supported platforms by YCM.
 
-Make sure you have Vim 7.4.1578 with Python 2 or Python 3 support.
+Make sure you have Vim 7.4.1578 with Python 3 support.
 
 **NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
 
@@ -588,7 +587,7 @@ process.
 **Please follow the instructions carefully. Read EVERY WORD.**
 
 1.  **Ensure that your version of Vim is _at least_ 7.4.1578 _and_ that it has
-    support for Python 2 or Python 3 scripting**.
+    support for Python 3 scripting**.
 
     Inside Vim, type `:version`. Look at the first two to three lines of output;
     it should say `Vi IMproved X.Y`, where X.Y is the major version of vim. If
@@ -654,7 +653,7 @@ process.
     Debian-like Linux distro, this would be `sudo apt-get install python-dev
     python3-dev`. On macOS they should already be present.
 
-    On Windows, you need to download and install [Python 2 or
+    On Windows, you need to download and install [Python
     Python 3][python-win-download]. Pick the version corresponding to your Vim
     architecture. You will also need Microsoft Visual C++ (MSVC) to build YCM.
     You can obtain it by installing [Visual Studio Build
@@ -1500,8 +1499,6 @@ should work out of the box with no additional configuration (provided that you
 built YCM with the `--rust-completer` flag; see the [*Installation*
 section](#installation) for details). The install script takes care of
 installing [the Rust source code][rust-src], so no configuration is necessary.
-In case you are running Python 2.7.8 and older, you will need to manually
-install [rustup][].
 
 To [configure RLS](#lsp-configuration) look up [rls configuration options][
 rls-preferences]. The value of the `ls` key must be structured as in the
@@ -3275,34 +3272,6 @@ But fear not, you should be able to tweak your extra conf files to continue
 working by using the `g:ycm_extra_conf_vim_data` option. See the docs on that
 option for details.
 
-### I get `ImportError` exceptions that mention `PyInit_ycm_core` or `initycm_core`
-
-These errors are caused by building the YCM native libraries for Python 2 and
-trying to load them into a Python 3 process (or the other way around).
-
-For instance, if building for Python 2 but loading in Python 3:
-
-```
-ImportError: dynamic module does not define init function (PyInit_ycm_core)
-```
-
-If building for Python 3 but loading in Python 2:
-
-```
-ImportError: dynamic module does not define init function (initycm_core)
-```
-
-Setting the `g:ycm_server_python_interpreter` option to force the use of a
-specific Python interpreter for `ycmd` is usually the easiest way to solve the
-problem. Common values for that option are `/usr/bin/python` and
-`/usr/bin/python3`.
-
-### I get a linker warning regarding `libpython` on macOS when compiling YCM
-
-If the warning is `ld: warning: path '/usr/lib/libpython2.7.dylib' following -L
-not a directory`, then feel free to ignore it; it's caused by a limitation of
-CMake and is not an issue. Everything should still work fine.
-
 ### I get a weird window at the top of my file when I use the semantic engine
 
 This is Vim's `preview` window. Vim uses it to show you extra information about
@@ -3380,20 +3349,20 @@ Look at the output of your CMake call. There should be a line in it like the
 following (with `.dylib` in place of `.so` on macOS):
 
 ```
--- Found PythonLibs: /usr/lib/libpython2.7.so (Required is at least version "2.5")
+-- Found PythonLibs: /usr/lib/libpython3.6.so (Required is at least version "3.5")
 ```
 
 That would be the **correct** output. An example of **incorrect** output would
 be the following:
 
 ```
--- Found PythonLibs: /usr/lib/libpython2.7.so (found suitable version "2.5.1", minimum required is "2.5")
+-- Found PythonLibs: /usr/lib/libpython3.6.so (found suitable version "3.5.1", minimum required is "3.5")
 ```
 
 Notice how there's an extra bit of output there, the `found suitable version
 "<version>"` part, where `<version>` is not the same as the version of the
-dynamic library. In the example shown, the library is version 2.7 but the second
-string is version `2.5.1`.
+dynamic library. In the example shown, the library is version 3.6 but the second
+string is version `3.5.1`.
 
 This means that CMake found one version of Python headers and a different
 version for the library. This is wrong. It can happen when you have multiple
@@ -3403,7 +3372,7 @@ You should probably add the following flags to your cmake call (again, `dylib`
 instead of `so` on macOS):
 
 ```
--DPYTHON_INCLUDE_DIR=/usr/include/python2.7 -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so
+-DPYTHON_INCLUDE_DIR=/usr/include/python3.6 -DPYTHON_LIBRARY=/usr/lib/libpython3.6.so
 ```
 
 This will force the paths to the Python include directory and the Python library
@@ -3411,22 +3380,22 @@ to use. You may need to set these flags to something else, but you need to make
 sure you use the same version of Python that your Vim binary is built against,
 which is highly likely to be the system's default Python.
 
-### I get `libpython2.7.a [...] relocation R_X86_64_32` when compiling
+### I get `libpython3.5.a [...] relocation R_X86_64_32` when compiling
 
 The error is usually encountered when compiling YCM on Centos or RHEL. The full
 error looks something like the following:
 
 ```
-/usr/bin/ld: /usr/local/lib/libpython2.7.a(abstract.o): relocation R_X86_64_32 against `a local symbol' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /usr/local/lib/libpython3.5.a(abstract.o): relocation R_X86_64_32 against `a local symbol' can not be used when making a shared object; recompile with -fPIC
 ```
 
 It's possible to get a slightly different error that's similar to the one above.
 Here's the problem and how you solve it:
 
-Your `libpython2.7.a` was not compiled with `-fPIC` so it can't be linked into
+Your `libpython3.5.a` was not compiled with `-fPIC` so it can't be linked into
 `ycm_core.so`.  Use the `-DPYTHON_LIBRARY=` CMake flag to point it to a `.so`
 version of libpython on your machine (for instance,
-`-DPYTHON_LIBRARY=/usr/lib/libpython2.7.so`). Naturally, this means you'll have
+`-DPYTHON_LIBRARY=/usr/lib/libpython3.5.so`). Naturally, this means you'll have
 to go through the full installation guide by hand.
 
 ### I see `undefined symbol: clang_getCompletionFixIt` in the server logs.
@@ -3663,20 +3632,6 @@ os.environ['PATH'] = ';'.join(path)
 EOF
 ```
 
-### I hear that YCM only supports Python 2, is that true?
-
-**No.** Both the Vim client and the [ycmd server][ycmd] run on Python 2 or 3. If
-you are talking about code completion in a project, you can configure the Python
-used for your project through a `.ycm_extra_conf.py` file. See [the Python
-Semantic Completion section](#python-semantic-completion) for more details.
-
-### On Windows I get `E887: Sorry, this command is disabled, the Python's site module could not be loaded`
-
-If you are running vim on Windows with Python 2.7.11, this is likely caused by a
-[bug][vim_win-python2.7.11-bug]. Follow this
-[workaround][vim_win-python2.7.11-bug_workaround] or use a different version
-(Python 2.7.12 does not suffer from the bug).
-
 ### I can't complete Python packages in a virtual environment.
 
 This means that the Python used to run [Jedi][] is not the Python of the virtual
@@ -3846,8 +3801,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [add-msbuild-to-path]: http://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [identify-R6034-cause]: http://stackoverflow.com/questions/14552348/runtime-error-r6034-in-embedded-python-application/34696022
 [ccoc]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[vim_win-python2.7.11-bug]: https://github.com/vim/vim/issues/717
-[vim_win-python2.7.11-bug_workaround]: https://github.com/vim/vim-win32-installer/blob/a27bbdba9bb87fa0e44c8a00d33d46be936822dd/appveyor.bat#L86-L88
 [gitter]: https://gitter.im/Valloric/YouCompleteMe
 [ninja-compdb]: https://ninja-build.org/manual.html
 [++enc]: http://vimdoc.sourceforge.net/htmldoc/editing.html#++enc
@@ -3874,3 +3827,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [roslyn-releases]: https://github.com/OmniSharp/omnisharp-roslyn/releases
 [compiledb]: https://pypi.org/project/compiledb/
 [signature-help-pr]: https://github.com/ycm-core/ycmd/pull/1255
+[legacy-py2]: https://github.com/ycm-core/YouCompleteMe/tree/legacy-py2

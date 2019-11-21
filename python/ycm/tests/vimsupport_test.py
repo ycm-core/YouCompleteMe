@@ -1,5 +1,3 @@
-# coding: utf-8
-#
 # Copyright (C) 2015-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
@@ -16,14 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
-
-# Intentionally not importing unicode_literals!
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm.tests import PathToTestFile
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
                                    MockVimBuffers, MockVimModule, Version,
@@ -1705,8 +1695,6 @@ def InsertNamespace_append_test( vim_current, *args ):
 
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
-  # No 'u' prefix for the current buffer name string to simulate Vim returning
-  # bytes on Python 2 but unicode on Python 3.
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
     vimsupport.JumpToLocation( os.path.realpath( u'uni¢𐍈d€' ),
