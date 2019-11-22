@@ -21,9 +21,9 @@ jobs:
       'Python 2.7':
         # Tests are failing on Python 2.7.0 with the exception
         # "TypeError: argument can't be <type 'unicode'>"
-        YCM_PYTHON_VERSION: '2.7.1'
+        YCM_PYTHON_VERSION: '2.7.13'
       'Python 3.5':
-        YCM_PYTHON_VERSION: '3.5.1'
+        YCM_PYTHON_VERSION: '3.5.3'
     maxParallel: 2
   variables:
     COVERAGE: true
