@@ -2375,6 +2375,7 @@ let g:ycm_filetype_blacklist = {
       \ 'vimwiki': 1,
       \ 'pandoc': 1,
       \ 'infolog': 1,
+      \ 'leaderf': 1,
       \ 'mail': 1
       \}
 ```
