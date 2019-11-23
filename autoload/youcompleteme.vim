@@ -610,13 +610,13 @@ endfunction
 
 
 function! s:OnBufferEnter()
+  call s:StartMessagePoll()
   if !s:VisitedBufferRequiresReparse()
     return
   endif
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
-  call s:StartMessagePoll()
 
   exec s:python_command "ycm_state.OnBufferVisit()"
   " Last parse may be outdated because of changes from other buffers. Force a
