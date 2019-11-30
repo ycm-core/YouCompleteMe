@@ -79,6 +79,10 @@ NO_COMPLETIONS = {
   'completions': []
 }
 
+# checking for existence of funcitons is a little slow and can't change at
+# tuntime, so we cache the results
+_VIM_SUPPORTS_POPUP_WINDOWS = None
+
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -1261,14 +1265,18 @@ def AutoCloseOnCurrentBuffer( name ):
 
 
 def VimSupportsPopupWindows():
-  return VimHasFunctions( 'popup_create',
-                          'popup_move',
-                          'popup_hide',
-                          'popup_settext',
-                          'popup_show',
-                          'popup_close',
-                          'prop_add',
-                          'prop_type_add' )
+  global _VIM_SUPPORTS_POPUP_WINDOWS
+  if _VIM_SUPPORTS_POPUP_WINDOWS is None:
+    _VIM_SUPPORTS_POPUP_WINDOWS =  VimHasFunctions( 'popup_create',
+                                                    'popup_move',
+                                                    'popup_hide',
+                                                    'popup_settext',
+                                                    'popup_show',
+                                                    'popup_close',
+                                                    'prop_add',
+                                                    'prop_type_add' )
+
+  return _VIM_SUPPORTS_POPUP_WINDOWS
 
 
 def VimHasFunctions( *functions ):
