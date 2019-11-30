@@ -68,18 +68,18 @@ class FakeFuture( object ):
 
 
 def MockAsyncServerResponseDone( response ):
-  """Return a fake future object that is complete with the supplied response
-  message. Suitable for mocking a response future within a client request. For
-  example:
+  """Return a MessagePoll containing a fake future object that is complete with
+  the supplied response message. Suitable for mocking a response future within
+  a client request. For example:
 
-    server_message = {
-      'message': 'this message came from the server'
-    }
-
-    with patch.object( ycm._message_poll_request,
-                       '_response_future',
-                       new = MockAsyncServerResponseDone( [] ) ) as mock_future:
-      ycm.OnPeriodicTick() # Uses ycm._message_poll_request ...
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseDone( response )
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ filetype ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ filetype ]._response_future = mock_response
+      # Needed to keep a reference to the mocked dictionary
+      mock_future = ycm._message_poll_requests[ filetype ]._response_future
+      ycm.OnPeriodicTick() # Uses ycm._message_poll_requests[ filetype ] ...
   """
   return mock.MagicMock( wraps = FakeFuture( True, response ) )
 
@@ -88,10 +88,14 @@ def MockAsyncServerResponseInProgress():
   """Return a fake future object that is incomplete. Suitable for mocking a
   response future within a client request. For example:
 
-    with patch.object( ycm._message_poll_request,
-                       '_response_future',
-                       new = MockAsyncServerResponseInProgress() ):
-      ycm.OnPeriodicTick() # Uses ycm._message_poll_request ...
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseInProgress()
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ filetype ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ filetype ]._response_future = mock_response
+      # Needed to keep a reference to the mocked dictionary
+      mock_future = ycm._message_poll_requests[ filetype ]._response_future
+      ycm.OnPeriodicTick() # Uses ycm._message_poll_requests[ filetype ] ...
   """
   return mock.MagicMock( wraps = FakeFuture( False ) )
 
@@ -100,11 +104,14 @@ def MockAsyncServerResponseException( exception ):
   """Return a fake future object that is complete, but raises an exception.
   Suitable for mocking a response future within a client request. For example:
 
-    exception = RuntimeError( 'Check client handles exception' )
-    with patch.object( ycm._message_poll_request,
-                       '_response_future',
-                       new = MockAsyncServerResponseException( exception ) ):
-      ycm.OnPeriodicTick() # Uses ycm._message_poll_request ...
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseException( exception )
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ filetype ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ filetype ]._response_future = mock_response
+      # Needed to keep a reference to the mocked dictionary
+      mock_future = ycm._message_poll_requests[ filetype ]._response_future
+      ycm.OnPeriodicTick() # Uses ycm._message_poll_requests[ filetype ] ...
   """
   return mock.MagicMock( wraps = FakeFuture( True, None, exception ) )
 
