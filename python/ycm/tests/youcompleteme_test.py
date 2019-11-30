@@ -1154,31 +1154,32 @@ def YouCompleteMe_OnPeriodicTick_DontRetry_test( ycm,
     assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
     post_data_to_handler_async.assert_called()
 
-  assert ycm._message_poll_request is not None
+  assert ycm._message_poll_requests[ 'ycmtest' ] is not None
   post_data_to_handler_async.reset_mock()
 
   # OK that sent the request, now poll to check if it is complete (say it is
   # not)
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = MockAsyncServerResponseInProgress() ) as mock_future:
-    poll_again = ycm.OnPeriodicTick()
-    mock_future.done.assert_called()
-    mock_future.result.assert_not_called()
-    assert_that( poll_again, equal_to( True ) )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    with patch.dict( ycm._message_poll_requests,
+        { 'ycmtest': MockAsyncServerResponseInProgress( v.current.buffer ) } ):
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      poll_again = ycm.OnPeriodicTick()
+      mock_future.done.assert_called()
+      mock_future.result.assert_not_called()
+      assert_that( poll_again, equal_to( True ) )
 
   # Poll again, but return a response (telling us to stop polling)
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = MockAsyncServerResponseDone( False ) ) \
-      as mock_future:
-    poll_again = ycm.OnPeriodicTick()
-    mock_future.done.assert_called()
-    mock_future.result.assert_called()
-    post_data_to_handler_async.assert_not_called()
-    # We reset and don't poll anymore
-    assert_that( ycm._message_poll_request is None )
-    assert_that( poll_again, equal_to( False ) )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    with patch.dict( ycm._message_poll_requests,
+        { 'ycmtest': MockAsyncServerResponseDone( v.current.buffer, False ) } ):
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      poll_again = ycm.OnPeriodicTick()
+      mock_future.done.assert_called()
+      mock_future.result.assert_called()
+      post_data_to_handler_async.assert_not_called()
+      # We reset and don't poll anymore
+      assert_that( ycm._message_poll_requests[ 'ycmtest' ] is None )
+      assert_that( poll_again, equal_to( False ) )
 
 
 
@@ -1203,16 +1204,17 @@ def YouCompleteMe_OnPeriodicTick_Exception_test( ycm,
   post_data_to_handler_async.reset_mock()
 
   # Poll again, but return an exception response
-  mock_response = MockAsyncServerResponseException( RuntimeError( 'test' ) )
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = mock_response ) as mock_future:
-    assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
-    mock_future.done.assert_called()
-    mock_future.result.assert_called()
-    post_data_to_handler_async.assert_not_called()
-    # We reset and don't poll anymore
-    assert_that( ycm._message_poll_request is None )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseException(
+        v.current.buffer, RuntimeError( 'test' ) )
+    with patch.dict( ycm._message_poll_requests, { 'ycmtest': mock_response } ):
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
+      mock_future.done.assert_called()
+      mock_future.result.assert_called()
+      post_data_to_handler_async.assert_not_called()
+      # We reset and don't poll anymore
+      assert_that( ycm._message_poll_requests[ 'ycmtest' ] is None )
 
 
 @YouCompleteMeInstance()
@@ -1239,15 +1241,16 @@ def YouCompleteMe_OnPeriodicTick_ValidResponse_test( ycm,
 
   # Poll again, and return a _proper_ response (finally!).
   # Note, _HandlePollResponse is tested independently (for simplicity)
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = MockAsyncServerResponseDone( [] ) ) as mock_future:
-    assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
-    handle_poll_response.assert_called()
-    mock_future.done.assert_called()
-    mock_future.result.assert_called()
-    post_data_to_handler_async.assert_called() # Poll again!
-    assert_that( ycm._message_poll_request is not None )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    with patch.dict( ycm._message_poll_requests,
+        { 'ycmtest': MockAsyncServerResponseDone( v.current.buffer, [] ) } ):
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+      handle_poll_response.assert_called()
+      mock_future.done.assert_called()
+      mock_future.result.assert_called()
+      post_data_to_handler_async.assert_called() # Poll again!
+      assert_that( ycm._message_poll_requests[ 'ycmtest' ] is not None )
 
 
 @YouCompleteMeInstance()

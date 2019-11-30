@@ -34,9 +34,9 @@ TIMEOUT_SECONDS = 60
 
 
 class MessagesPoll( BaseRequest ):
-  def __init__( self ):
+  def __init__( self, buff ):
     super( MessagesPoll, self ).__init__()
-    self._request_data = BuildRequestData()
+    self._request_data = BuildRequestData( buff.number )
     self._response_future = None
 
 
