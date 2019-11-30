@@ -63,6 +63,8 @@ jobs:
   steps:
   - checkout: self
     submodules: recursive
+  - bash: sudo -H $(PIP) install --upgrade pip setuptools wheel
+    displayName: Upgrade pip
   - bash: sudo -H $(PIP) install -r python/test_requirements.txt
     displayName: Install dependencies
   - bash: python3 ./install.py --clangd-completer --java-completer
