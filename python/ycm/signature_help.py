@@ -25,7 +25,7 @@ from builtins import *  # noqa
 import vim
 import json
 from ycm import vimsupport
-from ycm.vimsupport import GetIntValue
+from ycm.vimsupport import memoize, GetIntValue
 
 
 class SignatureHelpState( object ):
@@ -84,6 +84,7 @@ def _MakeSignatureHelpBuffer( signature_info ):
   return lines
 
 
+@memoize
 def ShouldUseSignatureHelp():
   return ( vimsupport.VimHasFunctions( 'screenpos', 'pum_getpos' ) and
            vimsupport.VimSupportsPopupWindows() )

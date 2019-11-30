@@ -81,7 +81,26 @@ NO_COMPLETIONS = {
 
 # checking for existence of funcitons is a little slow and can't change at
 # tuntime, so we cache the results
-_VIM_SUPPORTS_POPUP_WINDOWS = None
+MEMO = {}
+
+
+def memoize( func ):
+  global MEMO
+
+  import functools
+
+  @functools.wraps( func )
+  def wrapper( *args, **kwargs ):
+    dct = MEMO.setdefault( func, {} )
+    key = ( args, frozenset( kwargs.items() ) )
+    try:
+      return dct[ key ]
+    except KeyError:
+      result = func( *args, **kwargs )
+      dct[ key ] = result
+      return result
+
+  return wrapper
 
 
 def CurrentLineAndColumn():
@@ -1264,24 +1283,25 @@ def AutoCloseOnCurrentBuffer( name ):
   vim.command( 'augroup END' )
 
 
+@memoize
 def VimSupportsPopupWindows():
-  global _VIM_SUPPORTS_POPUP_WINDOWS
-  if _VIM_SUPPORTS_POPUP_WINDOWS is None:
-    _VIM_SUPPORTS_POPUP_WINDOWS =  VimHasFunctions( 'popup_create',
-                                                    'popup_move',
-                                                    'popup_hide',
-                                                    'popup_settext',
-                                                    'popup_show',
-                                                    'popup_close',
-                                                    'prop_add',
-                                                    'prop_type_add' )
+  return VimHasFunctions( 'popup_create',
+                          'popup_move',
+                          'popup_hide',
+                          'popup_settext',
+                          'popup_show',
+                          'popup_close',
+                          'prop_add',
+                          'prop_type_add' )
 
-  return _VIM_SUPPORTS_POPUP_WINDOWS
+
+@memoize
+def VimHasFunction( func ):
+  return bool( GetIntValue( "exists( '*{}' )".format( EscapeForVim( func ) ) ) )
 
 
 def VimHasFunctions( *functions ):
-  return all( ( bool( GetIntValue( vim.eval( 'exists( "*{}" )'.format( f ) ) ) )
-                for f in functions ) )
+  return all( VimHasFunction( f ) for f in functions )
 
 
 def WinIDForWindow( window ):

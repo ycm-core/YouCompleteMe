@@ -132,7 +132,7 @@ function! Test_Signatures_After_Trigger()
           \     pyxeval(
           \       'ycm_state.SignatureHelpRequestReady()'
           \     ),
-          \     'sig help request reqdy'
+          \     'sig help request ready'
           \   )
           \ } )
     call WaitForAssert( {->
@@ -140,7 +140,7 @@ function! Test_Signatures_After_Trigger()
           \     pyxeval(
           \       "bool( ycm_state.GetSignatureHelpResponse()[ 'signatures' ] )"
           \     ),
-          \     'sig help request reqdy'
+          \     'sig help request has signatures'
           \   )
           \ } )
     call WaitForAssert( {->
