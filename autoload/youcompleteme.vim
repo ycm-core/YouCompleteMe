@@ -553,11 +553,17 @@ function! s:SetCompleteFunc()
 endfunction
 
 
+function s:StopPoller( poller ) abort
+  call timer_stop( a:poller.id )
+  let a:poller.id = -1
+endfunction
+
+
 function! s:OnVimLeave()
   " Workaround a NeoVim issue - not shutting down timers correctly
   " https://github.com/neovim/neovim/issues/6840
   for poller in values( s:pollers )
-    call timer_stop( poller.id )
+    call s:StopPoller( poller )
   endfor
   exec s:python_command "ycm_state.OnVimLeave()"
 endfunction
@@ -668,7 +674,7 @@ function! s:OnFileReadyToParse( ... )
     call s:ClearSignatureHelp()
     exec s:python_command "ycm_state.OnFileReadyToParse()"
 
-    call timer_stop( s:pollers.file_parse_response.id )
+    call s:StopPoller( s:pollers.file_parse_response )
     let s:pollers.file_parse_response.id = timer_start(
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
@@ -715,11 +721,10 @@ function! s:OnInsertChar()
     return
   endif
 
-  call timer_stop( s:pollers.completion.id )
+  call s:StopPoller( s:pollers.completion )
   call s:CloseCompletionMenu()
 
-  " TODO: Do we really need this here?
-  call timer_stop( s:pollers.signature_help.id )
+  call s:StopPoller( s:pollers.signature_help )
 endfunction
 
 
@@ -728,10 +733,8 @@ function! s:OnDeleteChar( key )
     return a:key
   endif
 
-  call timer_stop( s:pollers.completion.id )
-  "
-  " TODO: Do we really need this here?
-  call timer_stop( s:pollers.signature_help.id )
+  call s:StopPoller( s:pollers.completion )
+  call s:StopPoller( s:pollers.signature_help )
   if pumvisible()
     return "\<C-y>" . a:key
   endif
@@ -740,7 +743,7 @@ endfunction
 
 
 function! s:StopCompletion( key )
-  call timer_stop( s:pollers.completion.id )
+  call s:StopPoller( s:pollers.completion )
 
   call s:ClearSignatureHelp()
 
@@ -815,7 +818,7 @@ function! s:OnInsertLeave()
     return
   endif
 
-  call timer_stop( s:pollers.completion.id )
+  call s:StopPoller( s:pollers.completion )
   let s:force_semantic = 0
   let s:completion = s:default_completion
 
@@ -940,13 +943,25 @@ function! s:RequestSignatureHelp()
     return
   endif
 
-  exec s:python_command "ycm_state.SendSignatureHelpRequest()"
-  call s:PollSignatureHelp()
+  if s:pollers.signature_help.id >= 0
+    " We're already polling.
+    return
+  endif
+
+  if s:Pyeval( 'ycm_state.SendSignatureHelpRequest()' )
+    call s:PollSignatureHelp()
+  endif
 endfunction
 
 
 function! s:PollSignatureHelp( ... )
   if !s:ShouldUseSignatureHelp()
+    return
+  endif
+
+  if a:0 == 0 && s:pollers.signature_help.id >= 0
+    " OK this is a bug. We have tried to poll for a response while the timer is
+    " already running. Just return and wait for the timer to fire.
     return
   endif
 
@@ -1023,7 +1038,7 @@ function! s:ClearSignatureHelp()
     return
   endif
 
-  call timer_stop( s:pollers.signature_help.id )
+  call s:StopPoller( s:pollers.signature_help )
   let s:signature_help = s:default_signature_help
   call s:Pyeval( 'ycm_state.ClearSignatureHelp()' )
 endfunction
@@ -1065,12 +1080,10 @@ function! s:RestartServer()
 
   exec s:python_command "ycm_state.RestartServer()"
 
-  call timer_stop( s:pollers.receive_messages.id )
-  let s:pollers.receive_messages.id = -1
-
+  call s:StopPoller( s:pollers.receive_messages )
   call s:ClearSignatureHelp()
 
-  call timer_stop( s:pollers.server_ready.id )
+  call s:StopPoller( s:pollers.server_ready )
   let s:pollers.server_ready.id = timer_start(
         \ s:pollers.server_ready.wait_milliseconds,
         \ function( 's:PollServerReady' ) )

@@ -322,11 +322,13 @@ class YouCompleteMe( object ):
 
 
   def SendSignatureHelpRequest( self ):
+    """Send a signature help request, if we're ready to. Return whether or not a
+    request was sent (and should be checked later)"""
     if not self.NativeFiletypeCompletionUsable():
-      return
+      return False
 
     if not self._latest_completion_request:
-      return
+      return False
 
     for filetype in vimsupport.CurrentFiletypes():
       if not self._signature_help_available_requests[ filetype ].Done():
@@ -340,7 +342,7 @@ class YouCompleteMe( object ):
       if sig_help_available == 'PENDING':
         # Send another /signature_help_available request
         self._signature_help_available_requests[ filetype ].Start( filetype )
-        return
+        return False
 
       request_data = self._latest_completion_request.request_data.copy()
       request_data[ 'signature_help_state' ] = self._signature_help_state.state
@@ -349,6 +351,7 @@ class YouCompleteMe( object ):
 
       self._latest_signature_help_request = SignatureHelpRequest( request_data )
       self._latest_signature_help_request.Start()
+      return True
 
 
   def SignatureHelpRequestReady( self ):
