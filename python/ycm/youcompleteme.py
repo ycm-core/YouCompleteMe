@@ -134,7 +134,7 @@ class YouCompleteMe( object ):
     self._user_notified_about_crash = False
     self._filetypes_with_keywords_loaded = set()
     self._server_is_ready_with_cache = False
-    self._message_poll_request = None
+    self._message_poll_requests = {}
 
     self._user_options = base.GetUserOptions()
     self._omnicomp = OmniCompleter( self._user_options )
@@ -492,18 +492,35 @@ class YouCompleteMe( object ):
       # Try again in a jiffy
       return True
 
-    if not self._message_poll_request:
-      self._message_poll_request = MessagesPoll()
+    buffers = set()
+    seen_filetypes = set()
+    for w in vim.windows:
+      b = w.buffer
+      filetypes = vimsupport.FiletypesForBuffer( b )
+      if any( ft not in seen_filetypes for ft in filetypes ):
+        buffers.add( w.buffer )
+        seen_filetypes.update( filetypes )
 
-    if not self._message_poll_request.Poll( self ):
-      # Don't poll again until some event which might change the server's mind
-      # about whether to provide messages for the current buffer (e.g. buffer
-      # visit, file ready to parse, etc.)
-      self._message_poll_request = None
-      return False
+    responses = set()
+    for buff in buffers:
+      filename = buff.name
+      # FIXME: Should the keys be filetypes? What if there's tons of hidden
+      # files of the same filetype and the user cycles through them - the code
+      # below would recreate the RequestData object.
+      if self._message_poll_requests.get( filename ) is None:
+        self._message_poll_requests[ filename ] = MessagesPoll( buff.number )
 
-    # Poll again in a jiffy
-    return True
+      if not self._message_poll_requests[ filename ].Poll( self ):
+        # Don't poll again until some event which might change the server's mind
+        # about whether to provide messages for the current buffer (e.g. buffer
+        # visit, file ready to parse, etc.)
+        self._message_poll_requests[ filename ] = None
+        responses.add( False )
+      responses.add( True )
+
+    # FIXME: Can we be smarter than this? We'll poll *everything* even if
+    # some filetypese said not to.
+    return any( responses )
 
 
   def OnFileReadyToParse( self ):
