@@ -22,7 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from future.utils import iteritems
+from future.utils import iteritems, itervalues
 import base64
 import json
 import logging
@@ -493,7 +493,7 @@ class YouCompleteMe( object ):
       return True
 
     for w in vim.windows:
-      for filetype in vimsupport.FileTypesForBuffer( w.buffer ):
+      for filetype in vimsupport.FiletypesForBuffer( w.buffer ):
         if filetype not in self._message_poll_requests:
           self._message_poll_requests[ filetype ] = MessagesPoll( w.buffer )
 

@@ -24,6 +24,8 @@ from builtins import *  # noqa
 import mock
 import requests
 
+from ycm.client.messages_request import MessagesPoll
+
 
 class FakeResponse( object ):
   """A fake version of a requests response object, just about suitable for
@@ -67,7 +69,7 @@ class FakeFuture( object ):
     return self._result
 
 
-def MockAsyncServerResponseDone( response ):
+def MockAsyncServerResponseDone( buff, response ):
   """Return a fake future object that is complete with the supplied response
   message. Suitable for mocking a response future within a client request. For
   example:
@@ -81,10 +83,13 @@ def MockAsyncServerResponseDone( response ):
                        new = MockAsyncServerResponseDone( [] ) ) as mock_future:
       ycm.OnPeriodicTick() # Uses ycm._message_poll_requests[ filetype ] ...
   """
-  return mock.MagicMock( wraps = FakeFuture( True, response ) )
+  message_poll = MessagesPoll( buff )
+  message_poll._response_future = mock.MagicMock(
+      wraps = FakeFuture( True, response ) )
+  return message_poll
 
 
-def MockAsyncServerResponseInProgress():
+def MockAsyncServerResponseInProgress( buff ):
   """Return a fake future object that is incomplete. Suitable for mocking a
   response future within a client request. For example:
 
@@ -93,10 +98,13 @@ def MockAsyncServerResponseInProgress():
                        new = MockAsyncServerResponseInProgress() ):
       ycm.OnPeriodicTick() # Uses ycm._message_poll_requests[ filetype ] ...
   """
-  return mock.MagicMock( wraps = FakeFuture( False ) )
+  message_poll = MessagesPoll( buff )
+  message_poll._response_future = mock.MagicMock(
+      wraps = FakeFuture( False ) )
+  return message_poll
 
 
-def MockAsyncServerResponseException( exception ):
+def MockAsyncServerResponseException( buff, exception ):
   """Return a fake future object that is complete, but raises an exception.
   Suitable for mocking a response future within a client request. For example:
 
@@ -106,6 +114,10 @@ def MockAsyncServerResponseException( exception ):
                        new = MockAsyncServerResponseException( exception ) ):
       ycm.OnPeriodicTick() # Uses ycm._message_poll_requests[ filetype ] ...
   """
+  message_poll = MessagesPoll( buff )
+  message_poll._response_future = mock.MagicMock(
+      wraps = FakeFuture( True, None, exception ) )
+  return message_poll
   return mock.MagicMock( wraps = FakeFuture( True, None, exception ) )
 
 
