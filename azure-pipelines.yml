@@ -83,11 +83,9 @@ jobs:
   strategy:
     matrix:
       'Python 2.7':
-        # Prior versions fail to compile with error "ld: library not found for
-        # -lSystemStubs"
-        YCM_PYTHON_VERSION: '2.7.2'
+        YCM_PYTHON_VERSION: '2.7.13'
       'Python 3.5':
-        YCM_PYTHON_VERSION: '3.5.1'
+        YCM_PYTHON_VERSION: '3.5.3'
     maxParallel: 2
   variables:
     COVERAGE: true
