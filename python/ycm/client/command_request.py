@@ -34,10 +34,7 @@ def _EnsureBackwardsCompatibility( arguments ):
 
 
 class CommandRequest( BaseRequest ):
-  def __init__( self,
-                arguments,
-                buffer_command = 'same-buffer',
-                extra_data = None ):
+  def __init__( self, arguments, extra_data ):
     super( CommandRequest, self ).__init__()
     self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._command = arguments and arguments[ 0 ]
@@ -51,6 +48,7 @@ class CommandRequest( BaseRequest ):
     self._request_data = BuildRequestData()
     if self._extra_data:
       self._request_data.update( self._extra_data )
+
     self._request_data.update( {
       'command_arguments': self._arguments
     } )
