@@ -22,7 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from future.utils import iteritems
+from future.utils import iteritems, itervalues
 import base64
 import json
 import logging
@@ -134,7 +134,7 @@ class YouCompleteMe( object ):
     self._user_notified_about_crash = False
     self._filetypes_with_keywords_loaded = set()
     self._server_is_ready_with_cache = False
-    self._message_poll_request = None
+    self._message_poll_requests = {}
 
     self._user_options = base.GetUserOptions()
     self._omnicomp = OmniCompleter( self._user_options )
@@ -492,18 +492,17 @@ class YouCompleteMe( object ):
       # Try again in a jiffy
       return True
 
-    if not self._message_poll_request:
-      self._message_poll_request = MessagesPoll()
+    for w in vim.windows:
+      for filetype in vimsupport.FiletypesForBuffer( w.buffer ):
+        if filetype not in self._message_poll_requests:
+          self._message_poll_requests[ filetype ] = MessagesPoll( w.buffer )
 
-    if not self._message_poll_request.Poll( self ):
-      # Don't poll again until some event which might change the server's mind
-      # about whether to provide messages for the current buffer (e.g. buffer
-      # visit, file ready to parse, etc.)
-      self._message_poll_request = None
-      return False
+        # None means don't poll this filetype
+        if ( self._message_poll_requests[ filetype ] and
+             not self._message_poll_requests[ filetype ].Poll( self ) ):
+          self._message_poll_requests[ filetype ] = None
 
-    # Poll again in a jiffy
-    return True
+    return any( itervalues( self._message_poll_requests ) )
 
 
   def OnFileReadyToParse( self ):

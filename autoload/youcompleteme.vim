@@ -169,23 +169,10 @@ function! youcompleteme#Enable()
 
   if exists( '*prop_type_add' ) && exists( '*prop_type_delete' )
     call prop_type_delete( 'YCM-signature-help-current-argument' )
-    call prop_type_delete( 'YCM-signature-help-current-signature' )
-    call prop_type_delete( 'YCM-signature-help-signature' )
-
     call prop_type_add( 'YCM-signature-help-current-argument', {
           \   'highlight': 'PMenuSel',
           \   'combine':   0,
           \   'priority':  50,
-          \ } )
-    call prop_type_add( 'YCM-signature-help-current-signature', {
-          \   'highlight': 'PMenu',
-          \   'combine':   0,
-          \   'priority':  40,
-          \ } )
-    call prop_type_add( 'YCM-signature-help-signature', {
-          \   'highlight': 'PMenuSbar',
-          \   'combine':   0,
-          \   'priority':  40,
           \ } )
   endif
 endfunction
