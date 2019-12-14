@@ -1,0 +1,52 @@
+{
+  "configurations": {
+    "python - launch nosetests": {
+      "adapter": "vscode-python",
+      "variables": [
+        {
+          "python": {
+            "shell": "/bin/bash -c 'if [ -z \"${dollar}VIRTUAL_ENV\" ]; then echo $$(which python); else echo \"${dollar}VIRTUAL_ENV/bin/python\"; fi'"
+          },
+          "nosetests": {
+            "shell": "/bin/bash -c 'if [ -z \"${dollar}VIRTUAL_ENV\" ]; then echo $$(which nosetests); else echo \"${dollar}VIRTUAL_ENV/bin/nosetests\"; fi'"
+          }
+        },
+        {
+          "python_path": {
+            "shell": [
+              "${python}",
+              "${workspaceRoot}/run_tests.py",
+              "--dump-path"
+            ]
+          }
+        }
+      ],
+      "configuration": {
+        "name": "Python nosetests",
+        "type": "vscode-python",
+        "request": "launch",
+
+        "cwd": "${workspaceRoot}",
+        "stopOnEntry": true,
+        "console": "integratedTerminal",
+        "justMyCode": false,
+
+        "debugOptions": [],
+
+        "program": "${nosetests}",
+        "pythonPath": "${python}",
+        "args": [
+          "-v",
+          "--with-id",
+          "--ignore-files=(^\\.|^setup\\.py$$)",
+          "${Test}"
+        ],
+        "env": {
+          "PYTHONPATH": "${python_path}",
+          "LD_LIBRARY_PATH": "${workspaceRoot}/third_party/ycmd/this_party/clang/lib",
+          "YCM_TEST_NO_RETRY": "1"
+        }
+      }
+    }
+  }
+}
