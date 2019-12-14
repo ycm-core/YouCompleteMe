@@ -125,7 +125,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   # Don't allow the popup to overlap the pum
   if line > 0 and GetIntValue( 'pumvisible()' ):
-    pum_line = GetIntValue( vim.eval( 'pum_getpos().row' ) ) + 1
+    pum_line = GetIntValue( 'pum_getpos().row' ) + 1
     if pos == 'botleft' and pum_line <= line:
       line = 0
     elif ( pos == 'topleft' and
@@ -167,9 +167,9 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   }
 
   if not state.popup_win_id:
-    state.popup_win_id = GetIntValue( vim.eval( "popup_create( {}, {} )".format(
+    state.popup_win_id = GetIntValue( "popup_create( {}, {} )".format(
       json.dumps( buf_lines ),
-      json.dumps( options ) ) ) )
+      json.dumps( options ) ) )
   else:
     vim.eval( 'popup_settext( {}, {} )'.format(
       state.popup_win_id,
