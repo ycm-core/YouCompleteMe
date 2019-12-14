@@ -25,6 +25,7 @@ from builtins import *  # noqa
 import vim
 import json
 from ycm import vimsupport
+from ycmd import utils
 from ycm.vimsupport import memoize, GetIntValue
 
 
@@ -41,7 +42,6 @@ class SignatureHelpState( object ):
 
 
 def _MakeSignatureHelpBuffer( signature_info ):
-  active_signature = int( signature_info.get( 'activeSignature', 0 ) )
   active_parameter = int( signature_info.get( 'activeParameter', 0 ) )
 
   lines = []
@@ -51,19 +51,6 @@ def _MakeSignatureHelpBuffer( signature_info ):
     props = []
 
     sig_label = signature[ 'label' ]
-    if sig_index == active_signature:
-      props.append( {
-        'col': 1,
-        'length': len( sig_label ),
-        'type': 'YCM-signature-help-current-signature'
-      } )
-    else:
-      props.append( {
-        'col': 1,
-        'length': len( sig_label ),
-        'type': 'YCM-signature-help-signature'
-      } )
-
     parameters = ( signature.get( 'parameters' ) or [] )
     for param_index, parameter in enumerate( parameters ):
       param_label = parameter[ 'label' ]
@@ -171,6 +158,10 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     "col": col,
     "pos": pos,
     "wrap": 0,
+    # NOTE: We *dont'* use "cursorline" here - that actually uses PMenuSel,
+    # which is just too invasive for us (it's more selected item than actual
+    # cursorline. So instead, we manually set 'cursorline' in the popup window
+    # and enable sytax based on the current file syntax)
     "flip": 1,
     "padding": [ 0, 1, 0, 1 ], # Pad 1 char in X axis to match completion menu
   }
@@ -188,5 +179,12 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
                                            json.dumps( options ) ) )
   vim.eval( 'popup_show( {} )'.format( state.popup_win_id ) )
+
+  active_signature = int( signature_info.get( 'activeSignature', 0 ) )
+  vim.eval( "win_execute( {}, 'set syntax={} cursorline | "
+            "call cursor( [ {}, 1 ] )' )".format(
+              state.popup_win_id,
+              utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] ),
+              active_signature + 1 ) )
 
   return state
