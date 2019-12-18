@@ -110,7 +110,8 @@ let g:ycm_filetype_blacklist =
       \   'pandoc': 1,
       \   'infolog': 1,
       \   'leaderf': 1,
-      \   'mail': 1
+      \   'mail': 1,
+      \   'noplugin': 1
       \ } )
 
 let g:ycm_open_loclist_on_ycm_diags =
