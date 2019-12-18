@@ -9,7 +9,7 @@ Early Warning: Dropping support for Python 2 in 2020
 ----
 
 In early 2020, YCM will drop support for Python 2. But we will maintain
-criticial fixes on a branch (name TBA) of YCM for a period of 1 year.
+critical fixes on a branch (name TBA) of YCM for a period of 1 year.
 
 Why?
 
