@@ -458,6 +458,14 @@ function! s:DisableOnLargeFile( buffer )
   return b:ycm_largefile
 endfunction
 
+function! s:HasAnyKey( dict, keys )
+  for key in a:keys
+    if has_key( a:dict, key )
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
 
 function! s:AllowedToCompleteInBuffer( buffer )
   let buftype = getbufvar( a:buffer, '&buftype' )
@@ -474,9 +482,9 @@ function! s:AllowedToCompleteInBuffer( buffer )
 
   let whitelist_allows = type( g:ycm_filetype_whitelist ) != type( {} ) ||
         \ has_key( g:ycm_filetype_whitelist, '*' ) ||
-        \ has_key( g:ycm_filetype_whitelist, filetype )
+        \ s:HasAnyKey( g:ycm_filetype_whitelist, split( filetype, '\.' ) )
   let blacklist_allows = type( g:ycm_filetype_blacklist ) != type( {} ) ||
-        \ !has_key( g:ycm_filetype_blacklist, filetype )
+        \ !s:HasAnyKey( g:ycm_filetype_blacklist, split( filetype, '\.' ) )
 
   let allowed = whitelist_allows && blacklist_allows
   if allowed
