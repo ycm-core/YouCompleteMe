@@ -49,6 +49,10 @@ let s:pollers = {
       \   'receive_messages': {
       \     'id': -1,
       \     'wait_milliseconds': 100
+      \   },
+      \   'hover': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
       \   }
       \ }
 let s:buftype_blacklist = {
@@ -171,7 +175,7 @@ function! youcompleteme#Enable()
     call prop_type_delete( 'YCM-signature-help-current-argument' )
     call prop_type_add( 'YCM-signature-help-current-argument', {
           \   'highlight': 'PMenuSel',
-          \   'combine':   0,
+          \   'combine':   1,
           \   'priority':  50,
           \ } )
   endif
@@ -1124,6 +1128,39 @@ function! s:CompleterCommand( mods, count, line1, line2, ... )
         \ "vimsupport.GetBoolValue( 'a:count != -1' )," .
         \ "vimsupport.GetIntValue( 'a:line1' )," .
         \ "vimsupport.GetIntValue( 'a:line2' ) )"
+endfunction
+
+
+function! s:PollHoverResponse( id ) abort
+  if !s:Pyeval( 'ycm_state.AsyncCommandResponseReady()' )
+    let s:pollers.hover.id = timer_start(
+          \ s:pollers.hover.wait_milliseconds,
+          \ function( 's:PollHoverResponse' ) )
+    return
+  endif
+
+  call s:StopPoller( s:pollers.hover )
+  call balloon_show( s:Pyeval( 'ycm_state.AsyncCommandResponseText()' ) )
+endfunction
+
+
+function! YCMHover() abort
+  if s:pollers.hover.id != -1
+    " Don't start a new one (TODO: we should probably abort the existing one)
+    return ''
+  endif
+
+  exec s:python_command "ycm_state.SendAsyncCommandRequestAtLocation( "
+        \ . "[ 'GetType' ], "
+        \ . "vimsupport.GetIntValue( 'v:beval_bufnr' ), "
+        \ . "vimsupport.GetIntValue( 'v:beval_lnum' ), "
+        \ . "vimsupport.GetIntValue( 'v:beval_col' ) ) "
+
+  let s:pollers.hover.id = timer_start(
+          \ s:pollers.hover.wait_milliseconds,
+          \ function( 's:PollHoverResponse' ) )
+
+  return ''
 endfunction
 
 

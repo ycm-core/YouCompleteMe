@@ -40,7 +40,8 @@ from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
-from ycm.client.command_request import SendCommandRequest
+from ycm.client.command_request import ( SendCommandRequest,
+                                         CommandRequest )
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.signature_help_request import SignatureHelpRequest
 from ycm.client.signature_help_request import SigHelpAvailableByFileType
@@ -114,6 +115,7 @@ class YouCompleteMe( object ):
     self._buffers = None
     self._latest_completion_request = None
     self._latest_signature_help_request = None
+    self._latest_async_command_request = None
     self._signature_help_available_requests = SigHelpAvailableByFileType()
     self._signature_help_state = signature_help.SignatureHelpState()
     self._logger = logging.getLogger( 'ycm' )
@@ -380,7 +382,8 @@ class YouCompleteMe( object ):
                           modifiers,
                           has_range,
                           start_line,
-                          end_line ):
+                          end_line,
+                          block = True ):
     final_arguments = []
     for argument in arguments:
       # The ft= option which specifies the completer when running a command is
@@ -404,6 +407,40 @@ class YouCompleteMe( object ):
                                modifiers,
                                self._user_options[ 'goto_buffer_command' ],
                                extra_data )
+
+
+  def SendAsyncCommandRequestAtLocation( self,
+                                         arguments,
+                                         bufnr,
+                                         line,
+                                         col ):
+    if self._latest_async_command_request:
+      if not self._latest_async_command_request.Done():
+        return
+
+    extra_data = {
+      'line_num': line,
+      'column_num': col,
+      'filepath': vimsupport.GetBufferFilepath( vim.buffers[ bufnr ] ),
+    }
+    self._AddExtraConfDataIfNeeded( extra_data )
+    self._latest_async_command_request = CommandRequest( arguments, extra_data )
+    self._latest_async_command_request.Start()
+
+
+  def AsyncCommandResponseReady( self ):
+    return bool( self._latest_async_command_request and
+                 self._latest_async_command_request.Done() )
+
+
+  def AsyncCommandResponseText( self ):
+    text = self._latest_async_command_request.GetResponseTextOnly()
+    self._latest_async_command_request = None
+
+    if text is None:
+      return [ '[No data]' ]
+
+    return text.splitlines()
 
 
   def GetDefinedSubcommandsAsync( self ):
