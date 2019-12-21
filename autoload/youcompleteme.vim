@@ -168,10 +168,11 @@ function! youcompleteme#Enable()
   let s:completion = s:default_completion
 
   if exists( '*prop_type_add' ) && exists( '*prop_type_delete' )
+    hi default YCMInverse term=reverse cterm=reverse gui=reverse
     call prop_type_delete( 'YCM-signature-help-current-argument' )
     call prop_type_add( 'YCM-signature-help-current-argument', {
-          \   'highlight': 'PMenuSel',
-          \   'combine':   0,
+          \   'highlight': 'YCMInverse',
+          \   'combine':   1,
           \   'priority':  50,
           \ } )
   endif
