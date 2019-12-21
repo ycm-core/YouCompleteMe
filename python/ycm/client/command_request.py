@@ -73,6 +73,30 @@ class CommandRequest( BaseRequest ):
     return self._response
 
 
+  def GetResponseTextOnly( self ):
+    if self._response is None and self._response_future is not None:
+      # This is a blocking call if not Done()
+      self.Response()
+
+    if self._response is None:
+      # An exception was raised and handled.
+      return
+
+    # If not a dictionary or a list, the response is necessarily a
+    # scalar: boolean, number, string, etc. In this case, we print
+    # it to the user.
+    if not isinstance( self._response, ( dict, list ) ):
+      return self._response
+
+    if 'message' in self._response:
+      return self._response[ 'message' ]
+
+    if 'detailed_info' in self._response:
+      return self._response[ 'detailed_info' ]
+
+    return '[No data]'
+
+
   def RunPostCommandActionsIfNeeded( self,
                                      buffer_command,
                                      modifiers ):
@@ -165,13 +189,6 @@ class CommandRequest( BaseRequest ):
 
   def _HandleDetailedInfoResponse( self ):
     vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
-
-
-def SendCommandRequestAsync( arguments, extra_data = None ):
-  request = CommandRequest( arguments, extra_data )
-  request.Start()
-  # Don't block
-  return request
 
 
 def SendCommandRequest( arguments,
