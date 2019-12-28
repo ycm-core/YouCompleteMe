@@ -92,7 +92,7 @@ class CommandRequest( BaseRequest ):
     if 'detailed_info' in self._response:
       return self._response[ 'detailed_info' ]
 
-    return '[No data]'
+    return None
 
 
   def RunPostCommandActionsIfNeeded( self,
