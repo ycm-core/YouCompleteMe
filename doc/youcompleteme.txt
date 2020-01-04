@@ -1,19 +1,20 @@
-*youcompleteme.txt*  YouCompleteMe: a code-completion engine for Vim
+*youcompleteme*  YouCompleteMe: a code-completion engine for Vim
 
 ===============================================================================
 Contents ~
 
  1. Introduction                                   |youcompleteme-introduction|
- 2. Help, Advice, Support                   |youcompleteme-help-advice-support|
- 3. Contents                                           |youcompleteme-contents|
- 4. Intro                                                 |youcompleteme-intro|
- 5. Installation                                   |youcompleteme-installation|
+ 2. Early Warning: Dropping support for Python 2 in 2020 |youcompleteme-early-warning-dropping-support-for-python-2-in-2020|
+ 3. Help, Advice, Support                   |youcompleteme-help-advice-support|
+ 4. Contents                                           |youcompleteme-contents|
+ 5. Intro                                                 |youcompleteme-intro|
+ 6. Installation                                   |youcompleteme-installation|
   1. macOS                                                |youcompleteme-macos|
   2. Linux 64-bit                                  |youcompleteme-linux-64-bit|
   3. Windows                                            |youcompleteme-windows|
   4. FreeBSD/OpenBSD                            |youcompleteme-freebsd-openbsd|
   5. Full Installation Guide            |youcompleteme-full-installation-guide|
- 6. Quick Feature Summary                 |youcompleteme-quick-feature-summary|
+ 7. Quick Feature Summary                 |youcompleteme-quick-feature-summary|
   1. General (all languages)                            |youcompleteme-general|
   2. C-family languages (C, C++, Objective C, Objective C++, CUDA) |youcompleteme-c-family-languages|
   3. C♯                                                       |youcompleteme-c|
@@ -22,7 +23,7 @@ Contents ~
   6. JavaScript and TypeScript            |youcompleteme-javascript-typescript|
   7. Rust                                                  |youcompleteme-rust|
   8. Java                                                  |youcompleteme-java|
- 7. User Guide                                       |youcompleteme-user-guide|
+ 8. User Guide                                       |youcompleteme-user-guide|
   1. General Usage                                |youcompleteme-general-usage|
   2. Client-Server Architecture      |youcompleteme-client-server-architecture|
   3. Completion String Ranking        |youcompleteme-completion-string-ranking|
@@ -59,7 +60,7 @@ Contents ~
   15. Writing New Semantic Completers |youcompleteme-writing-new-semantic-completers|
   16. Diagnostic Display                     |youcompleteme-diagnostic-display|
    1. Diagnostic Highlighting Groups |youcompleteme-diagnostic-highlighting-groups|
- 8. Commands                                           |youcompleteme-commands|
+ 9. Commands                                           |youcompleteme-commands|
   1. The |:YcmRestartServer| command
   2. The |:YcmForceCompileAndDiagnostics| command
   3. The |:YcmDiags| command
@@ -67,7 +68,7 @@ Contents ~
   5. The |:YcmDebugInfo| command
   6. The |:YcmToggleLogs| command
   7. The |:YcmCompleter| command
- 9. YcmCompleter Subcommands           |youcompleteme-ycmcompleter-subcommands|
+ 10. YcmCompleter Subcommands          |youcompleteme-ycmcompleter-subcommands|
   1. GoTo Commands                                |youcompleteme-goto-commands|
    1. The |GoToInclude| subcommand
    2. The |GoToDeclaration| subcommand
@@ -95,13 +96,13 @@ Contents ~
    2. The |RestartServer| subcommand
    3. The |ClearCompilationFlagCache| subcommand
    4. The |ReloadSolution| subcommand
- 10. Functions                                        |youcompleteme-functions|
+ 11. Functions                                        |youcompleteme-functions|
   1. The |youcompleteme#GetErrorCount| function
   2. The |youcompleteme#GetWarningCount| function
- 11. Autocommands                                  |youcompleteme-autocommands|
+ 12. Autocommands                                  |youcompleteme-autocommands|
   1. The |YcmLocationOpened| autocommand
   2. The |YcmQuickFixOpened| autocommand
- 12. Options                                            |youcompleteme-options|
+ 13. Options                                            |youcompleteme-options|
   1. The |g:ycm_min_num_of_chars_for_completion| option
   2. The |g:ycm_min_num_identifier_candidate_chars| option
   3. The |g:ycm_max_num_candidates| option
@@ -157,7 +158,7 @@ Contents ~
   53. The |g:ycm_clangd_uses_ycmd_caching| option
   54. The |g:ycm_language_server| option
   55. The |g:ycm_disable_signature_help| option
- 13. FAQ                                                    |youcompleteme-faq|
+ 14. FAQ                                                    |youcompleteme-faq|
   1. I used to be able to 'import vim' in '.ycm_extra_conf.py', but now can't |youcompleteme-i-used-to-be-able-to-import-vim-in-.ycm_extra_conf.py-but-now-cant|
   2. I get 'ImportError' exceptions that mention 'PyInit_ycm_core' or 'initycm_core' |youcompleteme-i-get-importerror-exceptions-that-mention-pyinit_ycm_core-or-initycm_core|
   3. I get a linker warning regarding 'libpython' on macOS when compiling YCM |youcompleteme-i-get-linker-warning-regarding-libpython-on-macos-when-compiling-ycm|
@@ -196,16 +197,36 @@ module could not be loaded" |youcompleteme-on-windows-i-get-e887-sorry-this-comm
   34. YCM does not work with my Anaconda Python setup |youcompleteme-ycm-does-not-work-with-my-anaconda-python-setup|
   35. Automatic import insertion after selecting a completion breaks undo |youcompleteme-automatic-import-insertion-after-selecting-completion-breaks-undo|
   36. 'TAB' is already mapped to trigger completion in the command-line window |youcompleteme-tab-is-already-mapped-to-trigger-completion-in-command-line-window|
- 14. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
- 15. Contact                                            |youcompleteme-contact|
- 16. License                                            |youcompleteme-license|
- 17. References                                      |youcompleteme-references|
+ 15. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
+ 16. Contact                                            |youcompleteme-contact|
+ 17. License                                            |youcompleteme-license|
+ 18. References                                      |youcompleteme-references|
 
 ===============================================================================
                                                    *youcompleteme-introduction*
 Introduction ~
 
 Image: Gitter room [1] Image: Build status [3] Image: Coverage status [5]
+
+===============================================================================
+            *youcompleteme-early-warning-dropping-support-for-python-2-in-2020*
+Early Warning: Dropping support for Python 2 in 2020 ~
+
+In early 2020, YCM will drop support for Python 2. But we will maintain
+critical fixes on a branch (name TBA) of YCM for a period of 1 year.
+
+Why?
+
+Over the past decade, YouCompleteMe has had an at times fractious, but
+ultimately very successful relationship with Python 2. However, more recently
+it has been carrying on a simultaneous relationship with Python 3. Indeed all
+of YCM and ycmd code is Python 3 code, with a lot of gubbins to make it work
+also on Python 2. This makes the code more complex, requires double testing of
+everything, and restricts the developers from using certain new langauge
+features, ultimately restricting the features we can deliver to users.
+
+On 1st January 2020, Python 2 will be officially end of life. And therefore, so
+will its relationship with YouCompleteMe and ycmd.
 
 ===============================================================================
                                             *youcompleteme-help-advice-support*
@@ -1043,12 +1064,16 @@ C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
+- Reference finding (|GoToReferences|)
+- Renaming symbols ('RefactorRename <new name>')
+- Code formatting (|Format|)
 
 -------------------------------------------------------------------------------
                                                               *youcompleteme-c*
 C♯ ~
 
 - Semantic auto-completion
+- Signature help
 - Real-time diagnostic display
 - Go to declaration/definition (|GoTo|, etc.)
 - Go to implementation (|GoToImplementation|)
@@ -1056,6 +1081,8 @@ C♯ ~
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
 - Management of OmniSharp-Roslyn server instance
+- Renaming symbols ('RefactorRename <new name>')
+- Code formatting (|Format|)
 
 -------------------------------------------------------------------------------
                                                          *youcompleteme-python*
@@ -1078,6 +1105,7 @@ Go ~
 - Go to declaration/definition (|GoTo|, etc.)
 - Go to type definition (|GoToType|)
 - Automatically fix certain errors (|FixIt|)
+- View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Code formatting (|Format|)
 - Management of 'gopls' server instance
@@ -1087,10 +1115,12 @@ Go ~
 JavaScript and TypeScript ~
 
 - Semantic auto-completion with automatic import insertion
+- Signature help
 - Real-time diagnostic display
 - Go to definition (|GoTo|, |GoToDefinition|, and |GoToDeclaration| are
   identical)
 - Go to type definition (|GoToType|)
+- Go to implementation (|GoToImplementation|)
 - Reference finding (|GoToReferences|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
@@ -2127,7 +2157,8 @@ This command attempts to find all of the references within the project to the
 identifier under the cursor and populates the quickfix list with those
 locations.
 
-Supported in filetypes: 'java, javascript, python, typescript, rust'
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, java, javascript, python,
+typescript, rust'
 
 -------------------------------------------------------------------------------
 The *GoToImplementation* subcommand
@@ -2136,7 +2167,7 @@ Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.
 
-Supported in filetypes: 'cs, java, rust'
+Supported in filetypes: 'cs, java, rust, typescript, javascript'
 
 -------------------------------------------------------------------------------
 The *GoToImplementationElseDeclaration* subcommand
@@ -2234,7 +2265,7 @@ under the cursor. Depending on the file type, this includes things like:
 - Python docstrings,
 - etc.
 
-Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, java, javascript,
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
 python, typescript, rust'
 
 -------------------------------------------------------------------------------
@@ -2304,7 +2335,8 @@ files. Rename operations may involve changes to multiple files, which may or
 may not be open in Vim buffers at the time. YouCompleteMe handles all of this
 for you. The behavior is described in the following section.
 
-Supported in filetypes: 'java, javascript, typescript, rust'
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, java, javascript,
+typescript, rust, cs'
 
 -------------------------------------------------------------------------------
                                             *youcompleteme-multi-file-refactor*
@@ -2348,7 +2380,8 @@ select it in one of Vim's visual modes (see ':h visual-use') and run the
 command or directly enter the range on the command line, e.g. ':2,5YcmCompleter
 Format' to format it from line 2 to line 5.
 
-Supported in filetypes: 'java, javascript, go, typescript, rust'
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, java, javascript, go,
+typescript, rust, cs'
 
 -------------------------------------------------------------------------------
 The *OrganizeImports* subcommand
@@ -2385,7 +2418,8 @@ The *RestartServer* subcommand
 Restarts the semantic-engine-as-localhost-server for those semantic engines
 that work as separate servers that YCM talks to.
 
-Supported in filetypes: 'cs, go, java, javascript, rust, typescript'
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
+rust, typescript'
 
 -------------------------------------------------------------------------------
 The *ClearCompilationFlagCache* subcommand
@@ -2633,6 +2667,7 @@ Default: '[see next line]'
         \ 'vimwiki': 1,
         \ 'pandoc': 1,
         \ 'infolog': 1,
+        \ 'leaderf': 1,
         \ 'mail': 1
         \}
 <
