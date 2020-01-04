@@ -839,6 +839,7 @@ Quick Feature Summary
 ### C♯
 
 * Semantic auto-completion
+* Signature help
 * Real-time diagnostic display
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to implementation (`GoToImplementation`)
@@ -846,6 +847,8 @@ Quick Feature Summary
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
 * Management of OmniSharp-Roslyn server instance
+* Renaming symbols (`RefactorRename <new name>`)
+* Code formatting (`Format`)
 
 ### Python
 
@@ -877,6 +880,7 @@ Quick Feature Summary
 * Go to definition (`GoTo`, `GoToDefinition`, and `GoToDeclaration` are
   identical)
 * Go to type definition (`GoToType`)
+* Go to implementation (`GoToImplementation`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -1893,7 +1897,7 @@ Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.
 
-Supported in filetypes: `cs, java, rust`
+Supported in filetypes: `cs, java, rust, typescript, javascript`
 
 #### The `GoToImplementationElseDeclaration` subcommand
 
@@ -2051,7 +2055,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, typescript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, typescript, rust, cs`
 
 #### Multi-file Refactor
 
@@ -2092,7 +2096,7 @@ it in one of Vim's visual modes (see `:h visual-use`) and run the command or
 directly enter the range on the command line, e.g. `:2,5YcmCompleter Format` to
 format it from line 2 to line 5.
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, go, typescript, rust`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, go, typescript, rust, cs`
 
 #### The `OrganizeImports` subcommand
 
