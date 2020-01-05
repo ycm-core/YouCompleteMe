@@ -22,6 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+import json
 from nose.tools import eq_
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
@@ -33,9 +34,8 @@ class ConvertCompletionResponseToVimDatas_test( object ):
   """ This class tests the
       completion_request._ConvertCompletionResponseToVimDatas method """
 
-  def _Check( self, completion_id, completion_data, expected_vim_data ):
+  def _Check( self, completion_data, expected_vim_data ):
     vim_data = completion_request._ConvertCompletionDataToVimData(
-        completion_id,
         completion_data )
 
     try:
@@ -49,15 +49,16 @@ class ConvertCompletionResponseToVimDatas_test( object ):
 
 
   def AllFields_test( self ):
-    self._Check( 0, {
+    extra_data = {
+        'doc_string':    'DOC STRING',
+    }
+    self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
       'kind':            'K',
       'detailed_info':   'DETAILED INFO',
-      'extra_data': {
-        'doc_string':    'DOC STRING',
-      },
+      'extra_data': extra_data,
     }, {
       'word'     : 'INSERTION TEXT',
       'abbr'     : 'MENU TEXT',
@@ -67,12 +68,12 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '0',
+      'user_data': json.dumps( extra_data ),
     } )
 
 
   def OnlyInsertionTextField_test( self ):
-    self._Check( 17, {
+    self._Check( {
       'insertion_text':  'INSERTION TEXT'
     }, {
       'word'     : 'INSERTION TEXT',
@@ -83,12 +84,12 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '17',
+      'user_data': '{}',
     } )
 
 
   def JustDetailedInfo_test( self ):
-    self._Check( 9999999999, {
+    self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
@@ -103,19 +104,20 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '9999999999',
+      'user_data': '{}',
     } )
 
 
   def JustDocString_test( self ):
-    self._Check( 'not_an_int', {
+    extra_data = {
+      'doc_string':    'DOC STRING',
+    }
+    self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
       'kind':            'K',
-      'extra_data': {
-        'doc_string':    'DOC STRING',
-      },
+      'extra_data': extra_data,
     }, {
       'word'     : 'INSERTION TEXT',
       'abbr'     : 'MENU TEXT',
@@ -125,12 +127,12 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': 'not_an_int',
+      'user_data': json.dumps( extra_data ),
     } )
 
 
   def ExtraInfoNoDocString_test( self ):
-    self._Check( 0, {
+    self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
@@ -146,20 +148,21 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '0',
+      'user_data': '{}',
     } )
 
 
   def NullCharactersInExtraInfoAndDocString_test( self ):
-    self._Check( '0', {
+    extra_data = {
+      'doc_string': 'DOC\x00STRING'
+    }
+    self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
       'kind':            'K',
       'detailed_info':   'DETAILED\x00INFO',
-      'extra_data': {
-        'doc_string': 'DOC\x00STRING'
-      },
+      'extra_data': extra_data,
     }, {
       'word'     : 'INSERTION TEXT',
       'abbr'     : 'MENU TEXT',
@@ -169,12 +172,12 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '0',
+      'user_data': json.dumps( extra_data ),
     } )
 
 
   def ExtraInfoNoDocStringWithDetailedInfo_test( self ):
-    self._Check( '0', {
+    self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
@@ -191,20 +194,21 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '0',
+      'user_data': '{}',
     } )
 
 
   def EmptyInsertionText_test( self ):
-    self._Check( 0, {
+    extra_data = {
+      'doc_string':    'DOC STRING',
+    }
+    self._Check( {
       'insertion_text':  '',
       'menu_text':       'MENU TEXT',
       'extra_menu_info': 'EXTRA MENU INFO',
       'kind':            'K',
       'detailed_info':   'DETAILED INFO',
-      'extra_data': {
-        'doc_string':    'DOC STRING',
-      },
+      'extra_data': extra_data,
     }, {
       'word'     : '',
       'abbr'     : 'MENU TEXT',
@@ -214,5 +218,5 @@ class ConvertCompletionResponseToVimDatas_test( object ):
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
-      'user_data': '0',
+      'user_data': json.dumps( extra_data ),
     } )
