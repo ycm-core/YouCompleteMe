@@ -22,6 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+import json
 import logging
 from ycmd.utils import ToUnicode
 from ycm.client.base_request import ( BaseRequest, DisplayServerException,
@@ -87,11 +88,11 @@ class CompletionRequest( BaseRequest ):
       self._OnCompleteDone_FixIt()
 
 
-  def _GetCompletionsUserMayHaveCompleted( self ):
+  def _GetExtraDataUserMayHaveCompleted( self ):
     completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
 
     # If Vim supports user_data (8.0.1493 or later), we actually know the
-    # _exact_ element that was selected, having put its index in the
+    # _exact_ element that was selected, having put its extra_data in the
     # user_data field. Otherwise, we have to guess by matching the values in the
     # completed item and the list of completions. Sometimes this returns
     # multiple possibilities, which is essentially unresolvable.
@@ -100,15 +101,14 @@ class CompletionRequest( BaseRequest ):
       return _FilterToMatchingCompletions( completed_item, completions )
 
     if completed_item[ 'user_data' ]:
-      completions = self._RawResponse()[ 'completions' ]
-      return [ completions[ int( completed_item[ 'user_data' ] ) ] ]
+      return [ json.loads( completed_item[ 'user_data' ] ) ]
 
     return []
 
 
   def _OnCompleteDone_Csharp( self ):
-    completions = self._GetCompletionsUserMayHaveCompleted()
-    namespaces = [ _GetRequiredNamespaceImport( c ) for c in completions ]
+    extra_datas = self._GetExtraDataUserMayHaveCompleted()
+    namespaces = [ _GetRequiredNamespaceImport( c ) for c in extra_datas ]
     namespaces = [ n for n in namespaces if n ]
     if not namespaces:
       return
@@ -127,8 +127,8 @@ class CompletionRequest( BaseRequest ):
 
 
   def _OnCompleteDone_FixIt( self ):
-    completions = self._GetCompletionsUserMayHaveCompleted()
-    fixit_completions = [ _GetFixItCompletion( c ) for c in completions ]
+    extra_datas = self._GetExtraDataUserMayHaveCompleted()
+    fixit_completions = [ _GetFixItCompletion( c ) for c in extra_datas ]
     fixit_completions = [ f for f in fixit_completions if f ]
     if not fixit_completions:
       return
@@ -147,18 +147,11 @@ class CompletionRequest( BaseRequest ):
 
 
 def _GetRequiredNamespaceImport( completion ):
-  if ( 'extra_data' not in completion
-       or 'required_namespace_import' not in completion[ 'extra_data' ] ):
-    return None
-  return completion[ 'extra_data' ][ 'required_namespace_import' ]
+  return completion.get( 'required_namespace_import' )
 
 
 def _GetFixItCompletion( completion ):
-  if ( 'extra_data' not in completion
-       or 'fixits' not in completion[ 'extra_data' ] ):
-    return None
-
-  return completion[ 'extra_data' ][ 'fixits' ]
+  return completion.get( 'fixits' )
 
 
 def _FilterToMatchingCompletions( completed_item, completions ):
@@ -173,7 +166,7 @@ def _FilterToMatchingCompletions( completed_item, completions ):
                ToUnicode( item.get( key, "" ) ) )
 
     if all( matcher( i ) for i in match_keys ):
-      matched_completions.append( completion )
+      matched_completions.append( completion.get( 'extra_data', {} ) )
   return matched_completions
 
 
@@ -213,7 +206,8 @@ def _ConvertCompletionDataToVimData( completion_identifier, completion_data ):
     #
     # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
     # the item to the dictionary is harmless in earlier Vims.
-    'user_data': str( completion_identifier )
+    # Note: Since 8.2.0084 we don't need to use str() here.
+    'user_data': str( completion_data.get( 'extra_data', {} ) )
   }
 
 
