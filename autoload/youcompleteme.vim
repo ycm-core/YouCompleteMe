@@ -324,8 +324,12 @@ function! s:SetUpSigns()
     highlight link YcmWarningLine SyntasticWarningLine
   endif
 
-  call sign_define( 'YcmError', { 'text': g:ycm_error_symbol, 'texthl': 'YcmErrorSign', 'linehl': 'YcmErrorLine' } )
-  call sign_define( 'YcmWarning', { 'text': g:ycm_error_symbol, 'texthl': 'YcmWarningSign', 'linehl': 'YcmWarningLine' } )
+  call sign_define( 'YcmError', { 'text': g:ycm_error_symbol,
+                                \ 'texthl': 'YcmErrorSign',
+                                \ 'linehl': 'YcmErrorLine' } )
+  call sign_define( 'YcmWarning', { 'text': g:ycm_error_symbol,
+                                  \ 'texthl': 'YcmWarningSign',
+                                  \ 'linehl': 'YcmWarningLine' } )
 endfunction
 
 
@@ -386,7 +390,8 @@ function! s:DisableOnLargeFile( buffer )
   let b:ycm_largefile =
         \ threshold > 0 && getfsize( expand( a:buffer ) ) > threshold
   if b:ycm_largefile
-    py3 vimsupport.PostVimMessage( 'YouCompleteMe is disabled in this buffer; the file exceeded the max size (see YCM options).' )
+    py3 vimsupport.PostVimMessage( 'YouCompleteMe is disabled in this buffer;' .
+          \ ' the file exceeded the max size (see YCM options).' )
   endif
   return b:ycm_largefile
 endfunction
@@ -826,7 +831,8 @@ endfunction
 
 
 function! s:RequestCompletion()
-  py3 ycm_state.SendCompletionRequest( vimsupport.GetBoolValue( 's:force_semantic' ) )
+  py3 ycm_state.SendCompletionRequest(
+        \ vimsupport.GetBoolValue( 's:force_semantic' ) )
 
   call s:PollCompletion()
 endfunction
@@ -1052,7 +1058,9 @@ endfunction
 
 
 function! youcompleteme#OpenGoToList()
-  py3 vimsupport.PostVimMessage( 'WARNING: youcompleteme#OpenGoToList function is deprecated. Do NOT use it.' )
+  py3 vimsupport.PostVimMessage(
+        \ "'WARNING: youcompleteme#OpenGoToList function is deprecated. " .
+        \ "Do NOT use it.'" )
   py3 vimsupport.OpenQuickFixList( True, True )
 endfunction
 
