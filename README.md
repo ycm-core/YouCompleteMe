@@ -100,7 +100,7 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
   completion for C/C++/Objective-C/Objective-C++/CUDA (from now on referred to
   as "the C-family languages"),
 - a powerful [clangd][]-based completion engine for the C-family languages.
-- a [Jedi][]-based completion engine for Python 3,
+- a [Jedi][]-based completion engine for Python 2 and 3,
 - an [OmniSharp-Roslyn][]-based completion engine for C#,
 - a [Gopls][]-based completion engine for Go,
 - a [TSServer][]-based completion engine for JavaScript and TypeScript,
