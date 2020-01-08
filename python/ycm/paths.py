@@ -59,7 +59,8 @@ def PathToPythonInterpreter():
   if _EndsWithPython( python_interpreter ):
     return python_interpreter
 
-  python_interpreter = utils.PathToFirstExistingExecutable( [ 'python3' ] )
+  python_interpreter = utils.PathToFirstExistingExecutable( [ 'python3',
+                                                              'python' ] )
   if python_interpreter:
     return python_interpreter
 
