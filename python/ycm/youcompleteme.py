@@ -80,6 +80,9 @@ CORE_MISSING_MESSAGE = (
 CORE_OUTDATED_MESSAGE = (
   'YCM core library too old; PLEASE RECOMPILE by running the install.py '
   'script. See the documentation for more details.' )
+NO_PYTHON2_SUPPORT_MESSAGE = (
+  'YCM has dropped support for python2. '
+  'You need to recompile it with python3 instead.' )
 SERVER_IDLE_SUICIDE_SECONDS = 1800  # 30 minutes
 CLIENT_LOGFILE_FORMAT = 'ycm_'
 SERVER_LOGFILE_FORMAT = 'ycmd_{port}_{std}_'
@@ -247,11 +250,14 @@ class YouCompleteMe:
       error_message = CORE_MISSING_MESSAGE
     elif return_code == 7:
       error_message = CORE_OUTDATED_MESSAGE
+    elif return_code == 8:
+      error_message = NO_PYTHON2_SUPPORT_MESSAGE
     else:
       error_message = EXIT_CODE_UNEXPECTED_MESSAGE.format( code = return_code,
                                                            logfile = logfile )
 
-    error_message = SERVER_SHUTDOWN_MESSAGE + ' ' + error_message
+    if return_code != 8:
+      error_message = SERVER_SHUTDOWN_MESSAGE + ' ' + error_message
     self._logger.error( error_message )
     vimsupport.PostVimMessage( error_message )
 

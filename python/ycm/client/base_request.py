@@ -19,10 +19,11 @@ import logging
 import json
 import vim
 from base64 import b64decode, b64encode
+from hmac import compare_digest
 from urllib.parse import urljoin, urlparse
 from ycm import vimsupport
 from ycmd.utils import ToBytes, GetCurrentDirectory
-from ycmd.hmac_utils import CreateRequestHmac, CreateHmac, SecureBytesEqual
+from ycmd.hmac_utils import CreateRequestHmac, CreateHmac
 from ycmd.responses import ServerError, UnknownExtraConf
 
 _HEADERS = { 'content-type': 'application/json' }
@@ -291,7 +292,7 @@ def _ToUtf8Json( data ):
 def _ValidateResponseObject( response ):
   our_hmac = CreateHmac( response.content, BaseRequest.hmac_secret )
   their_hmac = ToBytes( b64decode( response.headers[ _HMAC_HEADER ] ) )
-  if not SecureBytesEqual( our_hmac, their_hmac ):
+  if not compare_digest( our_hmac, their_hmac ):
     raise RuntimeError( 'Received invalid HMAC for response!' )
   return True
 
