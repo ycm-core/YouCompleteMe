@@ -21,7 +21,7 @@ from hamcrest import assert_that, equal_to
 import contextlib
 import functools
 import json
-import nose
+import pytest
 import os
 import re
 import sys
@@ -701,7 +701,7 @@ def ExpectedFailure( reason, *exception_matchers ):
           raise test_exception
 
         # Failed for the right reason
-        raise nose.SkipTest( reason )
+        pytest.skip( reason )
       else:
         raise AssertionError( 'Test was expected to fail: {}'.format(
           reason ) )

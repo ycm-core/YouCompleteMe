@@ -19,8 +19,8 @@ from ycm.tests.test_utils import ExtendedMock, MockVimModule
 MockVimModule()
 
 import json
+from hamcrest import assert_that
 from mock import patch, call
-from nose.tools import ok_
 from ycm.client.command_request import CommandRequest
 
 
@@ -281,8 +281,8 @@ class Response_Detection_test:
           request = CommandRequest( [ command ] )
           request._response = response
           request.RunPostCommandActionsIfNeeded( 'tab' )
-          ok_( set_qf_list.called )
-          ok_( open_qf_list.called )
+          assert_that( set_qf_list.called )
+          assert_that( open_qf_list.called )
 
     basic_goto = {
       'filepath': 'test',
