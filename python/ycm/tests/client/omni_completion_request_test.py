@@ -1,4 +1,4 @@
-# Copyright (C) 2016 YouCompleteMe contributors
+# Copyright (C) 2020 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #

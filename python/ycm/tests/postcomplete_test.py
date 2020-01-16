@@ -175,11 +175,7 @@ def OnCompleteDone_NoFixItForOmnifunc_test( *args ):
 def FilterToCompletedCompletions_MatchIsReturned_test():
   completions = [ BuildCompletion( insertion_text = 'Test' ) ]
   result = _FilterToMatchingCompletions( CompleteItemIs( 'Test' ), completions )
-<<<<<<< HEAD
-  eq_( list( result ), [ {} ] )
-=======
-  assert_that( list( result ), equal_to( completions ) )
->>>>>>> Drop nose.tools
+  assert_that( list( result ), contains_exactly( {} ) )
 
 
 def FilterToCompletedCompletions_ShortTextDoesntRaise_test():
@@ -191,11 +187,7 @@ def FilterToCompletedCompletions_ShortTextDoesntRaise_test():
 def FilterToCompletedCompletions_ExactMatchIsReturned_test():
   completions = [ BuildCompletion( insertion_text = 'Test' ) ]
   result = _FilterToMatchingCompletions( CompleteItemIs( 'Test' ), completions )
-<<<<<<< HEAD
-  eq_( list( result ), [ {} ] )
-=======
-  assert_that( list( result ), equal_to( completions ) )
->>>>>>> Drop nose.tools
+  assert_that( list( result ), contains_exactly( {} ) )
 
 
 def FilterToCompletedCompletions_NonMatchIsntReturned_test():
@@ -209,11 +201,7 @@ def FilterToCompletedCompletions_Unicode_test():
   completions = [ BuildCompletion( insertion_text = '†es†' ) ]
   result = _FilterToMatchingCompletions( CompleteItemIs( '†es†' ),
                                          completions )
-<<<<<<< HEAD
-  eq_( list( result ), [ {} ] )
-=======
-  assert_that( list( result ), equal_to( completions ) )
->>>>>>> Drop nose.tools
+  assert_that( list( result ), contains_exactly( {} ) )
 
 
 def GetRequiredNamespaceImport_ReturnNoneForNoExtraData_test():
@@ -222,16 +210,9 @@ def GetRequiredNamespaceImport_ReturnNoneForNoExtraData_test():
 
 def GetRequiredNamespaceImport_ReturnNamespaceFromExtraData_test():
   namespace = 'A_NAMESPACE'
-<<<<<<< HEAD
-  print( BuildCompletionNamespace( namespace ) )
-  eq_( _GetRequiredNamespaceImport(
-         BuildCompletionNamespace( namespace )[ 'extra_data' ] ),
-       namespace )
-=======
   assert_that( _GetRequiredNamespaceImport(
-                   BuildCompletionNamespace( namespace ) ),
+                   BuildCompletionNamespace( namespace )[ 'extra_data' ] ),
                equal_to( namespace ) )
->>>>>>> Drop nose.tools
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
@@ -240,11 +221,7 @@ def GetExtraDataUserMayHaveCompleted_ReturnEmptyIfPendingMatches_test(
     *args ):
   completions = [ BuildCompletionNamespace( None ) ]
   with _SetupForCsharpCompletionDone( completions ) as request:
-<<<<<<< HEAD
-    eq_( request._GetExtraDataUserMayHaveCompleted(), [] )
-=======
-    assert_that( request._GetCompletionsUserMayHaveCompleted(), empty() )
->>>>>>> Drop nose.tools
+    assert_that( request._GetExtraDataUserMayHaveCompleted(), empty() )
 
 
 def GetExtraDataUserMayHaveCompleted_ReturnMatchIfExactMatches_test( *args ):
@@ -253,13 +230,8 @@ def GetExtraDataUserMayHaveCompleted_ReturnMatchIfExactMatches_test( *args ):
   with _SetupForCsharpCompletionDone( completions ) as request:
     with patch( 'ycm.vimsupport.GetVariableValue',
                 GetVariableValue_CompleteItemIs( *info[ 1: ] ) ):
-<<<<<<< HEAD
-      eq_( request._GetExtraDataUserMayHaveCompleted(),
-           [ completions[ 0 ][ 'extra_data' ] ] )
-=======
-      assert_that( request._GetCompletionsUserMayHaveCompleted(),
-                   equal_to( completions ) )
->>>>>>> Drop nose.tools
+      assert_that( request._GetExtraDataUserMayHaveCompleted(),
+                   contains_exactly( completions[ 0 ][ 'extra_data' ] ) )
 
 
 def GetExtraDataUserMayHaveCompleted_ReturnMatchIfExactMatchesEvenIfPartial_test(): # noqa
@@ -269,13 +241,8 @@ def GetExtraDataUserMayHaveCompleted_ReturnMatchIfExactMatchesEvenIfPartial_test
   with _SetupForCsharpCompletionDone( completions ) as request:
     with patch( 'ycm.vimsupport.GetVariableValue',
                 GetVariableValue_CompleteItemIs( *info[ 1: ] ) ):
-<<<<<<< HEAD
-      eq_( request._GetExtraDataUserMayHaveCompleted(),
-           [ completions[ 0 ][ 'extra_data' ] ] )
-=======
-      assert_that( request._GetCompletionsUserMayHaveCompleted(),
-                   equal_to( [ completions[ 0 ] ] ) )
->>>>>>> Drop nose.tools
+      assert_that( request._GetExtraDataUserMayHaveCompleted(),
+                   contains_exactly( completions[ 0 ][ 'extra_data' ] ) )
 
 
 def GetExtraDataUserMayHaveCompleted_DontReturnMatchIfNoExactMatchesAndPartial_test(): # noqa
@@ -285,11 +252,7 @@ def GetExtraDataUserMayHaveCompleted_DontReturnMatchIfNoExactMatchesAndPartial_t
   with _SetupForCsharpCompletionDone( completions ) as request:
     with patch( 'ycm.vimsupport.GetVariableValue',
                 GetVariableValue_CompleteItemIs( *info[ 1: ] ) ):
-<<<<<<< HEAD
-      eq_( request._GetExtraDataUserMayHaveCompleted(), [] )
-=======
-      assert_that( request._GetCompletionsUserMayHaveCompleted(), empty() )
->>>>>>> Drop nose.tools
+      assert_that( request._GetExtraDataUserMayHaveCompleted(), empty() )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
@@ -297,13 +260,8 @@ def GetExtraDataUserMayHaveCompleted_DontReturnMatchIfNoExactMatchesAndPartial_t
 def GetExtraDataUserMayHaveCompleted_ReturnMatchIfMatches_test( *args ):
   completions = [ BuildCompletionNamespace( None ) ]
   with _SetupForCsharpCompletionDone( completions ) as request:
-<<<<<<< HEAD
-    eq_( request._GetExtraDataUserMayHaveCompleted(),
-         [ completions[ 0 ][ 'extra_data' ] ] )
-=======
-    assert_that( request._GetCompletionsUserMayHaveCompleted(),
-                 equal_to( completions ) )
->>>>>>> Drop nose.tools
+    assert_that( request._GetExtraDataUserMayHaveCompleted(),
+                 contains_exactly( completions[ 0 ][ 'extra_data' ] ) )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
@@ -319,13 +277,9 @@ def GetExtraDataUserMayHaveCompleted_UseUserData0_test( *args ):
   ]
 
   with _SetupForCsharpCompletionDone( completions ) as request:
-<<<<<<< HEAD
-    eq_( request._GetExtraDataUserMayHaveCompleted(),
-         [ BuildCompletionNamespace( 'namespace1' )[ 'extra_data' ] ] )
-=======
-    assert_that( request._GetCompletionsUserMayHaveCompleted(),
-                 equal_to( [ BuildCompletionNamespace( 'namespace1' ) ] ) )
->>>>>>> Drop nose.tools
+    assert_that( request._GetExtraDataUserMayHaveCompleted(),
+                 contains_exactly(
+                   BuildCompletionNamespace( 'namespace1' )[ 'extra_data' ] ) )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
@@ -341,8 +295,9 @@ def GetExtraDataUserMayHaveCompleted_UseUserData1_test( *args ):
   ]
 
   with _SetupForCsharpCompletionDone( completions ) as request:
-    assert_that( request._GetCompletionsUserMayHaveCompleted(),
-                 contains_exactly( BuildCompletionNamespace( 'namespace2' ) ) )
+    assert_that( request._GetExtraDataUserMayHaveCompleted(),
+                 contains_exactly(
+                   BuildCompletionNamespace( 'namespace2' )[ 'extra_data' ] ) )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
@@ -355,7 +310,7 @@ def GetExtraDataUserMayHaveCompleted_EmptyUserData_test( *args ):
   ]
 
   with _SetupForCsharpCompletionDone( completions ) as request:
-    assert_that( request._GetCompletionsUserMayHaveCompleted(), empty() )
+    assert_that( request._GetExtraDataUserMayHaveCompleted(), empty() )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
