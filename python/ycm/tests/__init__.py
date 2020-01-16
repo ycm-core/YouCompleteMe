@@ -105,8 +105,6 @@ def setUpPackage():
   # We treat warnings as errors in our tests because warnings raised inside Vim
   # will interrupt user workflow with a traceback and we don't want that.
   warnings.filterwarnings( 'error' )
-  # We ignore warnings from nose as we are not interested in them.
-  warnings.filterwarnings( 'ignore', module = 'nose' )
 
 
 def tearDownPackage():

@@ -16,7 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from nose.tools import eq_
+from hamcrest import assert_that, equal_to
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
 
@@ -32,7 +32,7 @@ class ConvertCompletionResponseToVimDatas_test:
         completion_data )
 
     try:
-      eq_( expected_vim_data, vim_data )
+      assert_that( expected_vim_data, equal_to( vim_data ) )
     except Exception:
       print( "Expected:\n'{}'\nwhen parsing:\n'{}'\nBut found:\n'{}'".format(
           expected_vim_data,

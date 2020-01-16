@@ -16,7 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from mock import MagicMock
-from nose.tools import eq_
+from hamcrest import assert_that, has_entries
 
 from ycm.client.omni_completion_request import OmniCompletionRequest
 
@@ -39,16 +39,16 @@ def BuildOmnicompletionRequest( results, start_column = 1 ):
 def Done_AlwaysTrue_test():
   request = BuildOmnicompletionRequest( [] )
 
-  eq_( request.Done(), True )
+  assert_that( request.Done() )
 
 
 def Response_FromOmniCompleter_test():
   results = [ { "word": "test" } ]
   request = BuildOmnicompletionRequest( results )
 
-  eq_( request.Response(), {
+  assert_that( request.Response(), has_entries( {
     'line': 1,
     'column': 1,
     'completion_start_column': 1,
     'completions': results
-  } )
+  } ) )

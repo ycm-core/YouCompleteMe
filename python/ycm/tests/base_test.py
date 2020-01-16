@@ -17,7 +17,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import contextlib
-from nose.tools import eq_, ok_
+from hamcrest import assert_that, equal_to
 from mock import patch
 
 from ycm.tests.test_utils import MockVimModule
@@ -47,259 +47,261 @@ def MockTextAfterCursor( text ):
 
 def AdjustCandidateInsertionText_Basic_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                             { 'word': 'foobar', 'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_ParenInTextAfterCursor_test():
   with MockTextAfterCursor( 'bar(zoo' ):
-    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                             { 'word': 'foobar', 'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_PlusInTextAfterCursor_test():
   with MockTextAfterCursor( 'bar+zoo' ):
-    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                             { 'word': 'foobar', 'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_WhitespaceInTextAfterCursor_test():
   with MockTextAfterCursor( 'bar zoo' ):
-    eq_( [ { 'word': 'foo',    'abbr': 'foobar' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo',    'abbr': 'foobar' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                             { 'word': 'foobar', 'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_MoreThanWordMatchingAfterCursor_test():
   with MockTextAfterCursor( 'bar.h' ):
-    eq_( [ { 'word': 'foo',      'abbr': 'foobar.h' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar.h', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo', 'abbr': 'foobar.h' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                             { 'word': 'foobar.h', 'abbr': '' } ] ) ) )
 
   with MockTextAfterCursor( 'bar(zoo' ):
-    eq_( [ { 'word': 'foo',        'abbr': 'foobar(zoo' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar(zoo', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo', 'abbr': 'foobar(zoo' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                             { 'word': 'foobar(zoo', 'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_NotSuffix_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'word': 'foofoo', 'abbr': 'foofoo' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foofoo', 'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foofoo', 'abbr': 'foofoo' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                   { 'word': 'foofoo', 'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_NothingAfterCursor_test():
   with MockTextAfterCursor( '' ):
-    eq_( [ { 'word': 'foofoo', 'abbr': '' },
-           { 'word': 'zobar',  'abbr': '' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foofoo', 'abbr': '' },
-           { 'word': 'zobar',  'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foofoo', 'abbr': '' },
+                   { 'word': 'zobar',  'abbr': '' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                   { 'word': 'foofoo', 'abbr': '' },
+                   { 'word': 'zobar',  'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_MultipleStrings_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'word': 'foo',    'abbr': 'foobar' },
-           { 'word': 'zo',     'abbr': 'zobar' },
-           { 'word': 'q',      'abbr': 'qbar' },
-           { 'word': '',       'abbr': 'bar' }, ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar', 'abbr': '' },
-           { 'word': 'zobar',  'abbr': '' },
-           { 'word': 'qbar',   'abbr': '' },
-           { 'word': 'bar',    'abbr': '' } ] ) )
+    assert_that( [ { 'word': 'foo',    'abbr': 'foobar' },
+                   { 'word': 'zo',     'abbr': 'zobar' },
+                   { 'word': 'q',      'abbr': 'qbar' },
+                   { 'word': '',       'abbr': 'bar' }, ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                   { 'word': 'foobar', 'abbr': '' },
+                   { 'word': 'zobar',  'abbr': '' },
+                   { 'word': 'qbar',   'abbr': '' },
+                   { 'word': 'bar',    'abbr': '' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_DontTouchAbbr_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'word': 'foo',    'abbr': '1234' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar', 'abbr': '1234' } ] ) )
+    assert_that( [ { 'word': 'foo',    'abbr': '1234' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                   { 'word': 'foobar', 'abbr': '1234' } ] ) ) )
 
 
 def AdjustCandidateInsertionText_NoAbbr_test():
   with MockTextAfterCursor( 'bar' ):
-    eq_( [ { 'word': 'foo', 'abbr': 'foobar' } ],
-         base.AdjustCandidateInsertionText( [
-           { 'word': 'foobar' } ] ) )
+    assert_that( [ { 'word': 'foo', 'abbr': 'foobar' } ],
+                 equal_to( base.AdjustCandidateInsertionText( [
+                   { 'word': 'foobar' } ] ) ) )
 
 
 def OverlapLength_Basic_test():
-  eq_( 3, base.OverlapLength( 'foo bar', 'bar zoo' ) )
-  eq_( 3, base.OverlapLength( 'foobar', 'barzoo' ) )
+  assert_that( 3, equal_to( base.OverlapLength( 'foo bar', 'bar zoo' ) ) )
+  assert_that( 3, equal_to( base.OverlapLength( 'foobar', 'barzoo' ) ) )
 
 
 def OverlapLength_BasicWithUnicode_test():
-  eq_( 3, base.OverlapLength( u'bar fäö', u'fäö bar' ) )
-  eq_( 3, base.OverlapLength( u'zoofäö', u'fäözoo' ) )
+  assert_that( 3, equal_to( base.OverlapLength( u'bar fäö', u'fäö bar' ) ) )
+  assert_that( 3, equal_to( base.OverlapLength( u'zoofäö', u'fäözoo' ) ) )
 
 
 def OverlapLength_OneCharOverlap_test():
-  eq_( 1, base.OverlapLength( 'foo b', 'b zoo' ) )
+  assert_that( 1, equal_to( base.OverlapLength( 'foo b', 'b zoo' ) ) )
 
 
 def OverlapLength_SameStrings_test():
-  eq_( 6, base.OverlapLength( 'foobar', 'foobar' ) )
+  assert_that( 6, equal_to( base.OverlapLength( 'foobar', 'foobar' ) ) )
 
 
 def OverlapLength_Substring_test():
-  eq_( 6, base.OverlapLength( 'foobar', 'foobarzoo' ) )
-  eq_( 6, base.OverlapLength( 'zoofoobar', 'foobar' ) )
+  assert_that( 6, equal_to( base.OverlapLength( 'foobar', 'foobarzoo' ) ) )
+  assert_that( 6, equal_to( base.OverlapLength( 'zoofoobar', 'foobar' ) ) )
 
 
 def OverlapLength_LongestOverlap_test():
-  eq_( 7, base.OverlapLength( 'bar foo foo', 'foo foo bar' ) )
+  assert_that( 7, equal_to( base.OverlapLength( 'bar foo foo',
+                                                'foo foo bar' ) ) )
 
 
 def OverlapLength_EmptyInput_test():
-  eq_( 0, base.OverlapLength( '', 'goobar' ) )
-  eq_( 0, base.OverlapLength( 'foobar', '' ) )
-  eq_( 0, base.OverlapLength( '', '' ) )
+  assert_that( 0, equal_to( base.OverlapLength( '', 'goobar' ) ) )
+  assert_that( 0, equal_to( base.OverlapLength( 'foobar', '' ) ) )
+  assert_that( 0, equal_to( base.OverlapLength( '', '' ) ) )
 
 
 def OverlapLength_NoOverlap_test():
-  eq_( 0, base.OverlapLength( 'foobar', 'goobar' ) )
-  eq_( 0, base.OverlapLength( 'foobar', '(^($@#$#@' ) )
-  eq_( 0, base.OverlapLength( 'foo bar zoo', 'foo zoo bar' ) )
+  assert_that( 0, equal_to( base.OverlapLength( 'foobar', 'goobar' ) ) )
+  assert_that( 0, equal_to( base.OverlapLength( 'foobar', '(^($@#$#@' ) ) )
+  assert_that( 0, equal_to( base.OverlapLength( 'foo bar zoo',
+                                                'foo zoo bar' ) ) )
 
 
 def LastEnteredCharIsIdentifierChar_Basic_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 3, 'abc' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 2, 'abc' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 1, 'abc' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
 
 def LastEnteredCharIsIdentifierChar_FiletypeHtml_test():
   with MockCurrentFiletypes( [ 'html' ] ):
     with MockCurrentColumnAndLineContents( 3, 'ab-' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
 
 def LastEnteredCharIsIdentifierChar_ColumnIsZero_test():
   with MockCurrentColumnAndLineContents( 0, 'abc' ):
-    ok_( not base.LastEnteredCharIsIdentifierChar() )
+    assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
 
 def LastEnteredCharIsIdentifierChar_LineEmpty_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 3, '' ):
-      ok_( not base.LastEnteredCharIsIdentifierChar() )
+      assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 0, '' ):
-      ok_( not base.LastEnteredCharIsIdentifierChar() )
+      assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
 
 def LastEnteredCharIsIdentifierChar_NotIdentChar_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 3, 'ab;' ):
-      ok_( not base.LastEnteredCharIsIdentifierChar() )
+      assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 1, ';' ):
-      ok_( not base.LastEnteredCharIsIdentifierChar() )
+      assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 3, 'ab-' ):
-      ok_( not base.LastEnteredCharIsIdentifierChar() )
+      assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
 
 def LastEnteredCharIsIdentifierChar_Unicode_test():
   with MockCurrentFiletypes():
     # CurrentColumn returns a byte offset and character ø is 2 bytes length.
     with MockCurrentColumnAndLineContents( 5, 'føo(' ):
-      ok_( not base.LastEnteredCharIsIdentifierChar() )
+      assert_that( not base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 4, 'føo(' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 3, 'føo(' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
     with MockCurrentColumnAndLineContents( 1, 'føo(' ):
-      ok_( base.LastEnteredCharIsIdentifierChar() )
+      assert_that( base.LastEnteredCharIsIdentifierChar() )
 
 
 def CurrentIdentifierFinished_Basic_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 3, 'ab;' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 2, 'ab;' ):
-      ok_( not base.CurrentIdentifierFinished() )
+      assert_that( not base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 1, 'ab;' ):
-      ok_( not base.CurrentIdentifierFinished() )
+      assert_that( not base.CurrentIdentifierFinished() )
 
 
 def CurrentIdentifierFinished_NothingBeforeColumn_test():
   with MockCurrentColumnAndLineContents( 0, 'ab;' ):
-    ok_( base.CurrentIdentifierFinished() )
+    assert_that( base.CurrentIdentifierFinished() )
 
   with MockCurrentColumnAndLineContents( 0, '' ):
-    ok_( base.CurrentIdentifierFinished() )
+    assert_that( base.CurrentIdentifierFinished() )
 
 
 def CurrentIdentifierFinished_InvalidColumn_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 5, '' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 5, 'abc' ):
-      ok_( not base.CurrentIdentifierFinished() )
+      assert_that( not base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 4, 'ab;' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
 
 def CurrentIdentifierFinished_InMiddleOfLine_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 4, 'bar.zoo' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 4, 'bar(zoo' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 4, 'bar-zoo' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
 
 def CurrentIdentifierFinished_Html_test():
   with MockCurrentFiletypes( [ 'html' ] ):
     with MockCurrentColumnAndLineContents( 4, 'bar-zoo' ):
-      ok_( not base.CurrentIdentifierFinished() )
+      assert_that( not base.CurrentIdentifierFinished() )
 
 
 def CurrentIdentifierFinished_WhitespaceOnly_test():
   with MockCurrentFiletypes():
     with MockCurrentColumnAndLineContents( 1, '\n' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 3, '\n    ' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 3, '\t\t\t\t' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
 
 def CurrentIdentifierFinished_Unicode_test():
   with MockCurrentFiletypes():
     # CurrentColumn returns a byte offset and character ø is 2 bytes length.
     with MockCurrentColumnAndLineContents( 6, 'føo ' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 5, 'føo ' ):
-      ok_( base.CurrentIdentifierFinished() )
+      assert_that( base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 4, 'føo ' ):
-      ok_( not base.CurrentIdentifierFinished() )
+      assert_that( not base.CurrentIdentifierFinished() )
 
     with MockCurrentColumnAndLineContents( 3, 'føo ' ):
-      ok_( not base.CurrentIdentifierFinished() )
+      assert_that( not base.CurrentIdentifierFinished() )

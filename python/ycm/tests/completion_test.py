@@ -22,7 +22,6 @@ MockVimModule()
 import contextlib
 from hamcrest import assert_that, contains_exactly, empty, has_entries
 from mock import call, MagicMock, patch
-from nose.tools import ok_
 
 from ycm.tests import PathToTestFile, YouCompleteMeInstance
 from ycmd.responses import ServerError
@@ -60,7 +59,7 @@ def SendCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
     with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
       with MockCompletionRequest( ServerResponse ):
         ycm.SendCompletionRequest()
-        ok_( ycm.CompletionRequestReady() )
+        assert_that( ycm.CompletionRequestReady() )
         assert_that(
           ycm.GetCompletionResponse(),
           has_entries( {
@@ -100,7 +99,7 @@ def SendCompletionRequest_ResponseContainingError_test( ycm, post_vim_message ):
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with MockCompletionRequest( ServerResponse ):
       ycm.SendCompletionRequest()
-      ok_( ycm.CompletionRequestReady() )
+      assert_that( ycm.CompletionRequestReady() )
       response = ycm.GetCompletionResponse()
       post_vim_message.assert_has_exact_calls( [
         call( 'Exception: message', truncate = True )
@@ -132,7 +131,7 @@ def SendCompletionRequest_ErrorFromServer_test( ycm,
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with MockCompletionRequest( ServerError( 'Server error' ) ):
       ycm.SendCompletionRequest()
-      ok_( ycm.CompletionRequestReady() )
+      assert_that( ycm.CompletionRequestReady() )
       response = ycm.GetCompletionResponse()
       logger.exception.assert_called_with( 'Error while handling server '
                                            'response' )
