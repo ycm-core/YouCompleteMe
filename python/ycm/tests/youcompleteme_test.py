@@ -29,7 +29,7 @@ import os
 import sys
 from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
                        has_entries, is_in, is_not, matches_regexp )
-from mock import call, MagicMock, patch
+from unittest.mock import call, MagicMock, patch
 
 from ycm import vimsupport
 from ycm.paths import _PathToPythonUsedDuringBuild

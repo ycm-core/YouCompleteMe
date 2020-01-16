@@ -32,7 +32,7 @@ from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
 from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
                        has_entries, has_entry, has_item, has_items, has_key,
                        is_not )
-from mock import call, MagicMock, patch
+from unittest.mock import call, MagicMock, patch
 
 
 def PresentDialog_Confirm_Call( message ):

@@ -18,7 +18,7 @@
 
 import contextlib
 from hamcrest import assert_that, equal_to
-from mock import patch
+from unittest.mock import patch
 
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()

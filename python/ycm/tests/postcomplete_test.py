@@ -21,12 +21,9 @@ from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 import contextlib
-<<<<<<< HEAD
 import json
-=======
-from hamcrest import assert_that, empty, equal_to, none
->>>>>>> Drop nose.tools
-from mock import MagicMock, DEFAULT, patch
+from hamcrest import assert_that, contains_exactly, empty, equal_to, none
+from unittest.mock import MagicMock, DEFAULT, patch
 
 from ycm import vimsupport
 from ycmd.utils import ToBytes
@@ -344,13 +341,8 @@ def GetExtraDataUserMayHaveCompleted_UseUserData1_test( *args ):
   ]
 
   with _SetupForCsharpCompletionDone( completions ) as request:
-<<<<<<< HEAD
-    eq_( request._GetExtraDataUserMayHaveCompleted(),
-         [ BuildCompletionNamespace( 'namespace2' )[ 'extra_data' ] ] )
-=======
     assert_that( request._GetCompletionsUserMayHaveCompleted(),
-                 equal_to( [ BuildCompletionNamespace( 'namespace2' ) ] ) )
->>>>>>> Drop nose.tools
+                 contains_exactly( BuildCompletionNamespace( 'namespace2' ) ) )
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',
@@ -363,11 +355,7 @@ def GetExtraDataUserMayHaveCompleted_EmptyUserData_test( *args ):
   ]
 
   with _SetupForCsharpCompletionDone( completions ) as request:
-<<<<<<< HEAD
-    eq_( request._GetExtraDataUserMayHaveCompleted(), [] )
-=======
     assert_that( request._GetCompletionsUserMayHaveCompleted(), empty() )
->>>>>>> Drop nose.tools
 
 
 @patch( 'ycm.vimsupport.GetVariableValue',

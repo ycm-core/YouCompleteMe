@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
-import mock
+from unittest import mock
 import requests
 
 

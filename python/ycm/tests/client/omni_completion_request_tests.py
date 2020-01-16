@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from mock import MagicMock
+from unittest.mock import MagicMock
 from hamcrest import assert_that, has_entries
 
 from ycm.client.omni_completion_request import OmniCompletionRequest

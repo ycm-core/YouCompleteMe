@@ -20,7 +20,7 @@ MockVimModule()
 
 import json
 from hamcrest import assert_that
-from mock import patch, call
+from unittest.mock import patch, call
 from ycm.client.command_request import CommandRequest
 
 
