@@ -18,6 +18,7 @@
 from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
+import pytest
 from hamcrest import assert_that
 from ycm.paths import _EndsWithPython
 
@@ -32,27 +33,23 @@ def EndsWithPython_Bad( path ):
               'Path {0} does end with a Python name.'.format( path ) )
 
 
-def EndsWithPython_Python3Paths_test():
-  python_paths = [
+@pytest.mark.parametrize( 'path', [
     'python3',
     '/usr/bin/python3.5',
     '/home/user/.pyenv/shims/python3.5',
     r'C:\Python35\python.exe'
-  ]
+  ] )
+def EndsWithPython_Python3Paths_test( path ):
+  EndsWithPython_Good( path )
 
-  for path in python_paths:
-    yield EndsWithPython_Good, path
 
-
-def EndsWithPython_BadPaths_test():
-  not_python_paths = [
+@pytest.mark.parametrize( 'path', [
     None,
     '',
     '/opt/local/bin/vim',
     r'C:\Program Files\Vim\vim74\gvim.exe',
     '/usr/bin/python2.7',
     '/home/user/.pyenv/shims/python3.2',
-  ]
-
-  for path in not_python_paths:
-    yield EndsWithPython_Bad, path
+  ] )
+def EndsWithPython_BadPaths_test( path ):
+  EndsWithPython_Bad( path )

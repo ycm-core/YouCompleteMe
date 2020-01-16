@@ -759,7 +759,7 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
     vimsupport.ReplaceChunks( chunks )
 
   # Ensure that we applied the replacement correctly
-  assert_that( result_buffer.GetLines(), contains(
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'replacementline2',
     'line3',
   ) )
@@ -851,7 +851,7 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   ] )
 
   # Ensure that we applied the replacement correctly
-  assert_that( result_buffer.GetLines(), contains(
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'replacementline2',
     'line3',
   ) )
@@ -963,7 +963,7 @@ def ReplaceChunks_SingleFile_NotOpen_Silent_test(
   confirm.assert_not_called()
 
   # Ensure that we applied the replacement correctly
-  assert_that( result_buffer.GetLines(), contains(
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'replacementline2',
     'line3',
   ) )
@@ -1060,7 +1060,7 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   ] )
 
   # Ensure that buffer is not changed
-  assert_that( result_buffer.GetLines(), contains(
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'line1',
     'line2',
     'line3',
@@ -1147,7 +1147,7 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
   ] )
 
   # Ensure that buffer is not changed
-  assert_that( result_buffer.GetLines(), contains(
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'line1',
     'line2',
     'line3',
@@ -1253,11 +1253,11 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
   ] )
 
   # Ensure that buffers are updated
-  assert_that( second_file.GetLines(), contains(
+  assert_that( second_file.GetLines(), contains_exactly(
     'another line1',
     'second_file_replacement ACME line2',
   ) )
-  assert_that( first_file.GetLines(), contains(
+  assert_that( first_file.GetLines(), contains_exactly(
     'first_file_replacement line2',
     'line3',
   ) )

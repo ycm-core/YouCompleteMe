@@ -56,12 +56,12 @@ def ParseArguments():
                        help = 'Dump the PYTHONPATH required to run tests '
                               'manually, then exit.' )
 
-  parsed_args, nosetests_args = parser.parse_known_args()
+  parsed_args, pytests_args = parser.parse_known_args()
 
   if 'COVERAGE' in os.environ:
     parsed_args.coverage = ( os.environ[ 'COVERAGE' ] == 'true' )
 
-  return parsed_args, nosetests_args
+  return parsed_args, pytests_args
 
 
 def BuildYcmdLibs( args ):
@@ -72,27 +72,22 @@ def BuildYcmdLibs( args ):
     ] )
 
 
-def NoseTests( parsed_args, extra_nosetests_args ):
-  # Always passing --with-id to nosetests enables non-surprising usage of
-  # its --failed flag.
-  nosetests_args = [ '-v', '--with-id' ]
+def PytestTests( parsed_args, extra_pytests_args ):
+  pytests_args = [ '-v' ]
 
   if parsed_args.coverage:
-    nosetests_args += [ '--with-coverage',
-                        '--cover-erase',
-                        '--cover-package=ycm',
-                        '--cover-html' ]
+    pytests_args += [ '--cov=ycm' ]
 
-  if extra_nosetests_args:
-    nosetests_args.extend( extra_nosetests_args )
+  if extra_pytests_args:
+    pytests_args.extend( extra_pytests_args )
   else:
-    nosetests_args.append( p.join( DIR_OF_THIS_SCRIPT, 'python' ) )
+    pytests_args.append( p.join( DIR_OF_THIS_SCRIPT, 'python' ) )
 
-  subprocess.check_call( [ sys.executable, '-m', 'nose' ] + nosetests_args )
+  subprocess.check_call( [ sys.executable, '-m', 'pytest' ] + pytests_args )
 
 
 def Main():
-  ( parsed_args, nosetests_args ) = ParseArguments()
+  ( parsed_args, pytests_args ) = ParseArguments()
   if parsed_args.dump_path:
     print( os.environ[ 'PYTHONPATH' ] )
     sys.exit()
@@ -101,7 +96,7 @@ def Main():
     RunFlake8()
 
   BuildYcmdLibs( parsed_args )
-  NoseTests( parsed_args, nosetests_args )
+  PytestTests( parsed_args, pytests_args )
 
 
 if __name__ == "__main__":

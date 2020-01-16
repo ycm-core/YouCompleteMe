@@ -26,10 +26,7 @@ import os
 import re
 import sys
 
-try:
-  from unittest import skipIf
-except ImportError:
-  from unittest2 import skipIf
+from unittest import skipIf
 
 from ycmd.utils import GetCurrentDirectory, OnMac, OnWindows, ToUnicode
 
