@@ -16,7 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict, namedtuple
-from mock import DEFAULT, MagicMock, patch
+from unittest.mock import DEFAULT, MagicMock, patch
 from hamcrest import assert_that, equal_to
 import contextlib
 import functools
@@ -618,7 +618,7 @@ def MockVimModule():
   next test. That is:
 
     from ycm.tests.test_utils import MockVimModule
-    from mock import patch
+    from unittest.mock import patch
 
     # Do this once
     MockVimModule()

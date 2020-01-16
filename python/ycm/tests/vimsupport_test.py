@@ -23,7 +23,7 @@ MockVimModule()
 from ycm import vimsupport
 from hamcrest import ( assert_that, calling, contains_exactly, empty, equal_to,
                        has_entry, is_not, raises )
-from mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
 import json

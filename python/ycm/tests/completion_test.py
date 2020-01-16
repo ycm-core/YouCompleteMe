@@ -21,7 +21,7 @@ MockVimModule()
 
 import contextlib
 from hamcrest import assert_that, contains_exactly, empty, has_entries
-from mock import call, MagicMock, patch
+from unittest.mock import call, MagicMock, patch
 
 from ycm.tests import PathToTestFile, YouCompleteMeInstance
 from ycmd.responses import ServerError
