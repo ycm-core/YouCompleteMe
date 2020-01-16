@@ -71,7 +71,7 @@ def SendCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
 
 @YouCompleteMeInstance()
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def SendCompletionRequest_ResponseContainingError_test( ycm, post_vim_message ):
+def SendCompletionRequest_ResponseContainingError_test( post_vim_message, ycm ):
   current_buffer = VimBuffer( 'buffer' )
 
   def ServerResponse( *args ):
@@ -124,9 +124,9 @@ def SendCompletionRequest_ResponseContainingError_test( ycm, post_vim_message ):
 @YouCompleteMeInstance()
 @patch( 'ycm.client.base_request._logger', autospec = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def SendCompletionRequest_ErrorFromServer_test( ycm,
-                                                post_vim_message,
-                                                logger ):
+def SendCompletionRequest_ErrorFromServer_test( post_vim_message,
+                                                logger,
+                                                ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with MockCompletionRequest( ServerError( 'Server error' ) ):
