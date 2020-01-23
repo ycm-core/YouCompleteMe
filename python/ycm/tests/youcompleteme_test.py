@@ -34,8 +34,8 @@ MockVimModule()
 
 import os
 import sys
-from hamcrest import ( assert_that, contains, empty, equal_to, has_entries,
-                       is_in, is_not, matches_regexp )
+from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
+                       has_entries, is_in, is_not, matches_regexp )
 from mock import call, MagicMock, patch
 
 from ycm import vimsupport
@@ -350,7 +350,7 @@ def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test( ycm ):
                 return_value = [ 'SomeCommand', 'AnotherCommand' ] ):
       assert_that(
         ycm.GetDefinedSubcommands(),
-        contains(
+        contains_exactly(
           'SomeCommand',
           'AnotherCommand'
         )
@@ -631,7 +631,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
     assert_that(
       test_utils.VIM_MATCHES_FOR_WINDOW,
       has_entries( {
-        1: contains(
+        1: contains_exactly(
           VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
           VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
           VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
@@ -642,7 +642,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
     # Only the error sign is placed.
     assert_that(
       test_utils.VIM_SIGNS,
-      contains(
+      contains_exactly(
         VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 3, 'YcmError', 5 )
       )
     )
@@ -675,7 +675,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
     assert_that(
       test_utils.VIM_MATCHES_FOR_WINDOW,
       has_entries( {
-        1: contains(
+        1: contains_exactly(
           VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
           VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' )
         )
@@ -684,7 +684,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
 
     assert_that(
       test_utils.VIM_SIGNS,
-      contains(
+      contains_exactly(
         VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 3, 'YcmWarning', 5 )
       )
     )
@@ -931,7 +931,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
   assert_that(
     test_utils.VIM_MATCHES_FOR_WINDOW,
     has_entries( {
-      1: contains(
+      1: contains_exactly(
         VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
       )
     } )
@@ -1117,7 +1117,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
   assert_that(
     test_utils.VIM_MATCHES_FOR_WINDOW,
     has_entries( {
-      1: contains(
+      1: contains_exactly(
         VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
       )
     } )

@@ -24,7 +24,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from hamcrest import assert_that, contains, empty, has_entries
+from hamcrest import assert_that, contains_exactly, empty, has_entries
 
 from ycm.tests.test_utils import ( MockVimBuffers, MockVimModule, ToBytesOnPY2,
                                    VimBuffer )
@@ -262,7 +262,7 @@ def OmniCompleter_GetCompletions_Cache_ObjectList_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': contains( {
+        'completions': contains_exactly( {
           'word' : 'test',
           'abbr' : 'ABBRTEST',
           'menu' : 'MENUTEST',
@@ -625,7 +625,7 @@ def OmniCompleter_GetCompletions_Cache_ObjectListObject_Unicode_test( ycm ):
     assert_that(
       ycm.GetCompletionResponse(),
       has_entries( {
-        'completions': contains( {
+        'completions': contains_exactly( {
           'word' : 'test',
           'abbr' : 'ÅııÂÊ‰ÍÊ',
           'menu' : '˜‰ˆËÊ‰ÍÊ',
@@ -669,7 +669,7 @@ def OmniCompleter_GetCompletions_RestoreCursorPositionAfterOmnifuncCall_test(
     ycm.SendCompletionRequest()
     assert_that(
       vimsupport.CurrentLineAndColumn(),
-      contains( 2, 5 )
+      contains_exactly( 2, 5 )
     )
     assert_that(
       ycm.GetCompletionResponse(),
@@ -704,7 +704,7 @@ def OmniCompleter_GetCompletions_MoveCursorPositionAtStartColumn_test( ycm ):
     ycm.SendCompletionRequest()
     assert_that(
       vimsupport.CurrentLineAndColumn(),
-      contains( 2, 7 )
+      contains_exactly( 2, 7 )
     )
     assert_that(
       ycm.GetCompletionResponse(),
