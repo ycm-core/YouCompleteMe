@@ -29,7 +29,7 @@ from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
 MockVimModule()
 
 import contextlib
-from hamcrest import assert_that, contains, empty, has_entries
+from hamcrest import assert_that, contains_exactly, empty, has_entries
 from mock import call, MagicMock, patch
 from nose.tools import ok_
 
@@ -117,7 +117,7 @@ def SendCompletionRequest_ResponseContainingError_test( ycm, post_vim_message ):
       assert_that(
         response,
         has_entries( {
-          'completions': contains( has_entries( {
+          'completions': contains_exactly( has_entries( {
             'word': 'insertion_text',
             'abbr': 'menu_text',
             'menu': 'extra_menu_info',
