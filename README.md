@@ -1525,6 +1525,10 @@ That is to say, `ls` should be paired with a dictionary containing a key `rust`,
 which should be paired with another dictionary in which the keys are RLS
 options.
 
+Also, for the time being, if you make changes to your `Cargo.toml` that RLS
+doesn't seem to recognize, you may need to restart it manually with
+`:YcmCompleter RestartServer`.
+
 ### Go Semantic Completion
 
 Completions and GoTo commands should work out of the box (provided that you
