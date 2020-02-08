@@ -612,7 +612,7 @@ process.
 
 2.  **Install YCM** with [Vundle][] (or [Pathogen][], but Vundle is a better
     idea). With Vundle, this would mean adding a `Plugin
-    'Valloric/YouCompleteMe'` line to your [vimrc][].
+    'ycm-core/YouCompleteMe'` line to your [vimrc][].
 
     If you don't install YCM with Vundle, make sure you have run
     `git submodule update --init --recursive` after checking out the YCM
