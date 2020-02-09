@@ -71,7 +71,7 @@ class BaseRequest:
     try:
       try:
         result = _JsonFromFuture( future )
-        _logger.debug( 'RX: %s', result )
+        _logger.debug( 'RX: %r', result )
         return result
       except UnknownExtraConf as e:
         if vimsupport.Confirm( str( e ) ):
