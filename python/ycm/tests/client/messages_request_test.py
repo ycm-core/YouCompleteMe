@@ -19,7 +19,7 @@ from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 from hamcrest import assert_that, equal_to
-from mock import patch, call
+from unittest.mock import patch, call
 
 from ycm.client.messages_request import _HandlePollResponse
 from ycm.tests.test_utils import ExtendedMock

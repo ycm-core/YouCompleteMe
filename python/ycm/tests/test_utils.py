@@ -16,20 +16,17 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict, namedtuple
-from mock import DEFAULT, MagicMock, patch
+from unittest.mock import DEFAULT, MagicMock, patch
 from hamcrest import assert_that, equal_to
 import contextlib
 import functools
 import json
-import nose
+import pytest
 import os
 import re
 import sys
 
-try:
-  from unittest import skipIf
-except ImportError:
-  from unittest2 import skipIf
+from unittest import skipIf
 
 from ycmd.utils import GetCurrentDirectory, OnMac, OnWindows, ToUnicode
 
@@ -618,7 +615,7 @@ def MockVimModule():
   next test. That is:
 
     from ycm.tests.test_utils import MockVimModule
-    from mock import patch
+    from unittest.mock import patch
 
     # Do this once
     MockVimModule()
@@ -701,7 +698,7 @@ def ExpectedFailure( reason, *exception_matchers ):
           raise test_exception
 
         # Failed for the right reason
-        raise nose.SkipTest( reason )
+        pytest.skip( reason )
       else:
         raise AssertionError( 'Test was expected to fail: {}'.format(
           reason ) )

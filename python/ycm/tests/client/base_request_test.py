@@ -19,7 +19,7 @@ from ycm.tests.test_utils import MockVimBuffers, MockVimModule, VimBuffer
 MockVimModule()
 
 from hamcrest import assert_that, has_entry
-from mock import patch
+from unittest.mock import patch
 from ycm.client.base_request import BuildRequestData
 
 

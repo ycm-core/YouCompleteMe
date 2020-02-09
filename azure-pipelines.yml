@@ -18,8 +18,8 @@ jobs:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
-      'Python 3.5':
-        YCM_PYTHON_VERSION: '3.5.3'
+      'Python 3.6':
+        YCM_PYTHON_VERSION: '3.6.3'
     maxParallel: 2
   variables:
     COVERAGE: true
@@ -45,7 +45,7 @@ jobs:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
-      'Python 3.5':
+      'Python 3.6':
         IMAGE: ycm-vim-py3
         PIP: pip3
     maxParallel: 2
@@ -75,8 +75,8 @@ jobs:
     vmImage: 'macOS-10.13'
   strategy:
     matrix:
-      'Python 3.5':
-        YCM_PYTHON_VERSION: '3.5.3'
+      'Python 3.6':
+        YCM_PYTHON_VERSION: '3.6.3'
     maxParallel: 2
   variables:
     COVERAGE: true
