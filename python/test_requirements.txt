@@ -9,4 +9,3 @@ PyHamcrest            >= 1.10.1
 future                == 0.15.2
 coverage              >= 4.2
 codecov               >= 2.0.5
-covimerage            >= 0.2.0
