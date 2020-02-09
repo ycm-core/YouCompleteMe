@@ -1504,7 +1504,30 @@ In case you are running Python 2.7.8 and older, you will need to manually
 install [rustup][].
 
 To [configure RLS](#lsp-configuration) look up [rls configuration options][
-rls-preferences]
+rls-preferences]. The value of the `ls` key must be structured as in the
+following example:
+
+```python
+def Settings( **kwargs ):
+  if kwargs[ 'language' ] == 'rust':
+    return {
+        'ls': {
+            'rust': {
+                'features': ['http2','spnego'],
+                'all_targets': False,
+                'wait_to_build': 1500,
+            }
+        }
+    }
+```
+
+That is to say, `ls` should be paired with a dictionary containing a key `rust`,
+which should be paired with another dictionary in which the keys are RLS
+options.
+
+Also, for the time being, if you make changes to your `Cargo.toml` that RLS
+doesn't seem to recognize, you may need to restart it manually with
+`:YcmCompleter RestartServer`.
 
 ### Go Semantic Completion
 
