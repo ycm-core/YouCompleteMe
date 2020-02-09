@@ -5,11 +5,12 @@ YouCompleteMe: a code-completion engine for Vim
 [![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/ycm-core.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build?definitionId=3&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
-Early Warning: Dropping support for Python 2 in 2020
+Warning: Support for Python 2 has been dropped
 ----
 
-In early 2020, YCM will drop support for Python 2. But we will maintain
-critical fixes on a branch (name TBA) of YCM for a period of 1 year.
+In early 2020, YCM has dropped support for Python 2. But we will maintain
+critical fixes on a branch (name: [`legacy-py2`][]) of YCM
+for a period of 1 year.
 
 Why?
 
@@ -3826,3 +3827,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [roslyn-releases]: https://github.com/OmniSharp/omnisharp-roslyn/releases
 [compiledb]: https://pypi.org/project/compiledb/
 [signature-help-pr]: https://github.com/ycm-core/ycmd/pull/1255
+[legacy-py2]: https://github.com/ycm-core/YouCompleteMe/tree/legacy-py2
