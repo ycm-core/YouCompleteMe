@@ -325,12 +325,11 @@ function! s:SetUpSigns()
     highlight link YcmWarningLine SyntasticWarningLine
   endif
 
-  call sign_define( 'YcmError', { 'text': g:ycm_error_symbol,
-                                \ 'texthl': 'YcmErrorSign',
-                                \ 'linehl': 'YcmErrorLine' } )
-  call sign_define( 'YcmWarning', { 'text': g:ycm_error_symbol,
-                                  \ 'texthl': 'YcmWarningSign',
-                                  \ 'linehl': 'YcmWarningLine' } )
+  exe 'sign define YcmError text=' . g:ycm_error_symbol .
+        \ ' texthl=YcmErrorSign linehl=YcmErrorLine'
+  exe 'sign define YcmWarning text=' . g:ycm_warning_symbol .
+        \ ' texthl=YcmWarningSign linehl=YcmWarningLine'
+
 endfunction
 
 
