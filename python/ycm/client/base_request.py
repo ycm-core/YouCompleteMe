@@ -22,7 +22,7 @@ from base64 import b64decode, b64encode
 from hmac import compare_digest
 from urllib.parse import urljoin, urlparse
 from ycm import vimsupport
-from ycmd.utils import ToBytes, ToUnicode, GetCurrentDirectory
+from ycmd.utils import ToBytes, GetCurrentDirectory
 from ycmd.hmac_utils import CreateRequestHmac, CreateHmac
 from ycmd.responses import ServerError, UnknownExtraConf
 
@@ -70,8 +70,7 @@ class BaseRequest:
     from this message."""
     try:
       try:
-        result = _JsonFromFuture( future )
-        return result
+        return _JsonFromFuture( future )
       except UnknownExtraConf as e:
         if vimsupport.Confirm( str( e ) ):
           _LoadExtraConfFile( e.extra_conf_file )
@@ -167,7 +166,7 @@ class BaseRequest:
 
     headers = BaseRequest._ExtraHeaders( method, request_uri )
 
-    _logger.debug( 'GET %s\n%s', request_uri, headers )
+    _logger.debug( 'GET %s (%s)\n%s', request_uri, payload, headers )
 
     return BaseRequest.Session().get(
       request_uri,
@@ -251,7 +250,7 @@ def BuildRequestData( buffer_number = None ):
 
 def _JsonFromFuture( future ):
   response = future.result()
-  _logger.debug( 'RX: %s', ToUnicode( result ) )
+  _logger.debug( 'RX: %s\n%s', response, response.text )
   _ValidateResponseObject( response )
   if response.status_code == BaseRequest.Requests().codes.server_error:
     raise MakeServerException( response.json() )
