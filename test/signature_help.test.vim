@@ -116,7 +116,6 @@ function! Test_Signatures_After_Trigger()
         \ '/test/testdata/vim/mixed_filetype.vim',
         \ { 'native_ft': 0 } )
 
-  setf vim.python
   call setpos( '.', [ 0, 3, 17 ] )
 
   " Required to trigger TextChangedI
