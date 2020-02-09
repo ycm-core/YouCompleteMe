@@ -307,17 +307,24 @@ class YouCompleteMe:
     return response
 
 
+  def SignatureHelpAvailableRequestComplete( self, filetype, send_new=True ):
+    """Triggers or polls signature help available request. Returns whether or
+    not the request is complete. When send_new is False, won't send a new
+    request, only return the current status (This is used by the tests)"""
+    if not send_new and filetype not in self._signature_help_available_requests:
+      return False
+
+    return self._signature_help_available_requests[ filetype ].Done()
+
+
   def SendSignatureHelpRequest( self ):
     """Send a signature help request, if we're ready to. Return whether or not a
     request was sent (and should be checked later)"""
     if not self.NativeFiletypeCompletionUsable():
       return False
 
-    if not self._latest_completion_request:
-      return False
-
     for filetype in vimsupport.CurrentFiletypes():
-      if not self._signature_help_available_requests[ filetype ].Done():
+      if not self.SignatureHelpAvailableRequestComplete( filetype ):
         continue
 
       sig_help_available = self._signature_help_available_requests[
@@ -329,6 +336,9 @@ class YouCompleteMe:
         # Send another /signature_help_available request
         self._signature_help_available_requests[ filetype ].Start( filetype )
         continue
+
+      if not self._latest_completion_request:
+        return False
 
       request_data = self._latest_completion_request.request_data.copy()
       request_data[ 'signature_help_state' ] = self._signature_help_state.state
@@ -526,10 +536,9 @@ class YouCompleteMe:
 
   def OnBufferVisit( self ):
     for filetype in vimsupport.CurrentFiletypes():
-      # The constructor of dictionary values starts the request,
-      # so the line below fires a new request only if the dictionary
-      # value is accessed for the first time.
-      self._signature_help_available_requests[ filetype ].Done()
+      # Send the signature help available request for these filetypes if we need
+      # to (as a side effect of checking if it is complete)
+      self.SignatureHelpAvailableRequestComplete( filetype, True )
 
     extra_data = {}
     self._AddUltiSnipsDataIfNeeded( extra_data )

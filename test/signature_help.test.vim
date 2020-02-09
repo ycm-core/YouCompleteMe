@@ -7,6 +7,12 @@ function! s:_ClearSigHelp()
   unlet! s:popup_win_id
 endfunction
 
+function! s:_CheckSignatureHelpAvailable( filetype )
+  return pyxeval(
+        \ 'ycm_state.SignatureHelpAvailableRequestComplete('
+        \ . ' vim.eval( "a:filetype" ), False )' )
+endfunction
+
 function s:_GetSigHelpWinID()
   call WaitForAssert( {->
         \   assert_true(
@@ -116,7 +122,9 @@ function! Test_Signatures_After_Trigger()
         \ '/test/testdata/vim/mixed_filetype.vim',
         \ { 'native_ft': 0 } )
 
-  setf vim.python
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'vim' ) } )
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
+
   call setpos( '.', [ 0, 3, 17 ] )
 
   " Required to trigger TextChangedI
@@ -184,6 +192,8 @@ function! Test_Signatures_With_PUM_NoSigns()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
         \ . '/make_drink.cc', {} )
+
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'cpp' ) } )
 
   " Make sure that error signs don't shift the window
   setlocal signcolumn=no
@@ -257,6 +267,8 @@ function! Test_Signatures_With_PUM_Signs()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
         \ . '/make_drink.cc', {} )
+
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'cpp' ) } )
 
   " Make sure that sign causes the popup to shift
   setlocal signcolumn=auto
@@ -496,6 +508,7 @@ endfunction
 
 function! Test_Signatures_TopLine()
   call youcompleteme#test#setup#OpenFile( 'test/testdata/python/test.py', {} )
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
   call setpos( '.', [ 0, 1, 24 ] )
   call test_override( 'char_avail', 1 )
 
@@ -515,6 +528,7 @@ endfunction
 
 function! Test_Signatures_TopLineWithPUM()
   call youcompleteme#test#setup#OpenFile( 'test/testdata/python/test.py', {} )
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
   call setpos( '.', [ 0, 1, 24 ] )
   call test_override( 'char_avail', 1 )
 
