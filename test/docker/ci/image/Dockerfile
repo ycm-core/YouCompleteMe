@@ -56,6 +56,9 @@ RUN mkdir -p /home/linuxbrew/.linuxbrew &&\
     echo "eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" \
         > /etc/bash.bashrc
 
+# Python
+RUN ${YCM_VIM_PYTHON} -m pip install --upgrade pip setuptools wheel
+
 # clean up
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
     /home/linuxbrew/.linuxbrew/bin/brew cleanup && \
