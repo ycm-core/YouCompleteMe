@@ -34,8 +34,8 @@ from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
-from ycm.client.signature_help_request import SignatureHelpRequest
-from ycm.client.signature_help_request import SigHelpAvailableByFileType
+from ycm.client.signature_help_request import ( SignatureHelpRequest,
+                                                SigHelpAvailableByFileType )
 from ycm.client.debug_info_request import ( SendDebugInfoRequest,
                                             FormatDebugInfoResponse )
 from ycm.client.omni_completion_request import OmniCompletionRequest
@@ -338,6 +338,8 @@ class YouCompleteMe:
       self._latest_signature_help_request = SignatureHelpRequest( request_data )
       self._latest_signature_help_request.Start()
       return True
+
+    return False
 
 
   def SignatureHelpRequestReady( self ):
