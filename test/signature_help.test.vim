@@ -1,4 +1,4 @@
-let s:timer_interval = 2000
+let s:timer_interval = 5000
 
 function! s:_ClearSigHelp()
   pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state, {} )
