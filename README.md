@@ -8,9 +8,13 @@ YouCompleteMe: a code-completion engine for Vim
 Warning: Support for Python 2 has been dropped
 ----
 
-In early 2020, YCM has dropped support for Python 2. But we will maintain
-critical fixes on a branch (name: [`legacy-py2`][]) of YCM
-for a period of 1 year.
+In early 2020, YCM dropped support for Python 2. But we will maintain
+critical fixes on a branch named [legacy-py2][] for a period of 1 year.
+
+How?
+
+In order to use the legacy Python 2 support, see 
+[this post](https://github.com/ycm-core/YouCompleteMe/issues/3595#issuecomment-584230366)
 
 Why?
 
