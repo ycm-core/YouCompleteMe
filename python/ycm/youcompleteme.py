@@ -328,7 +328,7 @@ class YouCompleteMe:
       if sig_help_available == 'PENDING':
         # Send another /signature_help_available request
         self._signature_help_available_requests[ filetype ].Start( filetype )
-        return False
+        continue
 
       request_data = self._latest_completion_request.request_data.copy()
       request_data[ 'signature_help_state' ] = self._signature_help_state.state
@@ -525,11 +525,12 @@ class YouCompleteMe:
 
 
   def OnBufferVisit( self ):
-    filetype = vimsupport.CurrentFiletypes()[ 0 ]
-    # The constructor of dictionary values starts the request,
-    # so the line below fires a new request only if the dictionary
-    # value is accessed for the first time.
-    self._signature_help_available_requests[ filetype ].Done()
+    for filetype in vimsupport.CurrentFiletypes():
+      # The constructor of dictionary values starts the request,
+      # so the line below fires a new request only if the dictionary
+      # value is accessed for the first time.
+      self._signature_help_available_requests[ filetype ].Done()
+
     extra_data = {}
     self._AddUltiSnipsDataIfNeeded( extra_data )
     SendEventNotificationAsync( 'BufferVisit', extra_data = extra_data )
