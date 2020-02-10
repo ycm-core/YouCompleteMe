@@ -1,3 +1,5 @@
+let s:timer_interval = 5000
+
 function! SetUp()
   let g:ycm_confirm_extra_conf = 0
   let g:ycm_auto_trigger = 1
@@ -27,7 +29,7 @@ function! Test_Ranged_Fixit_Works()
     call test_feedinput( "4\<CR>" )
   endfunction
 
-  call timer_start( 5000, funcref( 'SelectEntry' ) )
+  let timer_id = timer_start( s:timer_interval, funcref( 'SelectEntry' ) )
   '<,'>YcmCompleter FixIt
   redraw
 
@@ -35,6 +37,7 @@ function! Test_Ranged_Fixit_Works()
                      \ ' + w.getWidgetInfo();', getline( 34 ) )
   call assert_match( '\t\tSystem.out.println( \(x\|string\) );', getline( 35 ) )
   %bwipeout!
+  call timer_stop( timer_id )
   delfunction SelectEntry
 endfunction
 
@@ -46,11 +49,12 @@ function! Test_Unresolved_Fixit_Works()
     redraw
     call test_feedinput( "2\<CR>" )
   endfunction
-  call timer_start( 2000, funcref( 'SelectEntry' ) )
+  let timer_id = timer_start( s:timer_interval, funcref( 'SelectEntry' ) )
   YcmCompleter FixIt
   redraw
   call assert_equal( '  auto dummy = 1;', getline( '.' ) )
   call assert_equal( '  printf("%s", dummy);', getline( 4 ) )
   %bwipeout!
+  call timer_stop( timer_id )
   delfunction SelectEntry
 endfunction
