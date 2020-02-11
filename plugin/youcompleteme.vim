@@ -297,6 +297,7 @@ let g:ycm_python_binary_path =
 " Populate any other (undocumented) options set in the ycmd
 " default_settings.json. This ensures that any part of ycm that uses ycmd code
 " will have the default set. I'm looking at you, Omni-completer.
+let key = 0
 for key in keys( s:default_options )
   if ! has_key( g:, 'ycm_' . key )
     let g:[ 'ycm_' . key ] = s:default_options[ key ]
