@@ -1527,7 +1527,7 @@ def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
 
 def GetBufferFilepath_NoBufferName_UnicodeWorkingDirectory_test():
   vim_buffer = VimBuffer( '', number = 42 )
-  unicode_dir = PathToTestFile( u'uni¢𐍈d€' )
+  unicode_dir = PathToTestFile( u'uni¢od€' )
   with CurrentWorkingDirectory( unicode_dir ):
     assert_that( vimsupport.GetBufferFilepath( vim_buffer ),
                  equal_to( os.path.join( unicode_dir, '42' ) ) )
@@ -1701,9 +1701,9 @@ def InsertNamespace_append_test( vim_current, *args ):
 
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    vimsupport.JumpToLocation( os.path.realpath( u'uni¢𐍈d€' ),
+    vimsupport.JumpToLocation( os.path.realpath( u'uni¢od€' ),
                                2,
                                5,
                                'aboveleft',
@@ -1718,9 +1718,9 @@ def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
 
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'belowright', 'same-buffer' )
 
@@ -1736,9 +1736,9 @@ def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
 def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€', modified = True )
+  current_buffer = VimBuffer( 'uni¢od€', modified = True )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'botright', 'same-buffer' )
 
@@ -1754,9 +1754,9 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
 def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€', modified = True, bufhidden = "hide" )
+  current_buffer = VimBuffer( 'uni¢od€', modified = True, bufhidden = "hide" )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'leftabove', 'same-buffer' )
 
@@ -1773,11 +1773,11 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
 def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     assert_that(
       calling( vimsupport.JumpToLocation ).with_args(
-        os.path.realpath( u'different_uni¢𐍈d€' ),
+        os.path.realpath( u'different_uni¢od€' ),
         2,
         5,
         'rightbelow',
@@ -1790,9 +1790,9 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
         new_callable = ExtendedMock,
         side_effect = [ None, VimError( 'E325' ), None ] )
 def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'topleft', 'same-buffer' )
 
@@ -1806,9 +1806,9 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
         new_callable = ExtendedMock,
         side_effect = [ None, KeyboardInterrupt, None ] )
 def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Abort_test( vim_command ):
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'vertical', 'same-buffer' )
 
@@ -1822,13 +1822,13 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Abort_test( vim_command ):
 def JumpToLocation_DifferentFile_Split_CurrentTab_NotAlreadyOpened_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   current_window = MagicMock( buffer = current_buffer )
   current_tab = MagicMock( windows = [ current_window ] )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
     vim.current.tabpage = current_tab
 
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name,
                                2,
@@ -1847,8 +1847,8 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_NotAlreadyOpened_test(
 def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
-  different_buffer = VimBuffer( 'different_uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
+  different_buffer = VimBuffer( 'different_uni¢od€' )
   current_window = MagicMock( buffer = current_buffer )
   different_window = MagicMock( buffer = different_buffer )
   current_tab = MagicMock( windows = [ current_window, different_window ] )
@@ -1856,7 +1856,7 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
                        [ current_buffer ] ) as vim:
     vim.current.tabpage = current_tab
 
-    vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢𐍈d€' ),
+    vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢od€' ),
                                2,
                                5,
                                'belowright',
@@ -1904,9 +1904,9 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_Case_test(
 def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name,
                                2,
@@ -1925,15 +1925,15 @@ def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
 def JumpToLocation_DifferentFile_Split_AllTabs_AlreadyOpened_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
-  different_buffer = VimBuffer( 'different_uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
+  different_buffer = VimBuffer( 'different_uni¢od€' )
   current_window = MagicMock( buffer = current_buffer )
   different_window = MagicMock( buffer = different_buffer )
   current_tab = MagicMock( windows = [ current_window, different_window ] )
   with patch( 'vim.tabpages', [ current_tab ] ):
     with MockVimBuffers( [ current_buffer, different_buffer ],
                          [ current_buffer ] ) as vim:
-      vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢𐍈d€' ),
+      vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢od€' ),
                                  2,
                                  5,
                                  'tab',
@@ -1952,9 +1952,9 @@ def JumpToLocation_DifferentFile_Split_AllTabs_AlreadyOpened_test(
 def JumpToLocation_DifferentFile_NewOrExistingTab_NotAlreadyOpened_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( u'different_uni¢od€' )
 
     vimsupport.JumpToLocation( target_name,
                                2,
@@ -1973,15 +1973,15 @@ def JumpToLocation_DifferentFile_NewOrExistingTab_NotAlreadyOpened_test(
 def JumpToLocation_DifferentFile_NewOrExistingTab_AlreadyOpened_test(
     vim_command ):
 
-  current_buffer = VimBuffer( 'uni¢𐍈d€' )
-  different_buffer = VimBuffer( 'different_uni¢𐍈d€' )
+  current_buffer = VimBuffer( 'uni¢od€' )
+  different_buffer = VimBuffer( 'different_uni¢od€' )
   current_window = MagicMock( buffer = current_buffer )
   different_window = MagicMock( buffer = different_buffer )
   current_tab = MagicMock( windows = [ current_window, different_window ] )
   with patch( 'vim.tabpages', [ current_tab ] ):
     with MockVimBuffers( [ current_buffer, different_buffer ],
                          [ current_buffer ] ) as vim:
-      vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢𐍈d€' ),
+      vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢od€' ),
                                  2,
                                  5,
                                  'belowright tab',

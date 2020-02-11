@@ -49,8 +49,8 @@ def MockCompletionRequest( response_method ):
 
 @YouCompleteMeInstance()
 def SendCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
-  unicode_dir = PathToTestFile( 'uni¢𐍈d€' )
-  current_buffer = VimBuffer( PathToTestFile( 'uni¢𐍈d€', 'current_buffer' ) )
+  unicode_dir = PathToTestFile( 'uni¢od€' )
+  current_buffer = VimBuffer( PathToTestFile( 'uni¢od€', 'current_buffer' ) )
 
   def ServerResponse( *args ):
     return { 'completions': [], 'completion_start_column': 1 }
