@@ -70,9 +70,7 @@ class BaseRequest:
     from this message."""
     try:
       try:
-        result = _JsonFromFuture( future )
-        _logger.debug( 'RX: %s', result )
-        return result
+        return _JsonFromFuture( future )
       except UnknownExtraConf as e:
         if vimsupport.Confirm( str( e ) ):
           _LoadExtraConfFile( e.extra_conf_file )
@@ -168,7 +166,7 @@ class BaseRequest:
 
     headers = BaseRequest._ExtraHeaders( method, request_uri )
 
-    _logger.debug( 'GET %s\n%s', request_uri, headers )
+    _logger.debug( 'GET %s (%s)\n%s', request_uri, payload, headers )
 
     return BaseRequest.Session().get(
       request_uri,
@@ -252,6 +250,7 @@ def BuildRequestData( buffer_number = None ):
 
 def _JsonFromFuture( future ):
   response = future.result()
+  _logger.debug( 'RX: %s\n%s', response, response.text )
   _ValidateResponseObject( response )
   if response.status_code == BaseRequest.Requests().codes.server_error:
     raise MakeServerException( response.json() )

@@ -34,8 +34,8 @@ from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import SendCommandRequest
 from ycm.client.completion_request import CompletionRequest
-from ycm.client.signature_help_request import SignatureHelpRequest
-from ycm.client.signature_help_request import SigHelpAvailableByFileType
+from ycm.client.signature_help_request import ( SignatureHelpRequest,
+                                                SigHelpAvailableByFileType )
 from ycm.client.debug_info_request import ( SendDebugInfoRequest,
                                             FormatDebugInfoResponse )
 from ycm.client.omni_completion_request import OmniCompletionRequest
@@ -307,17 +307,24 @@ class YouCompleteMe:
     return response
 
 
+  def SignatureHelpAvailableRequestComplete( self, filetype, send_new=True ):
+    """Triggers or polls signature help available request. Returns whether or
+    not the request is complete. When send_new is False, won't send a new
+    request, only return the current status (This is used by the tests)"""
+    if not send_new and filetype not in self._signature_help_available_requests:
+      return False
+
+    return self._signature_help_available_requests[ filetype ].Done()
+
+
   def SendSignatureHelpRequest( self ):
     """Send a signature help request, if we're ready to. Return whether or not a
     request was sent (and should be checked later)"""
     if not self.NativeFiletypeCompletionUsable():
       return False
 
-    if not self._latest_completion_request:
-      return False
-
     for filetype in vimsupport.CurrentFiletypes():
-      if not self._signature_help_available_requests[ filetype ].Done():
+      if not self.SignatureHelpAvailableRequestComplete( filetype ):
         continue
 
       sig_help_available = self._signature_help_available_requests[
@@ -328,6 +335,9 @@ class YouCompleteMe:
       if sig_help_available == 'PENDING':
         # Send another /signature_help_available request
         self._signature_help_available_requests[ filetype ].Start( filetype )
+        continue
+
+      if not self._latest_completion_request:
         return False
 
       request_data = self._latest_completion_request.request_data.copy()
@@ -338,6 +348,8 @@ class YouCompleteMe:
       self._latest_signature_help_request = SignatureHelpRequest( request_data )
       self._latest_signature_help_request.Start()
       return True
+
+    return False
 
 
   def SignatureHelpRequestReady( self ):
@@ -523,11 +535,11 @@ class YouCompleteMe:
 
 
   def OnBufferVisit( self ):
-    filetype = vimsupport.CurrentFiletypes()[ 0 ]
-    # The constructor of dictionary values starts the request,
-    # so the line below fires a new request only if the dictionary
-    # value is accessed for the first time.
-    self._signature_help_available_requests[ filetype ].Done()
+    for filetype in vimsupport.CurrentFiletypes():
+      # Send the signature help available request for these filetypes if we need
+      # to (as a side effect of checking if it is complete)
+      self.SignatureHelpAvailableRequestComplete( filetype, True )
+
     extra_data = {}
     self._AddUltiSnipsDataIfNeeded( extra_data )
     SendEventNotificationAsync( 'BufferVisit', extra_data = extra_data )
