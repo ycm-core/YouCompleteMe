@@ -35,13 +35,13 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
 
   if get( a:kwargs, 'native_ft', 1 )
     call WaitForAssert( {->
-  	\ assert_true( pyxeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) )
-  	\ } )
-  
+        \ assert_true( pyxeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) )
+        \ } )
+
     " Need to wait for the server to be ready. The best way to do this is to
     " force compile and diagnostics, though this only works for the c-based
-    " completers. For python and others, we actually need to parse the debug info
-    " to check the server state.
+    " completers. For python and others, we actually need to parse the debug
+    " info to check the server state.
     YcmForceCompileAndDiagnostics
   endif
 
