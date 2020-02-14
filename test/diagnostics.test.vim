@@ -38,8 +38,11 @@ function! Test_MessagePoll_After_LocationList()
   call assert_equal( 'cpp', &ft )
   call WaitForAssert( {-> assert_equal( 1, len( sign_getplaced() ) ) } )
   call setline( 1, '' )
+  " Wait for the parse request to be complete otherwise we won't send another
+  " one when the TextChanged event fires
+  call WaitFor( {-> pyxeval( 'ycm_state.FileParseRequestReady()' ) } )
   doautocmd TextChanged
-  call WaitForAssert( {-> assert_true( empty( sign_getplaced() ) ) }, 10000 )
+  call WaitForAssert( {-> assert_true( empty( sign_getplaced() ) ) } )
   call assert_true( empty( getloclist( 0 ) ) )
   %bwipeout!
 endfunction
