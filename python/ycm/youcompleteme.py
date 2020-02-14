@@ -307,17 +307,24 @@ class YouCompleteMe:
     return response
 
 
+  def SignatureHelpAvailableRequestComplete( self, filetype, send_new=True ):
+    """Triggers or polls signature help available request. Returns whether or
+    not the request is complete. When send_new is False, won't send a new
+    request, only return the current status (This is used by the tests)"""
+    if not send_new and filetype not in self._signature_help_available_requests:
+      return False
+
+    return self._signature_help_available_requests[ filetype ].Done()
+
+
   def SendSignatureHelpRequest( self ):
     """Send a signature help request, if we're ready to. Return whether or not a
     request was sent (and should be checked later)"""
     if not self.NativeFiletypeCompletionUsable():
       return False
 
-    if not self._latest_completion_request:
-      return False
-
     for filetype in vimsupport.CurrentFiletypes():
-      if not self._signature_help_available_requests[ filetype ].Done():
+      if not self.SignatureHelpAvailableRequestComplete( filetype ):
         continue
 
       sig_help_available = self._signature_help_available_requests[
@@ -507,6 +514,10 @@ class YouCompleteMe:
     self._AddExtraConfDataIfNeeded( extra_data )
 
     self.CurrentBuffer().SendParseRequest( extra_data )
+    for filetype in vimsupport.CurrentFiletypes():
+      # Send the signature help available request for these filetypes if we need
+      # to (as a side effect of checking if it is complete)
+      self.SignatureHelpAvailableRequestComplete( filetype, True )
 
 
   def OnBufferUnload( self, deleted_buffer_number ):
