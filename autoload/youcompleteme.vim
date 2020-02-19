@@ -390,7 +390,7 @@ function! s:DisableOnLargeFile( buffer )
   let b:ycm_largefile =
         \ threshold > 0 && getfsize( expand( a:buffer ) ) > threshold
   if b:ycm_largefile
-    py3 vimsupport.PostVimMessage( 'YouCompleteMe is disabled in this buffer;' .
+    py3 vimsupport.PostVimMessage( 'YouCompleteMe is disabled in this buffer;' +
           \ ' the file exceeded the max size (see YCM options).' )
   endif
   return b:ycm_largefile
