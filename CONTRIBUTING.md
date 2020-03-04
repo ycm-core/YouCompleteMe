@@ -82,6 +82,10 @@ Here are the things you should do when creating an issue:
    issue. If you don't complete it in full, then the maintainers may elect to
    ignore or simply close your issue. This isn't personal, it's just that they
    are busy too.
+1. **Check that your issue reproduces with a minimal configuration**. Run `vim
+   -Nu /path/to/YCM/vimrc_ycm_minimal` and reproduce this issue. If it doesn't
+   repro, then copy your ycm-specific settings into this file and try again. If
+   it still doesn't repro, the issue is likely with another plugin.
 1. **Write a step-by-step procedure that when performed repeatedly reproduces
    your issue.** If we can't reproduce the issue, then we can't fix it. It's
    that simple.
@@ -91,13 +95,8 @@ Here are the things you should do when creating an issue:
 2. Add the output of [the `:YcmDebugInfo` command][ycm-debug-info-command]. Make
    sure that when you run this, your cursor is in the file that is experiencing
    the issue.
-3. Put the following options in your vimrc:
-   ```viml
-   let g:ycm_keep_logfiles = 1
-   let g:ycm_log_level = 'debug'
-   ```
-
-   Reproduce your issue and attach the contents of the logfiles. Use [the
+3. Reproduce your issue using `vim -Nu /path/to/YCM/vimrc_ycm_minimal` 
+    and attach the contents of the logfiles. Use [the
    `:YcmToggleLogs` command][ycm-toggle-logs-command] to directly open them in
    Vim.
 4. **Create a test case for your issue**. This is critical. Don't talk about how
