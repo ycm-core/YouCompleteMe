@@ -82,32 +82,31 @@ Here are the things you should do when creating an issue:
    issue. If you don't complete it in full, then the maintainers may elect to
    ignore or simply close your issue. This isn't personal, it's just that they
    are busy too.
-1. **Write a step-by-step procedure that when performed repeatedly reproduces
+2. **Check that your issue reproduces with a minimal configuration**. Run `vim
+   -Nu /path/to/YCM/vimrc_ycm_minimal` and reproduce this issue. If it doesn't
+   repro, then copy your ycm-specific settings into this file and try again. If
+   it still doesn't repro, the issue is likely with another plugin.
+3. **Write a step-by-step procedure that when performed repeatedly reproduces
    your issue.** If we can't reproduce the issue, then we can't fix it. It's
    that simple.
-2. Explain **what you expected to happen**, and **what actually happened**.
+4. Explain **what you expected to happen**, and **what actually happened**.
    This helps us understand if it is a bug, or just a misunderstanding of the
    behavior.
-2. Add the output of [the `:YcmDebugInfo` command][ycm-debug-info-command]. Make
+5. Add the output of [the `:YcmDebugInfo` command][ycm-debug-info-command]. Make
    sure that when you run this, your cursor is in the file that is experiencing
    the issue.
-3. Put the following options in your vimrc:
-   ```viml
-   let g:ycm_keep_logfiles = 1
-   let g:ycm_log_level = 'debug'
-   ```
-
-   Reproduce your issue and attach the contents of the logfiles. Use [the
+6. Reproduce your issue using `vim -Nu /path/to/YCM/vimrc_ycm_minimal` 
+    and attach the contents of the logfiles. Use [the
    `:YcmToggleLogs` command][ycm-toggle-logs-command] to directly open them in
    Vim.
-4. **Create a test case for your issue**. This is critical. Don't talk about how
+7. **Create a test case for your issue**. This is critical. Don't talk about how
    "when I have X in my file" or similar, _create a file with X in it_ and put
    the contents inside code blocks in your issue description. Try to make this
    test file _as small as possible_. Don't just paste a huge, 500 line source
    file you were editing and present that as a test. _Minimize_ the file so that
    the problem is reproduced with the smallest possible amount of test data.
-5. **Include your OS and OS version.**
-6. **Include the output of `vim --version`.**
+8. **Include your OS and OS version.**
+9. **Include the output of `vim --version`.**
 
 
 Creating good pull requests
