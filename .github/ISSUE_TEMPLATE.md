@@ -96,9 +96,9 @@ Paste output here
 > Include link to a [gist][] containing the invocation and entire output of
 > `install.py` if reporting an installation issue.
 
-[cont]: https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md
-[code]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[readme]: https://github.com/Valloric/YouCompleteMe/blob/master/README.md
-[faq]: https://github.com/Valloric/YouCompleteMe/blob/master/README.md#faq
-[search]: https://www.google.com/search?q=site%3Ahttps%3A%2F%2Fgithub.com%2FValloric%2FYouCompleteMe%2Fissues%20python%20mac
+[cont]: https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
+[code]: https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[readme]: https://github.com/ycm-core/YouCompleteMe/blob/master/README.md
+[faq]: https://github.com/ycm-core/YouCompleteMe/wiki/FAQ
+[search]: https://www.google.com/search?q=site%3Ahttps%3A%2F%2Fgithub.com%2Fycm-core%2FYouCompleteMe%2Fissues%20python%20mac
 [gist]: https://gist.github.com/

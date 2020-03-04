@@ -16,5 +16,5 @@ the brackets) _before_ filing your PR:**
 
 [Please explain **in detail** why the changes in this PR are needed.]
 
-[cont]: https://github.com/Valloric/YouCompleteMe/blob/master/CONTRIBUTING.md
-[code]: https://github.com/Valloric/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[cont]: https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
+[code]: https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
