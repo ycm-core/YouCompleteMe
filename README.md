@@ -114,9 +114,29 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).
 
-![YouCompleteMe GIF demo](https://i.imgur.com/0OP4ood.gif)
+![YouCompleteMe GIF subcommands demo](https://i.imgur.com/nmUUbdl.gif)
 
-Here's an explanation of what happens in the short GIF demo above.
+Here we can see YCM being able to do a few things:
+
+- Retrieve references across files
+- Go to declaration/definition
+- Expand `auto` in C++
+- Fix some common errors with `FixIt`
+- Not shown in the gif is `GoToImplementation` and `GoToType`
+  for servers that support it.
+
+![YouCompleteMe GIF unicode demo](https://user-images.githubusercontent.com/10026824/34471853-af9cf32a-ef53-11e7-8229-de534058ddc4.gif)
+
+YCM might be the only vim completion engine with the correct unicode support.
+  Though we do assume UTF-8 everywhere.
+
+![YouCompleteMe GIF signature help demo](https://user-images.githubusercontent.com/10584846/58738348-5060da80-83fd-11e9-9537-d07fdbf4554c.gif)
+
+If a server provides "signature help" support, YCM is able to leverage that.
+
+![YouCompleteMe GIF completion demo](https://i.imgur.com/0OP4ood.gif)
+
+Here's an explanation of what happens in the last GIF demo above.
 
 First, realize that **no keyboard shortcuts had to be pressed** to get the list
 of completion candidates at any point in the demo. The user just types and the
@@ -201,16 +221,24 @@ Installation
 
 - Install cmake, macvim and python; Note that the *system* vim is not supported.
 
+&nbsp;
+
     brew install cmake macvim python
 
 - Install mono, go, node and npm
+
+&nbsp;
 
     brew install mono go nodejs
 
 - Compile YCM
 
+&nbsp;
+
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --all
+
+- For plugging an arbitrary LSP server, check [the relevant section](#plugging-an-arbitrary-lsp-server)
 
 #### Explanation for the quick start
 
@@ -284,13 +312,19 @@ that are conservatively turned off by default that you may want to turn on.
 
 - Install cmake, vim and python
 
+&nbsp;
+
     apt install build-essential cmake vim python3-dev
 
 - Install mono-complete, go, node and npm
 - Compile YCM
 
+&nbsp;
+
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --all
+
+- For plugging an arbitrary LSP server, check [the relevant section](#plugging-an-arbitrary-lsp-server)
 
 #### Explanation for the quick start
 
@@ -317,13 +351,19 @@ Install development tools, CMake, and Python headers:
 
 - Fedora 27 and later:
 
+&nbsp;
+
       sudo dnf install cmake gcc-c++ make python3-devel
 
 - Ubuntu 14.04:
 
+&nbsp;
+
       sudo apt install build-essential cmake3 python3-dev
 
 - Ubuntu 16.04 and later:
+
+&nbsp;
 
       sudo apt install build-essential cmake python3-dev
 
@@ -376,10 +416,13 @@ that are conservatively turned off by default that you may want to turn on.
 - Install go, node and npm
 - Compile YCM
 
+&nbsp;
+
     cd YouCompleteMe
     python3 install.py --all
 
 - Add `set encoding=utf-8` to your [vimrc][]
+- For plugging an arbitrary LSP server, check [the relevant section](#plugging-an-arbitrary-lsp-server)
 
 #### Explanation for the quick start
 
@@ -482,13 +525,19 @@ that are conservatively turned off by default that you may want to turn on.
 
 - Install cmake
 
+&nbsp;
+
     pkg install cmake
 
 - Install xbuild, go, node and npm
 - Compile YCM
 
+&nbsp;
+
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --all
+
+- For plugging an arbitrary LSP server, check [the relevant section](#plugging-an-arbitrary-lsp-server)
 
 #### Explanation for the quick start
 
@@ -1333,6 +1382,22 @@ will be used as the `kwargs[ 'language' ]`.
 See [the LSP Examples](https://github.com/ycm-core/lsp-examples) project for more
 examples of configuring the likes of PHP, Ruby, Kotlin, and D.
 
+#### LSP Configuration
+
+Many LSP servers allow some level of user configuration. YCM enables this with
+the help of `.ycm_extra_conf.py` files. Here's an example of jdt.ls user
+configuration.
+
+```python
+def Settings( **kwargs ):
+  if kwargs[ 'language' ] == 'java':
+    return { 'ls': { 'java.format.onType.enabled': True } }
+```
+
+The `ls` key tells YCM that the dictionary should be passed to thet LSP server.
+For each of the LSP server's configuration you should look up the respective
+server's documentation.
+
 #### Using `omnifunc` for semantic completion
 
 YCM will use your `omnifunc` (see `:h omnifunc` in Vim) as a source for semantic
@@ -1350,22 +1415,6 @@ and don't forget to have `let g:EclimCompletionMethod = 'omnifunc'` in your
 vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs as
 the data source for semantic completions and provide the auto-triggering and
 subsequence-based matching (and other YCM features) on top of it.
-
-### LSP Configuration
-
-Many LSP servers allow some level of user configuration. YCM enables this with
-the help of `.ycm_extra_conf.py` files. Here's an example of jdt.ls user
-configuration.
-
-```python
-def Settings( **kwargs ):
-  if kwargs[ 'language' ] == 'java':
-    return { 'ls': { 'java.format.onType.enabled': True } }
-```
-
-The `ls` key tells YCM that the dictionary should be passed to thet LSP server.
-For each of the LSP server's configuration you should look up the respective
-server's documentation.
 
 ### Writing New Semantic Completers
 
