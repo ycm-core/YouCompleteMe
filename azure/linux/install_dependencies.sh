@@ -1,6 +1,7 @@
 # Exit immediately if a command returns a non-zero status.
 set -e
 
+sudo apt-get update
 sudo apt-get install libsqlite3-dev
 
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
