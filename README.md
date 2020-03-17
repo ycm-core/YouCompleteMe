@@ -114,26 +114,6 @@ YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
   to provide semantic completions for many other languages (Ruby, PHP etc.).
 
-![YouCompleteMe GIF subcommands demo](https://i.imgur.com/nmUUbdl.gif)
-
-Here we can see YCM being able to do a few things:
-
-- Retrieve references across files
-- Go to declaration/definition
-- Expand `auto` in C++
-- Fix some common errors with `FixIt`
-- Not shown in the gif is `GoToImplementation` and `GoToType`
-  for servers that support it.
-
-![YouCompleteMe GIF unicode demo](https://user-images.githubusercontent.com/10026824/34471853-af9cf32a-ef53-11e7-8229-de534058ddc4.gif)
-
-YCM might be the only vim completion engine with the correct unicode support.
-  Though we do assume UTF-8 everywhere.
-
-![YouCompleteMe GIF signature help demo](https://user-images.githubusercontent.com/10584846/58738348-5060da80-83fd-11e9-9537-d07fdbf4554c.gif)
-
-If a server provides "signature help" support, YCM is able to leverage that.
-
 ![YouCompleteMe GIF completion demo](https://i.imgur.com/0OP4ood.gif)
 
 Here's an explanation of what happens in the last GIF demo above.
@@ -187,6 +167,11 @@ features plus extra:
 
 **And that's not all...**
 
+YCM might be the only vim completion engine with the correct unicode support.
+Though we do assume UTF-8 everywhere.
+
+![YouCompleteMe GIF unicode demo](https://user-images.githubusercontent.com/10026824/34471853-af9cf32a-ef53-11e7-8229-de534058ddc4.gif)
+
 YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
 number of languages, including:
 
@@ -203,6 +188,17 @@ number of languages, including:
 For example, here's a demo of signature help:
 
 ![Signature Help Early Demo](https://user-images.githubusercontent.com/10584846/58738348-5060da80-83fd-11e9-9537-d07fdbf4554c.gif)
+
+Below we can see YCM being able to do a few things:
+
+- Retrieve references across files
+- Go to declaration/definition
+- Expand `auto` in C++
+- Fix some common errors with `FixIt`
+- Not shown in the gif is `GoToImplementation` and `GoToType`
+  for servers that support it.
+
+![YouCompleteMe GIF subcommands demo](https://i.imgur.com/nmUUbdl.gif)
 
 Features vary by file type, so make sure to check out the [file type feature
 summary](#quick-feature-summary) and the
@@ -613,7 +609,7 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Full Installation Guide
 
-The [full installation guide][wiki-full-installation] has been moved to the wiki.
+The [full installation guide][wiki-full-install] has been moved to the wiki.
 
 Quick Feature Summary
 -----
@@ -629,7 +625,7 @@ Quick Feature Summary
 ### C-family languages (C, C++, Objective C, Objective C++, CUDA)
 
 * Semantic auto-completion with automatic fixes
-* Signature help (when [using clangd](#selecting-a-c-family-completion-engine))
+* Signature help
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
 * View documentation comments for identifiers (`GetDoc`)
