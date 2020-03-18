@@ -24,7 +24,7 @@ recently it has been carrying on a simultaneous relationship with Python 3.
 Indeed all of YCM and ycmd code is Python 3 code, with a lot of gubbins
 to make it work also on Python 2. This makes the code more complex,
 requires double testing of everything, and restricts the developers from using
-certain new langauge features, ultimately restricting the features we can
+certain new language features, ultimately restricting the features we can
 deliver to users.
 
 On 1st January 2020, Python 2 will be officially end of life. And therefore, so
@@ -167,7 +167,7 @@ features plus extra:
 
 **And that's not all...**
 
-YCM might be the only vim completion engine with the correct unicode support.
+YCM might be the only vim completion engine with the correct Unicode support.
 Though we do assume UTF-8 everywhere.
 
 ![YouCompleteMe GIF unicode demo](https://user-images.githubusercontent.com/10026824/34471853-af9cf32a-ef53-11e7-8229-de534058ddc4.gif)
