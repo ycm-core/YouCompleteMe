@@ -193,16 +193,15 @@ def _GetCompletionInfoField( completion_data ):
   info = info.replace( '\x00', '' )
 
 
-  vf_strdisplaywidth = vimsupport.vim.Function( 'strdisplaywidth' )
-  vf_winwidth = vimsupport.vim.Function( 'winwidth' )
-
   # Get the width of the current window
-  winwidth = vf_winwidth( 0 )
+  winwidth = vimsupport.vim.current.window.width
 
   num_additional_line = 0
   for line in info.splitlines():
-    if vf_strdisplaywidth( line ) > winwidth:
-      num_additional_line += vf_strdisplaywidth( line ) // winwidth
+    vimsupport.vim.current.buffer.vars["ycm_tmp_var"] = line
+    strdisplaywidth = int( vimsupport.vim.eval( 'strdisplaywidth(b:ycm_tmp_var)' ) )
+    if strdisplaywidth > winwidth:
+      num_additional_line += strdisplaywidth // winwidth
 
   footer = ''
   if num_additional_line > 0:
