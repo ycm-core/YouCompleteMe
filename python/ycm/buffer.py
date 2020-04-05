@@ -20,7 +20,7 @@ from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 
 DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
-                            'javascript', 'typescript' }
+                            'javascript', 'typescript', 'typescriptreact' }
 
 
 # Emulates Vim buffer
