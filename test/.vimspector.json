@@ -1,0 +1,54 @@
+{
+  "$schema": "https://puremourning.github.io/vimspector/schema/vimspector.schema.json",
+  "configurations": {
+    "Run test": {
+      "adapter": {
+        "command": [
+          "node",
+          "/Users/ben/Development/vim-debug-adapter/dist/index.js"
+        ]
+      },
+      "configuration": {
+        "type": "vim",
+        "request": "launch",
+        "vim": "/Users/ben/Development/vim/src/vim",
+        "args": [
+           "--clean",
+           "--not-a-term",
+           "-S", "lib/run_test.vim",
+           "--cmd", "au SwapExists * let v:swapchoice = 'e'",
+           "${file}",
+           "${Test}"
+        ],
+        "cwd": "${workspaceRoot}",
+        "trace": {
+          "level": "Verbose"
+        }
+      }
+    },
+    "Run script": {
+      "adapter": {
+        "command": [
+          "node",
+          "/Users/ben/Development/vim-debug-adapter/dist/index.js"
+        ]
+      },
+      "configuration": {
+        "type": "vim",
+        "request": "launch",
+        "vim": "/Users/ben/Development/vim/src/vim",
+        "args": [
+           "--clean",
+           "--not-a-term",
+           "-S", "lib/run_test.vim",
+           "--cmd", "au SwapExists * let v:swapchoice = 'e'",
+           "${file}"
+        ],
+        "cwd": "${workspaceRoot}",
+        "trace": {
+          "level": "Verbose"
+        }
+      }
+    }
+  }
+}

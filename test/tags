@@ -1,0 +1,33 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Abort	lib//run_test.vim	/^func! Abort( timer_id )$/;"	f
+AfterTheTest	lib//run_test.vim	/^func AfterTheTest()$/;"	f
+EarlyExit	lib//run_test.vim	/^func EarlyExit(test)$/;"	f
+FinishTesting	lib//run_test.vim	/^func FinishTesting()$/;"	f
+RunTheTest	lib//run_test.vim	/^func RunTheTest(test)$/;"	f
+TestFailed	lib//run_test.vim	/^func s:TestFailed()$/;"	f
+WaitFor	lib//plugin/shared.vim	/^func WaitFor(expr, ...)$/;"	f
+WaitForAssert	lib//plugin/shared.vim	/^func WaitForAssert(assert, ...)$/;"	f
+WaitForCommon	lib//plugin/shared.vim	/^func s:WaitForCommon(expr, assert, timeout)$/;"	f
+coverage	lib//run_test.vim	/^  import coverage$/;"	m
+g:testname	lib//run_test.vim	/^let g:testname = expand('%')$/;"	v
+g:testpath	lib//run_test.vim	/^let g:testpath = expand('%:p')$/;"	v
+os	lib//run_test.vim	/^import os$/;"	m
+s:done	lib//run_test.vim	/^let s:done = 0$/;"	v
+s:errors	lib//run_test.vim	/^let s:errors = []$/;"	v
+s:fail	lib//run_test.vim	/^  let s:fail += 1$/;"	v
+s:fail	lib//run_test.vim	/^let s:fail = 0$/;"	v
+s:flaky_errors_re	lib//run_test.vim	/^let s:flaky_errors_re = '__does_not_match__'$/;"	v
+s:flaky_tests	lib//run_test.vim	/^let s:flaky_tests = []$/;"	v
+s:messages	lib//run_test.vim	/^let s:messages = []$/;"	v
+s:single_test_timeout	lib//run_test.vim	/^let s:single_test_timeout = 60000$/;"	v
+s:skipped	lib//run_test.vim	/^let s:skipped = []$/;"	v
+s:tests	lib//run_test.vim	/^  let s:tests = filter(s:tests, 'v:val =~ argv(1)')$/;"	v
+s:tests	lib//run_test.vim	/^let s:tests = split(substitute(@q, 'function \\(\\k*()\\)', '\\1', 'g'))$/;"	v
+youcompleteme#test#setup#CleanUp	lib//autoload/youcompleteme/test/setup.vim	/^function! youcompleteme#test#setup#CleanUp() abort$/;"	f
+youcompleteme#test#setup#OpenFile	lib//autoload/youcompleteme/test/setup.vim	/^function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort$/;"	f
+youcompleteme#test#setup#SetUp	lib//autoload/youcompleteme/test/setup.vim	/^function! youcompleteme#test#setup#SetUp() abort$/;"	f
