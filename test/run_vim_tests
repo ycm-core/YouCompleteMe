@@ -58,18 +58,20 @@ for t in ${TESTS}; do
     fi
   done
 
+  if [ -n "${COVERAGE}" ]; then
+    covimerage write_coverage --append \
+                              --source $(pwd)/.. \
+                              --data-file .coverage.vim \
+                              .vim_profile
+  fi
+
   rm -f $t.res
 done
 
 echo "Done running tests"
 
 if [ -n "${COVERAGE}" ]; then
-  echo "Preparing Vim coverage data..."
-  covimerage write_coverage --source $(pwd)/.. --data-file .coverage.vim \
-             .vim_profile
-
   mv .coverage.* ../
-  echo "Done"
 fi
 
 popd > /dev/null
