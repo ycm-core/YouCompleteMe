@@ -46,7 +46,7 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
   endif
 
   " Sometimes, that's just not enough to ensure stuff works
-  sleep 7
+  exe 'sleep' get( a:kwargs, 'delay', 7 )
 
   " FIXME: We need a much more robust way to wait for the server to be ready
 endfunction
