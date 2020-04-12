@@ -27,7 +27,7 @@ function! Test_Ranged_Fixit_Works()
     call test_feedinput( "4\<CR>" )
   endfunction
 
-  call timer_start( 5000, funcref( 'SelectEntry' ) )
+  call timer_start( 7000, funcref( 'SelectEntry' ) )
   '<,'>YcmCompleter FixIt
   redraw
 
