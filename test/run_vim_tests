@@ -7,6 +7,9 @@ if [ "$1" == "--help" ]; then
   echo " - run specific tests script: $0 signature_help.test.vim"
   echo " - run specific tests fun: $0 signature_help.test.vim:Test_signatures_TopLine\(\)"
   exit 0
+elif [ "$1" == "--stdout" ]; then
+  export YCM_TEST_STDOUT=1
+  shift
 fi
 
 RUN_VIM="vim --clean --not-a-term"
