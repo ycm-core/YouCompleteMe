@@ -3,6 +3,7 @@ let g:ycm_test_plugin_dir = expand( '<sfile>:p:h:h' )
 set mouse=a
 set lines=30
 set columns=80
+set shortmess+=c
 
 let g:ycm_confirm_extra_conf=0
 
