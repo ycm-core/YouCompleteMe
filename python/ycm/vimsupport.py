@@ -1152,7 +1152,8 @@ def OpenFilename( filename, options = {} ):
   - watch: automatically watch for changes (default: False). This is useful
   for logs;
   - position: set the position where the file is opened (default: start).
-  Choices are start and end."""
+  Choices are start and end.
+  - mods: The vim <mods> for the command, such as :vertical"""
 
   # Set the options.
   command = GetVimCommand( options.get( 'command', 'horizontal-split' ),
@@ -1170,7 +1171,10 @@ def OpenFilename( filename, options = {} ):
 
   # Open the file.
   try:
-    vim.command( '{0}{1} {2}'.format( size, command, filename ) )
+    vim.command( '{mods}{0}{1} {2}'.format( size,
+                                            command,
+                                            filename,
+                                            mods=options.get( 'mods', '' ) ) )
   # When the file we are trying to jump to has a swap file,
   # Vim opens swap-exists-choices dialog and throws vim.error with E325 error,
   # or KeyboardInterrupt after user selects one of the options which actually

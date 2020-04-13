@@ -674,16 +674,20 @@ class YouCompleteMe:
     return logfiles
 
 
-  def _OpenLogfile( self, logfile ):
+  def _OpenLogfile( self, size, mods, logfile ):
     # Open log files in a horizontal window with the same behavior as the
     # preview window (same height and winfixheight enabled). Automatically
     # watch for changes. Set the cursor position at the end of the file.
+    if not size:
+      size = vimsupport.GetIntValue( '&previewheight' )
+
     options = {
-      'size': vimsupport.GetIntValue( '&previewheight' ),
+      'size': size,
       'fix': True,
       'focus': False,
       'watch': True,
-      'position': 'end'
+      'position': 'end',
+      'mods': mods
     }
 
     vimsupport.OpenFilename( logfile, options )
@@ -693,7 +697,7 @@ class YouCompleteMe:
     vimsupport.CloseBuffersForFilename( logfile )
 
 
-  def ToggleLogs( self, *filenames ):
+  def ToggleLogs( self, size, mods, *filenames ):
     logfiles = self.GetLogfiles()
     if not filenames:
       sorted_logfiles = sorted( logfiles )
@@ -707,7 +711,7 @@ class YouCompleteMe:
 
       logfile = logfiles[ sorted_logfiles[ logfile_index ] ]
       if not vimsupport.BufferIsVisibleForFilename( logfile ):
-        self._OpenLogfile( logfile )
+        self._OpenLogfile( size, mods, logfile )
       else:
         self._CloseLogfile( logfile )
       return
@@ -719,7 +723,7 @@ class YouCompleteMe:
       logfile = logfiles[ filename ]
 
       if not vimsupport.BufferIsVisibleForFilename( logfile ):
-        self._OpenLogfile( logfile )
+        self._OpenLogfile( size, mods, logfile )
         continue
 
       self._CloseLogfile( logfile )
