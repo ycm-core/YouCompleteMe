@@ -293,7 +293,7 @@ func FinishTesting()
                 \ 'messages',
                 \ 's' )
 
-  if exists( '$COVERAGE' )
+  if exists( '$COVERAGE' ) && pyxeval( '_cov is not None' )
     pyx _cov.stop()
     pyx _cov.save()
   endif
@@ -343,7 +343,11 @@ endif
 
 pyx <<EOF
 def _InitCoverage():
-  import coverage
+  try:
+    import coverage
+  except ImportError:
+    return None
+
   cov = coverage.Coverage( data_file='.coverage.python' )
   cov.start()
   return cov

@@ -5,8 +5,7 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
 
-  " Use the default, which _should_ be the new API
-  unlet! g:ycm_use_completion_api
+  let g:ycm_use_completion_api = 0
 
   call youcompleteme#test#setup#SetUp()
 endfunction
@@ -17,17 +16,18 @@ endfunction
 
 exe 'source' expand( "<sfile>:p:h" ) .. '/completion.common.vim'
 
-function! Test_Using_New_API()
+function! Test_Using_Old_API()
   let debug_info = split( execute( 'YcmDebugInfo' ), "\n" )
+
   enew
   setf cpp
 
-  call assert_equal( '', &completefunc )
+  call assert_equal( 'youcompleteme#CompleteFunc', &completefunc )
 
   for line in debug_info
     if line =~# "^-- Completion API: "
       let ver = substitute( line, "^-- Completion API: ", "", "" )
-      call assert_equal( '1', ver, 'API version' )
+      call assert_equal( '0', ver, 'API version' )
       return
     endif
   endfor
