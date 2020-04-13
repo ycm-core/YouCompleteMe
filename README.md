@@ -665,6 +665,7 @@ Quick Feature Summary
 * Real-time diagnostic display
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to type definition (`GoToType`)
+* Go to implementation (`GoToImplementation`)
 * Automatically fix certain errors (`FixIt`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -1689,7 +1690,7 @@ Looks up the symbol under the cursor and jumps to its implementation (i.e.
 non-interface). If there are multiple implementations, instead provides a list
 of implementations to choose from.
 
-Supported in filetypes: `cs, java, rust, typescript, javascript`
+Supported in filetypes: `cs, go, java, rust, typescript, javascript`
 
 #### The `GoToImplementationElseDeclaration` subcommand
 
@@ -3013,6 +3014,34 @@ Default: `0`
 " Disable signature help
 let g:ycm_disable_signature_help = 1
 ```
+
+### The `g:ycm_gopls_binary_path` option
+
+In case the system-wide `gopls` binary is newer than the bundled one, setting
+this option to the path of the system-wide `gopls` would make YCM use that one
+instead.
+
+If the path is just `gopls`, YCM will search in `$PATH`.
+
+
+### The `g:ycm_rls_binary_path` and `g:ycm_rustc_binary_path` options
+
+Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), these two options
+tell YCM which `rls` and `rustc` to use.
+
+NOTE: You *need* to either set both or none of these two.
+
+
+### The `g:ycm_tsserver_binary_path` option
+
+Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), this option
+tells YCM where is the TSServer executable located.
+
+### The `g:ycm_roslyn_binary_path` option
+
+Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), this option
+tells YCM where is the Omnisharp-Roslyn executable located.
+
 
 FAQ
 ---

@@ -14,7 +14,7 @@ endfunction
 function! Test_Ranged_Fixit_Works()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .
-        \ '/src/com/test/TestLauncher.java', {} )
+        \ '/src/com/test/TestLauncher.java', { 'delay': 15 } )
 
   call setpos( '.', [ 0, 34, 50 ] )
   redraw
