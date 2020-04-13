@@ -14,7 +14,7 @@ endfunction
 function! Test_Ranged_Fixit_Works()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .
-        \ '/src/com/test/TestLauncher.java', {} )
+        \ '/src/com/test/TestLauncher.java', { 'delay': 15 } )
 
   call setpos( '.', [ 0, 34, 50 ] )
   redraw
@@ -27,7 +27,7 @@ function! Test_Ranged_Fixit_Works()
     call test_feedinput( "4\<CR>" )
   endfunction
 
-  call timer_start( 7000, funcref( 'SelectEntry' ) )
+  call timer_start( 5000, funcref( 'SelectEntry' ) )
   '<,'>YcmCompleter FixIt
   redraw
 
