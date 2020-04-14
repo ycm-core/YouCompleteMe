@@ -81,6 +81,12 @@ Paste output here
 Paste output here
 ```
 
+## Output of `git rev-parse HEAD` in YouCompleteMe installation directory
+
+```
+paste output here
+```
+
 ## Contents of YCM, ycmd and completion engine logfiles
 
 > Reproduce the issue with `vim -Nu /path/to/YCM/vimrc_ycm_minimal`, which
