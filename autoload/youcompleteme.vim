@@ -72,8 +72,11 @@ let s:completion_api = get( g:,
                           \ 'ycm_use_completion_api',
                           \ s:COMPLETION_TEXTCHANGEDP )
 
-" Fall back to using completefunc if the TextChangedP API isn't available
-if !exists( '##TextChangedP' ) || s:completion_api != s:COMPLETION_TEXTCHANGEDP
+" Fall back to using completefunc if the TextChangedP/CompleteChanged API
+" isn't available. Both are needed to ensure correct behaviour with the 'new'
+" complete() api
+if !exists( '##TextChangedP' ) || !exists( '##CompleteChanged' )
+      \ || s:completion_api != s:COMPLETION_TEXTCHANGEDP
   let s:completion_api = s:COMPLETION_COMPLETEFUNC
 endif
 
@@ -544,6 +547,10 @@ function! s:OnCompleteChanged()
     return
   endif
 
+  if ! empty( v:event.completed_item )
+    let s:last_char_inserted_by_user = v:false
+  endif
+
   call s:UpdateSignatureHelp()
 endfunction
 
@@ -657,25 +664,23 @@ function! s:PollFileParseResponse( ... )
 endfunction
 
 
-if s:completion_api == s:COMPLETION_COMPLETEFUNC
-  function! s:SendKeys( keys )
-    " By default keys are added to the end of the typeahead buffer. If there are
-    " already keys in the buffer, they will be processed first and may change
-    " the state that our keys combination was sent for (e.g. <C-X><C-U><C-P> in
-    " normal mode instead of insert mode or <C-e> outside of completion mode).
-    " We avoid that by inserting the keys at the start of the typeahead buffer
-    " with the 'i' option. Also, we don't want the keys to be remapped to
-    " something else so we add the 'n' option.
-    call feedkeys( a:keys, 'in' )
-  endfunction
+function! s:SendKeys( keys )
+  " By default keys are added to the end of the typeahead buffer. If there are
+  " already keys in the buffer, they will be processed first and may change
+  " the state that our keys combination was sent for (e.g. <C-X><C-U><C-P> in
+  " normal mode instead of insert mode or <C-e> outside of completion mode).
+  " We avoid that by inserting the keys at the start of the typeahead buffer
+  " with the 'i' option. Also, we don't want the keys to be remapped to
+  " something else so we add the 'n' option.
+  call feedkeys( a:keys, 'in' )
+endfunction
 
 
-  function! s:CloseCompletionMenu()
-    if pumvisible()
-      call s:SendKeys( "\<C-e>" )
-    endif
-  endfunction
-endif
+function! s:CloseCompletionMenu()
+  if pumvisible()
+    call s:SendKeys( "\<C-e>" )
+  endif
+endfunction
 
 
 function! s:OnInsertChar()
@@ -768,13 +773,19 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
     let s:force_semantic = 0
   endif
 
-  if exists( 'b:ycm_completing' ) &&
+  if get( b:, 'ycm_completing' ) &&
         \ ( g:ycm_auto_trigger || s:force_semantic ) &&
         \ !s:InsideCommentOrStringAndShouldStop() &&
         \ !s:OnBlankLine()
-    " The call to s:Complete here is absolutely necessary, to both prevent
-    " flicker and to ensure that tabbing throught the list does not continually
-    " filter the list to the selected element.
+    " The call to s:Complete here is necessary, to minimize flicker when we
+    " close the pum on every keypress. In that case, we try to quickly show it
+    " again with whatver the latest completion result is. When using complete(),
+    " we don't need to do this, as we only close the pum when there are no
+    " completions. However, it's still useful as we don't want Vim's filtering
+    " to _ever_ apply. Examples of when this is problematic is when typing some
+    " keys to filter (that are not a prefix of the completion), then deleting a
+    " character. Normally Vim would re-filter based on the new "query", but we
+    " don't want that.
     call s:Complete()
     call s:RequestCompletion()
 
@@ -907,7 +918,7 @@ function! s:RequestSemanticCompletion()
     return ''
   endif
 
-  if exists( 'b:ycm_completing' )
+  if get( b:, 'ycm_completing' )
     let s:force_semantic = 1
     if s:completion_api == s:COMPLETION_TEXTCHANGEDP
       call s:StopPoller( s:pollers.completion )
@@ -1014,11 +1025,15 @@ if s:completion_api == s:COMPLETION_TEXTCHANGEDP
       let s:completion.completion_start_column +=
             \ col( '.' ) - s:completion.column
     endif
-    let old_completeopt = &completeopt
-    set completeopt+=noselect
-    call complete( s:completion.completion_start_column,
-                 \ s:completion.completions )
-    let &completeopt = old_completeopt
+    if len( s:completion.completions )
+      let old_completeopt = &completeopt
+      set completeopt+=noselect
+      call complete( s:completion.completion_start_column,
+                   \ s:completion.completions )
+      let &completeopt = old_completeopt
+    elseif pumvisible()
+      call s:CloseCompletionMenu()
+    endif
   endfunction
 else
   function! s:Complete()
@@ -1162,7 +1177,7 @@ function! youcompleteme#GetCommandResponse( ... )
     return ''
   endif
 
-  if !exists( 'b:ycm_completing' )
+  if !get( b:, 'ycm_completing' )
     return ''
   endif
 

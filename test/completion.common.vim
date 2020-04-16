@@ -350,3 +350,65 @@ function! Test_Completion_FixIt()
 
   %bwipeout!
 endfunction
+
+function! Test_Select_Next_Previous_InsertModeMapping()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp',
+        \ #{ delay: 2 } )
+
+  call setpos( '.', [ 0, 11, 6 ] )
+
+  inoremap <C-n> <Down>
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function! Check( id )
+    call s:WaitForCompletion()
+
+    call s:CheckCurrentLine( '  foo.' )
+    call s:CheckCompletionItems( [ 'c', 'x', 'y' ] )
+
+    call s:FeedAndCheckAgain( "\<C-n>", funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( id )
+    call s:WaitForCompletion()
+    call s:CheckCurrentLine( '  foo.c' )
+    call s:CheckCompletionItems( [ 'c', 'x', 'y' ] )
+
+    call s:FeedAndCheckAgain( "\<C-n>", funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( id )
+    call s:WaitForCompletion()
+    call s:CheckCurrentLine( '  foo.x' )
+    call s:CheckCompletionItems( [ 'c', 'x', 'y' ] )
+
+    call s:FeedAndCheckAgain( "\<BS>a", funcref( 'Check4' ) )
+  endfunction
+
+  function! Check4( id )
+    call s:CheckCurrentLine( '  foo.a' )
+    call s:CheckCompletionItems( [] )
+    call s:FeedAndCheckAgain( "\<C-n>", funcref( 'Check5' ) )
+  endfunction
+
+  function! Check5( id )
+    " The last ctrl-n moved to the next line
+    call s:CheckCurrentLine( '}' )
+    call assert_equal( [ 0, 12, 2, 0 ], getpos( '.' ) )
+    call s:CheckCompletionItems( [] )
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+
+  call s:FeedAndCheckMain( 'cl.', funcref( 'Check' ) )
+  " Checks run in insert mode, then exit insert mode.
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+  iunmap <C-n>
+  %bwipeout!
+endfunction
