@@ -3024,6 +3024,18 @@ instead.
 If the path is just `gopls`, YCM will search in `$PATH`.
 
 
+### The `g:ycm_gopls_args` option
+
+Similar to [the `g:ycm_clangd_args`](#the-gycm-clangd-args), this option allows
+passing additional flags to the `gopls` command line.
+
+Default: `[]`
+
+```viml
+let g:ycm_gopls_args = []
+```
+
+
 ### The `g:ycm_rls_binary_path` and `g:ycm_rustc_binary_path` options
 
 Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), these two options

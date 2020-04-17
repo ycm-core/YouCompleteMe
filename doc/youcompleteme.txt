@@ -165,9 +165,10 @@ Contents ~
   54. The |g:ycm_language_server| option
   55. The |g:ycm_disable_signature_help| option
   56. The |g:ycm_gopls_binary_path| option
-  57. The |g:ycm_rls_binary_path| and 'g:ycm_rustc_binary_path' options
-  58. The |g:ycm_tsserver_binary_path| option
-  59. The |g:ycm_roslyn_binary_path| option
+  57. The |g:ycm_gopls_args| option
+  58. The |g:ycm_rls_binary_path| and |g:ycm_rustc_binary_path| options
+  59. The |g:ycm_tsserver_binary_path| option
+  60. The |g:ycm_roslyn_binary_path| option
  14. FAQ                                                    |youcompleteme-faq|
  15. Contributor Code of Conduct    |youcompleteme-contributor-code-of-conduct|
  16. Contact                                            |youcompleteme-contact|
@@ -3237,6 +3238,16 @@ instead.
 
 If the path is just 'gopls', YCM will search in '$PATH'.
 
+-------------------------------------------------------------------------------
+The *g:ycm_gopls_args* option
+
+Similar to the |g:ycm_clangd_args|, this option allows passing additional flags
+to the 'gopls' command line.
+
+Default: '[]'
+>
+  let g:ycm_gopls_args = []
+<
 -------------------------------------------------------------------------------
 The *g:ycm_rls_binary_path* and *g:ycm_rustc_binary_path* options
 
