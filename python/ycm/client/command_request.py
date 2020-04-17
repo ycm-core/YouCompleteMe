@@ -40,7 +40,7 @@ class CommandRequest( BaseRequest ):
     self._request_data = None
 
 
-  def Start( self ):
+  def Start( self, silent = False ):
     self._request_data = BuildRequestData()
     if self._extra_data:
       self._request_data.update( self._extra_data )
@@ -48,7 +48,8 @@ class CommandRequest( BaseRequest ):
       'command_arguments': self._arguments
     } )
     self._response = self.PostDataToHandler( self._request_data,
-                                             'run_completer_command' )
+                                             'run_completer_command',
+                                             display_message = not silent )
 
 
   def Response( self ):
@@ -78,6 +79,37 @@ class CommandRequest( BaseRequest ):
     # only one that we can't detect just by inspecting the response (it should
     # either be a single location or a list)
     return self._HandleGotoResponse( modifiers )
+
+
+  def StringResponse( self ):
+    # Retuns a supporable public API version of the response. The reason this
+    # exists is that the ycmd API here is wonky as it originally only supported
+    # text-responses and now has things like fixits and such.
+    #
+    # The supportable public API is basically any text-only response. All other
+    # response types are returned as empty strings
+    if not self.Done():
+      raise RuntimeError( "Response is not ready" )
+
+    # Completer threw an error ?
+    if self._response is None:
+      return ""
+
+    # If not a dictionary or a list, the response is necessarily a
+    # scalar: boolean, number, string, etc. In this case, we print
+    # it to the user.
+    if not isinstance( self._response, ( dict, list ) ):
+      return str( self._response )
+
+    if 'message' in self._response:
+      return self._response[ 'message' ]
+
+    if 'detailed_info' in self._response:
+      return self._response[ 'detailed_info' ]
+
+    # The only other type of response we understand is 'fixits' and GoTo. We
+    # don't provide string versions of them.
+    return ""
 
 
   def _HandleGotoResponse( self, modifiers ):
@@ -146,6 +178,13 @@ def SendCommandRequest( arguments,
   request.Start()
   request.RunPostCommandActionsIfNeeded( modifiers )
   return request.Response()
+
+
+def GetCommandResponse( arguments, extra_data = None ):
+  request = CommandRequest( arguments, "", extra_data )
+  # This is a blocking call.
+  request.Start( silent = True )
+  return request.StringResponse()
 
 
 def _BuildQfListItem( goto_data_item ):
