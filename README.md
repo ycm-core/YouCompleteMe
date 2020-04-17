@@ -1959,6 +1959,45 @@ For example:
   call youcompleteme#GetWarningCount()
 ```
 
+### The `youcompleteme#GetCommandResponse( ... )` function
+
+Run a [completer subcommand](#ycmcompleter-subcommands) and return the result as
+a string. This can be useful for example to display the `GetGoc` output in a
+popup window, e.g.:
+
+```viml
+let s:ycm_hover_popup = -1
+function s:Hover()
+  let response = youcompleteme#GetCommandResponse( 'GetDoc' )
+  if response == ''
+    return
+  endif
+
+  call popup_hide( s:ycm_hover_popup )
+  let s:ycm_hover_popup = popup_atcursor( balloon_split( response ), {} )
+endfunction
+
+" CursorHold triggers in normal mode after a delay
+autocmd CursorHold * call s:Hover()
+" Or, if you prefer, a mapping:
+nnoremap <leader>D :call <SID>Hover()<CR>
+```
+
+If the completer subcommand result is not a string (for example, it's a FixIt or
+a Location), or if the completer subcommand raises an error, an empty string is
+returned, so that calling code does not have to check for complex error
+conditions.
+
+The arguments to the function are the same as the arguments to the
+`:YcmCompleter` ex command, e.g. the name of the subcommand, followed by any
+additional subcommand arguments. As with the `YcmCompleter` command, if the
+first argument is `ft=<filetype>` the request is targetted at the specified
+filetype completer. This is an advanced usage and not necessary in most cases.
+
+NOTE: The request is run synchronously and blocks Vim until the response is
+received, so we do not recommend running this as part of an autocommand that
+triggers frequently.
+
 Autocommands
 ------------
 

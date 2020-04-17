@@ -45,3 +45,53 @@ function! Test_ToggleLogs()
 
   %bwipeout!
 endfunction
+
+function! Test_GetCommandResponse()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+
+  " detailed_info
+  call setpos( '.', [ 0, 12, 3 ] )
+  call assert_equal( "Test_OneLine()\n\nThis is the one line output.",
+                   \ youcompleteme#GetCommandResponse( 'GetDoc' ) )
+
+  call setpos( '.', [ 0, 13, 7 ] )
+  call assert_equal( "Test_MultiLine()\n\nThis is the one line output.\n"
+                   \ . "This is second line.",
+                   \ youcompleteme#GetCommandResponse( 'GetDoc' ) )
+
+  " display message
+  call setpos( '.', [ 0, 12, 10 ] )
+  call assert_equal( 'def Test_OneLine()',
+                   \ youcompleteme#GetCommandResponse( 'GetType' ) )
+
+  " Location
+  call setpos( '.', [ 0, 12, 10 ] )
+  call assert_equal( '',
+                   \ youcompleteme#GetCommandResponse( 'GoTo' ) )
+
+  " Error
+  call setpos( '.', [ 0, 12, 10 ] )
+  call assert_equal( '',
+                   \ youcompleteme#GetCommandResponse( 'NotACommand', 'arg' ) )
+
+  " Specify completer
+  call setpos( '.', [ 0, 13, 7 ] )
+  call assert_equal( "Test_MultiLine()\n\nThis is the one line output.\n"
+                   \ . "This is second line.",
+                   \ youcompleteme#GetCommandResponse( 'ft=python', 'GetDoc' ) )
+
+  " on a command, no error
+  call setpos( '.', [ 0, 1, 3 ] )
+  call assert_equal( '', youcompleteme#GetCommandResponse( 'GetDoc' ) )
+endfunction
+
+
+function! Test_GetCommandResponse_FixIt()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/fixit.c', {} )
+
+  " fixit returns empty
+  call setpos( '.', [ 0, 3, 4 ] )
+  call assert_equal( '',
+                   \ youcompleteme#GetCommandResponse( 'FixIt' ) )
+
+endfunction
