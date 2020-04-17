@@ -45,3 +45,20 @@ function! Test_ToggleLogs()
 
   %bwipeout!
 endfunction
+
+function! Test_GetCommandResponse()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+
+  call setpos( '.', [ 0, 12, 3 ] )
+  call assert_equal( "Test_OneLine()\n\nThis is the one line output.",
+                   \ youcompleteme#GetCommandResponse( 'GetDoc' ) )
+
+  call setpos( '.', [ 0, 13, 7 ] )
+  call assert_equal( "Test_MultiLine()\n\nThis is the one line output.\n"
+                   \ . "This is second line.",
+                   \ youcompleteme#GetCommandResponse( 'GetDoc' ) )
+
+  " on a command, no error
+  call setpos( '.', [ 0, 1, 3 ] )
+  call assert_equal( '', youcompleteme#GetCommandResponse( 'GetDoc' ) )
+endfunction

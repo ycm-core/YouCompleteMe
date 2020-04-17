@@ -32,7 +32,7 @@ from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
-from ycm.client.command_request import SendCommandRequest
+from ycm.client.command_request import SendCommandRequest, GetCommandResponse
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.signature_help_request import ( SignatureHelpRequest,
                                                 SigHelpAvailableByFileType )
@@ -373,12 +373,11 @@ class YouCompleteMe:
       signature_info )
 
 
-  def SendCommandRequest( self,
-                          arguments,
-                          modifiers,
-                          has_range,
-                          start_line,
-                          end_line ):
+  def _GetCommandRequestArguments( self,
+                                   arguments,
+                                   has_range,
+                                   start_line,
+                                   end_line ):
     final_arguments = []
     for argument in arguments:
       # The ft= option which specifies the completer when running a command is
@@ -398,10 +397,35 @@ class YouCompleteMe:
       extra_data.update( vimsupport.BuildRange( start_line, end_line ) )
     self._AddExtraConfDataIfNeeded( extra_data )
 
+    return final_arguments, extra_data
+
+
+
+  def SendCommandRequest( self,
+                          arguments,
+                          modifiers,
+                          has_range,
+                          start_line,
+                          end_line ):
+    final_arguments, extra_data = self._GetCommandRequestArguments(
+      arguments,
+      has_range,
+      start_line,
+      end_line )
     return SendCommandRequest( final_arguments,
                                modifiers,
                                self._user_options[ 'goto_buffer_command' ],
                                extra_data )
+
+
+  def GetCommandResponse( self, arguments ):
+    final_arguments, extra_data = self._GetCommandRequestArguments(
+      arguments,
+      False,
+      0,
+      0 )
+    return GetCommandResponse( final_arguments, extra_data )
+
 
 
   def GetDefinedSubcommands( self ):

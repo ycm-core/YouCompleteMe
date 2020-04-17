@@ -768,7 +768,7 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
     let s:force_semantic = 0
   endif
 
-  if b:ycm_completing &&
+  if exists( 'b:ycm_completing' ) &&
         \ ( g:ycm_auto_trigger || s:force_semantic ) &&
         \ !s:InsideCommentOrStringAndShouldStop() &&
         \ !s:OnBlankLine()
@@ -907,7 +907,7 @@ function! s:RequestSemanticCompletion()
     return ''
   endif
 
-  if b:ycm_completing
+  if exists( 'b:ycm_completing' )
     let s:force_semantic = 1
     if s:completion_api == s:COMPLETION_TEXTCHANGEDP
       call s:StopPoller( s:pollers.completion )
@@ -1154,6 +1154,19 @@ endfunction
 
 function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
   return join( py3eval( 'list( ycm_state.GetLogfiles() )' ), "\n" )
+endfunction
+
+
+function! youcompleteme#GetCommandResponse( ... )
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return ''
+  endif
+
+  if !exists( 'b:ycm_completing' )
+    return ''
+  endif
+
+  return py3eval( 'ycm_state.GetCommandResponse( vim.eval( "a:000" ) )' )
 endfunction
 
 
