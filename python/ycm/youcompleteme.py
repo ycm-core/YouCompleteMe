@@ -142,6 +142,8 @@ class YouCompleteMe:
     server_port = utils.GetUnusedLocalhostPort()
 
     BaseRequest.server_location = 'http://127.0.0.1:' + str( server_port )
+    BaseRequest.server_host = '127.0.0.1'
+    BaseRequest.server_port = server_port
     BaseRequest.hmac_secret = hmac_secret
 
     try:
