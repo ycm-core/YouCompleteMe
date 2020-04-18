@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 YouCompleteMe contributors
+# Copyright (C) 2013-2020 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -21,8 +21,6 @@ import vim
 from base64 import b64decode, b64encode
 from hmac import compare_digest
 from urllib.parse import urljoin, urlparse, urlencode
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
 from ycm import vimsupport
 from ycmd.utils import ToBytes, GetCurrentDirectory, ToUnicode
 from ycmd.hmac_utils import CreateRequestHmac, CreateHmac
@@ -32,7 +30,6 @@ HTTP_SERVER_ERROR = 500
 
 _HEADERS = { 'content-type': 'application/json' }
 _CONNECT_TIMEOUT_SEC = 0.01
-# Setting this to None seems to screw up the Requests/urllib3 libs.
 _READ_TIMEOUT_SEC = 30
 _HMAC_HEADER = 'x-ycm-hmac'
 _logger = logging.getLogger( __name__ )
@@ -81,12 +78,6 @@ class BaseRequest:
         else:
           _IgnoreExtraConfFile( e.extra_conf_file )
         self._should_resend = True
-    except URLError as e:
-      # We don't display this exception to the user since it is likely to happen
-      # for each subsequent request (typically if the server crashed) and we
-      # don't want to spam the user with it.
-      _logger.error( e )
-
     except Exception as e:
       _logger.exception( 'Error while handling server response' )
       if display_message:
@@ -96,10 +87,12 @@ class BaseRequest:
 
 
   # This method blocks
-  # |timeout| is num seconds to tolerate no response from server before giving
-  # up; see Requests docs for details (we just pass the param along).
-  # See the HandleFuture method for the |display_message| and |truncate_message|
-  # parameters.
+  #
+  # |timeout| is num seconds to tolerate no response from
+  # server before giving up
+  #
+  # See the HandleFuture method for the |display_message| and
+  # |truncate_message| parameters.
   def GetDataFromHandler( self,
                           handler,
                           timeout = _READ_TIMEOUT_SEC,
@@ -122,7 +115,7 @@ class BaseRequest:
 
   # This is the blocking version of the method. See below for async.
   # |timeout| is num seconds to tolerate no response from server before giving
-  # up; see Requests docs for details (we just pass the param along).
+  # up.
   # See the HandleFuture method for the |display_message| and |truncate_message|
   # parameters.
   def PostDataToHandler( self,
@@ -139,7 +132,7 @@ class BaseRequest:
 
   # This returns a future! Use HandleFuture to get the value.
   # |timeout| is num seconds to tolerate no response from server before giving
-  # up; see Requests docs for details (we just pass the param along).
+  # up.
   @staticmethod
   def PostDataToHandlerAsync( data, handler, timeout = _READ_TIMEOUT_SEC ):
     return BaseRequest._TalkToHandlerAsync( data, handler, 'POST', timeout )
@@ -155,37 +148,34 @@ class BaseRequest:
                            method,
                            timeout = _READ_TIMEOUT_SEC,
                            payload = None ):
-    def _MakeRequest( data, handler, method, timeout, payload ):
-      request_uri = _BuildUri( handler )
+    request_uri = _BuildUri( handler )
+    if method == 'POST':
+      sent_data = _ToUtf8Json( data )
+      headers = BaseRequest._ExtraHeaders( method,
+                                           request_uri,
+                                           sent_data )
+      _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
+      request_id  = vimsupport.Call( 'youcompleteme#http#POST',
+                                     BaseRequest.server_host,
+                                     BaseRequest.server_port,
+                                     request_uri,
+                                     headers,
+                                     sent_data )
+    else:
+      query_string = ''
+      if payload:
+        query_string = urlencode( payload )
 
-      if method == 'POST':
-        sent_data = _ToUtf8Json( data )
-        headers = BaseRequest._ExtraHeaders( method,
-                                             request_uri,
-                                             sent_data )
-        _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
-      else:
-        headers = BaseRequest._ExtraHeaders( method, request_uri )
-        if payload:
-          request_uri += ToBytes( f'?{urlencode( payload )}' )
+      headers = BaseRequest._ExtraHeaders( method, request_uri )
+      _logger.debug( 'GET %s (%s)\n%s', request_uri, query_string, headers )
+      request_id  = vimsupport.Call( 'youcompleteme#http#GET',
+                                     BaseRequest.server_host,
+                                     BaseRequest.server_port,
+                                     request_uri,
+                                     query_string,
+                                     headers )
 
-        _logger.debug( 'GET %s (%s)\n%s', request_uri, payload, headers )
-      return urlopen(
-        Request(
-          ToUnicode( request_uri ),
-          data = sent_data if data else None,
-          headers = headers,
-          method = method ),
-        timeout = max( _CONNECT_TIMEOUT_SEC, timeout ) )
-
-
-    return BaseRequest.Executor().submit(
-      _MakeRequest,
-      data,
-      handler,
-      method,
-      timeout,
-      payload )
+    return Future( request_id )
 
 
   @staticmethod
@@ -201,20 +191,79 @@ class BaseRequest:
     return headers
 
 
-  # This method exists to avoid importing the requests module at startup;
-  # reducing loading time since this module is slow to import.
-  @classmethod
-  def Executor( cls ):
-    try:
-      return cls.executor
-    except AttributeError:
-      from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
-      cls.executor = UnsafeThreadPoolExecutor( max_workers = 30 )
-      return cls.executor
-
-
   server_location = ''
+  server_host = ''
+  server_port = 0
   hmac_secret = ''
+
+
+class Future:
+  requests = {}
+
+  def __init__( self, request_id ):
+    self._done = False
+    Future.requests[ request_id ] = self
+
+
+  def done( self ):
+    return self._done
+
+
+  def result( self ):
+    iters = 0
+    while not self.done():
+      if iters >= 1000:
+        raise RuntimeError( "timeout" )
+
+      vim.command( 'sleep 10m' )
+      iters += 1
+
+    return self._result
+
+
+  def resolve( self, status_code, header_map, data ):
+    self._result = Response( status_code, header_map, data )
+    self._done = True
+
+
+  def reject( self, msg ):
+    _logger.error( 'Error sending request: {}'.format( msg ) )
+    self._result = None
+    self._done = True
+
+
+  def __str__( self ):
+    return str( self._result )
+
+  def __repr__( self ):
+    return repr( self._result )
+
+
+class Response:
+  def __init__( self, status_code, header_map, data ):
+    self.text = vimsupport.ToUnicode( data )
+    self.content = vimsupport.ToBytes( data )
+    self.status_code = status_code
+    self.headers = header_map
+
+
+  # If the response is an error, throw
+  def raise_for_status( self ):
+    if self.status_code != 200:
+      raise RuntimeError(
+        "Sever rejected with status: {}".format( self.status_code ) )
+
+
+  # Returns the json payload
+  def json( self ):
+    return json.loads( self.text )
+
+  def __str__( self ):
+    return str( {
+      'content': self.text,
+      'status_code': self.status_code,
+      'headers': self.headers
+    } )
 
 
 def BuildRequestData( buffer_number = None ):
@@ -249,25 +298,22 @@ def BuildRequestData( buffer_number = None ):
   }
 
 
-def _JsonFromFuture( future ):
-  try:
-    response = future.result()
-    response_text = response.read()
-    _ValidateResponseObject( response, response_text )
-    response.close()
 
-    if response_text:
-      return json.loads( response_text )
-    return None
-  except HTTPError as response:
-    if response.code == HTTP_SERVER_ERROR:
-      response_text = response.read()
-      response.close()
-      if response_text:
-        raise MakeServerException( json.loads( response_text ) )
-      else:
-        return None
-    raise
+HTTP_SERVER_ERRROR = 500
+
+
+def _JsonFromFuture( future ):
+  response = future.result()
+  _logger.debug( 'RX: %s\n%s', response, response.text )
+  _ValidateResponseObject( response, ToBytes( response.text ) )
+  if response.status_code == HTTP_SERVER_ERRROR:
+    raise MakeServerException( response.json() )
+
+  response.raise_for_status()
+
+  if response.text:
+    return response.json()
+  return None
 
 
 def _LoadExtraConfFile( filepath ):

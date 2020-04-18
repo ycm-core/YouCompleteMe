@@ -1388,3 +1388,17 @@ def BuildQfListItem( goto_data_item ):
     qf_item[ 'col' ] = goto_data_item[ 'column_num' ]
 
   return qf_item
+
+
+def Call( vimscript_function, *args ):
+  call = vimscript_function + '('
+  for index, arg in enumerate( args ):
+    if index > 0:
+      call += ', '
+
+    arg_name = f'_ycm_internal_arg_{ index }'
+    vim.vars[ arg_name ] = arg
+    call += 'g:' + arg_name
+
+  call += ')'
+  return vim.eval( call )
