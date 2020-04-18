@@ -1317,3 +1317,17 @@ def DisplayWidth():
 
 def DisplayWidthOfString( s ):
   return GetIntValue( f"strdisplaywidth( '{ EscapeForVim( s ) }' )" )
+
+
+def Call( vimscript_function, *args ):
+  call = vimscript_function + '('
+  for index, arg in enumerate( args ):
+    if index > 0:
+      call += ', '
+
+    arg_name = f'_ycm_internal_arg_{ index }'
+    vim.vars[ arg_name ] = arg
+    call += 'g:' + arg_name
+
+  call += ')'
+  return vim.eval( call )
