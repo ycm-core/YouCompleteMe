@@ -85,12 +85,8 @@ endfunction
 
 function! WaitForCompletion()
   call WaitForAssert( {->
-        \ assert_true( pyxeval( 'ycm_state.GetCurrentCompletionRequest() is not None' ) )
-        \ } )
-  call WaitForAssert( {->
-        \ assert_true( pyxeval( 'ycm_state.CompletionRequestReady()' ) )
-        \ } )
-  redraw
+        \ assert_false( youcompleteme#IsCompletionPending_() )
+        \ }, 10000 )
   call WaitForAssert( {->
         \ assert_true( pumvisible(), 'pumvisible()' )
         \ }, 10000 )

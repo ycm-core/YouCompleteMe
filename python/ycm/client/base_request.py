@@ -202,6 +202,9 @@ class Future:
 
   def __init__( self, request_id ):
     self._done = False
+    self._result = None
+    self._on_complete_handlers = []
+    self.request_id = request_id
     Future.requests[ request_id ] = self
 
 
@@ -212,8 +215,8 @@ class Future:
   def result( self ):
     iters = 0
     while not self.done():
-      if iters >= 1000:
-        raise RuntimeError( "timeout" )
+      if iters >= _READ_TIMEOUT_SEC * 100:
+        raise RuntimeError( "timeout blocking for response" )
 
       vim.command( 'sleep 10m' )
       iters += 1
@@ -221,9 +224,15 @@ class Future:
     return self._result
 
 
+  def add_complete_handler( self, handler ):
+    self._on_complete_handlers.append( handler )
+
+
   def resolve( self, status_code, header_map, data ):
     self._result = Response( status_code, header_map, data )
     self._done = True
+    for f in self._on_complete_handlers:
+      f( self )
 
 
   def reject( self, msg ):
@@ -303,6 +312,7 @@ HTTP_SERVER_ERRROR = 500
 
 
 def _JsonFromFuture( future ):
+  # Blocks here if necessary
   response = future.result()
   _logger.debug( 'RX: %s\n%s', response, response.text )
   _ValidateResponseObject( response, ToBytes( response.text ) )

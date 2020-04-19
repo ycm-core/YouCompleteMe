@@ -31,8 +31,6 @@ function! youcompleteme#http#POST( host, port, uri, headers, data )
   return s:Write( 'POST', a:host, a:port, a:uri, a:headers, a:data )
 endfunction
 
-" Insernal {{{
-
 let s:request_state = {}
 let s:CRLF = "\r\n"
 
@@ -103,18 +101,17 @@ function! s:Write( method, host, port, uri, headers, data )
     let a:headers[ 'Content-Length' ] = string( len( a:data ) )
   endif
 
-  call ch_sendraw( ch, a:method . ' '. a:uri . ' HTTP/1.1' . s:CRLF )
+  let msg = a:method . ' '. a:uri . ' HTTP/1.1' . s:CRLF
   for h in keys( a:headers )
-    call ch_sendraw( ch, h . ':' . a:headers[ h ] . s:CRLF )
+    let msg .= h . ':' . a:headers[ h ] . s:CRLF
   endfor
-  call ch_sendraw( ch, s:CRLF )
+  let msg .= s:CRLF
   if a:data != v:none
-    call ch_sendraw( ch, a:data )
+    let msg .= a:data
   endif
+  call ch_sendraw( ch, msg )
   return id
 endfunction
-
-" }}}
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

@@ -282,26 +282,54 @@ class YouCompleteMe:
     request_data = BuildRequestData()
     request_data[ 'force_semantic' ] = force_semantic
 
+    def handler( request_id, request ):
+      response = request.Response()
+      vimsupport.Call( 'youcompleteme#OnCompletionRequestDone',
+                       request_id,
+                       response )
+
     if not self.NativeFiletypeCompletionUsable():
       wrapped_request_data = RequestWrap( request_data )
       if self._omnicomp.ShouldUseNow( wrapped_request_data ):
         self._latest_completion_request = OmniCompletionRequest(
             self._omnicomp, wrapped_request_data )
-        self._latest_completion_request.Start()
-        return
+        return self._latest_completion_request.Start( handler )
 
     self._AddExtraConfDataIfNeeded( request_data )
     self._latest_completion_request = CompletionRequest( request_data )
-    self._latest_completion_request.Start()
+
+    return self._latest_completion_request.Start( handler )
 
 
-  def CompletionRequestReady( self ):
-    return bool( self._latest_completion_request and
-                 self._latest_completion_request.Done() )
+  def ResolveCompletionItem( self, item ):
+    # Note: As mentioned elsewhere, we replace the current completion request
+    # with a resolve request. It's not valid to have simultaneous resolve and
+    # completion requests, because the resolve request uses the request data
+    # from the last completion request and is therefore dependent on it not
+    # having changed.
+    #
+    # The result of this is that self.GetCurrentCompletionRequest() might return
+    # either a completion request of a resolve request and it's the
+    # responsibility of the vimscript code to ensure that it only does one at a
+    # time. This is handled by re-using the same poller for completions and
+    # resolves.
+    completion_request = self.GetCurrentCompletionRequest()
+    if not completion_request:
+      return -1
 
+    def handler( request_id, request ):
+      vimsupport.Call( 'youcompleteme#OnResolveRequestDone',
+                       request_id,
+                       request.Response() )
 
-  def GetCompletionResponse( self ):
-    return self._latest_completion_request.Response()
+    request_id, request = ResolveCompletionItem( completion_request,
+                                                 item,
+                                                 handler )
+    if request_id == -1:
+      return -1
+
+    self._latest_completion_request = request
+    return request_id
 
 
   def SignatureHelpAvailableRequestComplete( self, filetype, send_new=True ):
@@ -620,30 +648,6 @@ class YouCompleteMe:
     completion_request = self.GetCurrentCompletionRequest()
     if completion_request:
       completion_request.OnCompleteDone()
-
-
-  def ResolveCompletionItem( self, item ):
-    # Note: As mentioned elsewhere, we replace the current completion request
-    # with a resolve request. It's not valid to have simultaneous resolve and
-    # completion requests, because the resolve request uses the request data
-    # from the last completion request and is therefore dependent on it not
-    # having changed.
-    #
-    # The result of this is that self.GetCurrentCompletionRequest() might return
-    # either a completion request of a resolve request and it's the
-    # responsibility of the vimscript code to ensure that it only does one at a
-    # time. This is handled by re-using the same poller for completions and
-    # resolves.
-    completion_request = self.GetCurrentCompletionRequest()
-    if not completion_request:
-      return False
-
-    request  = ResolveCompletionItem( completion_request, item )
-    if not request:
-      return False
-
-    self._latest_completion_request = request
-    return True
 
 
   def GetErrorCount( self ):

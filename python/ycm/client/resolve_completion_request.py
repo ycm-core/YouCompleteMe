@@ -34,9 +34,14 @@ class ResolveCompletionRequest( BaseRequest ):
     self.request_data = request_data
     self.completion_request = completion_request
 
-  def Start( self ):
+
+  def Start( self, request_handler ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
                                                          'resolve_completion' )
+    self._response_future.add_complete_handler(
+      lambda future: request_handler( future.request_id, self ) )
+    return self._response_future.request_id
+
 
   def Done( self ):
     return bool( self._response_future ) and self._response_future.done()
@@ -72,16 +77,17 @@ class ResolveCompletionRequest( BaseRequest ):
     return response
 
 
-def ResolveCompletionItem( completion_request, item ):
+def ResolveCompletionItem( completion_request, item, handler ):
+  FAIL = -1, None
   if not completion_request.Done():
-    return None
+    return FAIL
   try:
     completion_extra_data = json.loads( item[ 'user_data' ] )
   except KeyError:
     return None
   except ( TypeError, json.JSONDecodeError ):
     # Can happen with the omni completer
-    return None
+    return FAIL
 
   request_data = completion_request.request_data
   try:
@@ -91,8 +97,8 @@ def ResolveCompletionItem( completion_request, item ):
     # longer needed.
     request_data[ 'resolve' ] = completion_extra_data[ 'resolve' ]
   except KeyError:
-    return None
+    return FAIL
 
   resolve_request = ResolveCompletionRequest( completion_request, request_data )
-  resolve_request.Start()
-  return resolve_request
+  request_id = resolve_request.Start( handler )
+  return request_id, resolve_request
