@@ -24,8 +24,10 @@ class OmniCompletionRequest( CompletionRequest ):
     self._omni_completer = omni_completer
 
 
-  def Start( self ):
+  def Start( self, handler ):
     self._results = self._omni_completer.ComputeCandidates( self.request_data )
+    handler( 0, self )
+    return 0
 
 
   def Done( self ):

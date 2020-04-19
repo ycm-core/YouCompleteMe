@@ -34,9 +34,12 @@ class CompletionRequest( BaseRequest ):
     self._response_future = None
 
 
-  def Start( self ):
+  def Start( self, request_handler ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
                                                          'completions' )
+    self._response_future.add_complete_handler(
+      lambda future: request_handler( future.request_id, self ) )
+    return self._response_future.request_id
 
 
   def Done( self ):
