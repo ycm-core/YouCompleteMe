@@ -85,10 +85,9 @@ endfunction
 
 function! WaitForCompletion()
   call WaitForAssert( {->
-        \ assert_false( youcompleteme#IsCompletionPending_() )
+        \ assert_false( youcompleteme#IsRequestPending( 'completion' ) )
         \ }, 10000 )
   call WaitForAssert( {->
         \ assert_true( pumvisible(), 'pumvisible()' )
         \ }, 10000 )
 endfunction
-

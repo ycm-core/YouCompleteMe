@@ -31,12 +31,7 @@ endfunction
 
 function s:_GetSigHelpWinID()
   call WaitForAssert( {->
-        \   assert_true(
-        \     pyxeval(
-        \       'ycm_state.SignatureHelpRequestReady()'
-        \     ),
-        \     'sig help request reqdy'
-        \   )
+        \   assert_false( youcompleteme#IsRequestPending( 'signature_help' ) )
         \ } )
   call WaitForAssert( {->
         \   assert_true(
@@ -126,20 +121,7 @@ function! Test_Signatures_After_Trigger()
   " neater in many contexts).
   function! Check( id ) closure
     call WaitForAssert( {->
-          \   assert_true(
-          \     pyxeval(
-          \       'ycm_state.SignatureHelpRequestReady()'
-          \     ),
-          \     'sig help request ready'
-          \   )
-          \ } )
-    call WaitForAssert( {->
-          \   assert_true(
-          \     pyxeval(
-          \       "bool( ycm_state.GetSignatureHelpResponse()[ 'signatures' ] )"
-          \     ),
-          \     'sig help request has signatures'
-          \   )
+          \   assert_false( youcompleteme#IsRequestPending( 'signature_help' ) )
           \ } )
     call WaitForAssert( {->
           \   assert_true(
@@ -159,7 +141,7 @@ function! Test_Signatures_After_Trigger()
     call feedkeys( "\<ESC>" )
   endfunction
 
-  call assert_false( pyxeval( 'ycm_state.SignatureHelpRequestReady()' ) )
+  call assert_false( youcompleteme#IsRequestPending( 'signature_help' ) )
   call timer_start( s:timer_interval, funcref( 'Check' ) )
   call feedkeys( 'cl(', 'ntx!' )
   call assert_false( pumvisible(), 'pumvisible()' )
@@ -235,7 +217,7 @@ function! Test_Signatures_With_PUM_NoSigns()
     call feedkeys( ' TypeOfD', 't' )
   endfunction
 
-  call assert_false( pyxeval( 'ycm_state.SignatureHelpRequestReady()' ) )
+  call assert_false( youcompleteme#IsRequestPending( 'signature_help' ) )
   call timer_start( s:timer_interval, funcref( 'Check' ) )
   call feedkeys( 'C(', 'ntx!' )
 
@@ -314,7 +296,7 @@ function! Test_Signatures_With_PUM_Signs()
     call feedkeys( ' TypeOfD', 't' )
   endfunction
 
-  call assert_false( pyxeval( 'ycm_state.SignatureHelpRequestReady()' ) )
+  call assert_false( youcompleteme#IsRequestPending( 'signature_help' ) )
   call timer_start( s:timer_interval, funcref( 'Check' ) )
   call feedkeys( 'C(', 'ntx!' )
 

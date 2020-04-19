@@ -35,19 +35,17 @@ let s:completion_stopped = 0
 let s:default_completion = {}
 let s:completion = s:default_completion
 let s:default_signature_help = {}
-let s:signature_help = s:default_completion
+let s:signature_help = s:default_signature_help
 let s:previous_allowed_buffer_number = 0
 let s:requests = {
       \   'completion': {
       \     'id': -1,
-      \     'wait_milliseconds': 10
+      \   },
+      \   'signature_help': {
+      \     'id': -1,
       \   },
       \ }
 let s:pollers = {
-      \   'signature_help': {
-      \     'id': -1,
-      \     'wait_milliseconds': 10
-      \   },
       \   'file_parse_response': {
       \     'id': -1,
       \     'wait_milliseconds': 100
@@ -1066,33 +1064,25 @@ function! s:RequestSignatureHelp()
     return
   endif
 
-  call s:StopPoller( s:pollers.signature_help )
+  call s:Cancel( s:requests.signature_help )
 
-  if py3eval( 'ycm_state.SendSignatureHelpRequest()' )
-    call s:PollSignatureHelp()
-  endif
+  let s:requests.signature_help.id =
+        \ py3eval( 'ycm_state.SendSignatureHelpRequest()' )
 endfunction
 
 
-function! s:PollSignatureHelp( ... )
+function! youcompleteme#OnSignatureHelpRequestDone( id, response )
   if !s:ShouldUseSignatureHelp()
     return
   endif
 
-  if a:0 == 0 && s:pollers.signature_help.id >= 0
-    " OK this is a bug. We have tried to poll for a response while the timer is
-    " already running. Just return and wait for the timer to fire.
+  if a:id != s:requests.signature_help.id
     return
   endif
 
-  if !py3eval( 'ycm_state.SignatureHelpRequestReady()' )
-    let s:pollers.signature_help.id = timer_start(
-          \ s:pollers.signature_help.wait_milliseconds,
-          \ function( 's:PollSignatureHelp' ) )
-    return
-  endif
+  call s:Cancel( s:requests.signature_help )
 
-  let s:signature_help = py3eval( 'ycm_state.GetSignatureHelpResponse()' )
+  let s:signature_help = a:response
   call s:UpdateSignatureHelp()
 endfunction
 
@@ -1143,7 +1133,7 @@ function! s:ClearSignatureHelp()
     return
   endif
 
-  call s:StopPoller( s:pollers.signature_help )
+  call s:Cancel( s:requests.signature_help )
   let s:signature_help = s:default_signature_help
   call py3eval( 'ycm_state.ClearSignatureHelp()' )
 endfunction
@@ -1464,8 +1454,8 @@ function! youcompleteme#Test_GetPollers()
   return s:pollers
 endfunction
 
-function! youcompleteme#IsCompletionPending_()
-  return s:requests.completion.id != -1
+function! youcompleteme#IsRequestPending( request )
+  return s:requests[ a:request ].id != -1
 endfunction
 
 " This is basic vim plugin boilerplate
