@@ -46,10 +46,6 @@ let s:requests = {
       \   },
       \ }
 let s:pollers = {
-      \   'file_parse_response': {
-      \     'id': -1,
-      \     'wait_milliseconds': 100
-      \   },
       \   'server_ready': {
       \     'id': -1,
       \     'wait_milliseconds': 100
@@ -770,26 +766,6 @@ function! s:OnFileReadyToParse( ... )
     " FIXME: sig hekp should be buffer local?
     call s:ClearSignatureHelp()
     py3 ycm_state.OnFileReadyToParse()
-
-    call s:StopPoller( s:pollers.file_parse_response )
-    let s:pollers.file_parse_response.id = timer_start(
-          \ s:pollers.file_parse_response.wait_milliseconds,
-          \ function( 's:PollFileParseResponse' ) )
-  endif
-endfunction
-
-
-function! s:PollFileParseResponse( ... )
-  if !py3eval( "ycm_state.FileParseRequestReady()" )
-    let s:pollers.file_parse_response.id = timer_start(
-          \ s:pollers.file_parse_response.wait_milliseconds,
-          \ function( 's:PollFileParseResponse' ) )
-    return
-  endif
-
-  py3 ycm_state.HandleFileParseRequest()
-  if py3eval( "ycm_state.ShouldResendFileParseRequest()" )
-    call s:OnFileReadyToParse( 1 )
   endif
 endfunction
 

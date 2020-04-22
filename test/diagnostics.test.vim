@@ -114,7 +114,7 @@ function! Test_MessagePoll_After_LocationList()
   call setline( 1, '' )
   " Wait for the parse request to be complete otherwise we won't send another
   " one when the TextChanged event fires
-  call WaitFor( {-> pyxeval( 'ycm_state.FileParseRequestReady()' ) } )
+  call WaitFor( {-> pyxeval( 'ycm_state.CurrentBuffer().FileParseRequestReady()' ) } )
   doautocmd TextChanged
   call WaitForAssert( {-> assert_true( empty( sign_getplaced(
                         \ '%',

@@ -43,7 +43,7 @@ class Buffer:
                  ( block or self._parse_request.Done() ) )
 
 
-  def SendParseRequest( self, extra_data ):
+  def SendParseRequest( self, extra_data, handler ):
     # Don't send a parse request if one is in progress
     if self._parse_request is not None and not self._parse_request.Done():
       self._should_resend = True
@@ -53,7 +53,7 @@ class Buffer:
 
     self._parse_request = EventNotification( 'FileReadyToParse',
                                              extra_data = extra_data )
-    self._parse_request.Start()
+    self._parse_request.Start( lambda request_id, request: handler( self ) )
     # Decrement handled tick to ensure correct handling when we are forcing
     # reparse on buffer visit and changed tick remains the same.
     self._handled_tick -= 1

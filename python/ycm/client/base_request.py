@@ -29,10 +29,12 @@ from ycmd.responses import ServerError, UnknownExtraConf
 HTTP_SERVER_ERROR = 500
 
 _HEADERS = { 'content-type': 'application/json' }
-_CONNECT_TIMEOUT_SEC = 0.01
 _READ_TIMEOUT_SEC = 30
 _HMAC_HEADER = 'x-ycm-hmac'
 _logger = logging.getLogger( __name__ )
+
+class YCMConnectionError( Exception ):
+  pass
 
 
 class BaseRequest:
@@ -78,6 +80,10 @@ class BaseRequest:
         else:
           _IgnoreExtraConfFile( e.extra_conf_file )
         self._should_resend = True
+    except YCMConnectionError as e:
+      _logger.debug( 'Failed to establish connection for %s: %s',
+                     future.context,
+                     e )
     except Exception as e:
       _logger.exception( 'Error while handling server response' )
       if display_message:
@@ -175,7 +181,10 @@ class BaseRequest:
                                      query_string,
                                      headers )
 
-    return Future( request_id )
+    future = Future( request_id, request_uri, timeout )
+    if request_id is None:
+      future.reject( YCMConnectionError( "Unable to connect to server" ) )
+    return future
 
 
   @staticmethod
@@ -200,11 +209,15 @@ class BaseRequest:
 class Future:
   requests = {}
 
-  def __init__( self, request_id ):
+  def __init__( self, request_id, context, timeout ):
+    self.request_id = request_id
+    self.context = context
+
     self._done = False
     self._result = None
+    self._exception = None
     self._on_complete_handlers = []
-    self.request_id = request_id
+    self._timeout = timeout
     Future.requests[ request_id ] = self
 
 
@@ -213,13 +226,18 @@ class Future:
 
 
   def result( self ):
-    iters = 0
-    while not self.done():
-      if iters >= _READ_TIMEOUT_SEC * 100:
-        raise RuntimeError( "timeout blocking for response" )
+    if not self.done():
+      vimsupport.Call( 'youcompleteme#http#Block',
+                       self.request_id,
+                       self._timeout * 1000 )
 
-      vim.command( 'sleep 10m' )
-      iters += 1
+    assert self.done()
+
+    if self._result is None:
+      if isinstance( self._exception, Exception ):
+        raise self._exception
+
+      raise RuntimeError( self._exception )
 
     return self._result
 
@@ -235,9 +253,9 @@ class Future:
       f( self )
 
 
-  def reject( self, msg ):
-    _logger.error( 'Error sending request: {}'.format( msg ) )
+  def reject( self, why ):
     self._result = None
+    self._exception = why
     self._done = True
 
 

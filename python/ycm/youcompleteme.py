@@ -574,7 +574,19 @@ class YouCompleteMe:
     self._AddSyntaxDataIfNeeded( extra_data )
     self._AddExtraConfDataIfNeeded( extra_data )
 
-    self.CurrentBuffer().SendParseRequest( extra_data )
+    # TODO: We actually get passed the buffer here, but only handle the
+    # _current_ buffer. That seems wrong and probably was always wrong. This
+    # implementation (for now) matches the historic behavior.
+    #
+    # FixMe the ClearSignatureHelp call below should areally be done in th viml
+    # layer, so that the request ID is cleared
+    def handler( buf ):
+      self.HandleFileParseRequest()
+      if self.ShouldResendFileParseRequest():
+        self.ClearSignatureHelp()
+        self.OnFileReadyToParse()
+
+    self.CurrentBuffer().SendParseRequest( extra_data, handler )
 
 
   def OnFileSave( self, saved_buffer_number ):
@@ -655,12 +667,6 @@ class YouCompleteMe:
   def _PopulateLocationListWithLatestDiagnostics( self ):
     return self.CurrentBuffer().PopulateLocationList(
         self._user_options[ 'open_loclist_on_ycm_diags' ] )
-
-
-  def FileParseRequestReady( self ):
-    # Return True if server is not ready yet, to stop repeating check timer.
-    return ( not self.IsServerReady() or
-             self.CurrentBuffer().FileParseRequestReady() )
 
 
   def HandleFileParseRequest( self, block = False ):

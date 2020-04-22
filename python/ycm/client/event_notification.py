@@ -28,7 +28,7 @@ class EventNotification( BaseRequest ):
     self._cached_response = None
 
 
-  def Start( self ):
+  def Start( self, handler = None ):
     request_data = BuildRequestData( self._buffer_number )
     if self._extra_data:
       request_data.update( self._extra_data )
@@ -36,6 +36,9 @@ class EventNotification( BaseRequest ):
 
     self._response_future = self.PostDataToHandlerAsync( request_data,
                                                          'event_notification' )
+    if handler:
+      self._response_future.add_complete_handler(
+        lambda future: handler( future.request_id, self ) )
 
 
   def Done( self ):
