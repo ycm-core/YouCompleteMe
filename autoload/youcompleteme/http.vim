@@ -31,11 +31,29 @@ function! youcompleteme#http#POST( host, port, uri, headers, data )
   return s:Write( 'POST', a:host, a:port, a:uri, a:headers, a:data )
 endfunction
 
+" Blocking reads are a little tricky, as we normaly handle the data when the
+" socket closes. We therefore block while the channel is open and manually
+" invoke the Close callback. Of course that requires us to unset the usual close
+" callback on the channel, as this is raised, _after_ this function returns.
+function! youcompleteme#http#Block( id, timeout )
+  let ch = s:request_state[ a:id ].handle
+  call ch_setoptions( ch, { 'close_cb': funcref( 's:NullClose' ) } )
+  while count( [ 'open', 'buffered' ],  ch_status( ch ) ) == 1
+    let data = ch_read( ch, { 'timeout': 1000 } )
+    let s:request_state[ a:id ].data .= data
+  endwhile
+  call s:OnClose( ch )
+endfunction
+
 let s:request_state = {}
 let s:CRLF = "\r\n"
 
 function! s:OnData( channel, msg )
-    let s:request_state[ ch_info( a:channel ).id ].data .= a:msg
+  let id =  ch_info( a:channel ).id 
+  let s:request_state[ id ].data .= a:msg
+endfunction
+
+function! s:NullClose( channel )
 endfunction
 
 function! s:OnClose( channel )
@@ -89,10 +107,15 @@ function! s:Write( method, host, port, uri, headers, data )
         \ mode: 'raw',
         \ callback: funcref( 's:OnData' ),
         \ close_cb: funcref( 's:OnClose' ),
-        \ waittime: 1000,
+        \ waittime: 100,
         \ } )
+
+  if ch_status( ch ) != 'open'
+    return v:none
+  endif
+
   let id = ch_info( ch ).id
-  let s:request_state[ id ] = #{ data: '' }
+  let s:request_state[ id ] = #{ data: '', handle: ch }
 
   let a:headers[ 'Host' ] = a:host
   let a:headers[ 'Connection' ] = 'close'
