@@ -584,13 +584,22 @@ function! s:OnFileTypeSet()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
-
+  autocmd youcompleteme BufWritePost,FileWritePost <buffer> call s:OnFileSave()
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   call s:StartMessagePoll()
 
   py3 ycm_state.OnFileTypeSet()
   call s:OnFileReadyToParse( 1 )
+endfunction
+
+
+function! s:OnFileSave()
+  let buffer_number = str2nr( expand( '<abuf>' ) )
+  if !s:AllowedToCompleteInBuffer( buffer_number )
+    return
+  endif
+  py3 ycm_state.OnFileSave( vimsupport.GetIntValue( 'buffer_number' ) )
 endfunction
 
 
