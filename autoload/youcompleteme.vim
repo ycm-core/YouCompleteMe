@@ -144,6 +144,7 @@ function! youcompleteme#Enable()
     " useful if the buffer filetype is set (we ignore the buffer if there is no
     " filetype) and if so, the FileType event has triggered before and thus the
     " buffer is already parsed.
+    autocmd BufWritePost,FileWritePost * call s:OnFileSave()
     autocmd FileType * call s:OnFileTypeSet()
     autocmd BufEnter,CmdwinEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
@@ -591,6 +592,15 @@ function! s:OnFileTypeSet()
 
   py3 ycm_state.OnFileTypeSet()
   call s:OnFileReadyToParse( 1 )
+endfunction
+
+
+function! s:OnFileSave()
+  let buffer_number = str2nr( expand( '<abuf>' ) )
+  if !s:AllowedToCompleteInBuffer( buffer_number )
+    return
+  endif
+  py3 ycm_state.OnFileSave( vimsupport.GetIntValue( 'buffer_number' ) )
 endfunction
 
 

@@ -543,6 +543,10 @@ class YouCompleteMe:
     self.CurrentBuffer().SendParseRequest( extra_data )
 
 
+  def OnFileSave( self, saved_buffer_number ):
+    SendEventNotificationAsync( 'FileSave', saved_buffer_number )
+
+
   def OnBufferUnload( self, deleted_buffer_number ):
     SendEventNotificationAsync( 'BufferUnload', deleted_buffer_number )
 
