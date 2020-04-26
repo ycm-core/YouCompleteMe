@@ -1331,3 +1331,7 @@ def Call( vimscript_function, *args ):
 
   call += ')'
   return vim.eval( call )
+
+
+def Log( message ):
+  Call( 'ch_log', message )
