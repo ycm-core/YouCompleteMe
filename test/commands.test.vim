@@ -83,6 +83,8 @@ function! Test_GetCommandResponse()
   " on a command, no error
   call setpos( '.', [ 0, 1, 3 ] )
   call assert_equal( '', youcompleteme#GetCommandResponse( 'GetDoc' ) )
+
+  %bwipe!
 endfunction
 
 
@@ -94,4 +96,21 @@ function! Test_GetCommandResponse_FixIt()
   call assert_equal( '',
                    \ youcompleteme#GetCommandResponse( 'FixIt' ) )
 
+  %bwipe!
+endfunction
+
+function! Test_GetDefinedSubcommands_Native()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/fixit.c', {} )
+  call assert_equal( 1, count( youcompleteme#GetDefinedSubcommands(),
+                             \ 'GetDoc' ) )
+
+  %bwipe!
+endfunction
+
+function! Test_GetDefinedSubcommands_NoNative()
+  enew
+  setf not_a_filetype
+  call assert_equal( [], youcompleteme#GetDefinedSubcommands() )
+
+  %bwipe!
 endfunction
