@@ -37,7 +37,7 @@ endfunction
 " callback on the channel, as this is raised, _after_ this function returns.
 function! youcompleteme#http#Block( id, timeout )
   let ch = s:request_state[ a:id ].handle
-  call ch_setoptions( ch, { 'close_cb': funcref( 's:NullClose' ) } )
+  call ch_setoptions( ch, { 'close_cb': '' } )
   while count( [ 'open', 'buffered' ],  ch_status( ch ) ) == 1
     let data = ch_read( ch, { 'timeout': a:timeout } )
     let s:request_state[ a:id ].data .= data
@@ -51,9 +51,6 @@ let s:CRLF = "\r\n"
 function! s:OnData( channel, msg )
   let id =  ch_info( a:channel ).id
   let s:request_state[ id ].data .= a:msg
-endfunction
-
-function! s:NullClose( channel )
 endfunction
 
 function! s:OnClose( channel )
