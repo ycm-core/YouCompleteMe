@@ -39,7 +39,7 @@ function! youcompleteme#http#Block( id, timeout )
   let ch = s:request_state[ a:id ].handle
   call ch_setoptions( ch, { 'close_cb': funcref( 's:NullClose' ) } )
   while count( [ 'open', 'buffered' ],  ch_status( ch ) ) == 1
-    let data = ch_read( ch, { 'timeout': 1000 } )
+    let data = ch_read( ch, { 'timeout': a:timeout } )
     let s:request_state[ a:id ].data .= data
   endwhile
   call s:OnClose( ch )
@@ -49,7 +49,7 @@ let s:request_state = {}
 let s:CRLF = "\r\n"
 
 function! s:OnData( channel, msg )
-  let id =  ch_info( a:channel ).id 
+  let id =  ch_info( a:channel ).id
   let s:request_state[ id ].data .= a:msg
 endfunction
 
@@ -76,7 +76,8 @@ function! s:OnClose( channel )
   let header_map = {}
   for header in headers
     let colon = match( header, ':' )
-    let header_map[ tolower( header[ : colon-1 ] ) ] = trim( header[ colon+1: ] )
+    let header_map[ tolower( header[ : colon-1 ] ) ]
+          \ = trim( header[ colon+1: ] )
   endfor
 
   let status_code = split( status_line )[ 1 ]
