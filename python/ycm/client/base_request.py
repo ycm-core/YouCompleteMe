@@ -29,7 +29,7 @@ from ycmd.responses import ServerError, UnknownExtraConf
 HTTP_SERVER_ERROR = 500
 
 _HEADERS = { 'content-type': 'application/json' }
-_READ_TIMEOUT_SEC = 30
+_READ_TIMEOUT_SEC = 5
 _HMAC_HEADER = 'x-ycm-hmac'
 _logger = logging.getLogger( __name__ )
 
