@@ -44,6 +44,21 @@
           "YCM_TEST_NO_RETRY": "1"
         }
       }
+    },
+    "Vimscript Run Dev YCM": {
+      "adapter": {
+        "command": [ "node",
+                     "/Users/ben/Development/vim-debug-adapter/dist/index.js" ]
+      },
+      "configuration": {
+        "type": "vim",
+        "request": "launch",
+        "vim": "/Users/ben/Development/vim/src/vim",
+        "args": [ "--cmd", "let g:benj_test_ycm=1" ],
+        "trace": {
+          "level": "Verbose"
+        }
+      }
     }
   }
 }
