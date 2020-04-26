@@ -206,6 +206,9 @@ let g:ycm_goto_buffer_command =
 let g:ycm_disable_for_files_larger_than_kb =
       \ get( g:, 'ycm_disable_for_files_larger_than_kb', 1000 )
 
+let g:ycm_auto_hover =
+      \ get( g:, 'ycm_auto_hover', 'CursorHold' )
+
 "
 " List of ycmd options.
 "
