@@ -59,6 +59,8 @@ let s:buftype_blacklist = {
       \   'quickfix': 1
       \ }
 let s:last_char_inserted_by_user = v:true
+let s:enable_hover = 0
+let s:cursorhold_popup = -1
 
 " We can use one of two approaches to auto-triggering completion
 "  * completefunc - the classic way - we set completefunc to our function and
@@ -574,6 +576,23 @@ function! s:OnCompleteChanged()
 endfunction
 
 
+function! s:EnableAutoHover()
+  if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
+    augroup YcmBufHover
+      autocmd! * <buffer>
+      autocmd CursorHold <buffer> call s:Hover()
+    augroup END
+  endif
+endfunction
+
+
+function! s:DisableAutoHover()
+  augroup YcmBufHover
+    autocmd! * <buffer>
+  augroup END
+endfunction
+
+
 function! s:OnFileTypeSet()
   " The contents of the command-line window are empty when the filetype is set
   " for the first time. Users should never change its filetype so we only rely
@@ -589,6 +608,7 @@ function! s:OnFileTypeSet()
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
   call s:StartMessagePoll()
+  call s:EnableAutoHover()
 
   py3 ycm_state.OnFileTypeSet()
   call s:OnFileReadyToParse( 1 )
@@ -1242,6 +1262,19 @@ function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
 endfunction
 
 
+function! youcompleteme#GetDefinedSubcommands()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return []
+  endif
+
+  if !exists( 'b:ycm_completing' )
+    return []
+  endif
+
+  return py3eval( 'ycm_state.GetDefinedSubcommands()' )
+endfunction
+
+
 function! youcompleteme#OpenGoToList()
   py3 vimsupport.PostVimMessage(
         \ "'WARNING: youcompleteme#OpenGoToList function is deprecated. " .
@@ -1264,6 +1297,59 @@ function! s:ForceCompileAndDiagnostics()
   py3 ycm_state.ForceCompileAndDiagnostics()
 endfunction
 
+
+if exists( '*popup_atcursor' )
+  function s:Hover()
+    if !py3eval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+      " Cancel the autocommand if it happens to have been set
+      call s:DisableAutoHover()
+      return
+    endif
+
+    if !has_key( b:, 'ycm_hover_command' )
+      let cmds = youcompleteme#GetDefinedSubcommands()
+      if index( cmds, 'GetHover' ) >= 0
+        let b:ycm_hover_command = 'GetHover'
+      elseif index( cmds, 'GetDoc' ) >= 0
+        let b:ycm_hover_command = 'GetDoc'
+      elseif index( cmds, 'GetType' ) >= 0
+        let b:ycm_hover_command = 'GetType'
+      else
+        let b:ycm_hover_command = v:none
+      endif
+    endif
+
+    if b:ycm_hover_command == v:none
+      return
+    endif
+
+    let response = youcompleteme#GetCommandResponse( b:ycm_hover_command )
+    if response == ''
+      return
+    endif
+
+    call popup_hide( s:cursorhold_popup )
+    let s:cursorhold_popup = popup_atcursor(
+          \   split( response, "\n" ),
+          \   {
+          \     'padding': [ 0, 1, 0, 1 ],
+          \     'maxwidth': &columns,
+          \     'close': 'button',
+          \   }
+          \ )
+    if b:ycm_hover_command ==# 'GetHover'
+      let syn = 'markdown.' . &syntax
+    else
+      let syn = &syntax
+    endif
+    call setbufvar( winbufnr( s:cursorhold_popup ), '&syntax', syn )
+  endfunction
+  let s:enable_hover = 1
+  nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>Hover()<CR>
+else
+  " Don't break people's mappings if this feature is disabled, just do nothing.
+  nnoremap <silent> <plug>(YCMHover) <Nop>
+endif
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

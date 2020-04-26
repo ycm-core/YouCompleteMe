@@ -176,12 +176,17 @@ YCM also provides [semantic IDE-like features](#quick-feature-summary) in a
 number of languages, including:
 
 - displaying signature help (argument hints) when entering the arguments to a
-  function call
-- finding declarations, definitions, usages, etc. of identifiers,
-- displaying type information for classes, variables, functions etc.,
-- displaying documentation for methods, members, etc. in the preview window,
-- fixing common coding errors, like missing semi-colons, typos, etc.,
-- semantic renaming of variables across files,
+  function call (Vim only)
+- [finding declarations, definitions, usages](#goto-commands), etc.
+  of identifiers,
+- [displaying type information](#the-gettype-subcommand) for classes,
+  variables, functions etc.,
+- displaying documentation for methods, members, etc. in the [preview
+  window](#the-getdoc-subcommand), or in a
+  [popup next to the cursor](#the-gycm_auto_hover-option) (Vim only)
+- [fixing common coding errors](#the-fixit-subcommand), like missing
+  semi-colons, typos, etc.,
+- [semantic renaming](#the-refactorrename-subcommand) of variables across files,
 - formatting code,
 - removing unused imports, sorting imports, etc.
 
@@ -199,6 +204,11 @@ Below we can see YCM being able to do a few things:
   for servers that support it.
 
 ![YouCompleteMe GIF subcommands demo](https://i.imgur.com/nmUUbdl.gif)
+
+And here's some documentation being shown in a hover popup, automatically and
+manually:
+
+![hover demo](https://user-images.githubusercontent.com/10584846/80312146-91af6500-87db-11ea-996b-7396f3134d1f.gif)
 
 Features vary by file type, so make sure to check out the [file type feature
 summary](#quick-feature-summary) and the
@@ -1980,8 +1990,11 @@ endfunction
 " CursorHold triggers in normal mode after a delay
 autocmd CursorHold * call s:Hover()
 " Or, if you prefer, a mapping:
-nnoremap <leader>D :call <SID>Hover()<CR>
+nnoremap <silent> <leader>D :call <SID>Hover()<CR>
 ```
+
+**NOTE**: This is only an example, for real hover support, see
+[`g:ycm_auto_hover`](#the-gycm_auto_hover-option).
 
 If the completer subcommand result is not a string (for example, it's a FixIt or
 a Location), or if the completer subcommand raises an error, an empty string is
@@ -2353,6 +2366,29 @@ Default: `1`
 ```viml
 let g:ycm_echo_current_diagnostic = 1
 ```
+
+### The `g:ycm_auto_hover` option
+
+This option controls whether or not YCM shows documentation in a popup at the
+cursor location after a short delay. Only supported in Vim.
+
+The displayed documentation depends on what the completer for the current
+language supports. It's selected in this order of preference: `GetHover`
+`GetDoc`, `GetType`.
+
+When this option is set to `'CursorHold'`, the popup is displayed on the
+`CursorHold` autocommand. See `:help CursorHold` for the deatils, but this means
+that it is displayed after `updatetime` milliseconds.  When set to an empty
+string, the popup is not automatically displayed.
+
+In addition to this setting, there is the `<plug>(YCMHover)` mapping, which can
+be used to manually trigger the popup. For example:
+
+```viml
+nmap <leader>D <plug>(YCMHover)
+```
+
+Default: `'CursorHold'`
 
 ### The `g:ycm_filter_diagnostics` option
 

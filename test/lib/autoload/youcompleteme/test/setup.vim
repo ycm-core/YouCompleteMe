@@ -43,10 +43,13 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
     " completers. For python and others, we actually need to parse the debug
     " info to check the server state.
     YcmForceCompileAndDiagnostics
-  endif
 
-  " Sometimes, that's just not enough to ensure stuff works
-  exe 'sleep' get( a:kwargs, 'delay', 7 )
+    " Sometimes, that's just not enough to ensure stuff works
+    let delay = get( a:kwargs, 'delay', 7 )
+    if delay > 0
+      exe 'sleep' delay
+    endif
+  endif
 
   " FIXME: We need a much more robust way to wait for the server to be ready
 endfunction
