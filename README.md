@@ -2382,11 +2382,15 @@ that it is displayed after `updatetime` milliseconds.  When set to an empty
 string, the popup is not automatically displayed.
 
 In addition to this setting, there is the `<plug>(YCMHover)` mapping, which can
-be used to manually trigger the popup. For example:
+be used to manually trigger or hide the popup (it works like a toggle).
+For example:
 
 ```viml
 nmap <leader>D <plug>(YCMHover)
 ```
+
+After dismissing the popup with this mapping, it will not be automatically
+triggered again until the cursor is moved (i.e. `CursorMoved` autocommand).
 
 Default: `'CursorHold'`
 

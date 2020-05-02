@@ -1351,8 +1351,26 @@ if exists( '*popup_atcursor' )
                             \ '&syntax',
                             \ b:ycm_hover.syntax )
   endfunction
+
+  function! s:ToggleHover()
+    let pos = popup_getpos( s:cursorhold_popup )
+    if !empty( pos ) && pos.visible
+      call popup_hide( s:cursorhold_popup )
+      let s:cursorhold_popup = -1
+
+      " Diable the auto-trigger until the next cursor movement.
+      call s:DisableAutoHover()
+      augroup YCMHover
+        autocmd! CursorMoved <buffer>
+        autocmd CursorMoved <buffer> call s:EnableAutoHover()
+      augroup END
+    else
+      call s:Hover()
+    endif
+  endfunction
+
   let s:enable_hover = 1
-  nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>Hover()<CR>
+  nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>ToggleHover()<CR>
 else
   " Don't break people's mappings if this feature is disabled, just do nothing.
   nnoremap <silent> <plug>(YCMHover) <Nop>
