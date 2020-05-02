@@ -19,7 +19,7 @@ function! Test_Hover_Uses_GetDoc()
   " no doc
   call setpos( '.', [ 0, 1, 1 ] )
   doautocmd CursorHold
-  call assert_equal( 'GetDoc', b:ycm_hover_command )
+  call assert_equal( { 'command': 'GetDoc', 'syntax': '' }, b:ycm_hover )
 
   let loc = screenpos( win_getid(), 2, 1 )
   call assert_equal( 0, popup_locate( loc.row, loc.col ) )
@@ -34,7 +34,7 @@ function! Test_Hover_Uses_GetDoc()
   call assert_notequal( 0, popup )
   call assert_equal( [ 'Test_OneLine()', '', 'This is the one line output.' ],
                    \ getbufline( winbufnr( popup ), 1, '$' ) )
-  call assert_equal( 'python', getbufvar( winbufnr( popup ), '&syntax' ) )
+  call assert_equal( '', getbufvar( winbufnr( popup ), '&syntax' ) )
 
   " some doc - mapping
   call setpos( '.', [ 0, 12, 3 ] )
@@ -44,7 +44,7 @@ function! Test_Hover_Uses_GetDoc()
   call assert_notequal( 0, popup )
   call assert_equal( [ 'Test_OneLine()', '', 'This is the one line output.' ],
                    \ getbufline( winbufnr( popup ), 1, '$' ) )
-  call assert_equal( 'python', getbufvar( winbufnr( popup ), '&syntax' ) )
+  call assert_equal( '', getbufvar( winbufnr( popup ), '&syntax' ) )
 
   call popup_clear()
   %bwipe!
@@ -53,8 +53,16 @@ endfunction
 function! Test_Hover_Uses_GetHover()
   call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
                                         \ { 'delay': 2 } )
-  doautocmd CursorHold
-  let b:ycm_hover_command = 'GetHover'
+  py3 <<EOPYTHON
+from unittest import mock
+with mock.patch.object( ycm_state,
+                        'GetDefinedSubcommands',
+                        return_value = [ 'GetHover' ] ):
+  vim.command( 'doautocmd CursorHold' )
+EOPYTHON
+
+  call assert_equal( { 'command': 'GetHover', 'syntax': 'markdown' },
+                   \ b:ycm_hover )
 
   " Only the generic LSP completer supports the GetHover response, so i guess we
   " test the error condition here...
@@ -68,13 +76,38 @@ function! Test_Hover_Uses_GetHover()
   %bwipe!
 endfunction
 
+function! Test_Hover_Uses_None()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
+                                        \ { 'delay': 2 } )
+  py3 <<EOPYTHON
+from unittest import mock
+with mock.patch.object( ycm_state, 'GetDefinedSubcommands', return_value = [] ):
+  vim.command( 'doautocmd CursorHold' )
+EOPYTHON
+
+  call assert_equal( {}, b:ycm_hover )
+
+  call setpos( '.', [ 0, 12, 3 ] )
+  normal \D
+  let loc = screenpos( win_getid(), 11, 4 )
+  cal assert_equal( 0, popup_locate( loc.row, loc.col ) )
+
+  %bwipe!
+endfunction
+
 function! Test_Hover_Uses_GetType()
   call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
                                         \ { 'delay': 2 } )
-  doautocmd CursorHold
-  let b:ycm_hover_command = 'GetType'
 
-  doautocmd CursorHold
+  py3 <<EOPYTHON
+from unittest import mock
+with mock.patch.object( ycm_state,
+                        'GetDefinedSubcommands',
+                        return_value = [ 'GetType' ] ):
+  vim.command( 'doautocmd CursorHold' )
+EOPYTHON
+
+  call assert_equal( { 'command': 'GetType', 'syntax': 'python' }, b:ycm_hover )
 
   let loc = screenpos( win_getid(), 2, 1 )
   call assert_equal( 0, popup_locate( loc.row, loc.col ) )
@@ -110,11 +143,11 @@ function! Test_Hover_NonNative()
   setfiletype NoASupportedFileType
   let messages_before = execute( 'messages' )
   doautocmd CursorHold
-  call assert_false( exists( 'b:ycm_hover_command' ) )
+  call assert_false( exists( 'b:ycm_hover' ) )
   call assert_equal( messages_before, execute( 'messages' ) )
 
   normal \D
-  call assert_false( exists( 'b:ycm_hover_command' ) )
+  call assert_false( exists( 'b:ycm_hover' ) )
   call assert_equal( messages_before, execute( 'messages' ) )
 
   %bwipe!
@@ -129,7 +162,7 @@ function! Test_Hover_Disabled_NonNative()
   setfiletype NoASupportedFileType
   let messages_before = execute( 'messages' )
   silent doautocmd CursorHold
-  call assert_false( exists( 'b:ycm_hover_command' ) )
+  call assert_false( exists( 'b:ycm_hover' ) )
   call assert_equal( messages_before, execute( 'messages' ) )
 
   %bwipe!
@@ -145,7 +178,7 @@ function! Test_Hover_Disabled()
 
   let messages_before = execute( 'messages' )
 
-  call assert_false( exists( 'b:ycm_hover_command' ) )
+  call assert_false( exists( 'b:ycm_hover' ) )
 
   call setpos( '.', [ 0, 12, 3 ] )
   silent doautocmd CursorHold
