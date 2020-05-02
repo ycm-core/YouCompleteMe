@@ -36,7 +36,8 @@
 let s:single_test_timeout = 60000
 
 " Restrict the runtimepath to the exact minimum needed for testing
-set rtp=$PWD/lib,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after
+let &rtp = getcwd() . '/lib'
+set rtp +=$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after
 
 call ch_logfile( 'debuglog', 'w' )
 

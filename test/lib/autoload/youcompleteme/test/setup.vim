@@ -9,7 +9,7 @@ function! youcompleteme#test#setup#SetUp() abort
     pyx del ycm_state
   endif
 
-  source $PWD/vimrc
+  exe 'source' getcwd() . '/vimrc'
 
   " This is a bit of a hack
   runtime! plugin/**/*.vim
