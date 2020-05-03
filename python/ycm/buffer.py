@@ -34,6 +34,7 @@ class Buffer:
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
+    self._should_resend = False
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
     self.UpdateFromFileTypes( filetypes )
 
@@ -44,6 +45,13 @@ class Buffer:
 
 
   def SendParseRequest( self, extra_data ):
+    # Don't send a parse request if one is in progress
+    if self._parse_request is not None and not self._parse_request.Done():
+      self._should_resend = True
+      return
+
+    self._should_resend = False
+
     self._parse_request = EventNotification( 'FileReadyToParse',
                                              extra_data = extra_data )
     self._parse_request.Start()
@@ -58,7 +66,9 @@ class Buffer:
 
 
   def ShouldResendParseRequest( self ):
-    return bool( self._parse_request and self._parse_request.ShouldResend() )
+    return ( self._should_resend
+             or ( bool( self._parse_request )
+                  and self._parse_request.ShouldResend() ) )
 
 
   def UpdateDiagnostics( self, force = False ):
