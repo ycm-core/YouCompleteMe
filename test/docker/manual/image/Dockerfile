@@ -1,6 +1,6 @@
 ARG YCM_PYTHON=py3
 
-FROM puremourning/ycm-vim-${YCM_PYTHON}:test
+FROM youcompleteme/ycm-vim-${YCM_PYTHON}:test
 
 RUN useradd -ms /bin/bash -d /home/dev -G sudo dev && \
     echo "dev:dev" | chpasswd && \
