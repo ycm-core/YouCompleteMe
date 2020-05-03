@@ -120,7 +120,7 @@ endfunction
 function! Test_Signatures_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
         \ '/test/testdata/vim/mixed_filetype.vim',
-        \ { 'native_ft': 0 } )
+        \ { 'native_ft': 0, 'force_delay': v:true } )
 
   call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'vim' ) } )
   call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
