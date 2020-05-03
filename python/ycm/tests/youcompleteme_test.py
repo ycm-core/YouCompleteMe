@@ -680,8 +680,10 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.client.event_notification.EventNotification.Done',
+        return_value = True )
 def YouCompleteMe_UpdateDiagnosticInterface_OldVim_test(
-    post_vim_message, filetype_completer_exists, ycm ):
+    request_done, post_vim_message, filetype_completer_exists, ycm ):
   YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 
 
@@ -692,8 +694,10 @@ def YouCompleteMe_UpdateDiagnosticInterface_OldVim_test(
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 8, 1, 614 ) )
+@patch( 'ycm.client.event_notification.EventNotification.Done',
+        return_value = True )
 def YouCompleteMe_UpdateDiagnosticInterface_NewVim_test(
-    post_vim_message, filetype_completer_exists, ycm ):
+    request_done, post_vim_message, filetype_completer_exists, ycm ):
   YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 
 
