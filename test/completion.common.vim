@@ -51,8 +51,7 @@ endfunction
 
 function! Test_Compl_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp',
-        \ #{ delay: 2 } )
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
 
   call setpos( '.', [ 0, 11, 6 ] )
 
@@ -77,8 +76,7 @@ endfunctio
 
 function! Test_Force_Semantic_TopLevel()
   call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp',
-        \ #{ delay: 2 } )
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
 
   call setpos( '.', [ 0, 17, 5 ] )
 
@@ -106,8 +104,7 @@ endfunction
 
 function! Test_Select_Next_Previous()
   call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp',
-        \ #{ delay: 2 } )
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
 
   call setpos( '.', [ 0, 11, 6 ] )
 
@@ -157,8 +154,7 @@ endfunction
 
 function! Test_Enter_Delete_Chars_Updates_Filter()
   call youcompleteme#test#setup#OpenFile(
-        \ 'test/testdata/cpp/completion.cc',
-        \ #{ delay: 2 } )
+        \ 'test/testdata/cpp/completion.cc', {} )
 
   call setpos( '.', [ 0, 23, 31 ] )
 
@@ -313,12 +309,10 @@ function! Test_Completion_FixIt()
   " file, auto_include_workaround #includes auto_include.h, so that clangd knows
   " about it
   call youcompleteme#test#setup#OpenFile(
-        \ 'test/testdata/cpp/auto_include_workaround.cc',
-        \ #{ delay: 2 } )
+        \ 'test/testdata/cpp/auto_include_workaround.cc', {} )
 
   call youcompleteme#test#setup#OpenFile(
-        \ 'test/testdata/cpp/auto_include.cc',
-        \ #{ delay: 2 } )
+        \ 'test/testdata/cpp/auto_include.cc', {} )
 
   function Check1( id )
     call s:WaitForCompletion()
@@ -353,8 +347,7 @@ endfunction
 
 function! Test_Select_Next_Previous_InsertModeMapping()
   call youcompleteme#test#setup#OpenFile(
-        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp',
-        \ #{ delay: 2 } )
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
 
   call setpos( '.', [ 0, 11, 6 ] )
 

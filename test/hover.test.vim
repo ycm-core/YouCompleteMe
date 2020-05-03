@@ -11,8 +11,7 @@ function! TearDown()
 endfunction
 
 function! Test_Hover_Uses_GetDoc()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
 
   call assert_equal( 'python', &syntax )
 
@@ -52,8 +51,7 @@ function! Test_Hover_Uses_GetDoc()
 endfunction
 
 function! Test_Hover_Uses_GetHover()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
   py3 <<EOPYTHON
 from unittest import mock
 with mock.patch.object( ycm_state,
@@ -79,8 +77,7 @@ EOPYTHON
 endfunction
 
 function! Test_Hover_Uses_None()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
   py3 <<EOPYTHON
 from unittest import mock
 with mock.patch.object( ycm_state, 'GetDefinedSubcommands', return_value = [] ):
@@ -99,8 +96,7 @@ EOPYTHON
 endfunction
 
 function! Test_Hover_Uses_GetType()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
 
   py3 <<EOPYTHON
 from unittest import mock
@@ -192,8 +188,7 @@ function! SetUp_Test_AutoHover_Disabled()
 endfunction
 
 function! Test_AutoHover_Disabled()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
 
   let messages_before = execute( 'messages' )
 
@@ -226,8 +221,7 @@ function! Test_AutoHover_Disabled()
 endfunction
 
 function! Test_Hover_MoveCursor()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
   function! CheckPopupVisible()
     let loc = screenpos( win_getid(), 11, 3 )
     let popup = popup_locate( loc.row, loc.col )
@@ -282,8 +276,7 @@ function! Test_Hover_MoveCursor()
 endfunction
 
 function! Test_Hover_Dismiss()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py',
-                                        \ { 'delay': 2 } )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
   function! CheckPopupVisible()
     let loc = screenpos( win_getid(), 11, 3 )
     let popup = popup_locate( loc.row, loc.col )

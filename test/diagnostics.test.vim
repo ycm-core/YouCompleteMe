@@ -5,6 +5,9 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
   let g:ycm_always_populate_location_list = 1
+
+  " diagnostics take ages
+  let g:ycm_test_min_delay = 7
   call youcompleteme#test#setup#SetUp()
 endfunction
 
