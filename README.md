@@ -2372,12 +2372,8 @@ let g:ycm_echo_current_diagnostic = 1
 This option controls whether or not YCM shows documentation in a popup at the
 cursor location after a short delay. Only supported in Vim.
 
-The displayed documentation depends on what the completer for the current
-language supports. It's selected in this order of preference: `GetHover`
-`GetDoc`, `GetType`.
-
 When this option is set to `'CursorHold'`, the popup is displayed on the
-`CursorHold` autocommand. See `:help CursorHold` for the deatils, but this means
+`CursorHold` autocommand. See `:help CursorHold` for the details, but this means
 that it is displayed after `updatetime` milliseconds.  When set to an empty
 string, the popup is not automatically displayed.
 
@@ -2391,6 +2387,33 @@ nmap <leader>D <plug>(YCMHover)
 
 After dismissing the popup with this mapping, it will not be automatically
 triggered again until the cursor is moved (i.e. `CursorMoved` autocommand).
+
+The displayed documentation depends on what the completer for the current
+language supports. It's selected heuristically in this order of preference:
+
+1. `GetHover` with `markdown` syntax
+2. `GetDoc` with no syntax
+3. `GetType` with the syntax of the current file. 
+
+You can customise this by manually setting up `b:ycm_hover` to your liking. This
+buffer-local variable can be set to a dictionary with the following keys:
+
+* `command`: The YCM completer subcommand which should be run on hover
+* `syntax`: The syntax to use (as in `set syntax=`) in the popup window for
+  highlighting.
+
+For example, to use C/C++ syntax highlighting in the popup for C-family
+languages, add something like this to your vimrc:
+
+```viml
+augroup MyYCMCustom
+  autocmd!
+  autocmd FileType c,cpp let b:ycm_hover = {
+    \ 'command': 'GetDoc',
+    \ 'syntax': &filetype
+    \ }
+augroup END
+```
 
 Default: `'CursorHold'`
 
