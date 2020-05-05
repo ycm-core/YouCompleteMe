@@ -1306,24 +1306,33 @@ if exists( '*popup_atcursor' )
       return
     endif
 
-    if !has_key( b:, 'ycm_hover_command' )
+    if !has_key( b:, 'ycm_hover' )
       let cmds = youcompleteme#GetDefinedSubcommands()
       if index( cmds, 'GetHover' ) >= 0
-        let b:ycm_hover_command = 'GetHover'
+        let b:ycm_hover = {
+              \ 'command': 'GetHover',
+              \ 'syntax': 'markdown',
+              \ }
       elseif index( cmds, 'GetDoc' ) >= 0
-        let b:ycm_hover_command = 'GetDoc'
+        let b:ycm_hover = {
+              \ 'command': 'GetDoc',
+              \ 'syntax': '',
+              \ }
       elseif index( cmds, 'GetType' ) >= 0
-        let b:ycm_hover_command = 'GetType'
+        let b:ycm_hover = {
+              \ 'command': 'GetType',
+              \ 'syntax': &syntax,
+              \ }
       else
-        let b:ycm_hover_command = v:none
+        let b:ycm_hover = {}
       endif
     endif
 
-    if b:ycm_hover_command == v:none
+    if empty( b:ycm_hover )
       return
     endif
 
-    let response = youcompleteme#GetCommandResponse( b:ycm_hover_command )
+    let response = youcompleteme#GetCommandResponse( b:ycm_hover.command )
     if response == ''
       return
     endif
@@ -1334,18 +1343,34 @@ if exists( '*popup_atcursor' )
           \   {
           \     'padding': [ 0, 1, 0, 1 ],
           \     'maxwidth': &columns,
+          \     'moved': 'word',
           \     'close': 'button',
           \   }
           \ )
-    if b:ycm_hover_command ==# 'GetHover'
-      let syn = 'markdown.' . &syntax
-    else
-      let syn = &syntax
-    endif
-    call setbufvar( winbufnr( s:cursorhold_popup ), '&syntax', syn )
+    call setbufvar( winbufnr( s:cursorhold_popup ),
+                            \ '&syntax',
+                            \ b:ycm_hover.syntax )
   endfunction
+
+  function! s:ToggleHover()
+    let pos = popup_getpos( s:cursorhold_popup )
+    if !empty( pos ) && pos.visible
+      call popup_hide( s:cursorhold_popup )
+      let s:cursorhold_popup = -1
+
+      " Diable the auto-trigger until the next cursor movement.
+      call s:DisableAutoHover()
+      augroup YCMHover
+        autocmd! CursorMoved <buffer>
+        autocmd CursorMoved <buffer> call s:EnableAutoHover()
+      augroup END
+    else
+      call s:Hover()
+    endif
+  endfunction
+
   let s:enable_hover = 1
-  nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>Hover()<CR>
+  nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>ToggleHover()<CR>
 else
   " Don't break people's mappings if this feature is disabled, just do nothing.
   nnoremap <silent> <plug>(YCMHover) <Nop>

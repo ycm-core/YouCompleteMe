@@ -9,7 +9,7 @@ function! youcompleteme#test#setup#SetUp() abort
     pyx del ycm_state
   endif
 
-  source $PWD/vimrc
+  exe 'source' getcwd() . '/vimrc'
 
   " This is a bit of a hack
   runtime! plugin/**/*.vim
@@ -33,7 +33,9 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
         \ . '/'
         \ . a:f
 
-  if get( a:kwargs, 'native_ft', 1 )
+  let native_ft = get( a:kwargs, 'native_ft', 1 )
+
+  if native_ft
     call WaitForAssert( {->
         \ assert_true( pyxeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) )
         \ } )
@@ -43,9 +45,17 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
     " completers. For python and others, we actually need to parse the debug
     " info to check the server state.
     YcmForceCompileAndDiagnostics
+  endif
 
+  if native_ft || get( a:kwargs, 'force_delay', 0 )
     " Sometimes, that's just not enough to ensure stuff works
-    let delay = get( a:kwargs, 'delay', 7 )
+    if exists( '$YCM_TEST_DELAY' )
+      let default_delay = $YCM_TEST_DELAY
+    else
+      let default_delay = get( g:, 'ycm_test_delay', 2 )
+    endif
+    let delay = max( [ get( a:kwargs, 'delay', default_delay ),
+                   \   get( g:, 'ycm_test_min_delay', 0 ) ] )
     if delay > 0
       exe 'sleep' delay
     endif

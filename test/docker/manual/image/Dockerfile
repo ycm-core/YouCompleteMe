@@ -1,6 +1,10 @@
 ARG YCM_PYTHON=py3
 
-FROM puremourning/ycm-vim-${YCM_PYTHON}:test
+FROM youcompleteme/ycm-vim-${YCM_PYTHON}:test
+
+RUN apt-get update && \
+  apt-get -y --no-install-recommends install less && \
+  apt-get -y autoremove
 
 RUN useradd -ms /bin/bash -d /home/dev -G sudo dev && \
     echo "dev:dev" | chpasswd && \

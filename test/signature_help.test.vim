@@ -1,5 +1,21 @@
 let s:timer_interval = 2000
 
+function! s:WaitForSigHelpAvailable( filetype )
+  let tries = 0
+  call WaitFor( {-> s:_CheckSignatureHelpAvailable( a:filetype ) } )
+  while py3eval(
+        \ 'ycm_state._signature_help_available_requests[ '
+        \ . 'vim.eval( "a:filetype" ) ].Response() == "PENDING"' ) &&
+        \ tries < 10
+    " Force sending another request
+    py3 ycm_state._signature_help_available_requests[
+          \ vim.eval( 'a:filetype' ) ].Start( vim.eval( 'a:filetype' ) )
+    call WaitFor( {-> s:_CheckSignatureHelpAvailable( a:filetype ) } )
+    let tries += 1
+  endwhile
+  call ch_log( "Signature help is avaialble now for " . a:filetype )
+endfunction
+
 function! s:_ClearSigHelp()
   pythonx _sh_state = sh.UpdateSignatureHelp( _sh_state, {} )
   call assert_true( pyxeval( '_sh_state.popup_win_id is None' ),
@@ -120,10 +136,10 @@ endfunction
 function! Test_Signatures_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
         \ '/test/testdata/vim/mixed_filetype.vim',
-        \ { 'native_ft': 0 } )
+        \ { 'native_ft': 0, 'force_delay': v:true } )
 
   call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'vim' ) } )
-  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
+  call s:WaitForSigHelpAvailable( 'python' )
 
   call setpos( '.', [ 0, 3, 17 ] )
 
@@ -193,7 +209,7 @@ function! Test_Signatures_With_PUM_NoSigns()
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
         \ . '/make_drink.cc', {} )
 
-  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'cpp' ) } )
+  call s:WaitForSigHelpAvailable( 'cpp' )
 
   " Make sure that error signs don't shift the window
   setlocal signcolumn=no
@@ -268,7 +284,7 @@ function! Test_Signatures_With_PUM_Signs()
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/general_fallback'
         \ . '/make_drink.cc', {} )
 
-  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'cpp' ) } )
+  call s:WaitForSigHelpAvailable( 'cpp' )
 
   " Make sure that sign causes the popup to shift
   setlocal signcolumn=auto
@@ -508,7 +524,7 @@ endfunction
 
 function! Test_Signatures_TopLine()
   call youcompleteme#test#setup#OpenFile( 'test/testdata/python/test.py', {} )
-  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
+  call s:WaitForSigHelpAvailable( 'python' )
   call setpos( '.', [ 0, 1, 24 ] )
   call test_override( 'char_avail', 1 )
 
@@ -528,7 +544,7 @@ endfunction
 
 function! Test_Signatures_TopLineWithPUM()
   call youcompleteme#test#setup#OpenFile( 'test/testdata/python/test.py', {} )
-  call WaitFor( {-> s:_CheckSignatureHelpAvailable( 'python' ) } )
+  call s:WaitForSigHelpAvailable( 'python' )
   call setpos( '.', [ 0, 1, 24 ] )
   call test_override( 'char_avail', 1 )
 
