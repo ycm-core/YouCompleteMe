@@ -38,6 +38,9 @@ For installation problems, make sure that any issue report includes the entire
 output of any build or installation commands, including **the command used to
 run them**.
 
+For common issues such as "the ycmd server SHUT DOWN", please check the GitHub
+Wiki.
+
 ### Other problems - check the issue tracker
 
 Further, **search the issue tracker for similar issues** before creating a new
