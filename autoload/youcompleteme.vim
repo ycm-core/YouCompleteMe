@@ -1344,7 +1344,7 @@ if exists( '*popup_atcursor' )
           \     'padding': [ 0, 1, 0, 1 ],
           \     'maxwidth': &columns,
           \     'moved': 'word',
-          \     'close': 'button',
+          \     'close': 'click',
           \   }
           \ )
     call setbufvar( winbufnr( s:cursorhold_popup ),
