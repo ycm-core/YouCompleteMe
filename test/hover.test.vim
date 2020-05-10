@@ -14,13 +14,15 @@ function! s:CheckPopupVisibleScreenPos( loc, text, syntax )
   let popup = popup_locate( a:loc.row, a:loc.col )
   call assert_notequal( 0,
                       \ popup,
-                      \ 'Locate popup at '
+                      \ 'Locate popup at ('
                       \ . a:loc.row
                       \ . ','
                       \ . a:loc.col
                       \ . ')' )
-  call assert_equal( a:text,
-                   \ getbufline( winbufnr( popup ), 1, '$' ) )
+  if a:text isnot v:none
+    call assert_equal( a:text,
+                     \ getbufline( winbufnr( popup ), 1, '$' ) )
+  endif
   call assert_equal( a:syntax, getbufvar( winbufnr( popup ), '&syntax' ) )
 endfunction
 
@@ -372,4 +374,53 @@ endfunction
 
 function! TearDown_Test_Hover_Custom_Command()
   au! MyYCMCustom
+endfunction
+
+function! Test_Long_Single_Line()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+  call cursor( [ 37, 3 ] )
+  normal \D
+
+  " The popup should cover at least the whole of the line above, and not the
+  " current line
+  call s:CheckPopupVisible( 36, 1, v:none, '' )
+  call s:CheckPopupVisible( 36, &columns, v:none, '' )
+
+  call s:CheckPopupNotVisible( 37, 1 )
+  call s:CheckPopupNotVisible( 37, &columns )
+
+  " Also wrap is ON so it should cover at least 2 lines + 2 for the header/empty
+  " line
+  call s:CheckPopupVisible( 35, 1, v:none, '' )
+  call s:CheckPopupVisible( 35, &columns, v:none, '' )
+  call s:CheckPopupVisible( 33, 1, v:none, '' )
+  call s:CheckPopupVisible( 33, &columns, v:none, '' )
+
+  call popup_clear()
+  %bwipe!
+endfunction
+
+function! Test_Long_Wrapped()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+  call cursor( [ 38, 22 ] )
+  normal \D
+
+  " The popup should cover at least the whole of the line above, and not the
+  " current line. In this case, it's because the popup was shifted.
+  call s:CheckPopupVisible( 37, 1, v:none, '' )
+  call s:CheckPopupVisible( 37, &columns, v:none, '' )
+
+  call s:CheckPopupNotVisible( 38, 1 )
+  call s:CheckPopupNotVisible( 38, &columns )
+
+  " Also, wrap is off, so it should be _exactly_ 9 lines + 2 for the signature
+  " and the empty line
+  call s:CheckPopupVisible( 27, 1, v:none, '' )
+  call s:CheckPopupVisible( 27, &columns, v:none, '' )
+
+  call s:CheckPopupNotVisible( 26, 1 )
+  call s:CheckPopupNotVisible( 26, &columns )
+
+  call popup_clear()
+  %bwipe!
 endfunction
