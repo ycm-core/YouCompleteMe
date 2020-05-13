@@ -1308,3 +1308,15 @@ def ScreenPositionForLineColumnInWindow( window, line, column ):
       WinIDForWindow( window ),
       line,
       column ) )
+
+
+def UsingPreviewPopup():
+  return 'popup' in ToUnicode( vim.options[ 'completeopt' ] ).split( ',' )
+
+
+def DisplayWidth():
+  return GetIntValue( '&columns' )
+
+
+def DisplayWidthOfString( s ):
+  return GetIntValue( "strdisplaywidth( '{}' )".format( EscapeForVim( s ) ) )
