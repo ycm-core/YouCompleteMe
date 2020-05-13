@@ -2936,15 +2936,23 @@ The *g:ycm_add_preview_to_completeopt* option
 
 When this option is set to '1', YCM will add the 'preview' string to Vim's
 'completeopt' option (see ':h completeopt'). If your 'completeopt' option
-already has 'preview' set, there will be no effect. You can see the current
-state of your 'completeopt' setting with ':set completeopt?' (yes, the question
-mark is important).
+already has 'preview' set, there will be no effect. Alternatively, when set to
+'popup' and your version of Vim supports popup windows (see ':help popup'),
+the 'popup' string will be used instead. You can see the current state of your
+'completeopt' setting with ':set completeopt?' (yes, the question mark is
+important).
 
 When 'preview' is present in 'completeopt', YCM will use the 'preview' window
 at the top of the file to store detailed information about the current
 completion candidate (but only if the candidate came from the semantic engine).
 For instance, it would show the full function prototype and all the function
 overloads in the window if the current completion is a function name.
+
+When 'popup' is present in 'completeopt', YCM will instead use a 'popup'
+window to the side of the completion popup for storing detailed information
+about the current completion candidate. In addition, YCM may truncate the
+detailed completion information in order to give the popup sufficient room
+to display that detailed information.
 
 Default: '0'
 >
