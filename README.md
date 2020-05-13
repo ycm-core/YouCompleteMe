@@ -229,7 +229,8 @@ Installation
 
 &nbsp;
 
-    brew install cmake macvim python
+    brew install cmake macvim python go nvm
+    nvm install node
 
 - Install mono, go, node and npm
 
