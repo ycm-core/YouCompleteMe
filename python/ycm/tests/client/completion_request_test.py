@@ -247,6 +247,33 @@ class ConvertCompletionResponseToVimDatas_test:
   @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
   @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
   @patch( "ycm.vimsupport.DisplayWidthOfString", len )
+  def OnlyTruncateForPopupIfNecessary_test( self, *args ):
+    extra_data = {
+      'doc_string':    'DOC STRING',
+    }
+    self._Check( {
+      'insertion_text':  '',
+      'menu_text':       'MENU TEXT',
+      'extra_menu_info': 'EXTRA MENU INFO',
+      'kind':            'K',
+      'detailed_info':   'DETAILED INFO',
+      'extra_data': extra_data,
+    }, {
+      'word'     : '',
+      'abbr'     : 'MENU TEXT',
+      'menu'     : 'EXTRA MENU INFO',
+      'kind'     : 'k',
+      'info'     : 'DETAILED INFO\nDOC STRING',
+      'equal'    : 1,
+      'dup'      : 1,
+      'empty'    : 1,
+      'user_data': json.dumps( extra_data ),
+    } )
+
+
+  @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
+  @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
+  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def TruncateForPopupWithoutDuplication_test( self, *args ):
     extra_data = {
       'doc_string':    'DOC STRING',
