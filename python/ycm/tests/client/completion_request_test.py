@@ -17,6 +17,7 @@
 
 import json
 from hamcrest import assert_that, equal_to
+from unittest.mock import patch
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
 
@@ -32,7 +33,7 @@ class ConvertCompletionResponseToVimDatas_test:
         completion_data )
 
     try:
-      assert_that( expected_vim_data, equal_to( vim_data ) )
+      assert_that( vim_data, equal_to( expected_vim_data ) )
     except Exception:
       print( "Expected:\n'{}'\nwhen parsing:\n'{}'\nBut found:\n'{}'".format(
           expected_vim_data,
@@ -208,6 +209,62 @@ class ConvertCompletionResponseToVimDatas_test:
       'menu'     : 'EXTRA MENU INFO',
       'kind'     : 'k',
       'info'     : 'DETAILED INFO\nDOC STRING',
+      'equal'    : 1,
+      'dup'      : 1,
+      'empty'    : 1,
+      'user_data': json.dumps( extra_data ),
+    } )
+
+
+  @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
+  @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
+  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
+  def TruncateForPopup_test( self, *args ):
+    extra_data = {
+      'doc_string':    'DOC STRING',
+    }
+    self._Check( {
+      'insertion_text':  '',
+      'menu_text':       'MENU TEXT',
+      'extra_menu_info': 'ESPECIALLY LONG EXTRA MENU INFO LOREM IPSUM DOLOR',
+      'kind':            'K',
+      'detailed_info':   'DETAILED INFO',
+      'extra_data': extra_data,
+    }, {
+      'word'     : '',
+      'abbr'     : 'MENU TEXT',
+      'menu'     : 'ESPECIALLY LONG E...',
+      'kind'     : 'k',
+      'info'     : 'ESPECIALLY LONG EXTRA MENU INFO LOREM IPSUM DOLOR\n\n' +
+                   'DETAILED INFO\nDOC STRING',
+      'equal'    : 1,
+      'dup'      : 1,
+      'empty'    : 1,
+      'user_data': json.dumps( extra_data ),
+    } )
+
+
+  @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
+  @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
+  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
+  def TruncateForPopupWithoutDuplication_test( self, *args ):
+    extra_data = {
+      'doc_string':    'DOC STRING',
+    }
+    self._Check( {
+      'insertion_text':  '',
+      'menu_text':       'MENU TEXT',
+      'extra_menu_info': 'ESPECIALLY LONG METHOD SIGNATURE LOREM IPSUM',
+      'kind':            'K',
+      'detailed_info':   'ESPECIALLY LONG METHOD SIGNATURE LOREM IPSUM',
+      'extra_data': extra_data,
+    }, {
+      'word'     : '',
+      'abbr'     : 'MENU TEXT',
+      'menu'     : 'ESPECIALLY LONG M...',
+      'kind'     : 'k',
+      'info'     : 'ESPECIALLY LONG METHOD SIGNATURE LOREM IPSUM\n' +
+                   'DOC STRING',
       'equal'    : 1,
       'dup'      : 1,
       'empty'    : 1,
