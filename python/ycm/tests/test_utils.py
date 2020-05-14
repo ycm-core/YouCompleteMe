@@ -183,6 +183,10 @@ def _MockVimWindowEval( value ):
 
 
 def _MockVimOptionsEval( value ):
+  result = VIM_MOCK.options.get( value )
+  if result is not None:
+    return result
+
   result = VIM_OPTIONS.get( value )
   if result is not None:
     return result
