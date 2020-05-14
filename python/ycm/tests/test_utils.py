@@ -70,6 +70,7 @@ VIM_MATCHES_FOR_WINDOW = defaultdict( list )
 VIM_SIGNS = []
 
 VIM_OPTIONS = {
+  '&completeopt': b'',
   '&previewheight': 12,
   '&columns': 80,
   '&ruler': 0,
@@ -183,10 +184,6 @@ def _MockVimWindowEval( value ):
 
 
 def _MockVimOptionsEval( value ):
-  result = VIM_MOCK.options.get( value )
-  if result is not None:
-    return result
-
   result = VIM_OPTIONS.get( value )
   if result is not None:
     return result
@@ -372,6 +369,14 @@ def _MockVimCommand( command ):
     return
 
   return DEFAULT
+
+
+def _MockVimOptions( option ):
+  result = VIM_OPTIONS.get( '&' + option )
+  if result is not None:
+    return result
+
+  return None
 
 
 class VimBuffer:
@@ -636,6 +641,8 @@ def MockVimModule():
   VIM_MOCK.command = MagicMock( side_effect = _MockVimCommand )
   VIM_MOCK.eval = MagicMock( side_effect = _MockVimEval )
   VIM_MOCK.error = VimError
+  VIM_MOCK.options = MagicMock()
+  VIM_MOCK.options.__getitem__.side_effect = _MockVimOptions
   sys.modules[ 'vim' ] = VIM_MOCK
 
   return VIM_MOCK
