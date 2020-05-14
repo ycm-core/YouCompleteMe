@@ -216,7 +216,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
+  @patch( "vim.options", { 'completeopt': b'popup,menuone' } )
   @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
   @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def TruncateForPopup_test( self, *args ):
@@ -244,7 +244,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
+  @patch( "vim.options", { 'completeopt': b'popup,menuone' } )
   @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
   @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def OnlyTruncateForPopupIfNecessary_test( self, *args ):
@@ -271,7 +271,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  @patch( "ycm.vimsupport.UsingPreviewPopup", return_value = True )
+  @patch( "vim.options", { 'completeopt': b'popup,menuone' } )
   @patch( "ycm.vimsupport.DisplayWidth", return_value = 60 )
   @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def TruncateForPopupWithoutDuplication_test( self, *args ):

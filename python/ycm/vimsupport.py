@@ -1311,7 +1311,7 @@ def ScreenPositionForLineColumnInWindow( window, line, column ):
 
 
 def UsingPreviewPopup():
-  return 'popup' in ToUnicode( vim.options[ 'completeopt' ] ).split( ',' )
+  return b'popup' in vim.options[ 'completeopt' ]
 
 
 def DisplayWidth():
