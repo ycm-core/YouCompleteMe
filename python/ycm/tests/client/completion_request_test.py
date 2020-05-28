@@ -17,7 +17,6 @@
 
 import json
 from hamcrest import assert_that, equal_to
-from unittest.mock import patch
 from ycm.tests.conftest import UserOptions
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
@@ -217,7 +216,6 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def TruncateForPopup_test( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'popup,menuone' } ):
       extra_data = {
@@ -244,7 +242,6 @@ class ConvertCompletionResponseToVimDatas_test:
       } )
 
 
-  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def OnlyTruncateForPopupIfNecessary_test( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'popup,menuone' } ):
       extra_data = {
@@ -270,7 +267,6 @@ class ConvertCompletionResponseToVimDatas_test:
       } )
 
 
-  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def DontTruncateIfNotPopup_test( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'preview,menuone' } ):
       extra_data = {
@@ -296,7 +292,6 @@ class ConvertCompletionResponseToVimDatas_test:
       } )
 
 
-  @patch( "ycm.vimsupport.DisplayWidthOfString", len )
   def TruncateForPopupWithoutDuplication_test( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'popup,menuone' } ):
       extra_data = {

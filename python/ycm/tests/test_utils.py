@@ -43,6 +43,8 @@ MATCHDELETE_REGEX = re.compile( '^matchdelete\\((?P<id>\\d+)\\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\\)$' )
 FNAMEESCAPE_REGEX = re.compile( '^fnameescape\\(\'(?P<filepath>.+)\'\\)$' )
+STRDISPLAYWIDTH_REGEX = re.compile(
+  '^strdisplaywidth\\( ?\'(?P<text>.+)\' ?\\)$' )
 SIGN_LIST_REGEX = re.compile(
   '^silent! sign place buffer=(?P<bufnr>\\d+)$' )
 SIGN_PLACE_REGEX = re.compile(
@@ -289,6 +291,10 @@ def _MockVimEval( value ):
 
   if value == REDIR[ 'variable' ]:
     return REDIR[ 'output' ]
+
+  match = STRDISPLAYWIDTH_REGEX.search( value )
+  if match:
+    return len( match.group( 'text' ) )
 
   raise VimError( 'Unexpected evaluation: {}'.format( value ) )
 
