@@ -1340,13 +1340,36 @@ if exists( '*popup_atcursor' )
     endif
 
     call popup_hide( s:cursorhold_popup )
+
+    " Try to position the popup at the cursor, but avoid wrapping. If the
+    " longest line is > screen width (&columns), then we just have to wrap, and
+    " place the popup at the leftmost column.
+    "
+    " Find the longest line (FIXME: probably doesn't work well for multi-byte)
+    let lines = split( response, "\n" )
+    let len = max( map( copy( lines ), "len( v:val )" ) )
+
+    let wrap = 0
+    let col = 'cursor'
+
+    " max width is screen columns minus x padding (2)
+    if len >= (&columns - 2)
+      " There's at least one line > our max - enable word wrap and draw the
+      " popup at the leftmost column
+      let col = 1
+      let wrap = 1
+    endif
+
     let s:cursorhold_popup = popup_atcursor(
-          \   split( response, "\n" ),
+          \   lines,
           \   {
+          \     'col': col,
+          \     'wrap': wrap,
           \     'padding': [ 0, 1, 0, 1 ],
-          \     'maxwidth': &columns,
           \     'moved': 'word',
+          \     'maxwidth': &columns,
           \     'close': 'click',
+          \     'fixed': 0,
           \   }
           \ )
     call setbufvar( winbufnr( s:cursorhold_popup ),
