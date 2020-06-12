@@ -70,6 +70,7 @@ Contents
     - [General Semantic Completion](#general-semantic-completion)
     - [C-family Semantic Completion](#c-family-semantic-completion)
     - [Java Semantic Completion](#java-semantic-completion)
+	- [C# Semantic Completion](#c-semantic-completion)
     - [Python Semantic Completion](#python-semantic-completion)
     - [Rust Semantic Completion](#rust-semantic-completion)
     - [Go Semantic Completion](#go-semantic-completion)
