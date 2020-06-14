@@ -181,11 +181,26 @@ def _GetCompletionInfoField( completion_data ):
 
 def _ConvertCompletionDataToVimData( completion_data ):
   # See :h complete-items for a description of the dictionary fields.
+  extra_menu_info = completion_data.get( 'extra_menu_info', '' )
+  preview_info = _GetCompletionInfoField( completion_data )
+
+  # When we are using a popup for the preview_info, it needs to fit on the
+  # screen alongside the extra_menu_info. Let's use some heuristics.  If the
+  # length of the extra_menu_info is more than, say, 1/3 of screen, truncate it
+  # and stick it in the preview_info.
+  if vimsupport.UsingPreviewPopup():
+    max_width = max( int( vimsupport.DisplayWidth() / 3 ), 3 )
+    extra_menu_info_width = vimsupport.DisplayWidthOfString( extra_menu_info )
+    if extra_menu_info_width > max_width:
+      if not preview_info.startswith( extra_menu_info ):
+        preview_info = extra_menu_info + '\n\n' + preview_info
+      extra_menu_info = extra_menu_info[ : ( max_width - 3 ) ] + '...'
+
   return {
     'word'     : completion_data[ 'insertion_text' ],
     'abbr'     : completion_data.get( 'menu_text', '' ),
-    'menu'     : completion_data.get( 'extra_menu_info', '' ),
-    'info'     : _GetCompletionInfoField( completion_data ),
+    'menu'     : extra_menu_info,
+    'info'     : preview_info,
     'kind'     : ToUnicode( completion_data.get( 'kind', '' ) )[ :1 ].lower(),
     # Disable Vim filtering.
     'equal'    : 1,
