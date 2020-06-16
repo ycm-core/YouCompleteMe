@@ -198,7 +198,7 @@ def BufferIsVisible( buffer_number ):
 
 def GetBufferFilepath( buffer_object ):
   if buffer_object.name:
-    return os.path.normpath( ToUnicode( buffer_object.name ) )
+    return os.path.abspath( ToUnicode( buffer_object.name ) )
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that.
   return os.path.join( GetCurrentDirectory(), str( buffer_object.number ) )
