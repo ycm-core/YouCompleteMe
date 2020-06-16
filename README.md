@@ -639,6 +639,7 @@ Quick Feature Summary
 * Signature help
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
+* Find Symbol (`GoToSymbol`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
@@ -653,6 +654,7 @@ Quick Feature Summary
 * Real-time diagnostic display
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to implementation (`GoToImplementation`)
+* Find Symbol (`GoToSymbol`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
@@ -665,6 +667,7 @@ Quick Feature Summary
 * Semantic auto-completion
 * Signature help
 * Go to definition (`GoTo`)
+* Find Symbol (`GoToSymbol`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -692,6 +695,7 @@ Quick Feature Summary
   identical)
 * Go to type definition (`GoToType`)
 * Go to implementation (`GoToImplementation`)
+* Find Symbol (`GoToSymbol`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -725,6 +729,7 @@ Quick Feature Summary
   identical)
 * Go to type definition (`GoToType`)
 * Go to implementation (`GoToImplementation`)
+* Find Symbol (`GoToSymbol`)
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -1686,6 +1691,13 @@ just browsing around your codebase, this command can spare you quite a bit of
 latency.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda`
+
+#### The `GoToSymbol <symbol query>` subcommand
+
+Finds the definition of all symbols matching a specified string. Note that this
+does not use any sort of smart/fuzzy matching.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, cs, java, javascript, python, typescript`
 
 #### The `GoToReferences` subcommand
 
