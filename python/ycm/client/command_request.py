@@ -136,7 +136,10 @@ class CommandRequest( BaseRequest ):
         # When there are multiple fixit suggestions, present them as a list to
         # the user hand have her choose which one to apply.
         fixits = self._response[ 'fixits' ]
-        if len( fixits ) > 1:
+        if ( len( fixits ) > 1 or
+             ( len( fixits ) == 1 and
+               self._command == 'FixIt' and
+               fixits[ 0 ].get( 'kind' ) == 'quickfix' ) ):
           fixit_index = vimsupport.SelectFromList(
             "Multiple FixIt suggestions are available at this location. "
             "Which one would you like to apply?",
