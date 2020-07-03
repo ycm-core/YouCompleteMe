@@ -1492,7 +1492,7 @@ current file in Vim's `locationlist`, which can be opened with the `:lopen` and
 `:lclose` commands (make sure you have set `let
 g:ycm_always_populate_location_list = 1` in your vimrc). A good way to toggle
 the display of the `locationlist` with a single key mapping is provided by
-another (very small) Vim plugin called [ListToggle][] (which also makes it
+another (very small) Vim plugin called [ListToggle](https://github.com/Valloric/ListToggle) (which also makes it
 possible to change the height of the `locationlist` window), also written by
 yours truly.
 
