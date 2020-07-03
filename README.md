@@ -3219,7 +3219,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [ycmd_flags_example]: https://raw.githubusercontent.com/ycm-core/ycmd/66030cd94299114ae316796f3cad181cac8a007c/.ycm_extra_conf.py
 [compdb]: https://clang.llvm.org/docs/JSONCompilationDatabase.html
 [subsequence]: https://en.wikipedia.org/wiki/Subsequence
-[listtoggle]: https://github.com/ycm-core/ListToggle
+[listtoggle]: https://github.com/Valloric/ListToggle
 [vim-build]: https://github.com/ycm-core/YouCompleteMe/wiki/Building-Vim-from-source
 [tracker]: https://github.com/ycm-core/YouCompleteMe/issues?state=open
 [completer-api]: https://github.com/ycm-core/ycmd/blob/master/ycmd/completers/completer.py
