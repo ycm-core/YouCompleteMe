@@ -82,10 +82,11 @@ Contents ~
    3. The |GoToDefinition| subcommand
    4. The |GoTo| subcommand
    5. The |GoToImprecise| subcommand
-   6. The |GoToReferences| subcommand
-   7. The |GoToImplementation| subcommand
-   8. The |GoToImplementationElseDeclaration| subcommand
-   9. The |GoToType| subcommand
+   6. The 'GoToSymbol <symbol query>' subcommand      |GoToSymbol-symbol-query|
+   7. The |GoToReferences| subcommand
+   8. The |GoToImplementation| subcommand
+   9. The |GoToImplementationElseDeclaration| subcommand
+   10. The |GoToType| subcommand
   2. Semantic Information Commands |youcompleteme-semantic-information-commands|
    1. The |GetType| subcommand
    2. The |GetTypeImprecise| subcommand
@@ -250,6 +251,7 @@ Contents ~
   - General Semantic Completion
   - C-family Semantic Completion
   - Java Semantic Completion
+  - C# Semantic Completion
   - Python Semantic Completion
   - Rust Semantic Completion
   - Go Semantic Completion
@@ -855,6 +857,7 @@ C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 - Signature help
 - Real-time diagnostic display
 - Go to include/declaration/definition (|GoTo|, etc.)
+- Find Symbol ('GoToSymbol')
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
@@ -871,6 +874,7 @@ C♯ ~
 - Real-time diagnostic display
 - Go to declaration/definition (|GoTo|, etc.)
 - Go to implementation (|GoToImplementation|)
+- Find Symbol ('GoToSymbol')
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
@@ -885,6 +889,7 @@ Python ~
 - Semantic auto-completion
 - Signature help
 - Go to definition (|GoTo|)
+- Find Symbol ('GoToSymbol')
 - Reference finding (|GoToReferences|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
@@ -916,6 +921,7 @@ JavaScript and TypeScript ~
   identical)
 - Go to type definition (|GoToType|)
 - Go to implementation (|GoToImplementation|)
+- Find Symbol ('GoToSymbol')
 - Reference finding (|GoToReferences|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
@@ -953,6 +959,7 @@ Java ~
   identical)
 - Go to type definition (|GoToType|)
 - Go to implementation (|GoToImplementation|)
+- Find Symbol ('GoToSymbol')
 - Reference finding (|GoToReferences|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
@@ -1933,6 +1940,16 @@ you're just browsing around your codebase, this command can spare you quite a
 bit of latency.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cuda'
+
+-------------------------------------------------------------------------------
+                                                      *GoToSymbol-symbol-query*
+The 'GoToSymbol <symbol query>' subcommand ~
+
+Finds the definition of all symbols matching a specified string. Note that this
+does not use any sort of smart/fuzzy matching.
+
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, java, javascript,
+python, typescript'
 
 -------------------------------------------------------------------------------
 The *GoToReferences* subcommand
@@ -3485,7 +3502,7 @@ References ~
 [68] https://github.com/ycm-core/lsp-examples
 [69] http://eclim.org/
 [70] https://github.com/ycm-core/ycmd/blob/master/ycmd/completers/completer.py
-[71] https://github.com/ycm-core/ListToggle
+[71] https://github.com/Valloric/ListToggle
 [72] https://github.com/puremourning/vimspector
 [73] https://github.com/itchyny/lightline.vim
 [74] https://docs.python.org/2/library/re.html#regular-expression-syntax

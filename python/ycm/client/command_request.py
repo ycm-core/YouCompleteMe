@@ -133,12 +133,19 @@ class CommandRequest( BaseRequest ):
       try:
         fixit_index = 0
 
-        # When there are multiple fixit suggestions, present them as a list to
-        # the user hand have her choose which one to apply.
+        # If there is more than one fixit, we need to ask the user which one
+        # should be applied.
+        #
+        # If there's only one, triggered by the FixIt subcommand (as opposed to
+        # `RefactorRename`, for example) and whose `kind` is not `quicfix`, we
+        # still need to as the user for confirmation.
         fixits = self._response[ 'fixits' ]
-        if len( fixits ) > 1:
+        if ( len( fixits ) > 1 or
+             ( len( fixits ) == 1 and
+               self._command == 'FixIt' and
+               fixits[ 0 ].get( 'kind' ) != 'quickfix' ) ):
           fixit_index = vimsupport.SelectFromList(
-            "Multiple FixIt suggestions are available at this location. "
+            "FixIt suggestion(s) available at this location. "
             "Which one would you like to apply?",
             [ fixit[ 'text' ] for fixit in fixits ] )
         chosen_fixit = fixits[ fixit_index ]
