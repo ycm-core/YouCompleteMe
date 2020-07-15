@@ -15,6 +15,7 @@ Why?
 On 13th September 2020, Python 3.5 will be officially end of life. And therefore, so
 will its relationship with YouCompleteMe and ycmd.
 
+Looking for Python 2 support? Check the [Wiki](https://github.com/ycm-core/YouCompleteMe/wiki/Python-2).
 
 Help, Advice, Support
 ---------------------
