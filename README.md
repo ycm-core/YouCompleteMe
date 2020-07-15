@@ -5,29 +5,14 @@ YouCompleteMe: a code-completion engine for Vim
 [![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/ycm-core.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build?definitionId=3&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
-Warning: Support for Python 2 has been dropped
+Warning: Support for Python 3.5 will end soon
 ----
 
-In early 2020, YCM dropped support for Python 2. But we will maintain
-critical fixes on a branch named [legacy-py2][] for a period of 1 year.
-
-How?
-
-In order to use the legacy Python 2 support, see 
-[this post](https://github.com/ycm-core/YouCompleteMe/issues/3595#issuecomment-584230366)
+In mid 2020, YCM will drop support for Python 3.5 runtime.
 
 Why?
 
-Over the past decade, YouCompleteMe has had an at times fractious, 
-but ultimately very successful relationship with Python 2. However, more
-recently it has been carrying on a simultaneous relationship with Python 3.
-Indeed all of YCM and ycmd code is Python 3 code, with a lot of gubbins
-to make it work also on Python 2. This makes the code more complex,
-requires double testing of everything, and restricts the developers from using
-certain new language features, ultimately restricting the features we can
-deliver to users.
-
-On 1st January 2020, Python 2 will be officially end of life. And therefore, so
+On 13th September 2020, Python 3.5 will be officially end of life. And therefore, so
 will its relationship with YouCompleteMe and ycmd.
 
 
