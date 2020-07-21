@@ -25,19 +25,19 @@ from ycm.paths import _EndsWithPython
 
 def EndsWithPython_Good( path ):
   assert_that( _EndsWithPython( path ),
-              'Path {0} does not end with a Python name.'.format( path ) )
+              f'Path { path } does not end with a Python name.' )
 
 
 def EndsWithPython_Bad( path ):
   assert_that( not _EndsWithPython( path ),
-              'Path {0} does end with a Python name.'.format( path ) )
+              f'Path { path } does end with a Python name.' )
 
 
 @pytest.mark.parametrize( 'path', [
     'python3',
-    '/usr/bin/python3.5',
-    '/home/user/.pyenv/shims/python3.5',
-    r'C:\Python35\python.exe'
+    '/usr/bin/python3.6',
+    '/home/user/.pyenv/shims/python3.6',
+    r'C:\Python36\python.exe'
   ] )
 def EndsWithPython_Python3Paths_test( path ):
   EndsWithPython_Good( path )

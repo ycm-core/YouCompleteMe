@@ -51,58 +51,51 @@ def FormatDebugInfoResponse( response ):
 def _FormatYcmdDebugInfo( ycmd ):
   python = ycmd[ 'python' ]
   clang = ycmd[ 'clang' ]
-  message = ( 'Server Python interpreter: {0}\n'
-              'Server Python version: {1}\n'
-              'Server has Clang support compiled in: {2}\n'
-              'Clang version: {3}\n'.format( python[ 'executable' ],
-                                             python[ 'version' ],
-                                             clang[ 'has_support' ],
-                                             clang[ 'version' ] ) )
+  message = (
+    f'Server Python interpreter: { python[ "executable" ] }\n'
+    f'Server Python version: { python[ "version" ] }\n'
+    f'Server has Clang support compiled in: { clang[ "has_support" ] }\n'
+    f'Clang version: { clang[ "version" ] }\n' )
   extra_conf = ycmd[ 'extra_conf' ]
   extra_conf_path = extra_conf[ 'path' ]
   if not extra_conf_path:
     message += 'No extra configuration file found\n'
   elif not extra_conf[ 'is_loaded' ]:
     message += ( 'Extra configuration file found but not loaded\n'
-                 'Extra configuration path: {0}\n'.format( extra_conf_path ) )
+                 f'Extra configuration path: { extra_conf_path }\n' )
   else:
     message += ( 'Extra configuration file found and loaded\n'
-                 'Extra configuration path: {0}\n'.format( extra_conf_path ) )
+                 f'Extra configuration path: { extra_conf_path }\n' )
   return message
 
 
 def _FormatCompleterDebugInfo( completer ):
-  message = '{0} completer debug information:\n'.format( completer[ 'name' ] )
+  message = f'{ completer[ "name" ] } completer debug information:\n'
   for server in completer[ 'servers' ]:
     name = server[ 'name' ]
     if server[ 'is_running' ]:
       address = server[ 'address' ]
       port = server[ 'port' ]
       if address and port:
-        message += '  {0} running at: http://{1}:{2}\n'.format( name,
-                                                                address,
-                                                                port )
+        message += f'  { name } running at: http://{ address }:{ port }\n'
       else:
-        message += '  {0} running\n'.format( name )
-      message += '  {0} process ID: {1}\n'.format( name, server[ 'pid' ] )
+        message += f'  { name } running\n'
+      message += f'  { name } process ID: { server[ "pid" ] }\n'
     else:
-      message += '  {0} not running\n'.format( name )
-    message += '  {0} executable: {1}\n'.format( name, server[ 'executable' ] )
+      message += f'  { name } not running\n'
+    message += f'  { name } executable: { server[ "executable" ] }\n'
     logfiles = server[ 'logfiles' ]
     if logfiles:
-      message += '  {0} logfiles:\n'.format( name )
+      message += f'  { name } logfiles:\n'
       for logfile in logfiles:
-        message += '    {0}\n'.format( logfile )
+        message += f'    { logfile }\n'
     else:
       message += '  No logfiles available\n'
     if 'extras' in server:
       for extra in server[ 'extras' ]:
-        message += '  {0} {1}: {2}\n'.format( name,
-                                              extra[ 'key' ],
-                                              extra[ 'value' ] )
+        message += f'  { name } { extra[ "key" ] }: { extra[ "value" ] }\n'
   for item in completer[ 'items' ]:
-    message += '  {0}: {1}\n'.format( item[ 'key' ].capitalize(),
-                                      item[ 'value' ] )
+    message += f'  { item[ "key" ].capitalize() }: { item[ "value" ] }\n'
   return message
 
 

@@ -58,7 +58,7 @@ elseif ( v:version > 800 || ( v:version == 800 && has( 'patch1436' ) ) ) &&
      \ !has( 'python3_compiled' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
-        \ "Python (3.5.1+) support." |
+        \ "Python (3.6.0+) support." |
         \ echohl None
   call s:restore_cpo()
   finish

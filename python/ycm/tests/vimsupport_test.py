@@ -44,7 +44,7 @@ def SetLocationListsForBuffer_Current_test( vim_eval ):
     vimsupport.SetLocationListsForBuffer( 3, diagnostics )
 
   vim_eval.assert_has_exact_calls( [
-    call( 'setloclist( 1, {0} )'.format( json.dumps( diagnostics ) ) )
+    call( f'setloclist( 1, { json.dumps( diagnostics ) } )' )
   ] )
 
 
@@ -101,7 +101,7 @@ def SetLocationListsForBuffer_MultipleWindows_test( vim_eval ):
     vimsupport.SetLocationListsForBuffer( 1, diagnostics )
 
   vim_eval.assert_has_exact_calls( [
-    call( 'setloclist( 2, {0} )'.format( json.dumps( diagnostics ) ) )
+    call( f'setloclist( 2, { json.dumps( diagnostics ) } )' )
   ] )
 
 
@@ -120,7 +120,7 @@ def SetLocationList_test( vim_eval ):
     vimsupport.SetLocationList( diagnostics )
 
   vim_eval.assert_has_calls( [
-    call( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) ),
+    call( f'setloclist( 0, { json.dumps( diagnostics ) } )' )
   ] )
 
 
@@ -143,7 +143,7 @@ def SetLocationList_NotCurrent_test( vim_eval ):
 
   # This version does not check the current buffer and just sets the current win
   vim_eval.assert_has_exact_calls( [
-    call( 'setloclist( 0, {0} )'.format( json.dumps( diagnostics ) ) ),
+    call( f'setloclist( 0, { json.dumps( diagnostics ) } )' )
   ] )
 
 
@@ -782,16 +782,17 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
   # we don't attempt to open any files
   open_filename.assert_not_called()
 
+  qflist = json.dumps( [ {
+    'bufnr': 1,
+    'filename': single_buffer_name,
+    'lnum': 1,
+    'col': 1,
+    'text': 'replacement',
+    'type': 'F'
+  } ] )
   # But we do set the quickfix list
   vim_eval.assert_has_exact_calls( [
-    call( 'setqflist( {0} )'.format( json.dumps( [ {
-      'bufnr': 1,
-      'filename': single_buffer_name,
-      'lnum': 1,
-      'col': 1,
-      'text': 'replacement',
-      'type': 'F'
-    } ] ) ) ),
+    call( f'setqflist( { qflist } )' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
@@ -889,17 +890,18 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
     call( 'hide' ),
   ] )
 
+  qflist = json.dumps( [ {
+    'bufnr': 1,
+    'filename': single_buffer_name,
+    'lnum': 1,
+    'col': 1,
+    'text': 'replacement',
+    'type': 'F'
+  } ] )
   # And update the quickfix list
   vim_eval.assert_has_exact_calls( [
     call( '&previewheight' ),
-    call( 'setqflist( {0} )'.format( json.dumps( [ {
-      'bufnr': 1,
-      'filename': single_buffer_name,
-      'lnum': 1,
-      'col': 1,
-      'text': 'replacement',
-      'type': 'F'
-    } ] ) ) ),
+    call( f'setqflist( { qflist } )' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
@@ -1275,24 +1277,25 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
     call( 'hide' ),
   ] )
 
+  qflist = json.dumps( [ {
+    'bufnr': 22,
+    'filename': first_buffer_name,
+    'lnum': 1,
+    'col': 1,
+    'text': 'first_file_replacement ',
+    'type': 'F'
+  }, {
+    'bufnr': 19,
+    'filename': second_buffer_name,
+    'lnum': 2,
+    'col': 1,
+    'text': 'second_file_replacement ',
+    'type': 'F'
+  } ] )
   # And update the quickfix list with each entry
   vim_eval.assert_has_exact_calls( [
     call( '&previewheight' ),
-    call( 'setqflist( {0} )'.format( json.dumps( [ {
-      'bufnr': 22,
-      'filename': first_buffer_name,
-      'lnum': 1,
-      'col': 1,
-      'text': 'first_file_replacement ',
-      'type': 'F'
-    }, {
-      'bufnr': 19,
-      'filename': second_buffer_name,
-      'lnum': 2,
-      'col': 1,
-      'text': 'second_file_replacement ',
-      'type': 'F'
-    } ] ) ) ),
+    call( f'setqflist( { qflist } )' )
   ] )
 
   # And it is ReplaceChunks that prints the message showing the number of
@@ -1497,9 +1500,8 @@ def OpenFilename_test( vim_current, vim_command ):
   vimsupport.OpenFilename( __file__, options )
 
   vim_command.assert_has_exact_calls( [
-    call( '12split {0}'.format( __file__ ) ),
-    call( "exec "
-          "'au BufEnter <buffer> :silent! checktime {0}'".format( __file__ ) ),
+    call( f'12split { __file__ }' ),
+    call( f"exec 'au BufEnter <buffer> :silent! checktime { __file__ }'" ),
     call( 'silent! normal! Gzz' ),
     call( 'silent! wincmd p' )
   ] )
@@ -1727,7 +1729,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
     assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps belowright edit {0}'.format( target_name ) ),
+      call( f'keepjumps belowright edit { target_name }' ),
       call( 'normal! zz' )
     ] )
 
@@ -1745,7 +1747,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
     assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps botright split {0}'.format( target_name ) ),
+      call( f'keepjumps botright split { target_name }' ),
       call( 'normal! zz' )
     ] )
 
@@ -1763,7 +1765,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
     assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps leftabove edit {0}'.format( target_name ) ),
+      call( f'keepjumps leftabove edit { target_name }' ),
       call( 'normal! zz' )
     ] )
 
@@ -1798,7 +1800,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps topleft edit {0}'.format( target_name ) )
+      call( f'keepjumps topleft edit { target_name }' )
     ] )
 
 
@@ -1814,7 +1816,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Abort_test( vim_command ):
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps vertical edit {0}'.format( target_name ) )
+      call( f'keepjumps vertical edit { target_name }' )
     ] )
 
 
@@ -1838,7 +1840,7 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_NotAlreadyOpened_test(
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps aboveleft split {0}'.format( target_name ) ),
+      call( f'keepjumps aboveleft split { target_name }' ),
       call( 'normal! zz' )
     ] )
 
@@ -1916,7 +1918,7 @@ def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps tab split {0}'.format( target_name ) ),
+      call( f'keepjumps tab split { target_name }' ),
       call( 'normal! zz' )
     ] )
 
@@ -1964,7 +1966,7 @@ def JumpToLocation_DifferentFile_NewOrExistingTab_NotAlreadyOpened_test(
 
     vim_command.assert_has_exact_calls( [
       call( 'normal! m\'' ),
-      call( u'keepjumps aboveleft vertical tabedit {0}'.format( target_name ) ),
+      call( f'keepjumps aboveleft vertical tabedit { target_name }' ),
       call( 'normal! zz' )
     ] )
 

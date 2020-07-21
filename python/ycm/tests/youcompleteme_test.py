@@ -64,7 +64,7 @@ def YouCompleteMe_InvalidPythonInterpreterPath_test( post_vim_message ):
       post_vim_message.assert_called_once_with(
         "Unable to start the ycmd server. "
         "Path in 'g:ycm_server_python_interpreter' option does not point "
-        "to a valid Python 3.5+. "
+        "to a valid Python 3.6+. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
 
       post_vim_message.reset_mock()
@@ -91,7 +91,7 @@ def YouCompleteMe_NoPythonInterpreterFound_test( post_vim_message, *args ):
 
       assert_that( ycm.IsServerAlive(), equal_to( False ) )
       post_vim_message.assert_called_once_with(
-        "Unable to start the ycmd server. Cannot find Python 3.5+. "
+        "Unable to start the ycmd server. Cannot find Python 3.6+. "
         "Set the 'g:ycm_server_python_interpreter' option to a Python "
         "interpreter path. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
@@ -229,20 +229,20 @@ def YouCompleteMe_DebugInfo_ServerNotRunning_test( ycm ):
 def YouCompleteMe_OnVimLeave_RemoveClientLogfileByDefault_test( ycm ):
   client_logfile = ycm._client_logfile
   assert_that( os.path.isfile( client_logfile ),
-               'Logfile {0} does not exist.'.format( client_logfile ) )
+               f'Logfile { client_logfile } does not exist.' )
   ycm.OnVimLeave()
   assert_that( not os.path.isfile( client_logfile ),
-               'Logfile {0} was not removed.'.format( client_logfile ) )
+               f'Logfile { client_logfile } was not removed.' )
 
 
 @YouCompleteMeInstance( { 'g:ycm_keep_logfiles': 1 } )
 def YouCompleteMe_OnVimLeave_KeepClientLogfile_test( ycm ):
   client_logfile = ycm._client_logfile
   assert_that( os.path.isfile( client_logfile ),
-               'Logfile {0} does not exist.'.format( client_logfile ) )
+               f'Logfile { client_logfile } does not exist.' )
   ycm.OnVimLeave()
   assert_that( os.path.isfile( client_logfile ),
-               'Logfile {0} was removed.'.format( client_logfile ) )
+               f'Logfile { client_logfile } was removed.' )
 
 
 @YouCompleteMeInstance()

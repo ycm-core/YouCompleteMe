@@ -79,7 +79,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   if not signatures:
     if state.popup_win_id:
       # TODO/FIXME: Should we use popup_hide() instead ?
-      vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
+      vim.eval( f"popup_close( { state.popup_win_id } )" )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
   if state.state != SignatureHelpState.ACTIVE:
@@ -130,7 +130,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # Nowhere to put it so hide it
     if state.popup_win_id:
       # TODO/FIXME: Should we use popup_hide() instead ?
-      vim.eval( "popup_close( {} )".format( state.popup_win_id ) )
+      vim.eval( f"popup_close( { state.popup_win_id } )" )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
   if int( screen_pos[ 'curscol' ] ) <= 1:
@@ -160,24 +160,21 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   }
 
   if not state.popup_win_id:
-    state.popup_win_id = GetIntValue( "popup_create( {}, {} )".format(
-      json.dumps( buf_lines ),
-      json.dumps( options ) ) )
+    state.popup_win_id = GetIntValue(
+      f'popup_create( { json.dumps( buf_lines ) }, '
+                    f'{ json.dumps( options ) } )' )
   else:
-    vim.eval( 'popup_settext( {}, {} )'.format(
-      state.popup_win_id,
-      json.dumps( buf_lines ) ) )
+    vim.eval( f'popup_settext( { state.popup_win_id }, '
+                             f'{ json.dumps( buf_lines ) } )' )
 
   # Should do nothing if already visible
-  vim.eval( 'popup_move( {}, {} )'.format( state.popup_win_id,
-                                           json.dumps( options ) ) )
-  vim.eval( 'popup_show( {} )'.format( state.popup_win_id ) )
+  vim.eval( f'popup_move( { state.popup_win_id }, { json.dumps( options ) } )' )
+  vim.eval( f'popup_show( { state.popup_win_id } )' )
 
+  syntax = utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] )
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )
-  vim.eval( "win_execute( {}, 'set syntax={} cursorline | "
-            "call cursor( [ {}, 1 ] )' )".format(
-              state.popup_win_id,
-              utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] ),
-              active_signature + 1 ) )
+  vim.eval( f"win_execute( { state.popup_win_id }, "
+            f"'set syntax={ syntax } cursorline | "
+            f"call cursor( [ { active_signature + 1 }, 1 ] )' )" )
 
   return state
