@@ -107,8 +107,7 @@ class CompletionRequest( BaseRequest ):
       return
 
     if len( namespaces ) > 1:
-      choices = [ "{0} {1}".format( i + 1, n )
-                  for i, n in enumerate( namespaces ) ]
+      choices = [ f"{ i + 1 } { n }" for i, n in enumerate( namespaces ) ]
       choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
       if choice < 0:
         return

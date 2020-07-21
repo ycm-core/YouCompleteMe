@@ -159,7 +159,7 @@ class GoToResponse_QuickFix_test:
     self._request.RunPostCommandActionsIfNeeded( 'aboveleft' )
 
     vim_eval.assert_has_exact_calls( [
-      call( 'setqflist( {0} )'.format( json.dumps( expected_qf_list ) ) )
+      call( f'setqflist( { json.dumps( expected_qf_list ) } )' )
     ] )
     vim_command.assert_has_exact_calls( [
       call( 'botright copen' ),
@@ -188,7 +188,7 @@ class Response_Detection_test:
         request = CommandRequest( [ command ] )
         request._response = response
         request.RunPostCommandActionsIfNeeded( 'belowright' )
-        vim_command.assert_called_with( "echo '{0}'".format( response ) )
+        vim_command.assert_called_with( f"echo '{ response }'" )
 
     _BasicResponseTest( command, response )
 

@@ -304,5 +304,5 @@ def MakeServerException( data ):
   if data[ 'exception' ][ 'TYPE' ] == UnknownExtraConf.__name__:
     return UnknownExtraConf( data[ 'exception' ][ 'extra_conf_file' ] )
 
-  return ServerError( '{0}: {1}'.format( data[ 'exception' ][ 'TYPE' ],
-                                         data[ 'message' ] ) )
+  return ServerError( f'{ data[ "exception" ][ "TYPE" ] }: '
+                      f'{ data[ "message" ] }' )

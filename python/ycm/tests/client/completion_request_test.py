@@ -35,10 +35,12 @@ class ConvertCompletionResponseToVimDatas_test:
     try:
       assert_that( vim_data, equal_to( expected_vim_data ) )
     except Exception:
-      print( "Expected:\n'{}'\nwhen parsing:\n'{}'\nBut found:\n'{}'".format(
-          expected_vim_data,
-          completion_data,
-          vim_data ) )
+      print( "Expected:\n"
+               f"'{ expected_vim_data }'\n"
+             "when parsing:\n'"
+               f"{ completion_data }'\n"
+             "But found:\n"
+               f"'{ vim_data }'" )
       raise
 
 

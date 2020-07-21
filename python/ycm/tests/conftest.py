@@ -88,7 +88,7 @@ def WaitUntilReady( timeout = 5 ):
     try:
       if time.time() > expiration:
         raise RuntimeError( 'Waited for the server to be ready '
-                            'for {0} seconds, aborting.'.format( timeout ) )
+                            f'for { timeout } seconds, aborting.' )
       if _IsReady():
         return
     except requests.exceptions.ConnectionError:
