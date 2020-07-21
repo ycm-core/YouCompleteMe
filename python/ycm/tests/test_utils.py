@@ -296,7 +296,7 @@ def _MockVimEval( value ):
   if match:
     return len( match.group( 'text' ) )
 
-  raise VimError( 'Unexpected evaluation: {}'.format( value ) )
+  raise VimError( f'Unexpected evaluation: { value }' )
 
 
 def _MockWipeoutBuffer( buffer_number ):
@@ -452,12 +452,11 @@ class VimBuffer:
       return self.visual_start
     if name == '>':
       return self.visual_end
-    raise ValueError( 'Unexpected mark: {name}'.format( name = name ) )
+    raise ValueError( f'Unexpected mark: { name }' )
 
 
   def __repr__( self ):
-    return "VimBuffer( name = '{}', number = {} )".format( self.name,
-                                                           self.number )
+    return f"VimBuffer( name = '{ self.name }', number = { self.number } )"
 
 
 class VimBuffers:
@@ -500,10 +499,9 @@ class VimWindow:
 
 
   def __repr__( self ):
-    return "VimWindow( number = {}, buffer = {}, cursor = {} )".format(
-      self.number,
-      self.buffer,
-      self.cursor )
+    return ( f'VimWindow( number = { self.number }, '
+                        f'buffer = { self.buffer }, '
+                        f'cursor = { self.cursor } )' )
 
 
 class VimWindows:
@@ -557,8 +555,7 @@ class VimMatch:
 
 
   def __repr__( self ):
-    return "VimMatch( group = '{}', pattern = '{}' )".format( self.group,
-                                                              self.pattern )
+    return f"VimMatch( group = '{ self.group }', pattern = '{ self.pattern }' )"
 
 
   def __getitem__( self, key ):
@@ -585,11 +582,8 @@ class VimSign:
 
 
   def __repr__( self ):
-    return ( "VimSign( id = {}, line = {}, "
-                      "name = '{}', bufnr = {} )".format( self.id,
-                                                          self.line,
-                                                          self.name,
-                                                          self.bufnr ) )
+    return ( f"VimSign( id = { self.id }, line = { self.line }, "
+                      f"name = '{ self.name }', bufnr = { self.bufnr } )" )
 
 
   def __getitem__( self, key ):
@@ -717,8 +711,7 @@ def ExpectedFailure( reason, *exception_matchers ):
         # Failed for the right reason
         pytest.skip( reason )
       else:
-        raise AssertionError( 'Test was expected to fail: {}'.format(
-          reason ) )
+        raise AssertionError( f'Test was expected to fail: { reason }' )
     return Wrapper
 
   return decorator
