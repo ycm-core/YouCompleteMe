@@ -23,7 +23,7 @@
    Continuing the example, this would be done as follows:
 
     ```bash
-        (ycm-website)$ ./update_from_readme.py ../../README.md
+        (ycm-website)$ ./update_from_readme.py ../../YouCompleteMe/README.md
     ```
 
 The command prints nothing if it succeeds. Check the output with `git status`
