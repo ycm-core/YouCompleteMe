@@ -15,6 +15,7 @@
     ```bash
         $ virtualenv -p python3 ~/Virtualenvs/ycm-website
         $ source ~/Virtualenvs/ycm-website/bin/activate
+        (ycm-website)$ cd Development/YouCompleteMe-website
         (ycm-website)$ pip install -r requirements.txt
     ```
 
@@ -23,7 +24,7 @@
 
     ```bash
         (ycm-website)$ cd Development/YouCompleteMe-website
-        (ycm-website)$ ./update_from_readme.py ../YouCompleteMe/README.md
+        (ycm-website)$ ./update_from_readme.py ../../README.md
     ```
 
 The command prints nothing if it succeeds. Check the output with `git status`
