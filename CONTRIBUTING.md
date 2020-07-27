@@ -6,7 +6,7 @@
    `Development/YouCompleteMe-website`:
 
     ```bash
-        $ git worktree add Development/YouCompleteMe-website gh-pages
+        $ git worktree add ../Development/YouCompleteMe-website gh-pages
     ```
 
 2. Install the required Python packages. It is recommended to do this with
@@ -15,6 +15,7 @@
     ```bash
         $ virtualenv -p python3 ~/Virtualenvs/ycm-website
         $ source ~/Virtualenvs/ycm-website/bin/activate
+        (ycm-website)$ cd ../Development/YouCompleteMe-website
         (ycm-website)$ pip install -r requirements.txt
     ```
 
@@ -22,8 +23,7 @@
    Continuing the example, this would be done as follows:
 
     ```bash
-        (ycm-website)$ cd Development/YouCompleteMe-website
-        (ycm-website)$ ./update_from_readme.py ../YouCompleteMe/README.md
+        (ycm-website)$ ./update_from_readme.py ../../YouCompleteMe/README.md
     ```
 
 The command prints nothing if it succeeds. Check the output with `git status`
