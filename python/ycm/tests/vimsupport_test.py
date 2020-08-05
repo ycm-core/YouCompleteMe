@@ -1529,7 +1529,7 @@ def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
 
 def GetBufferFilepath_NoBufferName_UnicodeWorkingDirectory_test():
   vim_buffer = VimBuffer( '', number = 42 )
-  unicode_dir = PathToTestFile( u'uni¢𐍈d€' )
+  unicode_dir = PathToTestFile( 'uni¢od€' )
   with CurrentWorkingDirectory( unicode_dir ):
     assert_that( vimsupport.GetBufferFilepath( vim_buffer ),
                  equal_to( os.path.join( unicode_dir, '42' ) ) )

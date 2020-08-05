@@ -377,7 +377,7 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
 @YouCompleteMeInstance( { 'g:ycm_collect_identifiers_from_tags_files': 1 } )
 def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
     add_ultisnips_data_if_needed, ycm ):
-  unicode_dir = PathToTestFile( 'uni¢𐍈d€' )
+  unicode_dir = PathToTestFile( 'uni¢od€' )
   current_buffer_file = PathToTestFile( 'uni¢𐍈d€', 'current_buffer' )
   current_buffer = VimBuffer( name = current_buffer_file,
                               contents = [ 'current_buffer_contents' ],
@@ -404,7 +404,7 @@ def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
             } )
           } ),
           'event_name': 'FileReadyToParse',
-          'tag_files': has_item( PathToTestFile( 'uni¢𐍈d€', 'tags' ) )
+          'tag_files': has_item( PathToTestFile( 'uni¢od€', 'tags' ) )
         } ),
         'event_notification'
       )
