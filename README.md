@@ -1397,7 +1397,7 @@ def Settings( **kwargs ):
     return { 'ls': { 'java.format.onType.enabled': True } }
 ```
 
-The `ls` key tells YCM that the dictionary should be passed to thet LSP server.
+The `ls` key tells YCM that the dictionary should be passed to the LSP server.
 For each of the LSP server's configuration you should look up the respective
 server's documentation.
 
