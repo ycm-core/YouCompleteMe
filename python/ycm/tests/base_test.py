@@ -134,8 +134,8 @@ def OverlapLength_Basic_test():
 
 
 def OverlapLength_BasicWithUnicode_test():
-  assert_that( 3, equal_to( base.OverlapLength( u'bar fäö', u'fäö bar' ) ) )
-  assert_that( 3, equal_to( base.OverlapLength( u'zoofäö', u'fäözoo' ) ) )
+  assert_that( 3, equal_to( base.OverlapLength( 'bar fäö', 'fäö bar' ) ) )
+  assert_that( 3, equal_to( base.OverlapLength( 'zoofäö', 'fäözoo' ) ) )
 
 
 def OverlapLength_OneCharOverlap_test():
