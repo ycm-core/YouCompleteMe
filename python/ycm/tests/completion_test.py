@@ -49,7 +49,7 @@ def MockCompletionRequest( response_method ):
 
 @YouCompleteMeInstance()
 def SendCompletionRequest_UnicodeWorkingDirectory_test( ycm ):
-  unicode_dir = PathToTestFile( 'uni¢𐍈d€' )
+  unicode_dir = PathToTestFile( 'uni¢od€' )
   current_buffer = VimBuffer( PathToTestFile( 'uni¢𐍈d€', 'current_buffer' ) )
 
   def ServerResponse( *args ):

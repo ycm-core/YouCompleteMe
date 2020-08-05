@@ -1517,19 +1517,19 @@ def OpenFilename_test( vim_current, vim_command ):
 
 def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
   filepath = os.path.realpath( 'filename' )
-  contents = [ ToBytes( u'abc' ), ToBytes( u'fДa' ) ]
+  contents = [ ToBytes( 'abc' ), ToBytes( 'fДa' ) ]
   vim_buffer = VimBuffer( filepath, contents = contents )
 
   with patch( 'vim.buffers', [ vim_buffer ] ):
     assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( vim_buffer,
                                                               filepath ),
                  has_entry( filepath,
-                            has_entry( u'contents', u'abc\nfДa\n' ) ) )
+                            has_entry( 'contents', 'abc\nfДa\n' ) ) )
 
 
 def GetBufferFilepath_NoBufferName_UnicodeWorkingDirectory_test():
   vim_buffer = VimBuffer( '', number = 42 )
-  unicode_dir = PathToTestFile( u'uni¢𐍈d€' )
+  unicode_dir = PathToTestFile( 'uni¢od€' )
   with CurrentWorkingDirectory( unicode_dir ):
     assert_that( vimsupport.GetBufferFilepath( vim_buffer ),
                  equal_to( os.path.join( unicode_dir, '42' ) ) )
@@ -1540,7 +1540,7 @@ def GetBufferFilepath_NoBufferName_UnicodeWorkingDirectory_test():
 @patch( 'vim.current.line', ToBytes( 'ДДaa' ) )
 @patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 4 ] )
 def TextBeforeCursor_EncodedUnicode_test( *args ):
-  assert_that( vimsupport.TextBeforeCursor(), equal_to( u'ДД' ) )
+  assert_that( vimsupport.TextBeforeCursor(), equal_to( 'ДД' ) )
 
 
 # NOTE: Vim returns byte offsets for columns, not actual character columns. This
@@ -1548,12 +1548,12 @@ def TextBeforeCursor_EncodedUnicode_test( *args ):
 @patch( 'vim.current.line', ToBytes( 'aaДД' ) )
 @patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 2 ] )
 def TextAfterCursor_EncodedUnicode_test( *args ):
-  assert_that( vimsupport.TextAfterCursor(), equal_to( u'ДД' ) )
+  assert_that( vimsupport.TextAfterCursor(), equal_to( 'ДД' ) )
 
 
 @patch( 'vim.current.line', ToBytes( 'fДa' ) )
 def CurrentLineContents_EncodedUnicode_test( *args ):
-  assert_that( vimsupport.CurrentLineContents(), equal_to( u'fДa' ) )
+  assert_that( vimsupport.CurrentLineContents(), equal_to( 'fДa' ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
@@ -1705,7 +1705,7 @@ def InsertNamespace_append_test( vim_current, *args ):
 def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    vimsupport.JumpToLocation( os.path.realpath( u'uni¢𐍈d€' ),
+    vimsupport.JumpToLocation( os.path.realpath( 'uni¢𐍈d€' ),
                                2,
                                5,
                                'aboveleft',
@@ -1722,7 +1722,7 @@ def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
 def JumpToLocation_DifferentFile_SameBuffer_Unmodified_test( vim_command ):
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'belowright', 'same-buffer' )
 
@@ -1740,7 +1740,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide_test(
 
   current_buffer = VimBuffer( 'uni¢𐍈d€', modified = True )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'botright', 'same-buffer' )
 
@@ -1758,7 +1758,7 @@ def JumpToLocation_DifferentFile_SameBuffer_Modified_CanHide_test(
 
   current_buffer = VimBuffer( 'uni¢𐍈d€', modified = True, bufhidden = "hide" )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'leftabove', 'same-buffer' )
 
@@ -1779,7 +1779,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     assert_that(
       calling( vimsupport.JumpToLocation ).with_args(
-        os.path.realpath( u'different_uni¢𐍈d€' ),
+        os.path.realpath( 'different_uni¢𐍈d€' ),
         2,
         5,
         'rightbelow',
@@ -1794,7 +1794,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Unexpected_test(
 def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'topleft', 'same-buffer' )
 
@@ -1810,7 +1810,7 @@ def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Quit_test( vim_command ):
 def JumpToLocation_DifferentFile_SameBuffer_SwapFile_Abort_test( vim_command ):
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name, 2, 5, 'vertical', 'same-buffer' )
 
@@ -1830,7 +1830,7 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_NotAlreadyOpened_test(
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
     vim.current.tabpage = current_tab
 
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name,
                                2,
@@ -1858,7 +1858,7 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
                        [ current_buffer ] ) as vim:
     vim.current.tabpage = current_tab
 
-    vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢𐍈d€' ),
+    vimsupport.JumpToLocation( os.path.realpath( 'different_uni¢𐍈d€' ),
                                2,
                                5,
                                'belowright',
@@ -1908,7 +1908,7 @@ def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
 
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name,
                                2,
@@ -1935,7 +1935,7 @@ def JumpToLocation_DifferentFile_Split_AllTabs_AlreadyOpened_test(
   with patch( 'vim.tabpages', [ current_tab ] ):
     with MockVimBuffers( [ current_buffer, different_buffer ],
                          [ current_buffer ] ) as vim:
-      vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢𐍈d€' ),
+      vimsupport.JumpToLocation( os.path.realpath( 'different_uni¢𐍈d€' ),
                                  2,
                                  5,
                                  'tab',
@@ -1956,7 +1956,7 @@ def JumpToLocation_DifferentFile_NewOrExistingTab_NotAlreadyOpened_test(
 
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    target_name = os.path.realpath( u'different_uni¢𐍈d€' )
+    target_name = os.path.realpath( 'different_uni¢𐍈d€' )
 
     vimsupport.JumpToLocation( target_name,
                                2,
@@ -1983,7 +1983,7 @@ def JumpToLocation_DifferentFile_NewOrExistingTab_AlreadyOpened_test(
   with patch( 'vim.tabpages', [ current_tab ] ):
     with MockVimBuffers( [ current_buffer, different_buffer ],
                          [ current_buffer ] ) as vim:
-      vimsupport.JumpToLocation( os.path.realpath( u'different_uni¢𐍈d€' ),
+      vimsupport.JumpToLocation( os.path.realpath( 'different_uni¢𐍈d€' ),
                                  2,
                                  5,
                                  'belowright tab',
