@@ -43,3 +43,7 @@ class OmniCompletionRequest( CompletionRequest ):
 
   def OnCompleteDone( self ):
     pass
+
+
+  def Resolve( self, item ):
+    return

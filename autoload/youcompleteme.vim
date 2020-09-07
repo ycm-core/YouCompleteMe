@@ -564,9 +564,20 @@ function! s:OnCompleteChanged()
 
   if ! empty( v:event.completed_item )
     let s:last_char_inserted_by_user = v:false
+    call s:ResolveCompletionItem( v:event.completed_item )
   endif
 
   call s:UpdateSignatureHelp()
+endfunction
+
+
+function! s:ResolveCompletionItem( item )
+  if py3eval( 'ycm_state.ResolveCompletionItem( vim.eval( "a:item" ) )' )
+    call s:StopPoller( s:pollers.completion )
+    " OK so this "works" but it resets the completion state each time. i think
+    " we need a way to update the completion candidate without reset
+    call timer_start( 10, function( 's:PollCompletion' ) )
+  endif
 endfunction
 
 
