@@ -577,7 +577,7 @@ function! s:ResolveCompletionItem( item )
     call s:StopPoller( s:pollers.completion )
     " OK so this "works" but it resets the completion state each time. i think
     " we need a way to update the completion candidate without reset
-    call timer_start( 10, function( 's:PollCompletion' ) )
+    call timer_start( 0, function( 's:PollResolve', [ a:item ] ) )
   endif
 endfunction
 
@@ -1013,6 +1013,30 @@ function! s:PollCompletion( ... )
 
   let s:completion = py3eval( 'ycm_state.GetCompletionResponse()' )
   call s:Complete()
+endfunction
+
+
+function! s:PollResolve( item, ... )
+  if !py3eval( 'ycm_state.CompletionRequestReady()' )
+    let s:pollers.completion.id = timer_start(
+          \ s:pollers.completion.wait_milliseconds,
+          \ function( 's:PollResolve', [ a:item ] ) )
+    return
+  endif
+
+  let completion =
+        \ py3eval( 'ycm_state.GetCompletionResponse()' )[ 'completions' ]
+  if type( completion ) != type( [] ) || len( completion ) != 1
+    return
+  endif
+
+  let completion = completion[ 0 ]
+
+  let id = popup_findinfo()
+  if id
+    call popup_settext( id, split( completion.info, '\n' ) )
+    call popup_show( id )
+  endif
 endfunction
 
 
