@@ -6,6 +6,19 @@ if exists('*WaitFor')
   finish
 endif
 
+" Run skip the current test if some expression returns true
+func SkipIf( expr, msg )
+  if type(a:expr) == v:t_func
+    let skip = a:expr()
+  else
+    let skip = eval(a:expr)
+  endif
+
+  if skip
+    throw 'SKIPPED: ' . a:msg
+  endif
+endfunction
+
 " Wait for up to five seconds for "expr" to become true.  "expr" can be a
 " stringified expression to evaluate, or a funcref without arguments.
 " Using a lambda works best.  Example:

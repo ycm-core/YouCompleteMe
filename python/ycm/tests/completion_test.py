@@ -20,11 +20,17 @@ from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
 MockVimModule()
 
 import contextlib
-from hamcrest import assert_that, contains_exactly, empty, has_entries
+from hamcrest import ( assert_that,
+                       contains_exactly,
+                       empty,
+                       equal_to,
+                       has_entries )
 from unittest.mock import call, MagicMock, patch
 
 from ycm.tests import PathToTestFile, YouCompleteMeInstance
 from ycmd.responses import ServerError
+
+import json
 
 
 @contextlib.contextmanager
@@ -45,6 +51,21 @@ def MockCompletionRequest( response_method ):
       with patch( 'ycm.client.base_request._JsonFromFuture',
                   side_effect = response_method ):
         yield
+
+
+@contextlib.contextmanager
+def MockResolveRequest( response_method ):
+  """Mock out the CompletionRequest, replacing the response handler
+  JsonFromFuture with the |response_method| parameter."""
+
+  with patch( 'ycm.client.resolve_completion_request.ResolveCompletionRequest.'
+              'PostDataToHandlerAsync',
+              return_value = MagicMock( return_value=True ) ):
+
+    # We set up a fake response.
+    with patch( 'ycm.client.base_request._JsonFromFuture',
+                side_effect = response_method ):
+      yield
 
 
 @YouCompleteMeInstance()
@@ -145,3 +166,312 @@ def SendCompletionRequest_ErrorFromServer_test( post_vim_message,
           'completion_start_column': -1
         } )
       )
+
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.client.base_request._logger', autospec = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def ResolveCompletionRequest_Resolves_test( post_vim_message,
+                                            logger,
+                                            ycm ):
+
+  def CompletionResponse( *args ):
+    return {
+      'completions': [ {
+        'insertion_text': 'insertion_text',
+        'menu_text': 'menu_text',
+        'extra_menu_info': 'extra_menu_info',
+        'detailed_info': 'detailed_info',
+        'kind': 'kind',
+        'extra_data': {
+          'doc_string': 'doc_string',
+          'resolve': 10
+        }
+      } ],
+      'completion_start_column': 3,
+      'errors': []
+    }
+
+  def ResolveResponse( *args ):
+    return {
+      'completion': {
+        'insertion_text': 'insertion_text',
+        'menu_text': 'menu_text',
+        'extra_menu_info': 'extra_menu_info',
+        'detailed_info': 'detailed_info',
+        'kind': 'kind',
+        'extra_data': {
+          'doc_string': 'doc_string with more info'
+        }
+      },
+      'errors': []
+    }
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+    with MockCompletionRequest( CompletionResponse ):
+      ycm.SendCompletionRequest()
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+
+      post_vim_message.assert_not_called()
+      assert_that(
+        response,
+        has_entries( {
+          'completions': contains_exactly( has_entries( {
+            'word': 'insertion_text',
+            'abbr': 'menu_text',
+            'menu': 'extra_menu_info',
+            'info': 'detailed_info\ndoc_string',
+            'kind': 'k',
+            'dup': 1,
+            'empty': 1
+          } ) ),
+          'completion_start_column': 3
+        } )
+      )
+
+      item = response[ 'completions' ][ 0 ]
+      assert_that( json.loads( item[ 'user_data' ] ),
+                   has_entries( { 'resolve': 10 } ) )
+
+    with MockResolveRequest( ResolveResponse ):
+      assert_that( ycm.ResolveCompletionItem( item ), equal_to( True ) )
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+      post_vim_message.assert_not_called()
+
+      assert_that(
+        response,
+        has_entries( {
+          'completion': has_entries( {
+            'word': 'insertion_text',
+            'abbr': 'menu_text',
+            'menu': 'extra_menu_info',
+            'info': 'detailed_info\ndoc_string with more info',
+            'kind': 'k',
+            'dup': 1,
+            'empty': 1
+          } )
+        } )
+      )
+
+      item = response[ 'completion' ]
+
+    with MockResolveRequest( ServerError( 'must not be called' ) ):
+      assert_that( ycm.ResolveCompletionItem( item ), equal_to( False ) )
+      post_vim_message.assert_not_called()
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.client.base_request._logger', autospec = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def ResolveCompletionRequest_ResponseContainsErrors_test( post_vim_message,
+                                                          logger,
+                                                          ycm ):
+
+  def CompletionResponse( *args ):
+    return {
+      'completions': [ {
+        'insertion_text': 'insertion_text',
+        'menu_text': 'menu_text',
+        'extra_menu_info': 'extra_menu_info',
+        'detailed_info': 'detailed_info',
+        'kind': 'kind',
+        'extra_data': {
+          'doc_string': 'doc_string',
+          'resolve': 10
+        }
+      } ],
+      'completion_start_column': 3,
+      'errors': []
+    }
+
+  def ResolveResponse( *args ):
+    return {
+      'completion': {
+        'insertion_text': 'insertion_text',
+        'menu_text': 'menu_text',
+        'extra_menu_info': 'extra_menu_info',
+        'detailed_info': 'detailed_info',
+        'kind': 'kind',
+        'extra_data': {
+          'doc_string': 'doc_string with more info'
+        }
+      },
+      'errors': [ {
+        'exception': {
+           'TYPE': 'Exception'
+        },
+        'message': 'message',
+        'traceback': 'traceback'
+      } ]
+    }
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+    with MockCompletionRequest( CompletionResponse ):
+      ycm.SendCompletionRequest()
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+
+      post_vim_message.assert_not_called()
+      assert_that(
+        response,
+        has_entries( {
+          'completions': contains_exactly( has_entries( {
+            'word': 'insertion_text',
+            'abbr': 'menu_text',
+            'menu': 'extra_menu_info',
+            'info': 'detailed_info\ndoc_string',
+            'kind': 'k',
+            'dup': 1,
+            'empty': 1
+          } ) ),
+          'completion_start_column': 3
+        } )
+      )
+
+      item = response[ 'completions' ][ 0 ]
+      assert_that( json.loads( item[ 'user_data' ] ),
+                   has_entries( { 'resolve': 10 } ) )
+
+    with MockResolveRequest( ResolveResponse ):
+      assert_that( ycm.ResolveCompletionItem( item ), equal_to( True ) )
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+
+      post_vim_message.assert_has_exact_calls( [
+        call( 'Exception: message', truncate = True )
+      ] )
+      assert_that(
+        response,
+        has_entries( {
+          'completion': has_entries( {
+            'word': 'insertion_text',
+            'abbr': 'menu_text',
+            'menu': 'extra_menu_info',
+            'info': 'detailed_info\ndoc_string with more info',
+            'kind': 'k',
+            'dup': 1,
+            'empty': 1
+          } )
+        } )
+      )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def ResolveCompletionItem_NoUserData_test( post_vim_message, ycm ):
+  def CompletionResponse( *args ):
+    return {
+      'completions': [ {
+        'insertion_text': 'insertion_text',
+        'menu_text': 'menu_text',
+        'extra_menu_info': 'extra_menu_info',
+        'detailed_info': 'detailed_info',
+        'kind': 'kind'
+      } ],
+      'completion_start_column': 3,
+      'errors': []
+    }
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+    with MockCompletionRequest( CompletionResponse ):
+      ycm.SendCompletionRequest()
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+
+      post_vim_message.assert_not_called()
+      assert_that(
+        response,
+        has_entries( {
+          'completions': contains_exactly( has_entries( {
+            'word': 'insertion_text',
+            'abbr': 'menu_text',
+            'menu': 'extra_menu_info',
+            'info': 'detailed_info',
+            'kind': 'k',
+            'dup': 1,
+            'empty': 1
+          } ) ),
+          'completion_start_column': 3
+        } )
+      )
+
+      item = response[ 'completions' ][ 0 ]
+      item.pop( 'user_data' )
+
+    with MockResolveRequest( ServerError( 'must not be called' ) ):
+      assert_that( ycm.ResolveCompletionItem( item ), equal_to( False ) )
+      post_vim_message.assert_not_called()
+
+
+@YouCompleteMeInstance()
+def ResolveCompletionItem_NoRequest_test( ycm ):
+  assert_that( ycm.GetCurrentCompletionRequest(), equal_to( None ) )
+  assert_that( ycm.ResolveCompletionItem( {} ), equal_to( False ) )
+
+
+@YouCompleteMeInstance()
+@patch( 'ycm.client.base_request._logger', autospec = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def ResolveCompletionRequest_ServerError_test( post_vim_message, logger, ycm ):
+
+  def ServerResponse( *args ):
+    return {
+      'completions': [ {
+        'insertion_text': 'insertion_text',
+        'menu_text': 'menu_text',
+        'extra_menu_info': 'extra_menu_info',
+        'detailed_info': 'detailed_info',
+        'kind': 'kind',
+        'extra_data': {
+          'doc_string': 'doc_string',
+          'resolve': 10
+        }
+      } ],
+      'completion_start_column': 3,
+      'errors': []
+    }
+
+  current_buffer = VimBuffer( 'buffer' )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+    with MockCompletionRequest( ServerResponse ):
+      ycm.SendCompletionRequest()
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+
+      post_vim_message.assert_not_called()
+      assert_that(
+        response,
+        has_entries( {
+          'completions': contains_exactly( has_entries( {
+            'word': 'insertion_text',
+            'abbr': 'menu_text',
+            'menu': 'extra_menu_info',
+            'info': 'detailed_info\ndoc_string',
+            'kind': 'k',
+            'dup': 1,
+            'empty': 1
+          } ) ),
+          'completion_start_column': 3
+        } )
+      )
+
+      item = response[ 'completions' ][ 0 ]
+      assert_that( json.loads( item[ 'user_data' ] ),
+                   has_entries( { 'resolve': 10 } ) )
+
+    with MockResolveRequest( ServerError( 'Server error' ) ):
+      ycm.ResolveCompletionItem( item )
+      assert_that( ycm.CompletionRequestReady() )
+      response = ycm.GetCompletionResponse()
+
+      logger.exception.assert_called_with( 'Error while handling server '
+                                           'response' )
+      post_vim_message.assert_has_exact_calls( [
+        call( 'Server error', truncate = True )
+      ] )

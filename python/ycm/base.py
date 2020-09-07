@@ -15,20 +15,42 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm import vimsupport
+import os
+import json
+
+from ycm import vimsupport, paths
 from ycmd import identifier_utils
 
 YCM_VAR_PREFIX = 'ycm_'
 
 
-def GetUserOptions():
+def GetUserOptions( default_options = {} ):
   """Builds a dictionary mapping YCM Vim user options to values. Option names
   don't have the 'ycm_' prefix."""
+
+  user_options = {}
+
+  # First load the default settings from ycmd. We do this to ensure that any
+  # client-side code that assumes all options are loaded (such as the
+  # omnicompleter) don't have to constantly check for values being present, and
+  # so that we don't jave to dulicate the list of server settings in
+  # youcomplete.vim
+  defaults_file =  os.path.join( paths.DIR_OF_YCMD,
+                                 'ycmd',
+                                 'default_settings.json' )
+  if os.path.exists( defaults_file ):
+    with open( defaults_file ) as defaults_file_handle:
+      user_options = json.load( defaults_file_handle )
+
+  # Override the server defaults with any client-generated defaults
+  user_options.update( default_options )
+
+  # Finally, override with any user-specified values in the g: dict
+
   # We only evaluate the keys of the vim globals and not the whole dictionary
   # to avoid unicode issues.
   # See https://github.com/Valloric/YouCompleteMe/pull/2151 for details.
   keys = vimsupport.GetVimGlobalsKeys()
-  user_options = {}
   for key in keys:
     if not key.startswith( YCM_VAR_PREFIX ):
       continue
