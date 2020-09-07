@@ -84,6 +84,7 @@ class CompletionRequest( BaseRequest ):
 
 
   def Resolve( self, item ):
+    # TODO/FIXME: move this to its own request object
     if not self.Done():
       return False
 
