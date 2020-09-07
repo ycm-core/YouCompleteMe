@@ -5,7 +5,7 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
 
-  let g:ycm_use_completion_api = 0
+  set completeopt-=preview
 
   call youcompleteme#test#setup#SetUp()
 endfunction
@@ -16,23 +16,22 @@ endfunction
 
 exe 'source' expand( "<sfile>:p:h" ) .. '/completion.common.vim'
 
-function! Test_Using_Old_API()
+function! Test_No_Resolve()
   let debug_info = split( execute( 'YcmDebugInfo' ), "\n" )
-
   enew
   setf cpp
 
-  call assert_equal( 'youcompleteme#CompleteFunc', &completefunc )
+  call assert_equal( '', &completefunc )
 
   for line in debug_info
-    if line =~# "^-- Completion API: "
-      let ver = substitute( line, "^-- Completion API: ", "", "" )
-      call assert_equal( '0', ver, 'API version' )
+    if line =~# "^-- Resolve completions: "
+      let ver = substitute( line, "^-- Resolve completions: ", "", "" )
+      call assert_equal( 'Never', ver, 'API version' )
       return
     endif
   endfor
 
-  call assert_report( "Didn't find the API version in the YcmDebugInfo" )
+  call assert_report( "Didn't find the resolve type in the YcmDebugInfo" )
 
   %bwipeout!
 endfunction

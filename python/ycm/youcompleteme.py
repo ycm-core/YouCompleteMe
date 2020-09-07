@@ -36,6 +36,7 @@ from ycm.client.command_request import ( SendCommandRequest,
                                          SendCommandRequestAsync,
                                          GetCommandResponse )
 from ycm.client.completion_request import CompletionRequest
+from ycm.client.resolve_completion_request import ResolveCompletionItem
 from ycm.client.signature_help_request import ( SignatureHelpRequest,
                                                 SigHelpAvailableByFileType )
 from ycm.client.debug_info_request import ( SendDebugInfoRequest,
@@ -95,12 +96,13 @@ HANDLE_FLAG_INHERIT = 0x00000001
 
 
 class YouCompleteMe:
-  def __init__( self ):
+  def __init__( self, default_options = {} ):
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
+    self._default_options = default_options
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetUpLogging()
     self._SetUpServer()
@@ -120,7 +122,7 @@ class YouCompleteMe:
     self._latest_command_reqeust = None
 
     self._signature_help_state = signature_help.SignatureHelpState()
-    self._user_options = base.GetUserOptions()
+    self._user_options = base.GetUserOptions( self._default_options )
     self._omnicomp = OmniCompleter( self._user_options )
     self._buffers = BufferDict( self._user_options )
 
@@ -297,10 +299,7 @@ class YouCompleteMe:
 
 
   def GetCompletionResponse( self ):
-    response = self._latest_completion_request.Response()
-    response[ 'completions' ] = base.AdjustCandidateInsertionText(
-        response[ 'completions' ] )
-    return response
+    return self._latest_completion_request.Response()
 
 
   def SignatureHelpAvailableRequestComplete( self, filetype, send_new=True ):
@@ -616,6 +615,30 @@ class YouCompleteMe:
     completion_request = self.GetCurrentCompletionRequest()
     if completion_request:
       completion_request.OnCompleteDone()
+
+
+  def ResolveCompletionItem( self, item ):
+    # Note: As mentioned elsewhere, we replace the current completion request
+    # with a resolve request. It's not valid to have simultaneous resolve and
+    # completion requests, because the resolve request uses the request data
+    # from the last completion request and is therefore dependent on it not
+    # having changed.
+    #
+    # The result of this is that self.GetCurrentCompletionRequest() might return
+    # either a completion request of a resolve request and it's the
+    # responsibility of the vimscript code to ensure that it only does one at a
+    # time. This is handled by re-using the same poller for completions and
+    # resolves.
+    completion_request = self.GetCurrentCompletionRequest()
+    if not completion_request:
+      return False
+
+    request  = ResolveCompletionItem( completion_request, item )
+    if not request:
+      return False
+
+    self._latest_completion_request = request
+    return True
 
 
   def GetErrorCount( self ):

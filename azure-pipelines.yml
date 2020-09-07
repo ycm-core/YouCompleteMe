@@ -37,8 +37,39 @@ jobs:
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
       CODECOV_JOB_NAME: '$(Agent.JobName)'
+- job: linuxvim_min
+  displayName: 'Linux Earliest Vim tests'
+  pool:
+    # List of available software on this image:
+    # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/linux/Ubuntu1604-README.md
+    vmImage: 'ubuntu-18.04'
+  strategy:
+    matrix:
+      'Python 3.6':
+        IMAGE: ycm-vim-py3
+        PIP: pip3
+    maxParallel: 2
+  variables:
+    COVERAGE: true
+    YCM_TEST_STDOUT: true
+  container: 'youcompleteme/$(IMAGE):test'
+  steps:
+  - checkout: self
+    submodules: recursive
+  - bash: sudo -H $(PIP) install -r python/test_requirements.txt
+    displayName: Install dependencies
+  - bash: python3 ./install.py --ts-completer --clangd-completer --java-completer
+    displayName: Build ycmd
+  # use the system vim - should be the minimal supported version
+  - script: ./test/run_vim_tests --vim /usr/bin/vim
+    displayName: Run vim tests
+  - bash: codecov --disable gcov --name '$(Agent.JobName)'
+    displayName: Send coverage
+    env:
+      CODECOV_TOKEN: $(CODECOV_TOKEN)
+      CODECOV_JOB_NAME: '$(Agent.JobName)'
 - job: linuxvim
-  displayName: 'Linux Vim tests'
+  displayName: 'Linux Recent Vim tests'
   pool:
     # List of available software on this image:
     # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/linux/Ubuntu1604-README.md
