@@ -18,7 +18,9 @@
 import json
 import logging
 from ycmd.utils import ToUnicode
-from ycm.client.base_request import ( BaseRequest, DisplayServerException,
+from ycm.client.base_request import ( BaseRequest,
+                                      BuildRequestData,
+                                      DisplayServerException,
                                       MakeServerException )
 from ycm import vimsupport
 from ycm.vimsupport import NO_COMPLETIONS
@@ -79,6 +81,24 @@ class CompletionRequest( BaseRequest ):
       self._OnCompleteDone_Csharp()
     else:
       self._OnCompleteDone_FixIt()
+
+
+  def Resolve( self, item ):
+    if not self.Done():
+      return False
+
+    if 'user_data' not in item:
+      return False
+
+    completion_extra_data = json.loads( item[ 'user_data' ] )
+    try:
+      self.request_data[ 'resolve' ] = completion_extra_data[ 'resolve' ]
+    except KeyError:
+      return
+
+    self._response_future = self.PostDataToHandlerAsync( self.request_data,
+                                                         'resolve_completion' )
+    return True
 
 
   def _GetExtraDataUserMayHaveCompleted( self ):

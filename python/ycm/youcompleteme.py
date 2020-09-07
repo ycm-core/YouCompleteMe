@@ -618,6 +618,14 @@ class YouCompleteMe:
       completion_request.OnCompleteDone()
 
 
+  def ResolveCompletionItem( self, item ):
+    completion_request = self.GetCurrentCompletionRequest()
+    if completion_request and completion_request.Done():
+      return completion_request.Resolve( item )
+
+    return False
+
+
   def GetErrorCount( self ):
     return self.CurrentBuffer().GetErrorCount()
 
