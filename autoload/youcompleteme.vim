@@ -446,10 +446,6 @@ function! s:AllowedToCompleteInBuffer( buffer )
 
   let filetype = getbufvar( a:buffer, '&filetype' )
 
-  if empty( filetype ) || s:DisableOnLargeFile( a:buffer )
-    return 0
-  endif
-
   let whitelist_allows = type( g:ycm_filetype_whitelist ) != type( {} ) ||
         \ has_key( g:ycm_filetype_whitelist, '*' ) ||
         \ s:HasAnyKey( g:ycm_filetype_whitelist, split( filetype, '\.' ) )
@@ -457,6 +453,11 @@ function! s:AllowedToCompleteInBuffer( buffer )
         \ !s:HasAnyKey( g:ycm_filetype_blacklist, split( filetype, '\.' ) )
 
   let allowed = whitelist_allows && blacklist_allows
+
+  if empty( filetype ) || !allowed || s:DisableOnLargeFile( a:buffer )
+    return 0
+  endif
+
   if allowed
     let s:previous_allowed_buffer_number = bufnr( a:buffer )
   endif
