@@ -411,8 +411,8 @@ class YouCompleteMe:
     return SendCommandRequest(
       final_arguments,
       modifiers,
-      extra_data = extra_data,
-      buffer_command = self._user_options[ 'goto_buffer_command' ] )
+      self._user_options[ 'goto_buffer_command' ],
+      extra_data )
 
 
   def GetCommandResponse( self, arguments ):

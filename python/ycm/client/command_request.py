@@ -205,8 +205,8 @@ def SendCommandRequestAsync( arguments, extra_data = None, silent = True ):
 
 def SendCommandRequest( arguments,
                         modifiers,
-                        extra_data = None,
-                        buffer_command = DEFAULT_BUFFER_COMMAND ):
+                        buffer_command = DEFAULT_BUFFER_COMMAND,
+                        extra_data = None ):
   request = SendCommandRequestAsync( arguments,
                                      extra_data = extra_data,
                                      silent = False )
