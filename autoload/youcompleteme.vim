@@ -534,17 +534,6 @@ function s:StopPoller( poller ) abort
 endfunction
 
 
-function! s:SetUpHover()
-  if !s:AllowedToCompleteInCurrentBuffer() || get( g:, 'ycm_disable_hover', 0 )
-    return
-  endif
-
-
-  if exists( '*popup_beval' )
-  endif
-endfunction
-
-
 function! s:OnVimLeave()
   " Workaround a NeoVim issue - not shutting down timers correctly
   " https://github.com/neovim/neovim/issues/6840
@@ -636,7 +625,6 @@ function! s:OnBufferEnter()
 
   call s:SetUpCompleteopt()
   call s:SetCompleteFunc()
-  call s:SetUpHover()
 
   py3 ycm_state.OnBufferVisit()
   " Last parse may be outdated because of changes from other buffers. Force a
