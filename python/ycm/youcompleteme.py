@@ -424,7 +424,7 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
-  def GetCommandResponseAsync( self, arguments ):
+  def SendCommandRequestAsync( self, arguments ):
     final_arguments, extra_data = self._GetCommandRequestArguments(
       arguments,
       False,

@@ -1301,7 +1301,7 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... )
   if s:DEBUG
     call ch_log( 'requesting ' . string( a:000 ) )
   endif
-  py3 ycm_state.GetCommandResponseAsync( vim.eval( "a:000" ) )
+  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
 
   let s:pollers.command.id = timer_start(
         \ s:pollers.command.wait_milliseconds,
