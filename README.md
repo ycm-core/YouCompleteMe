@@ -2007,12 +2007,56 @@ conditions.
 The arguments to the function are the same as the arguments to the
 `:YcmCompleter` ex command, e.g. the name of the subcommand, followed by any
 additional subcommand arguments. As with the `YcmCompleter` command, if the
-first argument is `ft=<filetype>` the request is targetted at the specified
+first argument is `ft=<filetype>` the request is targeted at the specified
 filetype completer. This is an advanced usage and not necessary in most cases.
 
 NOTE: The request is run synchronously and blocks Vim until the response is
 received, so we do not recommend running this as part of an autocommand that
 triggers frequently.
+
+### The `youcompleteme#GetCommandResponseAsync( callback, ... )` function
+
+This works exactly like `youcompleteme#GetCommandResponse`, except that instead
+of returning the result, you supply a `callback` argument. This argument must be
+a `FuncRef` to a function taking a single argument `response`. This callback
+will be called with the command response at some point later, or immediately.
+
+As with `youcompleteme#GetCommandResponse()`, this function will call the
+callback with `''` (an empty string) if the request is not sent, or if there was
+some sort of error.
+
+Here's an example that's similar to the one above:
+
+```viml
+
+let s:ycm_hover_popup = -1
+function! s:ShowDataPopup( response ) abort
+  if response == ''
+    return
+  endif
+
+  call popup_hide( s:ycm_hover_popup )
+  let s:ycm_hover_popup = popup_atcursor( balloon_split( response ), {} )
+endfunction
+
+function! s:GetData() abort
+  call youcompleteme#GetCommandResponseAsync(
+    \ function( 's:ShowDataPopup' ),
+    \ 'GetDoc' )
+endfunction
+
+autocommand CursorHold * call s:GetData()
+```
+
+Again, see [`g:ycm_auto_hover`](#the-gycm_auto_hover-option) for proper hover
+support.
+
+**NOTE**: The callback may be called immediately, in the stack frame that called
+this function.
+
+**NOTE**: Only one command request can be outstanding at once. Attempting to
+request a second responses while the first is outstanding will result in the
+second callback being immediately called with `''`.
 
 Autocommands
 ------------

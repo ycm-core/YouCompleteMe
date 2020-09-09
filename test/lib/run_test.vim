@@ -146,15 +146,19 @@ func RunTheTest(test)
     let s:testid_filesafe = g:testpath . '_' . test_filesafe
 
     au VimLeavePre * call EarlyExit(s:test)
+    call ch_log( 'StartTest: ' . a:test )
     exe 'call ' . a:test
+    call ch_log( 'EndTest: ' . a:test )
     au! VimLeavePre
   catch /^\cskipped/
+    call ch_log( 'Skipped: ' . a:test )
     call add(s:messages, '    Skipped')
     call add(s:skipped,
           \ 'SKIPPED ' . a:test
           \ . ': '
           \ . substitute(v:exception, '^\S*\s\+', '',  ''))
   catch
+    call ch_log( 'Catch: ' . a:test )
     call add(v:errors,
           \ 'Caught exception in ' . a:test
           \ . ': '

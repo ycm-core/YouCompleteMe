@@ -32,7 +32,9 @@ from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
-from ycm.client.command_request import SendCommandRequest, GetCommandResponse
+from ycm.client.command_request import ( SendCommandRequest,
+                                         SendCommandRequestAsync,
+                                         GetCommandResponse )
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.signature_help_request import ( SignatureHelpRequest,
                                                 SigHelpAvailableByFileType )
@@ -94,23 +96,12 @@ HANDLE_FLAG_INHERIT = 0x00000001
 
 class YouCompleteMe:
   def __init__( self ):
-    self._available_completers = {}
-    self._user_options = None
-    self._user_notified_about_crash = False
-    self._omnicomp = None
-    self._buffers = None
-    self._latest_completion_request = None
-    self._latest_signature_help_request = None
-    self._signature_help_available_requests = SigHelpAvailableByFileType()
-    self._signature_help_state = signature_help.SignatureHelpState()
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
-    self._filetypes_with_keywords_loaded = set()
     self._ycmd_keepalive = YcmdKeepalive()
-    self._server_is_ready_with_cache = False
     self._SetUpLogging()
     self._SetUpServer()
     self._ycmd_keepalive.Start()
@@ -123,6 +114,12 @@ class YouCompleteMe:
     self._server_is_ready_with_cache = False
     self._message_poll_requests = {}
 
+    self._latest_completion_request = None
+    self._latest_signature_help_request = None
+    self._signature_help_available_requests = SigHelpAvailableByFileType()
+    self._latest_command_reqeust = None
+
+    self._signature_help_state = signature_help.SignatureHelpState()
     self._user_options = base.GetUserOptions()
     self._omnicomp = OmniCompleter( self._user_options )
     self._buffers = BufferDict( self._user_options )
@@ -411,10 +408,11 @@ class YouCompleteMe:
       has_range,
       start_line,
       end_line )
-    return SendCommandRequest( final_arguments,
-                               modifiers,
-                               self._user_options[ 'goto_buffer_command' ],
-                               extra_data )
+    return SendCommandRequest(
+      final_arguments,
+      modifiers,
+      self._user_options[ 'goto_buffer_command' ],
+      extra_data )
 
 
   def GetCommandResponse( self, arguments ):
@@ -426,10 +424,24 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
+  def SendCommandRequestAsync( self, arguments ):
+    final_arguments, extra_data = self._GetCommandRequestArguments(
+      arguments,
+      False,
+      0,
+      0 )
+    self._latest_command_reqeust = SendCommandRequestAsync( final_arguments,
+                                                            extra_data )
+
+
+  def GetCommandRequest( self ):
+    return self._latest_command_reqeust
+
 
   def GetDefinedSubcommands( self ):
-    subcommands = BaseRequest().PostDataToHandler( BuildRequestData(),
-                                                   'defined_subcommands' )
+    request = BaseRequest()
+    subcommands = request.PostDataToHandler( BuildRequestData(),
+                                             'defined_subcommands' )
     return subcommands if subcommands else []
 
 
