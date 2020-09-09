@@ -426,10 +426,17 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
+  def GetDefinedSubcommandsAsync( self ):
+    request = BaseRequest()
+    future = request.PostDataToHandlerAsync( BuildRequestData(),
+                                             'defined_subcommands' )
+
+    return request, future
+
 
   def GetDefinedSubcommands( self ):
-    subcommands = BaseRequest().PostDataToHandler( BuildRequestData(),
-                                                   'defined_subcommands' )
+    request, future = self.GetDefinedSubcommandsAsync()
+    subcommands = request.HandleFuture( future )
     return subcommands if subcommands else []
 
 
