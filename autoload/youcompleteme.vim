@@ -19,8 +19,6 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:DEBUG = 0
-
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
@@ -49,6 +47,10 @@ let s:pollers = {
       \     'wait_milliseconds': 100
       \   },
       \   'receive_messages': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
+      \   },
+      \   'command': {
       \     'id': -1,
       \     'wait_milliseconds': 100
       \   }
@@ -547,14 +549,6 @@ function! s:OnCompleteDone()
     return
   endif
 
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnCompleteDone()' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user .
-               \ ' - v:completed_item=' .
-               \ string( v:completed_item ) )
-  endif
-
   let s:last_char_inserted_by_user = v:false
 
   py3 ycm_state.OnCompleteDone()
@@ -565,14 +559,6 @@ endfunction
 function! s:OnCompleteChanged()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
-  endif
-
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnCompleteChanged()' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user .
-               \ ' - v:event=' .
-               \ string( v:event ) )
   endif
 
   if ! empty( v:event.completed_item )
@@ -743,14 +729,6 @@ function! s:OnInsertChar()
     return
   endif
 
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnInsertChar()' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user .
-               \ ' - v:char = ' .
-               \ v:char )
-  endif
-
   let s:last_char_inserted_by_user = v:true
 
   if s:completion_api == s:COMPLETION_COMPLETEFUNC
@@ -811,12 +789,6 @@ endfunction
 function! s:OnTextChangedInsertMode( popup_is_visible )
   if !s:AllowedToCompleteInCurrentBuffer()
     return
-  endif
-
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnTextChangedInsertMode( ' . a:popup_is_visible . ')' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user )
   endif
 
   if a:popup_is_visible && !s:last_char_inserted_by_user
@@ -1211,6 +1183,7 @@ function! s:RestartServer()
   py3 ycm_state.RestartServer()
 
   call s:StopPoller( s:pollers.receive_messages )
+  call s:StopPoller( s:pollers.command )
   call s:ClearSignatureHelp()
 
   call s:StopPoller( s:pollers.server_ready )
@@ -1251,6 +1224,51 @@ function! youcompleteme#GetCommandResponse( ... )
   endif
 
   return py3eval( 'ycm_state.GetCommandResponse( vim.eval( "a:000" ) )' )
+endfunction
+
+
+function! youcompleteme#GetCommandResponseAsync( callback, ... )
+  if !s:AllowedToCompleteInCurrentBuffer()
+    eval a:callback( '' )
+    return
+  endif
+
+  if !get( b:, 'ycm_completing' )
+    eval a:callback( '' )
+    return
+  endif
+
+  if s:pollers.command.id != -1
+    eval a:callback( '' )
+    return
+  endif
+
+  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
+
+  let s:pollers.command.id = timer_start(
+        \ s:pollers.command.wait_milliseconds,
+        \ function( 's:PollCommand', [ a:callback ] ) )
+endfunction
+
+function! s:PollCommand( callback, id )
+  if py3eval( 'ycm_state.GetCommandRequest() is None' )
+    " Possible in case of race conditions and things like RestartServer
+    " But particualrly in the tests
+    return
+  endif
+
+  if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
+    let s:pollers.command.id = timer_start(
+          \ s:pollers.command.wait_milliseconds,
+          \ function( 's:PollCommand', [ a:callback ] ) )
+    return
+  endif
+
+  call s:StopPoller( s:pollers.command )
+
+  let result = py3eval( 'ycm_state.GetCommandRequest().StringResponse()' )
+
+  eval a:callback( result )
 endfunction
 
 
@@ -1339,19 +1357,25 @@ if exists( '*popup_atcursor' )
       return
     endif
 
-    let response = youcompleteme#GetCommandResponse( b:ycm_hover.command )
-    if response == ''
+    call youcompleteme#GetCommandResponseAsync(
+          \ function( 's:ShowHoverResult' ),
+          \ b:ycm_hover.command )
+  endfunction
+
+
+  function! s:ShowHoverResult( response )
+    call popup_hide( s:cursorhold_popup )
+
+    if empty( a:response )
       return
     endif
-
-    call popup_hide( s:cursorhold_popup )
 
     " Try to position the popup at the cursor, but avoid wrapping. If the
     " longest line is > screen width (&columns), then we just have to wrap, and
     " place the popup at the leftmost column.
     "
     " Find the longest line (FIXME: probably doesn't work well for multi-byte)
-    let lines = split( response, "\n" )
+    let lines = split( a:response, "\n" )
     let len = max( map( copy( lines ), "len( v:val )" ) )
 
     let wrap = 0
@@ -1382,6 +1406,7 @@ if exists( '*popup_atcursor' )
                             \ b:ycm_hover.syntax )
   endfunction
 
+
   function! s:ToggleHover()
     let pos = popup_getpos( s:cursorhold_popup )
     if !empty( pos ) && pos.visible
@@ -1405,6 +1430,10 @@ else
   " Don't break people's mappings if this feature is disabled, just do nothing.
   nnoremap <silent> <plug>(YCMHover) <Nop>
 endif
+
+function! youcompleteme#Test_GetPollers()
+  return s:pollers
+endfunction
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
