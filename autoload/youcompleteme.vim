@@ -1243,8 +1243,6 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... )
     return
   endif
 
-  call s:StopPoller( s:pollers.command )
-
   py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
 
   let s:pollers.command.id = timer_start(
