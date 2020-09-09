@@ -51,6 +51,10 @@ let s:pollers = {
       \   'receive_messages': {
       \     'id': -1,
       \     'wait_milliseconds': 100
+      \   },
+      \   'command': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100
       \   }
       \ }
 let s:buftype_blacklist = {
@@ -1266,6 +1270,44 @@ function! youcompleteme#GetCommandResponse( ... )
 endfunction
 
 
+function! youcompleteme#GetCommandResponseAsync( callback, ... )
+  if !s:AllowedToCompleteInCurrentBuffer()
+    eval a:callback( '' )
+    return
+  endif
+
+  if !get( b:, 'ycm_completing' )
+    eval a:callback( '' )
+    return
+  endif
+
+  if s:pollers.command.id != -1
+    eval a:callback( '' )
+    return
+  endif
+
+  py3 ycm_state.GetCommandResponseAsync( vim.eval( "a:000" ) )
+
+  let s:pollers.command.id = timer_start(
+        \ s:pollers.command.wait_milliseconds,
+        \ function( 's:PollCommand', [ a:callback ] ) )
+endfunction
+
+function! s:PollCommand( callback, id )
+  if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
+    let s:pollers.command.id = timer_start(
+          \ s:pollers.command.wait_milliseconds,
+          \ function( 's:PollCommand', [ a:callback ] ) )
+    return
+  endif
+
+  call s:StopPoller( s:pollers.command )
+
+  let result = py3eval( 'ycm_state.GetCommandRequest().StringResponse()' )
+  eval a:callback( result )
+endfunction
+
+
 function! s:CompleterCommand( mods, count, line1, line2, ... )
   py3 ycm_state.SendCommandRequest(
         \ vim.eval( 'a:000' ),
@@ -1326,6 +1368,7 @@ if exists( '*popup_atcursor' )
     endif
 
     if !has_key( b:, 'ycm_hover' )
+      " TODO: Use an async version of this (or a no-block version at least)
       let cmds = youcompleteme#GetDefinedSubcommands()
       if index( cmds, 'GetHover' ) >= 0
         let b:ycm_hover = {
@@ -1351,8 +1394,14 @@ if exists( '*popup_atcursor' )
       return
     endif
 
-    let response = youcompleteme#GetCommandResponse( b:ycm_hover.command )
-    if response == ''
+    call youcompleteme#GetCommandResponseAsync(
+          \ function( 's:ShowHoverResult' ),
+          \ b:ycm_hover.command )
+  endfunction
+
+
+  function! s:ShowHoverResult( response )
+    if empty( a:response )
       return
     endif
 
@@ -1363,7 +1412,7 @@ if exists( '*popup_atcursor' )
     " place the popup at the leftmost column.
     "
     " Find the longest line (FIXME: probably doesn't work well for multi-byte)
-    let lines = split( response, "\n" )
+    let lines = split( a:response, "\n" )
     let len = max( map( copy( lines ), "len( v:val )" ) )
 
     let wrap = 0
@@ -1393,6 +1442,7 @@ if exists( '*popup_atcursor' )
                             \ '&syntax',
                             \ b:ycm_hover.syntax )
   endfunction
+
 
   function! s:ToggleHover()
     let pos = popup_getpos( s:cursorhold_popup )

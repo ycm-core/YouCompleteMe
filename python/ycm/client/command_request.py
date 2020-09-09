@@ -39,7 +39,7 @@ class CommandRequest( BaseRequest ):
     self._response_future = None
 
 
-  def Start( self, silent = False ):
+  def Start( self ):
     self._request_data = BuildRequestData()
     if self._extra_data:
       self._request_data.update( self._extra_data )
@@ -105,25 +105,25 @@ class CommandRequest( BaseRequest ):
     #
     # The supportable public API is basically any text-only response. All other
     # response types are returned as empty strings
-    if not self.Done():
-      # This is a blocking call if not Done()
-      self.Response()
+
+    # This is a blocking call if not Done()
+    response = self.Response()
 
     # Completer threw an error ?
-    if self._response is None:
+    if response is None:
       return ""
 
     # If not a dictionary or a list, the response is necessarily a
     # scalar: boolean, number, string, etc. In this case, we print
     # it to the user.
-    if not isinstance( self._response, ( dict, list ) ):
-      return str( self._response )
+    if not isinstance( response, ( dict, list ) ):
+      return str( response )
 
-    if 'message' in self._response:
-      return self._response[ 'message' ]
+    if 'message' in response:
+      return response[ 'message' ]
 
-    if 'detailed_info' in self._response:
-      return self._response[ 'detailed_info' ]
+    if 'detailed_info' in response:
+      return response[ 'detailed_info' ]
 
     # The only other type of response we understand is 'fixits' and GoTo. We
     # don't provide string versions of them.
@@ -214,7 +214,7 @@ def SendCommandRequest( arguments,
 
 def GetCommandResponse( arguments, extra_data = None ):
   request = CommandRequest( arguments, "", extra_data )
-  request.Start( silent = True )
+  request.Start()
   # Block here to get the response
   return request.StringResponse()
 
