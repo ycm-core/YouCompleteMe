@@ -1227,6 +1227,7 @@ function! s:RestartServer()
   py3 ycm_state.RestartServer()
 
   call s:StopPoller( s:pollers.receive_messages )
+  call s:StopPoller( s:pollers.command )
   call s:ClearSignatureHelp()
 
   call s:StopPoller( s:pollers.server_ready )
@@ -1272,20 +1273,34 @@ endfunction
 
 function! youcompleteme#GetCommandResponseAsync( callback, ... )
   if !s:AllowedToCompleteInCurrentBuffer()
+    if s:DEBUG
+      call ch_log( 'Not requesting ' . string( a:000 ) . ' - not allowed' )
+    endif
     eval a:callback( '' )
     return
   endif
 
   if !get( b:, 'ycm_completing' )
+    if s:DEBUG
+      call ch_log( 'Not requesting ' . string( a:000 ) . ' - not completing' )
+    endif
     eval a:callback( '' )
     return
   endif
 
   if s:pollers.command.id != -1
+    if s:DEBUG
+      call ch_log( 'Not requesting ' . string( a:000 ) . ' - outstanding req' )
+    endif
     eval a:callback( '' )
     return
   endif
 
+  call s:StopPoller( s:pollers.command )
+
+  if s:DEBUG
+    call ch_log( 'requesting ' . string( a:000 ) )
+  endif
   py3 ycm_state.GetCommandResponseAsync( vim.eval( "a:000" ) )
 
   let s:pollers.command.id = timer_start(
@@ -1294,6 +1309,12 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... )
 endfunction
 
 function! s:PollCommand( callback, id )
+  if py3eval( 'ycm_state.GetCommandRequest() is None' )
+    " Possible in case of race conditions and things like RestartServer
+    " But particualrly in the tests
+    return
+  endif
+
   if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
     let s:pollers.command.id = timer_start(
           \ s:pollers.command.wait_milliseconds,
@@ -1302,8 +1323,13 @@ function! s:PollCommand( callback, id )
   endif
 
   call s:StopPoller( s:pollers.command )
+  if s:DEBUG
+    call ch_log( 'Stopped s:pollers.command: '
+              \ . string( s:pollers.command.id ) )
+  endif
 
   let result = py3eval( 'ycm_state.GetCommandRequest().StringResponse()' )
+
   eval a:callback( result )
 endfunction
 
@@ -1401,11 +1427,18 @@ if exists( '*popup_atcursor' )
 
 
   function! s:ShowHoverResult( response )
+    call popup_hide( s:cursorhold_popup )
+
     if empty( a:response )
+      if s:DEBUG
+        call ch_log( 'Hover result was empty' )
+      endif
       return
     endif
 
-    call popup_hide( s:cursorhold_popup )
+    if s:DEBUG
+      call ch_log( 'Hover result was ' .. string( a:response ) )
+    endif
 
     " Try to position the popup at the cursor, but avoid wrapping. If the
     " longest line is > screen width (&columns), then we just have to wrap, and
@@ -1467,6 +1500,10 @@ else
   " Don't break people's mappings if this feature is disabled, just do nothing.
   nnoremap <silent> <plug>(YCMHover) <Nop>
 endif
+
+function! youcompleteme#Test_GetPollers()
+  return s:pollers
+endfunction
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

@@ -408,10 +408,11 @@ class YouCompleteMe:
       has_range,
       start_line,
       end_line )
-    return SendCommandRequest( final_arguments,
-                               modifiers,
-                               self._user_options[ 'goto_buffer_command' ],
-                               extra_data )
+    return SendCommandRequest(
+      final_arguments,
+      modifiers,
+      extra_data = extra_data,
+      buffer_command = self._user_options[ 'goto_buffer_command' ] )
 
 
   def GetCommandResponse( self, arguments ):
@@ -437,17 +438,10 @@ class YouCompleteMe:
     return self._latest_command_reqeust
 
 
-  def GetDefinedSubcommandsAsync( self ):
-    request = BaseRequest()
-    future = request.PostDataToHandlerAsync( BuildRequestData(),
-                                             'defined_subcommands' )
-
-    return request, future
-
-
   def GetDefinedSubcommands( self ):
-    request, future = self.GetDefinedSubcommandsAsync()
-    subcommands = request.HandleFuture( future )
+    request = BaseRequest()
+    subcommands = request.PostDataToHandler( BuildRequestData(),
+                                             'defined_subcommands' )
     return subcommands if subcommands else []
 
 

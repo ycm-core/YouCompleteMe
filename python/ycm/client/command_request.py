@@ -19,6 +19,8 @@ from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm import vimsupport
 from ycmd.utils import ToUnicode
 
+DEFAULT_BUFFER_COMMAND = 'same-buffer'
+
 
 def _EnsureBackwardsCompatibility( arguments ):
   if arguments and arguments[ 0 ] == 'GoToDefinitionElseDeclaration':
@@ -27,9 +29,7 @@ def _EnsureBackwardsCompatibility( arguments ):
 
 
 class CommandRequest( BaseRequest ):
-  def __init__( self,
-                arguments,
-                extra_data = None ):
+  def __init__( self, arguments, extra_data = None, silent = False ):
     super( CommandRequest, self ).__init__()
     self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._command = arguments and arguments[ 0 ]
@@ -37,6 +37,7 @@ class CommandRequest( BaseRequest ):
     self._response = None
     self._request_data = None
     self._response_future = None
+    self._silent = silent
 
 
   def Start( self ):
@@ -59,19 +60,18 @@ class CommandRequest( BaseRequest ):
   def Response( self ):
     if self._response is None and self._response_future is not None:
       # Block
-      self._response = self.HandleFuture( self._response_future )
-      self._response_future = None
+      self._response = self.HandleFuture( self._response_future,
+                                          display_message = not self._silent )
 
     return self._response
 
 
   def RunPostCommandActionsIfNeeded( self,
-                                     buffer_command,
-                                     modifiers ):
+                                     modifiers,
+                                     buffer_command = DEFAULT_BUFFER_COMMAND ):
 
-    if self._response is None and self._response_future is not None:
-      # This is a blocking call if not Done()
-      self.Response()
+    # This is a blocking call if not Done()
+    self.Response()
 
     if self._response is None:
       # An exception was raised and handled.
@@ -107,23 +107,23 @@ class CommandRequest( BaseRequest ):
     # response types are returned as empty strings
 
     # This is a blocking call if not Done()
-    response = self.Response()
+    self.Response()
 
     # Completer threw an error ?
-    if response is None:
+    if self._response is None:
       return ""
 
     # If not a dictionary or a list, the response is necessarily a
     # scalar: boolean, number, string, etc. In this case, we print
     # it to the user.
-    if not isinstance( response, ( dict, list ) ):
-      return str( response )
+    if not isinstance( self._response, ( dict, list ) ):
+      return str( self._response )
 
-    if 'message' in response:
-      return response[ 'message' ]
+    if 'message' in self._response:
+      return self._response[ 'message' ]
 
-    if 'detailed_info' in response:
-      return response[ 'detailed_info' ]
+    if 'detailed_info' in self._response:
+      return self._response[ 'detailed_info' ]
 
     # The only other type of response we understand is 'fixits' and GoTo. We
     # don't provide string versions of them.
@@ -194,8 +194,10 @@ class CommandRequest( BaseRequest ):
     vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
 
 
-def SendCommandRequestAsync( arguments, extra_data = None ):
-  request = CommandRequest( arguments, extra_data )
+def SendCommandRequestAsync( arguments, extra_data = None, silent = True ):
+  request = CommandRequest( arguments,
+                            extra_data = extra_data,
+                            silent = silent )
   request.Start()
   # Don't block
   return request
@@ -203,18 +205,20 @@ def SendCommandRequestAsync( arguments, extra_data = None ):
 
 def SendCommandRequest( arguments,
                         modifiers,
-                        buffer_command,
-                        extra_data = None ):
-  request = CommandRequest( arguments, extra_data )
-  request.Start()
+                        extra_data = None,
+                        buffer_command = DEFAULT_BUFFER_COMMAND ):
+  request = SendCommandRequestAsync( arguments,
+                                     extra_data = extra_data,
+                                     silent = False )
   # Block here to get the response
-  request.RunPostCommandActionsIfNeeded( buffer_command, modifiers )
+  request.RunPostCommandActionsIfNeeded( modifiers, buffer_command )
   return request.Response()
 
 
 def GetCommandResponse( arguments, extra_data = None ):
-  request = CommandRequest( arguments, "", extra_data )
-  request.Start()
+  request = SendCommandRequestAsync( arguments,
+                                     extra_data = extra_data,
+                                     silent = True )
   # Block here to get the response
   return request.StringResponse()
 
