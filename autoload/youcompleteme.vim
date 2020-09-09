@@ -19,8 +19,6 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:DEBUG = 0
-
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
@@ -562,14 +560,6 @@ function! s:OnCompleteDone()
     return
   endif
 
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnCompleteDone()' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user .
-               \ ' - v:completed_item=' .
-               \ string( v:completed_item ) )
-  endif
-
   let s:last_char_inserted_by_user = v:false
 
   py3 ycm_state.OnCompleteDone()
@@ -580,14 +570,6 @@ endfunction
 function! s:OnCompleteChanged()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
-  endif
-
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnCompleteChanged()' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user .
-               \ ' - v:event=' .
-               \ string( v:event ) )
   endif
 
   if ! empty( v:event.completed_item )
@@ -759,14 +741,6 @@ function! s:OnInsertChar()
     return
   endif
 
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnInsertChar()' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user .
-               \ ' - v:char = ' .
-               \ v:char )
-  endif
-
   let s:last_char_inserted_by_user = v:true
 
   if s:completion_api == s:COMPLETION_COMPLETEFUNC
@@ -827,12 +801,6 @@ endfunction
 function! s:OnTextChangedInsertMode( popup_is_visible )
   if !s:AllowedToCompleteInCurrentBuffer()
     return
-  endif
-
-  if s:DEBUG
-    call ch_log( 'ycm: s:OnTextChangedInsertMode( ' . a:popup_is_visible . ')' .
-               \ ' - last_char_inserted_by_user=' .
-               \ s:last_char_inserted_by_user )
   endif
 
   if a:popup_is_visible && !s:last_char_inserted_by_user
@@ -1273,34 +1241,22 @@ endfunction
 
 function! youcompleteme#GetCommandResponseAsync( callback, ... )
   if !s:AllowedToCompleteInCurrentBuffer()
-    if s:DEBUG
-      call ch_log( 'Not requesting ' . string( a:000 ) . ' - not allowed' )
-    endif
     eval a:callback( '' )
     return
   endif
 
   if !get( b:, 'ycm_completing' )
-    if s:DEBUG
-      call ch_log( 'Not requesting ' . string( a:000 ) . ' - not completing' )
-    endif
     eval a:callback( '' )
     return
   endif
 
   if s:pollers.command.id != -1
-    if s:DEBUG
-      call ch_log( 'Not requesting ' . string( a:000 ) . ' - outstanding req' )
-    endif
     eval a:callback( '' )
     return
   endif
 
   call s:StopPoller( s:pollers.command )
 
-  if s:DEBUG
-    call ch_log( 'requesting ' . string( a:000 ) )
-  endif
   py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
 
   let s:pollers.command.id = timer_start(
@@ -1323,10 +1279,6 @@ function! s:PollCommand( callback, id )
   endif
 
   call s:StopPoller( s:pollers.command )
-  if s:DEBUG
-    call ch_log( 'Stopped s:pollers.command: '
-              \ . string( s:pollers.command.id ) )
-  endif
 
   let result = py3eval( 'ycm_state.GetCommandRequest().StringResponse()' )
 
@@ -1429,14 +1381,7 @@ if exists( '*popup_atcursor' )
     call popup_hide( s:cursorhold_popup )
 
     if empty( a:response )
-      if s:DEBUG
-        call ch_log( 'Hover result was empty' )
-      endif
       return
-    endif
-
-    if s:DEBUG
-      call ch_log( 'Hover result was ' .. string( a:response ) )
     endif
 
     " Try to position the popup at the cursor, but avoid wrapping. If the
