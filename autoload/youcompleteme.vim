@@ -1394,7 +1394,6 @@ if exists( '*popup_atcursor' )
     endif
 
     if !has_key( b:, 'ycm_hover' )
-      " TODO: Use an async version of this (or a no-block version at least)
       let cmds = youcompleteme#GetDefinedSubcommands()
       if index( cmds, 'GetHover' ) >= 0
         let b:ycm_hover = {
