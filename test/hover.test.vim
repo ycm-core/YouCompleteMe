@@ -112,6 +112,8 @@ endfunction
 
 function! TearDown()
   let g:ycm_auto_hover='CursorHold'
+
+  call assert_equal( -1, youcompleteme#Test_GetPollers().command.id )
 endfunction
 
 function! Test_Hover_Uses_GetDoc()
@@ -317,10 +319,6 @@ function! Test_Hover_MoveCursor()
 
   call feedkeys( "b\\D", 'xt' )
   call s:CheckPopupVisible( 11, 3, s:python_oneline.GetDoc, '' )
-
-  " line
-  call feedkeys( "ji\<Esc>", 'xt' )
-  call s:CheckPopupNotVisible( 11, 3, v:false )
 
   call test_override( 'ALL', 0 )
 
