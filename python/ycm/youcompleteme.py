@@ -96,12 +96,13 @@ HANDLE_FLAG_INHERIT = 0x00000001
 
 
 class YouCompleteMe:
-  def __init__( self ):
+  def __init__( self, default_options = {} ):
     self._logger = logging.getLogger( 'ycm' )
     self._client_logfile = None
     self._server_stdout = None
     self._server_stderr = None
     self._server_popen = None
+    self._default_options = default_options
     self._ycmd_keepalive = YcmdKeepalive()
     self._SetUpLogging()
     self._SetUpServer()
@@ -128,7 +129,8 @@ class YouCompleteMe:
     self._SetLogLevel()
 
     hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
-    options_dict = dict( self._user_options )
+    options_dict = dict( self._default_options )
+    options_dict.update( self._user_options )
     options_dict[ 'hmac_secret' ] = utils.ToUnicode(
       base64.b64encode( hmac_secret ) )
     options_dict[ 'server_keep_logfiles' ] = self._user_options[
@@ -621,9 +623,12 @@ class YouCompleteMe:
     if not completion_request:
       return False
 
-    self._latest_completion_request = ResolveCompletionItem( completion_request,
-                                                             item )
-    return bool( self._latest_completion_request )
+    request  = ResolveCompletionItem( completion_request, item )
+    if not request:
+      return False
+
+    self._latest_completion_request = request
+    return True
 
 
   def GetErrorCount( self ):

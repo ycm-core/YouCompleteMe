@@ -1,3 +1,5 @@
+scriptencoding utf-8
+
 function! s:CheckCompletionItems( expected_props, ... )
   let prop = 'abbr'
   if a:0 > 0
