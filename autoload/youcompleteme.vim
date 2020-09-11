@@ -86,7 +86,7 @@ if !exists( '##TextChangedP' ) || !exists( '##CompleteChanged' )
   let s:completion_api = s:COMPLETION_COMPLETEFUNC
 endif
 
-let s:use_preview_popup = 0
+let s:force_preview_popup = 0
 let s:resolve_completions = 0
 
 function! s:StartMessagePoll()
@@ -136,12 +136,18 @@ function! youcompleteme#Enable()
   " A non-numeric string compares equal to an integer zero. Without the type
   " check, users on a recent vim and disabling preview by setting it to 0
   " get `popup` added instead.
-  let s:use_preview_popup =
-        \ &completeopt =~# '\<popup\>' || (
+  let s:force_preview_popup =
         \ type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
           \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
-          \ ( v:version > 801 || ( v:version == 801 && has( 'patch1880' ) ) ) )
-  let s:resolve_completions = s:use_preview_popup && exists( '*popup_findinfo' )
+          \ ( v:version > 801 || ( v:version == 801 && has( 'patch1880' ) ) )
+
+  " We can resolve completion items on demand if the user alaready set
+  " completeopt += popu, or if they asked us to do it for tham, and vim supports
+  " this.
+  let s:resolve_completions =
+        \ ( index( split( &completeopt, ',' ), 'popup' ) >= 0 ||
+        \   s:force_preview_popup ) &&
+        \ exists( '*popup_findinfo' )
 
   if !s:SetUpPython()
     return
@@ -530,11 +536,12 @@ function! s:SetUpCompleteopt()
   " Also, having this option set breaks the plugin.
   set completeopt-=longest
 
-  if s:use_preview_popup
+  if s:resolve_completions
+    set completeopt+=popuphidden
+  endif
+
+  if s:force_preview_popup
     set completeopt+=popup
-    if s:resolve_completions
-      set completeopt+=popuphidden
-    endif
   elseif g:ycm_add_preview_to_completeopt
     set completeopt+=preview
   endif
@@ -606,6 +613,8 @@ function! s:ResolveCompletionItem( item )
     " OK so this "works" but it resets the completion state each time. i think
     " we need a way to update the completion candidate without reset
     call timer_start( 0, function( 's:PollResolve', [ a:item ] ) )
+  else
+    call s:ShowInfoPopup( a:item )
   endif
 endfunction
 
@@ -970,9 +979,7 @@ endfunction
 
 
 function! s:RequestCompletion()
-  if s:completion_api == s:COMPLETION_TEXTCHANGEDP
-    call s:StopPoller( s:pollers.completion )
-  endif
+  call s:StopPoller( s:pollers.completion )
 
   py3 ycm_state.SendCompletionRequest(
         \ vimsupport.GetBoolValue( 's:force_semantic' ) )
@@ -1058,9 +1065,14 @@ function! s:PollResolve( item, ... )
     return
   endif
 
+  call s:ShowInfoPopup( completion )
+
+endfunction
+
+function! s:ShowInfoPopup( completion )
   let id = popup_findinfo()
   if id
-    call popup_settext( id, split( completion.info, '\n' ) )
+    call popup_settext( id, split( a:completion.info, '\n' ) )
     call popup_show( id )
   endif
 endfunction
@@ -1260,6 +1272,7 @@ function! s:DebugInfo()
   echom "Printing YouCompleteMe debug information..."
   let debug_info = py3eval( 'ycm_state.DebugInfo()' )
   echom '-- Completion API: ' . string( s:completion_api )
+  echom '-- Resolve completions: ' string( s:resolve_completions )
   for line in split( debug_info, "\n" )
     echom '-- ' . line
   endfor
