@@ -73,6 +73,8 @@ let s:cursorhold_popup = -1
 let s:COMPLETION_COMPLETEFUNC = 0
 let s:COMPLETION_TEXTCHANGEDP = 1
 
+let s:RESOLVE_COMPLETIONS = exists( '*popup_findinfo' )
+
 " By default (if possible) use the new complete()/TextChangedP API
 let s:completion_api = get( g:,
                           \ 'ycm_use_completion_api',
@@ -512,9 +514,12 @@ function! s:SetUpCompleteopt()
   " check, users on a recent vim and disabling preview by setting it to 0
   " get `popup` added instead.
   if type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
-	\ g:ycm_add_preview_to_completeopt ==# 'popup' && 
+        \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
         \ ( v:version > 801 || ( v:version == 801 && has( 'patch1880' ) ) )
     set completeopt+=popup
+    if s:RESOLVE_COMPLETIONS
+      set completeopt+=popuphidden
+    endif
   elseif g:ycm_add_preview_to_completeopt
     set completeopt+=preview
   endif
@@ -572,6 +577,10 @@ endfunction
 
 
 function! s:ResolveCompletionItem( item )
+  if !s:RESOLVE_COMPLETIONS
+    return
+  endif
+
   if py3eval( 'ycm_state.ResolveCompletionItem( vim.eval( "a:item" ) )' )
     call s:StopPoller( s:pollers.completion )
     " OK so this "works" but it resets the completion state each time. i think
@@ -1024,12 +1033,10 @@ function! s:PollResolve( item, ... )
   endif
 
   let completion =
-        \ py3eval( 'ycm_state.GetCompletionResponse()' )[ 'completions' ]
-  if type( completion ) != type( [] ) || len( completion ) != 1
+        \ py3eval( 'ycm_state.GetCompletionResponse()' )[ 'completion' ]
+  if empty( completion ) || empty( completion.info )
     return
   endif
-
-  let completion = completion[ 0 ]
 
   let id = popup_findinfo()
   if id
