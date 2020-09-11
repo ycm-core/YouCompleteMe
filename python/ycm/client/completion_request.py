@@ -19,10 +19,9 @@ import json
 import logging
 from ycmd.utils import ToUnicode
 from ycm.client.base_request import ( BaseRequest,
-                                      BuildRequestData,
                                       DisplayServerException,
                                       MakeServerException )
-from ycm import vimsupport
+from ycm import vimsupport, base
 from ycm.vimsupport import NO_COMPLETIONS
 
 _logger = logging.getLogger( __name__ )
@@ -30,7 +29,7 @@ _logger = logging.getLogger( __name__ )
 
 class CompletionRequest( BaseRequest ):
   def __init__( self, request_data ):
-    super( CompletionRequest, self ).__init__()
+    super().__init__()
     self.request_data = request_data
     self._response_future = None
 
@@ -70,6 +69,10 @@ class CompletionRequest( BaseRequest ):
     response = self._RawResponse()
     response[ 'completions' ] = _ConvertCompletionDatasToVimDatas(
         response[ 'completions' ] )
+    # FIXME: Do we really need to do this AdjustCandidateInsertionText ? I feel
+    # like Vim should do that for us
+    response[ 'completions' ] = base.AdjustCandidateInsertionText(
+        response[ 'completions' ] )
     return response
 
 
@@ -81,25 +84,6 @@ class CompletionRequest( BaseRequest ):
       self._OnCompleteDone_Csharp()
     else:
       self._OnCompleteDone_FixIt()
-
-
-  def Resolve( self, item ):
-    # TODO/FIXME: move this to its own request object
-    if not self.Done():
-      return False
-
-    if 'user_data' not in item:
-      return False
-
-    completion_extra_data = json.loads( item[ 'user_data' ] )
-    try:
-      self.request_data[ 'resolve' ] = completion_extra_data[ 'resolve' ]
-    except KeyError:
-      return
-
-    self._response_future = self.PostDataToHandlerAsync( self.request_data,
-                                                         'resolve_completion' )
-    return True
 
 
   def _GetExtraDataUserMayHaveCompleted( self ):
@@ -157,6 +141,44 @@ class CompletionRequest( BaseRequest ):
 
     for fixit in fixit_completion:
       vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
+
+
+class ResolveCompletionRequest( CompletionRequest ):
+  def __init__( self, request_data ):
+    super().__init__( request_data )
+
+  def Start( self ):
+    self._response_future = self.PostDataToHandlerAsync( self.request_data,
+                                                         'resolve_completion' )
+
+  def Response( self ):
+    response = self._RawResponse()
+    response[ 'completion' ] = _ConvertCompletionDataToVimData(
+        response[ 'completion' ] )
+    return response
+
+
+def ResolveCompletionItem( completion_request, item ):
+  if not completion_request.Done():
+    return None
+
+  if 'user_data' not in item:
+    return None
+
+  completion_extra_data = json.loads( item[ 'user_data' ] )
+  request_data = completion_request.request_data
+  try:
+    # Note: We mutate the request_data inside the original completion request
+    # and pass it into the new request object. this is just a big efficiency
+    # saving. The request_data for a Done() request is almost certainly no
+    # longer needed.
+    request_data[ 'resolve' ] = completion_extra_data[ 'resolve' ]
+  except KeyError:
+    return None
+
+  resolve_request = ResolveCompletionRequest( request_data )
+  resolve_request.Start()
+  return resolve_request
 
 
 def _GetRequiredNamespaceImport( extra_data ):

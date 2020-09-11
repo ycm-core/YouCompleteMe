@@ -35,7 +35,8 @@ from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import ( SendCommandRequest,
                                          SendCommandRequestAsync,
                                          GetCommandResponse )
-from ycm.client.completion_request import CompletionRequest
+from ycm.client.completion_request import ( CompletionRequest,
+                                            ResolveCompletionItem )
 from ycm.client.signature_help_request import ( SignatureHelpRequest,
                                                 SigHelpAvailableByFileType )
 from ycm.client.debug_info_request import ( SendDebugInfoRequest,
@@ -297,10 +298,7 @@ class YouCompleteMe:
 
 
   def GetCompletionResponse( self ):
-    response = self._latest_completion_request.Response()
-    response[ 'completions' ] = base.AdjustCandidateInsertionText(
-        response[ 'completions' ] )
-    return response
+    return self._latest_completion_request.Response()
 
 
   def SignatureHelpAvailableRequestComplete( self, filetype, send_new=True ):
@@ -620,10 +618,12 @@ class YouCompleteMe:
 
   def ResolveCompletionItem( self, item ):
     completion_request = self.GetCurrentCompletionRequest()
-    if completion_request and completion_request.Done():
-      return completion_request.Resolve( item )
+    if not completion_request:
+      return False
 
-    return False
+    self._latest_completion_request = ResolveCompletionItem( completion_request,
+                                                             item )
+    return bool( self._latest_completion_request )
 
 
   def GetErrorCount( self ):
