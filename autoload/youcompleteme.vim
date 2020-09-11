@@ -73,8 +73,6 @@ let s:cursorhold_popup = -1
 let s:COMPLETION_COMPLETEFUNC = 0
 let s:COMPLETION_TEXTCHANGEDP = 1
 
-let s:RESOLVE_COMPLETIONS = exists( '*popup_findinfo' )
-
 " By default (if possible) use the new complete()/TextChangedP API
 let s:completion_api = get( g:,
                           \ 'ycm_use_completion_api',
@@ -88,6 +86,8 @@ if !exists( '##TextChangedP' ) || !exists( '##CompleteChanged' )
   let s:completion_api = s:COMPLETION_COMPLETEFUNC
 endif
 
+let s:use_preview_popup = 0
+let s:resolve_completions = 0
 
 function! s:StartMessagePoll()
   if s:pollers.receive_messages.id < 0
@@ -132,6 +132,16 @@ endfunction
 
 function! youcompleteme#Enable()
   call s:SetUpBackwardsCompatibility()
+
+  " A non-numeric string compares equal to an integer zero. Without the type
+  " check, users on a recent vim and disabling preview by setting it to 0
+  " get `popup` added instead.
+  let s:use_preview_popup =
+        \ &completeopt =~# '\<popup\>' || (
+        \ type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
+          \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
+          \ ( v:version > 801 || ( v:version == 801 && has( 'patch1880' ) ) ) )
+  let s:resolve_completions = s:use_preview_popup && exists( '*popup_findinfo' )
 
   if !s:SetUpPython()
     return
@@ -248,7 +258,16 @@ try:
     ycm_state.OnVimLeave()
     del ycm_state
 
-  ycm_state = youcompleteme.YouCompleteMe()
+  # If we're able to resolve completion details asynchronously, set the option
+  # which enables this in the server.
+  if int( vim.eval( 's:resolve_completions' ) ):
+    default_options = {
+      'max_num_candidates_to_detail': 10
+    }
+  else:
+    default_options = {}
+
+  ycm_state = youcompleteme.YouCompleteMe( default_options )
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -510,14 +529,9 @@ function! s:SetUpCompleteopt()
   " Also, having this option set breaks the plugin.
   set completeopt-=longest
 
-  " A non-numeric string compares equal to an integer zero. Without the type
-  " check, users on a recent vim and disabling preview by setting it to 0
-  " get `popup` added instead.
-  if type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
-        \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
-        \ ( v:version > 801 || ( v:version == 801 && has( 'patch1880' ) ) )
+  if s:use_preview_popup
     set completeopt+=popup
-    if s:RESOLVE_COMPLETIONS
+    if s:resolve_completions
       set completeopt+=popuphidden
     endif
   elseif g:ycm_add_preview_to_completeopt
@@ -577,7 +591,12 @@ endfunction
 
 
 function! s:ResolveCompletionItem( item )
-  if !s:RESOLVE_COMPLETIONS
+  if !s:resolve_completions
+    return
+  endif
+
+  let complete_mode = complete_info( [ 'mode' ] ).mode
+  if complete_mode !=# 'eval' && complete_mode !=# 'function'
     return
   endif
 
@@ -1033,7 +1052,7 @@ function! s:PollResolve( item, ... )
   endif
 
   let completion =
-        \ py3eval( 'ycm_state.GetCompletionResponse()' )[ 'completion' ]
+        \ py3eval( 'ycm_state.GetCompletionResponse()[ "completion" ]' )
   if empty( completion ) || empty( completion.info )
     return
   endif
