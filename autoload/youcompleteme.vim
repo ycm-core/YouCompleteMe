@@ -88,6 +88,7 @@ endif
 
 let s:force_preview_popup = 0
 let s:resolve_completions = 0
+let s:detail_completions = 1
 
 function! s:StartMessagePoll()
   if s:pollers.receive_messages.id < 0
@@ -136,6 +137,7 @@ function! youcompleteme#Enable()
   " A non-numeric string compares equal to an integer zero. Without the type
   " check, users on a recent vim and disabling preview by setting it to 0
   " get `popup` added instead.
+  let completeopt = split( &completeopt, ',' )
   let s:force_preview_popup =
         \ type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
           \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
@@ -145,9 +147,13 @@ function! youcompleteme#Enable()
   " completeopt += popu, or if they asked us to do it for tham, and vim supports
   " this.
   let s:resolve_completions =
-        \ ( index( split( &completeopt, ',' ), 'popup' ) >= 0 ||
-        \   s:force_preview_popup ) &&
+        \ ( index( completeopt, 'popup' ) >= 0 || s:force_preview_popup ) &&
         \ exists( '*popup_findinfo' )
+
+  let s:detail_completions =
+        \ index( completeopt, 'preview' ) >= 0 ||
+        \ ( type ( g:ycm_add_preview_to_completeopt ) != type( '' ) &&
+        \   g:ycm_add_preview_to_completeopt )
 
   if !s:SetUpPython()
     return
@@ -270,6 +276,10 @@ try:
   if int( vim.eval( 's:resolve_completions' ) ):
     default_options = {
       'max_num_candidates_to_detail': 10
+    }
+  elif not int( vim.eval( 's:detail_completions' ) ):
+    default_options = {
+      'max_num_candidates_to_detail': 0
     }
   else:
     default_options = {}
