@@ -161,11 +161,14 @@ class ResolveCompletionRequest( CompletionRequest ):
 def ResolveCompletionItem( completion_request, item ):
   if not completion_request.Done():
     return None
-
-  if 'user_data' not in item:
+  try:
+    completion_extra_data = json.loads( item[ 'user_data' ] )
+  except KeyError:
+    return None
+  except json.JSONDecodeError:
+    # Can happen with the omni completer
     return None
 
-  completion_extra_data = json.loads( item[ 'user_data' ] )
   request_data = completion_request.request_data
   try:
     # Note: We mutate the request_data inside the original completion request
