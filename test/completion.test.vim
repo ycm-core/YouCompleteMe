@@ -8,6 +8,8 @@ function! SetUp()
   " Use the default, which _should_ be the new API
   unlet! g:ycm_use_completion_api
 
+  let g:ycm_add_preview_to_completeopt = 1
+
   call youcompleteme#test#setup#SetUp()
 endfunction
 
