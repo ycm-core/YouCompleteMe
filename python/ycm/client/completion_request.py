@@ -143,47 +143,6 @@ class CompletionRequest( BaseRequest ):
       vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
 
 
-class ResolveCompletionRequest( CompletionRequest ):
-  def __init__( self, request_data ):
-    super().__init__( request_data )
-
-  def Start( self ):
-    self._response_future = self.PostDataToHandlerAsync( self.request_data,
-                                                         'resolve_completion' )
-
-  def Response( self ):
-    response = self._RawResponse()
-    response[ 'completion' ] = _ConvertCompletionDataToVimData(
-        response[ 'completion' ] )
-    return response
-
-
-def ResolveCompletionItem( completion_request, item ):
-  if not completion_request.Done():
-    return None
-  try:
-    completion_extra_data = json.loads( item[ 'user_data' ] )
-  except KeyError:
-    return None
-  except json.JSONDecodeError:
-    # Can happen with the omni completer
-    return None
-
-  request_data = completion_request.request_data
-  try:
-    # Note: We mutate the request_data inside the original completion request
-    # and pass it into the new request object. this is just a big efficiency
-    # saving. The request_data for a Done() request is almost certainly no
-    # longer needed.
-    request_data[ 'resolve' ] = completion_extra_data[ 'resolve' ]
-  except KeyError:
-    return None
-
-  resolve_request = ResolveCompletionRequest( request_data )
-  resolve_request.Start()
-  return resolve_request
-
-
 def _GetRequiredNamespaceImport( extra_data ):
   return extra_data.get( 'required_namespace_import' )
 
@@ -197,7 +156,7 @@ def _FilterToMatchingCompletions( completed_item, completions ):
   match_keys = [ 'word', 'abbr', 'menu', 'info' ]
   matched_completions = []
   for completion in completions:
-    item = _ConvertCompletionDataToVimData( completion )
+    item = ConvertCompletionDataToVimData( completion )
 
     def matcher( key ):
       return ( ToUnicode( completed_item.get( key, "" ) ) ==
@@ -224,7 +183,7 @@ def _GetCompletionInfoField( completion_data ):
   return info.replace( '\x00', '' )
 
 
-def _ConvertCompletionDataToVimData( completion_data ):
+def ConvertCompletionDataToVimData( completion_data ):
   # See :h complete-items for a description of the dictionary fields.
   extra_menu_info = completion_data.get( 'extra_menu_info', '' )
   preview_info = _GetCompletionInfoField( completion_data )
@@ -265,4 +224,4 @@ def _ConvertCompletionDataToVimData( completion_data ):
 
 
 def _ConvertCompletionDatasToVimDatas( response_data ):
-  return [ _ConvertCompletionDataToVimData( x ) for x in response_data ]
+  return [ ConvertCompletionDataToVimData( x ) for x in response_data ]
