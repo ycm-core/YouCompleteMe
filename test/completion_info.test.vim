@@ -86,20 +86,19 @@ function! Test_DontResolveCompletion_AlreadyResolved()
         \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .
         \ '/src/com/test/MethodsWithDocumentation.java', { 'delay': 15 } )
 
-  call setpos( '.', [ 0, 33, 28 ] )
+  call setpos( '.', [ 0, 34, 12 ] )
   " Required to trigger TextChangedI
   " https://github.com/vim/vim/issues/4665#event-2480928194
   call test_override( 'char_avail', 1 )
 
   function! Check1( id )
     call WaitForCompletion()
-    call assert_equal( 0, popup_findinfo() )
-    call CheckCompletionItems( [ 'getAString' ], 'word' )
+    call CheckCompletionItems( [ 'hashCode' ], 'word' )
     call assert_equal( -1, complete_info().selected )
-    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2', [ 0 ] ) )
+    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2' ) )
   endfunction
 
-  function! Check2( counter, id )
+  function! Check2( id )
     call WaitForCompletion()
     call WaitForAssert( { ->
           \ assert_notequal( 0, popup_findinfo() )
@@ -109,25 +108,18 @@ function! Test_DontResolveCompletion_AlreadyResolved()
           \ } )
 
     let compl = complete_info()
-    call ch_log( 'compl: ' . string( compl ) )
-    call assert_equal( 0, compl.selected )
-    let selected = compl.items[ compl.selected ]
+    let selected = compl.items[ 0 ]
+    call assert_equal( 1, len( compl.items ) )
+    call assert_equal( 'hashCode', selected.word )
 
-    call assert_equal( 'getAString', selected.word )
-
-    redraw!
     " It's line 5 because we truncated the signature to fit it in
-    call assert_equal( [ 'MethodsWithDocumentation.getAString() : String',
-          \              '',
-          \              'getAString() : String',
-          \              '',
-          \              'Single line description.' ],
-          \            getbufline( winbufnr( popup_findinfo() ), '1', '5' ) )
+    let doc_line = getbufline( winbufnr( popup_findinfo() ), '3' )[ 0 ]
+    call assert_match( '^Returns a hash code value', doc_line )
 
     call feedkeys( "\<Esc>" )
   endfunction
 
-  call FeedAndCheckMain( 'cw', funcref( 'Check1' ) )
+  call FeedAndCheckMain( 'C', funcref( 'Check1' ) )
 
   call assert_false( pumvisible(), 'pumvisible()' )
 
