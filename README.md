@@ -2479,18 +2479,24 @@ not render it.
 The following filter types are supported:
 
 - "regex": Accepts a string [regular expression][python-re]. This type matches
-when the regex (treated as case-insensitive) is found in the diagnostic text.
+when the regex (treated as case-insensitive) is found anywhere in the diagnostic
+text (`re.search`, not `re.match`)
 - "level": Accepts a string level, either "warning" or "error." This type
-matches when the diagnostic has the same level.
+matches when the diagnostic has the same level, that is,
+specifying `level: "error"` will remove **all** errors from the diagnostics.
 
 **NOTE:** The regex syntax is **NOT** Vim's, it's [Python's][python-re].
 
 Default: `{}`
 
+The following example will do, for java filetype only:
+- Remove **all** error level diagnostics, and,
+- Also remove anything that contains `ta<something>co`
+
 ```viml
 let g:ycm_filter_diagnostics = {
   \ "java": {
-  \      "regex": [ ".*taco.*", ... ],
+  \      "regex": [ "ta.+co", ... ],
   \      "level": "error",
   \      ...
   \    }
