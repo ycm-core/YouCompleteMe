@@ -6,15 +6,10 @@ YouCompleteMe: a code-completion engine for Vim
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
 NOTE: Minimum Requirements Have Changed
----------------------------------------
+----------------------------------------
 
 Our policy is to suppor the Vim version that's in the latest LTS of Ubuntu.
-That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`
-
-Legacy branches exist for:
-
-* [Legacy Python 2 support][legacy-py2]
-* [Legacy Vim support ][legacy-vim]
+That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
 
 Help, Advice, Support
 ---------------------
@@ -3359,8 +3354,6 @@ This software is licensed under the [GPL v3 license][gpl].
 [vimspector]: https://github.com/puremourning/vimspector
 [compiledb]: https://pypi.org/project/compiledb/
 [signature-help-pr]: https://github.com/ycm-core/ycmd/pull/1255
-[legacy-py2]: https://github.com/ycm-core/YouCompleteMe/tree/legacy-py2
 [wiki-faq]: https://github.com/ycm-core/YouCompleteMe/wiki/FAQ
 [wiki-full-install]: https://github.com/ycm-core/YouCompleteMe/wiki/Full-Installation-Guide
 [wiki-troubleshooting]: https://github.com/ycm-core/YouCompleteMe/wiki/Troubleshooting-steps-for-ycmd-server-SHUT-DOWN
-[legacy-vim]: https://github.com/ycm-core/YouCompleteMe/tree/legacy-vim
