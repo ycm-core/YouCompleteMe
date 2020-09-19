@@ -70,8 +70,11 @@ let s:enable_hover = 0
 let s:cursorhold_popup = -1
 
 let s:force_preview_popup = 0
-let s:resolve_completions = 0
-let s:detail_completions = 1
+
+let s:RESOLVE_NONE = 0
+let s:RESOLVE_UP_FRONT = 1
+let s:RESOLVE_ON_DEMAND = 2
+let s:resolve_completions = s:RESOLVE_NONE
 
 function! s:StartMessagePoll()
   if s:pollers.receive_messages.id < 0
@@ -117,26 +120,46 @@ endfunction
 function! youcompleteme#Enable()
   call s:SetUpBackwardsCompatibility()
 
-  " A non-numeric string compares equal to an integer zero. Without the type
-  " check, users on a recent vim and disabling preview by setting it to 0
-  " get `popup` added instead.
   let completeopt = split( &completeopt, ',' )
+
+  " Will we add 'popup' to the 'completeopt' (later)
   let s:force_preview_popup =
         \ type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
           \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
           \ !s:is_neovim
 
-  " We can resolve completion items on demand if the user alaready set
-  " completeopt += popu, or if they asked us to do it for tham, and vim supports
-  " this.
-  let s:resolve_completions =
-        \ ( index( completeopt, 'popup' ) >= 0 || s:force_preview_popup ) &&
-        \ exists( '*popup_findinfo' )
+  " Will we add 'preview' to the 'completeopt' (later)
+  let force_preview =
+        \ type( g:ycm_add_preview_to_completeopt ) != type( '' ) &&
+          \ g:ycm_add_preview_to_completeopt
 
-  let s:detail_completions =
-        \ index( completeopt, 'preview' ) >= 0 ||
-        \ ( type ( g:ycm_add_preview_to_completeopt ) != type( '' ) &&
-        \   g:ycm_add_preview_to_completeopt )
+  " Will we be using the preview popup ? That is either the user set it in their
+  " compelteopt or we're going to add it later.
+  let use_preview_popup =
+        \ s:force_preview_popup ||
+        \ index( completeopt, 'popup' ) >= 0
+
+  " We should only ask the server to resolve completion items upfront if we're
+  " going to display them - that is either:
+  "  - popup is (or will be) in completeopt
+  "  - preview is (or will be) in completeopt, or
+  let require_resolve =
+        \ use_preview_popup ||
+        \ force_preview ||
+        \ index( completeopt, 'preview' ) >= 0
+
+  if use_preview_popup && exists( '*popup_findinfo' )
+    " If the preview popup is going to be used, and on-demand resolve can be
+    " supported, enable it.
+    let s:resolve_completions = s:RESOLVE_ON_DEMAND
+  elseif require_resolve
+    " The preview window or info popup is enalbed - request the server
+    " pre-resolves completion items
+    let s:resolve_completions = s:RESOLVE_UP_FRONT
+  else
+    " Otherwise, there's no point in resolving completions - they'll never be
+    " displayed.
+  endif
 
   if !s:SetUpPython()
     return
@@ -251,15 +274,19 @@ try:
 
   # If we're able to resolve completion details asynchronously, set the option
   # which enables this in the server.
-  if int( vim.eval( 's:resolve_completions' ) ):
+  if int( vim.eval( 's:resolve_completions == s:RESOLVE_ON_DEMAND' ) ):
+    # resovle a small number upfront, the rest on demand
     default_options = {
       'max_num_candidates_to_detail': 10
     }
-  elif not int( vim.eval( 's:detail_completions' ) ):
+  elif int( vim.eval( 's:resolve_completions == s:RESOLVE_NONE' ) ):
+    # don't reasolve any
     default_options = {
       'max_num_candidates_to_detail': 0
     }
   else:
+    # i.e. s:resolve_completions == s:RESOLVE_UP_FRONT
+    # The server will decide - i.e. resovle everything upfront
     default_options = {}
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
@@ -514,7 +541,7 @@ function! s:SetUpCompleteopt()
   " Also, having this option set breaks the plugin.
   set completeopt-=longest
 
-  if s:resolve_completions
+  if s:resolve_completions == s:RESOLVE_ON_DEMAND
     set completeopt+=popuphidden
   endif
 
@@ -574,7 +601,7 @@ endfunction
 
 
 function! s:ResolveCompletionItem( item )
-  if !s:resolve_completions
+  if s:resolve_completions != s:RESOLVE_ON_DEMAND
     return
   endif
 
@@ -1163,8 +1190,10 @@ endfunction
 function! s:DebugInfo()
   echom "Printing YouCompleteMe debug information..."
   let debug_info = py3eval( 'ycm_state.DebugInfo()' )
-  echom '-- Resolve completions: ' string( s:resolve_completions )
-  echom '-- Detail completions: ' string( s:detail_completions )
+  echom '-- Resolve completions:'
+        \ ( s:resolve_completions == s:RESOLVE_ON_DEMAND ? 'On demand' :
+        \      s:resolve_completions == s:RESOLVE_UP_FRONT ? 'Up front' :
+        \       'Never' )
   for line in split( debug_info, "\n" )
     echom '-- ' . line
   endfor

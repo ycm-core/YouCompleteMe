@@ -5,7 +5,7 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
 
-  let g:ycm_add_preview_to_completeopt = 1
+  set completeopt-=preview
 
   call youcompleteme#test#setup#SetUp()
 endfunction
@@ -16,7 +16,7 @@ endfunction
 
 exe 'source' expand( "<sfile>:p:h" ) .. '/completion.common.vim'
 
-function! Test_Using_Upfront_Resolve()
+function! Test_No_Resolve()
   let debug_info = split( execute( 'YcmDebugInfo' ), "\n" )
   enew
   setf cpp
@@ -26,7 +26,7 @@ function! Test_Using_Upfront_Resolve()
   for line in debug_info
     if line =~# "^-- Resolve completions: "
       let ver = substitute( line, "^-- Resolve completions: ", "", "" )
-      call assert_equal( 'Up front', ver, 'API version' )
+      call assert_equal( 'Never', ver, 'API version' )
       return
     endif
   endfor
@@ -35,3 +35,4 @@ function! Test_Using_Upfront_Resolve()
 
   %bwipeout!
 endfunction
+

@@ -1,3 +1,16 @@
+function! s:AssertInfoPopupNotVisible()
+  call WaitForAssert( {-> assert_true(
+        \ popup_findinfo() == 0 ||
+        \ !popup_getpos( popup_findinfo() ).visible ) } )
+endfunction
+
+function! s:AssertInfoPopupVisible()
+  call WaitForAssert( {-> assert_true(
+        \ popup_findinfo() != 0 &&
+        \ !empty( popup_getpos( popup_findinfo() ) ) &&
+        \ popup_getpos( popup_findinfo() ).visible ) } )
+endfunction
+
 function! SetUp()
   let g:ycm_use_clangd = 1
   let g:ycm_confirm_extra_conf = 0
@@ -16,17 +29,24 @@ endfunction
 
 exe 'source' expand( "<sfile>:p:h" ) .. '/completion.common.vim'
 
-function! s:AssertInfoPopupNotVisible()
-  call WaitForAssert( {-> assert_true(
-        \ popup_findinfo() == 0 ||
-        \ !popup_getpos( popup_findinfo() ).visible ) } )
-endfunction
+function! Test_Using_Ondemand_Resolve()
+  let debug_info = split( execute( 'YcmDebugInfo' ), "\n" )
+  enew
+  setf cpp
 
-function! s:AssertInfoPopupVisible()
-  call WaitForAssert( {-> assert_true(
-        \ popup_findinfo() != 0 &&
-        \ !empty( popup_getpos( popup_findinfo() ) ) &&
-        \ popup_getpos( popup_findinfo() ).visible ) } )
+  call assert_equal( '', &completefunc )
+
+  for line in debug_info
+    if line =~# "^-- Resolve completions: "
+      let ver = substitute( line, "^-- Resolve completions: ", "", "" )
+      call assert_equal( 'On demand', ver, 'API version' )
+      return
+    endif
+  endfor
+
+  call assert_report( "Didn't find the resolve type in the YcmDebugInfo" )
+
+  %bwipeout!
 endfunction
 
 function! Test_ResolveCompletion_OnChange()
