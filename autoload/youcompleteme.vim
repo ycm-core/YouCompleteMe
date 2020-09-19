@@ -124,13 +124,13 @@ function! youcompleteme#Enable()
 
   " Will we add 'popup' to the 'completeopt' (later)
   let s:force_preview_popup =
-        \ type( g:ycm_add_preview_to_completeopt ) == type( '' ) &&
+        \ type( g:ycm_add_preview_to_completeopt ) == v:t_string &&
           \ g:ycm_add_preview_to_completeopt ==# 'popup' &&
           \ !s:is_neovim
 
   " Will we add 'preview' to the 'completeopt' (later)
   let force_preview =
-        \ type( g:ycm_add_preview_to_completeopt ) != type( '' ) &&
+        \ type( g:ycm_add_preview_to_completeopt ) != v:t_string &&
           \ g:ycm_add_preview_to_completeopt
 
   " Will we be using the preview popup ? That is either the user set it in their
@@ -479,10 +479,10 @@ function! s:AllowedToCompleteInBuffer( buffer )
 
   let filetype = getbufvar( a:buffer, '&filetype' )
 
-  let whitelist_allows = type( g:ycm_filetype_whitelist ) != type( {} ) ||
+  let whitelist_allows = type( g:ycm_filetype_whitelist ) != v:t_dict ||
         \ has_key( g:ycm_filetype_whitelist, '*' ) ||
         \ s:HasAnyKey( g:ycm_filetype_whitelist, split( filetype, '\.' ) )
-  let blacklist_allows = type( g:ycm_filetype_blacklist ) != type( {} ) ||
+  let blacklist_allows = type( g:ycm_filetype_blacklist ) != v:t_dict ||
         \ !s:HasAnyKey( g:ycm_filetype_blacklist, split( filetype, '\.' ) )
 
   let allowed = whitelist_allows && blacklist_allows
