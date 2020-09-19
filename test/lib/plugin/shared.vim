@@ -9,12 +9,12 @@ endif
 " Run skip the current test if some expression returns true
 func SkipIf( expr, msg )
   if type(a:expr) == v:t_func
-    let success = a:expr()
+    let skip = a:expr()
   else
-    let success = eval(a:expr)
+    let skip = eval(a:expr)
   endif
 
-  if !success
+  if skip
     throw 'SKIPPED: ' . a:msg
   endif
 endfunction

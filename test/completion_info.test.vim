@@ -77,6 +77,7 @@ function! Test_ResolveCompletion_OnChange()
 
     let compl = complete_info()
     let selected = compl.items[ compl.selected ]
+
     " All items should be resolved
     " NOTE: Even after resolving the item still has this as there's no way to
     " update the user data of the item at this point (need a vim change to do

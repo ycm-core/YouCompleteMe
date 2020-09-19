@@ -1046,7 +1046,6 @@ function! s:PollResolve( item, ... )
   endif
 
   call s:ShowInfoPopup( completion_item )
-
 endfunction
 
 function! s:ShowInfoPopup( completion_item )
