@@ -5,9 +5,6 @@ function! SetUp()
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
 
-  " Use the default, which _should_ be the new API
-  unlet! g:ycm_use_completion_api
-
   let g:ycm_add_preview_to_completeopt = 'popup'
 
   call youcompleteme#test#setup#SetUp()
@@ -33,6 +30,8 @@ function! s:AssertInfoPopupVisible()
 endfunction
 
 function! Test_ResolveCompletion_OnChange()
+  call SkipIf( !exists( '*popup_findinfo' ), 'no popup_findinfo' )
+
   " Only the java completer actually uses the completion resolve
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .
@@ -96,6 +95,8 @@ function! Test_ResolveCompletion_OnChange()
 endfunction
 
 function! Test_DontResolveCompletion_AlreadyResolved()
+  call SkipIf( !exists( '*popup_findinfo' ), 'no popup_findinfo' )
+
   " Only the java completer actually uses the completion resolve
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .

@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL C.UTF-8
@@ -18,14 +18,12 @@ RUN apt-get update && \
                      cmake \
                      curl \
                      sudo \
-                     python-dev \
-                     python-pip \
-                     python-setuptools \
                      python3-dev \
                      python3-pip \
                      python3-setuptools \
                      openjdk-11-jdk-headless \
                      npm \
+                     vim-nox \
                      zlib1g-dev && \
   apt-get -y autoremove
 
