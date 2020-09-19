@@ -122,15 +122,14 @@ class YouCompleteMe:
     self._latest_command_reqeust = None
 
     self._signature_help_state = signature_help.SignatureHelpState()
-    self._user_options = base.GetUserOptions()
+    self._user_options = base.GetUserOptions( self._default_options )
     self._omnicomp = OmniCompleter( self._user_options )
     self._buffers = BufferDict( self._user_options )
 
     self._SetLogLevel()
 
     hmac_secret = os.urandom( HMAC_SECRET_LENGTH )
-    options_dict = dict( self._default_options )
-    options_dict.update( self._user_options )
+    options_dict = dict( self._user_options )
     options_dict[ 'hmac_secret' ] = utils.ToUnicode(
       base64.b64encode( hmac_secret ) )
     options_dict[ 'server_keep_logfiles' ] = self._user_options[
