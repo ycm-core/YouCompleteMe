@@ -20,9 +20,16 @@ endfunction
 exe 'source' expand( "<sfile>:p:h" ) .. '/completion.common.vim'
 
 function! s:AssertInfoPopupNotVisible()
-  return assert_true(
+  call WaitForAssert( {-> assert_true(
         \ popup_findinfo() == 0 ||
-        \ !popup_getpos( popup_findinfo() ).visible )
+        \ !popup_getpos( popup_findinfo() ).visible ) } )
+endfunction
+
+function! s:AssertInfoPopupVisible()
+  call WaitForAssert( {-> assert_true(
+        \ popup_findinfo() != 0 &&
+        \ !empty( popup_getpos( popup_findinfo() ) ) &&
+        \ popup_getpos( popup_findinfo() ).visible ) } )
 endfunction
 
 function! Test_ResolveCompletion_OnChange()
@@ -46,17 +53,19 @@ function! Test_ResolveCompletion_OnChange()
 
   function! Check2( counter, id ) closure
     call WaitForCompletion()
+    call s:AssertInfoPopupVisible()
     let info_popup_id = popup_findinfo()
-    call assert_notequal( 0, info_popup_id )
-    call WaitForAssert( { ->
-          \ assert_true( popup_getpos( info_popup_id ).visible )
-          \ } )
 
     let compl = complete_info()
     let selected = compl.items[ compl.selected ]
+    " All items should be resolved
+    " NOTE: Even after resolving the item still has this as there's no way to
+    " update the user data of the item at this point (need a vim change to do
+    " that)
+    call assert_true( has_key( json_decode( selected.user_data ),
+          \ 'resolve' ) )
 
     if selected.word ==# 'getAString'
-      redraw!
       " It's line 5 because we truncated the signature to fit it in
       call WaitForAssert( { ->
             \ assert_equal( [ 'MethodsWithDocumentation.getAString() : String',
@@ -100,28 +109,29 @@ function! Test_DontResolveCompletion_AlreadyResolved()
   function! Check1( id )
     call WaitForCompletion()
     call CheckCompletionItems( [ 'hashCode' ], 'word' )
+    call s:AssertInfoPopupNotVisible()
     call assert_equal( -1, complete_info().selected )
+
+    let compl = complete_info()
+    let hashCode = compl.items[ 0 ]
+    call assert_equal( 1, len( compl.items ) )
+    call assert_equal( 'hashCode', hashCode.word )
+    call assert_false( has_key( json_decode( hashCode.user_data ),
+          \ 'resolve' ) )
+
     call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )
     call WaitForCompletion()
-    call WaitForAssert( { ->
-          \ assert_notequal( 0, popup_findinfo() )
-          \ } )
-    call WaitForAssert( { ->
-          \ assert_true( popup_getpos( popup_findinfo() ).visible )
-          \ } )
+    call s:AssertInfoPopupVisible()
 
     let compl = complete_info()
     let selected = compl.items[ 0 ]
     call assert_equal( 1, len( compl.items ) )
     call assert_equal( 'hashCode', selected.word )
-
-    " It's line 5 because we truncated the signature to fit it in
-    let doc_line = getbufline( winbufnr( popup_findinfo() ), '3' )[ 0 ]
-    call assert_match( '^Returns a hash code value', doc_line )
-
+    call assert_false( has_key( json_decode( selected.user_data ),
+          \ 'resolve' ) )
     call feedkeys( "\<Esc>" )
   endfunction
 
