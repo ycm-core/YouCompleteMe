@@ -3,9 +3,8 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL C.UTF-8
 
-ARG VIM_VERSION=v8.1.1875
+ARG VIM_VERSION=v8.1.1905
 ARG YCM_VIM_PYTHON=python3
-ARG YCM_PYTHON_VERSION=3.5.2
 
 RUN apt-get update && \
   apt-get -y dist-upgrade && \
