@@ -35,4 +35,3 @@ function! Test_No_Resolve()
 
   %bwipeout!
 endfunction
-

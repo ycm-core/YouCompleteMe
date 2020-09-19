@@ -553,7 +553,7 @@ function! s:SetUpCompleteopt()
 endfunction
 
 
-function! s:SetCompleteFunc()
+function! s:EnableCompletingInCurrentBuffer()
   let b:ycm_completing = 1
 endfunction
 
@@ -649,7 +649,7 @@ function! s:OnFileTypeSet()
   endif
 
   call s:SetUpCompleteopt()
-  call s:SetCompleteFunc()
+  call s:EnableCompletingInCurrentBuffer()
   call s:StartMessagePoll()
   call s:EnableAutoHover()
 
@@ -674,7 +674,7 @@ function! s:OnBufferEnter()
   endif
 
   call s:SetUpCompleteopt()
-  call s:SetCompleteFunc()
+  call s:EnableCompletingInCurrentBuffer()
 
   py3 ycm_state.OnBufferVisit()
   " Last parse may be outdated because of changes from other buffers. Force a
