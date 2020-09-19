@@ -612,8 +612,6 @@ function! s:ResolveCompletionItem( item )
 
   if py3eval( 'ycm_state.ResolveCompletionItem( vim.eval( "a:item" ) )' )
     call s:StopPoller( s:pollers.completion )
-    " OK so this "works" but it resets the completion state each time. i think
-    " we need a way to update the completion candidate without reset
     call timer_start( 0, function( 's:PollResolve', [ a:item ] ) )
   else
     call s:ShowInfoPopup( a:item )
@@ -1035,20 +1033,26 @@ function! s:PollResolve( item, ... )
     return
   endif
 
-  let completion =
+  " Note we re-use the 'completion' request for resolves. This prevents us
+  " sending a completion request and a resolve request at the same time, as
+  " resolve requests re-use the requset data from the last completion request
+  " and it must not change.
+  " We also re-use the poller, so that any new completion request effectively
+  " cancels this poller.
+  let completion_item =
         \ py3eval( 'ycm_state.GetCompletionResponse()[ "completion" ]' )
-  if empty( completion ) || empty( completion.info )
+  if empty( completion_item ) || empty( completion_item.info )
     return
   endif
 
-  call s:ShowInfoPopup( completion )
+  call s:ShowInfoPopup( completion_item )
 
 endfunction
 
-function! s:ShowInfoPopup( completion )
+function! s:ShowInfoPopup( completion_item )
   let id = popup_findinfo()
   if id
-    call popup_settext( id, split( a:completion.info, '\n' ) )
+    call popup_settext( id, split( a:completion_item.info, '\n' ) )
     call popup_show( id )
   endif
 endfunction
