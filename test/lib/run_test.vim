@@ -353,7 +353,7 @@ def _InitCoverage():
   except ImportError:
     return None
 
-  cov = coverage.Coverage( data_file='.coverage.python' )
+  cov = coverage.Coverage( data_file='.coverage.python', data_suffix = True )
   cov.start()
   return cov
 
