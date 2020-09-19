@@ -19,6 +19,12 @@ endfunction
 
 exe 'source' expand( "<sfile>:p:h" ) .. '/completion.common.vim'
 
+function! s:AssertInfoPopupNotVisible()
+  return assert_true(
+        \ popup_findinfo() == 0 ||
+        \ !popup_getpos( popup_findinfo() ).visible )
+endfunction
+
 function! Test_ResolveCompletion_OnChange()
   " Only the java completer actually uses the completion resolve
   call youcompleteme#test#setup#OpenFile(
@@ -32,7 +38,7 @@ function! Test_ResolveCompletion_OnChange()
 
   function! Check1( id )
     call WaitForCompletion()
-    call assert_equal( 0, popup_findinfo() )
+    call s:AssertInfoPopupNotVisible()
     call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2', [ 0 ] ) )
   endfunction
 
