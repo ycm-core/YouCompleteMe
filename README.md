@@ -1329,8 +1329,8 @@ built YCM with the `--go-completer` flag; see the [*Installation*
 section](#installation) for details). The server only works for projects with
 the "canonical" layout.
 
-While YCM can configure [a LSP server](#lsp-configuration), currently `gopls`
-doesn't implement [the required notification][gopls-preferences].
+gopls also has a handful of undocumented options for which the
+[source code][gopls-preferences] is the only reference.
 
 ### JavaScript and TypeScript Semantic Completion
 
@@ -3395,7 +3395,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [Bear]: https://github.com/rizsotto/Bear
 [ygen]: https://github.com/rdnetto/YCM-Generator
 [Gopls]: https://github.com/golang/go/wiki/gopls
-[gopls-preferences]: https://github.com/golang/tools/blob/master/internal/lsp/server.go#L120
+[gopls-preferences]: https://github.com/golang/tools/blob/master/internal/lsp/server.go
 [TSServer]: https://github.com/Microsoft/TypeScript/tree/master/src/server
 [jsconfig.json]: https://code.visualstudio.com/docs/languages/jsconfig
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html

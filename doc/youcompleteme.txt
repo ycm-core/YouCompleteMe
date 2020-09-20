@@ -1513,8 +1513,8 @@ Completions and GoTo commands should work out of the box (provided that you
 built YCM with the '--go-completer' flag; see the _Installation_ section for
 details). The server only works for projects with the "canonical" layout.
 
-While YCM can configure a LSP server, currently 'gopls' doesn't implement the
-required notification [63].
+gopls also has a handful of undocumented options for which the source code [63]
+is the only reference.
 
 -------------------------------------------------------------------------------
                       *youcompleteme-javascript-typescript-semantic-completion*
@@ -3601,7 +3601,7 @@ References ~
 [60] https://github.com/rust-lang/rls
 [61] https://www.rust-lang.org/downloads.html
 [62] https://github.com/rust-analyzer/rust-analyzer/blob/master/crates/rust-analyzer/src/config.rs
-[63] https://github.com/golang/tools/blob/master/internal/lsp/server.go#L120
+[63] https://github.com/golang/tools/blob/master/internal/lsp/server.go
 [64] https://ternjs.net
 [65] https://github.com/ycm-core/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
 [66] https://code.visualstudio.com/docs/languages/jsconfig
