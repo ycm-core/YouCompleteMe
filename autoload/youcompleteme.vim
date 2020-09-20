@@ -44,6 +44,10 @@ let s:requests = {
       \   'signature_help': {
       \     'id': -1,
       \   },
+      \   'command': {
+      \     'id': -1,
+      \     'callback': v:null,
+      \   }
       \ }
 let s:pollers = {
       \   'server_ready': {
@@ -54,10 +58,6 @@ let s:pollers = {
       \     'id': -1,
       \     'wait_milliseconds': 100
       \   },
-      \   'command': {
-      \     'id': -1,
-      \     'wait_milliseconds': 100
-      \   }
       \ }
 let s:buftype_blacklist = {
       \   'help': 1,
@@ -1145,7 +1145,7 @@ function! s:RestartServer()
   py3 ycm_state.RestartServer()
 
   call s:StopPoller( s:pollers.receive_messages )
-  call s:StopPoller( s:pollers.command )
+  call s:Cancel( s:requests.command )
   call s:ClearSignatureHelp()
 
   call s:StopPoller( s:pollers.server_ready )
@@ -1203,16 +1203,14 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  if s:pollers.command.id != -1
+  if s:requests.command.id != -1
     eval a:callback( '' )
     return
   endif
 
-  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
-
-  let s:pollers.command.id = timer_start(
-        \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ 'StringResponse', a:callback ] ) )
+  let s:requests.command.callback = a:callback
+  let s:requests.command.id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( False, vim.eval( "a:000" ) )' )
 endfunction
 
 
@@ -1232,34 +1230,22 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
-
-  let s:pollers.command.id = timer_start(
-        \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ 'Response', a:callback ] ) )
+  let s:requests.command.callback = a:callback
+  let s:requests.command.id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( True, vim.eval( "a:000" ) )' )
 endfunction
 
 
-function! s:PollCommand( response_func, callback, id ) abort
-  if py3eval( 'ycm_state.GetCommandRequest() is None' )
-    " Possible in case of race conditions and things like RestartServer
-    " But particualrly in the tests
+function! youcompleteme#OnCommandRequestDone( id, result )
+  if a:id != s:requests.command.id
     return
   endif
 
-  if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
-    let s:pollers.command.id = timer_start(
-          \ s:pollers.command.wait_milliseconds,
-          \ function( 's:PollCommand', [ a:response_func, a:callback ] ) )
-    return
-  endif
+  let Callback = s:requests.command.callback
+  call s:Cancel( s:requests.command )
+  let s:requests.command.callback = v:null
 
-  call s:StopPoller( s:pollers.command )
-
-  let result = py3eval( 'ycm_state.GetCommandRequest().'
-                      \ .a:response_func . '()' )
-
-  eval a:callback( result )
+  eval Callback( a:result )
 endfunction
 
 
@@ -1426,8 +1412,8 @@ endif
 " Internal functions for testing only
 "-------------------------------------------------------------------------------
 
-function! youcompleteme#Test_GetPollers()
-  return s:pollers
+function! youcompleteme#Test_GetRequests()
+  return s:requests
 endfunction
 
 function! youcompleteme#IsRequestPending( request )

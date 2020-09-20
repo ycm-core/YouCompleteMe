@@ -426,35 +426,45 @@ class YouCompleteMe:
                           has_range,
                           start_line,
                           end_line ):
-    final_arguments, extra_data = self._GetCommandRequestArguments(
-      arguments,
-      has_range,
-      start_line,
-      end_line )
-    return SendCommandRequest(
-      final_arguments,
-      modifiers,
-      self._user_options[ 'goto_buffer_command' ],
-      extra_data )
+    final_arguments, extra_data = self._GetCommandRequestArguments( arguments,
+                                                                    has_range,
+                                                                    start_line,
+                                                                    end_line )
+    return SendCommandRequest( final_arguments,
+                               modifiers,
+                               self._user_options[ 'goto_buffer_command' ],
+                               extra_data )
 
 
   def GetCommandResponse( self, arguments ):
-    final_arguments, extra_data = self._GetCommandRequestArguments(
-      arguments,
-      False,
-      0,
-      0 )
+    final_arguments, extra_data = self._GetCommandRequestArguments( arguments,
+                                                                    False,
+                                                                    0,
+                                                                    0 )
     return GetCommandResponse( final_arguments, extra_data )
 
 
-  def SendCommandRequestAsync( self, arguments ):
-    final_arguments, extra_data = self._GetCommandRequestArguments(
-      arguments,
-      False,
-      0,
-      0 )
-    self._latest_command_reqeust = SendCommandRequestAsync( final_arguments,
-                                                            extra_data )
+  def SendCommandRequestAsync( self, raw, arguments ):
+    final_arguments, extra_data = self._GetCommandRequestArguments( arguments,
+                                                                    False,
+                                                                    0,
+                                                                    0 )
+
+    def handler( request_id, request ):
+      if raw:
+        result = request.Response()
+      else:
+        result = request.StringResponse()
+
+      vimsupport.Call( 'youcompleteme#OnCommandRequestDone',
+                       request_id,
+                       result )
+
+    request_id, _ = SendCommandRequestAsync( final_arguments,
+                                             handler = handler,
+                                             extra_data = extra_data,
+                                             silent = True )
+    return request_id
 
 
   def GetCommandRequest( self ):

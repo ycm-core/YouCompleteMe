@@ -39,16 +39,23 @@ class CommandRequest( BaseRequest ):
     self._silent = silent
 
 
-  def Start( self ):
+  def Start( self, handler ):
     self._request_data = BuildRequestData()
     if self._extra_data:
       self._request_data.update( self._extra_data )
     self._request_data.update( {
       'command_arguments': self._arguments
     } )
+
     self._response_future = self.PostDataToHandlerAsync(
       self._request_data,
       'run_completer_command' )
+
+    if handler is not None:
+      self._response_future.add_complete_handler(
+        lambda future: handler( self._response_future.request_id, self ) )
+
+    return self._response_future.request_id
 
 
   def Done( self ):
@@ -194,30 +201,32 @@ class CommandRequest( BaseRequest ):
     vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
 
 
-def SendCommandRequestAsync( arguments, extra_data = None, silent = True ):
+def SendCommandRequestAsync( arguments, handler, extra_data, silent ):
   request = CommandRequest( arguments,
                             extra_data = extra_data,
                             silent = silent )
-  request.Start()
-  # Don't block
-  return request
+  return request.Start( handler ), request
 
 
 def SendCommandRequest( arguments,
                         modifiers,
                         buffer_command = DEFAULT_BUFFER_COMMAND,
                         extra_data = None ):
-  request = SendCommandRequestAsync( arguments,
-                                     extra_data = extra_data,
-                                     silent = False )
+
+  _, request = SendCommandRequestAsync( arguments,
+                                        handler = None,
+                                        extra_data = extra_data,
+                                        silent = False )
+
   # Block here to get the response
   request.RunPostCommandActionsIfNeeded( modifiers, buffer_command )
   return request.Response()
 
 
 def GetCommandResponse( arguments, extra_data = None ):
-  request = SendCommandRequestAsync( arguments,
-                                     extra_data = extra_data,
-                                     silent = True )
+  _, request = SendCommandRequestAsync( arguments,
+                                        handler = None,
+                                        extra_data = extra_data,
+                                        silent = True )
   # Block here to get the response
   return request.StringResponse()

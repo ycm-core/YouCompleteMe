@@ -91,7 +91,7 @@ endfunction
 function! TearDown()
   let g:ycm_auto_hover='CursorHold'
 
-  call assert_equal( -1, youcompleteme#Test_GetPollers().command.id )
+  call s:WaitForCommandRequestComplete()
 endfunction
 
 function! Test_Hover_Uses_GetDoc()
