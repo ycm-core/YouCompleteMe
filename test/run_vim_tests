@@ -12,7 +12,14 @@ elif [ "$1" == "--stdout" ]; then
   shift
 fi
 
-RUN_VIM="vim --clean --not-a-term"
+VIM=vim
+if [ "$1" == "--vim" ]; then
+  VIM=$2
+  shift
+  shift
+fi
+
+RUN_VIM="${VIM} --clean --not-a-term"
 RUN_TEST="${RUN_VIM} -S lib/run_test.vim"
 
 pushd $(dirname $0) > /dev/null
