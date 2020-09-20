@@ -98,7 +98,7 @@ contains:
 - an [OmniSharp-Roslyn][]-based completion engine for C#,
 - a [Gopls][]-based completion engine for Go,
 - a [TSServer][]-based completion engine for JavaScript and TypeScript,
-- a [rls][]-based completion engine for Rust,
+- a [rust-analyzer][]-based completion engine for Rust,
 - a [jdt.ls][]-based completion engine for Java.
 - a [generic Language Server Protocol implementation for any language](#plugging-an-arbitrary-lsp-server)
 - and an omnifunc-based completer that uses data from Vim's omnicomplete system
@@ -691,6 +691,7 @@ Quick Feature Summary
 * Reference finding (`GoToReferences`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
+* Renaming symbols (`RefactorRename <new name>`)
 
 ### Go
 
@@ -738,7 +739,7 @@ Quick Feature Summary
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
 * Execute custom server command (`ExecuteCommand <args>`)
-* Management of `rls` server instance
+* Management of `rust-analyzer` server instance
 
 ### Java
 
@@ -1303,37 +1304,23 @@ setting one of the options. YCM will automatically pick the new values.
 
 ### Rust Semantic Completion
 
+YCM uses [rust-analyzer][] for Rust semantic completion.
+
+NOTE: Previously, YCM used [rls][] for rust completion. This is no longer
+supported, as the Rust community has decided on [rust-analyzer][] as the future
+of Rust tooling.
+
 Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
 built YCM with the `--rust-completer` flag; see the [*Installation*
 section](#installation) for details). The install script takes care of
 installing [the Rust source code][rust-src], so no configuration is necessary.
 
-To [configure RLS](#lsp-configuration) look up [rls configuration options][
-rls-preferences]. The value of the `ls` key must be structured as in the
-following example:
-
-```python
-def Settings( **kwargs ):
-  if kwargs[ 'language' ] == 'rust':
-    return {
-        'ls': {
-            'rust': {
-                'features': ['http2','spnego'],
-                'all_targets': False,
-                'wait_to_build': 1500,
-            }
-        }
-    }
-```
-
-That is to say, `ls` should be paired with a dictionary containing a key `rust`,
-which should be paired with another dictionary in which the keys are RLS
-options.
-
-Also, for the time being, if you make changes to your `Cargo.toml` that RLS
-doesn't seem to recognize, you may need to restart it manually with
-`:YcmCompleter RestartServer`.
+rust-analyzer supports a myriad of options. These are configured using [LSP
+configuration](#lsp-configuration), but sadly don't appear to be documented at
+the time of writing. However, there is some
+[source code](https://github.com/rust-analyzer/rust-analyzer/blob/master/crates/rust-analyzer/src/config.rs)
+which might help.
 
 ### Go Semantic Completion
 
@@ -1380,7 +1367,7 @@ To get diagnostics in JavaScript, set the `checkJs` option to `true` in your
 
 C-family, C#, Go, Java, Python, Rust, and JavaScript/TypeScript languages are
 supported natively by YouCompleteMe using the [Clang][], [OmniSharp-Roslyn][],
-[Gopls][], [jdt.ls][], [Jedi][], [rls][], and [TSServer][] engines,
+[Gopls][], [jdt.ls][], [Jedi][], [rust-analyzer][], and [TSServer][] engines,
 respectively. Check the [installation](#installation) section for instructions
 to enable these features if desired.
 
@@ -1403,14 +1390,35 @@ let g:ycm_language_server =
   \     'cmdline': [ 'ra_lsp_server' ],
   \     'filetypes': [ 'rust' ],
   \     'project_root_files': [ 'Cargo.toml' ]
-  \   }
+  \   },
+  \   {
+  \     'name': 'godot',
+  \     'filetypes': [ 'gdscript' ],
+  \     'port': 6008,
+  \     'project_root_files': [ 'project.godot' ]
+  \    }
   \ ]
 ```
 
-`project_root_files` is an optional key, since not all servers need it.
+Each dictionary contains the following keys:
 
-When [configuring a LSP server](#lsp-configuration) the value of the `name` key
-will be used as the `kwargs[ 'language' ]`.
+* `name` (string, mandatory): When [configuring a LSP
+  server](#lsp-configuration) the value of the `name` key will be used as the
+  `kwargs[ 'language' ]`. Can be anything you like.
+* `filetypes` (list of string, mandatory): List of Vim filetypes this server
+  should be used for.
+* `project_root_files` (list of string, optional): List of filenames to search
+  for when trying to determine the project root.
+* `cmdline` (list of string, optional): If supplied, the server is started with
+  this command line (each list element is a command line word). Typically, the
+  server should be started with STDIO communication. If not supplied, `port`
+  must be supplied.
+* `port` (number, optional): If supplied, ycmd will connect to the server at
+  `localhost:<port>` using TCP (remote servers are not supported).
+* `capabilities` (dict, optional): If supplied, this is a dictionary that is
+  merged with the LSP client capabilities reported to the language server. This
+  can be used to enable or disable certain features, such as the support for
+  configuraiton sections (`workspace/configuration`).
 
 See [the LSP Examples](https://github.com/ycm-core/lsp-examples) project for more
 examples of configuring the likes of PHP, Ruby, Kotlin, and D.
@@ -1419,17 +1427,44 @@ examples of configuring the likes of PHP, Ruby, Kotlin, and D.
 
 Many LSP servers allow some level of user configuration. YCM enables this with
 the help of `.ycm_extra_conf.py` files. Here's an example of jdt.ls user
-configuration.
+examples of configuring the likes of PHP, Ruby, Kotlin, D, and many, many more.
 
 ```python
 def Settings( **kwargs ):
   if kwargs[ 'language' ] == 'java':
-    return { 'ls': { 'java.format.onType.enabled': True } }
+    return {
+      'ls': {
+        'java.format.onType.enabled': True
+      }
+    }
 ```
 
 The `ls` key tells YCM that the dictionary should be passed to the LSP server.
 For each of the LSP server's configuration you should look up the respective
 server's documentation.
+
+Some servers request settings from arbitrary 'sections' of configuration. There
+is no concept of configuration sections in vim, so you can specify an additional
+`config_sections` dictionary which maps section to a dictionary of config
+required by the server. For example:
+
+
+```python
+def Settings( **kwargs ):
+  if kwargs[ 'language' ] == 'java':
+    return {
+      'ls': {
+        'java.format.onType.enabled': True
+      },
+      'config_sections': {
+        'some section': {
+          'some option': 'some value'
+        }
+    }
+```
+
+The sections and options/values are complete server-specific and rarely well
+documented.
 
 #### Using `omnifunc` for semantic completion
 
@@ -1891,7 +1926,7 @@ files. Rename operations may involve changes to multiple files, which may or may
 not be open in Vim buffers at the time. YouCompleteMe handles all of this for
 you. The behavior is described in [the following section](#multi-file-refactor).
 
-Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, typescript, rust, cs`
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, python, typescript, rust, cs`
 
 #### Multi-file Refactor
 
@@ -1951,7 +1986,7 @@ flags.
 #### The `ExecuteCommand <args>` subcommand
 
 Some LSP completers (currently Rust and Java completers) support executing
-server specific commands. Consult the [rls][] and [jdt.ls][] respective
+server specific commands. Consult the [rust-analyzer][] and [jdt.ls][] respective
 documentations to find out what commands are supported and which arguments are
 expected.
 
@@ -2198,6 +2233,46 @@ Default: `50`
 
 ```viml
 let g:ycm_max_num_candidates = 50
+```
+
+### The `g:ycm_max_num_candidates_to_detail` option
+
+Some completion engines require completion candidates to be 'resolved' in order
+to get detailed info such as inline documentation, method signatures etc.  This
+information is displayed by YCM in the preview window, or if `completeopt`
+contains `popup`, in the info popup next to the completion menu.
+
+By deafult, if the info popup is in use, and there are more than 10 candidates,
+YCM will defer resolving candidates until they are selected in the completion
+menu.  Otherwise, YCM must resolve the details upfront, which can be costly.
+
+If neither `popup` nor `preview` are in `completeopt`, YCM disables resolving
+altogether as the information would not be displayed.
+
+This setting can be used to override these defaults and  controls the number of
+completion candidates that should be resolved upfront. Typically users do not
+need to change this, as YCM will work out an appropriate value based on your
+`completeopt` and `g:ycm_add_preview_to_completeopt` settings. Howver, you may
+override this calculation by setting this value to a number:
+
+* `-1` - Resolve all candidates up front
+* `0` - Never resolve any candidates up front.
+* `> 0` - Resolve up to this many candidates up front. If the number of
+  candidates is greater than this value, no candidates are resolved.
+
+In the later two cases, if `completeopt` contains `popup`, then candidates are
+resolved on demand asynchronously.
+
+Default:
+
+* `0` if neither `popup` nor `preview` are in `completeopt`.
+* `10` if `popup` is in completeopt.
+* `-1` if `preview` is in completeopt.
+
+Example:
+
+```viml
+let g:ycm_max_num_candidates_to_detail = 0
 ```
 
 ### The `g:ycm_max_num_identifier_candidates` option
@@ -3231,10 +3306,15 @@ let g:ycm_gopls_args = []
 
 ### The `g:ycm_rls_binary_path` and `g:ycm_rustc_binary_path` options
 
-Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), these two options
-tell YCM which `rls` and `rustc` to use.
+YCM no longer uses RLS for rust, and these options are therefore no longer
+supported.
 
-NOTE: You *need* to either set both or none of these two.
+To use a custom rust-analyzer, see `g:ycm_rust_toolchain_root`.
+
+### The `g:ycm_rust_toolchain_root` option
+
+Optionally specify the path to a custom rust toolchain including at least a
+supported version of `rust-analyzer`.
 
 
 ### The `g:ycm_tsserver_binary_path` option
@@ -3330,7 +3410,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [libclang-instructions]: https://github.com/ycm-core/YouCompleteMe/wiki/C-family-Semantic-Completion-through-libclang
 [Tern]: https://ternjs.net
 [rls]: https://github.com/rust-lang/rls
-[rls-preferences]: https://github.com/rust-lang/rls#configuration
+[rust-analyzer]: https://rust-analyzer.github.io
 [rust-src]: https://www.rust-lang.org/downloads.html
 [add-msbuild-to-path]: https://stackoverflow.com/questions/6319274/how-do-i-run-msbuild-from-the-command-line-using-windows-sdk-7-1
 [ccoc]: https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
