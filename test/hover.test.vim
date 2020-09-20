@@ -1,26 +1,17 @@
 function! s:WaitForCommandRequestComplete()
   call WaitForAssert( { ->
-        \ assert_true( py3eval(
-        \     'ycm_state.GetCommandRequest() is not None and '
-        \   . 'ycm_state.GetCommandRequest().Done()' ) )
-        \ } )
-
-  call WaitForAssert( { ->
-        \ assert_equal( -1,
-        \               youcompleteme#Test_GetPollers().command.id )
+        \ assert_false( youcompleteme#IsRequestPending( 'command' ) )
         \ } )
 endfunction
 
 function! s:CheckNoCommandRequest()
   call WaitForAssert( { ->
-        \ assert_true( py3eval(
-        \     'ycm_state.GetCommandRequest() is None or '
-        \   . 'ycm_state.GetCommandRequest().Done()' ) )
+        \ assert_false( youcompleteme#IsRequestPending( 'command' ) )
         \ } )
 
   call WaitForAssert( { ->
-        \ assert_equal( -1,
-        \               youcompleteme#Test_GetPollers().command.id )
+        \ assert_equal( v:null,
+        \               youcompleteme#Test_GetRequests().command.callback )
         \ } )
 endfunction
 
@@ -109,7 +100,7 @@ endfunction
 function! TearDown()
   let g:ycm_auto_hover='CursorHold'
 
-  call assert_equal( -1, youcompleteme#Test_GetPollers().command.id )
+  call s:WaitForCommandRequestComplete()
 endfunction
 
 function! Test_Hover_Uses_GetDoc()
