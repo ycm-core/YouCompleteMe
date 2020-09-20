@@ -8,7 +8,7 @@ YouCompleteMe: a code-completion engine for Vim
 NOTE: Minimum Requirements Have Changed
 ----------------------------------------
 
-Our policy is to suppor the Vim version that's in the latest LTS of Ubuntu.
+Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
 That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
 
 Help, Advice, Support
