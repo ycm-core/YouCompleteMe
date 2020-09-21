@@ -71,6 +71,7 @@ elseif &encoding !~? 'utf-\?8'
 endif
 
 let g:loaded_youcompleteme = 1
+let g:ycm_http9_vars = {}
 
 "
 " List of YCM options.

@@ -227,6 +227,7 @@ class YouCompleteMe:
     if not self._server_is_ready_with_cache and self.IsServerAlive():
       self._server_is_ready_with_cache = BaseRequest().GetDataFromHandler(
           'ready', display_message = False )
+      vimsupport.Log( f'ready? { self._server_is_ready_with_cache }' )
     return self._server_is_ready_with_cache
 
 
