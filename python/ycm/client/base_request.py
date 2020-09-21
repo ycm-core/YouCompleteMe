@@ -160,7 +160,7 @@ class BaseRequest:
                                            request_uri,
                                            sent_data )
       _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
-      request_id  = vimsupport.Call( 'youcompleteme#http#POST',
+      request_id  = vimsupport.Call( 'youcompleteme#http9#POST',
                                      BaseRequest.server_host,
                                      BaseRequest.server_port,
                                      request_uri,
@@ -173,7 +173,7 @@ class BaseRequest:
 
       headers = BaseRequest._ExtraHeaders( method, request_uri )
       _logger.debug( 'GET %s (%s)\n%s', request_uri, query_string, headers )
-      request_id  = vimsupport.Call( 'youcompleteme#http#GET',
+      request_id  = vimsupport.Call( 'youcompleteme#http9#GET',
                                      BaseRequest.server_host,
                                      BaseRequest.server_port,
                                      request_uri,
@@ -226,9 +226,8 @@ class Future:
 
   def result( self ):
     if not self.done():
-      vimsupport.Call( 'youcompleteme#http#Block',
-                       self.request_id,
-                       self._timeout * 1000 )
+      vim.eval( f'youcompleteme#http9#Block( { self.request_id }, '
+                f'                           { self._timeout * 1000 } )' )
 
     assert self.done()
 
@@ -247,6 +246,7 @@ class Future:
 
   def resolve( self, status_code, header_map, data ):
     self._result = Response( status_code, header_map, data )
+    vimsupport.Log( f'Result! { self._result }' )
     self._done = True
     for f in self._on_complete_handlers:
       f( self )
@@ -339,7 +339,10 @@ def _JsonFromFuture( future ):
   response.raise_for_status()
 
   if response.text:
+    vimsupport.Log( 'To JSON!!' )
     return response.json()
+
+  vimsupport.Log( 'NONE!' )
   return None
 
 
