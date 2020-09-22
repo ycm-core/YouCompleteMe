@@ -75,6 +75,8 @@ let g:loaded_youcompleteme = 1
 "
 " List of YCM options.
 "
+let g:ycm_pending_changes = {}
+
 let g:ycm_filetype_whitelist =
       \ get( g:, 'ycm_filetype_whitelist', { "*": 1 } )
 
