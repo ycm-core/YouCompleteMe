@@ -224,6 +224,7 @@ def BuildRequestData( buffer_number = None ):
   current_buffer = vim.current.buffer
 
   # TODO: Don't assume that the server can do incremental buffer changes.
+  vim.Function( 'listener_flush' )()
   incremental = True
   if buffer_number and current_buffer.number != buffer_number:
     # Cursor position is irrelevant when filepath is not the current buffer.

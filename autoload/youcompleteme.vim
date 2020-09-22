@@ -661,8 +661,14 @@ endfunction
 function! youcompleteme#ListenerCallback( buffer, start, end, added, changes )
   for c in a:changes
     let pending_buffer_changes = get( g:ycm_pending_changes, bufname( a:buffer ), [] )
+    let lines = getbufline( a:buffer, c.lnum, c.end - 1 + c.added )
+    if len( lines ) > 0
+      let replacement_text = join( lines, "\n" ) . "\n"
+    else
+      let replacement_text = ''
+    endif
     call add( pending_buffer_changes, {
-      \ 'replacement_text': join( getbufline( a:buffer, c.lnum, c.end - 1 + c.added ), "\n" ) . "\n",
+      \ 'replacement_text': replacement_text,
       \ 'range': {
         \ 'start': { 'line': c.lnum, 'col': 1 },
         \ 'end':   { 'line': c.end,   'col': 1 }

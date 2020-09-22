@@ -155,8 +155,8 @@ def GetUnsavedAndSpecifiedBufferData( included_buffer,
         end = rng[ 'end' ]
         start[ 'line' ] = int( start[ 'line' ] )
         start[ 'col' ] = int( start[ 'col' ] )
-        end[ 'line' ] = int( start[ 'line' ] )
-        end[ 'col' ] = int( start[ 'col' ] )
+        end[ 'line' ] = int( end[ 'line' ] )
+        end[ 'col' ] = int( end[ 'col' ] )
       buffer_data[ 'changes' ] = changes
       buffers_data[ full_path ] = buffer_data
     vim.command( 'let g:ycm_pending_changes = {}' )
