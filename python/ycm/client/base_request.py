@@ -33,6 +33,9 @@ _READ_TIMEOUT_SEC = 5
 _HMAC_HEADER = 'x-ycm-hmac'
 _logger = logging.getLogger( __name__ )
 
+# _HTTP_INTERFACE = 'http9'
+_HTTP_INTERFACE = 'http'
+
 class YCMConnectionError( Exception ):
   pass
 
@@ -161,7 +164,7 @@ class BaseRequest:
                                            request_uri,
                                            sent_data )
       _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
-      request_id  = vimsupport.Call( 'youcompleteme#http9#POST',
+      request_id  = vimsupport.Call( f'youcompleteme#{_HTTP_INTERFACE}#POST',
                                      BaseRequest.server_host,
                                      BaseRequest.server_port,
                                      request_uri,
@@ -174,7 +177,7 @@ class BaseRequest:
 
       headers = BaseRequest._ExtraHeaders( method, request_uri )
       _logger.debug( 'GET %s (%s)\n%s', request_uri, query_string, headers )
-      request_id  = vimsupport.Call( 'youcompleteme#http9#GET',
+      request_id  = vimsupport.Call( f'youcompleteme#{_HTTP_INTERFACE}#GET',
                                      BaseRequest.server_host,
                                      BaseRequest.server_port,
                                      request_uri,
@@ -227,8 +230,12 @@ class Future:
 
   def result( self ):
     if not self.done():
-      vim.eval( f'youcompleteme#http9#Block( { self.request_id }, '
-                f'                           { self._timeout * 1000 } )' )
+      # We have to use this to make sure they are passed as ints, as
+      # vimsupport.Call will pass ints as strings due to annoying if_python
+      # behaviour
+      vim.eval( f'youcompleteme#{_HTTP_INTERFACE}#Block( '
+                f'  { self.request_id }, '
+                f'  { self._timeout * 1000 } )' )
 
     assert self.done()
 
