@@ -149,6 +149,14 @@ def GetUnsavedAndSpecifiedBufferData( included_buffer,
     for buffer_name, changes in modified_buffers.items():
       full_path = os.path.abspath( buffer_name )
       buffer_data = buffers_data.get( full_path, {} )
+      for change in changes:
+        rng = change[ 'range' ]
+        start = rng[ 'start' ]
+        end = rng[ 'end' ]
+        start[ 'line' ] = int( start[ 'line' ] )
+        start[ 'col' ] = int( start[ 'col' ] )
+        end[ 'line' ] = int( start[ 'line' ] )
+        end[ 'col' ] = int( start[ 'col' ] )
       buffer_data[ 'changes' ] = changes
       buffers_data[ full_path ] = buffer_data
     vim.command( 'let g:ycm_pending_changes = {}' )
