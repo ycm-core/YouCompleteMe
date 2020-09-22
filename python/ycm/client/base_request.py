@@ -223,6 +223,8 @@ def BuildRequestData( buffer_number = None ):
   working_dir = GetCurrentDirectory()
   current_buffer = vim.current.buffer
 
+  # TODO: Don't assume that the server can do incremental buffer changes.
+  incremental = True
   if buffer_number and current_buffer.number != buffer_number:
     # Cursor position is irrelevant when filepath is not the current buffer.
     buffer_object = vim.buffers[ buffer_number ]
@@ -233,7 +235,8 @@ def BuildRequestData( buffer_number = None ):
       'column_num': 1,
       'working_dir': working_dir,
       'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( buffer_object,
-                                                                filepath )
+                                                                filepath,
+                                                                incremental )
     }
 
   current_filepath = vimsupport.GetBufferFilepath( current_buffer )
@@ -245,7 +248,8 @@ def BuildRequestData( buffer_number = None ):
     'column_num': column + 1,
     'working_dir': working_dir,
     'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( current_buffer,
-                                                              current_filepath )
+                                                              current_filepath,
+                                                              incremental )
   }
 
 

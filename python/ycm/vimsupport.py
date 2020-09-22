@@ -126,21 +126,32 @@ def GetBufferData( buffer_object ):
   }
 
 
-def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
+def GetUnsavedAndSpecifiedBufferData( included_buffer,
+                                      included_filepath,
+                                      incremental_changes_supported ):
   """Build part of the request containing the contents and filetypes of all
   dirty buffers as well as the buffer |included_buffer| with its filepath
   |included_filepath|."""
   buffers_data = { included_filepath: GetBufferData( included_buffer ) }
 
-  for buffer_object in vim.buffers:
-    if not BufferModified( buffer_object ):
-      continue
+  if not incremental_changes_supported:
+    for buffer_object in vim.buffers:
+      if not BufferModified( buffer_object ):
+        continue
 
-    filepath = GetBufferFilepath( buffer_object )
-    if filepath in buffers_data:
-      continue
+      filepath = GetBufferFilepath( buffer_object )
+      if filepath in buffers_data:
+        continue
 
-    buffers_data[ filepath ] = GetBufferData( buffer_object )
+      buffers_data[ filepath ] = GetBufferData( buffer_object )
+  else:
+    modified_buffers = vim.eval( 'g:ycm_pending_changes' )
+    for buffer_name, changes in modified_buffers.items():
+      full_path = os.path.abspath( buffer_name )
+      buffer_data = buffers_data.get( full_path, {} )
+      buffer_data[ 'changes' ] = changes
+      buffers_data[ full_path ] = buffer_data
+    vim.command( 'let g:ycm_pending_changes = {}' )
 
   return buffers_data
 

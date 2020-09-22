@@ -658,6 +658,30 @@ function! s:DisableAutoHover()
 endfunction
 
 
+function! youcompleteme#ListenerCallback( buffer, start, end, added, changes )
+  for c in a:changes
+    let pending_buffer_changes = get( g:ycm_pending_changes, bufname( a:buffer ), [] )
+    call add( pending_buffer_changes, {
+      \ 'replacement_text': join( getbufline( a:buffer, c.lnum, c.end - 1 + c.added ), "\n" ) . "\n",
+      \ 'range': {
+        \ 'start': { 'line': c.lnum, 'col': 1 },
+        \ 'end':   { 'line': c.end,   'col': 1 }
+      \ }
+    \ } )
+    let g:ycm_pending_changes[ bufname( a:buffer ) ] = pending_buffer_changes
+  endfor
+endfunction
+
+
+function! s:ChangeListener()
+  if get( b:, 'ycm_listening' )
+    return
+  endif
+  let b:ycm_listening = 1
+  call listener_add( 'youcompleteme#ListenerCallback', expand( '%' ) )
+endfunction
+
+
 function! s:OnFileTypeSet()
   " The contents of the command-line window are empty when the filetype is set
   " for the first time. Users should never change its filetype so we only rely
@@ -674,6 +698,7 @@ function! s:OnFileTypeSet()
   call s:EnableCompletingInCurrentBuffer()
   call s:StartMessagePoll()
   call s:EnableAutoHover()
+  call s:ChangeListener()
 
   py3 ycm_state.OnFileTypeSet()
   call s:OnFileReadyToParse( 1 )
@@ -697,6 +722,7 @@ function! s:OnBufferEnter()
 
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
+  call s:ChangeListener()
 
   py3 ycm_state.UpdateMatches()
   py3 ycm_state.OnBufferVisit()
