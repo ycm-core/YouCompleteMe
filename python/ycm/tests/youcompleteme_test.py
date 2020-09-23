@@ -225,32 +225,19 @@ class YouCompleteMeTest( TestCase ):
     assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
 
 
-  @patch( 'ycm.vimsupport.PostVimMessage' )
-  def test_YouCompleteMe_InvalidPythonInterpreterPath( self, post_vim_message ):
-    with UserOptions( {
-      'g:ycm_server_python_interpreter': '/invalid/python/path' } ):
-      try:
-        ycm = YouCompleteMe()
-
-        assert_that( ycm.IsServerAlive(), equal_to( False ) )
-        post_vim_message.assert_called_once_with(
-          "Unable to start the ycmd server. "
-          "Path in 'g:ycm_server_python_interpreter' option does not point "
-          "to a valid Python 3.6+. "
-          "Correct the error then restart the server with "
-          "':YcmRestartServer'." )
-
-        post_vim_message.reset_mock()
-
-        SetVariableValue( 'g:ycm_server_python_interpreter',
-                          _PathToPythonUsedDuringBuild() )
-        ycm.RestartServer()
-
-        assert_that( ycm.IsServerAlive(), equal_to( True ) )
-        post_vim_message.assert_called_once_with( 'Restarting ycmd server...' )
-      finally:
-        WaitUntilReady()
-        StopServer( ycm )
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_enable_diagnostic_signs': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch( 'ycm.client.base_request.BaseRequest._IncrementalBufferUpdatesSupported', return_value = False )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 8, 1, 614 ) )
+@patch( 'ycm.client.event_notification.EventNotification.Done',
+        return_value = True )
+def YouCompleteMe_UpdateDiagnosticInterface_NewVim_test(
+    request_done, post_vim_message, filetype_completer_exists, incremental_update_support, ycm ):
+  YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 
 
   @patch( 'ycmd.utils.PathToFirstExistingExecutable', return_value = None )
