@@ -39,7 +39,7 @@ _logger = logging.getLogger( __name__ )
 
 
 class BaseRequest:
-
+  _buffer_update_types = None
   def __init__( self ):
     self._should_resend = False
 
@@ -93,6 +93,42 @@ class BaseRequest:
         DisplayServerException( e, truncate_message )
 
     return None
+
+
+  @staticmethod
+  def _IncrementalBufferUpdatesSupported( buffer_number ):
+    from ycm.client.buffer_update_type_request import BufferUpdateTypeByFileType
+    if BaseRequest._buffer_update_types is None:
+      BaseRequest._buffer_update_types = BufferUpdateTypeByFileType()
+    if buffer_number:
+      filetypes = vimsupport.GetBufferFiletypes( buffer_number )
+    else:
+      filetypes = vimsupport.CurrentFiletypes()
+
+    # TODO: Figure out what to do with mixed filetypes.
+    # for filetype in filetypes:
+    #   if not BaseRequest._buffer_update_types[ filetype ].Done():
+    #     continue
+
+    #   buffer_update_type = BaseRequest._buffer_update_types[ filetype ].Response()
+    #   if buffer_update_type == 'Full':
+    #     continue
+
+    #   if buffer_update_type == 'PENDING':
+    #     BaseRequest._buffer_update_types[ filetype ].Start( filetype )
+    #     continue
+
+    #   return True
+    request = BaseRequest._buffer_update_types[ filetypes[ 0 ] ]
+    if not request.Done():
+      return False
+    response = request.Response()
+    if response == 'Full':
+      return False
+    if response == 'PENDING':
+      BaseRequest._buffer_update_types[ filetypes[ 0 ] ].Start( filetypes[ 0 ] )
+      return False
+    return True
 
 
   # This method blocks
@@ -193,6 +229,9 @@ class BaseRequest:
     if not request_body:
       request_body = bytes( b'' )
     headers = dict( _HEADERS )
+    print('AAA')
+    print( type( BaseRequest.hmac_secret ) )
+    print('aaa')
     headers[ _HMAC_HEADER ] = b64encode(
         CreateRequestHmac( ToBytes( method ),
                            ToBytes( urlparse( request_uri ).path ),
@@ -225,7 +264,7 @@ def BuildRequestData( buffer_number = None ):
 
   # TODO: Don't assume that the server can do incremental buffer changes.
   vim.Function( 'listener_flush' )()
-  incremental = True
+  incremental = BaseRequest._IncrementalBufferUpdatesSupported( buffer_number )
   if buffer_number and current_buffer.number != buffer_number:
     # Cursor position is irrelevant when filepath is not the current buffer.
     buffer_object = vim.buffers[ buffer_number ]
