@@ -264,11 +264,14 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
 
 @YouCompleteMeInstance()
 def EventNotification_FileReadyToParse_Diagnostic_Error_Native_test( ycm ):
-  test_utils.VIM_SIGNS = []
+  with patch( 'ycm.client.base_request.BaseRequest.'
+              '_IncrementalBufferUpdatesSupported',
+              return_value = False ):
+    test_utils.VIM_SIGNS = []
 
-  _Check_FileReadyToParse_Diagnostic_Error( ycm )
-  _Check_FileReadyToParse_Diagnostic_Warning( ycm )
-  _Check_FileReadyToParse_Diagnostic_Clean( ycm )
+    _Check_FileReadyToParse_Diagnostic_Error( ycm )
+    _Check_FileReadyToParse_Diagnostic_Warning( ycm )
+    _Check_FileReadyToParse_Diagnostic_Clean( ycm )
 
 
 def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
