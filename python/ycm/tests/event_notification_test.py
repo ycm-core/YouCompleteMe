@@ -100,7 +100,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
 
   with MockArbitraryBuffer( 'some_filetype' ):
     with patch( 'ycm.client.base_request.BaseRequest.'
-                '_IncrementalBufferUpdatesSupported', return_value = False ):
+                '_IncrementalBufferUpdatesSupported',
+                return_value = False ):
       with MockEventNotification( ErrorResponse ):
         ycm.OnFileReadyToParse()
         assert_that( ycm.FileParseRequestReady() )
@@ -139,12 +140,15 @@ def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
   test_utils.VIM_SIGNS = []
 
   with MockArbitraryBuffer( 'some_filetype' ):
-    with MockEventNotification( None, False ):
-      ycm.OnFileReadyToParse()
-      ycm.HandleFileParseRequest()
-      assert_that( test_utils.VIM_MATCHES, empty() )
-      assert_that( test_utils.VIM_SIGNS, empty() )
-      assert_that( not ycm.ShouldResendFileParseRequest() )
+    with patch( 'ycm.client.base_request.BaseRequest.'
+                '_IncrementalBufferUpdatesSupported',
+                return_value = False ):
+      with MockEventNotification( None, False ):
+        ycm.OnFileReadyToParse()
+        ycm.HandleFileParseRequest()
+        assert_that( test_utils.VIM_MATCHES, empty() )
+        assert_that( test_utils.VIM_SIGNS, empty() )
+        assert_that( not ycm.ShouldResendFileParseRequest() )
 
 
 @YouCompleteMeInstance()
@@ -164,7 +168,8 @@ def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
   with patch( 'ycm.client.base_request.BaseRequest.PostDataToHandler',
               new_callable = ExtendedMock ) as post_data_to_handler:
     with patch( 'ycm.client.base_request.BaseRequest.'
-                '_IncrementalBufferUpdatesSupported', return_value = False ):
+                '_IncrementalBufferUpdatesSupported',
+                return_value = False ):
       with MockArbitraryBuffer( 'some_filetype' ):
         with MockEventNotification( UnknownExtraConfResponse ):
 
