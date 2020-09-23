@@ -229,9 +229,6 @@ class BaseRequest:
     if not request_body:
       request_body = bytes( b'' )
     headers = dict( _HEADERS )
-    print('AAA')
-    print( type( BaseRequest.hmac_secret ) )
-    print('aaa')
     headers[ _HMAC_HEADER ] = b64encode(
         CreateRequestHmac( ToBytes( method ),
                            ToBytes( urlparse( request_uri ).path ),

@@ -670,8 +670,8 @@ function! youcompleteme#ListenerCallback( buffer, start, end, added, changes )
     call add( pending_buffer_changes, {
       \ 'replacement_text': replacement_text,
       \ 'range': {
-        \ 'start': { 'line': c.lnum, 'col': 1 },
-        \ 'end':   { 'line': c.end,   'col': 1 }
+        \ 'start': { 'line_num': c.lnum, 'column_num': 1 },
+        \ 'end':   { 'line_num': c.end, 'column_num': 1 }
       \ }
     \ } )
     let g:ycm_pending_changes[ bufname( a:buffer ) ] = pending_buffer_changes
