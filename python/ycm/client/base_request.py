@@ -106,19 +106,6 @@ class BaseRequest:
       filetypes = vimsupport.CurrentFiletypes()
 
     # TODO: Figure out what to do with mixed filetypes.
-    # for filetype in filetypes:
-    #   if not BaseRequest._buffer_update_types[ filetype ].Done():
-    #     continue
-
-    #   buffer_update_type = BaseRequest._buffer_update_types[ filetype ].Response()
-    #   if buffer_update_type == 'Full':
-    #     continue
-
-    #   if buffer_update_type == 'PENDING':
-    #     BaseRequest._buffer_update_types[ filetype ].Start( filetype )
-    #     continue
-
-    #   return True
     request = BaseRequest._buffer_update_types[ filetypes[ 0 ] ]
     if not request.Done():
       return False
