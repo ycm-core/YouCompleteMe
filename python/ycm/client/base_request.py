@@ -259,7 +259,6 @@ def BuildRequestData( buffer_number = None ):
   working_dir = GetCurrentDirectory()
   current_buffer = vim.current.buffer
 
-  # TODO: Don't assume that the server can do incremental buffer changes.
   vim.Function( 'listener_flush' )()
   incremental = BaseRequest._IncrementalBufferUpdatesSupported( buffer_number )
   if buffer_number and current_buffer.number != buffer_number:

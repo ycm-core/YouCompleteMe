@@ -157,6 +157,9 @@ def _MockVimBufferEval( value ):
   if value == '&filetype':
     return VIM_MOCK.current.buffer.filetype
 
+  if value == 'g:ycm_pending_changes':
+    return {}
+
   match = BUFNR_REGEX.search( value )
   if match:
     buffer_filename = match.group( 'buffer_filename' )
