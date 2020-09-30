@@ -1,3 +1,14 @@
+" windows default encoding is not supported
+set encoding=utf-8
+
+" If you using neovim and python isn't loading, copy your python setup from your
+" vimrc here:
+"
+" let g:python3_host_prog = '/path/to/python3/with/neovim/module'
+"
+" But remember that neovim is not officially supported, so please reproduce in
+" Vim.
+
 " Enable debugging
 let g:ycm_keep_logfiles = 1
 let g:ycm_log_level = 'debug'
