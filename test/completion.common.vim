@@ -205,7 +205,12 @@ endfunction
 
 function! Test_Compl_No_Filetype()
   enew
-  call setline( '.', 'hello ' )
+  call setline( '.', 'hello this is some text ' )
+
+  " Even when fileytpe is set to '', the filetype autocommand is triggered, but
+  " apparently, _not_ within this function.
+  doautocmd FileType
+  call assert_equal( 1, b:ycm_completing )
 
   " Required to trigger TextChangedI
   " https://github.com/vim/vim/issues/4665#event-2480928194
@@ -214,6 +219,7 @@ function! Test_Compl_No_Filetype()
   " Must do the checks in a timer callback because we need to stay in insert
   " mode until done.
   function! Check( id ) closure
+    call assert_equal( getline( '2' ), 'hell' )
     call WaitForCompletion()
     let items = complete_info().items
     call map( items, {index, value -> value.word} )
@@ -221,11 +227,12 @@ function! Test_Compl_No_Filetype()
     call feedkeys( "\<ESC>" )
   endfunction
 
-  call FeedAndCheckMain( 'Ahe', funcref( 'Check' ) )
+  call FeedAndCheckMain( 'ohell', funcref( 'Check' ) )
   " Checks run in insert mode, then exit insert mode.
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
+  delfunc! Check
   %bwipeout!
 endfunction
 
