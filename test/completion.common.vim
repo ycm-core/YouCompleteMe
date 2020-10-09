@@ -206,7 +206,6 @@ endfunction
 function! Test_Compl_No_Filetype()
   enew
   call setline( '.', 'hello ' )
-  call setpos( '.', [ 0, 1, 7 ] )
 
   " Required to trigger TextChangedI
   " https://github.com/vim/vim/issues/4665#event-2480928194
@@ -216,10 +215,13 @@ function! Test_Compl_No_Filetype()
   " mode until done.
   function! Check( id ) closure
     call WaitForCompletion()
+    let items = complete_info().items
+    call map( items, {index, value -> value.word} )
+    call assert_equal( [ 'hello' ], items )
     call feedkeys( "\<ESC>" )
   endfunction
 
-  call FeedAndCheckMain( 'ahe', funcref( 'Check' ) )
+  call FeedAndCheckMain( 'Ahe', funcref( 'Check' ) )
   " Checks run in insert mode, then exit insert mode.
   call assert_false( pumvisible(), 'pumvisible()' )
 
