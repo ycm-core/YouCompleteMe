@@ -2368,6 +2368,26 @@ let g:ycm_filetype_blacklist = {
       \}
 ```
 
+Note that completion works for buffers without filetype too. If you don't want it use
+`ycm_nofiletype` to turn it off:
+
+```viml
+let g:ycm_filetype_blacklist = {
+      \ 'tagbar': 1,
+      \ 'notes': 1,
+      \ 'markdown': 1,
+      \ 'netrw': 1,
+      \ 'unite': 1,
+      \ 'text': 1,
+      \ 'vimwiki': 1,
+      \ 'pandoc': 1,
+      \ 'infolog': 1,
+      \ 'leaderf': 1,
+      \ 'mail': 1,
+      \ 'ycm_nofiletype': 1
+      \}
+```
+
 ### The `g:ycm_filetype_specific_completion_to_disable` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should the YCM
