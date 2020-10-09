@@ -717,7 +717,7 @@ def EscapeForVim( text ):
 def CurrentFiletypes():
   filetypes = vim.eval( "&filetype" )
   if not filetypes:
-      filetypes = 'ycm_nofiletype'
+    filetypes = 'ycm_nofiletype'
   return ToUnicode( filetypes ).split( '.' )
 
 
@@ -734,7 +734,7 @@ def GetBufferFiletypes( bufnr ):
   command = f'getbufvar({ bufnr }, "&ft")'
   filetypes = vim.eval( command )
   if not filetypes:
-      filetypes = 'ycm_nofiletype'
+    filetypes = 'ycm_nofiletype'
   return ToUnicode( filetypes ).split( '.' )
 
 
