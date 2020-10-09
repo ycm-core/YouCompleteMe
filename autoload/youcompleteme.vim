@@ -478,7 +478,7 @@ function! s:AllowedToCompleteInBuffer( buffer )
   endif
 
   let filetype = getbufvar( a:buffer, '&filetype' )
-  if empty(filetype)
+  if empty( filetype )
     let filetype = 'ycm_nofiletype'
   endif
 
