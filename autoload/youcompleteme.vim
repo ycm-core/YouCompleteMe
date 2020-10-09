@@ -478,6 +478,9 @@ function! s:AllowedToCompleteInBuffer( buffer )
   endif
 
   let filetype = getbufvar( a:buffer, '&filetype' )
+  if empty(filetype)
+    let filetype = 'ycm_nofiletype'
+  endif
 
   let whitelist_allows = type( g:ycm_filetype_whitelist ) != v:t_dict ||
         \ has_key( g:ycm_filetype_whitelist, '*' ) ||
