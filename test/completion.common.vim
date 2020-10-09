@@ -203,6 +203,30 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
   %bwipeout!
 endfunction
 
+function! Test_Compl_No_Filetype()
+  enew
+  call setline( '.', 'hello ' )
+  call setpos( '.', [ 0, 1, 7 ] )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call WaitForCompletion()
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'ahe', funcref( 'Check' ) )
+  " Checks run in insert mode, then exit insert mode.
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+  %bwipeout!
+endfunction
+
 function! OmniFuncTester( findstart, query )
   if a:findstart
     return s:omnifunc_start_col
