@@ -17,7 +17,7 @@ your machine.
 * Run the tests:
   * `./test/run_vim_tests`
 
-## Running the tests locally
+## Running the tests locally
 
 The CI tests run in [the container](#running-the-tests-in-docker), so it's
 probably best to run your tests there too, but not strictly required.
