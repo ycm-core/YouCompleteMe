@@ -4,6 +4,9 @@ function! SetUp()
   let g:ycm_auto_trigger = 1
   let g:ycm_keep_logfiles = 1
   let g:ycm_always_populate_location_list = 1
+  let g:ycm_filetype_blacklist = {
+        \ 'ycm_nofiletype': 1
+        \ }
 
   " diagnostics take ages
   let g:ycm_test_min_delay = 7 

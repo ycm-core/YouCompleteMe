@@ -203,6 +203,76 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
   %bwipeout!
 endfunction
 
+function! Test_Compl_No_Filetype()
+  enew
+  call setline( '.', 'hello this is some text ' )
+
+  " Even when fileytpe is set to '', the filetype autocommand is triggered, but
+  " apparently, _not_ within this function.
+  doautocmd FileType
+  call assert_equal( 1, b:ycm_completing )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call assert_equal( getline( '2' ), 'hell' )
+    call WaitForCompletion()
+    let items = complete_info().items
+    call map( items, {index, value -> value.word} )
+    call assert_equal( [ 'hello' ], items )
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'ohell', funcref( 'Check' ) )
+  " Checks run in insert mode, then exit insert mode.
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+  delfunc! Check
+  %bwipeout!
+endfunction
+
+function! SetUp_Test_Compl_No_Filetype_Blacklisted()
+  let g:ycm_filetype_blacklist = { 'ycm_nofiletype': 1 }
+endfunction
+
+function! TearDown__Test_Compl_No_Filetype_Blacklisted()
+  unlet! g:ycm_filetype_blacklist
+endfunction
+
+function! Test_Compl_No_Filetype_Blacklisted()
+  enew
+  call setline( '.', 'hello this is some text ' )
+
+  " Even when fileytpe is set to '', the filetype autocommand is triggered, but
+  " apparently, _not_ within this function.
+  doautocmd FileType
+  call assert_false( exists( 'b:ycm_completing' ) )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call assert_false( pumvisible() )
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'ohell', funcref( 'Check' ) )
+  " Checks run in insert mode, then exit insert mode.
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+  delfunc! Check
+  %bwipeout!
+endfunction
+
 function! OmniFuncTester( findstart, query )
   if a:findstart
     return s:omnifunc_start_col
