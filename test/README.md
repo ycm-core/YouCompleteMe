@@ -17,7 +17,7 @@ your machine.
 * Run the tests:
   * `./test/run_vim_tests`
 
-## Running the tests locally
+## Running the tests locally
 
 The CI tests run in [the container](#running-the-tests-in-docker), so it's
 probably best to run your tests there too, but not strictly required.
@@ -31,7 +31,25 @@ in which you can run the tests.
 * Ensure ycmd is compiled ***with python3*** and clangd is enabled
   `python3 install.py --ts-completer --clangd-completer --java-completer`
 * Install the test python deps (`pip install -r python/test_requirements.txt`)
-* Run `./run_vim_tests`
+* Run `./test/run_vim_tests`
+
+## Runniing the tests in Windows (WSL)
+
+NOTE: This environment isn't officially supported, and the preferred mechanism to run the tests is to use docker.
+
+* Install Ubuntu 20.04 WSL from Windows Store and launch it
+* `sudo apt-get update && sudo apt-get dist-upgrade`
+* `sudo apt-get install build-essential default-jdk vim-nox cmake python3-dev nodejs python3-pip npm`
+* clone the plugin, and build ycmd, e.g.
+
+```
+git clone --recursive https://github.com/ycm-core/YouCompleteMe
+cd YouCompleteMe
+python3 install.py --ts-completer --clangd-completer --java-completer
+```
+
+* Install the test python deps: `pip3 install --user -r python/test_requirements.txt`
+* Run `./test/run_vim_tests`
 
 # Overview
 
