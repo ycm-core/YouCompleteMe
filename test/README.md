@@ -160,7 +160,7 @@ YCM's `ycm_state` object knows about.
 
 # The test plugin
 
-The "plguin" provides a handful of things, some of which were simply ported from
+The "plugin" provides a handful of things, some of which were simply ported from
 Vim's test framework, and some were writted specifically for YCM.
 
 ## Ported from Vim
@@ -171,7 +171,7 @@ These are general purpose functions which are commonly used:
   lambda) and waits for it to return 0, but allows the Vim event loop to run in
   betwen calls. This is key to ensuring that the YCM code can execute while the
   script is actively trying to test it. **NOTE**: It waits for the _function to
-  return 0_, ***NOT** for the assert to be true/v:errors to be empty!
+  return 0_, **NOT** for the assert to be true/v:errors to be empty!
 
 ## YCM-specific
 
