@@ -38,7 +38,7 @@ BWIPEOUT_REGEX = re.compile(
 GETBUFVAR_REGEX = re.compile(
   '^getbufvar\\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\\)$' )
 MATCHADD_REGEX = re.compile(
-  '^matchadd\\(\'(?P<group>.+)\', \'(?P<pattern>.+)\'\\)$' )
+  '^matchadd\\(\'(?P<group>.+)\', \'(?P<pattern>.+)\', -1\\)$' )
 MATCHDELETE_REGEX = re.compile( '^matchdelete\\((?P<id>\\d+)\\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\\)$' )
