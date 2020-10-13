@@ -73,7 +73,7 @@ def ResolveCompletionItem( completion_request, item ):
     completion_extra_data = json.loads( item[ 'user_data' ] )
   except KeyError:
     return None
-  except json.JSONDecodeError:
+  except ( TypeError, json.JSONDecodeError ):
     # Can happen with the omni completer
     return None
 
