@@ -43,7 +43,6 @@ function! Test_ToggleLogs()
   call assert_equal( bcount, len( getbufinfo() ) )
   call assert_equal( [], getbufinfo( keys( log_files )[ 0 ] ) )
 
-  %bwipeout!
 endfunction
 
 function! Test_GetCommandResponse()
@@ -84,7 +83,6 @@ function! Test_GetCommandResponse()
   call setpos( '.', [ 0, 1, 3 ] )
   call assert_equal( '', youcompleteme#GetCommandResponse( 'GetDoc' ) )
 
-  %bwipe!
 endfunction
 
 
@@ -96,7 +94,6 @@ function! Test_GetCommandResponse_FixIt()
   call assert_equal( '',
                    \ youcompleteme#GetCommandResponse( 'FixIt' ) )
 
-  %bwipe!
 endfunction
 
 function! Test_GetDefinedSubcommands_Native()
@@ -104,7 +101,6 @@ function! Test_GetDefinedSubcommands_Native()
   call assert_equal( 1, count( youcompleteme#GetDefinedSubcommands(),
                              \ 'GetDoc' ) )
 
-  %bwipe!
 endfunction
 
 function! Test_GetDefinedSubcommands_NoNative()
@@ -112,5 +108,4 @@ function! Test_GetDefinedSubcommands_NoNative()
   setf not_a_filetype
   call assert_equal( [], youcompleteme#GetDefinedSubcommands() )
 
-  %bwipe!
 endfunction

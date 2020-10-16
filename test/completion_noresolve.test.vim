@@ -32,6 +32,4 @@ function! Test_No_Resolve()
   endfor
 
   call assert_report( "Didn't find the resolve type in the YcmDebugInfo" )
-
-  %bwipeout!
 endfunction

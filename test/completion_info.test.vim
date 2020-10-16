@@ -46,7 +46,6 @@ function! Test_Using_Ondemand_Resolve()
 
   call assert_report( "Didn't find the resolve type in the YcmDebugInfo" )
 
-  %bwipeout!
 endfunction
 
 function! Test_ResolveCompletion_OnChange()
@@ -112,7 +111,6 @@ function! Test_ResolveCompletion_OnChange()
   call assert_equal( 1, found_getAString )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
 endfunction
 
 function! Test_DontResolveCompletion_AlreadyResolved()
@@ -162,5 +160,4 @@ function! Test_DontResolveCompletion_AlreadyResolved()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
 endfunction
