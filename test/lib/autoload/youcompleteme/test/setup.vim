@@ -28,7 +28,7 @@ function! youcompleteme#test#setup#CleanUp() abort
 endfunction
 
 function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
-  execute 'edit '
+  silent execute 'edit '
         \ . g:ycm_test_plugin_dir
         \ . '/'
         \ . a:f

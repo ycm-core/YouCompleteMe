@@ -1,0 +1,19 @@
+{
+  "$schema": "https://puremourning.github.io/vimspector/schema/vimspector.schema.json",
+  "configurations": {
+    "Run vim test": {
+      "adapter": "vim-debug-adapter",
+      "configuration": {
+        "request": "launch",
+        "cwd": "${workspaceRoot}",
+        "args": [
+          "--clean",
+          "--not-a-term",
+          "-S", "lib/run_test.vim",
+          "${file}",
+          "${TestFunction}"
+        ]
+      }
+    }
+  }
+}

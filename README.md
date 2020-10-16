@@ -2341,6 +2341,20 @@ Default: `{'*': 1}`
 let g:ycm_filetype_whitelist = {'*': 1}
 ```
 
+** Completion in buffers with no filetype **
+
+There is one exception to the above rule. YCM supports completion in buffers
+with no filetype set, but this must be _explicitly_ whitelisted. To identify
+buffers with no filetype, we use the `ycm_nofiletype` pseudo-filetype. To enable
+completion in buffers with no filetype, set:
+
+```viml
+let g:ycm_filetype_whitelist = {
+  \ '*': 1,
+  \ 'ycm_nofiletype': 1
+  \ }
+```
+
 ### The `g:ycm_filetype_blacklist` option
 
 This option controls for which Vim filetypes (see `:h filetype`) should YCM be
@@ -2367,6 +2381,10 @@ let g:ycm_filetype_blacklist = {
       \ 'mail': 1
       \}
 ```
+
+In addition, `ycm_nofiletype` (representing buffers with no filetype set)
+is blacklisted if `ycm_nofiletype` is not _explicitly_ whitelisted (using
+`g:ycm_filetype_whitelist`).
 
 ### The `g:ycm_filetype_specific_completion_to_disable` option
 

@@ -147,10 +147,24 @@ func RunTheTest(test)
 
     au VimLeavePre * call EarlyExit(s:test)
     call ch_log( 'StartTest: ' . a:test )
+
+    messages clear
     exe 'call ' . a:test
+    " We require that tests either don't make errors or that they call messages
+    " clear
+    call assert_true(
+          \ empty( execute( 'messages' ) ),
+          \ 'Test '
+          \ .. a:test
+          \ .. ' produced unexpected messages output '
+          \ .. string( execute( 'messages' ) )
+          \ .. ' (hint: call :messages clear if this is expected, '
+          \ .. 'or use :silent)' )
+
     call ch_log( 'EndTest: ' . a:test )
     au! VimLeavePre
   catch /^\cskipped/
+    let v:errors = []
     call ch_log( 'Skipped: ' . a:test )
     call add(s:messages, '    Skipped')
     call add(s:skipped,
@@ -209,6 +223,9 @@ func RunTheTest(test)
 
   " Clear any autocommands
   au!
+
+  call test_override( 'ALL', 0 )
+  %bwipe!
 
   " Close any extra tab pages and windows and make the current one not modified.
   while tabpagenr('$') > 1
