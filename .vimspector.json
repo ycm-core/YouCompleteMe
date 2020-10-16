@@ -6,7 +6,7 @@
       "variables": [
         {
           "python": {
-            "shell": "/bin/bash -c 'if [ -z \"${dollar}VIRTUAL_ENV\" ]; then echo $$(which python); else echo \"${dollar}VIRTUAL_ENV/bin/python\"; fi'"
+            "shell": "/bin/bash -c 'if [ -z \"${dollar}VIRTUAL_ENV\" ]; then echo $$(which python3); else echo \"${dollar}VIRTUAL_ENV/bin/python\"; fi'"
           }
         },
         {

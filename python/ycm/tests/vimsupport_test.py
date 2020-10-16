@@ -180,6 +180,19 @@ def SetFittingHeightForCurrentWindow_LineWrapOn_test( vim_command, *args ):
 
 
 @patch( 'vim.command' )
+def SetFittingHeightForCurrentWindow_NoResize_test( vim_command, *args ):
+  # Create a two lines buffer whose first line is longer than the window width.
+  current_buffer = VimBuffer( 'buffer',
+                              contents = [ 'a' * 140, 'b' * 80 ],
+                              vars = { 'ycm_no_resize': 1 } )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+    vim.current.window.width = 120
+    vim.current.window.options[ 'wrap' ] = True
+    vimsupport.SetFittingHeightForCurrentWindow()
+  vim_command.assert_not_called()
+
+
+@patch( 'vim.command' )
 def SetFittingHeightForCurrentWindow_LineWrapOff_test( vim_command, *args ):
   # Create a two lines buffer whose first line is longer than the window width.
   current_buffer = VimBuffer( 'buffer',
