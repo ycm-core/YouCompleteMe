@@ -134,7 +134,6 @@ function! Test_Hover_Uses_GetDoc()
   normal \D
   call s:CheckPopupVisible( 11, 4, s:python_oneline.GetDoc, '' )
   call popup_clear()
-  %bwipe!
 endfunction
 
 function! Test_Hover_Uses_GetHover()
@@ -159,7 +158,6 @@ EOPYTHON
   call s:CheckPopupNotVisible( 11, 4 )
   call popup_clear()
 
-  %bwipe!
 endfunction
 
 function! Test_Hover_Uses_None()
@@ -177,7 +175,6 @@ EOPYTHON
   call s:CheckPopupNotVisible( 11, 4, v:false )
 
   call popup_clear()
-  %bwipe!
 endfunction
 
 function! Test_Hover_Uses_GetType()
@@ -216,7 +213,6 @@ EOPYTHON
   call s:CheckPopupVisible( 11, 4, s:python_oneline.GetType, 'python' )
   call popup_clear()
 
-  %bwipe!
 endfunction
 
 function! Test_Hover_NonNative()
@@ -234,7 +230,6 @@ function! Test_Hover_NonNative()
   call assert_equal( messages_before, execute( 'messages' ) )
 
   call popup_clear()
-  %bwipe!
 endfunction
 
 function SetUp_Test_Hover_Disabled_NonNative()
@@ -245,13 +240,12 @@ function! Test_Hover_Disabled_NonNative()
   call youcompleteme#test#setup#OpenFile( '_not_a_file', { 'native_ft': 0 } )
   setfiletype NoASupportedFileType
   let messages_before = execute( 'messages' )
-  silent doautocmd CursorHold
+  silent! doautocmd CursorHold
   call s:CheckNoCommandRequest()
   call assert_false( exists( 'b:ycm_hover' ) )
   call assert_equal( messages_before, execute( 'messages' ) )
 
   call popup_clear()
-  %bwipe!
 endfunction
 
 function! SetUp_Test_AutoHover_Disabled()
@@ -266,7 +260,7 @@ function! Test_AutoHover_Disabled()
   call assert_false( exists( 'b:ycm_hover' ) )
 
   call setpos( '.', [ 0, 12, 3 ] )
-  silent doautocmd CursorHold
+  silent! doautocmd CursorHold
   call s:CheckPopupNotVisible( 11, 4, v:false )
   call assert_equal( messages_before, execute( 'messages' ) )
 
@@ -282,7 +276,6 @@ function! Test_AutoHover_Disabled()
   call assert_equal( messages_before, execute( 'messages' ) )
 
   call popup_clear()
-  %bwipeout!
 endfunction
 
 function! Test_Hover_MoveCursor()
@@ -315,7 +308,6 @@ function! Test_Hover_MoveCursor()
   call test_override( 'ALL', 0 )
 
   call popup_clear()
-  %bwipeout!
 endfunction
 
 function! Test_Hover_Dismiss()
@@ -336,7 +328,7 @@ function! Test_Hover_Dismiss()
   call s:CheckPopupNotVisible( 11, 3, v:false )
 
   " Make sure it doesn't come back
-  doautocmd CursorHold
+  silent! doautocmd CursorHold
   call s:CheckPopupNotVisible( 11, 3, v:false )
 
   " Move the cursor (again this is tricky). I couldn't find any tests in vim's
@@ -347,7 +339,6 @@ function! Test_Hover_Dismiss()
   call s:CheckPopupVisible( 11, 3, s:python_oneline.GetDoc, '' )
 
   call popup_clear()
-  %bwipeout!
 endfunction
 
 function! SetUp_Test_Hover_Custom_Syntax()
@@ -377,11 +368,10 @@ function! Test_Hover_Custom_Syntax()
   call s:CheckPopupNotVisibleScreenPos( { 'row': 7, 'col': 9 }, v:false )
 
   call popup_clear()
-  %bwipe!
 endfunction
 
 function! TearDown_Test_Hover_Custom_Syntax()
-  au! MyYCMCustom
+  silent! au! MyYCMCustom
 endfunction
 
 function! SetUp_Test_Hover_Custom_Command()
@@ -407,11 +397,10 @@ function! Test_Hover_Custom_Command()
   call s:CheckPopupVisible( 5, 9, s:cpp_lifetime.GetType, 'cpp' )
 
   call popup_clear()
-  %bwipe!
 endfunction
 
 function! TearDown_Test_Hover_Custom_Command()
-  au! MyYCMCustom
+  silent! au! MyYCMCustom
 endfunction
 
 function! Test_Long_Single_Line()
@@ -435,7 +424,6 @@ function! Test_Long_Single_Line()
   call s:CheckPopupVisible( 33, &columns, v:none, '' )
 
   call popup_clear()
-  %bwipe!
 endfunction
 
 function! Test_Long_Wrapped()
@@ -460,5 +448,4 @@ function! Test_Long_Wrapped()
   call s:CheckPopupNotVisible( 26, &columns, v:false )
 
   call popup_clear()
-  %bwipe!
 endfunction

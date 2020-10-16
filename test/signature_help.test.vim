@@ -98,7 +98,6 @@ endfunction
 "   " clean up
 "   call StopVimInTerminal(vim)
 "   call delete('XtestPopup')
-"   %bwipeout!
 " endfunction
 
 function! Test_Enough_Screen_Space()
@@ -175,7 +174,6 @@ function! Test_Signatures_After_Trigger()
         \ } )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
   delfunc! Check
 endfunction
 
@@ -195,7 +193,7 @@ function! Test_Signatures_With_PUM_NoSigns()
   " https://github.com/vim/vim/issues/4665#event-2480928194
   call test_override( 'char_avail', 1 )
 
-  function Check2( id ) closure
+  function! Check2( id ) closure
     call WaitForAssert( {-> assert_true( pumvisible() ) } )
     call WaitForAssert( {-> assert_notequal( [], complete_info().items ) } )
     call assert_equal( 7, pum_getpos().row )
@@ -251,7 +249,6 @@ function! Test_Signatures_With_PUM_NoSigns()
         \ } )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
   delfunc! Check
   delfunc! Check2
 endfunction
@@ -331,7 +328,6 @@ function! Test_Signatures_With_PUM_Signs()
         \ } )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
   delfunc! Check
   delfunc! Check2
 endfunction
@@ -414,7 +410,6 @@ function! Test_Placement_Simple()
   call s:_ClearSigHelp()
 
   call popup_clear()
-  %bwipeout!
 endfunction
 
 function! Test_Placement_MultiLine()
@@ -498,7 +493,6 @@ function! Test_Placement_MultiLine()
   call s:_ClearSigHelp()
 
   call popup_clear()
-  %bwipeout!
 endfunction
 
 function! Test_Signatures_TopLine()
@@ -519,7 +513,6 @@ function! Test_Signatures_TopLine()
   call feedkeys( 'cl(', 'ntx!' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
   delfun! Check
 endfunction
 
@@ -574,8 +567,215 @@ function! Test_Signatures_TopLineWithPUM()
   call feedkeys( 'C(', 'ntx!' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
 
   delfunc! CheckSigHelpAndTriggerCompletion
   delfunc! CheckCompletionVisibleAndSigHelpHidden
+endfunction
+
+function! SetUp_Test_Semantic_Completion_Popup_With_Sig_Help()
+  set signcolumn=no
+  let g:ycm_add_preview_to_completeopt = 'popup'
+endfunction
+
+function! Test_Semantic_Completion_Popup_With_Sig_Help()
+  call youcompleteme#test#setup#OpenFile(
+        \ 'test/testdata/cpp/complete_with_sig_help.cc', {} )
+  call s:WaitForSigHelpAvailable( 'cpp' )
+
+  call setpos( '.', [ 0, 10, 1 ] )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function! Check( ... )
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call FeedAndCheckAgain( '"", t.', funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( ... )
+    call WaitForCompletion()
+    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call CheckCurrentLine( 'printf("", t.' )
+    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( ... )
+    " Ensure that we didn't make an error?
+    call WaitForCompletion()
+    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    let compl = complete_info()
+    let selected = compl.items[ compl.selected ]
+    call assert_equal( 'that_is_a_thing', selected.word )
+
+    call WaitFor( {->
+          \ popup_findinfo() > 0 &&
+          \ has_key( popup_getpos( popup_findinfo() ), 'visible' ) } )
+    let info_popup_id = popup_findinfo()
+    call assert_true( popup_getpos( info_popup_id )[ 'visible' ] )
+
+    call CheckCurrentLine( 'printf("", t.that_is_a_thing' )
+    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check4' ) )
+
+  endfunction
+
+  function! Check4( ... )
+    " Ensure that we didn't make an error?
+    call WaitForCompletion()
+    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    let info_popup_id = popup_findinfo()
+    let compl = complete_info()
+    let selected = compl.items[ compl.selected ]
+    call assert_equal( 'this_is_a_thing', selected.word )
+    call assert_true( popup_getpos( info_popup_id )[ 'visible' ] )
+
+    call CheckCurrentLine( 'printf("", t.this_is_a_thing' )
+
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call FeedAndCheckMain( 'iprintf(', funcref( 'Check' ) )
+
+  call test_override( 'ALL', 0 )
+
+  delfunc! Check
+  delfunc! Check2
+  delfunc! Check3
+  delfunc! Check4
+endfunction
+
+function! TearDown_Test_Semantic_Completion_Popup_With_Sig_Help()
+  set signcolumn&
+  unlet! g:ycm_add_preview_to_completeopt
+endfunction
+
+function! SetUp_Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
+  set signcolumn=no
+  let g:ycm_filetype_whitelist = {
+        \ '*': 1,
+        \ 'ycm_nofiletype': 1
+        \ }
+  silent! call remove( g:ycm_filetype_blacklist, 'ycm_nofiletype' )
+  let g:ycm_add_preview_to_completeopt = 'popup'
+endfunction
+
+function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
+  call youcompleteme#test#setup#OpenFile(
+        \ 'test/testdata/cpp/complete_with_sig_help.cc', {} )
+  call s:WaitForSigHelpAvailable( 'cpp' )
+
+  call setpos( '.', [ 0, 10, 1 ] )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function! Check( ... )
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call FeedAndCheckAgain( '"", t.', funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( ... )
+    call WaitForCompletion()
+    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call CheckCurrentLine( 'printf("", t.' )
+    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( ... )
+    " Ensure that we didn't make an error?
+    call WaitForCompletion()
+    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+
+    " XFAIL: Currently the test fails here because the signature help popup
+    " disappears when the info_popup is displayed. This seems to be because we
+    " end up triggering a FileReadyToParse event inside the info popup (or the
+    " signature popup) due to what appears to be a vim bug - the `buftype` of
+    " the buffer inside the popup starts off as `popup` but shimers to `""` at
+    " some point, making us think it's ok to parse it with ycm_nofiletype is
+    " whitelisted.
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    let compl = complete_info()
+    let selected = compl.items[ compl.selected ]
+    call assert_equal( 'that_is_a_thing', selected.word )
+
+    call WaitFor( {->
+          \ popup_findinfo() > 0 &&
+          \ has_key( popup_getpos( popup_findinfo() ), 'visible' ) } )
+    let info_popup_id = popup_findinfo()
+    call assert_true( popup_getpos( info_popup_id )[ 'visible' ] )
+
+    call CheckCurrentLine( 'printf("", t.that_is_a_thing' )
+    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check4' ) )
+
+  endfunction
+
+  function! Check4( ... )
+    " Ensure that we didn't make an error?
+    call WaitForCompletion()
+    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    let info_popup_id = popup_findinfo()
+    let compl = complete_info()
+    let selected = compl.items[ compl.selected ]
+    call assert_equal( 'this_is_a_thing', selected.word )
+    call assert_true( popup_getpos( info_popup_id )[ 'visible' ] )
+
+    call CheckCurrentLine( 'printf("", t.this_is_a_thing' )
+
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call FeedAndCheckMain( 'iprintf(', funcref( 'Check' ) )
+
+  call test_override( 'ALL', 0 )
+
+  delfunc! Check
+  delfunc! Check2
+  delfunc! Check3
+  delfunc! Check4
+
+  throw 'SKIPPED: XFAIL: This test is expected to fail due to '
+        \ .. 'https://github.com/ycm-core/YouCompleteMe/issues/3781'
+
+endfunction
+
+function! TearDown_Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
+  set signcolumn&
+  unlet! g:ycm_add_preview_to_completeopt
+  call remove( g:ycm_filetype_whitelist, 'ycm_nofiletype' )
+  let g:ycm_filetype_blacklist[ 'ycm_nofiletype' ] = 1
 endfunction

@@ -63,7 +63,9 @@ let s:pollers = {
 let s:buftype_blacklist = {
       \   'help': 1,
       \   'terminal': 1,
-      \   'quickfix': 1
+      \   'quickfix': 1,
+      \   'popup': 1,
+      \   'nofile': 1,
       \ }
 let s:last_char_inserted_by_user = v:true
 let s:enable_hover = 0

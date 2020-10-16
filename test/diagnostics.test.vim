@@ -31,7 +31,6 @@ function! Test_Changing_Filetype_Refreshes_Diagnostics()
   call assert_equal( 1, len( sign_getplaced()[ 0 ][ 'signs' ] ) )
   call assert_equal( 'YcmError', sign_getplaced()[ 0 ][ 'signs' ][ 0 ][ 'name' ] )
   call assert_false( empty( getloclist( 0 ) ) )
-  %bwipeout!
 endfunction
 
 function! Test_MessagePoll_After_LocationList()
@@ -47,7 +46,6 @@ function! Test_MessagePoll_After_LocationList()
   doautocmd TextChanged
   call WaitForAssert( {-> assert_true( empty( sign_getplaced() ) ) } )
   call assert_true( empty( getloclist( 0 ) ) )
-  %bwipeout!
 endfunction
 
 function! Test_MessagePoll_Multiple_Filetypes()
@@ -56,7 +54,7 @@ function! Test_MessagePoll_Multiple_Filetypes()
         \ '/src/com/test/TestLauncher.java', {} )
   call WaitForAssert( {-> assert_true( len( sign_getplaced( '%' )[ 0 ][ 'signs' ] ) ) } )
   let java_signs = sign_getplaced( '%' )[ 0 ][ 'signs' ]
-  vsplit testdata/diagnostics/foo.cpp
+  silent vsplit testdata/diagnostics/foo.cpp
   " Make sure we've left the java buffer
   call assert_equal( java_signs, sign_getplaced( '#' )[ 0 ][ 'signs' ] )
   " Clangd emits two diagnostics for foo.cpp.
