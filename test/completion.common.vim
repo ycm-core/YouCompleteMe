@@ -149,11 +149,11 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
 endfunction
 
 function! SetUp_Test_Compl_No_Filetype()
-  let g:ycm_filetype_whitelist = {
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_whitelist', {
         \ '*': 1,
         \ 'ycm_nofiletype': 1
-        \ }
-  silent! call remove( g:ycm_filetype_blacklist, 'ycm_nofiletype' )
+        \ } )
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_blacklist', {} )
 endfunction
 
 function! Test_Compl_No_Filetype()
@@ -190,8 +190,8 @@ function! Test_Compl_No_Filetype()
 endfunction
 
 function! TearDown_Test_Compl_No_Filetype()
-  call remove( g:ycm_filetype_whitelist, 'ycm_nofiletype' )
-  let g:ycm_filetype_blacklist[ 'ycm_nofiletype' ] = 1
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_whitelist' )
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_blacklist' )
 endfunction
 
 function! Test_Compl_No_Filetype_Blacklisted()
@@ -232,9 +232,9 @@ function! OmniFuncTester( findstart, query )
 endfunction
 
 function! SetUp_Test_OmniComplete_Filter()
-  let g:ycm_semantic_triggers = {
+  call youcompleteme#test#setup#PushGlobal( 'ycm_semantic_triggers', {
         \ 'omnifunc_test': [ ':', '.' ]
-        \ }
+        \ } )
 endfunction
 
 function! Test_OmniComplete_Filter()
@@ -279,7 +279,7 @@ function! Test_OmniComplete_Filter()
 endfunction
 
 function! TearDown_Test_OmniComplete_Filter()
-  unlet g:ycm_semantic_triggers
+  call youcompleteme#test#setup#PopGlobal( 'ycm_semantic_triggers' )
 endfunction
 
 function! Test_OmniComplete_Force()

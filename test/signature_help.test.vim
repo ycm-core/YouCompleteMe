@@ -574,7 +574,8 @@ endfunction
 
 function! SetUp_Test_Semantic_Completion_Popup_With_Sig_Help()
   set signcolumn=no
-  let g:ycm_add_preview_to_completeopt = 'popup'
+  call youcompleteme#test#setup#PushGlobal( 'ycm_add_preview_to_completeopt',
+                                          \ 'popup' )
 endfunction
 
 function! Test_Semantic_Completion_Popup_With_Sig_Help()
@@ -664,17 +665,18 @@ endfunction
 
 function! TearDown_Test_Semantic_Completion_Popup_With_Sig_Help()
   set signcolumn&
-  unlet! g:ycm_add_preview_to_completeopt
+  call youcompleteme#test#setup#PopGlobal( 'ycm_add_preview_to_completeopt' )
 endfunction
 
 function! SetUp_Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   set signcolumn=no
-  let g:ycm_filetype_whitelist = {
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_whitelist', {
         \ '*': 1,
         \ 'ycm_nofiletype': 1
-        \ }
-  silent! call remove( g:ycm_filetype_blacklist, 'ycm_nofiletype' )
-  let g:ycm_add_preview_to_completeopt = 'popup'
+        \ } )
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_blacklist', {} )
+  call youcompleteme#test#setup#PushGlobal( 'ycm_add_preview_to_completeopt',
+                                          \ 'popup' )
 endfunction
 
 function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
@@ -775,7 +777,7 @@ endfunction
 
 function! TearDown_Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   set signcolumn&
-  unlet! g:ycm_add_preview_to_completeopt
-  call remove( g:ycm_filetype_whitelist, 'ycm_nofiletype' )
-  let g:ycm_filetype_blacklist[ 'ycm_nofiletype' ] = 1
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_whitelist' )
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_blacklist' )
+  call youcompleteme#test#setup#PopGlobal( 'ycm_add_preview_to_completeopt' )
 endfunction
