@@ -10,40 +10,40 @@ function! Test_ToggleLogs()
   let bcount = len( getbufinfo() )
 
   " default - show
-  exe 'YcmToggleLogs' keys( log_files )[ 0 ]
+  silent exe 'YcmToggleLogs' keys( log_files )[ 0 ]
   call assert_equal( bcount + 1, len( getbufinfo() ) )
   let win = getbufinfo( keys( log_files )[ 0 ] )[ 0 ].windows[ 0 ]
   call assert_equal( &previewheight, winheight( win_id2win( win ) ) )
 
   " default - hide
-  exe 'YcmToggleLogs' keys( log_files )[ 0 ]
+  silent exe 'YcmToggleLogs' keys( log_files )[ 0 ]
   " buffer is wiped out
   call assert_equal( bcount, len( getbufinfo() ) )
   call assert_equal( [], getbufinfo( keys( log_files )[ 0 ] ) )
 
   " show - 10 lines
-  exe '10YcmToggleLogs' keys( log_files )[ 0 ]
+  silent exe '10YcmToggleLogs' keys( log_files )[ 0 ]
   call assert_equal( bcount + 1, len( getbufinfo() ) )
   let win = getbufinfo( keys( log_files )[ 0 ] )[ 0 ].windows[ 0 ]
   call assert_equal( 10, winheight( win_id2win( win ) ) )
 
   " hide
-  exe '10YcmToggleLogs' keys( log_files )[ 0 ]
+  silent exe '10YcmToggleLogs' keys( log_files )[ 0 ]
   call assert_equal( bcount, len( getbufinfo() ) )
   call assert_equal( [], getbufinfo( keys( log_files )[ 0 ] ) )
 
   " show - 15 cols
-  exe 'vertical 15YcmToggleLogs' keys( log_files )[ 0 ]
+  silent exe 'vertical 15YcmToggleLogs' keys( log_files )[ 0 ]
   call assert_equal( bcount + 1, len( getbufinfo() ) )
   let win = getbufinfo( keys( log_files )[ 0 ] )[ 0 ].windows[ 0 ]
   call assert_equal( 15, winwidth( win_id2win( win ) ) )
 
   " hide
-  exe 'YcmToggleLogs' keys( log_files )[ 0 ]
+  silent exe 'YcmToggleLogs' keys( log_files )[ 0 ]
   call assert_equal( bcount, len( getbufinfo() ) )
   call assert_equal( [], getbufinfo( keys( log_files )[ 0 ] ) )
 
-  %bwipeout!
+
 endfunction
 
 function! Test_GetCommandResponse()
@@ -84,7 +84,6 @@ function! Test_GetCommandResponse()
   call setpos( '.', [ 0, 1, 3 ] )
   call assert_equal( '', youcompleteme#GetCommandResponse( 'GetDoc' ) )
 
-  %bwipe!
 endfunction
 
 
@@ -96,15 +95,12 @@ function! Test_GetCommandResponse_FixIt()
   call assert_equal( '',
                    \ youcompleteme#GetCommandResponse( 'FixIt' ) )
 
-  %bwipe!
 endfunction
 
 function! Test_GetDefinedSubcommands_Native()
   call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/fixit.c', {} )
   call assert_equal( 1, count( youcompleteme#GetDefinedSubcommands(),
                              \ 'GetDoc' ) )
-
-  %bwipe!
 endfunction
 
 function! Test_GetDefinedSubcommands_NoNative()
@@ -112,5 +108,6 @@ function! Test_GetDefinedSubcommands_NoNative()
   setf not_a_filetype
   call assert_equal( [], youcompleteme#GetDefinedSubcommands() )
 
-  %bwipe!
+  " The above call prints ValueError: No semantic completer ...."
+  messages clear
 endfunction

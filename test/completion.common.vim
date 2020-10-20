@@ -1,56 +1,5 @@
 scriptencoding utf-8
 
-function! CheckCompletionItems( expected_props, ... )
-  let prop = 'abbr'
-  if a:0 > 0
-    let prop = a:1
-  endif
-
-  let items = complete_info( [ 'items' ] )[ 'items' ]
-  let abbrs = []
-  for item in items
-    call add( abbrs, get( item, prop ) )
-  endfor
-
-  call assert_equal( a:expected_props,
-        \ abbrs,
-        \ 'not matched: '
-        \ .. string( a:expected_props )
-        \ .. ' against '
-        \ .. prop
-        \ .. ' in '
-        \ .. string( items )
-        \ .. ' matching '
-        \ .. string( abbrs ) )
-endfunction
-
-function! FeedAndCheckMain( keys, func )
-  call timer_start( 500, a:func )
-  call feedkeys( a:keys, 'tx!' )
-endfunction
-
-function! FeedAndCheckAgain( keys, func )
-  call timer_start( 500, a:func )
-  call feedkeys( a:keys )
-endfunction
-
-function! WaitForCompletion()
-  call WaitForAssert( {->
-        \ assert_true( pyxeval( 'ycm_state.GetCurrentCompletionRequest() is not None' ) )
-        \ } )
-  call WaitForAssert( {->
-        \ assert_true( pyxeval( 'ycm_state.CompletionRequestReady()' ) )
-        \ } )
-  redraw
-  call WaitForAssert( {->
-        \ assert_true( pumvisible(), 'pumvisible()' )
-        \ }, 10000 )
-endfunction
-
-function! CheckCurrentLine( expected_value )
-  return assert_equal( a:expected_value, getline( '.' ) )
-endfunction
-
 function! Test_Compl_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
@@ -73,7 +22,6 @@ function! Test_Compl_After_Trigger()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
 endfunctio
 
 function! Test_Force_Semantic_TopLevel()
@@ -101,7 +49,6 @@ function! Test_Force_Semantic_TopLevel()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
 endfunction
 
 function! Test_Select_Next_Previous()
@@ -151,7 +98,6 @@ function! Test_Select_Next_Previous()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
 endfunction
 
 function! Test_Enter_Delete_Chars_Updates_Filter()
@@ -200,10 +146,18 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-  %bwipeout!
+endfunction
+
+function! SetUp_Test_Compl_No_Filetype()
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_whitelist', {
+        \ '*': 1,
+        \ 'ycm_nofiletype': 1
+        \ } )
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_blacklist', {} )
 endfunction
 
 function! Test_Compl_No_Filetype()
+  call assert_false( has_key( g:ycm_filetype_blacklist, 'ycm_nofiletype' ) )
   enew
   call setline( '.', 'hello this is some text ' )
 
@@ -233,18 +187,16 @@ function! Test_Compl_No_Filetype()
 
   call test_override( 'ALL', 0 )
   delfunc! Check
-  %bwipeout!
 endfunction
 
-function! SetUp_Test_Compl_No_Filetype_Blacklisted()
-  let g:ycm_filetype_blacklist = { 'ycm_nofiletype': 1 }
-endfunction
-
-function! TearDown__Test_Compl_No_Filetype_Blacklisted()
-  unlet! g:ycm_filetype_blacklist
+function! TearDown_Test_Compl_No_Filetype()
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_whitelist' )
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_blacklist' )
 endfunction
 
 function! Test_Compl_No_Filetype_Blacklisted()
+  call assert_true( has_key( g:ycm_filetype_blacklist, 'ycm_nofiletype' ) )
+
   enew
   call setline( '.', 'hello this is some text ' )
 
@@ -270,7 +222,6 @@ function! Test_Compl_No_Filetype_Blacklisted()
 
   call test_override( 'ALL', 0 )
   delfunc! Check
-  %bwipeout!
 endfunction
 
 function! OmniFuncTester( findstart, query )
@@ -281,9 +232,9 @@ function! OmniFuncTester( findstart, query )
 endfunction
 
 function! SetUp_Test_OmniComplete_Filter()
-  let g:ycm_semantic_triggers = {
+  call youcompleteme#test#setup#PushGlobal( 'ycm_semantic_triggers', {
         \ 'omnifunc_test': [ ':', '.' ]
-        \ }
+        \ } )
 endfunction
 
 function! Test_OmniComplete_Filter()
@@ -325,12 +276,10 @@ function! Test_OmniComplete_Filter()
   call setline(1, 'te:' )
   call setpos( '.', [ 0, 1, 3 ] )
   call FeedAndCheckMain( 'ate', 'Check1' )
-
-  %bwipeout!
 endfunction
 
 function! TearDown_Test_OmniComplete_Filter()
-  unlet g:ycm_semantic_triggers
+  call youcompleteme#test#setup#PopGlobal( 'ycm_semantic_triggers' )
 endfunction
 
 function! Test_OmniComplete_Force()
@@ -372,7 +321,6 @@ function! Test_OmniComplete_Force()
   call setline(1, 'te' )
   call setpos( '.', [ 0, 1, 3 ] )
   call FeedAndCheckMain( "a\<C-Space>", 'Check1' )
-  %bwipeout!
 endfunction
 
 function! Test_Completion_FixIt()
@@ -413,8 +361,6 @@ function! Test_Completion_FixIt()
 
   call setpos( '.', [ 0, 3, 1 ] )
   call FeedAndCheckMain( "Ado_a\<C-Space>", funcref( 'Check1' ) )
-
-  %bwipeout!
 endfunction
 
 function! Test_Select_Next_Previous_InsertModeMapping()
@@ -475,5 +421,4 @@ function! Test_Select_Next_Previous_InsertModeMapping()
 
   call test_override( 'ALL', 0 )
   iunmap <C-n>
-  %bwipeout!
 endfunction
