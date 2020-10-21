@@ -107,6 +107,7 @@ class YouCompleteMe:
     self._SetUpLogging()
     self._SetUpServer()
     self._ycmd_keepalive.Start()
+    self._visited_filetypes = set()
 
 
   def _SetUpServer( self ):
@@ -871,6 +872,12 @@ class YouCompleteMe:
 
 
   def _AddUltiSnipsDataIfNeeded( self, extra_data ):
+    current_filetypes = vimsupport.CurrentFiletypes()
+    need_ultisnips = any( ft not in self._visited_filetypes
+                          for ft in current_filetypes )
+    if not need_ultisnips:
+      return
+
     # See :h UltiSnips#SnippetsInCurrentScope.
     try:
       vim.eval( 'UltiSnips#SnippetsInCurrentScope( 1 )' )
@@ -883,3 +890,4 @@ class YouCompleteMe:
         'description': snippet[ 'description' ] }
       for trigger, snippet in snippets.items()
     ]
+    self._visited_filetypes.update( current_filetypes )
