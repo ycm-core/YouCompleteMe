@@ -110,6 +110,7 @@ class YouCompleteMe:
 
 
   def _SetUpServer( self ):
+    self._sent_snippets_for_filetypes = set()
     self._available_completers = {}
     self._user_notified_about_crash = False
     self._filetypes_with_keywords_loaded = set()
@@ -871,6 +872,12 @@ class YouCompleteMe:
 
 
   def _AddUltiSnipsDataIfNeeded( self, extra_data ):
+    current_filetypes = vimsupport.CurrentFiletypes()
+    need_ultisnips = any( ft not in self._sent_snippets_for_filetypes
+                          for ft in current_filetypes )
+    if not need_ultisnips:
+      return
+
     # See :h UltiSnips#SnippetsInCurrentScope.
     try:
       vim.eval( 'UltiSnips#SnippetsInCurrentScope( 1 )' )
@@ -883,3 +890,4 @@ class YouCompleteMe:
         'description': snippet[ 'description' ] }
       for trigger, snippet in snippets.items()
     ]
+    self._sent_snippets_for_filetypes.update( current_filetypes )
