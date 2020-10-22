@@ -96,7 +96,7 @@ let g:ycm_filetype_blacklist =
 " Blacklist empty buffers unless explicity whitelisted; workaround for
 " https://github.com/ycm-core/YouCompleteMe/issues/3781
 if !has_key( g:ycm_filetype_whitelist, 'ycm_nofiletype' )
-  let g:ycm_filetype_blacklist[ 'ycm_nofiletype' ] = 1
+  let g:ycm_filetype_blacklist.ycm_nofiletype = 1
 endif
 
 let g:ycm_open_loclist_on_ycm_diags =
