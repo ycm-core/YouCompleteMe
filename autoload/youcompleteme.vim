@@ -824,7 +824,10 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
     return
   endif
 
-  if a:popup_is_visible && ( !s:last_char_inserted_by_user || complete_info().mode == 'whole_line' )
+  if a:popup_is_visible && (
+              \ !s:last_char_inserted_by_user ||
+              \ complete_info().mode == 'whole_line'
+              \)
     " If the last "input" wasn't from a user typing (i.e. didn't come from
     " InsertCharPre, then ignore this change in the text. This prevents ctrl-n
     " or tab from causing us to re-filter the list based on the now-selected
