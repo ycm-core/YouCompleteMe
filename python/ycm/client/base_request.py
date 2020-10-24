@@ -36,6 +36,7 @@ _logger = logging.getLogger( __name__ )
 # _HTTP_INTERFACE = 'http9'
 _HTTP_INTERFACE = 'http'
 
+
 class YCMConnectionError( Exception ):
   pass
 
