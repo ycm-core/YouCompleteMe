@@ -11,6 +11,19 @@ NOTE: Minimum Requirements Have Changed
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
 That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
 
+NOTE: Minimum compiler versions will soon be increased
+----------------------------------------
+
+In order to provide the best possible performance and stability, ycmd will
+soon update its code to C++17. This will require a version bump of the minimum
+supported compilers. The new requirements will be:
+
+| Compiler | Current Min | Upcoming |
+|-|-|-|
+| GCC | 4.8 | 8 |
+| Clang | 4 | 8 |
+| MSVC | 14 (VS 2015) | 15.7 (VS 2017) |
+
 Help, Advice, Support
 ---------------------
 
