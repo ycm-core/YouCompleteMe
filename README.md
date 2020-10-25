@@ -21,7 +21,7 @@ supported compilers. The new requirements will be:
 | Compiler | Current Min | Upcoming |
 |-|-|-|
 | GCC | 4.8 | 8 |
-| Clang | 4 | 8 |
+| Clang | 4 | 7 |
 | MSVC | 14 (VS 2015) | 15.7 (VS 2017) |
 
 Help, Advice, Support
