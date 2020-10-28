@@ -4,25 +4,26 @@ function! Test_UltiSnips_Cache()
   enew
   setf ultisnips_test
   call test_override( 'char_avail', 1 )
-  let s:first_run = 1
 
   function! Check( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'fo' )
     call CheckCompletionItems( [ 'foo' ] )
-    if s:first_run
-      call FeedAndCheckAgain( "\<Esc>", funcref( 'Check2' ) )
-      let s:first_run = 0
-    else
-      call feedkeys( "\<Esc>" )
-    endif
+    call FeedAndCheckAgain( "\<Esc>", funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )
     doautocmd BufEnter
     call assert_true( count( 'foo2', g:current_ulti_dict_info ) )
     call CheckCurrentLine( 'fo' )
-    call FeedAndCheckAgain( 'ccfo', funcref( 'Check' ) )
+    call FeedAndCheckAgain( 'ccfo', funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( id )
+    call WaitForCompletion()
+    call CheckCurrentLine( 'fo' )
+    call CheckCompletionItems( [ 'foo' ] )
+    call feedkeys( "\<Esc>" )
   endfunction
 
   call FeedAndCheckMain( 'ifo', funcref( 'Check' ) )
