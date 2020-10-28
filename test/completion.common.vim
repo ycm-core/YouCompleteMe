@@ -1,5 +1,37 @@
 scriptencoding utf-8
 
+function! Test_UltiSnips_Cache()
+  enew
+  setf ultisnips_test
+  call test_override( 'char_avail', 1 )
+  let s:first_run = 1
+
+  function! Check( id )
+    call WaitForCompletion()
+    call CheckCurrentLine( 'fo' )
+    call CheckCompletionItems( [ 'foo' ] )
+    if s:first_run
+      call FeedAndCheckAgain( "\<Esc>", funcref( 'Check2' ) )
+      let s:first_run = 0
+    else
+      call feedkeys( "\<Esc>" )
+    endif
+  endfunction
+
+  function! Check2( id )
+    doautocmd BufEnter
+    call assert_true( count( 'foo2', g:current_ulti_dict_info ) )
+    call CheckCurrentLine( 'fo' )
+    call FeedAndCheckAgain( 'ccfo', funcref( 'Check' ) )
+  endfunction
+
+  call FeedAndCheckMain( 'ifo', funcref( 'Check' ) )
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+endfunction
+
+
 function! Test_Compl_After_Trigger()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
