@@ -11,7 +11,7 @@ endfunction
 function! UltiSnips#SnippetsInCurrentScope( num )
   let ulti_func = get( s:, 'ultisnips_func' )
   if ulti_func
-    return ulti_func
+    return ulti_func()
   else
     return {}
   endif
