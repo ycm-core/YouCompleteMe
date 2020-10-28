@@ -1,7 +1,7 @@
 scriptencoding utf-8
 
 function! SetUp_Test_UltiSnips_Cache()
-  call UltiSnips#EnableSnippetsInCurrentScope()
+  call UltiSnips#Enable()
 endfunction!
 
 
@@ -39,7 +39,7 @@ endfunction
 
 
 function! TearDown_Test_UltiSnips_Cache()
-  call UltiSnips#DisableSnippetsInCurrentScope()
+  call UltiSnips#Disable()
 endfunction
 
 
