@@ -7,3 +7,8 @@ function! UltiSnips#SnippetsInCurrentScope( num )
     let g:current_ulti_dict_info = { 'foo2': { 'description': 'second' } }
   endif
 endfunction
+
+augroup ultisnips
+  au!
+  au FileType * let s:first_run = 0
+augroup END
