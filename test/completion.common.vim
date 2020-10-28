@@ -1,5 +1,10 @@
 scriptencoding utf-8
 
+function! SetUp_Test_UltiSnips_Cache()
+  call UltiSnips#EnableSnippetsInCurrentScope()
+endfunction!
+
+
 function! Test_UltiSnips_Cache()
   enew
   call test_override( 'char_avail', 1 )
@@ -30,6 +35,11 @@ function! Test_UltiSnips_Cache()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
+endfunction
+
+
+function! TearDown_Test_UltiSnips_Cache()
+  call UltiSnips#DisableSnippetsInCurrentScope()
 endfunction
 
 

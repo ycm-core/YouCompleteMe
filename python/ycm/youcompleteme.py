@@ -876,7 +876,6 @@ class YouCompleteMe:
     need_ultisnips = any( ft not in self._sent_snippets_for_filetypes
                           for ft in current_filetypes )
     if not need_ultisnips:
-      print( current_filetypes )
       return
 
     # See :h UltiSnips#SnippetsInCurrentScope.
