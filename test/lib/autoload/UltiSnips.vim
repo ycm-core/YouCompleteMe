@@ -1,3 +1,7 @@
+let s:first_run = v:none
+let s:ulti_func = v:none
+
+
 function! s:TestSnippets()
   if s:first_run == 1
     s:first_run = 0
@@ -25,6 +29,6 @@ endfunction
 
 
 function! UltiSnips#Disable()
-  unlet s:first_run
-  unlet s:ultisnips_func
+  let s:first_run = v:none
+  let s:ulti_func = v:none
 endfunction
