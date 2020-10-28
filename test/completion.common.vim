@@ -2,7 +2,6 @@ scriptencoding utf-8
 
 function! Test_UltiSnips_Cache()
   enew
-  setf ultisnips_test
   call test_override( 'char_avail', 1 )
 
   function! Check( id )
@@ -26,6 +25,7 @@ function! Test_UltiSnips_Cache()
     call feedkeys( "\<Esc>" )
   endfunction
 
+  setf ultisnips_test
   call FeedAndCheckMain( 'ifo', funcref( 'Check' ) )
   call assert_false( pumvisible(), 'pumvisible()' )
 
