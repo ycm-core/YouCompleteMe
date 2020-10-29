@@ -2,11 +2,13 @@ scriptencoding utf-8
 
 function! SetUp_Test_UltiSnips_Cache()
   call UltiSnips#Enable()
+  YcmRestartServer
 endfunction!
 
 
 function! Test_UltiSnips_Cache()
-  enew
+  call youcompleteme#test#setup#OpenFile(
+        \ '/test/testdata/new_file', { 'native_ft': 0 } )
   call test_override( 'char_avail', 1 )
 
   function! Check( id )
