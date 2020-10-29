@@ -8,7 +8,7 @@ endfunction!
 
 function! Test_UltiSnips_Cache()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/new_file', { 'native_ft': 0 } )
+        \ '/test/testdata/new_file', { 'native_ft': 0, 'force_delay': 1 } )
   setf ultisnips_test
   call test_override( 'char_avail', 1 )
 
