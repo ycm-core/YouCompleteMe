@@ -751,7 +751,6 @@ Quick Feature Summary
 * Type information for identifiers (`GetType`)
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
-* Execute custom server command (`ExecuteCommand <args>`)
 * Management of `rust-analyzer` server instance
 
 ### Java
@@ -1998,10 +1997,9 @@ flags.
 
 #### The `ExecuteCommand <args>` subcommand
 
-Some LSP completers (currently Rust and Java completers) support executing
-server specific commands. Consult the [rust-analyzer][] and [jdt.ls][] respective
-documentations to find out what commands are supported and which arguments are
-expected.
+Some LSP completers (currently only Java completers) support executing
+server specific commands. Consult the [jdt.ls][] documentation to find out
+what commands are supported and which arguments are expected.
 
 The support for `ExecuteCommand` was implemented to support plugins like
 [vimspector][] to debug java, but isn't limited to that specific use case.
