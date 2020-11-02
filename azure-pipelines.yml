@@ -15,7 +15,7 @@ jobs:
   pool:
     # List of available software on this image:
     # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/linux/Ubuntu1604-README.md
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       'Python 3.6':
@@ -42,7 +42,7 @@ jobs:
   pool:
     # List of available software on this image:
     # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/linux/Ubuntu1604-README.md
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       'Python 3.6':
@@ -73,7 +73,7 @@ jobs:
   pool:
     # List of available software on this image:
     # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/linux/Ubuntu1604-README.md
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       'Python 3.6':

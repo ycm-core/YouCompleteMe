@@ -38,7 +38,7 @@ function! Test_Ranged_Fixit_Works()
 endfunction
 
 function! Test_Unresolved_Fixit_Works()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/fixit.c', {} )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/fixit.cpp', {} )
   call setpos( '.', [ 0, 3, 15 ] )
   call assert_equal( '  printf("%s",1);', getline( '.' ) )
   function! SelectEntry( id ) closure
