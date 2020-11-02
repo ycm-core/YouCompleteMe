@@ -13,18 +13,18 @@ That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
 
 For neovim users, 0.4.4 is required.
 
-NOTE: Minimum compiler versions will soon be increased
+NOTE: Minimum compiler versions have been increased
 ----------------------------------------
 
-In order to provide the best possible performance and stability, ycmd will
-soon update its code to C++17. This will require a version bump of the minimum
-supported compilers. The new requirements will be:
+In order to provide the best possible performance and stability, ycmd has
+updated its code to C++17. This requires a version bump of the minimum
+supported compilers. The new requirements are:
 
-| Compiler | Current Min | Upcoming |
-|-|-|-|
-| GCC | 4.8 | 8 |
-| Clang | 4 | 7 |
-| MSVC | 14 (VS 2015) | 15.7 (VS 2017) |
+| Compiler | Current Min |
+|-|-|
+| GCC | 8 |
+| Clang | 7 |
+| MSVC | 15.7 (VS 2017) |
 
 Help, Advice, Support
 ---------------------
