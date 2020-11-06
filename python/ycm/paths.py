@@ -84,5 +84,8 @@ def _EndsWithPython( path ):
   return path and PYTHON_BINARY_REGEX.search( path ) is not None
 
 
-def PathToServerScript():
-  return os.path.join( DIR_OF_YCMD, 'ycmd' )
+def ArgsToInvokeServer():
+  if os.path.exists( DIR_OF_YCMD ):
+    return os.path.join( DIR_OF_YCMD, 'ycmd' )
+
+  return [ '-m', 'ycmd' ]

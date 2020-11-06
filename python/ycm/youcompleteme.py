@@ -155,12 +155,12 @@ class YouCompleteMe:
       vimsupport.PostVimMessage( error_message )
       return
 
-    args = [ python_interpreter,
-             paths.PathToServerScript(),
-             f'--port={ server_port }',
-             f'--options_file={ options_file.name }',
-             f'--log={ self._user_options[ "log_level" ] }',
-             f'--idle_suicide_seconds={ SERVER_IDLE_SUICIDE_SECONDS }' ]
+    args = ( [ python_interpreter ] +
+             paths.ArgsToInvokeServer() +
+             [ f'--port={ server_port }',
+               f'--options_file={ options_file.name }',
+               f'--log={ self._user_options[ "log_level" ] }',
+               f'--idle_suicide_seconds={ SERVER_IDLE_SUICIDE_SECONDS }' ] )
 
     self._server_stdout = utils.CreateLogfile(
         SERVER_LOGFILE_FORMAT.format( port = server_port, std = 'stdout' ) )
