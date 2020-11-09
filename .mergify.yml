@@ -7,7 +7,7 @@ pull_request_rules:
     actions:
       merge:
         method: merge
-        strict: smart
+        strict: true
       comment:
         message: Thanks for sending a PR!
   - name: Manual merge on Azure Pipelines and Maintainer Override
@@ -22,6 +22,6 @@ pull_request_rules:
     actions:
       merge:
         method: merge
-        strict: smart
+        strict: true
       comment:
         message: Thanks for sending a PR!
