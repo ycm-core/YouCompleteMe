@@ -88,11 +88,13 @@ let s:cpp_lifetime = {
       \ 'GetDoc': [ 'field lifetime',
       \             '',
       \             'Type: char',
+      \             'Offset: 16 bytes',
+      \             'Size: 1 byte',
       \             'nobody will live > 128 years',
       \             '',
       \             '// In PointInTime',
-      \             'char lifetime' ],
-      \ 'GetType': [ 'char lifetime; // In PointInTime' ],
+      \             'public: char lifetime' ],
+      \ 'GetType': [ 'public: char lifetime; // In PointInTime' ],
       \ }
 
 function! SetUp()
