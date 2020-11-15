@@ -1,0 +1,47 @@
+runtime defaults.vim
+
+" windows default encoding is not supported
+set encoding=utf-8
+
+" If you using neovim and python isn't loading, copy your python setup from your
+" vimrc here:
+"
+" let g:python3_host_prog = '/path/to/python3/with/neovim/module'
+"
+" But remember that neovim is not officially supported, so please reproduce in
+" Vim.
+
+" Enable debugging
+let g:ycm_keep_logfiles = 1
+let g:ycm_log_level = 'debug'
+
+" If the base settings don't repro, paste your existing config for YCM only,
+" here:
+" let g:ycm_....
+
+" Load YCM (only)
+let s:dir = expand( '<sfile>:p:h' )
+
+let g:ycm_add_preview_to_completeopt = 'popup'
+let g:ycm_confirm_extra_conf = 0
+
+let g:ycm_server_python_interpreter = s:dir . '/env/bin/python'
+" let g:ycm_ycmd_package_path = s:dir . '/env/lib/python3.8/site-packages'
+let g:ycm_ycmd_package_path = s:dir . '/env/lib/python3.8/site-packages'
+
+let s:ycmd_tp = expand( '$HOME/.vim/bundle/YouCompleteMe'
+                      \ . '/third_party/ycmd/third_party' )
+let g:ycm_clangd_binary_path = s:ycmd_tp . '/clangd/output/bin/clangd'
+let g:ycm_tsserver_binary_path = s:ycmd_tp . '/tsserver/node_modules/.bin/tsserver'
+let g:ycm_rust_toolchain_root = s:ycmd_tp . '/rust-analyzer'
+let g:ycm_roslyn_binary_path = s:ycmd_tp . '/omnisharp-roslyn/omnisharp/OmniSharp.exe'
+
+let g:ycm_java_jdtls_use_clean_workspace = 0
+let g:ycm_java_jdtls_extension_path = [ expand( '$HOME/.ycmd/java/extensions' ) ]
+let g:ycm_java_jdtls_workspace_root_path = expand( '$HOME/.ycmd/java/Workspace' )
+let g:ycm_jdtls_repository_path = s:ycmd_tp . '/eclipse.jdt.ls/target/repository'
+
+" etc...
+
+let &rtp .= ',' . s:dir . '/YouCompleteMe'
+filetype plugin indent on
