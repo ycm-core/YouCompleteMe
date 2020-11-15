@@ -233,20 +233,20 @@ officially supported.
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]
-- Install cmake, macvim and python; Note that the pre-installed macOs *system* vim is not supported.
+- Install cmake, macvim and python; Note that the pre-installed *macOS system* vim is not supported.
 
 ```
 brew install cmake python mono go nodejs
 ```
 
-- Pre-installed macOs *system* vim does not support Python. So you need to install either a Python supported vim OR macvim via homebrew:
+- Pre-installed macOs *system* vim does not support Python. So you need to install either a Python supported vim OR [MacVim][] with [Homebrew][brew]:
 
-  - Option 1: Installing python supported vim
+  - Option 1: Installing Python supported vim
   
   ```
   brew install vim
   ```
-  - Option 2: Installing macvim
+  - Option 2: Installing [MacVim][]
   
   ```
   brew install macvim
