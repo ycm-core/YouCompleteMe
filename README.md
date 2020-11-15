@@ -241,17 +241,16 @@ brew install cmake python mono go nodejs
 
 - Pre-installed macOs *system* vim does not support Python. So you need to install either a Python supported vim OR macvim via homebrew:
 
-Option 1: Installing python supported vim
-
-```
-brew install vim
-```
-
-Option 2: Installing macvim
-
-```
-brew install macvim
-```
+  - Option 1: Installing python supported vim
+  
+  ```
+  brew install vim
+  ```
+  - Option 2: Installing macvim
+  
+  ```
+  brew install macvim
+  ```
 
 - Compile YCM
 
@@ -273,8 +272,9 @@ A Python supported vim or [MacVim][] is required. YCM won't work with the pre-in
 its Python support is broken. If you don't already use a python supported vim or [MacVim][], install it
 with [Homebrew][brew]. Install CMake as well:
 
-    brew install cmake vim
-
+    brew install cmake vim    
+    
+   OR
 
     brew install cmake macvim
 
