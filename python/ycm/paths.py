@@ -20,10 +20,22 @@ import sys
 import vim
 import re
 
+
+def FindYcmd():
+  ycmd_dir = vim.vars.get( 'ycm_ycmd_package_path' )
+  if isinstance( ycmd_dir, bytes ):
+    ycmd_dir = ycmd_dir.decode( 'utf-8' )
+
+  if not ycmd_dir:
+    DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
+    ycmd_dir = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
+                             'ycmd' )
+
+  return ycmd_dir
+
+
 # Can't import these from setup.py because it makes nosetests go crazy.
-DIR_OF_CURRENT_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
-DIR_OF_YCMD = os.path.join( DIR_OF_CURRENT_SCRIPT, '..', '..', 'third_party',
-                            'ycmd' )
+DIR_OF_YCMD = FindYcmd()
 WIN_PYTHON_PATH = os.path.join( sys.exec_prefix, 'python.exe' )
 PYTHON_BINARY_REGEX = re.compile(
   r'python(3(\.[6-9])?)?(.exe)?$', re.IGNORECASE )
@@ -86,6 +98,6 @@ def _EndsWithPython( path ):
 
 def ArgsToInvokeServer():
   if os.path.exists( DIR_OF_YCMD ):
-    return os.path.join( DIR_OF_YCMD, 'ycmd' )
+    return [ os.path.join( DIR_OF_YCMD, 'ycmd' ) ]
 
   return [ '-m', 'ycmd' ]

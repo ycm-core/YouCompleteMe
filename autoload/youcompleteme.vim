@@ -249,10 +249,17 @@ import vim
 root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
 third_party_folder = p.join( root_folder, 'third_party' )
 
+ycmd_dir = vim.vars.get( 'ycm_ycmd_package_path' )
+if isinstance( ycmd_dir, bytes ):
+  ycmd_dir = ycmd_dir.decode( 'utf-8' )
+
+if not ycmd_dir:
+  ycmd_dir = p.join( third_party_folder, 'ycmd' )
+
 # Add dependencies to Python path.
 dependencies = [ p.join( root_folder, 'python' ),
                  p.join( third_party_folder, 'requests-futures' ),
-                 p.join( third_party_folder, 'ycmd' ),
+                 ycmd_dir,
                  p.join( third_party_folder, 'requests_deps', 'idna' ),
                  p.join( third_party_folder, 'requests_deps', 'chardet' ),
                  p.join( third_party_folder,
