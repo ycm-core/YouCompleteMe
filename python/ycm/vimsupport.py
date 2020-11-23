@@ -126,40 +126,26 @@ def GetBufferData( buffer_object ):
   }
 
 
-def GetUnsavedAndSpecifiedBufferData( included_buffer,
-                                      included_filepath,
-                                      incremental_changes_supported ):
+def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
   """Build part of the request containing the contents and filetypes of all
   dirty buffers as well as the buffer |included_buffer| with its filepath
   |included_filepath|."""
+  modified_buffers = vim.eval( 'g:ycm_pending_changes' )
   buffers_data = { included_filepath: GetBufferData( included_buffer ) }
-
-  if not incremental_changes_supported:
-    for buffer_object in vim.buffers:
-      if not BufferModified( buffer_object ):
-        continue
-
-      filepath = GetBufferFilepath( buffer_object )
-      if filepath in buffers_data:
-        continue
-
-      buffers_data[ filepath ] = GetBufferData( buffer_object )
-  else:
-    modified_buffers = vim.eval( 'g:ycm_pending_changes' )
-    for buffer_name, changes in modified_buffers.items():
-      full_path = os.path.abspath( buffer_name )
-      buffer_data = buffers_data.get( full_path, {} )
-      for change in changes:
-        rng = change[ 'range' ]
-        start = rng[ 'start' ]
-        end = rng[ 'end' ]
-        start[ 'line_num' ] = int( start[ 'line_num' ] )
-        start[ 'column_num' ] = int( start[ 'column_num' ] )
-        end[ 'line_num' ] = int( end[ 'line_num' ] )
-        end[ 'column_num' ] = int( end[ 'column_num' ] )
-      buffer_data[ 'changes' ] = changes
-      buffers_data[ full_path ] = buffer_data
-    vim.command( 'let g:ycm_pending_changes = {}' )
+  for buffer_name, changes in modified_buffers.items():
+    full_path = os.path.abspath( buffer_name )
+    buffer_data = buffers_data.get( full_path, {} )
+    for change in changes:
+      rng = change[ 'range' ]
+      start = rng[ 'start' ]
+      end = rng[ 'end' ]
+      start[ 'line_num' ] = int( start[ 'line_num' ] )
+      start[ 'column_num' ] = int( start[ 'column_num' ] )
+      end[ 'line_num' ] = int( end[ 'line_num' ] )
+      end[ 'column_num' ] = int( end[ 'column_num' ] )
+    buffer_data[ 'changes' ] = changes
+    buffers_data[ full_path ] = buffer_data
+  vim.command( 'let g:ycm_pending_changes = {}' )
 
   return buffers_data
 

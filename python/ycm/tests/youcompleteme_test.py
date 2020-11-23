@@ -228,9 +228,6 @@ class YouCompleteMeTest( TestCase ):
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_enable_diagnostic_signs': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
@@ -241,7 +238,6 @@ def YouCompleteMe_UpdateDiagnosticInterface_NewVim_test(
     request_done,
     post_vim_message,
     filetype_completer_exists,
-    incremental_update_support,
     ycm ):
   YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 

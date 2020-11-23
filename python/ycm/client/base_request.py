@@ -39,7 +39,6 @@ _logger = logging.getLogger( __name__ )
 
 
 class BaseRequest:
-  _buffer_update_types = None
   def __init__( self ):
     self._should_resend = False
 
@@ -93,29 +92,6 @@ class BaseRequest:
         DisplayServerException( e, truncate_message )
 
     return None
-
-
-  @staticmethod
-  def _IncrementalBufferUpdatesSupported( buffer_number ):
-    from ycm.client.buffer_update_type_request import BufferUpdateTypeByFileType
-    if BaseRequest._buffer_update_types is None:
-      BaseRequest._buffer_update_types = BufferUpdateTypeByFileType()
-    if buffer_number:
-      filetypes = vimsupport.GetBufferFiletypes( buffer_number )
-    else:
-      filetypes = vimsupport.CurrentFiletypes()
-
-    # TODO: Figure out what to do with mixed filetypes.
-    request = BaseRequest._buffer_update_types[ filetypes[ 0 ] ]
-    if not request.Done():
-      return False
-    response = request.Response()
-    if response == 'Full':
-      return False
-    if response == 'PENDING':
-      BaseRequest._buffer_update_types[ filetypes[ 0 ] ].Start( filetypes[ 0 ] )
-      return False
-    return True
 
 
   # This method blocks
@@ -247,7 +223,6 @@ def BuildRequestData( buffer_number = None ):
   current_buffer = vim.current.buffer
 
   vim.Function( 'listener_flush' )()
-  incremental = BaseRequest._IncrementalBufferUpdatesSupported( buffer_number )
   if buffer_number and current_buffer.number != buffer_number:
     # Cursor position is irrelevant when filepath is not the current buffer.
     buffer_object = vim.buffers[ buffer_number ]
@@ -258,8 +233,7 @@ def BuildRequestData( buffer_number = None ):
       'column_num': 1,
       'working_dir': working_dir,
       'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( buffer_object,
-                                                                filepath,
-                                                                incremental )
+                                                                filepath )
     }
 
   current_filepath = vimsupport.GetBufferFilepath( current_buffer )
@@ -271,8 +245,7 @@ def BuildRequestData( buffer_number = None ):
     'column_num': column + 1,
     'working_dir': working_dir,
     'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( current_buffer,
-                                                              current_filepath,
-                                                              incremental )
+                                                              current_filepath )
   }
 
 

@@ -51,10 +51,7 @@ def MockCompletionRequest( response_method ):
       # We set up a fake response.
       with patch( 'ycm.client.base_request._JsonFromFuture',
                   side_effect = response_method ):
-        with patch( 'ycm.client.base_request.BaseRequest.'
-                    '_IncrementalBufferUpdatesSupported',
-                    return_value = False ):
-          yield
+        yield
 
 
 @contextlib.contextmanager
