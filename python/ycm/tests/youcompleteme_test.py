@@ -328,11 +328,7 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_NoSelection_test(
 
 
 @YouCompleteMeInstance()
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
-def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test(
-    incremental_update_support, ycm ):
+def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test( ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.client.base_request._JsonFromFuture',
@@ -347,13 +343,10 @@ def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test(
 
 
 @YouCompleteMeInstance()
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.client.base_request._logger', autospec = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test(
-    post_vim_message, logger, incremental_update_support, ycm ):
+    post_vim_message, logger, ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.client.base_request._JsonFromFuture',
@@ -368,12 +361,9 @@ def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test(
 
 
 @YouCompleteMeInstance()
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
-  post_vim_message, incremental_update_support, ycm ):
+  post_vim_message, ycm ):
 
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -387,12 +377,9 @@ def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
 
 
 @YouCompleteMeInstance()
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDetailedDiagnostic_Exception_test(
-  post_vim_message, incremental_update_support, ycm ):
+  post_vim_message, ycm ):
 
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -422,16 +409,12 @@ def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( post_vim_message,
 @YouCompleteMeInstance()
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
   set_location_list_for_window,
   post_vim_message,
   filetype_completer_exists,
-  incremental_update_support,
   ycm ):
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp' )
@@ -452,9 +435,6 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
 @YouCompleteMeInstance( { 'g:ycm_log_level': 'debug',
                           'g:ycm_keep_logfiles': 1,
                           'g:ycm_open_loclist_on_ycm_diags': 0 } )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
@@ -463,7 +443,6 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
   set_location_list_for_window,
   post_vim_message,
   filetype_completer_exists,
-  incremental_update_support,
   ycm ):
 
   diagnostic = {
@@ -500,9 +479,6 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
 
 
 @YouCompleteMeInstance( { 'g:ycm_open_loclist_on_ycm_diags': 1 } )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
@@ -513,7 +489,6 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
   set_location_list_for_window,
   post_vim_message,
   filetype_completer_exists,
-  incremental_update_support,
   ycm ):
 
   diagnostic = {
@@ -714,9 +689,6 @@ def YouCompleteMe_UpdateDiagnosticInterface_OldVim_test(
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_enable_diagnostic_signs': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
@@ -727,7 +699,6 @@ def YouCompleteMe_UpdateDiagnosticInterface_NewVim_test(
     request_done,
     post_vim_message,
     filetype_completer_exists,
-    incremental_update_support,
     ycm ):
   YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 
@@ -757,13 +728,9 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabled_test(
     post_vim_message,
-    incremental_update_support,
     filetype_completer_exists,
     ycm ):
   diagnostics = [
@@ -820,13 +787,9 @@ def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabled_test(
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test(
     post_vim_message,
-    incrementa_buffer_support,
     filetype_completer_exists,
     ycm ):
 
@@ -986,13 +949,9 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test(
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = False )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test(
     post_vim_message,
-    incrementa_buffer_support,
     filetype_completer_exists,
     ycm ):
 

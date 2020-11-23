@@ -1522,8 +1522,7 @@ def GetUnsavedAndSpecifiedBufferData_EncodedUnicodeCharsInBuffers_test():
 
   with patch( 'vim.buffers', [ vim_buffer ] ):
     assert_that( vimsupport.GetUnsavedAndSpecifiedBufferData( vim_buffer,
-                                                              filepath,
-                                                              False ),
+                                                              filepath ),
                  has_entry( filepath,
                             has_entry( 'contents', 'abc\nfДa\n' ) ) )
 

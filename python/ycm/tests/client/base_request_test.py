@@ -23,9 +23,6 @@ from unittest.mock import patch
 from ycm.client.base_request import BuildRequestData
 
 
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = '/some/dir' )
 @patch( 'ycm.client.base_request.GetCurrentDirectory',
         return_value = '/some/dir' )
 def BuildRequestData_AddWorkingDir_test( *args ):
@@ -34,9 +31,6 @@ def BuildRequestData_AddWorkingDir_test( *args ):
     assert_that( BuildRequestData(), has_entry( 'working_dir', '/some/dir' ) )
 
 
-@patch( 'ycm.client.base_request.BaseRequest.'
-        '_IncrementalBufferUpdatesSupported',
-        return_value = '/some/dir' )
 @patch( 'ycm.client.base_request.GetCurrentDirectory',
         return_value = '/some/dir' )
 def BuildRequestData_AddWorkingDirWithFileName_test( *args ):
