@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 from unittest import mock
-import requests
+HTTP_OK = 200
 
 
 class FakeResponse:
@@ -25,7 +25,7 @@ class FakeResponse:
   def __init__( self, response, exception ):
     self._json = response
     self._exception = exception
-    self.status_code = requests.codes.ok
+    self.status_code = HTTP_OK
     self.text = not exception
 
   def json( self ):
