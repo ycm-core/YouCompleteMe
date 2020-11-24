@@ -20,9 +20,9 @@ MockVimModule()
 
 import contextlib
 import pytest
-import requests
 import time
 import warnings
+from urllib.error import HTTPError, URLError
 
 from ycm.client.base_request import BaseRequest
 from ycm.tests import test_utils
@@ -91,7 +91,7 @@ def WaitUntilReady( timeout = 5 ):
                             f'for { timeout } seconds, aborting.' )
       if _IsReady():
         return
-    except requests.exceptions.ConnectionError:
+    except ( URLError, HTTPError ):
       pass
     finally:
       time.sleep( 0.1 )
