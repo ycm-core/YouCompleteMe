@@ -233,11 +233,24 @@ officially supported.
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]
-- Install cmake, macvim and python; Note that the *system* vim is not supported.
+- Install cmake, macvim and python; Note that the pre-installed *macOS system* vim is not supported.
 
 ```
-brew install cmake macvim python mono go nodejs
+brew install cmake python mono go nodejs
 ```
+
+- Pre-installed macOS *system* Vim does not support Python 3. So you need to install either a Vim that supports Python 3 OR [MacVim][] with [Homebrew][brew]:
+
+  - Option 1: Installing a Vim that supports Python 3
+  
+  ```
+  brew install vim
+  ```
+  - Option 2: Installing [MacVim][]
+  
+  ```
+  brew install macvim
+  ```
 
 - Compile YCM
 
@@ -255,11 +268,15 @@ YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-[MacVim][] is required. YCM won't work with the pre-installed Vim from Apple as
-its Python support is broken. If you don't already use [MacVim][], install it
+A Vim that supports Python 3 or [MacVim][] is required. YCM won't work with the pre-installed Vim from Apple as
+its Python 3 support is broken. If you don't already use a Vim that supports Python 3 or [MacVim][], install it
 with [Homebrew][brew]. Install CMake as well:
 
-    brew install cmake macvim
+    brew install vim cmake     
+    
+   OR
+
+    brew install macvim cmake
 
 Install YouCompleteMe with [Vundle][].
 
