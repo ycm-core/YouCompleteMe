@@ -65,6 +65,7 @@ let s:buftype_blacklist = {
       \   'terminal': 1,
       \   'quickfix': 1,
       \   'popup': 1,
+      \   'prompt': 1,
       \   'nofile': 1,
       \ }
 let s:last_char_inserted_by_user = v:true
