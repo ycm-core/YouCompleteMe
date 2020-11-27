@@ -354,7 +354,7 @@ apt install build-essential cmake vim-nox python3-dev
 - Install mono-complete, go, node, java and npm
 
 ```
-apt install mono-complete gocode nodejs default-jdk npm
+apt install mono-complete golang nodejs default-jdk npm
 ```
 
 - Compile YCM
