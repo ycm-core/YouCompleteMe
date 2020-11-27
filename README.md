@@ -348,7 +348,7 @@ The following assume you're using Ubuntu 20.04.
 - Install cmake, vim and python
 
 ```
-apt install build-essential cmake vim python3-dev
+apt install build-essential cmake vim-nox python3-dev
 ```
 
 - Install mono-complete, go, node, java and npm
