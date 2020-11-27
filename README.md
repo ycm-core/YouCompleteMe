@@ -340,6 +340,8 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Linux 64-bit
 
+The following assume you're using Ubuntu 20.04.
+
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]
@@ -349,7 +351,12 @@ that are conservatively turned off by default that you may want to turn on.
 apt install build-essential cmake vim python3-dev
 ```
 
-- Install mono-complete, go, node and npm
+- Install mono-complete, go, node, java and npm
+
+```
+apt install mono-complete gocode nodejs default-jdk npm
+```
+
 - Compile YCM
 
 ```
