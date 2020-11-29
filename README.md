@@ -1175,6 +1175,10 @@ The format of [build.gradle][gradle-project] files is way beyond the scope of
 this document, but we do recommend using the various tools that can generate
 them for you, if you're not familiar with them already.
 
+Some users have experienced issues with their jdt.ls  when using the Groovy
+language for their build.gradle. As such, try using
+[Kotlin](https://github.com/ycm-core/lsp-examples#kotlin) instead.
+
 #### Troubleshooting
 
 If you're not getting completions or diagnostics, check the server health:
