@@ -370,26 +370,26 @@ function! s:SetUpSigns()
 
   if !hlexists( 'YcmErrorSign' )
     if hlexists( 'SyntasticErrorSign')
-      highlight link YcmErrorSign SyntasticErrorSign
+      highlight default link YcmErrorSign SyntasticErrorSign
     else
-      highlight link YcmErrorSign error
+      highlight default link YcmErrorSign error
     endif
   endif
 
   if !hlexists( 'YcmWarningSign' )
     if hlexists( 'SyntasticWarningSign')
-      highlight link YcmWarningSign SyntasticWarningSign
+      highlight default link YcmWarningSign SyntasticWarningSign
     else
-      highlight link YcmWarningSign todo
+      highlight default link YcmWarningSign todo
     endif
   endif
 
   if !hlexists( 'YcmErrorLine' )
-    highlight link YcmErrorLine SyntasticErrorLine
+    highlight default link YcmErrorLine SyntasticErrorLine
   endif
 
   if !hlexists( 'YcmWarningLine' )
-    highlight link YcmWarningLine SyntasticWarningLine
+    highlight default link YcmWarningLine SyntasticWarningLine
   endif
 
   exe 'sign define YcmError text=' . g:ycm_error_symbol .
@@ -406,17 +406,17 @@ function! s:SetUpSyntaxHighlighting()
 
   if !hlexists( 'YcmErrorSection' )
     if hlexists( 'SyntasticError' )
-      highlight link YcmErrorSection SyntasticError
+      highlight default link YcmErrorSection SyntasticError
     else
-      highlight link YcmErrorSection SpellBad
+      highlight default link YcmErrorSection SpellBad
     endif
   endif
 
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
-      highlight link YcmWarningSection SyntasticWarning
+      highlight default link YcmWarningSection SyntasticWarning
     else
-      highlight link YcmWarningSection SpellCap
+      highlight default link YcmWarningSection SpellCap
     endif
   endif
 endfunction
