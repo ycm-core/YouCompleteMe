@@ -25,17 +25,14 @@ def Write( method: string,
   const id = ch_info( ch ).id
   request_state[ id ] = { data: '', handle: ch }
 
-  var all_headers = copy( headers )
-  all_headers->extend( {
-    'Host': host,
-    'Connection': 'close',
-    'Accept': 'application/json',
+  var all_headers = copy( headers )->extend( {
+    Host: host,
+    Connection: 'close',
+    Accept: 'application/json',
   } )
 
   if !empty( data )
-    all_headers->extend( {
-      'Content-Length': string( len( data ) )
-    } )
+    all_headers['Content-Length'] = string( len( data ) )
   endif
 
   var msg = method .. ' ' .. uri .. ' HTTP/1.1' .. CRLF
@@ -44,16 +41,13 @@ def Write( method: string,
   endfor
   msg ..= s:CRLF
   msg ..= data
-  call ch_sendraw( ch, msg )
+  ch_sendraw( ch, msg )
   return id
 enddef
 
 def OnData( channel: channel, msg: string )
   const id = ch_info( channel ).id
-  const data = request_state[id].data
-  request_state[id]->extend( {
-    data: data .. msg
-  } )
+  request_state[ id ].data = request_state[ id ].data .. msg
 enddef
 
 def OnClose( channel: channel )
@@ -92,14 +86,14 @@ def Resolve( id: number,
              header_map: dict< string >,
              body: string )
 
-  g:ycm_http9_vars->extend( {
+  g:ycm_http9_vars = {
     id: id,
     status_code: status_code,
     header_map: header_map,
     body: body
-  } )
+  }
 
-  call ch_log( 'Resolve! ' .. string( g:ycm_http9_vars ) )
+  ch_log( 'Resolve! ' .. string( g:ycm_http9_vars ) )
 
   py3 from ycm.client import base_request
   py3 base_request.Future.requests.pop(
@@ -110,10 +104,10 @@ def Resolve( id: number,
 enddef
 
 def Reject( id: number, why: string )
-  g:ycm_http9_vars->extend( {
+  g:ycm_http9_vars = {
     id: id,
     why: why
-  } )
+  }
 
   py3 from ycm.client import base_request
   py3 base_request.Future.requests.pop(
@@ -152,5 +146,3 @@ def youcompleteme#http9#Block( id: number, timeout: number )
   endwhile
   OnClose( ch )
 enddef
-
-defcompile
