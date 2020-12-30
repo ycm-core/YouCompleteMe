@@ -33,8 +33,10 @@ _READ_TIMEOUT_SEC = 5
 _HMAC_HEADER = 'x-ycm-hmac'
 _logger = logging.getLogger( __name__ )
 
-_HTTP_INTERFACE = 'http9'
-# _HTTP_INTERFACE = 'http'
+import os
+
+# _HTTP_INTERFACE = 'http9'
+_HTTP_INTERFACE = os.environ.get( 'YCM_HTTP_INTERFACE', 'http' )
 
 
 class YCMConnectionError( Exception ):
