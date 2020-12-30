@@ -1,7 +1,7 @@
 vim9script
 
 const CRLF = "\r\n"
-let request_state: dict< dict< any > > = {}
+var request_state: dict< dict< any > > = {}
 
 
 def Write( method: string,
@@ -11,7 +11,7 @@ def Write( method: string,
            headers: dict< any  >,
            data: string ): number
 
-  let ch = ch_open( host .. ':' .. string( port ), #{
+  const ch = ch_open( host .. ':' .. string( port ), {
     mode: 'raw',
     callback: funcref( 's:OnData' ),
     close_cb: funcref( 's:OnClose' ),
@@ -22,10 +22,10 @@ def Write( method: string,
     return 0
   endif
 
-  let id = ch_info( ch ).id
-  request_state[ id ] = #{ data: '', handle: ch }
+  const id = ch_info( ch ).id
+  request_state[ id ] = { data: '', handle: ch }
 
-  let all_headers = copy( headers )
+  var all_headers = copy( headers )
   all_headers->extend( {
     'Host': host,
     'Connection': 'close',
@@ -38,7 +38,7 @@ def Write( method: string,
     } )
   endif
 
-  let msg = method .. ' ' .. uri .. ' HTTP/1.1' .. CRLF
+  var msg = method .. ' ' .. uri .. ' HTTP/1.1' .. CRLF
   for h in keys( all_headers )
     msg ..= h .. ':' .. all_headers[h] .. CRLF
   endfor
@@ -49,40 +49,40 @@ def Write( method: string,
 enddef
 
 def OnData( channel: channel, msg: string )
-  let id = ch_info( channel ).id
-  let data = request_state[id].data
-  request_state[id]->extend( #{
+  const id = ch_info( channel ).id
+  const data = request_state[id].data
+  request_state[id]->extend( {
     data: data .. msg
   } )
 enddef
 
 def OnClose( channel: channel )
-  let id = ch_info( channel ).id
-  let data = request_state[id].data
+  const id = ch_info( channel ).id
+  const data = request_state[id].data
   remove( request_state, id )
 
-  let boundary = match( data, CRLF .. CRLF )
+  const boundary = match( data, CRLF .. CRLF )
   if boundary < 0
     Reject( id, "Invalid message received" )
     return
   endif
 
-  let header_data = data->strpart( 0, boundary )
-  let body = data->strpart( boundary + 2 * len( CRLF ) )
+  const header_data = data->strpart( 0, boundary )
+  const body = data->strpart( boundary + 2 * len( CRLF ) )
 
-  let headers = split( header_data, CRLF )
-  let status_line = headers[0]
+  var headers = split( header_data, CRLF )
+  const status_line = headers[0]
   remove( headers, 0 )
 
-  let header_map: dict< string > = {}
+  var header_map: dict< string > = {}
   for header in headers
-    let colon = match( header, ':' )
-    let key = header->strpart( 0, colon )
-    let value = header->strpart( colon + 1 )
+    const colon = match( header, ':' )
+    const key = header->strpart( 0, colon )
+    const value = header->strpart( colon + 1 )
     header_map[ tolower( key ) ] = trim( value )
   endfor
 
-  let status_code = split( status_line )[1]
+  const status_code = split( status_line )[1]
 
   Resolve( id, status_code, header_map, body )
 enddef
@@ -92,7 +92,7 @@ def Resolve( id: number,
              header_map: dict< string >,
              body: string )
 
-  g:ycm_http9_vars->extend( #{
+  g:ycm_http9_vars->extend( {
     id: id,
     status_code: status_code,
     header_map: header_map,
@@ -110,7 +110,7 @@ def Resolve( id: number,
 enddef
 
 def Reject( id: number, why: string )
-  g:ycm_http9_vars->extend( #{
+  g:ycm_http9_vars->extend( {
     id: id,
     why: why
   } )
@@ -144,10 +144,10 @@ def youcompleteme#http9#POST( host: string,
 enddef
 
 def youcompleteme#http9#Block( id: number, timeout: number )
-  let ch = request_state[id].handle
+  const ch = request_state[id].handle
   ch_setoptions( ch, { 'close_cb': '' } )
   while count( [ 'open', 'buffered' ],  ch_status( ch ) ) == 1
-    let data  = ch_read( ch, { 'timeout': timeout } )
+    const data  = ch_read( ch, { 'timeout': timeout } )
     OnData( ch, data )
   endwhile
   OnClose( ch )
