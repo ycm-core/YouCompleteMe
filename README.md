@@ -236,7 +236,14 @@ officially supported.
 - Install cmake, macvim and python; Note that the pre-installed *macOS system* vim is not supported.
 
 ```
-brew install cmake python mono go nodejs java
+brew install cmake python mono go nodejs
+```
+
+- For java support you must install a JDK, one way to do this is with homebrew:
+
+```
+$ brew install java
+$ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 ```
 
 - Pre-installed macOS *system* Vim does not support Python 3. So you need to install either a Vim that supports Python 3 OR [MacVim][] with [Homebrew][brew]:
