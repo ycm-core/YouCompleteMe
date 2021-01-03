@@ -250,6 +250,7 @@ def _JsonFromFuture( future ):
     response = future.result()
     response_text = response.read()
     _ValidateResponseObject( response, response_text )
+    response.close()
 
     if response_text:
       return json.loads( response_text )
@@ -257,6 +258,7 @@ def _JsonFromFuture( future ):
   except HTTPError as response:
     if response.code == HTTP_SERVER_ERROR:
       response_text = response.read()
+      response.close()
       if response_text:
         raise MakeServerException( json.loads( response_text ) )
       else:
