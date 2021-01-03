@@ -250,7 +250,7 @@ def _JsonFromFuture( future ):
     response = future.result()
     response_text = response.read()
     _ValidateResponseObject( response, response_text )
-    response.close()
+    # response.close()
 
     if response_text:
       return json.loads( response_text )
