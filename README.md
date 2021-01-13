@@ -302,7 +302,7 @@ Compiling YCM **with** semantic support for C-family languages through
 
 ```
 cd ~/.vim/bundle/YouCompleteMe
-./install.py --clangd-completer
+./install.py --clang-completer
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -327,7 +327,7 @@ The following additional language support options are available:
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. You need to
-specify it manually by adding `--clangd-completer`. So, to install with all
+specify it manually by adding `--clang-completer`. So, to install with all
 language features, ensure `xbuild`, `go`, `node` and `npm` tools
 are installed and in your `PATH`, then simply run:
 
@@ -419,7 +419,7 @@ Compiling YCM **with** semantic support for C-family languages through
 
 ```
 cd ~/.vim/bundle/YouCompleteMe
-python3 install.py --clangd-completer
+python3 install.py --clang-completer
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -442,7 +442,7 @@ The following additional language support options are available:
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. You need to
-specify it manually by adding `--clangd-completer`. So, to install with all
+specify it manually by adding `--clang-completer`. So, to install with all
 language features, ensure `xbuild`, `go`, `node`, `npm` and tools
 are installed and in your `PATH`, then simply run:
 
@@ -536,7 +536,7 @@ Compiling YCM **with** semantic support for C-family languages through
 
 ```
 cd %USERPROFILE%/vimfiles/bundle/YouCompleteMe
-python install.py --clangd-completer
+python install.py --clang-completer
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -559,7 +559,7 @@ The following additional language support options are available:
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. You need to
-specify it manually by adding `--clangd-completer`. So, to install with all
+specify it manually by adding `--clang-completer`. So, to install with all
 language features, ensure `msbuild`, `go`, `node` and `npm` tools
 are installed and in your `PATH`, then simply run:
 
@@ -636,7 +636,7 @@ Compiling YCM **with** semantic support for C-family languages through
 
 ```
 cd ~/.vim/bundle/YouCompleteMe
-./install.py --clangd-completer
+./install.py --clang-completer
 ```
 
 Compiling YCM **without** semantic support for C-family languages:
@@ -650,7 +650,7 @@ If the `python` executable is not present, or the default `python` is not the
 one that should be compiled against, specify the python interpreter explicitly:
 
 ```
-python3 install.py --clangd-completer
+python3 install.py --clang-completer
 ```
 
 The following additional language support options are available:
@@ -666,7 +666,7 @@ The following additional language support options are available:
   `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. You need to
-specify it manually by adding `--clangd-completer`. So, to install with all
+specify it manually by adding `--clang-completer`. So, to install with all
 language features, ensure `xbuild`, `go`, `node`, `npm` and tools
 are installed and in your `PATH`, then simply run:
 
