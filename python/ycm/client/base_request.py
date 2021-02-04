@@ -163,7 +163,18 @@ class BaseRequest:
         headers = BaseRequest._ExtraHeaders( method,
                                              request_uri,
                                              sent_data )
-        _logger.debug( 'POST %s\n%s\n%s', request_uri, headers, sent_data )
+
+        if _logger.isEnabledFor( logging.DEBUG ):
+          # Copy data and pop the file_data - we probably don't need it and it's
+          # very noisy!
+          dump_data = dict( data )
+          dump_data.pop( 'file_data', None )
+          dump_data.pop( 'contents', None )
+          _logger.debug( 'POST %s\n%s\n%s',
+                         request_uri,
+                         headers,
+                         _ToUtf8Json( dump_data ) )
+
       else:
         headers = BaseRequest._ExtraHeaders( method, request_uri )
         if payload:
@@ -179,13 +190,15 @@ class BaseRequest:
         timeout = max( _CONNECT_TIMEOUT_SEC, timeout ) )
 
 
-    return BaseRequest.Executor().submit(
+    future = BaseRequest.Executor().submit(
       _MakeRequest,
       data,
       handler,
       method,
       timeout,
       payload )
+    future._handler = handler
+    return future
 
 
   @staticmethod
@@ -253,6 +266,12 @@ def _JsonFromFuture( future ):
   try:
     response = future.result()
     response_text = response.read()
+
+    _logger.debug( 'RX (%s): %s\n%s',
+                   future._handler,
+                   response.code,
+                   response_text )
+
     _ValidateResponseObject( response, response_text )
     response.close()
 
@@ -262,6 +281,12 @@ def _JsonFromFuture( future ):
   except HTTPError as response:
     if response.code == HTTP_SERVER_ERROR:
       response_text = response.read()
+
+      _logger.debug( 'RX (%s): %s\n%s',
+                     future._handler,
+                     response.code,
+                     response_text )
+
       response.close()
       if response_text:
         raise MakeServerException( json.loads( response_text ) )
