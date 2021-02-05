@@ -21,7 +21,7 @@ function! Test_Changing_Filetype_Refreshes_Diagnostics()
         \ { 'native_ft': 0 } )
 
   call assert_equal( 'xml', &ft )
-  call assert_true( pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
+  call assert_false( pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
   call assert_equal( [], sign_getplaced() )
   setf typescript
   call assert_equal( 'typescript', &ft )
