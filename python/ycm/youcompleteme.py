@@ -492,7 +492,7 @@ class YouCompleteMe:
       # Note: We only update location lists, etc. for visible buffers, because
       # otherwise we default to using the current location list and the results
       # are that non-visible buffer errors clobber visible ones.
-      self._buffers[ bufnr ].UpdateWithNewDiagnostics( diagnostics )
+      self._buffers[ bufnr ].UpdateWithNewDiagnostics( diagnostics, True )
     else:
       # The project contains errors in file "filepath", but that file is not
       # open in any buffer. This happens for Language Server Protocol-based
@@ -675,7 +675,9 @@ class YouCompleteMe:
       if self._user_options[ 'show_diagnostics_ui' ]:
         # Forcefuly update the location list, etc. from the parse request when
         # doing something like :YcmDiags
-        current_buffer.UpdateDiagnostics( block )
+        async_diags = any( self._message_poll_requests.get( filetype )
+                           for filetype in vimsupport.CurrentFiletypes() )
+        current_buffer.UpdateDiagnostics( block or not async_diags )
       else:
         # If the user disabled diagnostics, we just want to check
         # the _latest_file_parse_request for any exception or UnknownExtraConf
