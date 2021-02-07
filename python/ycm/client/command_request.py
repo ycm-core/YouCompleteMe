@@ -170,6 +170,8 @@ class CommandRequest( BaseRequest ):
           self._request_data.update( { 'fixit': chosen_fixit } )
           response = self.PostDataToHandler( self._request_data,
                                              'resolve_fixit' )
+          if response is None:
+            return
           fixits = response[ 'fixits' ]
           assert len( fixits ) == 1
           chosen_fixit = fixits[ 0 ]
