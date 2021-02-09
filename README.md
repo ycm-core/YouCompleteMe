@@ -5,6 +5,12 @@ YouCompleteMe: a code-completion engine for Vim
 [![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/ycm-core.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build?definitionId=3&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
+
+NOTE:This project tagged YCM to adapt to different MacOS platforms
+----------------------------------------
+- [**MAC OS 10.14.4 Version**](https://github.com/nine2/YouCompleteMe/tree/tag/20210208_mac_10.14.4)
+
+
 NOTE: Minimum Requirements Have Changed
 ----------------------------------------
 
@@ -280,7 +286,7 @@ its Python 3 support is broken. If you don't already use a Vim that supports Pyt
 with [Homebrew][brew]. Install CMake as well:
 
     brew install vim cmake     
-    
+
    OR
 
     brew install macvim cmake
@@ -3502,4 +3508,4 @@ This software is licensed under the [GPL v3 license][gpl].
 [signature-help-pr]: https://github.com/ycm-core/ycmd/pull/1255
 [wiki-faq]: https://github.com/ycm-core/YouCompleteMe/wiki/FAQ
 [wiki-full-install]: https://github.com/ycm-core/YouCompleteMe/wiki/Full-Installation-Guide
-[wiki-troubleshooting]: https://github.com/ycm-core/YouCompleteMe/wiki/Troubleshooting-steps-for-ycmd-server-SHUT-DOWN
+[kwiki-troubleshooting]: https://github.com/ycm-core/YouCompleteMe/wiki/Troubleshooting-steps-for-ycmd-server-SHUT-DOWN
