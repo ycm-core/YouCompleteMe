@@ -610,6 +610,19 @@ def ReplaceChunk_BeyondEndOfFile_test():
   AssertBuffersAreEqualAsBytes( [ 'first line' ], result_buffer )
 
 
+@patch( 'vim.current.window.cursor', ( 1, 1 ) )
+def ReplaceChunk_FileAppend_test():
+  result_buffer = VimBuffer( 'buffer', contents = [ 'first line',
+                                                    'second line' ] )
+  start, end = _BuildLocations( 4, 11, 4, 1 )
+  vimsupport.ReplaceChunk( start, end, 'third line', result_buffer )
+
+  AssertBuffersAreEqualAsBytes( [ 'first line',
+                                   'second line',
+                                   '',
+                                   'third line' ], result_buffer )
+
+
 @patch( 'vim.current.window.cursor', ( 1, 3 ) )
 def ReplaceChunk_CursorPosition_test():
   result_buffer = VimBuffer( 'buffer', contents = [ 'bar' ] )

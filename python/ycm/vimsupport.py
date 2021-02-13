@@ -987,13 +987,21 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )
 
-  # NOTE: Vim buffers are a list of unicode objects on Python 3.
-  start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
-  end_line_text = ToBytes( vim_buffer[ end_line ] )
-  end_existing_text = end_line_text[ end_column : ]
+  # Ensure the Vim buffer has the required line numbers in case text should be
+  # placed on line numbers beyond the current boundaries (typically when text
+  # needs to be appended to the buffer).
+  if start_line >= len( vim_buffer ):
+    end_line = start_line
+    padding = start_line - len( vim_buffer )
+    vim_buffer[ len( vim_buffer ) : ] = [ '' ] * padding
+  else:
+    # NOTE: Vim buffers are a list of unicode objects on Python 3.
+    start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
+    end_line_text = ToBytes( vim_buffer[ end_line ] )
+    end_existing_text = end_line_text[ end_column : ]
 
-  replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
-  replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
+    replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
+    replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
 
   cursor_line, cursor_column = CurrentLineAndColumn()
 
