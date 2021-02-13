@@ -53,3 +53,36 @@ function! Test_Unresolved_Fixit_Works()
   %bwipeout!
   delfunction SelectEntry
 endfunction
+
+function! Test_Move_Out_Of_Line_Fixit_Works()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/move_out_of_line_fixit.cpp', {} )
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/move_out_of_line_fixit.hpp', {} )
+
+  call setpos( '.', [ 0, 1, 6 ] )
+  call assert_equal( 'void f() {', getline( '.' ) )
+  function! SelectEntry( id ) closure
+    redraw
+    call test_feedinput( "2\<CR>" )
+  endfunction
+  function! ConfirmOpen( id ) closure
+    redraw
+    call test_feedinput( "O\<CR>" )
+  endfunction
+  call timer_start( 5000, funcref( 'SelectEntry' ) )
+  call timer_start( 7000, funcref( 'ConfirmOpen' ) )
+  YcmCompleter FixIt
+  redraw
+  call assert_equal( 'void f();', getline( 1 ) )
+
+  bnext!
+
+  call assert_equal( 'void f() {', getline( 2 ) )
+  call assert_equal( '  // hey im a function', getline( 3 ) )
+  call assert_equal( '}', getline( 4 ) )
+  %bwipeout!
+  %bwipeout!
+  messages clear
+
+  delfunction SelectEntry
+  delfunction ConfirmOpen
+endfunction
