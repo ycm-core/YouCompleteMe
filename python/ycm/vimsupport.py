@@ -975,33 +975,29 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # When sending a request to the server, a newline is added to the buffer
   # contents to match what gets saved to disk. If the server generates a chunk
   # containing that newline, this chunk goes past the Vim buffer contents since
-  # there is actually no new line. When this happens, recompute the end position
-  # of where the chunk is applied and remove all trailing characters in the
-  # chunk.
+  # there is actually no new line. When this happens, recompute the end and 
+  # start positions of where the chunk is applied and remove all trailing 
+  # characters in the chunk.
   if end_line >= len( vim_buffer ):
     end_column = len( ToBytes( vim_buffer[ -1 ] ) )
     end_line = len( vim_buffer ) - 1
     replacement_text = replacement_text.rstrip()
+    if (start_line > end_line):
+      # fix start_line and prepend to compensate
+      replacement_text = '\n' + replacement_text
+      start_line = end_line
 
   # NOTE: replacement_text is unicode, but all our offsets are byte offsets,
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )
 
-  # Ensure the Vim buffer has the required line numbers in case text should be
-  # placed on line numbers beyond the current boundaries (typically when text
-  # needs to be appended to the buffer).
-  if start_line >= len( vim_buffer ):
-    end_line = start_line
-    padding = start_line - len( vim_buffer )
-    vim_buffer[ len( vim_buffer ) : ] = [ '' ] * padding
-  else:
-    # NOTE: Vim buffers are a list of unicode objects on Python 3.
-    start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
-    end_line_text = ToBytes( vim_buffer[ end_line ] )
-    end_existing_text = end_line_text[ end_column : ]
+  # NOTE: Vim buffers are a list of unicode objects on Python 3.
+  start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
+  end_line_text = ToBytes( vim_buffer[ end_line ] )
+  end_existing_text = end_line_text[ end_column : ]
 
-    replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
-    replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
+  replacement_lines[ 0 ] = start_existing_text + replacement_lines[ 0 ]
+  replacement_lines[ -1 ] = replacement_lines[ -1 ] + end_existing_text
 
   cursor_line, cursor_column = CurrentLineAndColumn()
 
