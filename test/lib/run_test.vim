@@ -383,6 +383,7 @@ EOF
 if exists( '$COVERAGE' )
   profile start .vim_profile
   exe 'profile! file */youcompleteme.vim'
+  exe 'profile! file */youcompleteme/**.vim'
 endif
 
 " Execute the tests in alphabetical order.
