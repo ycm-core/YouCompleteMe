@@ -1150,7 +1150,7 @@ def OpenFilename( filename, options = {} ):
   - watch: automatically watch for changes (default: False). This is useful
   for logs;
   - position: set the position where the file is opened (default: start).
-  Choices are start and end.
+  Choices are 'start' and 'end'.
   - mods: The vim <mods> for the command, such as :vertical"""
 
   # Set the options.
@@ -1317,3 +1317,24 @@ def DisplayWidth():
 
 def DisplayWidthOfString( s ):
   return GetIntValue( f"strdisplaywidth( '{ EscapeForVim( s ) }' )" )
+
+
+def BuildQfListItem( goto_data_item ):
+  qf_item = {}
+  if 'filepath' in goto_data_item:
+    qf_item[ 'filename' ] = ToUnicode( goto_data_item[ 'filepath' ] )
+  if 'description' in goto_data_item:
+    qf_item[ 'text' ] = ToUnicode( goto_data_item[ 'description' ] )
+  if 'line_num' in goto_data_item:
+    qf_item[ 'lnum' ] = goto_data_item[ 'line_num' ]
+  if 'column_num' in goto_data_item:
+    # ycmd returns columns 1-based, and QuickFix lists require "byte offsets".
+    # See :help getqflist and equivalent comment in
+    # vimsupport.ConvertDiagnosticsToQfList.
+    #
+    # When the Vim help says "byte index", it really means "1-based column
+    # number" (which is somewhat confusing). :help getqflist states "first
+    # column is 1".
+    qf_item[ 'col' ] = goto_data_item[ 'column_num' ]
+
+  return qf_item
