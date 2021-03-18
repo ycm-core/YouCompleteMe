@@ -1,27 +1,9 @@
 function! s:WaitForCommandRequestComplete()
-  call WaitForAssert( { ->
-        \ assert_true( py3eval(
-        \     'ycm_state.GetCommandRequest() is not None and '
-        \   . 'ycm_state.GetCommandRequest().Done()' ) )
-        \ } )
-
-  call WaitForAssert( { ->
-        \ assert_equal( -1,
-        \               youcompleteme#Test_GetPollers().command.id )
-        \ } )
+  return youcompleteme#test#commands#WaitForCommandRequestComplete()
 endfunction
 
 function! s:CheckNoCommandRequest()
-  call WaitForAssert( { ->
-        \ assert_true( py3eval(
-        \     'ycm_state.GetCommandRequest() is None or '
-        \   . 'ycm_state.GetCommandRequest().Done()' ) )
-        \ } )
-
-  call WaitForAssert( { ->
-        \ assert_equal( -1,
-        \               youcompleteme#Test_GetPollers().command.id )
-        \ } )
+  return youcompleteme#test#commands#CheckNoCommandRequest()
 endfunction
 
 function! s:CheckPopupVisible( row, col, text, syntax )

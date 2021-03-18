@@ -828,6 +828,19 @@ class YouCompleteMe:
       vimsupport.OpenLocationList( focus = True )
 
 
+  def FilterAndSortItems( self,
+                          items,
+                          sort_property,
+                          query,
+                          max_items = 0 ):
+    return BaseRequest().PostDataToHandler( {
+      'candidates': items,
+      'sort_property': sort_property,
+      'max_num_candidates': max_items,
+      'query': vimsupport.ToUnicode( query )
+    }, 'filter_and_sort_candidates' )
+
+
   def _AddSyntaxDataIfNeeded( self, extra_data ):
     if not self._user_options[ 'seed_identifiers_with_syntax' ]:
       return
