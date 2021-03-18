@@ -563,6 +563,14 @@ function! s:EnableCompletingInCurrentBuffer()
 endfunction
 
 
+function! s:SetUpBufferMappings()
+  nnoremap <silent> <Plug>(YCMFindSymbolInWorkspace)
+        \ :call youcompleteme#finder#FindSymbol( 'workspace' )<CR>
+  nnoremap <silent> <Plug>(YCMFindSymbolInDocument)
+        \ :call youcompleteme#finder#FindSymbol( 'document' )<CR>
+endfunction
+
+
 function s:StopPoller( poller ) abort
   call timer_stop( a:poller.id )
   let a:poller.id = -1
@@ -655,6 +663,7 @@ function! s:OnFileTypeSet()
 
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
+  call s:SetUpBufferMappings()
   call s:StartMessagePoll()
   call s:EnableAutoHover()
 
@@ -680,6 +689,7 @@ function! s:OnBufferEnter()
 
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
+  call s:SetUpBufferMappings()
 
   py3 ycm_state.OnBufferVisit()
   " Last parse may be outdated because of changes from other buffers. Force a
@@ -1252,10 +1262,33 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... )
 
   let s:pollers.command.id = timer_start(
         \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ a:callback ] ) )
+        \ function( 's:PollCommand', [ 'StringResponse', a:callback ] ) )
 endfunction
 
-function! s:PollCommand( callback, id )
+function! youcompleteme#GetRawCommandResponseAsync( callback, ... )
+  if !s:AllowedToCompleteInCurrentBuffer()
+    eval a:callback( { 'error': 'ycm not allowed in buffer' } )
+    return
+  endif
+
+  if !get( b:, 'ycm_completing' )
+    eval a:callback( { 'error': 'ycm disabled in buffer' } )
+    return
+  endif
+
+  if s:pollers.command.id != -1
+    eval a:callback( { 'error': 'request in progress' } )
+    return
+  endif
+
+  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
+
+  let s:pollers.command.id = timer_start(
+        \ s:pollers.command.wait_milliseconds,
+        \ function( 's:PollCommand', [ 'Response', a:callback ] ) )
+endfunction
+
+function! s:PollCommand( response_func, callback, id )
   if py3eval( 'ycm_state.GetCommandRequest() is None' )
     " Possible in case of race conditions and things like RestartServer
     " But particualrly in the tests
@@ -1265,17 +1298,17 @@ function! s:PollCommand( callback, id )
   if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
     let s:pollers.command.id = timer_start(
           \ s:pollers.command.wait_milliseconds,
-          \ function( 's:PollCommand', [ a:callback ] ) )
+          \ function( 's:PollCommand', [ a:response_func, a:callback ] ) )
     return
   endif
 
   call s:StopPoller( s:pollers.command )
 
-  let result = py3eval( 'ycm_state.GetCommandRequest().StringResponse()' )
+  let result = py3eval( 'ycm_state.GetCommandRequest().'
+                      \ .a:response_func . '()' )
 
   eval a:callback( result )
 endfunction
-
 
 function! s:CompleterCommand( mods, count, line1, line2, ... )
   py3 ycm_state.SendCommandRequest(
