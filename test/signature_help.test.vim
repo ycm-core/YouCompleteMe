@@ -599,7 +599,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help()
 
   function! Check2( ... )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -612,7 +613,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help()
   function! Check3( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -636,7 +638,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help()
   function! Check4( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -700,7 +703,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
 
   function! Check2( ... )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -713,7 +717,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   function! Check3( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     " XFAIL: Currently the test fails here because the signature help popup
     " disappears when the info_popup is displayed. This seems to be because we
@@ -744,7 +749,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   function! Check4( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),

@@ -18,7 +18,8 @@
 from ycm.client.base_request import ( BaseRequest,
                                       DisplayServerException,
                                       MakeServerException )
-from ycm.client.completion_request import ConvertCompletionDataToVimData
+from ycm.client.completion_request import ( CompletionRequest,
+                                            ConvertCompletionDataToVimData )
 
 import logging
 import json
@@ -26,9 +27,12 @@ _logger = logging.getLogger( __name__ )
 
 
 class ResolveCompletionRequest( BaseRequest ):
-  def __init__( self, request_data ):
+  def __init__( self,
+                completion_request: CompletionRequest,
+                request_data ):
     super().__init__()
     self.request_data = request_data
+    self.completion_request = completion_request
 
   def Start( self ):
     self._response_future = self.PostDataToHandlerAsync( self.request_data,
@@ -41,8 +45,10 @@ class ResolveCompletionRequest( BaseRequest ):
   def OnCompleteDone( self ):
     # This is required to be compatible with the "CompletionRequest" API. We're
     # not really a CompletionRequest, but we are mutually exclusive with
-    # completion requests, so we impleent this API.
-    pass
+    # completion requests, so we implement this API by delegating to the
+    # original completion request, which contains all of the code for actually
+    # handling things like automatic imports etc.
+    self.completion_request.OnCompleteDone()
 
 
   def Response( self ):
@@ -87,6 +93,6 @@ def ResolveCompletionItem( completion_request, item ):
   except KeyError:
     return None
 
-  resolve_request = ResolveCompletionRequest( request_data )
+  resolve_request = ResolveCompletionRequest( completion_request, request_data )
   resolve_request.Start()
   return resolve_request
