@@ -44,6 +44,16 @@
           "YCM_TEST_NO_RETRY": "1"
         }
       }
+    },
+    "Python: Attach To Vim": {
+      "variables": {
+        "port": "5678",
+        "host": "localhost"
+      },
+      "adapter": "multi-session",
+      "configuration": {
+        "request": "attach"
+      }
     }
   }
 }

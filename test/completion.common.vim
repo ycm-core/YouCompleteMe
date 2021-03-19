@@ -358,7 +358,6 @@ function! Test_Completion_FixIt()
     call feedkeys( "\<Esc>" )
   endfunction
 
-
   call setpos( '.', [ 0, 3, 1 ] )
   call FeedAndCheckMain( "Ado_a\<C-Space>", funcref( 'Check1' ) )
 endfunction
