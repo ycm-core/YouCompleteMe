@@ -465,7 +465,7 @@ that are conservatively turned off by default that you may want to turn on.
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]
-- Install [Visual Studio Build Tools 2017][visual-studio-download]
+- Install [Visual Studio Build Tools 2019][visual-studio-download]
 - Install cmake, vim and python
 - Install go, node and npm
 - Compile YCM
@@ -528,8 +528,8 @@ Download and install the following software:
   matching the version number exactly.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
   variable.
-- [Visual Studio Build Tools 2017][visual-studio-download]. During setup,
-  select _Visual C++ build tools_ in _Workloads_.
+- [Build Tools for Visual Studio 2019][visual-studio-download]. During setup,
+  select _C++ build tools_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages through
 **clangd**:
@@ -3467,7 +3467,7 @@ This software is licensed under the [GPL v3 license][gpl].
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
 [vim-win-download]: https://github.com/vim/vim-win32-installer/releases
 [python-win-download]: https://www.python.org/downloads/windows/
-[visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15
+[visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16
 [mono-install-macos]: https://www.mono-project.com/docs/getting-started/install/mac/
 [mono-install-linux]: https://www.mono-project.com/download/stable/#download-lin
 [go-install]: https://golang.org/doc/install
