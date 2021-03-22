@@ -653,7 +653,7 @@ Windows ~
 Quick start, installing all completers ~
 
 - Install YCM plugin via Vundle [25]
-- Install Visual Studio Build Tools 2017 [34]
+- Install Visual Studio Build Tools 2019 [34]
 - Install cmake, vim and python
 - Install go, node and npm
 - Compile YCM
@@ -712,7 +712,7 @@ Download and install the following software:
 
 - CMake [38]. Add CMake executable to the PATH environment variable.
 
-- Visual Studio Build Tools 2017 [34]. During setup, select _Visual C++ build
+- Build Tools for Visual Studio 2019 [34]. During setup, select _C++ build
   tools_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages through
@@ -3641,7 +3641,7 @@ References ~
 [31] https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 [32] https://github.com/ycm-core/YouCompleteMe/wiki/Building-Vim-from-source
 [33] https://www.mono-project.com/download/stable/#download-lin
-[34] https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15
+[34] https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16
 [35] https://vimhelp.appspot.com/starting.txt.html#vimrc
 [36] https://github.com/vim/vim-win32-installer/releases
 [37] https://www.python.org/downloads/windows/
