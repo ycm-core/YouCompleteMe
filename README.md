@@ -706,6 +706,7 @@ Quick Feature Summary
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
 * Find Symbol (`GoToSymbol`)
+* Document outline (`GoToDocumentOutline`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors (`FixIt`)
@@ -747,6 +748,7 @@ Quick Feature Summary
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to type definition (`GoToType`)
 * Go to implementation (`GoToImplementation`)
+* Document outline (`GoToDocumentOutline`)
 * Automatically fix certain errors (`FixIt`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
@@ -779,6 +781,7 @@ Quick Feature Summary
 * Go to declaration/definition (`GoTo`, etc.)
 * Go to implementation (`GoToImplementation`)
 * Reference finding (`GoToReferences`)
+* Document outline (`GoToDocumentOutline`)
 * View documentation comments for identifiers (`GetDoc`)
 * Automatically fix certain errors (`FixIt`)
 * Type information for identifiers (`GetType`)
@@ -797,6 +800,7 @@ Quick Feature Summary
 * Go to implementation (`GoToImplementation`)
 * Find Symbol (`GoToSymbol`)
 * Reference finding (`GoToReferences`)
+* Document outline (`GoToDocumentOutline`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors including code generation (`FixIt`)
@@ -1833,6 +1837,12 @@ Looks up the symbol under the cursor and jumps to the definition of its type
 e.g. if the symbol is an object, go to the definition of its class.
 
 Supported in filetypes: `go, java, javascript, typescript`
+
+#### The `GoToDocumentOutline` subcommand
+
+Provides a list of symbols in current scope, in the quickfix list.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cuda, go, java, rust`
 
 ### Semantic Information Commands
 
