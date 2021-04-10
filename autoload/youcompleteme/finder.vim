@@ -279,6 +279,10 @@ function! s:HandleKeyPress( id, key ) abort
         \ a:key ==# "\<C-n>" ||
         \ a:key ==# "\<Tab>"
     let s:find_symbol_status.selected += 1
+    " wrap
+    if s:find_symbol_status.selected >= len( s:find_symbol_status.results )
+      let s:find_symbol_status.selected = 0
+    endif
     let l:redraw = 1
     let l:handled = 1
   elseif a:key ==# "\<C-k>" ||
@@ -286,6 +290,30 @@ function! s:HandleKeyPress( id, key ) abort
         \ a:key ==# "\<C-p>" ||
         \ a:key ==# "\<S-Tab>"
     let s:find_symbol_status.selected -= 1
+    " wrap
+    if s:find_symbol_status.selected < 0
+      let s:find_symbol_status.selected =
+            \ len( s:find_symbol_status.results ) - 1
+    endif
+    let l:redraw = 1
+    let l:handled = 1
+  elseif a:key ==# "\<PageDown>" || a:key ==# "\<kPageDown>"
+    let s:find_symbol_status.selected +=
+          \ popup_getpos( s:find_symbol_status.id ).core_height
+    " Don't wrap
+    if s:find_symbol_status.selected >= len( s:find_symbol_status.results )
+      let s:find_symbol_status.selected =
+            \ len( s:find_symbol_status.results ) - 1
+    endif
+    let l:redraw = 1
+    let l:handled = 1
+  elseif a:key ==# "\<PageUp>" || a:key ==# "\<kPageUp>"
+    let s:find_symbol_status.selected -=
+          \ popup_getpos( s:find_symbol_status.id ).core_height
+    " Don't wrap
+    if s:find_symbol_status.selected < 0
+      let s:find_symbol_status.selected = 0
+    endif
     let l:redraw = 1
     let l:handled = 1
   elseif a:key ==# "\<C-c>"
@@ -296,16 +324,6 @@ function! s:HandleKeyPress( id, key ) abort
       call popup_close( a:id, s:find_symbol_status.selected )
       let l:handled = 1
     endif
-  elseif a:key ==# "\<PageDown>" || a:key ==# "\<kPageDown>"
-    let s:find_symbol_status.selected +=
-          \ popup_getpos( s:find_symbol_status.id ).core_height
-    let l:redraw = 1
-    let l:handled = 1
-  elseif a:key ==# "\<PageUp>" || a:key ==# "\<kPageUp>"
-    let s:find_symbol_status.selected -=
-          \ popup_getpos( s:find_symbol_status.id ).core_height
-    let l:redraw = 1
-    let l:handled = 1
   elseif a:key ==# "\<Home>" || a:key ==# "\<kHome>"
     let s:find_symbol_status.selected = 0
     let l:redraw = 1
@@ -314,13 +332,6 @@ function! s:HandleKeyPress( id, key ) abort
     let s:find_symbol_status.selected = len( s:find_symbol_status.results ) - 1
     let l:redraw = 1
     let l:handled = 1
-  endif
-
-  if s:find_symbol_status.selected >= len( s:find_symbol_status.results )
-    let s:find_symbol_status.selected = 0
-  elseif s:find_symbol_status.selected < 0
-    let s:find_symbol_status.selected =
-          \ len( s:find_symbol_status.results ) - 1
   endif
 
   if l:redraw
