@@ -266,7 +266,7 @@ function! s:Cancel() abort
 endfunction
 " }}}
 
-" Popup events {{{
+" Popup and keyboard events {{{
 
 function! s:HandleKeyPress( id, key ) abort
   let l:redraw = 0
@@ -385,83 +385,105 @@ function! s:RedrawFinderPopup() abort
 
   if empty( s:find_symbol_status.results )
     call popup_settext( s:find_symbol_status.id, 'No results' )
-    return
+    let s:find_symbol_status.selected = -1
+  else
+    let popup_width = popup_getpos( s:find_symbol_status.id ).core_width
+
+    let buffer = []
+
+    for result in s:find_symbol_status.results
+      " Calculate  the text to use. Try and include the full path and line
+      " number, (right aligned), but truncate if there isn't space for the
+      " description and the file path. Include at least 8 spaces between them
+      " (if there's room).
+      if result->has_key( 'extra_data' )
+        let kind = result[ 'extra_data' ][ 'kind' ]
+        let name = result[ 'extra_data' ][ 'name' ]
+        let desc = kind .. ': ' .. name
+        if s:highlight_group_for_symbol_kind->has_key( kind )
+          let prop = 'YCM-symbol-' . kind
+        else
+          let prop = 'YCM-symbol-Normal'
+        endif
+        let props = [
+            \ { 'col': 1,
+            \   'length': len( kind ) + 2,
+            \   'type': 'YCM-symbol-Normal'  },
+            \ { 'col': len( kind ) + 3,
+            \   'length': len( name ),
+            \   'type': prop },
+            \ ]
+      elseif result->has_key( 'description' )
+        let desc = result[ 'description' ]
+        let props = [
+            \ { 'col': 1, 'length': len( desc ), 'type': 'YCM-symbol-Normal' },
+            \ ]
+      else
+        let desc = 'Invalid entry: ' . string( result )
+        let props = []
+      endif
+
+      let line_num = result[ 'line_num' ]
+      let path = fnamemodify( result[ 'filepath' ], ':.' )
+               \ .. ':'
+               \ .. line_num
+
+      let spaces = popup_width - len( desc ) - len( path )
+      let spacing = 8
+      if spaces < spacing
+        let spaces = spacing
+        let path_len_to_use = popup_width - spacing - len( desc ) - 3
+        if path_len_to_use > 0
+          let path = '...' . strpart( path, len( path ) - path_len_to_use )
+        else
+          let path = '...:' .. line_num
+        endif
+      endif
+      let line = desc .. repeat( ' ', spaces ) .. path
+      call add( buffer, {
+            \ 'text': line,
+            \ 'props': props + [
+              \ { 'col': popup_width - len( path ) + 1,
+              \   'length': len( path ) - len( line_num ),
+              \   'type': 'YCM-symbol-file' },
+              \ { 'col': popup_width - len( line_num ) + 1,
+              \   'length': len( line_num ),
+              \   'type': 'YCM-symbol-line-num' }
+              \ ]
+            \ } )
+    endfor
+
+    call popup_settext( s:find_symbol_status.id, buffer )
   endif
 
-  let popup_width = popup_getpos( s:find_symbol_status.id ).core_width
-
-  let buffer = []
-
-  for result in s:find_symbol_status.results
-    " Calculate  the text to use. Try and include the full path and line number,
-    " (right aligned), but truncate if there isn't space for the description and
-    " the file path. Include at least 8 spaces between them (if there's room).
-    if result->has_key( 'extra_data' )
-      let kind = result[ 'extra_data' ][ 'kind' ]
-      let name = result[ 'extra_data' ][ 'name' ]
-      let desc = kind .. ': ' .. name
-      if s:highlight_group_for_symbol_kind->has_key( kind )
-        let prop = 'YCM-symbol-' . kind
-      else
-        let prop = 'YCM-symbol-Normal'
-      endif
-      let props = [
-          \ { 'col': 1,
-          \   'length': len( kind ) + 2,
-          \   'type': 'YCM-symbol-Normal'  },
-          \ { 'col': len( kind ) + 3,
-          \   'length': len( name ),
-          \   'type': prop },
-          \ ]
-    elseif result->has_key( 'description' )
-      let desc = result[ 'description' ]
-      let props = [
-          \ { 'col': 1, 'length': len( desc ), 'type': 'YCM-symbol-Normal' },
-          \ ]
-    else
-      let desc = 'Invalid entry: ' . string( result )
-      let props = []
-    endif
-
-    let line_num = result[ 'line_num' ]
-    let path = fnamemodify( result[ 'filepath' ], ':.' )
-             \ .. ':'
-             \ .. line_num
-
-    let spaces = popup_width - len( desc ) - len( path )
-    let spacing = 8
-    if spaces < spacing
-      let spaces = spacing
-      let path_len_to_use = popup_width - spacing - len( desc ) - 3
-      if path_len_to_use > 0
-        let path = '...' . strpart( path, len( path ) - path_len_to_use )
-      else
-        let path = '...:' .. line_num
-      endif
-    endif
-    let line = desc .. repeat( ' ', spaces ) .. path
-    call add( buffer, {
-          \ 'text': line,
-          \ 'props': props + [
-            \ { 'col': popup_width - len( path ) + 1,
-            \   'length': len( path ) - len( line_num ),
-            \   'type': 'YCM-symbol-file' },
-            \ { 'col': popup_width - len( line_num ) + 1,
-            \   'length': len( line_num ),
-            \   'type': 'YCM-symbol-line-num' }
-            \ ]
-          \ } )
-  endfor
-
-  call popup_settext( s:find_symbol_status.id, buffer )
-
   if s:find_symbol_status.selected > -1
-    call win_execute(
-          \ s:find_symbol_status.id,
-          \ ':call cursor( ['
-          \   . string( s:find_symbol_status.selected + 1 )
-          \   . ', 1] )' )
-    call win_execute( s:find_symbol_status.id, 'set cursorline' )
+    " Move the cursor so that cursorline highlights the selected item. Also
+    " scroll the window if the selected item is not in view. To make scrolling
+    " feel natural we position the current line a the bottom of the window if
+    " the new current line is below the current viewport, and at the top if the
+    " new current line is above the viewport.
+    let new_line =  s:find_symbol_status.selected + 1
+    let pos = popup_getpos( s:find_symbol_status.id )
+
+    call win_execute( s:find_symbol_status.id,
+                    \ 'call cursor( [' . string( new_line ) . ', 1] )' )
+
+    if new_line < pos.firstline
+      " New line is above the viewport, scroll so that this line is at the top
+      " of the window.
+      call win_execute( s:find_symbol_status.id, "normal z\<CR>" )
+    elseif new_line >= ( pos.firstline + pos.core_height )
+      " New line is below the viewport, scroll so that this line is at the
+      " bottom of the window.
+      call win_execute( s:find_symbol_status.id, ':normal z-' )
+    endif
+    " Otherwise, new item is already displayed - don't scroll the window.
+
+    if !getwinvar( s:find_symbol_status.id, '&cursorline' )
+      call win_execute( s:find_symbol_status.id, 'set cursorline' )
+    endif
+  else
+    call win_execute( s:find_symbol_status.id, 'set nocursorline' )
   endif
 
 endfunction
