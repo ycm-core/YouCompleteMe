@@ -131,7 +131,6 @@ function! Test_Cancel_DocumentSymbol()
     call WaitForAssert( { -> assert_true(
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
-    " TODO: Wait for the popup to be displayed, and check the contents
     call FeedAndCheckAgain( 'thisisathing', funcref( 'SelectItem' ) )
   endfunction
 
