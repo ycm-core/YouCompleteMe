@@ -230,6 +230,11 @@ function! Test_EmptySearch()
           \ 10000 )
     call WaitForAssert( { -> assert_equal( 2, line( '$', id ) ) } )
 
+    " FIXME: Doing all these tests with only 2 entries means that it's not
+    " really checking the behaviour completely accurately, we should at least
+    " use 3, but that would require crafting a new test file, which is nonzero
+    " effort. Well, it's probably as much effort as writing this comment...
+
     " Check down movement
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
 
@@ -258,10 +263,23 @@ function! Test_EmptySearch()
     call feedkeys( "\<C-p>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
 
-
     call feedkeys( "\<Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
 
+    call feedkeys( "\<Home>", 'xt' )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+
+    call feedkeys( "\<End>", 'xt' )
+    call assert_equal( 1, youcompleteme#finder#GetState().selected )
+
+    call feedkeys( "\<End>", 'xt' )
+    call assert_equal( 1, youcompleteme#finder#GetState().selected )
+
+    call feedkeys( "\<PageUp>", 'xt' )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+
+    call feedkeys( "\<PageDown>", 'xt' )
+    call assert_equal( 1, youcompleteme#finder#GetState().selected )
 
     call feedkeys( "\<CR>" )
   endfunction
