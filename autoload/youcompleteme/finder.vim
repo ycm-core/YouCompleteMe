@@ -269,8 +269,8 @@ endfunction
 " Popup and keyboard events {{{
 
 function! s:HandleKeyPress( id, key ) abort
-  let l:redraw = 0
-  let l:handled = 0
+  let redraw = 0
+  let handled = 0
 
   " This is pretty terrible. We should proably start a prompt buffer and use the
   " TextChangedI event in that buffer to trigger updating.
@@ -283,8 +283,8 @@ function! s:HandleKeyPress( id, key ) abort
     if s:find_symbol_status.selected >= len( s:find_symbol_status.results )
       let s:find_symbol_status.selected = 0
     endif
-    let l:redraw = 1
-    let l:handled = 1
+    let redraw = 1
+    let handled = 1
   elseif a:key ==# "\<C-k>" ||
         \ a:key ==# "\<Up>" ||
         \ a:key ==# "\<C-p>" ||
@@ -295,8 +295,8 @@ function! s:HandleKeyPress( id, key ) abort
       let s:find_symbol_status.selected =
             \ len( s:find_symbol_status.results ) - 1
     endif
-    let l:redraw = 1
-    let l:handled = 1
+    let redraw = 1
+    let handled = 1
   elseif a:key ==# "\<PageDown>" || a:key ==# "\<kPageDown>"
     let s:find_symbol_status.selected +=
           \ popup_getpos( s:find_symbol_status.id ).core_height
@@ -305,8 +305,8 @@ function! s:HandleKeyPress( id, key ) abort
       let s:find_symbol_status.selected =
             \ len( s:find_symbol_status.results ) - 1
     endif
-    let l:redraw = 1
-    let l:handled = 1
+    let redraw = 1
+    let handled = 1
   elseif a:key ==# "\<PageUp>" || a:key ==# "\<kPageUp>"
     let s:find_symbol_status.selected -=
           \ popup_getpos( s:find_symbol_status.id ).core_height
@@ -314,31 +314,31 @@ function! s:HandleKeyPress( id, key ) abort
     if s:find_symbol_status.selected < 0
       let s:find_symbol_status.selected = 0
     endif
-    let l:redraw = 1
-    let l:handled = 1
+    let redraw = 1
+    let handled = 1
   elseif a:key ==# "\<C-c>"
     call popup_close( a:id, -1 )
-    let l:handled = 1
+    let handled = 1
   elseif a:key ==# "\<CR>"
     if s:find_symbol_status.selected >= 0
       call popup_close( a:id, s:find_symbol_status.selected )
-      let l:handled = 1
+      let handled = 1
     endif
   elseif a:key ==# "\<Home>" || a:key ==# "\<kHome>"
     let s:find_symbol_status.selected = 0
-    let l:redraw = 1
-    let l:handled = 1
+    let redraw = 1
+    let handled = 1
   elseif a:key ==# "\<End>" || a:key ==# "\<kEnd>"
     let s:find_symbol_status.selected = len( s:find_symbol_status.results ) - 1
-    let l:redraw = 1
-    let l:handled = 1
+    let redraw = 1
+    let handled = 1
   endif
 
-  if l:redraw
+  if redraw
     call s:RedrawFinderPopup()
   endif
 
-  return l:handled
+  return handled
 endfunction
 
 
