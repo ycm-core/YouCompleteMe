@@ -368,6 +368,19 @@ function! s:PopupClosed( id, selected ) abort
             \ [ vimsupport.BuildQfListItem( x ) for x in
             \ vim.eval( 's:find_symbol_status.results' ) ] )
 
+
+      " Emulate :echo, to avoid a redraw getting rid of the message.
+      let txt = 'Added ' . len( getqflist() ) . ' entries to quickfix list.'
+      call popup_notification(
+            \ txt,
+            \ {
+              \  'line':      1,
+              \  'col':       &columns - len( txt ),
+              \  'padding':   [ 0, 0, 0, 0 ],
+              \  'border':    [ 0, 0, 0, 0 ],
+              \  'highlight': 'PMenu'
+            \ } )
+
       " But don't open it, as this could take up valuable actual screen space
       " py3 vimsupport.OpenQuickFixList()
     endif
