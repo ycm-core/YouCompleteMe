@@ -2,6 +2,7 @@ pull_request_rules:
   - name: Automatic merge on Azure Pipelines and Reviewable successes
     conditions:
       - base=master
+      - "#approved-reviews-by>=2"
       - status-success=ycm-core.YouCompleteMe
       - status-success=code-review/reviewable
     actions:
