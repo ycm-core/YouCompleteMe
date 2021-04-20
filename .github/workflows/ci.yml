@@ -22,6 +22,10 @@ jobs:
           - runs-on: windows-2019
             python-arch: 'x64'
             python-version: 3.9
+        exclude:
+          - runs-on: windows-2019
+            python-arch: 'x64'
+            python-version: 3.6
     env:
       COVERAGE: true
     runs-on: ${{ matrix.runs-on }}
@@ -36,7 +40,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.python-arch }}
     - name: Run pip
-      run: python3 -m pip install -r test_requirements.txt
+      run: python3 -m pip install -r python/test_requirements.txt
     - name: Run tests
       run: python3 run_tests.py
     - name: Upload coverage data
@@ -58,7 +62,7 @@ jobs:
         submodules: recursive
         fetch-depth: 0
     - name: Install dependencies
-      run: sudo -H $(PIP) install -r python/test_requirements.txt
+      run: sudo -H pip3 install -r python/test_requirements.txt
     - name: Build ycmd
       run: python3 ./install.py --ts-completer --clangd-completer --java-completer
     - name: Run tests in new vim
