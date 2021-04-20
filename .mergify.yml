@@ -3,8 +3,12 @@ pull_request_rules:
     conditions:
       - base=master
       - "#approved-reviews-by>=2"
-      - status-success=ycm-core.YouCompleteMe
-      - status-success=code-review/reviewable
+      - status-success=Linux - Python 3.6 x64
+      - status-success=macOS - Python 3.6 x64
+      - status-success=Windows - Python 3.9 x64
+      - status-success=Windows - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
     actions:
       merge:
         method: merge
@@ -14,7 +18,12 @@ pull_request_rules:
   - name: Manual merge on Azure Pipelines and Maintainer Override
     conditions:
       - base=master
-      - status-success=ycm-core.YouCompleteMe
+      - status-success=Linux - Python 3.6 x64
+      - status-success=macOS - Python 3.6 x64
+      - status-success=Windows - Python 3.9 x64
+      - status-success=Windows - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
 
       - "#approved-reviews-by>=1"
       - "#changes-requested-reviews-by=0"
