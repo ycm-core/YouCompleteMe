@@ -67,7 +67,7 @@ jobs:
       run: sudo -H pip3 install -r python/test_requirements.txt
     - name: Build ycmd
       run: python3 ./install.py --ts-completer --clangd-completer --java-completer
-    - name: Run tests in new vim
+    - name: Run tests in old vim
       # System vim should be oldest supported.
       if: matrix.vim == 'old'
       run: ./test/run_vim_tests --vim /usr/bin/vim
