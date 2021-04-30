@@ -119,7 +119,8 @@ class YouCompleteMe:
     self._latest_completion_request = None
     self._latest_signature_help_request = None
     self._signature_help_available_requests = SigHelpAvailableByFileType()
-    self._latest_command_reqeust = None
+    self._command_requests = {}
+    self._next_command_request_id = 0
 
     self._signature_help_state = signature_help.SignatureHelpState()
     self._user_options = base.GetUserOptions( self._default_options )
@@ -434,12 +435,17 @@ class YouCompleteMe:
       False,
       0,
       0 )
-    self._latest_command_reqeust = SendCommandRequestAsync( final_arguments,
-                                                            extra_data )
+
+    request_id = self._next_command_request_id
+    self._next_command_request_id += 1
+    self._command_requests[ request_id ] = SendCommandRequestAsync(
+      final_arguments,
+      extra_data )
+    return request_id
 
 
-  def GetCommandRequest( self ):
-    return self._latest_command_reqeust
+  def GetCommandRequest( self, request_id ):
+    return self._command_requests.get( request_id )
 
 
   def GetDefinedSubcommands( self ):

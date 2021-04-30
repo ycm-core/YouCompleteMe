@@ -61,6 +61,7 @@ let s:pollers = {
       \   'command': {
       \     'id': -1,
       \     'wait_milliseconds': 100,
+      \     'requests': {},
       \   },
       \   'semantic_highlighting': {
       \     'id': -1,
@@ -1292,16 +1293,17 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  if s:pollers.command.id != -1
-    eval a:callback( '' )
-    return
+  let request_id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
+
+  let s:pollers.command.requests[ request_id ] = {
+        \ 'response_func': 'StringResponse',
+        \ 'callback': a:callback
+        \ }
+  if s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
   endif
-
-  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
-
-  let s:pollers.command.id = timer_start(
-        \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ 'StringResponse', a:callback ] ) )
 endfunction
 
 
@@ -1316,39 +1318,56 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  if s:pollers.command.id != -1
-    eval a:callback( { 'error': 'request in progress' } )
-    return
+  let request_id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
+
+  let s:pollers.command.requests[ request_id ] = {
+        \ 'response_func': 'Response',
+        \ 'callback': a:callback
+        \ }
+  if s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
   endif
-
-  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
-
-  let s:pollers.command.id = timer_start(
-        \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ 'Response', a:callback ] ) )
 endfunction
 
 
-function! s:PollCommand( response_func, callback, id ) abort
-  if py3eval( 'ycm_state.GetCommandRequest() is None' )
-    " Possible in case of race conditions and things like RestartServer
-    " But particualrly in the tests
-    return
-  endif
-
-  if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
-    let s:pollers.command.id = timer_start(
-          \ s:pollers.command.wait_milliseconds,
-          \ function( 's:PollCommand', [ a:response_func, a:callback ] ) )
-    return
-  endif
-
+function! s:PollCommands( timer_id ) abort
+  " Clear the timer id before calling the callback, as the callback might fire
+  " more requests
   call s:StopPoller( s:pollers.command )
 
-  let result = py3eval( 'ycm_state.GetCommandRequest().'
-                      \ .a:response_func . '()' )
+  " Must copy the requests because this loop is likely to modify it
+  let requests = copy( s:pollers.command.requests )
+  let poll_again = 0
+  for request_id in keys( requests )
+    let request = requests[ request_id ]
+    if py3eval( 'ycm_state.GetCommandRequest( int( vim.eval( "request_id" ) ) )'
+              \ . 'is None' )
+      " Possible in case of race conditions and things like RestartServer
+      " But particualrly in the tests
+      let result = v:none
+    elseif !py3eval( 'ycm_state.GetCommandRequest( '
+                   \ . 'int( vim.eval( "request_id" ) ) ).Done()' )
+      " Not ready yet, poll again and skip this one for now
+      let poll_again = 1
+      continue
+    else
+      let result = py3eval( 'ycm_state.GetCommandRequest( '
+                          \ . 'int( vim.eval( "request_id" ) ) ).'
+                          \ . request.response_func
+                          \ . '()' )
+    endif
 
-  eval a:callback( result )
+    " This request is done
+    call remove( s:pollers.command.requests, request_id )
+    call request[ 'callback' ]( result )
+  endfor
+
+  if poll_again && s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
+  endif
 endfunction
 
 
