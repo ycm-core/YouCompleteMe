@@ -449,7 +449,13 @@ function! s:RedrawFinderPopup() abort
       let len_filetype = max( [ len_filetype, len( result[ 'filetype' ] ) ] )
     endfor
 
-    let available_width = popup_width - len_filetype - 1
+    if len_filetype > 0
+      let filetype_sep = ' '
+    else
+      let filetype_sep = ''
+    endif
+
+    let available_width = popup_width - len_filetype - len( filetype_sep )
 
     for result in s:find_symbol_status.results
       " Calculate  the text to use. Try and include the full path and line
@@ -487,38 +493,54 @@ function! s:RedrawFinderPopup() abort
       let path = fnamemodify( result[ 'filepath' ], ':.' )
                \ .. ':'
                \ .. line_num
+      let path_includes_line = 1
 
       let spaces = available_width - len( desc ) - len( path )
-      let spacing = 8
+      let spacing = 4
       if spaces < spacing
         let spaces = spacing
-        let path_len_to_use = available_width - spacing - len( desc ) - 3
-        if path_len_to_use > 0
-          let path = '...' . strpart( path, len( path ) - path_len_to_use )
+        let space_for_path = available_width - spacing - len( desc )
+        let path_includes_line = space_for_path - 3 > len( line_num ) + 1
+        if space_for_path > 3
+          let path = '...' . strpart( path, len( path ) - space_for_path + 3 )
+        elseif space_for_path <= 0
+          let path = ''
         else
-          let path = '...:' .. line_num
+          let path_includes_line = 0
+          let path = '...'
         endif
       endif
+
       let line = desc
              \ .. repeat( ' ', spaces )
              \ .. path
-             \ .. ' '
+             \ .. filetype_sep
              \ .. result[ 'filetype' ]
 
-      call add( buffer, {
-            \ 'text': line,
-            \ 'props': props + [
+      if len( path ) > 0
+        let props += [
               \ { 'col': available_width - len( path ) + 1,
               \   'length': len( path ) - len( line_num ),
               \   'type': 'YCM-symbol-file' },
-              \ { 'col': available_width - len( line_num ) + 1,
-              \   'length': len( line_num ),
-              \   'type': 'YCM-symbol-line-num' },
-              \ { 'col': popup_width - len_filetype + 1,
-              \   'length': len_filetype,
-              \   'type': 'YCM-symbol-filetype' },
               \ ]
-            \ } )
+        if path_includes_line
+          let props += [
+                \ { 'col': available_width - len( line_num ) + 1,
+                \   'length': len( line_num ),
+                \   'type': 'YCM-symbol-line-num' },
+                \ ]
+        endif
+      endif
+
+      if len_filetype > 0
+        let props += [
+            \ { 'col': popup_width - len_filetype + len( filetype_sep ),
+            \   'length': len_filetype,
+            \   'type': 'YCM-symbol-filetype' },
+            \ ]
+      endif
+
+      call add( buffer, { 'text': line, 'props': props } )
     endfor
 
     call popup_settext( s:find_symbol_status.id, buffer )
@@ -673,7 +695,7 @@ endfunction
 function! s:HandleWorkspaceSymbols( filetype, results ) abort
 
   let s:find_symbol_status.raw_results[ a:filetype ] =
-        \ s:ParseGoToResponse( a:filetype,a:results )
+        \ s:ParseGoToResponse( a:filetype, a:results )
 
   " Collate the results from each filetype
   let results = []
@@ -752,7 +774,7 @@ endfunction
 
 
 function! s:HandleDocumentSymbols( results ) abort
-  let s:find_symbol_status.raw_results = s:ParseGoToResponse( a:results )
+  let s:find_symbol_status.raw_results = s:ParseGoToResponse( '', a:results )
   call s:SearchDocument( '' )
 endfunction
 
