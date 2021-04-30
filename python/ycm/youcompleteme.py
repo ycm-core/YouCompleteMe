@@ -375,21 +375,24 @@ class YouCompleteMe:
                                    has_range,
                                    start_line,
                                    end_line ):
-    final_arguments = []
-    for argument in arguments:
-      # The ft= option which specifies the completer when running a command is
-      # ignored because it has not been working for a long time. The option is
-      # still parsed to not break users that rely on it.
-      if argument.startswith( 'ft=' ):
-        continue
-      final_arguments.append( argument )
-
     extra_data = {
       'options': {
         'tab_size': vimsupport.GetIntValue( 'shiftwidth()' ),
         'insert_spaces': vimsupport.GetBoolValue( '&expandtab' )
       }
     }
+
+    final_arguments = []
+    for argument in arguments:
+      if argument.startswith( 'ft=' ):
+        extra_data[ 'completer_target' ] = argument[ 3: ]
+        continue
+      elif argument.startswith( '--bufnr=' ):
+        extra_data[ 'bufnr' ] = int( argument[ len( '--bufnr=' ): ] )
+        continue
+
+      final_arguments.append( argument )
+
     if has_range:
       extra_data.update( vimsupport.BuildRange( start_line, end_line ) )
     self._AddExtraConfDataIfNeeded( extra_data )
