@@ -1361,6 +1361,7 @@ function! s:PollCommands( timer_id ) abort
 
     " This request is done
     call remove( s:pollers.command.requests, request_id )
+    py3 ycm_state.FlushCommandRequest( vim.eval( "request_id" ) )
     call request[ 'callback' ]( result )
   endfor
 
