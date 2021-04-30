@@ -237,49 +237,94 @@ function! Test_EmptySearch()
 
     " Check down movement
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<C-j>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Down>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<C-n>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     " Check up movement and wrapping
     call feedkeys( "\<C-k>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Up>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<S-Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<C-p>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Home>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<End>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<End>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<PageUp>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<PageDown>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<CR>" )
   endfunction
@@ -291,7 +336,7 @@ function! Test_EmptySearch()
   call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
   call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
   call assert_equal( b, bufnr() )
-  call assert_equal( [ 0, 5, 7, 0 ], getpos( '.' ) )
+  call assert_equal( [ 0, 5, 28, 0 ], getpos( '.' ) )
 
   " We pop up a notification with some text in it
   if exists( '*popup_list' )
