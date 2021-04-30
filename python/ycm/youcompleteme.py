@@ -446,6 +446,10 @@ class YouCompleteMe:
     return self._command_requests.get( request_id )
 
 
+  def FlushCommandRequest( self, request_id ):
+    self._command_requests.pop( request_id, None )
+
+
   def GetDefinedSubcommands( self ):
     request = BaseRequest()
     subcommands = request.PostDataToHandler( BuildRequestData(),
