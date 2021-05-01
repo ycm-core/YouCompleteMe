@@ -32,11 +32,10 @@ function! Test_WorkspaceSymbol_Basic()
 
   function SelectItem( ... )
     let id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( id )
 
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: thisisathing ',
-          \ o.title  ) },
+          \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
@@ -81,11 +80,10 @@ function! Test_DocumentSymbols_Basic()
 
   function SelectItem( ... )
     let id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( id )
 
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: thisisathing ',
-          \ o.title  ) },
+          \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
@@ -136,11 +134,10 @@ function! Test_Cancel_DocumentSymbol()
 
   function SelectItem( ... )
     let id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( id )
 
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: thisisathing ',
-          \ o.title  ) },
+          \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
@@ -189,11 +186,10 @@ function! Test_EmptySearch()
 
   function SelectNothing( ... )
     let id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( id )
 
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: nothingshouldmatchthis ',
-          \ o.title  ) },
+          \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
@@ -205,13 +201,12 @@ function! Test_EmptySearch()
 
   function ChangeSearch( ... )
     let id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( id )
 
     " Hitting enter with nothing to select clears the prompt, because prompt
     " buffer
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: notarealthing ',
-          \ o.title  ) },
+          \ popup_getoptions( id ).title  ) },
           \ 10000 )
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
 
@@ -223,11 +218,10 @@ function! Test_EmptySearch()
   let popup_id = -1
   function TestUpDownSelect( ... ) closure
     let popup_id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( popup_id )
 
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: tiat ',
-          \ o.title  ) },
+          \ popup_getoptions( popup_id ).title  ) },
           \ 10000 )
     call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) } )
 
@@ -450,11 +444,10 @@ function! Test_NoFileType_NoCompletionIn_PromptBuffer()
 
   function! CheckNoPopup( ... )
     let id = youcompleteme#finder#GetState().id
-    let o = popup_getoptions( id )
 
     call WaitForAssert( { ->
-            \ assert_equal( ' [X] Search for symbol: thisisathing ', o.title )
-          \ },
+            \ assert_equal( ' [X] Search for symbol: thisisathing ',
+            \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
@@ -480,4 +473,264 @@ function! Test_NoFileType_NoCompletionIn_PromptBuffer()
   silent %bwipe!
   delfunct! PutQuery
   delfunct! CheckNoPopup
+endfunction
+
+function! Test_MultipleFileTypes()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+  split
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+
+  let original_win = winnr()
+  let b = bufnr()
+  let l = winlayout()
+
+  function! PutQuery( ... )
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    let popup_id = youcompleteme#finder#GetState().id
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thiswillnotmatchanything ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
+
+    call WaitForAssert( { -> assert_true(
+          \ youcompleteme#finder#GetState().id != -1 ) } )
+
+    let id = youcompleteme#finder#GetState().id
+    call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
+    call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'CheckCpp' ) )
+  endfunction
+
+  function! CheckCpp( ... )
+    let popup_id = youcompleteme#finder#GetState().id
+
+    " Python can be _really_ slow
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', popup_id ) ) } )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call FeedAndCheckAgain(
+          \ "\<C-u>Really_Long_Method",
+          \ funcref( 'CheckPython' ) )
+  endfunction
+
+  function! CheckPython( ... )
+    let popup_id = youcompleteme#finder#GetState().id
+
+    " Python can be _really_ slow
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
+          \ popup_getoptions( popup_id ).title ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
+                      \ 10000 )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'def Really_Long_Method',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].description )
+
+    call feedkeys( "\<C-c>")
+  endfunction
+
+
+  " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
+  call FeedAndCheckMain( '\\wthiswillnotmatchanything', funcref( 'PutQuery' ) )
+
+  call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
+  call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
+  call assert_equal( b, bufnr() )
+endfunction
+
+function! Test_MultipleFileTypes_CurrentNotSemantic()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+  split
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+  split
+  " Current buffer is a ycm_nofiletype, which ycm is blacklisted in
+  " but otherwise we behave the same as before with the exception that we open
+  " the python file in the current window
+
+  let original_win = winnr()
+  let b = bufnr()
+  let l = winlayout()
+
+  function! PutQuery( ... )
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call WaitForAssert( { -> assert_true(
+          \ youcompleteme#finder#GetState().id != -1 ) } )
+
+    let popup_id = youcompleteme#finder#GetState().id
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thiswillnotmatchanything ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
+
+    let id = youcompleteme#finder#GetState().id
+    call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
+    call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'CheckCpp' ) )
+  endfunction
+
+  function! CheckCpp( ... )
+    let popup_id = youcompleteme#finder#GetState().id
+
+    " Python can be _really_ slow
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', popup_id ) ) } )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call FeedAndCheckAgain(
+          \ "\<C-u>Really_Long_Method",
+          \ funcref( 'CheckPython' ) )
+  endfunction
+
+  function! CheckPython( ... )
+    let popup_id = youcompleteme#finder#GetState().id
+
+    " Python can be _really_ slow
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
+          \ popup_getoptions( popup_id ).title ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
+                      \ 10000 )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'def Really_Long_Method',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].description )
+
+    call feedkeys( "\<CR>")
+  endfunction
+
+
+  " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
+  call FeedAndCheckMain( '\\wthiswillnotmatchanything', funcref( 'PutQuery' ) )
+
+  " We pop up a notification with some text in it
+  if exists( '*popup_list' )
+    call assert_equal( 1, len( popup_list() ) )
+  endif
+
+  " Old vim doesn't have popup_list, so hit-test the top-right corner which is
+  " where we pup the popu
+  let notification_id = popup_locate( 1, &columns - 1 )
+  call assert_equal( [ 'Added 2 entries to quickfix list.' ],
+                   \ getbufline( winbufnr( notification_id ), 1, '$' ) )
+  " Wait for the notification to clear
+  call WaitForAssert(
+        \ { -> assert_equal( {}, popup_getpos( notification_id ) ) },
+        \ 10000 )
+
+  call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
+  call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
+  call assert_equal( bufnr( 'doc.py' ), bufnr() )
+  call assert_equal( [ 0, 16, 5, 0 ], getpos( '.' ) )
+endfunction
+
+function! Test_WorkspaceSymbol_NormalModeChange()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+
+  let original_win = winnr()
+  let b = bufnr()
+  let l = winlayout()
+
+  let popup_id = -1
+
+  function! PutQuery( ... )
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call WaitForAssert( { -> assert_true(
+          \ youcompleteme#finder#GetState().id != -1 ) } )
+
+    let id = youcompleteme#finder#GetState().id
+    call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
+    call FeedAndCheckAgain( 'thisisathing', funcref( 'ChangeQuery' ) )
+  endfunction
+
+  function ChangeQuery( ... )
+    let id = youcompleteme#finder#GetState().id
+
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ popup_getoptions( id ).title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call FeedAndCheckAgain( "\<Esc>bcwthatisathing",
+                          \ funcref( 'SelectNewItem' ) )
+  endfunction
+
+  function SelectNewItem( ... )
+    let id = youcompleteme#finder#GetState().id
+
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thatisathing ',
+          \ popup_getoptions( id ).title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    call feedkeys( "\<CR>" )
+  endfunction
+
+  " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
+  call FeedAndCheckMain( '\\w', funcref( 'PutQuery' ) )
+
+  call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
+  call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
+  call assert_equal( b, bufnr() )
+  call assert_equal( [ 0, 5, 28, 0 ], getpos( '.' ) )
+
+  delfunct PutQuery
+  delfunct SelectNewItem
+  delfunct ChangeQuery
+  silent %bwipe!
 endfunction
