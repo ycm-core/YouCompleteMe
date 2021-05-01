@@ -568,7 +568,11 @@ function! s:ParseGoToResponse( results ) abort
   if type( a:results ) == v:t_none || empty( a:results )
     let results = []
   elseif type( a:results ) != v:t_list
-    let results = [ a:results ]
+    if type( a:results ) == v:t_dict && has_key( a:results, 'error' )
+      let results = {}
+    else
+      let results = [ a:results ]
+    endif
   else
     let results = a:results
   endif
