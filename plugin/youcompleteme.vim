@@ -283,6 +283,9 @@ let g:ycm_java_jdtls_workspace_root_path =
 let g:ycm_python_binary_path =
       \ get( g:, 'ycm_python_binary_path', '' )
 
+let g:ycm_refilter_workspace_symbols =
+      \ get( g:, 'ycm_refilter_workspace_symbols', 1 )
+
 if has( 'vim_starting' ) " Loading at startup.
   " We defer loading until after VimEnter to allow the gui to fork (see
   " `:h gui-fork`) and avoid a deadlock situation, as explained here:
