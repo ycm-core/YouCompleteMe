@@ -599,6 +599,27 @@ function! s:RequeryFinderPopup() abort
   " snappy
   call s:SetTitle()
 
+  " FIXME: This is feeling a bit shitty now. The result of this is that we have
+  " to get rsponses from a full round of servers before we send another query.
+  " That makes updates feel laggy if you have say python or typescript files
+  " (whose engines are super slow) at the same time as some cc files (whose
+  " engine is extremely fast). You  realy want there to be a "pending" flag _per
+  " filetype_ and for all of this to be managed by the query_func, e.g.
+  "
+  " remove waiting
+  " pending is owned by the query funcs
+  " this function just calls the query func.
+  "
+  " For workspace:
+  "  - waiting if any( raw_results[ x ] is none for x in raw_results )
+  "  - pending if pending[ filetype ]
+  "
+  " For document:
+  "   - waiting if raw_results is v:none
+  "   - pending if pending
+  "
+  " We already pass still_waiting to the result func, so that can continue
+  "
   if s:find_symbol_status.waiting == 1
     let s:find_symbol_status.pending = 1
   elseif s:find_symbol_status.pending == 1
