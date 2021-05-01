@@ -392,7 +392,7 @@ def _ValidateResponseObject( response, response_text ):
 
 
 def _BuildUri( handler ):
-  return ToBytes( urljoin( BaseRequest.server_location, handler ) )
+  return ToBytes( '/' + handler )
 
 
 def MakeServerException( data ):
