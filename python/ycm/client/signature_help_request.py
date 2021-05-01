@@ -34,6 +34,7 @@ class SignatureHelpRequest( BaseRequest ):
     super( SignatureHelpRequest, self ).__init__()
     self.request_data = request_data
     self._response_future = None
+    self._response = None
 
 
   def Start( self ):
@@ -50,6 +51,12 @@ class SignatureHelpRequest( BaseRequest ):
 
 
   def Response( self ):
+    if self._response is None:
+      self._response = self._Response()
+    return self._response
+
+
+  def _Response( self ):
     if not self._response_future:
       return {}
 
