@@ -97,8 +97,10 @@ scriptencoding utf-8
 "    'raw_results', and store the results in 'results', then call
 "    "HandleSymbolSearchResults"
 "
-"  - SearchWorkspace - perform GoToSymbol request, and store the results in
-"    'results', then call "HandleSymbolSearchResults"
+"  - SearchWorkspace - perform GoToSymbol request for all open filetypes,
+"     and store the results in 'raw_results' as a dict mapping
+"     filetype->results. Merge the results in to 'results', then call
+"     "HandleSymbolSearchResults"
 "
 "  - HandleSymbolSearchResults - redraw the popup with the 'results'
 "
@@ -161,6 +163,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
             \ { 'highlight': s:highlight_group_for_symbol_kind[ k ] } )
     endfor
     call prop_type_add( 'YCM-symbol-file', { 'highlight': 'Comment' } )
+    call prop_type_add( 'YCM-symbol-filetype', { 'highlight': 'Special' } )
     call prop_type_add( 'YCM-symbol-line-num', { 'highlight': 'Number' } )
     let s:initialized_text_properties = v:true
   endif
@@ -397,10 +400,13 @@ endfunction
 " Results handling and re-query {{{
 
 " Render a set of results returned from the filter/search function
-function! s:HandleSymbolSearchResults( results ) abort
-  let s:find_symbol_status.waiting = 0
+function! s:HandleSymbolSearchResults( still_waiting, results ) abort
+  let s:find_symbol_status.waiting = a:still_waiting
   let s:find_symbol_status.results = []
-  call s:StopSpinner()
+
+  if !a:still_waiting
+    call s:StopSpinner()
+  endif
 
   if s:find_symbol_status.id < 0
     " Popup was closed, ignore this event
@@ -409,7 +415,10 @@ function! s:HandleSymbolSearchResults( results ) abort
 
   let s:find_symbol_status.results = a:results
   call s:RedrawFinderPopup()
-  call s:RequeryFinderPopup()
+
+  if !a:still_waiting
+    call s:RequeryFinderPopup()
+  endif
 endfunction
 
 
@@ -433,6 +442,14 @@ function! s:RedrawFinderPopup() abort
     let popup_width = popup_getpos( s:find_symbol_status.id ).core_width
 
     let buffer = []
+
+    let len_filetype = 0
+
+    for result in s:find_symbol_status.results
+      let len_filetype = max( [ len_filetype, len( result[ 'filetype' ] ) ] )
+    endfor
+
+    let available_width = popup_width - len_filetype - 1
 
     for result in s:find_symbol_status.results
       " Calculate  the text to use. Try and include the full path and line
@@ -471,27 +488,35 @@ function! s:RedrawFinderPopup() abort
                \ .. ':'
                \ .. line_num
 
-      let spaces = popup_width - len( desc ) - len( path )
+      let spaces = available_width - len( desc ) - len( path )
       let spacing = 8
       if spaces < spacing
         let spaces = spacing
-        let path_len_to_use = popup_width - spacing - len( desc ) - 3
+        let path_len_to_use = available_width - spacing - len( desc ) - 3
         if path_len_to_use > 0
           let path = '...' . strpart( path, len( path ) - path_len_to_use )
         else
           let path = '...:' .. line_num
         endif
       endif
-      let line = desc .. repeat( ' ', spaces ) .. path
+      let line = desc
+             \ .. repeat( ' ', spaces )
+             \ .. path
+             \ .. ' '
+             \ .. result[ 'filetype' ]
+
       call add( buffer, {
             \ 'text': line,
             \ 'props': props + [
-              \ { 'col': popup_width - len( path ) + 1,
+              \ { 'col': available_width - len( path ) + 1,
               \   'length': len( path ) - len( line_num ),
               \   'type': 'YCM-symbol-file' },
-              \ { 'col': popup_width - len( line_num ) + 1,
+              \ { 'col': available_width - len( line_num ) + 1,
               \   'length': len( line_num ),
-              \   'type': 'YCM-symbol-line-num' }
+              \   'type': 'YCM-symbol-line-num' },
+              \ { 'col': popup_width - len_filetype + 1,
+              \   'length': len_filetype,
+              \   'type': 'YCM-symbol-filetype' },
               \ ]
             \ } )
     endfor
@@ -563,12 +588,12 @@ function! s:RequeryFinderPopup() abort
   endif
 endfunction
 
-function! s:ParseGoToResponse( results ) abort
+function! s:ParseGoToResponse( filetype, results ) abort
   if type( a:results ) == v:t_none || empty( a:results )
     let results = []
   elseif type( a:results ) != v:t_list
     if type( a:results ) == v:t_dict && has_key( a:results, 'error' )
-      let results = {}
+      let results = []
     else
       let results = [ a:results ]
     endif
@@ -576,12 +601,10 @@ function! s:ParseGoToResponse( results ) abort
     let results = a:results
   endif
 
-  call map( results,
-        \ { i,v -> extend( v,
-              \ { 'key': v->get( 'extra_data',
-              \                  {} )->get( 'name',
-              \                             v[ 'description' ] ) } ) } )
-
+  call map( results, { _, r -> extend( r, {
+      \   'key': r->get( 'extra_data', {} )->get( 'name', r[ 'description' ] ),
+      \   'filetype': a:filetype
+      \ } ) } )
   return results
 endfunction
 
@@ -623,16 +646,48 @@ endfunction
 function! s:SearchWorkspace( query ) abort
   call s:StartSpinner()
 
-  let s:find_symbol_status.raw_results = v:none
-  call youcompleteme#GetRawCommandResponseAsync(
-        \ function( 's:HandleWorkspaceSymbols' ),
-        \ 'GoToSymbol',
-        \ a:query )
+  let s:find_symbol_status.raw_results = {}
+  let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
+  for ft in keys( ft_buffer_map )
+    if !youcompleteme#filetypes#AllowedForFiletype( ft )
+      continue
+    endif
+
+    let s:find_symbol_status.raw_results[ ft ] = v:none
+    call youcompleteme#GetRawCommandResponseAsync(
+          \ function( 's:HandleWorkspaceSymbols', [ ft ] ),
+          \ 'GoToSymbol',
+          \ '--bufnr=' . ft_buffer_map[ ft ][ 0 ],
+          \ 'ft=' . ft,
+          \ a:query )
+  endfor
+
+  if empty( s:find_symbol_status.raw_results )
+    " No filetypes allowed :( ....
+    call s:StopSpinner()
+    return
+  endif
 endfunction
 
 
-function! s:HandleWorkspaceSymbols( results ) abort
-  let results = s:ParseGoToResponse( a:results )
+function! s:HandleWorkspaceSymbols( filetype, results ) abort
+
+  let s:find_symbol_status.raw_results[ a:filetype ] =
+        \ s:ParseGoToResponse( a:filetype,a:results )
+
+  " Collate the results from each filetype
+  let results = []
+  let waiting = 0
+  for ft in keys( s:find_symbol_status.raw_results )
+    if s:find_symbol_status.raw_results[ ft ] is v:none
+      let waiting = 1
+      continue
+    endif
+
+    call extend( results, s:find_symbol_status.raw_results[ ft ] )
+  endfor
+
+  let query = s:find_symbol_status.query
 
   if g:ycm_refilter_workspace_symbols && !empty( results )
     " This is kinda wonky, but seems to work well enough.
@@ -656,13 +711,12 @@ function! s:HandleWorkspaceSymbols( results ) abort
     " option to disable this re-filter/sort.
     "
     let results = py3eval(
-          \ 'ycm_state.FilterAndSortItems( '
-          \ . ' vim.eval( "results" ),'
-          \ . ' "description",'
-          \ . ' vim.eval( "s:find_symbol_status.query" ) )' )
+          \ 'ycm_state.FilterAndSortItems( vim.eval( "results" ),'
+          \ .                              ' "description",'
+          \ .                              ' vim.eval( "query" ) )' )
   endif
 
-  eval s:HandleSymbolSearchResults( results )
+  eval s:HandleSymbolSearchResults( waiting, results )
 endfunction
 
 " }}}
@@ -686,7 +740,7 @@ function! s:SearchDocument( query ) abort
         \ . ' "description",'
         \ . ' vim.eval( "a:query" ) )' )
 
-  eval s:HandleSymbolSearchResults( response )
+  eval s:HandleSymbolSearchResults( 0, response )
 endfunction
 
 
