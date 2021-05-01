@@ -227,6 +227,9 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   let bufnr = bufadd( '_ycm_filter_' )
   silent call bufload( bufnr )
   silent topleft 1split _ycm_filter_
+  " Disable ycm/completion in this buffer
+  call setbufvar( bufnr, 'ycm_largefile', 1 )
+
   let s:find_symbol_status.prompt_bufnr = bufnr
   let s:find_symbol_status.prompt_winid = win_getid()
 
@@ -565,7 +568,11 @@ function! s:ParseGoToResponse( results ) abort
   if type( a:results ) == v:t_none || empty( a:results )
     let results = []
   elseif type( a:results ) != v:t_list
-    let results = [ a:results ]
+    if type( a:results ) == v:t_dict && has_key( a:results, 'error' )
+      let results = {}
+    else
+      let results = [ a:results ]
+    endif
   else
     let results = a:results
   endif

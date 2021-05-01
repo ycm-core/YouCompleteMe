@@ -54,7 +54,7 @@ function! Test_WorkspaceSymbol_Basic()
 
   delfunct PutQuery
   delfunct SelectItem
-  %bwipe!
+  silent %bwipe!
 endfunction
 
 function! Test_DocumentSymbols_Basic()
@@ -105,7 +105,7 @@ function! Test_DocumentSymbols_Basic()
 
   delfunct PutQuery
   delfunct SelectItem
-  %bwipe!
+  silent %bwipe!
 endfunction
 
 function! Test_Cancel_DocumentSymbol()
@@ -161,7 +161,7 @@ function! Test_Cancel_DocumentSymbol()
 
   delfunct PutQuery
   delfunct SelectItem
-  %bwipe!
+  silent %bwipe!
 endfunction
 
 function! Test_EmptySearch()
@@ -357,7 +357,7 @@ function! Test_EmptySearch()
   delfunct SelectNothing
   delfunct ChangeSearch
   delfunct TestUpDownSelect
-  %bwipe!
+  silent %bwipe!
 endfunction
 
 function! Test_LeaveWindow_CancelSearch()
@@ -402,5 +402,81 @@ function! Test_LeaveWindow_CancelSearch()
   endif
 
   delfunct PutQuery
-  %bwipe!
+  silent %bwipe!
+endfunction
+
+
+function! SetUp_Test_NoFileType_NoCompletionIn_PromptBuffer()
+  call youcompleteme#test#setup#PushGlobal( 'ycm_filetype_whitelist', {
+        \ '*': 1,
+        \ 'ycm_nofiletype': 1
+        \ } )
+endfunction
+
+function! TearDown_Test_NoFileType_NoCompletionIn_PromptBuffer()
+  call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_whitelist' )
+endfunction
+
+function! Test_NoFileType_NoCompletionIn_PromptBuffer()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+
+  call test_override( 'char_avail', 1 )
+
+  new
+  call feedkeys(
+        \ 'iThis is some text and so is thisisathing this_is_a_thing',
+        \ 'xt' )
+  wincmd w
+
+  let original_win = winnr()
+  let b = bufnr()
+  let l = winlayout()
+
+  let popup_id = -1
+
+  function! PutQuery( ... )
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call WaitForAssert( { -> assert_true(
+          \ youcompleteme#finder#GetState().id != -1 ) } )
+
+    " TODO: Wait for the popup to be displayed, and check the contents
+    call FeedAndCheckAgain( 'thisisathing', funcref( 'CheckNoPopup' ) )
+  endfunction
+
+  function! CheckNoPopup( ... )
+    let id = youcompleteme#finder#GetState().id
+    let o = popup_getoptions( id )
+
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ o.title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    " Check there is no PUM - we disable completion in the prompt buffer
+    call assert_false( pumvisible() )
+
+    call feedkeys( "\<CR>" )
+  endfunction
+
+  " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
+  call FeedAndCheckMain( '\\w', funcref( 'PutQuery' ) )
+
+  call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
+  call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
+  call assert_equal( b, bufnr() )
+  call assert_equal( [ 0, 5, 7, 0 ], getpos( '.' ) )
+
+  call test_override( 'ALL', 0 )
+  delfunct PutQuery
+  delfunct CheckNoPopup
+  silent %bwipe!
 endfunction
