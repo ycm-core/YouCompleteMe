@@ -39,6 +39,98 @@ import os
 _HTTP_INTERFACE = os.environ.get( 'YCM_HTTP_INTERFACE', 'http' )
 
 
+class Future:
+  requests = {}
+
+  def __init__( self, request_id, context, timeout ):
+    self.request_id = request_id
+    self.context = context
+
+    self._done = False
+    self._result = None
+    self._exception = None
+    self._on_complete_handlers = []
+    self._timeout = timeout
+    Future.requests[ request_id ] = self
+
+
+  def done( self ):
+    return self._done
+
+
+  def result( self ):
+    if not self.done():
+      # We have to use this to make sure they are passed as ints, as
+      # vimsupport.Call will pass ints as strings due to annoying if_python
+      # behaviour
+      vim.eval( f'youcompleteme#{_HTTP_INTERFACE}#Block( '
+                f'  { self.request_id }, '
+                f'  { self._timeout * 1000 } )' )
+
+    assert self.done()
+
+    if self._result is None:
+      if isinstance( self._exception, Exception ):
+        raise self._exception
+
+      raise RuntimeError( self._exception )
+
+    return self._result
+
+
+  def add_complete_handler( self, handler ):
+    self._on_complete_handlers.append( handler )
+
+
+  def resolve( self, status_code, header_map, data ):
+    self._result = Response( status_code, header_map, data )
+    vimsupport.Log( f'Result! { self._result }' )
+    self._done = True
+    for f in self._on_complete_handlers:
+      f( self )
+
+
+  def reject( self, why ):
+    self._result = None
+    self._exception = why
+    self._done = True
+
+
+  def __str__( self ):
+    return str( self._result )
+
+  def __repr__( self ):
+    return repr( self._result )
+
+
+class Response:
+  def __init__( self, status_code, header_map, data ):
+    self.text = vimsupport.ToUnicode( data )
+    self.content = vimsupport.ToBytes( data )
+    self.status_code = status_code
+    self.headers = header_map
+
+
+  # If the response is an error, throw
+  def raise_for_status( self ):
+    if self.status_code != 200:
+      raise RuntimeError(
+        "Sever rejected with status: {}".format( self.status_code ) )
+
+
+  # Returns the json payload
+  def json( self ):
+    return json.loads( self.text )
+
+  def __str__( self ):
+    return str( {
+      'content': self.text,
+      'status_code': self.status_code,
+      'headers': self.headers
+    } )
+
+
+
 class YCMConnectionError( Exception ):
   pass
 
@@ -66,7 +158,7 @@ class BaseRequest:
 
 
   def HandleFuture( self,
-                    future,
+                    future: Future,
                     display_message = True,
                     truncate_message = False ):
     """Get the server response from a |future| object and catch any exception
@@ -212,97 +304,6 @@ class BaseRequest:
   hmac_secret = ''
 
 
-class Future:
-  requests = {}
-
-  def __init__( self, request_id, context, timeout ):
-    self.request_id = request_id
-    self.context = context
-
-    self._done = False
-    self._result = None
-    self._exception = None
-    self._on_complete_handlers = []
-    self._timeout = timeout
-    Future.requests[ request_id ] = self
-
-
-  def done( self ):
-    return self._done
-
-
-  def result( self ):
-    if not self.done():
-      # We have to use this to make sure they are passed as ints, as
-      # vimsupport.Call will pass ints as strings due to annoying if_python
-      # behaviour
-      vim.eval( f'youcompleteme#{_HTTP_INTERFACE}#Block( '
-                f'  { self.request_id }, '
-                f'  { self._timeout * 1000 } )' )
-
-    assert self.done()
-
-    if self._result is None:
-      if isinstance( self._exception, Exception ):
-        raise self._exception
-
-      raise RuntimeError( self._exception )
-
-    return self._result
-
-
-  def add_complete_handler( self, handler ):
-    self._on_complete_handlers.append( handler )
-
-
-  def resolve( self, status_code, header_map, data ):
-    self._result = Response( status_code, header_map, data )
-    vimsupport.Log( f'Result! { self._result }' )
-    self._done = True
-    for f in self._on_complete_handlers:
-      f( self )
-
-
-  def reject( self, why ):
-    self._result = None
-    self._exception = why
-    self._done = True
-
-
-  def __str__( self ):
-    return str( self._result )
-
-  def __repr__( self ):
-    return repr( self._result )
-
-
-class Response:
-  def __init__( self, status_code, header_map, data ):
-    self.text = vimsupport.ToUnicode( data )
-    self.content = vimsupport.ToBytes( data )
-    self.status_code = status_code
-    self.headers = header_map
-
-
-  # If the response is an error, throw
-  def raise_for_status( self ):
-    if self.status_code != 200:
-      raise RuntimeError(
-        "Sever rejected with status: {}".format( self.status_code ) )
-
-
-  # Returns the json payload
-  def json( self ):
-    return json.loads( self.text )
-
-  def __str__( self ):
-    return str( {
-      'content': self.text,
-      'status_code': self.status_code,
-      'headers': self.headers
-    } )
-
-
 def BuildRequestData( buffer_number = None ):
   """Build request for the current buffer or the buffer with number
   |buffer_number| if specified."""
@@ -339,7 +340,7 @@ def BuildRequestData( buffer_number = None ):
 HTTP_SERVER_ERRROR = 500
 
 
-def _JsonFromFuture( future ):
+def _JsonFromFuture( future: Future ):
   # Blocks here if necessary
   response = future.result()
   _logger.debug( 'RX: %s\n%s', response, response.text )
