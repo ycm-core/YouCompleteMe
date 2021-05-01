@@ -10,7 +10,7 @@
           "--clean",
           "--not-a-term",
           "-S", "lib/run_test.vim",
-          "${file}",
+          "${TestScriptName}",
           "${TestFunction}"
         ]
       }
