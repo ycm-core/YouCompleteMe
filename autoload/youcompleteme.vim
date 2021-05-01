@@ -483,15 +483,6 @@ function! s:DisableOnLargeFile( buffer )
   return b:ycm_largefile
 endfunction
 
-function! s:HasAnyKey( dict, keys )
-  for key in a:keys
-    if has_key( a:dict, key )
-      return 1
-    endif
-  endfor
-  return 0
-endfunction
-
 function! s:PropertyTypeNotDefined( type )
   return exists( '*prop_type_add' ) &&
     \ index( prop_type_list(), a:type ) == -1
@@ -509,21 +500,13 @@ function! s:AllowedToCompleteInBuffer( buffer )
     let filetype = 'ycm_nofiletype'
   endif
 
-  let whitelist_allows = type( g:ycm_filetype_whitelist ) != v:t_dict ||
-        \ has_key( g:ycm_filetype_whitelist, '*' ) ||
-        \ s:HasAnyKey( g:ycm_filetype_whitelist, split( filetype, '\.' ) )
-  let blacklist_allows = type( g:ycm_filetype_blacklist ) != v:t_dict ||
-        \ !s:HasAnyKey( g:ycm_filetype_blacklist, split( filetype, '\.' ) )
-
-  let allowed = whitelist_allows && blacklist_allows
+  let allowed = youcompleteme#filetypes#AllowedForFiletype( filetype )
 
   if !allowed || s:DisableOnLargeFile( a:buffer )
     return 0
   endif
 
-  if allowed
-    let s:previous_allowed_buffer_number = bufnr( a:buffer )
-  endif
+  let s:previous_allowed_buffer_number = bufnr( a:buffer )
   return allowed
 endfunction
 
