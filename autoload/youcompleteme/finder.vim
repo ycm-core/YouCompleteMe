@@ -257,8 +257,10 @@ function! s:OnQueryTextChanged() abort
   let query = getbufline( bufnr, '$' )[ 0 ]
   let s:find_symbol_status.query = query[ len( s:prompt ) : ]
   let s:find_symbol_status.pending = 1
+
   call s:RequeryFinderPopup()
-  setlocal nomodified
+
+  call win_execute( s:find_symbol_status.prompt_winid, 'setlocal nomodified' )
 endfunction
 
 
