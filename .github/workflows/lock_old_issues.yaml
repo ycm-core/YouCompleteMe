@@ -1,0 +1,27 @@
+name: "Lock Old Issues"
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/lock-threads@v2
+        with:
+          github-token: ${{ github.token }}
+          issue-lock-inactive-days: '60'
+          # issue-exclude-created-before: ''
+          # issue-exclude-labels: ''
+          # issue-lock-labels: ''
+          # issue-lock-comment: ''
+          # issue-lock-reason: 'resolved'
+          # pr-lock-inactive-days: '365'
+          # pr-exclude-created-before: ''
+          # pr-exclude-labels: ''
+          # pr-lock-labels: ''
+          # pr-lock-comment: ''
+          # pr-lock-reason: 'resolved'
+          process-only: 'issues'
