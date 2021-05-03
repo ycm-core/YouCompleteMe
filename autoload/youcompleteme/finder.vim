@@ -197,7 +197,6 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
         \ 'resize': 1,
         \ 'close': 'button',
         \ 'border': [],
-        \ 'mapping': 0,
         \ 'callback': function( 's:PopupClosed' ),
         \ 'filter': function( 's:HandleKeyPress' ),
         \ 'highlight': 'Normal',
