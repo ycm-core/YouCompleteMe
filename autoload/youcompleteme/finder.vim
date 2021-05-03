@@ -173,8 +173,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
         \ 'query': '',
         \ 'results': [],
         \ 'raw_results': v:none,
-        \ 'waiting': 0,
-        \ 'pending': 0,
+        \ 'pending': [],
         \ 'winid': win_getid(),
         \ 'bufnr': bufnr(),
         \ 'prompt_bufnr': -1,
@@ -221,7 +220,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   if a:scope ==# 'document'
     call s:RequestDocumentSymbols()
   else
-    call s:SearchWorkspace( '' )
+    call s:SearchWorkspace( '', v:true )
   endif
 
   let bufnr = bufadd( '_ycm_filter_' )
@@ -254,9 +253,9 @@ function! s:OnQueryTextChanged() abort
   let bufnr = s:find_symbol_status.prompt_bufnr
   let query = getbufline( bufnr, '$' )[ 0 ]
   let s:find_symbol_status.query = query[ len( s:prompt ) : ]
-  let s:find_symbol_status.pending = 1
 
-  call s:RequeryFinderPopup()
+  " really, re-query if we can
+  call s:RequeryFinderPopup( v:true )
 
   call win_execute( s:find_symbol_status.prompt_winid, 'setlocal nomodified' )
 endfunction
@@ -401,7 +400,7 @@ endfunction
 " Results handling and re-query {{{
 
 " Render a set of results returned from the filter/search function
-function! s:HandleSymbolSearchResults( still_waiting, results ) abort
+function! s:HandleSymbolSearchResults( results ) abort
   let s:find_symbol_status.results = []
 
   if s:find_symbol_status.id < 0
@@ -412,9 +411,8 @@ function! s:HandleSymbolSearchResults( still_waiting, results ) abort
   let s:find_symbol_status.results = a:results
   call s:RedrawFinderPopup()
 
-  if !a:still_waiting
-    call s:RequeryFinderPopup()
-  endif
+  " Re-query but no change in the query text
+  call s:RequeryFinderPopup( v:false )
 endfunction
 
 
@@ -590,7 +588,7 @@ endfunction
 
 
 " Re-query or re-filter by calling the filter function
-function! s:RequeryFinderPopup() abort
+function! s:RequeryFinderPopup( new_query ) abort
   " Update the title even if we delay the query, as this makes the UI feel
   " snappy
   call s:SetTitle()
@@ -616,15 +614,10 @@ function! s:RequeryFinderPopup() abort
   "
   " We already pass still_waiting to the result func, so that can continue
   "
-  if s:find_symbol_status.waiting == 1
-    let s:find_symbol_status.pending = 1
-  elseif s:find_symbol_status.pending == 1
-    let s:find_symbol_status.pending = 0
-    let s:find_symbol_status.waiting = 1
-    call win_execute( s:find_symbol_status.winid,
-          \ 'call s:find_symbol_status.query_func('
-          \ . 's:find_symbol_status.query )' )
-  endif
+  call win_execute( s:find_symbol_status.winid,
+        \ 'call s:find_symbol_status.query_func('
+        \ . 's:find_symbol_status.query,'
+        \ . 'a:new_query )' )
 endfunction
 
 function! s:ParseGoToResponse( filetype, results ) abort
@@ -654,7 +647,6 @@ endfunction
 function! s:StartRequest() abort
   call s:EndRequest()
 
-  let s:find_symbol_status.waiting = 1
   let s:find_symbol_status.spinner = 0
   let s:find_symbol_status.spinner_timer = timer_start( s:spinner_delay,
         \ function( 's:TickSpinner' ) )
@@ -665,7 +657,6 @@ endfunction
 function! s:EndRequest() abort
   call timer_stop( s:find_symbol_status.spinner_timer )
 
-  let s:find_symbol_status.waiting = 0
   let s:find_symbol_status.spinner_timer = -1
 
   call s:SetTitle()
@@ -685,28 +676,55 @@ endfunction
 
 " Workspace search {{{
 
-function! s:SearchWorkspace( query ) abort
+function! s:SearchWorkspace( query, new_query ) abort
 
-  let s:find_symbol_status.raw_results = {}
-  let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
-  for ft in keys( ft_buffer_map )
-    if !youcompleteme#filetypes#AllowedForFiletype( ft )
-      continue
+  if a:new_query
+    if s:find_symbol_status.raw_results is# v:none
+      let raw_results = {}
+    else
+      let raw_results = copy( s:find_symbol_status.raw_results )
     endif
 
-    let s:find_symbol_status.raw_results[ ft ] = v:none
-    call youcompleteme#GetRawCommandResponseAsync(
-          \ function( 's:HandleWorkspaceSymbols', [ ft ] ),
-          \ 'GoToSymbol',
-          \ '--bufnr=' . ft_buffer_map[ ft ][ 0 ],
-          \ 'ft=' . ft,
-          \ a:query )
-  endfor
+    let s:find_symbol_status.raw_results = {}
+    let s:find_symbol_status.pending = []
 
-  if !empty( s:find_symbol_status.raw_results )
-    " We sent some requests
-    let s:find_symbol_status.waiting = 1
-    call s:StartRequest()
+    let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
+    for ft in keys( ft_buffer_map )
+      if !youcompleteme#filetypes#AllowedForFiletype( ft )
+        continue
+      endif
+
+      let s:find_symbol_status.raw_results[ ft ] = v:none
+      if has_key( raw_results, ft ) && raw_results[ ft ] is# v:none
+        call add( s:find_symbol_status.pending,
+                \ [ ft, ft_buffer_map[ ft ][ 0 ] ] )
+      else
+        call youcompleteme#GetRawCommandResponseAsync(
+              \ function( 's:HandleWorkspaceSymbols', [ ft ] ),
+              \ 'GoToSymbol',
+              \ '--bufnr=' . ft_buffer_map[ ft ][ 0 ],
+              \ 'ft=' . ft,
+              \ a:query )
+      endif
+    endfor
+
+    if !empty( s:find_symbol_status.raw_results )
+      " We sent some requests
+      call s:StartRequest()
+    endif
+  else
+    for [ ft, bufnr ] in copy( s:find_symbol_status.pending )
+      if s:find_symbol_status.raw_results[ ft ] isnot# v:none
+        call filter( s:find_symbol_status.pending, { v -> v !=# ft } )
+        let s:find_symbol_status.raw_results[ ft ] = v:none
+        call youcompleteme#GetRawCommandResponseAsync(
+              \ function( 's:HandleWorkspaceSymbols', [ ft ] ),
+              \ 'GoToSymbol',
+              \ '--bufnr=' . bufnr,
+              \ 'ft=' . ft,
+              \ a:query )
+      endif
+    endfor
   endif
 endfunction
 
@@ -760,14 +778,18 @@ function! s:HandleWorkspaceSymbols( filetype, results ) abort
   if !waiting
     call s:EndRequest()
   endif
-  eval s:HandleSymbolSearchResults( waiting, results )
+  eval s:HandleSymbolSearchResults( results )
 endfunction
 
 " }}}
 
 " Document Search {{{
 
-function! s:SearchDocument( query ) abort
+function! s:SearchDocument( query, new_query ) abort
+  if !a:new_query
+    return
+  endif
+
   if type( s:find_symbol_status.raw_results ) == v:t_none
     call popup_settext( s:find_symbol_status.id,
           \ 'No symbols found in document' )
@@ -783,7 +805,7 @@ function! s:SearchDocument( query ) abort
         \ . ' "description",'
         \ . ' vim.eval( "a:query" ) )' )
 
-  eval s:HandleSymbolSearchResults( 0, response )
+  eval s:HandleSymbolSearchResults( response )
 endfunction
 
 
@@ -798,7 +820,7 @@ endfunction
 function! s:HandleDocumentSymbols( results ) abort
   call s:EndRequest()
   let s:find_symbol_status.raw_results = s:ParseGoToResponse( '', a:results )
-  call s:SearchDocument( '' )
+  call s:SearchDocument( '', v:true )
 endfunction
 
 " }}}
