@@ -234,7 +234,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   let s:find_symbol_status.prompt_winid = win_getid()
 
   setlocal buftype=prompt noswapfile modifiable nomodified noreadonly
-  setlocal nobuflisted bufhidden=delete textwidth=0
+  setlocal nobuflisted bufhidden=unload textwidth=0
   call prompt_setprompt( bufnr(), s:prompt )
   augroup YCMPromptFindSymbol
     autocmd!
@@ -348,7 +348,7 @@ endfunction
 function! s:PopupClosed( id, selected ) abort
   stopinsert
   call win_gotoid( s:find_symbol_status.prompt_winid )
-  silent bwipe!
+  silent q!
 
   " Return to original window
   call win_gotoid( s:find_symbol_status.winid )
