@@ -220,7 +220,6 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   " Kick off the request now
   let s:find_symbol_status.waiting = 1
   if a:scope ==# 'document'
-    call s:StartSpinner()
     call s:RequestDocumentSymbols()
   else
     call s:SearchWorkspace( '' )
@@ -406,10 +405,6 @@ endfunction
 function! s:HandleSymbolSearchResults( still_waiting, results ) abort
   let s:find_symbol_status.waiting = a:still_waiting
   let s:find_symbol_status.results = []
-
-  if !a:still_waiting
-    call s:StopSpinner()
-  endif
 
   if s:find_symbol_status.id < 0
     " Popup was closed, ignore this event
@@ -690,7 +685,6 @@ endfunction
 " Workspace search {{{
 
 function! s:SearchWorkspace( query ) abort
-  call s:StartSpinner()
 
   let s:find_symbol_status.raw_results = {}
   let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
@@ -708,10 +702,9 @@ function! s:SearchWorkspace( query ) abort
           \ a:query )
   endfor
 
-  if empty( s:find_symbol_status.raw_results )
-    " No filetypes allowed :( ....
-    call s:StopSpinner()
-    return
+  if !empty( s:find_symbol_status.raw_results )
+    " We sent some requests
+    call s:StartSpinner()
   endif
 endfunction
 
@@ -762,6 +755,9 @@ function! s:HandleWorkspaceSymbols( filetype, results ) abort
           \ .                              ' vim.eval( "query" ) )' )
   endif
 
+  if !waiting
+    call s:StopSpinner()
+  endif
   eval s:HandleSymbolSearchResults( waiting, results )
 endfunction
 
@@ -771,13 +767,12 @@ endfunction
 
 function! s:SearchDocument( query ) abort
   if type( s:find_symbol_status.raw_results ) == v:t_none
-    call s:StopSpinner()
     call popup_settext( s:find_symbol_status.id,
           \ 'No symbols found in document' )
     return
   endif
 
-  call s:StartSpinner()
+  " No spinner, because this is actually a synchronous call
 
   " Call filter_and_sort_candidates on the results (synchronously)
   let response = py3eval(
@@ -791,6 +786,7 @@ endfunction
 
 
 function! s:RequestDocumentSymbols()
+  call s:StartSpinner()
   call youcompleteme#GetRawCommandResponseAsync(
         \ function( 's:HandleDocumentSymbols' ),
         \ 'GoToDocumentOutline' )
@@ -798,6 +794,7 @@ endfunction
 
 
 function! s:HandleDocumentSymbols( results ) abort
+  call s:StopSpinner()
   let s:find_symbol_status.raw_results = s:ParseGoToResponse( '', a:results )
   call s:SearchDocument( '' )
 endfunction
