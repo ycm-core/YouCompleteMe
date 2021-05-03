@@ -218,7 +218,6 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   let s:find_symbol_status.id = popup_create( 'Type to query for stuff', opts )
 
   " Kick off the request now
-  let s:find_symbol_status.waiting = 1
   if a:scope ==# 'document'
     call s:RequestDocumentSymbols()
   else
@@ -393,7 +392,7 @@ function! s:PopupClosed( id, selected ) abort
   endif
 
 
-  call s:StopSpinner()
+  call s:EndRequest()
   let s:find_symbol_status.id = -1
 endfunction
 
@@ -403,7 +402,6 @@ endfunction
 
 " Render a set of results returned from the filter/search function
 function! s:HandleSymbolSearchResults( still_waiting, results ) abort
-  let s:find_symbol_status.waiting = a:still_waiting
   let s:find_symbol_status.results = []
 
   if s:find_symbol_status.id < 0
@@ -653,9 +651,10 @@ endfunction
 
 " Spinner {{{
 
-function! s:StartSpinner() abort
-  call s:StopSpinner()
+function! s:StartRequest() abort
+  call s:EndRequest()
 
+  let s:find_symbol_status.waiting = 1
   let s:find_symbol_status.spinner = 0
   let s:find_symbol_status.spinner_timer = timer_start( s:spinner_delay,
         \ function( 's:TickSpinner' ) )
@@ -663,8 +662,10 @@ function! s:StartSpinner() abort
   call s:SetTitle()
 endfunction
 
-function! s:StopSpinner() abort
+function! s:EndRequest() abort
   call timer_stop( s:find_symbol_status.spinner_timer )
+
+  let s:find_symbol_status.waiting = 0
   let s:find_symbol_status.spinner_timer = -1
 
   call s:SetTitle()
@@ -704,7 +705,8 @@ function! s:SearchWorkspace( query ) abort
 
   if !empty( s:find_symbol_status.raw_results )
     " We sent some requests
-    call s:StartSpinner()
+    let s:find_symbol_status.waiting = 1
+    call s:StartRequest()
   endif
 endfunction
 
@@ -756,7 +758,7 @@ function! s:HandleWorkspaceSymbols( filetype, results ) abort
   endif
 
   if !waiting
-    call s:StopSpinner()
+    call s:EndRequest()
   endif
   eval s:HandleSymbolSearchResults( waiting, results )
 endfunction
@@ -786,7 +788,7 @@ endfunction
 
 
 function! s:RequestDocumentSymbols()
-  call s:StartSpinner()
+  call s:StartRequest()
   call youcompleteme#GetRawCommandResponseAsync(
         \ function( 's:HandleDocumentSymbols' ),
         \ 'GoToDocumentOutline' )
@@ -794,7 +796,7 @@ endfunction
 
 
 function! s:HandleDocumentSymbols( results ) abort
-  call s:StopSpinner()
+  call s:EndRequest()
   let s:find_symbol_status.raw_results = s:ParseGoToResponse( '', a:results )
   call s:SearchDocument( '' )
 endfunction
