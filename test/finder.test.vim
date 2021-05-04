@@ -537,7 +537,8 @@ function! Test_MultipleFileTypes()
           \ popup_getoptions( popup_id ).title ) },
           \ 10000 )
 
-    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) } )
+    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
+                      \ 10000 )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
     call assert_equal( 'def Really_Long_Method',
           \ youcompleteme#finder#GetState().results[
@@ -622,7 +623,8 @@ function! Test_MultipleFileTypes_CurrentNotSemantic()
           \ popup_getoptions( popup_id ).title ) },
           \ 10000 )
 
-    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) } )
+    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
+                      \ 10000 )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
     call assert_equal( 'def Really_Long_Method',
           \ youcompleteme#finder#GetState().results[
