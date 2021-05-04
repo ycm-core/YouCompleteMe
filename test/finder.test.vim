@@ -626,3 +626,79 @@ function! Test_MultipleFileTypes_CurrentNotSemantic()
   call assert_equal( bufnr( 'doc.py' ), bufnr() )
   call assert_equal( [ 0, 16, 5, 0 ], getpos( '.' ) )
 endfunction
+
+function! Test_WorkspaceSymbol_NormalModeChange()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+
+  let original_win = winnr()
+  let b = bufnr()
+  let l = winlayout()
+
+  let popup_id = -1
+
+  function! PutQuery( ... )
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call WaitForAssert( { -> assert_true(
+          \ youcompleteme#finder#GetState().id != -1 ) } )
+
+    let id = youcompleteme#finder#GetState().id
+    call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
+    call FeedAndCheckAgain( 'thisisathing', funcref( 'ChangeQuery' ) )
+  endfunction
+
+  function ChangeQuery( ... )
+    let id = youcompleteme#finder#GetState().id
+
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ popup_getoptions( id ).title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'this_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    " Wait for the current buffer to be a prompt buffer
+    call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
+    call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
+
+    call FeedAndCheckAgain( "\<Esc>bcwthatisathing",
+                          \ funcref( 'SelectNewItem' ) )
+  endfunction
+
+  function SelectNewItem( ... )
+    let id = youcompleteme#finder#GetState().id
+
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thatisathing ',
+          \ popup_getoptions( id ).title  ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'that_is_a_thing',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].extra_data.name )
+
+    call feedkeys( "\<CR>" )
+  endfunction
+
+  " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
+  call FeedAndCheckMain( '\\w', funcref( 'PutQuery' ) )
+
+  call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
+  call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
+  call assert_equal( b, bufnr() )
+  call assert_equal( [ 0, 5, 28, 0 ], getpos( '.' ) )
+
+  delfunct PutQuery
+  delfunct SelectNewItem
+  delfunct ChangeQuery
+  silent %bwipe!
+endfunction
