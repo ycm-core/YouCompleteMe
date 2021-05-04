@@ -489,12 +489,19 @@ function! Test_MultipleFileTypes()
     call WaitForAssert( { -> assert_equal( 'prompt', &buftype ) } )
     call WaitForAssert( { -> assert_equal( 'i', mode() ) } )
 
+    let popup_id = youcompleteme#finder#GetState().id
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thiswillnotmatchanything ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
+
     call WaitForAssert( { -> assert_true(
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
     let id = youcompleteme#finder#GetState().id
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'CheckCpp' ) )
+    call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'CheckCpp' ) )
   endfunction
 
   function! CheckCpp( ... )
@@ -541,7 +548,7 @@ function! Test_MultipleFileTypes()
 
 
   " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
-  call FeedAndCheckMain( '\\w', funcref( 'PutQuery' ) )
+  call FeedAndCheckMain( '\\wthiswillnotmatchanything', funcref( 'PutQuery' ) )
 
   call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
   call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
@@ -570,9 +577,16 @@ function! Test_MultipleFileTypes_CurrentNotSemantic()
     call WaitForAssert( { -> assert_true(
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
+    let popup_id = youcompleteme#finder#GetState().id
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thiswillnotmatchanything ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
+
     let id = youcompleteme#finder#GetState().id
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'CheckCpp' ) )
+    call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'CheckCpp' ) )
   endfunction
 
   function! CheckCpp( ... )
@@ -619,7 +633,22 @@ function! Test_MultipleFileTypes_CurrentNotSemantic()
 
 
   " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
-  call FeedAndCheckMain( '\\w', funcref( 'PutQuery' ) )
+  call FeedAndCheckMain( '\\wthiswillnotmatchanything', funcref( 'PutQuery' ) )
+
+  " We pop up a notification with some text in it
+  if exists( '*popup_list' )
+    call assert_equal( 1, len( popup_list() ) )
+  endif
+
+  " Old vim doesn't have popup_list, so hit-test the top-right corner which is
+  " where we pup the popu
+  let notification_id = popup_locate( 1, &columns - 1 )
+  call assert_equal( [ 'Added 2 entries to quickfix list.' ],
+                   \ getbufline( winbufnr( notification_id ), 1, '$' ) )
+  " Wait for the notification to clear
+  call WaitForAssert(
+        \ { -> assert_equal( {}, popup_getpos( notification_id ) ) },
+        \ 10000 )
 
   call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
   call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
