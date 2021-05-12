@@ -4,6 +4,7 @@ flake8-ycm            >= 0.1.0
 PyHamcrest            >= 1.10.1
 codecov               >= 2.0.5
 coverage              <5.0
+click                 <8.0.0
 covimerage            >= 0.2.0
 pytest
 pytest-cov
