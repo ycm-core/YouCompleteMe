@@ -73,7 +73,7 @@ def BuildYcmdLibs( args ):
 
 
 def PytestTests( parsed_args, extra_pytests_args ):
-  pytests_args = [ '-v' ]
+  pytests_args = []
 
   if parsed_args.coverage:
     pytests_args += [ '--cov=ycm' ]
