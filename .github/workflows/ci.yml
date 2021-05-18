@@ -44,6 +44,9 @@ jobs:
       run: python3 -m pip install -r python/test_requirements.txt
     - name: Run tests
       run: python3 run_tests.py --quiet
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
     - name: Upload coverage data
       run: codecov --name "${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.python-arch }}"
 
