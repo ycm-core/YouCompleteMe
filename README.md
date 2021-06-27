@@ -3457,6 +3457,17 @@ tells YCM where is the TSServer executable located.
 Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), this option
 tells YCM where is the Omnisharp-Roslyn executable located.
 
+### The `g:ycm_update_diagnostics_in_insert_mode` option
+
+With async diagnostics, LSP servers might send new diagnostics mid-typing.
+If seeing these new diagnostics while typing is not desired, this option can
+be set to 0.
+
+Default: `1`
+
+```viml
+let g:ycm_update_diagnostics_in_insert_mode = 1
+```
 
 FAQ
 ---

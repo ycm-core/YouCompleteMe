@@ -56,6 +56,7 @@ DEFAULT_CLIENT_OPTIONS = {
   'g:ycm_collect_identifiers_from_tags_files': 0,
   'g:ycm_seed_identifiers_with_syntax': 0,
   'g:ycm_goto_buffer_command': 'same-buffer',
+  'g:ycm_update_diagnostics_in_insert_mode': 1,
   # ycmd options
   'g:ycm_auto_trigger': 1,
   'g:ycm_min_num_of_chars_for_completion': 2,
