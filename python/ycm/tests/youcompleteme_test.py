@@ -531,7 +531,7 @@ class YouCompleteMeTest( TestCase ):
     with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
       with patch( 'ycm.client.base_request._JsonFromFuture',
                   return_value = { 'message': 'some_detailed_diagnostic' } ):
-        ycm.ShowDetailedDiagnostic(),
+        ycm.ShowDetailedDiagnostic( False ),
 
     post_vim_message.assert_has_exact_calls( [
       call( 'some_detailed_diagnostic', warning = False )
@@ -547,7 +547,7 @@ class YouCompleteMeTest( TestCase ):
     with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
       with patch( 'ycm.client.base_request._JsonFromFuture',
                   side_effect = RuntimeError( 'Some exception' ) ):
-        ycm.ShowDetailedDiagnostic(),
+        ycm.ShowDetailedDiagnostic( False ),
 
     post_vim_message.assert_has_exact_calls( [
       call( 'Some exception', truncate = False )

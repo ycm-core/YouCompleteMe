@@ -1304,6 +1304,7 @@ def VimIsNeovim():
 @memoize()
 def VimSupportsPopupWindows():
   return VimHasFunctions( 'popup_create',
+                          'popup_atcursor',
                           'popup_move',
                           'popup_hide',
                           'popup_settext',
