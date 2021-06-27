@@ -791,13 +791,16 @@ class YouCompleteMe:
       self._CloseLogfile( logfile )
 
 
-  def ShowDetailedDiagnostic( self ):
+  def ShowDetailedDiagnostic( self, message_in_popup ):
     detailed_diagnostic = BaseRequest().PostDataToHandler(
         BuildRequestData(), 'detailed_diagnostic' )
-
     if detailed_diagnostic and 'message' in detailed_diagnostic:
-      vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
-                                 warning = False )
+      message = detailed_diagnostic[ 'message' ]
+      if not message_in_popup:
+        vimsupport.PostVimMessage( message, warning = False )
+      else:
+        lines = message.split( '\n' )
+        vim.eval( f'popup_atcursor( { lines }, {{}} )' )
 
 
   def ForceCompileAndDiagnostics( self ):
