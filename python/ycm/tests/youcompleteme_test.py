@@ -782,6 +782,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabled_test(
 
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_update_diagnostics_in_insert_mode': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
@@ -944,6 +945,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test(
 
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_update_diagnostics_in_insert_mode': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
