@@ -797,13 +797,29 @@ class YouCompleteMe:
       self._CloseLogfile( logfile )
 
 
-  def ShowDetailedDiagnostic( self ):
+  def ShowDetailedDiagnostic( self, message_in_popup ):
     detailed_diagnostic = BaseRequest().PostDataToHandler(
         BuildRequestData(), 'detailed_diagnostic' )
-
     if detailed_diagnostic and 'message' in detailed_diagnostic:
-      vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
-                                 warning = False )
+      message = detailed_diagnostic[ 'message' ]
+      if message_in_popup and vimsupport.VimSupportsPopupWindows():
+        lines = message.split( '\n' )
+        window = vim.current.window
+        available_columns = vimsupport.GetIntValue( '&columns' )
+        col = window.cursor[ 1 ] + 1
+        if col > available_columns - 2: # -2 accounts for padding.
+          col = 0
+        options = {
+            'col': col,
+            'padding': [ 0, 1, 0, 1 ],
+            'moved': 'word',
+            'maxwidth': available_columns,
+            'close': 'click',
+            'fixed': 0,
+        }
+        vim.eval( f'popup_atcursor( { lines }, { options } )' )
+      else:
+        vimsupport.PostVimMessage( message, warning = False )
 
 
   def ForceCompileAndDiagnostics( self ):
