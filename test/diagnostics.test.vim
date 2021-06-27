@@ -15,6 +15,52 @@ function! TearDown()
   call youcompleteme#test#setup#CleanUp()
 endfunction
 
+function! Test_Diagnostics_Update_In_Insert_Mode()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/cpp/new_file.cpp', {} )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call WaitForAssert( {-> assert_true( len( sign_getplaced() ) ) } )
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'imain(', funcref( 'Check' ) )
+  call test_override( 'ALL', 0 )
+endfunction
+
+function! SetUp_Test_Disable_Diagnostics_Update_In_insert_Mode()
+  call youcompleteme#test#setup#PushGlobal( 'ycm_update_diagnostics_in_insert_mode', 0 )
+endfunction
+
+function! Test_Disable_Diagnostics_Update_In_insert_Mode()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/cpp/new_file.cpp', {} )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call WaitForAssert( {-> assert_false( len( sign_getplaced() ) ) } )
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'imain(', funcref( 'Check' ) )
+  call test_override( 'ALL', 0 )
+endfunction
+
+function! TearDown_Test_Disable_Diagnostics_Update_In_insert_Mode()
+  call youcompleteme#test#setup#PopGlobal( 'ycm_update_diagnostics_in_insert_mode' )
+endfunction
+
 function! Test_Changing_Filetype_Refreshes_Diagnostics()
   call youcompleteme#test#setup#OpenFile(
         \ '/test/testdata/diagnostics/foo.xml',
