@@ -15,26 +15,83 @@ function! TearDown()
   call youcompleteme#test#setup#CleanUp()
 endfunction
 
+function! Test_Diagnostics_Update_In_Insert_Mode()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/cpp/new_file.cpp', {} )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call WaitForAssert( {-> assert_true( len( sign_getplaced() ) ) } )
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'imain(', funcref( 'Check' ) )
+  call test_override( 'ALL', 0 )
+endfunction
+
+function! SetUp_Test_Disable_Diagnostics_Update_In_insert_Mode()
+  call youcompleteme#test#setup#PushGlobal( 
+    \ 'ycm_update_diagnostics_in_insert_mode', 0 )
+endfunction
+
+function! Test_Disable_Diagnostics_Update_In_insert_Mode()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/cpp/new_file.cpp', {} )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  " Must do the checks in a timer callback because we need to stay in insert
+  " mode until done.
+  function! Check( id ) closure
+    call WaitForAssert( {->
+      \ assert_true(
+        \ py3eval(
+           \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+      \ ) ) } )
+    call WaitForAssert( {-> assert_false( len( sign_getplaced() ) ) } )
+    call feedkeys( "\<ESC>" )
+  endfunction
+
+  call FeedAndCheckMain( 'imain(', funcref( 'Check' ) )
+  call test_override( 'ALL', 0 )
+endfunction
+
+function! TearDown_Test_Disable_Diagnostics_Update_In_insert_Mode()
+  call youcompleteme#test#setup#PopGlobal(
+    \ 'ycm_update_diagnostics_in_insert_mode' )
+endfunction
+
 function! Test_Changing_Filetype_Refreshes_Diagnostics()
   call youcompleteme#test#setup#OpenFile(
         \ '/test/testdata/diagnostics/foo.xml',
         \ { 'native_ft': 0 } )
 
   call assert_equal( 'xml', &ft )
-  call assert_false( pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
+  call assert_false(
+    \ pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
   call assert_equal( [], sign_getplaced() )
   setf typescript
   call assert_equal( 'typescript', &ft )
-  call assert_false( pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
+  call assert_false(
+    \ pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
   " Diagnostics are async, so wait for the assert to return 0 for a while.
   call WaitForAssert( {-> assert_equal( 1, len( sign_getplaced() ) ) } )
   call assert_equal( 1, len( sign_getplaced()[ 0 ][ 'signs' ] ) )
-  call assert_equal( 'YcmError', sign_getplaced()[ 0 ][ 'signs' ][ 0 ][ 'name' ] )
+  call assert_equal(
+    \ 'YcmError', sign_getplaced()[ 0 ][ 'signs' ][ 0 ][ 'name' ] )
   call assert_false( empty( getloclist( 0 ) ) )
 endfunction
 
 function! Test_MessagePoll_After_LocationList()
-  call youcompleteme#test#setup#OpenFile( '/test/testdata/diagnostics/foo.cpp', {} )
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/diagnostics/foo.cpp', {} )
 
   setf cpp
   call assert_equal( 'cpp', &ft )
@@ -52,13 +109,15 @@ function! Test_MessagePoll_Multiple_Filetypes()
   call youcompleteme#test#setup#OpenFile(
         \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .
         \ '/src/com/test/TestLauncher.java', {} )
-  call WaitForAssert( {-> assert_true( len( sign_getplaced( '%' )[ 0 ][ 'signs' ] ) ) } )
+  call WaitForAssert( {->
+    \ assert_true( len( sign_getplaced( '%' )[ 0 ][ 'signs' ] ) ) } )
   let java_signs = sign_getplaced( '%' )[ 0 ][ 'signs' ]
   silent vsplit testdata/diagnostics/foo.cpp
   " Make sure we've left the java buffer
   call assert_equal( java_signs, sign_getplaced( '#' )[ 0 ][ 'signs' ] )
   " Clangd emits two diagnostics for foo.cpp.
-  call WaitForAssert( {-> assert_equal( 2, len( sign_getplaced( '%' )[ 0 ][ 'signs' ] ) ) } )
+  call WaitForAssert( {->
+    \ assert_equal( 2, len( sign_getplaced( '%' )[ 0 ][ 'signs' ] ) ) } )
   let cpp_signs = sign_getplaced( '%' )[ 0 ][ 'signs' ]
   call assert_false( java_signs == cpp_signs )
 endfunction

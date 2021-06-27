@@ -115,6 +115,10 @@ class Buffer:
     return self._diag_interface.GetWarningCount()
 
 
+  def RefreshDiagnosticsUI( self ):
+    return self._diag_interface.RefreshDiagnosticsUI()
+
+
   def UpdateFromFileTypes( self, filetypes ):
     self._filetypes = filetypes
     # We will set this to true if we ever receive any diagnostics asyncronously.
