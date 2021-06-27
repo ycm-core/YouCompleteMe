@@ -1791,6 +1791,9 @@ _Options_ section for details.
 This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.
 
+An options argument can be passed. If the argument is `popup` the diagnostic
+text will be displayed in a popup at cursor position.
+
 ### The `:YcmDebugInfo` command
 
 This will print out various debug information for the current file. Useful to
