@@ -255,19 +255,8 @@ root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
 third_party_folder = p.join( root_folder, 'third_party' )
 
 # Add dependencies to Python path.
-dependencies = [ p.join( root_folder, 'python' ),
-                 p.join( third_party_folder, 'requests-futures' ),
-                 p.join( third_party_folder, 'ycmd' ),
-                 p.join( third_party_folder, 'requests_deps', 'idna' ),
-                 p.join( third_party_folder, 'requests_deps', 'chardet' ),
-                 p.join( third_party_folder,
-                         'requests_deps',
-                         'urllib3',
-                         'src' ),
-                 p.join( third_party_folder, 'requests_deps', 'certifi' ),
-                 p.join( third_party_folder, 'requests_deps', 'requests' ) ]
-
-sys.path[ 0:0 ] = dependencies
+sys.path[ 0:0 ] = [ p.join( root_folder, 'python' ),
+                    p.join( third_party_folder, 'ycmd' ) ]
 
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
