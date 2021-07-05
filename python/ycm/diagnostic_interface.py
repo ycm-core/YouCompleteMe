@@ -18,6 +18,7 @@
 from collections import defaultdict
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
+import vim
 
 
 class DiagnosticInterface:
@@ -60,6 +61,12 @@ class DiagnosticInterface:
                             self._ApplyDiagnosticFilter( diags ) ]
     self._ConvertDiagListToDict()
 
+    if ( self._user_options[ 'update_diagnostics_in_insert_mode' ] or
+         'i' not in vim.eval( 'mode()' ) ):
+      self.RefreshDiagnosticsUI()
+
+
+  def RefreshDiagnosticsUI( self ):
     if self._user_options[ 'echo_current_diagnostic' ]:
       self._EchoDiagnostic()
 

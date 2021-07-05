@@ -486,10 +486,6 @@ class YouCompleteMe:
     if not self._user_options[ 'show_diagnostics_ui' ]:
       return
 
-    if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
-         'i' in vim.eval( 'mode()' ) ):
-      return
-
     bufnr = vimsupport.GetBufferNumberForFilename( filepath )
     if bufnr in self._buffers and vimsupport.BufferIsVisible( bufnr ):
       # Note: We only update location lists, etc. for visible buffers, because
@@ -592,6 +588,9 @@ class YouCompleteMe:
 
 
   def OnInsertLeave( self ):
+    if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
+         not self.NeedsReparse() ):
+      self.CurrentBuffer()._diag_interface.RefreshDiagnosticsUI()
     SendEventNotificationAsync( 'InsertLeave' )
 
 
