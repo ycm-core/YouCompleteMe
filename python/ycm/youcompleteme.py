@@ -120,6 +120,7 @@ class YouCompleteMe:
     self._latest_signature_help_request = None
     self._signature_help_available_requests = SigHelpAvailableByFileType()
     self._latest_command_reqeust = None
+    self._latest_diagnostics = {}
 
     self._signature_help_state = signature_help.SignatureHelpState()
     self._user_options = base.GetUserOptions( self._default_options )
@@ -488,6 +489,7 @@ class YouCompleteMe:
 
     if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
          'i' in vim.eval( 'mode()' ) ):
+      self._latest_diagnostics[ filepath ] = diagnostics
       return
 
     bufnr = vimsupport.GetBufferNumberForFilename( filepath )
@@ -592,6 +594,11 @@ class YouCompleteMe:
 
 
   def OnInsertLeave( self ):
+    filepath = vimsupport.GetCurrentBufferFilepath()
+    if not self._user_options[ 'update_diagnostics_in_insert_mode' ]:
+      self.UpdateWithNewDiagnosticsForFile(
+              filepath,
+              self._latest_diagnostics.pop( filepath, [] ) )
     SendEventNotificationAsync( 'InsertLeave' )
 
 

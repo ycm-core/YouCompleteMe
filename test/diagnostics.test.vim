@@ -49,6 +49,7 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
   " Must do the checks in a timer callback because we need to stay in insert
   " mode until done.
   function! Check( id ) closure
+    call WaitForAssert( {-> assert_true( py3eval( 'len( ycm_state._latest_diagnostics )' ) ) } )
     call WaitForAssert( {-> assert_false( len( sign_getplaced() ) ) } )
     call feedkeys( "\<ESC>" )
   endfunction
