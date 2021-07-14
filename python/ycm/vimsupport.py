@@ -221,11 +221,10 @@ def GetTextProperties( buffer_number ):
 # the buffer. Numbers are 1-based byte offsets.
 def LineAndColumnNumbersClamped( line_num, column_num ):
   line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
-
   # Vim buffers are a list of Unicode objects on Python 3.
   max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
 
-  return line_num, min( column_num, max_column )
+  return line_num, max( min( column_num, max_column ), 1 )
 
 
 def SetLocationList( diagnostics ):
