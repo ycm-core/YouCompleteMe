@@ -155,7 +155,7 @@ class DiagnosticInterface:
 
   def _UpdateSigns( self ):
     signs_to_unplace = vimsupport.GetSignsInBuffer( self._bufnr )
-
+    signs_to_place = []
     for line, diags in self._line_to_diags.items():
       if not diags:
         continue
@@ -164,15 +164,18 @@ class DiagnosticInterface:
       # are sorted by errors in priority and Vim can only display one sign by
       # line.
       name = 'YcmError' if _DiagnosticIsError( diags[ 0 ] ) else 'YcmWarning'
-      sign = vimsupport.CreateSign( line, name, self._bufnr )
-
+      sign = {
+          'lnum': line,
+          'name': name,
+          'buffer': self._bufnr,
+          'group': 'ycm_signs'
+      }
       try:
         signs_to_unplace.remove( sign )
       except ValueError:
-        vimsupport.PlaceSign( sign )
-
-    for sign in signs_to_unplace:
-      vimsupport.UnplaceSign( sign )
+        signs_to_place.append( sign )
+    vim.eval( f'sign_placelist( { signs_to_place } )' )
+    vim.eval( f'sign_unplacelist( { signs_to_unplace } )' )
 
 
   def _ConvertDiagListToDict( self ):
