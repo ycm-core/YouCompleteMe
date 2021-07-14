@@ -18,6 +18,7 @@
 from collections import defaultdict
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
+import vim
 
 
 class DiagnosticInterface:
@@ -121,29 +122,20 @@ class DiagnosticInterface:
     if not self._user_options[ 'enable_diagnostic_highlighting' ]:
       return
 
-    # Vim doesn't provide a way to update the matches for a different window
-    # than the current one (which is a view of the current buffer).
-    if vimsupport.GetCurrentBufferNumber() != self._bufnr:
-      return
-
-    matches_to_remove = vimsupport.GetDiagnosticMatchesInCurrentWindow()
-
+    props_to_remove = vimsupport.GetTextProperties( self._bufnr )
     for diags in self._line_to_diags.values():
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
-        group = ( 'YcmErrorSection' if _DiagnosticIsError( diag ) else
-                  'YcmWarningSection' )
-
-        for pattern in _ConvertDiagnosticToMatchPatterns( diag ):
-          # The id doesn't matter for matches that we may add.
-          match = vimsupport.DiagnosticMatch( 0, group, pattern )
+        for prop in _ConvertDiagnosticToTextProperties( diag ):
           try:
-            matches_to_remove.remove( match )
+            props_to_remove.remove( prop )
           except ValueError:
-            vimsupport.AddDiagnosticMatch( match )
+            vim.eval( f'prop_add( { prop[ 0 ] }, '
+                                f'{ prop[ 1 ] }, '
+                                f'{ prop[ 2 ] } )' )
 
-    for match in matches_to_remove:
-      vimsupport.RemoveDiagnosticMatch( match )
+    for prop in props_to_remove:
+      vim.eval( f'prop_remove( { prop } )' )
 
 
   def _UpdateSigns( self ):
@@ -201,27 +193,49 @@ def _NormalizeDiagnostic( diag ):
   return diag
 
 
-def _ConvertDiagnosticToMatchPatterns( diagnostic ):
-  patterns = []
+def _ConvertDiagnosticToTextProperties( diagnostic ):
+  properties = []
 
+  name = ( 'YcmErrorProperty' if _DiagnosticIsError( diagnostic ) else
+            'YcmWarningProperty' )
   location_extent = diagnostic[ 'location_extent' ]
   if location_extent[ 'start' ][ 'line_num' ] <= 0:
-    location = diagnostic[ 'location' ]
-    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+    line, column = vimsupport.LineAndColumnNumbersClamped(
       location[ 'line_num' ],
-      location[ 'column_num' ] ) )
+      location[ 'column_num' ]
+    )
+    location = diagnostic[ 'location' ]
+    properties.append( ( line, column, { 'type': name } ) )
   else:
-    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+    start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
       location_extent[ 'start' ][ 'line_num' ],
-      location_extent[ 'start' ][ 'column_num' ],
+      location_extent[ 'start' ][ 'column_num' ]
+    )
+    end_line, end_column = vimsupport.LineAndColumnNumbersClamped(
       location_extent[ 'end' ][ 'line_num' ],
-      location_extent[ 'end' ][ 'column_num' ] ) )
+      location_extent[ 'end' ][ 'column_num' ]
+    )
+    properties.append( (
+      start_line,
+      start_column,
+      { 'end_lnum': end_line,
+        'end_col': end_column,
+        'type': name } ) )
 
   for diagnostic_range in diagnostic[ 'ranges' ]:
-    patterns.append( vimsupport.GetDiagnosticMatchPattern(
+    start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
       diagnostic_range[ 'start' ][ 'line_num' ],
-      diagnostic_range[ 'start' ][ 'column_num' ],
+      diagnostic_range[ 'start' ][ 'column_num' ]
+    )
+    end_line, end_column = vimsupport.LineAndColumnNumbersClamped(
       diagnostic_range[ 'end' ][ 'line_num' ],
-      diagnostic_range[ 'end' ][ 'column_num' ] ) )
+      diagnostic_range[ 'end' ][ 'column_num' ]
+    )
+    properties.append( (
+      start_line,
+      start_column,
+      { 'end_lnum': end_line,
+        'end_col': end_column,
+        'type': name } ) )
 
-  return patterns
+  return properties

@@ -207,54 +207,14 @@ def GetSignsInBuffer( buffer_number ):
   )[ 0 ][ 'signs' ]
 
 
-
-
-
-
-
-
-class DiagnosticMatch( namedtuple( 'DiagnosticMatch',
-                                   [ 'id', 'group', 'pattern' ] ) ):
-  def __eq__( self, other ):
-    return ( self.group == other.group and
-             self.pattern == other.pattern )
-
-
-def GetDiagnosticMatchesInCurrentWindow():
-  vim_matches = vim.eval( 'getmatches()' )
-  return [ DiagnosticMatch( match[ 'id' ],
-                            match[ 'group' ],
-                            match[ 'pattern' ] )
-           for match in vim_matches if match[ 'group' ].startswith( 'Ycm' ) ]
-
-
-def AddDiagnosticMatch( match ):
-  # TODO: Use matchaddpos which is much faster given that we always are using a
-  # location rather than an actual pattern
-  return GetIntValue( f"matchadd('{ match.group }', '{ match.pattern }', -1)" )
-
-
-def RemoveDiagnosticMatch( match ):
-  return GetIntValue( f"matchdelete({ match.id })" )
-
-
-def GetDiagnosticMatchPattern( line_num,
-                               column_num,
-                               line_end_num = None,
-                               column_end_num = None ):
-  line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
-  column_num = max( column_num, 1 )
-
-  if line_end_num is None or column_end_num is None:
-    return f'\\%{ line_num }l\\%{ column_num }c'
-
-  # -1 and then +1 to account for column end not included in the range.
-  line_end_num, column_end_num = LineAndColumnNumbersClamped(
-      line_end_num, column_end_num - 1 )
-  column_end_num = max( column_end_num + 1, 1 )
-
-  return ( f'\\%{ line_num }l\\%{ column_num }c\\_.\\{{-}}'
-           f'\\%{ line_end_num }l\\%{ column_end_num }c' )
+def GetTextProperties( buffer_number ):
+  properties = []
+  for line_number in range( len( vim.buffers[ buffer_number ] ) ):
+    properties.extend(
+      vim.eval( f'prop_list( {line_number + 1}, '
+                f'{{ "bufnr": { buffer_number }, "id": 42 }} )' )
+    )
+  return properties
 
 
 # Clamps the line and column numbers so that they are not past the contents of

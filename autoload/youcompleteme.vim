@@ -413,6 +413,7 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmErrorSection SpellBad
     endif
   endif
+  call prop_type_add( 'YcmErrorProperty', { 'highlight': 'YcmErrorSection', 'id': 42 } )
 
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
@@ -421,6 +422,7 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmWarningSection SpellCap
     endif
   endif
+  call prop_type_add( 'YcmWarningProperty', { 'highlight': 'YcmWarningSection', 'id': 42 } )
 endfunction
 
 
