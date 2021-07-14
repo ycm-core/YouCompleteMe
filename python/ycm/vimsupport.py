@@ -45,26 +45,6 @@ FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
 
 NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
 
-# This is the starting value assigned to the sign's id of each buffer. This
-# value is then incremented for each new sign. This should prevent conflicts
-# with other plugins using signs.
-SIGN_BUFFER_ID_INITIAL_VALUE = 100000000
-# This holds the next sign's id to assign for each buffer.
-SIGN_ID_FOR_BUFFER = defaultdict( lambda: SIGN_BUFFER_ID_INITIAL_VALUE )
-
-# The ":sign place" command ouputs each sign on one line in the format
-#
-#    line=<line> id=<id> name=<name> priority=<priority>
-#
-# where the words "line", "id", "name", and "priority" are localized. On
-# versions older than Vim 8.1.0614, the "priority" property doesn't exist and
-# the output is
-#
-#    line=<line> id=<id> name=<name>
-#
-SIGN_PLACE_REGEX = re.compile(
-  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)" )
-
 NO_COMPLETIONS = {
   'line': -1,
   'column': -1,
@@ -199,42 +179,16 @@ def CaptureVimCommand( command ):
   return output
 
 
-class DiagnosticSign( namedtuple( 'DiagnosticSign',
-                                  [ 'id', 'line', 'name', 'buffer_number' ] ) ):
-  # We want two signs that have different ids but the same location to compare
-  # equal. ID doesn't matter.
-  def __eq__( self, other ):
-    return ( self.line == other.line and
-             self.name == other.name and
-             self.buffer_number == other.buffer_number )
-
-
 def GetSignsInBuffer( buffer_number ):
-  sign_output = CaptureVimCommand( f'sign place buffer={ buffer_number }' )
-  signs = []
-  for line in sign_output.split( '\n' ):
-    match = SIGN_PLACE_REGEX.search( line )
-    if match:
-      signs.append( DiagnosticSign( int( match.group( 'id' ) ),
-                                    int( match.group( 'line' ) ),
-                                    match.group( 'name' ),
-                                    buffer_number ) )
-  return signs
+  return vim.eval(
+      f'sign_getplaced( { buffer_number }, {{ "group": "ycm_signs" }} )'
+  )[ 0 ][ 'signs' ]
 
 
-def CreateSign( line, name, buffer_number ):
-  sign_id = SIGN_ID_FOR_BUFFER[ buffer_number ]
-  SIGN_ID_FOR_BUFFER[ buffer_number ] += 1
-  return DiagnosticSign( sign_id, line, name, buffer_number )
 
 
-def UnplaceSign( sign ):
-  vim.command( f'sign unplace { sign.id } buffer={ sign.buffer_number }' )
 
 
-def PlaceSign( sign ):
-  vim.command( f'sign place { sign.id } name={ sign.name } '
-               f'line={ sign.line } buffer={ sign.buffer_number }' )
 
 
 class DiagnosticMatch( namedtuple( 'DiagnosticMatch',
