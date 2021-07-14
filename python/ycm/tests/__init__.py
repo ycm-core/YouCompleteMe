@@ -125,7 +125,7 @@ def YouCompleteMeInstance( custom_options = {} ):
         WaitUntilReady()
         ycm.CheckIfServerIsReady()
         try:
-          test_utils.VIM_MATCHES_FOR_WINDOW.clear()
+          test_utils.VIM_PROPS_FOR_BUFFER.clear()
           return test( test_case_instance, ycm, *args, **kwargs )
         finally:
           StopServer( ycm )
@@ -142,7 +142,7 @@ def youcompleteme_instance( custom_options = {} ):
     ycm = YouCompleteMe()
     WaitUntilReady()
     try:
-      test_utils.VIM_MATCHES_FOR_WINDOW.clear()
+      test_utils.VIM_PROPS_FOR_BUFFER.clear()
       yield ycm
     finally:
       StopServer( ycm )
