@@ -588,6 +588,9 @@ class YouCompleteMe:
 
 
   def OnInsertLeave( self ):
+    if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
+         not self.NeedsReparse() ):
+      self.CurrentBuffer().RefreshDiagnosticsUI()
     SendEventNotificationAsync( 'InsertLeave' )
 
 

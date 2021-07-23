@@ -22,7 +22,7 @@ function! Test_Compl_After_Trigger()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-endfunctio
+endfunction
 
 function! Test_Force_Semantic_TopLevel()
   call youcompleteme#test#setup#OpenFile(
