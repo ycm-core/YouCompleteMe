@@ -186,7 +186,7 @@ def GetSignsInBuffer( buffer_number ):
 
 
 def GetTextProperties( buffer_number ):
-  if GetIntValue( '!has( "nvim" )' ):
+  if not VimIsNeovim():
     properties = []
     for line_number in range( len( vim.buffers[ buffer_number ] ) ):
       properties.extend(
@@ -204,7 +204,7 @@ def GetTextProperties( buffer_number ):
 
 
 def AddTextProperty( buffer_number, line, column, extra_args ):
-  if GetIntValue( '!has( "nvim" )' ):
+  if not VimIsNeovim():
     extra_args[ 'bufnr' ] = buffer_number
     vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
   else:
@@ -223,10 +223,14 @@ def AddTextProperty( buffer_number, line, column, extra_args ):
 
 
 def RemoveTextProperty( buffer_number, prop ):
-  if GetIntValue( '!has( "nvim" )' ):
+  # NOTE: `prop` is an element from the list we get from GetTextProperties().
+  if not VimIsNeovim():
+    # In vim `prop` is a detailed dictionary.
     prop[ 'bufnr' ] = buffer_number
     vim.eval( f'prop_remove( { prop } )' )
   else:
+    # In neovim `prop` is a 3-element list, consisting of
+    # [property_id, start_line, start_column]
     vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
                                     f'{ YCM_NS_ID }, '
                                     f'{ prop[ 0 ] } )' )
@@ -1201,6 +1205,11 @@ def AutoCloseOnCurrentBuffer( name ):
                'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif '
                f'| autocmd! { name }' )
   vim.command( 'augroup END' )
+
+
+@memoize()
+def VimIsNeovim():
+  return GetBoolValue( 'has( "nvim" )' )
 
 
 @memoize()
