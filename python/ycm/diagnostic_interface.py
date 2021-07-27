@@ -130,12 +130,13 @@ class DiagnosticInterface:
           try:
             props_to_remove.remove( prop )
           except ValueError:
-            vim.eval( f'prop_add( { prop[ 0 ] }, '
-                                f'{ prop[ 1 ] }, '
-                                f'{ prop[ 2 ] } )' )
+            vimsupport.AddTextProperty( self._bufnr,
+                                        prop[ 0 ],
+                                        prop[ 1 ],
+                                        prop[ 2 ] )
 
     for prop in props_to_remove:
-      vim.eval( f'prop_remove( { prop } )' )
+      vimsupport.RemoveTextProperty( self._bufnr, prop )
 
 
   def _UpdateSigns( self ):

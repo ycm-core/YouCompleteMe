@@ -55,6 +55,8 @@ NO_COMPLETIONS = {
 # tuntime, so we cache the results
 MEMO = {}
 
+YCM_NS_ID = vim.eval( 'g:ycm_neovim_ns_id' )
+
 
 def memoize( func ):
   global MEMO
@@ -208,13 +210,50 @@ def GetSignsInBuffer( buffer_number ):
 
 
 def GetTextProperties( buffer_number ):
-  properties = []
-  for line_number in range( len( vim.buffers[ buffer_number ] ) ):
-    properties.extend(
-      vim.eval( f'prop_list( {line_number + 1}, '
-                f'{{ "bufnr": { buffer_number }, "id": 42 }} )' )
-    )
-  return properties
+  if GetIntValue( '!has( "nvim" )' ):
+    properties = []
+    for line_number in range( len( vim.buffers[ buffer_number ] ) ):
+      properties.extend(
+        vim.eval( f'prop_list( {line_number + 1}, '
+                  f'{{ "bufnr": { buffer_number }, "id": 42 }} )' )
+      )
+    return properties
+  else:
+    return vim.eval(
+      f'nvim_buf_get_extmarks( { buffer_number }, '
+                             f'{ YCM_NS_ID }, '
+                              '0, '
+                              '-1, '
+                              '{} )' )
+
+
+def AddTextProperty( buffer_number, line, column, extra_args ):
+  if GetIntValue( '!has( "nvim" )' ):
+    extra_args[ 'bufnr' ] = buffer_number
+    vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
+  else:
+    extra_args[ 'hl_group' ] = extra_args.pop( 'type' ).replace(
+        'Property', 'Section' )
+    # Neovim uses 0-based offsets
+    extra_args[ 'end_line' ] = extra_args.pop( 'end_lnum' ) - 1
+    extra_args[ 'end_col' ] = extra_args[ 'end_col' ] - 1
+    line -= 1
+    column -= 1
+    vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
+                                    f'{ YCM_NS_ID }, '
+                                    f'{ line }, '
+                                    f'{ column }, '
+                                    f'{ extra_args } )' )
+
+
+def RemoveTextProperty( buffer_number, prop ):
+  if GetIntValue( '!has( "nvim" )' ):
+    prop[ 'bufnr' ] = buffer_number
+    vim.eval( f'prop_remove( { prop } )' )
+  else:
+    vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
+                                    f'{ YCM_NS_ID }, '
+                                    f'{ prop[ 0 ] } )' )
 
 
 # Clamps the line and column numbers so that they are not past the contents of

@@ -24,6 +24,9 @@ set cpo&vim
 " neovim, which doesn't implement them.
 let s:is_neovim = has( 'nvim' )
 
+" Only useful in neovim, for handling text properties... I mean extmarks.
+let g:ycm_neovim_ns_id = s:is_neovim ? nvim_create_namespace( 'ycm_id' ) : -1
+
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
@@ -413,7 +416,11 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmErrorSection SpellBad
     endif
   endif
-  call prop_type_add( 'YcmErrorProperty', { 'highlight': 'YcmErrorSection', 'id': 42 } )
+  if !has( 'nvim' )
+    call prop_type_add( 'YcmErrorProperty', {
+          \ 'highlight': 'YcmErrorSection',
+          \ 'id': 42 } )
+  endif
 
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
@@ -422,7 +429,11 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmWarningSection SpellCap
     endif
   endif
-  call prop_type_add( 'YcmWarningProperty', { 'highlight': 'YcmWarningSection', 'id': 42 } )
+  if !has( 'nvim' )
+    call prop_type_add( 'YcmWarningProperty', {
+          \ 'highlight': 'YcmWarningSection',
+          \ 'id': 42 } )
+  endif
 endfunction
 
 
