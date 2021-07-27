@@ -19,7 +19,7 @@ import vim
 import os
 import json
 import re
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from functools import lru_cache as memoize
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
                          GetCurrentDirectory,
