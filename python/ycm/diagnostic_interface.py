@@ -207,11 +207,11 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
             'YcmWarningProperty' )
   location_extent = diagnostic[ 'location_extent' ]
   if location_extent[ 'start' ][ 'line_num' ] <= 0:
+    location = diagnostic[ 'location' ]
     line, column = vimsupport.LineAndColumnNumbersClamped(
       location[ 'line_num' ],
       location[ 'column_num' ]
     )
-    location = diagnostic[ 'location' ]
     properties.append( ( line, column, { 'type': name } ) )
   else:
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
