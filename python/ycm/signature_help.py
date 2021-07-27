@@ -64,7 +64,7 @@ def _MakeSignatureHelpBuffer( signature_info ):
   return lines
 
 
-@memoize
+@memoize()
 def ShouldUseSignatureHelp():
   return ( vimsupport.VimHasFunctions( 'screenpos', 'pum_getpos' ) and
            vimsupport.VimSupportsPopupWindows() )
