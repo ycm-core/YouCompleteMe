@@ -22,7 +22,7 @@ MockVimModule()
 
 from ycm import vimsupport
 from hamcrest import ( assert_that, calling, contains_exactly, empty, equal_to,
-                       has_entry, is_not, raises )
+                       has_entry, raises )
 from unittest.mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
@@ -2018,36 +2018,3 @@ def VimVersionAtLeast_test():
   assert_that( not vimsupport.VimVersionAtLeast( '7.4.1579' ) )
   assert_that( not vimsupport.VimVersionAtLeast( '7.4.1898' ) )
   assert_that( not vimsupport.VimVersionAtLeast( '8.1.278' ) )
-
-
-@patch( 'ycm.vimsupport.GetIntValue', return_value = 1 )
-def VimSupportsPopupWindows_Memo_test( *args ):
-  vimsupport.MEMO = {}
-
-  try:
-    assert_that( vimsupport.VimSupportsPopupWindows() )
-    assert_that( vimsupport.MEMO, is_not( empty() ) )
-
-    # If the momizer did not step in, we would throw an error in the following
-    # call to VimVersionAtLeast
-    with patch( 'ycm.vimsupport.VimHasFunctions', side_effect = RuntimeError ):
-      assert_that( vimsupport.VimSupportsPopupWindows() )
-  finally:
-    vimsupport.MEMO = {}
-
-
-@patch( 'ycm.vimsupport.GetIntValue', return_value = 1 )
-def VimHasFunction_Memo_test( GetIntValue ):
-  vimsupport.MEMO = {}
-
-  try:
-    assert_that( vimsupport.VimHasFunction( 'test' ) )
-    assert_that( vimsupport.MEMO, is_not( empty() ) )
-
-    GetIntValue.return_value = 0
-
-    # If the memoizer didn't kick in, the following call would return False
-    assert_that( vimsupport.VimHasFunction( 'test' ) )
-
-  finally:
-    vimsupport.MEMO = {}

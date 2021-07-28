@@ -20,6 +20,7 @@ import os
 import json
 import re
 from collections import defaultdict, namedtuple
+from functools import lru_cache as memoize
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
                          GetCurrentDirectory,
                          JoinLinesAsUnicode,
@@ -70,29 +71,6 @@ NO_COMPLETIONS = {
   'completion_start_column': -1,
   'completions': []
 }
-
-# checking for existence of funcitons is a little slow and can't change at
-# tuntime, so we cache the results
-MEMO = {}
-
-
-def memoize( func ):
-  global MEMO
-
-  import functools
-
-  @functools.wraps( func )
-  def wrapper( *args, **kwargs ):
-    dct = MEMO.setdefault( func, {} )
-    key = ( args, frozenset( kwargs.items() ) )
-    try:
-      return dct[ key ]
-    except KeyError:
-      result = func( *args, **kwargs )
-      dct[ key ] = result
-      return result
-
-  return wrapper
 
 
 def CurrentLineAndColumn():
@@ -1275,7 +1253,7 @@ def AutoCloseOnCurrentBuffer( name ):
   vim.command( 'augroup END' )
 
 
-@memoize
+@memoize()
 def VimSupportsPopupWindows():
   return VimHasFunctions( 'popup_create',
                           'popup_move',
@@ -1287,7 +1265,7 @@ def VimSupportsPopupWindows():
                           'prop_type_add' )
 
 
-@memoize
+@memoize()
 def VimHasFunction( func ):
   return bool( GetIntValue( f"exists( '*{ EscapeForVim( func ) }' )" ) )
 
