@@ -11,7 +11,7 @@ NOTE: Minimum Requirements Have Changed
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
 That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
 
-For neovim users, 0.4.4 is required.
+For neovim users, 0.5.0 is required.
 
 NOTE: Minimum compiler versions have been increased
 ----------------------------------------

@@ -418,8 +418,7 @@ function! s:SetUpSyntaxHighlighting()
   endif
   if !has( 'nvim' )
     call prop_type_add( 'YcmErrorProperty', {
-          \ 'highlight': 'YcmErrorSection',
-          \ 'id': 42 } )
+          \ 'highlight': 'YcmErrorSection' } )
   endif
 
   if !hlexists( 'YcmWarningSection' )
@@ -431,8 +430,7 @@ function! s:SetUpSyntaxHighlighting()
   endif
   if !has( 'nvim' )
     call prop_type_add( 'YcmWarningProperty', {
-          \ 'highlight': 'YcmWarningSection',
-          \ 'id': 42 } )
+          \ 'highlight': 'YcmWarningSection' } )
   endif
 endfunction
 

@@ -19,7 +19,7 @@ import vim
 import os
 import json
 import re
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from functools import lru_cache as memoize
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
                          GetCurrentDirectory,
@@ -51,6 +51,8 @@ NO_COMPLETIONS = {
   'completion_start_column': -1,
   'completions': []
 }
+
+YCM_NEOVIM_NS_ID = vim.eval( 'g:ycm_neovim_ns_id' )
 
 
 def CurrentLineAndColumn():
@@ -185,27 +187,47 @@ def GetSignsInBuffer( buffer_number ):
   )[ 0 ][ 'signs' ]
 
 
+class DiagnosticProperty( namedtuple( 'DiagnosticProperty', [ 'id',
+                                                              'type',
+                                                              'line',
+                                                              'column',
+                                                              'length' ] ) ):
+  def __eq__( self, other ):
+    return ( self.type == other.type and
+             self.line == other.line and
+             self.column == other.column and
+             self.length == other.length )
+
+
 def GetTextProperties( buffer_number ):
   if not VimIsNeovim():
     properties = []
     for line_number in range( len( vim.buffers[ buffer_number ] ) ):
+      vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
+                             f'{{ "bufnr": { buffer_number } }} )' )
       properties.extend(
-        vim.eval( f'prop_list( {line_number + 1}, '
-                  f'{{ "bufnr": { buffer_number }, "id": 42 }} )' )
+        [ DiagnosticProperty( p[ 'id' ],
+                              p[ 'type' ],
+                              line_number + 1,
+                              int( p[ 'col' ] ),
+                              int( p[ 'length' ] ) )
+        for p in vim_props if p[ 'type' ].startswith( 'Ycm' ) ]
       )
     return properties
   else:
     return vim.eval(
       f'nvim_buf_get_extmarks( { buffer_number }, '
-                             f'{ YCM_NS_ID }, '
+                             f'{ YCM_NEOVIM_NS_ID }, '
                               '0, '
                               '-1, '
                               '{} )' )
 
 
-def AddTextProperty( buffer_number, line, column, extra_args ):
+def AddTextProperty( buffer_number, line, column, extra_args, prop_id ):
   if not VimIsNeovim():
-    extra_args[ 'bufnr' ] = buffer_number
+    extra_args.update( {
+      'bufnr': buffer_number,
+      'id': prop_id } )
     vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
   else:
     extra_args[ 'hl_group' ] = extra_args.pop( 'type' ).replace(
@@ -216,7 +238,7 @@ def AddTextProperty( buffer_number, line, column, extra_args ):
     line -= 1
     column -= 1
     vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
-                                    f'{ YCM_NS_ID }, '
+                                    f'{ YCM_NEOVIM_NS_ID }, '
                                     f'{ line }, '
                                     f'{ column }, '
                                     f'{ extra_args } )' )
@@ -226,13 +248,17 @@ def RemoveTextProperty( buffer_number, prop ):
   # NOTE: `prop` is an element from the list we get from GetTextProperties().
   if not VimIsNeovim():
     # In vim `prop` is a detailed dictionary.
-    prop[ 'bufnr' ] = buffer_number
-    vim.eval( f'prop_remove( { prop } )' )
+    p = {
+        'bufnr': buffer_number,
+        'id': prop.id,
+        'type': prop.type,
+        'both': 1 }
+    vim.eval( f'prop_remove( { p } )' )
   else:
     # In neovim `prop` is a 3-element list, consisting of
     # [property_id, start_line, start_column]
     vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
-                                    f'{ YCM_NS_ID }, '
+                                    f'{ YCM_NEOVIM_NS_ID }, '
                                     f'{ prop[ 0 ] } )' )
 
 
