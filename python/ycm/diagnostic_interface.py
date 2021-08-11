@@ -19,6 +19,7 @@ from collections import defaultdict
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
 import vim
+YCM_VIM_PROPERTY_ID = 0
 
 
 class DiagnosticInterface:
@@ -133,14 +134,23 @@ class DiagnosticInterface:
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
         for prop in _ConvertDiagnosticToTextProperties( diag ):
+          global YCM_VIM_PROPERTY_ID
+          diag_prop = vimsupport.DiagnosticProperty(
+              YCM_VIM_PROPERTY_ID,
+              prop[ 2 ][ 'type' ],
+              prop[ 0 ], prop[ 1 ],
+              prop[ 2 ][ 'end_col' ] - prop[ 1 ] )
           try:
-            props_to_remove.remove( prop )
-          except ValueError:
+            props_to_remove.remove( diag_prop )
+          # TODO: Neovim GetTextProperties returns a list of lists of
+          # ID/Start Line/Start Col, which isn't enough data.
+          except ( ValueError, AttributeError ):
             vimsupport.AddTextProperty( self._bufnr,
                                         prop[ 0 ],
                                         prop[ 1 ],
-                                        prop[ 2 ] )
-
+                                        prop[ 2 ],
+                                        YCM_VIM_PROPERTY_ID )
+          YCM_VIM_PROPERTY_ID += 1
     for prop in props_to_remove:
       vimsupport.RemoveTextProperty( self._bufnr, prop )
 
