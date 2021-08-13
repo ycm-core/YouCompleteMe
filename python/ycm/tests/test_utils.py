@@ -292,7 +292,7 @@ def _MockVimVersionEval( value ):
   return None
 
 
-def _MockVimEval( value ):
+def _MockVimEval( value ): # noqa
   if value == 'g:ycm_neovim_ns_id':
     return 1
 
