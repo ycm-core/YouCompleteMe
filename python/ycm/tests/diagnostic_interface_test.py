@@ -16,7 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 from ycm import diagnostic_interface
 from ycm.tests.test_utils import VimBuffer, MockVimModule
-from hamcrest import assert_that, contains_exactly, has_entries
+from hamcrest import assert_that, contains_exactly, has_entries, has_item
 from unittest.mock import patch
 import pytest
 MockVimModule()
@@ -25,26 +25,26 @@ MockVimModule()
 def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col ):
   return {
     'kind': 'Error',
-    'location': { 'line_num': 1, 'column_num': 16 },
+    'location': { 'line_num': start_line, 'column_num': start_col },
     'location_extent': {
       'start': {
-        'line_num': 1,
-        'column_num': 16
+        'line_num': start_line,
+        'column_num': start_col
       },
       'end': {
-        'line_num': 1,
-        'column_num': 23
+        'line_num': end_line,
+        'column_num': end_col
       }
     },
     'ranges': [
       {
         'start': {
-          'line_num': 1,
-          'column_num': 16
+          'line_num': start_line,
+          'column_num': start_col
         },
         'end': {
-          'line_num': 1,
-          'column_num': 23
+          'line_num': end_line,
+          'column_num': end_col
         }
       }
     ]
@@ -52,9 +52,9 @@ def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col ):
 
 
 def YcmTextPropertyTupleMatcher( start_line, start_col, end_line, end_col ):
-  return contains_exactly( start_line, start_col, has_entries( {
-    'end_lnum': end_line,
-    'end_col': end_col } ) )
+  return has_item( contains_exactly( start_line, start_col, has_entries( {
+    'end_col': end_col,
+    'end_lnum': end_line } ) ) )
 
 
 @pytest.mark.parametrize( 'diag,contents,result', [
@@ -88,10 +88,7 @@ def YcmTextPropertyTupleMatcher( start_line, start_col, end_line, end_col ):
   ],
 ] )
 def ConvertDiagnosticToTextProperties_test( diag, contents, result ):
-  current_buffer = VimBuffer(
-    'some_file',
-    contents
-  )
+  current_buffer = VimBuffer( 'some_file', contents = contents )
 
   with patch( 'vim.current.buffer', current_buffer ):
     actual = diagnostic_interface._ConvertDiagnosticToTextProperties( diag )

@@ -138,8 +138,9 @@ class DiagnosticInterface:
           diag_prop = vimsupport.DiagnosticProperty(
               YCM_VIM_PROPERTY_ID,
               prop[ 2 ][ 'type' ],
-              prop[ 0 ], prop[ 1 ],
-              prop[ 2 ][ 'end_col' ] - prop[ 1 ] )
+              prop[ 0 ],
+              prop[ 1 ],
+              prop[ 2 ][ 'end_col' ] - prop[ 1 ] if 'end_col' in prop[ 2 ] else prop[ 1 ] )
           try:
             props_to_remove.remove( diag_prop )
           # TODO: Neovim GetTextProperties returns a list of lists of

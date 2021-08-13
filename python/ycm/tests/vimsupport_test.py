@@ -1340,63 +1340,6 @@ def _BuildChunk( start_line,
   }
 
 
-def GetDiagnosticMatchPattern_ErrorInMiddleOfLine_test():
-  current_buffer = VimBuffer(
-    'some_file',
-    contents = [ 'Highlight this error please' ]
-  )
-
-  with patch( 'vim.current.buffer', current_buffer ):
-    assert_that(
-      vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 21 ),
-      equal_to( '\\%1l\\%16c\\_.\\{-}\\%1l\\%21c' )
-    )
-
-
-def AddDiagnosticSyntaxMatch_WarningAtEndOfLine_test():
-  current_buffer = VimBuffer(
-    'some_file',
-    contents = [ 'Highlight this warning' ]
-  )
-
-  with patch( 'vim.current.buffer', current_buffer ):
-    assert_that(
-      vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 23 ),
-      equal_to( '\\%1l\\%16c\\_.\\{-}\\%1l\\%23c' )
-    )
-
-
-def AddDiagnosticSyntaxMatch_UnicodeAtEndOfLine_test():
-  current_buffer = VimBuffer(
-    'some_file',
-    contents = [ 'Highlight unicøde' ]
-  )
-
-  with patch( 'vim.current.buffer', current_buffer ):
-    assert_that(
-      vimsupport.GetDiagnosticMatchPattern( 1, 16, 1, 19 ),
-      equal_to( '\\%1l\\%16c\\_.\\{-}\\%1l\\%19c' )
-    )
-
-
-def AddDiagnosticSyntaxMatch_NonPositivePosition_test():
-  current_buffer = VimBuffer(
-    'some_file',
-    contents = [ 'Some contents' ]
-  )
-
-  with patch( 'vim.current.buffer', current_buffer ):
-    assert_that(
-      vimsupport.GetDiagnosticMatchPattern( 0, 0, 0, 0 ),
-      equal_to( '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
-    )
-
-    assert_that(
-      vimsupport.GetDiagnosticMatchPattern( -1, -2, -3, -4 ),
-      equal_to( '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
-    )
-
-
 @patch( 'vim.command', new_callable=ExtendedMock )
 @patch( 'vim.current', new_callable=ExtendedMock )
 def WriteToPreviewWindow_test( vim_current, vim_command ):

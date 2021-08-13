@@ -115,7 +115,7 @@ def ycm( request ):
     WaitUntilReady()
     ycm.CheckIfServerIsReady()
     try:
-      test_utils.VIM_MATCHES_FOR_WINDOW.clear()
+      test_utils.VIM_PROPS_FOR_BUFFER.clear()
       yield ycm
     finally:
       StopServer( ycm )

@@ -267,7 +267,7 @@ def RemoveTextProperty( buffer_number, prop ):
 def LineAndColumnNumbersClamped( line_num, column_num ):
   line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
   # Vim buffers are a list of Unicode objects on Python 3.
-  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
+  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) ) + 1
 
   return line_num, max( min( column_num, max_column ), 1 )
 

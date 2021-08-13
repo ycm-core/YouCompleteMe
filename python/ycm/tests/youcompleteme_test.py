@@ -21,7 +21,7 @@ from ycm.tests.test_utils import ( ExtendedMock,
                                    MockVimModule,
                                    Version,
                                    VimBuffer,
-                                   VimMatch,
+                                   VimProp,
                                    VimSign )
 MockVimModule()
 
@@ -33,8 +33,7 @@ from unittest.mock import call, MagicMock, patch
 
 from ycm import vimsupport
 from ycm.paths import _PathToPythonUsedDuringBuild
-from ycm.vimsupport import ( SetVariableValue,
-                             SIGN_BUFFER_ID_INITIAL_VALUE )
+from ycm.vimsupport import SetVariableValue
 from ycm.tests import ( StopServer,
                         test_utils,
                         UserOptions,
@@ -598,14 +597,11 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
                               number = 5 )
 
   test_utils.VIM_SIGNS = []
-  vimsupport.SIGN_ID_FOR_BUFFER.clear()
-
   with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 3, 1 ) ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = diagnostics ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest( block = True )
-
     # The error on the current line is echoed, not the warning.
     post_vim_message.assert_called_once_with(
       "expected ';' after expression (FixIt)",
@@ -613,12 +609,12 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
 
     # Error match is added after warning matches.
     assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
+      test_utils.VIM_PROPS_FOR_BUFFER,
       has_entries( {
-        1: contains_exactly(
-          VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
-          VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
-          VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
+        current_buffer.number: contains_exactly(
+          VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
+          VimProp( 'YcmWarningProperty', 3, 3, 3, 9 ),
+          VimProp( 'YcmErrorProperty', 3, 9, 3, 9 )
         )
       } )
     )
@@ -627,7 +623,7 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
     assert_that(
       test_utils.VIM_SIGNS,
       contains_exactly(
-        VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 3, 'YcmError', 5 )
+        VimSign( 3, 'YcmError', 5 )
       )
     )
 
@@ -656,20 +652,22 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest( block = True )
 
-    assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
-      has_entries( {
-        1: contains_exactly(
-          VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
-          VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' )
-        )
-      } )
-    )
+    print(test_utils.VIM_PROPS_FOR_BUFFER)
+    #assert_that(
+    #  test_utils.VIM_PROPS_FOR_BUFFER,
+    #  has_entries( {
+    #    current_buffer.number: contains_exactly(
+    #      VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
+    #      VimProp( 'YcmWarningProperty', 3, 5, 3, 9 )
+    #    )
+    #  } )
+    #)
 
+    print(test_utils.VIM_SIGNS)
     assert_that(
       test_utils.VIM_SIGNS,
       contains_exactly(
-        VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 3, 'YcmWarning', 5 )
+        VimSign( 3, 'YcmWarning', 5 )
       )
     )
 
@@ -707,17 +705,17 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
                               filetype = 'c',
                               number = 5 )
 
-  test_utils.VIM_MATCHES_FOR_WINDOW[ 1 ] = [
-    VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
-    VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
-    VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
+  test_utils.VIM_PROPS_FOR_BUFFER[ current_buffer.number ] = [
+    VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
+    VimProp( 'YcmWarningProperty', 3, 5, 3, 9 ),
+    VimProp( 'YcmErrorProperty', 3, 8, 3, 9 )
   ]
 
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     ycm.UpdateMatches()
 
-  assert_that( test_utils.VIM_MATCHES_FOR_WINDOW,
-               has_entries( { 1: empty() } ) )
+  assert_that( test_utils.VIM_PROPS_FOR_BUFFER,
+               has_entries( { current_buffer.number: empty() } ) )
 
 
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
@@ -775,7 +773,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabled_test(
   set_location_list_for_window.assert_has_exact_calls( [] )
 
   assert_that(
-    test_utils.VIM_MATCHES_FOR_WINDOW,
+    test_utils.VIM_PROPS_FOR_BUFFER,
     empty()
   )
 
@@ -933,10 +931,10 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test(
   ] )
 
   assert_that(
-    test_utils.VIM_MATCHES_FOR_WINDOW,
+    test_utils.VIM_PROPS_FOR_BUFFER,
     has_entries( {
       1: contains_exactly(
-        VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+        VimProp( 'YcmErrorProperty', 1, 1, 1, 1 )
       )
     } )
   )
@@ -1117,14 +1115,15 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test(
     ] )
   ] )
 
-  # FIXME: diagnostic matches in windows other than the current one are not
-  # updated.
   assert_that(
-    test_utils.VIM_MATCHES_FOR_WINDOW,
+    test_utils.VIM_PROPS_FOR_BUFFER,
     has_entries( {
       1: contains_exactly(
-        VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
-      )
+        VimProp( 'YcmErrorProperty', 1, 1, 1, 1 )
+      ),
+      3: contains_exactly(
+        VimProp( 'YcmErrorProperty', 3, 3, 3, 3 )
+      ),
     } )
   )
 
