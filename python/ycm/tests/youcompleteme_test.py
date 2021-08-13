@@ -31,7 +31,6 @@ from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
                        has_entries, is_in, is_not, matches_regexp )
 from unittest.mock import call, MagicMock, patch
 
-from ycm import vimsupport
 from ycm.paths import _PathToPythonUsedDuringBuild
 from ycm.vimsupport import SetVariableValue
 from ycm.tests import ( StopServer,
@@ -652,18 +651,18 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest( block = True )
 
-    print(test_utils.VIM_PROPS_FOR_BUFFER)
-    #assert_that(
-    #  test_utils.VIM_PROPS_FOR_BUFFER,
-    #  has_entries( {
-    #    current_buffer.number: contains_exactly(
-    #      VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
-    #      VimProp( 'YcmWarningProperty', 3, 5, 3, 9 )
-    #    )
-    #  } )
-    #)
+    print( test_utils.VIM_PROPS_FOR_BUFFER )
+    # assert_that(
+    #   test_utils.VIM_PROPS_FOR_BUFFER,
+    #   has_entries( {
+    #     current_buffer.number: contains_exactly(
+    #       VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
+    #       VimProp( 'YcmWarningProperty', 3, 5, 3, 9 )
+    #     )
+    #   } )
+    # )
 
-    print(test_utils.VIM_SIGNS)
+    print( test_utils.VIM_SIGNS )
     assert_that(
       test_utils.VIM_SIGNS,
       contains_exactly(

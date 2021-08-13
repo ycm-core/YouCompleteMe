@@ -206,12 +206,12 @@ def GetTextProperties( buffer_number ):
       vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
                              f'{{ "bufnr": { buffer_number } }} )' )
       properties.extend(
-        [ DiagnosticProperty( p[ 'id' ],
-                              p[ 'type' ],
-                              line_number + 1,
-                              int( p[ 'col' ] ),
-                              int( p[ 'length' ] ) )
-        for p in vim_props if p[ 'type' ].startswith( 'Ycm' ) ]
+        DiagnosticProperty( p[ 'id' ],
+          p[ 'type' ],
+          line_number + 1,
+          int( p[ 'col' ] ),
+          int( p[ 'length' ] ) )
+        for p in vim_props if p[ 'type' ].startswith( 'Ycm' )
       )
     return properties
   else:

@@ -38,7 +38,10 @@ BWIPEOUT_REGEX = re.compile(
 GETBUFVAR_REGEX = re.compile(
   '^getbufvar\\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\\)$' )
 PROP_ADD_REGEX = re.compile(
-        '^prop_add\\( (?P<start_line>\\d+), (?P<start_column>\\d+), {(\'end_lnum\': (?P<end_line>\\d+), \'end_col\': (?P<end_column>\\d+), )?\'type\': \'(?P<type>\\w+)\', \'bufnr\': (?P<bufnr>\\d+), \'id\': (?P<id>\\d+)} \\)$' )
+        '^prop_add\\( (?P<start_line>\\d+), (?P<start_column>\\d+), '
+        '{(\'end_lnum\': (?P<end_line>\\d+), \'end_col\': (?P<end_column>\\d+),'
+        ' )?\'type\': \'(?P<type>\\w+)\', \'bufnr\': (?P<bufnr>\\d+), '
+        '\'id\': (?P<id>\\d+)} \\)$' )
 PROP_REMOVE_REGEX = re.compile( '^prop_remove\\( (?P<prop>.+) \\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\\)$' )
@@ -211,9 +214,12 @@ def _MockVimFunctionsEval( value ):
   if value == 'has( "nvim" )':
     return False
 
-  match = re.match( 'sign_getplaced\\( (?P<bufnr>\\d+), { "group": "ycm_signs" } \\)', value )
+  match = re.match( 'sign_getplaced\\( (?P<bufnr>\\d+), '
+                    '{ "group": "ycm_signs" } \\)', value )
   if match:
-    filtered = list( filter( lambda sign: sign.bufnr == int( match.group( 'bufnr' ) ), VIM_SIGNS ) )
+    filtered = list( filter( lambda sign: sign.bufnr ==
+                                          int( match.group( 'bufnr' ) ),
+                             VIM_SIGNS ) )
     r = [ { 'signs': filtered } ]
     return r
 
@@ -228,14 +234,17 @@ def _MockVimFunctionsEval( value ):
   if match:
     sign_list = json.loads( match.group( 'sign_list' ).replace( "'", '"' ) )
     for sign in sign_list:
-      VIM_SIGNS.append( VimSign( sign[ 'lnum' ], sign[ 'name' ], sign[ 'buffer' ] ) )
+      VIM_SIGNS.append( VimSign( sign[ 'lnum' ],
+                                 sign[ 'name' ],
+                                 sign[ 'buffer' ] ) )
     return True # Why True?
 
   return None
 
 
 def _MockVimPropEval( value ):
-  match = re.match( 'prop_list\\( (?P<lnum>\\d+), { "bufnr": (?P<bufnr>\\d+) } \\)', value )
+  match = re.match( 'prop_list\\( (?P<lnum>\\d+), '
+                    '{ "bufnr": (?P<bufnr>\\d+) } \\)', value )
   if match:
     return VIM_PROPS_FOR_BUFFER[ int( match.group( 'bufnr' ) ) ]
 
@@ -246,17 +255,18 @@ def _MockVimPropEval( value ):
     prop_start_column = int( match.group( 'start_column' ) )
     prop_end_line = match.group( 'end_line' )
     prop_end_column = match.group( 'end_column' )
-    vim_prop = VimProp( prop_type,
-                        prop_start_line,
-                        prop_start_column,
-                        int( prop_end_line ) if prop_end_line else prop_end_line,
-                        int( prop_end_column ) if prop_end_column else prop_end_column )
+    vim_prop = VimProp(
+        prop_type,
+        prop_start_line,
+        prop_start_column,
+        int( prop_end_line ) if prop_end_line else prop_end_line,
+        int( prop_end_column ) if prop_end_column else prop_end_column )
     VIM_PROPS_FOR_BUFFER[ int( match.group( 'bufnr' ) ) ].append( vim_prop )
     return vim_prop.id
 
   match = PROP_REMOVE_REGEX.search( value )
   if match:
-    prop = eval(match.group( 'prop' ))
+    prop = eval( match.group( 'prop' ) )
     vim_props = VIM_PROPS_FOR_BUFFER[ prop[ 'bufnr' ] ]
     for index, vim_prop in enumerate( vim_props ):
       if vim_prop.id == prop[ 'id' ]:
@@ -531,7 +541,12 @@ class VimCurrent:
 
 class VimProp:
 
-  def __init__( self, prop_type, start_line, start_column, end_line = None, end_column = None ):
+  def __init__( self,
+                prop_type,
+                start_line,
+                start_column,
+                end_line = None,
+                end_column = None ):
     current_window = VIM_MOCK.current.window.number
     self.id = len( VIM_PROPS_FOR_BUFFER[ current_window ] ) + 1
     self.prop_type = prop_type

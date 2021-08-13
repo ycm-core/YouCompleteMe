@@ -257,8 +257,8 @@ def EventNotification_FileReadyToParse_Diagnostic_Error_Native_test( ycm ):
   test_utils.VIM_SIGNS = []
 
   _Check_FileReadyToParse_Diagnostic_Error( ycm )
-  # _Check_FileReadyToParse_Diagnostic_Warning( ycm )
-  # _Check_FileReadyToParse_Diagnostic_Clean( ycm )
+  _Check_FileReadyToParse_Diagnostic_Warning( ycm )
+  _Check_FileReadyToParse_Diagnostic_Clean( ycm )
 
 
 def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
