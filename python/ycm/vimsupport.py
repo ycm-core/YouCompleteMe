@@ -206,12 +206,12 @@ def GetTextProperties( buffer_number ):
       vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
                              f'{{ "bufnr": { buffer_number } }} )' )
       properties.extend(
-        [ DiagnosticProperty( p[ 'id' ],
-                              p[ 'type' ],
-                              line_number + 1,
-                              int( p[ 'col' ] ),
-                              int( p[ 'length' ] ) )
-        for p in vim_props if p[ 'type' ].startswith( 'Ycm' ) ]
+        DiagnosticProperty( p[ 'id' ],
+          p[ 'type' ],
+          line_number + 1,
+          int( p[ 'col' ] ),
+          int( p[ 'length' ] ) )
+        for p in vim_props if p[ 'type' ].startswith( 'Ycm' )
       )
     return properties
   else:
@@ -267,7 +267,7 @@ def RemoveTextProperty( buffer_number, prop ):
 def LineAndColumnNumbersClamped( line_num, column_num ):
   line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
   # Vim buffers are a list of Unicode objects on Python 3.
-  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
+  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) ) + 1
 
   return line_num, max( min( column_num, max_column ), 1 )
 
