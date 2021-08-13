@@ -614,7 +614,7 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
         current_buffer.number: contains_exactly(
           VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
           VimProp( 'YcmWarningProperty', 3, 3, 3, 9 ),
-          VimProp( 'YcmErrorProperty', 3, 9, 3, 9 )
+          VimProp( 'YcmErrorProperty', 3, 9 )
         )
       } )
     )
@@ -708,7 +708,7 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
   test_utils.VIM_PROPS_FOR_BUFFER[ current_buffer.number ] = [
     VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
     VimProp( 'YcmWarningProperty', 3, 5, 3, 9 ),
-    VimProp( 'YcmErrorProperty', 3, 8, 3, 9 )
+    VimProp( 'YcmErrorProperty', 3, 8 )
   ]
 
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
