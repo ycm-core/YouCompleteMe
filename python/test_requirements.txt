@@ -6,5 +6,3 @@ codecov               >= 2.0.5
 coverage              <5.0
 click                 <8.0.0
 covimerage            >= 0.2.0
-pytest
-pytest-cov

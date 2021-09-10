@@ -19,22 +19,24 @@ from ycm.tests.test_utils import MockVimBuffers, MockVimModule, VimBuffer
 MockVimModule()
 
 from hamcrest import assert_that, has_entry
+from unittest import TestCase
 from unittest.mock import patch
 from ycm.client.base_request import BuildRequestData
 
 
-@patch( 'ycm.client.base_request.GetCurrentDirectory',
-        return_value = '/some/dir' )
-def BuildRequestData_AddWorkingDir_test( *args ):
-  current_buffer = VimBuffer( 'foo' )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    assert_that( BuildRequestData(), has_entry( 'working_dir', '/some/dir' ) )
+class BaseRequestTest( TestCase ):
+  @patch( 'ycm.client.base_request.GetCurrentDirectory',
+          return_value = '/some/dir' )
+  def test_BuildRequestData_AddWorkingDir( self, *args ):
+    current_buffer = VimBuffer( 'foo' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      assert_that( BuildRequestData(), has_entry( 'working_dir', '/some/dir' ) )
 
 
-@patch( 'ycm.client.base_request.GetCurrentDirectory',
-        return_value = '/some/dir' )
-def BuildRequestData_AddWorkingDirWithFileName_test( *args ):
-  current_buffer = VimBuffer( 'foo' )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    assert_that( BuildRequestData( current_buffer.number ),
-                 has_entry( 'working_dir', '/some/dir' ) )
+  @patch( 'ycm.client.base_request.GetCurrentDirectory',
+          return_value = '/some/dir' )
+  def test_BuildRequestData_AddWorkingDirWithFileName( self, *args ):
+    current_buffer = VimBuffer( 'foo' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      assert_that( BuildRequestData( current_buffer.number ),
+                   has_entry( 'working_dir', '/some/dir' ) )

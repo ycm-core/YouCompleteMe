@@ -20,67 +20,130 @@ MockVimModule()
 
 from hamcrest import assert_that, contains_exactly, has_entries
 from unittest.mock import patch
+from unittest import TestCase
 
 from ycm.tests import YouCompleteMeInstance
 
 
-@YouCompleteMeInstance( { 'g:ycm_extra_conf_vim_data': [ 'tempname()' ] } )
-def SendCommandRequest_ExtraConfVimData_Works_test( ycm ):
-  current_buffer = VimBuffer( 'buffer' )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
-      ycm.SendCommandRequest( [ 'GoTo' ], 'aboveleft', False, 1, 1 )
-      assert_that(
-        # Positional arguments passed to SendCommandRequest.
-        send_request.call_args[ 0 ],
-        contains_exactly(
-          contains_exactly( 'GoTo' ),
-          'aboveleft',
-          'same-buffer',
-          has_entries( {
-            'options': has_entries( {
-              'tab_size': 2,
-              'insert_spaces': True,
-            } ),
-            'extra_conf_data': has_entries( {
-              'tempname()': '_TEMP_FILE_'
-            } ),
-          } )
-        )
-      )
-
-
-@YouCompleteMeInstance( { 'g:ycm_extra_conf_vim_data': [ 'undefined_value' ] } )
-def SendCommandRequest_ExtraConfData_UndefinedValue_test( ycm ):
-  current_buffer = VimBuffer( 'buffer' )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
-      ycm.SendCommandRequest( [ 'GoTo' ], 'belowright', False, 1, 1 )
-      assert_that(
-        # Positional arguments passed to SendCommandRequest.
-        send_request.call_args[ 0 ],
-        contains_exactly(
-          contains_exactly( 'GoTo' ),
-          'belowright',
-          'same-buffer',
-          has_entries( {
-            'options': has_entries( {
-              'tab_size': 2,
-              'insert_spaces': True,
+class CommandTest( TestCase ):
+  @YouCompleteMeInstance( { 'g:ycm_extra_conf_vim_data': [ 'tempname()' ] } )
+  def test_SendCommandRequest_ExtraConfVimData_Works( self, ycm ):
+    current_buffer = VimBuffer( 'buffer' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+        ycm.SendCommandRequest( [ 'GoTo' ], 'aboveleft', False, 1, 1 )
+        assert_that(
+          # Positional arguments passed to SendCommandRequest.
+          send_request.call_args[ 0 ],
+          contains_exactly(
+            contains_exactly( 'GoTo' ),
+            'aboveleft',
+            'same-buffer',
+            has_entries( {
+              'options': has_entries( {
+                'tab_size': 2,
+                'insert_spaces': True,
+              } ),
+              'extra_conf_data': has_entries( {
+                'tempname()': '_TEMP_FILE_'
+              } ),
             } )
-          } )
+          )
         )
-      )
 
 
-@YouCompleteMeInstance()
-def SendCommandRequest_BuildRange_NoVisualMarks_test( ycm, *args ):
-  current_buffer = VimBuffer( 'buffer', contents = [ 'first line',
-                                                     'second line' ] )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
-      ycm.SendCommandRequest( [ 'GoTo' ], '', True, 1, 2 )
-      send_request.assert_called_once_with(
+  @YouCompleteMeInstance( {
+    'g:ycm_extra_conf_vim_data': [ 'undefined_value' ] } )
+  def test_SendCommandRequest_ExtraConfData_UndefinedValue( self, ycm ):
+    current_buffer = VimBuffer( 'buffer' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+        ycm.SendCommandRequest( [ 'GoTo' ], 'belowright', False, 1, 1 )
+        assert_that(
+          # Positional arguments passed to SendCommandRequest.
+          send_request.call_args[ 0 ],
+          contains_exactly(
+            contains_exactly( 'GoTo' ),
+            'belowright',
+            'same-buffer',
+            has_entries( {
+              'options': has_entries( {
+                'tab_size': 2,
+                'insert_spaces': True,
+              } )
+            } )
+          )
+        )
+
+
+  @YouCompleteMeInstance()
+  def test_SendCommandRequest_BuildRange_NoVisualMarks( self, ycm, *args ):
+    current_buffer = VimBuffer( 'buffer', contents = [ 'first line',
+                                                       'second line' ] )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+        ycm.SendCommandRequest( [ 'GoTo' ], '', True, 1, 2 )
+        send_request.assert_called_once_with(
+          [ 'GoTo' ],
+          '',
+          'same-buffer',
+          {
+            'options': {
+              'tab_size': 2,
+              'insert_spaces': True
+            },
+            'range': {
+              'start': {
+                'line_num': 1,
+                'column_num': 1
+              },
+              'end': {
+                'line_num': 2,
+                'column_num': 12
+              }
+            }
+          }
+        )
+
+
+  @YouCompleteMeInstance()
+  def test_SendCommandRequest_BuildRange_VisualMarks( self, ycm, *args ):
+    current_buffer = VimBuffer( 'buffer',
+                                contents = [ 'first line',
+                                             'second line' ],
+                                visual_start = [ 1, 4 ],
+                                visual_end = [ 2, 8 ] )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+        ycm.SendCommandRequest( [ 'GoTo' ], 'tab', True, 1, 2 )
+        send_request.assert_called_once_with(
+          [ 'GoTo' ],
+          'tab',
+          'same-buffer',
+          {
+            'options': {
+              'tab_size': 2,
+              'insert_spaces': True
+            },
+            'range': {
+              'start': {
+                'line_num': 1,
+                'column_num': 5
+              },
+              'end': {
+                'line_num': 2,
+                'column_num': 9
+              }
+            }
+          }
+        )
+
+
+  @YouCompleteMeInstance()
+  def test_SendCommandRequest_IgnoreFileTypeOption( self, ycm, *args ):
+    current_buffer = VimBuffer( 'buffer' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+      expected_args = (
         [ 'GoTo' ],
         '',
         'same-buffer',
@@ -89,73 +152,13 @@ def SendCommandRequest_BuildRange_NoVisualMarks_test( ycm, *args ):
             'tab_size': 2,
             'insert_spaces': True
           },
-          'range': {
-            'start': {
-              'line_num': 1,
-              'column_num': 1
-            },
-            'end': {
-              'line_num': 2,
-              'column_num': 12
-            }
-          }
         }
       )
 
+      with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+        ycm.SendCommandRequest( [ 'ft=ycm:ident', 'GoTo' ], '', False, 1, 1 )
+        send_request.assert_called_once_with( *expected_args )
 
-@YouCompleteMeInstance()
-def SendCommandRequest_BuildRange_VisualMarks_test( ycm, *args ):
-  current_buffer = VimBuffer( 'buffer',
-                              contents = [ 'first line',
-                                           'second line' ],
-                              visual_start = [ 1, 4 ],
-                              visual_end = [ 2, 8 ] )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
-      ycm.SendCommandRequest( [ 'GoTo' ], 'tab', True, 1, 2 )
-      send_request.assert_called_once_with(
-        [ 'GoTo' ],
-        'tab',
-        'same-buffer',
-        {
-          'options': {
-            'tab_size': 2,
-            'insert_spaces': True
-          },
-          'range': {
-            'start': {
-              'line_num': 1,
-              'column_num': 5
-            },
-            'end': {
-              'line_num': 2,
-              'column_num': 9
-            }
-          }
-        }
-      )
-
-
-@YouCompleteMeInstance()
-def SendCommandRequest_IgnoreFileTypeOption_test( ycm, *args ):
-  current_buffer = VimBuffer( 'buffer' )
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    expected_args = (
-      [ 'GoTo' ],
-      '',
-      'same-buffer',
-      {
-        'options': {
-          'tab_size': 2,
-          'insert_spaces': True
-        },
-      }
-    )
-
-    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
-      ycm.SendCommandRequest( [ 'ft=ycm:ident', 'GoTo' ], '', False, 1, 1 )
-      send_request.assert_called_once_with( *expected_args )
-
-    with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
-      ycm.SendCommandRequest( [ 'GoTo', 'ft=python' ], '', False, 1, 1 )
-      send_request.assert_called_once_with( *expected_args )
+      with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
+        ycm.SendCommandRequest( [ 'GoTo', 'ft=python' ], '', False, 1, 1 )
+        send_request.assert_called_once_with( *expected_args )
