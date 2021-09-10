@@ -19,8 +19,8 @@ from ycm.tests.test_utils import ExtendedMock, MockVimModule
 MockVimModule()
 
 import json
-import pytest
 from hamcrest import assert_that
+from unittest import TestCase
 from unittest.mock import patch, call
 from ycm.client.command_request import CommandRequest
 
@@ -87,25 +87,25 @@ MULTI_FIXIT_FIRST_CHUNKS = MULTI_FIXIT[ 'fixits' ][ 0 ][ 'chunks' ]
 MULTI_FIXIT_SECOND_CHUNKS = MULTI_FIXIT[ 'fixits' ][ 1 ][ 'chunks' ]
 
 
-class GoToResponse_QuickFix_test:
+class GoToResponse_QuickFixTest( TestCase ):
   """This class tests the generation of QuickFix lists for GoTo responses which
   return multiple locations, such as the Python completer and JavaScript
   completer. It mostly proves that we use 1-based indexing for the column
   number."""
 
-  def setup_method( self ):
+  def setUp( self ):
     self._request = CommandRequest( [ 'GoToTest' ] )
 
 
-  def teardown_method( self ):
+  def tearDown( self ):
     self._request = None
 
 
-  def GoTo_EmptyList_test( self ):
+  def test_GoTo_EmptyList( self ):
     self._CheckGoToList( [], [] )
 
 
-  def GoTo_SingleItem_List_test( self ):
+  def test_GoTo_SingleItem_List( self ):
     self._CheckGoToList( [ {
       'filepath':     'dummy_file',
       'line_num':     10,
@@ -119,7 +119,7 @@ class GoToResponse_QuickFix_test:
     } ] )
 
 
-  def GoTo_MultiItem_List_test( self ):
+  def test_GoTo_MultiItem_List( self ):
     self._CheckGoToList( [ {
       'filepath':     'dummy_file',
       'line_num':     10,
@@ -174,15 +174,9 @@ class GoToResponse_QuickFix_test:
     set_fitting_height.assert_called_once_with()
 
 
-class Response_Detection_test:
+class Response_Detection_Test( TestCase ):
 
-  @pytest.mark.parametrize( 'command,response', [
-        [ 'AnythingYouLike',        True ],
-        [ 'GoToEvenWorks',          10 ],
-        [ 'FixItWorks',             'String!' ],
-        [ 'and8434fd andy garbag!', 10.3 ],
-  ] )
-  def BasicResponse_test( self, command, response ):
+  def test_BasicResponse( self ):
     def _BasicResponseTest( command, response ):
       with patch( 'vim.command' ) as vim_command:
         request = CommandRequest( [ command ] )
@@ -190,13 +184,16 @@ class Response_Detection_test:
         request.RunPostCommandActionsIfNeeded( 'belowright' )
         vim_command.assert_called_with( f"echo '{ response }'" )
 
-    _BasicResponseTest( command, response )
+    for command, response in [
+        [ 'AnythingYouLike',        True ],
+        [ 'GoToEvenWorks',          10 ],
+        [ 'FixItWorks',             'String!' ],
+        [ 'and8434fd andy garbag!', 10.3 ],
+      ]:
+      with self.subTest( command = command, response = response ):
+        _BasicResponseTest( command, response )
 
-  @pytest.mark.parametrize( 'command', [ 'FixIt',
-                                         'Refactor',
-                                         'GoToHell',
-                                         'any_old_garbade!!!21' ] )
-  def FixIt_Response_Empty_test( self, command ):
+  def test_FixIt_Response_Empty( self ):
     # Ensures we recognise and handle fixit responses which indicate that there
     # are no fixits available
     def EmptyFixItTest( command ):
@@ -212,27 +209,13 @@ class Response_Detection_test:
             'No fixits found for current line', warning = False )
           replace_chunks.assert_not_called()
 
-    EmptyFixItTest( command )
+    for command in [ 'FixIt', 'Refactor', 'GoToHell', 'any_old_garbade!!!21' ]:
+      with self.subTest( command = command ):
+        EmptyFixItTest( command )
 
 
 
-  @pytest.mark.parametrize( 'command,response,chunks,selection,silent', [
-      [ 'AnythingYouLike',
-        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
-      [ 'GoToEvenWorks',
-        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
-      [ 'FixItWorks',
-        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
-      [ 'and8434fd andy garbag!',
-        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
-      [ 'Format',
-        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, True ],
-      [ 'select from multiple 1',
-        MULTI_FIXIT,  MULTI_FIXIT_FIRST_CHUNKS,  0, False ],
-      [ 'select from multiple 2',
-        MULTI_FIXIT,  MULTI_FIXIT_SECOND_CHUNKS, 1, False ],
-    ] )
-  def FixIt_Response_test( self, command, response, chunks, selection, silent ):
+  def test_FixIt_Response( self ):
     # Ensures we recognise and handle fixit responses with some dummy chunk data
     def FixItTest( command, response, chunks, selection, silent ):
       with patch( 'ycm.vimsupport.ReplaceChunks' ) as replace_chunks:
@@ -247,15 +230,31 @@ class Response_Detection_test:
             post_vim_message.assert_not_called()
 
 
-    FixItTest( command, response, chunks, selection, silent )
+    for command, response, chunks, selection, silent in [
+      [ 'AnythingYouLike',
+        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
+      [ 'GoToEvenWorks',
+        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
+      [ 'FixItWorks',
+        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
+      [ 'and8434fd andy garbag!',
+        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, False ],
+      [ 'Format',
+        BASIC_FIXIT,  BASIC_FIXIT_CHUNKS,        0, True ],
+      [ 'select from multiple 1',
+        MULTI_FIXIT,  MULTI_FIXIT_FIRST_CHUNKS,  0, False ],
+      [ 'select from multiple 2',
+        MULTI_FIXIT,  MULTI_FIXIT_SECOND_CHUNKS, 1, False ],
+    ]:
+      with self.subTest( command = command,
+                                   response = response,
+                                   chunks = chunks,
+                                   selection = selection,
+                                   silent = silent ):
+        FixItTest( command, response, chunks, selection, silent )
 
 
-  @pytest.mark.parametrize( 'command,message', [
-      [ '___________', 'This is a message' ],
-      [ '',            'this is also a message' ],
-      [ 'GetType',     'std::string' ],
-    ] )
-  def Message_Response_test( self, command, message ):
+  def test_Message_Response( self ):
     # Ensures we correctly recognise and handle responses with a message to show
     # to the user
 
@@ -266,15 +265,16 @@ class Response_Detection_test:
         request.RunPostCommandActionsIfNeeded( 'rightbelow' )
         post_vim_message.assert_called_with( message, warning = False )
 
-    MessageTest( command, message )
-
-
-  @pytest.mark.parametrize( 'command,info', [
+    for command, message in [
       [ '___________', 'This is a message' ],
       [ '',            'this is also a message' ],
-      [ 'GetDoc',      'std::string\netc\netc' ],
-    ] )
-  def Detailed_Info_test( self, command, info ):
+      [ 'GetType',     'std::string' ],
+    ]:
+      with self.subTest( command = command, message = message ):
+        MessageTest( command, message )
+
+
+  def test_Detailed_Info( self ):
     # Ensures we correctly detect and handle detailed_info responses which are
     # used to display information in the preview window
 
@@ -285,10 +285,17 @@ class Response_Detection_test:
         request.RunPostCommandActionsIfNeeded( 'topleft' )
         write_to_preview.assert_called_with( info )
 
-    DetailedInfoTest( command, info )
+    for command, info in [
+      [ '___________', 'This is a message' ],
+      [ '',            'this is also a message' ],
+      [ 'GetDoc',      'std::string\netc\netc' ],
+    ]:
+      with self.subTest( command = command, info = info ):
+        DetailedInfoTest( command, info )
 
 
-  @pytest.mark.parametrize( 'test,command,response', [
+  def test_GoTo_Single( self ):
+    for test, command, response in [
       [ GoToTest,     'AnythingYouLike', BASIC_GOTO ],
       [ GoToTest,     'GoTo',            BASIC_GOTO ],
       [ GoToTest,     'FindAThing',      BASIC_GOTO ],
@@ -296,6 +303,6 @@ class Response_Detection_test:
       [ GoToListTest, 'AnythingYouLike', [ BASIC_GOTO ] ],
       [ GoToListTest, 'GoTo',            [] ],
       [ GoToListTest, 'FixItGoto',       [ BASIC_GOTO, BASIC_GOTO ] ],
-    ] )
-  def GoTo_Single_test( self, test, command, response ):
-    test( command, response )
+    ]:
+      with self.subTest( test = test, command = command, response = response ):
+        test( command, response )

@@ -17,20 +17,22 @@
 
 from hamcrest import ( assert_that,
                        empty )
+from unittest import TestCase
 from ycm import signature_help as sh
 
 
-def MakeSignatureHelpBuffer_Empty_test():
-  assert_that( sh._MakeSignatureHelpBuffer( {} ), empty() )
-  assert_that( sh._MakeSignatureHelpBuffer( {
-    'activeSignature': 0,
-    'activeParameter': 0,
-    'signatures': []
-  } ), empty() )
-  assert_that( sh._MakeSignatureHelpBuffer( {
-    'activeSignature': 0,
-    'activeParameter': 0,
-  } ), empty() )
-  assert_that( sh._MakeSignatureHelpBuffer( {
-    'signatures': []
-  } ), empty() )
+class SignatureHelpTest( TestCase ):
+  def test_MakeSignatureHelpBuffer_Empty( self ):
+    assert_that( sh._MakeSignatureHelpBuffer( {} ), empty() )
+    assert_that( sh._MakeSignatureHelpBuffer( {
+      'activeSignature': 0,
+      'activeParameter': 0,
+      'signatures': []
+    } ), empty() )
+    assert_that( sh._MakeSignatureHelpBuffer( {
+      'activeSignature': 0,
+      'activeParameter': 0,
+    } ), empty() )
+    assert_that( sh._MakeSignatureHelpBuffer( {
+      'signatures': []
+    } ), empty() )

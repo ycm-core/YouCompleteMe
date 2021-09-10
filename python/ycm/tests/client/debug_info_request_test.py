@@ -17,6 +17,7 @@
 
 from copy import deepcopy
 from hamcrest import assert_that, contains_string, equal_to
+from unittest import TestCase
 
 from ycm.client.debug_info_request import FormatDebugInfoResponse
 
@@ -66,111 +67,113 @@ GENERIC_RESPONSE = {
 }
 
 
-def FormatDebugInfoResponse_NoResponse_test():
-  assert_that(
-    FormatDebugInfoResponse( None ),
-    equal_to( 'Server errored, no debug info from server\n' )
-  )
-
-
-def FormatDebugInfoResponse_NoExtraConf_test():
-  response = deepcopy( GENERIC_RESPONSE )
-  response[ 'extra_conf' ].update( {
-    'is_loaded': False,
-    'path': None
-  } )
-  assert_that(
-    FormatDebugInfoResponse( response ),
-    contains_string(
-      'No extra configuration file found\n'
+class DebugInfoRequestTest( TestCase ):
+  def test_FormatDebugInfoResponse_NoResponse( self ):
+    assert_that(
+      FormatDebugInfoResponse( None ),
+      equal_to( 'Server errored, no debug info from server\n' )
     )
-  )
 
 
-def FormatDebugInfoResponse_ExtraConfFoundButNotLoaded_test():
-  response = deepcopy( GENERIC_RESPONSE )
-  response[ 'extra_conf' ].update( {
-    'is_loaded': False,
-    'path': '/path/to/extra/conf'
-  } )
-  assert_that(
-    FormatDebugInfoResponse( response ),
-    contains_string(
-      'Extra configuration file found but not loaded\n'
-      'Extra configuration path: /path/to/extra/conf\n'
+  def test_FormatDebugInfoResponse_NoExtraConf( self ):
+    response = deepcopy( GENERIC_RESPONSE )
+    response[ 'extra_conf' ].update( {
+      'is_loaded': False,
+      'path': None
+    } )
+    assert_that(
+      FormatDebugInfoResponse( response ),
+      contains_string(
+        'No extra configuration file found\n'
+      )
     )
-  )
 
 
-def FormatDebugInfoResponse_ExtraConfFoundAndLoaded_test():
-  response = deepcopy( GENERIC_RESPONSE )
-  response[ 'extra_conf' ].update( {
-    'is_loaded': True,
-    'path': '/path/to/extra/conf'
-  } )
-  assert_that(
-    FormatDebugInfoResponse( response ),
-    contains_string(
-      'Extra configuration file found and loaded\n'
-      'Extra configuration path: /path/to/extra/conf\n'
+  def test_FormatDebugInfoResponse_ExtraConfFoundButNotLoaded( self ):
+    response = deepcopy( GENERIC_RESPONSE )
+    response[ 'extra_conf' ].update( {
+      'is_loaded': False,
+      'path': '/path/to/extra/conf'
+    } )
+    assert_that(
+      FormatDebugInfoResponse( response ),
+      contains_string(
+        'Extra configuration file found but not loaded\n'
+        'Extra configuration path: /path/to/extra/conf\n'
+      )
     )
-  )
 
 
-def FormatDebugInfoResponse_Completer_ServerRunningWithHost_test():
-  response = deepcopy( GENERIC_RESPONSE )
-  assert_that(
-    FormatDebugInfoResponse( response ),
-    contains_string(
-      'Completer name completer debug information:\n'
-      '  Server name running at: http://127.0.0.1:1234\n'
-      '  Server name process ID: 12345\n'
-      '  Server name executable: /path/to/executable\n'
-      '  Server name logfiles:\n'
-      '    /path/to/stdout/logfile\n'
-      '    /path/to/stderr/logfile\n'
-      '  Server name key: value\n'
-      '  Key: value\n'
+  def test_FormatDebugInfoResponse_ExtraConfFoundAndLoaded( self ):
+    response = deepcopy( GENERIC_RESPONSE )
+    response[ 'extra_conf' ].update( {
+      'is_loaded': True,
+      'path': '/path/to/extra/conf'
+    } )
+    assert_that(
+      FormatDebugInfoResponse( response ),
+      contains_string(
+        'Extra configuration file found and loaded\n'
+        'Extra configuration path: /path/to/extra/conf\n'
+      )
     )
-  )
 
 
-def FormatDebugInfoResponse_Completer_ServerRunningWithoutHost_test():
-  response = deepcopy( GENERIC_RESPONSE )
-  response[ 'completer' ][ 'servers' ][ 0 ].update( {
-    'address': None,
-    'port': None
-  } )
-  assert_that(
-    FormatDebugInfoResponse( response ),
-    contains_string(
-      'Completer name completer debug information:\n'
-      '  Server name running\n'
-      '  Server name process ID: 12345\n'
-      '  Server name executable: /path/to/executable\n'
-      '  Server name logfiles:\n'
-      '    /path/to/stdout/logfile\n'
-      '    /path/to/stderr/logfile\n'
-      '  Server name key: value\n'
-      '  Key: value\n'
+  def test_FormatDebugInfoResponse_Completer_ServerRunningWithHost( self ):
+    response = deepcopy( GENERIC_RESPONSE )
+    assert_that(
+      FormatDebugInfoResponse( response ),
+      contains_string(
+        'Completer name completer debug information:\n'
+        '  Server name running at: http://127.0.0.1:1234\n'
+        '  Server name process ID: 12345\n'
+        '  Server name executable: /path/to/executable\n'
+        '  Server name logfiles:\n'
+        '    /path/to/stdout/logfile\n'
+        '    /path/to/stderr/logfile\n'
+        '  Server name key: value\n'
+        '  Key: value\n'
+      )
     )
-  )
 
 
-def FormatDebugInfoResponse_Completer_ServerNotRunningWithNoLogfiles_test():
-  response = deepcopy( GENERIC_RESPONSE )
-  response[ 'completer' ][ 'servers' ][ 0 ].update( {
-    'is_running': False,
-    'logfiles': []
-  } )
-  assert_that(
-    FormatDebugInfoResponse( response ),
-    contains_string(
-      'Completer name completer debug information:\n'
-      '  Server name not running\n'
-      '  Server name executable: /path/to/executable\n'
-      '  No logfiles available\n'
-      '  Server name key: value\n'
-      '  Key: value\n'
+  def test_FormatDebugInfoResponse_Completer_ServerRunningWithoutHost( self ):
+    response = deepcopy( GENERIC_RESPONSE )
+    response[ 'completer' ][ 'servers' ][ 0 ].update( {
+      'address': None,
+      'port': None
+    } )
+    assert_that(
+      FormatDebugInfoResponse( response ),
+      contains_string(
+        'Completer name completer debug information:\n'
+        '  Server name running\n'
+        '  Server name process ID: 12345\n'
+        '  Server name executable: /path/to/executable\n'
+        '  Server name logfiles:\n'
+        '    /path/to/stdout/logfile\n'
+        '    /path/to/stderr/logfile\n'
+        '  Server name key: value\n'
+        '  Key: value\n'
+      )
     )
-  )
+
+
+  def test_FormatDebugInfoResponse_Completer_ServerNotRunningWithNoLogfiles(
+      self ):
+    response = deepcopy( GENERIC_RESPONSE )
+    response[ 'completer' ][ 'servers' ][ 0 ].update( {
+      'is_running': False,
+      'logfiles': []
+    } )
+    assert_that(
+      FormatDebugInfoResponse( response ),
+      contains_string(
+        'Completer name completer debug information:\n'
+        '  Server name not running\n'
+        '  Server name executable: /path/to/executable\n'
+        '  No logfiles available\n'
+        '  Server name key: value\n'
+        '  Key: value\n'
+      )
+    )

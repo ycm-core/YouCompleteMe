@@ -19,6 +19,7 @@ from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 from hamcrest import assert_that, equal_to
+from unittest import TestCase
 from ycm.diagnostic_filter import DiagnosticFilter
 
 
@@ -45,91 +46,92 @@ def _CreateFilterForTypes( opts, types ):
   return DiagnosticFilter.CreateFromOptions( opts ).SubsetForTypes( types )
 
 
-def RegexFilter_test():
-  opts = _JavaFilter( { 'regex' : 'taco' } )
-  f = _CreateFilterForTypes( opts, [ 'java' ] )
+class DiagnosticFilterTest( TestCase ):
+  def test_RegexFilter( self ):
+    opts = _JavaFilter( { 'regex' : 'taco' } )
+    f = _CreateFilterForTypes( opts, [ 'java' ] )
 
-  _assert_rejects( f, 'This is a Taco' )
-  _assert_accepts( f, 'This is a Burrito' )
-
-
-def RegexSingleList_test():
-  opts = _JavaFilter( { 'regex' : [ 'taco' ] } )
-  f = _CreateFilterForTypes( opts, [ 'java' ] )
-
-  _assert_rejects( f, 'This is a Taco' )
-  _assert_accepts( f, 'This is a Burrito' )
+    _assert_rejects( f, 'This is a Taco' )
+    _assert_accepts( f, 'This is a Burrito' )
 
 
-def RegexMultiList_test():
-  opts = _JavaFilter( { 'regex' : [ 'taco', 'burrito' ] } )
-  f = _CreateFilterForTypes( opts, [ 'java' ] )
+  def test_RegexSingleList( self ):
+    opts = _JavaFilter( { 'regex' : [ 'taco' ] } )
+    f = _CreateFilterForTypes( opts, [ 'java' ] )
 
-  _assert_rejects( f, 'This is a Taco' )
-  _assert_rejects( f, 'This is a Burrito' )
-
-
-def RegexNotFiltered_test():
-  opts = _JavaFilter( { 'regex' : 'taco' } )
-  f = _CreateFilterForTypes( opts, [ 'cs' ] )
-
-  _assert_accepts( f, 'This is a Taco' )
-  _assert_accepts( f, 'This is a Burrito' )
+    _assert_rejects( f, 'This is a Taco' )
+    _assert_accepts( f, 'This is a Burrito' )
 
 
-def LevelWarnings_test():
-  opts = _JavaFilter( { 'level' : 'warning' } )
-  f = _CreateFilterForTypes( opts, [ 'java' ] )
+  def test_RegexMultiList( self ):
+    opts = _JavaFilter( { 'regex' : [ 'taco', 'burrito' ] } )
+    f = _CreateFilterForTypes( opts, [ 'java' ] )
 
-  _assert_rejects( f, { 'text' : 'This is an unimportant taco',
-                        'kind' : 'WARNING' } )
-  _assert_accepts( f, { 'text' : 'This taco will be shown',
-                        'kind' : 'ERROR' } )
+    _assert_rejects( f, 'This is a Taco' )
+    _assert_rejects( f, 'This is a Burrito' )
 
 
-def LevelErrors_test():
-  opts = _JavaFilter( { 'level' : 'error' } )
-  f = _CreateFilterForTypes( opts, [ 'java' ] )
+  def test_RegexNotFiltered( self ):
+    opts = _JavaFilter( { 'regex' : 'taco' } )
+    f = _CreateFilterForTypes( opts, [ 'cs' ] )
 
-  _assert_accepts( f, { 'text' : 'This is an IMPORTANT taco',
-                        'kind' : 'WARNING' } )
-  _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
-                        'kind' : 'ERROR' } )
+    _assert_accepts( f, 'This is a Taco' )
+    _assert_accepts( f, 'This is a Burrito' )
 
 
-def MultipleFilterTypesTypeTest_test():
+  def test_LevelWarnings( self ):
+    opts = _JavaFilter( { 'level' : 'warning' } )
+    f = _CreateFilterForTypes( opts, [ 'java' ] )
 
-  opts = _JavaFilter( { 'regex' : '.*taco.*',
-                        'level' : 'warning' } )
-  f = _CreateFilterForTypes( opts, [ 'java' ] )
-
-  _assert_rejects( f, { 'text' : 'This is an unimportant taco',
-                        'kind' : 'WARNING' } )
-  _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
-                        'kind' : 'ERROR' } )
-  _assert_accepts( f, { 'text' : 'This burrito WILL be shown',
-                        'kind' : 'ERROR' } )
+    _assert_rejects( f, { 'text' : 'This is an unimportant taco',
+                          'kind' : 'WARNING' } )
+    _assert_accepts( f, { 'text' : 'This taco will be shown',
+                          'kind' : 'ERROR' } )
 
 
-def MergeMultipleFiletypes_test():
+  def test_LevelErrors( self ):
+    opts = _JavaFilter( { 'level' : 'error' } )
+    f = _CreateFilterForTypes( opts, [ 'java' ] )
 
-  opts = { 'filter_diagnostics' : {
-    'java' : { 'regex' : '.*taco.*' },
-    'xml'  : { 'regex' : '.*burrito.*' } } }
-
-  f = _CreateFilterForTypes( opts, [ 'java', 'xml' ] )
-
-  _assert_rejects( f, 'This is a Taco' )
-  _assert_rejects( f, 'This is a Burrito' )
-  _assert_accepts( f, 'This is some Nachos' )
+    _assert_accepts( f, { 'text' : 'This is an IMPORTANT taco',
+                          'kind' : 'WARNING' } )
+    _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
+                          'kind' : 'ERROR' } )
 
 
-def CommaSeparatedFiletypes_test():
+  def test_MultipleFilterTypesTypeTest( self ):
 
-  opts = { 'filter_diagnostics' : {
-    'java,c,cs' : { 'regex' : '.*taco.*' } } }
+    opts = _JavaFilter( { 'regex' : '.*taco.*',
+                          'level' : 'warning' } )
+    f = _CreateFilterForTypes( opts, [ 'java' ] )
 
-  f = _CreateFilterForTypes( opts, [ 'cs' ] )
+    _assert_rejects( f, { 'text' : 'This is an unimportant taco',
+                          'kind' : 'WARNING' } )
+    _assert_rejects( f, { 'text' : 'This taco will NOT be shown',
+                          'kind' : 'ERROR' } )
+    _assert_accepts( f, { 'text' : 'This burrito WILL be shown',
+                          'kind' : 'ERROR' } )
 
-  _assert_rejects( f, 'This is a Taco' )
-  _assert_accepts( f, 'This is a Burrito' )
+
+  def test_MergeMultipleFiletypes( self ):
+
+    opts = { 'filter_diagnostics' : {
+      'java' : { 'regex' : '.*taco.*' },
+      'xml'  : { 'regex' : '.*burrito.*' } } }
+
+    f = _CreateFilterForTypes( opts, [ 'java', 'xml' ] )
+
+    _assert_rejects( f, 'This is a Taco' )
+    _assert_rejects( f, 'This is a Burrito' )
+    _assert_accepts( f, 'This is some Nachos' )
+
+
+  def test_CommaSeparatedFiletypes( self ):
+
+    opts = { 'filter_diagnostics' : {
+      'java,c,cs' : { 'regex' : '.*taco.*' } } }
+
+    f = _CreateFilterForTypes( opts, [ 'cs' ] )
+
+    _assert_rejects( f, 'This is a Taco' )
+    _assert_accepts( f, 'This is a Burrito' )

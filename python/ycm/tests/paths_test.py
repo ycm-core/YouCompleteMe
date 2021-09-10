@@ -18,8 +18,8 @@
 from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
-import pytest
 from hamcrest import assert_that
+from unittest import TestCase
 from ycm.paths import _EndsWithPython
 
 
@@ -33,23 +33,26 @@ def EndsWithPython_Bad( path ):
               f'Path { path } does end with a Python name.' )
 
 
-@pytest.mark.parametrize( 'path', [
-    'python3',
-    '/usr/bin/python3.6',
-    '/home/user/.pyenv/shims/python3.6',
-    r'C:\Python36\python.exe'
-  ] )
-def EndsWithPython_Python3Paths_test( path ):
-  EndsWithPython_Good( path )
+class PathTest( TestCase ):
+  def test_EndsWithPython_Python3Paths( self ):
+    for path in [
+      'python3',
+      '/usr/bin/python3.6',
+      '/home/user/.pyenv/shims/python3.6',
+      r'C:\Python36\python.exe'
+    ]:
+      with self.subTest( path = path ):
+        EndsWithPython_Good( path )
 
 
-@pytest.mark.parametrize( 'path', [
-    None,
-    '',
-    '/opt/local/bin/vim',
-    r'C:\Program Files\Vim\vim74\gvim.exe',
-    '/usr/bin/python2.7',
-    '/home/user/.pyenv/shims/python3.2',
-  ] )
-def EndsWithPython_BadPaths_test( path ):
-  EndsWithPython_Bad( path )
+  def test_EndsWithPython_BadPaths( self ):
+    for path in [
+      None,
+      '',
+      '/opt/local/bin/vim',
+      r'C:\Program Files\Vim\vim74\gvim.exe',
+      '/usr/bin/python2.7',
+      '/home/user/.pyenv/shims/python3.2',
+    ]:
+      with self.subTest( path = path ):
+        EndsWithPython_Bad( path )

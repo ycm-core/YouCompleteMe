@@ -17,11 +17,11 @@
 
 from collections import defaultdict, namedtuple
 from unittest.mock import DEFAULT, MagicMock, patch
+from unittest import skip
 from hamcrest import assert_that, equal_to
 import contextlib
 import functools
 import json
-import pytest
 import os
 import re
 import sys
@@ -712,7 +712,7 @@ def ExpectedFailure( reason, *exception_matchers ):
           raise test_exception
 
         # Failed for the right reason
-        pytest.skip( reason )
+        skip( reason )
       else:
         raise AssertionError( f'Test was expected to fail: { reason }' )
     return Wrapper
