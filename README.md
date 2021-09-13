@@ -95,6 +95,7 @@ Contents
 - [Contributor Code of Conduct](#contributor-code-of-conduct)
 - [Contact](#contact)
 - [License](#license)
+- [Sponsorship](#sponsorship)
 
 
 Intro
@@ -3506,6 +3507,20 @@ License
 
 This software is licensed under the [GPL v3 license][gpl].
 © 2015-2018 YouCompleteMe contributors
+
+Sponsorship
+-----------
+
+If you like YCM so much that you're wiling to part with your hard-earned cash, please consider donating to one of the following charities, which are meaningful to the current maintainers (in no particular order):
+
+* [Greyhound Rescue Wales](https://greyhoundrescuewales.co.uk)
+* [Budi Human](https://www.budihuman.rs/en)
+* [Cancer Research UK](https://www.cancerresearchuk.org)
+* [ICCF Holland](https://iccf.nl)
+* Any charity of your choosing.
+
+Please note: The YCM maintainers do not specifically endorse nor necessarily have any relationship with the above charities. Disclosure: It is noted that one key maintainer is family with Trustees of Greyhound Rescue Wales.
+
 
 [ycmd]: https://github.com/ycm-core/ycmd
 [Clang]: https://clang.llvm.org/
