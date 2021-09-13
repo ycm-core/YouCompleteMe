@@ -3514,7 +3514,7 @@ Sponsorship
 If you like YCM so much that you're wiling to part with your hard-earned cash, please consider donating to one of the following charities, which are meaningful to the current maintainers (in no particular order):
 
 * [Greyhound Rescue Wales](https://greyhoundrescuewales.co.uk)
-* [Budi Human](https://www.budihuman.rs/en)
+* [Be Humane](https://www.budihuman.rs/en)
 * [Cancer Research UK](https://www.cancerresearchuk.org)
 * [ICCF Holland](https://iccf.nl)
 * Any charity of your choosing.
