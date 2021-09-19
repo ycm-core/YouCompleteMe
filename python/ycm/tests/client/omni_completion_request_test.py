@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+from unittest import TestCase
 from unittest.mock import MagicMock
 from hamcrest import assert_that, has_entries
 
@@ -36,19 +37,20 @@ def BuildOmnicompletionRequest( results, start_column = 1 ):
   return request
 
 
-def Done_AlwaysTrue_test():
-  request = BuildOmnicompletionRequest( [] )
+class OmniCompletionRequestTest( TestCase ):
+  def test_Done_AlwaysTrue( self ):
+    request = BuildOmnicompletionRequest( [] )
 
-  assert_that( request.Done() )
+    assert_that( request.Done() )
 
 
-def Response_FromOmniCompleter_test():
-  results = [ { "word": "test" } ]
-  request = BuildOmnicompletionRequest( results )
+  def test_Response_FromOmniCompleter( self ):
+    results = [ { "word": "test" } ]
+    request = BuildOmnicompletionRequest( results )
 
-  assert_that( request.Response(), has_entries( {
-    'line': 1,
-    'column': 1,
-    'completion_start_column': 1,
-    'completions': results
-  } ) )
+    assert_that( request.Response(), has_entries( {
+      'line': 1,
+      'column': 1,
+      'completion_start_column': 1,
+      'completions': results
+    } ) )
