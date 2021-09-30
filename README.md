@@ -315,6 +315,20 @@ cd ~/.vim/bundle/YouCompleteMe
 ./install.py
 ```
 
+**NOTE**: If you are using an M1 Mac and would like to comile YCM **with** semantic support for C-family languages:
+
+```
+brew install llvm
+```
+Add this line to your `.vimrc` file:
+```
+let g:ycm_clangd_binary_path='clangd'
+```
+Lastly, compile:
+```
+cd ~/.vim/bundle/YouCompleteMe
+./install.py --clangd-completer --system-libclang
+```
 
 The following additional language support options are available:
 
