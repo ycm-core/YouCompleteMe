@@ -158,8 +158,15 @@ def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
 
 
 def GetBufferNumberForFilename( filename, create_buffer_if_needed = False ):
+  realpath = os.path.realpath( filename )
+  tail = os.path.split( realpath )[ 1 ]
+  bufnr = GetIntValue( f"bufnr('{ EscapeForVim( realpath ) }')" )
+  if bufnr != -1:
+    return bufnr
+  if not os.path.exists( realpath ) and tail.isnumeric():
+    return int( tail )
   return GetIntValue(
-      f"bufnr('{ EscapeForVim( os.path.realpath( filename ) ) }', "
+      f"bufnr('{ EscapeForVim( realpath ) }', "
              f"{ int( create_buffer_if_needed ) })" )
 
 

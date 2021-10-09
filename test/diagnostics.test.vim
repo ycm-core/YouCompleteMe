@@ -121,3 +121,14 @@ function! Test_MessagePoll_Multiple_Filetypes()
   let cpp_signs = sign_getplaced( '%' )[ 0 ][ 'signs' ]
   call assert_false( java_signs == cpp_signs )
 endfunction
+
+function! Test_BufferWithoutAssociatedFile_HighlightingWorks()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/diagnostics/foo.cpp', {} ) " Not actually of interest
+  new
+  call setbufline( '%', 1, 'iiii' )
+  setf c
+  call WaitForAssert( {->
+    \ assert_true( len( sign_getplaced( '%' )[ 0 ][ 'signs' ] ) ) } )
+  " TODO: After switching to text properties assert those too.
+endfunction
