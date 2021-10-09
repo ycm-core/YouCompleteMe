@@ -304,17 +304,56 @@ def GetWindowsForBufferNumber( buffer_number ):
            if window.buffer.number == buffer_number ]
 
 
-def SetLocationListsForBuffer( buffer_number, diagnostics ):
+def SetLocationListsForBuffer( buffer_number,
+                               diagnostics,
+                               open_on_edit = False ):
   """Populate location lists for all windows containing the buffer with number
   |buffer_number|. See SetLocationListForWindow for format of diagnostics."""
   for window in GetWindowsForBufferNumber( buffer_number ):
-    SetLocationListForWindow( window.number, diagnostics )
+    SetLocationListForWindow( window.number, diagnostics, open_on_edit )
 
 
-def SetLocationListForWindow( window_number, diagnostics ):
+def SetLocationListForWindow( window_number,
+                              diagnostics,
+                              open_on_edit = False ):
   """Populate the location list with diagnostics. Diagnostics should be in
   qflist format; see ":h setqflist" for details."""
-  vim.eval( f'setloclist( { window_number }, { json.dumps( diagnostics ) } )' )
+  total_location_lists = int( vim.eval( f'getloclist( { window_number}, '
+                                         '{ "nr": "$" } ).nr' ) )
+  ycm_loc_id = None
+  for i in range( total_location_lists ):
+    loc_data = vim.eval(
+        f'getloclist( { window_number }, '
+        f'{{ "nr": { i + 1 }, "id": 0, "title": 0 }} )' )
+    if loc_data[ 'title' ] == 'ycm_loc': # Found it!
+      ycm_loc_id = int( loc_data[ 'id' ] )
+      break
+
+  if ycm_loc_id is None:
+    # Create new and populate
+    vim.eval( f'setloclist( { window_number }, '
+                           '[], '
+                           '" ", '
+                           '{ "title": "ycm_loc", '
+                            f'"items": { json.dumps( diagnostics ) } }} )' )
+  elif open_on_edit:
+    # Remove old and create new list
+    vim.eval( f'setloclist( { window_number }, '
+                           '[], '
+                           '"r", '
+                          f'{{ "id": { ycm_loc_id }, '
+                              '"items": [], "title": "" } )' )
+    vim.eval( f'setloclist( { window_number }, '
+                           '[], '
+                           '" ", '
+                           '{ "title": "ycm_loc", '
+                            f'"items": { json.dumps( diagnostics ) } }} )' )
+  else:
+    vim.eval( f'setloclist( { window_number }, '
+                           '[], '
+                           '"r", '
+                          f'{{ "id": { ycm_loc_id }, '
+                             f'"items": { json.dumps( diagnostics ) } }} )' )
 
 
 def OpenLocationList( focus = False, autoclose = False ):
