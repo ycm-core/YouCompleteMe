@@ -203,7 +203,8 @@ function! youcompleteme#Enable()
   let s:default_completion = py3eval( 'vimsupport.NO_COMPLETIONS' )
   let s:completion = s:default_completion
 
-  if exists( '*prop_type_add' ) && exists( '*prop_type_delete' )
+  if exists( '*prop_type_add' ) &&
+      \ index( prop_type_list(), 'YCM-signature-help-current-argument' ) == -1
     hi default YCMInverse term=reverse cterm=reverse gui=reverse
     call prop_type_delete( 'YCM-signature-help-current-argument' )
     call prop_type_add( 'YCM-signature-help-current-argument', {
@@ -416,7 +417,8 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmErrorSection SpellBad
     endif
   endif
-  if !has( 'nvim' )
+  if exists( '*prop_type_add' ) &&
+      \ index( prop_type_list(), 'YcmErrorProperty' ) == -1
     call prop_type_add( 'YcmErrorProperty', {
           \ 'highlight': 'YcmErrorSection' } )
   endif
@@ -428,7 +430,8 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmWarningSection SpellCap
     endif
   endif
-  if !has( 'nvim' )
+  if exists( '*prop_type_add' ) &&
+      \ index( prop_type_list(), 'YcmWarningProperty' ) == -1
     call prop_type_add( 'YcmWarningProperty', {
           \ 'highlight': 'YcmWarningSection' } )
   endif
