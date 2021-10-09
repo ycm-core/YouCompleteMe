@@ -84,7 +84,10 @@ class VimsupportTest( TestCase ):
       vimsupport.SetLocationListsForBuffer( 3, diagnostics )
 
     vim_eval.assert_has_exact_calls( [
-      call( f'setloclist( 1, { json.dumps( diagnostics ) } )' )
+      call( 'setloclist( 1, [], " ", { "title": "ycm_loc", '
+            '"items": [{"bufnr": 3, "filename": "some_filename", "lnum": 5, '
+            '"col": 22, "type": "E", "valid": 1}] } )' ),
+      call( 'getloclist( 1, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
@@ -141,7 +144,9 @@ class VimsupportTest( TestCase ):
       vimsupport.SetLocationListsForBuffer( 1, diagnostics )
 
     vim_eval.assert_has_exact_calls( [
-      call( f'setloclist( 2, { json.dumps( diagnostics ) } )' )
+      call( 'setloclist( 2, [], " ", { "title": "ycm_loc", "items": '
+           f'{ json.dumps( diagnostics ) } }} )' ),
+      call( 'getloclist( 2, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
@@ -159,8 +164,11 @@ class VimsupportTest( TestCase ):
     with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ):
       vimsupport.SetLocationList( diagnostics )
 
-    vim_eval.assert_has_calls( [
-      call( f'setloclist( 0, { json.dumps( diagnostics ) } )' )
+    vim_eval.assert_has_exact_calls( [
+      call( 'setloclist( 0, [], " ", { "title": "ycm_loc", "items": [{"bufnr": '
+            '3, "filename": "some_filename", "lnum": '
+            '5, "col": 22, "type": "E", "valid": 1}] } )' ),
+      call( 'getloclist( 0, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
@@ -184,7 +192,10 @@ class VimsupportTest( TestCase ):
     # This version does not check the current
     # buffer and just sets the current win
     vim_eval.assert_has_exact_calls( [
-      call( f'setloclist( 0, { json.dumps( diagnostics ) } )' )
+      call( 'setloclist( 0, [], " ", { "title": "ycm_loc", "items": [{"bufnr": '
+            '3, "filename": "some_filename", "lnum": 5, "col": 22, '
+            '"type": "E", "valid": 1}] } )' ),
+      call( 'getloclist( 0, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 

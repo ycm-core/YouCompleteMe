@@ -503,6 +503,7 @@ class VimWindow:
     self.buffer = buffer_object
     self.cursor = cursor
     self.options = {}
+    self.vars = {}
 
 
   def __repr__( self ):

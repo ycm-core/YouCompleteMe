@@ -50,24 +50,24 @@ class DiagnosticInterface:
     return self._DiagnosticsCount( _DiagnosticIsWarning )
 
 
-  def PopulateLocationList( self ):
+  def PopulateLocationList( self, open_on_edit = False ):
     # Do nothing if loc list is already populated by diag_interface
     if not self._user_options[ 'always_populate_location_list' ]:
-      self._UpdateLocationLists()
+      self._UpdateLocationLists( open_on_edit )
     return bool( self._diagnostics )
 
 
-  def UpdateWithNewDiagnostics( self, diags ):
+  def UpdateWithNewDiagnostics( self, diags, open_on_edit = False ):
     self._diagnostics = [ _NormalizeDiagnostic( x ) for x in
                             self._ApplyDiagnosticFilter( diags ) ]
     self._ConvertDiagListToDict()
 
     if ( self._user_options[ 'update_diagnostics_in_insert_mode' ] or
          'i' not in vim.eval( 'mode()' ) ):
-      self.RefreshDiagnosticsUI()
+      self.RefreshDiagnosticsUI( open_on_edit )
 
 
-  def RefreshDiagnosticsUI( self ):
+  def RefreshDiagnosticsUI( self, open_on_edit = False ):
     if self._user_options[ 'echo_current_diagnostic' ]:
       self._EchoDiagnostic()
 
@@ -77,7 +77,7 @@ class DiagnosticInterface:
     self.UpdateMatches()
 
     if self._user_options[ 'always_populate_location_list' ]:
-      self._UpdateLocationLists()
+      self._UpdateLocationLists( open_on_edit )
 
 
   def _ApplyDiagnosticFilter( self, diags ):
@@ -119,10 +119,11 @@ class DiagnosticInterface:
     return count
 
 
-  def _UpdateLocationLists( self ):
+  def _UpdateLocationLists( self, open_on_edit = False ):
     vimsupport.SetLocationListsForBuffer(
       self._bufnr,
-      vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ) )
+      vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ),
+      open_on_edit )
 
 
   def UpdateMatches( self ):

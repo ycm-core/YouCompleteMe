@@ -593,7 +593,7 @@ class YouCompleteMeTest( TestCase ):
       call( 'Diagnostics refreshed', warning = False ),
       call( 'No warnings or errors detected.', warning = False )
     ] )
-    set_location_list_for_window.assert_called_once_with( 1, [] )
+    set_location_list_for_window.assert_called_once_with( 1, [], 1 )
 
 
   @YouCompleteMeInstance( { 'g:ycm_log_level': 'debug',
@@ -640,7 +640,7 @@ class YouCompleteMeTest( TestCase ):
         'text': 'error text',
         'type': 'E',
         'valid': 1
-    } ] )
+    } ], 0 )
 
 
   @YouCompleteMeInstance( { 'g:ycm_open_loclist_on_ycm_diags': 1 } )
@@ -688,7 +688,7 @@ class YouCompleteMeTest( TestCase ):
         'text': 'error text',
         'type': 'E',
         'valid': 1
-    } ] )
+    } ], 1 )
     open_location_list.assert_called_once_with( focus = True )
 
 
@@ -951,7 +951,7 @@ class YouCompleteMeTest( TestCase ):
           'type': 'E',
           'text': 'error text in buffer not open in Vim'
         }
-      ] )
+      ], False )
     ] )
 
     assert_that(
@@ -1126,7 +1126,7 @@ class YouCompleteMeTest( TestCase ):
           'type': 'E',
           'text': 'error text in current buffer',
         },
-      ] ),
+      ], False ),
 
       call( 3, [
         {
@@ -1137,7 +1137,7 @@ class YouCompleteMeTest( TestCase ):
           'type': 'E',
           'text': 'error text in a buffer open in a separate window',
         },
-      ] )
+      ], False )
     ] )
 
     assert_that(
