@@ -108,7 +108,7 @@ function! Test_MessagePoll_After_LocationList()
 
   setf cpp
   call assert_equal( 'cpp', &ft )
-  call WaitForAssert( {-> assert_equal( 1, len( sign_getplaced(
+  call WaitForAssert( {-> assert_equal( 2, len( sign_getplaced(
                         \ '%',
                         \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
   call setline( 1, '' )
