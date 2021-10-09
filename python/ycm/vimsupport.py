@@ -206,7 +206,8 @@ def GetTextProperties( buffer_number ):
       vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
                              f'{{ "bufnr": { buffer_number } }} )' )
       properties.extend(
-        DiagnosticProperty( p[ 'id' ],
+        DiagnosticProperty(
+          int( p[ 'id' ] ),
           p[ 'type' ],
           line_number + 1,
           int( p[ 'col' ] ),
@@ -215,12 +216,19 @@ def GetTextProperties( buffer_number ):
       )
     return properties
   else:
-    return vim.eval(
+    ext_marks = vim.eval(
       f'nvim_buf_get_extmarks( { buffer_number }, '
                              f'{ YCM_NEOVIM_NS_ID }, '
                               '0, '
                               '-1, '
-                              '{} )' )
+                              '{ "details": 1 } )' )
+    return [ DiagnosticProperty(
+               int( ext_mark[ 0 ] ),
+               ext_mark[ 3 ][ 'hl_group' ],
+               int( ext_mark[ 1 ] ) + 1, # Neovim uses 0-based lines and columns
+               int( ext_mark[ 2 ] ) + 1,
+               int( ext_mark[ 3 ][ 'end_col' ] ) - int( ext_mark[ 2 ] ) )
+             for ext_mark in ext_marks ]
 
 
 def AddTextProperty( buffer_number, line, column, extra_args, prop_id ):
@@ -244,10 +252,8 @@ def AddTextProperty( buffer_number, line, column, extra_args, prop_id ):
                                     f'{ extra_args } )' )
 
 
-def RemoveTextProperty( buffer_number, prop ):
-  # NOTE: `prop` is an element from the list we get from GetTextProperties().
+def RemoveTextProperty( buffer_number: int, prop: DiagnosticProperty ):
   if not VimIsNeovim():
-    # In vim `prop` is a detailed dictionary.
     p = {
         'bufnr': buffer_number,
         'id': prop.id,
@@ -255,11 +261,9 @@ def RemoveTextProperty( buffer_number, prop ):
         'both': 1 }
     vim.eval( f'prop_remove( { p } )' )
   else:
-    # In neovim `prop` is a 3-element list, consisting of
-    # [property_id, start_line, start_column]
     vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
                                     f'{ YCM_NEOVIM_NS_ID }, '
-                                    f'{ prop[ 0 ] } )' )
+                                    f'{ prop.id } )' )
 
 
 # Clamps the line and column numbers so that they are not past the contents of

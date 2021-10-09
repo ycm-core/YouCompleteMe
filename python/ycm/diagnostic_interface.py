@@ -135,6 +135,9 @@ class DiagnosticInterface:
       for diag in reversed( diags ):
         for prop in _ConvertDiagnosticToTextProperties( diag ):
           global YCM_VIM_PROPERTY_ID
+          if vimsupport.VimIsNeovim():
+            prop[ 2 ][ 'type' ] = prop[ 2 ][ 'type' ].replace( 'Property',
+                                                               'Section' )
           diag_prop = vimsupport.DiagnosticProperty(
               YCM_VIM_PROPERTY_ID,
               prop[ 2 ][ 'type' ],
@@ -144,9 +147,7 @@ class DiagnosticInterface:
                  if 'end_col' in prop[ 2 ] else prop[ 1 ] )
           try:
             props_to_remove.remove( diag_prop )
-          # TODO: Neovim GetTextProperties returns a list of lists of
-          # ID/Start Line/Start Col, which isn't enough data.
-          except ( ValueError, AttributeError ):
+          except ValueError:
             vimsupport.AddTextProperty( self._bufnr,
                                         prop[ 0 ],
                                         prop[ 1 ],
