@@ -27,8 +27,8 @@ function! Test_Diagnostics_Update_In_Insert_Mode()
   " mode until done.
   function! Check( id ) closure
     call WaitForAssert( {-> assert_true( len( sign_getplaced(
-				\ '%',
-    				\ { 'group': 'ycm_signs' } ) ) ) } )
+                           \ '%',
+                           \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
     call feedkeys( "\<ESC>" )
   endfunction
 
@@ -58,8 +58,8 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
            \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
       \ ) ) } )
     call WaitForAssert( {-> assert_false( len( sign_getplaced(
-				\ '%',
-    				\ { 'group': 'ycm_signs' } ) ) ) } )
+                           \ '%',
+                           \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
     call feedkeys( "\<ESC>" )
   endfunction
 
@@ -80,18 +80,20 @@ function! Test_Changing_Filetype_Refreshes_Diagnostics()
   call assert_equal( 'xml', &ft )
   call assert_false(
     \ pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
-  call assert_equal( [], sign_getplaced( '%', { 'group': 'ycm_signs' } ) )
+  call assert_true( empty( sign_getplaced(
+                        \ '%',
+                        \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) )
   setf typescript
   call assert_equal( 'typescript', &ft )
   call assert_false(
     \ pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
   " Diagnostics are async, so wait for the assert to return 0 for a while.
   call WaitForAssert( {-> assert_equal( 1, len( sign_getplaced(
-    			\ '%',
-  			\ { 'group': 'ycm_signs' } ) ) ) } )
+                        \ '%',
+                        \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
   call assert_equal( 1, len( sign_getplaced(
-    			\ '%',
-  			\ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) )
+                        \ '%',
+                        \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) )
   call assert_equal(
     \ 'YcmError',
     \ sign_getplaced(
@@ -107,16 +109,16 @@ function! Test_MessagePoll_After_LocationList()
   setf cpp
   call assert_equal( 'cpp', &ft )
   call WaitForAssert( {-> assert_equal( 1, len( sign_getplaced(
-    			\ '%',
-  			\ { 'group': 'ycm_signs' } ) ) ) } )
+                        \ '%',
+                        \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
   call setline( 1, '' )
   " Wait for the parse request to be complete otherwise we won't send another
   " one when the TextChanged event fires
   call WaitFor( {-> pyxeval( 'ycm_state.FileParseRequestReady()' ) } )
   doautocmd TextChanged
   call WaitForAssert( {-> assert_true( empty( sign_getplaced(
-    			\ '%',
-  			\ { 'group': 'ycm_signs' } ) ) ) } )
+                        \ '%',
+                        \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
   call assert_true( empty( getloclist( 0 ) ) )
 endfunction
 
