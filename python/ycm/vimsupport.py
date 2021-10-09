@@ -45,6 +45,12 @@ FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
 
 NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
 
+# When we're in a buffer without a file name associated with it, we need to
+# invent a file name. We do so by the means of $CWD/$BUFNR.
+# However, that causes problems with diagnostics - we also need a way to map
+# those same file names back to their originating buffer numbers.
+MADEUP_FILENAME_TO_BUFFER_NUMBER = {}
+
 NO_COMPLETIONS = {
   'line': -1,
   'column': -1,
@@ -140,9 +146,10 @@ def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
 
 
 def GetBufferNumberForFilename( filename, create_buffer_if_needed = False ):
-  return GetIntValue(
-      f"bufnr('{ EscapeForVim( os.path.realpath( filename ) ) }', "
-             f"{ int( create_buffer_if_needed ) })" )
+  realpath = os.path.realpath( filename )
+  return MADEUP_FILENAME_TO_BUFFER_NUMBER.get( realpath, GetIntValue(
+      f"bufnr('{ EscapeForVim( realpath ) }', "
+             f"{ int( create_buffer_if_needed ) })" ) )
 
 
 def GetCurrentBufferFilepath():
@@ -161,7 +168,9 @@ def GetBufferFilepath( buffer_object ):
     return os.path.abspath( ToUnicode( buffer_object.name ) )
   # Buffers that have just been created by a command like :enew don't have any
   # buffer name so we use the buffer number for that.
-  return os.path.join( GetCurrentDirectory(), str( buffer_object.number ) )
+  name = os.path.join( GetCurrentDirectory(), str( buffer_object.number ) )
+  MADEUP_FILENAME_TO_BUFFER_NUMBER[ name ] = buffer_object.number
+  return name
 
 
 def GetCurrentBufferNumber():
