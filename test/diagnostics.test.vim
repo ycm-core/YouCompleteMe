@@ -148,3 +148,39 @@ function! Test_MessagePoll_Multiple_Filetypes()
       \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ]
   call assert_false( java_signs == cpp_signs )
 endfunction
+
+function! Test_BufferWithoutAssociatedFile_HighlightingWorks()
+  enew
+  call setbufline( '%', 1, 'iiii' )
+  setf c
+  call WaitForAssert( {->
+    \ assert_true( len( sign_getplaced(
+                        \ '%',
+                        \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
+  let expected_properties = [
+    \ { 'id': 3,
+    \   'col': 1,
+    \   'end': 1,
+    \   'type': 'YcmErrorProperty',
+    \   'length': 0,
+    \   'start': 1 },
+    \ { 'id': 2,
+    \   'col': 1,
+    \   'end': 1,
+    \   'type': 'YcmErrorProperty',
+    \   'length': 0,
+    \   'start': 1 },
+    \ { 'id': 1,
+    \    'col': 1,
+    \    'end': 1,
+    \    'type': 'YcmErrorProperty',
+    \    'length': 4,
+    \    'start': 1 },
+    \ { 'id': 0,
+    \    'col': 1,
+    \    'end': 1,
+    \    'type': 'YcmErrorProperty',
+    \    'length': 4,
+    \    'start': 1 } ]
+  call assert_equal( expected_properties, prop_list( 1 ) )
+endfunction
