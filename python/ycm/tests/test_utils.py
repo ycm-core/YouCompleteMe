@@ -18,7 +18,10 @@
 from collections import defaultdict, namedtuple
 from unittest.mock import DEFAULT, MagicMock, patch
 from unittest import skip
-from hamcrest import assert_that, equal_to
+from hamcrest import ( assert_that,
+                       contains_exactly,
+                       contains_inanyorder,
+                       equal_to )
 import contextlib
 import functools
 import json
@@ -696,7 +699,8 @@ class ExtendedMock( MagicMock ):
   """
 
   def assert_has_exact_calls( self, calls, any_order = False ):
-    self.assert_has_calls( calls, any_order )
+    contains = contains_inanyorder if any_order else contains_exactly
+    assert_that( self.call_args_list, contains( *calls ) )
     assert_that( self.call_count, equal_to( len( calls ) ) )
 
 
