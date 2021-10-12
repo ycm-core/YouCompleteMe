@@ -133,25 +133,24 @@ class DiagnosticInterface:
     for diags in self._line_to_diags.values():
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
-        for prop in _ConvertDiagnosticToTextProperties( diag ):
+        for line, column, name, extras in _ConvertDiagnosticToTextProperties(
+            diag ):
           global YCM_VIM_PROPERTY_ID
-          if vimsupport.VimIsNeovim():
-            prop[ 2 ][ 'type' ] = prop[ 2 ][ 'type' ].replace( 'Property',
-                                                               'Section' )
+
           diag_prop = vimsupport.DiagnosticProperty(
               YCM_VIM_PROPERTY_ID,
-              prop[ 2 ][ 'type' ],
-              prop[ 0 ],
-              prop[ 1 ],
-              prop[ 2 ][ 'end_col' ] - prop[ 1 ]
-                 if 'end_col' in prop[ 2 ] else prop[ 1 ] )
+              name,
+              line,
+              column,
+              extras[ 'end_col' ] - column if 'end_col' in extras else column )
           try:
             props_to_remove.remove( diag_prop )
           except ValueError:
             vimsupport.AddTextProperty( self._bufnr,
-                                        prop[ 0 ],
-                                        prop[ 1 ],
-                                        prop[ 2 ],
+                                        line,
+                                        column,
+                                        name,
+                                        extras,
                                         YCM_VIM_PROPERTY_ID )
           YCM_VIM_PROPERTY_ID += 1
     for prop in props_to_remove:
@@ -218,6 +217,9 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
 
   name = ( 'YcmErrorProperty' if _DiagnosticIsError( diagnostic ) else
             'YcmWarningProperty' )
+  if vimsupport.VimIsNeovim():
+    name = name.replace( 'Property', 'Section' )
+
   location_extent = diagnostic[ 'location_extent' ]
   if location_extent[ 'start' ][ 'line_num' ] <= 0:
     location = diagnostic[ 'location' ]
@@ -225,7 +227,7 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
       location[ 'line_num' ],
       location[ 'column_num' ]
     )
-    properties.append( ( line, column, { 'type': name } ) )
+    properties.append( ( line, column, name, {} ) )
   else:
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
       location_extent[ 'start' ][ 'line_num' ],
@@ -238,9 +240,9 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
     properties.append( (
       start_line,
       start_column,
+      name,
       { 'end_lnum': end_line,
-        'end_col': end_column,
-        'type': name } ) )
+        'end_col': end_column } ) )
 
   for diagnostic_range in diagnostic[ 'ranges' ]:
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
@@ -254,8 +256,8 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
     properties.append( (
       start_line,
       start_column,
+      name,
       { 'end_lnum': end_line,
-        'end_col': end_column,
-        'type': name } ) )
+        'end_col': end_column } ) )
 
   return properties

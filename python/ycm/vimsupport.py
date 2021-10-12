@@ -223,26 +223,34 @@ def GetTextProperties( buffer_number ):
                               '-1, '
                               '{ "details": 1 } )' )
     return [ DiagnosticProperty(
-               int( ext_mark[ 0 ] ),
-               ext_mark[ 3 ][ 'hl_group' ],
-               int( ext_mark[ 1 ] ) + 1, # Neovim uses 0-based lines and columns
-               int( ext_mark[ 2 ] ) + 1,
-               int( ext_mark[ 3 ][ 'end_col' ] ) - int( ext_mark[ 2 ] ) )
-             for ext_mark in ext_marks ]
+               int( id ),
+               extra_args[ 'hl_group' ],
+               int( line ) + 1, # Neovim uses 0-based lines and columns
+               int( column ) + 1,
+               int( extra_args[ 'end_col' ] ) - int( column ) )
+             for id, line, column, extra_args in ext_marks ]
 
 
-def AddTextProperty( buffer_number, line, column, extra_args, prop_id ):
+def AddTextProperty( buffer_number,
+                     line,
+                     column,
+                     prop_type,
+                     extra_args,
+                     prop_id ):
   if not VimIsNeovim():
     extra_args.update( {
+      'type': prop_type,
       'bufnr': buffer_number,
       'id': prop_id } )
     vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
   else:
-    extra_args[ 'hl_group' ] = extra_args.pop( 'type' ).replace(
-        'Property', 'Section' )
+    extra_args[ 'hl_group' ] = prop_type
     # Neovim uses 0-based offsets
-    extra_args[ 'end_line' ] = extra_args.pop( 'end_lnum' ) - 1
     extra_args[ 'end_col' ] = extra_args[ 'end_col' ] - 1
+    if 'end_lnum' in extra_args:
+      extra_args[ 'end_line' ] = extra_args.pop( 'end_lnum' ) - 1
+    if 'end_col' in extra_args:
+      extra_args[ 'end_col' ] = extra_args.pop( 'end_col' ) - 1
     line -= 1
     column -= 1
     vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '

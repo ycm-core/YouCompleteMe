@@ -24,7 +24,7 @@ MockVimModule()
 
 def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col ):
   return {
-    'kind': 'Error',
+    'kind': 'ERROR',
     'location': { 'line_num': start_line, 'column_num': start_col },
     'location_extent': {
       'start': {
@@ -52,9 +52,11 @@ def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col ):
 
 
 def YcmTextPropertyTupleMatcher( start_line, start_col, end_line, end_col ):
-  return has_item( contains_exactly( start_line, start_col, has_entries( {
-    'end_col': end_col,
-    'end_lnum': end_line } ) ) )
+  return has_item( contains_exactly(
+    start_line,
+    start_col,
+    'YcmErrorProperty',
+    has_entries( { 'end_col': end_col, 'end_lnum': end_line } ) ) )
 
 
 class DiagnosticInterfaceTest( TestCase ):
