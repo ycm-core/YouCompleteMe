@@ -38,10 +38,18 @@ BWIPEOUT_REGEX = re.compile(
 GETBUFVAR_REGEX = re.compile(
   '^getbufvar\\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\\)$' )
 PROP_ADD_REGEX = re.compile(
-        '^prop_add\\( (?P<start_line>\\d+), (?P<start_column>\\d+), '
-        '{(\'end_lnum\': (?P<end_line>\\d+), \'end_col\': (?P<end_column>\\d+),'
-        ' )?\'type\': \'(?P<type>\\w+)\', \'bufnr\': (?P<bufnr>\\d+), '
-        '\'id\': (?P<id>\\d+)} \\)$' )
+        '^prop_add\\( ' # A literal at the start
+        '(?P<start_line>\\d+), ' # First argument - number
+        '(?P<start_column>\\d+), ' # Second argument - number
+        '{'                        # Third argument is a complex dict.
+          '('                        # And some keys are optional.
+            '\'end_lnum\': (?P<end_line>\\d+), '
+            '\'end_col\': (?P<end_column>\\d+), '
+          ')?'                       # End of optional keys
+            '\'type\': \'(?P<type>\\w+)\', '
+            '\'bufnr\': (?P<bufnr>\\d+), '
+            '\'id\': (?P<id>\\d+)'
+        '} \\)$' )
 PROP_REMOVE_REGEX = re.compile( '^prop_remove\\( (?P<prop>.+) \\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\\)$' )
