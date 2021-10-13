@@ -21,7 +21,7 @@ from ycm.tests.test_utils import ( ExtendedMock,
                                    MockVimModule,
                                    Version,
                                    VimBuffer,
-                                   VimMatch,
+                                   VimProp,
                                    VimSign )
 MockVimModule()
 
@@ -32,10 +32,8 @@ from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
 from unittest.mock import call, MagicMock, patch
 from unittest import TestCase
 
-from ycm import vimsupport
 from ycm.paths import _PathToPythonUsedDuringBuild
-from ycm.vimsupport import ( SetVariableValue,
-                             SIGN_BUFFER_ID_INITIAL_VALUE )
+from ycm.vimsupport import SetVariableValue
 from ycm.tests import ( StopServer,
                         test_utils,
                         UserOptions,
@@ -66,68 +64,77 @@ def RunNotifyUserIfServerCrashed( ycm, post_vim_message, test ):
 
 def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
 
-  contents = """int main() {
-  int x, y;
-  x == y
-}"""
+  contents = "\nint main() { int x, y; x == y }"
 
   # List of diagnostics returned by ycmd for the above code.
   diagnostics = [ {
     'kind': 'ERROR',
-    'text': "expected ';' after expression",
+    'text': "expected ';' after expression (fix available) "
+    "[expected_semi_after_expr]",
     'location': {
       'filepath': 'buffer',
-      'line_num': 3,
-      'column_num': 9
+      'line_num': 2,
+      'column_num': 31
     },
     # Looks strange but this is really what ycmd is returning.
     'location_extent': {
       'start': {
         'filepath': '',
-        'line_num': 0,
-        'column_num': 0,
+        'line_num': 2,
+        'column_num': 31,
       },
       'end': {
         'filepath': '',
-        'line_num': 0,
-        'column_num': 0,
+        'line_num': 2,
+        'column_num': 32,
       }
     },
-    'ranges': [],
-    'fixit_available': True
+    'ranges': [ {
+      'start': {
+        'line_num': 2,
+        'column_num': 31,
+        'filepath': 'buffer'
+      },
+      'end': {
+        'line_num': 2,
+        'column_num': 31,
+        'filepath': 'buffer'
+      }
+    } ],
+    'fixit_available': False
   }, {
     'kind': 'WARNING',
     'text': 'equality comparison result unused',
     'location': {
       'filepath': 'buffer',
-      'line_num': 3,
-      'column_num': 7,
+      'line_num': 2,
+      'column_num': 31,
     },
     'location_extent': {
       'start': {
         'filepath': 'buffer',
-        'line_num': 3,
-        'column_num': 5,
+        'line_num': 2,
+        'column_num': 31,
       },
       'end': {
         'filepath': 'buffer',
-        'line_num': 3,
-        'column_num': 7,
+        'line_num': 2,
+        'column_num': 32,
       }
     },
     'ranges': [ {
       'start': {
         'filepath': 'buffer',
-        'line_num': 3,
-        'column_num': 3,
+        'line_num': 2,
+        'column_num': 24,
       },
       'end': {
         'filepath': 'buffer',
-        'line_num': 3,
-        'column_num': 9,
+        'line_num': 2,
+        'column_num': 30,
       }
     } ],
-    'fixit_available': True
+    'fixit_available': False
   } ]
 
   current_buffer = VimBuffer( 'buffer',
@@ -136,27 +143,26 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
                               number = 5 )
 
   test_utils.VIM_SIGNS = []
-  vimsupport.SIGN_ID_FOR_BUFFER.clear()
-
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 3, 1 ) ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 2, 1 ) ):
     with patch( 'ycm.client.event_notification.EventNotification.Response',
                 return_value = diagnostics ):
       ycm.OnFileReadyToParse()
       ycm.HandleFileParseRequest( block = True )
-
     # The error on the current line is echoed, not the warning.
     post_vim_message.assert_called_once_with(
-      "expected ';' after expression (FixIt)",
+      "expected ';' after expression (fix available) "
+      "[expected_semi_after_expr]",
       truncate = True, warning = False )
 
     # Error match is added after warning matches.
     assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
+      test_utils.VIM_PROPS_FOR_BUFFER,
       has_entries( {
-        1: contains_exactly(
-          VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
-          VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
-          VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
+        current_buffer.number: contains_exactly(
+          VimProp( 'YcmWarningProperty', 2, 31, 2, 32 ),
+          VimProp( 'YcmWarningProperty', 2, 24, 2, 30 ),
+          VimProp( 'YcmErrorProperty', 2, 31, 2, 32 ),
+          VimProp( 'YcmErrorProperty', 2, 31, 2, 31 ),
         )
       } )
     )
@@ -165,28 +171,29 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
     assert_that(
       test_utils.VIM_SIGNS,
       contains_exactly(
-        VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 3, 'YcmError', 5 )
+        VimSign( 2, 'YcmError', 5 )
       )
     )
 
   # The error is not echoed again when moving the cursor along the line.
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 3, 2 ) ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 2, 2 ) ):
     post_vim_message.reset_mock()
     ycm.OnCursorMoved()
     post_vim_message.assert_not_called()
 
   # The error is cleared when moving the cursor to another line.
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 2, 2 ) ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 2 ) ):
     post_vim_message.reset_mock()
     ycm.OnCursorMoved()
     post_vim_message.assert_called_once_with( "", warning = False )
 
   # The error is echoed when moving the cursor back.
-  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 3, 2 ) ):
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 2, 2 ) ):
     post_vim_message.reset_mock()
     ycm.OnCursorMoved()
     post_vim_message.assert_called_once_with(
-      "expected ';' after expression (FixIt)",
+      "expected ';' after expression (fix available) "
+      "[expected_semi_after_expr]",
       truncate = True, warning = False )
 
     with patch( 'ycm.client.event_notification.EventNotification.Response',
@@ -195,11 +202,11 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
       ycm.HandleFileParseRequest( block = True )
 
     assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
+      test_utils.VIM_PROPS_FOR_BUFFER,
       has_entries( {
-        1: contains_exactly(
-          VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
-          VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' )
+        current_buffer.number: contains_exactly(
+          VimProp( 'YcmWarningProperty', 2, 31, 2, 32 ),
+          VimProp( 'YcmWarningProperty', 2, 24, 2, 30 )
         )
       } )
     )
@@ -207,7 +214,7 @@ def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
     assert_that(
       test_utils.VIM_SIGNS,
       contains_exactly(
-        VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 3, 'YcmWarning', 5 )
+        VimSign( 2, 'YcmWarning', 5 )
       )
     )
 
@@ -717,19 +724,20 @@ class YouCompleteMeTest( TestCase ):
       self, ycm ):
     current_buffer = VimBuffer( 'buffer',
                                 filetype = 'c',
+                                contents = '\n\n\n\n',
                                 number = 5 )
 
-    test_utils.VIM_MATCHES_FOR_WINDOW[ 1 ] = [
-      VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
-      VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
-      VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
+    test_utils.VIM_PROPS_FOR_BUFFER[ current_buffer.number ] = [
+      VimProp( 'YcmWarningProperty', 3, 5, 3, 7 ),
+      VimProp( 'YcmWarningProperty', 3, 3, 3, 9 ),
+      VimProp( 'YcmErrorProperty', 3, 8 )
     ]
 
     with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
       ycm.UpdateMatches()
 
-    assert_that( test_utils.VIM_MATCHES_FOR_WINDOW,
-                 has_entries( { 1: empty() } ) )
+    assert_that( test_utils.VIM_PROPS_FOR_BUFFER[ current_buffer.number ],
+                 empty() )
 
 
   @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
@@ -788,7 +796,7 @@ class YouCompleteMeTest( TestCase ):
     set_location_list_for_window.assert_has_exact_calls( [] )
 
     assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
+      test_utils.VIM_PROPS_FOR_BUFFER,
       empty()
     )
 
@@ -947,10 +955,10 @@ class YouCompleteMeTest( TestCase ):
     ] )
 
     assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
+      test_utils.VIM_PROPS_FOR_BUFFER,
       has_entries( {
         1: contains_exactly(
-          VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+          VimProp( 'YcmErrorProperty', 1, 1, 1, 1 )
         )
       } )
     )
@@ -1132,13 +1140,14 @@ class YouCompleteMeTest( TestCase ):
       ] )
     ] )
 
-    # FIXME: diagnostic matches in windows other than the current one are not
-    # updated.
     assert_that(
-      test_utils.VIM_MATCHES_FOR_WINDOW,
+      test_utils.VIM_PROPS_FOR_BUFFER,
       has_entries( {
         1: contains_exactly(
-          VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+          VimProp( 'YcmErrorProperty', 1, 1, 1, 1 )
+        ),
+        3: contains_exactly(
+          VimProp( 'YcmErrorProperty', 3, 3, 3, 3 )
         )
       } )
     )

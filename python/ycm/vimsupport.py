@@ -45,32 +45,14 @@ FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
 
 NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
 
-# This is the starting value assigned to the sign's id of each buffer. This
-# value is then incremented for each new sign. This should prevent conflicts
-# with other plugins using signs.
-SIGN_BUFFER_ID_INITIAL_VALUE = 100000000
-# This holds the next sign's id to assign for each buffer.
-SIGN_ID_FOR_BUFFER = defaultdict( lambda: SIGN_BUFFER_ID_INITIAL_VALUE )
-
-# The ":sign place" command ouputs each sign on one line in the format
-#
-#    line=<line> id=<id> name=<name> priority=<priority>
-#
-# where the words "line", "id", "name", and "priority" are localized. On
-# versions older than Vim 8.1.0614, the "priority" property doesn't exist and
-# the output is
-#
-#    line=<line> id=<id> name=<name>
-#
-SIGN_PLACE_REGEX = re.compile(
-  r"^.*=(?P<line>\d+).*=(?P<id>\d+).*=(?P<name>Ycm\w+)" )
-
 NO_COMPLETIONS = {
   'line': -1,
   'column': -1,
   'completion_start_column': -1,
   'completions': []
 }
+
+YCM_NEOVIM_NS_ID = vim.eval( 'g:ycm_neovim_ns_id' )
 
 
 def CurrentLineAndColumn():
@@ -199,97 +181,107 @@ def CaptureVimCommand( command ):
   return output
 
 
-class DiagnosticSign( namedtuple( 'DiagnosticSign',
-                                  [ 'id', 'line', 'name', 'buffer_number' ] ) ):
-  # We want two signs that have different ids but the same location to compare
-  # equal. ID doesn't matter.
-  def __eq__( self, other ):
-    return ( self.line == other.line and
-             self.name == other.name and
-             self.buffer_number == other.buffer_number )
-
-
 def GetSignsInBuffer( buffer_number ):
-  sign_output = CaptureVimCommand( f'sign place buffer={ buffer_number }' )
-  signs = []
-  for line in sign_output.split( '\n' ):
-    match = SIGN_PLACE_REGEX.search( line )
-    if match:
-      signs.append( DiagnosticSign( int( match.group( 'id' ) ),
-                                    int( match.group( 'line' ) ),
-                                    match.group( 'name' ),
-                                    buffer_number ) )
-  return signs
+  return vim.eval(
+      f'sign_getplaced( { buffer_number }, {{ "group": "ycm_signs" }} )'
+  )[ 0 ][ 'signs' ]
 
 
-def CreateSign( line, name, buffer_number ):
-  sign_id = SIGN_ID_FOR_BUFFER[ buffer_number ]
-  SIGN_ID_FOR_BUFFER[ buffer_number ] += 1
-  return DiagnosticSign( sign_id, line, name, buffer_number )
-
-
-def UnplaceSign( sign ):
-  vim.command( f'sign unplace { sign.id } buffer={ sign.buffer_number }' )
-
-
-def PlaceSign( sign ):
-  vim.command( f'sign place { sign.id } name={ sign.name } '
-               f'line={ sign.line } buffer={ sign.buffer_number }' )
-
-
-class DiagnosticMatch( namedtuple( 'DiagnosticMatch',
-                                   [ 'id', 'group', 'pattern' ] ) ):
+class DiagnosticProperty( namedtuple( 'DiagnosticProperty', [ 'id',
+                                                              'type',
+                                                              'line',
+                                                              'column',
+                                                              'length' ] ) ):
   def __eq__( self, other ):
-    return ( self.group == other.group and
-             self.pattern == other.pattern )
+    return ( self.type == other.type and
+             self.line == other.line and
+             self.column == other.column and
+             self.length == other.length )
 
 
-def GetDiagnosticMatchesInCurrentWindow():
-  vim_matches = vim.eval( 'getmatches()' )
-  return [ DiagnosticMatch( match[ 'id' ],
-                            match[ 'group' ],
-                            match[ 'pattern' ] )
-           for match in vim_matches if match[ 'group' ].startswith( 'Ycm' ) ]
+def GetTextProperties( buffer_number ):
+  if not VimIsNeovim():
+    properties = []
+    for line_number in range( len( vim.buffers[ buffer_number ] ) ):
+      vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
+                             f'{{ "bufnr": { buffer_number } }} )' )
+      properties.extend(
+        DiagnosticProperty(
+          int( p[ 'id' ] ),
+          p[ 'type' ],
+          line_number + 1,
+          int( p[ 'col' ] ),
+          int( p[ 'length' ] ) )
+        for p in vim_props if p[ 'type' ].startswith( 'Ycm' )
+      )
+    return properties
+  else:
+    ext_marks = vim.eval(
+      f'nvim_buf_get_extmarks( { buffer_number }, '
+                             f'{ YCM_NEOVIM_NS_ID }, '
+                              '0, '
+                              '-1, '
+                              '{ "details": 1 } )' )
+    return [ DiagnosticProperty(
+               int( id ),
+               extra_args[ 'hl_group' ],
+               int( line ) + 1, # Neovim uses 0-based lines and columns
+               int( column ) + 1,
+               int( extra_args[ 'end_col' ] ) - int( column ) )
+             for id, line, column, extra_args in ext_marks ]
 
 
-def AddDiagnosticMatch( match ):
-  # TODO: Use matchaddpos which is much faster given that we always are using a
-  # location rather than an actual pattern
-  return GetIntValue( f"matchadd('{ match.group }', '{ match.pattern }', -1)" )
+def AddTextProperty( buffer_number,
+                     line,
+                     column,
+                     prop_type,
+                     extra_args,
+                     prop_id ):
+  if not VimIsNeovim():
+    extra_args.update( {
+      'type': prop_type,
+      'bufnr': buffer_number,
+      'id': prop_id } )
+    vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
+  else:
+    extra_args[ 'hl_group' ] = prop_type
+    # Neovim uses 0-based offsets
+    extra_args[ 'end_col' ] = extra_args[ 'end_col' ] - 1
+    if 'end_lnum' in extra_args:
+      extra_args[ 'end_line' ] = extra_args.pop( 'end_lnum' ) - 1
+    if 'end_col' in extra_args:
+      extra_args[ 'end_col' ] = extra_args.pop( 'end_col' ) - 1
+    line -= 1
+    column -= 1
+    vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
+                                    f'{ YCM_NEOVIM_NS_ID }, '
+                                    f'{ line }, '
+                                    f'{ column }, '
+                                    f'{ extra_args } )' )
 
 
-def RemoveDiagnosticMatch( match ):
-  return GetIntValue( f"matchdelete({ match.id })" )
-
-
-def GetDiagnosticMatchPattern( line_num,
-                               column_num,
-                               line_end_num = None,
-                               column_end_num = None ):
-  line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
-  column_num = max( column_num, 1 )
-
-  if line_end_num is None or column_end_num is None:
-    return f'\\%{ line_num }l\\%{ column_num }c'
-
-  # -1 and then +1 to account for column end not included in the range.
-  line_end_num, column_end_num = LineAndColumnNumbersClamped(
-      line_end_num, column_end_num - 1 )
-  column_end_num = max( column_end_num + 1, 1 )
-
-  return ( f'\\%{ line_num }l\\%{ column_num }c\\_.\\{{-}}'
-           f'\\%{ line_end_num }l\\%{ column_end_num }c' )
+def RemoveTextProperty( buffer_number: int, prop: DiagnosticProperty ):
+  if not VimIsNeovim():
+    p = {
+        'bufnr': buffer_number,
+        'id': prop.id,
+        'type': prop.type,
+        'both': 1 }
+    vim.eval( f'prop_remove( { p } )' )
+  else:
+    vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
+                                    f'{ YCM_NEOVIM_NS_ID }, '
+                                    f'{ prop.id } )' )
 
 
 # Clamps the line and column numbers so that they are not past the contents of
 # the buffer. Numbers are 1-based byte offsets.
 def LineAndColumnNumbersClamped( line_num, column_num ):
   line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
-
   # Vim buffers are a list of Unicode objects on Python 3.
-  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
+  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) ) + 1
 
-  return line_num, min( column_num, max_column )
+  return line_num, max( min( column_num, max_column ), 1 )
 
 
 def SetLocationList( diagnostics ):
@@ -1251,6 +1243,11 @@ def AutoCloseOnCurrentBuffer( name ):
                'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif '
                f'| autocmd! { name }' )
   vim.command( 'augroup END' )
+
+
+@memoize()
+def VimIsNeovim():
+  return GetBoolValue( 'has( "nvim" )' )
 
 
 @memoize()

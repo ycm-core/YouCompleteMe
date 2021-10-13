@@ -24,6 +24,9 @@ set cpo&vim
 " neovim, which doesn't implement them.
 let s:is_neovim = has( 'nvim' )
 
+" Only useful in neovim, for handling text properties... I mean extmarks.
+let g:ycm_neovim_ns_id = s:is_neovim ? nvim_create_namespace( 'ycm_id' ) : -1
+
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
@@ -200,9 +203,8 @@ function! youcompleteme#Enable()
   let s:default_completion = py3eval( 'vimsupport.NO_COMPLETIONS' )
   let s:completion = s:default_completion
 
-  if exists( '*prop_type_add' ) && exists( '*prop_type_delete' )
+  if s:PropertyTypeNotDefined( 'YCM-signature-help-current-argument' )
     hi default YCMInverse term=reverse cterm=reverse gui=reverse
-    call prop_type_delete( 'YCM-signature-help-current-argument' )
     call prop_type_add( 'YCM-signature-help-current-argument', {
           \   'highlight': 'YCMInverse',
           \   'combine':   1,
@@ -386,10 +388,18 @@ function! s:SetUpSigns()
     highlight default link YcmWarningLine SyntasticWarningLine
   endif
 
-  exe 'sign define YcmError text=' . g:ycm_error_symbol .
-        \ ' texthl=YcmErrorSign linehl=YcmErrorLine'
-  exe 'sign define YcmWarning text=' . g:ycm_warning_symbol .
-        \ ' texthl=YcmWarningSign linehl=YcmWarningLine'
+  call sign_define( [
+    \ { 'name': 'YcmError',
+    \   'text': g:ycm_error_symbol,
+    \   'texthl': 'YcmErrorSign',
+    \   'linehl': 'YcmErrorLine',
+    \   'group':  'ycm_signs' },
+    \ { 'name': 'YcmWarning',
+    \   'text': g:ycm_warning_symbol,
+    \   'texthl': 'YcmWarningSign',
+    \   'linehl': 'YcmWarningLine',
+    \   'group':  'ycm_signs' }
+    \ ] )
 
 endfunction
 
@@ -405,6 +415,10 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmErrorSection SpellBad
     endif
   endif
+  if s:PropertyTypeNotDefined( 'YcmErrorProperty' )
+    call prop_type_add( 'YcmErrorProperty', {
+          \ 'highlight': 'YcmErrorSection' } )
+  endif
 
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
@@ -412,6 +426,10 @@ function! s:SetUpSyntaxHighlighting()
     else
       highlight default link YcmWarningSection SpellCap
     endif
+  endif
+  if s:PropertyTypeNotDefined( 'YcmWarningProperty' )
+    call prop_type_add( 'YcmWarningProperty', {
+          \ 'highlight': 'YcmWarningSection' } )
   endif
 endfunction
 
@@ -464,6 +482,11 @@ function! s:HasAnyKey( dict, keys )
     endif
   endfor
   return 0
+endfunction
+
+function! s:PropertyTypeNotDefined( type )
+  return exists( '*prop_type_add' ) &&
+    \ index( prop_type_list(), a:type ) == -1
 endfunction
 
 function! s:AllowedToCompleteInBuffer( buffer )
