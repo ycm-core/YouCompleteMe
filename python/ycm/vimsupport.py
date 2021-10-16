@@ -246,7 +246,6 @@ def AddTextProperty( buffer_number,
   else:
     extra_args[ 'hl_group' ] = prop_type
     # Neovim uses 0-based offsets
-    extra_args[ 'end_col' ] = extra_args[ 'end_col' ] - 1
     if 'end_lnum' in extra_args:
       extra_args[ 'end_line' ] = extra_args.pop( 'end_lnum' ) - 1
     if 'end_col' in extra_args:
