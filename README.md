@@ -5,28 +5,6 @@ YouCompleteMe: a code-completion engine for Vim
 [![Build status](https://dev.azure.com/YouCompleteMe/YCM/_apis/build/status/ycm-core.YouCompleteMe?branchName=master)](https://dev.azure.com/YouCompleteMe/YCM/_build?definitionId=3&branchName=master)
 [![Coverage status](https://img.shields.io/codecov/c/github/ycm-core/YouCompleteMe/master.svg)](https://codecov.io/gh/ycm-core/YouCompleteMe)
 
-NOTE: Minimum Requirements Have Changed
-----------------------------------------
-
-Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
-That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
-
-For neovim users, our policy is to require the latest released version. 
-Currently, neovim 0.5.0 is required.
-
-NOTE: Minimum compiler versions have been increased
-----------------------------------------
-
-In order to provide the best possible performance and stability, ycmd has
-updated its code to C++17. This requires a version bump of the minimum
-supported compilers. The new requirements are:
-
-| Compiler | Current Min |
-|-|-|
-| GCC | 8 |
-| Clang | 7 |
-| MSVC | 15.7 (VS 2017) |
-
 Help, Advice, Support
 ---------------------
 
@@ -224,20 +202,48 @@ Installation
 
 ### Requirements
 
-Minimum supported versions:
-- Vim v8.1.2269 huge build, compiled with Python 3.6 support (aka `vim-nox` in
-  Ubuntu 20.04 LTS)
-- Python 3.6 runtime, compiled with `--enable-shared` (or `--enable-framework`)
+#### Supported Vim Versions
 
-Please note that some features are not availble in Neovim, and Neovim is not
-officially supported.
+Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
+That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
+
+Vim must have a working Python 3.6 runtime, compiled with `--enable-shared` (or
+`--enable-framework`). You can check with `:py3 import sys; print( sys.version
+)`.
+
+For neovim users, our policy is to require the latest released version.
+Currently, neovim 0.5.0 is required.  Please note that some features are not
+availble in Neovim, and Neovim is not officially supported.
+
+#### Supported Compilers
+
+In order to provide the best possible performance and stability, ycmd has
+updated its code to C++17. This requires a version bump of the minimum
+supported compilers. The new requirements are:
+
+| Compiler | Current Min |
+|-|-|
+| GCC | 8 |
+| Clang | 7 |
+| MSVC | 15.7 (VS 2017) |
+
+YCM requires CMake 3.13 or greater. If your cmake is too old, you may be able to
+simply `pip install --user cmake` to get a really new version.
+
+#### Individual completer requirements
+
+When enabling language support for a particular language, there may be runtime
+requirements, such as needing Java Development Kit for Java support. In general,
+YCM is not in control of the required versions for the downstream compilers,
+though we do our best to signal where we know them.
 
 ### macOS
 
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]
-- Install cmake, macvim and python; Note that the pre-installed *macOS system* vim is not supported.
+- Install cmake, macvim and python; Note that the pre-installed *macOS system*
+  vim is not supported.
 
 ```
 brew install cmake python mono go nodejs
@@ -250,7 +256,9 @@ $ brew install java
 $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 ```
 
-- Pre-installed macOS *system* Vim does not support Python 3. So you need to install either a Vim that supports Python 3 OR [MacVim][] with [Homebrew][brew]:
+- Pre-installed macOS *system* Vim does not support Python 3. So you need to
+  install either a Vim that supports Python 3 OR [MacVim][] with
+  [Homebrew][brew]:
 
   - Option 1: Installing a Vim that supports Python 3
   
@@ -269,8 +277,8 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
 cd ~/.vim/bundle/YouCompleteMe
 python3 install.py --all
 ```
-
-- For plugging an arbitrary LSP server, check [the relevant section](#plugging-an-arbitrary-lsp-server)
+- For using an arbitrary LSP server, check [the relevant
+  section](#plugging-an-arbitrary-lsp-server)
 
 #### Explanation for the quick start
 
@@ -279,9 +287,11 @@ YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-A Vim that supports Python 3 or [MacVim][] is required. YCM won't work with the pre-installed Vim from Apple as
-its Python 3 support is broken. If you don't already use a Vim that supports Python 3 or [MacVim][], install it
-with [Homebrew][brew]. Install CMake as well:
+A supported Vim version with Python 3 is required. [MacVim][] is a good option,
+even if you only use the terminal. YCM won't work with the pre-installed Vim
+from Apple as its Python support is broken. If you don't already use a Vim
+that supports Python 3 or [MacVim][], install it with [Homebrew][brew]. Install
+CMake as well:
 
     brew install vim cmake     
     
@@ -327,7 +337,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+- Java support: install [JDK][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -383,13 +393,13 @@ YouCompleteMe, however they may not work for everyone. If the following
 instructions don't work for you, check out the [full installation
 guide](#full-installation-guide).
 
-Make sure you have Vim 7.4.1578 with Python 3 support. The Vim
-package on Fedora 27 and later and the pre-installed Vim on Ubuntu 16.04 and
-later are recent enough. You can see the version of Vim installed by running
-`vim --version`. If the version is too old, you may need to [compile Vim from
-source][vim-build] (don't worry, it's easy).
+Make sure you have a supportted version of Vim with Python 3 support, and a
+suoported compiler. The latest LTS of Ubuntu is the minimum platform for simple
+installation. For earier releases or other distributions, you may have to do
+some work to acquire the dependencies.
 
-**NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
+If your vim version is too old, you may need to [compile Vim from
+source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
 
@@ -399,22 +409,16 @@ will notify you to recompile it. You should then rerun the install process.
 
 Install development tools, CMake, and Python headers:
 
-- Fedora 27 and later:
+- Fedora-like distributions:
 
 ```
 sudo dnf install cmake gcc-c++ make python3-devel
 ```
 
-- Ubuntu 14.04:
+- Ubuntu LTS:
 
 ```
 sudo apt install build-essential cmake3 python3-dev
-```
-
-- Ubuntu 16.04 and later:
-
-```
-sudo apt install build-essential cmake python3-dev
 ```
 
 Compiling YCM **with** semantic support for C-family languages through
@@ -441,7 +445,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+- Java support: install [JDK][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -490,15 +494,13 @@ guide](#full-installation-guide).
 **Important:** we assume that you are using the `cmd.exe` command prompt and
 that you know how to add an executable to the PATH environment variable.
 
-Make sure you have at least Vim 7.4.1578 with Python 3 support. You
+Make sure you have a supported Vim version with Python 3 support. You
 can check the version and which Python is supported by typing `:version` inside
 Vim. Look at the features included: `+python3/dyn` for Python 3.
 Take note of the Vim architecture, i.e. 32 or
 64-bit. It will be important when choosing the Python installer. We recommend
 using a 64-bit client. [Daily updated installers of 32-bit and 64-bit Vim with
 Python 3 support][vim-win-download] are available.
-
-**NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
 
 Add the line:
 
@@ -557,7 +559,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+- Java support: install [JDK][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -612,14 +614,8 @@ guide](#full-installation-guide).
 
 **NOTE:** OpenBSD / FreeBSD are not officially supported platforms by YCM.
 
-Make sure you have Vim 7.4.1578 with Python 3 support.
-
-**NOTE**: For all features, such as signature help, use Vim 8.1.1875 or later.
-
-OpenBSD 5.5 and later have a Vim that's recent enough. You can see the version of
-Vim installed by running `vim --version`.
-
-For FreeBSD 11.x, the requirement is cmake:
+Make sure you have a supported Vim version with Python3 support, and a supported
+compiler and cmake, perhaps:
 
 ```
 pkg install cmake
@@ -663,7 +659,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `./install.py`.
-- Java support: install [JDK8 (version 8 required)][jdk-install] and add
+- Java support: install [JDK][jdk-install] and add
   `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -1093,9 +1089,6 @@ your file.
 4. If you previously used Eclim or Syntastic for Java, disable them for Java.
 
 5. Edit a Java file from your project.
-
-For the best experience, we highly recommend at least Vim 8.1.1875 when using
-Java support with YouCompleteMe.
 
 #### Java Project Files
 
@@ -1627,8 +1620,7 @@ You can also style the line that has the warning/error with these groups:
 Note that the line highlighting groups only work when the
 [`g:ycm_enable_diagnostic_signs`](#the-gycm_enable_diagnostic_signs-option)
 option is set. If you want highlighted lines but no signs in the Vim gutter,
-ensure that your Vim version is 7.4.2201 or later and set the `signcolumn`
-option to `off` in your vimrc:
+set the `signcolumn` option to `off` in your vimrc:
 
 ```viml
 set signcolumn=off
@@ -1648,7 +1640,7 @@ highlight YcmErrorLine guibg=#3f0000
 
 ### Symbol Search
 
-***This feature requires Vim and does not work in Neovim***
+***This feature requires Vim and is not supported in Neovim***
 
 YCM provides a way to search for and jump to a symbol in the current project or
 document when using supported languages.
@@ -3313,10 +3305,6 @@ To open in a new tab page, use the `:tab` modifier with the `'split'` or
 ```viml
 :tab YcmCompleter GoTo
 ```
-
-**NOTE:** command modifiers were added in Vim 7.4.1898. If you are using an
-older version, you can still configure this by setting the option to one of the
-deprecated values: `'vertical-split'`, `'new-tab'`, or `'new-or-existing-tab'`.
 
 Default: `'same-buffer'`
 
