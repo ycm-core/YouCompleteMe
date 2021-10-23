@@ -56,3 +56,4 @@ doc/tags
 .coverage
 .coverage.*
 coverage.xml
+.readme.utf-8.add.spl
