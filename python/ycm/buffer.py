@@ -33,6 +33,8 @@ class Buffer:
     self._parse_request = None
     self._should_resend = False
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
+    self._open_loclist_on_ycm_diags = user_options[
+                                        'open_loclist_on_ycm_diags' ]
     self.UpdateFromFileTypes( filetypes )
 
 
@@ -80,15 +82,17 @@ class Buffer:
 
   def UpdateWithNewDiagnostics( self, diagnostics, async_message ):
     self._async_diags = async_message
-    self._diag_interface.UpdateWithNewDiagnostics( diagnostics )
+    self._diag_interface.UpdateWithNewDiagnostics(
+        diagnostics,
+        not self._async_diags and self._open_loclist_on_ycm_diags )
 
 
   def UpdateMatches( self ):
     self._diag_interface.UpdateMatches()
 
 
-  def PopulateLocationList( self ):
-    return self._diag_interface.PopulateLocationList()
+  def PopulateLocationList( self, open_on_edit = False ):
+    return self._diag_interface.PopulateLocationList( open_on_edit )
 
 
   def GetResponse( self ):

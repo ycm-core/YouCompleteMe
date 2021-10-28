@@ -653,7 +653,8 @@ class YouCompleteMe:
 
 
   def _PopulateLocationListWithLatestDiagnostics( self ):
-    return self.CurrentBuffer().PopulateLocationList()
+    return self.CurrentBuffer().PopulateLocationList(
+        self._user_options[ 'open_loclist_on_ycm_diags' ] )
 
 
   def FileParseRequestReady( self ):
