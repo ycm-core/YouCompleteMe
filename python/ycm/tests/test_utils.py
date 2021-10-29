@@ -34,7 +34,8 @@ from unittest import skipIf
 from ycmd.utils import GetCurrentDirectory, OnMac, OnWindows, ToUnicode
 
 
-BUFNR_REGEX = re.compile( '^bufnr\\(\'(?P<buffer_filename>.+)\', ([01])\\)$' )
+BUFNR_REGEX = re.compile(
+  '^bufnr\\(\'(?P<buffer_filename>.+)\'(, ([01]))?\\)$' )
 BUFWINNR_REGEX = re.compile( '^bufwinnr\\((?P<buffer_number>[0-9]+)\\)$' )
 BWIPEOUT_REGEX = re.compile(
   '^(?:silent! )bwipeout!? (?P<buffer_number>[0-9]+)$' )
