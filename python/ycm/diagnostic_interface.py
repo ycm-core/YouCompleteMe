@@ -135,6 +135,7 @@ class DiagnosticInterface:
       # Insert squiggles in reverse order so that errors overlap warnings.
       for diag in reversed( diags ):
         for line, column, name, extras in _ConvertDiagnosticToTextProperties(
+            self._bufnr,
             diag ):
           global YCM_VIM_PROPERTY_ID
 
@@ -213,7 +214,7 @@ def _NormalizeDiagnostic( diag ):
   return diag
 
 
-def _ConvertDiagnosticToTextProperties( diagnostic ):
+def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
   properties = []
 
   name = ( 'YcmErrorProperty' if _DiagnosticIsError( diagnostic ) else
@@ -225,16 +226,19 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
   if location_extent[ 'start' ][ 'line_num' ] <= 0:
     location = diagnostic[ 'location' ]
     line, column = vimsupport.LineAndColumnNumbersClamped(
+      bufnr,
       location[ 'line_num' ],
       location[ 'column_num' ]
     )
     properties.append( ( line, column, name, {} ) )
   else:
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
+      bufnr,
       location_extent[ 'start' ][ 'line_num' ],
       location_extent[ 'start' ][ 'column_num' ]
     )
     end_line, end_column = vimsupport.LineAndColumnNumbersClamped(
+      bufnr,
       location_extent[ 'end' ][ 'line_num' ],
       location_extent[ 'end' ][ 'column_num' ]
     )
@@ -247,10 +251,12 @@ def _ConvertDiagnosticToTextProperties( diagnostic ):
 
   for diagnostic_range in diagnostic[ 'ranges' ]:
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
+      bufnr,
       diagnostic_range[ 'start' ][ 'line_num' ],
       diagnostic_range[ 'start' ][ 'column_num' ]
     )
     end_line, end_column = vimsupport.LineAndColumnNumbersClamped(
+      bufnr,
       diagnostic_range[ 'end' ][ 'line_num' ],
       diagnostic_range[ 'end' ][ 'column_num' ]
     )

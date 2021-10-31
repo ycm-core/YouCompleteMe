@@ -284,10 +284,11 @@ def RemoveTextProperty( buffer_number: int, prop: DiagnosticProperty ):
 
 # Clamps the line and column numbers so that they are not past the contents of
 # the buffer. Numbers are 1-based byte offsets.
-def LineAndColumnNumbersClamped( line_num, column_num ):
-  line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
-  # Vim buffers are a list of Unicode objects on Python 3.
-  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) ) + 1
+def LineAndColumnNumbersClamped( bufnr, line_num, column_num ):
+  vim_buffer = vim.buffers[ bufnr ]
+  line_num = max( min( line_num, len( vim_buffer ) ), 1 )
+  # Vim buffers are lists Unicode objects on Python 3.
+  max_column = len( ToBytes( vim_buffer[ line_num - 1 ] ) ) + 1
 
   return line_num, max( min( column_num, max_column ), 1 )
 
