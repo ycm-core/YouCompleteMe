@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 from ycm import diagnostic_interface
-from ycm.tests.test_utils import VimBuffer, MockVimModule
+from ycm.tests.test_utils import VimBuffer, MockVimModule, MockVimBuffers
 from hamcrest import assert_that, contains_exactly, has_entries, has_item
-from unittest.mock import patch
 from unittest import TestCase
 MockVimModule()
 
@@ -92,10 +91,13 @@ class DiagnosticInterfaceTest( TestCase ):
       ],
     ]:
       with self.subTest( diag = diag, contents = contents, result = result ):
-        current_buffer = VimBuffer( 'some_file', contents = contents )
+        current_buffer = VimBuffer( 'foo', number = 1, contents = [ '' ] )
+        target_buffer = VimBuffer( 'bar', number = 2, contents = contents )
 
-        with patch( 'vim.current.buffer', current_buffer ):
+        with MockVimBuffers( [ current_buffer, target_buffer ],
+                             [ current_buffer, target_buffer ] ):
           actual = diagnostic_interface._ConvertDiagnosticToTextProperties(
-                                          diag )
+              target_buffer.number,
+              diag )
           print( actual )
           assert_that( actual, result )
