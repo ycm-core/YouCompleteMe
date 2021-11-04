@@ -597,6 +597,11 @@ class VimProp:
       return self.end_column - self.start_column
 
 
+  def get( self, key, default = None ):
+    if key == 'type':
+      return self.prop_type
+
+
 class VimSign:
 
   def __init__( self, line, name, bufnr ):
