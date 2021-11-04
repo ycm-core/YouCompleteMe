@@ -184,3 +184,13 @@ function! Test_BufferWithoutAssociatedFile_HighlightingWorks()
     \    'start': 1 } ]
   call assert_equal( expected_properties, prop_list( 1 ) )
 endfunction
+
+function! Test_ThirdPartyDeletesItsTextProperty()
+  enew
+  call prop_type_add( 'ThirdPartyProperty', { 'highlight': 'Error' } )
+  call prop_add( 1, 1, { 'type': 'ThirdPartyProperty', 'bufnr': bufnr('%'), 'id': 42 } )
+  call prop_type_delete( 'ThirdPartyProperty' )
+
+  py3 from ycm.vimsupport import GetTextProperties, GetIntValue
+  call assert_equal( [], py3eval( 'GetTextProperties( GetIntValue( """bufnr( "%" )""" ) )' ) )
+endfunction
