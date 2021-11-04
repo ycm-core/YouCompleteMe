@@ -221,7 +221,7 @@ def GetTextProperties( buffer_number ):
           line_number + 1,
           int( p[ 'col' ] ),
           int( p[ 'length' ] ) )
-        for p in vim_props if p[ 'type' ].startswith( 'Ycm' )
+        for p in vim_props if p.get( 'type', '' ).startswith( 'Ycm' )
       )
     return properties
   else:
