@@ -185,13 +185,12 @@ function! youcompleteme#Enable()
     " buffer is already parsed.
     autocmd BufWritePost,FileWritePost * call s:OnFileSave()
     autocmd FileType * call s:OnFileTypeSet()
-    autocmd BufEnter,CmdwinEnter * call s:OnBufferEnter()
+    autocmd BufEnter,CmdwinEnter,WinEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
     autocmd CompleteChanged * call s:OnCompleteChanged()
-    autocmd BufEnter,WinEnter * call s:UpdateMatches()
   augroup END
 
   " The FileType event is not triggered for the first loaded file. We wait until
@@ -698,6 +697,7 @@ function! s:OnBufferEnter()
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
 
+  py3 ycm_state.UpdateMatches()
   py3 ycm_state.OnBufferVisit()
   " Last parse may be outdated because of changes from other buffers. Force a
   " new parse.
@@ -714,11 +714,6 @@ function! s:OnBufferUnload()
   endif
 
   py3 ycm_state.OnBufferUnload( vimsupport.GetIntValue( 'buffer_number' ) )
-endfunction
-
-
-function! s:UpdateMatches()
-  py3 ycm_state.UpdateMatches()
 endfunction
 
 
