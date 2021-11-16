@@ -246,7 +246,16 @@ though we do our best to signal where we know them.
   vim is not supported (due to it having broken Python intetgration).
 
 ```
-brew install cmake python mono go nodejs
+$ brew install cmake python go nodejs
+```
+
+- Install mono from [Mono Project](mono-install-macos) (NOTE: on Intel Macs you
+  can also `brew install mono`. On arm Macs, you may require Rosetta)
+
+- If you are on an arm64 (e.g. M1) Mac, install homebrew llvm:
+
+```
+$ brew install llvm
 ```
 
 - For java support you must install a JDK, one way to do this is with Homebrew:
@@ -271,12 +280,31 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
   brew install macvim
   ```
 
-- Compile YCM
+- Compile YCM.
 
-```
-cd ~/.vim/bundle/YouCompleteMe
-python3 install.py --all
-```
+  - For Intel Macs, use the bundled libclang/clangd:
+
+    ```
+    cd ~/.vim/bundle/YouCompleteMe
+    python3 install.py --all
+    ```
+
+  - For arm64 Macs, you need to use the system libclang and Homebrew clangd:
+
+    ```
+    cd ~/.vim/bundle/YouCompleteMe
+    python3 install.py --system-libclang --all
+    ```
+
+    And edit your vimrc to add the following line to use the Homebrew llvm's
+    clangd:
+
+    ```viml
+    " For arm64 Macs, we need to use Homebrew's clangd
+    let g:ycm_clangd_binary_path = trim(system('brew --prefix llvm')).'/bin/clangd'
+    ```
+
+
 - For using an arbitrary LSP server, check [the relevant
   section](#plugging-an-arbitrary-lsp-server)
 
@@ -329,9 +357,8 @@ cd ~/.vim/bundle/YouCompleteMe
 
 The following additional language support options are available:
 
-- C# support: install Mono with [Homebrew][brew] or by downloading the [Mono
-  macOS package][mono-install-macos] and add `--cs-completer` when calling
-  `install.py`.
+- C# support: install by downloading the [Mono macOS package][mono-install-macos]
+  and add `--cs-completer` when calling `install.py`.
 - Go support: install [Go][go-install] and add `--go-completer` when calling
   `install.py`.
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
@@ -3550,7 +3577,7 @@ Please note: The YCM maintainers do not specifically endorse nor necessarily hav
 [vim-win-download]: https://github.com/vim/vim-win32-installer/releases
 [python-win-download]: https://www.python.org/downloads/windows/
 [visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16
-[mono-install-macos]: https://www.mono-project.com/docs/getting-started/install/mac/
+[mono-install-macos]: https://www.mono-project.com/download/stable/
 [mono-install-linux]: https://www.mono-project.com/download/stable/#download-lin
 [go-install]: https://golang.org/doc/install
 [npm-install]: https://docs.npmjs.com/getting-started/installing-node#1-install-nodejs--npm
