@@ -50,6 +50,29 @@ function! CheckCompletionItemsHasItems( expected_props, ... )
   return result
 endfunction
 
+function! IndexOfCompletionItemInList( item, ... )
+  let prop = 'abbr'
+  if a:0 > 0
+    let prop = a:1
+  endif
+
+  let items = complete_info( [ 'items' ] )[ 'items' ]
+  let abbrs = []
+  let idx = 0
+  while idx < len( items )
+    if get( items[ idx ], prop ) == a:item
+      return idx
+    endif
+    let idx += 1
+  endwhile
+
+  call assert_report( 'Did not find item '
+                    \ . string( a:item )
+                    \ . ' in completion info list' )
+  return -1
+endfunction
+
+
 function! FeedAndCheckMain( keys, func )
   call timer_start( 500, a:func )
   call feedkeys( a:keys, 'tx!' )

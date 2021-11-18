@@ -599,8 +599,8 @@ python install.py --all
 ```
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
-option. YCM officially supports MSVC 14 (Visual Studio 2015), 15 (2017) and
-MSVC 16 (Visual Studio 2019).
+option. YCM officially supports MSVC 15 (2017), MSVC 16 (Visual Studio 2019) 
+and MSVC 17 (Visual Studio 17 2022).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
 Don't forget that if you want the C-family semantic completion engine to work,
@@ -962,7 +962,7 @@ performance. Users who rely on `override_filename` in their `.ycm_extra_conf.py`
 will need to stay on the old `libclang` engine. Instructions on how to stay on
 the old engine are available on [the wiki][libclang-instructions].
 
-Advantages of clangd over libclang include:
+Some of the features of clangd:
 
 - **Project wide indexing**: Clangd has both dynamic and static index support.
   The dynamic index stores up-to-date symbols coming from any files you are
@@ -984,6 +984,40 @@ Advantages of clangd over libclang include:
   lines or the whole file, whereas libclang doesn't have such functionality.
 - **Performance**: Clangd has faster re-parse and code completion times
   compared to libclang.
+
+#### Installation
+
+On supported architectures, the `install.py` script will download a suitable
+clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
+Supported architectures are:
+
+* Linux glibc >= 2.17 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
+* MacOS >=10.15 (Intel) - compatibility per clang.llvm.org downloads
+* Windows (Intel) - compatibility per clang.llvm.org downloads
+
+***clangd***:
+
+Typically, clangd is installed by the YCM installer (either with `--all` or with
+`--clangd-completer`). This downlaods a pre-built `clangd` binary for your
+architecture. If your OS or architecture is not supported or too old, you can
+install a compatible `clangd` and use [`g:ycm_clangd_binary_path`]() to point to
+it.
+
+***libclang***:
+
+`libclang` can be enabled also with `--all` or `--clang-completer`. As with
+`clangd`, YCM will try and download a version of `libclang` that is suitable for
+your environemnt, but again if your environemnt can't be supported, you can
+build or acquire `libclang` for yourself and specify it when building, as:
+
+```
+$ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang-compelter --system-libclang
+```
+
+Please note that if using custom `clangd` or `libclang` it _must_ match the
+version that YCM requires. Currently YCM requires ***clang 13.0.0***.
+
+#### Compile flags
 
 In order to perform semantic analysis such as code completion, `GoTo` and
 diagnostics, YouCompleteMe uses `clangd`, which makes use of

@@ -199,7 +199,8 @@ function! Test_EmptySearch()
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
 
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-    call FeedAndCheckAgain( "\<CR>", funcref( 'ChangeSearch' ) )
+    call FeedAndCheckAgain( "\<CR>notarealthing",
+                          \ funcref( 'ChangeSearch' ) )
   endfunction
 
   function ChangeSearch( ... )
@@ -209,14 +210,14 @@ function! Test_EmptySearch()
     " Hitting enter with nothing to select clears the prompt, because prompt
     " buffer
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol:  ',
+          \ assert_equal( ' [X] Search for symbol: notarealthing ',
           \ o.title  ) },
           \ 10000 )
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
 
     call assert_equal( -1, youcompleteme#finder#GetState().selected )
 
-    call FeedAndCheckAgain( 'tiat', funcref( 'TestUpDownSelect' ) )
+    call FeedAndCheckAgain( "\<C-u>tiat", funcref( 'TestUpDownSelect' ) )
   endfunction
 
   let popup_id = -1
@@ -452,8 +453,8 @@ function! Test_NoFileType_NoCompletionIn_PromptBuffer()
     let o = popup_getoptions( id )
 
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: thisisathing ',
-          \ o.title  ) },
+            \ assert_equal( ' [X] Search for symbol: thisisathing ', o.title )
+          \ },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
@@ -476,7 +477,7 @@ function! Test_NoFileType_NoCompletionIn_PromptBuffer()
   call assert_equal( [ 0, 5, 7, 0 ], getpos( '.' ) )
 
   call test_override( 'ALL', 0 )
-  delfunct PutQuery
-  delfunct CheckNoPopup
   silent %bwipe!
+  delfunct! PutQuery
+  delfunct! CheckNoPopup
 endfunction
