@@ -129,7 +129,9 @@ function! Test_Resolve_FixIt()
     call WaitForCompletion()
     call CheckCurrentLine( '    Tes' )
     call CheckCompletionItemsHasItems( [ 'Test - com.youcompleteme' ] )
-    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2' ) )
+    let tabs = IndexOfCompletionItemInList( 'Test - com.youcompleteme' ) + 1
+    let tabs = repeat( "\<Tab>", tabs )
+    call FeedAndCheckAgain( tabs, funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )

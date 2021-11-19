@@ -182,7 +182,8 @@ function! Test_BufferWithoutAssociatedFile_HighlightingWorks()
     \    'type': 'YcmErrorProperty',
     \    'length': 4,
     \    'start': 1 } ]
-  call assert_equal( expected_properties, prop_list( 1 ) )
+
+  call CheckListOfDicts( prop_list( 1 ), expected_properties )
 endfunction
 
 function! Test_ThirdPartyDeletesItsTextProperty()

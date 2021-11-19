@@ -144,6 +144,7 @@ let s:icon_spinner = [ '/', '-', '\', '|', '/', '-', '\', '|' ]
 let s:icon_done = 'X'
 let s:spinner_delay = 100
 let s:prompt = 'Find Symbol: '
+let s:find_symbol_status = {}
 
 " Entry point {{{
 
