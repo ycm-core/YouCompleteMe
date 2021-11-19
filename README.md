@@ -252,12 +252,6 @@ $ brew install cmake python go nodejs
 - Install mono from [Mono Project](mono-install-macos) (NOTE: on Intel Macs you
   can also `brew install mono`. On arm Macs, you may require Rosetta)
 
-- If you are on an arm64 (e.g. M1) Mac, install homebrew llvm:
-
-```
-$ brew install llvm
-```
-
 - For java support you must install a JDK, one way to do this is with Homebrew:
 
 ```
@@ -282,16 +276,18 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
 
 - Compile YCM.
 
-  - For Intel Macs, use the bundled libclang/clangd:
+  - For Intel and arm64 Macs, the bundled libclang/clangd work:
 
     ```
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --all
     ```
 
-  - For arm64 Macs, you need to use the system libclang and Homebrew clangd:
+  - If you have troubles with finding system frameworks or C++ stanard library,
+    try using the homebrew llvm:
 
     ```
+    brea install llvm
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --system-libclang --all
     ```
@@ -300,7 +296,7 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
     clangd:
 
     ```viml
-    " For arm64 Macs, we need to use Homebrew's clangd
+    " Use homebrew's clangd
     let g:ycm_clangd_binary_path = trim(system('brew --prefix llvm')).'/bin/clangd'
     ```
 
@@ -992,7 +988,9 @@ clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
 Supported architectures are:
 
 * Linux glibc >= 2.17 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
-* MacOS >=10.15 (Intel) - compatibility per clang.llvm.org downloads
+* MacOS >=10.15 (Intel, arm64)
+  - For Intel, compatibility per clang.llvm.org downloads
+  - For arm64, macOS 10.15+
 * Windows (Intel) - compatibility per clang.llvm.org downloads
 
 ***clangd***:
