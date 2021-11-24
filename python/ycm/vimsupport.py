@@ -210,20 +210,35 @@ class DiagnosticProperty( namedtuple( 'DiagnosticProperty', [ 'id',
 
 def GetTextProperties( buffer_number ):
   if not VimIsNeovim():
-    properties = []
-    for line_number in range( len( vim.buffers[ buffer_number ] ) ):
-      vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
-                             f'{{ "bufnr": { buffer_number } }} )' )
-      properties.extend(
+    if HasFastPropList():
+      return [
         DiagnosticProperty(
-          int( p[ 'id' ] ),
-          p[ 'type' ],
-          line_number + 1,
-          int( p[ 'col' ] ),
-          int( p[ 'length' ] ) )
-        for p in vim_props if p.get( 'type', '' ).startswith( 'Ycm' )
-      )
-    return properties
+            int( p[ 'id' ] ),
+            p[ 'type' ],
+            int( p[ 'lnum' ] ),
+            int( p[ 'col' ] ),
+            int( p[ 'length' ] ) )
+        for p in vim.eval(
+            f'prop_list( 1, '
+                         f'{{ "bufnr": { buffer_number }, '
+                             '"end_lnum": -1, '
+                             '"types": [ "YcmErrorProperty", '
+                                        '"YcmWarningProperty" ] } )' ) ]
+    else:
+      properties = []
+      for line_number in range( len( vim.buffers[ buffer_number ] ) ):
+        vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
+                               f'{{ "bufnr": { buffer_number } }} )' )
+        properties.extend(
+          DiagnosticProperty(
+            int( p[ 'id' ] ),
+            p[ 'type' ],
+            line_number + 1,
+            int( p[ 'col' ] ),
+            int( p[ 'length' ] ) )
+          for p in vim_props if p.get( 'type', '' ).startswith( 'Ycm' )
+        )
+      return properties
   else:
     ext_marks = vim.eval(
       f'nvim_buf_get_extmarks( { buffer_number }, '
@@ -1299,6 +1314,11 @@ def AutoCloseOnCurrentBuffer( name ):
 @memoize()
 def VimIsNeovim():
   return GetBoolValue( 'has( "nvim" )' )
+
+
+@memoize()
+def HasFastPropList():
+  return GetBoolValue( 'has( "patch-8.2.3652" )' )
 
 
 @memoize()
