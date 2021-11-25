@@ -223,7 +223,7 @@ def _MockVimFunctionsEval( value ):
   if value == 'shiftwidth()':
     return 2
 
-  if value == 'has( "nvim" )':
+  if value.startswith( 'has( "' ):
     return False
 
   match = re.match( 'sign_getplaced\\( (?P<bufnr>\\d+), '
