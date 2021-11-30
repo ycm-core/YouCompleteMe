@@ -803,8 +803,12 @@ class YouCompleteMe:
     if detailed_diagnostic and 'message' in detailed_diagnostic:
       message = detailed_diagnostic[ 'message' ]
       if message_in_popup and vimsupport.VimSupportsPopupWindows():
-        lines = message.split( '\n' )
         window = vim.current.window
+        buffer_number = vimsupport.GetCurrentBufferNumber()
+        diags_on_this_line = self._buffers[ buffer_number ].DiagnosticsForLine(
+            window.cursor[ 0 ] )
+
+        lines = message.split( '\n' )
         available_columns = vimsupport.GetIntValue( '&columns' )
         col = window.cursor[ 1 ] + 1
         if col > available_columns - 2: # -2 accounts for padding.
@@ -812,12 +816,22 @@ class YouCompleteMe:
         options = {
             'col': col,
             'padding': [ 0, 1, 0, 1 ],
-            'moved': 'word',
             'maxwidth': available_columns,
             'close': 'click',
             'fixed': 0,
         }
-        vim.eval( f'popup_atcursor( { lines }, { options } )' )
+        popup_func = 'popup_atcursor'
+        for diag in diags_on_this_line:
+          if message == diag[ 'text' ]:
+            popup_func = 'popup_create'
+            prop = vimsupport.GetTextPropertyForDiag( buffer_number,
+                                                      window.cursor[ 0 ], diag )
+            options.update( {
+              'textpropid': prop[ 'id' ],
+              'textprop': prop[ 'type' ]
+            } )
+            options.pop( 'col' )
+        vim.eval( f'{ popup_func }( { lines }, { options } )' )
       else:
         vimsupport.PostVimMessage( message, warning = False )
 
