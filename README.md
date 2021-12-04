@@ -1678,10 +1678,10 @@ You can also style the line that has the warning/error with these groups:
 Note that the line highlighting groups only work when the
 [`g:ycm_enable_diagnostic_signs`](#the-gycm_enable_diagnostic_signs-option)
 option is set. If you want highlighted lines but no signs in the Vim gutter,
-set the `signcolumn` option to `off` in your vimrc:
+set the `signcolumn` option to `no` in your vimrc:
 
 ```viml
-set signcolumn=off
+set signcolumn=no
 ```
 
 The syntax groups used to highlight regions of text with errors/warnings:
