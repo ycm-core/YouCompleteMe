@@ -336,7 +336,7 @@ function! Test_Completion_FixIt()
   call youcompleteme#test#setup#OpenFile(
         \ 'test/testdata/cpp/auto_include.cc', {} )
 
-  function Check1( id )
+  function! Check1( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'do_a' )
     call CheckCompletionItemsContainsExactly( [ 'do_a_thing(Thing thing)',
@@ -344,7 +344,7 @@ function! Test_Completion_FixIt()
     call FeedAndCheckAgain( "\<Tab>" , funcref( 'Check2' ) )
   endfunction
 
-  function Check2( id )
+  function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'do_a_thing' )
     call CheckCompletionItemsContainsExactly( [ 'do_a_thing(Thing thing)',
@@ -353,7 +353,7 @@ function! Test_Completion_FixIt()
   endfunction
 
 
-  function Check3( id )
+  function! Check3( id )
     call WaitForAssert( {-> assert_false( pumvisible(), 'pumvisible()' ) } )
     call CheckCurrentLine( 'do_a_thing(' )
     call assert_equal( '#include "auto_include.h"', getline( 1 ) )
@@ -422,4 +422,20 @@ function! Test_Select_Next_Previous_InsertModeMapping()
 
   call test_override( 'ALL', 0 )
   iunmap <C-n>
+endfunction
+
+function! Test_Completion_WorksWithoutMovingCursor()
+  call youcompleteme#test#setup#OpenFile(
+        \ 'test/testdata/cpp/auto_include_workaround.cc', {} )
+
+  function! Check( id )
+    call WaitForCompletion() " We don't care about completion
+                             " items, just that we didn't error
+                             " while opening the completion pum
+                             " without typing anything first.
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call setpos( '.', [ 0, 3, 1 ] )
+  call FeedAndCheckMain( "i\<C-Space>", funcref( 'Check' ) )
 endfunction

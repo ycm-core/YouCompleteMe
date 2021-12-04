@@ -223,6 +223,7 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     autocmd CursorMovedI * let s:current_cursor_position = getpos( '.' )
+    autocmd InsertEnter * let s:current_cursor_position = getpos( '.' )
     autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
