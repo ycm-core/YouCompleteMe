@@ -268,6 +268,7 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
   ```
   brew install vim
   ```
+
   - Option 2: Installing [MacVim][]
   
   ```
@@ -1458,6 +1459,7 @@ project. Ensure the file exists at the root of your project.
 
 To get diagnostics in JavaScript, set the `checkJs` option to `true` in your
 `jsconfig.json` file:
+
 ```json
 {
     "compilerOptions": {
@@ -1550,7 +1552,6 @@ Some servers request settings from arbitrary 'sections' of configuration. There
 is no concept of configuration sections in vim, so you can specify an additional
 `config_sections` dictionary which maps section to a dictionary of config
 required by the server. For example:
-
 
 ```python
 def Settings( **kwargs ):
@@ -1950,6 +1951,15 @@ Provides a list of symbols in current document, in the quickfix list. See also
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda, go, java, rust`
 
+#### The `GoToCallers` and `GoToCallees` subcommands
+
+Populate the quickfix list with the callers, or callees respectively, of the
+function associated with the current cursor position. The semantics of this
+differ depending on the filetype and language server.
+
+Only supported for LSP servers which provide the `callHierarchyProvider`
+capability.
+
 ### Semantic Information Commands
 
 These commands are useful for finding static information about the code, such
@@ -2182,6 +2192,7 @@ Get the number of YCM Diagnostic errors. If no errors are present, this function
 returns 0.
 
 For example:
+
 ```viml
   call youcompleteme#GetErrorCount()
 ```
@@ -2197,6 +2208,7 @@ Get the number of YCM Diagnostic warnings. If no warnings are present, this
 function returns 0.
 
 For example:
+
 ```viml
   call youcompleteme#GetWarningCount()
 ```
@@ -2298,6 +2310,7 @@ opened to the bottom of the current window and its height is set to fit all
 entries. This behavior can be overridden by using the `YcmLocationOpened`
 autocommand which is triggered while the cursor is in the location list window.
 For instance:
+
 ```viml
 function! s:CustomizeYcmLocationWindow()
   " Move the window to the top of the screen.
@@ -2319,6 +2332,7 @@ is opened to full width at the bottom of the screen and its height is set to fit
 all entries. This behavior can be overridden by using the `YcmQuickFixOpened`
 autocommand which is triggered while the cursor is in the quickfix window. For
 instance:
+
 ```viml
 function! s:CustomizeYcmQuickFixWindow()
   " Move the window to the top of the screen.
@@ -2583,6 +2597,7 @@ being filetype strings (like `python`, `cpp`, etc.) and values being unimportant
 
 The `*` key is special and matches all filetypes. Use this key if you want to
 completely disable filepath completion:
+
 ```viml
 let g:ycm_filepath_blacklist = {'*': 1}
 ```
@@ -3354,12 +3369,14 @@ To customize the way a new window is split, prefix the `GoTo*` command with one
 of the following modifiers: `:aboveleft`, `:belowright`, `:botright`,
 `:leftabove`, `:rightbelow`, `:topleft`, and `:vertical`. For instance, to
 split vertically to the right of the current window, run the command:
+
 ```viml
 :rightbelow vertical YcmCompleter GoTo
 ```
 
 To open in a new tab page, use the `:tab` modifier with the `'split'` or
 `'split-or-existing-window'` options e.g.:
+
 ```viml
 :tab YcmCompleter GoTo
 ```
