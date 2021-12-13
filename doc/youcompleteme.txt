@@ -95,6 +95,7 @@ Contents ~
    9. The |GoToImplementationElseDeclaration| subcommand
    10. The |GoToType| subcommand
    11. The |GoToDocumentOutline| subcommand
+   12. The |GoToCallers| and 'GoToCallees' subcommands
   2. Semantic Information Commands |youcompleteme-semantic-information-commands|
    1. The |GetType| subcommand
    2. The |GetTypeImprecise| subcommand
@@ -467,10 +468,6 @@ Quick start, installing all completers ~
 - Install mono from Mono Project [26] (NOTE: on Intel Macs you can also 'brew
   install mono'. On arm Macs, you may require Rosetta)
 
-- If you are on an arm64 (e.g. M1) Mac, install homebrew llvm:
->
-  $ brew install llvm
-<
 - For java support you must install a JDK, one way to do this is with
   Homebrew:
 >
@@ -482,8 +479,6 @@ Quick start, installing all completers ~
   [28]:
 
 - Option 1: Installing a Vim that supports Python 3
-
-
 >
   brew install vim
 <
@@ -493,20 +488,22 @@ Quick start, installing all completers ~
 <
 - Compile YCM.
 
-- For Intel Macs, use the bundled libclang/clangd:
+- For Intel and arm64 Macs, the bundled libclang/clangd work:
 >
   cd ~/.vim/bundle/YouCompleteMe
   python3 install.py --all
 <
-- For arm64 Macs, you need to use the system libclang and Homebrew clangd:
+- If you have troubles with finding system frameworks or C++ stanard library,
+  try using the homebrew llvm:
 >
+  brea install llvm
   cd ~/.vim/bundle/YouCompleteMe
   python3 install.py --system-libclang --all
 <
   And edit your vimrc to add the following line to use the Homebrew llvm's
   clangd:
 >
-  " For arm64 Macs, we need to use Homebrew's clangd
+  " Use homebrew's clangd
   let g:ycm_clangd_binary_path = trim(system('brew --prefix llvm')).'/bin/clangd'
 <
 - For using an arbitrary LSP server, check the relevant section
@@ -1184,7 +1181,9 @@ clangd ('--clangd-completer') or libclang ('--clang-completer') for you.
 Supported architectures are:
 
 - Linux glibc >= 2.17 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
-- MacOS >=10.15 (Intel) - compatibility per clang.llvm.org downloads
+- MacOS >=10.15 (Intel, arm64)
+- For Intel, compatibility per clang.llvm.org downloads
+- For arm64, macOS 10.15+
 - Windows (Intel) - compatibility per clang.llvm.org downloads
 
 **_clangd_**:
@@ -1892,10 +1891,10 @@ You can also style the line that has the warning/error with these groups:
 
 Note that the line highlighting groups only work when the
 |g:ycm_enable_diagnostic_signs| option is set. If you want highlighted lines
-but no signs in the Vim gutter, set the 'signcolumn' option to 'off' in your
+but no signs in the Vim gutter, set the 'signcolumn' option to 'no' in your
 vimrc:
 >
-  set signcolumn=off
+  set signcolumn=no
 <
 The syntax groups used to highlight regions of text with errors/warnings: -
 'YcmErrorSection', which falls back to group 'SyntasticError' if it exists and
@@ -2185,6 +2184,16 @@ Provides a list of symbols in current document, in the quickfix list. See also
 interactive symbol search.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cuda, go, java, rust'
+
+-------------------------------------------------------------------------------
+The *GoToCallers* and 'GoToCallees' subcommands
+
+Populate the quickfix list with the callers, or callees respectively, of the
+function associated with the current cursor position. The semantics of this
+differ depending on the filetype and language server.
+
+Only supported for LSP servers which provide the 'callHierarchyProvider'
+capability.
 
 -------------------------------------------------------------------------------
                                   *youcompleteme-semantic-information-commands*
