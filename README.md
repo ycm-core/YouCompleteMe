@@ -288,7 +288,7 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
     try using the homebrew llvm:
 
     ```
-    brea install llvm
+    brew install llvm
     cd ~/.vim/bundle/YouCompleteMe
     python3 install.py --system-libclang --all
     ```
