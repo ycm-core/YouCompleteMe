@@ -18,6 +18,7 @@
 from collections import defaultdict
 from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
+from ycmd.utils import ToBytes
 import vim
 YCM_VIM_PROPERTY_ID = 0
 
@@ -139,14 +140,14 @@ class DiagnosticInterface:
             diag ):
           global YCM_VIM_PROPERTY_ID
 
-          diag_prop = vimsupport.DiagnosticProperty(
-              YCM_VIM_PROPERTY_ID,
-              name,
-              line,
-              column,
-              extras[ 'end_col' ] - column if 'end_col' in extras else column )
           try:
-            props_to_remove.remove( diag_prop )
+            props = _SplitIntoSingleLineProps( line,
+                                               column,
+                                               name,
+                                               extras,
+                                               self._bufnr )
+            for diag_prop in props:
+              props_to_remove.remove( diag_prop )
           except ValueError:
             vimsupport.AddTextProperty( self._bufnr,
                                         line,
@@ -268,3 +269,24 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
         'end_col': end_column } ) )
 
   return properties
+
+
+def _SplitIntoSingleLineProps( start_line, column, name, extras, bufnr ):
+  end_line = extras.get( 'end_lnum', start_line )
+  if start_line < end_line:
+    for line in range( start_line, end_line + 1 ):
+      line_length = len( ToBytes( vim.buffers[ bufnr ][ line - 1 ] ) )
+      if line == start_line:
+        start_col = column
+        length = line_length - start_col + 2
+      elif line == end_line:
+        start_col = 1
+        length = extras[ 'end_col' ] - 1
+      else:
+        start_col = 1
+        length = line_length + 1
+
+      yield vimsupport.DiagnosticProperty( 0, name, line, start_col, length )
+  else:
+    length = extras[ 'end_col' ] - column if 'end_col' in extras else 1
+    yield vimsupport.DiagnosticProperty( 0, name, start_line, column, length )
