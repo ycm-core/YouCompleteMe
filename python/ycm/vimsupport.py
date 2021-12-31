@@ -527,6 +527,8 @@ def TryJumpLocationInTab( tab, filename, line, column ):
       vim.current.window = win
       vim.current.window.cursor = ( line, column - 1 )
 
+      # Open possible folding at location
+      vim.command( 'normal! zv' )
       # Center the screen on the jumped-to location
       vim.command( 'normal! zz' )
       return True
@@ -604,6 +606,8 @@ def JumpToLocation( filename, line, column, modifiers, command ):
 
   vim.current.window.cursor = ( line, column - 1 )
 
+  # Open possible folding at location
+  vim.command( 'normal! zv' )
   # Center the screen on the jumped-to location
   vim.command( 'normal! zz' )
 

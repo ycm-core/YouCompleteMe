@@ -1701,6 +1701,7 @@ class VimsupportTest( TestCase ):
       assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1722,6 +1723,7 @@ class VimsupportTest( TestCase ):
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
         call( f'keepjumps belowright edit { target_name }' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1740,6 +1742,7 @@ class VimsupportTest( TestCase ):
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
         call( f'keepjumps botright split { target_name }' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1758,6 +1761,7 @@ class VimsupportTest( TestCase ):
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
         call( f'keepjumps leftabove edit { target_name }' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1835,6 +1839,7 @@ class VimsupportTest( TestCase ):
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
         call( f'keepjumps aboveleft split { target_name }' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1863,6 +1868,7 @@ class VimsupportTest( TestCase ):
       assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1892,6 +1898,7 @@ class VimsupportTest( TestCase ):
       assert_that( vim.current.window.cursor, equal_to( ( 4, 0 ) ) )
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1913,6 +1920,7 @@ class VimsupportTest( TestCase ):
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
         call( f'keepjumps tab split { target_name }' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1940,6 +1948,7 @@ class VimsupportTest( TestCase ):
         assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
         vim_command.assert_has_exact_calls( [
           call( 'normal! m\'' ),
+          call( 'normal! zv' ),
           call( 'normal! zz' )
         ] )
 
@@ -1961,6 +1970,7 @@ class VimsupportTest( TestCase ):
       vim_command.assert_has_exact_calls( [
         call( 'normal! m\'' ),
         call( f'keepjumps aboveleft vertical tabedit { target_name }' ),
+        call( 'normal! zv' ),
         call( 'normal! zz' )
       ] )
 
@@ -1988,6 +1998,7 @@ class VimsupportTest( TestCase ):
         assert_that( vim.current.window.cursor, equal_to( ( 2, 4 ) ) )
         vim_command.assert_has_exact_calls( [
           call( 'normal! m\'' ),
+          call( 'normal! zv' ),
           call( 'normal! zz' )
         ] )
 
