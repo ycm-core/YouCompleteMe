@@ -243,7 +243,7 @@ though we do our best to signal where we know them.
 
 - Install YCM plugin via [Vundle][]
 - Install CMake, MacVim and Python 3; Note that the pre-installed *macOS system*
-  vim is not supported (due to it having broken Python intetgration).
+  vim is not supported (due to it having broken Python integration).
 
 ```
 $ brew install cmake python go nodejs
@@ -284,7 +284,7 @@ $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirt
     python3 install.py --all
     ```
 
-  - If you have troubles with finding system frameworks or C++ stanard library,
+  - If you have troubles with finding system frameworks or C++ standard library,
     try using the homebrew llvm:
 
     ```
@@ -997,7 +997,7 @@ Supported architectures are:
 ***clangd***:
 
 Typically, clangd is installed by the YCM installer (either with `--all` or with
-`--clangd-completer`). This downlaods a pre-built `clangd` binary for your
+`--clangd-completer`). This downloads a pre-built `clangd` binary for your
 architecture. If your OS or architecture is not supported or too old, you can
 install a compatible `clangd` and use [`g:ycm_clangd_binary_path`]() to point to
 it.
@@ -1006,7 +1006,7 @@ it.
 
 `libclang` can be enabled also with `--all` or `--clang-completer`. As with
 `clangd`, YCM will try and download a version of `libclang` that is suitable for
-your environemnt, but again if your environemnt can't be supported, you can
+your environment, but again if your environment can't be supported, you can
 build or acquire `libclang` for yourself and specify it when building, as:
 
 ```
