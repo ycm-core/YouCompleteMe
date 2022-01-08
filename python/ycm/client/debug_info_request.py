@@ -51,11 +51,15 @@ def FormatDebugInfoResponse( response ):
 def _FormatYcmdDebugInfo( ycmd ):
   python = ycmd[ 'python' ]
   clang = ycmd[ 'clang' ]
+  clangd = ycmd[ 'clangd' ] if 'clangd' in ycmd else None
   message = (
     f'Server Python interpreter: { python[ "executable" ] }\n'
     f'Server Python version: { python[ "version" ] }\n'
     f'Server has Clang support compiled in: { clang[ "has_support" ] }\n'
     f'Clang version: { clang[ "version" ] }\n' )
+  if clangd and clangd[ "has_support" ]:
+    message += ( f'Clangd version: { clangd[ "version" ] }\n'
+                 f'Clangd command: { clangd[ "command" ] }\n' )
   extra_conf = ycmd[ 'extra_conf' ]
   extra_conf_path = extra_conf[ 'path' ]
   if not extra_conf_path:
