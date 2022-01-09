@@ -256,7 +256,7 @@ $ brew install cmake python go nodejs
 
 ```
 $ brew install java
-$ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+$ sudo ln -sfn $(brew --prefix java)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 ```
 
 - Pre-installed macOS *system* Vim does not support Python 3. So you need to
