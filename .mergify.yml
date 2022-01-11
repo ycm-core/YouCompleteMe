@@ -1,3 +1,15 @@
+# https://blog.mergify.com/strict-mode-deprecation/
+queue_rules:
+  - name: default
+    # These define the conditions to get out of the merge queue
+    conditions:
+      - status-success=ubuntu-20.04 - Python 3.6 x64
+      - status-success=macos-10.15 - Python 3.6 x64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+
 pull_request_rules:
   - name: Automatic merge on Azure Pipelines and Reviewable successes
     conditions:
@@ -11,9 +23,9 @@ pull_request_rules:
       - status-success=Vim tests - old
       - status-success=code-review/reviewable
     actions:
-      merge:
+      queue:
         method: merge
-        strict: true
+        name: default
       comment:
         message: Thanks for sending a PR!
   - name: Manual merge on Azure Pipelines and Maintainer Override
@@ -31,8 +43,8 @@ pull_request_rules:
 
       - label="Ship It!"
     actions:
-      merge:
+      queue:
         method: merge
-        strict: true
+        name: default
       comment:
         message: Thanks for sending a PR!
