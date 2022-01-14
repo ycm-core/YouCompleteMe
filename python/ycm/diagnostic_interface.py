@@ -312,6 +312,9 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
         'end_col': end_column } ) )
 
   for diagnostic_range in diagnostic[ 'ranges' ]:
+    if diagnostic_range[ 'start' ][ 'line_num' ] == 0 or \
+       diagnostic_range[ 'end' ][ 'line_num' ] == 0:
+      continue
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
       bufnr,
       diagnostic_range[ 'start' ][ 'line_num' ],
