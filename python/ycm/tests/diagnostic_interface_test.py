@@ -54,6 +54,46 @@ def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col ):
   }
 
 
+def SimpleDiagnosticToJsonWithInvalidLineNum( start_line, start_col,
+                                              end_line, end_col ):
+  return {
+    'kind': 'ERROR',
+    'location': { 'line_num': start_line, 'column_num': start_col },
+    'location_extent': {
+      'start': {
+        'line_num': start_line,
+        'column_num': start_col
+      },
+      'end': {
+        'line_num': end_line,
+        'column_num': end_col
+      }
+    },
+    'ranges': [
+      {
+        'start': {
+          'line_num': 0,
+          'column_num': 0
+        },
+        'end': {
+          'line_num': 0,
+          'column_num': 0
+        }
+      },
+      {
+        'start': {
+          'line_num': start_line,
+          'column_num': start_col
+        },
+        'end': {
+          'line_num': end_line,
+          'column_num': end_col
+        }
+      }
+    ]
+  }
+
+
 def YcmTextPropertyTupleMatcher( start_line, start_col, end_line, end_col ):
   return has_item( contains_exactly(
     start_line,
@@ -86,7 +126,7 @@ class DiagnosticInterfaceTest( TestCase ):
       [
         SimpleDiagnosticToJson( 0, 0, 0, 0 ),
         [ 'Some contents' ],
-        YcmTextPropertyTupleMatcher( 1, 1, 1, 1 )
+        {}
       ],
       [
         SimpleDiagnosticToJson( -1, -2, -3, -4 ),
@@ -105,6 +145,39 @@ class DiagnosticInterfaceTest( TestCase ):
               diag )
           print( actual )
           assert_that( actual, result )
+
+  def test_ConvertDiagnosticWithInvalidLineNum( self ):
+    for diag, contents, result in [
+      # Error in middle of the line
+      [
+        SimpleDiagnosticToJsonWithInvalidLineNum( 1, 16, 1, 23 ),
+        [ 'Highlight this error please' ],
+        YcmTextPropertyTupleMatcher( 1, 16, 1, 23 )
+      ],
+      # Error at the end of the line
+      [
+        SimpleDiagnosticToJsonWithInvalidLineNum( 1, 16, 1, 21 ),
+        [ 'Highlight this warning' ],
+        YcmTextPropertyTupleMatcher( 1, 16, 1, 21 )
+      ],
+      [
+        SimpleDiagnosticToJsonWithInvalidLineNum( 1, 16, 1, 19 ),
+        [ 'Highlight unicøde' ],
+        YcmTextPropertyTupleMatcher( 1, 16, 1, 19 )
+      ],
+    ]:
+      with self.subTest( diag = diag, contents = contents, result = result ):
+        current_buffer = VimBuffer( 'foo', number = 1, contents = [ '' ] )
+        target_buffer = VimBuffer( 'bar', number = 2, contents = contents )
+
+        with MockVimBuffers( [ current_buffer, target_buffer ],
+                             [ current_buffer, target_buffer ] ):
+          actual = diagnostic_interface._ConvertDiagnosticToTextProperties(
+              target_buffer.number,
+              diag )
+          print( actual )
+          assert_that( actual, result )
+
 
   def test_IsValidRange( self ):
     for start_line, start_col, end_line, end_col, expect in (
