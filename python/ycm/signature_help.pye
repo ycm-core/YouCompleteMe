@@ -44,12 +44,6 @@ class SignatureHelpState:
       vim.eval( f'popup_show( { self.popup_win_id } )' )
 
 
-  def IsActive( self ):
-    if self.state in ( 'ACTIVE', 'ACTIVE_SUPPRESSED' ):
-      return 'ACTIVE'
-    return 'INACTIVE'
-
-
 def _MakeSignatureHelpBuffer( signature_info ):
   active_parameter = int( signature_info.get( 'activeParameter', 0 ) )
 
@@ -87,12 +81,15 @@ def ShouldUseSignatureHelp():
 
 
 def UpdateSignatureHelp( state, signature_info ): # noqa
+  print(state.state)
+  print(signature_info.get( 'signatures', [] ))
   if not ShouldUseSignatureHelp():
     return state
 
   signatures = signature_info.get( 'signatures' ) or []
 
   if not signatures:
+    print(2)
     if state.popup_win_id:
       # TODO/FIXME: Should we use popup_hide() instead ?
       vim.eval( f"popup_close( { state.popup_win_id } )" )
@@ -144,6 +141,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   if line <= 0:
     # Nowhere to put it so hide it
+    print(1)
     if state.popup_win_id:
       # TODO/FIXME: Should we use popup_hide() instead ?
       vim.eval( f"popup_close( { state.popup_win_id } )" )
