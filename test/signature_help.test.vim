@@ -787,3 +787,58 @@ function! TearDown_Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_blacklist' )
   call youcompleteme#test#setup#PopGlobal( 'ycm_add_preview_to_completeopt' )
 endfunction
+
+function! Test_Manual_Visibility_Toggling()
+  enew
+  setf python
+  imap qc <Plug>(YCMToggleSignatureHelp)
+  call setline(1, 'def f(a, b, c, d): pass')
+  call setline(2, '')
+  call setline(3, 'f(')
+
+  function! ShowPopupFromANewCursorPosition( ... )
+    call youcompleteme#test#popup#CheckPopupPosition( popup_id, { 'line': 2, 'col': 0 } )
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  function! PopupDoesNotReappearWhenCursorMoves( ... )
+    call youcompleteme#test#popup#CheckPopupPosition( popup_id, {} )
+    call FeedAndCheckAgain( 'qc', funcref( 'ShowPopupFromANewCursorPosition' ) )
+  endfunction
+
+  function! HidePopupFromANewCursorPosition( ... )
+    call youcompleteme#test#popup#CheckPopupPosition( popup_id, {} )
+    call FeedAndCheckAgain( '   ', funcref( 'PopupDoesNotReappearWhenCursorMoves' ) )
+  endfunction
+
+  function! MoveCursorWithoutClosingThePopup( ... )
+    call youcompleteme#test#popup#CheckPopupPosition( popup_id, { 'line': 2, 'col': 0 } )
+    call FeedAndCheckAgain( 'qc', funcref( 'HidePopupFromANewCursorPosition' ) )
+  endfunction
+
+  function! ShowPopupWithoutMovingCursor( ... )
+    call youcompleteme#test#popup#CheckPopupPosition( popup_id, { 'line': 2, 'col': 0 } )
+    call FeedAndCheckAgain( '   ', funcref( 'MoveCursorWithoutClosingThePopup' ) )
+  endfunction
+
+  function! HidePopupWithoutMovingCursor( ... )
+    call youcompleteme#test#popup#CheckPopupPosition( popup_id, {} )
+    call FeedAndCheckAgain( 'qc', funcref( 'ShowPopupWithoutMovingCursor' ) )
+  endfunction
+
+  let v_sh = {
+        \   'activeSignature': 0,
+        \   'activeParameter': 0,
+        \   'signatures': [
+        \     { 'label': 'toast function', 'parameters': [
+        \         { 'label': [ 0, 1 ] },
+        \         { 'label': [ 2, 3 ] },
+        \         { 'label': [ 4, 5 ] },
+        \         { 'label': [ 6, 7 ] }
+        \     ] },
+        \   ]
+        \ }
+  call s:_CheckSigHelpAtPos( v_sh, [ 3, 3 ], { 'line': 2, 'col': 1 } )
+  let g:sig_help_popup_id = py3eval( 'ycm_state._signature_help_state.popup_win_id' )
+  call FeedAndCheckMain( 'qc', funcref( 'HidePopupWithoutMovingCursor' ) )
+endfunction
