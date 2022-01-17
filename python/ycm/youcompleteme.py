@@ -845,6 +845,10 @@ class YouCompleteMe:
     }, 'filter_and_sort_candidates' )
 
 
+  def ToggleSignatureHelp( self ):
+    self._signature_help_state.ToggleVisibility()
+    return ''
+
   def _AddSyntaxDataIfNeeded( self, extra_data ):
     if not self._user_options[ 'seed_identifiers_with_syntax' ]:
       return

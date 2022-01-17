@@ -223,12 +223,17 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     autocmd CursorMovedI * let s:current_cursor_position = getpos( '.' )
-    autocmd InsertEnter * let s:current_cursor_position = getpos( '.' )
+    autocmd InsertEnter * call s:OnInsertEnter()
     autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
     autocmd InsertCharPre * call s:OnInsertChar()
   augroup END
+endfunction
+
+
+function! s:OnInsertEnter()
+  let s:current_cursor_position = getpos( '.' )
 endfunction
 
 
@@ -1482,6 +1487,12 @@ endif
 function! youcompleteme#Test_GetPollers()
   return s:pollers
 endfunction
+
+function! s:ToggleSignatureHelp()
+  return py3eval( 'ycm_state.ToggleSignatureHelp()' )
+endfunction
+
+silent! inoremap <silent> <plug>(YCMToggleSignatureHelp) <C-r>=<SID>ToggleSignatureHelp()<CR>
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
