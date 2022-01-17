@@ -336,7 +336,9 @@ class YouCompleteMe:
         return False
 
       request_data = self._latest_completion_request.request_data.copy()
-      request_data[ 'signature_help_state' ] = self._signature_help_state.state
+      request_data[ 'signature_help_state' ] = (
+          self._signature_help_state.IsActive()
+      )
 
       self._AddExtraConfDataIfNeeded( request_data )
 
@@ -843,6 +845,10 @@ class YouCompleteMe:
       'max_num_candidates': max_items,
       'query': vimsupport.ToUnicode( query )
     }, 'filter_and_sort_candidates' )
+
+
+  def ToggleSignatureHelp( self ):
+    self._signature_help_state.ToggleVisibility()
 
 
   def _AddSyntaxDataIfNeeded( self, extra_data ):

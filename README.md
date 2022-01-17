@@ -945,6 +945,19 @@ leave insert mode. There is no key binding to clear the popup.
 For more details on this feature and a few demos, check out the
 [PR that proposed it][signature-help-pr].
 
+#### Dismiss signature help
+
+The signature help popup sometimes gets in the way. You can toggle its
+visibility with a mapping. YCM provides the "Plug" mapping
+`<Plug>(YCMToggleSignatureHelp)` for this.
+
+For example, to hide/show the signature help popup by pressing Ctrl+l in insert
+mode: `imap <silent> <C-l> <Plug>(YCMToggleSignatureHelp)`.
+
+_NOTE_: No default mapping is provided because insert mappings are very
+difficult to create without breaking or overriding some existing functionality.
+Ctrl-l is not a suggestion, just an example.
+
 ### General Semantic Completion
 
 You can use Ctrl+Space to trigger the completion suggestions anywhere, even

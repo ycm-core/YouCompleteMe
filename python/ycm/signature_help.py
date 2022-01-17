@@ -25,6 +25,7 @@ from ycm.vimsupport import memoize, GetIntValue
 class SignatureHelpState:
   ACTIVE = 'ACTIVE'
   INACTIVE = 'INACTIVE'
+  ACTIVE_SUPPRESSED = 'ACTIVE_SUPPRESSED'
 
   def __init__( self,
                 popup_win_id = None,
@@ -32,6 +33,21 @@ class SignatureHelpState:
     self.popup_win_id = popup_win_id
     self.state = state
     self.anchor = None
+
+
+  def ToggleVisibility( self ):
+    if self.state == 'ACTIVE':
+      self.state = 'ACTIVE_SUPPRESSED'
+      vim.eval( f'popup_hide( { self.popup_win_id } )' )
+    elif self.state == 'ACTIVE_SUPPRESSED':
+      self.state = 'ACTIVE'
+      vim.eval( f'popup_show( { self.popup_win_id } )' )
+
+
+  def IsActive( self ):
+    if self.state in ( 'ACTIVE', 'ACTIVE_SUPPRESSED' ):
+      return 'ACTIVE'
+    return 'INACTIVE'
 
 
 def _MakeSignatureHelpBuffer( signature_info ):
@@ -82,10 +98,10 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
       vim.eval( f"popup_close( { state.popup_win_id } )" )
     return SignatureHelpState( None, SignatureHelpState.INACTIVE )
 
-  if state.state != SignatureHelpState.ACTIVE:
+  if state.state == SignatureHelpState.INACTIVE:
     state.anchor = vimsupport.CurrentLineAndColumn()
 
-  state.state = SignatureHelpState.ACTIVE
+    state.state = SignatureHelpState.ACTIVE
 
   # Generate the buffer as a list of lines
   buf_lines = _MakeSignatureHelpBuffer( signature_info )
@@ -154,9 +170,10 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # NOTE: We *dont'* use "cursorline" here - that actually uses PMenuSel,
     # which is just too invasive for us (it's more selected item than actual
     # cursorline. So instead, we manually set 'cursorline' in the popup window
-    # and enable sytax based on the current file syntax)
+    # and enable syntax based on the current file syntax)
     "flip": 1,
     "padding": [ 0, 1, 0, 1 ], # Pad 1 char in X axis to match completion menu
+    "hidden": int( state.state == SignatureHelpState.ACTIVE_SUPPRESSED )
   }
 
   if not state.popup_win_id:
@@ -169,7 +186,8 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   # Should do nothing if already visible
   vim.eval( f'popup_move( { state.popup_win_id }, { json.dumps( options ) } )' )
-  vim.eval( f'popup_show( { state.popup_win_id } )' )
+  if state.state == SignatureHelpState.ACTIVE:
+    vim.eval( f'popup_show( { state.popup_win_id } )' )
 
   syntax = utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] )
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )

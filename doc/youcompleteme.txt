@@ -39,6 +39,7 @@ Contents ~
   2. Client-Server Architecture      |youcompleteme-client-server-architecture|
   3. Completion String Ranking        |youcompleteme-completion-string-ranking|
   4. Signature Help                              |youcompleteme-signature-help|
+   1. Dismiss signature help             |youcompleteme-dismiss-signature-help|
   5. General Semantic Completion    |youcompleteme-general-semantic-completion|
   6. C-family Semantic Completion  |youcompleteme-c-family-semantic-completion|
    1. Installation
@@ -461,7 +462,7 @@ Quick start, installing all completers ~
 
 - Install YCM plugin via Vundle [25]
 - Install CMake, MacVim and Python 3; Note that the pre-installed _macOS
-  system_ vim is not supported (due to it having broken Python intetgration).
+  system_ vim is not supported (due to it having broken Python integration).
 >
   $ brew install cmake python go nodejs
 <
@@ -472,7 +473,7 @@ Quick start, installing all completers ~
   Homebrew:
 >
   $ brew install java
-  $ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+  $ sudo ln -sfn $(brew --prefix java)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 <
 - Pre-installed macOS _system_ Vim does not support Python 3. So you need to
   install either a Vim that supports Python 3 OR MacVim [27] with Homebrew
@@ -493,10 +494,10 @@ Quick start, installing all completers ~
   cd ~/.vim/bundle/YouCompleteMe
   python3 install.py --all
 <
-- If you have troubles with finding system frameworks or C++ stanard library,
-  try using the homebrew llvm:
+- If you have troubles with finding system frameworks or C++ standard
+  library, try using the homebrew llvm:
 >
-  brea install llvm
+  brew install llvm
   cd ~/.vim/bundle/YouCompleteMe
   python3 install.py --system-libclang --all
 <
@@ -1126,6 +1127,21 @@ For more details on this feature and a few demos, check out the PR that
 proposed it [44].
 
 -------------------------------------------------------------------------------
+                                         *youcompleteme-dismiss-signature-help*
+Dismiss signature help ~
+
+The signature help popup sometimes gets in the way. You can toggle its
+visibility with a mapping. YCM provides the "Plug" mapping
+'<Plug>(YCMToggleSignatureHelp)' for this.
+
+For example, to hide/show the signature help popup by pressing Ctrl+l in insert
+mode: 'imap <silent> <C-l> <Plug>(YCMToggleSignatureHelp)'.
+
+_NOTE_: No default mapping is provided because insert mappings are very
+difficult to create without breaking or overriding some existing functionality.
+Ctrl-l is not a suggestion, just an example.
+
+-------------------------------------------------------------------------------
                                     *youcompleteme-general-semantic-completion*
 General Semantic Completion ~
 
@@ -1189,7 +1205,7 @@ Supported architectures are:
 **_clangd_**:
 
 Typically, clangd is installed by the YCM installer (either with '--all' or
-with '--clangd-completer'). This downlaods a pre-built 'clangd' binary for your
+with '--clangd-completer'). This downloads a pre-built 'clangd' binary for your
 architecture. If your OS or architecture is not supported or too old, you can
 install a compatible 'clangd' and use |g:ycm_clangd_binary_path| to point to
 it.
@@ -1198,7 +1214,7 @@ it.
 
 'libclang' can be enabled also with '--all' or '--clang-completer'. As with
 'clangd', YCM will try and download a version of 'libclang' that is suitable
-for your environemnt, but again if your environemnt can't be supported, you can
+for your environment, but again if your environment can't be supported, you can
 build or acquire 'libclang' for yourself and specify it when building, as:
 >
   $ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang-compelter --system-libclang
