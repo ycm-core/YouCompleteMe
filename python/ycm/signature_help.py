@@ -146,6 +146,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   if col <= 0:
     col = 1
 
+  popup_hidden = vimsupport.GetIntValue( '!g:ycm_sig_visible' )
   options = {
     "line": line,
     "col": col,
@@ -157,6 +158,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # and enable sytax based on the current file syntax)
     "flip": 1,
     "padding": [ 0, 1, 0, 1 ], # Pad 1 char in X axis to match completion menu
+    "hidden": popup_hidden
   }
 
   if not state.popup_win_id:
@@ -169,7 +171,8 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   # Should do nothing if already visible
   vim.eval( f'popup_move( { state.popup_win_id }, { json.dumps( options ) } )' )
-  vim.eval( f'popup_show( { state.popup_win_id } )' )
+  if not popup_hidden:
+    vim.eval( f'popup_show( { state.popup_win_id } )' )
 
   syntax = utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] )
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )

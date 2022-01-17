@@ -36,6 +36,7 @@ let s:default_completion = {}
 let s:completion = s:default_completion
 let s:default_signature_help = {}
 let s:signature_help = s:default_completion
+let g:ycm_sig_visible = v:true
 let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
@@ -223,12 +224,18 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     autocmd CursorMovedI * let s:current_cursor_position = getpos( '.' )
-    autocmd InsertEnter * let s:current_cursor_position = getpos( '.' )
+    autocmd InsertEnter * call s:OnInsertEnter()
     autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
     autocmd InsertCharPre * call s:OnInsertChar()
   augroup END
+endfunction
+
+
+function! s:OnInsertEnter()
+  let s:current_cursor_position = getpos( '.' )
+  let g:ycm_sig_visible = v:true
 endfunction
 
 
@@ -1482,6 +1489,25 @@ endif
 function! youcompleteme#Test_GetPollers()
   return s:pollers
 endfunction
+
+function! s:ToggleSignatureHelp()
+  let sig_help_win_id = py3eval('ycm_state._signature_help_state.popup_win_id')
+
+  if sig_help_win_id == v:none
+    return ""
+  endif
+
+  if g:ycm_sig_visible
+    call popup_hide(sig_help_win_id)
+    let g:ycm_sig_visible = v:false
+  else
+    call popup_show(sig_help_win_id)
+    let g:ycm_sig_visible = v:true
+  endif
+  return ""
+endfunction
+
+silent! inoremap <silent> <plug>(YCMToggleSignatureHelp) <C-r>=<SID>ToggleSignatureHelp()<CR>
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
