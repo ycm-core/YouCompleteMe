@@ -115,11 +115,11 @@ def Reject( id: number, why: string )
         \ vim.eval( 'g:ycm_http9_vars.why' ) )
 enddef
 
-def youcompleteme#http9#GET( host: string,
-                             port: number,
-                             uri: string,
-                             query_string: string,
-                             headers: dict< any  > ): number
+export def GET( host: string,
+                port: number,
+                uri: string,
+                query_string: string,
+                headers: dict< any  > ): number
   return Write( 'GET',
                 host,
                 port,
@@ -129,15 +129,15 @@ def youcompleteme#http9#GET( host: string,
 enddef
 
 
-def youcompleteme#http9#POST( host: string,
-                              port: number,
-                              uri: string,
-                              headers: dict< any >,
-                              data: string ): number
+export def POST( host: string,
+                 port: number,
+                 uri: string,
+                 headers: dict< any >,
+                 data: string ): number
   return Write( 'POST', host, port, uri, headers, data )
 enddef
 
-def youcompleteme#http9#Block( id: number, timeout: number )
+export def Block( id: number, timeout: number )
   const ch = request_state[id].handle
   ch_setoptions( ch, { 'close_cb': '' } )
   while count( [ 'open', 'buffered' ],  ch_status( ch ) ) == 1
