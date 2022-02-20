@@ -250,6 +250,9 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
         'end_col': end_column } ) )
 
   for diagnostic_range in diagnostic[ 'ranges' ]:
+    if not _IsValidDiagnosticRange( diagnostic_range ):
+      continue
+
     start_line, start_column = vimsupport.LineAndColumnNumbersClamped(
       bufnr,
       diagnostic_range[ 'start' ][ 'line_num' ],
@@ -268,3 +271,23 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
         'end_col': end_column } ) )
 
   return properties
+
+
+def _IsValidDiagnosticRange( diagnostic_range ):
+  start = diagnostic_range[ 'start' ]
+  end = diagnostic_range[ 'end' ]
+
+  # End line before start line - invalid
+  if start[ 'line_num' ] > end[ 'line_num' ]:
+    return False
+
+  # End line after start line - valid
+  if start[ 'line_num' ] < end[ 'line_num' ]:
+    return True
+
+  # Same line, start colum after end column - invalid
+  if start[ 'column_num' ] > end[ 'column_num' ]:
+    return False
+
+  # Same line, start column before or equal to end column - valid
+  return True
