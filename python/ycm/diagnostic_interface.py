@@ -260,6 +260,10 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
       diagnostic_range[ 'end' ][ 'line_num' ],
       diagnostic_range[ 'end' ][ 'column_num' ]
     )
+
+    if not _IsValidRange( start_line, start_column, end_line, end_column ):
+      continue
+
     properties.append( (
       start_line,
       start_column,
@@ -268,3 +272,20 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
         'end_col': end_column } ) )
 
   return properties
+
+
+def _IsValidRange( start_line, start_column, end_line, end_column ):
+  # End line before start line - invalid
+  if start_line > end_line:
+    return False
+
+  # End line after start line - valid
+  if start_line < end_line:
+    return True
+
+  # Same line, start colum after end column - invalid
+  if start_column > end_column:
+    return False
+
+  # Same line, start column before or equal to end column - valid
+  return True

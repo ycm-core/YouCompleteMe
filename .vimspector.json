@@ -1,6 +1,16 @@
 {
   "$schema": "https://puremourning.github.io/vimspector/schema/vimspector.schema.json",
   "configurations": {
+    "Python: Attach To Vim": {
+      "variables": {
+        "port": "5678",
+        "host": "localhost"
+      },
+      "adapter": "multi-session",
+      "configuration": {
+        "request": "attach"
+      }
+    },
     "python - launch pytest": {
       "adapter": "debugpy",
       "variables": [
