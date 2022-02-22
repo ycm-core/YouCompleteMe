@@ -16,7 +16,11 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 from ycm import diagnostic_interface
 from ycm.tests.test_utils import VimBuffer, MockVimModule, MockVimBuffers
-from hamcrest import assert_that, contains_exactly, has_entries, has_item
+from hamcrest import ( assert_that,
+                       contains_exactly,
+                       equal_to,
+                       has_entries,
+                       has_item )
 from unittest import TestCase
 MockVimModule()
 
@@ -101,3 +105,21 @@ class DiagnosticInterfaceTest( TestCase ):
               diag )
           print( actual )
           assert_that( actual, result )
+
+  def test_IsValidRange( self ):
+    for start_line, start_col, end_line, end_col, expect in (
+      ( 1, 1, 1, 1, True ),
+      ( 1, 1, 0, 0, False ),
+      ( 1, 1, 2, 1, True ),
+      ( 1, 2, 2, 1, True ),
+      ( 2, 1, 1, 1, False ),
+      ( 2, 2, 2, 1, False ),
+    ):
+      with self.subTest( start=( start_line, start_col ),
+                         end=( end_line, end_col ),
+                         expect = expect ):
+        assert_that( diagnostic_interface._IsValidRange( start_line,
+                                                         start_col,
+                                                         end_line,
+                                                         end_col ),
+                     equal_to( expect ) )
