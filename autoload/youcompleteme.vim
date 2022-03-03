@@ -1225,7 +1225,7 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  if s:pollers.command.id != -1
+  if s:requests.command.id != -1
     eval a:callback( { 'error': 'request in progress' } )
     return
   endif
