@@ -3,7 +3,8 @@ function! youcompleteme#test#popup#CheckPopupPosition( winid, pos )
   let actual_pos = popup_getpos( a:winid )
   let ret = 0
   if a:pos->empty()
-    return assert_true( actual_pos->empty(), 'popup pos empty' )
+    return assert_true( actual_pos->empty(),
+          \ 'popup pos empty, got: ' . string( actual_pos ) )
   endif
   for c in keys( a:pos )
     if !has_key( actual_pos, c )

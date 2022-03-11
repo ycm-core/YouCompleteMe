@@ -1483,6 +1483,16 @@ function! youcompleteme#Test_GetPollers()
   return s:pollers
 endfunction
 
+function! s:ToggleSignatureHelp()
+  call py3eval( 'ycm_state.ToggleSignatureHelp()' )
+  " Because we do this in a insert-mode mapping, we return empty string to
+  " insert/type nothing
+  return ''
+endfunction
+
+silent! inoremap <silent> <plug>(YCMToggleSignatureHelp)
+      \ <C-r>=<SID>ToggleSignatureHelp()<CR>
+
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
 unlet s:save_cpo
