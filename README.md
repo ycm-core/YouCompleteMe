@@ -1434,10 +1434,7 @@ section](#installation) for details). The install script takes care of
 installing [the Rust source code][rust-src], so no configuration is necessary.
 
 `rust-analyzer` supports a myriad of options. These are configured using [LSP
-configuration](#lsp-configuration), but sadly don't appear to be documented at
-the time of writing. However, there is some
-[source code](https://github.com/rust-analyzer/rust-analyzer/blob/master/crates/rust-analyzer/src/config.rs)
-which might help.
+configuration](#lsp-configuration), and are [documented here](https://rust-analyzer.github.io/manual.html#configuration]).
 
 ### Go Semantic Completion
 
