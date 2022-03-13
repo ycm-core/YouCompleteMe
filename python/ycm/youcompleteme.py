@@ -814,21 +814,26 @@ class YouCompleteMe:
         if col > available_columns - 2: # -2 accounts for padding.
           col = 0
         options = {
-            'col': col,
-            'padding': [ 0, 1, 0, 1 ],
-            'maxwidth': available_columns,
-            'close': 'click',
-            'fixed': 0,
+          'col': col,
+          'padding': [ 0, 1, 0, 1 ],
+          'maxwidth': available_columns,
+          'close': 'click',
+          'fixed': 0,
+          'highlight': 'YcmErrorSection',
+          'border': [ 1, 1, 1, 1 ],
         }
         popup_func = 'popup_atcursor'
         for diag in diags_on_this_line:
           if message == diag[ 'text' ]:
             popup_func = 'popup_create'
             prop = vimsupport.GetTextPropertyForDiag( buffer_number,
-                                                      window.cursor[ 0 ], diag )
+                                                      window.cursor[ 0 ],
+                                                      diag )
             options.update( {
               'textpropid': prop[ 'id' ],
-              'textprop': prop[ 'type' ]
+              'textprop': prop[ 'type' ],
+              # Close when changing the current line.
+              'moved': [ window.cursor[ 0 ], 1, 9999999 ],
             } )
             options.pop( 'col' )
         vim.eval( f'{ popup_func }( { lines }, { options } )' )
