@@ -867,7 +867,7 @@ class YouCompleteMe:
   def _AddTagsFilesIfNeeded( self, extra_data ):
     def GetTagFiles():
       tag_files = vim.eval( 'tagfiles()' )
-      return [ os.path.join( utils.GetCurrentDirectory(), tag_file )
+      return [ os.path.abspath(tag_file)
                for tag_file in tag_files ]
 
     if not self._user_options[ 'collect_identifiers_from_tags_files' ]:
