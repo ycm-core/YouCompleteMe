@@ -821,6 +821,8 @@ class YouCompleteMe:
           'fixed': 0,
           'highlight': 'YcmErrorSection',
           'border': [ 1, 1, 1, 1 ],
+          # Close when moving cursor
+          'moved': 'expr',
         }
         popup_func = 'popup_atcursor'
         for diag in diags_on_this_line:
@@ -832,8 +834,6 @@ class YouCompleteMe:
             options.update( {
               'textpropid': prop[ 'id' ],
               'textprop': prop[ 'type' ],
-              # Close when changing the current line.
-              'moved': [ window.cursor[ 0 ], 1, 9999999 ],
             } )
             options.pop( 'col' )
         vim.eval( f'{ popup_func }( { lines }, { options } )' )
