@@ -220,13 +220,18 @@ function! Test_ShowDetailedDiagnostic_PopupAtCursor()
   call cursor( [ 3, 1 ] )
   YcmShowDetailedDiagnostic popup
 
-  let popups = popup_list()
-  call assert_equal( 1, len( popups ) )
-  let id = popups[ 0 ]
+  let id = popup_locate( 4, 1 )
+  call assert_notequal( 0, id, "Couldn't find popup!" )
+
+  if exists( '*popup_list' )
+    let popups = popup_list()
+    call assert_equal( 1, len( popups ) )
+  endif
 
   call youcompleteme#test#popup#CheckPopupPosition( id, {
         \ 'visible': 1,
-        \ 'col': 1
+        \ 'col': 1,
+        \ 'line': 4,
         \ } )
   call assert_equal(
         \ [
