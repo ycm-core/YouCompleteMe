@@ -83,7 +83,24 @@ class CompletionRequest( BaseRequest ):
     if 'cs' in vimsupport.CurrentFiletypes():
       self._OnCompleteDone_Csharp()
     else:
-      self._OnCompleteDone_FixIt()
+      extra_datas = self._GetExtraDataUserMayHaveCompleted()
+      if not extra_datas:
+        return
+
+      # If we have user_data in completions (8.0.1493 or later), then we would
+      # only ever return max. 1 completion here. However, if we had to guess, it
+      # is possible that we matched multiple completion items (e.g. for
+      # overloads, or similar classes in multiple packages). In any case, rather
+      # than prompting the user and disturbing her workflow, we just apply the
+      # first one. This might be wrong, but the solution is to use a newer
+      # version of Vim which supports user_data on completion items
+      completion_extra_data = extra_datas[ 0 ]
+
+      self._OnCompleteDone_FixIt( completion_extra_data )
+
+      snippet = completion_extra_data.get( 'snippet', None )
+      if snippet:
+        self._OnCompleteDone_Snippet( snippet )
 
 
   def _GetExtraDataUserMayHaveCompleted( self ):
@@ -106,7 +123,7 @@ class CompletionRequest( BaseRequest ):
 
   def _OnCompleteDone_Csharp( self ):
     extra_datas = self._GetExtraDataUserMayHaveCompleted()
-    namespaces = [ _GetRequiredNamespaceImport( c ) for c in extra_datas ]
+    namespaces = [ c.get( 'required_namespace_import' ) for c in extra_datas ]
     namespaces = [ n for n in namespaces if n ]
     if not namespaces:
       return
@@ -123,32 +140,19 @@ class CompletionRequest( BaseRequest ):
     vimsupport.InsertNamespace( namespace )
 
 
-  def _OnCompleteDone_FixIt( self ):
-    extra_datas = self._GetExtraDataUserMayHaveCompleted()
-    fixit_completions = [ _GetFixItCompletion( c ) for c in extra_datas ]
-    fixit_completions = [ f for f in fixit_completions if f ]
-    if not fixit_completions:
-      return
+  def _OnCompleteDone_FixIt( self, completion_extra_data ):
+    fixits = completion_extra_data.get( 'fixits', [] )
 
-    # If we have user_data in completions (8.0.1493 or later), then we would
-    # only ever return max. 1 completion here. However, if we had to guess, it
-    # is possible that we matched multiple completion items (e.g. for overloads,
-    # or similar classes in multiple packages). In any case, rather than
-    # prompting the user and disturbing her workflow, we just apply the first
-    # one. This might be wrong, but the solution is to use a (very) new version
-    # of Vim which supports user_data on completion items
-    fixit_completion = fixit_completions[ 0 ]
-
-    for fixit in fixit_completion:
-      vimsupport.ReplaceChunks( fixit[ 'chunks' ], silent=True )
+    for fixit in fixits:
+      cursor_position = 'end' if fixit.get( 'is_completion', False ) else None
+      vimsupport.ReplaceChunks( fixit[ 'chunks' ],
+                                silent = True,
+                                cursor_position = cursor_position )
 
 
-def _GetRequiredNamespaceImport( extra_data ):
-  return extra_data.get( 'required_namespace_import' )
-
-
-def _GetFixItCompletion( extra_data ):
-  return extra_data.get( 'fixits' )
+  def _OnCompleteDone_Snippet( self, snippet ):
+    vimsupport.ExpandSnippet( snippet[ 'snippet' ],
+                              snippet[ 'trigger_string' ] )
 
 
 def _FilterToMatchingCompletions( completed_item, completions ):
@@ -200,9 +204,24 @@ def ConvertCompletionDataToVimData( completion_data ):
         preview_info = extra_menu_info + '\n\n' + preview_info
       extra_menu_info = extra_menu_info[ : ( max_width - 3 ) ] + '...'
 
+  pfx = ''
+  extra_data = completion_data.get( 'extra_data', {} )
+
+  if 'snippet' in extra_data:
+    pfx += '*'
+  if 'fixits' in extra_data:
+    pfx += '+'
+
+  if 'menu_text' in completion_data:
+    abbr = pfx + completion_data[ 'menu_text' ]
+  elif pfx:
+    abbr = pfx + completion_data[ 'insertion_text' ]
+  else:
+    abbr = ''
+
   return {
     'word'     : completion_data[ 'insertion_text' ],
-    'abbr'     : completion_data.get( 'menu_text', '' ),
+    'abbr'     : abbr,
     'menu'     : extra_menu_info,
     'info'     : preview_info,
     'kind'     : ToUnicode( completion_data.get( 'kind', '' ) )[ :1 ].lower(),
@@ -219,7 +238,7 @@ def ConvertCompletionDataToVimData( completion_data ):
     # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
     # the item to the dictionary is harmless in earlier Vims.
     # Note: Since 8.2.0084 we don't need to use json.dumps() here.
-    'user_data': json.dumps( completion_data.get( 'extra_data', {} ) )
+    'user_data': json.dumps( extra_data )
   }
 
 
