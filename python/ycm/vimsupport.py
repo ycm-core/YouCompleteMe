@@ -208,6 +208,33 @@ class DiagnosticProperty( namedtuple( 'DiagnosticProperty', [ 'id',
              self.length == other.length )
 
 
+def GetTextPropertyForDiag( buffer_number, line_number, diag ):
+  range = diag[ 'location_extent' ]
+  start = range[ 'start' ]
+  end = range[ 'end' ]
+  length = end[ 'column_num' ] - start[ 'column_num' ]
+  if diag[ 'kind' ] == 'ERROR':
+    property_name = 'YcmErrorProperty'
+  else:
+    property_name = 'YcmWarningProperty'
+  if HasFastPropList():
+    vim_props = vim.eval( f'prop_list( { line_number }, '
+                          f'{{ "bufnr": { buffer_number }, '
+                             f'"types": [ "{ property_name }" ] }} )' )
+    return next( filter(
+        lambda p: start[ 'column_num' ] == int( p[ 'col' ] ) and
+                  length == int( p[ 'length' ] ),
+        vim_props ) )
+  else:
+    vim_props = vim.eval( f'prop_list( { line_number }, '
+                                     f'{{ "bufnr": { buffer_number } }} )' )
+    return next( filter(
+        lambda p: start[ 'column_num' ] == int( p[ 'col' ] ) and
+                  length == int( p[ 'length' ] ) and
+                  property_name == p[ 'type' ],
+        vim_props ) )
+
+
 def GetTextProperties( buffer_number ):
   if not VimIsNeovim():
     if HasFastPropList():
@@ -1355,6 +1382,7 @@ def VimSupportsTextProperties():
 @memoize()
 def VimSupportsPopupWindows():
   return VimHasFunctions( 'popup_create',
+                          'popup_atcursor',
                           'popup_move',
                           'popup_hide',
                           'popup_settext',

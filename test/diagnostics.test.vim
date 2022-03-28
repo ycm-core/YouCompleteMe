@@ -195,3 +195,57 @@ function! Test_ThirdPartyDeletesItsTextProperty()
   py3 from ycm.vimsupport import GetTextProperties, GetIntValue
   call assert_equal( [], py3eval( 'GetTextProperties( GetIntValue( """bufnr( "%" )""" ) )' ) )
 endfunction
+
+function! Test_ShowDetailedDiagnostic_CmdLine()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/cpp/fixit.cpp', {} )
+
+  call cursor( [ 3, 1 ] )
+  redir => output
+  YcmShowDetailedDiagnostic
+  redir END
+
+  call assert_equal(
+        \ "Format specifies type 'char *' but the argument has type 'int' "
+        \ . '(fix available)',
+        \ trim( output ) )
+
+  %bwipe!
+endfunction
+
+function! Test_ShowDetailedDiagnostic_PopupAtCursor()
+  call youcompleteme#test#setup#OpenFile(
+    \ '/test/testdata/cpp/fixit.cpp', {} )
+
+  call cursor( [ 3, 1 ] )
+  YcmShowDetailedDiagnostic popup
+
+  let id = popup_locate( 4, 1 )
+  call assert_notequal( 0, id, "Couldn't find popup!" )
+
+  if exists( '*popup_list' )
+    let popups = popup_list()
+    call assert_equal( 1, len( popups ) )
+  endif
+
+  call youcompleteme#test#popup#CheckPopupPosition( id, {
+        \ 'visible': 1,
+        \ 'col': 1,
+        \ 'line': 4,
+        \ } )
+  call assert_equal(
+        \ [
+        \   "Format specifies type 'char *' but the argument has type 'int' "
+        \   . '(fix available)',
+        \ ],
+        \ getbufline( winbufnr(id), 1, '$' ) )
+
+  " From vim's test_popupwin.vim
+  " trigger the check for last_cursormoved by going into insert mode
+  call test_override( 'char_avail', 1 )
+  call feedkeys( "ji\<Esc>", 'xt' )
+  call assert_equal( {}, popup_getpos( id ) )
+  call test_override( 'ALL', 0 )
+
+  %bwipe!
+endfunction
