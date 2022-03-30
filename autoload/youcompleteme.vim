@@ -1191,7 +1191,8 @@ function! s:SetUpCommands()
         \                                      <line2>,
         \                                      <f-args>)
   command! YcmDiags call s:ShowDiagnostics()
-  command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
+  command! -nargs=? YcmShowDetailedDiagnostic
+        \ call s:ShowDetailedDiagnostic( <f-args> )
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
 endfunction
 
@@ -1361,8 +1362,13 @@ function! s:ShowDiagnostics()
 endfunction
 
 
-function! s:ShowDetailedDiagnostic()
-  py3 ycm_state.ShowDetailedDiagnostic()
+function! s:ShowDetailedDiagnostic( ... )
+  if ( a:0 && a:1 == 'popup' )
+        \ || get( g:, 'ycm_show_detailed_diag_in_popup', 0 )
+    py3 ycm_state.ShowDetailedDiagnostic( True )
+  else
+    py3 ycm_state.ShowDetailedDiagnostic( False )
+  endif
 endfunction
 
 

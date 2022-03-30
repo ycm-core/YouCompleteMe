@@ -1802,6 +1802,12 @@ _Options_ section for details.
 This command shows the full diagnostic text when the user's cursor is on the
 line with the diagnostic.
 
+An options argument can be passed. If the argument is `popup` the diagnostic
+text will be displayed in a popup at cursor position.
+
+If you prefer the detailed diagnostic to always be shown in a popup, then
+`let g:ycm_show_detailed_diag_in_popup=1`.
+
 ### The `:YcmDebugInfo` command
 
 This will print out various debug information for the current file. Useful to
@@ -3208,10 +3214,24 @@ the user's cursor is on the line with the diagnostic. It basically calls
 
 Setting this option to an empty string will make sure no mapping is created.
 
+If you prefer the detailed diagnostic to be shown in a popup, then
+`let g:ycm_show_detailed_diag_in_popup=1`.
+
 Default: `<leader>d`
 
 ```viml
 let g:ycm_key_detailed_diagnostics = '<leader>d'
+```
+
+### The `g:ycm_show_detailed_diag_in_popup` option
+
+Makes `:YcmShowDetailedDiagnostic` always show in a popup rather than echoing to
+the command line.
+
+Default: 0
+
+```viml
+let g:ycm_show_detailed_diag_in_popup = 0
 ```
 
 ### The `g:ycm_global_ycm_extra_conf` option
