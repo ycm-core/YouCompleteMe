@@ -129,7 +129,6 @@ def _SetUpCompleteDone( completions ):
     yield request
 
 
-# TODO/FIXME: REplace these (essentially pointless) tets with vim-layer tests
 class PostcompleteTest( TestCase ):
   @patch( 'ycm.vimsupport.CurrentFiletypes', return_value = [ 'ycmtest' ] )
   def test_OnCompleteDone_DefaultFixIt( self, *args ):
