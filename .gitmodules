@@ -1,3 +1,3 @@
 [submodule "third_party/ycmd"]
 	path = third_party/ycmd
-	url = https://github.com/puremourning/ycmd-1
+	url = https://github.com/ycm-core/ycmd
