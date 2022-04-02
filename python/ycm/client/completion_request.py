@@ -204,24 +204,9 @@ def ConvertCompletionDataToVimData( completion_data ):
         preview_info = extra_menu_info + '\n\n' + preview_info
       extra_menu_info = extra_menu_info[ : ( max_width - 3 ) ] + '...'
 
-  pfx = ''
-  extra_data = completion_data.get( 'extra_data', {} )
-
-  if 'snippet' in extra_data:
-    pfx += '*'
-  if 'fixits' in extra_data:
-    pfx += '+'
-
-  if 'menu_text' in completion_data:
-    abbr = pfx + completion_data[ 'menu_text' ]
-  elif pfx:
-    abbr = pfx + completion_data[ 'insertion_text' ]
-  else:
-    abbr = ''
-
   return {
     'word'     : completion_data[ 'insertion_text' ],
-    'abbr'     : abbr,
+    'abbr'     : completion_data.get( 'menu_text', '' ),
     'menu'     : extra_menu_info,
     'info'     : preview_info,
     'kind'     : ToUnicode( completion_data.get( 'kind', '' ) )[ :1 ].lower(),
@@ -238,7 +223,7 @@ def ConvertCompletionDataToVimData( completion_data ):
     # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
     # the item to the dictionary is harmless in earlier Vims.
     # Note: Since 8.2.0084 we don't need to use json.dumps() here.
-    'user_data': json.dumps( extra_data )
+    'user_data': json.dumps( completion_data.get( 'extra_data', {} ) )
   }
 
 
