@@ -59,8 +59,7 @@ def Initialise():
 
   for token_type, group in HIGHLIGHT_GROUP.items():
     prop = f'YCM_HL_{ token_type }'
-    if prop not in props and vimsupport.GetIntValue(
-        f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
+    if prop not in props:
       AddTextPropertyType( prop, highlight = group )
 
 
