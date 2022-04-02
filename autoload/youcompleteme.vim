@@ -40,32 +40,28 @@ let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
       \     'id': -1,
-      \     'wait_milliseconds': 10,
+      \     'wait_milliseconds': 10
       \   },
       \   'signature_help': {
       \     'id': -1,
-      \     'wait_milliseconds': 10,
+      \     'wait_milliseconds': 10
       \   },
       \   'file_parse_response': {
       \     'id': -1,
-      \     'wait_milliseconds': 100,
+      \     'wait_milliseconds': 100
       \   },
       \   'server_ready': {
       \     'id': -1,
-      \     'wait_milliseconds': 100,
+      \     'wait_milliseconds': 100
       \   },
       \   'receive_messages': {
       \     'id': -1,
-      \     'wait_milliseconds': 100,
+      \     'wait_milliseconds': 100
       \   },
       \   'command': {
       \     'id': -1,
-      \     'wait_milliseconds': 100,
-      \   },
-      \   'semantic_highlighting': {
-      \     'id': -1,
-      \     'wait_milliseconds': 100,
-      \   },
+      \     'wait_milliseconds': 100
+      \   }
       \ }
 let s:buftype_blacklist = {
       \   'help': 1,
@@ -269,7 +265,6 @@ sys.path[ 0:0 ] = [ p.join( root_folder, 'python' ),
 try:
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
-  from ycm import semantic_highlighting as ycm_semantic_highlighting
 
   if 'ycm_state' in globals():
     # If re-initializing, pretend that we shut down
@@ -294,7 +289,6 @@ try:
     default_options = {}
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
-  ycm_semantic_highlighting.Initialise()
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -761,15 +755,6 @@ function! s:OnFileReadyToParse( ... )
     let s:pollers.file_parse_response.id = timer_start(
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
-
-    if get( g:, 'ycm_enable_semantic_highlightng', 0 ) ||
-          \ get( b:, 'ycm_enable_semantic_highlightng', 0 )
-      py3 ycm_state.CurrentBuffer().SendSemanticTokensRequest()
-      call s:StopPoller( s:pollers.semantic_highlighting )
-      let s:pollers.semantic_highlighting.id = timer_start(
-            \ s:pollers.semantic_highlighting.wait_milliseconds,
-            \ function( 's:PollSemanticHighlighting' ) )
-    endif
   endif
 endfunction
 
@@ -785,21 +770,6 @@ function! s:PollFileParseResponse( ... )
   py3 ycm_state.HandleFileParseRequest()
   if py3eval( "ycm_state.ShouldResendFileParseRequest()" )
     call s:OnFileReadyToParse( 1 )
-  endif
-endfunction
-
-
-function! s:PollSemanticHighlighting( ... )
-  if !py3eval( 'ycm_state.CurrentBuffer().SemanticTokensRequestReady()' )
-    let s:pollers.semantic_highlighting.id = timer_start(
-          \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting' ) )
-  endif
-
-  if py3eval( 'ycm_state.CurrentBuffer().UpdateSemanticTokens()' )
-    let s:pollers.semantic_highlighting.id = timer_start(
-          \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting' ) )
   endif
 endfunction
 

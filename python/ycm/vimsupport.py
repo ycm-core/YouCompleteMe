@@ -1353,11 +1353,6 @@ def HasFastPropList():
 
 
 @memoize()
-def VimSupportsTextProperties():
-  return VimHasFunctions( 'prop_add', 'prop_type_add' )
-
-
-@memoize()
 def VimSupportsPopupWindows():
   return VimHasFunctions( 'popup_create',
                           'popup_atcursor',
@@ -1365,7 +1360,9 @@ def VimSupportsPopupWindows():
                           'popup_hide',
                           'popup_settext',
                           'popup_show',
-                          'popup_close' ) and VimSupportsTextProperties()
+                          'popup_close',
+                          'prop_add',
+                          'prop_type_add' )
 
 
 @memoize()
