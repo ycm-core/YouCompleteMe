@@ -764,13 +764,11 @@ function! s:OnFileReadyToParse( ... )
 
     if get( g:, 'ycm_enable_semantic_highlightng', 0 ) ||
           \ get( b:, 'ycm_enable_semantic_highlightng', 0 )
-
-      call s:StopPoller( s:pollers.semantic_highlighting )
       py3 ycm_state.CurrentBuffer().SendSemanticTokensRequest()
+      call s:StopPoller( s:pollers.semantic_highlighting )
       let s:pollers.semantic_highlighting.id = timer_start(
             \ s:pollers.semantic_highlighting.wait_milliseconds,
             \ function( 's:PollSemanticHighlighting' ) )
-
     endif
   endif
 endfunction
@@ -796,7 +794,9 @@ function! s:PollSemanticHighlighting( ... )
     let s:pollers.semantic_highlighting.id = timer_start(
           \ s:pollers.semantic_highlighting.wait_milliseconds,
           \ function( 's:PollSemanticHighlighting' ) )
-  elseif ! py3eval( 'ycm_state.CurrentBuffer().UpdateSemanticTokens()' )
+  endif
+
+  if py3eval( 'ycm_state.CurrentBuffer().UpdateSemanticTokens()' )
     let s:pollers.semantic_highlighting.id = timer_start(
           \ s:pollers.semantic_highlighting.wait_milliseconds,
           \ function( 's:PollSemanticHighlighting' ) )

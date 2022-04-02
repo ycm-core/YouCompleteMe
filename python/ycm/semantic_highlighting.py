@@ -42,7 +42,6 @@ HIGHLIGHT_GROUP = {
   'function': 'Function',
   'member': 'Identifier',
   'macro': 'Macro',
-  'method': 'Function',
   'keyword': 'Keyword',
   'modifier': 'Keyword',
   'comment': 'Comment',
@@ -50,9 +49,7 @@ HIGHLIGHT_GROUP = {
   'number': 'Number',
   'regexp': 'String',
   'operator': 'Operator',
-  'unknown': 'Normal',
 }
-REPORTED_MISSING_TYPES = set()
 
 
 def Initialise():
@@ -95,7 +92,6 @@ class SemanticHighlighting:
       return
 
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
-
     self._request = SemanticTokensRequest( BuildRequestData() )
     self._request.Start()
 
@@ -103,23 +99,19 @@ class SemanticHighlighting:
     return self._request is not None and self._request.Done()
 
   def Update( self ):
-    if not self._request:
-      # Nothing to update
-      return True
-
-    assert self.IsResponseReady()
-
-    # We're ready to use this response. Clear it (to avoid repeatedly
-    # re-polling).
-    response = self._request.Response()
-    self._request = None
+    if not self.IsResponseReady():
+      # Not ready - poll
+      return False
 
     if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
       # Buffer has changed, we should ignore the data and retry
-      self.SendRequest()
-      return False # poll again
+      # self.SendRequest()
+      return False
 
     # We requested a snapshot
+    response = self._request.Response()
+    self._request = None
+
     tokens = response.get( 'tokens', [] )
 
     prev_prop_id = self._prop_id
@@ -127,10 +119,6 @@ class SemanticHighlighting:
 
     for token in tokens:
       if token[ 'type' ] not in HIGHLIGHT_GROUP:
-        if token[ 'type' ] not in REPORTED_MISSING_TYPES:
-          REPORTED_MISSING_TYPES.add( token[ 'type' ] )
-          vimsupport.PostVimMessage(
-            f"Missing property type for { token[ 'type' ] }" )
         continue
       prop_type = f"YCM_HL_{ token[ 'type' ] }"
       AddTextProperty( self._bufnr, self._prop_id, prop_type, token[ 'range' ] )
@@ -138,7 +126,7 @@ class SemanticHighlighting:
     ClearTextProperties( self._bufnr, prev_prop_id )
 
     # No need to re-poll
-    return True
+    return False
 
 
 # FIXME/TODO: Merge this with vimsupport funcitons, added after these were
