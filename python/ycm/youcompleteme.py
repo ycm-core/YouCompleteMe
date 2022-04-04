@@ -172,6 +172,15 @@ class YouCompleteMe:
     if self._user_options[ 'keep_logfiles' ]:
       args.append( '--keep_logfiles' )
 
+    if 'YCM_WITH_PTVSD' in os.environ:
+      args[ 1:1 ] = [ '-m', 'ptvsd',
+                      '--host', 'localhost',
+                      '--port', '1234',
+                      '--wait',
+                      '--no-subprocesses' ]
+
+    self._logger.debug( 'Starting ycmd with: %s', args )
+
     self._server_popen = utils.SafePopen( args, stdin_windows = PIPE,
                                           stdout = PIPE, stderr = PIPE )
 
