@@ -174,6 +174,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
         \ 'query': '',
         \ 'results': [],
         \ 'raw_results': v:none,
+        \ 'all_filetypes': v:true,
         \ 'pending': [],
         \ 'winid': win_getid(),
         \ 'bufnr': bufnr(),
@@ -276,6 +277,7 @@ endfunction
 function! s:HandleKeyPress( id, key ) abort
   let redraw = 0
   let handled = 0
+  let requery = 0
 
   " The input for the search/query is taken from the prompt buffer and the
   " TextChangedI event
@@ -337,9 +339,17 @@ function! s:HandleKeyPress( id, key ) abort
     let s:find_symbol_status.selected = len( s:find_symbol_status.results ) - 1
     let redraw = 1
     let handled = 1
+  elseif a:key ==# "\<C-f>"
+    " TOggle filetypes?
+    let s:find_symbol_status.all_filetypes = !s:find_symbol_status.all_filetypes
+    let redraw = 0
+    let requery = 1
+    let handled = 1
   endif
 
-  if redraw
+  if requery
+    call s:RequeryFinderPopup( v:true )
+  elseif redraw
     call s:RedrawFinderPopup()
   endif
 
@@ -689,7 +699,16 @@ function! s:SearchWorkspace( query, new_query ) abort
     let s:find_symbol_status.raw_results = {}
     let s:find_symbol_status.pending = []
 
-    let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
+    if s:find_symbol_status.all_filetypes
+      let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
+    else
+      let current_filetypes = py3eval( 'vimsupport.CurrentFiletypes()' )
+      let ft_buffer_map = {}
+      for ft in current_filetypes
+        let ft_buffer_map[ ft ] = [ bufnr() ]
+      endfor
+    endif
+
     for ft in keys( ft_buffer_map )
       if !youcompleteme#filetypes#AllowedForFiletype( ft )
         continue
