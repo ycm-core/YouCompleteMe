@@ -56,6 +56,9 @@ REPORTED_MISSING_TYPES = set()
 
 
 def Initialise():
+  if vimsupport.VimIsNeovim():
+    return
+
   props = GetTextPropertyTypes()
   if 'YCM_HL_UNKNOWN' not in props:
     AddTextPropertyType( 'YCM_HL_UNKNOWN', highlight = 'WarningMsg' )
@@ -142,53 +145,43 @@ class SemanticHighlighting:
 
 
 # FIXME/TODO: Merge this with vimsupport funcitons, added after these were
-# writted for Diagnostics
+# written. It's not trivial, as those vimsupport functions are a bit fiddly.
+# They also support neovim, but we don't.
+def AddTextPropertyType( name, **kwargs ):
+  props = {
+    'highlight': 'Ignore',
+    'combine': False,
+    'start_incl': False,
+    'end_incl': False,
+    'priority': 10
+  }
+  props.update( kwargs )
 
-if not vimsupport.VimSupportsTextProperties():
-  def AddTextPropertyType( *args, **kwargs ):
-    pass
-  def GetTextPropertyTypes( *args, **kwargs ):
-    return []
-  def AddTextProperty( *args, **kwargs ):
-    pass
-  def ClearTextProperties( *args, **kwargs ):
-    pass
-
-else:
-  def AddTextPropertyType( name, **kwargs ):
-    props = {
-      'highlight': 'Ignore',
-      'combine': False,
-      'start_incl': False,
-      'end_incl': False,
-      'priority': 10
-    }
-    props.update( kwargs )
-
-    vim.eval( f"prop_type_add( '{ vimsupport.EscapeForVim( name ) }', "
-              f"               { json.dumps( kwargs ) } )" )
+  vim.eval( f"prop_type_add( '{ vimsupport.EscapeForVim( name ) }', "
+            f"               { json.dumps( kwargs ) } )" )
 
 
-  def GetTextPropertyTypes( *args, **kwargs ):
-    return [ utils.ToUnicode( p ) for p in vim.eval( 'prop_type_list()' ) ]
+def GetTextPropertyTypes( *args, **kwargs ):
+  return [ utils.ToUnicode( p ) for p in vim.eval( 'prop_type_list()' ) ]
 
 
-  def AddTextProperty( bufnr, prop_id, prop_type, range ):
-    props = {
-      'end_lnum': range[ 'end' ][ 'line_num' ],
-      'end_col': range[ 'end' ][ 'column_num' ],
-      'bufnr': bufnr,
-      'id': prop_id,
-      'type': prop_type
-    }
-    vim.eval( f"prop_add( { range[ 'start' ][ 'line_num' ] },"
-              f"          { range[ 'start' ][ 'column_num' ] },"
-              f"          { json.dumps( props ) } )" )
+def AddTextProperty( bufnr, prop_id, prop_type, range ):
+  props = {
+    'end_lnum': range[ 'end' ][ 'line_num' ],
+    'end_col': range[ 'end' ][ 'column_num' ],
+    'bufnr': bufnr,
+    'id': prop_id,
+    'type': prop_type
+  }
+  vim.eval( f"prop_add( { range[ 'start' ][ 'line_num' ] },"
+            f"          { range[ 'start' ][ 'column_num' ] },"
+            f"          { json.dumps( props ) } )" )
 
-  def ClearTextProperties( bufnr, prop_id ):
-    props = {
-      'id': prop_id,
-      'bufnr': bufnr,
-      'all': 1,
-    }
-    vim.eval( f"prop_remove( { json.dumps( props ) } )" )
+
+def ClearTextProperties( bufnr, prop_id ):
+  props = {
+    'id': prop_id,
+    'bufnr': bufnr,
+    'all': 1,
+  }
+  vim.eval( f"prop_remove( { json.dumps( props ) } )" )

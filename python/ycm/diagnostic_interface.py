@@ -143,6 +143,9 @@ class DiagnosticInterface:
             diag ):
           global YCM_VIM_PROPERTY_ID
 
+          # FIXME: This remove() gambit probably never works because the IDs are
+          # almost certain to not match
+          # Perhaps we should have AddTextProperty return the ID?
           diag_prop = vimsupport.DiagnosticProperty(
               YCM_VIM_PROPERTY_ID,
               name,
