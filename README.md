@@ -733,6 +733,7 @@ Quick Feature Summary
 * Reference finding (`GoToReferences`)
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
+* Semantic highlighting
 
 ### C♯
 
@@ -808,6 +809,7 @@ Quick Feature Summary
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
 * Management of `rust-analyzer` server instance
+* Semantic highlighting
 
 ### Java
 
@@ -830,6 +832,7 @@ Quick Feature Summary
 * Detection of java projects
 * Execute custom server command (`ExecuteCommand <args>`)
 * Management of `jdt.ls` server instance
+* Semantic highlighting
 
 User Guide
 ----------
@@ -957,6 +960,74 @@ mode: `imap <silent> <C-l> <Plug>(YCMToggleSignatureHelp)`.
 _NOTE_: No default mapping is provided because insert mappings are very
 difficult to create without breaking or overriding some existing functionality.
 Ctrl-l is not a suggestion, just an example.
+
+### Semantic highlighting
+
+**NOTE**: This feature is highly experimental and offered in the hope that it is
+useful. It shall not be considered stable; if you find issues with it, feel free
+to report them however.
+
+Semantic highlighting is the process where the buffer text is coloured according
+to the underlying semantic type of the word, rather than classic syntax
+highlighting based on regular expressions. This can be powerful additional data
+that we can process very quickly.
+
+This feature is only supported in Vim.
+
+For example, here is a function with classic highlighting:
+
+![highliting-classic](https://user-images.githubusercontent.com/10584846/173137003-a265e8b0-84db-4993-98f0-03ee81b9de94.png)
+
+And here is the same function with semantic highlighting:
+
+![highliting-semantic](https://user-images.githubusercontent.com/10584846/173137012-7547de0b-145f-45fa-ace3-18943acd2141.png)
+
+As you can see, the function calls, macros, etc. are correctly identified. 
+
+This can be enabled globally with `let g:ycm_enable_semantic_highlighting=1` or
+per buffer, by setting `b:ycn_enable_semantic_highlighting`.
+
+#### Customising the highlight groups
+
+YCM uses text properties (see `:help text-prop-intro`) for semantic
+highlighting. In order to customise the coloring, you can define the text
+properties that are used.
+
+If you define a text property named `YCM_HL_<token type>`, then it will be used
+in place of the defaults. The `<token type>` is defined as the Language Server
+Protocol semantic token type, defined in the [LSP Spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_semanticTokens).
+
+Some servers also use custom values. In this case, YCM prints a warning
+including the token type name that you can customise.
+
+For example, to render `parameter` tokens using the `Nomral` highlight group,
+you can do this:
+
+```viml
+call prop_type_add( 'YCM_HL_parameter', { 'highlight': 'Normal' } )
+```
+
+More generally, this pattern can be useful for customising the groups:
+
+```viml
+let MY_YCM_HIGHLIGHT_GROUP = {
+      \   'typeParameter': 'PreProc',
+      \   'parameter': 'Normal',
+      \   'variable': 'Normal',
+      \   'property': 'Normal',
+      \   'enumMember': 'Normal',
+      \   'event': 'Special',
+      \   'member': 'Normal',
+      \   'method': 'Normal',
+      \   'class': 'Special',
+      \   'namespace': 'Special',
+      \ }
+
+for tokenType in keys( MY_YCM_HIGHLIGHT_GROUP )
+  call prop_type_add( 'YCM_HL_' . tokenType,
+                    \ { 'highlight': MY_YCM_HIGHLIGHT_GROUP[ tokenType ] } )
+endfor
+```
 
 ### General Semantic Completion
 
