@@ -764,8 +764,8 @@ function! s:OnFileReadyToParse( ... )
 
     call s:StopPoller( s:pollers.semantic_highlighting )
     if !s:is_neovim &&
-          \ ( get( g:, 'ycm_enable_semantic_highlighting', 0 ) ||
-          \   get( b:, 'ycm_enable_semantic_highlighting', 0 ) )
+          \ get( b:, 'ycm_enable_semantic_highlighting',
+          \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
 
       py3 ycm_state.CurrentBuffer().SendSemanticTokensRequest()
       let s:pollers.semantic_highlighting.id = timer_start(
