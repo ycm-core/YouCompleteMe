@@ -48,3 +48,23 @@ pull_request_rules:
         name: default
       comment:
         message: Thanks for sending a PR!
+
+  - name: Manual merge on Pipelines and Maintainer Override from owner PR
+    conditions:
+      - base=master
+      - author=puremourning
+      - status-success=ubuntu-20.04 - Python 3.6 x64
+      - status-success=macos-10.15 - Python 3.6 x64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+
+      - "#changes-requested-reviews-by=0"
+      - label="Ship It!"
+    actions:
+      queue:
+        method: merge
+        name: default
+      comment:
+        message: Thanks for sending a PR!
