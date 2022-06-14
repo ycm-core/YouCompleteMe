@@ -48,6 +48,7 @@ Contents
     - [Completion String Ranking](#completion-string-ranking)
     - [General Semantic Completion](#general-semantic-completion)
     - [Signature Help](#signature-help)
+    - [Semantic Highlighting](#semantic-highlighting)
     - [C-family Semantic Completion](#c-family-semantic-completion)
     - [Java Semantic Completion](#java-semantic-completion)
     - [C# Semantic Completion](#c-semantic-completion)
