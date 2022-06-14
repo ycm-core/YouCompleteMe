@@ -1023,7 +1023,7 @@ your environment, but again if your environment can't be supported, you can
 build or acquire `libclang` for yourself and specify it when building, as:
 
 ```
-$ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang-compelter --system-libclang
+$ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang-completer --system-libclang
 ```
 
 Please note that if using custom `clangd` or `libclang` it _must_ match the
