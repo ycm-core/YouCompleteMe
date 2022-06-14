@@ -1360,9 +1360,7 @@ def VimSupportsPopupWindows():
                           'popup_hide',
                           'popup_settext',
                           'popup_show',
-                          'popup_close',
-                          'prop_add',
-                          'prop_type_add' )
+                          'popup_close' )
 
 
 @memoize()
