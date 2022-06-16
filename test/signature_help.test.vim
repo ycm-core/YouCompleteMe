@@ -599,7 +599,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help()
 
   function! Check2( ... )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -612,7 +613,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help()
   function! Check3( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -636,7 +638,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help()
   function! Check4( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -700,7 +703,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
 
   function! Check2( ... )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -713,7 +717,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   function! Check3( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     " XFAIL: Currently the test fails here because the signature help popup
     " disappears when the info_popup is displayed. This seems to be because we
@@ -744,7 +749,8 @@ function! Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   function! Check4( ... )
     " Ensure that we didn't make an error?
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'that_is_a_thing', 'this_is_a_thing' ] )
+    call CheckCompletionItemsContainsExactly( [ 'that_is_a_thing',
+                                              \ 'this_is_a_thing' ] )
 
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
@@ -780,4 +786,109 @@ function! TearDown_Test_Semantic_Completion_Popup_With_Sig_Help_EmptyBuf()
   call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_whitelist' )
   call youcompleteme#test#setup#PopGlobal( 'ycm_filetype_blacklist' )
   call youcompleteme#test#setup#PopGlobal( 'ycm_add_preview_to_completeopt' )
+endfunction
+
+function! SetUp_Test_Signature_Help_Manual_HideShow()
+  imap <silent> kjkj <Plug>(YCMToggleSignatureHelp)
+endfunction
+
+function! Test_Signature_Help_Manual_HideShow()
+  call youcompleteme#test#setup#OpenFile(
+        \ 'test/testdata/cpp/complete_with_sig_help.cc', {} )
+  call s:WaitForSigHelpAvailable( 'cpp' )
+
+  call setpos( '.', [ 0, 10, 1 ] )
+
+  call test_override( 'char_avail', 1 )
+
+  function! Check( ... )
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call FeedAndCheckAgain( 'kjkj', funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( ... )
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 0 } )
+
+    call FeedAndCheckAgain( 'kjkj', funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( ... )
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+
+  call FeedAndCheckMain( 'iprintf(', funcref( 'Check' ) )
+
+  call test_override( 'ALL', 0 )
+
+  delfunc! Check
+  delfunc! Check2
+  delfunc! Check3
+endfunction
+
+function! TearDown_Test_Signature_Help_Manual_HideShow()
+  silent! iunmap kjkj
+endfunction
+
+function! SetUp_Test_Signature_Help_Manual_NoSigs()
+  imap <silent> kjkj <Plug>(YCMToggleSignatureHelp)
+endfunction
+
+function! Test_Signature_Help_Manual_NoSigs()
+  call youcompleteme#test#setup#OpenFile(
+        \ 'test/testdata/cpp/complete_with_sig_help.cc', {} )
+  call s:WaitForSigHelpAvailable( 'cpp' )
+
+  call setpos( '.', [ 0, 10, 1 ] )
+
+  call test_override( 'char_avail', 1 )
+
+  let popup_id = 0
+
+  function! CheckSigs( ... ) closure
+    let popup_id = s:_GetSigHelpWinID()
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ s:_GetSigHelpWinID(),
+          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+
+    call FeedAndCheckAgain( ')', funcref( 'CheckSigsClosed' ) )
+  endfunction
+
+  function! CheckSigsClosed( ... ) closure
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ popup_id,
+          \ {} )
+
+    call FeedAndCheckAgain( 'kjkj', funcref( 'CheckStillOK' ) )
+  endfunction
+
+  function! CheckStillOK( ... ) closure
+    call youcompleteme#test#popup#CheckPopupPosition(
+          \ popup_id,
+          \ {} )
+
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+
+  call FeedAndCheckMain( 'iprintf(', funcref( 'CheckSigs' ) )
+
+  call test_override( 'ALL', 0 )
+
+  delfunc! CheckSigs
+  delfunc! CheckSigsClosed
+  delfunc! CheckStillOK
+endfunction
+
+function! TearDown_Test_Signature_Help_Manual_NoSigs()
+  silent! iunmap kjkj
 endfunction

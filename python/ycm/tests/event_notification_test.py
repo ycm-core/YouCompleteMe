@@ -25,13 +25,13 @@ import os
 
 from ycm.tests import ( PathToTestFile, test_utils, YouCompleteMeInstance,
                         WaitUntilReady )
-from ycm.vimsupport import SIGN_BUFFER_ID_INITIAL_VALUE
 from ycmd.responses import ( BuildDiagnosticData, Diagnostic, Location, Range,
                              UnknownExtraConf, ServerError )
 
 from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
                        has_entries, has_entry, has_item, has_items, has_key,
                        is_not )
+from unittest import TestCase
 from unittest.mock import call, MagicMock, patch
 
 
@@ -85,183 +85,6 @@ def MockEventNotification( response_method, native_filetype_completer = True ):
         yield
 
 
-@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-@YouCompleteMeInstance()
-def EventNotification_FileReadyToParse_NonDiagnostic_Error_test(
-    post_vim_message, ycm ):
-
-  # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest
-  # in combination with YouCompleteMe.OnFileReadyToParse when the completer
-  # raises an exception handling FileReadyToParse event notification
-  ERROR_TEXT = 'Some completer response text'
-
-  def ErrorResponse( *args ):
-    raise ServerError( ERROR_TEXT )
-
-  with MockArbitraryBuffer( 'some_filetype' ):
-    with MockEventNotification( ErrorResponse ):
-      ycm.OnFileReadyToParse()
-      assert_that( ycm.FileParseRequestReady() )
-      ycm.HandleFileParseRequest()
-
-      # The first call raises a warning
-      post_vim_message.assert_has_exact_calls( [
-        call( ERROR_TEXT, truncate = True )
-      ] )
-
-      # Subsequent calls don't re-raise the warning
-      ycm.HandleFileParseRequest()
-      post_vim_message.assert_has_exact_calls( [
-        call( ERROR_TEXT, truncate = True )
-      ] )
-
-      assert_that( not ycm.ShouldResendFileParseRequest() )
-
-      # But it does if a subsequent event raises again
-      ycm.OnFileReadyToParse()
-      assert_that( ycm.FileParseRequestReady() )
-      ycm.HandleFileParseRequest()
-      post_vim_message.assert_has_exact_calls( [
-        call( ERROR_TEXT, truncate = True ),
-        call( ERROR_TEXT, truncate = True )
-      ] )
-
-      assert_that( not ycm.ShouldResendFileParseRequest() )
-
-
-@YouCompleteMeInstance()
-def EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative_test(
-  ycm ):
-
-  test_utils.VIM_MATCHES = []
-  test_utils.VIM_SIGNS = []
-
-  with MockArbitraryBuffer( 'some_filetype' ):
-    with MockEventNotification( None, False ):
-      ycm.OnFileReadyToParse()
-      ycm.HandleFileParseRequest()
-      assert_that( test_utils.VIM_MATCHES, empty() )
-      assert_that( test_utils.VIM_SIGNS, empty() )
-      assert_that( not ycm.ShouldResendFileParseRequest() )
-
-
-@YouCompleteMeInstance()
-def EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf_test(
-    ycm ):
-
-  # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest
-  # in combination with YouCompleteMe.OnFileReadyToParse when the completer
-  # raises the (special) UnknownExtraConf exception
-  FILE_NAME = 'a_file'
-  MESSAGE = ( 'Found ' + FILE_NAME + '. Load? \n\n(Question can be '
-              'turned off with options, see YCM docs)' )
-
-  def UnknownExtraConfResponse( *args ):
-    raise UnknownExtraConf( FILE_NAME )
-
-  with patch( 'ycm.client.base_request.BaseRequest.PostDataToHandler',
-              new_callable = ExtendedMock ) as post_data_to_handler:
-    with MockArbitraryBuffer( 'some_filetype' ):
-      with MockEventNotification( UnknownExtraConfResponse ):
-
-        # When the user accepts the extra conf, we load it
-        with patch( 'ycm.vimsupport.PresentDialog',
-                    return_value = 0,
-                    new_callable = ExtendedMock ) as present_dialog:
-          ycm.OnFileReadyToParse()
-          assert_that( ycm.FileParseRequestReady() )
-          ycm.HandleFileParseRequest()
-
-          present_dialog.assert_has_exact_calls( [
-            PresentDialog_Confirm_Call( MESSAGE ),
-          ] )
-          post_data_to_handler.assert_has_exact_calls( [
-            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
-          ] )
-
-          # Subsequent calls don't re-raise the warning
-          ycm.HandleFileParseRequest()
-
-          present_dialog.assert_has_exact_calls( [
-            PresentDialog_Confirm_Call( MESSAGE )
-          ] )
-          post_data_to_handler.assert_has_exact_calls( [
-            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
-          ] )
-
-          assert_that( ycm.ShouldResendFileParseRequest() )
-
-          # But it does if a subsequent event raises again
-          ycm.OnFileReadyToParse()
-          assert_that( ycm.FileParseRequestReady() )
-          ycm.HandleFileParseRequest()
-
-          present_dialog.assert_has_exact_calls( [
-            PresentDialog_Confirm_Call( MESSAGE ),
-            PresentDialog_Confirm_Call( MESSAGE ),
-          ] )
-          post_data_to_handler.assert_has_exact_calls( [
-            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' ),
-            call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
-          ] )
-
-          assert_that( ycm.ShouldResendFileParseRequest() )
-
-        post_data_to_handler.reset_mock()
-
-        # When the user rejects the extra conf, we reject it
-        with patch( 'ycm.vimsupport.PresentDialog',
-                    return_value = 1,
-                    new_callable = ExtendedMock ) as present_dialog:
-          ycm.OnFileReadyToParse()
-          assert_that( ycm.FileParseRequestReady() )
-          ycm.HandleFileParseRequest()
-
-          present_dialog.assert_has_exact_calls( [
-            PresentDialog_Confirm_Call( MESSAGE ),
-          ] )
-          post_data_to_handler.assert_has_exact_calls( [
-            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
-          ] )
-
-          # Subsequent calls don't re-raise the warning
-          ycm.HandleFileParseRequest()
-
-          present_dialog.assert_has_exact_calls( [
-            PresentDialog_Confirm_Call( MESSAGE )
-          ] )
-          post_data_to_handler.assert_has_exact_calls( [
-            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
-          ] )
-
-          assert_that( ycm.ShouldResendFileParseRequest() )
-
-          # But it does if a subsequent event raises again
-          ycm.OnFileReadyToParse()
-          assert_that( ycm.FileParseRequestReady() )
-          ycm.HandleFileParseRequest()
-
-          present_dialog.assert_has_exact_calls( [
-            PresentDialog_Confirm_Call( MESSAGE ),
-            PresentDialog_Confirm_Call( MESSAGE ),
-          ] )
-          post_data_to_handler.assert_has_exact_calls( [
-            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' ),
-            call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
-          ] )
-
-          assert_that( ycm.ShouldResendFileParseRequest() )
-
-
-@YouCompleteMeInstance()
-def EventNotification_FileReadyToParse_Diagnostic_Error_Native_test( ycm ):
-  test_utils.VIM_SIGNS = []
-
-  _Check_FileReadyToParse_Diagnostic_Error( ycm )
-  _Check_FileReadyToParse_Diagnostic_Warning( ycm )
-  _Check_FileReadyToParse_Diagnostic_Clean( ycm )
-
-
 def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
   # Tests Vim sign placement and error/warning count python API
   # when one error is returned.
@@ -280,7 +103,7 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains_exactly(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 1, 'YcmError', 1 )
+          VimSign( 1, 'YcmError', 1 )
         )
       )
       assert_that( ycm.GetErrorCount(), equal_to( 1 ) )
@@ -292,7 +115,7 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains_exactly(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 1, 'YcmError', 1 )
+          VimSign( 1, 'YcmError', 1 )
         )
       )
       assert_that( ycm.GetErrorCount(), equal_to( 1 ) )
@@ -307,7 +130,7 @@ def _Check_FileReadyToParse_Diagnostic_Error( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains_exactly(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 1, 'YcmError', 1 )
+          VimSign( 1, 'YcmError', 1 )
         )
       )
       assert_that( ycm.GetErrorCount(), equal_to( 1 ) )
@@ -335,7 +158,7 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains_exactly(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 2, 2, 'YcmWarning', 1 )
+          VimSign( 2, 'YcmWarning', 1 )
         )
       )
       assert_that( ycm.GetErrorCount(), equal_to( 0 ) )
@@ -347,7 +170,7 @@ def _Check_FileReadyToParse_Diagnostic_Warning( ycm ):
       assert_that(
         test_utils.VIM_SIGNS,
         contains_exactly(
-          VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 2, 2, 'YcmWarning', 1 )
+          VimSign( 2, 'YcmWarning', 1 )
         )
       )
       assert_that( ycm.GetErrorCount(), equal_to( 0 ) )
@@ -373,216 +196,397 @@ def _Check_FileReadyToParse_Diagnostic_Clean( ycm ):
       assert_that( not ycm.ShouldResendFileParseRequest() )
 
 
-@patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
-@YouCompleteMeInstance( { 'g:ycm_collect_identifiers_from_tags_files': 1 } )
-def EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory_test(
-    add_ultisnips_data_if_needed, ycm ):
-  unicode_dir = PathToTestFile( 'uni¢od€' )
-  current_buffer_file = PathToTestFile( 'uni¢𐍈d€', 'current_buffer' )
-  current_buffer = VimBuffer( name = current_buffer_file,
-                              contents = [ 'current_buffer_contents' ],
-                              filetype = 'some_filetype' )
+class EventNotificationTest( TestCase ):
+  @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+  @YouCompleteMeInstance()
+  def test_EventNotification_FileReadyToParse_NonDiagnostic_Error(
+      self, ycm, post_vim_message ):
 
-  with patch( 'ycm.client.event_notification.EventNotification.'
-              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with CurrentWorkingDirectory( unicode_dir ):
-      with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 5 ) ):
+    # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest
+    # in combination with YouCompleteMe.OnFileReadyToParse when the completer
+    # raises an exception handling FileReadyToParse event notification
+    ERROR_TEXT = 'Some completer response text'
+
+    def ErrorResponse( *args ):
+      raise ServerError( ERROR_TEXT )
+
+    with MockArbitraryBuffer( 'some_filetype' ):
+      with MockEventNotification( ErrorResponse ):
         ycm.OnFileReadyToParse()
+        assert_that( ycm.FileParseRequestReady() )
+        ycm.HandleFileParseRequest()
 
-    assert_that(
-      # Positional arguments passed to PostDataToHandlerAsync.
-      post_data_to_handler_async.call_args[ 0 ],
-      contains_exactly(
-        has_entries( {
-          'filepath': current_buffer_file,
-          'line_num': 1,
-          'column_num': 6,
-          'file_data': has_entries( {
-            current_buffer_file: has_entries( {
-              'contents': 'current_buffer_contents\n',
-              'filetypes': [ 'some_filetype' ]
-            } )
+        # The first call raises a warning
+        post_vim_message.assert_has_exact_calls( [
+          call( ERROR_TEXT, truncate = True )
+        ] )
+
+        # Subsequent calls don't re-raise the warning
+        ycm.HandleFileParseRequest()
+        post_vim_message.assert_has_exact_calls( [
+          call( ERROR_TEXT, truncate = True )
+        ] )
+
+        assert_that( not ycm.ShouldResendFileParseRequest() )
+
+        # But it does if a subsequent event raises again
+        ycm.OnFileReadyToParse()
+        assert_that( ycm.FileParseRequestReady() )
+        ycm.HandleFileParseRequest()
+        post_vim_message.assert_has_exact_calls( [
+          call( ERROR_TEXT, truncate = True ),
+          call( ERROR_TEXT, truncate = True )
+        ] )
+
+        assert_that( not ycm.ShouldResendFileParseRequest() )
+
+
+  @YouCompleteMeInstance()
+  def test_EventNotification_FileReadyToParse_NonDiagnostic_Error_NonNative(
+    self, ycm ):
+
+    test_utils.VIM_MATCHES = []
+    test_utils.VIM_SIGNS = []
+
+    with MockArbitraryBuffer( 'some_filetype' ):
+      with MockEventNotification( None, False ):
+        ycm.OnFileReadyToParse()
+        ycm.HandleFileParseRequest()
+        assert_that( test_utils.VIM_MATCHES, empty() )
+        assert_that( test_utils.VIM_SIGNS, empty() )
+        assert_that( not ycm.ShouldResendFileParseRequest() )
+
+
+  @YouCompleteMeInstance()
+  def test_EventNotification_FileReadyToParse_NonDiagnostic_ConfirmExtraConf(
+      self, ycm ):
+
+    # This test validates the behaviour of YouCompleteMe.HandleFileParseRequest
+    # in combination with YouCompleteMe.OnFileReadyToParse when the completer
+    # raises the (special) UnknownExtraConf exception
+    FILE_NAME = 'a_file'
+    MESSAGE = ( 'Found ' + FILE_NAME + '. Load? \n\n(Question can be '
+                'turned off with options, see YCM docs)' )
+
+    def UnknownExtraConfResponse( *args ):
+      raise UnknownExtraConf( FILE_NAME )
+
+    with patch( 'ycm.client.base_request.BaseRequest.PostDataToHandler',
+                new_callable = ExtendedMock ) as post_data_to_handler:
+      with MockArbitraryBuffer( 'some_filetype' ):
+        with MockEventNotification( UnknownExtraConfResponse ):
+
+          # When the user accepts the extra conf, we load it
+          with patch( 'ycm.vimsupport.PresentDialog',
+                      return_value = 0,
+                      new_callable = ExtendedMock ) as present_dialog:
+            ycm.OnFileReadyToParse()
+            assert_that( ycm.FileParseRequestReady() )
+            ycm.HandleFileParseRequest()
+
+            present_dialog.assert_has_exact_calls( [
+              PresentDialog_Confirm_Call( MESSAGE ),
+            ] )
+            post_data_to_handler.assert_has_exact_calls( [
+              call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
+            ] )
+
+            # Subsequent calls don't re-raise the warning
+            ycm.HandleFileParseRequest()
+
+            present_dialog.assert_has_exact_calls( [
+              PresentDialog_Confirm_Call( MESSAGE )
+            ] )
+            post_data_to_handler.assert_has_exact_calls( [
+              call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
+            ] )
+
+            assert_that( ycm.ShouldResendFileParseRequest() )
+
+            # But it does if a subsequent event raises again
+            ycm.OnFileReadyToParse()
+            assert_that( ycm.FileParseRequestReady() )
+            ycm.HandleFileParseRequest()
+
+            present_dialog.assert_has_exact_calls( [
+              PresentDialog_Confirm_Call( MESSAGE ),
+              PresentDialog_Confirm_Call( MESSAGE ),
+            ] )
+            post_data_to_handler.assert_has_exact_calls( [
+              call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' ),
+              call( { 'filepath': FILE_NAME }, 'load_extra_conf_file' )
+            ] )
+
+            assert_that( ycm.ShouldResendFileParseRequest() )
+
+          post_data_to_handler.reset_mock()
+
+          # When the user rejects the extra conf, we reject it
+          with patch( 'ycm.vimsupport.PresentDialog',
+                      return_value = 1,
+                      new_callable = ExtendedMock ) as present_dialog:
+            ycm.OnFileReadyToParse()
+            assert_that( ycm.FileParseRequestReady() )
+            ycm.HandleFileParseRequest()
+
+            present_dialog.assert_has_exact_calls( [
+              PresentDialog_Confirm_Call( MESSAGE ),
+            ] )
+            post_data_to_handler.assert_has_exact_calls( [
+              call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
+            ] )
+
+            # Subsequent calls don't re-raise the warning
+            ycm.HandleFileParseRequest()
+
+            present_dialog.assert_has_exact_calls( [
+              PresentDialog_Confirm_Call( MESSAGE )
+            ] )
+            post_data_to_handler.assert_has_exact_calls( [
+              call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
+            ] )
+
+            assert_that( ycm.ShouldResendFileParseRequest() )
+
+            # But it does if a subsequent event raises again
+            ycm.OnFileReadyToParse()
+            assert_that( ycm.FileParseRequestReady() )
+            ycm.HandleFileParseRequest()
+
+            present_dialog.assert_has_exact_calls( [
+              PresentDialog_Confirm_Call( MESSAGE ),
+              PresentDialog_Confirm_Call( MESSAGE ),
+            ] )
+            post_data_to_handler.assert_has_exact_calls( [
+              call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' ),
+              call( { 'filepath': FILE_NAME }, 'ignore_extra_conf_file' )
+            ] )
+
+            assert_that( ycm.ShouldResendFileParseRequest() )
+
+
+  @YouCompleteMeInstance()
+  def test_EventNotification_FileReadyToParse_Diagnostic_Error_Native(
+      self, ycm ):
+    test_utils.VIM_SIGNS = []
+
+    _Check_FileReadyToParse_Diagnostic_Error( ycm )
+    _Check_FileReadyToParse_Diagnostic_Warning( ycm )
+    _Check_FileReadyToParse_Diagnostic_Clean( ycm )
+
+
+  @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
+  @YouCompleteMeInstance( { 'g:ycm_collect_identifiers_from_tags_files': 1 } )
+  def test_EventNotification_FileReadyToParse_TagFiles_UnicodeWorkingDirectory(
+      self, ycm, *args ):
+    unicode_dir = PathToTestFile( 'uni¢od€' )
+    current_buffer_file = PathToTestFile( 'uni¢𐍈d€', 'current_buffer' )
+    current_buffer = VimBuffer( name = current_buffer_file,
+                                contents = [ 'current_buffer_contents' ],
+                                filetype = 'some_filetype' )
+
+    with patch( 'ycm.client.event_notification.EventNotification.'
+                'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+      with CurrentWorkingDirectory( unicode_dir ):
+        with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 5 ) ):
+          ycm.OnFileReadyToParse()
+
+      assert_that(
+        # Positional arguments passed to PostDataToHandlerAsync.
+        post_data_to_handler_async.call_args[ 0 ],
+        contains_exactly(
+          has_entries( {
+            'filepath': current_buffer_file,
+            'line_num': 1,
+            'column_num': 6,
+            'file_data': has_entries( {
+              current_buffer_file: has_entries( {
+                'contents': 'current_buffer_contents\n',
+                'filetypes': [ 'some_filetype' ]
+              } )
+            } ),
+            'event_name': 'FileReadyToParse',
+            'tag_files': has_item( PathToTestFile( 'uni¢od€', 'tags' ) )
           } ),
-          'event_name': 'FileReadyToParse',
-          'tag_files': has_item( PathToTestFile( 'uni¢od€', 'tags' ) )
-        } ),
-        'event_notification'
+          'event_notification'
+        )
       )
-    )
 
 
-@patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
-@YouCompleteMeInstance()
-def EventNotification_BufferVisit_BuildRequestForCurrentAndUnsavedBuffers_test(
-    add_ultisnips_data_if_needed, ycm ):
+  @patch( 'ycm.youcompleteme.YouCompleteMe._AddUltiSnipsDataIfNeeded' )
+  @YouCompleteMeInstance()
+  def test_EventNotification_BufferVisit_BuildRequestForCurrentAndUnsavedBuffers( # noqa
+      self, ycm, *args ):
 
-  current_buffer_file = os.path.realpath( 'current_buffer' )
-  current_buffer = VimBuffer( name = current_buffer_file,
-                              number = 1,
-                              contents = [ 'current_buffer_contents' ],
-                              filetype = 'some_filetype',
-                              modified = False )
-  modified_buffer_file = os.path.realpath( 'modified_buffer' )
-  modified_buffer = VimBuffer( name = modified_buffer_file,
-                               number = 2,
-                               contents = [ 'modified_buffer_contents' ],
-                               filetype = 'some_filetype',
-                               modified = True )
-
-  unmodified_buffer_file = os.path.realpath( 'unmodified_buffer' )
-  unmodified_buffer = VimBuffer( name = unmodified_buffer_file,
-                                 number = 3,
-                                 contents = [ 'unmodified_buffer_contents' ],
+    current_buffer_file = os.path.realpath( 'current_buffer' )
+    current_buffer = VimBuffer( name = current_buffer_file,
+                                number = 1,
+                                contents = [ 'current_buffer_contents' ],
+                                filetype = 'some_filetype',
+                                modified = False )
+    modified_buffer_file = os.path.realpath( 'modified_buffer' )
+    modified_buffer = VimBuffer( name = modified_buffer_file,
+                                 number = 2,
+                                 contents = [ 'modified_buffer_contents' ],
                                  filetype = 'some_filetype',
-                                 modified = False )
+                                 modified = True )
 
-  with patch( 'ycm.client.event_notification.EventNotification.'
-              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with MockVimBuffers( [ current_buffer, modified_buffer, unmodified_buffer ],
-                         [ current_buffer ],
-                         ( 1, 5 ) ):
-      ycm.OnBufferVisit()
+    unmodified_buffer_file = os.path.realpath( 'unmodified_buffer' )
+    unmodified_buffer = VimBuffer( name = unmodified_buffer_file,
+                                   number = 3,
+                                   contents = [ 'unmodified_buffer_contents' ],
+                                   filetype = 'some_filetype',
+                                   modified = False )
+
+    with patch( 'ycm.client.event_notification.EventNotification.'
+                'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+      with MockVimBuffers( [ current_buffer,
+                             modified_buffer,
+                             unmodified_buffer ],
+                           [ current_buffer ],
+                           ( 1, 5 ) ):
+        ycm.OnBufferVisit()
+
+      assert_that(
+        # Positional arguments passed to PostDataToHandlerAsync.
+        post_data_to_handler_async.call_args[ 0 ],
+        contains_exactly(
+          has_entries( {
+            'filepath': current_buffer_file,
+            'line_num': 1,
+            'column_num': 6,
+            'file_data': has_entries( {
+              current_buffer_file: has_entries( {
+                'contents': 'current_buffer_contents\n',
+                'filetypes': [ 'some_filetype' ]
+              } ),
+              modified_buffer_file: has_entries( {
+                'contents': 'modified_buffer_contents\n',
+                'filetypes': [ 'some_filetype' ]
+              } )
+            } ),
+            'event_name': 'BufferVisit'
+          } ),
+          'event_notification'
+        )
+      )
+
+
+  @YouCompleteMeInstance()
+  def test_EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers( # noqa
+      self, ycm ):
+    current_buffer_file = os.path.realpath( 'current_βuffer' )
+    current_buffer = VimBuffer( name = current_buffer_file,
+                                number = 1,
+                                contents = [ 'current_buffer_contents' ],
+                                filetype = 'some_filetype',
+                                modified = True )
+
+    deleted_buffer_file = os.path.realpath( 'deleted_βuffer' )
+    deleted_buffer = VimBuffer( name = deleted_buffer_file,
+                                number = 2,
+                                contents = [ 'deleted_buffer_contents' ],
+                                filetype = 'some_filetype',
+                                modified = False )
+
+    with patch( 'ycm.client.event_notification.EventNotification.'
+                'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+      with MockVimBuffers( [ current_buffer, deleted_buffer ],
+                           [ current_buffer ] ):
+        ycm.OnBufferUnload( deleted_buffer.number )
 
     assert_that(
       # Positional arguments passed to PostDataToHandlerAsync.
       post_data_to_handler_async.call_args[ 0 ],
       contains_exactly(
         has_entries( {
-          'filepath': current_buffer_file,
+          'filepath': deleted_buffer_file,
           'line_num': 1,
-          'column_num': 6,
+          'column_num': 1,
           'file_data': has_entries( {
             current_buffer_file: has_entries( {
               'contents': 'current_buffer_contents\n',
               'filetypes': [ 'some_filetype' ]
             } ),
-            modified_buffer_file: has_entries( {
-              'contents': 'modified_buffer_contents\n',
+            deleted_buffer_file: has_entries( {
+              'contents': 'deleted_buffer_contents\n',
               'filetypes': [ 'some_filetype' ]
             } )
           } ),
-          'event_name': 'BufferVisit'
+          'event_name': 'BufferUnload'
         } ),
         'event_notification'
       )
     )
 
 
-@YouCompleteMeInstance()
-def EventNotification_BufferUnload_BuildRequestForDeletedAndUnsavedBuffers_test(
-    ycm ):
-  current_buffer_file = os.path.realpath( 'current_βuffer' )
-  current_buffer = VimBuffer( name = current_buffer_file,
-                              number = 1,
-                              contents = [ 'current_buffer_contents' ],
-                              filetype = 'some_filetype',
-                              modified = True )
-
-  deleted_buffer_file = os.path.realpath( 'deleted_βuffer' )
-  deleted_buffer = VimBuffer( name = deleted_buffer_file,
-                              number = 2,
-                              contents = [ 'deleted_buffer_contents' ],
-                              filetype = 'some_filetype',
-                              modified = False )
-
-  with patch( 'ycm.client.event_notification.EventNotification.'
-              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with MockVimBuffers( [ current_buffer, deleted_buffer ],
-                         [ current_buffer ] ):
-      ycm.OnBufferUnload( deleted_buffer.number )
-
-  assert_that(
-    # Positional arguments passed to PostDataToHandlerAsync.
-    post_data_to_handler_async.call_args[ 0 ],
-    contains_exactly(
-      has_entries( {
-        'filepath': deleted_buffer_file,
-        'line_num': 1,
-        'column_num': 1,
-        'file_data': has_entries( {
-          current_buffer_file: has_entries( {
-            'contents': 'current_buffer_contents\n',
-            'filetypes': [ 'some_filetype' ]
-          } ),
-          deleted_buffer_file: has_entries( {
-            'contents': 'deleted_buffer_contents\n',
-            'filetypes': [ 'some_filetype' ]
-          } )
-        } ),
-        'event_name': 'BufferUnload'
-      } ),
-      'event_notification'
-    )
-  )
-
-
-@patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
+  @patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
 fooGroup xxx foo bar
              links to Statement""" )
-@YouCompleteMeInstance( { 'g:ycm_seed_identifiers_with_syntax': 1 } )
-def EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache_test(
-    capture_vim_command, ycm ):
+  @YouCompleteMeInstance( { 'g:ycm_seed_identifiers_with_syntax': 1 } )
+  def test_EventNotification_FileReadyToParse_SyntaxKeywords_SeedWithCache(
+      self, ycm, *args ):
 
-  current_buffer = VimBuffer( name = 'current_buffer',
-                              filetype = 'some_filetype' )
+    current_buffer = VimBuffer( name = 'current_buffer',
+                                filetype = 'some_filetype' )
 
-  with patch( 'ycm.client.event_notification.EventNotification.'
-              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-      ycm.OnFileReadyToParse()
-      assert_that(
-        # Positional arguments passed to PostDataToHandlerAsync.
-        post_data_to_handler_async.call_args[ 0 ],
-        contains_exactly(
-          has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
-          'event_notification'
+    with patch( 'ycm.client.event_notification.EventNotification.'
+                'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+      with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+        ycm.OnFileReadyToParse()
+        assert_that(
+          # Positional arguments passed to PostDataToHandlerAsync.
+          post_data_to_handler_async.call_args[ 0 ],
+          contains_exactly(
+            has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
+            'event_notification'
+          )
         )
-      )
 
-      # Do not send again syntax keywords in subsequent requests.
-      ycm.OnFileReadyToParse()
-      assert_that(
-        # Positional arguments passed to PostDataToHandlerAsync.
-        post_data_to_handler_async.call_args[ 0 ],
-        contains_exactly(
-          is_not( has_key( 'syntax_keywords' ) ),
-          'event_notification'
+        # Do not send again syntax keywords in subsequent requests.
+        ycm.OnFileReadyToParse()
+        assert_that(
+          # Positional arguments passed to PostDataToHandlerAsync.
+          post_data_to_handler_async.call_args[ 0 ],
+          contains_exactly(
+            is_not( has_key( 'syntax_keywords' ) ),
+            'event_notification'
+          )
         )
-      )
 
 
-@patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
+  @patch( 'ycm.vimsupport.CaptureVimCommand', return_value = """
 fooGroup xxx foo bar
              links to Statement""" )
-@YouCompleteMeInstance( { 'g:ycm_seed_identifiers_with_syntax': 1 } )
-def EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart_test(
-    capture_vim_command, ycm ):
+  @YouCompleteMeInstance( { 'g:ycm_seed_identifiers_with_syntax': 1 } )
+  def test_EventNotification_FileReadyToParse_SyntaxKeywords_ClearCacheIfRestart( # noqa
+      self, ycm, *args ):
 
-  current_buffer = VimBuffer( name = 'current_buffer',
-                              filetype = 'some_filetype' )
+    current_buffer = VimBuffer( name = 'current_buffer',
+                                filetype = 'some_filetype' )
 
-  with patch( 'ycm.client.event_notification.EventNotification.'
-              'PostDataToHandlerAsync' ) as post_data_to_handler_async:
-    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-      ycm.OnFileReadyToParse()
-      assert_that(
-        # Positional arguments passed to PostDataToHandlerAsync.
-        post_data_to_handler_async.call_args[ 0 ],
-        contains_exactly(
-          has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
-          'event_notification'
+    with patch( 'ycm.client.event_notification.EventNotification.'
+                'PostDataToHandlerAsync' ) as post_data_to_handler_async:
+      with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
+        ycm.OnFileReadyToParse()
+        assert_that(
+          # Positional arguments passed to PostDataToHandlerAsync.
+          post_data_to_handler_async.call_args[ 0 ],
+          contains_exactly(
+            has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
+            'event_notification'
+          )
         )
-      )
 
-      # Send again the syntax keywords after restarting the server.
-      ycm.RestartServer()
-      WaitUntilReady()
-      ycm.OnFileReadyToParse()
-      assert_that(
-        # Positional arguments passed to PostDataToHandlerAsync.
-        post_data_to_handler_async.call_args[ 0 ],
-        contains_exactly(
-          has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
-          'event_notification'
+        # Send again the syntax keywords after restarting the server.
+        ycm.RestartServer()
+        WaitUntilReady()
+        ycm.OnFileReadyToParse()
+        assert_that(
+          # Positional arguments passed to PostDataToHandlerAsync.
+          post_data_to_handler_async.call_args[ 0 ],
+          contains_exactly(
+            has_entry( 'syntax_keywords', has_items( 'foo', 'bar' ) ),
+            'event_notification'
+          )
         )
-      )

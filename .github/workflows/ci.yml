@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  python-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ ubuntu-20.04, macos-10.15, windows-2019 ]
+        python-arch: [ 'x64' ]
+        python-version: [ 3.6 ]
+        include:
+          - runs-on: windows-2019
+            python-arch: 'x86'
+            python-version: 3.9
+          - runs-on: windows-2019
+            python-arch: 'x64'
+            python-version: 3.9
+        exclude:
+          - runs-on: windows-2019
+            python-arch: 'x64'
+            python-version: 3.6
+    env:
+      COVERAGE: true
+    name: "${{ matrix.runs-on }} - Python ${{ matrix.python-version }} ${{ matrix.python-arch }}"
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.python-arch }}
+    - name: Run pip
+      run: python3 -m pip install -r python/test_requirements.txt
+    - name: Run tests
+      run: python3 run_tests.py --quiet python/ycm/tests
+    - name: Upload coverage data
+      run: codecov --name "${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.python-arch }}"
+
+  vim-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        vim: [ 'new', 'old' ]
+    runs-on: ubuntu-20.04
+    container: 'youcompleteme/ycm-vim-py3:test'
+    env:
+      COVERAGE: true
+      YCM_TEST_STDOUT: true
+    name: "Vim tests - ${{ matrix.vim }}"
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - name: Install dependencies
+      run: sudo -H pip3 install -r python/test_requirements.txt
+    - name: Build ycmd
+      run: python3 ./install.py --force-sudo --ts-completer --clangd-completer --java-completer
+    - name: Run tests in old vim
+      # System vim should be oldest supported.
+      if: matrix.vim == 'old'
+      run: ./test/run_vim_tests --vim /usr/bin/vim
+    - name: Run tests in new vim
+      if: matrix.vim == 'new'
+      run: ./test/run_vim_tests
+    - name: Upload coverage data
+      run: codecov --name "vim-tests-${{ matrix.vim }}"

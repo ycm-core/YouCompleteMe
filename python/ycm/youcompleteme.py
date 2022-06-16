@@ -336,7 +336,9 @@ class YouCompleteMe:
         return False
 
       request_data = self._latest_completion_request.request_data.copy()
-      request_data[ 'signature_help_state' ] = self._signature_help_state.state
+      request_data[ 'signature_help_state' ] = (
+          self._signature_help_state.IsActive()
+      )
 
       self._AddExtraConfDataIfNeeded( request_data )
 
@@ -588,6 +590,9 @@ class YouCompleteMe:
 
 
   def OnInsertLeave( self ):
+    if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
+         not self.NeedsReparse() ):
+      self.CurrentBuffer().RefreshDiagnosticsUI()
     SendEventNotificationAsync( 'InsertLeave' )
 
 
@@ -650,7 +655,8 @@ class YouCompleteMe:
 
 
   def _PopulateLocationListWithLatestDiagnostics( self ):
-    return self.CurrentBuffer().PopulateLocationList()
+    return self.CurrentBuffer().PopulateLocationList(
+        self._user_options[ 'open_loclist_on_ycm_diags' ] )
 
 
   def FileParseRequestReady( self ):
@@ -791,13 +797,48 @@ class YouCompleteMe:
       self._CloseLogfile( logfile )
 
 
-  def ShowDetailedDiagnostic( self ):
+  def ShowDetailedDiagnostic( self, message_in_popup ):
     detailed_diagnostic = BaseRequest().PostDataToHandler(
         BuildRequestData(), 'detailed_diagnostic' )
-
     if detailed_diagnostic and 'message' in detailed_diagnostic:
-      vimsupport.PostVimMessage( detailed_diagnostic[ 'message' ],
-                                 warning = False )
+      message = detailed_diagnostic[ 'message' ]
+      if message_in_popup and vimsupport.VimSupportsPopupWindows():
+        window = vim.current.window
+        buffer_number = vimsupport.GetCurrentBufferNumber()
+        diags_on_this_line = self._buffers[ buffer_number ].DiagnosticsForLine(
+            window.cursor[ 0 ] )
+
+        lines = message.split( '\n' )
+        available_columns = vimsupport.GetIntValue( '&columns' )
+        col = window.cursor[ 1 ] + 1
+        if col > available_columns - 2: # -2 accounts for padding.
+          col = 0
+        options = {
+          'col': col,
+          'padding': [ 0, 1, 0, 1 ],
+          'maxwidth': available_columns,
+          'close': 'click',
+          'fixed': 0,
+          'highlight': 'ErrorMsg',
+          'border': [ 1, 1, 1, 1 ],
+          # Close when moving cursor
+          'moved': 'expr',
+        }
+        popup_func = 'popup_atcursor'
+        for diag in diags_on_this_line:
+          if message == diag[ 'text' ]:
+            popup_func = 'popup_create'
+            prop = vimsupport.GetTextPropertyForDiag( buffer_number,
+                                                      window.cursor[ 0 ],
+                                                      diag )
+            options.update( {
+              'textpropid': prop[ 'id' ],
+              'textprop': prop[ 'type' ],
+            } )
+            options.pop( 'col' )
+        vim.eval( f'{ popup_func }( { lines }, { options } )' )
+      else:
+        vimsupport.PostVimMessage( message, warning = False )
 
 
   def ForceCompileAndDiagnostics( self ):
@@ -828,6 +869,23 @@ class YouCompleteMe:
       vimsupport.OpenLocationList( focus = True )
 
 
+  def FilterAndSortItems( self,
+                          items,
+                          sort_property,
+                          query,
+                          max_items = 0 ):
+    return BaseRequest().PostDataToHandler( {
+      'candidates': items,
+      'sort_property': sort_property,
+      'max_num_candidates': max_items,
+      'query': vimsupport.ToUnicode( query )
+    }, 'filter_and_sort_candidates' )
+
+
+  def ToggleSignatureHelp( self ):
+    self._signature_help_state.ToggleVisibility()
+
+
   def _AddSyntaxDataIfNeeded( self, extra_data ):
     if not self._user_options[ 'seed_identifiers_with_syntax' ]:
       return
@@ -844,7 +902,8 @@ class YouCompleteMe:
   def _AddTagsFilesIfNeeded( self, extra_data ):
     def GetTagFiles():
       tag_files = vim.eval( 'tagfiles()' )
-      return [ os.path.join( utils.GetCurrentDirectory(), tag_file )
+      return [ ( os.path.join( utils.GetCurrentDirectory(), tag_file )
+                 if not os.path.isabs( tag_file ) else tag_file )
                for tag_file in tag_files ]
 
     if not self._user_options[ 'collect_identifiers_from_tags_files' ]:

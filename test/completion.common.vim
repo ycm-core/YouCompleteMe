@@ -22,7 +22,7 @@ function! Test_Compl_After_Trigger()
   call assert_false( pumvisible(), 'pumvisible()' )
 
   call test_override( 'ALL', 0 )
-endfunctio
+endfunction
 
 function! Test_Force_Semantic_TopLevel()
   call youcompleteme#test#setup#OpenFile(
@@ -65,7 +65,7 @@ function! Test_Select_Next_Previous()
     call WaitForCompletion()
 
     call CheckCurrentLine( '  foo.' )
-    call CheckCompletionItems( [ 'c', 'x', 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'c', 'x', 'y' ] )
 
     call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2' ) )
   endfunction
@@ -73,7 +73,7 @@ function! Test_Select_Next_Previous()
   function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( '  foo.c' )
-    call CheckCompletionItems( [ 'c', 'x', 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'c', 'x', 'y' ] )
 
     call FeedAndCheckAgain( "\<Tab>", funcref( 'Check3' ) )
   endfunction
@@ -81,7 +81,7 @@ function! Test_Select_Next_Previous()
   function! Check3( id )
     call WaitForCompletion()
     call CheckCurrentLine( '  foo.x' )
-    call CheckCompletionItems( [ 'c', 'x', 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'c', 'x', 'y' ] )
 
     call FeedAndCheckAgain( "\<BS>y", funcref( 'Check4' ) )
   endfunction
@@ -89,7 +89,7 @@ function! Test_Select_Next_Previous()
   function! Check4( id )
     call WaitForCompletion()
     call CheckCurrentLine( '  foo.y' )
-    call CheckCompletionItems( [ 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'y' ] )
     call feedkeys( "\<ESC>" )
   endfunction
 
@@ -112,13 +112,13 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
 
   function! Check1( id )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'colourOfLine', 'lengthOfLine' ] )
+    call CheckCompletionItemsContainsExactly( [ 'colourOfLine', 'lengthOfLine' ] )
     call FeedAndCheckAgain( "\<BS>", funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )
     call WaitForCompletion()
-    call CheckCompletionItems( [
+    call CheckCompletionItemsContainsExactly( [
           \ 'operator=(…)',
           \ 'colourOfLine',
           \ 'lengthOfLine',
@@ -128,7 +128,7 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
 
   function! Check3( id )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'RED_AND_YELLOW' ] )
+    call CheckCompletionItemsContainsExactly( [ 'RED_AND_YELLOW' ] )
     " now type something that doesnt match
     call FeedAndCheckAgain( 'this_does_not_match', funcref( 'Check4' ) )
   endfunction
@@ -137,7 +137,7 @@ function! Test_Enter_Delete_Chars_Updates_Filter()
     call WaitForAssert( { -> assert_false( pumvisible() ) } )
     call CheckCurrentLine(
           \ '  p->line.colourOfLine = Line::owthis_does_not_match' )
-    call CheckCompletionItems( [] )
+    call CheckCompletionItemsContainsExactly( [] )
     call feedkeys( "\<Esc>" )
   endfunction
 
@@ -248,28 +248,29 @@ function! Test_OmniComplete_Filter()
   function! Check1( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'te:te' )
-    call CheckCompletionItems( [ 'test', 'testy', 'testing' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'test', 'testy', 'testing' ],
+                                            \ 'word' )
     call FeedAndCheckAgain( 'y', funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'te:tey' )
-    call CheckCompletionItems( [ 'testy' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'testy' ], 'word' )
     call FeedAndCheckAgain( "\<C-n>", funcref( 'Check3' ) )
   endfunction
 
   function! Check3( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'te:testy' )
-    call CheckCompletionItems( [ 'testy' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'testy' ], 'word' )
     call FeedAndCheckAgain( "\<C-p>", funcref( 'Check4' ) )
   endfunction
 
   function! Check4( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'te:tey' )
-    call CheckCompletionItems( [ 'testy' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'testy' ], 'word' )
     call feedkeys( "\<Esc>" )
   endfunction
 
@@ -293,28 +294,29 @@ function! Test_OmniComplete_Force()
   function! Check1( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'te' )
-    call CheckCompletionItems( [ 'test', 'testy', 'testing' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'test', 'testy', 'testing' ],
+                                            \ 'word' )
     call FeedAndCheckAgain( 'y', funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'tey' )
-    call CheckCompletionItems( [ 'testy' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'testy' ], 'word' )
     call FeedAndCheckAgain( "\<C-n>", funcref( 'Check3' ) )
   endfunction
 
   function! Check3( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'testy' )
-    call CheckCompletionItems( [ 'testy' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'testy' ], 'word' )
     call FeedAndCheckAgain( "\<C-p>", funcref( 'Check4' ) )
   endfunction
 
   function! Check4( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'tey' )
-    call CheckCompletionItems( [ 'testy' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'testy' ], 'word' )
     call feedkeys( "\<Esc>" )
   endfunction
 
@@ -334,30 +336,29 @@ function! Test_Completion_FixIt()
   call youcompleteme#test#setup#OpenFile(
         \ 'test/testdata/cpp/auto_include.cc', {} )
 
-  function Check1( id )
+  function! Check1( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'do_a' )
-    call CheckCompletionItems( [ 'do_a_thing(Thing thing)',
+    call CheckCompletionItemsContainsExactly( [ 'do_a_thing(Thing thing)',
                                  \ 'do_another_thing()' ] )
     call FeedAndCheckAgain( "\<Tab>" , funcref( 'Check2' ) )
   endfunction
 
-  function Check2( id )
+  function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'do_a_thing' )
-    call CheckCompletionItems( [ 'do_a_thing(Thing thing)',
+    call CheckCompletionItemsContainsExactly( [ 'do_a_thing(Thing thing)',
                                  \ 'do_another_thing()' ] )
     call FeedAndCheckAgain( '(' , funcref( 'Check3' ) )
   endfunction
 
 
-  function Check3( id )
+  function! Check3( id )
     call WaitForAssert( {-> assert_false( pumvisible(), 'pumvisible()' ) } )
     call CheckCurrentLine( 'do_a_thing(' )
     call assert_equal( '#include "auto_include.h"', getline( 1 ) )
     call feedkeys( "\<Esc>" )
   endfunction
-
 
   call setpos( '.', [ 0, 3, 1 ] )
   call FeedAndCheckMain( "Ado_a\<C-Space>", funcref( 'Check1' ) )
@@ -379,7 +380,7 @@ function! Test_Select_Next_Previous_InsertModeMapping()
     call WaitForCompletion()
 
     call CheckCurrentLine( '  foo.' )
-    call CheckCompletionItems( [ 'c', 'x', 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'c', 'x', 'y' ] )
 
     call FeedAndCheckAgain( "\<C-n>", funcref( 'Check2' ) )
   endfunction
@@ -387,7 +388,7 @@ function! Test_Select_Next_Previous_InsertModeMapping()
   function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( '  foo.c' )
-    call CheckCompletionItems( [ 'c', 'x', 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'c', 'x', 'y' ] )
 
     call FeedAndCheckAgain( "\<C-n>", funcref( 'Check3' ) )
   endfunction
@@ -395,14 +396,14 @@ function! Test_Select_Next_Previous_InsertModeMapping()
   function! Check3( id )
     call WaitForCompletion()
     call CheckCurrentLine( '  foo.x' )
-    call CheckCompletionItems( [ 'c', 'x', 'y' ] )
+    call CheckCompletionItemsContainsExactly( [ 'c', 'x', 'y' ] )
 
     call FeedAndCheckAgain( "\<BS>a", funcref( 'Check4' ) )
   endfunction
 
   function! Check4( id )
     call CheckCurrentLine( '  foo.a' )
-    call CheckCompletionItems( [] )
+    call CheckCompletionItemsContainsExactly( [] )
     call FeedAndCheckAgain( "\<C-n>", funcref( 'Check5' ) )
   endfunction
 
@@ -410,7 +411,7 @@ function! Test_Select_Next_Previous_InsertModeMapping()
     " The last ctrl-n moved to the next line
     call CheckCurrentLine( '}' )
     call assert_equal( [ 0, 12, 2, 0 ], getpos( '.' ) )
-    call CheckCompletionItems( [] )
+    call CheckCompletionItemsContainsExactly( [] )
     call feedkeys( "\<Esc>" )
   endfunction
 
@@ -421,4 +422,20 @@ function! Test_Select_Next_Previous_InsertModeMapping()
 
   call test_override( 'ALL', 0 )
   iunmap <C-n>
+endfunction
+
+function! Test_Completion_WorksWithoutMovingCursor()
+  call youcompleteme#test#setup#OpenFile(
+        \ 'test/testdata/cpp/auto_include_workaround.cc', {} )
+
+  function! Check( id )
+    call WaitForCompletion() " We don't care about completion
+                             " items, just that we didn't error
+                             " while opening the completion pum
+                             " without typing anything first.
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call setpos( '.', [ 0, 3, 1 ] )
+  call FeedAndCheckMain( "i\<C-Space>", funcref( 'Check' ) )
 endfunction
