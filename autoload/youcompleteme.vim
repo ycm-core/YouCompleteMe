@@ -24,6 +24,9 @@ set cpo&vim
 " neovim, which doesn't implement them.
 let s:is_neovim = has( 'nvim' )
 
+" Only useful in neovim, for handling text properties... I mean extmarks.
+let g:ycm_neovim_ns_id = s:is_neovim ? nvim_create_namespace( 'ycm_id' ) : -1
+
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
@@ -37,28 +40,32 @@ let s:previous_allowed_buffer_number = 0
 let s:pollers = {
       \   'completion': {
       \     'id': -1,
-      \     'wait_milliseconds': 10
+      \     'wait_milliseconds': 10,
       \   },
       \   'signature_help': {
       \     'id': -1,
-      \     'wait_milliseconds': 10
+      \     'wait_milliseconds': 10,
       \   },
       \   'file_parse_response': {
       \     'id': -1,
-      \     'wait_milliseconds': 100
+      \     'wait_milliseconds': 100,
       \   },
       \   'server_ready': {
       \     'id': -1,
-      \     'wait_milliseconds': 100
+      \     'wait_milliseconds': 100,
       \   },
       \   'receive_messages': {
       \     'id': -1,
-      \     'wait_milliseconds': 100
+      \     'wait_milliseconds': 100,
       \   },
       \   'command': {
       \     'id': -1,
-      \     'wait_milliseconds': 100
-      \   }
+      \     'wait_milliseconds': 100,
+      \   },
+      \   'semantic_highlighting': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100,
+      \   },
       \ }
 let s:buftype_blacklist = {
       \   'help': 1,
@@ -182,13 +189,12 @@ function! youcompleteme#Enable()
     " buffer is already parsed.
     autocmd BufWritePost,FileWritePost * call s:OnFileSave()
     autocmd FileType * call s:OnFileTypeSet()
-    autocmd BufEnter,CmdwinEnter * call s:OnBufferEnter()
+    autocmd BufEnter,CmdwinEnter,WinEnter * call s:OnBufferEnter()
     autocmd BufUnload * call s:OnBufferUnload()
     autocmd InsertLeave * call s:OnInsertLeave()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
     autocmd CompleteChanged * call s:OnCompleteChanged()
-    autocmd BufEnter,WinEnter * call s:UpdateMatches()
   augroup END
 
   " The FileType event is not triggered for the first loaded file. We wait until
@@ -200,15 +206,19 @@ function! youcompleteme#Enable()
   let s:default_completion = py3eval( 'vimsupport.NO_COMPLETIONS' )
   let s:completion = s:default_completion
 
-  if exists( '*prop_type_add' ) && exists( '*prop_type_delete' )
+  if s:PropertyTypeNotDefined( 'YCM-signature-help-current-argument' )
     hi default YCMInverse term=reverse cterm=reverse gui=reverse
-    call prop_type_delete( 'YCM-signature-help-current-argument' )
     call prop_type_add( 'YCM-signature-help-current-argument', {
           \   'highlight': 'YCMInverse',
           \   'combine':   1,
           \   'priority':  50,
           \ } )
   endif
+
+  nnoremap <silent> <Plug>(YCMFindSymbolInWorkspace)
+        \ :call youcompleteme#finder#FindSymbol( 'workspace' )<CR>
+  nnoremap <silent> <Plug>(YCMFindSymbolInDocument)
+        \ :call youcompleteme#finder#FindSymbol( 'document' )<CR>
 endfunction
 
 
@@ -216,6 +226,8 @@ function! youcompleteme#EnableCursorMovedAutocommands()
   augroup ycmcompletemecursormove
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
+    autocmd CursorMovedI * let s:current_cursor_position = getpos( '.' )
+    autocmd InsertEnter * let s:current_cursor_position = getpos( '.' )
     autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
@@ -250,24 +262,14 @@ root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
 third_party_folder = p.join( root_folder, 'third_party' )
 
 # Add dependencies to Python path.
-dependencies = [ p.join( root_folder, 'python' ),
-                 p.join( third_party_folder, 'requests-futures' ),
-                 p.join( third_party_folder, 'ycmd' ),
-                 p.join( third_party_folder, 'requests_deps', 'idna' ),
-                 p.join( third_party_folder, 'requests_deps', 'chardet' ),
-                 p.join( third_party_folder,
-                         'requests_deps',
-                         'urllib3',
-                         'src' ),
-                 p.join( third_party_folder, 'requests_deps', 'certifi' ),
-                 p.join( third_party_folder, 'requests_deps', 'requests' ) ]
-
-sys.path[ 0:0 ] = dependencies
+sys.path[ 0:0 ] = [ p.join( root_folder, 'python' ),
+                    p.join( third_party_folder, 'ycmd' ) ]
 
 # We enclose this code in a try/except block to avoid backtraces in Vim.
 try:
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
+  from ycm import semantic_highlighting as ycm_semantic_highlighting
 
   if 'ycm_state' in globals():
     # If re-initializing, pretend that we shut down
@@ -292,6 +294,7 @@ try:
     default_options = {}
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
+  ycm_semantic_highlighting.Initialise()
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -392,10 +395,18 @@ function! s:SetUpSigns()
     highlight default link YcmWarningLine SyntasticWarningLine
   endif
 
-  exe 'sign define YcmError text=' . g:ycm_error_symbol .
-        \ ' texthl=YcmErrorSign linehl=YcmErrorLine'
-  exe 'sign define YcmWarning text=' . g:ycm_warning_symbol .
-        \ ' texthl=YcmWarningSign linehl=YcmWarningLine'
+  call sign_define( [
+    \ { 'name': 'YcmError',
+    \   'text': g:ycm_error_symbol,
+    \   'texthl': 'YcmErrorSign',
+    \   'linehl': 'YcmErrorLine',
+    \   'group':  'ycm_signs' },
+    \ { 'name': 'YcmWarning',
+    \   'text': g:ycm_warning_symbol,
+    \   'texthl': 'YcmWarningSign',
+    \   'linehl': 'YcmWarningLine',
+    \   'group':  'ycm_signs' }
+    \ ] )
 
 endfunction
 
@@ -411,6 +422,10 @@ function! s:SetUpSyntaxHighlighting()
       highlight default link YcmErrorSection SpellBad
     endif
   endif
+  if s:PropertyTypeNotDefined( 'YcmErrorProperty' )
+    call prop_type_add( 'YcmErrorProperty', {
+          \ 'highlight': 'YcmErrorSection' } )
+  endif
 
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
@@ -418,6 +433,10 @@ function! s:SetUpSyntaxHighlighting()
     else
       highlight default link YcmWarningSection SpellCap
     endif
+  endif
+  if s:PropertyTypeNotDefined( 'YcmWarningProperty' )
+    call prop_type_add( 'YcmWarningProperty', {
+          \ 'highlight': 'YcmWarningSection' } )
   endif
 endfunction
 
@@ -470,6 +489,11 @@ function! s:HasAnyKey( dict, keys )
     endif
   endfor
   return 0
+endfunction
+
+function! s:PropertyTypeNotDefined( type )
+  return exists( '*prop_type_add' ) &&
+    \ index( prop_type_list(), a:type ) == -1
 endfunction
 
 function! s:AllowedToCompleteInBuffer( buffer )
@@ -681,6 +705,7 @@ function! s:OnBufferEnter()
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
 
+  py3 ycm_state.UpdateMatches()
   py3 ycm_state.OnBufferVisit()
   " Last parse may be outdated because of changes from other buffers. Force a
   " new parse.
@@ -697,11 +722,6 @@ function! s:OnBufferUnload()
   endif
 
   py3 ycm_state.OnBufferUnload( vimsupport.GetIntValue( 'buffer_number' ) )
-endfunction
-
-
-function! s:UpdateMatches()
-  py3 ycm_state.UpdateMatches()
 endfunction
 
 
@@ -741,6 +761,18 @@ function! s:OnFileReadyToParse( ... )
     let s:pollers.file_parse_response.id = timer_start(
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
+
+    call s:StopPoller( s:pollers.semantic_highlighting )
+    if !s:is_neovim &&
+          \ get( b:, 'ycm_enable_semantic_highlighting',
+          \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
+
+      py3 ycm_state.CurrentBuffer().SendSemanticTokensRequest()
+      let s:pollers.semantic_highlighting.id = timer_start(
+            \ s:pollers.semantic_highlighting.wait_milliseconds,
+            \ function( 's:PollSemanticHighlighting' ) )
+
+    endif
   endif
 endfunction
 
@@ -756,6 +788,19 @@ function! s:PollFileParseResponse( ... )
   py3 ycm_state.HandleFileParseRequest()
   if py3eval( "ycm_state.ShouldResendFileParseRequest()" )
     call s:OnFileReadyToParse( 1 )
+  endif
+endfunction
+
+
+function! s:PollSemanticHighlighting( ... )
+  if !py3eval( 'ycm_state.CurrentBuffer().SemanticTokensRequestReady()' )
+    let s:pollers.semantic_highlighting.id = timer_start(
+          \ s:pollers.semantic_highlighting.wait_milliseconds,
+          \ function( 's:PollSemanticHighlighting' ) )
+  elseif ! py3eval( 'ycm_state.CurrentBuffer().UpdateSemanticTokens()' )
+    let s:pollers.semantic_highlighting.id = timer_start(
+          \ s:pollers.semantic_highlighting.wait_milliseconds,
+          \ function( 's:PollSemanticHighlighting' ) )
   endif
 endfunction
 
@@ -832,6 +877,7 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
     return
   endif
 
+  let s:current_cursor_position = getpos( '.' )
   if s:completion_stopped
     let s:completion_stopped = 0
     let s:completion = s:default_completion
@@ -1026,7 +1072,9 @@ function! s:PollCompletion( ... )
   endif
 
   let s:completion = py3eval( 'ycm_state.GetCompletionResponse()' )
-  call s:Complete()
+  if s:current_cursor_position == getpos( '.' )
+    call s:Complete()
+  endif
 endfunction
 
 
@@ -1174,7 +1222,8 @@ function! s:SetUpCommands()
         \                                      <line2>,
         \                                      <f-args>)
   command! YcmDiags call s:ShowDiagnostics()
-  command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
+  command! -nargs=? YcmShowDetailedDiagnostic
+        \ call s:ShowDetailedDiagnostic( <f-args> )
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
 endfunction
 
@@ -1219,7 +1268,7 @@ function! youcompleteme#LogsComplete( arglead, cmdline, cursorpos )
 endfunction
 
 
-function! youcompleteme#GetCommandResponse( ... )
+function! youcompleteme#GetCommandResponse( ... ) abort
   if !s:AllowedToCompleteInCurrentBuffer()
     return ''
   endif
@@ -1232,7 +1281,7 @@ function! youcompleteme#GetCommandResponse( ... )
 endfunction
 
 
-function! youcompleteme#GetCommandResponseAsync( callback, ... )
+function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
   if !s:AllowedToCompleteInCurrentBuffer()
     eval a:callback( '' )
     return
@@ -1252,10 +1301,35 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... )
 
   let s:pollers.command.id = timer_start(
         \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ a:callback ] ) )
+        \ function( 's:PollCommand', [ 'StringResponse', a:callback ] ) )
 endfunction
 
-function! s:PollCommand( callback, id )
+
+function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
+  if !s:AllowedToCompleteInCurrentBuffer()
+    eval a:callback( { 'error': 'ycm not allowed in buffer' } )
+    return
+  endif
+
+  if !get( b:, 'ycm_completing' )
+    eval a:callback( { 'error': 'ycm disabled in buffer' } )
+    return
+  endif
+
+  if s:pollers.command.id != -1
+    eval a:callback( { 'error': 'request in progress' } )
+    return
+  endif
+
+  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
+
+  let s:pollers.command.id = timer_start(
+        \ s:pollers.command.wait_milliseconds,
+        \ function( 's:PollCommand', [ 'Response', a:callback ] ) )
+endfunction
+
+
+function! s:PollCommand( response_func, callback, id ) abort
   if py3eval( 'ycm_state.GetCommandRequest() is None' )
     " Possible in case of race conditions and things like RestartServer
     " But particualrly in the tests
@@ -1265,13 +1339,14 @@ function! s:PollCommand( callback, id )
   if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
     let s:pollers.command.id = timer_start(
           \ s:pollers.command.wait_milliseconds,
-          \ function( 's:PollCommand', [ a:callback ] ) )
+          \ function( 's:PollCommand', [ a:response_func, a:callback ] ) )
     return
   endif
 
   call s:StopPoller( s:pollers.command )
 
-  let result = py3eval( 'ycm_state.GetCommandRequest().StringResponse()' )
+  let result = py3eval( 'ycm_state.GetCommandRequest().'
+                      \ .a:response_func . '()' )
 
   eval a:callback( result )
 endfunction
@@ -1318,8 +1393,13 @@ function! s:ShowDiagnostics()
 endfunction
 
 
-function! s:ShowDetailedDiagnostic()
-  py3 ycm_state.ShowDetailedDiagnostic()
+function! s:ShowDetailedDiagnostic( ... )
+  if ( a:0 && a:1 == 'popup' )
+        \ || get( g:, 'ycm_show_detailed_diag_in_popup', 0 )
+    py3 ycm_state.ShowDetailedDiagnostic( True )
+  else
+    py3 ycm_state.ShowDetailedDiagnostic( False )
+  endif
 endfunction
 
 
@@ -1439,6 +1519,16 @@ endif
 function! youcompleteme#Test_GetPollers()
   return s:pollers
 endfunction
+
+function! s:ToggleSignatureHelp()
+  call py3eval( 'ycm_state.ToggleSignatureHelp()' )
+  " Because we do this in a insert-mode mapping, we return empty string to
+  " insert/type nothing
+  return ''
+endfunction
+
+silent! inoremap <silent> <plug>(YCMToggleSignatureHelp)
+      \ <C-r>=<SID>ToggleSignatureHelp()<CR>
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

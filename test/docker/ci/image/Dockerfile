@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL C.UTF-8
 
-ARG VIM_VERSION=v8.2.1456
+ARG VIM_VERSION=v8.2.2735
 ARG YCM_VIM_PYTHON=python3
 
 RUN apt-get update && \

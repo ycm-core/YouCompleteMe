@@ -113,6 +113,47 @@ function! Test_ResolveCompletion_OnChange()
   call test_override( 'ALL', 0 )
 endfunction
 
+function! Test_Resolve_FixIt()
+  call SkipIf( !exists( '*popup_findinfo' ), 'no popup_findinfo' )
+
+  " Only the java completer actually uses the completion resolve
+  call youcompleteme#test#setup#OpenFile(
+        \ '/third_party/ycmd/ycmd/tests/java/testdata/simple_eclipse_project' .
+        \ '/src/com/test/TestWithDocumentation.java', { 'delay': 15 } )
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function! Check1( id )
+    call WaitForCompletion()
+    call CheckCurrentLine( '    Tes' )
+    call CheckCompletionItemsHasItems( [ 'Test - com.youcompleteme' ] )
+    let tabs = IndexOfCompletionItemInList( 'Test - com.youcompleteme' ) + 1
+    let tabs = repeat( "\<Tab>", tabs )
+    call FeedAndCheckAgain( tabs, funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( id )
+    call WaitForCompletion()
+    call CheckCompletionItemsHasItems( [ 'Test - com.youcompleteme' ] )
+    call CheckCurrentLine( '    Test' )
+    call FeedAndCheckAgain( "\<C-y>", funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( id )
+    call WaitForAssert( {-> assert_false( pumvisible(), 'pumvisible()' ) } )
+    call CheckCurrentLine( '    Test' )
+    call assert_equal( 'import com.youcompleteme.Test;', getline( 3 ) )
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call setpos( '.', [ 0, 7, 1 ] )
+  call FeedAndCheckMain( "oTes\<C-space>", funcref( 'Check1' ) )
+
+  call test_override( 'ALL', 0 )
+endfunction
+
 function! Test_DontResolveCompletion_AlreadyResolved()
   call SkipIf( !exists( '*popup_findinfo' ), 'no popup_findinfo' )
 
@@ -128,7 +169,7 @@ function! Test_DontResolveCompletion_AlreadyResolved()
 
   function! Check1( id )
     call WaitForCompletion()
-    call CheckCompletionItems( [ 'hashCode' ], 'word' )
+    call CheckCompletionItemsContainsExactly( [ 'hashCode' ], 'word' )
     call s:AssertInfoPopupNotVisible()
     call assert_equal( -1, complete_info().selected )
 

@@ -17,14 +17,15 @@
 
 import json
 from hamcrest import assert_that, equal_to
-from ycm.tests.conftest import UserOptions
+from unittest import TestCase
+from ycm.tests import UserOptions
 from ycm.tests.test_utils import MockVimModule
 vim_mock = MockVimModule()
 
 from ycm.client import completion_request
 
 
-class ConvertCompletionResponseToVimDatas_test:
+class ConvertCompletionResponseToVimDatasTest( TestCase ):
   """ This class tests the
       completion_request.ConvertCompletionResponseToVimDatas method """
 
@@ -44,7 +45,7 @@ class ConvertCompletionResponseToVimDatas_test:
       raise
 
 
-  def AllFields_test( self ):
+  def test_AllFields( self ):
     extra_data = {
         'doc_string':    'DOC STRING',
     }
@@ -68,7 +69,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def OnlyInsertionTextField_test( self ):
+  def test_OnlyInsertionTextField( self ):
     self._Check( {
       'insertion_text':  'INSERTION TEXT'
     }, {
@@ -84,7 +85,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def JustDetailedInfo_test( self ):
+  def test_JustDetailedInfo( self ):
     self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -104,7 +105,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def JustDocString_test( self ):
+  def test_JustDocString( self ):
     extra_data = {
       'doc_string':    'DOC STRING',
     }
@@ -127,7 +128,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def ExtraInfoNoDocString_test( self ):
+  def test_ExtraInfoNoDocString( self ):
     self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -148,7 +149,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def NullCharactersInExtraInfoAndDocString_test( self ):
+  def test_NullCharactersInExtraInfoAndDocString( self ):
     extra_data = {
       'doc_string': 'DOC\x00STRING'
     }
@@ -172,7 +173,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def ExtraInfoNoDocStringWithDetailedInfo_test( self ):
+  def test_ExtraInfoNoDocStringWithDetailedInfo( self ):
     self._Check( {
       'insertion_text':  'INSERTION TEXT',
       'menu_text':       'MENU TEXT',
@@ -194,7 +195,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def EmptyInsertionText_test( self ):
+  def test_EmptyInsertionText( self ):
     extra_data = {
       'doc_string':    'DOC STRING',
     }
@@ -218,7 +219,7 @@ class ConvertCompletionResponseToVimDatas_test:
     } )
 
 
-  def TruncateForPopup_test( self, *args ):
+  def test_TruncateForPopup( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'popup,menuone' } ):
       extra_data = {
         'doc_string':    'DOC STRING',
@@ -244,7 +245,7 @@ class ConvertCompletionResponseToVimDatas_test:
       } )
 
 
-  def OnlyTruncateForPopupIfNecessary_test( self, *args ):
+  def test_OnlyTruncateForPopupIfNecessary( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'popup,menuone' } ):
       extra_data = {
         'doc_string':    'DOC STRING',
@@ -269,7 +270,7 @@ class ConvertCompletionResponseToVimDatas_test:
       } )
 
 
-  def DontTruncateIfNotPopup_test( self, *args ):
+  def test_DontTruncateIfNotPopup( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'preview,menuone' } ):
       extra_data = {
         'doc_string':    'DOC STRING',
@@ -294,7 +295,7 @@ class ConvertCompletionResponseToVimDatas_test:
       } )
 
 
-  def TruncateForPopupWithoutDuplication_test( self, *args ):
+  def test_TruncateForPopupWithoutDuplication( self, *args ):
     with UserOptions( { '&columns': 60, '&completeopt': b'popup,menuone' } ):
       extra_data = {
         'doc_string':    'DOC STRING',

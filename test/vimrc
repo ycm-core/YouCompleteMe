@@ -16,3 +16,4 @@ let &runtimepath = g:ycm_test_plugin_dir . ',' . &runtimepath
 
 filetype plugin indent on
 syntax enable
+set modeline

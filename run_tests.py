@@ -20,13 +20,7 @@ DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
 #
 # Pip knows how to install this correctly so that it doesn't matter where in
 # sys.path the path is.
-python_path = [ p.join( DIR_OF_THIRD_PARTY, 'pythonfutures' ),
-                p.join( DIR_OF_THIRD_PARTY, 'requests-futures' ),
-                p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'chardet' ),
-                p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'certifi' ),
-                p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'idna' ),
-                p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'requests' ),
-                p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'urllib3', 'src' ),
+python_path = [ p.join( DIR_OF_THIS_SCRIPT, 'python' ),
                 p.join( DIR_OF_THIRD_PARTY, 'ycmd' ) ]
 if os.environ.get( 'PYTHONPATH' ):
   python_path.append( os.environ[ 'PYTHONPATH' ] )
@@ -56,38 +50,49 @@ def ParseArguments():
                        help = 'Dump the PYTHONPATH required to run tests '
                               'manually, then exit.' )
 
-  parsed_args, pytests_args = parser.parse_known_args()
+  parsed_args, unittest_args = parser.parse_known_args()
 
   if 'COVERAGE' in os.environ:
     parsed_args.coverage = ( os.environ[ 'COVERAGE' ] == 'true' )
 
-  return parsed_args, pytests_args
+  return parsed_args, unittest_args
 
 
 def BuildYcmdLibs( args ):
   if not args.skip_build:
     subprocess.check_call( [
       sys.executable,
-      p.join( DIR_OF_THIS_SCRIPT, 'third_party', 'ycmd', 'build.py' )
+      p.join( DIR_OF_THIS_SCRIPT, 'third_party', 'ycmd', 'build.py' ),
+      '--quiet'
     ] )
 
 
-def PytestTests( parsed_args, extra_pytests_args ):
-  pytests_args = [ '-v' ]
+def UnittestTests( parsed_args, extra_unittest_args ):
+  unittest_args = [ '-cb' ]
+  prefer_regular = any( p.isfile( arg ) for arg in extra_unittest_args )
+  if not prefer_regular:
+    unittest_args += [ '-p', '*_test.py' ]
+
+  if extra_unittest_args:
+    unittest_args.extend( extra_unittest_args )
+  if not ( prefer_regular and extra_unittest_args ):
+    unittest_args.append( '-s' )
+    test_directory = p.join( DIR_OF_THIS_SCRIPT, 'python', 'ycm', 'tests' )
+    unittest_args.append( test_directory )
 
   if parsed_args.coverage:
-    pytests_args += [ '--cov=ycm' ]
-
-  if extra_pytests_args:
-    pytests_args.extend( extra_pytests_args )
+    executable = [ sys.executable, '-We', '-m', 'coverage', 'run' ]
   else:
-    pytests_args.append( p.join( DIR_OF_THIS_SCRIPT, 'python' ) )
+    executable = [ sys.executable, '-We' ]
 
-  subprocess.check_call( [ sys.executable, '-m', 'pytest' ] + pytests_args )
+  unittest = [ '-m', 'unittest' ]
+  if not prefer_regular:
+    unittest.append( 'discover' )
+  subprocess.check_call( executable + unittest + unittest_args )
 
 
 def Main():
-  ( parsed_args, pytests_args ) = ParseArguments()
+  ( parsed_args, unittest_args ) = ParseArguments()
   if parsed_args.dump_path:
     print( os.environ[ 'PYTHONPATH' ] )
     sys.exit()
@@ -96,7 +101,7 @@ def Main():
     RunFlake8()
 
   BuildYcmdLibs( parsed_args )
-  PytestTests( parsed_args, pytests_args )
+  UnittestTests( parsed_args, unittest_args )
 
 
 if __name__ == "__main__":

@@ -50,7 +50,12 @@ issue you found is **closed as resolved** (e.g. with a PR or the original user's
 problem was resolved), raise a **new issue**, because you've found a new
 problem. Reference the original issue if you think that's useful information.
 
-If you do find a similar open issue, **don't just post 'me too' or similar**
+Please note: Closed issues which have been inactive for 60 days will be locked,
+this helps to keep discussions focussed. If you believe you are still
+experiencing an issue which has been closed, please raise a new issue,
+completing the issue template.
+
+If you do find a similar _open_ issue, **don't just post 'me too' or similar**
 responses. This almost never helps resolve the issue, and just causes noise for
 the maintainers. Only post if it will aid the maintainers in solving the issue;
 if there are existing diagnostics requested in the thread, perform

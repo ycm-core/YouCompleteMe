@@ -1,4 +1,4 @@
-function! CheckCompletionItems( expected_props, ... )
+function! CheckCompletionItemsContainsExactly( expected_props, ... )
   let prop = 'abbr'
   if a:0 > 0
     let prop = a:1
@@ -10,17 +10,68 @@ function! CheckCompletionItems( expected_props, ... )
     call add( abbrs, get( item, prop ) )
   endfor
 
-  call assert_equal( a:expected_props,
-        \ abbrs,
-        \ 'not matched: '
-        \ .. string( a:expected_props )
-        \ .. ' against '
-        \ .. prop
-        \ .. ' in '
-        \ .. string( items )
-        \ .. ' matching '
-        \ .. string( abbrs ) )
+  return assert_equal( a:expected_props,
+                     \ abbrs,
+                     \ 'not matched: '
+                     \ .. string( a:expected_props )
+                     \ .. ' against '
+                     \ .. prop
+                     \ .. ' in '
+                     \ .. string( items )
+                     \ .. ' matching '
+                     \ .. string( abbrs ) )
 endfunction
+
+function! CheckCompletionItemsHasItems( expected_props, ... )
+  let prop = 'abbr'
+  if a:0 > 0
+    let prop = a:1
+  endif
+
+  let items = complete_info( [ 'items' ] )[ 'items' ]
+  let abbrs = []
+  for item in items
+    call add( abbrs, get( item, prop ) )
+  endfor
+
+  let result = 0
+  for expected in a:expected_props
+    if index( abbrs, expected ) < 0
+      call assert_report( "Didn't find item with "
+                        \ .. prop
+                        \ .. '="'
+                        \ .. expected
+                        \ .. '" in completion list: '
+                        \ .. string( abbrs ) )
+      let result += 1
+    endif
+  endfor
+
+  return result
+endfunction
+
+function! IndexOfCompletionItemInList( item, ... )
+  let prop = 'abbr'
+  if a:0 > 0
+    let prop = a:1
+  endif
+
+  let items = complete_info( [ 'items' ] )[ 'items' ]
+  let abbrs = []
+  let idx = 0
+  while idx < len( items )
+    if get( items[ idx ], prop ) == a:item
+      return idx
+    endif
+    let idx += 1
+  endwhile
+
+  call assert_report( 'Did not find item '
+                    \ . string( a:item )
+                    \ . ' in completion info list' )
+  return -1
+endfunction
+
 
 function! FeedAndCheckMain( keys, func )
   call timer_start( 500, a:func )
