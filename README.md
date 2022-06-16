@@ -986,7 +986,7 @@ And here is the same function with semantic highlighting:
 As you can see, the function calls, macros, etc. are correctly identified. 
 
 This can be enabled globally with `let g:ycm_enable_semantic_highlighting=1` or
-per buffer, by setting `b:ycn_enable_semantic_highlighting`.
+per buffer, by setting `b:ycm_enable_semantic_highlighting`.
 
 #### Customising the highlight groups
 
