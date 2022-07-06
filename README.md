@@ -1001,7 +1001,7 @@ Protocol semantic token type, defined in the [LSP Spec](https://microsoft.github
 Some servers also use custom values. In this case, YCM prints a warning
 including the token type name that you can customise.
 
-For example, to render `parameter` tokens using the `Nomral` highlight group,
+For example, to render `parameter` tokens using the `Normal` highlight group,
 you can do this:
 
 ```viml
