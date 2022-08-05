@@ -341,14 +341,15 @@ def AddTextProperty( buffer_number,
                      line,
                      column,
                      prop_type,
-                     extra_args,
-                     prop_id ):
+                     extra_args ):
   if not VimIsNeovim():
     extra_args.update( {
       'type': prop_type,
-      'bufnr': buffer_number,
-      'id': prop_id } )
-    vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
+      'bufnr': buffer_number
+    } )
+    return GetIntValue(
+      vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
+    )
   else:
     extra_args[ 'hl_group' ] = prop_type
     # Neovim uses 0-based offsets
@@ -358,25 +359,35 @@ def AddTextProperty( buffer_number,
       extra_args[ 'end_col' ] = extra_args.pop( 'end_col' ) - 1
     line -= 1
     column -= 1
-    vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
-                                    f'{ YCM_NEOVIM_NS_ID }, '
-                                    f'{ line }, '
-                                    f'{ column }, '
-                                    f'{ extra_args } )' )
+    return GetIntValue( 
+      vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
+                                         f'{ YCM_NEOVIM_NS_ID }, '
+                                         f'{ line }, '
+                                         f'{ column }, '
+                                         f'{ extra_args } )' ) )
 
 
-def RemoveTextProperty( buffer_number: int, prop: DiagnosticProperty ):
+def RemoveDiagnosticProperty( buffer_number: int, prop: DiagnosticProperty ):
+  RemoveTextProperty( buffer_number,
+                      prop.line,
+                      prop.id,
+                      prop.type )
+
+
+def RemoveTextProperty( buffer_number, line_num, prop_id, prop_type ):
   if not VimIsNeovim():
     p = {
-        'bufnr': buffer_number,
-        'id': prop.id,
-        'type': prop.type,
-        'both': 1 }
-    vim.eval( f'prop_remove( { p } )' )
+      'bufnr': buffer_number,
+      'id': prop_id,
+      'type': prop_type,
+      'both': 1,
+      'all': 1
+    }
+    vim.eval( f'prop_remove( { p }, { line_num } )' )
   else:
     vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
                                     f'{ YCM_NEOVIM_NS_ID }, '
-                                    f'{ prop.id } )' )
+                                    f'{ prop_id } )' )
 
 
 # Clamps the line and column numbers so that they are not past the contents of

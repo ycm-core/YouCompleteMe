@@ -31,7 +31,7 @@ class DiagnosticInterface:
     # Line and column numbers are 1-based
     self._line_to_diags = defaultdict( list )
     self._previous_diag_line_number = -1
-    self._diag_message_needs_clearing = False
+    self._diag_message_needs_clearing = None
 
 
   def OnCursorMoved( self ):
@@ -97,14 +97,17 @@ class DiagnosticInterface:
 
 
   def _EchoDiagnosticForLine( self, line_num ):
+    global YCM_VIM_PROPERTY_ID
+
+    if self._diag_message_needs_clearing is not None:
+      # Clear any previous diag echo
+      vimsupport.RemoveTextProperty( **self._diag_message_needs_clearing )
+      self._diag_message_needs_clearing = None
+
     self._previous_diag_line_number = line_num
 
     diags = self._line_to_diags[ line_num ]
     if not diags:
-      if self._diag_message_needs_clearing:
-        # Clear any previous diag echo
-        vimsupport.PostVimMessage( '', warning = False )
-        self._diag_message_needs_clearing = False
       return
 
     first_diag = diags[ 0 ]
@@ -112,8 +115,21 @@ class DiagnosticInterface:
     if first_diag.get( 'fixit_available', False ):
       text += ' (FixIt)'
 
-    vimsupport.PostVimMessage( text, warning = False, truncate = True )
-    self._diag_message_needs_clearing = True
+    self._diag_message_needs_clearing = {
+      'buffer_number': self._bufnr,
+      'prop_id': vimsupport.AddTextProperty(
+        self._bufnr,
+        line_num,
+        0,
+        'YcmErrorProperty',
+        {
+          'text': '    ' + ' '.join( text.splitlines() ),
+          'text_align': 'right',
+          'text_wrap': 'wrap'
+        } ),
+      'line_num': line_num,
+      'prop_type': 'YcmErrorProperty'
+    }
 
 
   def _DiagnosticsCount( self, predicate ):
@@ -143,9 +159,8 @@ class DiagnosticInterface:
             diag ):
           global YCM_VIM_PROPERTY_ID
 
-          # FIXME: This remove() gambit probably never works because the IDs are
-          # almost certain to not match
-          # Perhaps we should have AddTextProperty return the ID?
+          # Note the following .remove() works because the __eq__ on
+          # DiagnosticProperty does not actually check the IDs match...
           diag_prop = vimsupport.DiagnosticProperty(
               YCM_VIM_PROPERTY_ID,
               name,
@@ -155,15 +170,17 @@ class DiagnosticInterface:
           try:
             props_to_remove.remove( diag_prop )
           except ValueError:
+            extras.update( {
+              'id': YCM_VIM_PROPERTY_ID
+            } )
             vimsupport.AddTextProperty( self._bufnr,
                                         line,
                                         column,
                                         name,
-                                        extras,
-                                        YCM_VIM_PROPERTY_ID )
+                                        extras )
           YCM_VIM_PROPERTY_ID += 1
     for prop in props_to_remove:
-      vimsupport.RemoveTextProperty( self._bufnr, prop )
+      vimsupport.RemoveDiagnosticProperty( self._bufnr, prop )
 
 
   def _UpdateSigns( self ):
