@@ -66,6 +66,10 @@ let s:pollers = {
       \     'id': -1,
       \     'wait_milliseconds': 100,
       \   },
+      \   'inlay_hints': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100,
+      \   },
       \ }
 let s:buftype_blacklist = {
       \   'help': 1,
@@ -270,6 +274,7 @@ try:
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
   from ycm import semantic_highlighting as ycm_semantic_highlighting
+  from ycm import inlay_hints as ycm_inlay_hints
 
   if 'ycm_state' in globals():
     # If re-initializing, pretend that we shut down
@@ -295,6 +300,7 @@ try:
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
   ycm_semantic_highlighting.Initialise()
+  ycm_inlay_hints.Initialise()
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -773,6 +779,18 @@ function! s:OnFileReadyToParse( ... )
             \ function( 's:PollSemanticHighlighting' ) )
 
     endif
+
+    call s:StopPoller( s:pollers.inlay_hints )
+    if !s:is_neovim &&
+          \ get( b:, 'ycm_enable_inlay_hints',
+          \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
+
+      py3 ycm_state.CurrentBuffer().SendInlayHintsRequest()
+      let s:pollers.inlay_hints.id = timer_start(
+            \ s:pollers.inlay_hints.wait_milliseconds,
+            \ function( 's:PollInlayHints' ) )
+
+    endif
   endif
 endfunction
 
@@ -803,6 +821,20 @@ function! s:PollSemanticHighlighting( ... )
           \ function( 's:PollSemanticHighlighting' ) )
   endif
 endfunction
+
+
+function! s:PollInlayHints( ... )
+  if !py3eval( 'ycm_state.CurrentBuffer().InlayHintsReady()' )
+    let s:pollers.inlay_hints.id = timer_start(
+          \ s:pollers.inlay_hints.wait_milliseconds,
+          \ function( 's:PollInlayHints' ) )
+  elseif ! py3eval( 'ycm_state.CurrentBuffer().UpdateInlayHints()' )
+    let s:pollers.inlay_hints.id = timer_start(
+          \ s:pollers.inlay_hints.wait_milliseconds,
+          \ function( 's:PollInlayHints' ) )
+  endif
+endfunction
+
 
 
 function! s:SendKeys( keys )

@@ -19,6 +19,7 @@ from ycm import vimsupport
 from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 from ycm.semantic_highlighting import SemanticHighlighting
+from ycm.inlay_hints import InlayHints
 
 
 # Emulates Vim buffer
@@ -36,8 +37,8 @@ class Buffer:
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
     self._open_loclist_on_ycm_diags = user_options[
                                         'open_loclist_on_ycm_diags' ]
-    self._semantic_highlighting = SemanticHighlighting( bufnr,
-                                                        user_options )
+    self._semantic_highlighting = SemanticHighlighting( bufnr, user_options )
+    self._inlay_hints = InlayHints( bufnr, user_options )
     self.UpdateFromFileTypes( filetypes )
 
 
@@ -146,6 +147,18 @@ class Buffer:
 
   def UpdateSemanticTokens( self ):
     return self._semantic_highlighting.Update()
+
+
+  def SendInlayHintsRequest( self ):
+    self._inlay_hints.SendRequest()
+
+
+  def InlayHintsReady( self ):
+    return self._inlay_hints.IsResponseReady()
+
+
+  def UpdateInlayHints( self ):
+    return self._inlay_hints.Update()
 
 
   def _ChangedTick( self ):
