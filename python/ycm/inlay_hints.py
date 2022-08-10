@@ -51,6 +51,8 @@ def Initialise():
 class InlayHints:
   """Stores the inlay hints state for a Vim buffer"""
 
+  # FIXME: Send a request per-disjoint range for this buffer rather than the
+  # maximal range. then collaate the results when all responses are returned
   def __init__( self, bufnr, user_options ):
     self._request = None
     self._bufnr = bufnr
