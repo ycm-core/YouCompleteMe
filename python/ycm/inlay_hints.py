@@ -89,6 +89,13 @@ class InlayHints:
   def IsResponseReady( self ):
     return self._request is not None and self._request.Done()
 
+
+  def Clear( self ):
+    for prop_id in self._prop_ids:
+      tp.ClearTextProperties( self._bufnr, prop_id )
+    self._prop_ids.clear()
+
+
   def Update( self ):
     if not self._request:
       # Nothing to update
@@ -106,10 +113,7 @@ class InlayHints:
       self.SendRequest()
       return False # poll again
 
-    for prop_id in self._prop_ids:
-      tp.ClearTextProperties( self._bufnr, prop_id )
-
-    self._prop_ids.clear()
+    self.Clear()
 
     for inlay_hint in inlay_hints:
       if 'kind' not in  inlay_hint:

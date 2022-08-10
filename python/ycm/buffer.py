@@ -161,6 +161,10 @@ class Buffer:
     return self._inlay_hints.Update()
 
 
+  def ClearInlayHints( self ):
+    return self._inlay_hints.Clear()
+
+
   def _ChangedTick( self ):
     return vimsupport.GetBufferChangedTick( self._number )
 

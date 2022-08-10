@@ -231,7 +231,7 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     autocmd CursorMovedI * let s:current_cursor_position = getpos( '.' )
-    autocmd InsertEnter * let s:current_cursor_position = getpos( '.' )
+    autocmd InsertEnter * call s:OnInsertEnter()
     autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
@@ -952,6 +952,11 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
   endif
 endfunction
 
+
+function! s:OnInsertEnter() abort
+  let s:current_cursor_position = getpos( '.' )
+  py3 ycm_state.CurrentBuffer().ClearInlayHints()
+endfunction
 
 function! s:OnInsertLeave()
   if !s:AllowedToCompleteInCurrentBuffer()
