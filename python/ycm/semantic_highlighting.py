@@ -96,7 +96,11 @@ class SemanticHighlighting:
 
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
 
-    self._request = SemanticTokensRequest( BuildRequestData( self._bufnr ) )
+    request: dict = BuildRequestData( self._bufnr )
+    request.update( {
+      'range': vimsupport.RangeVisibleInBuffer( self._bufnr )
+    } )
+    self._request = SemanticTokensRequest( request )
     self._request.Start()
 
   def IsResponseReady( self ):

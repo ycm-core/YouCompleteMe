@@ -72,16 +72,7 @@ class InlayHints:
     # Perhaps the maximal range of visible windows or something.
     request_data = BuildRequestData( self._bufnr )
     request_data.update( {
-      'range': {
-        'start': {
-          'line_num': 1,
-          'column_num': 1
-        },
-        'end': {
-          'line_num': max( len( vim.buffers[ self._bufnr ] ), 1 ),
-          'column_num': len( ToBytes( vim.buffers[ self._bufnr ][ -1 ] ) ) + 1
-        }
-      }
+      'range': vimsupport.RangeVisibleInBuffer( self._bufnr )
     } )
     self._request = InlayHintsRequest( request_data )
     self._request.Start()

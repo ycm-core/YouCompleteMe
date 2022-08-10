@@ -236,6 +236,7 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
     autocmd InsertCharPre * call s:OnInsertChar()
+    autocmd WinScrolled * call s:OnWinScrolled()
   augroup END
 endfunction
 
@@ -768,29 +769,39 @@ function! s:OnFileReadyToParse( ... )
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
 
-    call s:StopPoller( s:pollers.semantic_highlighting )
-    if !s:is_neovim &&
-          \ get( b:, 'ycm_enable_semantic_highlighting',
-          \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
+    call s:UpdateSemanticHighlighting( bufnr() )
+    call s:UpdateInlayHints( bufnr() )
 
-      py3 ycm_state.CurrentBuffer().SendSemanticTokensRequest()
-      let s:pollers.semantic_highlighting.id = timer_start(
-            \ s:pollers.semantic_highlighting.wait_milliseconds,
-            \ function( 's:PollSemanticHighlighting' ) )
+  endif
+endfunction
 
-    endif
+function! s:UpdateSemanticHighlighting( bufnr ) abort
+  call s:StopPoller( s:pollers.semantic_highlighting )
+  if !s:is_neovim &&
+        \ get( b:, 'ycm_enable_semantic_highlighting',
+        \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
 
-    call s:StopPoller( s:pollers.inlay_hints )
-    if !s:is_neovim &&
-          \ get( b:, 'ycm_enable_inlay_hints',
-          \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
+    py3 ycm_state.Buffer(
+          \ int( vim.eval( "a:bufnr" ) ) ).SendSemanticTokensRequest()
+    let s:pollers.semantic_highlighting.id = timer_start(
+          \ s:pollers.semantic_highlighting.wait_milliseconds,
+          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
 
-      py3 ycm_state.CurrentBuffer().SendInlayHintsRequest()
-      let s:pollers.inlay_hints.id = timer_start(
-            \ s:pollers.inlay_hints.wait_milliseconds,
-            \ function( 's:PollInlayHints' ) )
+  endif
+endfunction
 
-    endif
+
+function! s:UpdateInlayHints( bufnr )
+  call s:StopPoller( s:pollers.inlay_hints )
+  if !s:is_neovim &&
+        \ get( b:, 'ycm_enable_inlay_hints',
+        \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
+
+    py3 ycm_state.Buffer( int( vim.eval( 'a:bufnr' ) ) ).SendInlayHintsRequest()
+    let s:pollers.inlay_hints.id = timer_start(
+          \ s:pollers.inlay_hints.wait_milliseconds,
+          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+
   endif
 endfunction
 
@@ -810,28 +821,34 @@ function! s:PollFileParseResponse( ... )
 endfunction
 
 
-function! s:PollSemanticHighlighting( ... )
-  if !py3eval( 'ycm_state.CurrentBuffer().SemanticTokensRequestReady()' )
+function! s:PollSemanticHighlighting( bufnr, ... )
+  if !py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.SemanticTokensRequestReady()' )
     let s:pollers.semantic_highlighting.id = timer_start(
           \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting' ) )
-  elseif ! py3eval( 'ycm_state.CurrentBuffer().UpdateSemanticTokens()' )
+          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
+  elseif !py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.UpdateSemanticTokens()' )
     let s:pollers.semantic_highlighting.id = timer_start(
           \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting' ) )
+          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
   endif
 endfunction
 
 
-function! s:PollInlayHints( ... )
-  if !py3eval( 'ycm_state.CurrentBuffer().InlayHintsReady()' )
+function! s:PollInlayHints( bufnr, ... )
+  if !py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).InlayHintsReady()' )
     let s:pollers.inlay_hints.id = timer_start(
           \ s:pollers.inlay_hints.wait_milliseconds,
-          \ function( 's:PollInlayHints' ) )
-  elseif ! py3eval( 'ycm_state.CurrentBuffer().UpdateInlayHints()' )
+          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+  elseif ! py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).UpdateInlayHints()' )
     let s:pollers.inlay_hints.id = timer_start(
           \ s:pollers.inlay_hints.wait_milliseconds,
-          \ function( 's:PollInlayHints' ) )
+          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
   endif
 endfunction
 
@@ -884,6 +901,16 @@ function! s:OnCursorMovedNormalMode()
   endif
 
   py3 ycm_state.OnCursorMoved()
+endfunction
+
+
+function! s:OnWinScrolled()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+  let bufnr = winbufnr( expand( '<afile>' ) )
+  call s:UpdateSemanticHighlighting( bufnr )
+  call s:UpdateInlayHints( bufnr )
 endfunction
 
 

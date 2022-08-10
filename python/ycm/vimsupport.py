@@ -181,6 +181,57 @@ def GetBufferChangedTick( bufnr ):
   return GetIntValue( f'getbufvar({ bufnr }, "changedtick")' )
 
 
+# Returns a range covering the earliest and latest lines visible in the current
+# tab page for the supplied buffer number. By default this range is then
+# extended by half of the resulting range size
+def RangeVisibleInBuffer( bufnr, factor=0.5 ):
+  windows = [ w for w in vim.eval( f'win_findbuf( { bufnr } )' )
+              if GetIntValue( vim.eval( f'win_id2tabwin( { w } )[ 0 ]' ) ) ==
+                vim.current.tabpage.number ]
+
+  class Location:
+    line: int = None
+    col: int = None
+
+  class Range:
+    start: Location = Location()
+    end: Location = Location()
+
+  buffer = vim.buffers[ bufnr ]
+
+  if not windows:
+    return None
+
+  r = Range()
+  for winid in windows:
+    win_info = vim.eval( f'getwininfo( { winid } )[ 0 ]' )
+    if r.start.line is None or r.start.line > int( win_info[ 'topline' ] ):
+      r.start.line = int( win_info[ 'topline' ] )
+    if r.end.line is None or r.end.line < int( win_info[ 'botline' ] ):
+      r.end.line = int( win_info[ 'botline' ] )
+
+  # Extend the range by 1 factor, and calculate the columns
+  num_lines = r.end.line - r.start.line + 1
+  r.start.line = max( r.start.line - int( num_lines * factor ), 1 )
+  r.start.col = 1
+  r.end.line = min( r.end.line + int( num_lines * factor ), len( buffer ) )
+  r.end.col = len( buffer[ r.end.line - 1 ] )
+
+  filepath = GetBufferFilepath( buffer )
+  return {
+    'start': {
+      'line_num': r.start.line,
+      'column_num': r.start.col,
+      'filepath': filepath,
+    },
+    'end': {
+      'line_num': r.end.line,
+      'column_num': r.end.col,
+      'filepath': filepath,
+    }
+  }
+
+
 def CaptureVimCommand( command ):
   vim.command( 'redir => b:ycm_command' )
   vim.command( f'silent! { command }' )

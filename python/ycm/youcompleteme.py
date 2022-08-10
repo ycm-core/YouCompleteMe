@@ -586,7 +586,11 @@ class YouCompleteMe:
 
 
   def CurrentBuffer( self ):
-    return self._buffers[ vimsupport.GetCurrentBufferNumber() ]
+    return self.Buffer( vimsupport.GetCurrentBufferNumber() )
+
+
+  def Buffer( self, bufnr ):
+    return self._buffers[ bufnr ]
 
 
   def OnInsertLeave( self ):
