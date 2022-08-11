@@ -797,7 +797,7 @@ function! s:UpdateInlayHints( bufnr )
         \ get( b:, 'ycm_enable_inlay_hints',
         \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
 
-    py3 ycm_state.Buffer( int( vim.eval( 'a:bufnr' ) ) ).SendInlayHintsRequest()
+    py3 ycm_state.Buffer( int( vim.eval( 'a:bufnr' ) ) ).inlay_hints.Request()
     let s:pollers.inlay_hints.id = timer_start(
           \ s:pollers.inlay_hints.wait_milliseconds,
           \ function( 's:PollInlayHints', [ a:bufnr ] ) )
@@ -840,12 +840,14 @@ endfunction
 
 function! s:PollInlayHints( bufnr, ... )
   if !py3eval(
-      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).InlayHintsReady()' )
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.inlay_hints.Ready()' )
     let s:pollers.inlay_hints.id = timer_start(
           \ s:pollers.inlay_hints.wait_milliseconds,
           \ function( 's:PollInlayHints', [ a:bufnr ] ) )
   elseif ! py3eval(
-      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).UpdateInlayHints()' )
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.inlay_hints.Update()' )
     let s:pollers.inlay_hints.id = timer_start(
           \ s:pollers.inlay_hints.wait_milliseconds,
           \ function( 's:PollInlayHints', [ a:bufnr ] ) )
@@ -982,7 +984,7 @@ endfunction
 
 function! s:OnInsertEnter() abort
   let s:current_cursor_position = getpos( '.' )
-  py3 ycm_state.CurrentBuffer().ClearInlayHints()
+  py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
 endfunction
 
 function! s:OnInsertLeave()
@@ -1004,6 +1006,9 @@ function! s:OnInsertLeave()
   endif
 
   call s:ClearSignatureHelp()
+  " We cleared inlay hints on insert enter
+  " TODO: Probalby should use ModeChange
+  py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
 endfunction
 
 

@@ -58,10 +58,11 @@ class InlayHints:
     self._bufnr = bufnr
     self._prop_ids = set()
     self.tick = -1
+    self._latest_inlay_hints = []
 
 
-  def SendRequest( self ):
-    if self._request and not self.IsResponseReady():
+  def Request( self ):
+    if self._request and not self.Ready():
       return
 
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
@@ -79,7 +80,8 @@ class InlayHints:
     self._request = InlayHintsRequest( request_data )
     self._request.Start()
 
-  def IsResponseReady( self ):
+
+  def Ready( self ):
     return self._request is not None and self._request.Done()
 
 
@@ -94,11 +96,12 @@ class InlayHints:
       # Nothing to update
       return True
 
-    assert self.IsResponseReady()
+    assert self.Ready()
 
     # We're ready to use this response. Clear it (to avoid repeatedly
     # re-polling).
-    inlay_hints = self._request.Response()
+    self._latest_inlay_hints = [] ;# in case there was an error in request
+    self._latest_inlay_hints = self._request.Response()
     self._request = None
 
     if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
@@ -106,10 +109,17 @@ class InlayHints:
       self.SendRequest()
       return False # poll again
 
+    self.Refresh()
+
+    # No need to re-poll
+    return True
+
+
+  def Refresh( self ):
     self.Clear()
 
-    for inlay_hint in inlay_hints:
-      if 'kind' not in  inlay_hint:
+    for inlay_hint in self._latest_inlay_hints:
+      if 'kind' not in inlay_hint:
         prop_type = 'YCM_INLAY_UNKNOWN'
       elif inlay_hint[ 'kind' ] not in HIGHLIGHT_GROUP:
         prop_type = 'YCM_INLAY_UNKNOWN'
@@ -128,5 +138,3 @@ class InlayHints:
                               'text': inlay_hint[ 'label' ]
                             } ) )
 
-    # No need to re-poll
-    return True

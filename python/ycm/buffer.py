@@ -38,7 +38,7 @@ class Buffer:
     self._open_loclist_on_ycm_diags = user_options[
                                         'open_loclist_on_ycm_diags' ]
     self._semantic_highlighting = SemanticHighlighting( bufnr, user_options )
-    self._inlay_hints = InlayHints( bufnr, user_options )
+    self.inlay_hints = InlayHints( bufnr, user_options )
     self.UpdateFromFileTypes( filetypes )
 
 
@@ -147,22 +147,6 @@ class Buffer:
 
   def UpdateSemanticTokens( self ):
     return self._semantic_highlighting.Update()
-
-
-  def SendInlayHintsRequest( self ):
-    self._inlay_hints.SendRequest()
-
-
-  def InlayHintsReady( self ):
-    return self._inlay_hints.IsResponseReady()
-
-
-  def UpdateInlayHints( self ):
-    return self._inlay_hints.Update()
-
-
-  def ClearInlayHints( self ):
-    return self._inlay_hints.Clear()
 
 
   def _ChangedTick( self ):
