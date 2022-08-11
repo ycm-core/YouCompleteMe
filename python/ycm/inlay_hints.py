@@ -65,6 +65,8 @@ class InlayHints:
     if self._request and not self.Ready():
       return
 
+    # We're requesting changes, so the existing results are now invalid
+    self._latest_inlay_hints = []
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
 
     # TODO: How to determine the range to display ? Should we do the range
@@ -106,16 +108,28 @@ class InlayHints:
 
     if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
       # Buffer has changed, we should ignore the data and retry
-      self.SendRequest()
+      self.Request()
       return False # poll again
 
-    self.Refresh()
+    self._Draw()
 
     # No need to re-poll
     return True
 
 
   def Refresh( self ):
+    if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
+      # state data
+      return
+
+    if self._request is not None:
+      # request in progress; we''l handle refreshing when it's done.
+      return
+
+    self._Draw()
+
+
+  def _Draw( self ):
     self.Clear()
 
     for inlay_hint in self._latest_inlay_hints:
