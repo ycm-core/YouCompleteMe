@@ -31,7 +31,8 @@ class DiagnosticInterface:
     # Line and column numbers are 1-based
     self._line_to_diags = defaultdict( list )
     self._previous_diag_line_number = -1
-    self._diag_message_needs_clearing = None
+    self._diag_message_needs_clearing = False
+    self._diag_message_prop_ids = []
 
 
   def OnCursorMoved( self ):
@@ -97,39 +98,61 @@ class DiagnosticInterface:
 
 
   def _EchoDiagnosticForLine( self, line_num ):
-    global YCM_VIM_PROPERTY_ID
-
-    if self._diag_message_needs_clearing is not None:
-      # Clear any previous diag echo
-      vimsupport.RemoveTextProperty( **self._diag_message_needs_clearing )
-      self._diag_message_needs_clearing = None
-
     self._previous_diag_line_number = line_num
 
     diags = self._line_to_diags[ line_num ]
-    if not diags:
-      return
+    text = None
+    if diags:
+      first_diag = diags[ 0 ]
+      text = first_diag[ 'text' ]
+      if first_diag.get( 'fixit_available', False ):
+        text += ' (FixIt)'
 
-    first_diag = diags[ 0 ]
-    text = first_diag[ 'text' ]
-    if first_diag.get( 'fixit_available', False ):
-      text += ' (FixIt)'
+    if self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text':
+      if self._diag_message_prop_ids:
+        # Clear any previous diag echo
+        for prop in self._diag_message_prop_ids:
+          vimsupport.RemoveTextProperty( **prop )
+        self._diag_message_prop_ids.clear()
 
-    self._diag_message_needs_clearing = {
-      'buffer_number': self._bufnr,
-      'prop_id': vimsupport.AddTextProperty(
-        self._bufnr,
-        line_num,
-        0,
-        'YcmErrorProperty',
-        {
-          'text': '    ' + ' '.join( text.splitlines() ),
-          'text_align': 'right',
-          'text_wrap': 'wrap'
-        } ),
-      'line_num': line_num,
-      'prop_type': 'YcmErrorProperty'
-    }
+      if not text:
+        return
+
+      def MakeVritualTextProperty( prop_type, text, position='after' ):
+        return {
+          'buffer_number': self._bufnr,
+          'prop_id': vimsupport.AddTextProperty(
+            self._bufnr,
+            line_num,
+            0,
+            prop_type,
+            {
+              'text': text,
+              'text_align': position,
+              'text_wrap': 'wrap'
+            } ),
+          'line_num': line_num,
+          'prop_type': prop_type
+        }
+
+      self._diag_message_prop_ids = [
+        MakeVritualTextProperty(
+          'YcmPadding',
+          ' ' * vim.buffers[ self._bufnr ].options[ 'shiftwidth' ] ),
+        MakeVritualTextProperty(
+          'YcmErrorProperty',
+          [ line for line in text.splitlines() if line ][ 0 ] )
+      ]
+    else:
+      if not text:
+        if self._diag_message_needs_clearing:
+          # Clear any previous diag echo
+          vimsupport.PostVimMessage( '', warning = False )
+          self._diag_message_needs_clearing = False
+        return
+
+      vimsupport.PostVimMessage( text, warning = False, truncate = True )
+      self._diag_message_needs_clearing = True
 
 
   def _DiagnosticsCount( self, predicate ):
