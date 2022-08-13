@@ -237,6 +237,19 @@ def RangeVisibleInBuffer( bufnr, grow_factor=0.5 ):
   }
 
 
+def VisibleRangeOfBufferOverlaps( bufnr, expanded_range ):
+  visible_range = RangeVisibleInBuffer( bufnr, 0 )
+  # As above, we ignore horizontal scroll and only check lines
+  return (
+    expanded_range is not None and
+    visible_range is not None and
+    visible_range[ 'start' ][ 'line_num' ]
+      >= expanded_range[ 'start' ][ 'line_num' ] and
+    visible_range[ 'end' ][ 'line_num' ]
+      <= expanded_range[ 'end' ][ 'line_num' ]
+  )
+
+
 def CaptureVimCommand( command ):
   vim.command( 'redir => b:ycm_command' )
   vim.command( f'silent! { command }' )

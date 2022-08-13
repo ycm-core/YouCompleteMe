@@ -64,17 +64,31 @@ class InlayHints:
   def __init__( self, bufnr, user_options ):
     self._request = None
     self._bufnr = bufnr
-    self._prop_ids = set()
     self.tick = -1
     self._latest_inlay_hints = []
+    self._last_requested_range = None
 
 
-  def Request( self ):
+  def Request( self, force=False ):
     if self._request and not self.Ready():
-      return
+      return True
+
+    # Check to see if the buffer ranges would actually change anything visible.
+    # This avoids a round-trip for every single line scroll event
+    if ( not force and
+         self.tick == vimsupport.GetBufferChangedTick( self._bufnr ) and
+         vimsupport.VisibleRangeOfBufferOverlaps(
+           self._bufnr,
+           self._last_requested_range ) ):
+      return False # don't poll
 
     # We're requesting changes, so the existing results are now invalid
     self._latest_inlay_hints = []
+    # FIXME: This call is duplicated in the call to VisibleRangeOfBufferOverlaps
+    #  - remove the expansion param
+    #  - look up the actual visible range, then call this function
+    #  - if not overlapping, do the factor expansion and request
+    self._last_requested_range = vimsupport.RangeVisibleInBuffer( self._bufnr )
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
 
     # TODO: How to determine the range to display ? Should we do the range
@@ -85,10 +99,11 @@ class InlayHints:
     # Perhaps the maximal range of visible windows or something.
     request_data = BuildRequestData( self._bufnr )
     request_data.update( {
-      'range': vimsupport.RangeVisibleInBuffer( self._bufnr )
+      'range': self._last_requested_range
     } )
     self._request = InlayHintsRequest( request_data )
     self._request.Start()
+    return True
 
 
   def Ready( self ):
@@ -116,13 +131,12 @@ class InlayHints:
 
     # We're ready to use this response. Clear it (to avoid repeatedly
     # re-polling).
-    self._latest_inlay_hints = [] # in case there was an error in request
     self._latest_inlay_hints = self._request.Response()
     self._request = None
 
     if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
       # Buffer has changed, we should ignore the data and retry
-      self.Request()
+      self.Request( force=True )
       return False # poll again
 
     self._Draw()

@@ -788,7 +788,7 @@ function! s:OnFileReadyToParse( ... )
           \ function( 's:PollFileParseResponse' ) )
 
     call s:UpdateSemanticHighlighting( bufnr() )
-    call s:UpdateInlayHints( bufnr() )
+    call s:UpdateInlayHints( bufnr(), 1 )
 
   endif
 endfunction
@@ -809,16 +809,19 @@ function! s:UpdateSemanticHighlighting( bufnr ) abort
 endfunction
 
 
-function! s:UpdateInlayHints( bufnr )
+function! s:UpdateInlayHints( bufnr, force )
   call s:StopPoller( s:pollers.inlay_hints )
   if s:enable_inlay_hints &&
         \ get( b:, 'ycm_enable_inlay_hints',
         \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
 
-    py3 ycm_state.Buffer( int( vim.eval( 'a:bufnr' ) ) ).inlay_hints.Request()
-    let s:pollers.inlay_hints.id = timer_start(
-          \ s:pollers.inlay_hints.wait_milliseconds,
-          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+    if py3eval(
+        \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).'
+        \ . 'inlay_hints.Request( force=int( vim.eval( "a:force" ) ) )' )
+      let s:pollers.inlay_hints.id = timer_start(
+            \ s:pollers.inlay_hints.wait_milliseconds,
+            \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+    endif
 
   endif
 endfunction
@@ -930,7 +933,7 @@ function! s:OnWinScrolled()
   endif
   let bufnr = winbufnr( expand( '<afile>' ) )
   call s:UpdateSemanticHighlighting( bufnr )
-  call s:UpdateInlayHints( bufnr )
+  call s:UpdateInlayHints( bufnr, 0 )
 endfunction
 
 
