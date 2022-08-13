@@ -723,6 +723,12 @@ class YouCompleteMe:
       debug_info += ( 'Server logfiles:\n'
                       f'  { self._server_stdout }\n'
                       f'  { self._server_stderr }' )
+    debug_info += ( '\nSemantic highlighting supported: ' +
+                    str( not vimsupport.VimIsNeovim() ) )
+    debug_info += ( '\nVirtual text supported: ' +
+                    str( vimsupport.VimSupportsVirtualText() ) )
+    debug_info += ( '\nPopup windows supported: ' +
+                    str( vimsupport.VimSupportsPopupWindows() ) )
     return debug_info
 
 
