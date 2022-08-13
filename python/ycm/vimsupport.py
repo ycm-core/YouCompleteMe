@@ -62,7 +62,7 @@ YCM_NEOVIM_NS_ID = vim.eval( 'g:ycm_neovim_ns_id' )
 
 # Virtual text is not a feature in itself and early patches don't work well, so
 # we need to keep changing this at the moment
-VIM_VIRTUAL_TEXT_VERSION_REQ = '9.0.193'
+VIM_VIRTUAL_TEXT_VERSION_REQ = '9.0.199'
 
 
 def CurrentLineAndColumn():

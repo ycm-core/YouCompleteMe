@@ -435,7 +435,9 @@ function! s:SetUpSyntaxHighlighting()
   if s:PropertyTypeNotDefined( 'YcmErrorProperty' )
     call prop_type_add( 'YcmErrorProperty', {
           \ 'highlight': 'YcmErrorSection',
-          \ 'priority': 30 } )
+          \ 'priority': 30,
+          \ 'combine': 0,
+          \ 'override': 1 } )
   endif
 
   " Used for virtual text
@@ -445,10 +447,52 @@ function! s:SetUpSyntaxHighlighting()
   if !hlexists( 'YcmInlayHint' )
     highlight default link YcmInlayHint NonText
   endif
+  if !hlexists( 'YcmErrorText' )
+    if exists( '*hlget' )
+      let YcmErrorText = hlget( 'SpellBad', v:true )[ 0 ]
+      let YcmErrorText.name = 'YcmErrorText'
+      let YcmErrorText.cterm = {}
+      let YcmErrorText.gui = {}
+      let YcmErrorText.term = {}
+      call hlset( [ YcmErrorText ] )
+    else
+      " approximation
+      hi default link YcmErrorText WarningMsg
+    endif
+  endif
+  if !hlexists( 'YcmWarningText' )
+    if exists( '*hlget' )
+      let YcmWarningText = hlget( 'SpellCap', v:true )[ 0 ]
+      let YcmWarningText.name = 'YcmWarningText'
+      let YcmWarningText.cterm = {}
+      let YcmWarningText.gui = {}
+      let YcmWarningText.term = {}
+      call hlset( [ YcmWarningText] )
+    else
+      " Lame approximation
+      hi default link YcmWarningText Conceal
+    endif
+  endif
+
+  if s:PropertyTypeNotDefined( 'YcmVirtError' )
+    call prop_type_add( 'YcmVirtError', {
+          \ 'highlight': 'YcmErrorText',
+          \ 'priority': 20,
+          \ 'combine': 0 } )
+  endif
+  if s:PropertyTypeNotDefined( 'YcmVirtWarning' )
+    call prop_type_add( 'YcmVirtWarning', {
+          \ 'highlight': 'YcmWarningText',
+          \ 'priority': 19,
+          \ 'combine': 0 } )
+  endif
+
+
   if s:PropertyTypeNotDefined( 'YcmPadding' )
-    call prop_type_add( 'YcmPadding',
-          \ { 'highlight': 'YcmInvisible',
-          \   'priority': 100 } )
+    call prop_type_add( 'YcmPadding', {
+          \ 'highlight': 'YcmInvisible',
+          \ 'priority': 100,
+          \ 'combine': 1 } )
   endif
 
   if !hlexists( 'YcmWarningSection' )
@@ -461,7 +505,9 @@ function! s:SetUpSyntaxHighlighting()
   if s:PropertyTypeNotDefined( 'YcmWarningProperty' )
     call prop_type_add( 'YcmWarningProperty', {
           \ 'highlight': 'YcmWarningSection',
-          \ 'priority': 30 } )
+          \ 'priority': 29,
+          \ 'combine': 0,
+          \ 'override': 1 } )
   endif
 endfunction
 
