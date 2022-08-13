@@ -1003,7 +1003,7 @@ endfunction
 function! s:OnInsertEnter() abort
   let s:current_cursor_position = getpos( '.' )
   if s:enable_inlay_hints
-    py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+    "py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
   endif
 endfunction
 
@@ -1029,7 +1029,7 @@ function! s:OnInsertLeave()
   if s:enable_inlay_hints
     " We cleared inlay hints on insert enter
     " TODO: Probalby should use ModeChange
-    py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
+    "py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
   endif
 endfunction
 
