@@ -25,8 +25,8 @@ from ycm import text_properties as tp
 HIGHLIGHT_GROUP = {
   # 1-based inedexes
   0: '',
-  1: 'Comment',        # Type
-  2: 'Comment'   # Parameter
+  1: 'YcmInlayHint',  # Type
+  2: 'YcmInlayHint'   # Parameter
 }
 REPORTED_MISSING_TYPES = set()
 
@@ -37,13 +37,21 @@ def Initialise():
 
   props = tp.GetTextPropertyTypes()
   if 'YCM_INLAY_UNKNOWN' not in props:
-    tp.AddTextPropertyType( 'YCM_INLAY_UNKNOWN', highlight = 'Comment' )
+    tp.AddTextPropertyType( 'YCM_INLAY_UNKNOWN',
+                            highlight = 'YcmInlayHint',
+                            start_incl = 1 )
+  if 'YCM_INLAY_PADDING' not in props:
+    tp.AddTextPropertyType( 'YCM_INLAY_PADDING',
+                            highlight = 'YcmInvisible',
+                            start_incl = 1 )
 
   for token_type, group in HIGHLIGHT_GROUP.items():
     prop = f'YCM_INLAY_{ token_type }'
     if prop not in props and vimsupport.GetIntValue(
         f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
-      tp.AddTextPropertyType( prop, highlight = group )
+      tp.AddTextPropertyType( prop,
+                              highlight = group,
+                              start_incl = 1 )
 
   return True
 
@@ -88,9 +96,15 @@ class InlayHints:
 
 
   def Clear( self ):
-    for prop_id in self._prop_ids:
-      tp.ClearTextProperties( self._bufnr, prop_id )
-    self._prop_ids.clear()
+    # FIXME: ClearTextProperties is slow as it must scan the whole buffer
+    # We should use _last_requested_range to specify the range to clear
+    for type in HIGHLIGHT_GROUP.keys():
+      if type == 0:
+        continue
+      tp.ClearTextProperties( self._bufnr, type=f'YCM_INLAY_{ type }' )
+
+    tp.ClearTextProperties( self._bufnr, type='YCM_INLAY_UNKNOWN' )
+    tp.ClearTextProperties( self._bufnr, type='YCM_INLAY_PADDING' )
 
 
   def Update( self ):
@@ -140,14 +154,37 @@ class InlayHints:
       else:
         prop_type = 'YCM_INLAY_' + str( inlay_hint[ 'kind' ] )
 
-      self._prop_ids.add(
+      if inlay_hint.get( 'paddingLeft', False ):
         tp.AddTextProperty( self._bufnr,
                             None,
-                            prop_type,
+                            'YCM_INLAY_PADDING',
                             {
                               'start': inlay_hint[ 'position' ],
                               'end': inlay_hint[ 'position' ],
                             },
                             {
-                              'text': inlay_hint[ 'label' ]
-                            } ) )
+                              'text': ' '
+                            } )
+
+      tp.AddTextProperty( self._bufnr,
+                          None,
+                          prop_type,
+                          {
+                            'start': inlay_hint[ 'position' ],
+                            'end': inlay_hint[ 'position' ],
+                          },
+                          {
+                            'text': inlay_hint[ 'label' ]
+                          } )
+
+      if inlay_hint.get( 'paddingRight', False ):
+        tp.AddTextProperty( self._bufnr,
+                            None,
+                            'YCM_INLAY_PADDING',
+                            {
+                              'start': inlay_hint[ 'position' ],
+                              'end': inlay_hint[ 'position' ],
+                            },
+                            {
+                              'text': ' '
+                            } )

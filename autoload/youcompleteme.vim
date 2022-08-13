@@ -181,6 +181,10 @@ function! youcompleteme#Enable()
 
   call s:SetUpOptions()
 
+  py3 ycm_semantic_highlighting.Initialise()
+  py3 vim.command( 'let s:enable_inlay_hints = ' +
+        \ '1' if ycm_inlay_hints.Initialise() else '0' )
+
   call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
     autocmd!
@@ -301,9 +305,6 @@ try:
     default_options = {}
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
-  ycm_semantic_highlighting.Initialise()
-  vim.command( 'let s:enable_inlay_hints = ' +
-    '1' if ycm_inlay_hints.Initialise() else '0' )
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -433,11 +434,21 @@ function! s:SetUpSyntaxHighlighting()
   endif
   if s:PropertyTypeNotDefined( 'YcmErrorProperty' )
     call prop_type_add( 'YcmErrorProperty', {
-          \ 'highlight': 'YcmErrorSection' } )
+          \ 'highlight': 'YcmErrorSection',
+          \ 'priority': 30 } )
+  endif
+
+  " Used for virtual text
+  if !hlexists( 'YcmInvisible' )
+    highlight default link YcmInvisible Normal
+  endif
+  if !hlexists( 'YcmInlayHint' )
+    highlight default link YcmInlayHint NonText
   endif
   if s:PropertyTypeNotDefined( 'YcmPadding' )
     call prop_type_add( 'YcmPadding',
-          \ { 'highlight': 'Normal' } )
+          \ { 'highlight': 'YcmInvisible',
+          \   'priority': 100 } )
   endif
 
   if !hlexists( 'YcmWarningSection' )
@@ -449,7 +460,8 @@ function! s:SetUpSyntaxHighlighting()
   endif
   if s:PropertyTypeNotDefined( 'YcmWarningProperty' )
     call prop_type_add( 'YcmWarningProperty', {
-          \ 'highlight': 'YcmWarningSection' } )
+          \ 'highlight': 'YcmWarningSection',
+          \ 'priority': 30 } )
   endif
 endfunction
 

@@ -188,7 +188,7 @@ def GetBufferChangedTick( bufnr ):
 # Returns a range covering the earliest and latest lines visible in the current
 # tab page for the supplied buffer number. By default this range is then
 # extended by half of the resulting range size
-def RangeVisibleInBuffer( bufnr, factor=0.5 ):
+def RangeVisibleInBuffer( bufnr, grow_factor=0.5 ):
   windows = [ w for w in vim.eval( f'win_findbuf( { bufnr } )' )
               if GetIntValue( vim.eval( f'win_id2tabwin( { w } )[ 0 ]' ) ) ==
                 vim.current.tabpage.number ]
@@ -207,6 +207,7 @@ def RangeVisibleInBuffer( bufnr, factor=0.5 ):
     return None
 
   r = Range()
+  # Note, for this we ignore horizontal scrolling
   for winid in windows:
     win_info = vim.eval( f'getwininfo( { winid } )[ 0 ]' )
     if r.start.line is None or r.start.line > int( win_info[ 'topline' ] ):
@@ -216,9 +217,9 @@ def RangeVisibleInBuffer( bufnr, factor=0.5 ):
 
   # Extend the range by 1 factor, and calculate the columns
   num_lines = r.end.line - r.start.line + 1
-  r.start.line = max( r.start.line - int( num_lines * factor ), 1 )
+  r.start.line = max( r.start.line - int( num_lines * grow_factor ), 1 )
   r.start.col = 1
-  r.end.line = min( r.end.line + int( num_lines * factor ), len( buffer ) )
+  r.end.line = min( r.end.line + int( num_lines * grow_factor ), len( buffer ) )
   r.end.col = len( buffer[ r.end.line - 1 ] )
 
   filepath = GetBufferFilepath( buffer )

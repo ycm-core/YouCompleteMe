@@ -29,15 +29,16 @@ import json
 def AddTextPropertyType( name, **kwargs ):
   props = {
     'highlight': 'Ignore',
-    'combine': False,
-    'start_incl': False,
-    'end_incl': False,
+    'combine': 0,
+    'override': 0,
+    'start_incl': 0,
+    'end_incl': 0,
     'priority': 10
   }
   props.update( kwargs )
 
   vim.eval( f"prop_type_add( '{ vimsupport.EscapeForVim( name ) }', "
-            f"               { json.dumps( kwargs ) } )" )
+            f"               { json.dumps( props ) } )" )
 
 
 def GetTextPropertyTypes( *args, **kwargs ):
@@ -56,7 +57,7 @@ def AddTextProperty( bufnr,
     'type': prop_type
   }
   if prop_id is not None:
-    props[ 'id' ]: prop_id
+    props[ 'id' ] = prop_id
   if extra_args:
     props.update( extra_args )
   return vim.eval( f"prop_add( { range[ 'start' ][ 'line_num' ] },"
@@ -64,10 +65,17 @@ def AddTextProperty( bufnr,
                    f"          { json.dumps( props ) } )" )
 
 
-def ClearTextProperties( bufnr, prop_id ):
+def ClearTextProperties( bufnr, prop_id=None, type=None ):
   props = {
-    'id': prop_id,
     'bufnr': bufnr,
     'all': 1,
   }
+  if prop_id is not None:
+    props[ 'id' ] = prop_id
+  if type is not None:
+    props[ 'type' ] = type
+
+  if prop_id is not None and type is not None:
+    props[ 'both' ] = 1
+
   vim.eval( f"prop_remove( { json.dumps( props ) } )" )
