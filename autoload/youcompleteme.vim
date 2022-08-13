@@ -435,6 +435,10 @@ function! s:SetUpSyntaxHighlighting()
     call prop_type_add( 'YcmErrorProperty', {
           \ 'highlight': 'YcmErrorSection' } )
   endif
+  if s:PropertyTypeNotDefined( 'YcmPadding' )
+    call prop_type_add( 'YcmPadding',
+          \ { 'highlight': 'Normal' } )
+  endif
 
   if !hlexists( 'YcmWarningSection' )
     if hlexists( 'SyntasticWarning' )
