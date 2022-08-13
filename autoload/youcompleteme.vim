@@ -81,6 +81,7 @@ let s:buftype_blacklist = {
 let s:last_char_inserted_by_user = v:true
 let s:enable_hover = 0
 let s:cursorhold_popup = -1
+let s:enable_inlay_hints = 0
 
 let s:force_preview_popup = 0
 
@@ -301,7 +302,8 @@ try:
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
   ycm_semantic_highlighting.Initialise()
-  ycm_inlay_hints.Initialise()
+  vim.command( 'let s:enable_inlay_hints = ' +
+    '1' if ycm_inlay_hints.Initialise() else '0' )
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -793,7 +795,7 @@ endfunction
 
 function! s:UpdateInlayHints( bufnr )
   call s:StopPoller( s:pollers.inlay_hints )
-  if !s:is_neovim &&
+  if s:enable_inlay_hints &&
         \ get( b:, 'ycm_enable_inlay_hints',
         \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
 
@@ -984,7 +986,9 @@ endfunction
 
 function! s:OnInsertEnter() abort
   let s:current_cursor_position = getpos( '.' )
-  py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+  if s:enable_inlay_hints
+    py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+  endif
 endfunction
 
 function! s:OnInsertLeave()
@@ -1006,9 +1010,11 @@ function! s:OnInsertLeave()
   endif
 
   call s:ClearSignatureHelp()
-  " We cleared inlay hints on insert enter
-  " TODO: Probalby should use ModeChange
-  py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
+  if s:enable_inlay_hints
+    " We cleared inlay hints on insert enter
+    " TODO: Probalby should use ModeChange
+    py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
+  endif
 endfunction
 
 

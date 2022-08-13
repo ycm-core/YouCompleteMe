@@ -34,8 +34,8 @@ REPORTED_MISSING_TYPES = set()
 
 
 def Initialise():
-  if vimsupport.VimIsNeovim():
-    return
+  if not vimsupport.VimSupportsVirtualText():
+    return False
 
   props = tp.GetTextPropertyTypes()
   if 'YCM_INLAY_UNKNOWN' not in props:
@@ -47,6 +47,7 @@ def Initialise():
         f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
       tp.AddTextPropertyType( prop, highlight = group )
 
+  return True
 
 class InlayHints:
   """Stores the inlay hints state for a Vim buffer"""
