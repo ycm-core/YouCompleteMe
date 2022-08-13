@@ -71,4 +71,3 @@ def ClearTextProperties( bufnr, prop_id ):
     'all': 1,
   }
   vim.eval( f"prop_remove( { json.dumps( props ) } )" )
-

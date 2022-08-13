@@ -359,7 +359,7 @@ def AddTextProperty( buffer_number,
       extra_args[ 'end_col' ] = extra_args.pop( 'end_col' ) - 1
     line -= 1
     column -= 1
-    return GetIntValue( 
+    return GetIntValue(
       vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
                                          f'{ YCM_NEOVIM_NS_ID }, '
                                          f'{ line }, '

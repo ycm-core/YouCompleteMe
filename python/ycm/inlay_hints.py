@@ -20,8 +20,6 @@ from ycm.client.inlay_hints_request import InlayHintsRequest
 from ycm.client.base_request import BuildRequestData
 from ycm import vimsupport
 from ycm import text_properties as tp
-import vim
-from ycmd.utils import ToBytes
 
 
 HIGHLIGHT_GROUP = {
@@ -48,6 +46,7 @@ def Initialise():
       tp.AddTextPropertyType( prop, highlight = group )
 
   return True
+
 
 class InlayHints:
   """Stores the inlay hints state for a Vim buffer"""
@@ -103,7 +102,7 @@ class InlayHints:
 
     # We're ready to use this response. Clear it (to avoid repeatedly
     # re-polling).
-    self._latest_inlay_hints = [] ;# in case there was an error in request
+    self._latest_inlay_hints = [] # in case there was an error in request
     self._latest_inlay_hints = self._request.Response()
     self._request = None
 
@@ -152,4 +151,3 @@ class InlayHints:
                             {
                               'text': inlay_hint[ 'label' ]
                             } ) )
-

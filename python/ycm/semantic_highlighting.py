@@ -146,4 +146,3 @@ class SemanticHighlighting:
 
     # No need to re-poll
     return True
-
