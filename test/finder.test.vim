@@ -480,6 +480,7 @@ function! Test_MultipleFileTypes()
         \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
   split
   call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+  wincmd w
 
   let original_win = winnr()
   let b = bufnr()
@@ -545,7 +546,46 @@ function! Test_MultipleFileTypes()
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].description )
 
-    call feedkeys( "\<C-c>")
+    " Toggle single-filetype mode
+    call FeedAndCheckAgain( "\<C-f>", funcref( 'CheckCppAgain' ) )
+  endfunction
+
+  function! CheckCppAgain( ... )
+    let popup_id = youcompleteme#finder#GetState().id
+
+    " Python can be _really_ slow
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
+          \ popup_getoptions( popup_id ).title ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_true(
+          \ youcompleteme#finder#GetState().id != -1 ) } )
+
+    let id = youcompleteme#finder#GetState().id
+    call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
+
+    " And back to multiple filetypes
+    call FeedAndCheckAgain( "\<C-f>", funcref( 'CheckPythonAgain' ) )
+  endfunction
+
+  function! CheckPythonAgain( ... )
+    let popup_id = youcompleteme#finder#GetState().id
+
+    " Python can be _really_ slow
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
+          \ popup_getoptions( popup_id ).title ) },
+          \ 10000 )
+
+    call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
+                      \ 10000 )
+    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+    call assert_equal( 'def Really_Long_Method',
+          \ youcompleteme#finder#GetState().results[
+          \   youcompleteme#finder#GetState().selected ].description )
+
+    call feedkeys( "\<C-c>" )
   endfunction
 
 
