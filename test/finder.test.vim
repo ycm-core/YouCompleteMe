@@ -677,9 +677,15 @@ function! Test_WorkspaceSymbol_NormalModeChange()
     call WaitForAssert( { -> assert_true(
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
+    let popup_id = youcompleteme#finder#GetState().id
+    call WaitForAssert( { ->
+          \ assert_equal( ' [X] Search for symbol: thiswillnotmatchanything ',
+          \ popup_getoptions( popup_id ).title  ) },
+          \ 10000 )
+
     let id = youcompleteme#finder#GetState().id
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'ChangeQuery' ) )
+    call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'ChangeQuery' ) )
   endfunction
 
   function ChangeQuery( ... )
@@ -722,7 +728,7 @@ function! Test_WorkspaceSymbol_NormalModeChange()
   endfunction
 
   " <Leader> is \ - this calls <Plug>(YCMFindSymbolInWorkspace)
-  call FeedAndCheckMain( '\\w', funcref( 'PutQuery' ) )
+  call FeedAndCheckMain( '\\wthiswillnotmatchanything', funcref( 'PutQuery' ) )
 
   call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
   call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
