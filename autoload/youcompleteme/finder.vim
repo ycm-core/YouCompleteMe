@@ -240,7 +240,6 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   augroup YCMPromptFindSymbol
     autocmd!
     autocmd TextChanged,TextChangedI <buffer> call s:OnQueryTextChanged()
-    autocmd TextChanged,TextChanged <buffer> call s:OnQueryTextChanged()
     autocmd WinLeave <buffer> call s:Cancel()
     autocmd CmdLineEnter <buffer> call s:Cancel()
   augroup END
