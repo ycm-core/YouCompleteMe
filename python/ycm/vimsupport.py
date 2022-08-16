@@ -361,9 +361,7 @@ def AddTextProperty( buffer_number,
       'type': prop_type,
       'bufnr': buffer_number
     } )
-    return GetIntValue(
-      vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
-    )
+    return GetIntValue( f'prop_add( { line }, { column }, { extra_args } )' )
   else:
     extra_args[ 'hl_group' ] = prop_type
     # Neovim uses 0-based offsets
@@ -373,12 +371,11 @@ def AddTextProperty( buffer_number,
       extra_args[ 'end_col' ] = extra_args.pop( 'end_col' ) - 1
     line -= 1
     column -= 1
-    return GetIntValue(
-      vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
-                                         f'{ YCM_NEOVIM_NS_ID }, '
-                                         f'{ line }, '
-                                         f'{ column }, '
-                                         f'{ extra_args } )' ) )
+    return GetIntValue( f'nvim_buf_set_extmark( { buffer_number }, '
+                                              f'{ YCM_NEOVIM_NS_ID }, '
+                                              f'{ line }, '
+                                              f'{ column }, '
+                                              f'{ extra_args } )' )
 
 
 def RemoveDiagnosticProperty( buffer_number: int, prop: DiagnosticProperty ):
