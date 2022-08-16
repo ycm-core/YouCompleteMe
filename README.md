@@ -1814,6 +1814,9 @@ input, and puts you in insert mode. This means that you can hit `<Esc>` to go
 into normal mode and use any other input commands that are supported in prompt
 buffers. As you type characters, the search is updated.
 
+Intially, results are queried from all open filetypes. You can hit `<C-f>` to
+switch to just the current filetype while the popup is open.
+
 While the popup is open, the following keys are intercepted:
 
 * `<C-j>`, `<Down>`, `<C-n>`, `<Tab>` - select the next item
@@ -1824,6 +1827,7 @@ While the popup is open, the following keys are intercepted:
 * `<End>`, `<kEnd>` - jump to last item
 * `<CR>` - jump to the selected item
 * `<C-c>` cancel/dismiss the popup
+* `<C-f>` - toggle results from all file types or just the current filetype
 
 The search is also cancelled if you leave the prompt buffer window at any time,
 so you can use window commands `<C-w>...` for example.
