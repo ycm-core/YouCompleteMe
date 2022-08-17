@@ -603,27 +603,6 @@ function! s:RequeryFinderPopup( new_query ) abort
   " snappy
   call s:SetTitle()
 
-  " FIXME: This is feeling a bit shitty now. The result of this is that we have
-  " to get rsponses from a full round of servers before we send another query.
-  " That makes updates feel laggy if you have say python or typescript files
-  " (whose engines are super slow) at the same time as some cc files (whose
-  " engine is extremely fast). You  realy want there to be a "pending" flag _per
-  " filetype_ and for all of this to be managed by the query_func, e.g.
-  "
-  " remove waiting
-  " pending is owned by the query funcs
-  " this function just calls the query func.
-  "
-  " For workspace:
-  "  - waiting if any( raw_results[ x ] is none for x in raw_results )
-  "  - pending if pending[ filetype ]
-  "
-  " For document:
-  "   - waiting if raw_results is v:none
-  "   - pending if pending
-  "
-  " We already pass still_waiting to the result func, so that can continue
-  "
   call win_execute( s:find_symbol_status.winid,
         \ 'call s:find_symbol_status.query_func('
         \ . 's:find_symbol_status.query,'
@@ -696,6 +675,8 @@ function! s:SearchWorkspace( query, new_query ) abort
     endif
 
     let s:find_symbol_status.raw_results = {}
+    " FIXME: We might still get results for any pending results. There is no
+    " cancellation mechanism implemented for the async request!
     let s:find_symbol_status.pending = []
 
     if s:find_symbol_status.all_filetypes
@@ -732,6 +713,8 @@ function! s:SearchWorkspace( query, new_query ) abort
       call s:StartRequest()
     endif
   else
+    " Just requery those completer filetypes that we're not currently waiting
+    " for
     for [ ft, bufnr ] in copy( s:find_symbol_status.pending )
       if s:find_symbol_status.raw_results[ ft ] isnot# v:none
         call filter( s:find_symbol_status.pending, { v -> v !=# ft } )
@@ -777,13 +760,13 @@ function! s:HandleWorkspaceSymbols( filetype, results ) abort
     "  - server filterins will differ by server and this leads to horrible wonky
     "    user experience
     "  - ycmd filter is consistent, even if not perfect
-    "  - servers are supposed to return _all_ symbols if we request a query of ""
-    "    but no actual servers obey this part of the spec.
+    "  - servers are supposed to return _all_ symbols if we request a query of
+    "    "" but not all servers actually do
     "
-    " So as a compromise we let the server filter the results, then we _refilter_
-    " and sort them using ycmd's method. This provides consistency with the
-    " filtering and sorting on the completion popup menu, with the disadvantage of
-    " additional latency.
+    " So as a compromise we let the server filter the results, then we
+    " _refilter_ and sort them using ycmd's method. This provides consistency
+    " with the filtering and sorting on the completion popup menu, with the
+    " disadvantage of additional latency.
     "
     " We're not currently sure this is going to be perfecct, so we have a hidden
     " option to disable this re-filter/sort.
