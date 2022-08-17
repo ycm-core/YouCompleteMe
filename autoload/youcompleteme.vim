@@ -61,6 +61,7 @@ let s:pollers = {
       \   'command': {
       \     'id': -1,
       \     'wait_milliseconds': 100,
+      \     'requests': {},
       \   },
       \   'semantic_highlighting': {
       \     'id': -1,
@@ -482,15 +483,6 @@ function! s:DisableOnLargeFile( buffer )
   return b:ycm_largefile
 endfunction
 
-function! s:HasAnyKey( dict, keys )
-  for key in a:keys
-    if has_key( a:dict, key )
-      return 1
-    endif
-  endfor
-  return 0
-endfunction
-
 function! s:PropertyTypeNotDefined( type )
   return exists( '*prop_type_add' ) &&
     \ index( prop_type_list(), a:type ) == -1
@@ -508,21 +500,13 @@ function! s:AllowedToCompleteInBuffer( buffer )
     let filetype = 'ycm_nofiletype'
   endif
 
-  let whitelist_allows = type( g:ycm_filetype_whitelist ) != v:t_dict ||
-        \ has_key( g:ycm_filetype_whitelist, '*' ) ||
-        \ s:HasAnyKey( g:ycm_filetype_whitelist, split( filetype, '\.' ) )
-  let blacklist_allows = type( g:ycm_filetype_blacklist ) != v:t_dict ||
-        \ !s:HasAnyKey( g:ycm_filetype_blacklist, split( filetype, '\.' ) )
-
-  let allowed = whitelist_allows && blacklist_allows
+  let allowed = youcompleteme#filetypes#AllowedForFiletype( filetype )
 
   if !allowed || s:DisableOnLargeFile( a:buffer )
     return 0
   endif
 
-  if allowed
-    let s:previous_allowed_buffer_number = bufnr( a:buffer )
-  endif
+  let s:previous_allowed_buffer_number = bufnr( a:buffer )
   return allowed
 endfunction
 
@@ -1292,16 +1276,17 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  if s:pollers.command.id != -1
-    eval a:callback( '' )
-    return
+  let request_id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
+
+  let s:pollers.command.requests[ request_id ] = {
+        \ 'response_func': 'StringResponse',
+        \ 'callback': a:callback
+        \ }
+  if s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
   endif
-
-  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
-
-  let s:pollers.command.id = timer_start(
-        \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ 'StringResponse', a:callback ] ) )
 endfunction
 
 
@@ -1316,39 +1301,57 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  if s:pollers.command.id != -1
-    eval a:callback( { 'error': 'request in progress' } )
-    return
+  let request_id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
+
+  let s:pollers.command.requests[ request_id ] = {
+        \ 'response_func': 'Response',
+        \ 'callback': a:callback
+        \ }
+  if s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
   endif
-
-  py3 ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )
-
-  let s:pollers.command.id = timer_start(
-        \ s:pollers.command.wait_milliseconds,
-        \ function( 's:PollCommand', [ 'Response', a:callback ] ) )
 endfunction
 
 
-function! s:PollCommand( response_func, callback, id ) abort
-  if py3eval( 'ycm_state.GetCommandRequest() is None' )
-    " Possible in case of race conditions and things like RestartServer
-    " But particualrly in the tests
-    return
-  endif
-
-  if !py3eval( 'ycm_state.GetCommandRequest().Done()' )
-    let s:pollers.command.id = timer_start(
-          \ s:pollers.command.wait_milliseconds,
-          \ function( 's:PollCommand', [ a:response_func, a:callback ] ) )
-    return
-  endif
-
+function! s:PollCommands( timer_id ) abort
+  " Clear the timer id before calling the callback, as the callback might fire
+  " more requests
   call s:StopPoller( s:pollers.command )
 
-  let result = py3eval( 'ycm_state.GetCommandRequest().'
-                      \ .a:response_func . '()' )
+  " Must copy the requests because this loop is likely to modify it
+  let requests = copy( s:pollers.command.requests )
+  let poll_again = 0
+  for request_id in keys( requests )
+    let request = requests[ request_id ]
+    if py3eval( 'ycm_state.GetCommandRequest( int( vim.eval( "request_id" ) ) )'
+              \ . 'is None' )
+      " Possible in case of race conditions and things like RestartServer
+      " But particualrly in the tests
+      let result = v:none
+    elseif !py3eval( 'ycm_state.GetCommandRequest( '
+                   \ . 'int( vim.eval( "request_id" ) ) ).Done()' )
+      " Not ready yet, poll again and skip this one for now
+      let poll_again = 1
+      continue
+    else
+      let result = py3eval( 'ycm_state.GetCommandRequest( '
+                          \ . 'int( vim.eval( "request_id" ) ) ).'
+                          \ . request.response_func
+                          \ . '()' )
+    endif
 
-  eval a:callback( result )
+    " This request is done
+    call remove( s:pollers.command.requests, request_id )
+    py3 ycm_state.FlushCommandRequest( vim.eval( "request_id" ) )
+    call request[ 'callback' ]( result )
+  endfor
+
+  if poll_again && s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
+  endif
 endfunction
 
 
