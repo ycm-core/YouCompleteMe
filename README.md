@@ -2216,7 +2216,7 @@ current line, this command has no effect on the current buffer. If any
 modifications are made, the number of changes made to the buffer is echo'd and
 the user may use the editor's undo command to revert.
 
-When a diagnostic is available, and `g:ycm_echo_current_diagnostic` is set to 1,
+When a diagnostic is available, and `g:ycm_echo_current_diagnostic` is enabled,
 then the text ` (FixIt)` is appended to the echo'd diagnostic when the
 completer is able to add this indication. The text ` (FixIt available)` is
 also appended to the diagnostic text in the output of the `:YcmDiags` command
@@ -2841,9 +2841,18 @@ let g:ycm_enable_diagnostic_highlighting = 1
 
 ### The `g:ycm_echo_current_diagnostic` option
 
-When this option is set, YCM will echo the text of the diagnostic present on the
-current line when you move your cursor to that line. If a `FixIt` is available
-for the current diagnostic, then ` (FixIt)` is appended.
+When this option is set to 1, YCM will echo the text of the diagnostic present
+on the current line when you move your cursor to that line. If a `FixIt` is
+available for the current diagnostic, then ` (FixIt)` is appended.
+
+If you have a vim that supports virtual text (9.0.200+), you can set this option
+to the string `virtual-text`, and the diagnostic will be displayed inline with
+the text, right aligned in the window and wrapping to the next line if there is
+not enough space, for example:
+
+![Virtual text diagnostic demo][diagnostic-echo-virtual-text1]
+
+![Virtual text diagnostic demo][diagnostic-echo-virtual-text2]
 
 This option is part of the Syntastic compatibility layer; if the option is not
 set, YCM will fall back to the value of the `g:syntastic_echo_current_error`
@@ -2851,8 +2860,17 @@ option before using this option's default.
 
 Default: `1`
 
+Valid values:
+
+* `0` - disabled
+* `1` - echo diagnostic to the command area
+* `'virtual-text'` - display the dignostic to the right of the line in the
+  window using virtual text
+
 ```viml
 let g:ycm_echo_current_diagnostic = 1
+" Or, when you can vim 9.0.200+
+let g:ycm_echo_current_diagnostic = 'virtual-text'
 ```
 
 ### The `g:ycm_auto_hover` option
@@ -3815,3 +3833,5 @@ Please note: The YCM maintainers do not specifically endorse nor necessarily hav
 [wiki-full-install]: https://github.com/ycm-core/YouCompleteMe/wiki/Full-Installation-Guide
 [wiki-troubleshooting]: https://github.com/ycm-core/YouCompleteMe/wiki/Troubleshooting-steps-for-ycmd-server-SHUT-DOWN
 [lsp-examples]: https://github.com/ycm-core/lsp-examples
+[diagnostic-echo-virtual-text1]: https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
+[diagnostic-echo-virtual-text2]: https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
