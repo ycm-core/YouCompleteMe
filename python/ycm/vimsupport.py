@@ -361,7 +361,9 @@ def AddTextProperty( buffer_number,
       'type': prop_type,
       'bufnr': buffer_number
     } )
-    return GetIntValue( f'prop_add( { line }, { column }, { extra_args } )' )
+    return GetIntValue( f'prop_add( { line }, '
+                                  f'{ column }, '
+                                  f'{ json.dumps( extra_args ) } )' )
   else:
     extra_args[ 'hl_group' ] = prop_type
     # Neovim uses 0-based offsets
