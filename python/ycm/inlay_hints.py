@@ -23,10 +23,9 @@ from ycm import text_properties as tp
 
 
 HIGHLIGHT_GROUP = {
-  # 1-based inedexes
-  0: '',
-  1: 'YcmInlayHint',  # Type
-  2: 'YcmInlayHint'   # Parameter
+  'Type':      'YcmInlayHint',
+  'Parameter': 'YcmInlayHint',
+  'Enum':      'YcmInlayHint',
 }
 REPORTED_MISSING_TYPES = set()
 
