@@ -1047,6 +1047,20 @@ An inlay hint is text renderd on the screen which is not part of the buffer and
 is often used to mark up the type or name of arguments, perameters, etc. which
 help the developer understand the semantics of the code.
 
+Here are some examples:
+
+* C
+
+![c-inlay](https://user-images.githubusercontent.com/10584846/185708054-68074fc0-e50c-4a65-887c-da6f372b8982.png)
+
+* TypeScript
+
+![ts-inlay](https://user-images.githubusercontent.com/10584846/185708156-b52970ce-005f-4f0b-97e7-bdf8feeefedc.png)
+
+* Go
+
+![go-inlay](https://user-images.githubusercontent.com/10584846/185708242-e42dab6f-1847-46f1-8585-2d9f2c8a76dc.png)
+
 ### Highlight groups
 
 By default, YCM renders the inlay hints with the `NonText` highlight group. To
