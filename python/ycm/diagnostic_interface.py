@@ -20,7 +20,7 @@ from ycm import vimsupport
 from ycm.diagnostic_filter import DiagnosticFilter, CompileLevel
 from ycm import text_properties as tp
 import vim
-YCM_VIM_PROPERTY_ID = 0
+YCM_VIM_PROPERTY_ID = 1
 
 
 class DiagnosticInterface:
@@ -108,7 +108,8 @@ class DiagnosticInterface:
       if first_diag.get( 'fixit_available', False ):
         text += ' (FixIt)'
 
-    if self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text':
+    if ( vimsupport.VimSupportsVirtualText() and
+         self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
       if self._diag_message_needs_clearing:
         # Clear any previous diag echo
         tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagPadding' )
