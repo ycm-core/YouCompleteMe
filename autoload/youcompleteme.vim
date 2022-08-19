@@ -241,7 +241,9 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
     autocmd InsertCharPre * call s:OnInsertChar()
-    autocmd WinScrolled * call s:OnWinScrolled()
+    if exists( '#WinScrolled' )
+      autocmd WinScrolled * call s:OnWinScrolled()
+    endif
   augroup END
 endfunction
 
