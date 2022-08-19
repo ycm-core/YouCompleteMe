@@ -49,6 +49,7 @@ Contents
     - [General Semantic Completion](#general-semantic-completion)
     - [Signature Help](#signature-help)
     - [Semantic Highlighting](#semantic-highlighting)
+    - [Inlay Hints](#inlay-hints)
     - [C-family Semantic Completion](#c-family-semantic-completion)
     - [Java Semantic Completion](#java-semantic-completion)
     - [C# Semantic Completion](#c-semantic-completion)
@@ -735,6 +736,7 @@ Quick Feature Summary
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
 * Semantic highlighting
+* Inlay hints
 
 ### C♯
 
@@ -795,6 +797,7 @@ Quick Feature Summary
 * Code formatting (`Format`)
 * Organize imports (`OrganizeImports`)
 * Management of `TSServer` server instance
+* Inlay hints
 
 ### Rust
 
@@ -811,6 +814,7 @@ Quick Feature Summary
 * Code formatting (`Format`)
 * Management of `rust-analyzer` server instance
 * Semantic highlighting
+* Inlay hints
 
 ### Java
 
@@ -1029,6 +1033,39 @@ for tokenType in keys( MY_YCM_HIGHLIGHT_GROUP )
                     \ { 'highlight': MY_YCM_HIGHLIGHT_GROUP[ tokenType ] } )
 endfor
 ```
+
+## Inlay hints
+
+**NOTE**: Hightly experimental feature, requiring vim 9.0.200 or later (no
+neovim).
+
+When `g:ycm_enable_inlay_hints` (globally) or `b:ycm_enable_inlay_hints` (for a
+specific buffer) is set to `1`, then YCM will insert inlay hints as supported by
+the language semantic engine.
+
+An inlay hint is text renderd on the screen which is not part of the buffer and
+is often used to mark up the type or name of arguments, perameters, etc. which
+help the developer understand the semantics of the code.
+
+### Highlight groups
+
+By default, YCM renders the inlay hints with the `NonText` highlight group. To
+override this, define the `YcmInlayHint` highlight yourself, e.g. in your
+`.vimrc`:
+
+```viml
+hi link YcmInlayHint Comment
+```
+
+Similar to semantic highlighting above, you can override specific highlighting
+for different inlay hint types by defining text properties named after the kind
+of inlay hint, for example:
+
+```viml
+call prop_type_add( 'YCM_INLAY_Type', #{ highlight: 'Comment' } )
+```
+
+The list of inlay hint kinds can be found in `python/ycm/inlay_hints.py`
 
 ### General Semantic Completion
 
