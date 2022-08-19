@@ -476,22 +476,22 @@ function! s:SetUpSyntaxHighlighting()
     endif
   endif
 
-  if s:PropertyTypeNotDefined( 'YcmVirtError' )
-    call prop_type_add( 'YcmVirtError', {
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagError' )
+    call prop_type_add( 'YcmVirtDiagError', {
           \ 'highlight': 'YcmErrorText',
           \ 'priority': 20,
           \ 'combine': 0 } )
   endif
-  if s:PropertyTypeNotDefined( 'YcmVirtWarning' )
-    call prop_type_add( 'YcmVirtWarning', {
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagWarning' )
+    call prop_type_add( 'YcmVirtDiagWarning', {
           \ 'highlight': 'YcmWarningText',
           \ 'priority': 19,
           \ 'combine': 0 } )
   endif
 
 
-  if s:PropertyTypeNotDefined( 'YcmPadding' )
-    call prop_type_add( 'YcmPadding', {
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagPadding' )
+    call prop_type_add( 'YcmVirtDiagPadding', {
           \ 'highlight': 'YcmInvisible',
           \ 'priority': 100,
           \ 'combine': 1 } )

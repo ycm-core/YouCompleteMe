@@ -111,8 +111,9 @@ class DiagnosticInterface:
     if self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text':
       if self._diag_message_needs_clearing:
         # Clear any previous diag echo
-        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtError' )
-        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtWarning' )
+        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagPadding' )
+        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagError' )
+        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagWarning' )
         self._diag_message_needs_clearing = False
 
       if not text:
@@ -130,11 +131,11 @@ class DiagnosticInterface:
                                     } )
 
       MakeVritualTextProperty(
-        'YcmPadding',
+        'YcmVirtDiagPadding',
         ' ' * vim.buffers[ self._bufnr ].options[ 'shiftwidth' ] ),
       MakeVritualTextProperty(
-        'YcmVirtError' if _DiagnosticIsError( first_diag )
-                       else 'YcmVirtWarning',
+        'YcmVirtDiagError' if _DiagnosticIsError( first_diag )
+                       else 'YcmVirtDiagWarning',
         [ line for line in text.splitlines() if line ][ 0 ] )
     else:
       if not text:
