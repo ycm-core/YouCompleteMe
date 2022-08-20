@@ -144,13 +144,18 @@ class DiagnosticInterface:
                                       'text_wrap': 'wrap'
                                     } )
 
+      if vim.options[ 'ambiwidth' ] != 'double':
+        marker = '⚠'
+      else:
+        marker = '>'
+
       MakeVritualTextProperty(
         'YcmVirtDiagPadding',
         ' ' * vim.buffers[ self._bufnr ].options[ 'shiftwidth' ] ),
       MakeVritualTextProperty(
         'YcmVirtDiagError' if _DiagnosticIsError( first_diag )
                        else 'YcmVirtDiagWarning',
-        [ line for line in text.splitlines() if line ][ 0 ] )
+        marker + ' ' + [ line for line in text.splitlines() if line ][ 0 ] )
     else:
       if not text:
         if self._diag_message_needs_clearing:
