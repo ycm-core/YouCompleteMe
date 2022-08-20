@@ -83,60 +83,34 @@ class CompletionRequest( BaseRequest ):
     if 'cs' in vimsupport.CurrentFiletypes():
       self._OnCompleteDone_Csharp()
     else:
-      extra_datas = self._GetExtraDataUserMayHaveCompleted()
-      if not extra_datas:
+      extra_data = self._GetCompletionExtraData()
+      if not extra_data:
         return
 
-      # If we have user_data in completions (8.0.1493 or later), then we would
-      # only ever return max. 1 completion here. However, if we had to guess, it
-      # is possible that we matched multiple completion items (e.g. for
-      # overloads, or similar classes in multiple packages). In any case, rather
-      # than prompting the user and disturbing her workflow, we just apply the
-      # first one. This might be wrong, but the solution is to use a newer
-      # version of Vim which supports user_data on completion items
-      completion_extra_data = extra_datas[ 0 ]
+      self._OnCompleteDone_FixIt( extra_data )
 
-      self._OnCompleteDone_FixIt( completion_extra_data )
-
-      snippet = completion_extra_data.get( 'snippet', None )
+      snippet = extra_data.get( 'snippet' )
       if snippet:
         self._OnCompleteDone_Snippet( snippet )
 
 
-  def _GetExtraDataUserMayHaveCompleted( self ):
+  def _GetCompletionExtraData( self ):
     completed_item = vimsupport.GetVariableValue( 'v:completed_item' )
 
-    # If Vim supports user_data (8.0.1493 or later), we actually know the
-    # _exact_ element that was selected, having put its extra_data in the
-    # user_data field. Otherwise, we have to guess by matching the values in the
-    # completed item and the list of completions. Sometimes this returns
-    # multiple possibilities, which is essentially unresolvable.
+    if not completed_item:
+      return None
+
     if 'user_data' not in completed_item:
-      completions = self._RawResponse()[ 'completions' ]
-      return _FilterToMatchingCompletions( completed_item, completions )
+      return None
 
-    if completed_item[ 'user_data' ]:
-      return [ json.loads( completed_item[ 'user_data' ] ) ]
-
-    return []
+    return json.loads( completed_item[ 'user_data' ] )
 
 
   def _OnCompleteDone_Csharp( self ):
-    extra_datas = self._GetExtraDataUserMayHaveCompleted()
-    namespaces = [ c.get( 'required_namespace_import' ) for c in extra_datas ]
-    namespaces = [ n for n in namespaces if n ]
-    if not namespaces:
+    extra_data = self._GetCompletionExtraData()
+    namespace = extra_data.get( 'required_namespace_import' )
+    if not namespace:
       return
-
-    if len( namespaces ) > 1:
-      choices = [ f"{ i + 1 } { n }" for i, n in enumerate( namespaces ) ]
-      choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
-      if choice < 0:
-        return
-      namespace = namespaces[ choice ]
-    else:
-      namespace = namespaces[ 0 ]
-
     vimsupport.InsertNamespace( namespace )
 
 
@@ -153,22 +127,6 @@ class CompletionRequest( BaseRequest ):
   def _OnCompleteDone_Snippet( self, snippet ):
     vimsupport.ExpandSnippet( snippet[ 'snippet' ],
                               snippet[ 'trigger_string' ] )
-
-
-def _FilterToMatchingCompletions( completed_item, completions ):
-  """Filter to completions matching the item Vim said was completed"""
-  match_keys = [ 'word', 'abbr', 'menu', 'info' ]
-  matched_completions = []
-  for completion in completions:
-    item = ConvertCompletionDataToVimData( completion )
-
-    def matcher( key ):
-      return ( ToUnicode( completed_item.get( key, "" ) ) ==
-               ToUnicode( item.get( key, "" ) ) )
-
-    if all( matcher( i ) for i in match_keys ):
-      matched_completions.append( completion.get( 'extra_data', {} ) )
-  return matched_completions
 
 
 def _GetCompletionInfoField( completion_data ):
@@ -234,9 +192,6 @@ def ConvertCompletionDataToVimData( completion_data ):
     # in the CompleteDone handler, by inspecting this item from v:completed_item
     #
     # We convert to string because completion user data items must be strings.
-    #
-    # Note: Not all versions of Vim support this (added in 8.0.1483), but adding
-    # the item to the dictionary is harmless in earlier Vims.
     # Note: Since 8.2.0084 we don't need to use json.dumps() here.
     'user_data': json.dumps( extra_data )
   }

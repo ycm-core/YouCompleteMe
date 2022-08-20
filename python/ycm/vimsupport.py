@@ -1533,7 +1533,7 @@ def BuildQfListItem( goto_data_item ):
 
 
 def ExpandSnippet( snippet, trigger_string ):
-  if vim.eval( 'exists( "+UltiSnips#Anon" )' ):
+  if VimHasFunction( "UltiSnips#Anon" ):
     vim.eval( f"UltiSnips#Anon( '{ EscapeForVim( snippet ) }',"
               f"                '{ EscapeForVim( trigger_string )  }',"
                "                'unused description',"
