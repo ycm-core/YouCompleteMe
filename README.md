@@ -2261,6 +2261,18 @@ you. The behavior is described in [the following section](#multi-file-refactor).
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda, java, javascript, python, typescript, rust, cs`
 
+#### Python refactorings
+
+The following additional commands are supported for python:
+
+* `RefactorInline`
+* `RefactorExtractVariable`
+* `RefactorExtractFunction`
+
+See the [jedi docs][jedi-refactor-doc] for what they do.
+
+Supported in filetypes: `python`
+
 #### Multi-file Refactor
 
 When a Refactor or FixIt command touches multiple files, YouCompleteMe attempts
@@ -3863,3 +3875,4 @@ Please note: The YCM maintainers do not specifically endorse nor necessarily hav
 [lsp-examples]: https://github.com/ycm-core/lsp-examples
 [diagnostic-echo-virtual-text1]: https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
 [diagnostic-echo-virtual-text2]: https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
+[jedi-refactor-doc]: https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable

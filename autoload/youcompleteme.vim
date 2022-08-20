@@ -1047,7 +1047,7 @@ endfunction
 
 function! s:OnInsertEnter() abort
   let s:current_cursor_position = getpos( '.' )
-  if s:ShouldUseInlayHintsNow( bufnr() ) && 
+  if s:ShouldUseInlayHintsNow( bufnr() ) &&
         \ get(g:, 'ycm_clear_inlay_hints_in_insert_mode' )
     py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
   endif
