@@ -1036,7 +1036,7 @@ endfor
 
 ## Inlay hints
 
-**NOTE**: Hightly experimental feature, requiring vim 9.0.200 or later (no
+**NOTE**: Hightly experimental feature, requiring vim 9.0.214 or later (no
 neovim).
 
 When `g:ycm_enable_inlay_hints` (globally) or `b:ycm_enable_inlay_hints` (for a
@@ -2876,7 +2876,7 @@ When this option is set to 1, YCM will echo the text of the diagnostic present
 on the current line when you move your cursor to that line. If a `FixIt` is
 available for the current diagnostic, then ` (FixIt)` is appended.
 
-If you have a vim that supports virtual text (9.0.200+), you can set this option
+If you have a vim that supports virtual text, you can set this option
 to the string `virtual-text`, and the diagnostic will be displayed inline with
 the text, right aligned in the window and wrapping to the next line if there is
 not enough space, for example:
@@ -2905,7 +2905,7 @@ Valid values:
 
 ```viml
 let g:ycm_echo_current_diagnostic = 1
-" Or, when you can vim 9.0.200+
+" Or, when you have vim supporting virtual text
 let g:ycm_echo_current_diagnostic = 'virtual-text'
 ```
 
