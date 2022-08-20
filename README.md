@@ -2854,6 +2854,11 @@ not enough space, for example:
 
 ![Virtual text diagnostic demo][diagnostic-echo-virtual-text2]
 
+**NOTE**: It's _strongly_ recommended to also set
+`g:ycm_update_diagnostics_in_insert_mode` to `0` when using `virtual-text` for
+diagnostics. This is due to the increased amount distraction provided by
+drawing diagnostics next to your input position.
+
 This option is part of the Syntastic compatibility layer; if the option is not
 set, YCM will fall back to the value of the `g:syntastic_echo_current_error`
 option before using this option's default.
@@ -3702,6 +3707,10 @@ tells YCM where is the Omnisharp-Roslyn executable located.
 With async diagnostics, LSP servers might send new diagnostics mid-typing.
 If seeing these new diagnostics while typing is not desired, this option can
 be set to 0.
+
+In addition, this option is recommended when `g:ycm_echo_current_diagnostic` is
+set to `virtual-text` as it prevents updating the virtual text while you are
+typing.
 
 Default: `1`
 

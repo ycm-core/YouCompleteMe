@@ -35,11 +35,20 @@ class DiagnosticInterface:
     self._diag_message_needs_clearing = False
 
 
+  def ShouldUpdateDiagnosticsUINow( self ):
+    return ( self._user_options[ 'update_diagnostics_in_insert_mode' ] or
+             'i' not in vim.eval( 'mode()' ) )
+
+
   def OnCursorMoved( self ):
     if self._user_options[ 'echo_current_diagnostic' ]:
       line, _ = vimsupport.CurrentLineAndColumn()
       line += 1  # Convert to 1-based
-      if line != self._previous_diag_line_number:
+      if ( not self.ShouldUpdateDiagnosticsUINow() and
+           self._diag_message_needs_clearing ):
+        # Clear any previously echo'd diagnostic in insert mode
+        self._EchoDiagnosticText( line, None, None )
+      elif line != self._previous_diag_line_number:
         self._EchoDiagnosticForLine( line )
 
 
@@ -63,8 +72,7 @@ class DiagnosticInterface:
                             self._ApplyDiagnosticFilter( diags ) ]
     self._ConvertDiagListToDict()
 
-    if ( self._user_options[ 'update_diagnostics_in_insert_mode' ] or
-         'i' not in vim.eval( 'mode()' ) ):
+    if self.ShouldUpdateDiagnosticsUINow():
       self.RefreshDiagnosticsUI( open_on_edit )
 
 
@@ -102,12 +110,17 @@ class DiagnosticInterface:
 
     diags = self._line_to_diags[ line_num ]
     text = None
+    first_diag = None
     if diags:
       first_diag = diags[ 0 ]
       text = first_diag[ 'text' ]
       if first_diag.get( 'fixit_available', False ):
         text += ' (FixIt)'
 
+    self._EchoDiagnosticText( line_num, first_diag, text )
+
+
+  def _EchoDiagnosticText( self, line_num, first_diag, text ):
     if ( vimsupport.VimSupportsVirtualText() and
          self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
       if self._diag_message_needs_clearing:

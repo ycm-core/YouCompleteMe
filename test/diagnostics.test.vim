@@ -60,6 +60,20 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
     call WaitForAssert( {-> assert_false( len( sign_getplaced(
                            \ '%',
                            \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
+
+    call FeedAndCheckAgain( "   \<BS>\<BS>\<BS>", funcref( 'CheckAgain' ) )
+  endfunction
+
+  function! CheckAgain( id ) closure
+    call WaitForAssert( {->
+      \ assert_true(
+        \ py3eval(
+           \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+      \ ) ) } )
+    call WaitForAssert( {-> assert_false( len( sign_getplaced(
+                           \ '%',
+                           \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
+
     call feedkeys( "\<ESC>" )
   endfunction
 
