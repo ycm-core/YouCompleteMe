@@ -1676,7 +1676,7 @@ function! s:ToggleInlayHints()
         \       'ycm_enable_inlay_hints',
         \       get( g:, 'ycm_enable_inlay_hints' ) )
 
-  if !b:ycm_enable_inlay_hints
+  if !b:ycm_enable_inlay_hints && s:enable_inlay_hints
     py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
   else
     call s:UpdateInlayHints( bufnr(), 0, 1 )
