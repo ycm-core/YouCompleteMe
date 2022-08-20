@@ -863,6 +863,16 @@ def EscapeForVim( text ):
   return ToUnicode( text.replace( "'", "''" ) )
 
 
+def AllOpenedFiletypes():
+  """Returns a dict mapping filetype to list of buffer numbers for all open
+  buffers"""
+  filetypes = defaultdict( list )
+  for buffer in vim.buffers:
+    for filetype in FiletypesForBuffer( buffer ):
+      filetypes[ filetype ].append( buffer.number )
+  return filetypes
+
+
 def CurrentFiletypes():
   filetypes = vim.eval( "&filetype" )
   if not filetypes:

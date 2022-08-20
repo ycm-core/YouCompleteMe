@@ -119,7 +119,8 @@ class YouCompleteMe:
     self._latest_completion_request = None
     self._latest_signature_help_request = None
     self._signature_help_available_requests = SigHelpAvailableByFileType()
-    self._latest_command_reqeust = None
+    self._command_requests = {}
+    self._next_command_request_id = 0
 
     self._signature_help_state = signature_help.SignatureHelpState()
     self._user_options = base.GetUserOptions( self._default_options )
@@ -375,21 +376,24 @@ class YouCompleteMe:
                                    has_range,
                                    start_line,
                                    end_line ):
-    final_arguments = []
-    for argument in arguments:
-      # The ft= option which specifies the completer when running a command is
-      # ignored because it has not been working for a long time. The option is
-      # still parsed to not break users that rely on it.
-      if argument.startswith( 'ft=' ):
-        continue
-      final_arguments.append( argument )
-
     extra_data = {
       'options': {
         'tab_size': vimsupport.GetIntValue( 'shiftwidth()' ),
         'insert_spaces': vimsupport.GetBoolValue( '&expandtab' )
       }
     }
+
+    final_arguments = []
+    for argument in arguments:
+      if argument.startswith( 'ft=' ):
+        extra_data[ 'completer_target' ] = argument[ 3: ]
+        continue
+      elif argument.startswith( '--bufnr=' ):
+        extra_data[ 'bufnr' ] = int( argument[ len( '--bufnr=' ): ] )
+        continue
+
+      final_arguments.append( argument )
+
     if has_range:
       extra_data.update( vimsupport.BuildRange( start_line, end_line ) )
     self._AddExtraConfDataIfNeeded( extra_data )
@@ -431,12 +435,21 @@ class YouCompleteMe:
       False,
       0,
       0 )
-    self._latest_command_reqeust = SendCommandRequestAsync( final_arguments,
-                                                            extra_data )
+
+    request_id = self._next_command_request_id
+    self._next_command_request_id += 1
+    self._command_requests[ request_id ] = SendCommandRequestAsync(
+      final_arguments,
+      extra_data )
+    return request_id
 
 
-  def GetCommandRequest( self ):
-    return self._latest_command_reqeust
+  def GetCommandRequest( self, request_id ):
+    return self._command_requests.get( request_id )
+
+
+  def FlushCommandRequest( self, request_id ):
+    self._command_requests.pop( request_id, None )
 
 
   def GetDefinedSubcommands( self ):
