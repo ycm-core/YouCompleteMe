@@ -857,12 +857,16 @@ function! s:UpdateSemanticHighlighting( bufnr ) abort
 endfunction
 
 
+function s:ShouldUseInlayHintsNow( bufnr )
+  return s:enable_inlay_hints &&
+        \ getbufvar( a:bufnr, 'ycm_enable_inlay_hints',
+        \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
+endfunction
+
 function! s:UpdateInlayHints( bufnr, force, redraw_anyway )
   call s:StopPoller( s:pollers.inlay_hints )
-  if s:enable_inlay_hints &&
-        \ get( b:, 'ycm_enable_inlay_hints',
-        \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
 
+  if s:ShouldUseInlayHintsNow( a:bufnr )
     if py3eval(
         \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).'
         \ . 'inlay_hints.Request( force=int( vim.eval( "a:force" ) ) )' )
@@ -1043,7 +1047,8 @@ endfunction
 
 function! s:OnInsertEnter() abort
   let s:current_cursor_position = getpos( '.' )
-  if s:enable_inlay_hints && get(g:, 'ycm_clear_inclay_hints_in_insert_mode' )
+  if s:ShouldUseInlayHintsNow( bufnr() ) && 
+        \ get(g:, 'ycm_clear_inlay_hints_in_insert_mode' )
     py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
   endif
 endfunction
@@ -1067,9 +1072,9 @@ function! s:OnInsertLeave()
   endif
 
   call s:ClearSignatureHelp()
-  if s:enable_inlay_hints && get( g:, 'ycm_clear_inclay_hints_in_insert_mode' )
+  if s:ShouldUseInlayHintsNow( bufnr() )
+        \ && get( g:, 'ycm_clear_inlay_hints_in_insert_mode' )
     " We cleared inlay hints on insert enter
-    " TODO: Probalby should use ModeChange
     py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
   endif
 endfunction

@@ -1081,6 +1081,25 @@ call prop_type_add( 'YCM_INLAY_Type', #{ highlight: 'Comment' } )
 
 The list of inlay hint kinds can be found in `python/ycm/inlay_hints.py`
 
+### Options
+
+* `g:ycm_enable_inlay_hints` or `b:ycm_enable_inlay_hints` - enable/disable
+  globally or for local buffer
+* `g:ycm_clear_inlay_hints_in_insert_mode` - set to `1` to remove all inlay
+  hints when entering insert mode and reinstate them when leaving insert mode
+
+### Toggling
+
+Inlay hints can add a lot of text to the screen and may be distracting. You can
+toggle them on/off instantly, by mapping something to
+`<Plug>(YCMToggleInlayHints)`, for example:
+
+```viml
+nnoremap <silent> <localleader>h <Plug>(YCMToggleInlayHints)
+```
+
+No default mapping is provided for this due to the personal nature of mappings.
+
 ### General Semantic Completion
 
 You can use Ctrl+Space to trigger the completion suggestions anywhere, even
