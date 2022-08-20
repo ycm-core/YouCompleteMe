@@ -1027,19 +1027,7 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
         \ ( g:ycm_auto_trigger || s:force_semantic ) &&
         \ !s:InsideCommentOrStringAndShouldStop() &&
         \ !s:OnBlankLine()
-    " The call to s:Complete here is necessary, to minimize flicker when we
-    " close the pum on every keypress. In that case, we try to quickly show it
-    " again with whatver the latest completion result is. When using complete(),
-    " we don't need to do this, as we only close the pum when there are no
-    " completions. However, it's still useful as we don't want Vim's filtering
-    " to _ever_ apply. Examples of when this is problematic is when typing some
-    " keys to filter (that are not a prefix of the completion), then deleting a
-    " character. Normally Vim would re-filter based on the new "query", but we
-    " don't want that.
-    call s:Complete()
     call s:RequestCompletion()
-
-    call s:UpdateSignatureHelp()
     call s:RequestSignatureHelp()
   endif
 
