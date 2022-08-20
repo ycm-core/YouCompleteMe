@@ -67,6 +67,10 @@ let s:pollers = {
       \     'id': -1,
       \     'wait_milliseconds': 100,
       \   },
+      \   'inlay_hints': {
+      \     'id': -1,
+      \     'wait_milliseconds': 100,
+      \   },
       \ }
 let s:buftype_blacklist = {
       \   'help': 1,
@@ -78,6 +82,7 @@ let s:buftype_blacklist = {
 let s:last_char_inserted_by_user = v:true
 let s:enable_hover = 0
 let s:cursorhold_popup = -1
+let s:enable_inlay_hints = 0
 
 let s:force_preview_popup = 0
 
@@ -177,6 +182,10 @@ function! youcompleteme#Enable()
 
   call s:SetUpOptions()
 
+  py3 ycm_semantic_highlighting.Initialise()
+  py3 vim.command( 'let s:enable_inlay_hints = ' +
+        \ '1' if ycm_inlay_hints.Initialise() else '0' )
+
   call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
     autocmd!
@@ -228,11 +237,14 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd!
     autocmd CursorMoved * call s:OnCursorMovedNormalMode()
     autocmd CursorMovedI * let s:current_cursor_position = getpos( '.' )
-    autocmd InsertEnter * let s:current_cursor_position = getpos( '.' )
+    autocmd InsertEnter * call s:OnInsertEnter()
     autocmd TextChanged * call s:OnTextChangedNormalMode()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
     autocmd InsertCharPre * call s:OnInsertChar()
+    if exists( '##WinScrolled' )
+      autocmd WinScrolled * call s:OnWinScrolled()
+    endif
   augroup END
 endfunction
 
@@ -271,6 +283,7 @@ try:
   # Import the modules used in this file.
   from ycm import base, vimsupport, youcompleteme
   from ycm import semantic_highlighting as ycm_semantic_highlighting
+  from ycm import inlay_hints as ycm_inlay_hints
 
   if 'ycm_state' in globals():
     # If re-initializing, pretend that we shut down
@@ -295,7 +308,6 @@ try:
     default_options = {}
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
-  ycm_semantic_highlighting.Initialise()
 except Exception as error:
   # We don't use PostVimMessage or EchoText from the vimsupport module because
   # importing this module may fail.
@@ -425,7 +437,65 @@ function! s:SetUpSyntaxHighlighting()
   endif
   if s:PropertyTypeNotDefined( 'YcmErrorProperty' )
     call prop_type_add( 'YcmErrorProperty', {
-          \ 'highlight': 'YcmErrorSection' } )
+          \ 'highlight': 'YcmErrorSection',
+          \ 'priority': 30,
+          \ 'combine': 0,
+          \ 'override': 1 } )
+  endif
+
+  " Used for virtual text
+  if !hlexists( 'YcmInvisible' )
+    highlight default link YcmInvisible Normal
+  endif
+  if !hlexists( 'YcmInlayHint' )
+    highlight default link YcmInlayHint NonText
+  endif
+  if !hlexists( 'YcmErrorText' )
+    if exists( '*hlget' )
+      let YcmErrorText = hlget( 'SpellBad', v:true )[ 0 ]
+      let YcmErrorText.name = 'YcmErrorText'
+      let YcmErrorText.cterm = {}
+      let YcmErrorText.gui = {}
+      let YcmErrorText.term = {}
+      call hlset( [ YcmErrorText ] )
+    else
+      " approximation
+      hi default link YcmErrorText WarningMsg
+    endif
+  endif
+  if !hlexists( 'YcmWarningText' )
+    if exists( '*hlget' )
+      let YcmWarningText = hlget( 'SpellCap', v:true )[ 0 ]
+      let YcmWarningText.name = 'YcmWarningText'
+      let YcmWarningText.cterm = {}
+      let YcmWarningText.gui = {}
+      let YcmWarningText.term = {}
+      call hlset( [ YcmWarningText] )
+    else
+      " Lame approximation
+      hi default link YcmWarningText Conceal
+    endif
+  endif
+
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagError' )
+    call prop_type_add( 'YcmVirtDiagError', {
+          \ 'highlight': 'YcmErrorText',
+          \ 'priority': 20,
+          \ 'combine': 0 } )
+  endif
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagWarning' )
+    call prop_type_add( 'YcmVirtDiagWarning', {
+          \ 'highlight': 'YcmWarningText',
+          \ 'priority': 19,
+          \ 'combine': 0 } )
+  endif
+
+
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagPadding' )
+    call prop_type_add( 'YcmVirtDiagPadding', {
+          \ 'highlight': 'YcmInvisible',
+          \ 'priority': 100,
+          \ 'combine': 1 } )
   endif
 
   if !hlexists( 'YcmWarningSection' )
@@ -437,7 +507,10 @@ function! s:SetUpSyntaxHighlighting()
   endif
   if s:PropertyTypeNotDefined( 'YcmWarningProperty' )
     call prop_type_add( 'YcmWarningProperty', {
-          \ 'highlight': 'YcmWarningSection' } )
+          \ 'highlight': 'YcmWarningSection',
+          \ 'priority': 29,
+          \ 'combine': 0,
+          \ 'override': 1 } )
   endif
 endfunction
 
@@ -746,17 +819,48 @@ function! s:OnFileReadyToParse( ... )
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
 
-    call s:StopPoller( s:pollers.semantic_highlighting )
-    if !s:is_neovim &&
-          \ get( b:, 'ycm_enable_semantic_highlighting',
-          \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
+    call s:UpdateSemanticHighlighting( bufnr() )
+    call s:UpdateInlayHints( bufnr(), 1, 0 )
 
-      py3 ycm_state.CurrentBuffer().SendSemanticTokensRequest()
-      let s:pollers.semantic_highlighting.id = timer_start(
-            \ s:pollers.semantic_highlighting.wait_milliseconds,
-            \ function( 's:PollSemanticHighlighting' ) )
+  endif
+endfunction
 
+function! s:UpdateSemanticHighlighting( bufnr ) abort
+  call s:StopPoller( s:pollers.semantic_highlighting )
+  if !s:is_neovim &&
+        \ get( b:, 'ycm_enable_semantic_highlighting',
+        \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
+
+    py3 ycm_state.Buffer(
+          \ int( vim.eval( "a:bufnr" ) ) ).SendSemanticTokensRequest()
+    let s:pollers.semantic_highlighting.id = timer_start(
+          \ s:pollers.semantic_highlighting.wait_milliseconds,
+          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
+
+  endif
+endfunction
+
+
+function s:ShouldUseInlayHintsNow( bufnr )
+  return s:enable_inlay_hints &&
+        \ getbufvar( a:bufnr, 'ycm_enable_inlay_hints',
+        \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
+endfunction
+
+function! s:UpdateInlayHints( bufnr, force, redraw_anyway )
+  call s:StopPoller( s:pollers.inlay_hints )
+
+  if s:ShouldUseInlayHintsNow( a:bufnr )
+    if py3eval(
+        \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).'
+        \ . 'inlay_hints.Request( force=int( vim.eval( "a:force" ) ) )' )
+      let s:pollers.inlay_hints.id = timer_start(
+            \ s:pollers.inlay_hints.wait_milliseconds,
+            \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+    elseif a:redraw_anyway
+      py3 ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).inlay_hints.Refresh()
     endif
+
   endif
 endfunction
 
@@ -776,17 +880,39 @@ function! s:PollFileParseResponse( ... )
 endfunction
 
 
-function! s:PollSemanticHighlighting( ... )
-  if !py3eval( 'ycm_state.CurrentBuffer().SemanticTokensRequestReady()' )
+function! s:PollSemanticHighlighting( bufnr, ... )
+  if !py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.SemanticTokensRequestReady()' )
     let s:pollers.semantic_highlighting.id = timer_start(
           \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting' ) )
-  elseif ! py3eval( 'ycm_state.CurrentBuffer().UpdateSemanticTokens()' )
+          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
+  elseif !py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.UpdateSemanticTokens()' )
     let s:pollers.semantic_highlighting.id = timer_start(
           \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting' ) )
+          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
   endif
 endfunction
+
+
+function! s:PollInlayHints( bufnr, ... )
+  if !py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.inlay_hints.Ready()' )
+    let s:pollers.inlay_hints.id = timer_start(
+          \ s:pollers.inlay_hints.wait_milliseconds,
+          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+  elseif ! py3eval(
+      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
+      \ . '.inlay_hints.Update()' )
+    let s:pollers.inlay_hints.id = timer_start(
+          \ s:pollers.inlay_hints.wait_milliseconds,
+          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+  endif
+endfunction
+
 
 
 function! s:SendKeys( keys )
@@ -839,6 +965,16 @@ function! s:OnCursorMovedNormalMode()
 endfunction
 
 
+function! s:OnWinScrolled()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+  let bufnr = winbufnr( expand( '<afile>' ) )
+  call s:UpdateSemanticHighlighting( bufnr )
+  call s:UpdateInlayHints( bufnr, 0, 0 )
+endfunction
+
+
 function! s:OnTextChangedNormalMode()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
@@ -881,19 +1017,7 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
         \ ( g:ycm_auto_trigger || s:force_semantic ) &&
         \ !s:InsideCommentOrStringAndShouldStop() &&
         \ !s:OnBlankLine()
-    " The call to s:Complete here is necessary, to minimize flicker when we
-    " close the pum on every keypress. In that case, we try to quickly show it
-    " again with whatver the latest completion result is. When using complete(),
-    " we don't need to do this, as we only close the pum when there are no
-    " completions. However, it's still useful as we don't want Vim's filtering
-    " to _ever_ apply. Examples of when this is problematic is when typing some
-    " keys to filter (that are not a prefix of the completion), then deleting a
-    " character. Normally Vim would re-filter based on the new "query", but we
-    " don't want that.
-    call s:Complete()
     call s:RequestCompletion()
-
-    call s:UpdateSignatureHelp()
     call s:RequestSignatureHelp()
   endif
 
@@ -904,6 +1028,14 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
   endif
 endfunction
 
+
+function! s:OnInsertEnter() abort
+  let s:current_cursor_position = getpos( '.' )
+  if s:ShouldUseInlayHintsNow( bufnr() ) &&
+        \ get(g:, 'ycm_clear_inlay_hints_in_insert_mode' )
+    py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+  endif
+endfunction
 
 function! s:OnInsertLeave()
   if !s:AllowedToCompleteInCurrentBuffer()
@@ -924,6 +1056,11 @@ function! s:OnInsertLeave()
   endif
 
   call s:ClearSignatureHelp()
+  if s:ShouldUseInlayHintsNow( bufnr() )
+        \ && get( g:, 'ycm_clear_inlay_hints_in_insert_mode' )
+    " We cleared inlay hints on insert enter
+    py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
+  endif
 endfunction
 
 
@@ -1532,6 +1669,22 @@ endfunction
 
 silent! inoremap <silent> <plug>(YCMToggleSignatureHelp)
       \ <C-r>=<SID>ToggleSignatureHelp()<CR>
+
+function! s:ToggleInlayHints()
+  let b:ycm_enable_inlay_hints =
+        \ !get( b:,
+        \       'ycm_enable_inlay_hints',
+        \       get( g:, 'ycm_enable_inlay_hints' ) )
+
+  if !b:ycm_enable_inlay_hints
+    py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+  else
+    call s:UpdateInlayHints( bufnr(), 0, 1 )
+  endif
+endfunction
+
+silent! nnoremap <silent> <Plug>(YCMToggleInlayHints)
+      \ <cmd>call <SID>ToggleInlayHints()<CR>
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

@@ -42,18 +42,12 @@ BWIPEOUT_REGEX = re.compile(
 GETBUFVAR_REGEX = re.compile(
   '^getbufvar\\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\\)$' )
 PROP_ADD_REGEX = re.compile(
-        '^prop_add\\( ' # A literal at the start
-        '(?P<start_line>\\d+), ' # First argument - number
+        '^prop_add\\( '            # A literal at the start
+        '(?P<start_line>\\d+), '   # First argument - number
         '(?P<start_column>\\d+), ' # Second argument - number
-        '{'                        # Third argument is a complex dict.
-          '('                        # And some keys are optional.
-            '\'end_lnum\': (?P<end_line>\\d+), '
-            '\'end_col\': (?P<end_column>\\d+), '
-          ')?'                       # End of optional keys
-            '\'type\': \'(?P<type>\\w+)\', '
-            '\'bufnr\': (?P<bufnr>\\d+), '
-            '\'id\': (?P<id>\\d+)'
-        '} \\)$' )
+        '{(?P<opts>.+)} '          # Third argument is a complex dict, which
+                                   # we parse separately
+        '\\)$' )
 PROP_REMOVE_REGEX = re.compile( '^prop_remove\\( (?P<prop>.+) \\)$' )
 OMNIFUNC_REGEX_FORMAT = (
   '^{omnifunc_name}\\((?P<findstart>[01]),[\'"](?P<base>.*)[\'"]\\)$' )
@@ -263,23 +257,23 @@ def _MockVimPropEval( value ):
 
   match = PROP_ADD_REGEX.search( value )
   if match:
-    prop_type = match.group( 'type' )
     prop_start_line = int( match.group( 'start_line' ) )
     prop_start_column = int( match.group( 'start_column' ) )
-    prop_end_line = match.group( 'end_line' )
-    prop_end_column = match.group( 'end_column' )
+    import ast
+    opts = ast.literal_eval( '{' + match.group( 'opts' ) + '}' )
     vim_prop = VimProp(
-        prop_type,
+        opts[ 'type' ],
         prop_start_line,
         prop_start_column,
-        int( prop_end_line ) if prop_end_line else prop_end_line,
-        int( prop_end_column ) if prop_end_column else prop_end_column )
-    VIM_PROPS_FOR_BUFFER[ int( match.group( 'bufnr' ) ) ].append( vim_prop )
+        int( opts[ 'end_lnum' ] ) if opts[ 'end_lnum' ] else prop_start_line,
+        int( opts[ 'end_col' ] ) if opts[ 'end_col' ] else prop_start_column
+    )
+    VIM_PROPS_FOR_BUFFER[ int( opts[ 'bufnr' ] ) ].append( vim_prop )
     return vim_prop.id
 
   match = PROP_REMOVE_REGEX.search( value )
   if match:
-    prop = eval( match.group( 'prop' ) )
+    prop, lin_num = eval( match.group( 'prop' ) )
     vim_props = VIM_PROPS_FOR_BUFFER[ prop[ 'bufnr' ] ]
     for index, vim_prop in enumerate( vim_props ):
       if vim_prop.id == prop[ 'id' ]:

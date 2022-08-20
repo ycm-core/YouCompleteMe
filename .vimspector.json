@@ -34,18 +34,19 @@
         "type": "debugpy",
         "request": "launch",
 
-        "cwd": "${workspaceRoot}/python",
+        "cwd": "${workspaceRoot}",
         "stopOnEntry": false,
         "console": "integratedTerminal",
         "justMyCode": true,
+        "logToFile": true,
+        "showReturnValue": true,
 
         "debugOptions": [],
 
-        "module": "pytest",
+        "module": "unittest",
         "python": "${python}",
         "args": [
           "-v",
-          "--tb=native",
           "${Test}"
         ],
         "env": {

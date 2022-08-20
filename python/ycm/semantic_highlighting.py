@@ -19,10 +19,7 @@
 from ycm.client.semantic_tokens_request import SemanticTokensRequest
 from ycm.client.base_request import BuildRequestData
 from ycm import vimsupport
-from ycmd import utils
-
-import vim
-import json
+from ycm import text_properties as tp
 
 
 HIGHLIGHT_GROUP = {
@@ -59,15 +56,19 @@ def Initialise():
   if vimsupport.VimIsNeovim():
     return
 
-  props = GetTextPropertyTypes()
+  props = tp.GetTextPropertyTypes()
   if 'YCM_HL_UNKNOWN' not in props:
-    AddTextPropertyType( 'YCM_HL_UNKNOWN', highlight = 'WarningMsg' )
+    tp.AddTextPropertyType( 'YCM_HL_UNKNOWN',
+                            highlight = 'WarningMsg',
+                            priority = 0 )
 
   for token_type, group in HIGHLIGHT_GROUP.items():
     prop = f'YCM_HL_{ token_type }'
     if prop not in props and vimsupport.GetIntValue(
         f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
-      AddTextPropertyType( prop, highlight = group )
+      tp.AddTextPropertyType( prop,
+                              highlight = group,
+                              priority = 0 )
 
 
 # "arbitrary" base id
@@ -99,7 +100,11 @@ class SemanticHighlighting:
 
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
 
-    self._request = SemanticTokensRequest( BuildRequestData() )
+    request: dict = BuildRequestData( self._bufnr )
+    request.update( {
+      'range': vimsupport.RangeVisibleInBuffer( self._bufnr )
+    } )
+    self._request = SemanticTokensRequest( request )
     self._request.Start()
 
   def IsResponseReady( self ):
@@ -136,52 +141,12 @@ class SemanticHighlighting:
             f"Missing property type for { token[ 'type' ] }" )
         continue
       prop_type = f"YCM_HL_{ token[ 'type' ] }"
-      AddTextProperty( self._bufnr, self._prop_id, prop_type, token[ 'range' ] )
+      tp.AddTextProperty( self._bufnr,
+                          self._prop_id,
+                          prop_type,
+                          token[ 'range' ] )
 
-    ClearTextProperties( self._bufnr, prev_prop_id )
+    tp.ClearTextProperties( self._bufnr, prev_prop_id )
 
     # No need to re-poll
     return True
-
-
-# FIXME/TODO: Merge this with vimsupport funcitons, added after these were
-# written. It's not trivial, as those vimsupport functions are a bit fiddly.
-# They also support neovim, but we don't.
-def AddTextPropertyType( name, **kwargs ):
-  props = {
-    'highlight': 'Ignore',
-    'combine': False,
-    'start_incl': False,
-    'end_incl': False,
-    'priority': 10
-  }
-  props.update( kwargs )
-
-  vim.eval( f"prop_type_add( '{ vimsupport.EscapeForVim( name ) }', "
-            f"               { json.dumps( kwargs ) } )" )
-
-
-def GetTextPropertyTypes( *args, **kwargs ):
-  return [ utils.ToUnicode( p ) for p in vim.eval( 'prop_type_list()' ) ]
-
-
-def AddTextProperty( bufnr, prop_id, prop_type, range ):
-  props = {
-    'end_lnum': range[ 'end' ][ 'line_num' ],
-    'end_col': range[ 'end' ][ 'column_num' ],
-    'bufnr': bufnr,
-    'id': prop_id,
-    'type': prop_type
-  }
-  vim.eval( f"prop_add( { range[ 'start' ][ 'line_num' ] },"
-            f"          { range[ 'start' ][ 'column_num' ] },"
-            f"          { json.dumps( props ) } )" )
-
-
-def ClearTextProperties( bufnr, prop_id ):
-  props = {
-    'id': prop_id,
-    'bufnr': bufnr,
-    'all': 1,
-  }
-  vim.eval( f"prop_remove( { json.dumps( props ) } )" )

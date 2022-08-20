@@ -599,7 +599,11 @@ class YouCompleteMe:
 
 
   def CurrentBuffer( self ):
-    return self._buffers[ vimsupport.GetCurrentBufferNumber() ]
+    return self.Buffer( vimsupport.GetCurrentBufferNumber() )
+
+
+  def Buffer( self, bufnr ):
+    return self._buffers[ bufnr ]
 
 
   def OnInsertLeave( self ):
@@ -732,6 +736,12 @@ class YouCompleteMe:
       debug_info += ( 'Server logfiles:\n'
                       f'  { self._server_stdout }\n'
                       f'  { self._server_stderr }' )
+    debug_info += ( '\nSemantic highlighting supported: ' +
+                    str( not vimsupport.VimIsNeovim() ) )
+    debug_info += ( '\nVirtual text supported: ' +
+                    str( vimsupport.VimSupportsVirtualText() ) )
+    debug_info += ( '\nPopup windows supported: ' +
+                    str( vimsupport.VimSupportsPopupWindows() ) )
     return debug_info
 
 
