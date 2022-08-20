@@ -90,12 +90,6 @@ class InlayHints:
     self._last_requested_range = vimsupport.RangeVisibleInBuffer( self._bufnr )
     self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
 
-    # TODO: How to determine the range to display ? Should we do the range
-    # visible in "all" windows? We're doing this per-buffer, but perhaps it
-    # should actually be per-window; that might ultimately be a better model
-    # but the resulting properties are per-buffer, not per-window.
-    #
-    # Perhaps the maximal range of visible windows or something.
     request_data = BuildRequestData( self._bufnr )
     request_data.update( {
       'range': self._last_requested_range
@@ -110,15 +104,35 @@ class InlayHints:
 
 
   def Clear( self ):
-    # FIXME: ClearTextProperties is slow as it must scan the whole buffer
-    # We should use _last_requested_range to specify the range to clear
+    # ClearTextProperties is slow as it must scan the whole buffer
+    # we shouldn't use _last_requested_range, because the server is free to
+    # return a larger range, so we pick the first/last from the latest results
+    try:
+      first_line = self._latest_inlay_hints[ 0 ][ 'position' ][ 'line_num' ]
+    except ( KeyError, IndexError ):
+      first_line = None
+
+    try:
+      last_line = self._latest_inlay_hints[ -1 ][ 'position' ][ 'line_num' ]
+    except ( KeyError, IndexError ):
+      last_line = None
+
     for type in HIGHLIGHT_GROUP.keys():
       if type == 0:
         continue
-      tp.ClearTextProperties( self._bufnr, type=f'YCM_INLAY_{ type }' )
+      tp.ClearTextProperties( self._bufnr,
+                              type=f'YCM_INLAY_{ type }',
+                              first_line = first_line,
+                              last_line = last_line )
 
-    tp.ClearTextProperties( self._bufnr, type='YCM_INLAY_UNKNOWN' )
-    tp.ClearTextProperties( self._bufnr, type='YCM_INLAY_PADDING' )
+    tp.ClearTextProperties( self._bufnr,
+                            type='YCM_INLAY_UNKNOWN',
+                            first_line = first_line,
+                            last_line = last_line )
+    tp.ClearTextProperties( self._bufnr,
+                            type='YCM_INLAY_PADDING',
+                            first_line = first_line,
+                            last_line = last_line )
 
 
   def Update( self ):
@@ -146,7 +160,7 @@ class InlayHints:
 
   def Refresh( self ):
     if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
-      # state data
+      # stale data
       return
 
     if self._request is not None:

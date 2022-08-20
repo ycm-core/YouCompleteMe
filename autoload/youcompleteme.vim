@@ -241,7 +241,7 @@ function! youcompleteme#EnableCursorMovedAutocommands()
     autocmd TextChangedI * call s:OnTextChangedInsertMode( v:false )
     autocmd TextChangedP * call s:OnTextChangedInsertMode( v:true )
     autocmd InsertCharPre * call s:OnInsertChar()
-    if exists( '#WinScrolled' )
+    if exists( '##WinScrolled' )
       autocmd WinScrolled * call s:OnWinScrolled()
     endif
   augroup END
@@ -836,7 +836,7 @@ function! s:OnFileReadyToParse( ... )
           \ function( 's:PollFileParseResponse' ) )
 
     call s:UpdateSemanticHighlighting( bufnr() )
-    call s:UpdateInlayHints( bufnr(), 1 )
+    call s:UpdateInlayHints( bufnr(), 1, 0 )
 
   endif
 endfunction
@@ -857,7 +857,7 @@ function! s:UpdateSemanticHighlighting( bufnr ) abort
 endfunction
 
 
-function! s:UpdateInlayHints( bufnr, force )
+function! s:UpdateInlayHints( bufnr, force, redraw_anyway )
   call s:StopPoller( s:pollers.inlay_hints )
   if s:enable_inlay_hints &&
         \ get( b:, 'ycm_enable_inlay_hints',
@@ -869,6 +869,8 @@ function! s:UpdateInlayHints( bufnr, force )
       let s:pollers.inlay_hints.id = timer_start(
             \ s:pollers.inlay_hints.wait_milliseconds,
             \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+    elseif a:redraw_anyway
+      py3 ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).inlay_hints.Refresh()
     endif
 
   endif
@@ -981,7 +983,7 @@ function! s:OnWinScrolled()
   endif
   let bufnr = winbufnr( expand( '<afile>' ) )
   call s:UpdateSemanticHighlighting( bufnr )
-  call s:UpdateInlayHints( bufnr, 0 )
+  call s:UpdateInlayHints( bufnr, 0, 0 )
 endfunction
 
 
@@ -1041,8 +1043,8 @@ endfunction
 
 function! s:OnInsertEnter() abort
   let s:current_cursor_position = getpos( '.' )
-  if s:enable_inlay_hints
-    "py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+  if s:enable_inlay_hints && get(g:, 'ycm_clear_inclay_hints_in_insert_mode' )
+    py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
   endif
 endfunction
 
@@ -1065,10 +1067,10 @@ function! s:OnInsertLeave()
   endif
 
   call s:ClearSignatureHelp()
-  if s:enable_inlay_hints
+  if s:enable_inlay_hints && get( g:, 'ycm_clear_inclay_hints_in_insert_mode' )
     " We cleared inlay hints on insert enter
     " TODO: Probalby should use ModeChange
-    "py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
+    py3 ycm_state.CurrentBuffer().inlay_hints.Refresh()
   endif
 endfunction
 
@@ -1659,6 +1661,22 @@ endfunction
 
 silent! inoremap <silent> <plug>(YCMToggleSignatureHelp)
       \ <C-r>=<SID>ToggleSignatureHelp()<CR>
+
+function! s:ToggleInlayHints()
+  let b:ycm_enable_inlay_hints =
+        \ !get( b:,
+        \       'ycm_enable_inlay_hints',
+        \       get( g:, 'ycm_enable_inlay_hints' ) )
+
+  if !b:ycm_enable_inlay_hints
+    py3 ycm_state.CurrentBuffer().inlay_hints.Clear()
+  else
+    call s:UpdateInlayHints( bufnr(), 0, 1 )
+  endif
+endfunction
+
+silent! nnoremap <silent> <Plug>(YCMToggleInlayHints)
+      \ <cmd>call <SID>ToggleInlayHints()<CR>
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

@@ -65,7 +65,11 @@ def AddTextProperty( bufnr,
                    f"          { json.dumps( props ) } )" )
 
 
-def ClearTextProperties( bufnr, prop_id=None, type=None ):
+def ClearTextProperties( bufnr,
+                         prop_id=None,
+                         type=None,
+                         first_line = None,
+                         last_line = None ):
   props = {
     'bufnr': bufnr,
     'all': 1,
@@ -78,4 +82,10 @@ def ClearTextProperties( bufnr, prop_id=None, type=None ):
   if prop_id is not None and type is not None:
     props[ 'both' ] = 1
 
-  vim.eval( f"prop_remove( { json.dumps( props ) } )" )
+  if last_line is not None:
+    vim.eval(
+      f"prop_remove( { json.dumps( props ) }, { first_line }, { last_line } )" )
+  elif first_line is not None:
+    vim.eval( f"prop_remove( { json.dumps( props ) }, { first_line } )" )
+  else:
+    vim.eval( f"prop_remove( { json.dumps( props ) } )" )
