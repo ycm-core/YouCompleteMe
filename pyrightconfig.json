@@ -1,0 +1,6 @@
+{
+  "extraPaths": [
+    "python",
+    "third_party/ycmd"
+  ]
+}
