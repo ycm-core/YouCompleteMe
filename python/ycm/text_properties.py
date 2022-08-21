@@ -17,10 +17,12 @@
 
 
 from ycm import vimsupport
+from ycm.vimsupport import GetIntValue
 from ycmd import utils
 
 import vim
 import json
+import typing
 
 
 # FIXME/TODO: Merge this with vimsupport funcitons, added after these were
@@ -65,27 +67,48 @@ def AddTextProperty( bufnr,
                    f"          { json.dumps( props ) } )" )
 
 
-def ClearTextProperties( bufnr,
-                         prop_id=None,
-                         type=None,
-                         first_line = None,
-                         last_line = None ):
+def ClearTextProperties(
+  bufnr,
+  prop_id = None,
+  prop_types: typing.Union[ typing.List[ str ], str ] = None,
+  first_line = None,
+  last_line = None ):
+
   props = {
     'bufnr': bufnr,
     'all': 1,
   }
   if prop_id is not None:
     props[ 'id' ] = prop_id
-  if type is not None:
-    props[ 'type' ] = type
 
-  if prop_id is not None and type is not None:
+  if prop_id is not None and prop_types is not None:
     props[ 'both' ] = 1
 
-  if last_line is not None:
-    vim.eval(
-      f"prop_remove( { json.dumps( props ) }, { first_line }, { last_line } )" )
-  elif first_line is not None:
-    vim.eval( f"prop_remove( { json.dumps( props ) }, { first_line } )" )
-  else:
-    vim.eval( f"prop_remove( { json.dumps( props ) } )" )
+  def prop_remove():
+    if last_line is not None:
+      return GetIntValue( f"prop_remove( { json.dumps( props ) },"
+                                      f" { first_line },"
+                                      f" { last_line } )" )
+    elif first_line is not None:
+      return GetIntValue( f"prop_remove( { json.dumps( props ) },"
+                                      f" { first_line } )" )
+    else:
+      return GetIntValue( f"prop_remove( { json.dumps( props ) } )" )
+
+  if prop_types is None:
+    return prop_remove()
+
+  if not isinstance( prop_types, list ):
+    prop_types = [ prop_types ]
+
+  # 9.0.233 added types list to prop_remove, so use that
+  if vimsupport.VimVersionAtLeast( '9.0.233' ):
+    props[ 'types' ] = prop_types
+    return prop_remove()
+
+  # Older versions we have to run prop_remove for each type
+  removed = 0
+  for prop_type in prop_types:
+    props[ 'type' ] = prop_type
+    removed += prop_remove()
+  return removed

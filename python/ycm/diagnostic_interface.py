@@ -125,9 +125,10 @@ class DiagnosticInterface:
          self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
       if self._diag_message_needs_clearing:
         # Clear any previous diag echo
-        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagPadding' )
-        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagError' )
-        tp.ClearTextProperties( self._bufnr, type = 'YcmVirtDiagWarning' )
+        tp.ClearTextProperties( self._bufnr,
+                                prop_types = [ 'YcmVirtDiagPadding',
+                                               'YcmVirtDiagError',
+                                               'YcmVirtDiagWarning' ] )
         self._diag_message_needs_clearing = False
 
       if not text:
