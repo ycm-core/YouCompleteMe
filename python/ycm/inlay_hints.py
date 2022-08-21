@@ -117,22 +117,15 @@ class InlayHints:
     except ( KeyError, IndexError ):
       last_line = None
 
-    for type in HIGHLIGHT_GROUP.keys():
-      if type == 0:
-        continue
-      tp.ClearTextProperties( self._bufnr,
-                              type=f'YCM_INLAY_{ type }',
-                              first_line = first_line,
-                              last_line = last_line )
+    types = [ 'YCM_INLAY_UNKNOWN', 'YCM_INLAY_PADDING' ] + [
+      f'YCM_INLAY_{ prop_type }' for prop_type in HIGHLIGHT_GROUP.keys()
+    ]
 
-    tp.ClearTextProperties( self._bufnr,
-                            type='YCM_INLAY_UNKNOWN',
-                            first_line = first_line,
-                            last_line = last_line )
-    tp.ClearTextProperties( self._bufnr,
-                            type='YCM_INLAY_PADDING',
-                            first_line = first_line,
-                            last_line = last_line )
+    tp.ClearTextProperties(
+      self._bufnr,
+      prop_types = types,
+      first_line = first_line,
+      last_line = last_line )
 
 
   def Update( self ):
@@ -179,7 +172,7 @@ class InlayHints:
       elif inlay_hint[ 'kind' ] not in HIGHLIGHT_GROUP:
         prop_type = 'YCM_INLAY_UNKNOWN'
       else:
-        prop_type = 'YCM_INLAY_' + str( inlay_hint[ 'kind' ] )
+        prop_type = 'YCM_INLAY_' + inlay_hint[ 'kind' ]
 
       if inlay_hint.get( 'paddingLeft', False ):
         tp.AddTextProperty( self._bufnr,

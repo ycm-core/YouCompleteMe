@@ -146,7 +146,7 @@ class SemanticHighlighting:
                           prop_type,
                           token[ 'range' ] )
 
-    tp.ClearTextProperties( self._bufnr, prev_prop_id )
+    tp.ClearTextProperties( self._bufnr, prop_id = prev_prop_id )
 
     # No need to re-poll
     return True
