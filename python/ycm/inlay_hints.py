@@ -107,26 +107,11 @@ class InlayHints:
     # ClearTextProperties is slow as it must scan the whole buffer
     # we shouldn't use _last_requested_range, because the server is free to
     # return a larger range, so we pick the first/last from the latest results
-    try:
-      first_line = self._latest_inlay_hints[ 0 ][ 'position' ][ 'line_num' ]
-    except ( KeyError, IndexError ):
-      first_line = None
-
-    try:
-      last_line = self._latest_inlay_hints[ -1 ][ 'position' ][ 'line_num' ]
-    except ( KeyError, IndexError ):
-      last_line = None
-
     types = [ 'YCM_INLAY_UNKNOWN', 'YCM_INLAY_PADDING' ] + [
       f'YCM_INLAY_{ prop_type }' for prop_type in HIGHLIGHT_GROUP.keys()
     ]
 
-    tp.ClearTextProperties(
-      self._bufnr,
-      prop_types = types,
-      first_line = first_line,
-      last_line = last_line )
-
+    tp.ClearTextProperties( self._bufnr, prop_types = types )
 
   def Update( self ):
     if not self._request:
