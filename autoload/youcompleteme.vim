@@ -183,8 +183,7 @@ function! youcompleteme#Enable()
   call s:SetUpOptions()
 
   py3 ycm_semantic_highlighting.Initialise()
-  py3 vim.command( 'let s:enable_inlay_hints = ' +
-        \ '1' if ycm_inlay_hints.Initialise() else '0' )
+  let s:enable_inlay_hints = py3eval( 'ycm_inlay_hints.Initialise()' ) ? 1 : 0
 
   call youcompleteme#EnableCursorMovedAutocommands()
   augroup youcompleteme
