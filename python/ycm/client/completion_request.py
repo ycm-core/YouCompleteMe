@@ -103,7 +103,10 @@ class CompletionRequest( BaseRequest ):
     if not completed_item.get( 'user_data' ):
       return None
 
-    return json.loads( completed_item[ 'user_data' ] )
+    try:
+      return json.loads( completed_item[ 'user_data' ] )
+    except json.JSONDecodeError:
+      return None
 
 
   def _OnCompleteDone_Csharp( self ):
