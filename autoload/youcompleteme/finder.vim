@@ -578,7 +578,8 @@ function! s:RedrawFinderPopup() abort
     " Otherwise, new item is already displayed - don't scroll the window.
 
     if !getwinvar( s:find_symbol_status.id, '&cursorline' )
-      call win_execute( s:find_symbol_status.id, 'set cursorline' )
+      call win_execute( s:find_symbol_status.id,
+                      \ 'set cursorline cursorlineopt&' )
     endif
   else
     call win_execute( s:find_symbol_status.id, 'set nocursorline' )
