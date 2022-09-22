@@ -235,9 +235,9 @@ simply `pip install --user cmake` to get a really new version.
 #### Individual completer requirements
 
 When enabling language support for a particular language, there may be runtime
-requirements, such as needing Java Development Kit for Java support. In general,
-YCM is not in control of the required versions for the downstream compilers,
-though we do our best to signal where we know them.
+requirements, such as needing a very recent Java Development Kit for Java
+support. In general, YCM is not in control of the required versions for the
+downstream compilers, though we do our best to signal where we know them.
 
 ### macOS
 
@@ -363,7 +363,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `install.py`.
-- Java support: install [JDK][jdk-install] and add
+- Java support: install [JDK 17][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -400,7 +400,7 @@ apt install build-essential cmake vim-nox python3-dev
 - Install mono-complete, go, node, java and npm
 
 ```
-apt install mono-complete golang nodejs default-jdk npm
+apt install mono-complete golang nodejs openjdk-17-jdk openjdk-17-jre npm
 ```
 
 - Compile YCM
@@ -471,7 +471,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `install.py`.
-- Java support: install [JDK][jdk-install] and add
+- Java support: install [JDK 17][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -585,7 +585,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `install.py`.
-- Java support: install [JDK][jdk-install] and add
+- Java support: install [JDK 17][jdk-install] and add
   `--java-completer` when calling `install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -685,7 +685,7 @@ The following additional language support options are available:
 - JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
   add `--ts-completer` when calling `install.py`.
 - Rust support: add `--rust-completer` when calling `./install.py`.
-- Java support: install [JDK][jdk-install] and add
+- Java support: install [JDK 17][jdk-install] and add
   `--java-completer` when calling `./install.py`.
 
 To simply compile with everything enabled, there's a `--all` flag. So, to
@@ -3858,7 +3858,7 @@ Please note: The YCM maintainers do not specifically endorse nor necessarily hav
 [++enc]: http://vimdoc.sourceforge.net/htmldoc/editing.html#++enc
 [contributing-md]: https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
 [jdt.ls]: https://github.com/eclipse/eclipse.jdt.ls
-[jdk-install]: https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+[jdk-install]: https://adoptium.net/en-GB/temurin/releases
 [mvn-project]: https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html
 [eclipse-project]: https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html
 [gradle-project]: https://docs.gradle.org/current/userguide/tutorial_java_projects.html
