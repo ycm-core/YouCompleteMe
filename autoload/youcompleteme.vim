@@ -168,7 +168,7 @@ function! youcompleteme#Enable()
     " supported, enable it.
     let s:resolve_completions = s:RESOLVE_ON_DEMAND
   elseif require_resolve
-    " The preview window or info popup is enalbed - request the server
+    " The preview window or info popup is enabled - request the server
     " pre-resolves completion items
     let s:resolve_completions = s:RESOLVE_UP_FRONT
   else
@@ -1225,6 +1225,7 @@ function! s:ShowInfoPopup( completion_item )
   let id = popup_findinfo()
   if id
     call popup_settext( id, split( a:completion_item.info, '\n' ) )
+    call win_execute( id, 'set nonumber' )
     call popup_show( id )
   endif
 endfunction
@@ -1587,7 +1588,15 @@ if exists( '*popup_atcursor' )
   endfunction
 
 
+  let s:last_line = line(".")
+  let s:last_col = col(".")
   function! s:ShowHoverResult( response )
+    if line(".") == s:last_line && col(".") == s:last_col
+      return
+    endif
+    let s:last_line = line(".")
+    let s:last_col = col(".")
+    
     call popup_hide( s:cursorhold_popup )
 
     if empty( a:response )
@@ -1618,9 +1627,11 @@ if exists( '*popup_atcursor' )
           \   {
           \     'col': col,
           \     'wrap': wrap,
+          \     'border': [ 1, 1, 1, 1 ],
           \     'padding': [ 0, 1, 0, 1 ],
           \     'moved': 'word',
           \     'maxwidth': &columns,
+          \     'maxheight': max( [ winline() - 1, winheight( win_getid() ) - winline() ] ),
           \     'close': 'click',
           \     'fixed': 0,
           \   }
