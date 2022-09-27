@@ -1143,7 +1143,7 @@ On supported architectures, the `install.py` script will download a suitable
 clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
 Supported architectures are:
 
-* Linux glibc >= 2.17 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
+* Linux glibc >= 2.27 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
 * MacOS >=10.15 (Intel, arm64)
   - For Intel, compatibility per clang.llvm.org downloads
   - For arm64, macOS 10.15+
