@@ -685,6 +685,22 @@ def JumpToLocation( filename, line, column, modifiers, command ):
   # Add an entry to the jumplist
   vim.command( "normal! m'" )
 
+  # Add an entry to the tags stack
+  # TODO: Also modify newly created split window's tags stack.
+  lnum, col = vim.current.window.cursor
+  tags_stack = { 'items': [ {
+      'bufnr': vim.current.buffer.number,
+      'from': [ 0, lnum, col + 1, 0 ],
+      'matchnr': 1,
+      # NOTE: Going back in the future with `:tag` works by reissuing the tag
+      # command with the saved `tagname`. It obviously doesn't work currently
+      # as we do not save the tag name.
+      'tagname': '???'
+  } ] }
+  vim.eval(
+      f"settagstack( { vim.current.window.number }, { tags_stack }, 'a' )"
+  )
+
   if filename != GetCurrentBufferFilepath():
     # We prefix the command with 'keepjumps' so that opening the file is not
     # recorded in the jumplist. So when we open the file and move the cursor to
