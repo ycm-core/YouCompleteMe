@@ -698,7 +698,7 @@ def JumpToLocation( filename, line, column, modifiers, command ):
       'tagname': vim.eval("expand('<cword>')")
   } ] }
   vim.eval(
-      f"settagstack( { vim.current.window.number }, { tags_stack }, 'a' )"
+      f"settagstack( { vim.current.window.number }, { tags_stack }, 't' )"
   )
 
   if filename != GetCurrentBufferFilepath():
