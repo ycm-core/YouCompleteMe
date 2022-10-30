@@ -695,7 +695,7 @@ def JumpToLocation( filename, line, column, modifiers, command ):
       # NOTE: Going back in the future with `:tag` works by reissuing the tag
       # command with the saved `tagname`. It obviously doesn't work currently
       # as we do not save the tag name.
-      'tagname': '???'
+      'tagname': vim.eval("expand('<cword>')")
   } ] }
   vim.eval(
       f"settagstack( { vim.current.window.number }, { tags_stack }, 'a' )"
