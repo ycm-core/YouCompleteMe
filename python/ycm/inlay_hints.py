@@ -165,7 +165,6 @@ class InlayHints:
                             'YCM_INLAY_PADDING',
                             {
                               'start': inlay_hint[ 'position' ],
-                              'end': inlay_hint[ 'position' ],
                             },
                             {
                               'text': ' '
@@ -176,7 +175,6 @@ class InlayHints:
                           prop_type,
                           {
                             'start': inlay_hint[ 'position' ],
-                            'end': inlay_hint[ 'position' ],
                           },
                           {
                             'text': inlay_hint[ 'label' ]
@@ -188,7 +186,6 @@ class InlayHints:
                             'YCM_INLAY_PADDING',
                             {
                               'start': inlay_hint[ 'position' ],
-                              'end': inlay_hint[ 'position' ],
                             },
                             {
                               'text': ' '

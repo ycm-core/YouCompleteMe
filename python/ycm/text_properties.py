@@ -53,8 +53,6 @@ def AddTextProperty( bufnr,
                      range,
                      extra_args: dict = None ):
   props = {
-    'end_lnum': range[ 'end' ][ 'line_num' ],
-    'end_col': range[ 'end' ][ 'column_num' ],
     'bufnr': bufnr,
     'type': prop_type
   }
@@ -62,6 +60,11 @@ def AddTextProperty( bufnr,
     props[ 'id' ] = prop_id
   if extra_args:
     props.update( extra_args )
+  if 'end' in range:
+    props.update( {
+      'end_lnum': range[ 'end' ][ 'line_num' ],
+      'end_col':  range[ 'end' ][ 'column_num' ],
+    } )
   return vim.eval( f"prop_add( { range[ 'start' ][ 'line_num' ] },"
                    f"          { range[ 'start' ][ 'column_num' ] },"
                    f"          { json.dumps( props ) } )" )
