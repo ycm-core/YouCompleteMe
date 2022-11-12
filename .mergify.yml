@@ -22,12 +22,13 @@ pull_request_rules:
       - status-success=Vim tests - new
       - status-success=Vim tests - old
       - status-success=code-review/reviewable
-    actions:
+    actions: &merge-actions
       queue:
         method: merge
         name: default
       comment:
         message: Thanks for sending a PR!
+
   - name: Manual merge on Azure Pipelines and Maintainer Override
     conditions:
       - base=master
@@ -43,11 +44,7 @@ pull_request_rules:
 
       - label="Ship It!"
     actions:
-      queue:
-        method: merge
-        name: default
-      comment:
-        message: Thanks for sending a PR!
+      <<: *merge-actions
 
   - name: Manual merge on Pipelines and Maintainer Override from owner PR
     conditions:
@@ -63,8 +60,16 @@ pull_request_rules:
       - "#changes-requested-reviews-by=0"
       - label="Ship It!"
     actions:
-      queue:
-        method: merge
-        name: default
-      comment:
-        message: Thanks for sending a PR!
+      <<: *merge-actions
+
+  - name: Merge auto pr when approved
+    conditions:
+      - author=VimspectorUpdateBot
+      - label=auto
+      - base=master
+      # Review
+      - status-success=code-review/reviewable
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+    actions:
+      <<: *merge-actions
