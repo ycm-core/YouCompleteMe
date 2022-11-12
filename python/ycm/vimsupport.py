@@ -182,7 +182,7 @@ def GetCurrentBufferNumber():
 
 
 def GetBufferChangedTick( bufnr ):
-  return GetIntValue( f'getbufvar({ bufnr }, "changedtick")' )
+  return GetIntValue( f'getbufvar({ bufnr }, "changedtick") ?? 0' )
 
 
 # Returns a range covering the earliest and latest lines visible in the current
