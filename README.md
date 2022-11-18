@@ -1043,8 +1043,8 @@ When `g:ycm_enable_inlay_hints` (globally) or `b:ycm_enable_inlay_hints` (for a
 specific buffer) is set to `1`, then YCM will insert inlay hints as supported by
 the language semantic engine.
 
-An inlay hint is text renderd on the screen which is not part of the buffer and
-is often used to mark up the type or name of arguments, perameters, etc. which
+An inlay hint is text rendered on the screen which is not part of the buffer and
+is often used to mark up the type or name of arguments, parameters, etc. which
 help the developer understand the semantics of the code.
 
 Here are some examples:
