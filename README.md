@@ -1036,7 +1036,7 @@ endfor
 
 ## Inlay hints
 
-**NOTE**: Hightly experimental feature, requiring vim 9.0.214 or later (not
+**NOTE**: Highly experimental feature, requiring vim 9.0.214 or later (not
 supported in NeoVim).
 
 When `g:ycm_enable_inlay_hints` (globally) or `b:ycm_enable_inlay_hints` (for a
