@@ -254,6 +254,37 @@ class Response_Detection_Test( TestCase ):
         FixItTest( command, response, chunks, selection, silent )
 
 
+  def test_FixIt_WithPattern_Response( self ):
+    # Ensures we recognise and handle fixit responses with some dummy chunk data
+    def FixItTest( pattern, response, chunks, silent ):
+      with patch( 'ycm.vimsupport.ReplaceChunks' ) as replace_chunks:
+        with patch( 'ycm.vimsupport.PostVimMessage' ) as post_vim_message:
+          request = CommandRequest( [ 'FixIt', pattern ] )
+          request._response = response
+          request.RunPostCommandActionsIfNeeded( 'leftabove' )
+
+          if chunks:
+            replace_chunks.assert_called_with( chunks, silent = silent )
+            post_vim_message.assert_not_called()
+          else:
+            replace_chunks.assert_not_called()
+            post_vim_message.assert_called()
+
+    for pattern, response, chunks, silent in [
+      [ 'irsr?',
+        MULTI_FIXIT,  MULTI_FIXIT_FIRST_CHUNKS,  False ],
+      [ 'e.o',
+        MULTI_FIXIT,  MULTI_FIXIT_SECOND_CHUNKS, False ],
+      [ 'none',
+        MULTI_FIXIT,  None, False ],
+    ]:
+      with self.subTest( pattern = pattern,
+                                   response = response,
+                                   chunks = chunks,
+                                   silent = silent ):
+        FixItTest( pattern, response, chunks, silent )
+
+
   def test_Message_Response( self ):
     # Ensures we correctly recognise and handle responses with a message to show
     # to the user

@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm import vimsupport
 
@@ -165,10 +167,22 @@ class CommandRequest( BaseRequest ):
              ( len( fixits ) == 1 and
                self._command == 'FixIt' and
                fixits[ 0 ].get( 'kind' ) != 'quickfix' ) ):
-          fixit_index = vimsupport.SelectFromList(
-            "FixIt suggestion(s) available at this location. "
-            "Which one would you like to apply?",
-            [ fixit[ 'text' ] for fixit in fixits ] )
+          # If the user provided another argument, use it as a pattern to
+          # automatically select the fixit to apply.
+          if len( self._arguments ) == 2:
+            pat = self._arguments[ 1 ]
+            fixit_index = _FindFirstIndex(
+              lambda fixit: re.search( pat, fixit[ 'text' ] ),
+              fixits )
+            if fixit_index is None:
+              vimsupport.PostVimMessage(
+                f'No fixits found for current line matching {pat}' )
+              return
+          else:
+            fixit_index = vimsupport.SelectFromList(
+              "FixIt suggestion(s) available at this location. "
+              "Which one would you like to apply?",
+              [ fixit[ 'text' ] for fixit in fixits ] )
         chosen_fixit = fixits[ fixit_index ]
         if chosen_fixit[ 'resolve' ]:
           self._request_data.update( { 'fixit': chosen_fixit } )
@@ -226,3 +240,9 @@ def GetCommandResponse( arguments, extra_data = None ):
                                      silent = True )
   # Block here to get the response
   return request.StringResponse()
+
+
+def _FindFirstIndex( matcher, items ):
+  return next(
+    ( i for ( i, item ) in enumerate( items ) if matcher( item ) ),
+    None )
