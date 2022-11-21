@@ -60,6 +60,10 @@ NO_COMPLETIONS = {
 
 YCM_NEOVIM_NS_ID = vim.eval( 'g:ycm_neovim_ns_id' )
 
+# Virtual text is not a feature in itself and early patches don't work well, so
+# we need to keep changing this at the moment
+VIM_VIRTUAL_TEXT_VERSION_REQ = '9.0.214'
+
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -181,6 +185,71 @@ def GetBufferChangedTick( bufnr ):
   return GetIntValue( f'getbufvar({ bufnr }, "changedtick")' )
 
 
+# Returns a range covering the earliest and latest lines visible in the current
+# tab page for the supplied buffer number. By default this range is then
+# extended by half of the resulting range size
+def RangeVisibleInBuffer( bufnr, grow_factor=0.5 ):
+  windows = [ w for w in vim.eval( f'win_findbuf( { bufnr } )' )
+              if GetIntValue( vim.eval( f'win_id2tabwin( { w } )[ 0 ]' ) ) ==
+                vim.current.tabpage.number ]
+
+  class Location:
+    line: int = None
+    col: int = None
+
+  class Range:
+    start: Location = Location()
+    end: Location = Location()
+
+  buffer = vim.buffers[ bufnr ]
+
+  if not windows:
+    return None
+
+  r = Range()
+  # Note, for this we ignore horizontal scrolling
+  for winid in windows:
+    win_info = vim.eval( f'getwininfo( { winid } )[ 0 ]' )
+    if r.start.line is None or r.start.line > int( win_info[ 'topline' ] ):
+      r.start.line = int( win_info[ 'topline' ] )
+    if r.end.line is None or r.end.line < int( win_info[ 'botline' ] ):
+      r.end.line = int( win_info[ 'botline' ] )
+
+  # Extend the range by 1 factor, and calculate the columns
+  num_lines = r.end.line - r.start.line + 1
+  r.start.line = max( r.start.line - int( num_lines * grow_factor ), 1 )
+  r.start.col = 1
+  r.end.line = min( r.end.line + int( num_lines * grow_factor ), len( buffer ) )
+  r.end.col = len( buffer[ r.end.line - 1 ] )
+
+  filepath = GetBufferFilepath( buffer )
+  return {
+    'start': {
+      'line_num': r.start.line,
+      'column_num': r.start.col,
+      'filepath': filepath,
+    },
+    'end': {
+      'line_num': r.end.line,
+      'column_num': r.end.col,
+      'filepath': filepath,
+    }
+  }
+
+
+def VisibleRangeOfBufferOverlaps( bufnr, expanded_range ):
+  visible_range = RangeVisibleInBuffer( bufnr, 0 )
+  # As above, we ignore horizontal scroll and only check lines
+  return (
+    expanded_range is not None and
+    visible_range is not None and
+    visible_range[ 'start' ][ 'line_num' ]
+      >= expanded_range[ 'start' ][ 'line_num' ] and
+    visible_range[ 'end' ][ 'line_num' ]
+      <= expanded_range[ 'end' ][ 'line_num' ]
+  )
+
+
 def CaptureVimCommand( command ):
   vim.command( 'redir => b:ycm_command' )
   vim.command( f'silent! { command }' )
@@ -286,14 +355,15 @@ def AddTextProperty( buffer_number,
                      line,
                      column,
                      prop_type,
-                     extra_args,
-                     prop_id ):
+                     extra_args ):
   if not VimIsNeovim():
     extra_args.update( {
       'type': prop_type,
-      'bufnr': buffer_number,
-      'id': prop_id } )
-    vim.eval( f'prop_add( { line }, { column }, { extra_args } )' )
+      'bufnr': buffer_number
+    } )
+    return GetIntValue( f'prop_add( { line }, '
+                                  f'{ column }, '
+                                  f'{ json.dumps( extra_args ) } )' )
   else:
     extra_args[ 'hl_group' ] = prop_type
     # Neovim uses 0-based offsets
@@ -303,25 +373,34 @@ def AddTextProperty( buffer_number,
       extra_args[ 'end_col' ] = extra_args.pop( 'end_col' ) - 1
     line -= 1
     column -= 1
-    vim.eval( f'nvim_buf_set_extmark( { buffer_number }, '
-                                    f'{ YCM_NEOVIM_NS_ID }, '
-                                    f'{ line }, '
-                                    f'{ column }, '
-                                    f'{ extra_args } )' )
+    return GetIntValue( f'nvim_buf_set_extmark( { buffer_number }, '
+                                              f'{ YCM_NEOVIM_NS_ID }, '
+                                              f'{ line }, '
+                                              f'{ column }, '
+                                              f'{ extra_args } )' )
 
 
-def RemoveTextProperty( buffer_number: int, prop: DiagnosticProperty ):
+def RemoveDiagnosticProperty( buffer_number: int, prop: DiagnosticProperty ):
+  RemoveTextProperty( buffer_number,
+                      prop.line,
+                      prop.id,
+                      prop.type )
+
+
+def RemoveTextProperty( buffer_number, line_num, prop_id, prop_type ):
   if not VimIsNeovim():
     p = {
-        'bufnr': buffer_number,
-        'id': prop.id,
-        'type': prop.type,
-        'both': 1 }
-    vim.eval( f'prop_remove( { p } )' )
+      'bufnr': buffer_number,
+      'id': prop_id,
+      'type': prop_type,
+      'both': 1,
+      'all': 1
+    }
+    vim.eval( f'prop_remove( { p }, { line_num } )' )
   else:
     vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
                                     f'{ YCM_NEOVIM_NS_ID }, '
-                                    f'{ prop.id } )' )
+                                    f'{ prop_id } )' )
 
 
 # Clamps the line and column numbers so that they are not past the contents of
@@ -782,6 +861,16 @@ def SelectFromList( prompt, items ):
 
 def EscapeForVim( text ):
   return ToUnicode( text.replace( "'", "''" ) )
+
+
+def AllOpenedFiletypes():
+  """Returns a dict mapping filetype to list of buffer numbers for all open
+  buffers"""
+  filetypes = defaultdict( list )
+  for buffer in vim.buffers:
+    for filetype in FiletypesForBuffer( buffer ):
+      filetypes[ filetype ].append( buffer.number )
+  return filetypes
 
 
 def CurrentFiletypes():
@@ -1361,6 +1450,11 @@ def VimSupportsPopupWindows():
                           'popup_settext',
                           'popup_show',
                           'popup_close' )
+
+
+@memoize()
+def VimSupportsVirtualText():
+  return not VimIsNeovim() and VimVersionAtLeast( VIM_VIRTUAL_TEXT_VERSION_REQ )
 
 
 @memoize()

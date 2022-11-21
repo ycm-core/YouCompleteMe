@@ -68,8 +68,13 @@ def BuildYcmdLibs( args ):
 
 
 def UnittestTests( parsed_args, extra_unittest_args ):
+  # if any extra arg is a specific file, or the '--' token, then assume the
+  # arguments are unittest-aware test selection:
+  #  - don't use discover
+  #  - don't set the pattern to search for
   unittest_args = [ '-cb' ]
-  prefer_regular = any( p.isfile( arg ) for arg in extra_unittest_args )
+  prefer_regular = any( arg == '--' or p.isfile( arg )
+                        for arg in extra_unittest_args )
   if not prefer_regular:
     unittest_args += [ '-p', '*_test.py' ]
 

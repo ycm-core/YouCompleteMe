@@ -37,10 +37,15 @@ class CommandRequest( BaseRequest ):
     self._request_data = None
     self._response_future = None
     self._silent = silent
+    self._bufnr = extra_data.pop( 'bufnr', None ) if extra_data else None
 
 
   def Start( self ):
-    self._request_data = BuildRequestData()
+    if self._bufnr is not None:
+      self._request_data = BuildRequestData( self._bufnr )
+    else:
+      self._request_data = BuildRequestData()
+
     if self._extra_data:
       self._request_data.update( self._extra_data )
     self._request_data.update( {

@@ -65,6 +65,11 @@ jobs:
         fetch-depth: 0
     - name: Install dependencies
       run: sudo -H pip3 install -r python/test_requirements.txt
+    - name: Install Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: 17
+        distribution: 'adopt'
     - name: Build ycmd
       run: python3 ./install.py --force-sudo --ts-completer --clangd-completer --java-completer
     - name: Run tests in old vim

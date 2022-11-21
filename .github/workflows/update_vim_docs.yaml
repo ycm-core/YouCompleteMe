@@ -1,0 +1,35 @@
+name: "Update vim docs"
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  update-vim-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Update local repo'
+        run: './update-vim-docs'
+      - name: 'Check diffs'
+        run: 'git diff'
+      - name: 'Create pull request'
+        uses: peter-evans/create-pull-request@v4
+        id: cpr
+        with:
+          token: ${{ secrets.VIMSPECTOR_UPDATE_BOT_PAT }}
+          push-to-fork: VimspectorUpdateBot/YouCompleteMe
+          commit-message: "Update vim docs"
+          branch: 'auto/update-vim-docs'
+          delete-branch: true
+          title: "[Auto] Update vim docs"
+          body: "Update the vim docs after recent changes"
+          labels: "auto"
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

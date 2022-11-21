@@ -97,8 +97,10 @@ scriptencoding utf-8
 "    'raw_results', and store the results in 'results', then call
 "    "HandleSymbolSearchResults"
 "
-"  - SearchWorkspace - perform GoToSymbol request, and store the results in
-"    'results', then call "HandleSymbolSearchResults"
+"  - SearchWorkspace - perform GoToSymbol request for all open filetypes,
+"     and store the results in 'raw_results' as a dict mapping
+"     filetype->results. Merge the results in to 'results', then call
+"     "HandleSymbolSearchResults"
 "
 "  - HandleSymbolSearchResults - redraw the popup with the 'results'
 "
@@ -162,6 +164,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
             \ { 'highlight': s:highlight_group_for_symbol_kind[ k ] } )
     endfor
     call prop_type_add( 'YCM-symbol-file', { 'highlight': 'Comment' } )
+    call prop_type_add( 'YCM-symbol-filetype', { 'highlight': 'Special' } )
     call prop_type_add( 'YCM-symbol-line-num', { 'highlight': 'Number' } )
     let s:initialized_text_properties = v:true
   endif
@@ -171,8 +174,8 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
         \ 'query': '',
         \ 'results': [],
         \ 'raw_results': v:none,
-        \ 'waiting': 0,
-        \ 'pending': 0,
+        \ 'all_filetypes': v:true,
+        \ 'pending': [],
         \ 'winid': win_getid(),
         \ 'bufnr': bufnr(),
         \ 'prompt_bufnr': -1,
@@ -216,12 +219,10 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
   let s:find_symbol_status.id = popup_create( 'Type to query for stuff', opts )
 
   " Kick off the request now
-  let s:find_symbol_status.waiting = 1
   if a:scope ==# 'document'
-    call s:StartSpinner()
     call s:RequestDocumentSymbols()
   else
-    call s:SearchWorkspace( '' )
+    call s:SearchWorkspace( '', v:true )
   endif
 
   let bufnr = bufadd( '_ycm_filter_' )
@@ -253,9 +254,11 @@ function! s:OnQueryTextChanged() abort
   let bufnr = s:find_symbol_status.prompt_bufnr
   let query = getbufline( bufnr, '$' )[ 0 ]
   let s:find_symbol_status.query = query[ len( s:prompt ) : ]
-  let s:find_symbol_status.pending = 1
-  call s:RequeryFinderPopup()
-  setlocal nomodified
+
+  " really, re-query if we can
+  call s:RequeryFinderPopup( v:true )
+
+  call win_execute( s:find_symbol_status.prompt_winid, 'setlocal nomodified' )
 endfunction
 
 
@@ -273,6 +276,7 @@ endfunction
 function! s:HandleKeyPress( id, key ) abort
   let redraw = 0
   let handled = 0
+  let requery = 0
 
   " The input for the search/query is taken from the prompt buffer and the
   " TextChangedI event
@@ -334,9 +338,17 @@ function! s:HandleKeyPress( id, key ) abort
     let s:find_symbol_status.selected = len( s:find_symbol_status.results ) - 1
     let redraw = 1
     let handled = 1
+  elseif a:key ==# "\<C-f>"
+    " TOggle filetypes?
+    let s:find_symbol_status.all_filetypes = !s:find_symbol_status.all_filetypes
+    let redraw = 0
+    let requery = 1
+    let handled = 1
   endif
 
-  if redraw
+  if requery
+    call s:RequeryFinderPopup( v:true )
+  elseif redraw
     call s:RedrawFinderPopup()
   endif
 
@@ -389,7 +401,7 @@ function! s:PopupClosed( id, selected ) abort
   endif
 
 
-  call s:StopSpinner()
+  call s:EndRequest()
   let s:find_symbol_status.id = -1
 endfunction
 
@@ -399,9 +411,7 @@ endfunction
 
 " Render a set of results returned from the filter/search function
 function! s:HandleSymbolSearchResults( results ) abort
-  let s:find_symbol_status.waiting = 0
   let s:find_symbol_status.results = []
-  call s:StopSpinner()
 
   if s:find_symbol_status.id < 0
     " Popup was closed, ignore this event
@@ -410,7 +420,9 @@ function! s:HandleSymbolSearchResults( results ) abort
 
   let s:find_symbol_status.results = a:results
   call s:RedrawFinderPopup()
-  call s:RequeryFinderPopup()
+
+  " Re-query but no change in the query text
+  call s:RequeryFinderPopup( v:false )
 endfunction
 
 
@@ -434,6 +446,20 @@ function! s:RedrawFinderPopup() abort
     let popup_width = popup_getpos( s:find_symbol_status.id ).core_width
 
     let buffer = []
+
+    let len_filetype = 0
+
+    for result in s:find_symbol_status.results
+      let len_filetype = max( [ len_filetype, len( result[ 'filetype' ] ) ] )
+    endfor
+
+    if len_filetype > 0
+      let filetype_sep = ' '
+    else
+      let filetype_sep = ''
+    endif
+
+    let available_width = popup_width - len_filetype - len( filetype_sep )
 
     for result in s:find_symbol_status.results
       " Calculate  the text to use. Try and include the full path and line
@@ -471,30 +497,58 @@ function! s:RedrawFinderPopup() abort
       let path = fnamemodify( result[ 'filepath' ], ':.' )
                \ .. ':'
                \ .. line_num
+      let path_includes_line = 1
 
-      let spaces = popup_width - len( desc ) - len( path )
-      let spacing = 8
+      let spaces = available_width - len( desc ) - len( path )
+      let spacing = 4
       if spaces < spacing
         let spaces = spacing
-        let path_len_to_use = popup_width - spacing - len( desc ) - 3
-        if path_len_to_use > 0
-          let path = '...' . strpart( path, len( path ) - path_len_to_use )
+        let space_for_path = available_width - spacing - len( desc )
+        let path_includes_line = space_for_path - 3 > len( line_num ) + 1
+        if space_for_path > 3
+          let path = '...' . strpart( path, len( path ) - space_for_path + 3 )
+        elseif space_for_path <= 0
+          let path = ''
         else
-          let path = '...:' .. line_num
+          let path_includes_line = 0
+          let path = '...'
         endif
       endif
-      let line = desc .. repeat( ' ', spaces ) .. path
-      call add( buffer, {
-            \ 'text': line,
-            \ 'props': props + [
-              \ { 'col': popup_width - len( path ) + 1,
-              \   'length': len( path ) - len( line_num ),
-              \   'type': 'YCM-symbol-file' },
-              \ { 'col': popup_width - len( line_num ) + 1,
-              \   'length': len( line_num ),
-              \   'type': 'YCM-symbol-line-num' }
-              \ ]
-            \ } )
+
+      let line = desc
+             \ .. repeat( ' ', spaces )
+             \ .. path
+             \ .. filetype_sep
+             \ .. result[ 'filetype' ]
+
+      if len( path ) > 0
+        if path_includes_line
+          let props += [
+                \ { 'col': available_width - len( path ) + 1,
+                \   'length': len( path ) - len( line_num ),
+                \   'type': 'YCM-symbol-file' },
+                \ { 'col': available_width - len( line_num ) + 1,
+                \   'length': len( line_num ),
+                \   'type': 'YCM-symbol-line-num' },
+                \ ]
+        else
+          let props += [
+                \ { 'col': available_width - len( path ) + 1,
+                \   'length': len( path ),
+                \   'type': 'YCM-symbol-file' },
+                \ ]
+        endif
+      endif
+
+      if len_filetype > 0
+        let props += [
+            \ { 'col': popup_width - len_filetype + len( filetype_sep ),
+            \   'length': len_filetype,
+            \   'type': 'YCM-symbol-filetype' },
+            \ ]
+      endif
+
+      call add( buffer, { 'text': line, 'props': props } )
     endfor
 
     call popup_settext( s:find_symbol_status.id, buffer )
@@ -524,7 +578,8 @@ function! s:RedrawFinderPopup() abort
     " Otherwise, new item is already displayed - don't scroll the window.
 
     if !getwinvar( s:find_symbol_status.id, '&cursorline' )
-      call win_execute( s:find_symbol_status.id, 'set cursorline' )
+      call win_execute( s:find_symbol_status.id,
+                      \ 'set cursorline cursorlineopt&' )
     endif
   else
     call win_execute( s:find_symbol_status.id, 'set nocursorline' )
@@ -548,28 +603,23 @@ endfunction
 
 
 " Re-query or re-filter by calling the filter function
-function! s:RequeryFinderPopup() abort
+function! s:RequeryFinderPopup( new_query ) abort
   " Update the title even if we delay the query, as this makes the UI feel
   " snappy
   call s:SetTitle()
 
-  if s:find_symbol_status.waiting == 1
-    let s:find_symbol_status.pending = 1
-  elseif s:find_symbol_status.pending == 1
-    let s:find_symbol_status.pending = 0
-    let s:find_symbol_status.waiting = 1
-    call win_execute( s:find_symbol_status.winid,
-          \ 'call s:find_symbol_status.query_func('
-          \ . 's:find_symbol_status.query )' )
-  endif
+  call win_execute( s:find_symbol_status.winid,
+        \ 'call s:find_symbol_status.query_func('
+        \ . 's:find_symbol_status.query,'
+        \ . 'a:new_query )' )
 endfunction
 
-function! s:ParseGoToResponse( results ) abort
+function! s:ParseGoToResponse( filetype, results ) abort
   if type( a:results ) == v:t_none || empty( a:results )
     let results = []
   elseif type( a:results ) != v:t_list
     if type( a:results ) == v:t_dict && has_key( a:results, 'error' )
-      let results = {}
+      let results = []
     else
       let results = [ a:results ]
     endif
@@ -577,12 +627,10 @@ function! s:ParseGoToResponse( results ) abort
     let results = a:results
   endif
 
-  call map( results,
-        \ { i,v -> extend( v,
-              \ { 'key': v->get( 'extra_data',
-              \                  {} )->get( 'name',
-              \                             v[ 'description' ] ) } ) } )
-
+  call map( results, { _, r -> extend( r, {
+      \   'key': r->get( 'extra_data', {} )->get( 'name', r[ 'description' ] ),
+      \   'filetype': a:filetype
+      \ } ) } )
   return results
 endfunction
 
@@ -590,8 +638,8 @@ endfunction
 
 " Spinner {{{
 
-function! s:StartSpinner() abort
-  call s:StopSpinner()
+function! s:StartRequest() abort
+  call s:EndRequest()
 
   let s:find_symbol_status.spinner = 0
   let s:find_symbol_status.spinner_timer = timer_start( s:spinner_delay,
@@ -600,8 +648,9 @@ function! s:StartSpinner() abort
   call s:SetTitle()
 endfunction
 
-function! s:StopSpinner() abort
+function! s:EndRequest() abort
   call timer_stop( s:find_symbol_status.spinner_timer )
+
   let s:find_symbol_status.spinner_timer = -1
 
   call s:SetTitle()
@@ -621,19 +670,90 @@ endfunction
 
 " Workspace search {{{
 
-function! s:SearchWorkspace( query ) abort
-  call s:StartSpinner()
+function! s:SearchWorkspace( query, new_query ) abort
 
-  let s:find_symbol_status.raw_results = v:none
-  call youcompleteme#GetRawCommandResponseAsync(
-        \ function( 's:HandleWorkspaceSymbols' ),
-        \ 'GoToSymbol',
-        \ a:query )
+  if a:new_query
+    if s:find_symbol_status.raw_results is# v:none
+      let raw_results = {}
+    else
+      let raw_results = copy( s:find_symbol_status.raw_results )
+    endif
+
+    let s:find_symbol_status.raw_results = {}
+    " FIXME: We might still get results for any pending results. There is no
+    " cancellation mechanism implemented for the async request!
+    let s:find_symbol_status.pending = []
+
+    if s:find_symbol_status.all_filetypes
+      let ft_buffer_map = py3eval( 'vimsupport.AllOpenedFiletypes()' )
+    else
+      let current_filetypes = py3eval( 'vimsupport.CurrentFiletypes()' )
+      let ft_buffer_map = {}
+      for ft in current_filetypes
+        let ft_buffer_map[ ft ] = [ bufnr() ]
+      endfor
+    endif
+
+    for ft in keys( ft_buffer_map )
+      if !youcompleteme#filetypes#AllowedForFiletype( ft )
+        continue
+      endif
+
+      let s:find_symbol_status.raw_results[ ft ] = v:none
+      if has_key( raw_results, ft ) && raw_results[ ft ] is# v:none
+        call add( s:find_symbol_status.pending,
+                \ [ ft, ft_buffer_map[ ft ][ 0 ] ] )
+      else
+        call youcompleteme#GetRawCommandResponseAsync(
+              \ function( 's:HandleWorkspaceSymbols', [ ft ] ),
+              \ 'GoToSymbol',
+              \ '--bufnr=' . ft_buffer_map[ ft ][ 0 ],
+              \ 'ft=' . ft,
+              \ a:query )
+      endif
+    endfor
+
+    if !empty( s:find_symbol_status.raw_results )
+      " We sent some requests
+      call s:StartRequest()
+    endif
+  else
+    " Just requery those completer filetypes that we're not currently waiting
+    " for
+    for [ ft, bufnr ] in copy( s:find_symbol_status.pending )
+      if s:find_symbol_status.raw_results[ ft ] isnot# v:none
+        call filter( s:find_symbol_status.pending, { v -> v !=# ft } )
+        let s:find_symbol_status.raw_results[ ft ] = v:none
+        call youcompleteme#GetRawCommandResponseAsync(
+              \ function( 's:HandleWorkspaceSymbols', [ ft ] ),
+              \ 'GoToSymbol',
+              \ '--bufnr=' . bufnr,
+              \ 'ft=' . ft,
+              \ a:query )
+      endif
+    endfor
+  endif
 endfunction
 
 
-function! s:HandleWorkspaceSymbols( results ) abort
-  let results = s:ParseGoToResponse( a:results )
+function! s:HandleWorkspaceSymbols( filetype, results ) abort
+
+  let s:find_symbol_status.raw_results[ a:filetype ] =
+        \ s:ParseGoToResponse( a:filetype, a:results )
+
+  " Collate the results from each filetype
+  let results = []
+  let waiting = 0
+  for ft in keys( s:find_symbol_status.raw_results )
+    if s:find_symbol_status.raw_results[ ft ] is v:none
+      let waiting = 1
+      continue
+    endif
+
+    call extend( results, s:find_symbol_status.raw_results[ ft ] )
+  endfor
+
+  let query = s:find_symbol_status.query
 
   if g:ycm_refilter_workspace_symbols && !empty( results )
     " This is kinda wonky, but seems to work well enough.
@@ -645,24 +765,26 @@ function! s:HandleWorkspaceSymbols( results ) abort
     "  - server filterins will differ by server and this leads to horrible wonky
     "    user experience
     "  - ycmd filter is consistent, even if not perfect
-    "  - servers are supposed to return _all_ symbols if we request a query of ""
-    "    but no actual servers obey this part of the spec.
+    "  - servers are supposed to return _all_ symbols if we request a query of
+    "    "" but not all servers actually do
     "
-    " So as a compromise we let the server filter the results, then we _refilter_
-    " and sort them using ycmd's method. This provides consistency with the
-    " filtering and sorting on the completion popup menu, with the disadvantage of
-    " additional latency.
+    " So as a compromise we let the server filter the results, then we
+    " _refilter_ and sort them using ycmd's method. This provides consistency
+    " with the filtering and sorting on the completion popup menu, with the
+    " disadvantage of additional latency.
     "
     " We're not currently sure this is going to be perfecct, so we have a hidden
     " option to disable this re-filter/sort.
     "
     let results = py3eval(
-          \ 'ycm_state.FilterAndSortItems( '
-          \ . ' vim.eval( "results" ),'
-          \ . ' "description",'
-          \ . ' vim.eval( "s:find_symbol_status.query" ) )' )
+          \ 'ycm_state.FilterAndSortItems( vim.eval( "results" ),'
+          \ .                              ' "key",'
+          \ .                              ' vim.eval( "query" ) )' )
   endif
 
+  if !waiting
+    call s:EndRequest()
+  endif
   eval s:HandleSymbolSearchResults( results )
 endfunction
 
@@ -670,21 +792,24 @@ endfunction
 
 " Document Search {{{
 
-function! s:SearchDocument( query ) abort
+function! s:SearchDocument( query, new_query ) abort
+  if !a:new_query
+    return
+  endif
+
   if type( s:find_symbol_status.raw_results ) == v:t_none
-    call s:StopSpinner()
     call popup_settext( s:find_symbol_status.id,
           \ 'No symbols found in document' )
     return
   endif
 
-  call s:StartSpinner()
+  " No spinner, because this is actually a synchronous call
 
   " Call filter_and_sort_candidates on the results (synchronously)
   let response = py3eval(
         \ 'ycm_state.FilterAndSortItems( '
         \ . ' vim.eval( "s:find_symbol_status.raw_results" ),'
-        \ . ' "description",'
+        \ . ' "key",'
         \ . ' vim.eval( "a:query" ) )' )
 
   eval s:HandleSymbolSearchResults( response )
@@ -692,6 +817,7 @@ endfunction
 
 
 function! s:RequestDocumentSymbols()
+  call s:StartRequest()
   call youcompleteme#GetRawCommandResponseAsync(
         \ function( 's:HandleDocumentSymbols' ),
         \ 'GoToDocumentOutline' )
@@ -699,8 +825,9 @@ endfunction
 
 
 function! s:HandleDocumentSymbols( results ) abort
-  let s:find_symbol_status.raw_results = s:ParseGoToResponse( a:results )
-  call s:SearchDocument( '' )
+  call s:EndRequest()
+  let s:find_symbol_status.raw_results = s:ParseGoToResponse( '', a:results )
+  call s:SearchDocument( '', v:true )
 endfunction
 
 " }}}

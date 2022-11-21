@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+tmpdir=$(mktemp -d)
+python3 -m venv ${tmpdir}/env
+source ${tmpdir}/env/bin/activate
+
+if [ -z "$1" ]; then
+  git clone https://github.com/ycm-core/vim-tools ${tmpdir}/vim-tools
+  TOOLS=${tmpdir}/vim-tools
+else
+  TOOLS="$1"
+fi
+
+pip install -r ${TOOLS}/requirements.txt
+
+pushd $(dirname $0)
+  python3 ${TOOLS}/html2vimdoc.py -f youcompleteme \
+                                   README.md \
+                                   > doc/youcompleteme.txt
+popd
+
+deactivate
+
+rm -rf ${tmpdir}

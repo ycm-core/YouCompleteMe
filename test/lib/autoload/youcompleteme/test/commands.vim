@@ -1,8 +1,10 @@
 function! youcompleteme#test#commands#WaitForCommandRequestComplete() abort
   call WaitForAssert( { ->
         \ assert_true( py3eval(
-        \     'ycm_state.GetCommandRequest() is not None and '
-        \   . 'ycm_state.GetCommandRequest().Done()' ) )
+        \     'ycm_state.GetCommandRequest( '
+        \   . '  ycm_state._next_command_request_id - 1 ) is not None and '
+        \   . 'ycm_state.GetCommandRequest(  '
+        \   . '  ycm_state._next_command_request_id - 1 ).Done()' ) )
         \ } )
 
   call WaitForAssert( { ->
@@ -14,8 +16,10 @@ endfunction
 function! youcompleteme#test#commands#CheckNoCommandRequest() abort
   call WaitForAssert( { ->
         \ assert_true( py3eval(
-        \     'ycm_state.GetCommandRequest() is None or '
-        \   . 'ycm_state.GetCommandRequest().Done()' ) )
+        \     'ycm_state.GetCommandRequest( '
+        \   . '  ycm_state._next_command_request_id - 1 ) is None or '
+        \   . 'ycm_state.GetCommandRequest( '
+        \   . '  ycm_state._next_command_request_id - 1 ).Done()' ) )
         \ } )
 
   call WaitForAssert( { ->
