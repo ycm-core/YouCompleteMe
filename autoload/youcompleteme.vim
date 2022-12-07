@@ -266,11 +266,23 @@ endfunction
 function! s:SetUpPython() abort
   py3 << EOF
 import os.path as p
+import os
+import re
 import sys
 import traceback
 import vim
+IS_MSYS = 'MSYS' == os.environ.get( 'MSYSTEM' )
+IS_WINDOWS = sys.platform == 'win32'
 
 root_folder = p.normpath( p.join( vim.eval( 's:script_folder_path' ), '..' ) )
+# convert posix-based mingw path to windows path
+# such as \c\path\to\directory to C:\path\to\directory
+if IS_WINDOWS and not IS_MSYS:
+  root_paths = root_folder.split( os.sep )
+  if len(root_paths) > 1 and root_paths[0] == '' and re.match( '^[a-zA-Z]$', root_paths[ 1 ] ):
+    root_paths = root_paths[ 1: ]
+    root_paths[ 0 ] = root_paths[ 0 ] + ':'
+  root_folder = os.sep.join( root_paths )
 third_party_folder = p.join( root_folder, 'third_party' )
 
 # Add dependencies to Python path.
