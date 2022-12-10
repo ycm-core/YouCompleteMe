@@ -390,7 +390,7 @@ Below we can see YCM being able to do a few things:
 - Retrieve references across files
 - Go to declaration/definition
 - Expand 'auto' in C++
-- Fix some common errors with |FixIt|
+- Fix some common errors and perform refactoring with |FixIt|
 - Not shown in the GIF is |GoToImplementation| and |GoToType| for servers
   that support it.
 
@@ -927,6 +927,7 @@ C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Reference finding (|GoToReferences|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -946,6 +947,7 @@ C♯ ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Management of OmniSharp-Roslyn server instance
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -975,6 +977,7 @@ Go ~
 - Go to implementation (|GoToImplementation|)
 - Document outline (|GoToDocumentOutline|), with interactive search
 - Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Code formatting (|Format|)
@@ -996,6 +999,7 @@ JavaScript and TypeScript ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
 - Organize imports (|OrganizeImports|)
@@ -1014,6 +1018,7 @@ Rust ~
 - Document outline (|GoToDocumentOutline|), with interactive search
 - View documentation comments for identifiers (|GetDoc|)
 - Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Type information for identifiers (|GetType|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -1038,6 +1043,7 @@ Java ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors including code generation (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
 - Organize imports (|OrganizeImports|)
@@ -2480,16 +2486,25 @@ undone, and never saves or writes files to the disk.
 -------------------------------------------------------------------------------
 The *FixIt* subcommand
 
-Where available, attempts to make changes to the buffer to correct diagnostics
-on the current line. Where multiple suggestions are available (such as when
-there are multiple ways to resolve a given warning, or where multiple
-diagnostics are reported for the current line), the options are presented and
+Where available, attempts to make changes to the buffer to correct diagnostics,
+or perform refactoring, on the current line or selection. Where multiple
+suggestions are available (such as when there are multiple ways to resolve a
+given warning, or where multiple diagnostics are reported for the current line,
+or multiple refactoring tweaks are available), the options are presented and
 one can be selected.
 
 Completers which provide diagnostics may also provide trivial modifications to
 the source in order to correct the diagnostic. Examples include syntax errors
-such as missing trailing semi-colons, spurious characters, or other errors
-which the semantic engine can deterministically suggest corrections.
+such as missing trailing semi-colons, spurious characters, or other errors which
+the semantic engine can deterministically suggest corrections. A small demo
+presenting how diagnostics can be fixed with clangd: [99].
+
+Completers (LSPs) may also provide refactoring tweaks, which may be available
+even when no diagnostic is presented for the current line. These include
+function extraction, variable extraction, 'switch' population, constructor
+generation, ... The tweaks work for a selection as well. Consult your LSP for
+available refactorings. A demonstration of refactoring capabilities with 
+clangd: [100].
 
 If no fix-it is available for the current line, or there is no diagnostic on
 the current line, this command has no effect on the current buffer. If any
@@ -4106,5 +4121,7 @@ References ~
 [96] https://www.budihuman.rs/en
 [97] https://www.cancerresearchuk.org
 [98] https://iccf.nl
+[99] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
+[100] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
 
 vim: ft=help
