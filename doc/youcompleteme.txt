@@ -926,7 +926,8 @@ C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 - Document outline (|GoToDocumentOutline|), with interactive search
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
-- Automatically fix certain errors and perform refactoring (|FixIt|)
+- Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Reference finding (|GoToReferences|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -945,7 +946,8 @@ C♯ ~
 - Find Symbol ('GoToSymbol'), with interactive search
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
-- Automatically fix certain errors and perform refactoring (|FixIt|)
+- Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Management of OmniSharp-Roslyn server instance
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -974,7 +976,8 @@ Go ~
 - Go to type definition (|GoToType|)
 - Go to implementation (|GoToImplementation|)
 - Document outline (|GoToDocumentOutline|), with interactive search
-- Automatically fix certain errors and perform refactoring (|FixIt|)
+- Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Code formatting (|Format|)
@@ -995,7 +998,8 @@ JavaScript and TypeScript ~
 - Reference finding (|GoToReferences|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
-- Automatically fix certain errors and perform refactoring (|FixIt|)
+- Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
 - Organize imports (|OrganizeImports|)
@@ -1013,7 +1017,8 @@ Rust ~
 - Reference finding (|GoToReferences|)
 - Document outline (|GoToDocumentOutline|), with interactive search
 - View documentation comments for identifiers (|GetDoc|)
-- Automatically fix certain errors and perform refactoring (|FixIt|)
+- Automatically fix certain errors (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Type information for identifiers (|GetType|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -1038,6 +1043,7 @@ Java ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors including code generation (|FixIt|)
+- Perform refactoring (|FixIt|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
 - Organize imports (|OrganizeImports|)

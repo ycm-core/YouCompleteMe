@@ -731,7 +731,8 @@ Quick Feature Summary
 * Document outline (`GoToDocumentOutline`), with interactive search
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
-* Automatically fix certain errors and perform refactoring (`FixIt`)
+* Automatically fix certain errors (`FixIt`)
+* Peform refactoring (`FixIt`)
 * Reference finding (`GoToReferences`)
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
@@ -748,7 +749,8 @@ Quick Feature Summary
 * Find Symbol (`GoToSymbol`), with interactive search
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
-* Automatically fix certain errors and perform refactoring (`FixIt`)
+* Automatically fix certain errors (`FixIt`)
+* Peform refactoring (`FixIt`)
 * Management of OmniSharp-Roslyn server instance
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
@@ -773,7 +775,8 @@ Quick Feature Summary
 * Go to type definition (`GoToType`)
 * Go to implementation (`GoToImplementation`)
 * Document outline (`GoToDocumentOutline`), with interactive search
-* Automatically fix certain errors and perform refactoring (`FixIt`)
+* Automatically fix certain errors (`FixIt`)
+* Peform refactoring (`FixIt`)
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Code formatting (`Format`)
@@ -793,6 +796,7 @@ Quick Feature Summary
 * View documentation comments for identifiers (`GetDoc`)
 * Type information for identifiers (`GetType`)
 * Automatically fix certain errors and perform refactoring (`FixIt`)
+* Peform refactoring (`FixIt`)
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
 * Organize imports (`OrganizeImports`)
@@ -808,7 +812,8 @@ Quick Feature Summary
 * Reference finding (`GoToReferences`)
 * Document outline (`GoToDocumentOutline`), with interactive search
 * View documentation comments for identifiers (`GetDoc`)
-* Automatically fix certain errors and perform refactoring (`FixIt`)
+* Automatically fix certain errors (`FixIt`)
+* Peform refactoring (`FixIt`)
 * Type information for identifiers (`GetType`)
 * Renaming symbols (`RefactorRename <new name>`)
 * Code formatting (`Format`)
