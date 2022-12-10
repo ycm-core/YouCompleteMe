@@ -2238,13 +2238,18 @@ one can be selected.
 Completers which provide diagnostics may also provide trivial modifications to
 the source in order to correct the diagnostic. Examples include syntax errors
 such as missing trailing semi-colons, spurious characters, or other errors which
-the semantic engine can deterministically suggest corrections.
+the semantic engine can deterministically suggest corrections. A small demo
+presenting how diagnostics can be fixed with clangd:
+
+![YcmCompleter-FixIt-OnDiagnostic](https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif)
 
 Completers (LSPs) may also provide refactoring tweaks, which may be available
 even when no diagnostic is presented for the current line. These include
 function extraction, variable extraction, `switch` population, constructor
 generation, ... The tweaks work for a selection as well. Consult your LSP for
-available refactorings.
+available refactorings. A demonstration of refactoring capabilities with clangd:
+
+![YouCompleter-FixIt-Refactoring](https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif)
 
 If no fix-it is available for the current line, or there is no diagnostic on the
 current line, this command has no effect on the current buffer. If any
