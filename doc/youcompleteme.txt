@@ -390,7 +390,7 @@ Below we can see YCM being able to do a few things:
 - Retrieve references across files
 - Go to declaration/definition
 - Expand 'auto' in C++
-- Fix some common errors and perform refactoring with |FixIt|
+- Fix some common errors, and provide refactorings, with |FixIt|
 - Not shown in the GIF is |GoToImplementation| and |GoToType| for servers
   that support it.
 
@@ -998,7 +998,7 @@ JavaScript and TypeScript ~
 - Reference finding (|GoToReferences|)
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
-- Automatically fix certain errors (|FixIt|)
+- Automatically fix certain errors and perform refactoring (|FixIt|)
 - Perform refactoring (|FixIt|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
@@ -1043,7 +1043,6 @@ Java ~
 - View documentation comments for identifiers (|GetDoc|)
 - Type information for identifiers (|GetType|)
 - Automatically fix certain errors including code generation (|FixIt|)
-- Perform refactoring (|FixIt|)
 - Renaming symbols ('RefactorRename <new name>')
 - Code formatting (|Format|)
 - Organize imports (|OrganizeImports|)
@@ -2495,16 +2494,20 @@ one can be selected.
 
 Completers which provide diagnostics may also provide trivial modifications to
 the source in order to correct the diagnostic. Examples include syntax errors
-such as missing trailing semi-colons, spurious characters, or other errors which
-the semantic engine can deterministically suggest corrections. A small demo
-presenting how diagnostics can be fixed with clangd: [99].
+such as missing trailing semi-colons, spurious characters, or other errors
+which the semantic engine can deterministically suggest corrections. A small
+demo presenting how diagnostics can be fixed with clangd:
+
+  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [83])
 
 Completers (LSPs) may also provide refactoring tweaks, which may be available
 even when no diagnostic is presented for the current line. These include
 function extraction, variable extraction, 'switch' population, constructor
 generation, ... The tweaks work for a selection as well. Consult your LSP for
-available refactorings. A demonstration of refactoring capabilities with 
-clangd: [100].
+available refactorings. A demonstration of refactoring capabilities with
+clangd:
+
+  Image: YouCompleter-FixIt-Refactoring (see reference [84])
 
 If no fix-it is available for the current line, or there is no diagnostic on
 the current line, this command has no effect on the current buffer. If any
@@ -2550,7 +2553,7 @@ The following additional commands are supported for python:
 - 'RefactorExtractVariable'
 - 'RefactorExtractFunction'
 
-See the jedi docs [83] for what they do.
+See the jedi docs [85] for what they do.
 
 Supported in filetypes: 'python'
 
@@ -2625,7 +2628,7 @@ specific commands. Consult the jdt.ls [16] documentation to find out what
 commands are supported and which arguments are expected.
 
 The support for 'ExecuteCommand' was implemented to support plugins like
-Vimspector [84] to debug java, but isn't limited to that specific use case.
+Vimspector [86] to debug java, but isn't limited to that specific use case.
 
 -------------------------------------------------------------------------------
 The *RestartServer* subcommand
@@ -2661,7 +2664,7 @@ For example:
   call youcompleteme#GetErrorCount()
 <
 Both this function and |youcompleteme#GetWarningCount| can be useful when
-integrating YCM with other Vim plugins. For example, a lightline [85] user
+integrating YCM with other Vim plugins. For example, a lightline [87] user
 could add a diagnostics section to their statusline which would display the
 number of errors and warnings.
 
@@ -3149,9 +3152,9 @@ string 'virtual-text', and the diagnostic will be displayed inline with the
 text, right aligned in the window and wrapping to the next line if there is not
 enough space, for example:
 
-  Image: Virtual text diagnostic demo (see reference [86])
+  Image: Virtual text diagnostic demo (see reference [88])
 
-  Image: Virtual text diagnostic demo (see reference [87])
+  Image: Virtual text diagnostic demo (see reference [89])
 
 **NOTE**: It's _strongly_ recommended to also set
 |g:ycm_update_diagnostics_in_insert_mode| to '0' when using 'virtual-text' for
@@ -3237,7 +3240,7 @@ YCM will not render it.
 
 The following filter types are supported:
 
-- "regex": Accepts a string regular expression [88]. This type matches when
+- "regex": Accepts a string regular expression [90]. This type matches when
   the regex (treated as case-insensitive) is found anywhere in the diagnostic
   text ('re.search', not 're.match')
 
@@ -3245,7 +3248,7 @@ The following filter types are supported:
   matches when the diagnostic has the same level, that is, specifying 'level:
   "error"' will remove **all** errors from the diagnostics.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [88].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [90].
 
 Default: '{}'
 
@@ -3340,7 +3343,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [89]. The format
+The only supported tag format is the Exuberant Ctags format [91]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the
 '--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -3743,7 +3746,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [88].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [90].
 
 Default: '[see next line]'
 >
@@ -3973,17 +3976,17 @@ The FAQ section has been moved to the wiki [8].
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[90]. By participating in this project you agree to abide by its terms.
+[92]. By participating in this project you agree to abide by its terms.
 
 ===============================================================================
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please join the Gitter
-room [1] or use the ycm-users [91] mailing list.
+room [1] or use the ycm-users [93] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[92]. Before you do, please carefully read CONTRIBUTING.md [93] as this asks
+[94]. Before you do, please carefully read CONTRIBUTING.md [95] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -3998,7 +4001,7 @@ YouCompleteMe maintainers directly using the contact details.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [94]. © 2015-2018
+This software is licensed under the GPL v3 license [96]. © 2015-2018
 YouCompleteMe contributors
 
 ===============================================================================
@@ -4009,10 +4012,10 @@ If you like YCM so much that you're wiling to part with your hard-earned cash,
 please consider donating to one of the following charities, which are
 meaningful to the current maintainers (in no particular order):
 
-- Greyhound Rescue Wales [95]
-- Be Humane [96]
-- Cancer Research UK [97]
-- ICCF Holland [98]
+- Greyhound Rescue Wales [97]
+- Be Humane [98]
+- Cancer Research UK [99]
+- ICCF Holland [100]
 - Any charity of your choosing.
 
 Please note: The YCM maintainers do not specifically endorse nor necessarily
@@ -4105,23 +4108,23 @@ References ~
 [80] https://github.com/Valloric/ListToggle
 [81] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C
 [82] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C.svg
-[83] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
-[84] https://github.com/puremourning/vimspector
-[85] https://github.com/itchyny/lightline.vim
-[86] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
-[87] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
-[88] https://docs.python.org/2/library/re.html#regular-expression-syntax
-[89] http://ctags.sourceforge.net/FORMAT
-[90] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[91] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[92] https://github.com/ycm-core/YouCompleteMe/issues?state=open
-[93] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
-[94] https://www.gnu.org/copyleft/gpl.html
-[95] https://greyhoundrescuewales.co.uk
-[96] https://www.budihuman.rs/en
-[97] https://www.cancerresearchuk.org
-[98] https://iccf.nl
-[99] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
-[100] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
+[83] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
+[84] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
+[85] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
+[86] https://github.com/puremourning/vimspector
+[87] https://github.com/itchyny/lightline.vim
+[88] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
+[89] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
+[90] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[91] http://ctags.sourceforge.net/FORMAT
+[92] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[93] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[94] https://github.com/ycm-core/YouCompleteMe/issues?state=open
+[95] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
+[96] https://www.gnu.org/copyleft/gpl.html
+[97] https://greyhoundrescuewales.co.uk
+[98] https://www.budihuman.rs/en
+[99] https://www.cancerresearchuk.org
+[100] https://iccf.nl
 
 vim: ft=help
