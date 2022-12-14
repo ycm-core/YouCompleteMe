@@ -40,7 +40,7 @@ BUFWINNR_REGEX = re.compile( '^bufwinnr\\((?P<buffer_number>[0-9]+)\\)$' )
 BWIPEOUT_REGEX = re.compile(
   '^(?:silent! )bwipeout!? (?P<buffer_number>[0-9]+)$' )
 GETBUFVAR_REGEX = re.compile(
-  '^getbufvar\\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\\)$' )
+  '^getbufvar\\((?P<buffer_number>[0-9]+), "(?P<option>.+)"\\)( \\?\\? 0)?$' )
 PROP_ADD_REGEX = re.compile(
         '^prop_add\\( '            # A literal at the start
         '(?P<start_line>\\d+), '   # First argument - number

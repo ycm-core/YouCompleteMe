@@ -30,6 +30,7 @@ let g:ycm_neovim_ns_id = s:is_neovim ? nvim_create_namespace( 'ycm_id' ) : -1
 " This needs to be called outside of a function
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 let s:force_semantic = 0
+let s:force_manual = 0
 let s:completion_stopped = 0
 " These two variables are initialized in youcompleteme#Enable.
 let s:default_completion = {}
@@ -224,9 +225,9 @@ function! youcompleteme#Enable()
           \ } )
   endif
 
-  nnoremap <silent> <Plug>(YCMFindSymbolInWorkspace)
+  nnoremap <silent> <plug>(YCMFindSymbolInWorkspace)
         \ :call youcompleteme#finder#FindSymbol( 'workspace' )<CR>
-  nnoremap <silent> <Plug>(YCMFindSymbolInDocument)
+  nnoremap <silent> <plug>(YCMFindSymbolInDocument)
         \ :call youcompleteme#finder#FindSymbol( 'document' )<CR>
 endfunction
 
@@ -639,6 +640,9 @@ endfunction
 
 
 function! s:EnableCompletingInCurrentBuffer()
+  if !g:ycm_auto_trigger
+    call s:SetCompleteFunc()
+  endif
   let b:ycm_completing = 1
 endfunction
 
@@ -1010,10 +1014,11 @@ function! s:OnTextChangedInsertMode( popup_is_visible )
   " CurrentIdentifierFinished check.
   if s:force_semantic && !py3eval( 'base.LastEnteredCharIsIdentifierChar()' )
     let s:force_semantic = 0
+    let s:force_manual = 0
   endif
 
   if get( b:, 'ycm_completing' ) &&
-        \ ( g:ycm_auto_trigger || s:force_semantic ) &&
+        \ ( g:ycm_auto_trigger || s:force_semantic || s:force_manual ) &&
         \ !s:InsideCommentOrStringAndShouldStop() &&
         \ !s:OnBlankLine()
     call s:RequestCompletion()
@@ -1045,6 +1050,7 @@ function! s:OnInsertLeave()
 
   call s:StopPoller( s:pollers.completion )
   let s:force_semantic = 0
+  let s:force_manual = 0
   let s:completion = s:default_completion
 
   call s:OnFileReadyToParse()
@@ -1085,6 +1091,7 @@ function! s:IdentifierFinishedOperations()
   endif
   py3 ycm_state.OnCurrentIdentifierFinished()
   let s:force_semantic = 0
+  let s:force_manual = 0
   let s:completion = s:default_completion
 endfunction
 
@@ -1149,8 +1156,37 @@ function! s:RequestCompletion()
   endif
 endfunction
 
+function! s:ManuallyRequestCompletion() abort
+  " Since this function is called in a mapping through the expression register
+  " <C-R>=, its return value is inserted (see :h c_CTRL-R_=). We don't want to
+  " insert anything so we return an empty string.
 
-function! s:RequestSemanticCompletion()
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return ''
+  endif
+
+  if get( b:, 'ycm_completing' )
+    let s:force_manual = 0
+    call s:RequestCompletion()
+    call s:RequestSignatureHelp()
+  endif
+
+  return ''
+endfunction
+
+function! s:SetCompleteFunc()
+   let &completefunc = 'youcompleteme#CompleteFunc'
+endfunction
+
+function! youcompleteme#CompleteFunc( findstart, base ) abort
+  call s:ManuallyRequestCompletion()
+  " Cancel, but silently stay in completion mode.
+  return -2
+endfunction
+
+inoremap <silent> <plug>(YCMComplete) <C-r>=<SID>ManuallyRequestCompletion()<CR>
+
+function! s:RequestSemanticCompletion() abort
   if !s:AllowedToCompleteInCurrentBuffer()
     return ''
   endif
@@ -1682,7 +1718,7 @@ function! s:ToggleInlayHints()
   endif
 endfunction
 
-silent! nnoremap <silent> <Plug>(YCMToggleInlayHints)
+silent! nnoremap <silent> <plug>(YCMToggleInlayHints)
       \ <cmd>call <SID>ToggleInlayHints()<CR>
 
 " This is basic vim plugin boilerplate

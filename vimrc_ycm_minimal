@@ -13,9 +13,6 @@ set encoding=utf-8
 let g:ycm_keep_logfiles = 1
 let g:ycm_log_level = 'debug'
 
-" If you're on an arm mac, uncomment the following line
-" let g:ycm_clangd_binary_path=trim(system('brew --prefix llvm')).'/bin/clangd'
-
 " If the base settings don't repro, paste your existing config for YCM only,
 " here:
 " let g:ycm_....
@@ -23,4 +20,4 @@ let g:ycm_log_level = 'debug'
 " Load YCM (only)
 let &rtp .= ',' . expand( '<sfile>:p:h' )
 filetype plugin indent on
-
+syn on
