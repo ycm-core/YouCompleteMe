@@ -439,3 +439,98 @@ function! Test_Completion_WorksWithoutMovingCursor()
   call setpos( '.', [ 0, 3, 1 ] )
   call FeedAndCheckMain( "i\<C-Space>", funcref( 'Check' ) )
 endfunction
+
+function! SetUp_Test_Manual_Trigger()
+  call youcompleteme#test#setup#PushGlobal( 'ycm_auto_trigger', 0 )
+endfunction
+
+function! Test_Manual_Trigger()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
+
+  call setpos( '.', [ 0, 11, 6 ] )
+
+  imap <C-d> <plug>(YCMComplete)
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function! Check( id )
+    call WaitForCompletion()
+
+    call CheckCurrentLine( '  tfthne' )
+    call CheckCompletionItemsContainsExactly( [
+          \ 'test_function_that_has_no_errors' ], 'word' )
+
+    call FeedAndCheckAgain( "\<BS>", funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( id )
+    call WaitForCompletion()
+
+    call CheckCurrentLine( '  tfthn' )
+    call CheckCompletionItemsContainsExactly( [
+          \ 'test_function_that_has_no_errors' ], 'word' )
+
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call FeedAndCheckMain( "Otfthne\<C-d>", funcref( 'Check' ) )
+  " Checks run in insert mode, then exit insert mode.
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+  iunmap <C-d>
+endfunction
+
+function! TearDown_Test_Manual_Trigger()
+  call youcompleteme#test#setup#PopGlobal( 'ycm_auto_trigger' )
+endfunction
+
+function! SetUp_Test_Manual_Trigger_CompleteFunc()
+  call youcompleteme#test#setup#PushGlobal( 'ycm_auto_trigger', 0 )
+endfunction
+
+function! Test_Manual_Trigger_CompleteFunc()
+  call youcompleteme#test#setup#OpenFile(
+        \ '/third_party/ycmd/ycmd/tests/clangd/testdata/basic.cpp', {} )
+
+  call setpos( '.', [ 0, 11, 6 ] )
+  set completefunc=youcompleteme#CompleteFunc
+
+  " Required to trigger TextChangedI
+  " https://github.com/vim/vim/issues/4665#event-2480928194
+  call test_override( 'char_avail', 1 )
+
+  function! Check( id )
+    call WaitForCompletion()
+
+    call CheckCurrentLine( '  tfthne' )
+    call CheckCompletionItemsContainsExactly( [
+          \ 'test_function_that_has_no_errors' ], 'word' )
+
+    call FeedAndCheckAgain( "\<BS>", funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( id )
+    call WaitForCompletion()
+
+    call CheckCurrentLine( '  tfthn' )
+    call CheckCompletionItemsContainsExactly( [
+          \ 'test_function_that_has_no_errors' ], 'word' )
+
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+  call FeedAndCheckMain( "Otfthne\<C-x>\<C-u>", funcref( 'Check' ) )
+  " Checks run in insert mode, then exit insert mode.
+  call assert_false( pumvisible(), 'pumvisible()' )
+
+  call test_override( 'ALL', 0 )
+  set completefunc=
+endfunction
+
+function! TearDown_Test_Manual_Trigger_CompleteFunc()
+  call youcompleteme#test#setup#PopGlobal( 'ycm_auto_trigger' )
+endfunction
