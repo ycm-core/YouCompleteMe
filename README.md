@@ -2672,6 +2672,21 @@ If you want to just turn off the identifier completer but keep the semantic
 triggers, you should set `g:ycm_min_num_of_chars_for_completion` to a high
 number like `99`.
 
+When `g:ycm_auto_trigger` is `0`, YCM sets the `completefunc`, so that you can
+manually trigger normal completion using `C-x C-u`.
+
+If you want to map something else to trigger completion, such as `C-d``,
+then you can map it to `<plug>(YCMComplete)`. For example:
+
+```viml
+let g:ycm_auto_trigger = 0
+imap <c-d> <plug>(YCMComplete)
+```
+
+NOTE: It's not possible to map one of the keys in
+`g:ycm_key_list_select_completion` (or similar) to `<plug>(YCMComplete)`. In
+practice that means that you can't use `<Tab>` for this.
+
 Default: `1`
 
 ```viml
@@ -3386,9 +3401,10 @@ let g:ycm_key_list_stop_completion = ['<C-y>']
 
 This option controls the key mapping used to invoke the completion menu for
 semantic completion. By default, semantic completion is triggered automatically
-after typing `.`, `->` and `::` in insert mode (if semantic completion support
-has been compiled in). This key mapping can be used to trigger semantic
-completion anywhere. Useful for searching for top-level functions and classes.
+after typing characters appropriate for the language, such as `.`, `->`, `::`,
+etc. in insert mode (if semantic completion support has been compiled in). This
+key mapping can be used to trigger semantic completion anywhere. Useful for
+searching for top-level functions and classes.
 
 Console Vim (not Gvim or MacVim) passes `<Nul>` to Vim when the user types
 `<C-Space>` so YCM will make sure that `<Nul>` is used in the map command when
