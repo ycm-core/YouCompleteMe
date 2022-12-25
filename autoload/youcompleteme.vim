@@ -169,7 +169,7 @@ function! youcompleteme#Enable()
     " supported, enable it.
     let s:resolve_completions = s:RESOLVE_ON_DEMAND
   elseif require_resolve
-    " The preview window or info popup is enalbed - request the server
+    " The preview window or info popup is enabled - request the server
     " pre-resolves completion items
     let s:resolve_completions = s:RESOLVE_UP_FRONT
   else
@@ -709,19 +709,18 @@ endfunction
 
 
 function! s:EnableAutoHover()
-  if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
-    augroup YcmBufHover
-      autocmd! * <buffer>
-      autocmd CursorHold <buffer> call s:Hover()
-    augroup END
+  if s:enable_hover
+    set ballooneval
+    set balloonevalterm
+    set balloonexpr=youcompleteme#hover()
   endif
 endfunction
 
 
 function! s:DisableAutoHover()
-  augroup YcmBufHover
-    autocmd! * <buffer>
-  augroup END
+  call popup_clear()
+  set noballooneval
+  set noballoonevalterm
 endfunction
 
 
@@ -1259,7 +1258,9 @@ endfunction
 
 function! s:ShowInfoPopup( completion_item )
   let id = popup_findinfo()
-  if id
+  if id && !empty( a:completion_item.info )
+    call setwinvar( id, '&number', 0 )
+    call setwinvar( id, '&wincolor', 'Pmenu' )
     call popup_settext( id, split( a:completion_item.info, '\n' ) )
     call popup_show( id )
   endif
@@ -1583,11 +1584,10 @@ function! s:ForceCompileAndDiagnostics()
 endfunction
 
 
-if exists( '*popup_atcursor' )
+if exists( '*popup_beval' )
   function s:Hover()
     if !py3eval( 'ycm_state.NativeFiletypeCompletionUsable()' )
       " Cancel the autocommand if it happens to have been set
-      call s:DisableAutoHover()
       return
     endif
 
@@ -1619,7 +1619,10 @@ if exists( '*popup_atcursor' )
 
     call youcompleteme#GetCommandResponseAsync(
           \ function( 's:ShowHoverResult' ),
-          \ b:ycm_hover.command )
+          \ b:ycm_hover.command,
+          \ '--bufnr=' . v:beval_bufnr,
+          \ '--line_num=' . v:beval_lnum,
+          \ '--column_num=' . v:beval_col )
   endfunction
 
 
@@ -1636,56 +1639,85 @@ if exists( '*popup_atcursor' )
     "
     " Find the longest line (FIXME: probably doesn't work well for multi-byte)
     let lines = split( a:response, "\n" )
-    let len = max( map( copy( lines ), "len( v:val )" ) )
+    let len = max( map( copy( lines ), "strdisplaywidth( v:val )" ) )
 
+    let mousepos = screenpos( v:beval_winid, v:beval_lnum, v:beval_col )
+    let col = mousepos.col
     let wrap = 0
-    let col = 'cursor'
+    let border  = { 'above': 1, 'right': 1, 'below': 1, 'left': 1 }
+    let padding = { 'above': 0, 'right': 1, 'below': 0, 'left': 1 }
+    let left_right_reserve  = border['left']  + border['right'] + padding['left']  + padding['right']
+    let above_below_reserve = border['above'] + border['below'] + padding['above'] + padding['below']
+    let maxheight = max( [ mousepos.row - 1, &lines - mousepos.row ] ) - above_below_reserve
 
-    " max width is screen columns minus x padding (2)
-    if len >= (&columns - 2)
-      " There's at least one line > our max - enable word wrap and draw the
+    " max width is screen columns minus border and padding
+    let maxwidth = &columns - left_right_reserve
+    let minwidth = min( [ len, maxwidth ] )
+    if len >= maxwidth
+      " There's at least one line >= our max - enable word wrap and draw the
       " popup at the leftmost column
       let col = 1
       let wrap = 1
     endif
 
-    let s:cursorhold_popup = popup_atcursor(
+    let s:cursorhold_popup = popup_beval(
           \   lines,
           \   {
-          \     'col': col,
-          \     'wrap': wrap,
-          \     'padding': [ 0, 1, 0, 1 ],
-          \     'moved': 'word',
-          \     'maxwidth': &columns,
-          \     'close': 'click',
-          \     'fixed': 0,
+          \     'col'      : col,
+          \     'wrap'     : wrap,
+          \     'border'   : [ border['above'],  border['right'],  border['below'],  border['left'] ],
+          \     'padding'  : [ padding['above'], padding['right'], padding['below'], padding['left'] ],
+          \     'maxheight': maxheight,
+          \     'maxwidth' : maxwidth,
+          \     'minwidth' : minwidth,
+          \     'close'    : 'click',
+          \     'fixed'    : 0,
+          \     'resize'   : 1,
+          \     'drag'     : 1
           \   }
           \ )
+    if popup_getpos( s:cursorhold_popup ).scrollbar
+      call popup_setoptions( s:cursorhold_popup,
+                           \ { 'maxwidth': maxwidth - 1 } )
+    endif
     call setbufvar( winbufnr( s:cursorhold_popup ),
                             \ '&syntax',
-                            \ b:ycm_hover.syntax )
+                            \ getbufvar( v:beval_bufnr, 'ycm_hover' ).syntax )
   endfunction
 
 
   function! s:ToggleHover()
+    if !s:enable_hover
+      return
+    endif
+
     let pos = popup_getpos( s:cursorhold_popup )
     if !empty( pos ) && pos.visible
       call popup_hide( s:cursorhold_popup )
       let s:cursorhold_popup = -1
 
-      " Diable the auto-trigger until the next cursor movement.
+      " Disable the auto-trigger until the next cursor movement.
       call s:DisableAutoHover()
       augroup YCMHover
         autocmd! CursorMoved <buffer>
-        autocmd CursorMoved <buffer> call s:EnableAutoHover()
+        autocmd CursorMoved <buffer> ++once call s:EnableAutoHover()
       augroup END
     else
-      call s:Hover()
+      call s:EnableAutoHover()
     endif
   endfunction
 
   let s:enable_hover = 1
   nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>ToggleHover()<CR>
+  nnoremap <silent> <plug>(YCMHoverON) :<C-u>call <SID>EnableAutoHover()<CR>
+  nnoremap <silent> <plug>(YCMHoverOFF) :<C-u>call <SID>DisableAutoHover()<CR>
+  autocmd InsertEnter <buffer> silent call s:DisableAutoHover()
+  autocmd InsertLeave <buffer> silent call s:EnableAutoHover()
+
+  function! youcompleteme#hover()
+    call win_execute( v:beval_winid, 'call s:Hover()' )
+    return ''
+  endfunction
 else
   " Don't break people's mappings if this feature is disabled, just do nothing.
   nnoremap <silent> <plug>(YCMHover) <Nop>
