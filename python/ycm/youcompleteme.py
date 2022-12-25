@@ -393,8 +393,10 @@ class YouCompleteMe:
         continue
       elif argument.startswith( '--line_num=' ):
         extra_data[ 'line_num' ] = int( argument[ len( '--line_num=' ): ] )
+        continue
       elif argument.startswith( '--column_num=' ):
         extra_data[ 'column_num' ] = int( argument[ len( '--column_num=' ): ] )
+        continue
 
       final_arguments.append( argument )
 
