@@ -406,7 +406,7 @@ apt install mono-complete golang nodejs openjdk-17-jdk openjdk-17-jre npm
 - Compile YCM
 
 ```
-cd ~/.vim/bundle/YouCompleteMe
+cd ~/.vim/bundle/youcompleteme
 python3 install.py --all
 ```
 
