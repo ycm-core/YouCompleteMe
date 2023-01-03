@@ -58,7 +58,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: 17
-        distribution: 'adopt'
+        distribution: 'temurin'
     - name: Build ycmd
       run: python3 ./install.py --force-sudo --ts-completer --clangd-completer --java-completer
     - name: Run tests in old vim
