@@ -14,18 +14,7 @@ jobs:
       matrix:
         runs-on: [ ubuntu-20.04, macos-10.15, windows-2019 ]
         python-arch: [ 'x64' ]
-        python-version: [ 3.6 ]
-        include:
-          - runs-on: windows-2019
-            python-arch: 'x86'
-            python-version: 3.9
-          - runs-on: windows-2019
-            python-arch: 'x64'
-            python-version: 3.9
-        exclude:
-          - runs-on: windows-2019
-            python-arch: 'x64'
-            python-version: 3.6
+        python-version: [ 3.10 ]
     env:
       COVERAGE: true
     name: "${{ matrix.runs-on }} - Python ${{ matrix.python-version }} ${{ matrix.python-arch }}"
