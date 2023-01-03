@@ -754,6 +754,7 @@ Quick Feature Summary
 * Signature help
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
+* Go to alternate file (e.g. associated header `GoToAlternateFile`)
 * Find Symbol (`GoToSymbol`), with interactive search
 * Document outline (`GoToDocumentOutline`), with interactive search
 * View documentation comments for identifiers (`GetDoc`)
@@ -2054,6 +2055,13 @@ autocommand](#the-ycmquickfixopened-autocommand).
 Looks up the current line for a header and jumps to it.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda`
+
+#### The `GoToAlternateFile` subcommand
+
+Jump to the associated file, as defined by the language server. Typically this
+will jump you to the associated header file for a c or c++ translation unit.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cuda` (clangd only)
 
 #### The `GoToDeclaration` subcommand
 
