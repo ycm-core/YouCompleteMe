@@ -206,8 +206,8 @@ Installation
 
 | Runtime | Min Version | Recommended Version (full support) | Python |
 |---------|-------------|------------------------------------|--------|
-| Vim     | 8.1.2269    | 9.0.214                            | 3.10   |
-| Neovim  | 0.5         | Vim 9.0.214                        | 3.10   |
+| Vim     | 8.1.2269    | 9.0.214                            | 3.8    |
+| Neovim  | 0.5         | Vim 9.0.214                        | 3.8    |
 
 #### Supported Vim Versions
 
@@ -223,16 +223,16 @@ available in Neovim, and Neovim is not officially supported.
 #### Supported Python runtime
 
 YCM has two components: A server and a client. Both the server and client
-require Python 3.10 or later 3.x release. 
+require Python 3.8 or later 3.x release. 
 
 For the Vim client, Vim must be, compiled with `--enable-shared` (or
 `--enable-framework` on macOS). You can check if this is working with `:py3
-import sys; print( sys.version)`. It should say something like `3.10.8 (...)`.
+import sys; print( sys.version)`. It should say something like `3.8.2 (...)`.
 
-For Neovim, you must have a python 3.10 runtime and the Neovim python
-extensions. See Neovim's help for how to set that up.
+For Neovim, you must have a python 3.8 runtime and the Neovim python
+extensions. See Neovim's `:help provider-python` for how to set that up.
 
-For the server, you must run the `install.py` script with a python 3.10 (or
+For the server, you must run the `install.py` script with a python 3.8 (or
 later) runtime. Anaconda etc. are not supported. YCM will remember the runtime
 you used to run `install.py` and will use that when launching the server, so if
 you usually use anaconda, then make sure to use the full path to a real cpython3,
@@ -3850,8 +3850,9 @@ The latest version of the plugin is available at
 
 The author's homepage is <https://val.markovic.io>.
 
-Please do **NOT** go to #vim on freenode for support. Please contact the
-YouCompleteMe maintainers directly using the [contact details](#contact).
+Please do **NOT** go to #vim, reddit, or stack overflow for support. Please
+contact the YouCompleteMe maintainers directly using the [contact
+details](#contact).
 
 License
 -------
