@@ -10,8 +10,9 @@ Contents ~
  5. Installation                                   |youcompleteme-installation|
   1. Requirements                                  |youcompleteme-requirements|
    1. Supported Vim Versions             |youcompleteme-supported-vim-versions|
-   2. Supported Compilers                   |youcompleteme-supported-compilers|
-   3. Individual completer requirements |youcompleteme-individual-completer-requirements|
+   2. Supported Python runtime         |youcompleteme-supported-python-runtime|
+   3. Supported Compilers                   |youcompleteme-supported-compilers|
+   4. Individual completer requirements |youcompleteme-individual-completer-requirements|
   2. macOS                                                |youcompleteme-macos|
    1. Quick start, installing all completers |youcompleteme-quick-start-installing-all-completers|
    2. Explanation for the quick start |youcompleteme-explanation-for-quick-start|
@@ -92,17 +93,18 @@ Contents ~
  10. YcmCompleter Subcommands          |youcompleteme-ycmcompleter-subcommands|
   1. GoTo Commands                                |youcompleteme-goto-commands|
    1. The |GoToInclude| subcommand
-   2. The |GoToDeclaration| subcommand
-   3. The |GoToDefinition| subcommand
-   4. The |GoTo| subcommand
-   5. The |GoToImprecise| subcommand
-   6. The 'GoToSymbol <symbol query>' subcommand      |GoToSymbol-symbol-query|
-   7. The |GoToReferences| subcommand
-   8. The |GoToImplementation| subcommand
-   9. The |GoToImplementationElseDeclaration| subcommand
-   10. The |GoToType| subcommand
-   11. The |GoToDocumentOutline| subcommand
-   12. The |GoToCallers| and 'GoToCallees' subcommands
+   2. The |GoToAlternateFile| subcommand
+   3. The |GoToDeclaration| subcommand
+   4. The |GoToDefinition| subcommand
+   5. The |GoTo| subcommand
+   6. The |GoToImprecise| subcommand
+   7. The 'GoToSymbol <symbol query>' subcommand      |GoToSymbol-symbol-query|
+   8. The |GoToReferences| subcommand
+   9. The |GoToImplementation| subcommand
+   10. The |GoToImplementationElseDeclaration| subcommand
+   11. The |GoToType| subcommand
+   12. The |GoToDocumentOutline| subcommand
+   13. The |GoToCallers| and 'GoToCallees' subcommands
   2. Semantic Information Commands |youcompleteme-semantic-information-commands|
    1. The |GetType| subcommand
    2. The |GetTypeImprecise| subcommand
@@ -361,7 +363,7 @@ to trigger this, it "just happens" in the background.
 
 **And that's not all...**
 
-YCM might be the only vim completion engine with the correct Unicode support.
+YCM might be the only Vim completion engine with the correct Unicode support.
 Though we do assume UTF-8 everywhere.
 
   Image: YouCompleteMe GIF unicode demo (see reference [20])
@@ -416,6 +418,15 @@ Installation ~
                                                    *youcompleteme-requirements*
 Requirements ~
 
+===============================================================================
+| _Runtime_ | _Min Version_ | _Recommended Version (full support)_ | _Python_ |
+===============================================================================
+| Vim       | 8.1.2269      | 9.0.214                              | 3.8      |
+-------------------------------------------------------------------------------
+| Neovim    | 0.5           | Vim 9.0.214                          | 3.8      |
+-------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
                                          *youcompleteme-supported-vim-versions*
 Supported Vim Versions ~
@@ -423,13 +434,37 @@ Supported Vim Versions ~
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
 That's currently Ubuntu 20.04 which contains 'vim-nox' at 'v8.1.2269'.
 
-Vim must have a working Python 3.6 runtime, compiled with '--enable-shared' (or
-'--enable-framework'). You can check with ':py3 import sys; print( sys.version
-)'.
+Vim must have a working Python 3 runtime.
 
 For Neovim users, our policy is to require the latest released version.
 Currently, Neovim 0.5.0 is required. Please note that some features are not
 available in Neovim, and Neovim is not officially supported.
+
+-------------------------------------------------------------------------------
+                                       *youcompleteme-supported-python-runtime*
+Supported Python runtime ~
+
+YCM has two components: A server and a client. Both the server and client
+require Python 3.8 or later 3.x release.
+
+For the Vim client, Vim must be, compiled with '--enable-shared' (or
+'--enable-framework' on macOS). You can check if this is working with ':py3
+import sys; print( sys.version)'. It should say something like '3.8.2 (...)'.
+
+For Neovim, you must have a python 3.8 runtime and the Neovim python
+extensions. See Neovim's ':help provider-python' for how to set that up.
+
+For the server, you must run the 'install.py' script with a python 3.8 (or
+later) runtime. Anaconda etc. are not supported. YCM will remember the runtime
+you used to run 'install.py' and will use that when launching the server, so if
+you usually use anaconda, then make sure to use the full path to a real
+cpython3, e.g. '/usr/bin/python3 install.py --all' etc.
+
+Our policy is to support the python3 version that's availble in the latest
+Ubuntu LTS (similar to our Vim version policy). We don't increase the python
+runtime version without a reason, though. Typically, we do this when the
+current python version wer're using goes out of support. At that time we will
+typically pick a version that will be supported for a number of years.
 
 -------------------------------------------------------------------------------
                                             *youcompleteme-supported-compilers*
@@ -472,7 +507,7 @@ Quick start, installing all completers ~
 
 - Install YCM plugin via Vundle [25]
 - Install CMake, MacVim and Python 3; Note that the pre-installed _macOS
-  system_ vim is not supported (due to it having broken Python integration).
+  system_ Vim is not supported (due to it having broken Python integration).
 >
   $ brew install cmake python go nodejs
 <
@@ -630,7 +665,7 @@ supported compiler. The latest LTS of Ubuntu is the minimum platform for simple
 installation. For earlier releases or other distributions, you may have to do
 some work to acquire the dependencies.
 
-If your vim version is too old, you may need to compile Vim from source [33]
+If your Vim version is too old, you may need to compile Vim from source [33]
 (don't worry, it's easy).
 
 Install YouCompleteMe with Vundle [25].
@@ -922,6 +957,7 @@ C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 - Signature help
 - Real-time diagnostic display
 - Go to include/declaration/definition (|GoTo|, etc.)
+- Go to alternate file (e.g. associated header |GoToAlternateFile|)
 - Find Symbol ('GoToSymbol'), with interactive search
 - Document outline (|GoToDocumentOutline|), with interactive search
 - View documentation comments for identifiers (|GetDoc|)
@@ -1234,7 +1270,7 @@ More generally, this pattern can be useful for customising the groups:
                                                     *youcompleteme-inlay-hints*
 Inlay hints ~
 
-**NOTE**: Highly experimental feature, requiring vim 9.0.214 or later (not
+**NOTE**: Highly experimental feature, requiring Vim 9.0.214 or later (not
 supported in NeoVim).
 
 When 'g:ycm_enable_inlay_hints' (globally) or 'b:ycm_enable_inlay_hints' (for a
@@ -1924,7 +1960,7 @@ For each of the LSP server's configuration you should look up the respective
 server's documentation.
 
 Some servers request settings from arbitrary 'sections' of configuration. There
-is no concept of configuration sections in vim, so you can specify an
+is no concept of configuration sections in Vim, so you can specify an
 additional 'config_sections' dictionary which maps section to a dictionary of
 config required by the server. For example:
 >
@@ -1958,7 +1994,7 @@ and Eclipse '>= 4.2.*').
 
 After installing Eclim remember to create a new Eclipse project within your
 application by typing ':ProjectCreate <path-to-your-project> -n ruby' inside
-vim and don't forget to have "let g:EclimCompletionMethod = 'omnifunc'" in your
+Vim and don't forget to have "let g:EclimCompletionMethod = 'omnifunc'" in your
 vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs
 as the data source for semantic completions and provide the auto-triggering and
 subsequence-based matching (and other YCM features) on top of it.
@@ -2264,6 +2300,14 @@ The *GoToInclude* subcommand
 Looks up the current line for a header and jumps to it.
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cuda'
+
+-------------------------------------------------------------------------------
+The *GoToAlternateFile* subcommand
+
+Jump to the associated file, as defined by the language server. Typically this
+will jump you to the associated header file for a c or c++ translation unit.
+
+Supported in filetypes: 'c, cpp, objc, objcpp, cuda' (clangd only)
 
 -------------------------------------------------------------------------------
 The *GoToDeclaration* subcommand
@@ -2935,6 +2979,19 @@ If you want to just turn off the identifier completer but keep the semantic
 triggers, you should set |g:ycm_min_num_of_chars_for_completion| to a high
 number like '99'.
 
+When |g:ycm_auto_trigger| is '0', YCM sets the 'completefunc', so that you can
+manually trigger normal completion using 'C-x C-u'.
+
+If you want to map something else to trigger completion, such as 'C-d``, then
+you can map it to'(YCMComplete)`. For example:
+>
+  let g:ycm_auto_trigger = 0
+  imap <c-d> <plug>(YCMComplete)
+<
+NOTE: It's not possible to map one of the keys in
+|g:ycm_key_list_select_completion| (or similar) to '<plug>(YCMComplete)'. In
+practice that means that you can't use '<Tab>' for this.
+
 Default: '1'
 >
   let g:ycm_auto_trigger = 1
@@ -3147,7 +3204,7 @@ When this option is set to 1, YCM will echo the text of the diagnostic present
 on the current line when you move your cursor to that line. If a |FixIt| is
 available for the current diagnostic, then '(FixIt)' is appended.
 
-If you have a vim that supports virtual text, you can set this option to the
+If you have a Vim that supports virtual text, you can set this option to the
 string 'virtual-text', and the diagnostic will be displayed inline with the
 text, right aligned in the window and wrapping to the next line if there is not
 enough space, for example:
@@ -3175,7 +3232,7 @@ Valid values:
   window using virtual text
 >
   let g:ycm_echo_current_diagnostic = 1
-  " Or, when you have vim supporting virtual text
+  " Or, when you have Vim supporting virtual text
   let g:ycm_echo_current_diagnostic = 'virtual-text'
 <
 -------------------------------------------------------------------------------
@@ -3603,9 +3660,10 @@ The *g:ycm_key_invoke_completion* option
 
 This option controls the key mapping used to invoke the completion menu for
 semantic completion. By default, semantic completion is triggered automatically
-after typing '.', '->' and '::' in insert mode (if semantic completion support
-has been compiled in). This key mapping can be used to trigger semantic
-completion anywhere. Useful for searching for top-level functions and classes.
+after typing characters appropriate for the language, such as '.', '->', '::',
+etc. in insert mode (if semantic completion support has been compiled in). This
+key mapping can be used to trigger semantic completion anywhere. Useful for
+searching for top-level functions and classes.
 
 Console Vim (not Gvim or MacVim) passes '<Nul>' to Vim when the user types
 '<C-Space>' so YCM will make sure that '<Nul>' is used in the map command when
@@ -3994,8 +4052,8 @@ https://ycm-core.github.io/YouCompleteMe/.
 
 The author's homepage is https://val.markovic.io.
 
-Please do **NOT** go to #vim on freenode for support. Please contact the
-YouCompleteMe maintainers directly using the contact details.
+Please do **NOT** go to #vim, reddit, or stack overflow for support. Please
+contact the YouCompleteMe maintainers directly using the contact details.
 
 ===============================================================================
                                                         *youcompleteme-license*

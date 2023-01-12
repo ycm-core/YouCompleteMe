@@ -14,18 +14,18 @@ jobs:
       matrix:
         runs-on: [ ubuntu-20.04, macos-10.15, windows-2019 ]
         python-arch: [ 'x64' ]
-        python-version: [ 3.6 ]
+        python-version: [ '3.8' ]
         include:
           - runs-on: windows-2019
             python-arch: 'x86'
-            python-version: 3.9
+            python-version: '3.9'
           - runs-on: windows-2019
             python-arch: 'x64'
-            python-version: 3.9
+            python-version: '3.9'
         exclude:
           - runs-on: windows-2019
             python-arch: 'x64'
-            python-version: 3.6
+            python-version: '3.8'
     env:
       COVERAGE: true
     name: "${{ matrix.runs-on }} - Python ${{ matrix.python-version }} ${{ matrix.python-arch }}"
@@ -69,7 +69,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: 17
-        distribution: 'adopt'
+        distribution: 'temurin'
     - name: Build ycmd
       run: python3 ./install.py --force-sudo --ts-completer --clangd-completer --java-completer
     - name: Run tests in old vim
