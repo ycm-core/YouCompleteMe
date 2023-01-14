@@ -100,7 +100,7 @@ class CompletionRequest( BaseRequest ):
     if not completed_item:
       return None
 
-    if 'user_data' not in completed_item:
+    if not completed_item.get( 'user_data' ):
       return None
 
     return json.loads( completed_item[ 'user_data' ] )
