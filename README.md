@@ -148,7 +148,7 @@ don't need to save your file or press any keyboard shortcut to trigger this, it
 
 **And that's not all...**
 
-YCM might be the only vim completion engine with the correct Unicode support.
+YCM might be the only Vim completion engine with the correct Unicode support.
 Though we do assume UTF-8 everywhere.
 
 ![YouCompleteMe GIF unicode demo](https://user-images.githubusercontent.com/10026824/34471853-af9cf32a-ef53-11e7-8229-de534058ddc4.gif)
@@ -204,18 +204,45 @@ Installation
 
 ### Requirements
 
+| Runtime | Min Version | Recommended Version (full support) | Python |
+|---------|-------------|------------------------------------|--------|
+| Vim     | 8.1.2269    | 9.0.214                            | 3.8    |
+| Neovim  | 0.5         | Vim 9.0.214                        | 3.8    |
+
 #### Supported Vim Versions
 
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
 That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
 
-Vim must have a working Python 3.6 runtime, compiled with `--enable-shared` (or
-`--enable-framework`). You can check with `:py3 import sys; print( sys.version
-)`.
+Vim must have a [working Python 3 runtime](#supported-python-runtime).
 
 For Neovim users, our policy is to require the latest released version.
 Currently, Neovim 0.5.0 is required.  Please note that some features are not
 available in Neovim, and Neovim is not officially supported.
+
+#### Supported Python runtime
+
+YCM has two components: A server and a client. Both the server and client
+require Python 3.8 or later 3.x release. 
+
+For the Vim client, Vim must be, compiled with `--enable-shared` (or
+`--enable-framework` on macOS). You can check if this is working with `:py3
+import sys; print( sys.version)`. It should say something like `3.8.2 (...)`.
+
+For Neovim, you must have a python 3.8 runtime and the Neovim python
+extensions. See Neovim's `:help provider-python` for how to set that up.
+
+For the server, you must run the `install.py` script with a python 3.8 (or
+later) runtime. Anaconda etc. are not supported. YCM will remember the runtime
+you used to run `install.py` and will use that when launching the server, so if
+you usually use anaconda, then make sure to use the full path to a real cpython3,
+e.g. `/usr/bin/python3 install.py --all` etc.
+
+Our policy is to support the python3 version that's availble in the latest
+Ubuntu LTS (similar to our Vim version policy). We don't increase the python
+runtime version without a reason, though. Typically, we do this when the current
+python version wer're using goes out of support. At that time we will typically
+pick a version that will be supported for a number of years.
 
 #### Supported Compilers
 
@@ -223,11 +250,11 @@ In order to provide the best possible performance and stability, ycmd has
 updated its code to C++17. This requires a version bump of the minimum
 supported compilers. The new requirements are:
 
-| Compiler | Current Min |
-|-|-|
-| GCC | 8 |
-| Clang | 7 |
-| MSVC | 15.7 (VS 2017) |
+| Compiler | Current Min    |
+|----------|----------------|
+| GCC      | 8              |
+| Clang    | 7              |
+| MSVC     | 15.7 (VS 2017) |
 
 YCM requires CMake 3.13 or greater. If your CMake is too old, you may be able to
 simply `pip install --user cmake` to get a really new version.
@@ -245,7 +272,7 @@ downstream compilers, though we do our best to signal where we know them.
 
 - Install YCM plugin via [Vundle][]
 - Install CMake, MacVim and Python 3; Note that the pre-installed *macOS system*
-  vim is not supported (due to it having broken Python integration).
+  Vim is not supported (due to it having broken Python integration).
 
 ```
 $ brew install cmake python go nodejs
@@ -424,7 +451,7 @@ supported compiler. The latest LTS of Ubuntu is the minimum platform for simple
 installation. For earlier releases or other distributions, you may have to do
 some work to acquire the dependencies.
 
-If your vim version is too old, you may need to [compile Vim from
+If your Vim version is too old, you may need to [compile Vim from
 source][vim-build] (don't worry, it's easy).
 
 Install YouCompleteMe with [Vundle][].
@@ -727,6 +754,7 @@ Quick Feature Summary
 * Signature help
 * Real-time diagnostic display
 * Go to include/declaration/definition (`GoTo`, etc.)
+* Go to alternate file (e.g. associated header `GoToAlternateFile`)
 * Find Symbol (`GoToSymbol`), with interactive search
 * Document outline (`GoToDocumentOutline`), with interactive search
 * View documentation comments for identifiers (`GetDoc`)
@@ -1041,7 +1069,7 @@ endfor
 
 ## Inlay hints
 
-**NOTE**: Highly experimental feature, requiring vim 9.0.214 or later (not
+**NOTE**: Highly experimental feature, requiring Vim 9.0.214 or later (not
 supported in NeoVim).
 
 When `g:ycm_enable_inlay_hints` (globally) or `b:ycm_enable_inlay_hints` (for a
@@ -1706,7 +1734,7 @@ For each of the LSP server's configuration you should look up the respective
 server's documentation.
 
 Some servers request settings from arbitrary 'sections' of configuration. There
-is no concept of configuration sections in vim, so you can specify an additional
+is no concept of configuration sections in Vim, so you can specify an additional
 `config_sections` dictionary which maps section to a dictionary of config
 required by the server. For example:
 
@@ -1739,7 +1767,7 @@ the _latest_ Eclim installed and configured (this means Eclim `>= 2.2.*` and
 Eclipse `>= 4.2.*`).
 
 After installing Eclim remember to create a new Eclipse project within your
-application by typing `:ProjectCreate <path-to-your-project> -n ruby` inside vim
+application by typing `:ProjectCreate <path-to-your-project> -n ruby` inside Vim
 and don't forget to have `let g:EclimCompletionMethod = 'omnifunc'` in your
 vimrc. This will make YCM and Eclim play nice; YCM will use Eclim's omnifuncs as
 the data source for semantic completions and provide the auto-triggering and
@@ -2027,6 +2055,13 @@ autocommand](#the-ycmquickfixopened-autocommand).
 Looks up the current line for a header and jumps to it.
 
 Supported in filetypes: `c, cpp, objc, objcpp, cuda`
+
+#### The `GoToAlternateFile` subcommand
+
+Jump to the associated file, as defined by the language server. Typically this
+will jump you to the associated header file for a c or c++ translation unit.
+
+Supported in filetypes: `c, cpp, objc, objcpp, cuda` (clangd only)
 
 #### The `GoToDeclaration` subcommand
 
@@ -2912,7 +2947,7 @@ When this option is set to 1, YCM will echo the text of the diagnostic present
 on the current line when you move your cursor to that line. If a `FixIt` is
 available for the current diagnostic, then ` (FixIt)` is appended.
 
-If you have a vim that supports virtual text, you can set this option
+If you have a Vim that supports virtual text, you can set this option
 to the string `virtual-text`, and the diagnostic will be displayed inline with
 the text, right aligned in the window and wrapping to the next line if there is
 not enough space, for example:
@@ -2941,7 +2976,7 @@ Valid values:
 
 ```viml
 let g:ycm_echo_current_diagnostic = 1
-" Or, when you have vim supporting virtual text
+" Or, when you have Vim supporting virtual text
 let g:ycm_echo_current_diagnostic = 'virtual-text'
 ```
 
@@ -3815,8 +3850,9 @@ The latest version of the plugin is available at
 
 The author's homepage is <https://val.markovic.io>.
 
-Please do **NOT** go to #vim on freenode for support. Please contact the
-YouCompleteMe maintainers directly using the [contact details](#contact).
+Please do **NOT** go to #vim, reddit, or stack overflow for support. Please
+contact the YouCompleteMe maintainers directly using the [contact
+details](#contact).
 
 License
 -------
