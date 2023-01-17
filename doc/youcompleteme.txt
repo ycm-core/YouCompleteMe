@@ -4015,6 +4015,10 @@ With async diagnostics, LSP servers might send new diagnostics mid-typing. If
 seeing these new diagnostics while typing is not desired, this option can be
 set to 0.
 
+When this option is set to '0', diagnostic signs, virtual text and highlights
+are cleared when entering insert mode and replaced when leaving insert mode.
+This reduces visual noise while editing.
+
 In addition, this option is recommended when |g:ycm_echo_current_diagnostic| is
 set to 'virtual-text' as it prevents updating the virtual text while you are
 typing.
