@@ -608,9 +608,14 @@ class YouCompleteMe:
     return self._buffers[ bufnr ]
 
 
+  def OnInsertEnter( self ):
+    if not self._user_options[ 'update_diagnostics_in_insert_mode' ]:
+      self.CurrentBuffer().ClearDiagnosticsUI()
+
+
   def OnInsertLeave( self ):
     if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
-         not self.NeedsReparse() ):
+         not self.CurrentBuffer().ParseRequestPending() ):
       self.CurrentBuffer().RefreshDiagnosticsUI()
     SendEventNotificationAsync( 'InsertLeave' )
 
