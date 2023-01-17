@@ -1729,6 +1729,124 @@ class VimsupportTest( TestCase ):
 
 
   @patch( 'vim.command', new_callable = ExtendedMock )
+  def test_JumpToLocation_SameFile_NoLineCol( self, vim_command ):
+    current_buffer = VimBuffer( 'uni¢𐍈d€' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+      vim.current.window.cursor = ( 99, 99 )
+
+      target_name = os.path.realpath( 'uni¢𐍈d€' )
+      vimsupport.JumpToLocation( target_name,
+                                 None,
+                                 None,
+                                 'belowright',
+                                 'same-buffer' )
+
+      assert_that( vim.current.window.cursor, equal_to( ( 99, 99 ) ) )
+      vim_command.assert_has_exact_calls( [
+        call( 'normal! m\'' ),
+      ] )
+
+
+  @patch( 'vim.command', new_callable = ExtendedMock )
+  def test_JumpToLocation_SameFile_NoLine( self, vim_command ):
+    current_buffer = VimBuffer( 'uni¢𐍈d€' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+      vim.current.window.cursor = ( 99, 99 )
+
+      target_name = os.path.realpath( 'uni¢𐍈d€' )
+      vimsupport.JumpToLocation( target_name,
+                                 None,
+                                 1,
+                                 'belowright',
+                                 'same-buffer' )
+
+      assert_that( vim.current.window.cursor, equal_to( ( 99, 99 ) ) )
+      vim_command.assert_has_exact_calls( [
+        call( 'normal! m\'' ),
+      ] )
+
+
+  @patch( 'vim.command', new_callable = ExtendedMock )
+  def test_JumpToLocation_SameFile_NoCol( self, vim_command ):
+    current_buffer = VimBuffer( 'uni¢𐍈d€' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+      vim.current.window.cursor = ( 99, 99 )
+
+      target_name = os.path.realpath( 'uni¢𐍈d€' )
+      vimsupport.JumpToLocation( target_name,
+                                 1,
+                                 None,
+                                 'belowright',
+                                 'same-buffer' )
+
+      assert_that( vim.current.window.cursor, equal_to( ( 99, 99 ) ) )
+      vim_command.assert_has_exact_calls( [
+        call( 'normal! m\'' ),
+      ] )
+
+
+  @patch( 'vim.command', new_callable = ExtendedMock )
+  def test_JumpToLocation_DifferentFile_NoLineCol( self, vim_command ):
+    current_buffer = VimBuffer( 'uni¢𐍈d€' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+      vim.current.window.cursor = ( 99, 99 )
+
+      target_name = os.path.realpath( 'different_uni¢𐍈d€' )
+      vimsupport.JumpToLocation( target_name,
+                                 None,
+                                 None,
+                                 'belowright',
+                                 'same-buffer' )
+
+      assert_that( vim.current.window.cursor, equal_to( ( 99, 99 ) ) )
+      vim_command.assert_has_exact_calls( [
+        call( 'normal! m\'' ),
+        call( f'keepjumps belowright edit { target_name }' ),
+      ] )
+
+
+  @patch( 'vim.command', new_callable = ExtendedMock )
+  def test_JumpToLocation_DifferentFile_NoLine( self, vim_command ):
+    current_buffer = VimBuffer( 'uni¢𐍈d€' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+      vim.current.window.cursor = ( 99, 99 )
+
+      target_name = os.path.realpath( 'different_uni¢𐍈d€' )
+      vimsupport.JumpToLocation( target_name,
+                                 None,
+                                 1,
+                                 'belowright',
+                                 'same-buffer' )
+
+      assert_that( vim.current.window.cursor, equal_to( ( 99, 99 ) ) )
+      vim_command.assert_has_exact_calls( [
+        call( 'normal! m\'' ),
+        call( f'keepjumps belowright edit { target_name }' ),
+      ] )
+
+
+  @patch( 'vim.command', new_callable = ExtendedMock )
+  def test_JumpToLocation_DifferentFile_NoCol( self, vim_command ):
+    current_buffer = VimBuffer( 'uni¢𐍈d€' )
+    with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
+      vim.current.window.cursor = ( 99, 99 )
+
+      target_name = os.path.realpath( 'different_uni¢𐍈d€' )
+      vimsupport.JumpToLocation( target_name,
+                                 1,
+                                 None,
+                                 'belowright',
+                                 'same-buffer' )
+
+      assert_that( vim.current.window.cursor, equal_to( ( 99, 99 ) ) )
+      vim_command.assert_has_exact_calls( [
+        call( 'normal! m\'' ),
+        call( f'keepjumps belowright edit { target_name }' ),
+      ] )
+
+
+
+  @patch( 'vim.command', new_callable = ExtendedMock )
   def test_JumpToLocation_DifferentFile_SameBuffer_Modified_CannotHide(
       self, vim_command ):
 
