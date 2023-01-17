@@ -138,6 +138,12 @@ class CommandRequest( BaseRequest ):
       vimsupport.SetQuickFixList(
         [ vimsupport.BuildQfListItem( x ) for x in self._response ] )
       vimsupport.OpenQuickFixList( focus = True, autoclose = True )
+    elif self._response.get( 'file_only' ):
+      vimsupport.JumpToLocation( self._response[ 'filepath' ],
+                                 None,
+                                 None,
+                                 modifiers,
+                                 buffer_command )
     else:
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
                                  self._response[ 'line_num' ],

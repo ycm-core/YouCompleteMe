@@ -631,12 +631,13 @@ def TryJumpLocationInTab( tab, filename, line, column ):
     if ComparePaths( GetBufferFilepath( win.buffer ), filename ):
       vim.current.tabpage = tab
       vim.current.window = win
-      vim.current.window.cursor = ( line, column - 1 )
+      if line is not None and column is not None:
+        vim.current.window.cursor = ( line, column - 1 )
+        # Open possible folding at location
+        vim.command( 'normal! zv' )
+        # Center the screen on the jumped-to location
+        vim.command( 'normal! zz' )
 
-      # Open possible folding at location
-      vim.command( 'normal! zv' )
-      # Center the screen on the jumped-to location
-      vim.command( 'normal! zz' )
       return True
   # 'filename' is not opened in this tab page
   return False
@@ -710,12 +711,13 @@ def JumpToLocation( filename, line, column, modifiers, command ):
     if not JumpToFile( filename, command, modifiers ):
       return
 
-  vim.current.window.cursor = ( line, column - 1 )
+  if line is not None and column is not None:
+    vim.current.window.cursor = ( line, column - 1 )
 
-  # Open possible folding at location
-  vim.command( 'normal! zv' )
-  # Center the screen on the jumped-to location
-  vim.command( 'normal! zz' )
+    # Open possible folding at location
+    vim.command( 'normal! zv' )
+    # Center the screen on the jumped-to location
+    vim.command( 'normal! zz' )
 
 
 def NumLinesInBuffer( buffer_object ):
