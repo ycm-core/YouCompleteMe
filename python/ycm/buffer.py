@@ -43,8 +43,8 @@ class Buffer:
 
 
   def FileParseRequestReady( self, block = False ):
-    return bool( self._parse_request and
-                 ( block or self._parse_request.Done() ) )
+    return ( bool( self._parse_request ) and
+             ( block or self._parse_request.Done() ) )
 
 
   def SendParseRequest( self, extra_data ):
@@ -62,6 +62,10 @@ class Buffer:
     # reparse on buffer visit and changed tick remains the same.
     self._handled_tick -= 1
     self._parse_tick = self._ChangedTick()
+
+
+  def ParseRequestPending( self ):
+    return bool( self._parse_request ) and not self._parse_request.Done()
 
 
   def NeedsReparse( self ):
@@ -125,6 +129,10 @@ class Buffer:
 
   def RefreshDiagnosticsUI( self ):
     return self._diag_interface.RefreshDiagnosticsUI()
+
+
+  def ClearDiagnosticsUI( self ):
+    return self._diag_interface.ClearDiagnosticsUI()
 
 
   def DiagnosticsForLine( self, line_number ):
