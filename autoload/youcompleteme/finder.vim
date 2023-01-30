@@ -243,6 +243,38 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
     autocmd WinLeave <buffer> call s:Cancel()
     autocmd CmdLineEnter <buffer> call s:Cancel()
   augroup END
+  " override all the global mappings in the finder buffer
+  " by remapping each previously mapped key sequence to itself
+  " (still preserve the previously defined buffer-local mappings)
+  if exists( '*maplist' ) && exists( '*mapset' )
+    let bufmapsave = maplist()->filter( 'v:val.buffer == 1' )
+    for mapitem in map(
+          \ maplist()->filter( 'v:val.buffer == 0' ),
+          \ { _, val -> val->extend( #{ expr: 0, noremap: 1, rhs: val.lhs, buffer: 1, silent: 1 } ) } )
+        call mapset( mapitem )
+    endfor
+    for mapitem in bufmapsave
+      call mapset( mapitem )
+    endfor
+  else
+    let bufmapsave = []
+    let mapitems = []
+    for mapitem in split( execute( 'map | map!' ), '\n\+' )
+      let [ mapmode, lhs, attr; _ ] = split( mapitem, '\s\+', 1 )
+      if attr =~ '^[*&]\?@'
+        call add( bufmapsave, lhs )
+      else
+        call add( mapitems, [ mapmode, lhs ] )
+      endif
+    endfor
+    for mapitem in mapitems
+      let [ mapmode, lhs ] = mapitem
+      if index( bufmapsave, lhs ) == -1
+        let mapcmd = mapmode == '!' ? 'noremap!' : ( mapmode . 'noremap' )
+        silent exec mapcmd . ' <buffer> <silent> ' . lhs . ' ' . lhs
+      endif
+    endfor
+  endif
   startinsert
 endfunction
 
