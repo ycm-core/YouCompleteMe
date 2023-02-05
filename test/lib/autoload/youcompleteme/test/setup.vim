@@ -33,6 +33,10 @@ function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
         \ . '/'
         \ . a:f
 
+  call youcompleteme#test#setup#WaitForInitialParse( a:kwargs )
+endfunction
+
+function! youcompleteme#test#setup#WaitForInitialParse( kwargs ) abort
   let native_ft = get( a:kwargs, 'native_ft', 1 )
 
   if native_ft
