@@ -27,12 +27,16 @@ endfunction
 function! youcompleteme#test#setup#CleanUp() abort
 endfunction
 
-function! youcompleteme#test#setup#OpenFile( f, kwargs ) abort
+function! youcompleteme#test#setup#OpenFile( kwargs ) abort
   silent execute 'edit '
         \ . g:ycm_test_plugin_dir
         \ . '/'
         \ . a:f
 
+  call youcompleteme#test#setup#WaitForInitialParse( a:kwargs )
+endfunction
+
+function! youcompleteme#test#setup#WaitForInitialParse( kwargs ) abort
   let native_ft = get( a:kwargs, 'native_ft', 1 )
 
   if native_ft

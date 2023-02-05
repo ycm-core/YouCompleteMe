@@ -866,7 +866,8 @@ class YouCompleteMe:
               'textprop': prop[ 'type' ],
             } )
             options.pop( 'col' )
-        vim.eval( f'{ popup_func }( { lines }, { options } )' )
+        vim.eval( f'{ popup_func }( { json.dumps( lines ) }, '
+                                  f'{ json.dumps( options ) } )' )
       else:
         vimsupport.PostVimMessage( message, warning = False )
 
