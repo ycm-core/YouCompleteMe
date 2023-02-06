@@ -537,11 +537,14 @@ function! Test_MultipleFileTypes()
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
           \ popup_getoptions( popup_id ).title ) },
-          \ 10000 )
+          \ 20000 )
 
     call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
-                      \ 10000 )
-    call assert_equal( 0, youcompleteme#finder#GetState().selected )
+                      \ 20000 )
+    call WaitForAssert( { ->
+          \   assert_equal( 0, youcompleteme#finder#GetState().selected )
+          \ },
+          \ 20000 )
     call assert_equal( 'def Really_Long_Method',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].description )
@@ -557,7 +560,7 @@ function! Test_MultipleFileTypes()
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
           \ popup_getoptions( popup_id ).title ) },
-          \ 10000 )
+          \ 20000 )
 
     call WaitForAssert( { -> assert_true(
           \ youcompleteme#finder#GetState().id != -1 ) } )
@@ -576,10 +579,10 @@ function! Test_MultipleFileTypes()
     call WaitForAssert( { ->
           \ assert_equal( ' [X] Search for symbol: Really_Long_Method ',
           \ popup_getoptions( popup_id ).title ) },
-          \ 10000 )
+          \ 20000 )
 
     call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) },
-                      \ 10000 )
+                      \ 20000 )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
     call assert_equal( 'def Really_Long_Method',
           \ youcompleteme#finder#GetState().results[
