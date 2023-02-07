@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-CONTAINER=youcompleteme/ycm-vim-py3:manual
+ARCH=$(uname -m)
+CONTAINER=youcompleteme/ycm-vim-${ARCH}-py3:manual
 
 pushd $(dirname $0)
   docker run --mount src="$(pwd)/../../../",target=/home/dev/YouCompleteMe,type=bind \
