@@ -8,6 +8,8 @@ else
   OPTS="--no-cache"
 fi
 
-docker build ${OPTS} -t youcompleteme/ycm-vim-py3:test \
+ARCH=$(uname -m)
+
+docker build ${OPTS} -t youcompleteme/ycm-vim-${ARCH}-py3:test \
                      --build-arg YCM_VIM_PYTHON=python3 \
                      image/

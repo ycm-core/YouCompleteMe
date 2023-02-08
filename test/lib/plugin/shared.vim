@@ -89,6 +89,9 @@ func s:WaitForCommon(expr, assert, timeout)
     else
       let slept += 10
     endif
+    if slept % 100 == 0
+      redraw!
+    endif
   endwhile
 
   return -1  " timed out

@@ -2,4 +2,6 @@
 
 set -e
 
-docker push youcompleteme/ycm-vim-py3:test
+ARCH=$(uname -m)
+
+docker push youcompleteme/ycm-vim-${ARCH}-py3:test
