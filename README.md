@@ -30,6 +30,11 @@ get in touch.
 Please do **NOT** go to #vim on Freenode for support. Please contact the
 YouCompleteMe maintainers directly using the [contact details](#contact) below.
 
+# Vundle
+
+Please note that the below instructions suggest using Vundle. Currently there
+are problems with Vundle, so here are some [alternative instructions](https://github.com/ycm-core/YouCompleteMe/issues/4134#issuecomment-1446235584) using Vim packages.
+
 Contents
 --------
 
