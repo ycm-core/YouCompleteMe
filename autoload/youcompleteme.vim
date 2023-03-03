@@ -710,17 +710,27 @@ endfunction
 
 function! s:EnableAutoHover()
   if s:enable_hover
-    set ballooneval
-    set balloonevalterm
-    set balloonexpr=youcompleteme#hover()
+    if has( 'balloon_eval' )
+      set ballooneval
+    endif
+    if has( 'balloon_eval_term' )
+      set balloonevalterm
+    endif
+    if exists( '+balloonexpr' ) && empty( &balloonexpr )
+      set balloonexpr=youcompleteme#hover()
+    endif
   endif
 endfunction
 
 
 function! s:DisableAutoHover()
   call popup_clear()
-  set noballooneval
-  set noballoonevalterm
+  if has( 'balloon_eval' )
+    set noballooneval
+  endif
+  if has( 'balloon_eval_term' )
+    set noballoonevalterm
+  endif
 endfunction
 
 
@@ -1244,7 +1254,7 @@ function! s:PollResolve( item, ... )
 
   " Note we re-use the 'completion' request for resolves. This prevents us
   " sending a completion request and a resolve request at the same time, as
-  " resolve requests re-use the requset data from the last completion request
+  " resolve requests re-use the request data from the last completion request
   " and it must not change.
   " We also re-use the poller, so that any new completion request effectively
   " cancels this poller.
@@ -1257,11 +1267,12 @@ function! s:PollResolve( item, ... )
   call s:ShowInfoPopup( completion_item )
 endfunction
 
+set completepopup+=align:menu
+
 function! s:ShowInfoPopup( completion_item )
   let id = popup_findinfo()
   if id && !empty( a:completion_item.info )
-    call setwinvar( id, '&number', 0 )
-    call setwinvar( id, '&wincolor', 'Pmenu' )
+    call popup_setoptions( id, { 'highlight': 'Pmenu' } )
     call popup_settext( id, split( a:completion_item.info, '\n' ) )
     call popup_show( id )
   endif
@@ -1585,8 +1596,8 @@ function! s:ForceCompileAndDiagnostics()
 endfunction
 
 
-if exists( '*popup_beval' )
-  function s:Hover()
+if exists( '*popup_atcursor' ) && exists( '*popup_beval' )
+  function s:Hover( hover_type )
     if !py3eval( 'ycm_state.NativeFiletypeCompletionUsable()' )
       " Cancel the autocommand if it happens to have been set
       return
@@ -1618,17 +1629,28 @@ if exists( '*popup_beval' )
       return
     endif
 
-    call youcompleteme#GetCommandResponseAsync(
-          \ function( 's:ShowHoverResult' ),
-          \ b:ycm_hover.command,
-          \ '--bufnr=' . v:beval_bufnr,
-          \ '--line_num=' . v:beval_lnum,
-          \ '--column_num=' . v:beval_col )
+    let s:hover_syntax = b:ycm_hover.syntax
+    if a:hover_type == 'cursorhold'
+      let s:hover_pos = screenpos( win_getid(), line( '.' ), col( '.' ) )
+      let s:HoverPopupFunc = function( 'popup_atcursor' )
+      call youcompleteme#GetCommandResponseAsync(
+            \ function( 's:ShowHoverResult' ),
+            \ b:ycm_hover.command )
+    elseif a:hover_type == 'balloon'
+      let s:hover_pos = screenpos( v:beval_winid, v:beval_lnum, v:beval_col )
+      let s:HoverPopupFunc = function( 'popup_beval' )
+      call youcompleteme#GetCommandResponseAsync(
+            \ function( 's:ShowHoverResult' ),
+            \ b:ycm_hover.command,
+            \ '--bufnr=' . v:beval_bufnr,
+            \ '--line_num=' . v:beval_lnum,
+            \ '--column_num=' . v:beval_col )
+    endif
   endfunction
 
 
   function! s:ShowHoverResult( response )
-    call popup_hide( s:cursorhold_popup )
+    call popup_close( s:cursorhold_popup )
 
     if empty( a:response )
       return
@@ -1642,14 +1664,13 @@ if exists( '*popup_beval' )
     let lines = split( a:response, "\n" )
     let len = max( map( copy( lines ), "strdisplaywidth( v:val )" ) )
 
-    let mousepos = screenpos( v:beval_winid, v:beval_lnum, v:beval_col )
-    let col = mousepos.col
+    let col = s:hover_pos.col
     let wrap = 0
     let border  = { 'above': 1, 'right': 1, 'below': 1, 'left': 1 }
     let padding = { 'above': 0, 'right': 1, 'below': 0, 'left': 1 }
-    let left_right_reserve  = border['left']  + border['right'] + padding['left']  + padding['right']
-    let above_below_reserve = border['above'] + border['below'] + padding['above'] + padding['below']
-    let maxheight = max( [ mousepos.row - 1, &lines - mousepos.row ] ) - above_below_reserve
+    let left_right_reserve  = border.left  + border.right + padding.left  + padding.right
+    let above_below_reserve = border.above + border.below + padding.above + padding.below
+    let maxheight = max( [ s:hover_pos.row - 1, &lines - s:hover_pos.row ] ) - above_below_reserve
 
     " max width is screen columns minus border and padding
     let maxwidth = &columns - left_right_reserve
@@ -1661,13 +1682,13 @@ if exists( '*popup_beval' )
       let wrap = 1
     endif
 
-    let s:cursorhold_popup = popup_beval(
+    let s:cursorhold_popup = s:HoverPopupFunc(
           \   lines,
           \   {
           \     'col'      : col,
           \     'wrap'     : wrap,
-          \     'border'   : [ border['above'],  border['right'],  border['below'],  border['left'] ],
-          \     'padding'  : [ padding['above'], padding['right'], padding['below'], padding['left'] ],
+          \     'border'   : [ border.above,  border.right,  border.below,  border.left  ],
+          \     'padding'  : [ padding.above, padding.right, padding.below, padding.left ],
           \     'maxheight': maxheight,
           \     'maxwidth' : maxwidth,
           \     'minwidth' : minwidth,
@@ -1683,28 +1704,17 @@ if exists( '*popup_beval' )
     endif
     call setbufvar( winbufnr( s:cursorhold_popup ),
                             \ '&syntax',
-                            \ getbufvar( v:beval_bufnr, 'ycm_hover' ).syntax )
+                            \ s:hover_syntax )
   endfunction
 
 
   function! s:ToggleHover()
-    if !s:enable_hover
-      return
-    endif
-
     let pos = popup_getpos( s:cursorhold_popup )
     if !empty( pos ) && pos.visible
-      call popup_hide( s:cursorhold_popup )
+      call popup_close( s:cursorhold_popup )
       let s:cursorhold_popup = -1
-
-      " Disable the auto-trigger until the next cursor movement.
-      call s:DisableAutoHover()
-      augroup YCMHover
-        autocmd! CursorMoved <buffer>
-        autocmd CursorMoved <buffer> ++once call s:EnableAutoHover()
-      augroup END
     else
-      call s:EnableAutoHover()
+      call s:Hover( 'cursorhold' )
     endif
   endfunction
 
@@ -1712,13 +1722,12 @@ if exists( '*popup_beval' )
   nnoremap <silent> <plug>(YCMHover) :<C-u>call <SID>ToggleHover()<CR>
   nnoremap <silent> <plug>(YCMHoverON) :<C-u>call <SID>EnableAutoHover()<CR>
   nnoremap <silent> <plug>(YCMHoverOFF) :<C-u>call <SID>DisableAutoHover()<CR>
-  autocmd InsertEnter <buffer> silent call s:DisableAutoHover()
-  autocmd InsertLeave <buffer> silent call s:EnableAutoHover()
 
   function! youcompleteme#hover()
-    call win_execute( v:beval_winid, 'call s:Hover()' )
+    call win_execute( v:beval_winid, 'call s:Hover( "balloon" )' )
     return ''
   endfunction
+
 else
   " Don't break people's mappings if this feature is disabled, just do nothing.
   nnoremap <silent> <plug>(YCMHover) <Nop>
