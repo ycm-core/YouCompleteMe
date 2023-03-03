@@ -89,6 +89,16 @@ class DiagnosticInterface:
       self._UpdateLocationLists( open_on_edit )
 
 
+  def ClearDiagnosticsUI( self ):
+    if self._user_options[ 'echo_current_diagnostic' ]:
+      self._ClearCurrentDiagnostic()
+
+    if self._user_options[ 'enable_diagnostic_signs' ]:
+      self._ClearSigns()
+
+    self._ClearMatches()
+
+
   def DiagnosticsForLine( self, line_number ):
     return self._line_to_diags[ line_number ]
 
@@ -120,17 +130,28 @@ class DiagnosticInterface:
     self._EchoDiagnosticText( line_num, first_diag, text )
 
 
-  def _EchoDiagnosticText( self, line_num, first_diag, text ):
+  def _ClearCurrentDiagnostic( self, will_be_replaced=False ):
+    if not self._diag_message_needs_clearing:
+      return
+
     if ( vimsupport.VimSupportsVirtualText() and
          self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
-      if self._diag_message_needs_clearing:
-        # Clear any previous diag echo
-        tp.ClearTextProperties( self._bufnr,
-                                prop_types = [ 'YcmVirtDiagPadding',
-                                               'YcmVirtDiagError',
-                                               'YcmVirtDiagWarning' ] )
-        self._diag_message_needs_clearing = False
+      tp.ClearTextProperties( self._bufnr,
+                              prop_types = [ 'YcmVirtDiagPadding',
+                                             'YcmVirtDiagError',
+                                             'YcmVirtDiagWarning' ] )
+    else:
+      if not will_be_replaced:
+        vimsupport.PostVimMessage( '', warning = False )
 
+    self._diag_message_needs_clearing = False
+
+
+  def _EchoDiagnosticText( self, line_num, first_diag, text ):
+    self._ClearCurrentDiagnostic( bool( text ) )
+
+    if ( vimsupport.VimSupportsVirtualText() and
+         self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
       if not text:
         return
 
@@ -159,10 +180,7 @@ class DiagnosticInterface:
         marker + ' ' + [ line for line in text.splitlines() if line ][ 0 ] )
     else:
       if not text:
-        if self._diag_message_needs_clearing:
-          # Clear any previous diag echo
-          vimsupport.PostVimMessage( '', warning = False )
-          self._diag_message_needs_clearing = False
+        # We already cleared it
         return
 
       vimsupport.PostVimMessage( text, warning = False, truncate = True )
@@ -182,6 +200,12 @@ class DiagnosticInterface:
       self._bufnr,
       vimsupport.ConvertDiagnosticsToQfList( self._diagnostics ),
       open_on_edit )
+
+
+  def _ClearMatches( self ):
+    props_to_remove = vimsupport.GetTextProperties( self._bufnr )
+    for prop in props_to_remove:
+      vimsupport.RemoveDiagnosticProperty( self._bufnr, prop )
 
 
   def UpdateMatches( self ):
@@ -219,6 +243,11 @@ class DiagnosticInterface:
           YCM_VIM_PROPERTY_ID += 1
     for prop in props_to_remove:
       vimsupport.RemoveDiagnosticProperty( self._bufnr, prop )
+
+
+  def _ClearSigns( self ):
+    signs_to_unplace = vimsupport.GetSignsInBuffer( self._bufnr )
+    vim.eval( f'sign_unplacelist( { signs_to_unplace } )' )
 
 
   def _UpdateSigns( self ):

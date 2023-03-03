@@ -614,9 +614,14 @@ class YouCompleteMe:
     return self._buffers[ bufnr ]
 
 
+  def OnInsertEnter( self ):
+    if not self._user_options[ 'update_diagnostics_in_insert_mode' ]:
+      self.CurrentBuffer().ClearDiagnosticsUI()
+
+
   def OnInsertLeave( self ):
     if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
-         not self.NeedsReparse() ):
+         not self.CurrentBuffer().ParseRequestPending() ):
       self.CurrentBuffer().RefreshDiagnosticsUI()
     SendEventNotificationAsync( 'InsertLeave' )
 
@@ -867,7 +872,8 @@ class YouCompleteMe:
               'textprop': prop[ 'type' ],
             } )
             options.pop( 'col' )
-        vim.eval( f'{ popup_func }( { lines }, { options } )' )
+        vim.eval( f'{ popup_func }( { json.dumps( lines ) }, '
+                                  f'{ json.dumps( options ) } )' )
       else:
         vimsupport.PostVimMessage( message, warning = False )
 

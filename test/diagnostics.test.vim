@@ -263,3 +263,51 @@ function! Test_ShowDetailedDiagnostic_PopupAtCursor()
 
   %bwipe!
 endfunction
+
+function! Test_ShowDetailedDiagnostic_Popup_WithCharacters()
+  let f = tempname() . '.cc'
+  execut 'edit' f
+  call setline( 1, [
+        \   'struct Foo {};',
+        \   'template<char...> Foo operator""_foo() { return {}; }',
+        \   'int main() {',
+        \       '""_foo',
+        \   '}',
+        \ ] )
+  call youcompleteme#test#setup#WaitForInitialParse( {} )
+
+  call WaitForAssert( {->
+    \ assert_true(
+      \ py3eval(
+         \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+    \ ) ) } )
+
+  call cursor( [ 4, 1 ] )
+  YcmShowDetailedDiagnostic popup
+
+  let id = popup_locate( 5, 1 )
+  call assert_notequal( 0, id, "Couldn't find popup!" )
+
+  if exists( '*popup_list' )
+    let popups = popup_list()
+    call assert_equal( 1, len( popups ) )
+  endif
+
+  call youcompleteme#test#popup#CheckPopupPosition( id, {
+        \ 'visible': 1,
+        \ 'col': 1,
+        \ 'line': 5,
+        \ } )
+  call assert_match(
+        \ "^No matching literal operator for call to 'operator\"\"_foo'.*",
+        \ getbufline( winbufnr(id), 1, '$' )[ 0 ] )
+
+  " From vim's test_popupwin.vim
+  " trigger the check for last_cursormoved by going into insert mode
+  call test_override( 'char_avail', 1 )
+  call feedkeys( "ji\<Esc>", 'xt' )
+  call assert_equal( {}, popup_getpos( id ) )
+  call test_override( 'ALL', 0 )
+
+  %bwipe!
+endfunction

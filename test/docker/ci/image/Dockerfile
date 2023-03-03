@@ -44,20 +44,10 @@ RUN mkdir -p $HOME/vim && \
     make -j 4 && \
     make install
 
-# linuxbrew (homebrew)
-RUN mkdir -p /home/linuxbrew/.linuxbrew &&\
-    chmod -R go+rwx /home/linuxbrew && \
-    mkdir -p /home/linuxbrew/.linuxbrew/bin && \
-    git clone  https://github.com/Homebrew/brew /home/linuxbrew/.linuxbrew/Homebrew && \
-    ln -s /home/linuxbrew/.linuxbrew/Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin && \
-    echo "eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" \
-        > /etc/bash.bashrc
-
 # Python
 RUN ${YCM_VIM_PYTHON} -m pip install --upgrade pip setuptools wheel
 
 # clean up
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
-    /home/linuxbrew/.linuxbrew/bin/brew cleanup && \
     rm -rf ~/.cache && \
     rm -rf $HOME/vim

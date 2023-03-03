@@ -30,6 +30,11 @@ get in touch.
 Please do **NOT** go to #vim on Freenode for support. Please contact the
 YouCompleteMe maintainers directly using the [contact details](#contact) below.
 
+# Vundle
+
+Please note that the below instructions suggest using Vundle. Currently there
+are problems with Vundle, so here are some [alternative instructions](https://github.com/ycm-core/YouCompleteMe/issues/4134#issuecomment-1446235584) using Vim packages.
+
 Contents
 --------
 
@@ -3810,6 +3815,10 @@ tells YCM where is the Omnisharp-Roslyn executable located.
 With async diagnostics, LSP servers might send new diagnostics mid-typing.
 If seeing these new diagnostics while typing is not desired, this option can
 be set to 0.
+
+When this option is set to `0`, diagnostic signs, virtual text and highlights
+are cleared when entering insert mode and replaced when leaving insert mode.
+This reduces visual noise while editing.
 
 In addition, this option is recommended when `g:ycm_echo_current_diagnostic` is
 set to `virtual-text` as it prevents updating the virtual text while you are
