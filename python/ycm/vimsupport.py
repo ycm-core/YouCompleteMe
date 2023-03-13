@@ -182,7 +182,12 @@ def GetCurrentBufferNumber():
 
 
 def GetBufferChangedTick( bufnr ):
-  return GetIntValue( f'getbufvar({ bufnr }, "changedtick")' or 0 )
+  try:
+    return GetIntValue( f'getbufvar({ bufnr }, "changedtick")' )
+  except ValueError:
+    # For some reason, occasionally changedtick returns '' and causes an error.
+    # In that case, just return 0 rather than spamming an error to the console.
+    return 0
 
 
 # Returns a range covering the earliest and latest lines visible in the current
@@ -929,7 +934,7 @@ def GetBoolValue( variable ):
 
 
 def GetIntValue( variable ):
-  return int( vim.eval( variable ) )
+  return int( vim.eval( variable ) or 0 )
 
 
 def _SortChunksByFile( chunks ):
