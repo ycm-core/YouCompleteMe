@@ -1650,21 +1650,21 @@ if exists( '*popup_atcursor' )
       let wrap = 1
     endif
 
-    let popup_params = {
-      \   'col': col,
-      \   'wrap': wrap,
-      \   'padding': [ 0, 1, 0, 1 ],
-      \   'moved': 'word',
-      \   'maxwidth': &columns,
-      \   'close': 'click',
-      \   'fixed': 0,
-      \   }
+    let s:popup_params = {
+          \ 'col': col,
+          \ 'wrap': wrap,
+          \ 'padding': [ 0, 1, 0, 1 ],
+          \ 'moved': 'word',
+          \ 'maxwidth': &columns,
+          \ 'close': 'click',
+          \ 'fixed': 0,
+          \ }
 
     if has_key( b:ycm_hover, 'popup_params' )
-      let popup_params = extend( copy( popup_params ), b:ycm_hover.popup_params )
+      let s:popup_params = extend( copy( s:popup_params ), b:ycm_hover.popup_params )
     endif
 
-    let s:cursorhold_popup = popup_atcursor( lines, popup_params )
+    let s:cursorhold_popup = popup_atcursor( lines, s:popup_params )
     call setbufvar( winbufnr( s:cursorhold_popup ),
                             \ '&syntax',
                             \ b:ycm_hover.syntax )
