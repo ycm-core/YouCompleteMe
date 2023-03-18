@@ -3290,9 +3290,10 @@ languages, add something like this to your vimrc:
       \ }
   augroup END
 <
+You can also modify the opened popup with 'popup_params' key. For example, you
+can limit the popup's maximum width and add a border to it:
 
-You can also modify the opened popup with 'popup_params' key.
-For example, you can limit the popup's maximum width and add a border to it:
+
 >
   augroup MyYCMCustom
     autocmd!
@@ -3307,7 +3308,8 @@ For example, you can limit the popup's maximum width and add a border to it:
       \ }
   augroup END
 <
-See |popup_create-arguments| for the list of available popup window options.
+See ':help popup_create-arguments' for the list of available popup window
+options.
 
 Default: "'CursorHold'"
 

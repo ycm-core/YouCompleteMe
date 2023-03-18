@@ -3051,7 +3051,7 @@ augroup MyYCMCustom
     \ }
 augroup END
 ```
-See `popup_create-arguments` for the list of available popup window options.
+See `:help popup_create-arguments` for the list of available popup window options.
 
 Default: `'CursorHold'`
 
