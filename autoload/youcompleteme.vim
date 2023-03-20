@@ -1652,7 +1652,7 @@ if exists( '*popup_atcursor' )
 
     let popup_params = {
           \ 'col': col,
-          \ 'wrap': 1,
+          \ 'wrap': wrap,
           \ 'padding': [ 0, 1, 0, 1 ],
           \ 'moved': 'word',
           \ 'maxwidth': &columns,
