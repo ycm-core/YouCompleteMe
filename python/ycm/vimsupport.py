@@ -137,11 +137,11 @@ def ShouldIncludeBufferInRequests( buffer_object ):
     return False
 
   bt = BufferTypeForBufferObject( buffer_object )
-  if not GetIntValue( 'youcompleteme#filetypes#AllowedForBuftype( "{bt}" )' ):
+  if not GetIntValue( f'youcompleteme#filetypes#AllowedForBuftype( "{bt}" )' ):
     return False
 
   if not all(
-    GetIntValue( 'youcompleteme#filetypes#AllowedForFiletype( "{ft}" )' )
+    GetIntValue( f'youcompleteme#filetypes#AllowedForFiletype( "{ft}" )' )
     for ft in FiletypesForBuffer( buffer_object ) ):
     return False
 
