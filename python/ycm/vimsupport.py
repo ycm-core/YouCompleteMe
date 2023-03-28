@@ -130,6 +130,24 @@ def GetBufferData( buffer_object ):
   }
 
 
+def ShouldIncludeBufferInRequests( buffer_object ):
+  # TODO : Neovim ?
+  if buffer_object.name.startswith( '!' ):
+    # it's a terminal buffer
+    return False
+
+  bt = BufferTypeForBufferObject( buffer_object )
+  if not GetIntValue( 'youcompleteme#filetypes#AllowedForBuftype( "{bt}" )' ):
+    return False
+
+  if not all(
+    GetIntValue( 'youcompleteme#filetypes#AllowedForFiletype( "{ft}" )' )
+    for ft in FiletypesForBuffer( buffer_object ) ):
+    return False
+
+  return True
+
+
 def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
   """Build part of the request containing the contents and filetypes of all
   dirty buffers as well as the buffer |included_buffer| with its filepath
@@ -138,6 +156,9 @@ def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
 
   for buffer_object in vim.buffers:
     if not BufferModified( buffer_object ):
+      continue
+
+    if not ShouldIncludeBufferInRequests( buffer_object ):
       continue
 
     filepath = GetBufferFilepath( buffer_object )
@@ -915,6 +936,15 @@ def FiletypesForBuffer( buffer_object ):
   # to get the filetypes because this causes annoying flickering when the buffer
   # is hidden.
   return GetBufferFiletypes( buffer_object.number )
+
+
+def GetBufferType( bufnr ):
+  return ToUnicode( vim.eval( f'getbufvar( {bufnr}, "&buftype" )' ) )
+
+
+def BufferTypeForBufferObject( buffer_object ):
+  # Similar reasons to above, we don't use options[ 'buftype' ]
+  return GetBufferType( buffer_object.number )
 
 
 def VariableExists( variable ):

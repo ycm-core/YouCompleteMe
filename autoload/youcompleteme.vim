@@ -73,13 +73,6 @@ let s:pollers = {
       \     'wait_milliseconds': 100,
       \   },
       \ }
-let s:buftype_blacklist = {
-      \   'help': 1,
-      \   'terminal': 1,
-      \   'quickfix': 1,
-      \   'popup': 1,
-      \   'nofile': 1,
-      \ }
 let s:last_char_inserted_by_user = v:true
 let s:enable_hover = 0
 let s:cursorhold_popup = -1
@@ -563,17 +556,13 @@ endfunction
 
 function! s:AllowedToCompleteInBuffer( buffer )
   let buftype = getbufvar( a:buffer, '&buftype' )
-
-  if has_key( s:buftype_blacklist, buftype )
-    return 0
-  endif
-
   let filetype = getbufvar( a:buffer, '&filetype' )
   if empty( filetype )
     let filetype = 'ycm_nofiletype'
   endif
 
-  let allowed = youcompleteme#filetypes#AllowedForFiletype( filetype )
+  let allowed = youcompleteme#filetypes#AllowedForFiletype( filetype ) &&
+        \ youcompleteme#filetypes#AllowedForBuftype( buftype )
 
   if !allowed || s:DisableOnLargeFile( a:buffer )
     return 0

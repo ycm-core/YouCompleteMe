@@ -25,6 +25,14 @@ function! s:HasAnyKey( dict, keys ) abort
   return 0
 endfunction
 
+let s:buftype_blacklist = {
+      \   'help': 1,
+      \   'terminal': 1,
+      \   'quickfix': 1,
+      \   'popup': 1,
+      \   'nofile': 1,
+      \ }
+
 function! youcompleteme#filetypes#AllowedForFiletype( filetype ) abort
   let whitelist_allows = type( g:ycm_filetype_whitelist ) != v:t_dict ||
         \ has_key( g:ycm_filetype_whitelist, '*' ) ||
@@ -33,4 +41,8 @@ function! youcompleteme#filetypes#AllowedForFiletype( filetype ) abort
         \ !s:HasAnyKey( g:ycm_filetype_blacklist, split( a:filetype, '\.' ) )
 
   return whitelist_allows && blacklist_allows
+endfunction
+
+function! youcompleteme#filetypes#AllowedForBuftype( buftype ) abort
+  return ! has_key( s:buftype_blacklist, a:buftype )
 endfunction
