@@ -4105,7 +4105,7 @@ If you like YCM so much that you're wiling to part with your hard-earned cash,
 please consider donating to one of the following charities, which are
 meaningful to the current maintainers (in no particular order):
 
-- Greyhound Rescue Wales [98]
+- Hector's Greyhound Rescue [98]
 - Be Humane [99]
 - Cancer Research UK [100]
 - ICCF Holland [101]
@@ -4216,7 +4216,7 @@ References ~
 [95] https://github.com/ycm-core/YouCompleteMe/issues?state=open
 [96] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
 [97] https://www.gnu.org/copyleft/gpl.html
-[98] https://greyhoundrescuewales.co.uk
+[98] https://www.hectorsgreyhoundrescue.org
 [99] https://www.budihuman.rs/en
 [100] https://www.cancerresearchuk.org
 [101] https://iccf.nl
