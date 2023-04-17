@@ -44,8 +44,12 @@ jobs:
       run: python3 -m pip install -r python/test_requirements.txt
     - name: Run tests
       run: python3 run_tests.py --quiet python/ycm/tests
+    - name: summarise coverage
+      run: coverage xml
     - name: Upload coverage data
-      run: codecov --name "${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.python-arch }}"
+      uses: codecov/codecov-action@v3
+      with:
+        name: "${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.python-arch }}"
 
   vim-tests:
     strategy:
@@ -80,5 +84,9 @@ jobs:
     - name: Run tests in new vim
       if: matrix.vim == 'new'
       run: ./test/run_vim_tests
+    - name: Combine and summarise coverage
+      run: coverage combine && coverage xml
     - name: Upload coverage data
-      run: codecov --name "vim-tests-${{ matrix.vim }}"
+      uses: codecov/codecov-action@v3
+      with:
+        name: "vim-tests-${{ matrix.vim }}"

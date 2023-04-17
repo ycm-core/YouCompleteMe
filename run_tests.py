@@ -86,7 +86,10 @@ def UnittestTests( parsed_args, extra_unittest_args ):
     unittest_args.append( test_directory )
 
   if parsed_args.coverage:
-    executable = [ sys.executable, '-We', '-m', 'coverage', 'run' ]
+    executable = [ sys.executable,
+                   '-m',
+                   'coverage',
+                   'run' ]
   else:
     executable = [ sys.executable, '-We' ]
 

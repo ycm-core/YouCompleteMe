@@ -44,7 +44,6 @@ Contents
     - [macOS](#macos)
     - [Linux 64-bit](#linux-64-bit)
     - [Windows](#windows)
-    - [FreeBSD/OpenBSD](#freebsdopenbsd)
     - [Full Installation Guide](#full-installation-guide)
 - [Quick Feature Summary](#quick-feature-summary)
 - [User Guide](#user-guide)
@@ -642,102 +641,6 @@ YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
-### FreeBSD/OpenBSD
-
-#### Quick start, installing all completers
-
-- Install YCM plugin via [Vundle][]
-- Install CMake
-
-```
-pkg install cmake
-```
-
-- Install xbuild, go, node and npm
-- Compile YCM
-
-```
-cd ~/.vim/bundle/YouCompleteMe
-python3 install.py --all
-```
-
-- For plugging an arbitrary LSP server, check [the relevant section](#plugging-an-arbitrary-lsp-server)
-
-#### Explanation for the quick start
-
-These instructions (using `install.py`) are the quickest way to install
-YouCompleteMe, however they may not work for everyone. If the following
-instructions don't work for you, check out the [full installation
-guide](#full-installation-guide).
-
-**NOTE:** OpenBSD / FreeBSD are not officially supported platforms by YCM.
-
-Make sure you have a supported Vim version with Python 3 support, and a supported
-compiler and CMake, perhaps:
-
-```
-pkg install cmake
-```
-
-Install YouCompleteMe with [Vundle][].
-
-**Remember:** YCM is a plugin with a compiled component. If you **update** YCM
-using Vundle and the `ycm_core` library APIs have changed (happens
-rarely), YCM will notify you to recompile it. You should then rerun the install
-process.
-
-Compiling YCM **with** semantic support for C-family languages through
-**clangd**:
-
-```
-cd ~/.vim/bundle/YouCompleteMe
-./install.py --clangd-completer
-```
-
-Compiling YCM **without** semantic support for C-family languages:
-
-```
-cd ~/.vim/bundle/YouCompleteMe
-./install.py
-```
-
-If the `python` executable is not present, or the default `python` is not the
-one that should be compiled against, specify the python interpreter explicitly:
-
-```
-python3 install.py --clangd-completer
-```
-
-The following additional language support options are available:
-
-- C# support: install Mono and add `--cs-completer` when calling
-  `./install.py`.
-- Go support: install [Go][go-install] and add `--go-completer` when calling
-  `./install.py`.
-- JavaScript and TypeScript support: install [Node.js and npm][npm-install] and
-  add `--ts-completer` when calling `install.py`.
-- Rust support: add `--rust-completer` when calling `./install.py`.
-- Java support: install [JDK 17][jdk-install] and add
-  `--java-completer` when calling `./install.py`.
-
-To simply compile with everything enabled, there's a `--all` flag. So, to
-install with all language features, ensure `xbuild`, `go`, `node` and `npm`
-tools are installed and in your `PATH`, then simply run:
-
-```
-cd ~/.vim/bundle/YouCompleteMe
-./install.py --all
-```
-
-That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
-Don't forget that if you want the C-family semantic completion engine to work,
-you will need to provide the compilation flags for your project to YCM. It's all
-in the User Guide.
-
-YCM comes with sane defaults for its options, but you still may want to take a
-look at what's available for configuration. There are a few interesting options
-that are conservatively turned off by default that you may want to turn on.
-
 ### Full Installation Guide
 
 The [full installation guide][wiki-full-install] has been moved to the wiki.
@@ -1181,7 +1084,7 @@ On supported architectures, the `install.py` script will download a suitable
 clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
 Supported architectures are:
 
-* Linux glibc >= 2.27 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
+* Linux glibc >= 2.31 (Intel, armv7-a, aarch64) - built on ubuntu 20.04
 * MacOS >=10.15 (Intel, arm64)
   - For Intel, compatibility per clang.llvm.org downloads
   - For arm64, macOS 10.15+
@@ -1207,7 +1110,7 @@ $ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang
 ```
 
 Please note that if using custom `clangd` or `libclang` it _must_ match the
-version that YCM requires. Currently YCM requires ***clang 15.0.1***.
+version that YCM requires. Currently YCM requires ***clang 16.0.1***.
 
 #### Compile flags
 
@@ -3019,6 +2922,7 @@ buffer-local variable can be set to a dictionary with the following keys:
 * `command`: The YCM completer subcommand which should be run on hover
 * `syntax`: The syntax to use (as in `set syntax=`) in the popup window for
   highlighting.
+* `popup_params`: The params passed to a popup window which gets opened.
 
 For example, to use C/C++ syntax highlighting in the popup for C-family
 languages, add something like this to your vimrc:
@@ -3032,6 +2936,25 @@ augroup MyYCMCustom
     \ }
 augroup END
 ```
+
+You can also modify the opened popup with `popup_params` key.
+For example, you can limit the popup's maximum width and add a border to it:
+
+```viml
+augroup MyYCMCustom
+  autocmd!
+  autocmd FileType c,cpp let b:ycm_hover = {
+    \ 'command': 'GetDoc',
+    \ 'syntax': &filetype
+    \ 'popup_params': {
+    \     'maxwidth': 80,
+    \     'border': [],
+    \     'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
+    \   },
+    \ }
+augroup END
+```
+See `:help popup_create-arguments` for the list of available popup window options.
 
 Default: `'CursorHold'`
 
@@ -3874,7 +3797,7 @@ Sponsorship
 
 If you like YCM so much that you're wiling to part with your hard-earned cash, please consider donating to one of the following charities, which are meaningful to the current maintainers (in no particular order):
 
-* [Greyhound Rescue Wales](https://greyhoundrescuewales.co.uk)
+* [Hector's Greyhound Rescue](https://www.hectorsgreyhoundrescue.org)
 * [Be Humane](https://www.budihuman.rs/en)
 * [Cancer Research UK](https://www.cancerresearchuk.org)
 * [ICCF Holland](https://iccf.nl)

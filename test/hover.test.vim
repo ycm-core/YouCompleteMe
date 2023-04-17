@@ -387,6 +387,53 @@ function! TearDown_Test_Hover_Custom_Command()
   silent! au! MyYCMCustom
 endfunction
 
+function! SetUp_Test_Hover_Custom_Popup()
+  augroup MyYCMCustom
+    autocmd!
+    autocmd FileType cpp let b:ycm_hover = {
+      \ 'command': 'GetDoc',
+      \ 'syntax': 'cpp',
+      \ 'popup_params': {
+      \     'maxwidth': 10,
+      \   }
+      \ }
+  augroup END
+endfunction
+
+function! Test_Hover_Custom_Popup()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/completion.cc',
+                                        \ {} )
+  call assert_equal( 'cpp', &filetype )
+  call assert_equal( {
+                   \   'command': 'GetDoc',
+                   \   'syntax': 'cpp',
+                   \   'popup_params': { 'maxwidth': 10 }
+                   \ }, b:ycm_hover )
+
+  call setpos( '.', [ 0, 6, 8 ] )
+  doautocmd CursorHold
+  call assert_equal( {
+                   \   'command': 'GetDoc',
+                   \   'syntax': 'cpp',
+                   \   'popup_params': { 'maxwidth': 10 }
+                   \ }, b:ycm_hover )
+
+  call s:CheckPopupVisibleScreenPos( { 'row': 7, 'col': 9 },
+                                   \ s:cpp_lifetime.GetDoc,
+                                   \ 'cpp' )
+  " Check that popup's width is limited by maxwidth being passed
+  call s:CheckPopupNotVisibleScreenPos( { 'row': 7, 'col': 20 }, v:false )
+
+  normal \D
+  call s:CheckPopupNotVisibleScreenPos( { 'row': 7, 'col': 9 }, v:false )
+
+  call popup_clear()
+endfunction
+
+function! TearDown_Test_Hover_Custom_Popup()
+  silent! au! MyYCMCustom
+endfunction
+
 function! Test_Long_Single_Line()
   call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
   call cursor( [ 37, 3 ] )

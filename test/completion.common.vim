@@ -339,16 +339,16 @@ function! Test_Completion_FixIt()
   function! Check1( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'do_a' )
-    call CheckCompletionItemsContainsExactly( [ 'do_a_thing(Thing thing)',
-                                 \ 'do_another_thing()' ] )
+    call CheckCompletionItemsHasItems( [ 'do_a_thing(Thing thing)',
+                                       \ 'do_another_thing()' ] )
     call FeedAndCheckAgain( "\<Tab>" , funcref( 'Check2' ) )
   endfunction
 
   function! Check2( id )
     call WaitForCompletion()
     call CheckCurrentLine( 'do_a_thing' )
-    call CheckCompletionItemsContainsExactly( [ 'do_a_thing(Thing thing)',
-                                 \ 'do_another_thing()' ] )
+    call CheckCompletionItemsHasItems( [ 'do_a_thing(Thing thing)',
+                                       \ 'do_another_thing()' ] )
     call FeedAndCheckAgain( '(' , funcref( 'Check3' ) )
   endfunction
 
