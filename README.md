@@ -1181,7 +1181,7 @@ On supported architectures, the `install.py` script will download a suitable
 clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
 Supported architectures are:
 
-* Linux glibc >= 2.27 (Intel, armv7-a, aarch64) - built on ubuntu 18.04
+* Linux glibc >= 2.31 (Intel, armv7-a, aarch64) - built on ubuntu 20.04
 * MacOS >=10.15 (Intel, arm64)
   - For Intel, compatibility per clang.llvm.org downloads
   - For arm64, macOS 10.15+
@@ -1207,7 +1207,7 @@ $ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang
 ```
 
 Please note that if using custom `clangd` or `libclang` it _must_ match the
-version that YCM requires. Currently YCM requires ***clang 15.0.1***.
+version that YCM requires. Currently YCM requires ***clang 16.0.1***.
 
 #### Compile flags
 
