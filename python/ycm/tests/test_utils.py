@@ -489,6 +489,26 @@ class VimBuffers:
     return self._buffers.pop( index )
 
 
+class VimTabpages:
+  def __init__( self, *args ):
+    """|buffers| is a list of VimBuffer objects."""
+    self._tabpages = []
+    self._tabpages.extend( args )
+
+
+  def __getitem__( self, number ):
+    """Emulates vim.buffers[ number ]"""
+    for tabpage in self._tabpages:
+      if number == tabpage.number:
+        return tabpage
+    raise KeyError( number )
+
+
+  def __iter__( self ):
+    """Emulates for loop on vim.buffers"""
+    return iter( self._tabpages )
+
+
 class VimWindow:
   """An object that looks like a vim.window object:
     - |number|: number of the window;
@@ -496,7 +516,8 @@ class VimWindow:
       window;
     - |cursor|: a tuple corresponding to the cursor position."""
 
-  def __init__( self, number, buffer_object, cursor = None ):
+  def __init__( self, tabpage, number, buffer_object, cursor = None ):
+    self.tabpage = tabpage
     self.number = number
     self.buffer = buffer_object
     self.cursor = cursor
@@ -510,31 +531,33 @@ class VimWindow:
                         f'cursor = { self.cursor } )' )
 
 
-class VimWindows:
+class VimTabpage:
   """An object that looks like a vim.windows object."""
 
-  def __init__( self, buffers, cursor ):
+  def __init__( self, number, buffers, cursor ):
     """|buffers| is a list of VimBuffer objects corresponding to the window
     layout. The first element of that list is assumed to be the current window.
     |cursor| is the cursor position of that window."""
-    windows = []
-    windows.append( VimWindow( 1, buffers[ 0 ], cursor ) )
+    self.number = number
+    self.windows = []
+    self.windows.append( VimWindow( self, 1, buffers[ 0 ], cursor ) )
     for window_number in range( 1, len( buffers ) ):
-      windows.append( VimWindow( window_number + 1, buffers[ window_number ] ) )
-    self._windows = windows
+      self.windows.append( VimWindow( self,
+                                      window_number + 1,
+                                      buffers[ window_number ] ) )
 
 
   def __getitem__( self, number ):
     """Emulates vim.windows[ number ]"""
     try:
-      return self._windows[ number ]
+      return self.windows[ number ]
     except IndexError:
       raise IndexError( 'no such window' )
 
 
   def __iter__( self ):
     """Emulates for loop on vim.windows"""
-    return iter( self._windows )
+    return iter( self.windows )
 
 
 class VimCurrent:
@@ -544,6 +567,7 @@ class VimCurrent:
   def __init__( self, current_window ):
     self.buffer = current_window.buffer
     self.window = current_window
+    self.tabpage = current_window.tabpage
     self.line = self.buffer.contents[ current_window.cursor[ 0 ] - 1 ]
 
 
@@ -639,10 +663,11 @@ def MockVimBuffers( buffers, window_buffers, cursor_position = ( 1, 1 ) ):
                         'which corresponds to the current window.' )
 
   with patch( 'vim.buffers', VimBuffers( buffers ) ):
-    with patch( 'vim.windows', VimWindows( window_buffers,
-                                           cursor_position ) ) as windows:
-      with patch( 'vim.current', VimCurrent( windows[ 0 ] ) ):
-        yield VIM_MOCK
+    with patch( 'vim.tabpages', VimTabpages(
+      VimTabpage( 1, window_buffers, cursor_position ) ) ) as tabpages:
+      with patch( 'vim.windows', tabpages[ 1 ] ) as windows:
+        with patch( 'vim.current', VimCurrent( windows[ 0 ] ) ):
+          yield VIM_MOCK
 
 
 def MockVimModule():
