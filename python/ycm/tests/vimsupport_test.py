@@ -69,8 +69,9 @@ def _BuildLocations( start_line, start_column, end_line, end_column ):
 
 
 class VimsupportTest( TestCase ):
+  @patch( 'ycm.vimsupport.WinIDForWindow', side_effect = range( 1001, 1010 ) )
   @patch( 'vim.eval', new_callable = ExtendedMock )
-  def test_SetLocationListsForBuffer_Current( self, vim_eval ):
+  def test_SetLocationListsForBuffer_Current( self, vim_eval, *args ):
     diagnostics = [ {
       'bufnr': 3,
       'filename': 'some_filename',
@@ -84,10 +85,10 @@ class VimsupportTest( TestCase ):
       vimsupport.SetLocationListsForBuffer( 3, diagnostics )
 
     vim_eval.assert_has_exact_calls( [
-      call( 'setloclist( 1, [], " ", { "title": "ycm_loc", '
+      call( 'setloclist( 1001, [], " ", { "title": "ycm_loc", '
             '"items": [{"bufnr": 3, "filename": "some_filename", "lnum": 5, '
             '"col": 22, "type": "E", "valid": 1}] } )' ),
-      call( 'getloclist( 1, { "nr": "$", "id": 0 } ).id' ),
+      call( 'getloclist( 1001, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
@@ -127,8 +128,9 @@ class VimsupportTest( TestCase ):
     vim_eval.assert_not_called()
 
 
+  @patch( 'ycm.vimsupport.WinIDForWindow', side_effect = range( 1001, 1010 ) )
   @patch( 'vim.eval', new_callable = ExtendedMock, side_effect = [ -1, 1 ] )
-  def test_SetLocationListsForBuffer_MultipleWindows( self, vim_eval ):
+  def test_SetLocationListsForBuffer_MultipleWindows( self, vim_eval, *args ):
     diagnostics = [ {
       'bufnr': 3,
       'filename': 'some_filename',
@@ -144,14 +146,15 @@ class VimsupportTest( TestCase ):
       vimsupport.SetLocationListsForBuffer( 1, diagnostics )
 
     vim_eval.assert_has_exact_calls( [
-      call( 'setloclist( 2, [], " ", { "title": "ycm_loc", "items": '
+      call( 'setloclist( 1001, [], " ", { "title": "ycm_loc", "items": '
            f'{ json.dumps( diagnostics ) } }} )' ),
-      call( 'getloclist( 2, { "nr": "$", "id": 0 } ).id' ),
+      call( 'getloclist( 1001, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
+  @patch( 'ycm.vimsupport.WinIDForWindow', side_effect = range( 1001, 1010 ) )
   @patch( 'vim.eval', new_callable = ExtendedMock )
-  def test_SetLocationList( self, vim_eval ):
+  def test_SetLocationList( self, vim_eval, *args ):
     diagnostics = [ {
       'bufnr': 3,
       'filename': 'some_filename',
@@ -165,15 +168,16 @@ class VimsupportTest( TestCase ):
       vimsupport.SetLocationList( diagnostics )
 
     vim_eval.assert_has_exact_calls( [
-      call( 'setloclist( 0, [], " ", { "title": "ycm_loc", "items": [{"bufnr": '
-            '3, "filename": "some_filename", "lnum": '
+      call( 'setloclist( 1001, [], " ", { "title": "ycm_loc", "items": '
+            '[{"bufnr": 3, "filename": "some_filename", "lnum": '
             '5, "col": 22, "type": "E", "valid": 1}] } )' ),
-      call( 'getloclist( 0, { "nr": "$", "id": 0 } ).id' ),
+      call( 'getloclist( 1001, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
+  @patch( 'ycm.vimsupport.WinIDForWindow', side_effect = range( 1001, 1010 ) )
   @patch( 'vim.eval', new_callable = ExtendedMock )
-  def test_SetLocationList_NotCurrent( self, vim_eval ):
+  def test_SetLocationList_NotCurrent( self, vim_eval, *args ):
     diagnostics = [ {
       'bufnr': 3,
       'filename': 'some_filename',
@@ -192,10 +196,10 @@ class VimsupportTest( TestCase ):
     # This version does not check the current
     # buffer and just sets the current win
     vim_eval.assert_has_exact_calls( [
-      call( 'setloclist( 0, [], " ", { "title": "ycm_loc", "items": [{"bufnr": '
-            '3, "filename": "some_filename", "lnum": 5, "col": 22, '
+      call( 'setloclist( 1001, [], " ", { "title": "ycm_loc", "items": '
+            '[{"bufnr": 3, "filename": "some_filename", "lnum": 5, "col": 22, '
             '"type": "E", "valid": 1}] } )' ),
-      call( 'getloclist( 0, { "nr": "$", "id": 0 } ).id' ),
+      call( 'getloclist( 1001, { "nr": "$", "id": 0 } ).id' ),
     ] )
 
 
@@ -2052,9 +2056,9 @@ class VimsupportTest( TestCase ):
     current_window = MagicMock( buffer = current_buffer )
     different_window = MagicMock( buffer = different_buffer )
     current_tab = MagicMock( windows = [ current_window, different_window ] )
-    with patch( 'vim.tabpages', [ current_tab ] ):
-      with MockVimBuffers( [ current_buffer, different_buffer ],
-                           [ current_buffer ] ) as vim:
+    with MockVimBuffers( [ current_buffer, different_buffer ],
+                         [ current_buffer ] ) as vim:
+      with patch( 'vim.tabpages', [ current_tab ] ):
         vimsupport.JumpToLocation( os.path.realpath( 'different_uni¢𐍈d€' ),
                                    2,
                                    5,
@@ -2102,9 +2106,9 @@ class VimsupportTest( TestCase ):
     current_window = MagicMock( buffer = current_buffer )
     different_window = MagicMock( buffer = different_buffer )
     current_tab = MagicMock( windows = [ current_window, different_window ] )
-    with patch( 'vim.tabpages', [ current_tab ] ):
-      with MockVimBuffers( [ current_buffer, different_buffer ],
-                           [ current_buffer ] ) as vim:
+    with MockVimBuffers( [ current_buffer, different_buffer ],
+                         [ current_buffer ] ) as vim:
+      with patch( 'vim.tabpages', [ current_tab ] ):
         vimsupport.JumpToLocation( os.path.realpath( 'different_uni¢𐍈d€' ),
                                    2,
                                    5,
