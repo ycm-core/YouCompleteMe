@@ -442,7 +442,7 @@ def LineAndColumnNumbersClamped( bufnr, line_num, column_num ):
 
 def SetLocationList( diagnostics ):
   """Set the location list for the current window to the supplied diagnostics"""
-  SetLocationListForWindow( 0, diagnostics )
+  SetLocationListForWindow( vim.current.window, diagnostics )
 
 
 def GetWindowsForBufferNumber( buffer_number ):
@@ -458,49 +458,50 @@ def SetLocationListsForBuffer( buffer_number,
   """Populate location lists for all windows containing the buffer with number
   |buffer_number|. See SetLocationListForWindow for format of diagnostics."""
   for window in GetWindowsForBufferNumber( buffer_number ):
-    SetLocationListForWindow( window.number, diagnostics, open_on_edit )
+    SetLocationListForWindow( window, diagnostics, open_on_edit )
 
 
-def SetLocationListForWindow( window_number,
+def SetLocationListForWindow( window,
                               diagnostics,
                               open_on_edit = False ):
+  window_id = WinIDForWindow( window )
   """Populate the location list with diagnostics. Diagnostics should be in
   qflist format; see ":h setqflist" for details."""
-  ycm_loc_id = vim.windows[ window_number - 1 ].vars.get( 'ycm_loc_id' )
+  ycm_loc_id = window.vars.get( 'ycm_loc_id' )
   # User may have made a bunch of `:lgrep` calls and we do not own the
   # location list with the ID we remember any more.
   if ( ycm_loc_id is not None and
-       vim.eval( f'getloclist( { window_number }, '
+       vim.eval( f'getloclist( { window_id }, '
                                f'{{ "id": { ycm_loc_id }, '
                                 '"title": 0 } ).title' ) == 'ycm_loc' ):
     ycm_loc_id = None
 
   if ycm_loc_id is None:
     # Create new and populate
-    vim.eval( f'setloclist( { window_number }, '
+    vim.eval( f'setloclist( { window_id }, '
                            '[], '
                            '" ", '
                            '{ "title": "ycm_loc", '
                             f'"items": { json.dumps( diagnostics ) } }} )' )
-    vim.windows[ window_number - 1 ].vars[ 'ycm_loc_id' ] = GetIntValue(
-        f'getloclist( { window_number }, {{ "nr": "$", "id": 0 }} ).id' )
+    window.vars[ 'ycm_loc_id' ] = GetIntValue(
+        f'getloclist( { window_id }, {{ "nr": "$", "id": 0 }} ).id' )
   elif open_on_edit:
     # Remove old and create new list
-    vim.eval( f'setloclist( { window_number }, '
+    vim.eval( f'setloclist( { window_id }, '
                            '[], '
                            '"r", '
                           f'{{ "id": { ycm_loc_id }, '
                               '"items": [], "title": "" } )' )
-    vim.eval( f'setloclist( { window_number }, '
+    vim.eval( f'setloclist( { window_id }, '
                            '[], '
                            '" ", '
                            '{ "title": "ycm_loc", '
                             f'"items": { json.dumps( diagnostics ) } }} )' )
-    vim.windows[ window_number - 1 ].vars[ 'ycm_loc_id' ] = GetIntValue(
-        f'getloclist( { window_number }, {{ "nr": "$", "id": 0 }} ).id' )
+    window.vars[ 'ycm_loc_id' ] = GetIntValue(
+        f'getloclist( { window_id }, {{ "nr": "$", "id": 0 }} ).id' )
   else:
     # Just populate the old one
-    vim.eval( f'setloclist( { window_number }, '
+    vim.eval( f'setloclist( { window_id }, '
                            '[], '
                            '"r", '
                           f'{{ "id": { ycm_loc_id }, '
