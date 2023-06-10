@@ -20,6 +20,7 @@ from ycm.client.inlay_hints_request import InlayHintsRequest
 from ycm.client.base_request import BuildRequestData
 from ycm import vimsupport
 from ycm import text_properties as tp
+from ycm import scrolling_range as sr
 
 
 HIGHLIGHT_GROUP = {
@@ -55,103 +56,28 @@ def Initialise():
   return True
 
 
-class InlayHints:
+class InlayHints( sr.ScrollingBufferRange ):
   """Stores the inlay hints state for a Vim buffer"""
 
-  # FIXME: Send a request per-disjoint range for this buffer rather than the
-  # maximal range. then collaate the results when all responses are returned
-  def __init__( self, bufnr, user_options ):
-    self._request = None
-    self._bufnr = bufnr
-    self.tick = -1
-    self._latest_inlay_hints = []
-    self._last_requested_range = None
 
-
-  def Request( self, force=False ):
-    if self._request and not self.Ready():
-      return True
-
-    # Check to see if the buffer ranges would actually change anything visible.
-    # This avoids a round-trip for every single line scroll event
-    if ( not force and
-         self.tick == vimsupport.GetBufferChangedTick( self._bufnr ) and
-         vimsupport.VisibleRangeOfBufferOverlaps(
-           self._bufnr,
-           self._last_requested_range ) ):
-      return False # don't poll
-
-    # We're requesting changes, so the existing results are now invalid
-    self._latest_inlay_hints = []
-    # FIXME: This call is duplicated in the call to VisibleRangeOfBufferOverlaps
-    #  - remove the expansion param
-    #  - look up the actual visible range, then call this function
-    #  - if not overlapping, do the factor expansion and request
-    self._last_requested_range = vimsupport.RangeVisibleInBuffer( self._bufnr )
-    self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
-
+  def _NewRequest( self, request_range ):
     request_data = BuildRequestData( self._bufnr )
-    request_data.update( {
-      'range': self._last_requested_range
-    } )
-    self._request = InlayHintsRequest( request_data )
-    self._request.Start()
-    return True
+    request_data[ 'range' ] = request_range
+    return InlayHintsRequest( request_data )
 
 
-  def Ready( self ):
-    return self._request is not None and self._request.Done()
-
-
-  def Clear( self ):
-    # ClearTextProperties is slow as it must scan the whole buffer
-    # we shouldn't use _last_requested_range, because the server is free to
-    # return a larger range, so we pick the first/last from the latest results
+  def _Clear( self ):
     types = [ 'YCM_INLAY_UNKNOWN', 'YCM_INLAY_PADDING' ] + [
       f'YCM_INLAY_{ prop_type }' for prop_type in HIGHLIGHT_GROUP.keys()
     ]
 
     tp.ClearTextProperties( self._bufnr, prop_types = types )
 
-  def Update( self ):
-    if not self._request:
-      # Nothing to update
-      return True
-
-    assert self.Ready()
-
-    # We're ready to use this response. Clear it (to avoid repeatedly
-    # re-polling).
-    self._latest_inlay_hints = self._request.Response()
-    self._request = None
-
-    if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
-      # Buffer has changed, we should ignore the data and retry
-      self.Request( force=True )
-      return False # poll again
-
-    self._Draw()
-
-    # No need to re-poll
-    return True
-
-
-  def Refresh( self ):
-    if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
-      # stale data
-      return
-
-    if self._request is not None:
-      # request in progress; we''l handle refreshing when it's done.
-      return
-
-    self._Draw()
-
 
   def _Draw( self ):
-    self.Clear()
+    self._Clear()
 
-    for inlay_hint in self._latest_inlay_hints:
+    for inlay_hint in self._latest_response:
       if 'kind' not in inlay_hint:
         prop_type = 'YCM_INLAY_UNKNOWN'
       elif inlay_hint[ 'kind' ] not in HIGHLIGHT_GROUP:
