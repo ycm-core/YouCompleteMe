@@ -85,6 +85,15 @@ class InlayHints( sr.ScrollingBufferRange ):
       else:
         prop_type = 'YCM_INLAY_' + inlay_hint[ 'kind' ]
 
+      self.GrowRangeIfNeeded( {
+        'start': inlay_hint[ 'position' ],
+        'end': {
+          'line_num': inlay_hint[ 'position' ][ 'line_num' ],
+          'column_num': inlay_hint[ 'position' ][ 'column_num' ] + len(
+            inlay_hint[ 'label' ] )
+        }
+      } )
+
       if inlay_hint.get( 'paddingLeft', False ):
         tp.AddTextProperty( self._bufnr,
                             None,

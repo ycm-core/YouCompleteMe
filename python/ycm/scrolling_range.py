@@ -20,7 +20,7 @@ import abc
 from ycm import vimsupport
 
 
-class ScrollingBufferRange:
+class ScrollingBufferRange(object):
   """Abstraction used by inlay hints and semantic tokens to only request visible
   ranges"""
 
@@ -97,6 +97,31 @@ class ScrollingBufferRange:
       return
 
     self._Draw()
+
+
+  def GrowRangeIfNeeded( self, rng ):
+    """When processing results, we may receive a wider range than requested. In
+    that case, grow our 'last requested' range to minimise requesting more
+    frequently than we need to."""
+    # Note: references (pointers) so no need to re-assign
+    rmin = self._last_requested_range[ 'start' ]
+    rmax = self._last_requested_range[ 'end' ]
+
+    start = rng[ 'start' ]
+    end = rng[ 'end' ]
+
+    if rmin[ 'line_num' ] is None or start[ 'line_num' ] < rmin[ 'line_num' ]:
+      rmin[ 'line_num' ] = start[ 'line_num' ]
+      rmin[ 'column_num' ] = start[ 'column_num' ]
+    elif start[ 'line_num' ] == rmin[ 'line_num' ]:
+      rmin[ 'column_num' ] = min( start[ 'column_num' ],
+                                  rmin[ 'column_num' ] )
+
+    if rmax[ 'line_num' ] is None or end[ 'line_num' ] > rmax[ 'line_num' ]:
+      rmax[ 'line_num' ] = end[ 'line_num' ]
+      rmax[ 'column_num' ] = end[ 'column_num' ]
+    elif end[ 'line_num' ] == rmax[ 'line_num' ]:
+      rmax[ 'column_num' ] = max( end[ 'column_num' ], rmax[ 'column_num' ] )
 
 
   # API; just implement the following, using self._bufnr and
