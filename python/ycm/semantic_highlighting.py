@@ -20,6 +20,7 @@ from ycm.client.semantic_tokens_request import SemanticTokensRequest
 from ycm.client.base_request import BuildRequestData
 from ycm import vimsupport
 from ycm import text_properties as tp
+from ycm import scrolling_range as sr
 
 
 HIGHLIGHT_GROUP = {
@@ -84,51 +85,23 @@ def NextPropID():
 
 
 
-class SemanticHighlighting:
+class SemanticHighlighting( sr.ScrollingBufferRange ):
   """Stores the semantic highlighting state for a Vim buffer"""
 
-  def __init__( self, bufnr, user_options ):
-    self._request = None
-    self._bufnr = bufnr
+  def __init__( self, bufnr ):
     self._prop_id = NextPropID()
-    self.tick = -1
+    super().__init__( bufnr )
 
 
-  def SendRequest( self ):
-    if self._request and not self.IsResponseReady():
-      return
-
-    self.tick = vimsupport.GetBufferChangedTick( self._bufnr )
-
+  def _NewRequest( self, request_range ):
     request: dict = BuildRequestData( self._bufnr )
-    request.update( {
-      'range': vimsupport.RangeVisibleInBuffer( self._bufnr )
-    } )
-    self._request = SemanticTokensRequest( request )
-    self._request.Start()
+    request[ 'range' ] = request_range
+    return SemanticTokensRequest( request )
 
-  def IsResponseReady( self ):
-    return self._request is not None and self._request.Done()
 
-  def Update( self ):
-    if not self._request:
-      # Nothing to update
-      return True
-
-    assert self.IsResponseReady()
-
-    # We're ready to use this response. Clear it (to avoid repeatedly
-    # re-polling).
-    response = self._request.Response()
-    self._request = None
-
-    if self.tick != vimsupport.GetBufferChangedTick( self._bufnr ):
-      # Buffer has changed, we should ignore the data and retry
-      self.SendRequest()
-      return False # poll again
-
+  def _Draw( self ):
     # We requested a snapshot
-    tokens = response.get( 'tokens', [] )
+    tokens = self._latest_response.get( 'tokens', [] )
 
     prev_prop_id = self._prop_id
     self._prop_id = NextPropID()
@@ -147,6 +120,3 @@ class SemanticHighlighting:
                           token[ 'range' ] )
 
     tp.ClearTextProperties( self._bufnr, prop_id = prev_prop_id )
-
-    # No need to re-poll
-    return True

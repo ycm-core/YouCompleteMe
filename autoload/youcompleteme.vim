@@ -822,24 +822,29 @@ function! s:OnFileReadyToParse( ... )
           \ s:pollers.file_parse_response.wait_milliseconds,
           \ function( 's:PollFileParseResponse' ) )
 
-    call s:UpdateSemanticHighlighting( bufnr() )
+    call s:UpdateSemanticHighlighting( bufnr(), 1, 0 )
     call s:UpdateInlayHints( bufnr(), 1, 0 )
 
   endif
 endfunction
 
-function! s:UpdateSemanticHighlighting( bufnr ) abort
+function! s:UpdateSemanticHighlighting( bufnr, force, redraw_anyway ) abort
   call s:StopPoller( s:pollers.semantic_highlighting )
   if !s:is_neovim &&
         \ get( b:, 'ycm_enable_semantic_highlighting',
         \   get( g:, 'ycm_enable_semantic_highlighting', 0 ) )
 
-    py3 ycm_state.Buffer(
-          \ int( vim.eval( "a:bufnr" ) ) ).SendSemanticTokensRequest()
-    let s:pollers.semantic_highlighting.id = timer_start(
-          \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
-
+    if py3eval(
+        \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) ).'
+        \ . 'semantic_highlighting.Request( '
+        \ . '  force=int( vim.eval( "a:force" ) ) )' )
+      let s:pollers.semantic_highlighting.id = timer_start(
+            \ s:pollers.semantic_highlighting.wait_milliseconds,
+            \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
+    elseif a:redraw_anyway
+      py3 ycm_state.Buffer(
+            \ int( vim.eval( "a:bufnr" ) ) ).semantic_highlighting.Refresh()
+    endif
   endif
 endfunction
 
@@ -850,7 +855,7 @@ function s:ShouldUseInlayHintsNow( bufnr )
         \   get( g:, 'ycm_enable_inlay_hints', 0 ) )
 endfunction
 
-function! s:UpdateInlayHints( bufnr, force, redraw_anyway )
+function! s:UpdateInlayHints( bufnr, force, redraw_anyway ) abort
   call s:StopPoller( s:pollers.inlay_hints )
 
   if s:ShouldUseInlayHintsNow( a:bufnr )
@@ -883,36 +888,29 @@ function! s:PollFileParseResponse( ... )
 endfunction
 
 
-function! s:PollSemanticHighlighting( bufnr, ... )
-  if !py3eval(
-      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
-      \ . '.SemanticTokensRequestReady()' )
-    let s:pollers.semantic_highlighting.id = timer_start(
-          \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
-  elseif !py3eval(
-      \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
-      \ . '.UpdateSemanticTokens()' )
-    let s:pollers.semantic_highlighting.id = timer_start(
-          \ s:pollers.semantic_highlighting.wait_milliseconds,
-          \ function( 's:PollSemanticHighlighting', [ a:bufnr ] ) )
-  endif
+function! s:PollSemanticHighlighting( bufnr, ... ) abort
+  return s:PollScrollable( a:bufnr, 'semantic_highlighting' )
 endfunction
 
 
-function! s:PollInlayHints( bufnr, ... )
+function! s:PollInlayHints( bufnr, ... ) abort
+  return s:PollScrollable( a:bufnr, 'inlay_hints' )
+endfunction
+
+
+function! s:PollScrollable( bufnr, scrollable, ... ) abort
   if !py3eval(
       \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
-      \ . '.inlay_hints.Ready()' )
-    let s:pollers.inlay_hints.id = timer_start(
-          \ s:pollers.inlay_hints.wait_milliseconds,
-          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+      \ . '.' . a:scrollable . '.Ready()' )
+    let s:pollers[a:scrollable].id = timer_start(
+          \ s:pollers[a:scrollable].wait_milliseconds,
+          \ function( 's:PollScrollable', [ a:bufnr, a:scrollable ] ) )
   elseif ! py3eval(
       \ 'ycm_state.Buffer( int( vim.eval( "a:bufnr" ) ) )'
-      \ . '.inlay_hints.Update()' )
-    let s:pollers.inlay_hints.id = timer_start(
-          \ s:pollers.inlay_hints.wait_milliseconds,
-          \ function( 's:PollInlayHints', [ a:bufnr ] ) )
+      \ . '.' . a:scrollable . '.Update()' )
+    let s:pollers[ a:scrollable ].id = timer_start(
+          \ s:pollers[ a:scrollable ].wait_milliseconds,
+          \ function( 's:PollScrollable', [ a:bufnr, a:scrollable ] ) )
   endif
 endfunction
 
@@ -973,7 +971,7 @@ function! s:OnWinScrolled()
     return
   endif
   let bufnr = winbufnr( expand( '<afile>' ) )
-  call s:UpdateSemanticHighlighting( bufnr )
+  call s:UpdateSemanticHighlighting( bufnr, 0, 0 )
   call s:UpdateInlayHints( bufnr, 0, 0 )
 endfunction
 
