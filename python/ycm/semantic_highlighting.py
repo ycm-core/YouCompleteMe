@@ -114,9 +114,9 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
             f"Missing property type for { token[ 'type' ] }" )
         continue
       prop_type = f"YCM_HL_{ token[ 'type' ] }"
-      tp.AddTextProperty( self._bufnr,
-                          self._prop_id,
-                          prop_type,
-                          token[ 'range' ] )
+
+      rng = token[ 'range' ]
+      self.GrowRangeIfNeeded( rng )
+      tp.AddTextProperty( self._bufnr, self._prop_id, prop_type, rng )
 
     tp.ClearTextProperties( self._bufnr, prop_id = prev_prop_id )
