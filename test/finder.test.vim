@@ -10,7 +10,7 @@ endfunction
 
 function! Test_WorkspaceSymbol_Basic()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+        \ '/test/testdata/cpp/finder_test.cc', {} )
 
   let original_win = winnr()
   let b = bufnr()
@@ -27,14 +27,14 @@ function! Test_WorkspaceSymbol_Basic()
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
     " TODO: Wait for the popup to be displayed, and check the contents
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'SelectItem' ) )
+    call FeedAndCheckAgain( 'xthisisathing', funcref( 'SelectItem' ) )
   endfunction
 
   function SelectItem( ... )
     let id = youcompleteme#finder#GetState().id
 
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ assert_equal( ' [X] Search for symbol: xthisisathing ',
           \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
@@ -58,7 +58,7 @@ endfunction
 
 function! Test_DocumentSymbols_Basic()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+        \ '/test/testdata/cpp/finder_test.cc', {} )
 
   let original_win = winnr()
   let b = bufnr()
@@ -75,14 +75,14 @@ function! Test_DocumentSymbols_Basic()
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
     " TODO: Wait for the popup to be displayed, and check the contents
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'SelectItem' ) )
+    call FeedAndCheckAgain( 'xthisisathing', funcref( 'SelectItem' ) )
   endfunction
 
   function SelectItem( ... )
     let id = youcompleteme#finder#GetState().id
 
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ assert_equal( ' [X] Search for symbol: xthisisathing ',
           \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
@@ -108,7 +108,7 @@ endfunction
 
 function! Test_Cancel_DocumentSymbol()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+        \ '/test/testdata/cpp/finder_test.cc', {} )
 
   let original_win = winnr()
   let b = bufnr()
@@ -129,14 +129,14 @@ function! Test_Cancel_DocumentSymbol()
     call WaitForAssert( { -> assert_true(
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'SelectItem' ) )
+    call FeedAndCheckAgain( 'xthisisathing', funcref( 'SelectItem' ) )
   endfunction
 
   function SelectItem( ... )
     let id = youcompleteme#finder#GetState().id
 
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: thisisathing ',
+          \ assert_equal( ' [X] Search for symbol: xthisisathing ',
           \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
@@ -163,7 +163,7 @@ endfunction
 
 function! Test_EmptySearch()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+        \ '/test/testdata/cpp/finder_test.cc', {} )
 
   let original_win = winnr()
   let b = bufnr()
@@ -180,7 +180,7 @@ function! Test_EmptySearch()
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
     " TODO: Wait for the popup to be displayed, and check the contents
-    call FeedAndCheckAgain( 'nothingshouldmatchthis',
+    call FeedAndCheckAgain( 'xnothingshouldmatchthisx',
                           \ funcref( 'SelectNothing' ) )
   endfunction
 
@@ -188,14 +188,14 @@ function! Test_EmptySearch()
     let id = youcompleteme#finder#GetState().id
 
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: nothingshouldmatchthis ',
+          \ assert_equal( ' [X] Search for symbol: xnothingshouldmatchthisx ',
           \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
 
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-    call FeedAndCheckAgain( "\<CR>notarealthing",
+    call FeedAndCheckAgain( "\<CR>xnotarealthingx",
                           \ funcref( 'ChangeSearch' ) )
   endfunction
 
@@ -205,14 +205,14 @@ function! Test_EmptySearch()
     " Hitting enter with nothing to select clears the prompt, because prompt
     " buffer
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: notarealthing ',
+          \ assert_equal( ' [X] Search for symbol: xnotarealthingx ',
           \ popup_getoptions( id ).title  ) },
           \ 10000 )
     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
 
     call assert_equal( -1, youcompleteme#finder#GetState().selected )
 
-    call FeedAndCheckAgain( "\<C-u>tiat", funcref( 'TestUpDownSelect' ) )
+    call FeedAndCheckAgain( "\<C-u>xtiat", funcref( 'TestUpDownSelect' ) )
   endfunction
 
   let popup_id = -1
@@ -220,7 +220,7 @@ function! Test_EmptySearch()
     let popup_id = youcompleteme#finder#GetState().id
 
     call WaitForAssert( { ->
-          \ assert_equal( ' [X] Search for symbol: tiat ',
+          \ assert_equal( ' [X] Search for symbol: xtiat ',
           \ popup_getoptions( popup_id ).title  ) },
           \ 10000 )
     call WaitForAssert( { -> assert_equal( 2, line( '$', popup_id ) ) } )
@@ -232,92 +232,92 @@ function! Test_EmptySearch()
 
     " Check down movement
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<C-j>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Down>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<C-n>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     " Check up movement and wrapping
     call feedkeys( "\<C-k>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Up>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<S-Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<C-p>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Tab>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<Home>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<End>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<End>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<PageUp>", 'xt' )
     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
     call feedkeys( "\<PageDown>", 'xt' )
     call assert_equal( 1, youcompleteme#finder#GetState().selected )
-    call assert_equal( 'that_is_a_thing',
+    call assert_equal( 'x_that_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
@@ -331,7 +331,7 @@ function! Test_EmptySearch()
   call WaitForAssert( { -> assert_equal( l, winlayout() ) } )
   call WaitForAssert( { -> assert_equal( original_win, winnr() ) } )
   call assert_equal( b, bufnr() )
-  call assert_equal( [ 0, 5, 28, 0 ], getpos( '.' ) )
+  call assert_equal( [ 0, 5, 30, 0 ], getpos( '.' ) )
 
   " We pop up a notification with some text in it
   if exists( '*popup_list' )
@@ -357,7 +357,7 @@ endfunction
 
 function! Test_LeaveWindow_CancelSearch()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+        \ '/test/testdata/cpp/finder_test.cc', {} )
 
   let original_win = winnr()
   let b = bufnr()
@@ -414,13 +414,13 @@ endfunction
 
 function! Test_NoFileType_NoCompletionIn_PromptBuffer()
   call youcompleteme#test#setup#OpenFile(
-        \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+        \ '/test/testdata/cpp/finder_test.cc', {} )
 
   call test_override( 'char_avail', 1 )
 
   new
   call feedkeys(
-        \ 'iThis is some text and so is thisisathing this_is_a_thing',
+        \ 'iThis is some text and so is xthisisathing x_this_is_a_thing',
         \ 'xt' )
   wincmd w
 
@@ -439,19 +439,19 @@ function! Test_NoFileType_NoCompletionIn_PromptBuffer()
           \ youcompleteme#finder#GetState().id != -1 ) } )
 
     " TODO: Wait for the popup to be displayed, and check the contents
-    call FeedAndCheckAgain( 'thisisathing', funcref( 'CheckNoPopup' ) )
+    call FeedAndCheckAgain( 'xthisisathing', funcref( 'CheckNoPopup' ) )
   endfunction
 
   function! CheckNoPopup( ... )
     let id = youcompleteme#finder#GetState().id
 
     call WaitForAssert( { ->
-            \ assert_equal( ' [X] Search for symbol: thisisathing ',
+            \ assert_equal( ' [X] Search for symbol: xthisisathing ',
             \ popup_getoptions( id ).title  ) },
           \ 10000 )
 
     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
-    call assert_equal( 'this_is_a_thing',
+    call assert_equal( 'x_this_is_a_thing',
           \ youcompleteme#finder#GetState().results[
           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 
@@ -477,7 +477,7 @@ endfunction
 
 " function! Test_MultipleFileTypes()
 "   call youcompleteme#test#setup#OpenFile(
-"         \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+"         \ '/test/testdata/cpp/finder_test.cc', {} )
 "   split
 "   call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
 "   wincmd w
@@ -503,7 +503,7 @@ endfunction
 "
 "     let id = youcompleteme#finder#GetState().id
 "     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-"     call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'CheckCpp' ) )
+"     call FeedAndCheckAgain( "\<C-u>xthisisathing", funcref( 'CheckCpp' ) )
 "   endfunction
 "
 "   function! CheckCpp( ... )
@@ -511,13 +511,13 @@ endfunction
 "
 "     " Python can be _really_ slow
 "     call WaitForAssert( { ->
-"           \ assert_equal( ' [X] Search for symbol: thisisathing ',
+"           \ assert_equal( ' [X] Search for symbol: xthisisathing ',
 "           \ popup_getoptions( popup_id ).title  ) },
 "           \ 10000 )
 "
 "     call WaitForAssert( { -> assert_equal( 1, line( '$', popup_id ) ) } )
 "     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-"     call assert_equal( 'this_is_a_thing',
+"     call assert_equal( 'x_this_is_a_thing',
 "           \ youcompleteme#finder#GetState().results[
 "           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 "
@@ -602,7 +602,7 @@ endfunction
 "
 " function! Test_MultipleFileTypes_CurrentNotSemantic()
 "   call youcompleteme#test#setup#OpenFile(
-"         \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+"         \ '/test/testdata/cpp/finder_test.cc', {} )
 "   split
 "   call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
 "   split
@@ -631,7 +631,7 @@ endfunction
 "
 "     let id = youcompleteme#finder#GetState().id
 "     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-"     call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'CheckCpp' ) )
+"     call FeedAndCheckAgain( "\<C-u>xthisisathing", funcref( 'CheckCpp' ) )
 "   endfunction
 "
 "   function! CheckCpp( ... )
@@ -639,13 +639,13 @@ endfunction
 "
 "     " Python can be _really_ slow
 "     call WaitForAssert( { ->
-"           \ assert_equal( ' [X] Search for symbol: thisisathing ',
+"           \ assert_equal( ' [X] Search for symbol: xthisisathing ',
 "           \ popup_getoptions( popup_id ).title  ) },
 "           \ 10000 )
 "
 "     call WaitForAssert( { -> assert_equal( 1, line( '$', popup_id ) ) } )
 "     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-"     call assert_equal( 'this_is_a_thing',
+"     call assert_equal( 'x_this_is_a_thing',
 "           \ youcompleteme#finder#GetState().results[
 "           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 "
@@ -704,7 +704,7 @@ endfunction
 "
 " function! Test_WorkspaceSymbol_NormalModeChange()
 "   call youcompleteme#test#setup#OpenFile(
-"         \ '/test/testdata/cpp/complete_with_sig_help.cc', {} )
+"         \ '/test/testdata/cpp/finder_test.cc', {} )
 "
 "   let original_win = winnr()
 "   let b = bufnr()
@@ -728,20 +728,20 @@ endfunction
 "
 "     let id = youcompleteme#finder#GetState().id
 "     call assert_equal( 'No results', getbufline( winbufnr( id ), '$' )[ 0 ] )
-"     call FeedAndCheckAgain( "\<C-u>thisisathing", funcref( 'ChangeQuery' ) )
+"     call FeedAndCheckAgain( "\<C-u>xthisisathing", funcref( 'ChangeQuery' ) )
 "   endfunction
 "
 "   function ChangeQuery( ... )
 "     let id = youcompleteme#finder#GetState().id
 "
 "     call WaitForAssert( { ->
-"           \ assert_equal( ' [X] Search for symbol: thisisathing ',
+"           \ assert_equal( ' [X] Search for symbol: xthisisathing ',
 "           \ popup_getoptions( id ).title  ) },
 "           \ 10000 )
 "
 "     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
 "     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-"     call assert_equal( 'this_is_a_thing',
+"     call assert_equal( 'x_this_is_a_thing',
 "           \ youcompleteme#finder#GetState().results[
 "           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 "
@@ -763,7 +763,7 @@ endfunction
 "
 "     call WaitForAssert( { -> assert_equal( 1, line( '$', id ) ) } )
 "     call assert_equal( 0, youcompleteme#finder#GetState().selected )
-"     call assert_equal( 'that_is_a_thing',
+"     call assert_equal( 'x_that_is_a_thing',
 "           \ youcompleteme#finder#GetState().results[
 "           \   youcompleteme#finder#GetState().selected ].extra_data.name )
 "
