@@ -19,6 +19,7 @@ function! SetUp()
   let g:ycm_log_level = 'DEBUG'
 
   let g:ycm_add_preview_to_completeopt = 'popup'
+  let g:ycm_enable_semantic_highlighting = 1
 
   call youcompleteme#test#setup#SetUp()
 endfunction

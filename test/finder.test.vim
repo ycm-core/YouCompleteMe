@@ -1,5 +1,6 @@
 function! SetUp()
   let g:ycm_use_clangd = 1
+  let g:ycm_enable_semantic_highlighting = 1
   call youcompleteme#test#setup#SetUp()
   nmap <leader><leader>w <Plug>(YCMFindSymbolInWorkspace)
   nmap <leader><leader>d <Plug>(YCMFindSymbolInDocument)
