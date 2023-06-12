@@ -83,6 +83,8 @@ function! SetUp()
   let g:ycm_use_clangd = 1
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
+  let g:ycm_enable_semantic_highlighting = 1
+
   set signcolumn=no
   nmap <leader>D <Plug>(YCMHover)
   call youcompleteme#test#setup#SetUp()

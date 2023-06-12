@@ -4,6 +4,7 @@ function! SetUp()
   let g:ycm_auto_trigger = 1
   let g:ycm_keep_logfiles = 1
   let g:ycm_log_level = 'DEBUG'
+  let g:ycm_enable_semantic_highlighting = 1
 
   set completeopt-=preview
 
