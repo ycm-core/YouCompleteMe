@@ -2182,6 +2182,11 @@ See the file type feature summary for an overview of the features available for
 each file type. See the _YcmCompleter subcommands_ section for more information
 on the available subcommands and their usage.
 
+Some commands, like |Format| accept a range, like ':%YcmCompleter Format'.
+
+Some commands like |GetDoc| and the various |GoTo| commands respect modifiers,
+like ':rightbelow YcmCompleter GetDoc', ':vertical YcmCompleter GoTo'.
+
 -------------------------------------------------------------------------------
                                        *youcompleteme-ycmcompleter-subcommands*
 YcmCompleter Subcommands ~
@@ -2417,6 +2422,25 @@ under the cursor. Depending on the file type, this includes things like:
 - Doxygen/javadoc comments,
 - Python docstrings,
 - etc.
+
+The documentation is opened in the preview window, and options like
+'previewheight' are respected. If you would like to customise the height and
+position of this window, we suggest a custom command that:
+
+- Sets 'previewheight' temporarily
+- Runs the |GetDoc| command with supplied modifiers
+- Restores 'previewheight'.
+
+For example:
+>
+  command -count ShowDocWithSize
+    \ let g:ph=&previewheight 
+    \ <bar> set previewheight=<count>
+    \ <bar> <mods> YcmCompleter GetDoc
+    \ <bar> let &previewheight=g:ph
+<
+You can then use something like ':botright vertical 80ShowDocWithSize'. Here's
+an example of that: https://asciinema.org/a/hE6Pi1gU6omBShwFna8iwGEe9
 
 Supported in filetypes: 'c, cpp, objc, objcpp, cuda, cs, go, java, javascript,
 python, typescript, rust'
