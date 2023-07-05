@@ -889,7 +889,8 @@ Signature help is triggered in insert mode automatically when
 `g:ycm_auto_trigger` is enabled and is not supported when it is not enabled.
 
 The signatures popup is hidden when there are no matching signatures or when you
-leave insert mode. There is no key binding to clear the popup.
+leave insert mode. If you want to manually control when it is visible, you can
+map something to `<plug>YCMToggleSignatureHelp` (see below).
 
 For more details on this feature and a few demos, check out the
 [PR that proposed it][signature-help-pr].
@@ -3687,6 +3688,19 @@ Default: `0`
 ```viml
 " Disable signature help
 let g:ycm_disable_signature_help = 1
+```
+
+### The `g:ycm_signature_help_disable_syntax` option
+
+Set this to 1 to disable syntax highlighting in the signature help popup. Thiis
+can help if your colourscheme doesn't work well with the default highliting and
+inverse video.
+
+Default: `0`
+
+```viml
+" Disable signature help syntax highliting
+let g:ycm_signature_help_disable_syntax = 1
 ```
 
 ### The `g:ycm_gopls_binary_path` option
