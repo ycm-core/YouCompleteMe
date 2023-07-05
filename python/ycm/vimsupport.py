@@ -256,12 +256,7 @@ def VisibleRangeOfBufferOverlaps( bufnr, expanded_range ):
 
 
 def CaptureVimCommand( command ):
-  vim.command( 'redir => b:ycm_command' )
-  vim.command( f'silent! { command }' )
-  vim.command( 'redir END' )
-  output = ToUnicode( vim.eval( 'b:ycm_command' ) )
-  vim.command( 'unlet b:ycm_command' )
-  return output
+  return vim.eval( f"execute( '{EscapeForVim(command)}', 'silent!' )" )
 
 
 def GetSignsInBuffer( buffer_number ):
