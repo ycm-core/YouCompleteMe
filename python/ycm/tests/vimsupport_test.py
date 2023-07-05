@@ -1375,7 +1375,7 @@ class VimsupportTest( TestCase ):
   def test_WriteToPreviewWindow( self, vim_current, vim_command ):
     vim_current.window.options.__getitem__ = MagicMock( return_value = True )
 
-    vimsupport.WriteToPreviewWindow( "test" )
+    vimsupport.WriteToPreviewWindow( "test", '' )
 
     vim_command.assert_has_exact_calls( [
       call( 'silent! pclose!' ),
@@ -1398,11 +1398,39 @@ class VimsupportTest( TestCase ):
       call( 'readonly', True ),
     ], any_order = True )
 
+  @patch( 'vim.command', new_callable=ExtendedMock )
+  @patch( 'vim.current', new_callable=ExtendedMock )
+  def test_WriteToPreviewWindow_Mods( self, vim_current, vim_command ):
+    vim_current.window.options.__getitem__ = MagicMock( return_value = True )
+
+    vimsupport.WriteToPreviewWindow( "test", 'tab leftabove' )
+
+    vim_command.assert_has_exact_calls( [
+      call( 'silent! pclose!' ),
+      call( 'silent! tab leftabove pedit! _TEMP_FILE_' ),
+      call( 'silent! wincmd P' ),
+      call( 'silent! wincmd p' ) ] )
+
+    vim_current.buffer.__setitem__.assert_called_with(
+        slice( None, None, None ), [ 'test' ] )
+
+    vim_current.buffer.options.__setitem__.assert_has_exact_calls( [
+      call( 'modifiable', True ),
+      call( 'readonly', False ),
+      call( 'buftype', 'nofile' ),
+      call( 'bufhidden', 'wipe' ),
+      call( 'buflisted', False ),
+      call( 'swapfile', False ),
+      call( 'modifiable', False ),
+      call( 'modified', False ),
+      call( 'readonly', True ),
+    ], any_order = True )
+
 
   @patch( 'vim.current' )
   def test_WriteToPreviewWindow_MultiLine( self, vim_current ):
     vim_current.window.options.__getitem__ = MagicMock( return_value = True )
-    vimsupport.WriteToPreviewWindow( "test\ntest2" )
+    vimsupport.WriteToPreviewWindow( "test\ntest2", '' )
 
     vim_current.buffer.__setitem__.assert_called_with(
         slice( None, None, None ), [ 'test', 'test2' ] )
@@ -1413,7 +1441,7 @@ class VimsupportTest( TestCase ):
   def test_WriteToPreviewWindow_JumpFail( self, vim_current, vim_command ):
     vim_current.window.options.__getitem__ = MagicMock( return_value = False )
 
-    vimsupport.WriteToPreviewWindow( "test" )
+    vimsupport.WriteToPreviewWindow( "test", '' )
 
     vim_command.assert_has_exact_calls( [
       call( 'silent! pclose!' ),
@@ -1434,7 +1462,7 @@ class VimsupportTest( TestCase ):
 
     vim_current.window.options.__getitem__ = MagicMock( return_value = False )
 
-    vimsupport.WriteToPreviewWindow( "test\ntest2" )
+    vimsupport.WriteToPreviewWindow( "test\ntest2", '' )
 
     vim_command.assert_has_exact_calls( [
       call( 'silent! pclose!' ),
