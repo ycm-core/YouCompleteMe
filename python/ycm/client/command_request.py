@@ -93,7 +93,7 @@ class CommandRequest( BaseRequest ):
       return self._HandleMessageResponse()
 
     if 'detailed_info' in self._response:
-      return self._HandleDetailedInfoResponse()
+      return self._HandleDetailedInfoResponse( modifiers )
 
     # The only other type of response we understand is GoTo, and that is the
     # only one that we can't detect just by inspecting the response (it should
@@ -201,8 +201,9 @@ class CommandRequest( BaseRequest ):
     vimsupport.PostVimMessage( self._response[ 'message' ], warning = False )
 
 
-  def _HandleDetailedInfoResponse( self ):
-    vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ] )
+  def _HandleDetailedInfoResponse( self, modifiers ):
+    vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ],
+                                     modifiers )
 
 
 def SendCommandRequestAsync( arguments, extra_data = None, silent = True ):

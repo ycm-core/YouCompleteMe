@@ -283,7 +283,7 @@ class Response_Detection_Test( TestCase ):
         request = CommandRequest( [ command ] )
         request._response = { 'detailed_info': info }
         request.RunPostCommandActionsIfNeeded( 'topleft' )
-        write_to_preview.assert_called_with( info )
+        write_to_preview.assert_called_with( info, 'topleft' )
 
     for command, info in [
       [ '___________', 'This is a message' ],

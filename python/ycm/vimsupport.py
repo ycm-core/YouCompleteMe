@@ -1231,12 +1231,14 @@ def JumpToTab( tab_number ):
   vim.command( f'silent! tabn { tab_number }' )
 
 
-def OpenFileInPreviewWindow( filename ):
+def OpenFileInPreviewWindow( filename, modifiers ):
   """ Open the supplied filename in the preview window """
-  vim.command( 'silent! pedit! ' + filename )
+  if modifiers:
+    modifiers = ' ' + modifiers
+  vim.command( f'silent!{modifiers} pedit! { filename }' )
 
 
-def WriteToPreviewWindow( message ):
+def WriteToPreviewWindow( message, modifiers ):
   """ Display the supplied message in the preview window """
 
   # This isn't something that comes naturally to Vim. Vim only wants to show
@@ -1248,7 +1250,7 @@ def WriteToPreviewWindow( message ):
 
   ClosePreviewWindow()
 
-  OpenFileInPreviewWindow( vim.eval( 'tempname()' ) )
+  OpenFileInPreviewWindow( vim.eval( 'tempname()' ), modifiers )
 
   if JumpToPreviewWindow():
     # We actually got to the preview window. By default the preview window can't
