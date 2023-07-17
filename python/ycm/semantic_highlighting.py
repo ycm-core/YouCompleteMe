@@ -107,13 +107,18 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
     self._prop_id = NextPropID()
 
     for token in tokens:
-      if token[ 'type' ] not in HIGHLIGHT_GROUP:
-        if token[ 'type' ] not in REPORTED_MISSING_TYPES:
-          REPORTED_MISSING_TYPES.add( token[ 'type' ] )
-          vimsupport.PostVimMessage(
-            f"Missing property type for { token[ 'type' ] }" )
-        continue
       prop_type = f"YCM_HL_{ token[ 'type' ] }"
+
+      if token[ 'type' ] not in HIGHLIGHT_GROUP:
+        props = tp.GetTextPropertyTypes()
+        if prop_type in props:
+          HIGHLIGHT_GROUP[token['type']] = ''
+        else:
+          if token[ 'type' ] not in REPORTED_MISSING_TYPES:
+            REPORTED_MISSING_TYPES.add( token[ 'type' ] )
+            vimsupport.PostVimMessage(
+              f"Missing property type for { token[ 'type' ] }" )
+          continue
 
       rng = token[ 'range' ]
       self.GrowRangeIfNeeded( rng )
