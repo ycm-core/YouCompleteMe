@@ -71,6 +71,14 @@ def Initialise():
                               highlight = group,
                               priority = 0 )
 
+  # add user defined properties
+  ycm_prop_suffix = f'YCM_HL_'
+  for prop in props:
+    if prop[0:len(ycm_prop_suffix)] == ycm_prop_suffix:
+      name = prop[len(ycm_prop_suffix):]
+      if name not in HIGHLIGHT_GROUP.keys():
+        HIGHLIGHT_GROUP[name] = ''
+
 
 # "arbitrary" base id
 NEXT_TEXT_PROP_ID = 70784
@@ -107,18 +115,13 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
     self._prop_id = NextPropID()
 
     for token in tokens:
-      prop_type = f"YCM_HL_{ token[ 'type' ] }"
-
       if token[ 'type' ] not in HIGHLIGHT_GROUP:
-        props = tp.GetTextPropertyTypes()
-        if prop_type in props:
-          HIGHLIGHT_GROUP[token['type']] = ''
-        else:
-          if token[ 'type' ] not in REPORTED_MISSING_TYPES:
-            REPORTED_MISSING_TYPES.add( token[ 'type' ] )
-            vimsupport.PostVimMessage(
-              f"Missing property type for { token[ 'type' ] }" )
-          continue
+        if token[ 'type' ] not in REPORTED_MISSING_TYPES:
+          REPORTED_MISSING_TYPES.add( token[ 'type' ] )
+          vimsupport.PostVimMessage(
+            f"Missing property type for { token[ 'type' ] }" )
+        continue
+      prop_type = f"YCM_HL_{ token[ 'type' ] }"
 
       rng = token[ 'range' ]
       self.GrowRangeIfNeeded( rng )
