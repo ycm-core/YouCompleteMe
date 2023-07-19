@@ -22,6 +22,8 @@ from ycm import vimsupport
 from ycm import text_properties as tp
 from ycm import scrolling_range as sr
 
+import vim
+
 
 HIGHLIGHT_GROUP = {
   'namespace': 'Type',
@@ -107,16 +109,21 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
     self._prop_id = NextPropID()
 
     for token in tokens:
-      if token[ 'type' ] not in HIGHLIGHT_GROUP:
-        if token[ 'type' ] not in REPORTED_MISSING_TYPES:
-          REPORTED_MISSING_TYPES.add( token[ 'type' ] )
-          vimsupport.PostVimMessage(
-            f"Missing property type for { token[ 'type' ] }" )
-        continue
       prop_type = f"YCM_HL_{ token[ 'type' ] }"
-
       rng = token[ 'range' ]
       self.GrowRangeIfNeeded( rng )
-      tp.AddTextProperty( self._bufnr, self._prop_id, prop_type, rng )
+
+      try:
+        tp.AddTextProperty( self._bufnr, self._prop_id, prop_type, rng )
+      except vim.error as e:
+        if 'E971:' in str( e ): # Text property doesn't exist
+          if token[ 'type' ] not in REPORTED_MISSING_TYPES:
+            REPORTED_MISSING_TYPES.add( token[ 'type' ] )
+            vimsupport.PostVimMessage(
+              f"Token type { token[ 'type' ] } not supported. "
+              f"Define property type { prop_type }. "
+              f"See :help youcompleteme-customising-highlight-groups" )
+        else:
+          raise e
 
     tp.ClearTextProperties( self._bufnr, prop_id = prev_prop_id )
