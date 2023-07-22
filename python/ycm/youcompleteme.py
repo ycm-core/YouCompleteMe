@@ -849,7 +849,7 @@ class YouCompleteMe:
           'maxwidth': available_columns,
           'close': 'click',
           'fixed': 0,
-          'highlight': 'ErrorMsg',
+          'highlight': 'YcmErrorPopup',
           'border': [ 1, 1, 1, 1 ],
           # Close when moving cursor
           'moved': 'expr',
