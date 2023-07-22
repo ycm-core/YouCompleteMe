@@ -25,33 +25,35 @@ from ycm import scrolling_range as sr
 import vim
 
 
-HIGHLIGHT_GROUP = {
-  'namespace': 'Type',
-  'type': 'Type',
-  'class': 'Structure',
-  'enum': 'Structure',
-  'interface': 'Structure',
-  'struct': 'Structure',
-  'typeParameter': 'Identifier',
-  'parameter': 'Identifier',
-  'variable': 'Identifier',
-  'property': 'Identifier',
-  'enumMember': 'Identifier',
-  'enumConstant': 'Constant',
-  'event': 'Identifier',
-  'function': 'Function',
-  'member': 'Identifier',
-  'macro': 'Macro',
-  'method': 'Function',
-  'keyword': 'Keyword',
-  'modifier': 'Keyword',
-  'comment': 'Comment',
-  'string': 'String',
-  'number': 'Number',
-  'regexp': 'String',
-  'operator': 'Operator',
-  'unknown': 'Normal',
-}
+HIGHLIGHT_GROUPS = [{
+  'highlight': {
+    'namespace': 'Type',
+    'type': 'Type',
+    'class': 'Structure',
+    'enum': 'Structure',
+    'interface': 'Structure',
+    'struct': 'Structure',
+    'typeParameter': 'Identifier',
+    'parameter': 'Identifier',
+    'variable': 'Identifier',
+    'property': 'Identifier',
+    'enumMember': 'Identifier',
+    'enumConstant': 'Constant',
+    'event': 'Identifier',
+    'function': 'Function',
+    'member': 'Identifier',
+    'macro': 'Macro',
+    'method': 'Function',
+    'keyword': 'Keyword',
+    'modifier': 'Keyword',
+    'comment': 'Comment',
+    'string': 'String',
+    'number': 'Number',
+    'regexp': 'String',
+    'operator': 'Operator',
+    'unknown': 'Normal',
+  }
+}]
 REPORTED_MISSING_TYPES = set()
 
 
@@ -59,19 +61,12 @@ def Initialise():
   if vimsupport.VimIsNeovim():
     return
 
-  props = tp.GetTextPropertyTypes()
-  if 'YCM_HL_UNKNOWN' not in props:
-    tp.AddTextPropertyType( 'YCM_HL_UNKNOWN',
-                            highlight = 'WarningMsg',
-                            priority = 0 )
+  global HIGHLIGHT_GROUPS
 
-  for token_type, group in HIGHLIGHT_GROUP.items():
-    prop = f'YCM_HL_{ token_type }'
-    if prop not in props and vimsupport.GetIntValue(
-        f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
-      tp.AddTextPropertyType( prop,
-                              highlight = group,
-                              priority = 0 )
+  if "ycm_semantic_highlight_groups" in vimsupport.GetVimGlobalsKeys():
+    hi_groups: list[dict] = vimsupport.VimExpressionToPythonType("g:ycm_semantic_highlight_groups")
+    hi_groups.extend(HIGHLIGHT_GROUPS[:])
+    HIGHLIGHT_GROUPS = hi_groups
 
 
 # "arbitrary" base id
@@ -94,14 +89,53 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
     self._prop_id = NextPropID()
     super().__init__( bufnr )
 
+    self._filetypes = vimsupport.CurrentFiletypes()
+
+    target_groups = None
+    for ft_groups in HIGHLIGHT_GROUPS:
+      if 'filetypes' in ft_groups:
+        for filetype in self._filetypes:
+          if filetype in ft_groups[ 'filetypes' ]:
+            target_groups = ft_groups
+      elif target_groups is None:
+        target_groups = ft_groups
+
+    if 'highlight' in target_groups:
+      for token_type, group in target_groups[ 'highlight' ].items():
+        prop = f'YCM_HL_{ token_type }'
+        if group is None or len(group) == 0:
+          tp.AddTextPropertyType( prop,
+                                  highlight = 'Normal',
+                                  priority = 0,
+                                  combine = 1,
+                                  bufnr = bufnr )
+        else:
+          tp.AddTextPropertyType( prop,
+                                  highlight = group,
+                                  priority = 0,
+                                  combine = 0,
+                                  bufnr = bufnr )
+
+      self._hi_groups = target_groups[ 'highlight' ]
+    else:
+      self._hi_groups = None
+
+
+
 
   def _NewRequest( self, request_range ):
+    if self._hi_groups is None:
+      return
+
     request: dict = BuildRequestData( self._bufnr )
     request[ 'range' ] = request_range
     return SemanticTokensRequest( request )
 
 
   def _Draw( self ):
+    if self._hi_groups is None:
+      return
+
     # We requested a snapshot
     tokens = self._latest_response.get( 'tokens', [] )
 
@@ -120,9 +154,9 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
           if token[ 'type' ] not in REPORTED_MISSING_TYPES:
             REPORTED_MISSING_TYPES.add( token[ 'type' ] )
             vimsupport.PostVimMessage(
-              f"Token type { token[ 'type' ] } not supported. "
-              f"Define property type { prop_type }. "
-              f"See :help youcompleteme-customising-highlight-groups" )
+              f"Token type { token[ 'type' ] } not supported for { self._filetypes }. "
+              f"See :help youcompleteme-customising-highlight-groups"
+              )
         else:
           raise e
 
