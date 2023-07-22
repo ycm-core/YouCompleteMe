@@ -512,6 +512,17 @@ function! s:SetUpSyntaxHighlighting()
           \ 'combine': 0,
           \ 'override': 1 } )
   endif
+
+  if !hlexists( 'YcmErrorPopup' )
+    highlight default link YcmErrorPopup ErrorMsg
+  endif
+  if s:PropertyTypeNotDefined( 'YcmErrorProperty' )
+    call prop_type_add( 'YcmErrorProperty', {
+          \ 'highlight': 'YcmErrorPopup',
+          \ 'priority': 30,
+          \ 'combine': 0,
+          \ 'override': 1 } )
+  endif
 endfunction
 
 
