@@ -68,6 +68,27 @@ def Initialise():
     hi_groups.extend(HIGHLIGHT_GROUPS[:])
     HIGHLIGHT_GROUPS = hi_groups
 
+  # init default highlight
+  default_hi = None
+  for groups in HIGHLIGHT_GROUPS:
+    if 'filetypes' not in groups:
+      default_hi = groups
+      break
+
+  if default_hi is None or 'highlight' not in default_hi:
+    return
+
+  props = tp.GetTextPropertyTypes()
+
+  # XXX make it compatible with older settings
+  for token_type, group in default_hi['highlight'].items():
+    prop = f'YCM_HL_{ token_type }'
+    if prop not in props and vimsupport.GetIntValue(
+        f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
+      tp.AddTextPropertyType( prop,
+                              highlight = group,
+                              priority = 0 )
+
 
 # "arbitrary" base id
 NEXT_TEXT_PROP_ID = 70784
@@ -91,49 +112,55 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
 
     self._filetypes = vimsupport.CurrentFiletypes()
 
+    default_hi = None
     target_groups = None
     for ft_groups in HIGHLIGHT_GROUPS:
       if 'filetypes' in ft_groups:
         for filetype in self._filetypes:
           if filetype in ft_groups[ 'filetypes' ]:
             target_groups = ft_groups
-      elif target_groups is None:
-        target_groups = ft_groups
+      elif default_hi is None:
+        default_hi = ft_groups
 
-    if 'highlight' in target_groups:
-      for token_type, group in target_groups[ 'highlight' ].items():
-        prop = f'YCM_HL_{ token_type }'
-        if group is None or len(group) == 0:
-          tp.AddTextPropertyType( prop,
-                                  highlight = 'Normal',
-                                  priority = 0,
-                                  combine = 1,
-                                  bufnr = bufnr )
-        else:
-          tp.AddTextPropertyType( prop,
-                                  highlight = group,
-                                  priority = 0,
-                                  combine = 0,
-                                  bufnr = bufnr )
+    if target_groups is None and (default_hi is None or 'highlight' not in default_hi):
+      self._do_highlight = False
+      return
+    elif target_groups is None:
+      # default highlight should be defined globaly
+      self._do_highlight = True
+      return
+    elif 'highlight' not in target_groups:
+      self._do_highlight = False
+      return
 
-      self._hi_groups = target_groups[ 'highlight' ]
-    else:
-      self._hi_groups = None
+    for token_type, group in target_groups[ 'highlight' ].items():
+      prop = f'YCM_HL_{ token_type }'
+      if group is None or len(group) == 0:
+        tp.AddTextPropertyType( prop,
+                                highlight = 'Normal',
+                                priority = 0,
+                                combine = 1,
+                                bufnr = bufnr )
+      else:
+        tp.AddTextPropertyType( prop,
+                                highlight = group,
+                                priority = 0,
+                                combine = 0,
+                                bufnr = bufnr )
+
+    self._do_highlight = True
 
 
 
 
   def _NewRequest( self, request_range ):
-    if self._hi_groups is None:
-      return
-
     request: dict = BuildRequestData( self._bufnr )
     request[ 'range' ] = request_range
     return SemanticTokensRequest( request )
 
 
   def _Draw( self ):
-    if self._hi_groups is None:
+    if self._do_highlight == False:
       return
 
     # We requested a snapshot
