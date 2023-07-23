@@ -95,8 +95,10 @@ def Initialise():
   global HIGHLIGHT_GROUPS
 
   if "ycm_semantic_highlight_groups" in vimsupport.GetVimGlobalsKeys():
-    hi_groups: list[dict] = vimsupport.VimExpressionToPythonType("g:ycm_semantic_highlight_groups")
-    hi_groups.extend(HIGHLIGHT_GROUPS[:])
+    hi_groups: list[dict] = vimsupport.VimExpressionToPythonType(
+        "g:ycm_semantic_highlight_groups"
+        )
+    hi_groups.extend( HIGHLIGHT_GROUPS[:] )
     HIGHLIGHT_GROUPS = hi_groups
 
   # init default highlight
@@ -147,7 +149,7 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
       elif default_hi is None:
         default_hi = ft_groups
 
-    if target_groups is None and (default_hi is None or 'highlight' not in default_hi):
+    if target_groups is None and ( default_hi is None or 'highlight' not in default_hi ):
       self._do_highlight = False
       return
     elif target_groups is None:
@@ -162,8 +164,6 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
       AddHiForTokenType( bufnr, token_type, group )
 
     self._do_highlight = True
-
-
 
 
   def _NewRequest( self, request_range ):
