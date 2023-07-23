@@ -57,6 +57,37 @@ HIGHLIGHT_GROUPS = [{
 REPORTED_MISSING_TYPES = set()
 
 
+def AddHiForTokenType( bufnr, token_type, group ):
+  prop = f'YCM_HL_{ token_type }'
+  hi = group
+  combine = 0
+
+  if group is None or len( group ) == 0:
+    hi = 'Normal'
+    combine = 1
+
+  if not vimsupport.GetIntValue(
+      f"hlexists( '{ vimsupport.EscapeForVim( hi ) }' )" ):
+    vimsupport.PostVimMessage(
+        f"Higlight group { hi } is not difined"
+        )
+    return
+
+  if bufnr is None:
+    props = tp.GetTextPropertyTypes()
+    if prop not in props:
+      tp.AddTextPropertyType( prop,
+                              highlight = hi,
+                              priority = 0,
+                              combine = combine )
+  else:
+    tp.AddTextPropertyType( prop,
+                            highlight = hi,
+                            priority = 0,
+                            combine = combine,
+                            bufnr = bufnr )
+
+
 def Initialise():
   if vimsupport.VimIsNeovim():
     return
@@ -78,16 +109,10 @@ def Initialise():
   if default_hi is None or 'highlight' not in default_hi:
     return
 
-  props = tp.GetTextPropertyTypes()
-
-  # XXX make it compatible with older settings
-  for token_type, group in default_hi['highlight'].items():
-    prop = f'YCM_HL_{ token_type }'
-    if prop not in props and vimsupport.GetIntValue(
-        f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
-      tp.AddTextPropertyType( prop,
-                              highlight = group,
-                              priority = 0 )
+  # XXX define default settings globally for make it compatible with older
+  # settings
+  for token_type, group in default_hi[ 'highlight' ].items():
+    AddHiForTokenType( None, token_type, group )
 
 
 # "arbitrary" base id
@@ -134,19 +159,7 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
       return
 
     for token_type, group in target_groups[ 'highlight' ].items():
-      prop = f'YCM_HL_{ token_type }'
-      if group is None or len(group) == 0:
-        tp.AddTextPropertyType( prop,
-                                highlight = 'Normal',
-                                priority = 0,
-                                combine = 1,
-                                bufnr = bufnr )
-      else:
-        tp.AddTextPropertyType( prop,
-                                highlight = group,
-                                priority = 0,
-                                combine = 0,
-                                bufnr = bufnr )
+      AddHiForTokenType( bufnr, token_type, group )
 
     self._do_highlight = True
 
