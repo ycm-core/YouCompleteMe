@@ -194,7 +194,7 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
           if token[ 'type' ] not in REPORTED_MISSING_TYPES:
             REPORTED_MISSING_TYPES.add( token[ 'type' ] )
             vimsupport.PostVimMessage(
-              f"Token type { token[ 'type' ] } not supported for { self._filetypes }. "
+              f"Token type { token[ 'type' ] } is not defined for { self._filetypes }. "
               f"See :help youcompleteme-customising-highlight-groups"
               )
         else:
