@@ -61,6 +61,9 @@ def AddHiForTokenType( bufnr, token_type, group ):
   prop = f'YCM_HL_{ token_type }'
   hi = group
   combine = 0
+  filetypes = "(default)"
+  if bufnr is not None:
+    filetypes = vimsupport.GetBufferFiletypes(bufnr)
 
   if group is None or len( group ) == 0:
     hi = 'Normal'
@@ -69,8 +72,8 @@ def AddHiForTokenType( bufnr, token_type, group ):
   if not vimsupport.GetIntValue(
       f"hlexists( '{ vimsupport.EscapeForVim( hi ) }' )" ):
     vimsupport.PostVimMessage(
-        f"Higlight group { hi } is not difined"
-        )
+        f"Higlight group { hi } is not difined for { filetypes }. "
+        f"See :help youcompleteme-customising-highlight-groups" )
     return
 
   if bufnr is None:
@@ -96,8 +99,7 @@ def Initialise():
 
   if "ycm_semantic_highlight_groups" in vimsupport.GetVimGlobalsKeys():
     hi_groups: list[dict] = vimsupport.VimExpressionToPythonType(
-        "g:ycm_semantic_highlight_groups"
-        )
+        "g:ycm_semantic_highlight_groups" )
     hi_groups.extend( HIGHLIGHT_GROUPS[:] )
     HIGHLIGHT_GROUPS = hi_groups
 
@@ -137,7 +139,7 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
     self._prop_id = NextPropID()
     super().__init__( bufnr )
 
-    self._filetypes = vimsupport.CurrentFiletypes()
+    self._filetypes = vimsupport.GetBufferFiletypes( bufnr )
 
     default_hi = None
     target_groups = None
@@ -195,8 +197,7 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
             REPORTED_MISSING_TYPES.add( token[ 'type' ] )
             vimsupport.PostVimMessage(
               f"Token type { token[ 'type' ] } is not defined for { self._filetypes }. "
-              f"See :help youcompleteme-customising-highlight-groups"
-              )
+              f"See :help youcompleteme-customising-highlight-groups" )
         else:
           raise e
 
