@@ -187,13 +187,14 @@ Contents ~
    56. The |g:ycm_clangd_uses_ycmd_caching| option
    57. The |g:ycm_language_server| option
    58. The |g:ycm_disable_signature_help| option
-   59. The |g:ycm_gopls_binary_path| option
-   60. The |g:ycm_gopls_args| option
-   61. The |g:ycm_rls_binary_path| and 'g:ycm_rustc_binary_path' options
-   62. The |g:ycm_rust_toolchain_root| option
-   63. The |g:ycm_tsserver_binary_path| option
-   64. The |g:ycm_roslyn_binary_path| option
-   65. The |g:ycm_update_diagnostics_in_insert_mode| option
+   59. The |g:ycm_signature_help_disable_syntax| option
+   60. The |g:ycm_gopls_binary_path| option
+   61. The |g:ycm_gopls_args| option
+   62. The |g:ycm_rls_binary_path| and 'g:ycm_rustc_binary_path' options
+   63. The |g:ycm_rust_toolchain_root| option
+   64. The |g:ycm_tsserver_binary_path| option
+   65. The |g:ycm_roslyn_binary_path| option
+   66. The |g:ycm_update_diagnostics_in_insert_mode| option
   12. FAQ                                                   |youcompleteme-faq|
   13. Contributor Code of Conduct   |youcompleteme-contributor-code-of-conduct|
   14. Contact                                           |youcompleteme-contact|
@@ -1095,7 +1096,8 @@ Signature help is triggered in insert mode automatically when
 |g:ycm_auto_trigger| is enabled and is not supported when it is not enabled.
 
 The signatures popup is hidden when there are no matching signatures or when
-you leave insert mode. There is no key binding to clear the popup.
+you leave insert mode. If you want to manually control when it is visible, you
+can map something to '<plug>YCMToggleSignatureHelp' (see below).
 
 For more details on this feature and a few demos, check out the PR that
 proposed it [45].
@@ -3925,6 +3927,18 @@ Default: '0'
 >
   " Disable signature help
   let g:ycm_disable_signature_help = 1
+<
+-------------------------------------------------------------------------------
+The *g:ycm_signature_help_disable_syntax* option
+
+Set this to 1 to disable syntax highlighting in the signature help popup. Thiis
+can help if your colourscheme doesn't work well with the default highliting and
+inverse video.
+
+Default: '0'
+>
+  " Disable signature help syntax highliting
+  let g:ycm_signature_help_disable_syntax = 1
 <
 -------------------------------------------------------------------------------
 The *g:ycm_gopls_binary_path* option
