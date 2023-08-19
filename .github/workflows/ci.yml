@@ -31,12 +31,12 @@ jobs:
     name: "${{ matrix.runs-on }} - Python ${{ matrix.python-version }} ${{ matrix.python-arch }}"
     runs-on: ${{ matrix.runs-on }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
     - name: Install Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.python-arch }}
@@ -59,7 +59,7 @@ jobs:
       YCM_TEST_STDOUT: true
     name: "Vim tests - ${{ matrix.vim }}"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
