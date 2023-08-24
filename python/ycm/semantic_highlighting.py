@@ -107,8 +107,16 @@ def Initialise():
   default_hi = None
   for groups in HIGHLIGHT_GROUPS:
     if 'filetypes' not in groups:
-      default_hi = groups
-      break
+      if 'highlight' not in groups:
+        continue
+
+      if default_hi is None:
+        default_hi = groups
+      else:
+        # merge all defaults
+        for token_type, group in groups[ 'highlight' ].items():
+          if token_type not in default_hi[ 'highlight' ]:
+            default_hi[ 'highlight' ][ token_type ] = group
 
   if default_hi is None or 'highlight' not in default_hi:
     return
