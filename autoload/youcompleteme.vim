@@ -1452,6 +1452,7 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
 
   let s:pollers.command.requests[ request_id ] = {
         \ 'response_func': 'StringResponse',
+        \ 'response_func_args': '',
         \ 'callback': a:callback
         \ }
   if s:pollers.command.id == -1
@@ -1477,6 +1478,7 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
 
   let s:pollers.command.requests[ request_id ] = {
         \ 'response_func': 'Response',
+        \ 'response_func_args': '',
         \ 'callback': a:callback
         \ }
   if s:pollers.command.id == -1
@@ -1507,10 +1509,18 @@ function! s:PollCommands( timer_id ) abort
       let poll_again = 1
       continue
     else
-      let result = py3eval( 'ycm_state.GetCommandRequest( '
-                          \ . 'int( vim.eval( "request_id" ) ) ).'
-                          \ . request.response_func
-                          \ . '()' )
+      if len( request.response_func_args ) == 0
+        let result = py3eval( 'ycm_state.GetCommandRequest( '
+                            \ . 'int( vim.eval( "request_id" ) ) ).'
+                            \ . request.response_func
+                            \ . '()' )
+      else
+        let result = py3eval( 'ycm_state.GetCommandRequest( '
+                            \ . 'int( vim.eval( "request_id" ) ) ).'
+                            \ . request.response_func
+                            \ . '(' . request.response_func_args . ')' )
+        let request.response_func_args = ''
+      endif
     endif
 
     " This request is done
@@ -1526,13 +1536,28 @@ function! s:PollCommands( timer_id ) abort
 endfunction
 
 
+function! s:EmptyCallback( result ) abort
+endfunction
+
+
 function! s:CompleterCommand( mods, count, line1, line2, ... )
-  py3 ycm_state.SendCommandRequest(
-        \ vim.eval( 'a:000' ),
-        \ vim.eval( 'a:mods' ),
-        \ vimsupport.GetBoolValue( 'a:count != -1' ),
-        \ vimsupport.GetIntValue( 'a:line1' ),
-        \ vimsupport.GetIntValue( 'a:line2' ) )
+  let request_id = py3eval( 'ycm_state.SendCommandRequestAsync(' .
+                          \ ' vim.eval( "a:000" ),' .
+                          \ ' vimsupport.GetBoolValue( "a:count != -1" ),' .
+                          \ ' vimsupport.GetIntValue( "a:line1" ),' .
+                          \ ' vimsupport.GetIntValue( "a:line2" ),' .
+                          \ ' False )' )
+  let s:pollers.command.requests[ request_id ] = {
+        \ 'response_func': 'RunPostCommandActionsIfNeeded',
+        \ 'response_func_args':
+                \ '"' . a:mods . '","' . g:ycm_goto_buffer_command . '"',
+        \ 'callback': function( 's:EmptyCallback' )
+        \ }
+  if s:pollers.command.id == -1
+    let s:pollers.command.id =
+          \ timer_start( s:pollers.command.wait_milliseconds,
+                       \ function( 's:PollCommands' ) )
+  endif
 endfunction
 
 

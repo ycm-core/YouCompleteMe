@@ -32,8 +32,7 @@ from ycm import syntax_parse
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
-from ycm.client.command_request import ( SendCommandRequest,
-                                         SendCommandRequestAsync,
+from ycm.client.command_request import ( SendCommandRequestAsync,
                                          GetCommandResponse )
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.resolve_completion_request import ResolveCompletionItem
@@ -403,25 +402,6 @@ class YouCompleteMe:
     return final_arguments, extra_data
 
 
-
-  def SendCommandRequest( self,
-                          arguments,
-                          modifiers,
-                          has_range,
-                          start_line,
-                          end_line ):
-    final_arguments, extra_data = self._GetCommandRequestArguments(
-      arguments,
-      has_range,
-      start_line,
-      end_line )
-    return SendCommandRequest(
-      final_arguments,
-      modifiers,
-      self._user_options[ 'goto_buffer_command' ],
-      extra_data )
-
-
   def GetCommandResponse( self, arguments ):
     final_arguments, extra_data = self._GetCommandRequestArguments(
       arguments,
@@ -431,18 +411,24 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
-  def SendCommandRequestAsync( self, arguments ):
+  def SendCommandRequestAsync( self,
+                               arguments,
+                               has_range = False,
+                               start_line = 0,
+                               end_line = 0,
+                               silent = True ):
     final_arguments, extra_data = self._GetCommandRequestArguments(
       arguments,
-      False,
-      0,
-      0 )
+      has_range,
+      start_line,
+      end_line )
 
     request_id = self._next_command_request_id
     self._next_command_request_id += 1
     self._command_requests[ request_id ] = SendCommandRequestAsync(
       final_arguments,
-      extra_data )
+      extra_data,
+      silent )
     return request_id
 
 
