@@ -751,6 +751,7 @@ def PostVimMessage( message, warning = True, truncate = False ):
     vim_width = GetIntValue( '&columns' )
 
     message = message.replace( '\n', ' ' )
+    message = message.replace( '\t', ' ' )
     if len( message ) >= vim_width:
       message = message[ : vim_width - 4 ] + '...'
 
