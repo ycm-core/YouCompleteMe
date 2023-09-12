@@ -1770,6 +1770,10 @@ You can also style the line that has the warning/error with these groups:
 - `YcmWarningLine`, which falls back to group `SyntasticWarningLine` if it
   exists
 
+Finally, you can also style the popup for the detailed diagnostics (it is shown
+if `g:ycm_show_detailed_diag_in_popup` is set) using the group `YcmErrorPopup`,
+which falls back to `ErrorMsg`.
+
 Note that the line highlighting groups only work when the
 [`g:ycm_enable_diagnostic_signs`](#the-gycm_enable_diagnostic_signs-option)
 option is set. If you want highlighted lines but no signs in the Vim gutter,

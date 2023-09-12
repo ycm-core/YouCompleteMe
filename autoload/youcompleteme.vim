@@ -512,6 +512,10 @@ function! s:SetUpSyntaxHighlighting()
           \ 'combine': 0,
           \ 'override': 1 } )
   endif
+
+  if !hlexists( 'YcmErrorPopup' )
+    highlight default link YcmErrorPopup ErrorMsg
+  endif
 endfunction
 
 
