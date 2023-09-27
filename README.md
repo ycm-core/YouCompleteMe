@@ -1527,8 +1527,19 @@ built YCM with the `--go-completer` flag; see the [*Installation*
 section](#installation) for details). The server only works for projects with
 the "canonical" layout.
 
-`gopls` also has a handful of undocumented options for which the
-[source code][gopls-preferences] is the only reference.
+`gopls` also has a load of [documented options](https://github.com/golang/tools/blob/master/gopls/doc/settings.md).
+
+You can set these in your `.ycm_extra_conf.py`. For example, to set the build tags:
+
+```python
+def Settings( **kwargs ):
+  if kwargs[ 'language' ] == 'go':
+    return {
+       'ls': {
+         'build': { 'buildFlags': [ '-tags=debug' ] }
+       }
+    }
+```
 
 ### JavaScript and TypeScript Semantic Completion
 
