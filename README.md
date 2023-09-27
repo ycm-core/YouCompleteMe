@@ -1536,7 +1536,7 @@ def Settings( **kwargs ):
   if kwargs[ 'language' ] == 'go':
     return {
        'ls': {
-         'build': { 'buildFlags': [ '-tags=debug' ] }
+         'build.buildFlags': [ '-tags=debug' ] }
        }
     }
 ```
