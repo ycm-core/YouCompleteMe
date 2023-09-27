@@ -1756,9 +1756,19 @@ Completions and GoTo commands should work out of the box (provided that you
 built YCM with the '--go-completer' flag; see the _Installation_ section for
 details). The server only works for projects with the "canonical" layout.
 
-'gopls' also has a handful of undocumented options for which the source code
-[72] is the only reference.
+'gopls' also has a load of documented options [72].
 
+You can set these in your '.ycm_extra_conf.py'. For example, to set the build
+tags:
+>
+  def Settings( **kwargs ):
+    if kwargs[ 'language' ] == 'go':
+      return {
+         'ls': {
+           'build.buildFlags': [ '-tags=debug' ] }
+         }
+      }
+<
 -------------------------------------------------------------------------------
                       *youcompleteme-javascript-typescript-semantic-completion*
 JavaScript and TypeScript Semantic Completion ~
@@ -4140,7 +4150,7 @@ References ~
 [69] https://github.com/rust-lang/rls
 [70] https://www.rust-lang.org/downloads.html
 [71] https://rust-analyzer.github.io/manual.html#configuration]
-[72] https://github.com/golang/tools/blob/master/internal/lsp/server.go
+[72] https://github.com/golang/tools/blob/master/gopls/doc/settings.md
 [73] https://ternjs.net
 [74] https://github.com/ycm-core/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
 [75] https://code.visualstudio.com/docs/languages/jsconfig
