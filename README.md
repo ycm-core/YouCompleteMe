@@ -1111,7 +1111,7 @@ $ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang
 ```
 
 Please note that if using custom `clangd` or `libclang` it _must_ match the
-version that YCM requires. Currently YCM requires ***clang 16.0.1***.
+version that YCM requires. Currently YCM requires ***clang 17.0.1***.
 
 #### Compile flags
 
