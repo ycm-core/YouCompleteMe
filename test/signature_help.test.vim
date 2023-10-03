@@ -804,7 +804,7 @@ function! Test_Signature_Help_Manual_HideShow()
   function! Check( ... )
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+          \ { 'line': 9, 'col': 8, 'visible': 1 } )
 
     call FeedAndCheckAgain( 'kjkj', funcref( 'Check2' ) )
   endfunction
@@ -812,7 +812,7 @@ function! Test_Signature_Help_Manual_HideShow()
   function! Check2( ... )
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 9, 'col': 6, 'visible': 0 } )
+          \ { 'line': 9, 'col': 8, 'visible': 0 } )
 
     call FeedAndCheckAgain( 'kjkj', funcref( 'Check3' ) )
   endfunction
@@ -820,7 +820,7 @@ function! Test_Signature_Help_Manual_HideShow()
   function! Check3( ... )
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+          \ { 'line': 9, 'col': 8, 'visible': 1 } )
 
     call feedkeys( "\<Esc>" )
   endfunction
@@ -858,7 +858,7 @@ function! Test_Signature_Help_Manual_NoSigs()
     let popup_id = s:_GetSigHelpWinID()
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 9, 'col': 6, 'visible': 1 } )
+          \ { 'line': 9, 'col': 8, 'visible': 1 } )
 
     call FeedAndCheckAgain( ')', funcref( 'CheckSigsClosed' ) )
   endfunction
