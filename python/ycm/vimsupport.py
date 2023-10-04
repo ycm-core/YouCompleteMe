@@ -206,7 +206,10 @@ def RangeVisibleInBuffer( bufnr, grow_factor=0.5 ):
     start: Location = Location()
     end: Location = Location()
 
-  buffer = vim.buffers[ bufnr ]
+  try:
+    buffer = vim.buffers[ bufnr ]
+  except KeyError:
+    return None
 
   if not windows:
     return None
