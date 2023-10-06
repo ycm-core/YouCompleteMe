@@ -766,6 +766,10 @@ function! s:OnBufferEnter()
     return
   endif
 
+  if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
+    call timer_stop( s:pollers.command.id )
+  endif
+
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
 
@@ -1594,6 +1598,7 @@ if exists( '*popup_atcursor' )
       return
     endif
 
+    call timer_stop( s:pollers.command.id )
     if !has_key( b:, 'ycm_hover' )
       let cmds = youcompleteme#GetDefinedSubcommands()
       if index( cmds, 'GetHover' ) >= 0
