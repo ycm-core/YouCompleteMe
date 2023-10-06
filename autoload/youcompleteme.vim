@@ -766,6 +766,10 @@ function! s:OnBufferEnter()
     return
   endif
 
+  if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
+    call s:StopPoller( s:pollers.command )
+  endif
+
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
 
@@ -964,6 +968,10 @@ endfunction
 function! s:OnCursorMovedNormalMode()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
+  endif
+
+  if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
+    call s:StopPoller( s:pollers.command )
   endif
 
   py3 ycm_state.OnCursorMoved()
