@@ -52,7 +52,7 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
 
   " Must do the checks in a timer callback because we need to stay in insert
   " mode until done.
-  function! Check( id ) closure
+  function! CheckNoDiagUIAfterOpenParenthesis( id ) closure
     call WaitForAssert( {->
       \ assert_true(
         \ py3eval(
@@ -62,10 +62,11 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
                            \ '%',
                            \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
 
-    call FeedAndCheckAgain( "   \<BS>\<BS>\<BS>", funcref( 'CheckAgain' ) )
+    call FeedAndCheckAgain( "   \<BS>\<BS>\<BS>)",
+      \ funcref( 'CheckNoDiagUIAfterClosingPatenthesis' ) )
   endfunction
 
-  function! CheckAgain( id ) closure
+  function! CheckNoDiagUIAfterClosingPatenthesis( id ) closure
     call WaitForAssert( {->
       \ assert_true(
         \ py3eval(
@@ -76,9 +77,37 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
                            \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
 
     call feedkeys( "\<ESC>" )
+    call FeedAndCheckAgain( "\<ESC>",
+      \ funcref( 'CheckDiagUIRefreshedAfterLeavingInsertMode' ) )
   endfunction
 
-  call FeedAndCheckMain( 'imain(', funcref( 'Check' ) )
+  function! CheckDiagUIRefreshedAfterLeavingInsertMode( id ) closure
+    call WaitForAssert( {->
+      \ assert_true(
+        \ py3eval(
+           \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+      \ ) ) } )
+    call WaitForAssert( {-> assert_true( len( sign_getplaced(
+                           \ '%',
+                           \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
+    call FeedAndCheckAgain( "A\<CR>", funcref( 'CheckNoPropsAfterNewLine' )
+  endfunction
+
+  function! CheckNoPropsAfterNewLine( id ) closure
+    call WaitForAssert( {->
+      \ assert_true(
+        \ py3eval(
+           \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+      \ ) ) } )
+    call WaitForAssert( {-> assert_false( len( prop_list(
+                           \ 1, { 'end_lnum': -1,
+                                \ 'types': [ 'YcmVirtDiagWarning',
+                                           \ 'YcmVirtDiagError',
+                                           \ 'YcmVirtDiagPadding' ] } ) ) ) )
+  endfunction
+
+  call FeedAndCheckMain( 'imain(',
+      \ funcref( 'CheckNoDiagUIAfterOpenParenthesis' ) )
   call test_override( 'ALL', 0 )
 endfunction
 
