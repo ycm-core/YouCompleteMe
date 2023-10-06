@@ -760,11 +760,27 @@ function! s:OnFileSave()
 endfunction
 
 
+function! s:AbortAutohoverRequest() abort
+  if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
+    let requests = copy( s:pollers.command.requests )
+    for request_id in keys( requests )
+      let request = requests[ request_id ]
+      if request.origin == 'autohover'
+        call remove( s:pollers.command.requests, request_id )
+        call request.callback( '' )
+      endif
+    endfor
+  endif
+endfunction
+
+
 function! s:OnBufferEnter()
   call s:StartMessagePoll()
   if !s:VisitedBufferRequiresReparse()
     return
   endif
+
+  call s:AbortAutohoverRequest()
 
   call s:SetUpCompleteopt()
   call s:EnableCompletingInCurrentBuffer()
@@ -965,6 +981,8 @@ function! s:OnCursorMovedNormalMode()
   if !s:AllowedToCompleteInCurrentBuffer()
     return
   endif
+
+  call s:AbortAutohoverRequest()
 
   py3 ycm_state.OnCursorMoved()
 endfunction
@@ -1441,6 +1459,22 @@ function! youcompleteme#GetCommandResponse( ... ) abort
 endfunction
 
 
+function! s:GetCommandResponseAsyncImpl( callback, origin, ... ) abort
+  let request_id = py3eval(
+        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
+
+  let s:pollers.command.requests[ request_id ] = {
+        \ 'response_func': 'StringResponse',
+        \ 'origin': a:origin,
+        \ 'callback': a:callback
+        \ }
+  if s:pollers.command.id == -1
+    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
+                                          \ function( 's:PollCommands' ) )
+  endif
+endfunction
+
+
 function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
   if !s:AllowedToCompleteInCurrentBuffer()
     eval a:callback( '' )
@@ -1452,17 +1486,7 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  let request_id = py3eval(
-        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
-
-  let s:pollers.command.requests[ request_id ] = {
-        \ 'response_func': 'StringResponse',
-        \ 'callback': a:callback
-        \ }
-  if s:pollers.command.id == -1
-    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
-                                          \ function( 's:PollCommands' ) )
-  endif
+  call s:GetCommandResponseAsyncImpl( callback, 'extern', a:000 )
 endfunction
 
 
@@ -1482,6 +1506,7 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
 
   let s:pollers.command.requests[ request_id ] = {
         \ 'response_func': 'Response',
+        \ 'origin': 'extern_raw',
         \ 'callback': a:callback
         \ }
   if s:pollers.command.id == -1
@@ -1621,8 +1646,9 @@ if exists( '*popup_atcursor' )
       return
     endif
 
-    call youcompleteme#GetCommandResponseAsync(
+    call s:GetCommandResponseAsyncImpl(
           \ function( 's:ShowHoverResult' ),
+          \ 'autohover',
           \ b:ycm_hover.command )
   endfunction
 
