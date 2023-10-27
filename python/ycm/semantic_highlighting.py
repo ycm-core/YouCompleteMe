@@ -84,11 +84,16 @@ def AddHiForTokenType( bufnr, token_type, group ):
                               priority = 0,
                               combine = combine )
   else:
-    tp.AddTextPropertyType( prop,
-                            highlight = hi,
-                            priority = 0,
-                            combine = combine,
-                            bufnr = bufnr )
+    try:
+      tp.AddTextPropertyType( prop,
+                              highlight = hi,
+                              priority = 0,
+                              combine = combine,
+                              bufnr = bufnr )
+    except vim.error:
+      # at YcmRestart we can get error about redefining properties, just ignore them
+      pass
+
 
 
 def Initialise():
