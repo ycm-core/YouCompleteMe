@@ -277,11 +277,13 @@ class DiagnosticInterface:
   def _ConvertDiagListToDict( self ):
     self._line_to_diags = defaultdict( list )
     for diag in self._diagnostics:
-      location = diag[ 'location' ]
-      bufnr = vimsupport.GetBufferNumberForFilename( location[ 'filepath' ] )
+      location_extent = diag[ 'location_extent' ]
+      start = location_extent[ 'start' ]
+      end = location_extent[ 'end' ]
+      bufnr = vimsupport.GetBufferNumberForFilename( start[ 'filepath' ] )
       if bufnr == self._bufnr:
-        line_number = location[ 'line_num' ]
-        self._line_to_diags[ line_number ].append( diag )
+        for line_number in range( start[ 'line_num' ], end[ 'line_num' ] + 1 ):
+          self._line_to_diags[ line_number ].append( diag )
 
     for diags in self._line_to_diags.values():
       # We also want errors to be listed before warnings so that errors aren't
