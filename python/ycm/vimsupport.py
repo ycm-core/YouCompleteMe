@@ -284,7 +284,17 @@ def GetTextPropertyForDiag( buffer_number, line_number, diag ):
   range = diag[ 'location_extent' ]
   start = range[ 'start' ]
   end = range[ 'end' ]
-  length = end[ 'column_num' ] - start[ 'column_num' ]
+  start_line = start[ 'line_num' ]
+  end_line = end[ 'line_num' ]
+  if start_line == end_line:
+    length = end[ 'column_num' ] - start[ 'column_num' ]
+  elif start_line == line_number:
+    current_line_len = len( vim.buffers[ buffer_number ][ line_number - 1 ] )
+    length = current_line_len - start[ 'column_num' ] + 2
+  elif end_line == line_number:
+    length = end[ 'column_num' ] - 1
+  else:
+    length = len( vim.buffers[ buffer_number ][ line_number - 1 ] ) + 1
   if diag[ 'kind' ] == 'ERROR':
     property_name = 'YcmErrorProperty'
   else:
