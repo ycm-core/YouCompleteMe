@@ -938,20 +938,21 @@ per buffer, by setting `b:ycm_enable_semantic_highlighting`.
 YCM uses text properties (see `:help text-prop-intro`) for semantic
 highlighting. In order to customise the coloring, you should set
 `g:ycm_semantic_highlight_groups` list. Each item in that list must be
-dictionary with next fields:
-- `filetypes` - list of filetypes that should use this settings for semantic
-  highlighting. If not defined, then this settings will be used as default for
-  any not defined filetype
+dictionary with the following keys:
+- `filetypes` - list of filetypes that should use these settings for semantic
+  highlighting. If not defined, then these settings will be used as default for
+  any filetype without explicit configuration
 - `highlight` - dictionary, where key is [token type](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_semanticTokens)
-  and value is highlighting group. If not defined, then semantic highlighting
-  will be disabled for that filetypes. If group is empty string or `v:null`,
-  then semantic highlighing for that group will be disabled
+  and value is highlighting group. If this key is not present, then semantic
+  highlighting will be disabled for that filetypes. If group is empty string or
+  `v:null`, then semantic highlighing for that group will be disabled
 
 Some servers also use custom values. In this case, YCM prints a warning
 including the token type name that you can customise.
 
-For example (set custom highlight for go, disable highlight for rust and define
-default highlight for other filetypes):
+In the following example, we set a custom set of highlights for go, disable
+semantic highlighting for rust, and define default highlighting groups for all
+other languages:
 
 ```viml
 let g:ycm_enable_semantic_highlighting=1
