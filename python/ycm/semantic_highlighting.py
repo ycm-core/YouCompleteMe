@@ -16,6 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from ycm.client.base_request import BaseRequest
 from ycm.client.semantic_tokens_request import SemanticTokensRequest
 from ycm.client.base_request import BuildRequestData
 from ycm import vimsupport
@@ -185,6 +186,9 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
 
 
   def _NewRequest( self, request_range ):
+    if self._do_highlight == False:
+      return BaseRequest()
+
     request: dict = BuildRequestData( self._bufnr )
     request[ 'range' ] = request_range
     return SemanticTokensRequest( request )
