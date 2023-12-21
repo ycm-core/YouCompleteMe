@@ -994,7 +994,6 @@ let g:ycm_semantic_highlight_groups = [
       \},
       \{
       \ 'filetypes': ['rust']
-      \ }
       \},
       \{
       \ 'highlight': {
