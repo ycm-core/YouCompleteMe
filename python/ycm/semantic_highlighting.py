@@ -90,9 +90,12 @@ def AddHiForTokenType( bufnr, token_type, group ):
                               priority = 0,
                               combine = combine,
                               bufnr = bufnr )
-    except vim.error:
-      # at YcmRestart we can get error about redefining properties, just ignore them
-      pass
+    except vim.error as e:
+      if 'E969:' in str( e ):
+        # at YcmRestart we can get error about redefining properties, just ignore them
+        pass
+      else:
+        raise e
 
 
 
