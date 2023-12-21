@@ -126,8 +126,8 @@ def Initialise():
   if default_hi is None or 'highlight' not in default_hi:
     return
 
-  # XXX define default settings globally for make it compatible with older
-  # settings
+  # define default settings globally for make it compatible with older settings,
+  # that used global highlight groups, instead of groups per buffer
   for token_type, group in default_hi[ 'highlight' ].items():
     AddHiForTokenType( None, token_type, group )
 
