@@ -947,6 +947,9 @@ dictionary with the following keys:
   highlighting will be disabled for that filetypes. If group is empty string or
   `v:null`, then semantic highlighing for that group will be disabled
 
+For compatibility reasons we also support defining text properties named
+`YCM_HL_<token_type>`, but this may be removed in future.
+
 Some servers also use custom values. In this case, YCM prints a warning
 including the token type name that you can customise.
 
