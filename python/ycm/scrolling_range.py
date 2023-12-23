@@ -55,6 +55,13 @@ class ScrollingBufferRange( object ):
     #  - look up the actual visible range, then call this function
     #  - if not overlapping, do the factor expansion and request
     self._last_requested_range = vimsupport.RangeVisibleInBuffer( self._bufnr )
+    # If this is false, either the self._bufnr is not a valid buffer number or
+    # the buffer is not visible in any window.
+    # Since this is called asynchronously, a user may bwipeout a buffer with
+    # self._bufnr number between polls.
+    if self._last_requested_range is None:
+      return False
+
     self._tick = vimsupport.GetBufferChangedTick( self._bufnr )
 
     # We'll never use the last response again, so clear it

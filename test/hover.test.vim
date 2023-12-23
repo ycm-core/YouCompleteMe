@@ -71,7 +71,7 @@ let s:cpp_lifetime = {
       \             '',
       \             'Type: char',
       \             'Offset: 16 bytes',
-      \             'Size: 1 byte (+7 padding)',
+      \             'Size: 1 byte (+7 bytes padding)',
       \             'nobody will live > 128 years',
       \             '',
       \             '// In PointInTime',

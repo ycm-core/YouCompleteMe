@@ -189,7 +189,11 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
   if state.state == SignatureHelpState.ACTIVE:
     vim.eval( f'popup_show( { state.popup_win_id } )' )
 
-  syntax = utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] )
+  if vim.vars.get( 'ycm_signature_help_disable_syntax', False ):
+    syntax = ''
+  else:
+    syntax = utils.ToUnicode( vim.current.buffer.options[ 'syntax' ] )
+
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )
   vim.eval( f"win_execute( { state.popup_win_id }, "
             f"'set syntax={ syntax } cursorline | "

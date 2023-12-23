@@ -206,7 +206,10 @@ def RangeVisibleInBuffer( bufnr, grow_factor=0.5 ):
     start: Location = Location()
     end: Location = Location()
 
-  buffer = vim.buffers[ bufnr ]
+  try:
+    buffer = vim.buffers[ bufnr ]
+  except KeyError:
+    return None
 
   if not windows:
     return None
@@ -751,6 +754,7 @@ def PostVimMessage( message, warning = True, truncate = False ):
     vim_width = GetIntValue( '&columns' )
 
     message = message.replace( '\n', ' ' )
+    message = message.replace( '\t', ' ' )
     if len( message ) >= vim_width:
       message = message[ : vim_width - 4 ] + '...'
 

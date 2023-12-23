@@ -44,8 +44,7 @@ class DiagnosticInterface:
     if self._user_options[ 'echo_current_diagnostic' ]:
       line, _ = vimsupport.CurrentLineAndColumn()
       line += 1  # Convert to 1-based
-      if ( not self.ShouldUpdateDiagnosticsUINow() and
-           self._diag_message_needs_clearing ):
+      if not self.ShouldUpdateDiagnosticsUINow():
         # Clear any previously echo'd diagnostic in insert mode
         self._EchoDiagnosticText( line, None, None )
       elif line != self._previous_diag_line_number:

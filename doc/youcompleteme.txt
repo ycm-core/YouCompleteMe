@@ -187,13 +187,14 @@ Contents ~
    56. The |g:ycm_clangd_uses_ycmd_caching| option
    57. The |g:ycm_language_server| option
    58. The |g:ycm_disable_signature_help| option
-   59. The |g:ycm_gopls_binary_path| option
-   60. The |g:ycm_gopls_args| option
-   61. The |g:ycm_rls_binary_path| and 'g:ycm_rustc_binary_path' options
-   62. The |g:ycm_rust_toolchain_root| option
-   63. The |g:ycm_tsserver_binary_path| option
-   64. The |g:ycm_roslyn_binary_path| option
-   65. The |g:ycm_update_diagnostics_in_insert_mode| option
+   59. The |g:ycm_signature_help_disable_syntax| option
+   60. The |g:ycm_gopls_binary_path| option
+   61. The |g:ycm_gopls_args| option
+   62. The |g:ycm_rls_binary_path| and 'g:ycm_rustc_binary_path' options
+   63. The |g:ycm_rust_toolchain_root| option
+   64. The |g:ycm_tsserver_binary_path| option
+   65. The |g:ycm_roslyn_binary_path| option
+   66. The |g:ycm_update_diagnostics_in_insert_mode| option
   12. FAQ                                                   |youcompleteme-faq|
   13. Contributor Code of Conduct   |youcompleteme-contributor-code-of-conduct|
   14. Contact                                           |youcompleteme-contact|
@@ -609,7 +610,7 @@ The following additional language support options are available:
 - Go support: install Go [31] and add '--go-completer' when calling
   'install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [32] and add
+- JavaScript and TypeScript support: install Node.js 18+ and npm [32] and add
   '--ts-completer' when calling 'install.py'.
 
 - Rust support: add '--rust-completer' when calling 'install.py'.
@@ -649,6 +650,9 @@ Quick start, installing all completers ~
 <
 - Install mono-complete, go, node, java and npm
 >
+  sudo mkdir -p /etc/apt/keyrings
+  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_current.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
   apt install mono-complete golang nodejs openjdk-17-jdk openjdk-17-jre npm
 <
 - Compile YCM
@@ -708,7 +712,7 @@ The following additional language support options are available:
 - Go support: install Go [31] and add '--go-completer' when calling
   'install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [32] and add
+- JavaScript and TypeScript support: install Node.js 18+ and npm [32] and add
   '--ts-completer' when calling 'install.py'.
 
 - Rust support: add '--rust-completer' when calling 'install.py'.
@@ -818,7 +822,7 @@ The following additional language support options are available:
 - Go support: install Go [31] and add '--go-completer' when calling
   'install.py'.
 
-- JavaScript and TypeScript support: install Node.js and npm [32] and add
+- JavaScript and TypeScript support: install Node.js 18+ and npm [32] and add
   '--ts-completer' when calling 'install.py'.
 
 - Rust support: add '--rust-completer' when calling 'install.py'.
@@ -1095,7 +1099,8 @@ Signature help is triggered in insert mode automatically when
 |g:ycm_auto_trigger| is enabled and is not supported when it is not enabled.
 
 The signatures popup is hidden when there are no matching signatures or when
-you leave insert mode. There is no key binding to clear the popup.
+you leave insert mode. If you want to manually control when it is visible, you
+can map something to '<plug>YCMToggleSignatureHelp' (see below).
 
 For more details on this feature and a few demos, check out the PR that
 proposed it [45].
@@ -1331,7 +1336,7 @@ build or acquire 'libclang' for yourself and specify it when building, as:
   $ EXTRA_CMAKE_ARGS='-DPATH_TO_LLVM_ROOT=/path/to/your/llvm' ./install.py --clang-completer --system-libclang
 <
 Please note that if using custom 'clangd' or 'libclang' it _must_ match the
-version that YCM requires. Currently YCM requires **_clang 16.0.1_**.
+version that YCM requires. Currently YCM requires **_clang 17.0.1_**.
 
 -------------------------------------------------------------------------------
                                                   *youcompleteme-compile-flags*
@@ -1754,9 +1759,19 @@ Completions and GoTo commands should work out of the box (provided that you
 built YCM with the '--go-completer' flag; see the _Installation_ section for
 details). The server only works for projects with the "canonical" layout.
 
-'gopls' also has a handful of undocumented options for which the source code
-[72] is the only reference.
+'gopls' also has a load of documented options [72].
 
+You can set these in your '.ycm_extra_conf.py'. For example, to set the build
+tags:
+>
+  def Settings( **kwargs ):
+    if kwargs[ 'language' ] == 'go':
+      return {
+         'ls': {
+           'build.buildFlags': [ '-tags=debug' ] }
+         }
+      }
+<
 -------------------------------------------------------------------------------
                       *youcompleteme-javascript-typescript-semantic-completion*
 JavaScript and TypeScript Semantic Completion ~
@@ -1773,7 +1788,7 @@ available on the wiki [74].
 
 All JavaScript and TypeScript features are provided by the TSServer [15]
 engine, which is included in the TypeScript SDK. To enable these features,
-install Node.js and npm [32] and call the 'install.py' script with the
+install Node.js 18+ and npm [32] and call the 'install.py' script with the
 '--ts-completer' flag.
 
 TSServer [15] relies on the 'jsconfig.json' file [75] for JavaScript and the
@@ -2014,6 +2029,10 @@ You can also style the line that has the warning/error with these groups:
 - 'YcmErrorLine', which falls back to group 'SyntasticErrorLine' if it exists
 - 'YcmWarningLine', which falls back to group 'SyntasticWarningLine' if it
   exists
+
+Finally, you can also style the popup for the detailed diagnostics (it is shown
+if |g:ycm_show_detailed_diag_in_popup| is set) using the group 'YcmErrorPopup',
+which falls back to 'ErrorMsg'.
 
 Note that the line highlighting groups only work when the
 |g:ycm_enable_diagnostic_signs| option is set. If you want highlighted lines
@@ -3927,6 +3946,18 @@ Default: '0'
   let g:ycm_disable_signature_help = 1
 <
 -------------------------------------------------------------------------------
+The *g:ycm_signature_help_disable_syntax* option
+
+Set this to 1 to disable syntax highlighting in the signature help popup. Thiis
+can help if your colourscheme doesn't work well with the default highliting and
+inverse video.
+
+Default: '0'
+>
+  " Disable signature help syntax highliting
+  let g:ycm_signature_help_disable_syntax = 1
+<
+-------------------------------------------------------------------------------
 The *g:ycm_gopls_binary_path* option
 
 In case the system-wide 'gopls' binary is newer than the bundled one, setting
@@ -4122,7 +4153,7 @@ References ~
 [69] https://github.com/rust-lang/rls
 [70] https://www.rust-lang.org/downloads.html
 [71] https://rust-analyzer.github.io/manual.html#configuration]
-[72] https://github.com/golang/tools/blob/master/internal/lsp/server.go
+[72] https://github.com/golang/tools/blob/master/gopls/doc/settings.md
 [73] https://ternjs.net
 [74] https://github.com/ycm-core/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
 [75] https://code.visualstudio.com/docs/languages/jsconfig
