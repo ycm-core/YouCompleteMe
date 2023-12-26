@@ -210,13 +210,13 @@ Installation
 
 | Runtime | Min Version | Recommended Version (full support) | Python |
 |---------|-------------|------------------------------------|--------|
-| Vim     | 8.1.2269    | 9.0.214                            | 3.8    |
+| Vim     | 8.2.3995    | 9.0.214                            | 3.8    |
 | Neovim  | 0.5         | Vim 9.0.214                        | 3.8    |
 
 #### Supported Vim Versions
 
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
-That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
+That's currently Ubuntu 22.04 which contains `vim-nox` at `v8.2.3995`.
 
 Vim must have a [working Python 3 runtime](#supported-python-runtime).
 
@@ -417,7 +417,7 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Linux 64-bit
 
-The following assume you're using Ubuntu 20.04.
+The following assume you're using Ubuntu 22.04.
 
 #### Quick start, installing all completers
 
@@ -1088,7 +1088,7 @@ On supported architectures, the `install.py` script will download a suitable
 clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
 Supported architectures are:
 
-* Linux glibc >= 2.31 (Intel, armv7-a, aarch64) - built on ubuntu 20.04
+* Linux glibc >= 2.31 (Intel, armv7-a, aarch64) - built on ubuntu 22.04
 * MacOS >=10.15 (Intel, arm64)
   - For Intel, compatibility per clang.llvm.org downloads
   - For arm64, macOS 10.15+
