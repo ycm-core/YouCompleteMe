@@ -24,17 +24,17 @@ function! s:restore_cpo()
   unlet s:save_cpo
 endfunction
 
-" NOTE: The minimum supported version is 8.1.2269, but neovim always reports as
+" NOTE: The minimum supported version is 8.2.3395, but neovim always reports as
 " v:version 800, but will largely work.
 let s:is_neovim = has( 'nvim' )
 
 if exists( "g:loaded_youcompleteme" )
   call s:restore_cpo()
   finish
-elseif ( v:version < 801 || (v:version == 801 && !has( 'patch2269' )) ) &&
+elseif ( v:version < 802 || (v:version == 802 && !has( 'patch3395' )) ) &&
       \ !s:is_neovim
   echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 8.1.2269+." |
+        \ echomsg "YouCompleteMe unavailable: requires Vim 8.1.3395+." |
         \ echohl None
   call s:restore_cpo()
   finish

@@ -210,13 +210,13 @@ Installation
 
 | Runtime | Min Version | Recommended Version (full support) | Python |
 |---------|-------------|------------------------------------|--------|
-| Vim     | 8.1.2269    | 9.0.214                            | 3.8    |
+| Vim     | 8.2.3995    | 9.0.214                            | 3.8    |
 | Neovim  | 0.5         | Vim 9.0.214                        | 3.8    |
 
 #### Supported Vim Versions
 
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
-That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.1.2269`.
+That's currently Ubuntu 20.04 which contains `vim-nox` at `v8.2.3995`.
 
 Vim must have a [working Python 3 runtime](#supported-python-runtime).
 
