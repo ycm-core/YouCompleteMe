@@ -64,6 +64,7 @@ Contents ~
    7. C# Semantic Completion              |youcompleteme-c-semantic-completion|
     1. Automatically discovered solution files |youcompleteme-automatically-discovered-solution-files|
     2. Manually specified solution files |youcompleteme-manually-specified-solution-files|
+    3. Use with .NET 6.0 and .NET SDKs |youcompleteme-use-with-.net-6.0-.net-sdks|
    8. Python Semantic Completion     |youcompleteme-python-semantic-completion|
     1. Working with virtual environments |youcompleteme-working-with-virtual-environments|
     2. Working with third-party packages |youcompleteme-working-with-third-party-packages|
@@ -1625,6 +1626,27 @@ If the path returned by 'CSharpSolutionFile' is not an actual file, YCM will
 fall back to the other way of finding the file.
 
 -------------------------------------------------------------------------------
+                                    *youcompleteme-use-with-.net-6.0-.net-sdks*
+Use with .NET 6.0 and .NET SDKs ~
+
+YCM ships with older version of OmniSharp-Roslyn based on Mono runtime. It is
+possible to use it with .NET 6.0 and newer, but it requires manual setup.
+
+1. Download NET 6.0 version of the OmniSharp server for your system from
+   releases [68]
+
+2. Set |g:ycm_roslyn_binary_path| to the unpacked executable 'OmniSharp'
+
+3. Create a solution file if one doesn't already exist, it is currently
+   required by YCM for internal bookkeeping
+
+   1. Run 'dotnet new sln' at the root of your project
+   2. Run 'dotnet sln add <project1.csproj> <project2.csproj> ...' for
+      all of your projects
+
+4. Run |:YcmRestartServer|
+
+-------------------------------------------------------------------------------
                                      *youcompleteme-python-semantic-completion*
 Python Semantic Completion ~
 
@@ -1695,7 +1717,7 @@ the second position of 'sys.path':
     sys_path.insert( 1, '/path/to/third_party/package' )
     return sys_path
 <
-A more advanced example can be found in YCM's own '.ycm_extra_conf.py' [68].
+A more advanced example can be found in YCM's own '.ycm_extra_conf.py' [69].
 
 -------------------------------------------------------------------------------
                                 *youcompleteme-configuring-through-vim-options*
@@ -1738,7 +1760,7 @@ Rust Semantic Completion ~
 
 YCM uses rust-analyzer [16] for Rust semantic completion.
 
-NOTE: Previously, YCM used rls [69] for rust completion. This is no longer
+NOTE: Previously, YCM used rls [70] for rust completion. This is no longer
 supported, as the Rust community has decided on rust-analyzer [16] as the
 future of Rust tooling.
 
@@ -1746,10 +1768,10 @@ Completions and GoTo commands within the current crate and its dependencies
 should work out of the box with no additional configuration (provided that you
 built YCM with the '--rust-completer' flag; see the _Installation_ section for
 details). The install script takes care of installing the Rust source code
-[70], so no configuration is necessary.
+[71], so no configuration is necessary.
 
 'rust-analyzer' supports a myriad of options. These are configured using LSP
-configuration, and are documented here [71].
+configuration, and are documented here [72].
 
 -------------------------------------------------------------------------------
                                          *youcompleteme-go-semantic-completion*
@@ -1759,7 +1781,7 @@ Completions and GoTo commands should work out of the box (provided that you
 built YCM with the '--go-completer' flag; see the _Installation_ section for
 details). The server only works for projects with the "canonical" layout.
 
-'gopls' also has a load of documented options [72].
+'gopls' also has a load of documented options [73].
 
 You can set these in your '.ycm_extra_conf.py'. For example, to set the build
 tags:
@@ -1776,23 +1798,23 @@ tags:
                       *youcompleteme-javascript-typescript-semantic-completion*
 JavaScript and TypeScript Semantic Completion ~
 
-**NOTE:** YCM originally used the Tern [73] engine for JavaScript but due to
-Tern [73] not being maintained anymore by its main author and the TSServer [15]
+**NOTE:** YCM originally used the Tern [74] engine for JavaScript but due to
+Tern [74] not being maintained anymore by its main author and the TSServer [15]
 engine offering more features, YCM is moving to TSServer [15]. This won't
-affect you if you were already using Tern [73] but you are encouraged to do the
+affect you if you were already using Tern [74] but you are encouraged to do the
 switch by deleting the 'third_party/ycmd/third_party/tern_runtime/node_modules'
-directory in YCM folder. If you are a new user but still want to use Tern [73],
+directory in YCM folder. If you are a new user but still want to use Tern [74],
 you should pass the '--js-completer' option to the 'install.py' script during
-installation. Further instructions on how to setup YCM with Tern [73] are
-available on the wiki [74].
+installation. Further instructions on how to setup YCM with Tern [74] are
+available on the wiki [75].
 
 All JavaScript and TypeScript features are provided by the TSServer [15]
 engine, which is included in the TypeScript SDK. To enable these features,
 install Node.js 18+ and npm [32] and call the 'install.py' script with the
 '--ts-completer' flag.
 
-TSServer [15] relies on the 'jsconfig.json' file [75] for JavaScript and the
-'tsconfig.json' file [76] for TypeScript to analyze your project. Ensure the
+TSServer [15] relies on the 'jsconfig.json' file [76] for JavaScript and the
+'tsconfig.json' file [77] for TypeScript to analyze your project. Ensure the
 file exists at the root of your project.
 
 To get diagnostics in JavaScript, set the 'checkJs' option to 'true' in your
@@ -1809,7 +1831,7 @@ To get diagnostics in JavaScript, set the 'checkJs' option to 'true' in your
 Semantic Completion for Other Languages ~
 
 C-family, C#, Go, Java, Python, Rust, and JavaScript/TypeScript languages are
-supported natively by YouCompleteMe using the Clang [77], OmniSharp-Roslyn
+supported natively by YouCompleteMe using the Clang [78], OmniSharp-Roslyn
 [13], Gopls [14], jdt.ls [17], Jedi [12], rust-analyzer [16], and TSServer [15]
 engines, respectively. Check the installation section for instructions to
 enable these features if desired.
@@ -1868,7 +1890,7 @@ Each dictionary contains the following keys:
   This can be used to enable or disable certain features, such as the support
   for configuration sections ('workspace/configuration').
 
-See the LSP Examples [78] project for more examples of configuring the likes of
+See the LSP Examples [79] project for more examples of configuring the likes of
 PHP, Ruby, Kotlin, and D.
 
 -------------------------------------------------------------------------------
@@ -1920,7 +1942,7 @@ semantic completions if it does not have a native semantic completion engine
 for your file's filetype. Vim comes with rudimentary omnifuncs for various
 languages like Ruby, PHP, etc. It depends on the language.
 
-You can get a stellar omnifunc for Ruby with Eclim [79]. Just make sure you
+You can get a stellar omnifunc for Ruby with Eclim [80]. Just make sure you
 have the _latest_ Eclim installed and configured (this means Eclim '>= 2.2.*'
 and Eclipse '>= 4.2.*').
 
@@ -1937,7 +1959,7 @@ Writing New Semantic Completers ~
 
 You have two options here: writing an 'omnifunc' for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for
-YCM using the Completer API [80].
+YCM using the Completer API [81].
 
 Here are the differences between the two approaches:
 
@@ -1956,7 +1978,7 @@ Here are the differences between the two approaches:
   than VimScript.
 
 If you want to use the 'omnifunc' system, see the relevant Vim docs with ':h
-complete-functions'. For the Completer API, see the API docs [80].
+complete-functions'. For the Completer API, see the API docs [81].
 
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
@@ -2007,7 +2029,7 @@ current file in Vim's 'locationlist', which can be opened with the ':lopen' and
 ':lclose' commands (make sure you have set 'let
 g:ycm_always_populate_location_list = 1' in your vimrc). A good way to toggle
 the display of the 'locationlist' with a single key mapping is provided by
-another (very small) Vim plugin called ListToggle [81] (which also makes it
+another (very small) Vim plugin called ListToggle [82] (which also makes it
 possible to change the height of the 'locationlist' window), also written by
 yours truly.
 
@@ -2065,7 +2087,7 @@ supported.
 
 Here's a quick demo:
 
-  Image: asciicast [82]
+  Image: asciicast [83]
 
 As you can see, you can type and YCM filters down the list as you type. The
 current set of matches are displayed in a popup window in the centre of the
@@ -2502,7 +2524,7 @@ such as missing trailing semi-colons, spurious characters, or other errors
 which the semantic engine can deterministically suggest corrections. A small
 demo presenting how diagnostics can be fixed with clangd:
 
-  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [84])
+  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [85])
 
 Completers (LSPs) may also provide refactoring tweaks, which may be available
 even when no diagnostic is presented for the current line. These include
@@ -2511,7 +2533,7 @@ generation, ... The tweaks work for a selection as well. Consult your LSP for
 available refactorings. A demonstration of refactoring capabilities with
 clangd:
 
-  Image: YouCompleter-FixIt-Refactoring (see reference [85])
+  Image: YouCompleter-FixIt-Refactoring (see reference [86])
 
 If no fix-it is available for the current line, or there is no diagnostic on
 the current line, this command has no effect on the current buffer. If any
@@ -2557,7 +2579,7 @@ The following additional commands are supported for python:
 - 'RefactorExtractVariable'
 - 'RefactorExtractFunction'
 
-See the jedi docs [86] for what they do.
+See the jedi docs [87] for what they do.
 
 Supported in filetypes: 'python'
 
@@ -2632,7 +2654,7 @@ specific commands. Consult the jdt.ls [17] documentation to find out what
 commands are supported and which arguments are expected.
 
 The support for 'ExecuteCommand' was implemented to support plugins like
-Vimspector [87] to debug java, but isn't limited to that specific use case.
+Vimspector [88] to debug java, but isn't limited to that specific use case.
 
 -------------------------------------------------------------------------------
 The *RestartServer* subcommand
@@ -2668,7 +2690,7 @@ For example:
   call youcompleteme#GetErrorCount()
 <
 Both this function and |youcompleteme#GetWarningCount| can be useful when
-integrating YCM with other Vim plugins. For example, a lightline [88] user
+integrating YCM with other Vim plugins. For example, a lightline [89] user
 could add a diagnostics section to their statusline which would display the
 number of errors and warnings.
 
@@ -3169,9 +3191,9 @@ string 'virtual-text', and the diagnostic will be displayed inline with the
 text, right aligned in the window and wrapping to the next line if there is not
 enough space, for example:
 
-  Image: Virtual text diagnostic demo (see reference [89])
-
   Image: Virtual text diagnostic demo (see reference [90])
+
+  Image: Virtual text diagnostic demo (see reference [91])
 
 **NOTE**: It's _strongly_ recommended to also set
 |g:ycm_update_diagnostics_in_insert_mode| to '0' when using 'virtual-text' for
@@ -3279,7 +3301,7 @@ YCM will not render it.
 
 The following filter types are supported:
 
-- "regex": Accepts a string regular expression [91]. This type matches when
+- "regex": Accepts a string regular expression [92]. This type matches when
   the regex (treated as case-insensitive) is found anywhere in the diagnostic
   text ('re.search', not 're.match')
 
@@ -3287,7 +3309,7 @@ The following filter types are supported:
   matches when the diagnostic has the same level, that is, specifying 'level:
   "error"' will remove **all** errors from the diagnostics.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [91].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [92].
 
 Default: '{}'
 
@@ -3382,7 +3404,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [92]. The format
+The only supported tag format is the Exuberant Ctags format [93]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the
 '--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -3786,7 +3808,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [91].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [92].
 
 Default: '[see next line]'
 >
@@ -3926,7 +3948,7 @@ first making sure YCM won't choose that existing completer in the first place.
 A simple working example of this option can be found in the section called
 "Semantic Completion for Other Languages".
 
-Many working examples can be found in the YCM lsp-examples [78] repo.
+Many working examples can be found in the YCM lsp-examples [79] repo.
 
 Default: '[]'
 >
@@ -4032,17 +4054,17 @@ The FAQ section has been moved to the wiki [8].
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[93]. By participating in this project you agree to abide by its terms.
+[94]. By participating in this project you agree to abide by its terms.
 
 -------------------------------------------------------------------------------
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please join the Gitter
-room [1] or use the ycm-users [94] mailing list.
+room [1] or use the ycm-users [95] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[95]. Before you do, please carefully read CONTRIBUTING.md [96] as this asks
+[96]. Before you do, please carefully read CONTRIBUTING.md [97] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -4057,7 +4079,7 @@ contact the YouCompleteMe maintainers directly using the contact details.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [97]. © 2015-2018
+This software is licensed under the GPL v3 license [98]. © 2015-2018
 YouCompleteMe contributors
 
 -------------------------------------------------------------------------------
@@ -4068,10 +4090,10 @@ If you like YCM so much that you're wiling to part with your hard-earned cash,
 please consider donating to one of the following charities, which are
 meaningful to the current maintainers (in no particular order):
 
-- Hector's Greyhound Rescue [98]
-- Be Humane [99]
-- Cancer Research UK [100]
-- ICCF Holland [101]
+- Hector's Greyhound Rescue [99]
+- Be Humane [100]
+- Cancer Research UK [101]
+- ICCF Holland [102]
 - Any charity of your choosing.
 
 Please note: The YCM maintainers do not specifically endorse nor necessarily
@@ -4149,39 +4171,40 @@ References ~
 [65] https://github.com/ycm-core/ycmd/blob/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_maven_project/pom.xml
 [66] https://github.com/ycm-core/ycmd/tree/3602f38ef7a762fc765afd75e562aec9a134711e/ycmd/tests/java/testdata/simple_gradle_project
 [67] https://github.com/ycm-core/lsp-examples#kotlin
-[68] https://github.com/ycm-core/YouCompleteMe/blob/master/.ycm_extra_conf.py
-[69] https://github.com/rust-lang/rls
-[70] https://www.rust-lang.org/downloads.html
-[71] https://rust-analyzer.github.io/manual.html#configuration]
-[72] https://github.com/golang/tools/blob/master/gopls/doc/settings.md
-[73] https://ternjs.net
-[74] https://github.com/ycm-core/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
-[75] https://code.visualstudio.com/docs/languages/jsconfig
-[76] https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-[77] https://clang.llvm.org/
-[78] https://github.com/ycm-core/lsp-examples
-[79] http://eclim.org/
-[80] https://github.com/ycm-core/ycmd/blob/master/ycmd/completers/completer.py
-[81] https://github.com/Valloric/ListToggle
-[82] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C
-[83] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C.svg
-[84] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
-[85] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
-[86] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
-[87] https://github.com/puremourning/vimspector
-[88] https://github.com/itchyny/lightline.vim
-[89] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
-[90] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
-[91] https://docs.python.org/2/library/re.html#regular-expression-syntax
-[92] http://ctags.sourceforge.net/FORMAT
-[93] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[94] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[95] https://github.com/ycm-core/YouCompleteMe/issues?state=open
-[96] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
-[97] https://www.gnu.org/copyleft/gpl.html
-[98] https://www.hectorsgreyhoundrescue.org
-[99] https://www.budihuman.rs/en
-[100] https://www.cancerresearchuk.org
-[101] https://iccf.nl
+[68] https://github.com/OmniSharp/omnisharp-roslyn/releases/
+[69] https://github.com/ycm-core/YouCompleteMe/blob/master/.ycm_extra_conf.py
+[70] https://github.com/rust-lang/rls
+[71] https://www.rust-lang.org/downloads.html
+[72] https://rust-analyzer.github.io/manual.html#configuration]
+[73] https://github.com/golang/tools/blob/master/gopls/doc/settings.md
+[74] https://ternjs.net
+[75] https://github.com/ycm-core/YouCompleteMe/wiki/JavaScript-Semantic-Completion-through-Tern
+[76] https://code.visualstudio.com/docs/languages/jsconfig
+[77] https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
+[78] https://clang.llvm.org/
+[79] https://github.com/ycm-core/lsp-examples
+[80] http://eclim.org/
+[81] https://github.com/ycm-core/ycmd/blob/master/ycmd/completers/completer.py
+[82] https://github.com/Valloric/ListToggle
+[83] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C
+[84] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C.svg
+[85] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
+[86] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
+[87] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
+[88] https://github.com/puremourning/vimspector
+[89] https://github.com/itchyny/lightline.vim
+[90] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
+[91] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
+[92] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[93] http://ctags.sourceforge.net/FORMAT
+[94] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[95] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[96] https://github.com/ycm-core/YouCompleteMe/issues?state=open
+[97] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
+[98] https://www.gnu.org/copyleft/gpl.html
+[99] https://www.hectorsgreyhoundrescue.org
+[100] https://www.budihuman.rs/en
+[101] https://www.cancerresearchuk.org
+[102] https://iccf.nl
 
 vim: ft=help
