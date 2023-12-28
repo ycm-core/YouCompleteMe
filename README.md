@@ -1393,6 +1393,21 @@ def CSharpSolutionFile( filepath ):
 If the path returned by `CSharpSolutionFile` is not an actual file, YCM will
 fall back to the other way of finding the file.
 
+#### Use with .NET 6.0 and .NET SDKs
+
+YCM ships with older version of OmniSharp-Roslyn based on Mono runtime.
+It is possible to use it with .NET 6.0 and newer, but it requires manual setup.
+
+1. Download NET 6.0 version of the OmniSharp server for your system from
+[releases](https://github.com/OmniSharp/omnisharp-roslyn/releases/)
+1. Set `g:ycm_roslyn_binary_path` to the unpacked executable `OmniSharp`
+1. Create a solution file if one doesn't already exist, it is currently required
+by YCM for internal bookkeeping
+    1. Run `dotnet new sln` at the root of your project
+    1. Run `dotnet sln add <project1.csproj> <project2.csproj> ...`
+    for all of your projects
+1. Run `:YcmRestartServer`
+
 ### Python Semantic Completion
 
 YCM relies on the [Jedi][] engine to provide completion and code navigation. By

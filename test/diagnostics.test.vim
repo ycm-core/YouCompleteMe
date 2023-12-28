@@ -90,7 +90,7 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
     call WaitForAssert( {-> assert_true( len( sign_getplaced(
                            \ '%',
                            \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
-    call FeedAndCheckAgain( "A\<CR>", funcref( 'CheckNoPropsAfterNewLine' )
+    call FeedAndCheckAgain( "A\<CR>", funcref( 'CheckNoPropsAfterNewLine' ) )
   endfunction
 
   function! CheckNoPropsAfterNewLine( id ) closure
@@ -103,7 +103,7 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
                            \ 1, { 'end_lnum': -1,
                                 \ 'types': [ 'YcmVirtDiagWarning',
                                            \ 'YcmVirtDiagError',
-                                           \ 'YcmVirtDiagPadding' ] } ) ) ) )
+                                           \ 'YcmVirtDiagPadding' ] } ) ) ) } )
   endfunction
 
   call FeedAndCheckMain( 'imain(',
@@ -121,14 +121,14 @@ function! Test_Changing_Filetype_Refreshes_Diagnostics()
         \ '/test/testdata/diagnostics/foo.xml',
         \ { 'native_ft': 0 } )
 
-  call assert_equal( 'xml', &ft )
+  call assert_equal( 'xml', &filetype )
   call assert_false(
     \ pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
   call assert_true( empty( sign_getplaced(
                         \ '%',
                         \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) )
   setf typescript
-  call assert_equal( 'typescript', &ft )
+  call assert_equal( 'typescript', &filetype )
   call assert_false(
     \ pyxeval( 'ycm_state._buffers[' . bufnr( '%' ) . ']._async_diags' ) )
   " Diagnostics are async, so wait for the assert to return 0 for a while.
@@ -151,7 +151,7 @@ function! Test_MessagePoll_After_LocationList()
     \ '/test/testdata/diagnostics/foo.cpp', {} )
 
   setf cpp
-  call assert_equal( 'cpp', &ft )
+  call assert_equal( 'cpp', &filetype )
   call WaitForAssert( {-> assert_equal( 2, len( sign_getplaced(
                         \ '%',
                         \ { 'group': 'ycm_signs' } )[ 0 ][ 'signs' ] ) ) } )
@@ -251,7 +251,7 @@ function! Test_ShowDetailedDiagnostic_CmdLine()
 
   call assert_equal(
         \ "Format specifies type 'char *' but the argument has type 'int' "
-        \ . '(fix available)',
+        \ . '(fix available) [-Wformat]',
         \ trim( output ) )
 
   %bwipe!
@@ -264,8 +264,11 @@ function! Test_ShowDetailedDiagnostic_PopupAtCursor()
   call cursor( [ 3, 1 ] )
   YcmShowDetailedDiagnostic popup
 
-  let id = popup_locate( 4, 1 )
-  call assert_notequal( 0, id, "Couldn't find popup!" )
+  let id = popup_locate( 4, 16 )
+  call assert_notequal(
+        \ 0,
+        \ id,
+        \ "Couldn't find popup! " .. youcompleteme#test#popup#DumpPopups() )
 
   if exists( '*popup_list' )
     let popups = popup_list()
@@ -274,13 +277,13 @@ function! Test_ShowDetailedDiagnostic_PopupAtCursor()
 
   call youcompleteme#test#popup#CheckPopupPosition( id, {
         \ 'visible': 1,
-        \ 'col': 1,
+        \ 'col': 16,
         \ 'line': 4,
         \ } )
   call assert_equal(
         \ [
         \   "Format specifies type 'char *' but the argument has type 'int' "
-        \   . '(fix available)',
+        \   . '(fix available) [-Wformat]',
         \ ],
         \ getbufline( winbufnr(id), 1, '$' ) )
 
@@ -315,8 +318,11 @@ function! Test_ShowDetailedDiagnostic_Popup_WithCharacters()
   call cursor( [ 4, 1 ] )
   YcmShowDetailedDiagnostic popup
 
-  let id = popup_locate( 5, 1 )
-  call assert_notequal( 0, id, "Couldn't find popup!" )
+  let id = popup_locate( 5, 7 )
+  call assert_notequal(
+        \ 0,
+        \ id,
+        \ "Couldn't find popup! " .. youcompleteme#test#popup#DumpPopups() )
 
   if exists( '*popup_list' )
     let popups = popup_list()
@@ -325,7 +331,7 @@ function! Test_ShowDetailedDiagnostic_Popup_WithCharacters()
 
   call youcompleteme#test#popup#CheckPopupPosition( id, {
         \ 'visible': 1,
-        \ 'col': 1,
+        \ 'col': 7,
         \ 'line': 5,
         \ } )
   call assert_match(
