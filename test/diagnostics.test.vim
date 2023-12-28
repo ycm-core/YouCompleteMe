@@ -251,7 +251,7 @@ function! Test_ShowDetailedDiagnostic_CmdLine()
 
   call assert_equal(
         \ "Format specifies type 'char *' but the argument has type 'int' "
-        \ . '(fix available)',
+        \ . '(fix available) [-Wformat]',
         \ trim( output ) )
 
   %bwipe!
