@@ -203,3 +203,47 @@ function! Test_DontResolveCompletion_AlreadyResolved()
 
   call test_override( 'ALL', 0 )
 endfunction
+
+function! Test_SwitchingToSemanticCompletionAfterSelectingIdentifierCandidate()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/cpp/identifier_semantic_switch.cpp', {} )
+  call setpos( '.', [ 0, 3, 0 ] )
+  call test_override( 'char_avail', 1 )
+
+  function! Check1( id )
+    call WaitForCompletion()
+    call CheckCompletionItemsContainsExactly( [ 'ZbCdE' ], 'word' )
+    let compl = complete_info()
+    call assert_equal( -1, compl.selected )
+    call assert_equal( 1, len( compl.items ) )
+    let ZbCdE = compl.items[ 0 ]
+    call assert_equal( 'ZbCdE', ZbCdE.word )
+    call assert_equal( '[ID]', ZbCdE.menu )
+    call assert_equal( '', ZbCdE.kind )
+    call FeedAndCheckAgain( "\<Tab>", funcref( 'Check2' ) )
+  endfunction
+
+  function! Check2( id )
+    call WaitForCompletion()
+    call assert_match( 'ZbCdE', getline( '.' ) )
+    call FeedAndCheckAgain( "\<C-Space>", funcref( 'Check3' ) )
+  endfunction
+
+  function! Check3( id )
+    call WaitForCompletion()
+    call CheckCompletionItemsContainsExactly( [ 'ZbCdE' ], 'word' )
+    let compl = complete_info()
+    call assert_equal( -1, compl.selected )
+    call assert_match( 'ZbCdE', getline( '.' ) )
+    call assert_equal( 1, len( compl.items ) )
+    let ZbCdE = compl.items[ 0 ]
+    call assert_equal( 'ZbCdE', ZbCdE.word )
+    call assert_equal( 'void', ZbCdE.menu )
+    call assert_equal( 'f', ZbCdE.kind )
+    call feedkeys( "\<Esc>" )
+  endfunction
+
+
+  call FeedAndCheckMain( 'CZE', funcref( 'Check1' ) )
+  call assert_false( pumvisible(), 'pumvisible()' )
+  call test_override( 'ALL', 0 )
+endfunction
