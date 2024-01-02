@@ -717,6 +717,7 @@ function! s:EnableAutoHover()
     augroup YcmBufHover
       autocmd! * <buffer>
       autocmd CursorHold <buffer> call s:Hover()
+      autocmd WinScrolled <buffer> call popup_close( s:cursorhold_popup )
     augroup END
   endif
 endfunction
@@ -1621,9 +1622,11 @@ if exists( '*popup_atcursor' )
       return
     endif
 
-    call youcompleteme#GetCommandResponseAsync(
-          \ function( 's:ShowHoverResult' ),
-          \ b:ycm_hover.command )
+    if empty( popup_getpos( s:cursorhold_popup ) )
+      call youcompleteme#GetCommandResponseAsync(
+            \ function( 's:ShowHoverResult' ),
+            \ b:ycm_hover.command )
+    endif
   endfunction
 
 
