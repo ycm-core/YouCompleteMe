@@ -512,6 +512,10 @@ function! s:SetUpSyntaxHighlighting()
           \ 'combine': 0,
           \ 'override': 1 } )
   endif
+
+  if !hlexists( 'YcmErrorPopup' )
+    highlight default link YcmErrorPopup ErrorMsg
+  endif
 endfunction
 
 
@@ -1192,6 +1196,7 @@ function! s:RequestSemanticCompletion() abort
 
   if get( b:, 'ycm_completing' )
     let s:force_semantic = 1
+    let s:current_cursor_position = getpos( '.' )
     call s:StopPoller( s:pollers.completion )
     py3 ycm_state.SendCompletionRequest( True )
 

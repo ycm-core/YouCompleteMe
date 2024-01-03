@@ -53,6 +53,11 @@ HIGHLIGHT_GROUPS = [{
     'regexp': 'String',
     'operator': 'Operator',
     'unknown': 'Normal',
+
+    # These are not part of the spec, but are used by clangd
+    'bracket': 'Normal',
+    # These are not part of the spec, but are used by jdt.ls
+    'annotation': 'Macro',
   }
 }]
 REPORTED_MISSING_TYPES = set()

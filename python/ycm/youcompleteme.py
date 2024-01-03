@@ -614,8 +614,10 @@ class YouCompleteMe:
 
 
   def OnInsertLeave( self ):
+    async_diags = any( self._message_poll_requests.get( filetype )
+                      for filetype in vimsupport.CurrentFiletypes() )
     if ( not self._user_options[ 'update_diagnostics_in_insert_mode' ] and
-         not self.CurrentBuffer().ParseRequestPending() ):
+         ( async_diags or not self.CurrentBuffer().ParseRequestPending() ) ):
       self.CurrentBuffer().RefreshDiagnosticsUI()
     SendEventNotificationAsync( 'InsertLeave' )
 
@@ -849,7 +851,7 @@ class YouCompleteMe:
           'maxwidth': available_columns,
           'close': 'click',
           'fixed': 0,
-          'highlight': 'ErrorMsg',
+          'highlight': 'YcmErrorPopup',
           'border': [ 1, 1, 1, 1 ],
           # Close when moving cursor
           'moved': 'expr',
