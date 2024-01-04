@@ -40,3 +40,21 @@ function! youcompleteme#test#popup#ScreenPos( winid, row, col )
   let [ w_row, w_col ] = win_screenpos( a:winid )
   return { 'row': w_row + a:row, 'col':  w_col + a:col }
 endfunction
+
+
+function! youcompleteme#test#popup#DumpPopups() abort
+  if !exists( 'popup_list' )
+    " Old vim..
+    return ''
+  endif
+
+  let output = 'Popups:'
+  for winid in popup_list()
+    let output .= ' ['
+              \ . string( winid )
+              \ . '@'
+              \ . string( popup_getpos( winid ) )
+              \ . ']'
+  endfor
+  return output
+endfunction
