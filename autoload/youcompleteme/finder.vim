@@ -499,7 +499,7 @@ function! s:RedrawFinderPopup() abort
                \ .. line_num
       let path_includes_line = 1
 
-      let spaces = available_width - len( desc ) - len( path )
+      let spaces = available_width - strdisplaywidth( desc ) - strdisplaywidth( path )
       let spacing = 4
       if spaces < spacing
         let spaces = spacing
@@ -524,16 +524,16 @@ function! s:RedrawFinderPopup() abort
       if len( path ) > 0
         if path_includes_line
           let props += [
-                \ { 'col': available_width - len( path ) + 1,
+                \ { 'col': len( desc ) + spaces + 1,
                 \   'length': len( path ) - len( line_num ),
                 \   'type': 'YCM-symbol-file' },
-                \ { 'col': available_width - len( line_num ) + 1,
+                \ { 'col': len( desc ) + spaces + 1 + len( path ) - len( line_num ),
                 \   'length': len( line_num ),
                 \   'type': 'YCM-symbol-line-num' },
                 \ ]
         else
           let props += [
-                \ { 'col': available_width - len( path ) + 1,
+                \ { 'col': len( desc ) + spaces + 1,
                 \   'length': len( path ),
                 \   'type': 'YCM-symbol-file' },
                 \ ]
