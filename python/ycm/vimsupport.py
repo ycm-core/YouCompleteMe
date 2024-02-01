@@ -288,18 +288,22 @@ def GetTextPropertyForDiag( buffer_number, line_number, diag ):
   end_line = end[ 'line_num' ]
   if start_line == end_line:
     length = end[ 'column_num' ] - start[ 'column_num' ]
+    column = start[ 'column_num' ]
   elif start_line == line_number:
     # -1 switches to 0-based indexing.
     current_line_len = len( vim.buffers[ buffer_number ][ line_number - 1 ] )
     # +2 includes the start columnand accounts for properties at the end of line
     # covering \n as well.
     length = current_line_len - start[ 'column_num' ] + 2
+    column = start[ 'column_num' ]
   elif end_line == line_number:
     length = end[ 'column_num' ] - 1
+    column = 1
   else:
     # -1 switches to 0-based indexing.
     # +1 accounts for properties at the end of line covering \n as well.
     length = len( vim.buffers[ buffer_number ][ line_number - 1 ] ) + 1
+    column = 1
   if diag[ 'kind' ] == 'ERROR':
     property_name = 'YcmErrorProperty'
   else:
@@ -309,7 +313,7 @@ def GetTextPropertyForDiag( buffer_number, line_number, diag ):
                           f'{{ "bufnr": { buffer_number }, '
                              f'"types": [ "{ property_name }" ] }} )' )
     return next( filter(
-        lambda p: start[ 'column_num' ] == int( p[ 'col' ] ) and
+        lambda p: column == int( p[ 'col' ] ) and
                   length == int( p[ 'length' ] ),
         vim_props ) )
   else:
