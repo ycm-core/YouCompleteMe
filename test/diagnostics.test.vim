@@ -446,3 +446,21 @@ function! Test_ShowDetailedDiagnostic_Popup_MultilineDiagFromStartOfLine()
 
   %bwipe!
 endfunction
+
+function! Test_ShowDetailedDiagnostic_Popup_MultipleDiagsPerLine_SameMessage()
+  let f = tempname() . '.cc'
+  execut 'edit' f
+  call setline( 1, [ 'void f(){a;a;}', ] )
+  call youcompleteme#test#setup#WaitForInitialParse( {} )
+
+  call WaitForAssert( {->
+    \ assert_true(
+      \ py3eval(
+        \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+    \ ) ) } )
+
+  YcmShowDetailedDiagnostic popup
+  call assert_equal( 1, len( popup_list() ) )
+  call feedkeys( "i\<Esc>", 'xt' )
+  call assert_equal( 0, len( popup_list() ) )
+endfunction
