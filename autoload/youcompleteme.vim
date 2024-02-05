@@ -19,8 +19,8 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-" NOTE: Noevim reports v:version as 800, which is garbage. For some features
-" that are supporetd by our minimum Vim version, we have to guard them against
+" NOTE: Neovim reports v:version as 800, which is garbage. For some features
+" that are supported by our minimum Vim version, we have to guard them against
 " neovim, which doesn't implement them.
 let s:is_neovim = has( 'nvim' )
 
@@ -150,7 +150,7 @@ function! youcompleteme#Enable()
           \ g:ycm_add_preview_to_completeopt
 
   " Will we be using the preview popup ? That is either the user set it in their
-  " compelteopt or we're going to add it later.
+  " completeopt or we're going to add it later.
   let use_preview_popup =
         \ s:force_preview_popup ||
         \ index( completeopt, 'popup' ) >= 0
@@ -169,7 +169,7 @@ function! youcompleteme#Enable()
     " supported, enable it.
     let s:resolve_completions = s:RESOLVE_ON_DEMAND
   elseif require_resolve
-    " The preview window or info popup is enalbed - request the server
+    " The preview window or info popup is enabled - request the server
     " pre-resolves completion items
     let s:resolve_completions = s:RESOLVE_UP_FRONT
   else
@@ -293,18 +293,18 @@ try:
   # If we're able to resolve completion details asynchronously, set the option
   # which enables this in the server.
   if int( vim.eval( 's:resolve_completions == s:RESOLVE_ON_DEMAND' ) ):
-    # resovle a small number upfront, the rest on demand
+    # resolve a small number upfront, the rest on demand
     default_options = {
       'max_num_candidates_to_detail': 10
     }
   elif int( vim.eval( 's:resolve_completions == s:RESOLVE_NONE' ) ):
-    # don't reasolve any
+    # don't resolve any
     default_options = {
       'max_num_candidates_to_detail': 0
     }
   else:
     # i.e. s:resolve_completions == s:RESOLVE_UP_FRONT
-    # The server will decide - i.e. resovle everything upfront
+    # The server will decide - i.e. resolve everything upfront
     default_options = {}
 
   ycm_state = youcompleteme.YouCompleteMe( default_options )
@@ -816,8 +816,8 @@ function! s:OnFileReadyToParse( ... )
   " We only want to send a new FileReadyToParse event notification if the buffer
   " has changed since the last time we sent one, or if forced.
   if force_parsing || py3eval( "ycm_state.NeedsReparse()" )
-    " We switched buffers or somethuing, so claer.
-    " FIXME: sig hekp should be buffer local?
+    " We switched buffers or something, so clear.
+    " FIXME: sig help should be buffer local?
     call s:ClearSignatureHelp()
     py3 ycm_state.OnFileReadyToParse()
 
@@ -1144,8 +1144,8 @@ function! s:RequestCompletion()
         \ vimsupport.GetBoolValue( 's:force_semantic' ) )
 
   if py3eval( 'ycm_state.CompletionRequestReady()' )
-    " We can't call complete() syncrhounsouly in the TextChangedI/TextChangedP
-    " autocommmands (it's designed to be used async only completion). The result
+    " We can't call complete() synchronously in the TextChangedI/TextChangedP
+    " autocommands (it's designed to be used async only completion). The result
     " (somewhat oddly) is that the completion menu is shown, but ctrl-n doesn't
     " actually select anything.
     " When the request is satisfied synchronously (e.g. the omnicompleter), we
@@ -1201,8 +1201,8 @@ function! s:RequestSemanticCompletion() abort
     py3 ycm_state.SendCompletionRequest( True )
 
     if py3eval( 'ycm_state.CompletionRequestReady()' )
-      " We can't call complete() syncrhounsouly in the TextChangedI/TextChangedP
-      " autocommmands (it's designed to be used async only completion). The
+      " We can't call complete() synchronously in the TextChangedI/TextChangedP
+      " autocommands (it's designed to be used async only completion). The
       " result (somewhat oddly) is that the completion menu is shown, but ctrl-n
       " doesn't actually select anything.  When the request is satisfied
       " synchronously (e.g. the omnicompleter), we must return to the main loop
@@ -1248,7 +1248,7 @@ function! s:PollResolve( item, ... )
 
   " Note we re-use the 'completion' request for resolves. This prevents us
   " sending a completion request and a resolve request at the same time, as
-  " resolve requests re-use the requset data from the last completion request
+  " resolve requests re-use the request data from the last completion request
   " and it must not change.
   " We also re-use the poller, so that any new completion request effectively
   " cancels this poller.
@@ -1504,7 +1504,7 @@ function! s:PollCommands( timer_id ) abort
     if py3eval( 'ycm_state.GetCommandRequest( int( vim.eval( "request_id" ) ) )'
               \ . 'is None' )
       " Possible in case of race conditions and things like RestartServer
-      " But particualrly in the tests
+      " But particularly in the tests
       let result = v:none
     elseif !py3eval( 'ycm_state.GetCommandRequest( '
                    \ . 'int( vim.eval( "request_id" ) ) ).Done()' )
@@ -1681,7 +1681,7 @@ if exists( '*popup_atcursor' )
       call popup_hide( s:cursorhold_popup )
       let s:cursorhold_popup = -1
 
-      " Diable the auto-trigger until the next cursor movement.
+      " Disable the auto-trigger until the next cursor movement.
       call s:DisableAutoHover()
       augroup YCMHover
         autocmd! CursorMoved <buffer>
