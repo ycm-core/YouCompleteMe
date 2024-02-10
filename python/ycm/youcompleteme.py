@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2018 YouCompleteMe contributors
+# Copyright (C) 2011-2024 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -29,6 +29,7 @@ from ycmd import utils
 from ycmd.request_wrap import RequestWrap
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
+from ycm.hierarchy_tree import HierarchyTree
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
@@ -108,6 +109,55 @@ class YouCompleteMe:
     self._SetUpLogging()
     self._SetUpServer()
     self._ycmd_keepalive.Start()
+    self._current_hierarchy = HierarchyTree()
+
+
+  def InitializeCurrentHierarchy( self, items, kind, direction ):
+    return self._current_hierarchy.SetRootNode( items, kind, direction )
+
+
+  def UpdateCurrentHierarchy( self, handle : int ):
+    items = self.ResolveHierarchyItem( handle )
+    self._current_hierarchy.UpdateHierarchy( handle, items )
+    return self._current_hierarchy.HierarchyToLines()
+
+
+  def ResolveHierarchyItem( self, handle : int ):
+    node_data = self._current_hierarchy._nodes[ handle ]._data
+    kind = self._current_hierarchy._kind
+    direction = self._current_hierarchy._direction
+    try:
+      item = node_data[ 'from' ]
+    except KeyError:
+      try:
+        item = node_data[ 'to' ]
+      except KeyError:
+        item = node_data
+
+    return SendCommandRequest(
+      [ f'Resolve{ kind.title() }HierarchyItem', item, direction ],
+      '',
+      self._user_options[ 'goto_buffer_command' ],
+      extra_data = None,
+      skip_post_command_action = True
+    )
+
+
+  def ItemNeedsResolving( self, handle : int ):
+    item = self._current_hierarchy._nodes[ handle ]
+    return item._references is None
+
+
+  def ResetCurrentHierarchy( self ):
+    self._current_hierarchy.Reset()
+
+
+  def JumpToHierarchyItem( self, handle : int ):
+    item = self._current_hierarchy._nodes[ handle ]
+    file, line, column = item.ToLocation()
+    line += 1
+    column += 1
+    vimsupport.JumpToLocation( file, line, column, '', self._user_options[ 'goto_buffer_command' ] )
 
 
   def _SetUpServer( self ):
@@ -419,7 +469,8 @@ class YouCompleteMe:
       final_arguments,
       modifiers,
       self._user_options[ 'goto_buffer_command' ],
-      extra_data )
+      extra_data,
+      'Hierarchy' in arguments[ 0 ] )
 
 
   def GetCommandResponse( self, arguments ):
