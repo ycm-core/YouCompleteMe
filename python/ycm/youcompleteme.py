@@ -112,19 +112,20 @@ class YouCompleteMe:
     self._current_hierarchy = HierarchyTree()
 
 
-  def InitializeCurrentHierarchy( self, items, kind, direction ):
-    return self._current_hierarchy.SetRootNode( items, kind, direction )
+  def InitializeCurrentHierarchy( self, items, kind ):
+    return self._current_hierarchy.SetRootNode( items, kind )
 
 
-  def UpdateCurrentHierarchy( self, handle ):
-    items = self._ResolveHierarchyItem( handle )
-    self._current_hierarchy.UpdateHierarchy( handle, items )
-    return self._current_hierarchy.HierarchyToLines()
+  def UpdateCurrentHierarchy( self, handle : int, direction : str ):
+    items = self._ResolveHierarchyItem( handle, direction )
+    self._current_hierarchy.UpdateHierarchy( handle, items, direction )
+    offset = len( items ) if items is not None and direction == 'up' else 0
+    return self._current_hierarchy.HierarchyToLines(), offset
 
 
-  def _ResolveHierarchyItem( self, handle ):
+  def _ResolveHierarchyItem( self, handle : int, direction : str ):
     return SendCommandRequest(
-      self._current_hierarchy.ResolveArguments( handle ),
+      self._current_hierarchy.ResolveArguments( handle, direction ),
       '',
       self._user_options[ 'goto_buffer_command' ],
       extra_data = None,
@@ -132,8 +133,8 @@ class YouCompleteMe:
     )
 
 
-  def ShouldResolveItem( self, handle ):
-    return self._current_hierarchy.ShouldResolveItem( handle )
+  def ShouldResolveItem( self, handle : int, direction : str ):
+    return self._current_hierarchy.ShouldResolveItem( handle, direction )
 
 
   def ResetCurrentHierarchy( self ):

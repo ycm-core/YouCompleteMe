@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2024 YouCompleteMe contributors
+# Copyright (C) 2024 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -38,82 +38,113 @@ class HierarchyNode:
 
 class HierarchyTree:
   def __init__( self ):
-    self._nodes : List[HierarchyNode] = []
+    self._up_nodes : List[HierarchyNode] = []
+    self._down_nodes : List[HierarchyNode] = []
     self._kind : str = ''
-    self._direction : str = ''
 
-  def SetRootNode( self, items, kind : str, direction : str ):
+  def SetRootNode( self, items, kind : str ):
     if items:
-      self._root_node_indices = list( range( 0, len( items ) ) )
-      self._nodes.append( HierarchyNode( items[ 0 ], 0 ) )
+      assert len( items ) == 1
+      self._root_node_indices = [ 0 ]
+      self._down_nodes.append( HierarchyNode( items[ 0 ], 0 ) )
+      self._up_nodes.append( HierarchyNode( items[ 0 ], 0 ) )
       self._kind = kind
-      self._direction = direction
-      return self.HierarchyToLines( is_root_node = True )
+      return self.HierarchyToLines()
     return []
 
 
-  def UpdateHierarchy( self, handle : int, items ):
-    current_index = handle // 1000000
+  def UpdateHierarchy( self, handle : int, items, direction : str ):
+    current_index = abs( handle ) // 1000000
+    nodes = self._down_nodes if direction == 'down' else self._up_nodes
     if items:
-      self._nodes.extend( [
+      nodes.extend( [
         HierarchyNode( item,
-                       self._nodes[ current_index ]._distance_from_root + 1 )
+                       nodes[ current_index ]._distance_from_root + 1 )
         for item in items ] )
-      self._nodes[ current_index ]._references = list(
-          range( len( self._nodes ) - len( items ),
-                 len( self._nodes ) ) )
+      nodes[ current_index ]._references = list(
+          range( len( nodes ) - len( items ),
+                 len( nodes ) ) )
     else:
-      self._nodes[ current_index ]._references = []
+      nodes[ current_index ]._references = []
 
 
   def Reset( self ):
-    self._nodes = []
+    self._down_nodes = []
+    self._up_nodes = []
+    self._kind = ''
 
 
-  def _HierarchyToLinesHelper( self, refs, is_root_node = False ):
+  def _HierarchyToLinesHelper( self, refs, use_down_nodes ):
     partial_result = []
+    nodes = self._down_nodes if use_down_nodes else self._up_nodes
     for i in refs:
-      next_node = self._nodes[ i ]
+      next_node = nodes[ i ]
       indent = 2 * next_node._distance_from_root
-      can_expand = next_node._references is None
+      if i == 0:
+        can_expand = self._down_nodes[ 0 ]._references is None or self._up_nodes[ 0 ]._references is None
+      else:
+        can_expand = next_node._references is None
       symbol = '+' if can_expand else '-'
       name = next_node._data[ 'name' ]
       kind = next_node._data[ 'kind' ]
-      partial_result.extend( [
-        ( ' ' * indent + symbol + kind + ': ' + name + '\t' +
-            os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
-            str( l[ 'line_num' ] ) + '\t' + l[ 'description' ],
-          i * 1000000 + j )
-        for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
+      if use_down_nodes:
+        partial_result.extend( [
+          ( ' ' * indent + symbol + kind + ': ' + name + '\t' +
+              os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
+              str( l[ 'line_num' ] ) + '\t' + l[ 'description' ],
+            ( i * 1000000 + j ) )
+          for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
+      else:
+        partial_result.extend( [
+          ( ' ' * indent + symbol + kind + ': ' + name + '\t' +
+              os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
+              str( l[ 'line_num' ] ) + '\t' + l[ 'description' ],
+            ( i * 1000000 + j ) * -1 )
+          for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
       if next_node._references:
         partial_result.extend(
-          self._HierarchyToLinesHelper( next_node._references, is_root_node ) )
+          self._HierarchyToLinesHelper( next_node._references, use_down_nodes ) )
     return partial_result
 
-  def HierarchyToLines( self, is_root_node = False ):
-    lines = []
-    for i in self._root_node_indices:
-      lines.extend( self._HierarchyToLinesHelper( [ i ], is_root_node ) )
-    return lines
+  def HierarchyToLines( self ):
+    down_lines = self._HierarchyToLinesHelper( [ 0 ], True )
+    up_lines = self._HierarchyToLinesHelper( [ 0 ], False )
+    up_lines.reverse()
+    return up_lines + down_lines[ 1: ]
 
 
   def JumpToItem( self, handle : int, command ):
-    node_index = handle // 1000000
-    location_index = handle % 1000000
-    node = self._nodes[ node_index ]
+    node_index = abs( handle ) // 1000000
+    location_index = abs( handle ) % 1000000
+    if handle >= 0:
+      node = self._down_nodes[ node_index ]
+    else:
+      node = self._up_nodes[ node_index ]
     file, line, column = node.ToLocation( location_index )
     vimsupport.JumpToLocation( file, line, column, '', command )
 
 
-  def ShouldResolveItem( self, handle : int ):
-    node_index = handle // 1000000
-    return self._nodes[ node_index ]._references is None
+  def ShouldResolveItem( self, handle : int, direction : str ):
+    node_index = abs( handle ) // 1000000
+    if direction == 'down':
+      node = self._down_nodes[ node_index ]
+    else:
+      node = self._up_nodes[ node_index ]
+    return node._references is None
 
 
-  def ResolveArguments( self, handle : int ):
-    node_index = handle // 1000000
+  def ResolveArguments( self, handle : int, direction : str ):
+    node_index = abs( handle ) // 1000000
+    if self._kind == 'call':
+      direction = 'outgoing' if direction == 'up' else 'incoming'
+    else:
+      direction = 'supertypes' if direction == 'up' else 'subtypes'
+    if handle >= 0:
+      node = self._down_nodes[ node_index ]
+    else:
+      node = self._up_nodes[ node_index ]
     return [
       f'Resolve{ self._kind.title() }HierarchyItem',
-      self._nodes[ node_index ]._data,
-      self._direction
+      node._data,
+      direction
     ]

@@ -25,33 +25,39 @@ let s:popup_id = -1
 let s:lines_and_handles = v:none
 let s:select = -1
 let s:kind = ''
-let s:direction = ''
 
-function! youcompleteme#hierarchy#StartRequest( kind, direction )
+function! youcompleteme#hierarchy#StartRequest( kind )
   py3 ycm_state.ResetCurrentHierarchy()
   if a:kind == 'call'
     let lines_and_handles = py3eval(
       \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( ' .
-      \ '[ "CallHierarchy", vim.eval( "a:direction" ) ], "", False, 0, 0 ), ' .
-      \ 'vim.eval( "a:kind" ), vim.eval( "a:direction" ) )' )
+      \ '[ "CallHierarchy" ], "", False, 0, 0 ), ' .
+      \ 'vim.eval( "a:kind" ) )' )
   else
     let lines_and_handles = py3eval( 
       \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( ' .
-      \ '[ "TypeHierarchy", vim.eval( "a:direction" ) ], "", False, 0, 0 ), ' .
-      \ 'vim.eval( "a:kind" ), vim.eval( "a:direction" ) )' )
+      \ '[ "TypeHierarchy" ], "", False, 0, 0 ), ' .
+      \ 'vim.eval( "a:kind" ) )' )
   endif
   if len( lines_and_handles )
     let s:lines_and_handles = lines_and_handles
     let s:kind = a:kind
-    let s:direction = a:direction
     let s:select = 1
     call s:SetupMenu()
   endif
 endfunction
 
 function! s:MenuFilter( winid, key )
+  if a:key == "\<S-Tab>"
+    if s:lines_and_handles[ s:select - 1 ][ 1 ] <= 0 " TODO: switching root not impl
+      call popup_close( s:popup_id, [ s:select - 1, 'resolve_up' ] )
+    endif
+    return 1
+  endif
   if a:key == "\<Tab>"
-    call popup_close( s:popup_id, [ s:select - 1, 'resolve' ] )
+    if s:lines_and_handles[ s:select - 1 ][ 1 ] >= 0 " TODO: switching root not impl
+      call popup_close( s:popup_id, [ s:select - 1, 'resolve_down' ] )
+    endif
     return 1
   endif
   if a:key == "\<Esc>"
@@ -86,8 +92,10 @@ endfunction
 function! s:MenuCallback( winid, result )
   let operation = a:result[ 1 ]
   let selection = a:result[ 0 ]
-  if operation == 'resolve'
-    call s:ResolveItem( selection )
+  if operation == 'resolve_down'
+    call s:ResolveItem( selection, 'down' )
+  elseif operation == 'resolve_up'
+    call s:ResolveItem( selection, 'up' )
   else
     if operation == 'jump'
       let handle = s:lines_and_handles[ selection ][ 1 ]
@@ -95,7 +103,6 @@ function! s:MenuCallback( winid, result )
     endif
     py3 ycm_state.ResetCurrentHierarchy()
     let s:kind = ''
-    let s:direction = ''
     let s:select = 1
   endif
 endfunction
@@ -112,13 +119,16 @@ function! s:SetupMenu()
                   \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
 endfunction
 
-function! s:ResolveItem( choice )
+function! s:ResolveItem( choice, direction )
   let handle = s:lines_and_handles[ a:choice ][ 1 ]
   if py3eval(
-      \ 'ycm_state.ShouldResolveItem( vimsupport.GetIntValue( "handle" ) )' )
-    let s:lines_and_handles = py3eval(
+      \ 'ycm_state.ShouldResolveItem( vimsupport.GetIntValue( "handle" ), vim.eval( "a:direction" ) )' )
+    let lines_and_handles_with_offset = py3eval(
         \ 'ycm_state.UpdateCurrentHierarchy( ' .
-        \ 'vimsupport.GetIntValue( "handle" ) )' )
+        \ 'vimsupport.GetIntValue( "handle" ), ' .
+        \ 'vim.eval( "a:direction" ) )' )
+    let s:select += lines_and_handles_with_offset[ 1 ]
+    let s:lines_and_handles = lines_and_handles_with_offset[ 0 ]
   endif
   call s:SetupMenu()
 endfunction
