@@ -30,9 +30,15 @@ let s:direction = ''
 function! youcompleteme#hierarchy#StartRequest( kind, direction )
   py3 ycm_state.ResetCurrentHierarchy()
   if a:kind == 'call'
-    let lines_and_handles = py3eval( 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( [ "CallHierarchy", vim.eval( "a:direction" ) ], "", False, 0, 0 ), vim.eval( "a:kind" ), vim.eval( "a:direction" ) )' )
+    let lines_and_handles = py3eval(
+      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( ' .
+      \ '[ "CallHierarchy", vim.eval( "a:direction" ) ], "", False, 0, 0 ), ' .
+      \ 'vim.eval( "a:kind" ), vim.eval( "a:direction" ) )' )
   else
-    let lines_and_handles = py3eval( 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( [ "TypeHierarchy", vim.eval( "a:direction" ) ], "", False, 0, 0 ), vim.eval( "a:kind" ), vim.eval( "a:direction" ) )' )
+    let lines_and_handles = py3eval( 
+      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( ' .
+      \ '[ "TypeHierarchy", vim.eval( "a:direction" ) ], "", False, 0, 0 ), ' .
+      \ 'vim.eval( "a:kind" ), vim.eval( "a:direction" ) )' )
   endif
   if len( lines_and_handles )
     let s:lines_and_handles = lines_and_handles
@@ -61,7 +67,8 @@ function! s:MenuFilter( winid, key )
     if s:select < 1
       let s:select = 1
     endif
-    call win_execute( s:popup_id, 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+    call win_execute( s:popup_id,
+                    \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
     return 1
   endif
   if a:key == "\<Down>"
@@ -69,19 +76,21 @@ function! s:MenuFilter( winid, key )
     if s:select > len( s:lines_and_handles )
       let s:select = len( s:lines_and_handles )
     endif
-    call win_execute( s:popup_id, 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+    call win_execute( s:popup_id,
+                    \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
     return 1
   endif
   return 0
 endfunction
 
 function! s:MenuCallback( winid, result )
-  let operation = result[ 1 ]
+  let operation = a:result[ 1 ]
+  let selection = a:result[ 0 ]
   if operation == 'resolve'
-    call s:ResolveItem( a:result )
+    call s:ResolveItem( selection )
   else
     if operation == 'jump'
-      let handle = s:lines_and_handles[ a:result ][ 1 ]
+      let handle = s:lines_and_handles[ selection ][ 1 ]
       py3 ycm_state.JumpToHierarchyItem( vimsupport.GetIntValue( "handle" ) )
     endif
     py3 ycm_state.ResetCurrentHierarchy()
@@ -96,14 +105,20 @@ function! s:SetupMenu()
   for line_and_item in s:lines_and_handles
     call add( menu_lines, line_and_item[ 0 ] )
   endfor
-  let s:popup_id = popup_menu( menu_lines, #{ filter: funcref( 's:MenuFilter' ), callback: funcref( 's:MenuCallback' ) } )
-  call win_execute( s:popup_id, 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+  let s:popup_id = popup_menu( menu_lines, #{
+    \ filter: funcref( 's:MenuFilter' ),
+    \ callback: funcref( 's:MenuCallback' ) } )
+  call win_execute( s:popup_id,
+                  \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
 endfunction
 
 function! s:ResolveItem( choice )
   let handle = s:lines_and_handles[ a:choice ][ 1 ]
-  if py3eval( 'ycm_state.ItemNeedsResolving( vimsupport.GetIntValue( "handle" ) )' )
-    let s:lines_and_handles = py3eval( 'ycm_state.UpdateCurrentHierarchy( vimsupport.GetIntValue( "handle" ) )' )
+  if py3eval(
+      \ 'ycm_state.ShouldResolveItem( vimsupport.GetIntValue( "handle" ) )' )
+    let s:lines_and_handles = py3eval(
+        \ 'ycm_state.UpdateCurrentHierarchy( ' .
+        \ 'vimsupport.GetIntValue( "handle" ) )' )
   endif
   call s:SetupMenu()
 endfunction
