@@ -49,23 +49,21 @@ endfunction
 
 function! s:MenuFilter( winid, key )
   if a:key == "\<S-Tab>"
-    if s:lines_and_handles[ s:select - 1 ][ 1 ] <= 0 " TODO: switching root not impl
-      call popup_close( s:popup_id, [ s:select - 1, 'resolve_up' ] )
-    endif
+    let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] > 0
+    call popup_close( s:popup_id, [ s:select - 1, 'resolve_up', will_change_root ] )
     return 1
   endif
   if a:key == "\<Tab>"
-    if s:lines_and_handles[ s:select - 1 ][ 1 ] >= 0 " TODO: switching root not impl
-      call popup_close( s:popup_id, [ s:select - 1, 'resolve_down' ] )
-    endif
+    let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] < 0
+    call popup_close( s:popup_id, [ s:select - 1, 'resolve_down', will_change_root ] )
     return 1
   endif
   if a:key == "\<Esc>"
-    call popup_close( s:popup_id, [ s:select - 1, 'cancel' ] )
+    call popup_close( s:popup_id, [ s:select - 1, 'cancel', v:none ] )
     return 1
   endif
   if a:key == "\<CR>"
-    call popup_close( s:popup_id, [ s:select - 1, 'jump' ] )
+    call popup_close( s:popup_id, [ s:select - 1, 'jump', v:none ] )
     return 1
   endif
   if a:key == "\<Up>"
@@ -93,9 +91,9 @@ function! s:MenuCallback( winid, result )
   let operation = a:result[ 1 ]
   let selection = a:result[ 0 ]
   if operation == 'resolve_down'
-    call s:ResolveItem( selection, 'down' )
+    call s:ResolveItem( selection, 'down', a:result[ 2 ] )
   elseif operation == 'resolve_up'
-    call s:ResolveItem( selection, 'up' )
+    call s:ResolveItem( selection, 'up', a:result[ 2 ] )
   else
     if operation == 'jump'
       let handle = s:lines_and_handles[ selection ][ 1 ]
@@ -119,7 +117,7 @@ function! s:SetupMenu()
                   \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
 endfunction
 
-function! s:ResolveItem( choice, direction )
+function! s:ResolveItem( choice, direction, will_change_root )
   let handle = s:lines_and_handles[ a:choice ][ 1 ]
   if py3eval(
       \ 'ycm_state.ShouldResolveItem( vimsupport.GetIntValue( "handle" ), vim.eval( "a:direction" ) )' )
@@ -127,8 +125,12 @@ function! s:ResolveItem( choice, direction )
         \ 'ycm_state.UpdateCurrentHierarchy( ' .
         \ 'vimsupport.GetIntValue( "handle" ), ' .
         \ 'vim.eval( "a:direction" ) )' )
-    let s:select += lines_and_handles_with_offset[ 1 ]
     let s:lines_and_handles = lines_and_handles_with_offset[ 0 ]
+    if a:will_change_root
+      let s:select = 1 + indexof( s:lines_and_handles, { i, v -> v[0][0] =~ "[-+]" } )
+    else
+      let s:select += lines_and_handles_with_offset[ 1 ]
+    endif
   endif
   call s:SetupMenu()
 endfunction

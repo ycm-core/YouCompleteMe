@@ -55,17 +55,27 @@ class HierarchyTree:
 
   def UpdateHierarchy( self, handle : int, items, direction : str ):
     current_index = abs( handle ) // 1000000
-    nodes = self._down_nodes if direction == 'down' else self._up_nodes
-    if items:
-      nodes.extend( [
-        HierarchyNode( item,
-                       nodes[ current_index ]._distance_from_root + 1 )
-        for item in items ] )
-      nodes[ current_index ]._references = list(
-          range( len( nodes ) - len( items ),
-                 len( nodes ) ) )
+    if ( ( handle >= 0 and direction == 'down' ) or
+         ( handle <= 0 and direction == 'up' ) ):
+      nodes = self._down_nodes if direction == 'down' else self._up_nodes
+      if items:
+        nodes.extend( [
+          HierarchyNode( item,
+                         nodes[ current_index ]._distance_from_root + 1 )
+          for item in items ] )
+        nodes[ current_index ]._references = list(
+            range( len( nodes ) - len( items ), len( nodes ) ) )
+      else:
+        nodes[ current_index ]._references = []
     else:
-      nodes[ current_index ]._references = []
+      if direction == 'up':
+        current_node = self._down_nodes[ current_index ]
+      else:
+        current_node = self._up_nodes[ current_index ]
+      old_kind = self._kind
+      self.Reset()
+      self.SetRootNode( [ current_node._data ], old_kind )
+      self.UpdateHierarchy( 0, items, direction )
 
 
   def Reset( self ):
@@ -81,7 +91,8 @@ class HierarchyTree:
       next_node = nodes[ i ]
       indent = 2 * next_node._distance_from_root
       if i == 0:
-        can_expand = self._down_nodes[ 0 ]._references is None or self._up_nodes[ 0 ]._references is None
+        can_expand = ( self._down_nodes[ 0 ]._references is None or
+                       self._up_nodes[ 0 ]._references is None )
       else:
         can_expand = next_node._references is None
       symbol = '+' if can_expand else '-'
@@ -89,21 +100,22 @@ class HierarchyTree:
       kind = next_node._data[ 'kind' ]
       if use_down_nodes:
         partial_result.extend( [
-          ( ' ' * indent + symbol + kind + ': ' + name + '\t' +
+          ( ' ' * indent + symbol + kind + ': ' + name + 3 * '\t' +
               os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
-              str( l[ 'line_num' ] ) + '\t' + l[ 'description' ],
+              str( l[ 'line_num' ] ) + 3 * '\t' + l[ 'description' ],
             ( i * 1000000 + j ) )
           for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
       else:
         partial_result.extend( [
-          ( ' ' * indent + symbol + kind + ': ' + name + '\t' +
+          ( ' ' * indent + symbol + kind + ': ' + name + 3 * '\t' +
               os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
-              str( l[ 'line_num' ] ) + '\t' + l[ 'description' ],
+              str( l[ 'line_num' ] ) + 3 * '\t' + l[ 'description' ],
             ( i * 1000000 + j ) * -1 )
           for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
       if next_node._references:
         partial_result.extend(
-          self._HierarchyToLinesHelper( next_node._references, use_down_nodes ) )
+          self._HierarchyToLinesHelper(
+            next_node._references, use_down_nodes ) )
     return partial_result
 
   def HierarchyToLines( self ):
@@ -126,11 +138,14 @@ class HierarchyTree:
 
   def ShouldResolveItem( self, handle : int, direction : str ):
     node_index = abs( handle ) // 1000000
-    if direction == 'down':
-      node = self._down_nodes[ node_index ]
-    else:
-      node = self._up_nodes[ node_index ]
-    return node._references is None
+    if ( ( handle >= 0 and direction == 'down' ) or
+         ( handle <= 0 and direction == 'up' ) ):
+      if direction == 'down':
+        node = self._down_nodes[ node_index ]
+      else:
+        node = self._up_nodes[ node_index ]
+      return node._references is None
+    return True
 
 
   def ResolveArguments( self, handle : int, direction : str ):
