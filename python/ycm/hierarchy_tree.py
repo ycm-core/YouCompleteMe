@@ -22,7 +22,7 @@ import os
 
 class HierarchyNode:
   def __init__( self, data, distance : int ):
-    self._references : Optional[List[int]] = None
+    self._references : Optional[ List[ int ] ] = None
     self._data = data
     self._distance_from_root = distance
 
@@ -38,8 +38,8 @@ class HierarchyNode:
 
 class HierarchyTree:
   def __init__( self ):
-    self._up_nodes : List[HierarchyNode] = []
-    self._down_nodes : List[HierarchyNode] = []
+    self._up_nodes : List[ HierarchyNode ] = []
+    self._down_nodes : List[ HierarchyNode ] = []
     self._kind : str = ''
 
   def SetRootNode( self, items, kind : str ):
