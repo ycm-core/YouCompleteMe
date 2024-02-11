@@ -116,26 +116,15 @@ class YouCompleteMe:
     return self._current_hierarchy.SetRootNode( items, kind, direction )
 
 
-  def UpdateCurrentHierarchy( self, handle : int ):
-    items = self.ResolveHierarchyItem( handle )
+  def UpdateCurrentHierarchy( self, handle ):
+    items = self._ResolveHierarchyItem( handle )
     self._current_hierarchy.UpdateHierarchy( handle, items )
     return self._current_hierarchy.HierarchyToLines()
 
 
-  def ResolveHierarchyItem( self, handle : int ):
-    node_data = self._current_hierarchy._nodes[ handle ]._data
-    kind = self._current_hierarchy._kind
-    direction = self._current_hierarchy._direction
-    try:
-      item = node_data[ 'from' ]
-    except KeyError:
-      try:
-        item = node_data[ 'to' ]
-      except KeyError:
-        item = node_data
-
+  def _ResolveHierarchyItem( self, handle ):
     return SendCommandRequest(
-      [ f'Resolve{ kind.title() }HierarchyItem', item, direction ],
+      self._current_hierarchy.ResolveArguments( handle ),
       '',
       self._user_options[ 'goto_buffer_command' ],
       extra_data = None,
@@ -143,21 +132,18 @@ class YouCompleteMe:
     )
 
 
-  def ItemNeedsResolving( self, handle : int ):
-    item = self._current_hierarchy._nodes[ handle ]
-    return item._references is None
+  def ShouldResolveItem( self, handle ):
+    return self._current_hierarchy.ShouldResolveItem( handle )
 
 
   def ResetCurrentHierarchy( self ):
     self._current_hierarchy.Reset()
 
 
-  def JumpToHierarchyItem( self, handle : int ):
-    item = self._current_hierarchy._nodes[ handle ]
-    file, line, column = item.ToLocation()
-    line += 1
-    column += 1
-    vimsupport.JumpToLocation( file, line, column, '', self._user_options[ 'goto_buffer_command' ] )
+  def JumpToHierarchyItem( self, handle ):
+    self._current_hierarchy.JumpToItem(
+        handle,
+        self._user_options[ 'goto_buffer_command' ] )
 
 
   def _SetUpServer( self ):
