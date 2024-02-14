@@ -1763,6 +1763,11 @@ endfunction
 silent! nnoremap <silent> <plug>(YCMToggleInlayHints)
       \ <cmd>call <SID>ToggleInlayHints()<CR>
 
+silent! nnoremap <silent> <plug>(YCMTypeHierarchy)
+      \ <cmd>call youcompleteme#hierarchy#StartRequest( 'type' )
+silent! nnoremap <silent> <plug>(YCMCallHierarchy)
+      \ <cmd>call youcompleteme#hierarchy#StartRequest( 'call' )
+
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
 unlet s:save_cpo

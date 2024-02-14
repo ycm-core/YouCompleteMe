@@ -218,12 +218,14 @@ def SendCommandRequestAsync( arguments, extra_data = None, silent = True ):
 def SendCommandRequest( arguments,
                         modifiers,
                         buffer_command = DEFAULT_BUFFER_COMMAND,
-                        extra_data = None ):
+                        extra_data = None,
+                        skip_post_command_action = False ):
   request = SendCommandRequestAsync( arguments,
                                      extra_data = extra_data,
                                      silent = False )
   # Block here to get the response
-  request.RunPostCommandActionsIfNeeded( modifiers, buffer_command )
+  if not skip_post_command_action:
+    request.RunPostCommandActionsIfNeeded( modifiers, buffer_command )
   return request.Response()
 
 
