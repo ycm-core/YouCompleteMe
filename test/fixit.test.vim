@@ -24,7 +24,7 @@ function! Test_Ranged_Fixit_Works()
 
   function! SelectEntry( id ) closure
     redraw
-    call test_feedinput( "3\<CR>" )
+    call test_feedinput( "4\<CR>" )
   endfunction
 
   call timer_start( 5000, funcref( 'SelectEntry' ) )
