@@ -2678,7 +2678,7 @@ number like `99`.
 When `g:ycm_auto_trigger` is `0`, YCM sets the `completefunc`, so that you can
 manually trigger normal completion using `C-x C-u`.
 
-If you want to map something else to trigger completion, such as `C-d``,
+If you want to map something else to trigger completion, such as `C-d`,
 then you can map it to `<plug>(YCMComplete)`. For example:
 
 ```viml
