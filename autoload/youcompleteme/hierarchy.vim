@@ -23,6 +23,9 @@ scriptencoding utf-8
 
 let s:popup_id = -1
 let s:lines_and_handles = v:none
+" 1-based index of the selected item in the popup
+" -1 means none set
+"  0 means nothing, (Invalid)
 let s:select = -1
 let s:kind = ''
 
@@ -54,6 +57,8 @@ endfunction
 
 function! s:MenuFilter( winid, key )
   if a:key == "\<S-Tab>"
+    " ROot changes if we're showing super-tree of a sub-tree of the root
+    " (indeicated by the handle being positive)
     let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] > 0
     call popup_close(
           \ s:popup_id,
@@ -61,6 +66,8 @@ function! s:MenuFilter( winid, key )
     return 1
   endif
   if a:key == "\<Tab>"
+    " Root changes if we're showing sub-tree of a super-tree of the root
+    " (indeicated by the handle being negative)
     let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] < 0
     call popup_close(
           \ s:popup_id,
@@ -119,14 +126,32 @@ function! s:MenuCallback( winid, result )
 endfunction
 
 function! s:SetUpMenu()
-  let menu_lines = []
-  for line_and_item in s:lines_and_handles
-    call add( menu_lines, line_and_item[ 0 ] )
-  endfor
-  let s:popup_id = popup_menu( menu_lines, #{
+  let s:popup_id = popup_menu( [], #{
     \   filter: funcref( 's:MenuFilter' ),
-    \   callback: funcref( 's:MenuCallback' )
+    \   callback: funcref( 's:MenuCallback' ),
+    \   wrap: 0,
+    \   minwidth: &columns * 90/100,
+    \   maxwidth: &columns * 90/100,
+    \   maxheight: &lines * 75/100,
+    \   scrollbar: 1,
+    \   padding: [ 0, 0, 0, 0 ],
     \ } )
+  let menu_lines = []
+  let popup_width = popup_getpos( s:popup_id ).core_width
+  let tabstop = popup_width / 3
+  for [ item, handle ] in s:lines_and_handles
+    let name = repeat( ' ', item.indent ) .. item.icon .. item.symbol
+    " TODO: Explain (understand) why it's -2 not -1 for the space (padding?)
+    let line = name[ : tabstop -2 ]
+          \ . "\t"
+          \ .. item.filepath[ : tabstop -2 ]
+          \ . "\t"
+          \ .. item.description[ : tabstop - 2 ]
+    call add( menu_lines, line )
+  endfor
+  call popup_settext( s:popup_id, menu_lines )
+  call win_execute( s:popup_id,
+                  \ 'setlocal tabstop=' . tabstop )
   call win_execute( s:popup_id,
                   \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
 endfunction
@@ -141,8 +166,13 @@ function! s:ResolveItem( choice, direction, will_change_root )
         \ 'vim.eval( "a:direction" ) )' )
     let s:lines_and_handles = lines_and_handles_with_offset[ 0 ]
     if a:will_change_root
+      " When re-rooting the tree, put the cursor on the new "root" item, as this
+      " helps with orientation. This behaviour is consistent with an expansion
+      " where we _don't_ re-root the tree, so feels more natural than anything
+      " else.
+      " The new root is the element with indent of 0.
       let s:select = 1 + indexof( s:lines_and_handles,
-            \                     { i, v -> v[0][0] =~ "[-+]" } )
+            \                     { i, v -> v[0].indent == 0 } )
     else
       let s:select += lines_and_handles_with_offset[ 1 ]
     endif
