@@ -102,14 +102,14 @@ class HierarchyTree:
         partial_result.extend( [
           ( ' ' * indent + symbol + kind + ': ' + name + 3 * '\t' +
               os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
-              str( l[ 'line_num' ] ) + 3 * '\t' + l[ 'description' ],
+              str( l[ 'line_num' ] ) + 3 * '\t' + l.get( 'description', '' ),
             ( i * 1000000 + j ) )
           for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
       else:
         partial_result.extend( [
           ( ' ' * indent + symbol + kind + ': ' + name + 3 * '\t' +
               os.path.split( l[ 'filepath' ] )[ 1 ] + ':' +
-              str( l[ 'line_num' ] ) + 3 * '\t' + l[ 'description' ],
+              str( l[ 'line_num' ] ) + 3 * '\t' + l.get( 'description', '' ),
             ( i * 1000000 + j ) * -1 )
           for j, l in enumerate( next_node._data[ 'locations' ] ) ] )
       if next_node._references:
