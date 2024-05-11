@@ -35,6 +35,16 @@ class HierarchyNode:
     return file, line, column
 
 
+MAX_HANDLES_PER_INDEX = 1000000
+
+def handle_to_index( handle : int ):
+  return abs( handle ) // MAX_HANDLES_PER_INDEX
+
+def handle_to_location_index( handle : int ):
+  return abs( handle ) % MAX_HANDLES_PER_INDEX
+
+def make_handle( index : int, location_index : int ):
+  return index * MAX_HANDLES_PER_INDEX + location_index
 
 class HierarchyTree:
   def __init__( self ):
@@ -54,7 +64,7 @@ class HierarchyTree:
 
 
   def UpdateHierarchy( self, handle : int, items, direction : str ):
-    current_index = abs( handle ) // 1000000
+    current_index = handle_to_index( handle )
     if ( ( handle >= 0 and direction == 'down' ) or
          ( handle <= 0 and direction == 'up' ) ):
       nodes = self._down_nodes if direction == 'down' else self._up_nodes
@@ -87,10 +97,10 @@ class HierarchyTree:
   def _HierarchyToLinesHelper( self, refs, use_down_nodes ):
     partial_result = []
     nodes = self._down_nodes if use_down_nodes else self._up_nodes
-    for i in refs:
-      next_node = nodes[ i ]
+    for index in refs:
+      next_node = nodes[ index ]
       indent = 2 * next_node._distance_from_root
-      if i == 0:
+      if index == 0:
         can_expand = ( self._down_nodes[ 0 ]._references is None or
                        self._up_nodes[ 0 ]._references is None )
       else:
@@ -108,9 +118,9 @@ class HierarchyTree:
               'filepath': os.path.split( l[ 'filepath' ] )[ 1 ] + ':' + str( l[ 'line_num' ] ),
               'description': l.get( 'description', '' ),
             },
-            i * 1000000 + j
+            make_handle( index, location_index )
           )
-          for j, l in enumerate( next_node._data[ 'locations' ] )
+          for location_index, l in enumerate( next_node._data[ 'locations' ] )
         ] )
       else:
         partial_result.extend( [
@@ -122,9 +132,9 @@ class HierarchyTree:
               'filepath': os.path.split( l[ 'filepath' ] )[ 1 ] + ':' + str( l[ 'line_num' ] ),
               'description': l.get( 'description', '' ),
             },
-            ( i * 1000000 + j ) * -1
+            make_handle( index, location_index ) * -1
           )
-          for j, l in enumerate( next_node._data[ 'locations' ] )
+          for location_index, l in enumerate( next_node._data[ 'locations' ] )
         ] )
       if next_node._references:
         partial_result.extend(
@@ -140,8 +150,8 @@ class HierarchyTree:
 
 
   def JumpToItem( self, handle : int, command ):
-    node_index = abs( handle ) // 1000000
-    location_index = abs( handle ) % 1000000
+    node_index = handle_to_index( handle )
+    location_index = handle_to_location_index( handle )
     if handle >= 0:
       node = self._down_nodes[ node_index ]
     else:
@@ -151,7 +161,7 @@ class HierarchyTree:
 
 
   def ShouldResolveItem( self, handle : int, direction : str ):
-    node_index = abs( handle ) // 1000000
+    node_index = handle_to_index( handle )
     if ( ( handle >= 0 and direction == 'down' ) or
          ( handle <= 0 and direction == 'up' ) ):
       if direction == 'down':
@@ -163,7 +173,7 @@ class HierarchyTree:
 
 
   def ResolveArguments( self, handle : int, direction : str ):
-    node_index = abs( handle ) // 1000000
+    node_index = handle_to_index( handle )
     if self._kind == 'call':
       direction = 'outgoing' if direction == 'up' else 'incoming'
     else:
