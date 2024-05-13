@@ -157,6 +157,9 @@ function! s:SetUpMenu()
           \ .. item.icon
           \ .. item.kind
           \ .. ': ' .. item.symbol
+    " -2 because:
+    "   0-based index
+    "   1 for the tab character
     let trunc_name = name[ : tabstop - 2 ]
     let props = []
     let name_pfx_len = len( indent ) + len( item.icon ) + len( item.kind ) + 2
@@ -193,7 +196,6 @@ function! s:SetUpMenu()
 
     let trunc_desc = item.description[ : tabstop - 2 ]
 
-    " TODO: Explain (understand) why it's -2 not -1 for the space (padding?)
     let line = trunc_name
           \ . "\t"
           \ .. trunc_path
