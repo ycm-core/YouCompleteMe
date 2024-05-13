@@ -35,6 +35,7 @@ let s:ingored_keys = [
       \ ]
 
 function! youcompleteme#hierarchy#StartRequest( kind )
+  call youcompleteme#symbol#InitSymbolProperties()
   py3 ycm_state.ResetCurrentHierarchy()
   if a:kind == 'call'
     let lines_and_handles = py3eval(
@@ -85,6 +86,8 @@ function! s:MenuFilter( winid, key )
     endif
     call win_execute( s:popup_id,
                     \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+    call win_execute( s:popup_id,
+                    \ 'set cursorline cursorlineopt&' )
     return 1
   endif
   if a:key == "\<Down>" || a:key == "\<C-n>" || a:key == "\<C-j>" || a:key == "j"
@@ -94,6 +97,8 @@ function! s:MenuFilter( winid, key )
     endif
     call win_execute( s:popup_id,
                     \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+    call win_execute( s:popup_id,
+                    \ 'set cursorline cursorlineopt&' )
     return 1
   endif
   if index( s:ingored_keys, a:key ) >= 0
@@ -126,7 +131,7 @@ function! s:MenuCallback( winid, result )
 endfunction
 
 function! s:SetUpMenu()
-  let s:popup_id = popup_menu( [], #{
+  let opts = #{
     \   filter: funcref( 's:MenuFilter' ),
     \   callback: funcref( 's:MenuCallback' ),
     \   wrap: 0,
@@ -135,25 +140,74 @@ function! s:SetUpMenu()
     \   maxheight: &lines * 75/100,
     \   scrollbar: 1,
     \   padding: [ 0, 0, 0, 0 ],
-    \ } )
+    \   highlight: 'Normal',
+    \   border: [],
+    \ }
+  if &ambiwidth ==# 'single' && &encoding ==? 'utf-8'
+    let opts[ 'borderchars' ] = [ '─', '│', '─', '│', '╭', '╮', '┛', '╰' ]
+  endif
+
+  let s:popup_id = popup_create( [], opts )
   let menu_lines = []
   let popup_width = popup_getpos( s:popup_id ).core_width
   let tabstop = popup_width / 3
   for [ item, handle ] in s:lines_and_handles
-    let name = repeat( ' ', item.indent ) .. item.icon .. item.symbol
+    let indent = repeat( ' ', item.indent )
+    let name = indent
+          \ .. item.icon
+          \ .. item.kind
+          \ .. ': ' .. item.symbol
+    let trunc_name = name[ : tabstop - 2 ]
+    let props = []
+    let name_pfx_len = len( indent ) + len( item.icon ) + len( item.kind ) + 2
+    if len( trunc_name ) > name_pfx_len
+      let props += [
+          \ {
+          \   'col': name_pfx_len + 1,
+          \   'length': len( trunc_name ) - name_pfx_len,
+          \   'type': youcompleteme#symbol#GetPropForSymbolKind( item.kind ),
+          \ }
+      \ ]
+    endif
+
+    let file_name = item.filepath .. ':' .. item.line_num
+    let trunc_path = file_name[ : tabstop - 2 ]
+    if len(trunc_path) > 0
+      let props += [
+            \ {
+            \   'col': len(trunc_name) + 2,
+            \   'length': min( [ len(trunc_path), len( item.filepath ) ] ),
+            \   'type': 'YCM-symbol-file'
+            \ }
+          \ ]
+      if len(trunc_path) > len(item.filepath) + 1
+        let props += [
+              \ {
+              \   'col': len(trunc_name) + 2 + len(item.filepath) + 1,
+              \   'length': min( [ len(trunc_path), len( item.line_num ) ] ),
+              \   'type': 'YCM-symbol-line-num'
+              \ }
+            \ ]
+      endif
+    endif
+
+    let trunc_desc = item.description[ : tabstop - 2 ]
+
     " TODO: Explain (understand) why it's -2 not -1 for the space (padding?)
-    let line = name[ : tabstop -2 ]
+    let line = trunc_name
           \ . "\t"
-          \ .. item.filepath[ : tabstop -2 ]
+          \ .. trunc_path
           \ . "\t"
-          \ .. item.description[ : tabstop - 2 ]
-    call add( menu_lines, line )
+          \ .. trunc_desc
+    call add( menu_lines, { 'text': line, 'props': props } )
   endfor
-  call popup_settext( s:popup_id, menu_lines )
   call win_execute( s:popup_id,
                   \ 'setlocal tabstop=' . tabstop )
+  call popup_settext( s:popup_id, menu_lines )
   call win_execute( s:popup_id,
                   \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+  call win_execute( s:popup_id,
+                  \ 'set cursorline cursorlineopt&' )
 endfunction
 
 function! s:ResolveItem( choice, direction, will_change_root )

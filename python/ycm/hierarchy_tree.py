@@ -114,8 +114,10 @@ class HierarchyTree:
             {
               'indent': indent,
               'icon': symbol,
-              'symbol': kind + ': ' + name,
-              'filepath': os.path.split( l[ 'filepath' ] )[ 1 ] + ':' + str( l[ 'line_num' ] ),
+              'symbol': name,
+              'kind': kind,
+              'filepath': os.path.split( l[ 'filepath' ] )[ 1 ],
+              'line_num': str( l[ 'line_num' ] ),
               'description': l.get( 'description', '' ),
             },
             make_handle( index, location_index )
@@ -128,8 +130,10 @@ class HierarchyTree:
             {
               'indent': indent,
               'icon': symbol,
-              'symbol': kind + ': ' + name,
-              'filepath': os.path.split( l[ 'filepath' ] )[ 1 ] + ':' + str( l[ 'line_num' ] ),
+              'symbol': name,
+              'kind': kind,
+              'filepath': os.path.split( l[ 'filepath' ] )[ 1 ],
+              'line_num': str( l[ 'line_num' ] ),
               'description': l.get( 'description', '' ),
             },
             make_handle( index, location_index ) * -1
