@@ -118,7 +118,7 @@ class HierarchyTree:
               'kind': kind,
               'filepath': os.path.split( l[ 'filepath' ] )[ 1 ],
               'line_num': str( l[ 'line_num' ] ),
-              'description': l.get( 'description', '' ),
+              'description': l.get( 'description', '' ).strip(),
             },
             make_handle( index, location_index )
           )
@@ -134,7 +134,7 @@ class HierarchyTree:
               'kind': kind,
               'filepath': os.path.split( l[ 'filepath' ] )[ 1 ],
               'line_num': str( l[ 'line_num' ] ),
-              'description': l.get( 'description', '' ),
+              'description': l.get( 'description', '' ).strip(),
             },
             make_handle( index, location_index ) * -1
           )
