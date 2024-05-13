@@ -308,6 +308,7 @@ def _BuildUri( handler ):
 
 
 def MakeServerException( data ):
+  _logger.debug( 'Server exception: %s', data )
   if data[ 'exception' ][ 'TYPE' ] == UnknownExtraConf.__name__:
     return UnknownExtraConf( data[ 'exception' ][ 'extra_conf_file' ] )
 
