@@ -144,7 +144,7 @@ function! s:SetUpMenu()
     \   border: [],
     \ }
   if &ambiwidth ==# 'single' && &encoding ==? 'utf-8'
-    let opts[ 'borderchars' ] = [ '─', '│', '─', '│', '╭', '╮', '┛', '╰' ]
+    let opts[ 'borderchars' ] = [ '─', '│', '─', '│', '╭', '╮', '╯', '╰' ]
   endif
 
   let s:popup_id = popup_create( [], opts )
