@@ -47,7 +47,8 @@ class CommandTest( TestCase ):
               'extra_conf_data': has_entries( {
                 'tempname()': '_TEMP_FILE_'
               } ),
-            } )
+            } ),
+            False
           )
         )
 
@@ -71,7 +72,8 @@ class CommandTest( TestCase ):
                 'tab_size': 2,
                 'insert_spaces': True,
               } )
-            } )
+            } ),
+            False
           )
         )
 
@@ -102,7 +104,8 @@ class CommandTest( TestCase ):
                 'column_num': 12
               }
             }
-          }
+          },
+          False
         )
 
 
@@ -135,7 +138,8 @@ class CommandTest( TestCase ):
                 'column_num': 9
               }
             }
-          }
+          },
+          False
         )
 
 
@@ -153,7 +157,8 @@ class CommandTest( TestCase ):
             'tab_size': 2,
             'insert_spaces': True
           },
-        }
+        },
+        False
       )
 
       with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:

@@ -37,14 +37,18 @@ class HierarchyNode:
 
 MAX_HANDLES_PER_INDEX = 1000000
 
+
 def handle_to_index( handle : int ):
   return abs( handle ) // MAX_HANDLES_PER_INDEX
+
 
 def handle_to_location_index( handle : int ):
   return abs( handle ) % MAX_HANDLES_PER_INDEX
 
+
 def make_handle( index : int, location_index : int ):
   return index * MAX_HANDLES_PER_INDEX + location_index
+
 
 class HierarchyTree:
   def __init__( self ):
