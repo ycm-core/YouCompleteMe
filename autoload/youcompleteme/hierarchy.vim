@@ -22,7 +22,7 @@ set cpoptions&vim
 scriptencoding utf-8
 
 let s:popup_id = -1
-let s:lines_and_handles = v:none
+let s:lines_and_handles = v:null
 " 1-based index of the selected item in the popup
 " -1 means none set
 "  0 means nothing, (Invalid)
@@ -35,6 +35,11 @@ let s:ingored_keys = [
       \ ]
 
 function! youcompleteme#hierarchy#StartRequest( kind )
+  if !py3eval( 'vimsupport.VimSupportsPopupWindows()' )
+    echo 'Sorry, this feature is not supported in your editor'
+    return
+  endif
+
   call youcompleteme#symbol#InitSymbolProperties()
   py3 ycm_state.ResetCurrentHierarchy()
   if a:kind == 'call'
