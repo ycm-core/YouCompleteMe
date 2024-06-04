@@ -3914,7 +3914,7 @@ Please note: The YCM maintainers do not specifically endorse nor necessarily hav
 [tsconfig.json]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
 [vim-win-download]: https://github.com/vim/vim-win32-installer/releases
 [python-win-download]: https://www.python.org/downloads/windows/
-[visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16
+[visual-studio-download]: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&workload=cplusplus
 [mono-install-macos]: https://www.mono-project.com/download/stable/
 [mono-install-linux]: https://www.mono-project.com/download/stable/#download-lin
 [go-install]: https://golang.org/doc/install
