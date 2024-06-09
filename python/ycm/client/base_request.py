@@ -167,7 +167,7 @@ class BaseRequest:
       else:
         headers = BaseRequest._ExtraHeaders( method, request_uri )
         if payload:
-          request_uri += ToBytes( f'?{urlencode( payload )}' )
+          request_uri += ToBytes( f'?{ urlencode( payload ) }' )
 
         _logger.debug( 'GET %s (%s)\n%s', request_uri, payload, headers )
       return urlopen(
@@ -246,6 +246,21 @@ def BuildRequestData( buffer_number = None ):
     'working_dir': working_dir,
     'file_data': vimsupport.GetUnsavedAndSpecifiedBufferData( current_buffer,
                                                               current_filepath )
+  }
+
+
+def BuildRequestDataForLocation( location ):
+  file, line, column = location
+  current_buffer = vim.current.buffer
+  current_filepath = vimsupport.GetBufferFilepath( current_buffer )
+  file_data = vimsupport.GetUnsavedAndSpecifiedBufferData( current_buffer,
+                                                           current_filepath )
+  return {
+    'filepath': file,
+    'line_num': line,
+    'column_num': column,
+    'working_dir': GetCurrentDirectory(),
+    'file_data': file_data
   }
 
 

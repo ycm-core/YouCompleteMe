@@ -69,27 +69,16 @@ class HierarchyTree:
 
   def UpdateHierarchy( self, handle : int, items, direction : str ):
     current_index = handle_to_index( handle )
-    if ( ( handle >= 0 and direction == 'down' ) or
-         ( handle <= 0 and direction == 'up' ) ):
-      nodes = self._down_nodes if direction == 'down' else self._up_nodes
-      if items:
-        nodes.extend( [
-          HierarchyNode( item,
-                         nodes[ current_index ]._distance_from_root + 1 )
-          for item in items ] )
-        nodes[ current_index ]._references = list(
-            range( len( nodes ) - len( items ), len( nodes ) ) )
-      else:
-        nodes[ current_index ]._references = []
+    nodes = self._down_nodes if direction == 'down' else self._up_nodes
+    if items:
+      nodes.extend( [
+        HierarchyNode( item,
+                       nodes[ current_index ]._distance_from_root + 1 )
+        for item in items ] )
+      nodes[ current_index ]._references = list(
+          range( len( nodes ) - len( items ), len( nodes ) ) )
     else:
-      if direction == 'up':
-        current_node = self._down_nodes[ current_index ]
-      else:
-        current_node = self._up_nodes[ current_index ]
-      old_kind = self._kind
-      self.Reset()
-      self.SetRootNode( [ current_node._data ], old_kind )
-      self.UpdateHierarchy( 0, items, direction )
+      nodes[ current_index ]._references = []
 
 
   def Reset( self ):
@@ -195,3 +184,20 @@ class HierarchyTree:
       node._data,
       direction
     ]
+
+
+  def HandleToLocation( self, handle : int ):
+    node_index = handle_to_index( handle )
+
+    if handle >= 0:
+      node = self._down_nodes[ node_index ]
+    else:
+      node = self._up_nodes[ node_index ]
+
+    location_index = handle_to_location_index( handle )
+    return node.ToLocation( location_index )
+
+
+  def UpdateChangesRoot( self, handle : int, direction : str ):
+    return ( ( handle < 0 and direction == 'down' ) or
+             ( handle > 0 and direction == 'up'   ) )

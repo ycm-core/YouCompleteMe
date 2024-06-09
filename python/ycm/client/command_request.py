@@ -15,7 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from ycm.client.base_request import BaseRequest, BuildRequestData
+from ycm.client.base_request import ( BaseRequest,
+                                      BuildRequestData,
+                                      BuildRequestDataForLocation )
 from ycm import vimsupport
 
 DEFAULT_BUFFER_COMMAND = 'same-buffer'
@@ -28,7 +30,11 @@ def _EnsureBackwardsCompatibility( arguments ):
 
 
 class CommandRequest( BaseRequest ):
-  def __init__( self, arguments, extra_data = None, silent = False ):
+  def __init__( self,
+                arguments,
+                extra_data = None,
+                silent = False,
+                location = None ):
     super( CommandRequest, self ).__init__()
     self._arguments = _EnsureBackwardsCompatibility( arguments )
     self._command = arguments and arguments[ 0 ]
@@ -38,10 +44,13 @@ class CommandRequest( BaseRequest ):
     self._response_future = None
     self._silent = silent
     self._bufnr = extra_data.pop( 'bufnr', None ) if extra_data else None
+    self._location = location
 
 
   def Start( self ):
-    if self._bufnr is not None:
+    if self._location is not None:
+      self._request_data = BuildRequestDataForLocation( self._location )
+    elif self._bufnr is not None:
       self._request_data = BuildRequestData( self._bufnr )
     else:
       self._request_data = BuildRequestData()
@@ -206,10 +215,14 @@ class CommandRequest( BaseRequest ):
                                      modifiers )
 
 
-def SendCommandRequestAsync( arguments, extra_data = None, silent = True ):
+def SendCommandRequestAsync( arguments,
+                             extra_data = None,
+                             silent = True,
+                             location = None ):
   request = CommandRequest( arguments,
                             extra_data = extra_data,
-                            silent = silent )
+                            silent = silent,
+                            location = location )
   request.Start()
   # Don't block
   return request

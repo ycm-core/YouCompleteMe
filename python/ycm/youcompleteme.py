@@ -119,10 +119,22 @@ class YouCompleteMe:
 
 
   def UpdateCurrentHierarchy( self, handle : int, direction : str ):
-    items = self._ResolveHierarchyItem( handle, direction )
-    self._current_hierarchy.UpdateHierarchy( handle, items, direction )
-    offset = len( items ) if items is not None and direction == 'up' else 0
-    return self._current_hierarchy.HierarchyToLines(), offset
+    if not self._current_hierarchy.UpdateChangesRoot( handle, direction ):
+      items = self._ResolveHierarchyItem( handle, direction )
+      self._current_hierarchy.UpdateHierarchy( handle, items, direction )
+      offset = len( items ) if items is not None and direction == 'up' else 0
+      return self._current_hierarchy.HierarchyToLines(), offset
+    else:
+      location = self._current_hierarchy.HandleToLocation( handle )
+      kind = self._current_hierarchy._kind
+      self._current_hierarchy.Reset()
+      request_id = self.SendCommandRequestAsync(
+        [ f'{ kind.title() }Hierarchy' ],
+        silent = False,
+        location = location
+      )
+      handle = self.InitializeCurrentHierarchy( request_id, kind )[ 0 ][ 1 ]
+      return self.UpdateCurrentHierarchy( handle, direction )
 
 
   def _ResolveHierarchyItem( self, handle : int, direction : str ):
@@ -471,7 +483,10 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
-  def SendCommandRequestAsync( self, arguments, silent = True ):
+  def SendCommandRequestAsync( self,
+                               arguments,
+                               silent = True,
+                               location = None ):
     final_arguments, extra_data = self._GetCommandRequestArguments(
       arguments,
       False,
@@ -483,7 +498,8 @@ class YouCompleteMe:
     self._command_requests[ request_id ] = SendCommandRequestAsync(
       final_arguments,
       extra_data,
-      silent )
+      silent,
+      location = location )
     return request_id
 
 

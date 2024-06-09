@@ -64,7 +64,7 @@ endfunction
 function! s:MenuFilter( winid, key )
   if a:key == "\<S-Tab>"
     " Root changes if we're showing super-tree of a sub-tree of the root
-    " (indeicated by the handle being positive)
+    " (indicated by the handle being positive)
     let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] > 0
     call popup_close(
           \ s:popup_id,
@@ -73,7 +73,7 @@ function! s:MenuFilter( winid, key )
   endif
   if a:key == "\<Tab>"
     " Root changes if we're showing sub-tree of a super-tree of the root
-    " (indeicated by the handle being negative)
+    " (indicated by the handle being negative)
     let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] < 0
     call popup_close(
           \ s:popup_id,
