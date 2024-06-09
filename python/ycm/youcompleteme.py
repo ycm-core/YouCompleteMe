@@ -112,7 +112,9 @@ class YouCompleteMe:
     self._current_hierarchy = HierarchyTree()
 
 
-  def InitializeCurrentHierarchy( self, items, kind ):
+  def InitializeCurrentHierarchy( self, request_id, kind ):
+    items = self.GetCommandRequest( request_id ).Response()
+    self.FlushCommandRequest( request_id )
     return self._current_hierarchy.SetRootNode( items, kind )
 
 
@@ -124,13 +126,13 @@ class YouCompleteMe:
 
 
   def _ResolveHierarchyItem( self, handle : int, direction : str ):
-    return SendCommandRequest(
+    request_id = self.SendCommandRequestAsync(
       self._current_hierarchy.ResolveArguments( handle, direction ),
-      '',
-      self._user_options[ 'goto_buffer_command' ],
-      extra_data = None,
-      skip_post_command_action = True
+      silent = False
     )
+    response = self.GetCommandRequest( request_id ).Response()
+    self.FlushCommandRequest( request_id )
+    return response
 
 
   def ShouldResolveItem( self, handle : int, direction : str ):
@@ -424,12 +426,13 @@ class YouCompleteMe:
 
     final_arguments = []
     for argument in arguments:
-      if argument.startswith( 'ft=' ):
-        extra_data[ 'completer_target' ] = argument[ 3: ]
-        continue
-      elif argument.startswith( '--bufnr=' ):
-        extra_data[ 'bufnr' ] = int( argument[ len( '--bufnr=' ): ] )
-        continue
+      if isinstance( argument, str ):
+        if argument.startswith( 'ft=' ):
+          extra_data[ 'completer_target' ] = argument[ 3: ]
+          continue
+        elif argument.startswith( '--bufnr=' ):
+          extra_data[ 'bufnr' ] = int( argument[ len( '--bufnr=' ): ] )
+          continue
 
       final_arguments.append( argument )
 
@@ -456,8 +459,7 @@ class YouCompleteMe:
       final_arguments,
       modifiers,
       self._user_options[ 'goto_buffer_command' ],
-      extra_data,
-      'Hierarchy' in arguments[ 0 ] )
+      extra_data )
 
 
   def GetCommandResponse( self, arguments ):
@@ -469,7 +471,7 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
-  def SendCommandRequestAsync( self, arguments ):
+  def SendCommandRequestAsync( self, arguments, silent = True ):
     final_arguments, extra_data = self._GetCommandRequestArguments(
       arguments,
       False,
@@ -480,7 +482,8 @@ class YouCompleteMe:
     self._next_command_request_id += 1
     self._command_requests[ request_id ] = SendCommandRequestAsync(
       final_arguments,
-      extra_data )
+      extra_data,
+      silent )
     return request_id
 
 

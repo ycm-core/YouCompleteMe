@@ -44,13 +44,13 @@ function! youcompleteme#hierarchy#StartRequest( kind )
   py3 ycm_state.ResetCurrentHierarchy()
   if a:kind == 'call'
     let lines_and_handles = py3eval(
-      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( ' .
-      \ '[ "CallHierarchy" ], "", False, 0, 0 ), ' .
+      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequestAsync( ' .
+      \ '[ "CallHierarchy" ] ), ' .
       \ 'vim.eval( "a:kind" ) )' )
   else
     let lines_and_handles = py3eval( 
-      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequest( ' .
-      \ '[ "TypeHierarchy" ], "", False, 0, 0 ), ' .
+      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequestAsync( ' .
+      \ '[ "TypeHierarchy" ] ), ' .
       \ 'vim.eval( "a:kind" ) )' )
   endif
   if len( lines_and_handles )
@@ -63,7 +63,7 @@ endfunction
 
 function! s:MenuFilter( winid, key )
   if a:key == "\<S-Tab>"
-    " ROot changes if we're showing super-tree of a sub-tree of the root
+    " Root changes if we're showing super-tree of a sub-tree of the root
     " (indeicated by the handle being positive)
     let will_change_root = s:lines_and_handles[ s:select - 1 ][ 1 ] > 0
     call popup_close(
