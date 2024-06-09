@@ -531,7 +531,7 @@ that are conservatively turned off by default that you may want to turn on.
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]
-- Install [Visual Studio Build Tools 2019][visual-studio-download]
+- Install [Visual Studio Build Tools 2022][visual-studio-download]
 - Install CMake, Vim and Python
 - Install go, node and npm
 - Compile YCM
@@ -592,7 +592,7 @@ Download and install the following software:
   matching the version number exactly.
 - [CMake][cmake-download]. Add CMake executable to the PATH environment
   variable.
-- [Build Tools for Visual Studio 2019][visual-studio-download]. During setup,
+- [Build Tools for Visual Studio 2022][visual-studio-download]. During setup,
   select _C++ build tools_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages through
@@ -632,7 +632,7 @@ python install.py --all
 ```
 
 You can specify the Microsoft Visual C++ (MSVC) version using the `--msvc`
-option. YCM officially supports MSVC 15 (2017), MSVC 16 (Visual Studio 2019) 
+option. YCM officially supports MSVC 15 (2017), MSVC 16 (Visual Studio 2022) 
 and MSVC 17 (Visual Studio 17 2022).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
