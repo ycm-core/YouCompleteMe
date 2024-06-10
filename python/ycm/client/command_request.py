@@ -248,3 +248,11 @@ def GetCommandResponse( arguments, extra_data = None ):
                                      silent = True )
   # Block here to get the response
   return request.StringResponse()
+
+
+def GetRawCommandResponse( arguments, silent, location = None ):
+  request = SendCommandRequestAsync( arguments,
+                                     extra_data = None,
+                                     silent = silent,
+                                     location = location )
+  return request.Response()

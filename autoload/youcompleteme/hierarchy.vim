@@ -42,15 +42,16 @@ function! youcompleteme#hierarchy#StartRequest( kind )
 
   call youcompleteme#symbol#InitSymbolProperties()
   py3 ycm_state.ResetCurrentHierarchy()
+  py3 from ycm.client.command_request import GetRawCommandResponse
   if a:kind == 'call'
     let lines_and_handles = py3eval(
-      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequestAsync( ' .
-      \ '[ "CallHierarchy" ] ), ' .
+      \ 'ycm_state.InitializeCurrentHierarchy( GetRawCommandResponse( ' .
+      \ '[ "CallHierarchy" ], False ), ' .
       \ 'vim.eval( "a:kind" ) )' )
   else
     let lines_and_handles = py3eval( 
-      \ 'ycm_state.InitializeCurrentHierarchy( ycm_state.SendCommandRequestAsync( ' .
-      \ '[ "TypeHierarchy" ] ), ' .
+      \ 'ycm_state.InitializeCurrentHierarchy( GetRawCommandResponse( ' .
+      \ '[ "TypeHierarchy" ], False ), ' .
       \ 'vim.eval( "a:kind" ) )' )
   endif
   if len( lines_and_handles )

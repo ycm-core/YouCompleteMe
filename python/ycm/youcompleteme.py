@@ -35,7 +35,8 @@ from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import ( SendCommandRequest,
                                          SendCommandRequestAsync,
-                                         GetCommandResponse )
+                                         GetCommandResponse,
+                                         GetRawCommandResponse )
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.resolve_completion_request import ResolveCompletionItem
 from ycm.client.signature_help_request import ( SignatureHelpRequest,
@@ -112,9 +113,7 @@ class YouCompleteMe:
     self._current_hierarchy = HierarchyTree()
 
 
-  def InitializeCurrentHierarchy( self, request_id, kind ):
-    items = self.GetCommandRequest( request_id ).Response()
-    self.FlushCommandRequest( request_id )
+  def InitializeCurrentHierarchy( self, items, kind ):
     return self._current_hierarchy.SetRootNode( items, kind )
 
 
@@ -128,23 +127,20 @@ class YouCompleteMe:
       location = self._current_hierarchy.HandleToLocation( handle )
       kind = self._current_hierarchy._kind
       self._current_hierarchy.Reset()
-      request_id = self.SendCommandRequestAsync(
+      items = GetRawCommandResponse(
         [ f'{ kind.title() }Hierarchy' ],
         silent = False,
         location = location
       )
-      handle = self.InitializeCurrentHierarchy( request_id, kind )[ 0 ][ 1 ]
+      handle = self.InitializeCurrentHierarchy( items, kind )[ 0 ][ 1 ]
       return self.UpdateCurrentHierarchy( handle, direction )
 
 
   def _ResolveHierarchyItem( self, handle : int, direction : str ):
-    request_id = self.SendCommandRequestAsync(
+    return GetRawCommandResponse(
       self._current_hierarchy.ResolveArguments( handle, direction ),
       silent = False
     )
-    response = self.GetCommandRequest( request_id ).Response()
-    self.FlushCommandRequest( request_id )
-    return response
 
 
   def ShouldResolveItem( self, handle : int, direction : str ):
