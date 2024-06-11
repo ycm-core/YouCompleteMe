@@ -121,7 +121,12 @@ class YouCompleteMe:
     if not self._current_hierarchy.UpdateChangesRoot( handle, direction ):
       items = self._ResolveHierarchyItem( handle, direction )
       self._current_hierarchy.UpdateHierarchy( handle, items, direction )
-      offset = len( items ) if items is not None and direction == 'up' else 0
+
+      if items is not None and direction == 'up':
+        offset = sum( map( lambda item: len( item[ 'locations' ] ), items ) )
+      else:
+        offset = 0
+
       return self._current_hierarchy.HierarchyToLines(), offset
     else:
       location = self._current_hierarchy.HandleToRootLocation( handle )
