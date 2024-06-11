@@ -27,6 +27,16 @@ class HierarchyNode:
     self._distance_from_root = distance
 
 
+  def ToRootLocation( self, subindex : int ):
+    if location := self._data.get( 'root_location' ):
+      file = location[ 'filepath' ]
+      line = location[ 'line_num' ]
+      column = location[ 'column_num' ]
+      return file, line, column
+    else:
+      return self.ToLocation( subindex )
+
+
   def ToLocation( self, subindex : int ):
     location = self._data[ 'locations' ][ subindex ]
     line = location[ 'line_num' ]
@@ -186,7 +196,7 @@ class HierarchyTree:
     ]
 
 
-  def HandleToLocation( self, handle : int ):
+  def HandleToRootLocation( self, handle : int ):
     node_index = handle_to_index( handle )
 
     if handle >= 0:
@@ -195,7 +205,7 @@ class HierarchyTree:
       node = self._up_nodes[ node_index ]
 
     location_index = handle_to_location_index( handle )
-    return node.ToLocation( location_index )
+    return node.ToRootLocation( location_index )
 
 
   def UpdateChangesRoot( self, handle : int, direction : str ):

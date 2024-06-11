@@ -124,7 +124,7 @@ class YouCompleteMe:
       offset = len( items ) if items is not None and direction == 'up' else 0
       return self._current_hierarchy.HierarchyToLines(), offset
     else:
-      location = self._current_hierarchy.HandleToLocation( handle )
+      location = self._current_hierarchy.HandleToRootLocation( handle )
       kind = self._current_hierarchy._kind
       self._current_hierarchy.Reset()
       items = GetRawCommandResponse(
@@ -132,6 +132,8 @@ class YouCompleteMe:
         silent = False,
         location = location
       )
+      # [ 0 ] chooses the data for the 1st (and only) line.
+      # [ 1 ] chooses only the handle
       handle = self.InitializeCurrentHierarchy( items, kind )[ 0 ][ 1 ]
       return self.UpdateCurrentHierarchy( handle, direction )
 
