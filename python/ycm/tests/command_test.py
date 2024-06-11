@@ -48,7 +48,6 @@ class CommandTest( TestCase ):
                 'tempname()': '_TEMP_FILE_'
               } ),
             } ),
-            False
           )
         )
 
@@ -73,7 +72,6 @@ class CommandTest( TestCase ):
                 'insert_spaces': True,
               } )
             } ),
-            False
           )
         )
 
@@ -105,7 +103,6 @@ class CommandTest( TestCase ):
               }
             }
           },
-          False
         )
 
 
@@ -139,7 +136,6 @@ class CommandTest( TestCase ):
               }
             }
           },
-          False
         )
 
 
@@ -158,7 +154,6 @@ class CommandTest( TestCase ):
             'insert_spaces': True
           },
         },
-        False
       )
 
       with patch( 'ycm.youcompleteme.SendCommandRequest' ) as send_request:
