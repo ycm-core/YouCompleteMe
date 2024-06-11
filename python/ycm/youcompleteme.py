@@ -436,13 +436,12 @@ class YouCompleteMe:
 
     final_arguments = []
     for argument in arguments:
-      if isinstance( argument, str ):
-        if argument.startswith( 'ft=' ):
-          extra_data[ 'completer_target' ] = argument[ 3: ]
-          continue
-        elif argument.startswith( '--bufnr=' ):
-          extra_data[ 'bufnr' ] = int( argument[ len( '--bufnr=' ): ] )
-          continue
+      if argument.startswith( 'ft=' ):
+        extra_data[ 'completer_target' ] = argument[ 3: ]
+        continue
+      elif argument.startswith( '--bufnr=' ):
+        extra_data[ 'bufnr' ] = int( argument[ len( '--bufnr=' ): ] )
+        continue
 
       final_arguments.append( argument )
 

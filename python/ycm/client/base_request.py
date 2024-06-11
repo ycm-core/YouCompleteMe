@@ -252,9 +252,11 @@ def BuildRequestData( buffer_number = None ):
 def BuildRequestDataForLocation( location ):
   file, line, column = location
   current_buffer = vim.current.buffer
-  current_filepath = vimsupport.GetBufferFilepath( current_buffer )
-  file_data = vimsupport.GetUnsavedAndSpecifiedBufferData( current_buffer,
-                                                           current_filepath )
+  vim.command( f'badd {file }' )
+  vim.eval( f'bufload( "{ file }" )' )
+  buffer_number = vimsupport.GetBufferNumberForFilename( file )
+  buffer = vim.buffers[ buffer_number ]
+  file_data = vimsupport.GetUnsavedAndSpecifiedBufferData( buffer, file )
   return {
     'filepath': file,
     'line_num': line,
