@@ -123,7 +123,7 @@ class YouCompleteMe:
       self._current_hierarchy.UpdateHierarchy( handle, items, direction )
 
       if items is not None and direction == 'up':
-        offset = sum( map( lambda item: len( item[ 'locations' ] ), items ) )
+        offset = sum( len( item[ 'locations' ] ) for item in items )
       else:
         offset = 0
 

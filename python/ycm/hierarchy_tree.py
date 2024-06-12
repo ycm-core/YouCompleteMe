@@ -210,4 +210,4 @@ class HierarchyTree:
 
   def UpdateChangesRoot( self, handle : int, direction : str ):
     return ( ( handle < 0 and direction == 'down' ) or
-             ( handle > 0 and direction == 'up'   ) )
+             ( handle > 0 and direction == 'up' ) )
