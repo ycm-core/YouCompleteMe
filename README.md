@@ -723,6 +723,7 @@ Quick Feature Summary
 * Type information for identifiers (`GetType`)
 * Code formatting (`Format`)
 * Management of `gopls` server instance
+* Inlay hints
 * Call hierarchy
 
 ### JavaScript and TypeScript
@@ -745,6 +746,7 @@ Quick Feature Summary
 * Organize imports (`OrganizeImports`)
 * Management of `TSServer` server instance
 * Inlay hints
+* Call hierarchy
 
 ### Rust
 
@@ -787,6 +789,7 @@ Quick Feature Summary
 * Execute custom server command (`ExecuteCommand <args>`)
 * Management of `jdt.ls` server instance
 * Semantic highlighting
+* Inlay hints
 * Type hierarchy
 * Call hierarchy
 
