@@ -49,7 +49,7 @@ class CommandRequest( BaseRequest ):
 
   def Start( self ):
     if self._location is not None:
-      self._request_data = BuildRequestDataForLocation( self._location )
+      self._request_data = BuildRequestDataForLocation( *self._location )
     elif self._bufnr is not None:
       self._request_data = BuildRequestData( self._bufnr )
     else:

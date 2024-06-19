@@ -249,16 +249,15 @@ def BuildRequestData( buffer_number = None ):
   }
 
 
-def BuildRequestDataForLocation( location ):
-  file, line, column = location
-  if file not in vim.buffers:
-    vim.command( f'badd { file }' )
+def BuildRequestDataForLocation( file : str, line : int, column : int ):
+  buffer_number = vimsupport.GetBufferNumberForFilename(
+      file,
+      create_buffer_if_needed = True )
   try:
     vim.eval( f'bufload( "{ file }" )' )
   except vim.error as e:
     if 'E325' not in str( e ):
       raise
-  buffer_number = vimsupport.GetBufferNumberForFilename( file )
   buffer = vim.buffers[ buffer_number ]
   file_data = vimsupport.GetUnsavedAndSpecifiedBufferData( buffer, file )
   return {
