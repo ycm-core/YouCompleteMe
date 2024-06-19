@@ -233,8 +233,15 @@ function! s:ResolveItem( choice, direction, will_change_root )
       " where we _don't_ re-root the tree, so feels more natural than anything
       " else.
       " The new root is the element with indent of 0.
-      let s:select = 1 + indexof( s:lines_and_handles,
-            \                     { i, v -> v[0].indent == 0 } )
+      " let s:select = 1 + indexof( s:lines_and_handles,
+      "       \                     { i, v -> v[0].indent == 0 } )
+      let s:select = 1
+      for item in s:lines_and_handles
+        if item[0].indent == 0
+          break
+        endif
+        let s:select += 1
+      endfor
     else
       let s:select += lines_and_handles_with_offset[ 1 ]
     endif
