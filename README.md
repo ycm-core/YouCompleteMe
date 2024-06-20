@@ -946,43 +946,95 @@ per buffer, by setting `b:ycm_enable_semantic_highlighting`.
 #### Customising the highlight groups
 
 YCM uses text properties (see `:help text-prop-intro`) for semantic
-highlighting. In order to customise the coloring, you can define the text
-properties that are used.
+highlighting. In order to customise the coloring, you should set
+`g:ycm_semantic_highlight_groups` list. Each item in that list must be
+dictionary with the following keys:
+- `filetypes` - list of filetypes that should use these settings for semantic
+  highlighting. If not defined, then these settings will be used as default for
+  any filetype without explicit configuration
+- `highlight` - dictionary, where key is [token type](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_semanticTokens)
+  and value is highlighting group. If this key is not present, then semantic
+  highlighting will be disabled for that filetypes. If group is empty string or
+  `v:null`, then semantic highlighing for that group will be disabled
 
-If you define a text property named `YCM_HL_<token type>`, then it will be used
-in place of the defaults. The `<token type>` is defined as the Language Server
-Protocol semantic token type, defined in the [LSP Spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_semanticTokens).
+For compatibility reasons we also support defining text properties named
+`YCM_HL_<token_type>`, but this may be removed in future.
 
 Some servers also use custom values. In this case, YCM prints a warning
 including the token type name that you can customise.
 
-For example, to render `parameter` tokens using the `Normal` highlight group,
-you can do this:
+In the following example, we set a custom set of highlights for go, disable
+semantic highlighting for rust, and define default highlighting groups for all
+other languages:
 
 ```viml
-call prop_type_add( 'YCM_HL_parameter', { 'highlight': 'Normal' } )
-```
+let g:ycm_enable_semantic_highlighting=1
 
-More generally, this pattern can be useful for customising the groups:
-
-```viml
-let MY_YCM_HIGHLIGHT_GROUP = {
-      \   'typeParameter': 'PreProc',
-      \   'parameter': 'Normal',
-      \   'variable': 'Normal',
-      \   'property': 'Normal',
-      \   'enumMember': 'Normal',
-      \   'event': 'Special',
-      \   'member': 'Normal',
-      \   'method': 'Normal',
-      \   'class': 'Special',
-      \   'namespace': 'Special',
+let g:ycm_semantic_highlight_groups = [
+      \{
+      \ 'filetypes': ['go'],
+      \ 'highlight': {
+      \   'namespace':      'Namespace',
+      \   'type':           'goType',
+      \   'class':          'goType',
+      \   'struct':         'goType',
+      \   'interface':      'goType',
+      \   'concept':        v:null,
+      \   'typeParameter':  v:null,
+      \   'enum':           'EnumConstant',
+      \   'enumMember':     'EnumConstant',
+      \   'function':       'goFunction',
+      \   'method':         'goFunction',
+      \   'member':         'goFunction',
+      \   'property':       'goFunction',
+      \   'macro':          v:null,
+      \   'variable':       v:null,
+      \   'parameter':      v:null,
+      \   'comment':        v:null,
+      \   'operator':       v:null,
+      \   'keyword':        v:null,
+      \   'modifier':       v:null,
+      \   'event':          v:null,
+      \   'number':         v:null,
+      \   'string':         v:null,
+      \   'regexp':         v:null,
+      \   'unknown':        v:null,
+      \   'bracket':        v:null,
       \ }
-
-for tokenType in keys( MY_YCM_HIGHLIGHT_GROUP )
-  call prop_type_add( 'YCM_HL_' . tokenType,
-                    \ { 'highlight': MY_YCM_HIGHLIGHT_GROUP[ tokenType ] } )
-endfor
+      \},
+      \{
+      \ 'filetypes': ['rust']
+      \},
+      \{
+      \ 'highlight': {
+      \   'namespace': 'Type',
+      \   'type': 'Type',
+      \   'class': 'Structure',
+      \   'enum': 'Structure',
+      \   'interface': 'Structure',
+      \   'struct': 'Structure',
+      \   'typeParameter': 'Identifier',
+      \   'parameter': 'Identifier',
+      \   'variable': 'Identifier',
+      \   'property': 'Identifier',
+      \   'enumMember': 'Identifier',
+      \   'enumConstant': 'Constant',
+      \   'event': 'Identifier',
+      \   'function': 'Function',
+      \   'member': 'Identifier',
+      \   'macro': 'Macro',
+      \   'method': 'Function',
+      \   'keyword': 'Keyword',
+      \   'modifier': 'Keyword',
+      \   'comment': 'Comment',
+      \   'string': 'String',
+      \   'number': 'Number',
+      \   'regexp': 'String',
+      \   'operator': 'Operator',
+      \   'unknown': 'Normal',
+      \ }
+      \}
+      \]
 ```
 
 ## Inlay hints
