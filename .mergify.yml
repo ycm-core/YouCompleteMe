@@ -3,8 +3,8 @@ queue_rules:
   - name: default
     # These define the conditions to get out of the merge queue
     conditions:
-      - status-success=ubuntu-20.04 - Python 3.8 x64
-      - status-success=macos-12 - Python 3.8 x64
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
       - status-success=windows-2019 - Python 3.9 x64
       - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
@@ -15,8 +15,8 @@ pull_request_rules:
     conditions:
       - base=master
       - "#approved-reviews-by>=2"
-      - status-success=ubuntu-20.04 - Python 3.8 x64
-      - status-success=macos-12 - Python 3.8 x64
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
       - status-success=windows-2019 - Python 3.9 x64
       - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
@@ -32,8 +32,8 @@ pull_request_rules:
   - name: Manual merge on Azure Pipelines and Maintainer Override
     conditions:
       - base=master
-      - status-success=ubuntu-20.04 - Python 3.8 x64
-      - status-success=macos-12 - Python 3.8 x64
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
       - status-success=windows-2019 - Python 3.9 x64
       - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
@@ -50,8 +50,8 @@ pull_request_rules:
     conditions:
       - base=master
       - author=puremourning
-      - status-success=ubuntu-20.04 - Python 3.8 x64
-      - status-success=macos-12 - Python 3.8 x64
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
       - status-success=windows-2019 - Python 3.9 x64
       - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
