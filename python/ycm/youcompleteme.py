@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2018 YouCompleteMe contributors
+# Copyright (C) 2011-2024 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
 #
@@ -29,12 +29,14 @@ from ycmd import utils
 from ycmd.request_wrap import RequestWrap
 from ycm.omni_completer import OmniCompleter
 from ycm import syntax_parse
+from ycm.hierarchy_tree import HierarchyTree
 from ycm.client.ycmd_keepalive import YcmdKeepalive
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.client.completer_available_request import SendCompleterAvailableRequest
 from ycm.client.command_request import ( SendCommandRequest,
                                          SendCommandRequestAsync,
-                                         GetCommandResponse )
+                                         GetCommandResponse,
+                                         GetRawCommandResponse )
 from ycm.client.completion_request import CompletionRequest
 from ycm.client.resolve_completion_request import ResolveCompletionItem
 from ycm.client.signature_help_request import ( SignatureHelpRequest,
@@ -108,6 +110,58 @@ class YouCompleteMe:
     self._SetUpLogging()
     self._SetUpServer()
     self._ycmd_keepalive.Start()
+    self._current_hierarchy = HierarchyTree()
+
+
+  def InitializeCurrentHierarchy( self, items, kind ):
+    return self._current_hierarchy.SetRootNode( items, kind )
+
+
+  def UpdateCurrentHierarchy( self, handle : int, direction : str ):
+    if not self._current_hierarchy.UpdateChangesRoot( handle, direction ):
+      items = self._ResolveHierarchyItem( handle, direction )
+      self._current_hierarchy.UpdateHierarchy( handle, items, direction )
+
+      if items is not None and direction == 'up':
+        offset = sum( len( item[ 'locations' ] ) for item in items )
+      else:
+        offset = 0
+
+      return self._current_hierarchy.HierarchyToLines(), offset
+    else:
+      location = self._current_hierarchy.HandleToRootLocation( handle )
+      kind = self._current_hierarchy._kind
+      self._current_hierarchy.Reset()
+      items = GetRawCommandResponse(
+        [ f'{ kind.title() }Hierarchy' ],
+        silent = False,
+        location = location
+      )
+      # [ 0 ] chooses the data for the 1st (and only) line.
+      # [ 1 ] chooses only the handle
+      handle = self.InitializeCurrentHierarchy( items, kind )[ 0 ][ 1 ]
+      return self.UpdateCurrentHierarchy( handle, direction )
+
+
+  def _ResolveHierarchyItem( self, handle : int, direction : str ):
+    return GetRawCommandResponse(
+      self._current_hierarchy.ResolveArguments( handle, direction ),
+      silent = False
+    )
+
+
+  def ShouldResolveItem( self, handle : int, direction : str ):
+    return self._current_hierarchy.ShouldResolveItem( handle, direction )
+
+
+  def ResetCurrentHierarchy( self ):
+    self._current_hierarchy.Reset()
+
+
+  def JumpToHierarchyItem( self, handle ):
+    self._current_hierarchy.JumpToItem(
+        handle,
+        self._user_options[ 'goto_buffer_command' ] )
 
 
   def _SetUpServer( self ):
@@ -431,7 +485,10 @@ class YouCompleteMe:
     return GetCommandResponse( final_arguments, extra_data )
 
 
-  def SendCommandRequestAsync( self, arguments ):
+  def SendCommandRequestAsync( self,
+                               arguments,
+                               silent = True,
+                               location = None ):
     final_arguments, extra_data = self._GetCommandRequestArguments(
       arguments,
       False,
@@ -442,7 +499,9 @@ class YouCompleteMe:
     self._next_command_request_id += 1
     self._command_requests[ request_id ] = SendCommandRequestAsync(
       final_arguments,
-      extra_data )
+      extra_data,
+      silent,
+      location = location )
     return request_id
 
 

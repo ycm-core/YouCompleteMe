@@ -167,7 +167,7 @@ class BaseRequest:
       else:
         headers = BaseRequest._ExtraHeaders( method, request_uri )
         if payload:
-          request_uri += ToBytes( f'?{urlencode( payload )}' )
+          request_uri += ToBytes( f'?{ urlencode( payload ) }' )
 
         _logger.debug( 'GET %s (%s)\n%s', request_uri, payload, headers )
       return urlopen(
@@ -249,6 +249,26 @@ def BuildRequestData( buffer_number = None ):
   }
 
 
+def BuildRequestDataForLocation( file : str, line : int, column : int ):
+  buffer_number = vimsupport.GetBufferNumberForFilename(
+      file,
+      create_buffer_if_needed = True )
+  try:
+    vim.eval( f'bufload( "{ file }" )' )
+  except vim.error as e:
+    if 'E325' not in str( e ):
+      raise
+  buffer = vim.buffers[ buffer_number ]
+  file_data = vimsupport.GetUnsavedAndSpecifiedBufferData( buffer, file )
+  return {
+    'filepath': file,
+    'line_num': line,
+    'column_num': column,
+    'working_dir': GetCurrentDirectory(),
+    'file_data': file_data
+  }
+
+
 def _JsonFromFuture( future ):
   try:
     response = future.result()
@@ -308,6 +328,7 @@ def _BuildUri( handler ):
 
 
 def MakeServerException( data ):
+  _logger.debug( 'Server exception: %s', data )
   if data[ 'exception' ][ 'TYPE' ] == UnknownExtraConf.__name__:
     return UnknownExtraConf( data[ 'exception' ][ 'extra_conf_file' ] )
 
