@@ -50,10 +50,12 @@ HIGHLIGHT_GROUP = {
   'number': 'Number',
   'regexp': 'String',
   'operator': 'Operator',
+  'decorator': 'Comment',
   'unknown': 'Normal',
 
   # These are not part of the spec, but are used by clangd
   'bracket': 'Normal',
+  'concept': 'Normal',
   # These are not part of the spec, but are used by jdt.ls
   'annotation': 'Macro',
 }
