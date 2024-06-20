@@ -12,33 +12,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ ubuntu-20.04, macos-12, windows-2019 ]
+        runs-on: [ ubuntu-24.04, macos-14, windows-2019 ]
         python-arch: [ 'x64' ]
-        python-version: [ '3.8' ]
         include:
+          - runs-on: macos-14
+            python-arch: 'arm64'
           - runs-on: windows-2019
             python-arch: 'x86'
-            python-version: '3.9'
-          - runs-on: windows-2019
-            python-arch: 'x64'
-            python-version: '3.9'
         exclude:
-          - runs-on: windows-2019
-            python-arch: 'x64'
-            python-version: '3.8'
+          - runs-on: macos-14
+            python-arch: "x64"
     env:
       COVERAGE: true
-    name: "${{ matrix.runs-on }} - Python ${{ matrix.python-version }} ${{ matrix.python-arch }}"
+    name: "${{ matrix.runs-on }} - Python 3.9 ${{ matrix.python-arch }}"
     runs-on: ${{ matrix.runs-on }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
     - name: Install Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.9"
         architecture: ${{ matrix.python-arch }}
     - name: Run pip
       run: python3 -m pip install -r python/test_requirements.txt
@@ -47,9 +43,9 @@ jobs:
     - name: summarise coverage
       run: coverage xml
     - name: Upload coverage data
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
-        name: "${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.python-arch }}"
+        name: "${{ runner.os }}-3.9-${{ matrix.python-arch }}"
         token: ${{ secrets.CODECOV_TOKEN }}
 
   vim-tests:
@@ -65,14 +61,14 @@ jobs:
       YCM_TEST_STDOUT: true
     name: "Vim tests - ${{ matrix.vim }}"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
     - name: Install dependencies
       run: sudo -H pip3 install -r python/test_requirements.txt
     - name: Install Java
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: 17
         distribution: 'temurin'
@@ -88,7 +84,7 @@ jobs:
     - name: Combine and summarise coverage
       run: coverage combine && coverage xml
     - name: Upload coverage data
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         name: "vim-tests-${{ matrix.vim }}"
         token: ${{ secrets.CODECOV_TOKEN }}
