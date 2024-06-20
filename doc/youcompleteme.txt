@@ -81,6 +81,7 @@ Contents ~
     1. Diagnostic Highlighting Groups |youcompleteme-diagnostic-highlighting-groups|
    15. Symbol Search                              |youcompleteme-symbol-search|
     1. Closing the popup                          |youcompleteme-closing-popup|
+   16. Type/Call Hierarchy                  |youcompleteme-type-call-hierarchy|
   7. Commands                                          |youcompleteme-commands|
    1. The |:YcmRestartServer| command
    2. The |:YcmForceCompileAndDiagnostics| command
@@ -280,6 +281,7 @@ Contents ~
     - Diagnostic Highlighting Groups
 
   - Symbol Search
+  - Type/Call Hierarchy
 
 - Commands
 
@@ -892,6 +894,8 @@ C-family languages (C, C++, Objective C, Objective C++, CUDA) ~
 - Code formatting (|Format|)
 - Semantic highlighting
 - Inlay hints
+- Type hierarchy
+- Call hierarchy
 
 -------------------------------------------------------------------------------
                                                               *youcompleteme-c*
@@ -941,6 +945,8 @@ Go ~
 - Type information for identifiers (|GetType|)
 - Code formatting (|Format|)
 - Management of 'gopls' server instance
+- Inlay hints
+- Call hierarchy
 
 -------------------------------------------------------------------------------
                                           *youcompleteme-javascript-typescript*
@@ -964,6 +970,7 @@ JavaScript and TypeScript ~
 - Organize imports (|OrganizeImports|)
 - Management of 'TSServer' server instance
 - Inlay hints
+- Call hierarchy
 
 -------------------------------------------------------------------------------
                                                            *youcompleteme-rust*
@@ -984,6 +991,7 @@ Rust ~
 - Management of 'rust-analyzer' server instance
 - Semantic highlighting
 - Inlay hints
+- Call hierarchy
 
 -------------------------------------------------------------------------------
                                                            *youcompleteme-java*
@@ -1009,6 +1017,9 @@ Java ~
 - Execute custom server command ('ExecuteCommand <args>')
 - Management of 'jdt.ls' server instance
 - Semantic highlighting
+- Inlay hints
+- Type hierarchy
+- Call hierarchy
 
 -------------------------------------------------------------------------------
                                                      *youcompleteme-user-guide*
@@ -1125,10 +1136,6 @@ Ctrl-l is not a suggestion, just an example.
 -------------------------------------------------------------------------------
                                           *youcompleteme-semantic-highlighting*
 Semantic highlighting ~
-
-**NOTE**: This feature is highly experimental and offered in the hope that it
-is useful. It shall not be considered stable; if you find issues with it, feel
-free to report them, however.
 
 Semantic highlighting is the process where the buffer text is coloured
 according to the underlying semantic type of the word, rather than classic
@@ -2138,6 +2145,60 @@ for that, or use a window command (e.g. '<Ctrl-w>j') or the mouse to leave the
 prompt buffer window.
 
 -------------------------------------------------------------------------------
+                                            *youcompleteme-type-call-hierarchy*
+Type/Call Hierarchy ~
+
+**_This feature requires Vim and is not supported in Neovim_**
+
+**NOTE**: This feature is highly experimental and offered in the hope that it
+is useful. Please help us by reporting issues and offering feedback.
+
+YCM provides a way to view and navigate hierarchies. The following hierarchies
+are supported:
+
+- Type hierachy '<Plug>(YCMTypeHierarchy)': Display subtypes and supertypes
+  of the symbol under cursor. Expand down to subtypes and up to supertypes.
+
+- Call hierarchy '<Plug>(YCMCallHierarchy)': Display callees and callers of
+  the symbol under cursor. Expand down to callers and up to callees.
+
+Take a look at this Image: asciicast [85] for brief demo.
+
+Hierarchy UI can be initiated by mapping something to the indicated plug
+mappings, for example:
+>
+  nmap <leader>yth <Plug>(YCMTypeHierarchy)
+  nmap <leader>ych <Plug>(YCMCallHierarchy)
+<
+This opens a "modal" popup showing the current element in the hierarchy tree.
+The current tree root is aligned to the left and child and parent nodes are
+expanded to the right. Expand the tree "down" with '<Tab> and "up" with'`.
+
+The "root" of the tree can be re-focused to the selected item with '<S-Tab>'
+and further '<S-Tab>' will show the parents of the selected item. This can take
+a little getting used to, but it's particularly important with multiple
+inheritance where a "child" of the current root may actually have other,
+invisible, parent links. '<S-Tab>' on that row will show these by setting the
+display root to the selected item.
+
+When the hierarchy is displayed, the following keys are intercepted:
+
+- '<Tab>': Drill into the hierarchy at the selected item: expand and show
+  children of the selected item.
+- '<S-Tab>': Show parents of the selected item. When applied to sub-types,
+  this will re-root the tree at that type, so that all parent types (are
+  displayed). Similar for callers.
+- '<CR>': Jump to the symbol currently selected.
+- '<Down>', '<C-n>', '<C-j>', 'j': Select the next item
+- '<Up>', '<C-p>', '<C-k>', 'k'; Select the previous item
+- Any other key: closes the popup without jumping to any location
+
+**Note:** you might think the call hierarchy tree is inverted, but we think
+this way round is more intuitive because this is the typical way that call
+stacks are displayed (with the current function at the top, and its callers
+below).
+
+-------------------------------------------------------------------------------
                                                        *youcompleteme-commands*
 Commands ~
 
@@ -2380,6 +2441,9 @@ Supported in filetypes: 'c, cpp, objc, objcpp, cuda, go, java, rust'
 -------------------------------------------------------------------------------
 The *GoToCallers* and 'GoToCallees' subcommands
 
+Note: A much more powerful call and type hierarchy can be viewd interactively.
+See interactive type and call hierarchy.
+
 Populate the quickfix list with the callers, or callees respectively, of the
 function associated with the current cursor position. The semantics of this
 differ depending on the filetype and language server.
@@ -2526,7 +2590,7 @@ such as missing trailing semi-colons, spurious characters, or other errors
 which the semantic engine can deterministically suggest corrections. A small
 demo presenting how diagnostics can be fixed with clangd:
 
-  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [85])
+  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [87])
 
 Completers (LSPs) may also provide refactoring tweaks, which may be available
 even when no diagnostic is presented for the current line. These include
@@ -2535,7 +2599,7 @@ generation, ... The tweaks work for a selection as well. Consult your LSP for
 available refactorings. A demonstration of refactoring capabilities with
 clangd:
 
-  Image: YouCompleter-FixIt-Refactoring (see reference [86])
+  Image: YouCompleter-FixIt-Refactoring (see reference [88])
 
 If no fix-it is available for the current line, or there is no diagnostic on
 the current line, this command has no effect on the current buffer. If any
@@ -2581,7 +2645,7 @@ The following additional commands are supported for Python:
 - 'RefactorExtractVariable'
 - 'RefactorExtractFunction'
 
-See the jedi docs [87] for what they do.
+See the jedi docs [89] for what they do.
 
 Supported in filetypes: 'python'
 
@@ -2656,7 +2720,7 @@ server-specific commands. Consult the jdt.ls [17] documentation to find out
 what commands are supported and which arguments are expected.
 
 The support for 'ExecuteCommand' was implemented to support plugins like
-Vimspector [88] to debug java, but isn't limited to that specific use case.
+Vimspector [90] to debug java, but isn't limited to that specific use case.
 
 -------------------------------------------------------------------------------
 The *RestartServer* subcommand
@@ -2692,7 +2756,7 @@ For example:
   call youcompleteme#GetErrorCount()
 <
 Both this function and |youcompleteme#GetWarningCount| can be useful when
-integrating YCM with other Vim plugins. For example, a lightline [89] user
+integrating YCM with other Vim plugins. For example, a lightline [91] user
 could add a diagnostics section to their statusline which would display the
 number of errors and warnings.
 
@@ -3193,9 +3257,9 @@ string 'virtual-text', and the diagnostic will be displayed inline with the
 text, right aligned in the window and wrapping to the next line if there is not
 enough space, for example:
 
-  Image: Virtual text diagnostic demo (see reference [90])
+  Image: Virtual text diagnostic demo (see reference [92])
 
-  Image: Virtual text diagnostic demo (see reference [91])
+  Image: Virtual text diagnostic demo (see reference [93])
 
 **NOTE**: It's _strongly_ recommended to also set
 |g:ycm_update_diagnostics_in_insert_mode| to '0' when using 'virtual-text' for
@@ -3303,7 +3367,7 @@ YCM will not render it.
 
 The following filter types are supported:
 
-- "regex": Accepts a string regular expression [92]. This type matches when
+- "regex": Accepts a string regular expression [94]. This type matches when
   the regex (treated as case-insensitive) is found anywhere in the diagnostic
   text ('re.search', not 're.match')
 
@@ -3311,7 +3375,7 @@ The following filter types are supported:
   matches when the diagnostic has the same level, that is, specifying 'level:
   "error"' will remove **all** errors from the diagnostics.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [92].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [94].
 
 Default: '{}'
 
@@ -3406,7 +3470,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [93]. The format
+The only supported tag format is the Exuberant Ctags format [95]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the
 '--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -3810,7 +3874,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [92].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [94].
 
 Default: '[see next line]'
 >
@@ -3960,9 +4024,7 @@ Default: '[]'
 The *g:ycm_disable_signature_help* option
 
 This option allows you to disable all signature help for all completion
-engines. There is no way to disable it per-completer. This option is
-_reserved_, meaning that while signature help support remains experimental, its
-values and meaning may change and it may be removed in a future version.
+engines. There is no way to disable it per-completer.
 
 Default: '0'
 >
@@ -4056,17 +4118,17 @@ The FAQ section has been moved to the wiki [8].
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[94]. By participating in this project you agree to abide by its terms.
+[96]. By participating in this project you agree to abide by its terms.
 
 -------------------------------------------------------------------------------
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please join the Gitter
-room [1] or use the ycm-users [95] mailing list.
+room [1] or use the ycm-users [97] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[96]. Before you do, please carefully read CONTRIBUTING.md [97] as this asks
+[98]. Before you do, please carefully read CONTRIBUTING.md [99] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -4081,7 +4143,7 @@ contact the YouCompleteMe maintainers directly using the contact details.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [98]. © 2015-2018
+This software is licensed under the GPL v3 license [100]. © 2015-2018
 YouCompleteMe contributors
 
 -------------------------------------------------------------------------------
@@ -4092,10 +4154,10 @@ If you like YCM so much that you're willing to part with your hard-earned cash,
 please consider donating to one of the following charities, which are
 meaningful to the current maintainers (in no particular order):
 
-- Hector's Greyhound Rescue [99]
-- Be Humane [100]
-- Cancer Research UK [101]
-- ICCF Holland [102]
+- Hector's Greyhound Rescue [101]
+- Be Humane [102]
+- Cancer Research UK [103]
+- ICCF Holland [104]
 - Any charity of your choosing.
 
 Please note: The YCM maintainers do not specifically endorse nor necessarily
@@ -4190,23 +4252,25 @@ References ~
 [82] https://github.com/Valloric/ListToggle
 [83] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C
 [84] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C.svg
-[85] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
-[86] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
-[87] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
-[88] https://github.com/puremourning/vimspector
-[89] https://github.com/itchyny/lightline.vim
-[90] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
-[91] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
-[92] https://docs.python.org/2/library/re.html#regular-expression-syntax
-[93] http://ctags.sourceforge.net/FORMAT
-[94] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[95] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[96] https://github.com/ycm-core/YouCompleteMe/issues?state=open
-[97] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
-[98] https://www.gnu.org/copyleft/gpl.html
-[99] https://www.hectorsgreyhoundrescue.org
-[100] https://www.budihuman.rs/en
-[101] https://www.cancerresearchuk.org
-[102] https://iccf.nl
+[85] https://asciinema.org/a/659925
+[86] https://asciinema.org/a/659925.svg
+[87] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
+[88] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
+[89] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
+[90] https://github.com/puremourning/vimspector
+[91] https://github.com/itchyny/lightline.vim
+[92] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
+[93] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
+[94] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[95] http://ctags.sourceforge.net/FORMAT
+[96] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[97] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[98] https://github.com/ycm-core/YouCompleteMe/issues?state=open
+[99] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
+[100] https://www.gnu.org/copyleft/gpl.html
+[101] https://www.hectorsgreyhoundrescue.org
+[102] https://www.budihuman.rs/en
+[103] https://www.cancerresearchuk.org
+[104] https://iccf.nl
 
 vim: ft=help
