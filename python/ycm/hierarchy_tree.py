@@ -28,7 +28,8 @@ class HierarchyNode:
 
 
   def ToRootLocation( self, subindex : int ):
-    if location := self._data.get( 'root_location' ):
+    location = self._data.get( 'root_location' )
+    if location:
       file = location[ 'filepath' ]
       line = location[ 'line_num' ]
       column = location[ 'column_num' ]
