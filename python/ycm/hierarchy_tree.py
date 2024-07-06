@@ -21,11 +21,11 @@ import os
 
 
 class HierarchyNode:
-  def __init__( self, data, distance : int ):
+  def __init__( self, data, distance : int, parent ):
     self._references : Optional[ List[ int ] ] = None
     self._data = data
     self._distance_from_root = distance
-
+    self._parent = parent
 
   def ToRootLocation( self, subindex : int ):
     if location := self._data.get( 'root_location' ):
@@ -70,8 +70,8 @@ class HierarchyTree:
     if items:
       assert len( items ) == 1
       self._root_node_indices = [ 0 ]
-      self._down_nodes.append( HierarchyNode( items[ 0 ], 0 ) )
-      self._up_nodes.append( HierarchyNode( items[ 0 ], 0 ) )
+      self._down_nodes.append( HierarchyNode( items[ 0 ], 0, None ) )
+      self._up_nodes.append( HierarchyNode( items[ 0 ], 0, None ) )
       self._kind = kind
       return self.HierarchyToLines()
     return []
@@ -80,15 +80,64 @@ class HierarchyTree:
   def UpdateHierarchy( self, handle : int, items, direction : str ):
     current_index = handle_to_index( handle )
     nodes = self._down_nodes if direction == 'down' else self._up_nodes
+    node = nodes[ current_index ]
     if items:
       nodes.extend( [
         HierarchyNode( item,
-                       nodes[ current_index ]._distance_from_root + 1 )
+                       node._distance_from_root + 1, node )
         for item in items ] )
-      nodes[ current_index ]._references = list(
+      node._references = list(
           range( len( nodes ) - len( items ), len( nodes ) ) )
     else:
-      nodes[ current_index ]._references = []
+      node._references = []
+
+
+  def AddNodes( self, handle : int, items ):
+    if not items:
+      return
+    current_index = handle_to_index( handle )
+    nodes = self._down_nodes
+    node = nodes[ current_index ]
+    nodes.extend( [
+      HierarchyNode( item, node._distance_from_root + 1, node )
+      for item in items ] )
+    new_refs = list( range( len( nodes ) - len( items ), len( nodes ) ) )
+    if node._references:
+      node._references.extend( new_refs)
+    else:
+      node._references = new_refs
+
+
+  def RemoveNode( self, handle : int ):
+    current_index = handle_to_index( handle )
+    nodes = self._down_nodes
+    node = nodes[ current_index ]
+    self._CloseNode( node )
+    if node._parent:
+      node._parent._references.remove( current_index )
+      if len( node._parent._references ) == 0:
+        node._parent._references = None
+      nodes[ current_index ] = None
+      return True
+    else:
+      return False
+
+
+  def _CloseNode( self, node: HierarchyNode ):
+    nodes = self._down_nodes
+    if node._references:
+      for subindex in node._references:
+        if nodes[ subindex ]:
+          self._CloseNode( nodes[ subindex ])
+          nodes[ subindex ] = None
+    node._references = None
+
+
+  def CloseNode( self, handle : int):
+    current_index = handle_to_index( handle )
+    nodes = self._down_nodes
+    node = nodes[ current_index ]
+    self._CloseNode( node )
 
 
   def Reset( self ):

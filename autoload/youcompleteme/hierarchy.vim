@@ -41,15 +41,35 @@ function! youcompleteme#hierarchy#StartRequest( kind )
   endif
 
   call youcompleteme#symbol#InitSymbolProperties()
-  py3 ycm_state.ResetCurrentHierarchy()
   py3 from ycm.client.command_request import GetRawCommandResponse
+
+  if a:kind == 'resume'
+    if s:lines_and_handles != v:null
+      call s:SetUpMenu()
+    endif
+    return
+  endif
+
+  if a:kind == 'addcall'
+    let handle = s:lines_and_handles[ s:select - 1 ][ 1 ]
+    let lines_and_handles = py3eval(
+      \ 'ycm_state.AddCurrentHierarchy( ' .
+      \ 'vimsupport.GetIntValue( "handle" ), ' .
+      \ 'GetRawCommandResponse( ' .
+      \ '[ "CallHierarchy" ], False ))' )
+    let s:lines_and_handles = lines_and_handles
+    call s:SetUpMenu()
+    return
+  endif
+
+  py3 ycm_state.ResetCurrentHierarchy()
   if a:kind == 'call'
     let lines_and_handles = py3eval(
       \ 'ycm_state.InitializeCurrentHierarchy( GetRawCommandResponse( ' .
       \ '[ "CallHierarchy" ], False ), ' .
       \ 'vim.eval( "a:kind" ) )' )
   else
-    let lines_and_handles = py3eval( 
+    let lines_and_handles = py3eval(
       \ 'ycm_state.InitializeCurrentHierarchy( GetRawCommandResponse( ' .
       \ '[ "TypeHierarchy" ], False ), ' .
       \ 'vim.eval( "a:kind" ) )' )
@@ -59,10 +79,29 @@ function! youcompleteme#hierarchy#StartRequest( kind )
     let s:kind = a:kind
     let s:select = 1
     call s:SetUpMenu()
+  else
+    let s:lines_and_handles = v:null
+    let s:select = -1
+    let s:kind = ''
+  endif
+endfunction
+
+function! s:RedrawMenu()
+  let pos = popup_getpos( s:popup_id )
+  call win_execute( s:popup_id,
+                  \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
+  call win_execute( s:popup_id,
+                  \ 'set cursorline cursorlineopt&' )
+  if s:select < pos.firstline
+    call win_execute( s:popup_id, "normal z\<CR>" )
+  endif
+  if s:select >= (pos.firstline + pos.core_height )
+    call win_execute( s:popup_id, ':normal z-' )
   endif
 endfunction
 
 function! s:MenuFilter( winid, key )
+  let pos = popup_getpos( s:popup_id )
   if a:key == "\<S-Tab>"
     " Root changes if we're showing super-tree of a sub-tree of the root
     " (indicated by the handle being positive)
@@ -81,6 +120,20 @@ function! s:MenuFilter( winid, key )
           \ [ s:select - 1, 'resolve_down', will_change_root ] )
     return 1
   endif
+  if a:key == "c"
+    let will_change_root = 0
+    call popup_close(
+          \ s:popup_id,
+          \ [ s:select - 1, 'resolve_close', will_change_root ] )
+  return 1
+  endif
+  if a:key == "d"
+    let will_change_root = 0
+    call popup_close(
+          \ s:popup_id,
+          \ [ s:select - 1, 'resolve_remove', will_change_root ] )
+  return 1
+  endif
   if a:key == "\<CR>"
     call popup_close( s:popup_id, [ s:select - 1, 'jump', v:none ] )
     return 1
@@ -90,10 +143,15 @@ function! s:MenuFilter( winid, key )
     if s:select < 1
       let s:select = 1
     endif
-    call win_execute( s:popup_id,
-                    \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
-    call win_execute( s:popup_id,
-                    \ 'set cursorline cursorlineopt&' )
+    call s:RedrawMenu()
+    return 1
+  endif
+  if a:key == "\<PageUp>" || a:key == "\<kPageUp>"
+    let s:select -= pos.core_height
+    if s:select < 1
+      let s:select = 1
+    endif
+    call s:RedrawMenu()
     return 1
   endif
   if a:key == "\<Down>" || a:key == "\<C-n>" || a:key == "\<C-j>" || a:key == "j"
@@ -101,10 +159,15 @@ function! s:MenuFilter( winid, key )
     if s:select > len( s:lines_and_handles )
       let s:select = len( s:lines_and_handles )
     endif
-    call win_execute( s:popup_id,
-                    \ 'call cursor( [' . string( s:select ) . ', 1 ] )' )
-    call win_execute( s:popup_id,
-                    \ 'set cursorline cursorlineopt&' )
+    call s:RedrawMenu()
+    return 1
+  endif
+  if a:key == "\<PageDown>" || a:key == "\<kPageDown>"
+    let s:select += pos.core_height
+    if s:select > len( s:lines_and_handles )
+      let s:select = len( s:lines_and_handles )
+    endif
+    call s:RedrawMenu()
     return 1
   endif
   if index( s:ingored_keys, a:key ) >= 0
@@ -125,14 +188,15 @@ function! s:MenuCallback( winid, result )
     call s:ResolveItem( selection, 'down', a:result[ 2 ] )
   elseif operation == 'resolve_up'
     call s:ResolveItem( selection, 'up', a:result[ 2 ] )
+  elseif operation == 'resolve_close'
+    call s:ResolveItem( selection, 'close', a:result[ 2 ] )
+  elseif operation == 'resolve_remove'
+    call s:ResolveItem( selection, 'remove', a:result[ 2 ] )
   else
     if operation == 'jump'
       let handle = s:lines_and_handles[ selection ][ 1 ]
       py3 ycm_state.JumpToHierarchyItem( vimsupport.GetIntValue( "handle" ) )
     endif
-    py3 ycm_state.ResetCurrentHierarchy()
-    let s:kind = ''
-    let s:select = 1
   endif
 endfunction
 
@@ -208,6 +272,7 @@ function! s:SetUpMenu()
           \ . "\t"
           \ .. trunc_desc
     call add( menu_lines, { 'text': line, 'props': props } )
+
   endfor
   call win_execute( s:popup_id,
                   \ 'setlocal tabstop=' . tabstop )

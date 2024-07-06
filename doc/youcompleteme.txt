@@ -2162,6 +2162,11 @@ are supported:
 - Call hierarchy '<Plug>(YCMCallHierarchy)': Display callees and callers of
   the symbol under cursor. Expand down to callers and up to callees.
 
+- Resume hierarchy '<Plug>(YCMResumeHierarchy)': Reopen the Hierarchy window.
+
+- Add hierarchy '<Plug>(YCMAddCallHierarchy)': Add a caller to current node
+  manually.
+
 Take a look at this Image: asciicast [85] for brief demo.
 
 Hierarchy UI can be initiated by mapping something to the indicated plug
@@ -2169,6 +2174,8 @@ mappings, for example:
 >
   nmap <leader>yth <Plug>(YCMTypeHierarchy)
   nmap <leader>ych <Plug>(YCMCallHierarchy)
+  nmap <leader>ycr <Plug>(YCMResumeHierarchy)
+  nmap <leader>yca <Plug>(YCMAddCallHierarchy)
 <
 This opens a "modal" popup showing the current element in the hierarchy tree.
 The current tree root is aligned to the left and child and parent nodes are
@@ -2181,6 +2188,16 @@ inheritance where a "child" of the current root may actually have other,
 invisible, parent links. '<S-Tab>' on that row will show these by setting the
 display root to the selected item.
 
+When YCMCallHierarchy cannot find the actual caller, '<Plug>(YCMAddCallHierarchy)'
+will be very useful. For example, when tracking the caller of callback functions
+in C language, YCMCallHierarchy may not be able to find the true caller; instead,
+it may trace related registration functions or initialization functions. The
+relevant code passes the callback function to a function pointer, resulting in
+a call stack that may not be what you are looking for. In this case, you can
+manually find the function that calls the function pointer, which is the true
+caller, and use '<Plug>(YCMAddCallHierarchy)' to manually add the true caller
+to the call stack, thus extending the call stack.
+
 When the hierarchy is displayed, the following keys are intercepted:
 
 - '<Tab>': Drill into the hierarchy at the selected item: expand and show
@@ -2191,6 +2208,11 @@ When the hierarchy is displayed, the following keys are intercepted:
 - '<CR>': Jump to the symbol currently selected.
 - '<Down>', '<C-n>', '<C-j>', 'j': Select the next item
 - '<Up>', '<C-p>', '<C-k>', 'k'; Select the previous item
+- '<PageUp>': Select the item on the previous page.
+- '<PageDown>': Select the item on the next page.
+- '<c>': Close the current item, in other words, remove the caller of the
+   item under the cursorline.
+- '<d>': Remove the current item.
 - Any other key: closes the popup without jumping to any location
 
 **Note:** you might think the call hierarchy tree is inverted, but we think
