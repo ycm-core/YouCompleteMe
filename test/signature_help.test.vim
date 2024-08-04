@@ -209,7 +209,7 @@ function! Test_Signatures_With_PUM_NoSigns()
     " Popup is shifted due to 80 column screen
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 5, 'col': 5 } )
+          \ { 'line': 3, 'col': 11 } )
 
     call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>", 't' )
@@ -229,7 +229,7 @@ function! Test_Signatures_With_PUM_NoSigns()
     " Popup is shifted left due to 80 char screen
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 5, 'col': 5 } )
+          \ { 'line': 3, 'col': 11 } )
 
     call timer_start( s:timer_interval, funcref( 'Check2' ) )
     call feedkeys( ' TypeOfD', 't' )
@@ -288,7 +288,7 @@ function! Test_Signatures_With_PUM_Signs()
     " one which uses a much smaller popup to do that.
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 5, 'col': 5 } )
+          \ { 'line': 3, 'col': 13 } )
 
     call test_override( 'ALL', 0 )
     call feedkeys( "\<ESC>", 't' )
@@ -308,7 +308,7 @@ function! Test_Signatures_With_PUM_Signs()
     " Popup is shifted left due to 80 char screen
     call youcompleteme#test#popup#CheckPopupPosition(
           \ s:_GetSigHelpWinID(),
-          \ { 'line': 5, 'col': 5 } )
+          \ { 'line': 3, 'col': 11 } )
 
     call timer_start( s:timer_interval, funcref( 'Check2' ) )
     call feedkeys( ' TypeOfD', 't' )
@@ -391,7 +391,7 @@ function! Test_Placement_Simple()
   " Cursor at top-right of window
   call s:_CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
         \ 'line': 2,
-        \ 'col': &columns - len( "test function" ) - 1,
+        \ 'col': 77,
         \ } )
   call s:_ClearSigHelp()
 
@@ -404,8 +404,8 @@ function! Test_Placement_Simple()
 
   " Bottom-right of window
   call s:_CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
-        \ 'line': &lines - 2,
-        \ 'col': &columns - len( "test function" ) - 1,
+        \ 'line': 22,
+        \ 'col': 77,
         \ } )
   call s:_ClearSigHelp()
 
@@ -474,7 +474,7 @@ function! Test_Placement_MultiLine()
   " Cursor at top-right of window
   call s:_CheckSigHelpAtPos( v_sh, [ 1, &columns ], {
         \ 'line': 2,
-        \ 'col': &columns - len( "toast function" ) - 1,
+        \ 'col': 77,
         \ } )
   call s:_ClearSigHelp()
 
@@ -487,8 +487,8 @@ function! Test_Placement_MultiLine()
 
   " Bottom-right of window
   call s:_CheckSigHelpAtPos( v_sh, [ &lines + 1, &columns ], {
-        \ 'line': &lines - 3,
-        \ 'col': &columns - len( "toast function" ) - 1,
+        \ 'line': 15,
+        \ 'col': 77,
         \ } )
   call s:_ClearSigHelp()
 
