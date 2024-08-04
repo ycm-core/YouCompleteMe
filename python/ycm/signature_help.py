@@ -196,7 +196,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )
   vim.eval( f"win_execute( { state.popup_win_id }, "
-            f"'set syntax={ syntax } cursorline | "
+            f"'set syntax={ syntax } cursorline wrap | "
             f"call cursor( [ { active_signature + 1 }, 1 ] )' )" )
 
   return state
