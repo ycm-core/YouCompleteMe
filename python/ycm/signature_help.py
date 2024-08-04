@@ -159,6 +159,17 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # inserting the char ?
     col = int( screen_pos[ 'curscol' ] ) - 2
 
+  # Vim stops shifting the popup to the left if we turn on soft-wrapping.
+  # Instead, we want to first shift the popup to the left and then
+  # and then turn on wrapping.
+  max_line_length = len( max(
+    buf_lines,
+    key = lambda item: len( item[ 'text' ] ) )[ 'text' ] )
+  vim_width = vimsupport.GetIntValue( '&columns' )
+  line_available = vim_width - int( screen_pos[ 'col' ] )
+  if max_line_length > line_available:
+    col = vim_width - max_line_length
+
   if col <= 0:
     col = 1
 
@@ -172,6 +183,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
     # cursorline. So instead, we manually set 'cursorline' in the popup window
     # and enable syntax based on the current file syntax)
     "flip": 1,
+    "fixed": 1,
     "padding": [ 0, 1, 0, 1 ], # Pad 1 char in X axis to match completion menu
     "hidden": int( state.state == SignatureHelpState.ACTIVE_SUPPRESSED )
   }
@@ -196,7 +208,7 @@ def UpdateSignatureHelp( state, signature_info ): # noqa
 
   active_signature = int( signature_info.get( 'activeSignature', 0 ) )
   vim.eval( f"win_execute( { state.popup_win_id }, "
-            f"'set syntax={ syntax } cursorline | "
+            f"'set syntax={ syntax } cursorline wrap | "
             f"call cursor( [ { active_signature + 1 }, 1 ] )' )" )
 
   return state
