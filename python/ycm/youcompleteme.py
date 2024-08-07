@@ -118,7 +118,14 @@ class YouCompleteMe:
 
 
   def UpdateCurrentHierarchy( self, handle : int, direction : str ):
-    if not self._current_hierarchy.UpdateChangesRoot( handle, direction ):
+    if direction == 'close':
+      self._current_hierarchy.CloseNode( handle )
+      return self._current_hierarchy.HierarchyToLines(), 0
+    elif direction == 'remove':
+      ret = self._current_hierarchy.RemoveNode( handle )
+      offset = -1 if ret else 0
+      return self._current_hierarchy.HierarchyToLines(), offset
+    elif not self._current_hierarchy.UpdateChangesRoot( handle, direction ):
       items = self._ResolveHierarchyItem( handle, direction )
       self._current_hierarchy.UpdateHierarchy( handle, items, direction )
 
@@ -141,6 +148,16 @@ class YouCompleteMe:
       # [ 1 ] chooses only the handle
       handle = self.InitializeCurrentHierarchy( items, kind )[ 0 ][ 1 ]
       return self.UpdateCurrentHierarchy( handle, direction )
+
+
+  def AddCurrentHierarchy( self, handle : int, items ):
+      self._current_hierarchy.AddNodes( handle, items )
+      return self._current_hierarchy.HierarchyToLines()
+
+
+  def RemoveCurrentHierarchy( self, handle : int ):
+      self._current_hierarchy.RemoveNode( handle )
+      return self._current_hierarchy.HierarchyToLines()
 
 
   def _ResolveHierarchyItem( self, handle : int, direction : str ):
