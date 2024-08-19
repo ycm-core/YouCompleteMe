@@ -353,7 +353,7 @@ that supports Python 3 or [MacVim][], install it with [Homebrew][brew]. Install
 CMake as well:
 
     brew install vim cmake     
-    
+
    OR
 
     brew install macvim cmake
@@ -429,10 +429,12 @@ The following assume you're using Ubuntu 22.04.
 apt install build-essential cmake vim-nox python3-dev
 ```
 
-- Install mono-complete, go, node, java, and npm
+- Install mono-complete, node, java, npm and latest go
 
 ```
-apt install mono-complete golang nodejs openjdk-17-jdk openjdk-17-jre npm
+add-apt-repository ppa:longsleep/golang-backports 
+apt update && apt install golang-go
+apt install mono-complete nodejs openjdk-17-jdk openjdk-17-jre npm
 ```
 
 - Compile YCM
@@ -520,7 +522,7 @@ Don't forget that if you want the C-family semantic completion engine to work,
 you will need to provide the compilation flags for your project to YCM. It's all
 in the User Guide.
 
-YCM comes with sane defaults for its options, but you still may want to take a
+​		YCM comes with sane defaults for its options, but you still may want to take a
 look at what's available for configuration. There are a few interesting options
 that are conservatively turned off by default that you may want to turn on.
 
@@ -1405,7 +1407,7 @@ It is possible to use it with .NET 6.0 and newer, but it requires manual setup.
 [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases/)
 1. Set `g:ycm_roslyn_binary_path` to the unpacked executable `OmniSharp`
 1. Create a solution file if one doesn't already exist, it is currently required
-by YCM for internal bookkeeping
+   by YCM for internal bookkeeping
     1. Run `dotnet new sln` at the root of your project
     1. Run `dotnet sln add <project1.csproj> <project2.csproj> ...`
     for all of your projects
