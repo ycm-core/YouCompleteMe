@@ -31,10 +31,10 @@ let s:is_neovim = has( 'nvim' )
 if exists( "g:loaded_youcompleteme" )
   call s:restore_cpo()
   finish
-elseif ( v:version < 802 || (v:version == 802 && !has( 'patch3995' )) ) &&
+elseif ( v:version < 901 || (v:version == 901 && !has( 'patch0016' )) ) &&
       \ !s:is_neovim
   echohl WarningMsg |
-        \ echomsg "YouCompleteMe unavailable: requires Vim 8.2.3995+." |
+        \ echomsg "YouCompleteMe unavailable: requires Vim 9.1.0016+." |
         \ echohl None
   call s:restore_cpo()
   finish
