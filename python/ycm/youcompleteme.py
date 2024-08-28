@@ -807,7 +807,7 @@ class YouCompleteMe:
     debug_info += ( '\nSemantic highlighting supported: ' +
                     str( not vimsupport.VimIsNeovim() ) )
     debug_info += ( '\nVirtual text supported: ' +
-                    str( vimsupport.VimSupportsVirtualText() ) )
+                    str( not vimsupport.VimIsNeovim() ) )
     debug_info += ( '\nPopup windows supported: ' +
                     str( vimsupport.VimSupportsPopupWindows() ) )
     return debug_info

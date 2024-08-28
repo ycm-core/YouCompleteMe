@@ -32,7 +32,7 @@ REPORTED_MISSING_TYPES = set()
 
 
 def Initialise():
-  if not vimsupport.VimSupportsVirtualText():
+  if vimsupport.VimIsNeovim():
     return False
 
   props = tp.GetTextPropertyTypes()
