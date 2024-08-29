@@ -66,7 +66,7 @@ jobs:
         submodules: recursive
         fetch-depth: 0
     - name: Install dependencies
-      run: sudo -H pip3 install -r python/test_requirements.txt
+      run: sudo -H pip3 install --break-system-packages -r python/test_requirements.txt
     - name: Install Java
       uses: actions/setup-java@v4
       with:
