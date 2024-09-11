@@ -2,6 +2,5 @@ flake8                >= 3.0.0
 flake8-comprehensions >= 1.4.1
 flake8-ycm            >= 0.1.0
 PyHamcrest            >= 1.10.1
-coverage              <5.0
-click                 <8.0.0
-covimerage            >= 0.2.0
+# Use the updated fork
+git+https://github.com/bstaletic/covimerage
