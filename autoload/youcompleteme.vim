@@ -1357,7 +1357,7 @@ function! s:Complete()
   endif
   if len( s:completion.completions )
     let old_completeopt = &completeopt
-    set completeopt+=noselect
+    setlocal completeopt+=noselect
     call complete( s:completion.completion_start_column,
                  \ s:completion.completions )
     let &completeopt = old_completeopt
