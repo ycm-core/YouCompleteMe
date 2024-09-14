@@ -104,14 +104,5 @@ def ClearTextProperties(
   if not isinstance( prop_types, list ):
     prop_types = [ prop_types ]
 
-  # 9.0.233 added types list to prop_remove, so use that
-  if vimsupport.VimVersionAtLeast( '9.0.233' ):
-    props[ 'types' ] = prop_types
-    return prop_remove()
-
-  # Older versions we have to run prop_remove for each type
-  removed = 0
-  for prop_type in prop_types:
-    props[ 'type' ] = prop_type
-    removed += prop_remove()
-  return removed
+  props[ 'types' ] = prop_types
+  return prop_remove()

@@ -1357,7 +1357,7 @@ function! s:Complete()
   endif
   if len( s:completion.completions )
     let old_completeopt = &completeopt
-    set completeopt+=noselect
+    setlocal completeopt+=noselect
     call complete( s:completion.completion_start_column,
                  \ s:completion.completions )
     let &completeopt = old_completeopt
@@ -1762,6 +1762,11 @@ endfunction
 
 silent! nnoremap <silent> <plug>(YCMToggleInlayHints)
       \ <cmd>call <SID>ToggleInlayHints()<CR>
+
+silent! nnoremap <silent> <plug>(YCMTypeHierarchy)
+      \ <cmd>call youcompleteme#hierarchy#StartRequest( 'type' )<cr>
+silent! nnoremap <silent> <plug>(YCMCallHierarchy)
+      \ <cmd>call youcompleteme#hierarchy#StartRequest( 'call' )<cr>
 
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo

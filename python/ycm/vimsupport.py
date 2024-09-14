@@ -60,10 +60,6 @@ NO_COMPLETIONS = {
 
 YCM_NEOVIM_NS_ID = vim.eval( 'g:ycm_neovim_ns_id' )
 
-# Virtual text is not a feature in itself and early patches don't work well, so
-# we need to keep changing this at the moment
-VIM_VIRTUAL_TEXT_VERSION_REQ = '9.0.214'
-
 
 def CurrentLineAndColumn():
   """Returns the 0-based current line and 0-based current column."""
@@ -152,8 +148,8 @@ def GetUnsavedAndSpecifiedBufferData( included_buffer, included_filepath ):
 def GetBufferNumberForFilename( filename, create_buffer_if_needed = False ):
   realpath = os.path.realpath( filename )
   return MADEUP_FILENAME_TO_BUFFER_NUMBER.get( realpath, GetIntValue(
-      f"bufnr('{ EscapeForVim( realpath ) }', "
-             f"{ int( create_buffer_if_needed ) })" ) )
+      f"bufnr( '{ EscapeForVim( realpath ) }', "
+             f"{ int( create_buffer_if_needed ) } )" ) )
 
 
 def GetCurrentBufferFilepath():
@@ -163,7 +159,7 @@ def GetCurrentBufferFilepath():
 def BufferIsVisible( buffer_number ):
   if buffer_number < 0:
     return False
-  window_number = GetIntValue( f"bufwinnr({ buffer_number })" )
+  window_number = GetIntValue( f"bufwinnr( { buffer_number } )" )
   return window_number != -1
 
 
@@ -259,7 +255,7 @@ def VisibleRangeOfBufferOverlaps( bufnr, expanded_range ):
 
 
 def CaptureVimCommand( command ):
-  return vim.eval( f"execute( '{EscapeForVim(command)}', 'silent!' )" )
+  return vim.eval( f"execute( '{ EscapeForVim( command ) }', 'silent!' )" )
 
 
 def GetSignsInBuffer( buffer_number ):
@@ -308,55 +304,30 @@ def GetTextPropertyForDiag( buffer_number, line_number, diag ):
     property_name = 'YcmErrorProperty'
   else:
     property_name = 'YcmWarningProperty'
-  if HasFastPropList():
-    vim_props = vim.eval( f'prop_list( { line_number }, '
-                          f'{{ "bufnr": { buffer_number }, '
-                             f'"types": [ "{ property_name }" ] }} )' )
-    return next( filter(
-        lambda p: column == int( p[ 'col' ] ) and
-                  length == int( p[ 'length' ] ),
-        vim_props ) )
-  else:
-    vim_props = vim.eval( f'prop_list( { line_number }, '
-                                     f'{{ "bufnr": { buffer_number } }} )' )
-    return next( filter(
-        lambda p: start[ 'column_num' ] == int( p[ 'col' ] ) and
-                  length == int( p[ 'length' ] ) and
-                  property_name == p[ 'type' ],
-        vim_props ) )
+  vim_props = vim.eval( f'prop_list( { line_number }, '
+                        f'{{ "bufnr": { buffer_number }, '
+                           f'"types": [ "{ property_name }" ] }} )' )
+  return next( filter(
+      lambda p: column == int( p[ 'col' ] ) and
+                length == int( p[ 'length' ] ),
+      vim_props ) )
 
 
 def GetTextProperties( buffer_number ):
   if not VimIsNeovim():
-    if HasFastPropList():
-      return [
-        DiagnosticProperty(
-            int( p[ 'id' ] ),
-            p[ 'type' ],
-            int( p[ 'lnum' ] ),
-            int( p[ 'col' ] ),
-            int( p[ 'length' ] ) )
-        for p in vim.eval(
-            f'prop_list( 1, '
-                         f'{{ "bufnr": { buffer_number }, '
-                             '"end_lnum": -1, '
-                             '"types": [ "YcmErrorProperty", '
-                                        '"YcmWarningProperty" ] } )' ) ]
-    else:
-      properties = []
-      for line_number in range( len( vim.buffers[ buffer_number ] ) ):
-        vim_props =  vim.eval( f'prop_list( {line_number + 1}, '
-                               f'{{ "bufnr": { buffer_number } }} )' )
-        properties.extend(
-          DiagnosticProperty(
-            int( p[ 'id' ] ),
-            p[ 'type' ],
-            line_number + 1,
-            int( p[ 'col' ] ),
-            int( p[ 'length' ] ) )
-          for p in vim_props if p.get( 'type', '' ).startswith( 'Ycm' )
-        )
-      return properties
+    return [
+      DiagnosticProperty(
+          int( p[ 'id' ] ),
+          p[ 'type' ],
+          int( p[ 'lnum' ] ),
+          int( p[ 'col' ] ),
+          int( p[ 'length' ] ) )
+      for p in vim.eval(
+          f'prop_list( 1, '
+                       f'{{ "bufnr": { buffer_number }, '
+                           '"end_lnum": -1, '
+                           '"types": [ "YcmErrorProperty", '
+                                      '"YcmWarningProperty" ] } )' ) ]
   else:
     ext_marks = vim.eval(
       f'nvim_buf_get_extmarks( { buffer_number }, '
@@ -818,9 +789,9 @@ def PresentDialog( message, choices, default_choice_index = 0 ):
       [Y]es, (N)o, May(b)e:"""
   message = EscapeForVim( ToUnicode( message ) )
   choices = EscapeForVim( ToUnicode( '\n'.join( choices ) ) )
-  to_eval = ( f"confirm('{ message }', "
-                      f"'{ choices }', "
-                      f"{ default_choice_index + 1 })" )
+  to_eval = ( f"confirm( '{ message }', "
+                       f"'{ choices }', "
+                       f"{ default_choice_index + 1 } )" )
   try:
     return GetIntValue( to_eval ) - 1
   except KeyboardInterrupt:
@@ -1258,7 +1229,7 @@ def OpenFileInPreviewWindow( filename, modifiers ):
   """ Open the supplied filename in the preview window """
   if modifiers:
     modifiers = ' ' + modifiers
-  vim.command( f'silent!{modifiers} pedit! { filename }' )
+  vim.command( f'silent!{ modifiers } pedit! { filename }' )
 
 
 def WriteToPreviewWindow( message, modifiers ):
@@ -1353,7 +1324,7 @@ def OpenFilename( filename, options = {} ):
 
   # Open the file.
   try:
-    vim.command( f'{ options.get( "mods", "") }'
+    vim.command( f'{ options.get( "mods", "" ) }'
                  f'{ size }'
                  f'{ command } '
                  f'{ filename }' )
@@ -1465,11 +1436,6 @@ def VimIsNeovim():
 
 
 @memoize()
-def HasFastPropList():
-  return GetBoolValue( 'has( "patch-8.2.3652" )' )
-
-
-@memoize()
 def VimSupportsPopupWindows():
   return VimHasFunctions( 'popup_create',
                           'popup_atcursor',
@@ -1478,11 +1444,6 @@ def VimSupportsPopupWindows():
                           'popup_settext',
                           'popup_show',
                           'popup_close' )
-
-
-@memoize()
-def VimSupportsVirtualText():
-  return not VimIsNeovim() and VimVersionAtLeast( VIM_VIRTUAL_TEXT_VERSION_REQ )
 
 
 @memoize()

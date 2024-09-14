@@ -67,6 +67,7 @@ Contents
     - [Diagnostic Display](#diagnostic-display)
         - [Diagnostic Highlighting Groups](#diagnostic-highlighting-groups)
     - [Symbol Search](#symbol-search)
+    - [Type/Call Hierarchy](#typecall-hierarchy)
 - [Commands](#commands)
     - [YcmCompleter subcommands](#ycmcompleter-subcommands)
         - [GoTo Commands](#goto-commands)
@@ -210,13 +211,12 @@ Installation
 
 | Runtime | Min Version | Recommended Version (full support) | Python |
 |---------|-------------|------------------------------------|--------|
-| Vim     | 8.2.3995    | 9.0.214                            | 3.8    |
-| Neovim  | 0.5         | Vim 9.0.214                        | 3.8    |
+| Vim     | 9.1.0016    | 9.1.0016                           | 3.8    |
+| Neovim  | 0.5         | Vim 9.1.0016                       | 3.8    |
 
 #### Supported Vim Versions
 
 Our policy is to support the Vim version that's in the latest LTS of Ubuntu.
-That's currently Ubuntu 22.04 which contains `vim-nox` at `v8.2.3995`.
 
 Vim must have a [working Python 3 runtime](#supported-python-runtime).
 
@@ -417,7 +417,7 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Linux 64-bit
 
-The following assume you're using Ubuntu 22.04.
+The following assume you're using Ubuntu 24.04.
 
 #### Quick start, installing all completers
 
@@ -431,9 +431,6 @@ apt install build-essential cmake vim-nox python3-dev
 - Install mono-complete, go, node, java, and npm
 
 ```
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_current.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 apt install mono-complete golang nodejs openjdk-17-jdk openjdk-17-jre npm
 ```
 
@@ -677,6 +674,8 @@ Quick Feature Summary
 * Code formatting (`Format`)
 * Semantic highlighting
 * Inlay hints
+* Type hierarchy
+* Call hierarchy
 
 ### C♯
 
@@ -720,6 +719,8 @@ Quick Feature Summary
 * Type information for identifiers (`GetType`)
 * Code formatting (`Format`)
 * Management of `gopls` server instance
+* Inlay hints
+* Call hierarchy
 
 ### JavaScript and TypeScript
 
@@ -741,6 +742,7 @@ Quick Feature Summary
 * Organize imports (`OrganizeImports`)
 * Management of `TSServer` server instance
 * Inlay hints
+* Call hierarchy
 
 ### Rust
 
@@ -759,6 +761,7 @@ Quick Feature Summary
 * Management of `rust-analyzer` server instance
 * Semantic highlighting
 * Inlay hints
+* Call hierarchy
 
 ### Java
 
@@ -782,6 +785,9 @@ Quick Feature Summary
 * Execute custom server command (`ExecuteCommand <args>`)
 * Management of `jdt.ls` server instance
 * Semantic highlighting
+* Inlay hints
+* Type hierarchy
+* Call hierarchy
 
 User Guide
 ----------
@@ -912,10 +918,6 @@ difficult to create without breaking or overriding some existing functionality.
 Ctrl-l is not a suggestion, just an example.
 
 ### Semantic highlighting
-
-**NOTE**: This feature is highly experimental and offered in the hope that it is
-useful. It shall not be considered stable; if you find issues with it, feel free
-to report them, however.
 
 Semantic highlighting is the process where the buffer text is coloured according
 to the underlying semantic type of the word, rather than classic syntax
@@ -1088,7 +1090,7 @@ On supported architectures, the `install.py` script will download a suitable
 clangd (`--clangd-completer`) or libclang (`--clang-completer`) for you.
 Supported architectures are:
 
-* Linux glibc >= 2.31 (Intel, armv7-a, aarch64) - built on ubuntu 22.04
+* Linux glibc >= 2.39 (Intel, armv7-a, aarch64) - built on ubuntu 24.04
 * MacOS >=10.15 (Intel, arm64)
   - For Intel, compatibility per clang.llvm.org downloads
   - For arm64, macOS 10.15+
@@ -1614,10 +1616,10 @@ let g:ycm_language_server =
   \     'filetypes': [ 'yaml' ]
   \   },
   \   {
-  \     'name': 'rust',
-  \     'cmdline': [ 'ra_lsp_server' ],
-  \     'filetypes': [ 'rust' ],
-  \     'project_root_files': [ 'Cargo.toml' ]
+  \     'name': 'csharp',
+  \     'cmdline': [ 'OmniSharp', '-lsp' ],
+  \     'filetypes': [ 'csharp' ],
+  \     'project_root_files': [ '*.csproj', '*.sln' ]
   \   },
   \   {
   \     'name': 'godot',
@@ -1636,7 +1638,8 @@ Each dictionary contains the following keys:
 * `filetypes` (list of string, mandatory): List of Vim filetypes this server
   should be used for.
 * `project_root_files` (list of string, optional): List of filenames to search
-  for when trying to determine the project's root.
+  for when trying to determine the project's root. Uses python's pathlib for
+  glob matching.
 * `cmdline` (list of strings, optional): If supplied, the server is started with
   this command line (each list element is a command line word). Typically, the
   server should be started with STDIO communication. If not supplied, `port`
@@ -1883,6 +1886,61 @@ so you can use window commands `<C-w>...` for example.
 for that, or use a window command (e.g. `<Ctrl-w>j`) or the mouse to leave the
 prompt buffer window.
 
+### Type/Call Hierarchy
+
+***This feature requires Vim and is not supported in Neovim***
+
+**NOTE**: This feature is highly experimental and offered in the hope that it is
+useful. Please help us by reporting issues and offering feedback.
+
+YCM provides a way to view and navigate hierarchies. The following hierarchies
+are supported:
+
+* Type hierachy `<Plug>(YCMTypeHierarchy)`: Display subtypes and supertypes
+  of the symbol under cursor. Expand down to subtypes and up to supertypes.
+* Call hierarchy `<Plug>(YCMCallHierarchy)`: Display callees and callers of
+  the symbol under cursor. Expand down to callers and up to callees.
+
+Take a look at this [![asciicast](https://asciinema.org/a/659925.svg)](https://asciinema.org/a/659925)
+for brief demo.
+
+Hierarchy UI can be initiated by mapping something to the indicated plug
+mappings, for example:
+
+```viml
+nmap <leader>yth <Plug>(YCMTypeHierarchy)
+nmap <leader>ych <Plug>(YCMCallHierarchy)
+```
+
+This opens a "modal" popup showing the current element in the hierarchy tree.
+The current tree root is aligned to the left and child and parent nodes are
+expanded to the right. Expand the tree "down" with `<Tab> and "up" with
+`<S-Tab>`.
+
+The "root" of the tree can be re-focused to the selected item with
+`<S-Tab>` and further `<S-Tab>` will show the parents of the selected item. This
+can take a little getting used to, but it's particularly important with multiple
+inheritance where a "child" of the current root may actually have other,
+invisible, parent links. `<S-Tab>` on that row will show these by setting the
+display root to the selected item.
+
+When the hierarchy is displayed, the following keys are intercepted:
+
+* `<Tab>`: Drill into the hierarchy at the selected item: expand and show
+  children of the selected item.
+* `<S-Tab>`: Show parents of the selected item. When applied to sub-types, this
+  will re-root the tree at that type, so that all parent types (are displayed).
+  Similar for callers.
+* `<CR>`: Jump to the symbol currently selected.
+* `<Down>`, `<C-n>`, `<C-j>`, `j`: Select the next item
+* `<Up>`, `<C-p>`, `<C-k>`, `k`; Select the previous item
+* Any other key: closes the popup without jumping to any location
+
+**Note:** you might think the call hierarchy tree is inverted, but we think
+this way round is more intuitive because this is the typical way that call
+stacks are displayed (with the current function at the top, and its callers
+below). 
+
 Commands
 --------
 
@@ -2101,6 +2159,9 @@ Provides a list of symbols in the current document, in the quickfix list. See al
 Supported in filetypes: `c, cpp, objc, objcpp, cuda, go, java, rust`
 
 #### The `GoToCallers` and `GoToCallees` subcommands
+
+Note: A much more powerful call and type hierarchy can be viewd interactively.
+See [interactive type and call hierarchy](#interactive-type-and-call-hierarchy).
 
 Populate the quickfix list with the callers, or callees respectively, of the
 function associated with the current cursor position. The semantics of this
@@ -3738,9 +3799,7 @@ let g:ycm_language_server = []
 ### The `g:ycm_disable_signature_help` option
 
 This option allows you to disable all signature help for all completion engines.
-There is no way to disable it per-completer. This option is _reserved_, meaning
-that while signature help support remains experimental, its values and meaning
-may change and it may be removed in a future version.
+There is no way to disable it per-completer.
 
 Default: `0`
 

@@ -133,7 +133,7 @@ class DiagnosticInterface:
     if not self._diag_message_needs_clearing:
       return
 
-    if ( vimsupport.VimSupportsVirtualText() and
+    if ( not vimsupport.VimIsNeovim() and
          self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
       tp.ClearTextProperties( self._bufnr,
                               prop_types = [ 'YcmVirtDiagPadding',
@@ -149,7 +149,7 @@ class DiagnosticInterface:
   def _EchoDiagnosticText( self, line_num, first_diag, text ):
     self._ClearCurrentDiagnostic( bool( text ) )
 
-    if ( vimsupport.VimSupportsVirtualText() and
+    if ( not vimsupport.VimIsNeovim() and
          self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
       if not text:
         return
