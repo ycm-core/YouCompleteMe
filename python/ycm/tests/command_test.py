@@ -99,7 +99,7 @@ class CommandTest( TestCase ):
               },
               'end': {
                 'line_num': 2,
-                'column_num': 12
+                'column_num': 13
               }
             }
           },
@@ -132,7 +132,7 @@ class CommandTest( TestCase ):
               },
               'end': {
                 'line_num': 2,
-                'column_num': 9
+                'column_num': 10
               }
             }
           },
