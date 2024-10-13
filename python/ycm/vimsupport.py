@@ -937,10 +937,10 @@ def _SortChunksByFile( chunks ):
   for chunk in chunks:
     if 'range' in chunk:
       filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
-    elif 'old_file' in chunk:
-      filepath = chunk[ 'old_file' ]
+    elif 'old_filepath' in chunk:
+      filepath = chunk[ 'old_filepath' ]
     else:
-      filepath = chunk[ 'file' ]
+      filepath = chunk[ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
   return chunks_by_file
@@ -1098,22 +1098,22 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
           chunk[ 'range' ][ 'end' ],
           chunk[ 'replacement_text' ],
           vim_buffer ) )
-    elif 'old_file' in chunk:
+    elif 'old_filepath' in chunk:
       replace_chunks.append(
         RenameChunk(
-          chunk[ 'old_file' ],
-          chunk[ 'new_file' ],
+          chunk[ 'old_filepath' ],
+          chunk[ 'new_filepath' ],
           vim_buffer ) )
     elif chunk[ 'kind' ] == 'create':
       replace_chunks.append(
         CreateChunk(
-          chunk[ 'file' ],
+          chunk[ 'filepath' ],
           vim_buffer,
           chunk[ 'kind' ] ) )
     elif chunk[ 'kind' ] == 'delete':
       replace_chunks.append(
         DeleteChunk(
-          chunk[ 'file' ],
+          chunk[ 'filepath' ],
           vim_buffer,
           chunk[ 'kind' ] ) )
   return reversed( replace_chunks )
@@ -1228,7 +1228,10 @@ def CreateChunk( file, vim_buffer, kind = 'create' ):
 
 def DeleteChunk( file, vim_buffer, kind = 'delete' ):
   vim.command( f'silent! bw! { vim_buffer }' )
-  os.remove( file )
+  try:
+    os.remove( file )
+  except FileNotFoundError:
+    pass
   return {
     'bufnr': vim_buffer.number,
     'filename': file,
