@@ -21,6 +21,7 @@ import shutil
 import os
 import json
 import re
+import io
 from collections import defaultdict, namedtuple
 from functools import lru_cache as memoize
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
@@ -40,10 +41,13 @@ BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'new-tab'          : 'tabedit' }
 
 FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
-    'The requested operation will apply changes to {0} files which are not '
-    'currently open. This will therefore open {0} new files in the hidden '
-    'buffers. The quickfix list can then be used to review the changes. No '
-    'files will be written to disk. Do you wish to continue?' )
+    'The requested operation will apply the following changes:\n\n'
+    '{0}\n'
+    'Create, Rename and Delete operations change the state on disk.\n'
+    'Change operations are only reflected inside vim, unless followed by '
+    'another kind of operation relating to the same file.\n'
+    'The results will be placed in the location list.\n'
+    'Do you wish to continue?' )
 
 NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
 
@@ -949,12 +953,32 @@ def _SortChunksByFile( chunks ):
   return chunks_by_file
 
 
-def _GetNumNonVisibleFiles( file_list ):
+def _GetNumNonVisibleFiles( chunks ):
   """Returns the number of file in the iterable list of files |file_list| which
   are not curerntly open in visible windows"""
-  return len(
-      [ f for f in file_list
-        if not BufferIsVisible( GetBufferNumberForFilename( f ) ) ] )
+  warn = False
+  operations = io.StringIO()
+  for chunk in chunks:
+    kind = chunk[ 'kind' ]
+    if kind in ( 'create', 'rename', 'delete' ):
+      warn = True
+    if kind == 'change':
+      filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    elif kind == 'rename':
+      filepath = chunk[ 'old_filepath' ]
+    else:
+      filepath = chunk[ 'filepath' ]
+    if not BufferIsVisible( GetBufferNumberForFilename( filepath ) ):
+      warn = True
+    if kind != 'rename':
+      operations.write( f' - { kind.title() }: { filepath }\n' )
+    else:
+      old = chunk[ 'old_filepath' ]
+      new = chunk[ 'new_filepath' ]
+      operations.write( f' - { kind.title() }: { old }\n'
+                        f'       to: { new }\n' )
+
+  return warn, operations.getvalue()
 
 
 def _OpenFileInSplitIfNeeded( filepath ):
@@ -1033,11 +1057,11 @@ def ReplaceChunks( chunks, silent=False ):
   if not silent:
     # Make sure the user is prepared to have her screen mutilated by the new
     # buffers.
-    num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
+    warn, format_operations = _GetNumNonVisibleFiles( chunks )
 
-    if num_files_to_open > 0:
+    if warn:
       if not Confirm(
-            FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( num_files_to_open ) ):
+            FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( format_operations ) ):
         return
 
   # Store the list of locations where we applied changes. We use this to display
