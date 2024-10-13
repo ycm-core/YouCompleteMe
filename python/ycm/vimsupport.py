@@ -1203,7 +1203,7 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
 def RenameChunk( old_file, new_file, vim_buffer, kind = 'rename' ):
   OpenFilename( old_file )
   vim.command( f'silent! saveas { new_file }' )
-  vim.command( f'silent! bw! old_file' )
+  vim.command( f'silent! bw! { old_file }' )
   os.remove( old_file )
   return {
     'bufnr': vim_buffer.number,
