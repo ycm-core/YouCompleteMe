@@ -935,7 +935,12 @@ def _SortChunksByFile( chunks ):
   chunks_by_file = defaultdict( list )
 
   for chunk in chunks:
-    filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    if 'range' in chunk:
+      filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    elif 'old_file' in chunk:
+      filepath = chunk[ 'old_file' ]
+    else:
+      filepath = chunk[ 'file' ]
     chunks_by_file[ filepath ].append( chunk )
 
   return chunks_by_file
@@ -1078,17 +1083,40 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
   # reverse order.
   chunks.reverse()
   chunks.sort( key = lambda chunk: (
-    chunk[ 'range' ][ 'start' ][ 'line_num' ],
-    chunk[ 'range' ][ 'start' ][ 'column_num' ]
+    chunk.get( 'range', {} ).get( 'start', {} ).get( 'line_num', 1 ),
+    chunk.get( 'range', {} ).get( 'start', {} ).get( 'column_num', 1 )
   ), reverse = True )
 
   # However, we still want to display the locations from the top of the buffer
   # to its bottom.
-  return reversed( [ ReplaceChunk( chunk[ 'range' ][ 'start' ],
-                                   chunk[ 'range' ][ 'end' ],
-                                   chunk[ 'replacement_text' ],
-                                   vim_buffer )
-                     for chunk in chunks ] )
+  replace_chunks = []
+  for chunk in chunks:
+    if 'range' in chunk:
+      replace_chunks.append(
+        ReplaceChunk(
+          chunk[ 'range' ][ 'start' ],
+          chunk[ 'range' ][ 'end' ],
+          chunk[ 'replacement_text' ],
+          vim_buffer ) )
+    elif 'old_file' in chunk:
+      replace_chunks.append(
+        RenameChunk(
+          chunk[ 'old_file' ],
+          chunk[ 'new_file' ],
+          vim_buffer ) )
+    elif chunk[ 'kind' ] == 'create':
+      replace_chunks.append(
+        CreateChunk(
+          chunk[ 'file' ],
+          vim_buffer,
+          chunk[ 'kind' ] ) )
+    elif chunk[ 'kind' ] == 'delete':
+      replace_chunks.append(
+        DeleteChunk(
+          chunk[ 'file' ],
+          vim_buffer,
+          chunk[ 'kind' ] ) )
+  return reversed( replace_chunks )
 
 
 def SplitLines( contents ):
@@ -1168,6 +1196,45 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
     'lnum': start_line + 1,
     'col': start_column + 1,
     'text': replacement_text,
+    'type': 'F',
+  }
+
+
+def RenameChunk( old_file, new_file, vim_buffer, kind = 'rename' ):
+  OpenFilename( old_file )
+  vim.command( f'silent! saveas { new_file }' )
+  vim.command( f'silent! bw! old_file' )
+  os.remove( old_file )
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': new_file,
+    'lnum': 1,
+    'col': 1,
+    'text': '',
+    'type': 'F',
+  }
+
+
+def CreateChunk( file, vim_buffer, kind = 'create' ):
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': file,
+    'lnum': 1,
+    'col': 1,
+    'text': '',
+    'type': 'F',
+  }
+
+
+def DeleteChunk( file, vim_buffer, kind = 'delete' ):
+  vim.command( f'silent! bw! { vim_buffer }' )
+  os.remove( file )
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': file,
+    'lnum': 1,
+    'col': 1,
+    'text': '',
     'type': 'F',
   }
 
