@@ -16,6 +16,8 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
+import pathlib
+import shutil
 import os
 import json
 import re
@@ -935,12 +937,13 @@ def _SortChunksByFile( chunks ):
   chunks_by_file = defaultdict( list )
 
   for chunk in chunks:
-    if 'range' in chunk:
+    kind = chunk[ 'kind' ]
+    if kind == 'change':
       filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
-    elif 'old_file' in chunk:
-      filepath = chunk[ 'old_file' ]
+    elif kind == 'rename':
+      filepath = chunk[ 'old_filepath' ]
     else:
-      filepath = chunk[ 'file' ]
+      filepath = chunk[ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
   return chunks_by_file
@@ -1091,30 +1094,34 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
   # to its bottom.
   replace_chunks = []
   for chunk in chunks:
-    if 'range' in chunk:
+    kind = chunk[ 'kind' ]
+    if kind == 'change':
       replace_chunks.append(
         ReplaceChunk(
           chunk[ 'range' ][ 'start' ],
           chunk[ 'range' ][ 'end' ],
           chunk[ 'replacement_text' ],
           vim_buffer ) )
-    elif 'old_file' in chunk:
+    elif kind == 'rename':
       replace_chunks.append(
         RenameChunk(
-          chunk[ 'old_file' ],
-          chunk[ 'new_file' ],
+          chunk[ 'old_filepath' ],
+          chunk[ 'new_filepath' ],
+          chunk[ 'options' ],
           vim_buffer ) )
-    elif chunk[ 'kind' ] == 'create':
+    elif kind == 'create':
       replace_chunks.append(
         CreateChunk(
-          chunk[ 'file' ],
+          chunk[ 'filepath' ],
           vim_buffer,
+          chunk[ 'options' ],
           chunk[ 'kind' ] ) )
-    elif chunk[ 'kind' ] == 'delete':
+    elif kind == 'delete':
       replace_chunks.append(
         DeleteChunk(
-          chunk[ 'file' ],
+          chunk[ 'filepath' ],
           vim_buffer,
+          chunk[ 'options' ],
           chunk[ 'kind' ] ) )
   return reversed( replace_chunks )
 
@@ -1200,11 +1207,14 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   }
 
 
-def RenameChunk( old_file, new_file, vim_buffer, kind = 'rename' ):
-  OpenFilename( old_file )
-  vim.command( f'silent! saveas { new_file }' )
-  vim.command( f'silent! bw! { old_file }' )
-  os.remove( old_file )
+def RenameChunk( old_file, new_file, vim_buffer, options, kind = 'rename' ):
+  os.rename( old_file, new_file )
+  vim_buffer.name = new_file
+  vim_buffer.options[ 'modified' ] = True
+  old_current = vim.current.buffer
+  vim.current.buffer = vim_buffer
+  vim.command( "write!" )
+  vim.current.buffer = old_current
   return {
     'bufnr': vim_buffer.number,
     'filename': new_file,
@@ -1215,7 +1225,11 @@ def RenameChunk( old_file, new_file, vim_buffer, kind = 'rename' ):
   }
 
 
-def CreateChunk( file, vim_buffer, kind = 'create' ):
+def CreateChunk( file, vim_buffer, options, kind = 'create' ):
+  filepath = pathlib.Path( file )
+  directory = filepath.parent()
+  os.makedirs( directory, exist_ok = True )
+  open( file, 'a' ).close()
   return {
     'bufnr': vim_buffer.number,
     'filename': file,
@@ -1226,9 +1240,15 @@ def CreateChunk( file, vim_buffer, kind = 'create' ):
   }
 
 
-def DeleteChunk( file, vim_buffer, kind = 'delete' ):
+def DeleteChunk( file, vim_buffer, options, kind = 'delete' ):
   vim.command( f'silent! bw! { vim_buffer }' )
-  os.remove( file )
+  try:
+    if options.get( 'recursive' ):
+      shutil.rmtree( file )
+    else:
+      os.remove( file )
+  except FileNotFoundError:
+    pass
   return {
     'bufnr': vim_buffer.number,
     'filename': file,
