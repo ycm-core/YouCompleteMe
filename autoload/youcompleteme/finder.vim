@@ -113,35 +113,6 @@ scriptencoding utf-8
 " The other functions are utility for the most part and handle things like
 " TextChangedI event, starting/stopping drawing the spinner and such.
 
-let s:highlight_group_for_symbol_kind = {
-      \ 'Array': 'Identifier',
-      \ 'Boolean': 'Boolean',
-      \ 'Class': 'Structure',
-      \ 'Constant': 'Constant',
-      \ 'Constructor': 'Function',
-      \ 'Enum': 'Structure',
-      \ 'EnumMember': 'Identifier',
-      \ 'Event': 'Identifier',
-      \ 'Field': 'Identifier',
-      \ 'Function': 'Function',
-      \ 'Interface': 'Structure',
-      \ 'Key': 'Identifier',
-      \ 'Method': 'Function',
-      \ 'Module': 'Include',
-      \ 'Namespace': 'Type',
-      \ 'Null': 'Keyword',
-      \ 'Number': 'Number',
-      \ 'Object': 'Structure',
-      \ 'Operator': 'Operator',
-      \ 'Package': 'Include',
-      \ 'Property': 'Identifier',
-      \ 'String': 'String',
-      \ 'Struct': 'Structure',
-      \ 'TypeParameter': 'Typedef',
-      \ 'Variable': 'Identifier',
-      \ }
-let s:initialized_text_properties = v:false
-
 let s:icon_spinner = [ '/', '-', '\', '|', '/', '-', '\', '|' ]
 let s:icon_done = 'X'
 let s:spinner_delay = 100
@@ -156,18 +127,7 @@ function! youcompleteme#finder#FindSymbol( scope ) abort
     return
   endif
 
-  if !s:initialized_text_properties
-    call prop_type_add( 'YCM-symbol-Normal', { 'highlight': 'Normal' } )
-    for k in keys( s:highlight_group_for_symbol_kind )
-      call prop_type_add(
-            \ 'YCM-symbol-' . k,
-            \ { 'highlight': s:highlight_group_for_symbol_kind[ k ] } )
-    endfor
-    call prop_type_add( 'YCM-symbol-file', { 'highlight': 'Comment' } )
-    call prop_type_add( 'YCM-symbol-filetype', { 'highlight': 'Special' } )
-    call prop_type_add( 'YCM-symbol-line-num', { 'highlight': 'Number' } )
-    let s:initialized_text_properties = v:true
-  endif
+  call youcompleteme#symbol#InitSymbolProperties()
 
   let s:find_symbol_status = {
         \ 'selected': -1,
@@ -470,11 +430,7 @@ function! s:RedrawFinderPopup() abort
         let kind = result[ 'extra_data' ][ 'kind' ]
         let name = result[ 'extra_data' ][ 'name' ]
         let desc = kind .. ': ' .. name
-        if s:highlight_group_for_symbol_kind->has_key( kind )
-          let prop = 'YCM-symbol-' . kind
-        else
-          let prop = 'YCM-symbol-Normal'
-        endif
+        let prop = youcompleteme#symbol#GetPropForSymbolKind( kind )
         let props = [
             \ { 'col': 1,
             \   'length': len( kind ) + 2,
@@ -499,7 +455,7 @@ function! s:RedrawFinderPopup() abort
                \ .. line_num
       let path_includes_line = 1
 
-      let spaces = available_width - len( desc ) - len( path )
+      let spaces = available_width - strdisplaywidth( desc ) - strdisplaywidth( path )
       let spacing = 4
       if spaces < spacing
         let spaces = spacing
@@ -524,16 +480,16 @@ function! s:RedrawFinderPopup() abort
       if len( path ) > 0
         if path_includes_line
           let props += [
-                \ { 'col': available_width - len( path ) + 1,
+                \ { 'col': len( desc ) + spaces + 1,
                 \   'length': len( path ) - len( line_num ),
                 \   'type': 'YCM-symbol-file' },
-                \ { 'col': available_width - len( line_num ) + 1,
+                \ { 'col': len( desc ) + spaces + 1 + len( path ) - len( line_num ),
                 \   'length': len( line_num ),
                 \   'type': 'YCM-symbol-line-num' },
                 \ ]
         else
           let props += [
-                \ { 'col': available_width - len( path ) + 1,
+                \ { 'col': len( desc ) + spaces + 1,
                 \   'length': len( path ),
                 \   'type': 'YCM-symbol-file' },
                 \ ]

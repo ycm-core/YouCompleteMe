@@ -6,6 +6,7 @@ function! SetUp()
   let g:ycm_log_level = 'DEBUG'
   let g:ycm_always_populate_location_list = 1
   let g:ycm_enable_semantic_highlighting = 1
+  let g:ycm_auto_hover = ''
 
   " diagnostics take ages
   let g:ycm_test_min_delay = 7
@@ -348,7 +349,56 @@ function! Test_ShowDetailedDiagnostic_Popup_WithCharacters()
   %bwipe!
 endfunction
 
-function! Test_ShowDetailedDiagnostic_Popup_MultilineDiag()
+function! Test_ShowDetailedDiagnostic_Popup_MultilineDiagNotFromStartOfLine()
+  let f = tempname() . '.cc'
+  execut 'edit' f
+  call setline( 1, [
+        \   'int main () {',
+        \   '  int a \',
+        \   '=\',
+        \   '=',
+        \   '3;',
+        \   '}',
+        \ ] )
+  call youcompleteme#test#setup#WaitForInitialParse( {} )
+
+  call WaitForAssert( {->
+    \ assert_true(
+      \ py3eval(
+         \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+    \ ) ) } )
+
+  call test_override( 'char_avail', 1 )
+
+  for cursor_pos in [ [ 2, 9 ], [ 3, 1], [ 4, 1 ] ]
+    call cursor( cursor_pos )
+    YcmShowDetailedDiagnostic popup
+
+    call assert_equal( len( popup_list() ), 1 )
+    let id = popup_list()[ 0 ]
+    call assert_notequal( 0, id, "Couldn't find popup!" )
+    call assert_equal( [ 3, 10 ], win_screenpos( id ) )
+
+    call youcompleteme#test#popup#CheckPopupPosition( id, {
+          \ 'visible': 1,
+          \ 'col': 10,
+          \ 'line': 3,
+          \ } )
+    call assert_match(
+          \ "^Invalid '==' at end of declaration; did you mean '='?.*",
+          \ getbufline( winbufnr(id), 1, '$' )[ 0 ] )
+    " From vim's test_popupwin.vim
+    " trigger the check for last_cursormoved by going into insert mode
+    call feedkeys( "ji\<Esc>", 'xt' )
+    call assert_equal( {}, popup_getpos( id ) )
+  endfor
+
+  call test_override( 'ALL', 0 )
+
+  %bwipe!
+endfunction
+
+function! Test_ShowDetailedDiagnostic_Popup_MultilineDiagFromStartOfLine()
   let f = tempname() . '.cc'
   execut 'edit' f
   call setline( 1, [
@@ -367,63 +417,50 @@ function! Test_ShowDetailedDiagnostic_Popup_MultilineDiag()
          \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
     \ ) ) } )
 
-  " Start of multiline diagnostic.
-  call cursor( [ 2, 1 ] )
-  YcmShowDetailedDiagnostic popup
-
-  let popup_location = screenpos( bufwinid( '%' ), 3, 13 )
-  let id = popup_locate( popup_location[ 'row' ], popup_location[ 'col' ] )
-  call assert_notequal( 0, id, "Couldn't find popup!" )
-
-  call youcompleteme#test#popup#CheckPopupPosition( id, {
-        \ 'visible': 1,
-        \ 'col': 13,
-        \ 'line': 3,
-        \ } )
-  call assert_match(
-        \ "^Variable 'rd' declared const here.*",
-        \ getbufline( winbufnr(id), 1, '$' )[ 0 ] )
-
-  " Middle of multiline diagnostic.
-  call cursor( [ 3, 9 ] )
-  YcmShowDetailedDiagnostic popup
-
-  let popup_location = screenpos( bufwinid( '%' ), 3, 13 )
-  let id = popup_locate( popup_location[ 'row' ], popup_location[ 'col' ] )
-  call assert_notequal( 0, id, "Couldn't find popup!" )
-
-  " End of multiline diagnostic.
-  call youcompleteme#test#popup#CheckPopupPosition( id, {
-        \ 'visible': 1,
-        \ 'col': 13,
-        \ 'line': 3,
-        \ } )
-  call assert_match(
-        \ "^Variable 'rd' declared const here.*",
-        \ getbufline( winbufnr(id), 1, '$' )[ 0 ] )
-
-  call cursor( [ 4, 5 ] )
-  YcmShowDetailedDiagnostic popup
-
-  let popup_location = screenpos( bufwinid( '%' ), 3, 13 )
-  let id = popup_locate( popup_location[ 'row' ], popup_location[ 'col' ] )
-  call assert_notequal( 0, id, "Couldn't find popup!" )
-
-  call youcompleteme#test#popup#CheckPopupPosition( id, {
-        \ 'visible': 1,
-        \ 'col': 13,
-        \ 'line': 3,
-        \ } )
-  call assert_match(
-        \ "^Variable 'rd' declared const here.*",
-        \ getbufline( winbufnr(id), 1, '$' )[ 0 ] )
-
-  " From vim's test_popupwin.vim
-  " trigger the check for last_cursormoved by going into insert mode
   call test_override( 'char_avail', 1 )
-  call feedkeys( "ji\<Esc>", 'xt' )
-  call assert_equal( {}, popup_getpos( id ) )
+
+  for cursor_pos in [ [ 2, 1 ], [ 3, 9 ], [ 4, 5 ] ]
+    call cursor( cursor_pos )
+    YcmShowDetailedDiagnostic popup
+
+    call assert_equal( 1, len( popup_list() ) )
+    let id = popup_list()[ 0 ]
+    call assert_notequal( 0, id, "Couldn't find popup!" )
+    call assert_equal( [ 3, 13 ], win_screenpos( id ) )
+
+    call youcompleteme#test#popup#CheckPopupPosition( id, {
+          \ 'visible': 1,
+          \ 'col': 13,
+          \ 'line': 3,
+          \ } )
+    call assert_match(
+          \ "^Variable 'rd' declared const here.*",
+          \ getbufline( winbufnr(id), 1, '$' )[ 0 ] )
+    " From vim's test_popupwin.vim
+    " trigger the check for last_cursormoved by going into insert mode
+    call feedkeys( "ji\<Esc>ki\<Esc>", 'xt' )
+    call assert_equal( {}, popup_getpos( id ) )
+  endfor
+
   call test_override( 'ALL', 0 )
 
   %bwipe!
+endfunction
+
+function! Test_ShowDetailedDiagnostic_Popup_MultipleDiagsPerLine_SameMessage()
+  let f = tempname() . '.cc'
+  execut 'edit' f
+  call setline( 1, [ 'void f(){a;a;}', ] )
+  call youcompleteme#test#setup#WaitForInitialParse( {} )
+
+  call WaitForAssert( {->
+    \ assert_true(
+      \ py3eval(
+        \ 'len( ycm_state.CurrentBuffer()._diag_interface._diagnostics )'
+    \ ) ) } )
+
+  YcmShowDetailedDiagnostic popup
+  let popup_list = popup_list()
+  call assert_equal( 1, len( popup_list ) )
+  call popup_close( popup_list[ 0 ] )
 endfunction
