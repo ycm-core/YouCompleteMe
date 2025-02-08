@@ -1,14 +1,82 @@
 # https://blog.mergify.com/strict-mode-deprecation/
 queue_rules:
-  - name: default
-    # These define the conditions to get out of the merge queue
-    conditions:
+  - name: duplicated default from Automatic merge on Azure Pipelines and Reviewable
+      successes
+    queue_conditions:
+      - base=master
+      - "#approved-reviews-by>=2"
       - status-success=ubuntu-24.04 - Python 3.9 x64
       - status-success=macos-14 - Python 3.9 arm64
       - status-success=windows-2019 - Python 3.9 x64
       - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
       - status-success=Vim tests - old
+      - status-success=code-review/reviewable
+    merge_conditions:
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+    merge_method: merge
+  - name: duplicated default from Manual merge on Azure Pipelines and Maintainer Override
+    queue_conditions:
+      - base=master
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+      - label="Ship It!"
+    merge_conditions:
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+    merge_method: merge
+  - name: duplicated default from Manual merge on Pipelines and Maintainer Override
+      from owner PR
+    queue_conditions:
+      - base=master
+      - author=puremourning
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+      - "#changes-requested-reviews-by=0"
+      - label="Ship It!"
+    merge_conditions:
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+    merge_method: merge
+  - name: duplicated default from Merge auto pr when approved
+    queue_conditions:
+      - author=VimspectorUpdateBot
+      - label=auto
+      - base=master
+      - status-success=code-review/reviewable
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+    merge_conditions:
+      - status-success=ubuntu-24.04 - Python 3.9 x64
+      - status-success=macos-14 - Python 3.9 arm64
+      - status-success=windows-2019 - Python 3.9 x64
+      - status-success=windows-2019 - Python 3.9 x86
+      - status-success=Vim tests - new
+      - status-success=Vim tests - old
+    merge_method: merge
 
 pull_request_rules:
   - name: Automatic merge on Azure Pipelines and Reviewable successes
@@ -23,9 +91,6 @@ pull_request_rules:
       - status-success=Vim tests - old
       - status-success=code-review/reviewable
     actions: &merge-actions
-      queue:
-        method: merge
-        name: default
       comment:
         message: Thanks for sending a PR!
 
@@ -45,7 +110,6 @@ pull_request_rules:
       - label="Ship It!"
     actions:
       <<: *merge-actions
-
   - name: Manual merge on Pipelines and Maintainer Override from owner PR
     conditions:
       - base=master
@@ -61,7 +125,6 @@ pull_request_rules:
       - label="Ship It!"
     actions:
       <<: *merge-actions
-
   - name: Merge auto pr when approved
     conditions:
       - author=VimspectorUpdateBot
@@ -73,3 +136,9 @@ pull_request_rules:
       - "#changes-requested-reviews-by=0"
     actions:
       <<: *merge-actions
+  - name: Automatic merge on Azure Pipelines and Reviewable successes + Manual merge
+      on Azure Pipelines and Maintainer Override + Manual merge on Pipelines and Maintainer
+      Override from owner PR + Merge auto pr when approved
+    conditions: []
+    actions:
+      queue:
