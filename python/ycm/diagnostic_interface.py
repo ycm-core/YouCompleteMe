@@ -76,6 +76,8 @@ class DiagnosticInterface:
 
 
   def RefreshDiagnosticsUI( self, open_on_edit = False ):
+    if self._user_options[ 'echo_all_diagnostics' ]:
+      self._EchoAllDiagnostics()
     if self._user_options[ 'echo_current_diagnostic' ]:
       self._EchoDiagnostic()
 
@@ -89,6 +91,12 @@ class DiagnosticInterface:
 
 
   def ClearDiagnosticsUI( self ):
+    if self._user_options[ 'echo_all_diagnostics' ]:
+      tp.ClearTextProperties( self._bufnr,
+                              prop_types = [ 'YcmVirtDiagPadding',
+                                             'YcmVirtDiagError',
+                                             'YcmVirtDiagWarning' ] )
+
     if self._user_options[ 'echo_current_diagnostic' ]:
       self._ClearCurrentDiagnostic()
 
@@ -133,8 +141,9 @@ class DiagnosticInterface:
     if not self._diag_message_needs_clearing:
       return
 
-    if ( not vimsupport.VimIsNeovim() and
-         self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
+    if ( not vimsupport.VimIsNeovim()
+         and self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text'
+         and not self._user_options[ 'echo_all_diagnostics' ] ):
       tp.ClearTextProperties( self._bufnr,
                               prop_types = [ 'YcmVirtDiagPadding',
                                              'YcmVirtDiagError',
@@ -146,15 +155,9 @@ class DiagnosticInterface:
     self._diag_message_needs_clearing = False
 
 
-  def _EchoDiagnosticText( self, line_num, first_diag, text ):
-    self._ClearCurrentDiagnostic( bool( text ) )
-
-    if ( not vimsupport.VimIsNeovim() and
-         self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text' ):
-      if not text:
-        return
-
-      def MakeVritualTextProperty( prop_type, text, position='after' ):
+  def _PlaceDiagnosticVirtualText( self, line_num, first_diag, text ):
+    def MakeVritualTextProperty( prop_type, text, position='after' ):
+      try:
         vimsupport.AddTextProperty( self._bufnr,
                                     line_num,
                                     0,
@@ -164,24 +167,51 @@ class DiagnosticInterface:
                                       'text_align': position,
                                       'text_wrap': 'wrap'
                                     } )
+      except vim.error:
+        pass
 
-      if vim.options[ 'ambiwidth' ] != 'double':
-        marker = '⚠'
-      else:
-        marker = '>'
-
-      MakeVritualTextProperty(
-        'YcmVirtDiagPadding',
-        ' ' * vim.buffers[ self._bufnr ].options[ 'shiftwidth' ] ),
-      MakeVritualTextProperty(
-        'YcmVirtDiagError' if _DiagnosticIsError( first_diag )
-                       else 'YcmVirtDiagWarning',
-        marker + ' ' + [ line for line in text.splitlines() if line ][ 0 ] )
+    if vim.options[ 'ambiwidth' ] != 'double':
+      marker = '⚠'
     else:
-      if not text:
-        # We already cleared it
-        return
+      marker = '>'
 
+    MakeVritualTextProperty(
+      'YcmVirtDiagPadding',
+      ' ' * vim.buffers[ self._bufnr ].options[ 'shiftwidth' ] ),
+    MakeVritualTextProperty(
+      'YcmVirtDiagError' if _DiagnosticIsError( first_diag )
+        else 'YcmVirtDiagWarning',
+      marker + ' ' + [ line for line in text.splitlines() if line ][ 0 ] )
+
+
+  def _EchoAllDiagnostics( self ):
+    if vimsupport.VimIsNeovim():
+      return
+
+    tp.ClearTextProperties( self._bufnr,
+                            prop_types = [ 'YcmVirtDiagPadding',
+                                           'YcmVirtDiagError',
+                                           'YcmVirtDiagWarning' ] )
+
+    for line, diags in self._line_to_diags.items():
+      if not diags:
+        continue
+      num_diags = f' [+{ len( diags ) - 1 }]' if len( diags ) > 1 else ''
+      diag = diags[ 0 ]
+      self._PlaceDiagnosticVirtualText( line, diag, diag[ 'text' ] + num_diags )
+
+
+  def _EchoDiagnosticText( self, line_num, first_diag, text ):
+    self._ClearCurrentDiagnostic( bool( text ) )
+
+    if not text:
+      return
+
+    if ( not vimsupport.VimIsNeovim()
+         and self._user_options[ 'echo_current_diagnostic' ] == 'virtual-text'
+         and not self._user_options[ 'echo_all_diagnostics' ] ):
+      self._PlaceDiagnosticVirtualText( line_num, first_diag, text )
+    else:
       vimsupport.PostVimMessage( text, warning = False, truncate = True )
 
     self._diag_message_needs_clearing = True
@@ -279,16 +309,12 @@ class DiagnosticInterface:
     for diag in self._diagnostics:
       location_extent = diag[ 'location_extent' ]
       start = location_extent[ 'start' ]
-      end = location_extent[ 'end' ]
-      bufnr = vimsupport.GetBufferNumberForFilename( start[ 'filepath' ] )
-      if bufnr == self._bufnr:
-        for line_number in range( start[ 'line_num' ], end[ 'line_num' ] + 1 ):
-          self._line_to_diags[ line_number ].append( diag )
+      self._line_to_diags[ start[ 'line_num' ] ].append( diag )
 
     for diags in self._line_to_diags.values():
       # We also want errors to be listed before warnings so that errors aren't
       # hidden by the warnings; Vim won't place a sign over an existing one.
-      diags.sort( key = lambda diag: ( diag[ 'kind' ],
+      diags.sort( key = lambda diag: ( diag.get( 'severity', diag[ 'kind' ] ),
                                        diag[ 'location' ][ 'column_num' ] ) )
 
 

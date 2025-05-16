@@ -159,6 +159,8 @@ let g:ycm_echo_current_diagnostic =
       \ get( g:, 'ycm_echo_current_diagnostic',
       \ get( g:, 'syntastic_echo_current_error', 1 ) )
 
+let g:ycm_echo_all_diagnostics = get( g:, 'ycm_echo_all_diagnostics', 0 )
+
 let g:ycm_filter_diagnostics =
       \ get( g:, 'ycm_filter_diagnostics', {} )
 
