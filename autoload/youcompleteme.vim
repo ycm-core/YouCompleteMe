@@ -765,6 +765,37 @@ function! s:OnFileSave()
   py3 ycm_state.OnFileSave( vimsupport.GetIntValue( 'buffer_number' ) )
 endfunction
 
+function! youcompleteme#FormatPreFileSave()
+  " TODO: For the file version, we should use the '[,'] range
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  if !get(b:, 'ycm_completing')
+    return
+  endif
+
+  if !get(b:, 'ycm_format_on_save', get(g:, 'ycm_format_on_save', 0))
+    return
+  endif
+
+  if !has_key(b:, 'ycm_format_supported')
+    let cmds = youcompleteme#GetDefinedSubcommands()
+    let b:ycm_format_supported = index( cmds, 'Format' ) >= 0
+    if b:ycm_format_supported
+      echom "'Format' subcommand is supported"
+    else
+      echom "'Format' subcommand is not supported; no format on save"
+    endif
+  endif
+
+  if !b:ycm_format_supported
+    return
+  endif
+
+  YcmCompleter Format
+endfunction
+
 
 function! s:AbortAutohoverRequest() abort
   if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
