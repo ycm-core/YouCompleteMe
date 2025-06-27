@@ -25,9 +25,10 @@ from unittest import TestCase
 MockVimModule()
 
 
-def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col ):
+def SimpleDiagnosticToJson( start_line, start_col, end_line, end_col,
+                            kind = "ERROR" ):
   return {
-    'kind': 'ERROR',
+    'kind': kind,
     'location': { 'line_num': start_line, 'column_num': start_col },
     'location_extent': {
       'start': {
@@ -94,11 +95,12 @@ def SimpleDiagnosticToJsonWithInvalidLineNum( start_line, start_col,
   }
 
 
-def YcmTextPropertyTupleMatcher( start_line, start_col, end_line, end_col ):
+def YcmTextPropertyTupleMatcher( start_line, start_col, end_line, end_col,
+                                 highlight_group = 'YcmErrorProperty' ):
   return has_item( contains_exactly(
     start_line,
     start_col,
-    'YcmErrorProperty',
+    highlight_group,
     has_entries( { 'end_col': end_col, 'end_lnum': end_line } ) ) )
 
 
@@ -111,11 +113,23 @@ class DiagnosticInterfaceTest( TestCase ):
         [ 'Highlight this error please' ],
         YcmTextPropertyTupleMatcher( 1, 16, 1, 23 )
       ],
-      # Error at the end of the line
+      # Warning at the end of the line
       [
-        SimpleDiagnosticToJson( 1, 16, 1, 21 ),
+        SimpleDiagnosticToJson( 1, 16, 1, 21, 'WARNING' ),
         [ 'Highlight this warning' ],
-        YcmTextPropertyTupleMatcher( 1, 16, 1, 21 )
+        YcmTextPropertyTupleMatcher( 1, 16, 1, 21, 'YcmWarningProperty' )
+      ],
+      # Info at the start of the line
+      [
+        SimpleDiagnosticToJson( 1, 1, 1, 5, 'INFORMATION' ),
+        [ 'Highlight this information' ],
+        YcmTextPropertyTupleMatcher( 1, 1, 1, 5, 'YcmInformationProperty' )
+      ],
+      # Hint at the start of the line
+      [
+        SimpleDiagnosticToJson( 1, 5, 1, 5, 'HINT' ),
+        [ 'Highlight this hint' ],
+        YcmTextPropertyTupleMatcher( 1, 5, 1, 5, 'YcmHintProperty' )
       ],
       [
         SimpleDiagnosticToJson( 1, 16, 1, 19 ),

@@ -2053,10 +2053,10 @@ in the Vim gutter, the relevant groups are:
   'todo' if they exist
 
 - 'YcmInformationSign', which falls back to group 'SyntasticInformationSign' and then
-  'todo' if they exist
+  'added' if they exist
 
 - 'YcmHintSign', which falls back to group 'SyntasticHintSign' and then
-  'todo' if they exist
+  'changed' if they exist
 
 You can also style the line that has the warning/error with these groups:
 

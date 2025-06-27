@@ -104,6 +104,8 @@ function! Test_Disable_Diagnostics_Update_In_insert_Mode()
                            \ 1, { 'end_lnum': -1,
                                 \ 'types': [ 'YcmVirtDiagWarning',
                                            \ 'YcmVirtDiagError',
+                                           \ 'YcmVirtDiagInformation',
+                                           \ 'YcmVirtDiagHint',
                                            \ 'YcmVirtDiagPadding' ] } ) ) ) } )
   endfunction
 

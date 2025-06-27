@@ -334,8 +334,8 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
 
   name = ( 'YcmErrorProperty' if _DiagnosticIsError( diagnostic ) else
            'YcmWarningProperty' if _DiagnosticIsWarning( diagnostic ) else
-           'YcmInformationProperty' if _DiagnosticIsInformation( diagnostic ) else
-           'YcmHintProperty' )
+           'YcmInformationProperty' if _DiagnosticIsInformation( diagnostic )
+          else 'YcmHintProperty' )
   if vimsupport.VimIsNeovim():
     name = name.replace( 'Property', 'Section' )
 
