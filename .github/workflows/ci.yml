@@ -54,7 +54,7 @@ jobs:
       matrix:
         vim: [ 'new', 'old' ]
         arch: [ 'x86_64' ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: 'youcompleteme/ycm-vim-${{ matrix.arch }}-py3:test'
     env:
       COVERAGE: true
