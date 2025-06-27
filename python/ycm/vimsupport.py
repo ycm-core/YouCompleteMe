@@ -302,8 +302,12 @@ def GetTextPropertyForDiag( buffer_number, line_number, diag ):
     column = 1
   if diag[ 'kind' ] == 'ERROR':
     property_name = 'YcmErrorProperty'
-  else:
+  elif diag[ 'kind' ] == 'WARNING':
     property_name = 'YcmWarningProperty'
+  elif diag[ 'kind' ] == 'INFORMATION':
+    property_name = 'YcmInformationProperty'
+  else:
+    property_name = 'YcmHintProperty'
   vim_props = vim.eval( f'prop_list( { line_number }, '
                         f'{{ "bufnr": { buffer_number }, '
                            f'"types": [ "{ property_name }" ] }} )' )
@@ -327,7 +331,9 @@ def GetTextProperties( buffer_number ):
                        f'{{ "bufnr": { buffer_number }, '
                            '"end_lnum": -1, '
                            '"types": [ "YcmErrorProperty", '
-                                      '"YcmWarningProperty" ] } )' ) ]
+                                      '"YcmWarningProperty", '
+                                      '"YcmInformationProperty", '
+                                      '"YcmHintProperty" ] } )' ) ]
   else:
     ext_marks = vim.eval(
       f'nvim_buf_get_extmarks( { buffer_number }, '
@@ -566,7 +572,8 @@ def ConvertDiagnosticsToQfList( diagnostics ):
       'lnum'  : line_num,
       'col'   : location[ 'column_num' ],
       'text'  : text,
-      'type'  : diagnostic[ 'kind' ][ 0 ],
+      'type'  : "n" if diagnostic[ 'kind' ] == "HINT"
+                else diagnostic[ 'kind' ][ 0 ],
       'valid' : 1
     }
 

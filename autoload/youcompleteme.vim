@@ -400,12 +400,36 @@ function! s:SetUpSigns()
     endif
   endif
 
+  if !hlexists( 'YcmInformationSign' )
+    if hlexists( 'SyntasticInformationSign')
+      highlight default link YcmInformationSign SyntasticInformationSign
+    else
+      highlight default link YcmInformationSign added
+    endif
+  endif
+
+  if !hlexists( 'YcmHintSign' )
+    if hlexists( 'SyntasticHintSign')
+      highlight default link YcmHintSign SyntasticHintSign
+    else
+      highlight default link YcmHintSign changed
+    endif
+  endif
+
   if !hlexists( 'YcmErrorLine' )
     highlight default link YcmErrorLine SyntasticErrorLine
   endif
 
   if !hlexists( 'YcmWarningLine' )
     highlight default link YcmWarningLine SyntasticWarningLine
+  endif
+
+  if !hlexists( 'YcmInformationLine' )
+    highlight default link YcmInformationLine SyntasticInformationLine
+  endif
+
+  if !hlexists( 'YcmHintLine' )
+    highlight default link YcmHintLine SyntasticHintLine
   endif
 
   call sign_define( [
@@ -418,6 +442,16 @@ function! s:SetUpSigns()
     \   'text': g:ycm_warning_symbol,
     \   'texthl': 'YcmWarningSign',
     \   'linehl': 'YcmWarningLine',
+    \   'group':  'ycm_signs' },
+    \ { 'name': 'YcmInformation',
+    \   'text': g:ycm_information_symbol,
+    \   'texthl': 'YcmInformationSign',
+    \   'linehl': 'YcmInformationLine',
+    \   'group':  'ycm_signs' },
+    \ { 'name': 'YcmHint',
+    \   'text': g:ycm_hint_symbol,
+    \   'texthl': 'YcmHintSign',
+    \   'linehl': 'YcmHintLine',
     \   'group':  'ycm_signs' }
     \ ] )
 
@@ -476,6 +510,32 @@ function! s:SetUpSyntaxHighlighting()
       hi default link YcmWarningText Conceal
     endif
   endif
+  if !hlexists( 'YcmInformationText' )
+    if exists( '*hlget' )
+      let YcmInformationText = hlget( 'SpellLocal', v:true )[ 0 ]
+      let YcmInformationText.name = 'YcmInformationText'
+      let YcmInformationText.cterm = {}
+      let YcmInformationText.gui = {}
+      let YcmInformationText.term = {}
+      call hlset( [ YcmInformationText] )
+    else
+      " Lame approximation
+      hi default link YcmInformationText Conceal
+    endif
+  endif
+  if !hlexists( 'YcmHintText' )
+    if exists( '*hlget' )
+      let YcmHintText = hlget( 'SpellRare', v:true )[ 0 ]
+      let YcmHintText.name = 'YcmHintText'
+      let YcmHintText.cterm = {}
+      let YcmHintText.gui = {}
+      let YcmHintText.term = {}
+      call hlset( [ YcmHintText] )
+    else
+      " Lame approximation
+      hi default link YcmHintText Conceal
+    endif
+  endif
 
   if s:PropertyTypeNotDefined( 'YcmVirtDiagError' )
     call prop_type_add( 'YcmVirtDiagError', {
@@ -487,6 +547,18 @@ function! s:SetUpSyntaxHighlighting()
     call prop_type_add( 'YcmVirtDiagWarning', {
           \ 'highlight': 'YcmWarningText',
           \ 'priority': 19,
+          \ 'combine': 0 } )
+  endif
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagInformation' )
+    call prop_type_add( 'YcmVirtDiagInformation', {
+          \ 'highlight': 'YcmInformationText',
+          \ 'priority': 18,
+          \ 'combine': 0 } )
+  endif
+  if s:PropertyTypeNotDefined( 'YcmVirtDiagHint' )
+    call prop_type_add( 'YcmVirtDiagHint', {
+          \ 'highlight': 'YcmHintText',
+          \ 'priority': 17,
           \ 'combine': 0 } )
   endif
 
@@ -509,6 +581,36 @@ function! s:SetUpSyntaxHighlighting()
     call prop_type_add( 'YcmWarningProperty', {
           \ 'highlight': 'YcmWarningSection',
           \ 'priority': 29,
+          \ 'combine': 0,
+          \ 'override': 1 } )
+  endif
+
+  if !hlexists( 'YcmInformationSection' )
+    if hlexists( 'SyntasticInformation' )
+      highlight default link YcmInformationSection SyntasticInformation
+    else
+      highlight default link YcmInformationSection SpellLocal
+    endif
+  endif
+  if s:PropertyTypeNotDefined( 'YcmInformationProperty' )
+    call prop_type_add( 'YcmInformationProperty', {
+          \ 'highlight': 'YcmInformationSection',
+          \ 'priority': 28,
+          \ 'combine': 0,
+          \ 'override': 1 } )
+  endif
+
+  if !hlexists( 'YcmHintSection' )
+    if hlexists( 'SyntasticHint' )
+      highlight default link YcmHintSection SyntasticHint
+    else
+      highlight default link YcmHintSection SpellRare
+    endif
+  endif
+  if s:PropertyTypeNotDefined( 'YcmHintProperty' )
+    call prop_type_add( 'YcmHintProperty', {
+          \ 'highlight': 'YcmHintSection',
+          \ 'priority': 27,
           \ 'combine': 0,
           \ 'override': 1 } )
   endif

@@ -174,6 +174,14 @@ let g:ycm_warning_symbol =
       \ get( g:, 'ycm_warning_symbol',
       \ get( g:, 'syntastic_warning_symbol', '>>' ) )
 
+let g:ycm_information_symbol =
+      \ get( g:, 'ycm_information_symbol',
+      \ get( g:, 'syntastic_information_symbol', '--' ) )
+
+let g:ycm_hint_symbol =
+      \ get( g:, 'ycm_hint_symbol',
+      \ get( g:, 'syntastic_hint_symbol', '? ' ) )
+
 let g:ycm_complete_in_comments =
       \ get( g:, 'ycm_complete_in_comments', 0 )
 
