@@ -927,20 +927,6 @@ def GetIntValue( variable ):
   return int( vim.eval( variable ) or 0 )
 
 
-def _SortChunksByFile( chunks ):
-  """Sort the members of the list |chunks| (which must be a list of dictionaries
-  conforming to ycmd.responses.FixItChunk) by their filepath. Returns a new
-  list in arbitrary order."""
-
-  chunks_by_file = defaultdict( list )
-
-  for chunk in chunks:
-    filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
-    chunks_by_file[ filepath ].append( chunk )
-
-  return chunks_by_file
-
-
 def _GetNumNonVisibleFiles( file_list ):
   """Returns the number of file in the iterable list of files |file_list| which
   are not curerntly open in visible windows"""
@@ -1016,31 +1002,109 @@ def ReplaceChunks( chunks, silent=False ):
   If for some reason a file could not be opened or changed, raises RuntimeError.
   Otherwise, returns no meaningful value."""
 
-  # We apply the edits file-wise for efficiency.
-  chunks_by_file = _SortChunksByFile( chunks )
-
-  # We sort the file list simply to enable repeatable testing.
-  sorted_file_list = sorted( chunks_by_file.keys() )
-
-  if not silent:
-    # Make sure the user is prepared to have her screen mutilated by the new
-    # buffers.
-    num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
-
-    if num_files_to_open > 0:
-      if not Confirm(
-            FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( num_files_to_open ) ):
-        return
-
   # Store the list of locations where we applied changes. We use this to display
   # the quickfix window showing the user where we applied changes.
   locations = []
+  files_changed = set()
 
-  for filepath in sorted_file_list:
+  chunks_by_filepath = defaultdict( list )
+
+  def apply_chunks( filepath ):
+    chunks = chunks_by_filepath.pop( filepath, [] )
+    if not chunks:
+      return False
+
     buffer_num, close_window = _OpenFileInSplitIfNeeded( filepath )
+    files_changed.add( filepath )
 
-    locations.extend( ReplaceChunksInBuffer( chunks_by_file[ filepath ],
+    locations.extend( ReplaceChunksInBuffer( chunks,
                                              vim.buffers[ buffer_num ] ) )
+
+    return close_window
+
+  for chunk in chunks:
+    if 'resource_op' in chunk:
+      resource_op = chunk[ 'resource_op' ]
+      close_window = False
+      if resource_op[ 'op' ] == 'create':
+        filepath = resource_op[ 'uri' ]
+
+        # Discard any chunks for this file; any such chunks are a server error
+        # and should be ignored
+        chunks_by_filepath.pop( filepath, None )
+
+        os.makedirs( os.path.dirname( filepath ), exist_ok = True )
+        buffer_num, _ = _OpenFileInSplitIfNeeded( filepath )
+        files_changed.add( filepath )
+        locations.append( {
+          'bufnr': buffer_num,
+          'filename': filepath,
+          'lnum': 1,
+          'col': 1,
+          'text': "File created",
+          'type': 'F',
+        } )
+
+      elif resource_op[ 'op' ] == 'delete':
+        filepath = resource_op[ 'uri' ]
+        files_changed.add( filepath )
+
+        # Discard any chunks for this file as we're deleting it
+        chunks_by_filepath.pop( filepath, None )
+
+        buffer_num = GetBufferNumberForFilename( filepath )
+        if buffer_num >= 0:
+          vim.command( 'bdelete! {}'.format( buffer_num ) )
+        flags = ''
+        if resource_op[ 'options' ].get( 'recursive', False ):
+          flags = 'rf'
+        vim.eval( 'delete( "{}", "{}" )'.format(
+          EscapeForVim( filepath ),
+          EscapeForVim( flags )
+        ) )
+
+        locations.append( {
+          'bufnr': buffer_num,
+          'filename': filepath,
+          'lnum': 1,
+          'col': 1,
+          'text': "File deleted",
+          'type': 'F',
+        } )
+
+      else:
+        old_filepath = resource_op[ 'old_filepath' ]
+        new_filepath = resource_op[ 'new_filepath' ]
+        files_changed.add( new_filepath )
+
+        # Apply any chunks for the old file prior to rename
+        apply_chunks( old_filepath )
+
+        buffer_num = GetBufferNumberForFilename( old_filepath )
+        if buffer_num >= 0:
+          vim.command( 'bdelete! {}'.format( buffer_num ) )
+
+        os.makedirs( os.path.dirname( new_filepath ), exist_ok = True)
+        vim.eval( 'rename( "{}", "{}" )'.format(
+          EscapeForVim( old_filepath ),
+          EscapeForVim( new_filepath ) ) )
+        buffer_num, _ = _OpenFileInSplitIfNeeded( new_filepath )
+
+        locations.append( {
+          'bufnr': buffer_num,
+          'filename': new_filepath,
+          'lnum': 1,
+          'col': 1,
+          'text': "File renamed from '{}'".format( old_filepath ),
+          'type': 'F',
+        } )
+
+    else:
+      filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+      chunks_by_filepath[ filepath ].append( chunk )
+
+  for filepath in list( chunks_by_filepath.keys() ):
+    close_window = apply_chunks( filepath )
 
     # When opening tons of files, we don't want to have a split for each new
     # file, as this simply does not scale, so we open the window, make the
@@ -1061,6 +1125,8 @@ def ReplaceChunks( chunks, silent=False ):
       SetQuickFixList( locations )
 
     PostVimMessage( f'Applied { len( chunks ) } changes', warning = False )
+
+  return ( len( chunks ), files_changed )
 
 
 def ReplaceChunksInBuffer( chunks, vim_buffer ):
@@ -1131,6 +1197,9 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # there is actually no new line. When this happens, recompute the end position
   # of where the chunk is applied and remove all trailing characters in the
   # chunk.
+  while start_line >= len( vim_buffer ):
+    vim_buffer.append( '' )
+
   if end_line >= len( vim_buffer ):
     end_column = len( ToBytes( vim_buffer[ -1 ] ) )
     end_line = len( vim_buffer ) - 1

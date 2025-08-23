@@ -314,7 +314,8 @@ class DiagnosticInterface:
     for diags in self._line_to_diags.values():
       # We also want errors to be listed before warnings so that errors aren't
       # hidden by the warnings; Vim won't place a sign over an existing one.
-      diags.sort( key = lambda diag: ( diag.get( 'severity', diag[ 'kind' ] ),
+      diags.sort( key = lambda diag: ( diag.get( 'severity', 0 ),
+                                       diag[ 'kind' ],
                                        diag[ 'location' ][ 'column_num' ] ) )
 
 

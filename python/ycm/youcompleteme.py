@@ -558,6 +558,17 @@ class YouCompleteMe:
     return self.CurrentBuffer().NeedsReparse()
 
 
+  def BuffersModifiedByServer( self, filepaths ):
+    extra_data = {}
+    self._AddTagsFilesIfNeeded( extra_data )
+    self._AddSyntaxDataIfNeeded( extra_data )
+    self._AddExtraConfDataIfNeeded( extra_data )
+    for filepath in filepaths:
+      bufnr = vimsupport.GetBufferNumberForFilename( filepath )
+      if bufnr in self._buffers:
+        self._buffers[ bufnr ].SendParseRequest( extra_data )
+
+
   def UpdateWithNewDiagnosticsForFile( self, filepath, diagnostics ):
     if not self._user_options[ 'show_diagnostics_ui' ]:
       return

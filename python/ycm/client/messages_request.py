@@ -16,7 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycm.client.base_request import BaseRequest, BuildRequestData
-from ycm.vimsupport import PostVimMessage
+from ycm.vimsupport import PostVimMessage, ReplaceChunks
 
 import logging
 
@@ -81,6 +81,16 @@ def _HandlePollResponse( response, diagnostics_handler ):
         diagnostics_handler.UpdateWithNewDiagnosticsForFile(
           notification[ 'filepath' ],
           notification[ 'diagnostics' ] )
+      elif 'fixits' in notification:
+        file_list = set()
+        for fixit in notification[ 'fixits' ]:
+          _, files_updated = ReplaceChunks(
+            chunks = fixit[ 'chunks' ],
+            silent = True )
+          file_list.update( files_updated )
+
+        diagnostics_handler.BuffersModifiedByServer( file_list )
+
   elif response is False:
     # Don't keep polling for this file
     return False
