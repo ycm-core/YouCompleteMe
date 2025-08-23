@@ -1707,12 +1707,27 @@ if exists( '*popup_atcursor' )
       return
     endif
 
+    let l:syntax = b:ycm_hover.syntax
+    if type( a:response ) == v:t_dict
+      if has_key( a:response, 'detailed_info' )
+        let response = a:response.detailed_info
+      elseif has_key( a:response, 'message' )
+        let response = a:response.message
+      endif
+
+      if has_key( a:response, 'filetype' )
+        let l:syntax = a:response.filetype
+      endif
+    else
+      let response = string(a:response)
+    endif
+
     " Try to position the popup at the cursor, but avoid wrapping. If the
     " longest line is > screen width (&columns), then we just have to wrap, and
     " place the popup at the leftmost column.
     "
     " Find the longest line (FIXME: probably doesn't work well for multi-byte)
-    let lines = split( a:response, "\n" )
+    let lines = split( response, "\n" )
     let len = max( map( copy( lines ), "len( v:val )" ) )
 
     let wrap = 0
@@ -1734,6 +1749,7 @@ if exists( '*popup_atcursor' )
           \ 'maxwidth': &columns,
           \ 'close': 'click',
           \ 'fixed': 0,
+          \ 'scrollbar': 1,
           \ }
 
     if has_key( b:ycm_hover, 'popup_params' )
@@ -1742,9 +1758,10 @@ if exists( '*popup_atcursor' )
     endif
 
     let s:cursorhold_popup = popup_atcursor( lines, popup_params )
+
     call setbufvar( winbufnr( s:cursorhold_popup ),
                             \ '&syntax',
-                            \ b:ycm_hover.syntax )
+                            \ l:syntax )
   endfunction
 
 
