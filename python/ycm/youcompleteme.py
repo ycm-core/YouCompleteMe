@@ -681,6 +681,9 @@ class YouCompleteMe:
     SendEventNotificationAsync( 'InsertLeave' )
 
 
+  def ClearDiagnosticsUI( self, bufnr ):
+    self._buffers[ bufnr ].ClearDiagnosticsUI()
+
   def OnCursorMoved( self ):
     self.CurrentBuffer().OnCursorMoved()
 
