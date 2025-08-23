@@ -765,6 +765,12 @@ function! s:OnFileSave()
   py3 ycm_state.OnFileSave( vimsupport.GetIntValue( 'buffer_number' ) )
 endfunction
 
+function! youcompleteme#EnableFormatOnSaveForThisBuffer()
+  let b:ycm_format_on_save = 1
+  autocmd BufWritePost,FileWritePost <buffer>
+        \ call youcompleteme#FormatPreFileSave()
+endfunction
+
 function! youcompleteme#FormatPreFileSave()
   " TODO: For the file version, we should use the '[,'] range
   if !s:AllowedToCompleteInCurrentBuffer()
@@ -782,11 +788,6 @@ function! youcompleteme#FormatPreFileSave()
   if !has_key(b:, 'ycm_format_supported')
     let cmds = youcompleteme#GetDefinedSubcommands()
     let b:ycm_format_supported = index( cmds, 'Format' ) >= 0
-    if b:ycm_format_supported
-      echom "'Format' subcommand is supported"
-    else
-      echom "'Format' subcommand is not supported; no format on save"
-    endif
   endif
 
   if !b:ycm_format_supported
