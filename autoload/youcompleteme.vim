@@ -1499,12 +1499,12 @@ function! youcompleteme#GetCommandResponse( ... ) abort
 endfunction
 
 
-function! s:GetCommandResponseAsyncImpl( callback, origin, ... ) abort
+function! s:GetCommandResponseAsyncImpl( callback, origin, resp_type, ... ) abort
   let request_id = py3eval(
         \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
 
   let s:pollers.command.requests[ request_id ] = {
-        \ 'response_func': 'StringResponse',
+        \ 'response_func': a:resp_type,
         \ 'origin': a:origin,
         \ 'callback': a:callback
         \ }
@@ -1526,7 +1526,8 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  call s:GetCommandResponseAsyncImpl( callback, 'extern', a:000 )
+  call call('s:GetCommandResponseAsyncImpl',
+           \ [ a:callback, 'extern', 'StringResponse' ] + a:000 )
 endfunction
 
 
@@ -1541,18 +1542,8 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  let request_id = py3eval(
-        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
-
-  let s:pollers.command.requests[ request_id ] = {
-        \ 'response_func': 'Response',
-        \ 'origin': 'extern_raw',
-        \ 'callback': a:callback
-        \ }
-  if s:pollers.command.id == -1
-    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
-                                          \ function( 's:PollCommands' ) )
-  endif
+  call call( 's:GetCommandResponseAsyncImpl',
+           \ [ a:callback, 'extern_raw', 'Response' ] + a:000 )
 endfunction
 
 
@@ -1703,6 +1694,7 @@ if exists( '*popup_atcursor' )
       call s:GetCommandResponseAsyncImpl(
             \ function( 's:ShowHoverResult' ),
             \ 'autohover',
+            \ 'Response',
             \ b:ycm_hover.command )
     endif
   endfunction
