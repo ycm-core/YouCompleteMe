@@ -439,6 +439,16 @@ class VimsupportTest( TestCase ):
 
 
   @patch( 'vim.current.window.cursor', ( 1, 1 ) )
+  def test_Foo( self ):
+    result_buffer = VimBuffer( 'buffer', contents = [ 'first line' ] )
+    start, end = _BuildLocations( 2, 1, 2, 1 )
+    vimsupport.ReplaceChunk( start, end, 'second line', result_buffer )
+
+    AssertBuffersAreEqualAsBytes( [ 'first line', 'second line' ],
+                                result_buffer )
+
+
+  @patch( 'vim.current.window.cursor', ( 1, 1 ) )
   def test_ReplaceChunk_SingleToMultipleLines2( self ):
     result_buffer = VimBuffer( 'buffer', contents = [ 'aAa',
                                                       'aBa',
