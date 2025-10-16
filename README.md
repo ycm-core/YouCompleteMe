@@ -525,6 +525,10 @@ that are conservatively turned off by default that you may want to turn on.
 
 ### Windows
 
+***NOTE***: Windows support is *deprecated* and *unmaintained*. We will do our
+best to keep it working, but we no longer test it in CI and there is a high
+likelihood of breakages.
+
 #### Quick start, installing all completers
 
 - Install YCM plugin via [Vundle][]

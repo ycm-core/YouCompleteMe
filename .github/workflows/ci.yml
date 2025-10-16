@@ -12,13 +12,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ ubuntu-24.04, macos-14, windows-2019 ]
+        runs-on: [ ubuntu-24.04, macos-14 ]
         python-arch: [ 'x64' ]
         include:
           - runs-on: macos-14
             python-arch: 'arm64'
-          - runs-on: windows-2019
-            python-arch: 'x86'
         exclude:
           - runs-on: macos-14
             python-arch: "x64"
