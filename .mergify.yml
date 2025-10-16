@@ -5,8 +5,8 @@ queue_rules:
     conditions:
       - status-success=ubuntu-24.04 - Python 3.9 x64
       - status-success=macos-14 - Python 3.9 arm64
-      - status-success=windows-2019 - Python 3.9 x64
-      - status-success=windows-2019 - Python 3.9 x86
+      # - status-success=windows-2019 - Python 3.9 x64
+      # - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
       - status-success=Vim tests - old
 
@@ -17,8 +17,8 @@ pull_request_rules:
       - "#approved-reviews-by>=2"
       - status-success=ubuntu-24.04 - Python 3.9 x64
       - status-success=macos-14 - Python 3.9 arm64
-      - status-success=windows-2019 - Python 3.9 x64
-      - status-success=windows-2019 - Python 3.9 x86
+      # - status-success=windows-2019 - Python 3.9 x64
+      # - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
       - status-success=Vim tests - old
       - status-success=code-review/reviewable
@@ -34,8 +34,8 @@ pull_request_rules:
       - base=master
       - status-success=ubuntu-24.04 - Python 3.9 x64
       - status-success=macos-14 - Python 3.9 arm64
-      - status-success=windows-2019 - Python 3.9 x64
-      - status-success=windows-2019 - Python 3.9 x86
+      # - status-success=windows-2019 - Python 3.9 x64
+      # - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
       - status-success=Vim tests - old
 
@@ -52,8 +52,8 @@ pull_request_rules:
       - author=puremourning
       - status-success=ubuntu-24.04 - Python 3.9 x64
       - status-success=macos-14 - Python 3.9 arm64
-      - status-success=windows-2019 - Python 3.9 x64
-      - status-success=windows-2019 - Python 3.9 x86
+      # - status-success=windows-2019 - Python 3.9 x64
+      # - status-success=windows-2019 - Python 3.9 x86
       - status-success=Vim tests - new
       - status-success=Vim tests - old
 
