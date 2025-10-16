@@ -1,3 +1,8 @@
+name: Issue
+about: Report a bug or suggest an enhancement
+
+---
+
 # Issue Prelude
 
 **Please complete these steps and check these boxes (by putting an `x` inside
