@@ -53,6 +53,10 @@ def _worker( executor_reference, work_queue ):
       work_item = work_queue.get( block=True )
       if work_item is not None:
         work_item.run()
+        # Delete references to object,
+        # whis allow remove object by GC without stuck on work_queue.get()
+        # on next cycle iteration. See GH-60488
+        del work_item
         continue
       executor = executor_reference()
       # Exit if:
