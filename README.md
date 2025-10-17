@@ -1799,11 +1799,19 @@ in the Vim gutter, the relevant groups are:
   `error` if they exist
 - `YcmWarningSign`, which falls back to group `SyntasticWarningSign` and then
   `todo` if they exist
+- `YcmInformationSign`, which falls back to group `SyntasticInformationSign` and then
+  `added` if they exist
+- `YcmHintSign`, which falls back to group `SyntasticHintSign` and then
+  `changed` if they exist
 
 You can also style the line that has the warning/error with these groups:
 
 - `YcmErrorLine`, which falls back to group `SyntasticErrorLine` if it exists
 - `YcmWarningLine`, which falls back to group `SyntasticWarningLine` if it
+  exists
+- `YcmInformationLine`, which falls back to group `SyntasticInformationLine` if it
+  exists
+- `YcmHintLine`, which falls back to group `SyntasticHintLine` if it
   exists
 
 Finally, you can also style the popup for the detailed diagnostics (it is shown
@@ -1824,6 +1832,10 @@ The syntax groups used to highlight regions of text with errors/warnings:
   then `SpellBad`
 - `YcmWarningSection`, which falls back to group `SyntasticWarning` if it exists
   and then `SpellCap`
+- `YcmInformationSection`, which falls back to group `SyntasticInformation` if it exists
+  and then `SpellLocal`
+- `YcmHintSection`, which falls back to group `SyntasticHint` if it exists
+  and then `SpellRare`
 
 Here's how you'd change the style for a group:
 
@@ -2946,8 +2958,8 @@ let g:ycm_warning_symbol = '>>'
 ### The `g:ycm_enable_diagnostic_signs` option
 
 When this option is set, YCM will put icons in Vim's gutter on lines that have a
-diagnostic set. Turning this off will also turn off the `YcmErrorLine` and
-`YcmWarningLine` highlighting.
+diagnostic set. Turning this off will also turn off the `YcmErrorLine`,
+`YcmWarningLine`, `YcmInformationLine` and `YcmHintLine` highlighting.
 
 This option is part of the Syntastic compatibility layer; if the option is not
 set, YCM will fall back to the value of the `g:syntastic_enable_signs` option

@@ -83,7 +83,7 @@ def CompileRegex( raw_regex ):
 
 
 def CompileLevel( level ):
-  # valid kinds are WARNING and ERROR;
+  # valid kinds are WARNING, ERROR, INFORMATION and HINT;
   #  expected input levels are `warning` and `error`
   # NOTE: we don't validate the input...
   expected_kind = level.upper()

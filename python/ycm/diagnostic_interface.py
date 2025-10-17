@@ -138,7 +138,9 @@ class DiagnosticInterface:
       tp.ClearTextProperties( self._bufnr,
                               prop_types = [ 'YcmVirtDiagPadding',
                                              'YcmVirtDiagError',
-                                             'YcmVirtDiagWarning' ] )
+                                             'YcmVirtDiagWarning'
+                                             'YcmVirtDiagInformation',
+                                             'YcmVirtDiagHint' ] )
     else:
       if not will_be_replaced:
         vimsupport.PostVimMessage( '', warning = False )
@@ -175,7 +177,9 @@ class DiagnosticInterface:
         ' ' * vim.buffers[ self._bufnr ].options[ 'shiftwidth' ] ),
       MakeVritualTextProperty(
         'YcmVirtDiagError' if _DiagnosticIsError( first_diag )
-                       else 'YcmVirtDiagWarning',
+        else 'YcmVirtDiagWarning' if _DiagnosticIsWarning( first_diag )
+        else 'YcmVirtDiagInformation' if _DiagnosticIsInformation( first_diag )
+                       else 'YcmVirtDiagHint',
         marker + ' ' + [ line for line in text.splitlines() if line ][ 0 ] )
     else:
       if not text:
@@ -259,7 +263,10 @@ class DiagnosticInterface:
       # We always go for the first diagnostic on the line because diagnostics
       # are sorted by errors in priority and Vim can only display one sign by
       # line.
-      name = 'YcmError' if _DiagnosticIsError( diags[ 0 ] ) else 'YcmWarning'
+      name = ( 'YcmError' if _DiagnosticIsError( diags[ 0 ] )
+        else 'YcmWarning' if _DiagnosticIsWarning( diags[ 0 ] )
+        else 'YcmInformation' if _DiagnosticIsInformation( diags[ 0 ] )
+        else 'YcmHint' )
       sign = {
           'lnum': line,
           'name': name,
@@ -286,14 +293,30 @@ class DiagnosticInterface:
           self._line_to_diags[ line_number ].append( diag )
 
     for diags in self._line_to_diags.values():
-      # We also want errors to be listed before warnings so that errors aren't
-      # hidden by the warnings; Vim won't place a sign over an existing one.
-      diags.sort( key = lambda diag: ( diag[ 'kind' ],
+      # We also want sorted by kind priority (e.g. errors than warning etc) so
+      # that the most important sign is applied first; Vim won't place a sign
+      # over an existing one.
+      diags.sort( key = lambda diag: ( _DiagnosticKindSortKey( diag ),
                                        diag[ 'location' ][ 'column_num' ] ) )
+
+
+def _DiagnosticKindSortKey( diag ):
+  if _DiagnosticIsError( diag ):
+    return 1
+  elif _DiagnosticIsWarning( diag ):
+    return 2
+  elif _DiagnosticIsInformation( diag ):
+    return 3
+  elif _DiagnosticIsHint( diag ):
+    return 4
+  else:
+    return 5
 
 
 _DiagnosticIsError = CompileLevel( 'error' )
 _DiagnosticIsWarning = CompileLevel( 'warning' )
+_DiagnosticIsInformation = CompileLevel( 'information' )
+_DiagnosticIsHint = CompileLevel( 'information' )
 
 
 def _NormalizeDiagnostic( diag ):
@@ -310,7 +333,9 @@ def _ConvertDiagnosticToTextProperties( bufnr, diagnostic ):
   properties = []
 
   name = ( 'YcmErrorProperty' if _DiagnosticIsError( diagnostic ) else
-            'YcmWarningProperty' )
+           'YcmWarningProperty' if _DiagnosticIsWarning( diagnostic ) else
+           'YcmInformationProperty' if _DiagnosticIsInformation( diagnostic )
+          else 'YcmHintProperty' )
   if vimsupport.VimIsNeovim():
     name = name.replace( 'Property', 'Section' )
 
