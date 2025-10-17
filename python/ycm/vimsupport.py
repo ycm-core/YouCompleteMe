@@ -1497,3 +1497,44 @@ def BuildQfListItem( goto_data_item ):
     qf_item[ 'col' ] = goto_data_item[ 'column_num' ]
 
   return qf_item
+
+
+def CreateTemporaryReadonlyBuffer( contents=None,
+                                   buffer_name='[YCM-Temp-Readonly]',
+                                   syntax=None,
+                                   line=None,
+                                   column=None ):
+  """
+  Create a new temporary readonly buffer in Vim, optionally filled
+  with contents.  The buffer will not be associated with a file and
+  will be readonly and unmodifiable.
+  """
+  vim.command( 'enew' )
+  buf = vim.current.buffer
+
+  vim.command( f"file { buffer_name }" )
+
+  if contents:
+    buf.options[ 'modifiable' ] = True
+    buf[ : ] = contents.splitlines()
+    buf.options[ 'modifiable' ] = False
+
+  buf.options[ 'readonly' ] = True
+  buf.options[ 'modifiable' ] = False
+  buf.options[ 'bufhidden' ] = 'wipe'
+  buf.options[ 'buftype' ] = 'nofile'
+  buf.options[ 'buflisted' ] = False
+
+  vim.command( 'setlocal noswapfile' )
+  vim.command( 'setlocal nobuflisted' )
+  vim.command( 'setlocal nobuflisted' )
+
+  if syntax:
+    vim.command( f'set syntax={ syntax }' )
+
+  if line is not None and column is not None:
+    vim.current.window.cursor = ( line + 1, column )
+
+  vim.command( 'normal! zz' )
+
+  return buf
