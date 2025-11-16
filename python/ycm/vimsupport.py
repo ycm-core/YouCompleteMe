@@ -1400,7 +1400,7 @@ def BuildRange( start_line, end_line ):
         # Vim returns the maximum 32-bit integer value when a whole line is
         # selected. Use the end of line instead.
         'column_num': min( end[ 1 ],
-                           len( vim.current.buffer[ end[ 0 ] - 1 ] ) ) + 1
+                           len( vim.current.buffer[ end[ 0 ] - 1 ] ) ) + 2
       }
     }
   }
