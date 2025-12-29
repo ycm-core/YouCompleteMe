@@ -68,18 +68,19 @@ function! Test_Call_Hierarchy()
   call assert_match( '^    -Function: h.*:8', getbufline( winbufnr( popup_list()[ 0 ] ), 4 )[ 0 ] )
   call assert_match( '^  -Function: h.*:9', getbufline( winbufnr( popup_list()[ 0 ] ), 5 )[ 0 ] )
 
-  " silent, because clangd does not support outgoing calls.
-  silent call feedkeys( "\<Down>\<Down>\<Down>\<Down>\<S-Tab>", "xt" )
-  " Re-root at h.
-  call WaitForAssert( { -> assert_equal( len( getbufline( winbufnr( popup_list()[ 0 ] ), 1, '$' ) ), 1 ) } )
-  call assert_match( '^+Function: h', getbufline( winbufnr( popup_list()[ 0 ] ), 1 )[0] )
+  " re-root at h; show outgoing calls from h
+  call feedkeys( "\<Down>\<Down>\<Down>\<Down>\<S-Tab>", "xt" )
+  call WaitForAssert( { -> assert_equal( len( getbufline( winbufnr( popup_list()[ 0 ] ), 1, '$' ) ), 3 ) } )
+  call assert_match( '^  +Function: g', getbufline( winbufnr( popup_list()[ 0 ] ), 1 )[0] )
+  call assert_match( '^  +Function: f', getbufline( winbufnr( popup_list()[ 0 ] ), 2 )[0] )
+  call assert_match( '^+Function: h', getbufline( winbufnr( popup_list()[ 0 ] ), 3 )[0] )
 
-  " silent, because clangd does not support outgoing calls.
+  " silent, because h() has no incoming calls
   silent call feedkeys( "\<S-Tab>\<Tab>", "xt" )
-  " Expansion after re-rooting works.
-  " NOTE: Clangd does not support outgoing calls, hence, we are stuck at just h.
-  call WaitForAssert( { -> assert_equal( len( getbufline( winbufnr( popup_list()[ 0 ] ), 1, '$' ) ), 1 ) } )
-  call assert_match( '^-Function: h', getbufline( winbufnr( popup_list()[ 0 ] ), 1 )[ 0 ] )
+  call WaitForAssert( { -> assert_equal( len( getbufline( winbufnr( popup_list()[ 0 ] ), 1, '$' ) ), 3 ) } )
+  call assert_match( '^  +Function: g', getbufline( winbufnr( popup_list()[ 0 ] ), 1 )[0] )
+  call assert_match( '^  +Function: f', getbufline( winbufnr( popup_list()[ 0 ] ), 2 )[0] )
+  call assert_match( '^-Function: h', getbufline( winbufnr( popup_list()[ 0 ] ), 3 )[0] )
 
   call feedkeys( "\<C-c>", "xt" )
   " Make sure it is closed.
