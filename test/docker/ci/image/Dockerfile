@@ -23,7 +23,7 @@ RUN apt-get update && \
                      python3-pip \
                      python3-setuptools \
                      python3-wheel \
-                     openjdk-11-jdk-headless \
+                     openjdk-21-jdk-headless \
                      nodejs \
                      npm \
                      vim-nox \
