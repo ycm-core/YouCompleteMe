@@ -12,8 +12,8 @@ import os.path as p
 import glob
 
 version = sys.version_info[ 0 : 3 ]
-if version < ( 3, 6, 0 ):
-  sys.exit( 'YouCompleteMe requires Python >= 3.6.0; '
+if version < ( 3, 12, 0 ):
+  sys.exit( 'YouCompleteMe requires Python >= 3.12.0; '
             'your version of Python is ' + sys.version )
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )

@@ -22,7 +22,7 @@ jobs:
             python-arch: "x64"
     env:
       COVERAGE: true
-    name: "${{ matrix.runs-on }} - Python 3.9 ${{ matrix.python-arch }}"
+    name: "${{ matrix.runs-on }} - Python 3.12 ${{ matrix.python-arch }}"
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.9"
+        python-version: "3.12"
         architecture: ${{ matrix.python-arch }}
     - name: Run pip
       run: python3 -m pip install -r python/test_requirements.txt
@@ -43,7 +43,7 @@ jobs:
     - name: Upload coverage data
       uses: codecov/codecov-action@v4
       with:
-        name: "${{ runner.os }}-3.9-${{ matrix.python-arch }}"
+        name: "${{ runner.os }}-3.12-${{ matrix.python-arch }}"
         token: ${{ secrets.CODECOV_TOKEN }}
 
   vim-tests:
@@ -68,7 +68,7 @@ jobs:
     - name: Install Java
       uses: actions/setup-java@v4
       with:
-        java-version: 17
+        java-version: 21
         distribution: 'temurin'
     - name: Build ycmd
       run: python3 ./install.py --force-sudo --ts-completer --clangd-completer --java-completer

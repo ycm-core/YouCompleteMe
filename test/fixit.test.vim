@@ -27,13 +27,14 @@ function! Test_Ranged_Fixit_Works()
     call test_feedinput( "4\<CR>" )
   endfunction
 
-  call timer_start( 5000, funcref( 'SelectEntry' ) )
+  let t = timer_start( 5000, funcref( 'SelectEntry' ) )
   '<,'>YcmCompleter FixIt
   redraw
 
   call assert_match( '        String \(x\|string\) = "Did something useful: "' .
                      \ ' + w.getWidgetInfo();', getline( 34 ) )
   call assert_match( '        System.out.println( \(x\|string\) );', getline( 35 ) )
+  silent! call timer_stop( t )
   delfunction SelectEntry
 endfunction
 
@@ -45,11 +46,12 @@ function! Test_Unresolved_Fixit_Works()
     redraw
     call test_feedinput( "2\<CR>" )
   endfunction
-  call timer_start( 2000, funcref( 'SelectEntry' ) )
+  let t = timer_start( 2000, funcref( 'SelectEntry' ) )
   YcmCompleter FixIt
   redraw
   call assert_equal( '  auto placeholder = 1;', getline( 3 ) )
   call assert_equal( '  printf("%s", placeholder);', getline( 4 ) )
   %bwipeout!
+  silent! call timer_stop( t )
   delfunction SelectEntry
 endfunction
