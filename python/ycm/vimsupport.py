@@ -16,9 +16,12 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 import vim
+import pathlib
+import shutil
 import os
 import json
 import re
+import io
 from collections import defaultdict, namedtuple
 from functools import lru_cache as memoize
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
@@ -38,10 +41,13 @@ BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'new-tab'          : 'tabedit' }
 
 FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT = (
-    'The requested operation will apply changes to {0} files which are not '
-    'currently open. This will therefore open {0} new files in the hidden '
-    'buffers. The quickfix list can then be used to review the changes. No '
-    'files will be written to disk. Do you wish to continue?' )
+    'The requested operation will apply the following changes:\n\n'
+    '{0}\n'
+    'Create, Rename and Delete operations change the state on disk.\n'
+    'Change operations are only reflected inside vim, unless followed by '
+    'another kind of operation relating to the same file.\n'
+    'The results will be placed in the location list.\n'
+    'Do you wish to continue?' )
 
 NO_SELECTION_MADE_MSG = "No valid selection was made; aborting."
 
@@ -935,18 +941,44 @@ def _SortChunksByFile( chunks ):
   chunks_by_file = defaultdict( list )
 
   for chunk in chunks:
-    filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    kind = chunk[ 'kind' ]
+    if kind == 'change':
+      filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    elif kind == 'rename':
+      filepath = chunk[ 'old_filepath' ]
+    else:
+      filepath = chunk[ 'filepath' ]
     chunks_by_file[ filepath ].append( chunk )
 
   return chunks_by_file
 
 
-def _GetNumNonVisibleFiles( file_list ):
+def _GetNumNonVisibleFiles( chunks ):
   """Returns the number of file in the iterable list of files |file_list| which
   are not curerntly open in visible windows"""
-  return len(
-      [ f for f in file_list
-        if not BufferIsVisible( GetBufferNumberForFilename( f ) ) ] )
+  warn = False
+  operations = io.StringIO()
+  for chunk in chunks:
+    kind = chunk[ 'kind' ]
+    if kind in ( 'create', 'rename', 'delete' ):
+      warn = True
+    if kind == 'change':
+      filepath = chunk[ 'range' ][ 'start' ][ 'filepath' ]
+    elif kind == 'rename':
+      filepath = chunk[ 'old_filepath' ]
+    else:
+      filepath = chunk[ 'filepath' ]
+    if not BufferIsVisible( GetBufferNumberForFilename( filepath ) ):
+      warn = True
+    if kind != 'rename':
+      operations.write( f' - { kind.title() }: { filepath }\n' )
+    else:
+      old = chunk[ 'old_filepath' ]
+      new = chunk[ 'new_filepath' ]
+      operations.write( f' - { kind.title() }: { old }\n'
+                        f'       to: { new }\n' )
+
+  return warn, operations.getvalue()
 
 
 def _OpenFileInSplitIfNeeded( filepath ):
@@ -1025,11 +1057,11 @@ def ReplaceChunks( chunks, silent=False ):
   if not silent:
     # Make sure the user is prepared to have her screen mutilated by the new
     # buffers.
-    num_files_to_open = _GetNumNonVisibleFiles( sorted_file_list )
+    warn, format_operations = _GetNumNonVisibleFiles( chunks )
 
-    if num_files_to_open > 0:
+    if warn:
       if not Confirm(
-            FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( num_files_to_open ) ):
+            FIXIT_OPENING_BUFFERS_MESSAGE_FORMAT.format( format_operations ) ):
         return
 
   # Store the list of locations where we applied changes. We use this to display
@@ -1078,17 +1110,44 @@ def ReplaceChunksInBuffer( chunks, vim_buffer ):
   # reverse order.
   chunks.reverse()
   chunks.sort( key = lambda chunk: (
-    chunk[ 'range' ][ 'start' ][ 'line_num' ],
-    chunk[ 'range' ][ 'start' ][ 'column_num' ]
+    chunk.get( 'range', {} ).get( 'start', {} ).get( 'line_num', 1 ),
+    chunk.get( 'range', {} ).get( 'start', {} ).get( 'column_num', 1 )
   ), reverse = True )
 
   # However, we still want to display the locations from the top of the buffer
   # to its bottom.
-  return reversed( [ ReplaceChunk( chunk[ 'range' ][ 'start' ],
-                                   chunk[ 'range' ][ 'end' ],
-                                   chunk[ 'replacement_text' ],
-                                   vim_buffer )
-                     for chunk in chunks ] )
+  replace_chunks = []
+  for chunk in chunks:
+    kind = chunk[ 'kind' ]
+    if kind == 'change':
+      replace_chunks.append(
+        ReplaceChunk(
+          chunk[ 'range' ][ 'start' ],
+          chunk[ 'range' ][ 'end' ],
+          chunk[ 'replacement_text' ],
+          vim_buffer ) )
+    elif kind == 'rename':
+      replace_chunks.append(
+        RenameChunk(
+          chunk[ 'old_filepath' ],
+          chunk[ 'new_filepath' ],
+          chunk[ 'options' ],
+          vim_buffer ) )
+    elif kind == 'create':
+      replace_chunks.append(
+        CreateChunk(
+          chunk[ 'filepath' ],
+          vim_buffer,
+          chunk[ 'options' ],
+          chunk[ 'kind' ] ) )
+    elif kind == 'delete':
+      replace_chunks.append(
+        DeleteChunk(
+          chunk[ 'filepath' ],
+          vim_buffer,
+          chunk[ 'options' ],
+          chunk[ 'kind' ] ) )
+  return reversed( replace_chunks )
 
 
 def SplitLines( contents ):
@@ -1168,6 +1227,58 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
     'lnum': start_line + 1,
     'col': start_column + 1,
     'text': replacement_text,
+    'type': 'F',
+  }
+
+
+def RenameChunk( old_file, new_file, vim_buffer, options, kind = 'rename' ):
+  os.rename( old_file, new_file )
+  vim_buffer.name = new_file
+  vim_buffer.options[ 'modified' ] = True
+  old_current = vim.current.buffer
+  vim.current.buffer = vim_buffer
+  vim.command( "write!" )
+  vim.current.buffer = old_current
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': new_file,
+    'lnum': 1,
+    'col': 1,
+    'text': '',
+    'type': 'F',
+  }
+
+
+def CreateChunk( file, vim_buffer, options, kind = 'create' ):
+  filepath = pathlib.Path( file )
+  directory = filepath.parent()
+  os.makedirs( directory, exist_ok = True )
+  open( file, 'a' ).close()
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': file,
+    'lnum': 1,
+    'col': 1,
+    'text': '',
+    'type': 'F',
+  }
+
+
+def DeleteChunk( file, vim_buffer, options, kind = 'delete' ):
+  vim.command( f'silent! bw! { vim_buffer }' )
+  try:
+    if options.get( 'recursive' ):
+      shutil.rmtree( file )
+    else:
+      os.remove( file )
+  except FileNotFoundError:
+    pass
+  return {
+    'bufnr': vim_buffer.number,
+    'filename': file,
+    'lnum': 1,
+    'col': 1,
+    'text': '',
     'type': 'F',
   }
 
