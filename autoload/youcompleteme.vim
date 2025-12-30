@@ -1665,7 +1665,7 @@ if exists( '*popup_atcursor' )
   function! s:ShowHoverResult( response )
     call popup_hide( s:cursorhold_popup )
 
-    if empty( a:response )
+    if empty( a:response ) || !exists( 'b:ycm_hover' )
       return
     endif
 
