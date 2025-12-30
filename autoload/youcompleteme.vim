@@ -765,6 +765,38 @@ function! s:OnFileSave()
   py3 ycm_state.OnFileSave( vimsupport.GetIntValue( 'buffer_number' ) )
 endfunction
 
+function! youcompleteme#EnableFormatOnSaveForThisBuffer()
+  let b:ycm_format_on_save = 1
+  autocmd BufWritePost,FileWritePost <buffer>
+        \ call youcompleteme#FormatPreFileSave()
+endfunction
+
+function! youcompleteme#FormatPreFileSave()
+  " TODO: For the file version, we should use the '[,'] range
+  if !s:AllowedToCompleteInCurrentBuffer()
+    return
+  endif
+
+  if !get(b:, 'ycm_completing')
+    return
+  endif
+
+  if !get(b:, 'ycm_format_on_save', get(g:, 'ycm_format_on_save', 0))
+    return
+  endif
+
+  if !has_key(b:, 'ycm_format_supported')
+    let cmds = youcompleteme#GetDefinedSubcommands()
+    let b:ycm_format_supported = index( cmds, 'Format' ) >= 0
+  endif
+
+  if !b:ycm_format_supported
+    return
+  endif
+
+  YcmCompleter Format
+endfunction
+
 
 function! s:AbortAutohoverRequest() abort
   if g:ycm_auto_hover ==# 'CursorHold' && s:enable_hover
@@ -1407,6 +1439,7 @@ function! s:SetUpCommands()
         \                                      <line2>,
         \                                      <f-args>)
   command! YcmDiags call s:ShowDiagnostics()
+  command! -nargs=* YcmClearDiags call s:ClearDiagnostics( <f-args> )
   command! -nargs=? YcmShowDetailedDiagnostic
         \ call s:ShowDetailedDiagnostic( <f-args> )
   command! YcmForceCompileAndDiagnostics call s:ForceCompileAndDiagnostics()
@@ -1466,12 +1499,12 @@ function! youcompleteme#GetCommandResponse( ... ) abort
 endfunction
 
 
-function! s:GetCommandResponseAsyncImpl( callback, origin, ... ) abort
+function! s:GetCommandResponseAsyncImpl( callback, origin, resp_type, ... ) abort
   let request_id = py3eval(
         \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
 
   let s:pollers.command.requests[ request_id ] = {
-        \ 'response_func': 'StringResponse',
+        \ 'response_func': a:resp_type,
         \ 'origin': a:origin,
         \ 'callback': a:callback
         \ }
@@ -1493,7 +1526,8 @@ function! youcompleteme#GetCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  call s:GetCommandResponseAsyncImpl( callback, 'extern', a:000 )
+  call call('s:GetCommandResponseAsyncImpl',
+           \ [ a:callback, 'extern', 'StringResponse' ] + a:000 )
 endfunction
 
 
@@ -1508,18 +1542,8 @@ function! youcompleteme#GetRawCommandResponseAsync( callback, ... ) abort
     return
   endif
 
-  let request_id = py3eval(
-        \ 'ycm_state.SendCommandRequestAsync( vim.eval( "a:000" ) )' )
-
-  let s:pollers.command.requests[ request_id ] = {
-        \ 'response_func': 'Response',
-        \ 'origin': 'extern_raw',
-        \ 'callback': a:callback
-        \ }
-  if s:pollers.command.id == -1
-    let s:pollers.command.id = timer_start( s:pollers.command.wait_milliseconds,
-                                          \ function( 's:PollCommands' ) )
-  endif
+  call call( 's:GetCommandResponseAsyncImpl',
+           \ [ a:callback, 'extern_raw', 'Response' ] + a:000 )
 endfunction
 
 
@@ -1599,6 +1623,19 @@ function! youcompleteme#OpenGoToList()
 endfunction
 
 
+function! s:ClearDiagnostics( ... ) abort
+  if index( a:000, 'all' ) >= 0
+    " Clear diagnostics for all buffers
+    py3 <<trim EOF
+      for buf in vim.buffers:
+        ycm_state.ClearDiagnosticsUI( buffer.numer )
+    EOF
+  else
+    py3 ycm_state.ClearDiagnosticsUI( vim.current.buffer.number )
+  endif
+endfunction
+
+
 function! s:ShowDiagnostics()
   py3 ycm_state.ShowDiagnostics()
 endfunction
@@ -1657,6 +1694,7 @@ if exists( '*popup_atcursor' )
       call s:GetCommandResponseAsyncImpl(
             \ function( 's:ShowHoverResult' ),
             \ 'autohover',
+            \ 'Response',
             \ b:ycm_hover.command )
     endif
   endfunction
@@ -1669,12 +1707,27 @@ if exists( '*popup_atcursor' )
       return
     endif
 
+    let l:syntax = b:ycm_hover.syntax
+    if type( a:response ) == v:t_dict
+      if has_key( a:response, 'detailed_info' )
+        let response = a:response.detailed_info
+      elseif has_key( a:response, 'message' )
+        let response = a:response.message
+      endif
+
+      if has_key( a:response, 'filetype' )
+        let l:syntax = a:response.filetype
+      endif
+    else
+      let response = string(a:response)
+    endif
+
     " Try to position the popup at the cursor, but avoid wrapping. If the
     " longest line is > screen width (&columns), then we just have to wrap, and
     " place the popup at the leftmost column.
     "
     " Find the longest line (FIXME: probably doesn't work well for multi-byte)
-    let lines = split( a:response, "\n" )
+    let lines = split( response, "\n" )
     let len = max( map( copy( lines ), "len( v:val )" ) )
 
     let wrap = 0
@@ -1696,6 +1749,7 @@ if exists( '*popup_atcursor' )
           \ 'maxwidth': &columns,
           \ 'close': 'click',
           \ 'fixed': 0,
+          \ 'scrollbar': 1,
           \ }
 
     if has_key( b:ycm_hover, 'popup_params' )
@@ -1704,9 +1758,10 @@ if exists( '*popup_atcursor' )
     endif
 
     let s:cursorhold_popup = popup_atcursor( lines, popup_params )
+
     call setbufvar( winbufnr( s:cursorhold_popup ),
                             \ '&syntax',
-                            \ b:ycm_hover.syntax )
+                            \ l:syntax )
   endfunction
 
 

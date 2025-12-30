@@ -125,10 +125,10 @@ class CommandRequest( BaseRequest ):
     if self._response is None:
       return ""
 
-    # If not a dictionary or a list, the response is necessarily a
+    # If not a dictionary, the response is necessarily a
     # scalar: boolean, number, string, etc. In this case, we print
     # it to the user.
-    if not isinstance( self._response, ( dict, list ) ):
+    if not isinstance( self._response, dict ):
       return str( self._response )
 
     if 'message' in self._response:
@@ -211,8 +211,10 @@ class CommandRequest( BaseRequest ):
 
 
   def _HandleDetailedInfoResponse( self, modifiers ):
-    vimsupport.WriteToPreviewWindow( self._response[ 'detailed_info' ],
-                                     modifiers )
+    vimsupport.WriteToPreviewWindow(
+      self._response[ 'detailed_info' ],
+      modifiers,
+      syntax = self._response.get( 'filetype' ) )
 
 
 def SendCommandRequestAsync( arguments,
