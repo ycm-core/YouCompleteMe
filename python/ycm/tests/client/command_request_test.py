@@ -51,12 +51,35 @@ def GoToListTest( command, response ):
       assert_that( open_qf_list.called )
 
 
+def GoToJdt( command, response ):
+  with patch( 'ycm.vimsupport.CreateTemporaryReadonlyBuffer' ) as temp_buffer:
+    request = CommandRequest( [ command ] )
+    request._response = response
+    request.RunPostCommandActionsIfNeeded( '' )
+    temp_buffer.assert_called_once_with(
+        contents=response[ 'jdt_contents' ],
+        buffer_name=JDT_GOTO[ 'uri' ],
+        syntax='java',
+        line=JDT_GOTO[ 'range' ][ 'start' ][ 'line' ],
+        column=JDT_GOTO[ 'range' ][ 'start' ][ 'character' ] )
+
+
 BASIC_GOTO = {
   'filepath': 'test',
   'line_num': 10,
   'column_num': 100,
 }
 
+JDT_GOTO = {
+  'jdt_contents': 'public class Member {}',
+  'uri': 'jdt://contents/stuff/whatever/Member.class',
+  'range': {
+    'start': {
+      'line': 1,
+      'character': 5
+    }
+  }
+}
 
 BASIC_FIXIT = {
   'fixits': [ {
@@ -298,6 +321,7 @@ class Response_Detection_Test( TestCase ):
     for test, command, response in [
       [ GoToTest,     'AnythingYouLike', BASIC_GOTO ],
       [ GoToTest,     'GoTo',            BASIC_GOTO ],
+      [ GoToJdt,      'GoTo',            JDT_GOTO ],
       [ GoToTest,     'FindAThing',      BASIC_GOTO ],
       [ GoToTest,     'FixItGoto',       BASIC_GOTO ],
       [ GoToListTest, 'AnythingYouLike', [ BASIC_GOTO ] ],
@@ -306,3 +330,28 @@ class Response_Detection_Test( TestCase ):
     ]:
       with self.subTest( test = test, command = command, response = response ):
         test( command, response )
+
+
+class JdtUriParsingTest( TestCase ):
+  def setUp( self ):
+    self.cmd_req = CommandRequest( [] )
+
+  def test_get_class_name_from_jdt_uri_with_valid_uri( self ):
+    uri = "jdt://contents/JDA-5.6.1.jar/net.dv8tion.jda.api."\
+          "entities/Member.class?\\u003dapplication/%5C/Users%5C/user"\
+          "%5C/.gradle%5C/caches%5C/modules-2%5C/files-2.1%5C/net."\
+          "dv8tion%5C/JDA%5C/5.6.1%5C/e69e9bf2049f96bcad99e0bbe4"\
+          "ddce9c67947cf6%5C/JDA-5.6.1.jar\\u003d/gradle_used_by_"\
+          "scope\\u003d/main,test\\u003d/%3Cnet.dv8tion.jda.api.en"\
+          "tities(Member.class"
+    result = self.cmd_req._GetClassNameFromJdtURI( uri )
+    self.assertEqual( result, "Member.class" )
+
+  def test_get_class_name_from_jdt_uri_with_no_class( self ):
+    uri = "jdt://contents/com/example/Member"
+    result = self.cmd_req._GetClassNameFromJdtURI( uri )
+    self.assertIsNone( result )
+
+  def test_get_class_name_from_jdt_uri_with_non_string( self ):
+    result = self.cmd_req._GetClassNameFromJdtURI( None )
+    self.assertIsNone( result )
