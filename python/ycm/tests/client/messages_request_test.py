@@ -138,3 +138,125 @@ class MessagesRequestTest( TestCase ):
             warning=False,
             truncate=True ),
     ] )
+
+
+  def test_Poll_FirstCall_StartsRequest( self ):
+    from ycm.client.messages_request import MessagesPoll
+    from unittest.mock import MagicMock
+    
+    # Create MessagesPoll with mock buffer
+    mock_buffer = MagicMock()
+    mock_buffer.number = 1
+    poller = MessagesPoll( mock_buffer )
+    
+    # Mock the async request method
+    poller.PostDataToHandlerAsync = MagicMock( return_value = MagicMock() )
+    
+    # First poll should start request
+    result = poller.Poll( None )
+    
+    assert_that( result, equal_to( True ) )
+    poller.PostDataToHandlerAsync.assert_called_once()
+
+
+  def test_Poll_FutureNotDone_ReturnsTrue( self ):
+    from ycm.client.messages_request import MessagesPoll
+    from unittest.mock import MagicMock
+    
+    mock_buffer = MagicMock()
+    mock_buffer.number = 1
+    poller = MessagesPoll( mock_buffer )
+    
+    # Mock future that is not done
+    mock_future = MagicMock()
+    mock_future.done.return_value = False
+    poller._response_future = mock_future
+    
+    # Should return True without extracting result
+    result = poller.Poll( None )
+    
+    assert_that( result, equal_to( True ) )
+    mock_future.result.assert_not_called()
+
+
+  def test_Poll_FutureReady_ExtractsResponseNonBlocking( self ):
+    from ycm.client.messages_request import MessagesPoll
+    from unittest.mock import MagicMock
+    import json
+    
+    mock_buffer = MagicMock()
+    mock_buffer.number = 1
+    poller = MessagesPoll( mock_buffer )
+    
+    # Mock completed future with response
+    mock_response = MagicMock()
+    mock_response.read.return_value = json.dumps( [ { 'message': 'test' } ] ).encode()
+    mock_response.close = MagicMock()
+    
+    mock_future = MagicMock()
+    mock_future.done.return_value = True
+    mock_future.result.return_value = mock_response
+    poller._response_future = mock_future
+    
+    # Mock diagnostics handler
+    mock_handler = MagicMock()
+    
+    # Should extract result with timeout=0 (non-blocking)
+    with patch( 'ycm.client.messages_request.PostVimMessage' ):
+      result = poller.Poll( mock_handler )
+    
+    # Verify non-blocking extraction
+    mock_future.result.assert_called_once_with( timeout = 0 )
+    mock_response.read.assert_called_once()
+    mock_response.close.assert_called_once()
+    assert_that( result, equal_to( True ) )
+
+
+  def test_Poll_FutureException_ReturnsFalse( self ):
+    from ycm.client.messages_request import MessagesPoll
+    from unittest.mock import MagicMock
+    
+    mock_buffer = MagicMock()
+    mock_buffer.number = 1
+    poller = MessagesPoll( mock_buffer )
+    
+    # Mock future that raises exception
+    mock_future = MagicMock()
+    mock_future.done.return_value = True
+    mock_future.result.side_effect = Exception( 'Connection error' )
+    poller._response_future = mock_future
+    
+    # Should catch exception and return False
+    result = poller.Poll( None )
+    
+    assert_that( result, equal_to( False ) )
+
+
+  def test_Poll_DoesNotCallHandleFuture( self ):
+    """Verify that Poll() does NOT call HandleFuture() to avoid blocking."""
+    from ycm.client.messages_request import MessagesPoll
+    from unittest.mock import MagicMock, patch
+    import json
+    
+    mock_buffer = MagicMock()
+    mock_buffer.number = 1
+    poller = MessagesPoll( mock_buffer )
+    
+    # Mock completed future
+    mock_response = MagicMock()
+    mock_response.read.return_value = json.dumps( True ).encode()
+    mock_response.close = MagicMock()
+    
+    mock_future = MagicMock()
+    mock_future.done.return_value = True
+    mock_future.result.return_value = mock_response
+    poller._response_future = mock_future
+    
+    # Spy on HandleFuture to ensure it's NOT called
+    original_handle_future = poller.HandleFuture
+    poller.HandleFuture = MagicMock( side_effect = original_handle_future )
+    
+    # Poll should not call HandleFuture
+    poller.Poll( None )
+    
+    poller.HandleFuture.assert_not_called()
