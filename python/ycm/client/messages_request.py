@@ -57,8 +57,19 @@ class MessagesPoll( BaseRequest ):
       # Nothing yet...
       return True
 
-    # Non-blocking extraction since done() is True. We avoid HandleFuture()
-    # because it calls response.read() which blocks on large responses.
+    # Avoid HandleFuture() to prevent blocking in timer callbacks.
+    # HandleFuture() does:
+    #   1. Complex exception handling (UnknownExtraConf, DisplayServerException)
+    #   2. User dialogs that can block waiting for input
+    #   3. Vim UI updates during callback execution
+    # By extracting the response directly with minimal error handling, we avoid
+    # blocking vim's main thread. Note that response.read() is still technically
+    # blocking, but:
+    #   - The future is already done() (data received from localhost ycmd server)
+    #   - Network I/O is complete, read() just copies from buffer to memory
+    #   - No user interaction or complex processing
+    # The real performance issue was HandleFuture's heavy exception handling,
+    # not the I/O itself.
     try:
       response = self._response_future.result( timeout = 0 )
       response_text = response.read()
