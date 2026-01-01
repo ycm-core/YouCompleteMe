@@ -18,6 +18,7 @@
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm.vimsupport import PostVimMessage
 
+import json
 import logging
 
 _logger = logging.getLogger( __name__ )
@@ -56,8 +57,21 @@ class MessagesPoll( BaseRequest ):
       # Nothing yet...
       return True
 
-    response = self.HandleFuture( self._response_future,
-                                  display_message = False )
+    # Non-blocking extraction since done() is True. We avoid HandleFuture()
+    # because it calls response.read() which blocks on large responses.
+    try:
+      response = self._response_future.result( timeout = 0 )
+      response_text = response.read()
+      response.close()
+      if response_text:
+        response = json.loads( response_text )
+      else:
+        response = None
+    except Exception as e:
+      _logger.exception( 'Error while handling server response in Poll' )
+      # Server returned an exception.
+      return False
+
     if response is None:
       # Server returned an exception.
       return False
