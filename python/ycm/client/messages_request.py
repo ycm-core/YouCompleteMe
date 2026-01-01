@@ -67,7 +67,7 @@ class MessagesPoll( BaseRequest ):
         response = json.loads( response_text )
       else:
         response = None
-    except Exception as e:
+    except Exception:
       _logger.exception( 'Error while handling server response in Poll' )
       # Server returned an exception.
       return False

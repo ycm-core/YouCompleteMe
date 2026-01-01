@@ -56,7 +56,7 @@ class FakeFuture:
     return self._done
 
 
-  def result( self ):
+  def result( self, timeout = None ):
     return self._result
 
 

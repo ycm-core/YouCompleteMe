@@ -15,15 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
 from ycm.tests.test_utils import MockVimModule
 MockVimModule()
 
 from hamcrest import assert_that, equal_to
 from unittest import TestCase
-from unittest.mock import patch, call
+from unittest.mock import patch, call, MagicMock
 
-from ycm.client.messages_request import _HandlePollResponse
-from ycm.tests.test_utils import ExtendedMock
+from ycm.client.messages_request import _HandlePollResponse, MessagesPoll
+from ycm.tests.test_utils import ExtendedMock, MockVimBuffers, VimBuffer
 
 
 class MessagesRequestTest( TestCase ):
@@ -141,122 +142,109 @@ class MessagesRequestTest( TestCase ):
 
 
   def test_Poll_FirstCall_StartsRequest( self ):
-    from ycm.client.messages_request import MessagesPoll
-    from unittest.mock import MagicMock
-    
-    # Create MessagesPoll with mock buffer
-    mock_buffer = MagicMock()
-    mock_buffer.number = 1
-    poller = MessagesPoll( mock_buffer )
-    
-    # Mock the async request method
-    poller.PostDataToHandlerAsync = MagicMock( return_value = MagicMock() )
-    
-    # First poll should start request
-    result = poller.Poll( None )
-    
-    assert_that( result, equal_to( True ) )
-    poller.PostDataToHandlerAsync.assert_called_once()
+    test_buffer = VimBuffer( 'test_buffer', number = 1, contents = [ '' ] )
+
+    with MockVimBuffers( [ test_buffer ], [ test_buffer ] ):
+      poller = MessagesPoll( test_buffer )
+
+      # Mock the async request method to avoid actual HTTP call
+      mock_future = MagicMock()
+      with patch.object( poller, 'PostDataToHandlerAsync',
+                        return_value = mock_future ) as mock_post:
+        # First poll should start request
+        result = poller.Poll( None )
+
+        assert_that( result, equal_to( True ) )
+        mock_post.assert_called_once()
 
 
   def test_Poll_FutureNotDone_ReturnsTrue( self ):
-    from ycm.client.messages_request import MessagesPoll
-    from unittest.mock import MagicMock
-    
-    mock_buffer = MagicMock()
-    mock_buffer.number = 1
-    poller = MessagesPoll( mock_buffer )
-    
-    # Mock future that is not done
-    mock_future = MagicMock()
-    mock_future.done.return_value = False
-    poller._response_future = mock_future
-    
-    # Should return True without extracting result
-    result = poller.Poll( None )
-    
-    assert_that( result, equal_to( True ) )
-    mock_future.result.assert_not_called()
+    test_buffer = VimBuffer( 'test_buffer', number = 1, contents = [ '' ] )
+
+    with MockVimBuffers( [ test_buffer ], [ test_buffer ] ):
+      poller = MessagesPoll( test_buffer )
+
+      # Mock future that is not done
+      mock_future = MagicMock()
+      mock_future.done.return_value = False
+      poller._response_future = mock_future
+
+      # Should return True without extracting result
+      result = poller.Poll( None )
+
+      assert_that( result, equal_to( True ) )
+      mock_future.result.assert_not_called()
 
 
   def test_Poll_FutureReady_ExtractsResponseNonBlocking( self ):
-    from ycm.client.messages_request import MessagesPoll
-    from unittest.mock import MagicMock
-    import json
-    
-    mock_buffer = MagicMock()
-    mock_buffer.number = 1
-    poller = MessagesPoll( mock_buffer )
-    
-    # Mock completed future with response
-    mock_response = MagicMock()
-    mock_response.read.return_value = json.dumps( [ { 'message': 'test' } ] ).encode()
-    mock_response.close = MagicMock()
-    
-    mock_future = MagicMock()
-    mock_future.done.return_value = True
-    mock_future.result.return_value = mock_response
-    poller._response_future = mock_future
-    
-    # Mock diagnostics handler
-    mock_handler = MagicMock()
-    
-    # Should extract result with timeout=0 (non-blocking)
-    with patch( 'ycm.client.messages_request.PostVimMessage' ):
-      result = poller.Poll( mock_handler )
-    
-    # Verify non-blocking extraction
-    mock_future.result.assert_called_once_with( timeout = 0 )
-    mock_response.read.assert_called_once()
-    mock_response.close.assert_called_once()
-    assert_that( result, equal_to( True ) )
+    test_buffer = VimBuffer( 'test_buffer', number = 1, contents = [ '' ] )
+
+    with MockVimBuffers( [ test_buffer ], [ test_buffer ] ):
+      poller = MessagesPoll( test_buffer )
+
+      # Mock completed future with response
+      mock_response = MagicMock()
+      mock_response.read.return_value = json.dumps(
+          [ { 'message': 'test' } ] ).encode()
+      mock_response.close = MagicMock()
+
+      mock_future = MagicMock()
+      mock_future.done.return_value = True
+      mock_future.result.return_value = mock_response
+      poller._response_future = mock_future
+
+      # Mock diagnostics handler
+      mock_handler = MagicMock()
+
+      # Should extract result with timeout=0 (non-blocking)
+      with patch( 'ycm.client.messages_request.PostVimMessage' ):
+        result = poller.Poll( mock_handler )
+
+      # Verify non-blocking extraction
+      mock_future.result.assert_called_once_with( timeout = 0 )
+      mock_response.read.assert_called_once()
+      mock_response.close.assert_called_once()
+      assert_that( result, equal_to( True ) )
 
 
   def test_Poll_FutureException_ReturnsFalse( self ):
-    from ycm.client.messages_request import MessagesPoll
-    from unittest.mock import MagicMock
-    
-    mock_buffer = MagicMock()
-    mock_buffer.number = 1
-    poller = MessagesPoll( mock_buffer )
-    
-    # Mock future that raises exception
-    mock_future = MagicMock()
-    mock_future.done.return_value = True
-    mock_future.result.side_effect = Exception( 'Connection error' )
-    poller._response_future = mock_future
-    
-    # Should catch exception and return False
-    result = poller.Poll( None )
-    
-    assert_that( result, equal_to( False ) )
+    test_buffer = VimBuffer( 'test_buffer', number = 1, contents = [ '' ] )
+
+    with MockVimBuffers( [ test_buffer ], [ test_buffer ] ):
+      poller = MessagesPoll( test_buffer )
+
+      # Mock future that raises exception
+      mock_future = MagicMock()
+      mock_future.done.return_value = True
+      mock_future.result.side_effect = Exception( 'Connection error' )
+      poller._response_future = mock_future
+
+      # Should catch exception and return False
+      result = poller.Poll( None )
+
+      assert_that( result, equal_to( False ) )
 
 
   def test_Poll_DoesNotCallHandleFuture( self ):
     """Verify that Poll() does NOT call HandleFuture() to avoid blocking."""
-    from ycm.client.messages_request import MessagesPoll
-    from unittest.mock import MagicMock, patch
-    import json
-    
-    mock_buffer = MagicMock()
-    mock_buffer.number = 1
-    poller = MessagesPoll( mock_buffer )
-    
-    # Mock completed future
-    mock_response = MagicMock()
-    mock_response.read.return_value = json.dumps( True ).encode()
-    mock_response.close = MagicMock()
-    
-    mock_future = MagicMock()
-    mock_future.done.return_value = True
-    mock_future.result.return_value = mock_response
-    poller._response_future = mock_future
-    
-    # Spy on HandleFuture to ensure it's NOT called
-    original_handle_future = poller.HandleFuture
-    poller.HandleFuture = MagicMock( side_effect = original_handle_future )
-    
-    # Poll should not call HandleFuture
-    poller.Poll( None )
-    
-    poller.HandleFuture.assert_not_called()
+    test_buffer = VimBuffer( 'test_buffer', number = 1, contents = [ '' ] )
+
+    with MockVimBuffers( [ test_buffer ], [ test_buffer ] ):
+      poller = MessagesPoll( test_buffer )
+
+      # Mock completed future
+      mock_response = MagicMock()
+      mock_response.read.return_value = json.dumps( True ).encode()
+      mock_response.close = MagicMock()
+
+      mock_future = MagicMock()
+      mock_future.done.return_value = True
+      mock_future.result.return_value = mock_response
+      poller._response_future = mock_future
+
+      # Spy on HandleFuture to ensure it's NOT called
+      with patch.object( poller, 'HandleFuture' ) as mock_handle_future:
+        # Poll should not call HandleFuture
+        poller.Poll( None )
+
+        mock_handle_future.assert_not_called()
