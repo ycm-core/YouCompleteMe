@@ -65,7 +65,7 @@ class MessagesPoll( BaseRequest ):
     # By extracting the response directly with minimal error handling, we avoid
     # blocking vim's main thread. Note that response.read() is still technically
     # blocking, but:
-    #   - The future is already done() (data received from localhost ycmd server)
+    #   - The future is already done(), data received from localhost ycmd server
     #   - Network I/O is complete, read() just copies from buffer to memory
     #   - No user interaction or complex processing
     # The real performance issue was HandleFuture's heavy exception handling,
