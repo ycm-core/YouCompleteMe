@@ -1140,6 +1140,10 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )
 
+  if start_line >= len( vim_buffer ):
+    start_line -= 1
+    replacement_lines = [ ToBytes( vim_buffer[ -1 ] ) ] + replacement_lines
+
   # NOTE: Vim buffers are a list of unicode objects on Python 3.
   start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
   end_line_text = ToBytes( vim_buffer[ end_line ] )
