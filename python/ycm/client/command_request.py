@@ -47,7 +47,7 @@ class CommandRequest( BaseRequest ):
     self._location = location
 
 
-  def Start( self ):
+  def Start( self, handler = 'run_completer_command' ):
     if self._location is not None:
       self._request_data = BuildRequestDataForLocation( *self._location )
     elif self._bufnr is not None:
@@ -62,7 +62,7 @@ class CommandRequest( BaseRequest ):
     } )
     self._response_future = self.PostDataToHandlerAsync(
       self._request_data,
-      'run_completer_command' )
+      handler )
 
 
   def Done( self ):
@@ -198,6 +198,18 @@ class CommandRequest( BaseRequest ):
         vimsupport.ReplaceChunks(
           chosen_fixit[ 'chunks' ],
           silent = self._command == 'Format' )
+        while chosen_fixit[ 'keep_going' ]:
+          self.Start( handler = 'next_fixit' )
+          response = self.HandleFuture( self._response_future,
+                                        display_message = not self._silent )
+          if response is None:
+            return
+          fixits = response[ 'fixits' ]
+          assert len( fixits ) == 1
+          chosen_fixit = fixits[ 0 ]
+          vimsupport.ReplaceChunks(
+            chosen_fixit[ 'chunks' ],
+            silent = self._command == 'Format' )
       except RuntimeError as e:
         vimsupport.PostVimMessage( str( e ) )
 
