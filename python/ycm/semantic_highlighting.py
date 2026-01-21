@@ -16,6 +16,7 @@
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from ycm.client.base_request import BaseRequest
 from ycm.client.semantic_tokens_request import SemanticTokensRequest
 from ycm.client.base_request import BuildRequestData
 from ycm import vimsupport
@@ -25,60 +26,119 @@ from ycm import scrolling_range as sr
 import vim
 
 
-HIGHLIGHT_GROUP = {
-  'namespace': 'Type',
-  'type': 'Type',
-  'class': 'Structure',
-  'enum': 'Structure',
-  'interface': 'Structure',
-  'struct': 'Structure',
-  'typeParameter': 'Identifier',
-  'parameter': 'Identifier',
-  'variable': 'Identifier',
-  'property': 'Identifier',
-  'enumMember': 'Identifier',
-  'enumConstant': 'Constant',
-  'event': 'Identifier',
-  'function': 'Function',
-  'member': 'Identifier',
-  'macro': 'Macro',
-  'method': 'Function',
-  'keyword': 'Keyword',
-  'modifier': 'Keyword',
-  'comment': 'Comment',
-  'string': 'String',
-  'number': 'Number',
-  'regexp': 'String',
-  'operator': 'Operator',
-  'decorator': 'Special',
-  'unknown': 'Normal',
+HIGHLIGHT_GROUPS = [{
+  'highlight': {
+    'namespace': 'Type',
+    'type': 'Type',
+    'class': 'Structure',
+    'enum': 'Structure',
+    'interface': 'Structure',
+    'struct': 'Structure',
+    'typeParameter': 'Identifier',
+    'parameter': 'Identifier',
+    'variable': 'Identifier',
+    'property': 'Identifier',
+    'enumMember': 'Identifier',
+    'enumConstant': 'Constant',
+    'event': 'Identifier',
+    'function': 'Function',
+    'member': 'Identifier',
+    'macro': 'Macro',
+    'method': 'Function',
+    'keyword': 'Keyword',
+    'modifier': 'Keyword',
+    'comment': 'Comment',
+    'string': 'String',
+    'number': 'Number',
+    'regexp': 'String',
+    'operator': 'Operator',
+    'unknown': 'Normal',
 
-  # These are not part of the spec, but are used by clangd
-  'bracket': 'Normal',
-  'concept': 'Type',
-  # These are not part of the spec, but are used by jdt.ls
-  'annotation': 'Macro',
-}
+    # These are not part of the spec, but are used by clangd
+    'bracket': 'Normal',
+    # These are not part of the spec, but are used by jdt.ls
+    'annotation': 'Macro',
+  }
+}]
 REPORTED_MISSING_TYPES = set()
+
+
+def AddHiForTokenType( bufnr, token_type, group ):
+  prop = f'YCM_HL_{ token_type }'
+  hi = group
+  combine = 0
+  filetypes = "(default)"
+  if bufnr is not None:
+    filetypes = vimsupport.GetBufferFiletypes(bufnr)
+
+  if group is None or len( group ) == 0:
+    hi = 'Normal'
+    combine = 1
+
+  if not vimsupport.GetIntValue(
+      f"hlexists( '{ vimsupport.EscapeForVim( hi ) }' )" ):
+    vimsupport.PostVimMessage(
+        f"Higlight group { hi } is not difined for { filetypes }. "
+        f"See :help youcompleteme-customising-highlight-groups" )
+    return
+
+  if bufnr is None:
+    props = tp.GetTextPropertyTypes()
+    if prop not in props:
+      tp.AddTextPropertyType( prop,
+                              highlight = hi,
+                              priority = 0,
+                              combine = combine )
+  else:
+    try:
+      tp.AddTextPropertyType( prop,
+                              highlight = hi,
+                              priority = 0,
+                              combine = combine,
+                              bufnr = bufnr )
+    except vim.error as e:
+      if 'E969:' in str( e ):
+        # at YcmRestart we can get error about redefining properties, just ignore them
+        pass
+      else:
+        raise e
+
 
 
 def Initialise():
   if vimsupport.VimIsNeovim():
     return
 
-  props = tp.GetTextPropertyTypes()
-  if 'YCM_HL_UNKNOWN' not in props:
-    tp.AddTextPropertyType( 'YCM_HL_UNKNOWN',
-                            highlight = 'WarningMsg',
-                            priority = 0 )
+  global HIGHLIGHT_GROUPS
 
-  for token_type, group in HIGHLIGHT_GROUP.items():
-    prop = f'YCM_HL_{ token_type }'
-    if prop not in props and vimsupport.GetIntValue(
-        f"hlexists( '{ vimsupport.EscapeForVim( group ) }' )" ):
-      tp.AddTextPropertyType( prop,
-                              highlight = group,
-                              priority = 0 )
+  if "ycm_semantic_highlight_groups" in vimsupport.GetVimGlobalsKeys():
+    hi_groups: list[dict] = vimsupport.VimExpressionToPythonType(
+        "g:ycm_semantic_highlight_groups" )
+    hi_groups.extend( HIGHLIGHT_GROUPS[:] )
+    HIGHLIGHT_GROUPS = hi_groups
+
+  # init default highlight
+  default_hi = None
+  for groups in HIGHLIGHT_GROUPS:
+    if 'filetypes' not in groups:
+      if 'highlight' not in groups:
+        continue
+
+      if default_hi is None:
+        default_hi = groups
+      else:
+        # merge all defaults
+        for token_type, group in groups[ 'highlight' ].items():
+          if token_type not in default_hi[ 'highlight' ]:
+            default_hi[ 'highlight' ][ token_type ] = group
+
+  if default_hi is None or 'highlight' not in default_hi:
+    return
+
+  # define default settings globally for make it compatible with older settings,
+  # that used global highlight groups, instead of groups per buffer
+  for token_type, group in default_hi[ 'highlight' ].items():
+    AddHiForTokenType( None, token_type, group )
 
 
 # "arbitrary" base id
@@ -101,14 +161,48 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
     self._prop_id = NextPropID()
     super().__init__( bufnr )
 
+    self._filetypes = vimsupport.GetBufferFiletypes( bufnr )
+
+    default_hi = None
+    target_groups = None
+    for ft_groups in HIGHLIGHT_GROUPS:
+      if 'filetypes' in ft_groups:
+        for filetype in self._filetypes:
+          if filetype in ft_groups[ 'filetypes' ]:
+            target_groups = ft_groups
+      elif default_hi is None:
+        default_hi = ft_groups
+
+    if target_groups is None and ( default_hi is None or 'highlight' not in default_hi ):
+      self._do_highlight = False
+      return
+    elif target_groups is None:
+      # default highlight should be defined globaly
+      self._do_highlight = True
+      return
+    elif 'highlight' not in target_groups:
+      self._do_highlight = False
+      return
+
+    for token_type, group in target_groups[ 'highlight' ].items():
+      AddHiForTokenType( bufnr, token_type, group )
+
+    self._do_highlight = True
+
 
   def _NewRequest( self, request_range ):
+    if self._do_highlight == False:
+      return BaseRequest()
+
     request: dict = BuildRequestData( self._bufnr )
     request[ 'range' ] = request_range
     return SemanticTokensRequest( request )
 
 
   def _Draw( self ):
+    if self._do_highlight == False:
+      return
+
     # We requested a snapshot
     tokens = self._latest_response.get( 'tokens', [] )
 
@@ -127,8 +221,7 @@ class SemanticHighlighting( sr.ScrollingBufferRange ):
           if token[ 'type' ] not in REPORTED_MISSING_TYPES:
             REPORTED_MISSING_TYPES.add( token[ 'type' ] )
             vimsupport.PostVimMessage(
-              f"Token type { token[ 'type' ] } not supported. "
-              f"Define property type { prop_type }. "
+              f"Token type { token[ 'type' ] } is not defined for { self._filetypes }. "
               f"See :help youcompleteme-customising-highlight-groups" )
         else:
           raise e
