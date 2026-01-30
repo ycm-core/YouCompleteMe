@@ -1874,33 +1874,12 @@ be:
     \    }
     \ ]
 <
-Each dictionary contains the following keys:
+Each dictionary contains the following keys: 'name', 'cmdline', 'port',
+'filetypes', 'capabilities', 'project_root_files', 'additional_workspace_dirs',
+'triggerCharacters', and 'settings'. The full description of each key can be
+found in the ycmd [79] repository.
 
-- 'name' (string, mandatory): When configuring a LSP server the value of the
-  'name' key will be used as the "kwargs[ 'language' ]". Can be anything you
-  like.
-
-- 'filetypes' (list of string, mandatory): List of Vim filetypes this server
-  should be used for.
-
-- 'project_root_files' (list of string, optional): List of filenames to
-  search for when trying to determine the project's root. Uses python's
-  pathlib for glob matching.
-
-- 'cmdline' (list of strings, optional): If supplied, the server is started
-  with this command line (each list element is a command line word).
-  Typically, the server should be started with STDIO communication. If not
-  supplied, 'port' must be supplied.
-
-- 'port' (number, optional): If supplied, ycmd will connect to the server at
-  'localhost:<port>' using TCP (remote servers are not supported).
-
-- 'capabilities' (dict, optional): If supplied, this is a dictionary that is
-  merged with the LSP client capabilities reported to the language server.
-  This can be used to enable or disable certain features, such as the support
-  for configuration sections ('workspace/configuration').
-
-See the LSP Examples [79] project for more examples of configuring the likes of
+See the LSP Examples [80] project for more examples of configuring the likes of
 PHP, Ruby, Kotlin, and D.
 
 -------------------------------------------------------------------------------
@@ -1952,7 +1931,7 @@ semantic completions if it does not have a native semantic completion engine
 for your file's filetype. Vim comes with rudimentary omnifuncs for various
 languages like Ruby, PHP, etc. It depends on the language.
 
-You can get a stellar omnifunc for Ruby with Eclim [80]. Just make sure you
+You can get a stellar omnifunc for Ruby with Eclim [81]. Just make sure you
 have the _latest_ Eclim installed and configured (this means Eclim '>= 2.2.*'
 and Eclipse '>= 4.2.*').
 
@@ -1969,7 +1948,7 @@ Writing New Semantic Completers ~
 
 You have two options here: writing an 'omnifunc' for Vim's omnicomplete system
 that YCM will then use through its omni-completer, or a custom completer for
-YCM using the Completer API [81].
+YCM using the Completer API [82].
 
 Here are the differences between the two approaches:
 
@@ -1988,7 +1967,7 @@ Here are the differences between the two approaches:
   than VimScript.
 
 If you want to use the 'omnifunc' system, see the relevant Vim docs with ':h
-complete-functions'. For the Completer API, see the API docs [81].
+complete-functions'. For the Completer API, see the API docs [82].
 
 If you want to upstream your completer into YCM's source, you should use the
 Completer API.
@@ -2039,7 +2018,7 @@ current file in Vim's 'locationlist', which can be opened with the ':lopen' and
 ':lclose' commands (make sure you have set 'let
 g:ycm_always_populate_location_list = 1' in your vimrc). A good way to toggle
 the display of the 'locationlist' with a single key mapping is provided by
-another (very small) Vim plugin called ListToggle [82] (which also makes it
+another (very small) Vim plugin called ListToggle [83] (which also makes it
 possible to change the height of the 'locationlist' window), also written by
 yours truly.
 
@@ -2097,7 +2076,7 @@ supported.
 
 Here's a quick demo:
 
-  Image: asciicast [83]
+  Image: asciicast [84]
 
 As you can see, you can type and YCM filters down the list as you type. The
 current set of matches are displayed in a popup window in the centre of the
@@ -2163,7 +2142,7 @@ are supported:
 - Call hierarchy '<Plug>(YCMCallHierarchy)': Display callees and callers of
   the symbol under cursor. Expand down to callers and up to callees.
 
-Take a look at this Image: asciicast [85] for brief demo.
+Take a look at this Image: asciicast [86] for brief demo.
 
 Hierarchy UI can be initiated by mapping something to the indicated plug
 mappings, for example:
@@ -2173,7 +2152,8 @@ mappings, for example:
 <
 This opens a "modal" popup showing the current element in the hierarchy tree.
 The current tree root is aligned to the left and child and parent nodes are
-expanded to the right. Expand the tree "down" with '<Tab> and "up" with'`.
+expanded to the right. Expand the tree "down" with '<Tab>' and "up" with
+'<S-Tab>'.
 
 The "root" of the tree can be re-focused to the selected item with '<S-Tab>'
 and further '<S-Tab>' will show the parents of the selected item. This can take
@@ -2591,7 +2571,7 @@ such as missing trailing semi-colons, spurious characters, or other errors
 which the semantic engine can deterministically suggest corrections. A small
 demo presenting how diagnostics can be fixed with clangd:
 
-  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [87])
+  Image: YcmCompleter-FixIt-OnDiagnostic (see reference [88])
 
 Completers (LSPs) may also provide refactoring tweaks, which may be available
 even when no diagnostic is presented for the current line. These include
@@ -2600,7 +2580,7 @@ generation, ... The tweaks work for a selection as well. Consult your LSP for
 available refactorings. A demonstration of refactoring capabilities with
 clangd:
 
-  Image: YouCompleter-FixIt-Refactoring (see reference [88])
+  Image: YouCompleter-FixIt-Refactoring (see reference [89])
 
 If no fix-it is available for the current line, or there is no diagnostic on
 the current line, this command has no effect on the current buffer. If any
@@ -2646,7 +2626,7 @@ The following additional commands are supported for Python:
 - 'RefactorExtractVariable'
 - 'RefactorExtractFunction'
 
-See the jedi docs [89] for what they do.
+See the jedi docs [90] for what they do.
 
 Supported in filetypes: 'python'
 
@@ -2721,7 +2701,7 @@ server-specific commands. Consult the jdt.ls [17] documentation to find out
 what commands are supported and which arguments are expected.
 
 The support for 'ExecuteCommand' was implemented to support plugins like
-Vimspector [90] to debug java, but isn't limited to that specific use case.
+Vimspector [91] to debug java, but isn't limited to that specific use case.
 
 -------------------------------------------------------------------------------
 The *RestartServer* subcommand
@@ -2757,7 +2737,7 @@ For example:
   call youcompleteme#GetErrorCount()
 <
 Both this function and |youcompleteme#GetWarningCount| can be useful when
-integrating YCM with other Vim plugins. For example, a lightline [91] user
+integrating YCM with other Vim plugins. For example, a lightline [92] user
 could add a diagnostics section to their statusline which would display the
 number of errors and warnings.
 
@@ -3258,9 +3238,9 @@ string 'virtual-text', and the diagnostic will be displayed inline with the
 text, right aligned in the window and wrapping to the next line if there is not
 enough space, for example:
 
-  Image: Virtual text diagnostic demo (see reference [92])
-
   Image: Virtual text diagnostic demo (see reference [93])
+
+  Image: Virtual text diagnostic demo (see reference [94])
 
 **NOTE**: It's _strongly_ recommended to also set
 |g:ycm_update_diagnostics_in_insert_mode| to '0' when using 'virtual-text' for
@@ -3368,7 +3348,7 @@ YCM will not render it.
 
 The following filter types are supported:
 
-- "regex": Accepts a string regular expression [94]. This type matches when
+- "regex": Accepts a string regular expression [95]. This type matches when
   the regex (treated as case-insensitive) is found anywhere in the diagnostic
   text ('re.search', not 're.match')
 
@@ -3376,7 +3356,7 @@ The following filter types are supported:
   matches when the diagnostic has the same level, that is, specifying 'level:
   "error"' will remove **all** errors from the diagnostics.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [94].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [95].
 
 Default: '{}'
 
@@ -3471,7 +3451,7 @@ from the 'tagfiles()' Vim function which examines the 'tags' Vim option. See
 
 YCM will re-index your tags files if it detects that they have been modified.
 
-The only supported tag format is the Exuberant Ctags format [95]. The format
+The only supported tag format is the Exuberant Ctags format [96]. The format
 from "plain" ctags is NOT supported. Ctags needs to be called with the
 '--fields=+l' option (that's a lowercase 'L', not a one) because YCM needs the
 'language:<lang>' field in the tags output.
@@ -3875,7 +3855,7 @@ It's also possible to use a regular expression as a trigger. You have to prefix
 your trigger with 're!' to signify it's a regex trigger. For instance,
 're!\w+\.' would only trigger after the '\w+\.' regex matches.
 
-**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [94].
+**NOTE:** The regex syntax is **NOT** Vim's, it's Python's [95].
 
 Default: '[see next line]'
 >
@@ -4015,7 +3995,7 @@ first making sure YCM won't choose that existing completer in the first place.
 A simple working example of this option can be found in the section called
 "Semantic Completion for Other Languages".
 
-Many working examples can be found in the YCM lsp-examples [79] repo.
+Many working examples can be found in the YCM lsp-examples [80] repository.
 
 Default: '[]'
 >
@@ -4119,17 +4099,17 @@ The FAQ section has been moved to the wiki [8].
 Contributor Code of Conduct ~
 
 Please note that this project is released with a Contributor Code of Conduct
-[96]. By participating in this project you agree to abide by its terms.
+[97]. By participating in this project you agree to abide by its terms.
 
 -------------------------------------------------------------------------------
                                                         *youcompleteme-contact*
 Contact ~
 
 If you have questions about the plugin or need help, please join the Gitter
-room [1] or use the ycm-users [97] mailing list.
+room [1] or use the ycm-users [98] mailing list.
 
 If you have bug reports or feature suggestions, please use the issue tracker
-[98]. Before you do, please carefully read CONTRIBUTING.md [99] as this asks
+[99]. Before you do, please carefully read CONTRIBUTING.md [100] as this asks
 for important diagnostics which the team will use to help get you going.
 
 The latest version of the plugin is available at
@@ -4144,7 +4124,7 @@ contact the YouCompleteMe maintainers directly using the contact details.
                                                         *youcompleteme-license*
 License ~
 
-This software is licensed under the GPL v3 license [100]. © 2015-2018
+This software is licensed under the GPL v3 license [101]. © 2015-2018
 YouCompleteMe contributors
 
 -------------------------------------------------------------------------------
@@ -4155,10 +4135,10 @@ If you like YCM so much that you're willing to part with your hard-earned cash,
 please consider donating to one of the following charities, which are
 meaningful to the current maintainers (in no particular order):
 
-- Hector's Greyhound Rescue [101]
-- Be Humane [102]
-- Cancer Research UK [103]
-- ICCF Holland [104]
+- Hector's Greyhound Rescue [102]
+- Be Humane [103]
+- Cancer Research UK [104]
+- ICCF Holland [105]
 - Any charity of your choosing.
 
 Please note: The YCM maintainers do not specifically endorse nor necessarily
@@ -4247,31 +4227,32 @@ References ~
 [76] https://code.visualstudio.com/docs/languages/jsconfig
 [77] https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
 [78] https://clang.llvm.org/
-[79] https://github.com/ycm-core/lsp-examples
-[80] http://eclim.org/
-[81] https://github.com/ycm-core/ycmd/blob/master/ycmd/completers/completer.py
-[82] https://github.com/Valloric/ListToggle
-[83] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C
-[84] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C.svg
-[85] https://asciinema.org/a/659925
-[86] https://asciinema.org/a/659925.svg
-[87] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
-[88] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
-[89] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
-[90] https://github.com/puremourning/vimspector
-[91] https://github.com/itchyny/lightline.vim
-[92] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
-[93] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
-[94] https://docs.python.org/2/library/re.html#regular-expression-syntax
-[95] http://ctags.sourceforge.net/FORMAT
-[96] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
-[97] https://groups.google.com/forum/?hl=en#!forum/ycm-users
-[98] https://github.com/ycm-core/YouCompleteMe/issues?state=open
-[99] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
-[100] https://www.gnu.org/copyleft/gpl.html
-[101] https://www.hectorsgreyhoundrescue.org
-[102] https://www.budihuman.rs/en
-[103] https://www.cancerresearchuk.org
-[104] https://iccf.nl
+[79] https://github.com/ycm-core/ycmd#language_server-configuration
+[80] https://github.com/ycm-core/lsp-examples
+[81] http://eclim.org/
+[82] https://github.com/ycm-core/ycmd/blob/master/ycmd/completers/completer.py
+[83] https://github.com/Valloric/ListToggle
+[84] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C
+[85] https://asciinema.org/a/4JmYLAaz5hOHbZDD0hbsQpY8C.svg
+[86] https://asciinema.org/a/659925
+[87] https://asciinema.org/a/659925.svg
+[88] https://user-images.githubusercontent.com/17928698/206855014-9131a49b-87e8-4ed4-8d91-f2fe7808a0b9.gif
+[89] https://user-images.githubusercontent.com/17928698/206855713-3588c8de-d0f5-4725-b65e-bc51110252cc.gif
+[90] https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
+[91] https://github.com/puremourning/vimspector
+[92] https://github.com/itchyny/lightline.vim
+[93] https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
+[94] https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
+[95] https://docs.python.org/2/library/re.html#regular-expression-syntax
+[96] http://ctags.sourceforge.net/FORMAT
+[97] https://github.com/ycm-core/YouCompleteMe/blob/master/CODE_OF_CONDUCT.md
+[98] https://groups.google.com/forum/?hl=en#!forum/ycm-users
+[99] https://github.com/ycm-core/YouCompleteMe/issues?state=open
+[100] https://github.com/ycm-core/YouCompleteMe/blob/master/CONTRIBUTING.md
+[101] https://www.gnu.org/copyleft/gpl.html
+[102] https://www.hectorsgreyhoundrescue.org
+[103] https://www.budihuman.rs/en
+[104] https://www.cancerresearchuk.org
+[105] https://iccf.nl
 
 vim: ft=help
