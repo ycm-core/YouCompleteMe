@@ -1634,26 +1634,10 @@ let g:ycm_language_server =
   \ ]
 ```
 
-Each dictionary contains the following keys:
-
-* `name` (string, mandatory): When [configuring a LSP
-  server](#lsp-configuration) the value of the `name` key will be used as the
-  `kwargs[ 'language' ]`. Can be anything you like.
-* `filetypes` (list of string, mandatory): List of Vim filetypes this server
-  should be used for.
-* `project_root_files` (list of string, optional): List of filenames to search
-  for when trying to determine the project's root. Uses python's pathlib for
-  glob matching.
-* `cmdline` (list of strings, optional): If supplied, the server is started with
-  this command line (each list element is a command line word). Typically, the
-  server should be started with STDIO communication. If not supplied, `port`
-  must be supplied.
-* `port` (number, optional): If supplied, ycmd will connect to the server at
-  `localhost:<port>` using TCP (remote servers are not supported).
-* `capabilities` (dict, optional): If supplied, this is a dictionary that is
-  merged with the LSP client capabilities reported to the language server. This
-  can be used to enable or disable certain features, such as the support for
-  configuration sections (`workspace/configuration`).
+Each dictionary contains the following keys: `name`, `cmdline`, `port`,
+`filetypes`, `capabilities`, `project_root_files`, `additional_workspace_dirs`,
+`triggerCharacters`, and `settings`. The full description of each key can be
+found in the [ycmd][language_server-configuration] repository.
 
 See [the LSP Examples](https://github.com/ycm-core/lsp-examples) project for more
 examples of configuring the likes of PHP, Ruby, Kotlin, and D.
@@ -1918,8 +1902,7 @@ nmap <leader>ych <Plug>(YCMCallHierarchy)
 
 This opens a "modal" popup showing the current element in the hierarchy tree.
 The current tree root is aligned to the left and child and parent nodes are
-expanded to the right. Expand the tree "down" with `<Tab> and "up" with
-`<S-Tab>`.
+expanded to the right. Expand the tree "down" with `<Tab>` and "up" with `<S-Tab>`.
 
 The "root" of the tree can be re-focused to the selected item with
 `<S-Tab>` and further `<S-Tab>` will show the parents of the selected item. This
@@ -3792,7 +3775,7 @@ making sure YCM won't choose that existing completer in the first place.
 A simple working example of this option can be found in the section called
 ["Semantic Completion for Other Languages"](#semantic-completion-for-other-languages).
 
-Many working examples can be found in the YCM [lsp-examples][] repo.
+Many working examples can be found in the YCM [lsp-examples][] repository.
 
 Default: `[]`
 
@@ -4014,6 +3997,7 @@ Please note: The YCM maintainers do not specifically endorse nor necessarily hav
 [wiki-full-install]: https://github.com/ycm-core/YouCompleteMe/wiki/Full-Installation-Guide
 [wiki-troubleshooting]: https://github.com/ycm-core/YouCompleteMe/wiki/Troubleshooting-steps-for-ycmd-server-SHUT-DOWN
 [lsp-examples]: https://github.com/ycm-core/lsp-examples
+[language_server-configuration]: https://github.com/ycm-core/ycmd#language_server-configuration
 [diagnostic-echo-virtual-text1]: https://user-images.githubusercontent.com/10584846/185707973-39703699-0263-47d3-82ac-639d52259bea.png
 [diagnostic-echo-virtual-text2]: https://user-images.githubusercontent.com/10584846/185707993-14ff5fd7-c082-4e5a-b825-f1364e619b6a.png
 [jedi-refactor-doc]: https://jedi.readthedocs.io/en/latest/docs/api.html#jedi.Script.extract_variable
