@@ -75,7 +75,9 @@ SERVER_SHUTDOWN_MESSAGE = (
   "The ycmd server SHUT DOWN (restart with ':YcmRestartServer')." )
 EXIT_CODE_UNEXPECTED_MESSAGE = (
   "Unexpected exit code {code}. "
-  "Type ':YcmToggleLogs {logfile}' to check the logs." )
+  "Type ':YcmToggleLogs {logfile}' to check the logs. "
+  "Possible causes include a .ycm_extra_conf.py returning an empty 'flags' "
+  "list." )
 CORE_UNEXPECTED_MESSAGE = (
   "Unexpected error while loading the YCM core library. "
   "Type ':YcmToggleLogs {logfile}' to check the logs." )

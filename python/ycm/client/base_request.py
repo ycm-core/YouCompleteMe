@@ -87,6 +87,19 @@ class BaseRequest:
       # don't want to spam the user with it.
       _logger.error( e )
 
+    except ServerError as e:
+      _logger.exception( 'Error while handling server response' )
+      if display_message:
+        if _IsEmptyFlagsException( str( e ) ):
+          vimsupport.PostVimMessage(
+            "The ycmd server reported an error likely caused by an empty "
+            "'flags' list in your .ycm_extra_conf.py file. Ensure that "
+            "Settings() or FlagsForFile() returns a non-empty list of "
+            "compiler flags. See the documentation for details.",
+            truncate = truncate_message )
+        else:
+          DisplayServerException( e, truncate_message )
+
     except Exception as e:
       _logger.exception( 'Error while handling server response' )
       if display_message:
@@ -286,7 +299,10 @@ def _JsonFromFuture( future ):
       if response_text:
         raise MakeServerException( json.loads( response_text ) )
       else:
-        return None
+        raise ServerError(
+          'The ycmd server returned an internal error with no details. '
+          'This can happen when your .ycm_extra_conf.py returns an empty '
+          "'flags' list. Check the server logs with ':YcmToggleLogs'." )
     raise
 
 
@@ -307,7 +323,34 @@ def DisplayServerException( exception, truncate_message = False ):
   # up often and isn't something that's actionable by the user.
   if 'already being parsed' in serialized_exception:
     return
+
+  # Check if the error is related to empty flags from .ycm_extra_conf.py and
+  # provide a more helpful message to the user (see issue #4319).
+  if _IsEmptyFlagsException( serialized_exception ):
+    serialized_exception += (
+      ' NOTE: Your .ycm_extra_conf.py appears to be returning an empty '
+      "'flags' list. Ensure that Settings() or FlagsForFile() returns a "
+      "non-empty list of compiler flags." )
+
   vimsupport.PostVimMessage( serialized_exception, truncate = truncate_message )
+
+
+def _IsEmptyFlagsException( message ):
+  """Check if a server exception message indicates that empty flags were
+  provided by the user's .ycm_extra_conf.py. Common patterns include errors
+  about no compilation flags, empty flags list, or missing input files that
+  result from having no flags."""
+  message_lower = message.lower()
+  empty_flags_patterns = [
+    'no flags',
+    'empty flags',
+    'flags are empty',
+    'no compilation database',
+    'no compilation flags',
+    'no input file',
+    'no compiler flags',
+  ]
+  return any( pattern in message_lower for pattern in empty_flags_patterns )
 
 
 def _ToUtf8Json( data ):
