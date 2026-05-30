@@ -324,7 +324,10 @@ def _ValidateResponseObject( response, response_text ):
 
 
 def _BuildUri( handler ):
-  return ToBytes( urljoin( BaseRequest.server_location, handler ) )
+  request_uri = urljoin( BaseRequest.server_location, handler )
+  if urlparse( request_uri ).scheme not in ( 'http', 'https' ):
+    raise RuntimeError( 'Invalid URI scheme. Only http and https are allowed.' )
+  return ToBytes( request_uri )
 
 
 def MakeServerException( data ):

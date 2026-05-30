@@ -18,10 +18,10 @@
 from ycm.tests.test_utils import MockVimBuffers, MockVimModule, VimBuffer
 MockVimModule()
 
-from hamcrest import assert_that, has_entry
+from hamcrest import assert_that, has_entry, equal_to
 from unittest import TestCase
 from unittest.mock import patch
-from ycm.client.base_request import BuildRequestData
+from ycm.client.base_request import BuildRequestData, _BuildUri, BaseRequest
 
 
 class BaseRequestTest( TestCase ):
@@ -40,3 +40,15 @@ class BaseRequestTest( TestCase ):
     with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
       assert_that( BuildRequestData( current_buffer.number ),
                    has_entry( 'working_dir', '/some/dir' ) )
+
+
+  def test_BuildUri_ValidScheme( self ):
+    BaseRequest.server_location = 'http://localhost:1234'
+    assert_that( _BuildUri( 'handler' ),
+                 equal_to( b'http://localhost:1234/handler' ) )
+
+
+  def test_BuildUri_InvalidScheme( self ):
+    BaseRequest.server_location = 'http://localhost:1234'
+    with self.assertRaisesRegex( RuntimeError, 'Invalid URI scheme' ):
+      _BuildUri( 'file:///etc/passwd' )
