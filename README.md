@@ -1544,6 +1544,10 @@ installing [the Rust source code][rust-src], so no configuration is necessary.
 `rust-analyzer` supports a myriad of options. These are configured using [LSP
 configuration](#lsp-configuration), and are [documented here](https://rust-analyzer.github.io/manual.html#configuration]).
 
+For global (`$VIMRC`-level) configuration without a `.ycm_extra_conf.py`, you can
+also use the [`g:ycm_completer_settings`](#the-gycm_completer_settings-option)
+option.
+
 ### Go Semantic Completion
 
 Completions and GoTo commands should work out of the box (provided that you
@@ -1564,6 +1568,10 @@ def Settings( **kwargs ):
        }
     }
 ```
+
+For global (`$VIMRC`-level) configuration without a `.ycm_extra_conf.py`, you can
+also use the [`g:ycm_completer_settings`](#the-gycm_completer_settings-option)
+option.
 
 ### JavaScript and TypeScript Semantic Completion
 
@@ -1647,6 +1655,8 @@ examples of configuring the likes of PHP, Ruby, Kotlin, and D.
 Many LSP servers allow some level of user configuration. YCM enables this with
 the help of `.ycm_extra_conf.py` files. Here's an example of jdt.ls user
 examples of configuring the likes of PHP, Ruby, Kotlin, D, and many, many more.
+
+See also [`g:ycm_completer_settings`](#the-gycm_completer_settings-option).
 
 ```python
 def Settings( **kwargs ):
@@ -3851,6 +3861,44 @@ tells YCM where is the TSServer executable located.
 
 Similar to [the `gopls` path](#the-gycm-gopls-binaty-path), this option
 tells YCM where is the Omnisharp-Roslyn executable located.
+
+### The `g:ycm_completer_settings` option
+
+Sets global LSP configuration for ycmd's predefined completers (Java, Go, Rust,
+C-family) without needing per-project `.ycm_extra_conf.py` files.
+
+The dictionary keys map to completer names: `java`, `go`, `rust`, and
+`cpp`/`c`/`objc`/`objcpp`/`cuda` for C-family. The values are dictionaries of
+server settings - equivalent to the `ls` key in the `Settings()` function of
+`.ycm_extra_conf.py`.
+
+**Settings priority** (lowest to highest):
+1. Hardcoded completer defaults
+2. `g:ycm_completer_settings`
+3. The `ls` key returned by `Settings()` in `.ycm_extra_conf.py`
+
+Example:
+
+```viml
+let g:ycm_completer_settings = {
+\  'go': {
+\    'hoverKind': 'SynopsisDocumentation'
+\  },
+\  'rust': {
+\    'diagnostics': {
+\      'disabled': [
+\        'inactive-code',
+\      ]
+\    },
+\  }
+\}
+```
+
+Default: `{}`
+
+```viml
+let g:ycm_completer_settings = {}
+```
 
 ### The `g:ycm_update_diagnostics_in_insert_mode` option
 

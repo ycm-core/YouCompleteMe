@@ -197,6 +197,7 @@ Contents ~
    64. The |g:ycm_tsserver_binary_path| option
    65. The |g:ycm_roslyn_binary_path| option
    66. The |g:ycm_update_diagnostics_in_insert_mode| option
+   67. The |g:ycm_completer_settings| option
   12. FAQ                                                   |youcompleteme-faq|
   13. Contributor Code of Conduct   |youcompleteme-contributor-code-of-conduct|
   14. Contact                                           |youcompleteme-contact|
@@ -4069,6 +4070,42 @@ The *g:ycm_roslyn_binary_path* option
 Similar to the 'gopls' path, this option tells YCM where is the
 Omnisharp-Roslyn executable located.
 
+-------------------------------------------------------------------------------
+The *g:ycm_completer_settings* option
+
+Sets global LSP configuration for ycmd's predefined completers (Java, Go, Rust,
+C-family) without needing per-project '.ycm_extra_conf.py' files.
+
+The dictionary keys map to completer names: 'java', 'go', 'rust', and
+'cpp'/'c'/'objc'/'objcpp'/'cuda' for C-family. The values are dictionaries of
+server settings - equivalent to the 'ls' key in the 'Settings()' function of
+'.ycm_extra_conf.py'.
+
+Settings priority (lowest to highest):
+  1. Hardcoded completer defaults
+  2. 'g:ycm_completer_settings'
+  3. The 'ls' key returned by 'Settings()' in '.ycm_extra_conf.py'
+
+Example:
+>
+  let g:ycm_completer_settings = {
+  \  'go': {
+  \    'hoverKind': 'SynopsisDocumentation'
+  \  },
+  \  'rust': {
+  \    'diagnostics': {
+  \      'disabled': [
+  \        'inactive-code',
+  \      ]
+  \    },
+  \  }
+  \}
+<
+
+Default: '{}'
+>
+  let g:ycm_completer_settings = {}
+<
 -------------------------------------------------------------------------------
 The *g:ycm_update_diagnostics_in_insert_mode* option
 
