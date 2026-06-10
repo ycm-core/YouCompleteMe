@@ -374,7 +374,7 @@ function! s:SetUpKeyMappings()
   endif
 
   if !empty( g:ycm_key_detailed_diagnostics )
-    silent! exe 'nnoremap <unique> ' . g:ycm_key_detailed_diagnostics .
+    silent! exe 'nnoremap <unique> <silent> ' . g:ycm_key_detailed_diagnostics .
           \ ' :YcmShowDetailedDiagnostic<CR>'
   endif
 endfunction
