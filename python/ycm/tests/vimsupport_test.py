@@ -667,6 +667,16 @@ class VimsupportTest( TestCase ):
     AssertBuffersAreEqualAsBytes( [ 'first line' ], result_buffer )
 
 
+  @patch( 'vim.current.window.cursor', ( 1, 1 ) )
+  def test_ReplaceChunk_AtOneLinePastEndOfFile( self ):
+    result_buffer = VimBuffer( 'buffer', contents = [ 'first line' ] )
+    start, end = _BuildLocations( 2, 1, 2, 1 )
+    vimsupport.ReplaceChunk( start, end, 'second line', result_buffer )
+
+    AssertBuffersAreEqualAsBytes( [ 'first line', 'second line' ],
+                                result_buffer )
+
+
   @patch( 'vim.current.window.cursor', ( 1, 3 ) )
   def test_ReplaceChunk_CursorPosition( self ):
     result_buffer = VimBuffer( 'buffer', contents = [ 'bar' ] )
