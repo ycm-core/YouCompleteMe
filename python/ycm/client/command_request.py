@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
 from ycm.client.base_request import ( BaseRequest,
                                       BuildRequestData,
                                       BuildRequestDataForLocation )
@@ -142,11 +143,40 @@ class CommandRequest( BaseRequest ):
     return ""
 
 
+  def _GetClassNameFromJdtURI( self, uri ):
+    if not isinstance( uri, str ):
+      return None
+
+    matches = re.findall( r'([^\\(]+\.class)', uri )
+    if matches:
+      return matches[ -1 ]
+    return None
+
+
   def _HandleGotoResponse( self, buffer_command, modifiers ):
     if isinstance( self._response, list ):
       vimsupport.SetQuickFixList(
         [ vimsupport.BuildQfListItem( x ) for x in self._response ] )
       vimsupport.OpenQuickFixList( focus = True, autoclose = True )
+    elif 'jdt_contents' in self._response:
+      class_name = self._GetClassNameFromJdtURI( self._response.get( 'uri' ) )
+
+      range = self._response.get( 'range' )
+      range_start = range.get( 'start' )
+
+      line_num = range_start[ 'line' ] if range_start else 0
+      column_num = range_start[ 'character' ] if range_start else 0
+
+      contents = self._response.get( 'jdt_contents' )
+
+      if not contents:
+        raise RuntimeError( 'JDT contents not available.' )
+
+      vimsupport.CreateTemporaryReadonlyBuffer( contents=contents,
+                                                buffer_name=class_name,
+                                                syntax='java',
+                                                line=line_num,
+                                                column=column_num )
     elif self._response.get( 'file_only' ):
       vimsupport.JumpToLocation( self._response[ 'filepath' ],
                                  None,
