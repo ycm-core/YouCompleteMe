@@ -748,7 +748,7 @@ likelihood of breakages.
 Quick start, installing all completers ~
 
 - Install YCM plugin via Vundle [26]
-- Install Visual Studio Build Tools 2019 [36]
+- Install Visual Studio Build Tools 2022 [36]
 - Install CMake, Vim and Python
 - Install go, node and npm
 - Compile YCM
@@ -804,7 +804,7 @@ Download and install the following software:
 
 - CMake [40]. Add CMake executable to the PATH environment variable.
 
-- Build Tools for Visual Studio 2019 [36]. During setup, select _C++ build
+- Build Tools for Visual Studio 2022 [36]. During setup, select _C++ build
   tools_ in _Workloads_.
 
 Compiling YCM **with** semantic support for C-family languages through
@@ -842,7 +842,7 @@ tools are installed and in your 'PATH', then simply run:
   python install.py --all
 <
 You can specify the Microsoft Visual C++ (MSVC) version using the '--msvc'
-option. YCM officially supports MSVC 15 (2017), MSVC 16 (Visual Studio 2019)
+option. YCM officially supports MSVC 15 (2017), MSVC 16 (Visual Studio 2022)
 and MSVC 17 (Visual Studio 17 2022).
 
 That's it. You're done. Refer to the _User Guide_ section on how to use YCM.
