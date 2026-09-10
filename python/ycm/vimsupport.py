@@ -264,16 +264,19 @@ def GetSignsInBuffer( buffer_number ):
   )[ 0 ][ 'signs' ]
 
 
-class DiagnosticProperty( namedtuple( 'DiagnosticProperty', [ 'id',
-                                                              'type',
-                                                              'line',
-                                                              'column',
-                                                              'length' ] ) ):
+class DiagnosticProperty( namedtuple( 'DiagnosticProperty',
+                                      [ 'id',
+                                        'type',
+                                        'start_line',
+                                        'start_column',
+                                        'end_line',
+                                        'end_column' ] ) ):
   def __eq__( self, other ):
     return ( self.type == other.type and
-             self.line == other.line and
-             self.column == other.column and
-             self.length == other.length )
+             self.start_line == other.start_line and
+             self.start_column == other.start_column and
+             self.end_line == other.end_line and
+             self.end_column == other.end_column )
 
 
 def GetTextPropertyForDiag( buffer_number, line_number, diag ):
@@ -315,19 +318,12 @@ def GetTextPropertyForDiag( buffer_number, line_number, diag ):
 
 def GetTextProperties( buffer_number ):
   if not VimIsNeovim():
-    return [
-      DiagnosticProperty(
-          int( p[ 'id' ] ),
-          p[ 'type' ],
-          int( p[ 'lnum' ] ),
-          int( p[ 'col' ] ),
-          int( p[ 'length' ] ) )
-      for p in vim.eval(
-          f'prop_list( 1, '
-                       f'{{ "bufnr": { buffer_number }, '
-                           '"end_lnum": -1, '
-                           '"types": [ "YcmErrorProperty", '
-                                      '"YcmWarningProperty" ] } )' ) ]
+    vim_props = vim.eval( f'prop_list( 1, '
+                          f'{{ "bufnr": { buffer_number }, '
+                              '"end_lnum": -1, '
+                              '"types": [ "YcmErrorProperty", '
+                                         '"YcmWarningProperty" ] } )' )
+    return _MergeVimTextProperties( vim_props )
   else:
     ext_marks = vim.eval(
       f'nvim_buf_get_extmarks( { buffer_number }, '
@@ -342,6 +338,48 @@ def GetTextProperties( buffer_number ):
                int( column ) + 1,
                int( extra_args[ 'end_col' ] ) - int( column ) )
              for id, line, column, extra_args in ext_marks ]
+
+
+def _MergeVimTextProperties( vim_props ):
+  # Vim's prop_list() splits text properties at line boundaries. Here, we stitch
+  # these separated properties back together based on their id.
+
+  # Note that during editing, a text property may be split into multiple parts.
+  # This means that we may get multiple "start" and "end" properties (denoting
+  # the first and last line, respectively) for the same id.
+  # For this reason, we keep track of both open and closed properties: Any
+  # property we encounter is initially open, but if we encounter the same
+  # property again (based on its id), we move its previous incarnation to the
+  # closed list.
+  open_props = {}
+  closed_props = []
+
+  for vim_prop in vim_props:
+    prop_id = int( vim_prop[ 'id' ] )
+    existing_prop = open_props.pop( prop_id, None )
+    if existing_prop:
+      start = int( vim_prop[ 'start' ] or 0 ) # not available in unit tests
+      if start:
+        closed_props.append( existing_prop )
+        open_props[ prop_id ] = _VimPropToDiag( vim_prop )
+      else:
+        open_props[ prop_id ] = existing_prop._replace(
+          end_line = int( vim_prop[ 'lnum' ] ),
+          end_column = int( vim_prop[ 'col' ] ) + int( vim_prop[ 'length' ] ) )
+    else:
+      open_props[ prop_id ] = _VimPropToDiag( vim_prop )
+
+  return closed_props + list( open_props.values() )
+
+
+def _VimPropToDiag( vim_prop ):
+  return DiagnosticProperty(
+    int( vim_prop[ 'id' ] ),
+    vim_prop[ 'type' ],
+    int( vim_prop[ 'lnum' ] ),
+    int( vim_prop[ 'col' ] ),
+    int( vim_prop[ 'lnum' ] ),
+    int( vim_prop[ 'col' ] ) + int( vim_prop[ 'length' ] ) )
 
 
 def AddTextProperty( buffer_number,
@@ -375,12 +413,17 @@ def AddTextProperty( buffer_number,
 
 def RemoveDiagnosticProperty( buffer_number: int, prop: DiagnosticProperty ):
   RemoveTextProperty( buffer_number,
-                      prop.line,
+                      prop.start_line,
+                      prop.end_line,
                       prop.id,
                       prop.type )
 
 
-def RemoveTextProperty( buffer_number, line_num, prop_id, prop_type ):
+def RemoveTextProperty( buffer_number,
+                        start_line,
+                        end_line,
+                        prop_id,
+                        prop_type ):
   if not VimIsNeovim():
     p = {
       'bufnr': buffer_number,
@@ -389,7 +432,7 @@ def RemoveTextProperty( buffer_number, line_num, prop_id, prop_type ):
       'both': 1,
       'all': 1
     }
-    vim.eval( f'prop_remove( { p }, { line_num } )' )
+    vim.eval( f'prop_remove( { p }, { start_line }, { end_line } )' )
   else:
     vim.eval( f'nvim_buf_del_extmark( { buffer_number }, '
                                     f'{ YCM_NEOVIM_NS_ID }, '

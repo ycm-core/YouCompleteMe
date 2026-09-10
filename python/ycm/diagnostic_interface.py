@@ -212,34 +212,48 @@ class DiagnosticInterface:
       return
 
     props_to_remove = vimsupport.GetTextProperties( self._bufnr )
-    for diags in self._line_to_diags.values():
-      # Insert squiggles in reverse order so that errors overlap warnings.
-      for diag in reversed( diags ):
-        for line, column, name, extras in _ConvertDiagnosticToTextProperties(
-            self._bufnr,
-            diag ):
-          global YCM_VIM_PROPERTY_ID
 
-          # Note the following .remove() works because the __eq__ on
-          # DiagnosticProperty does not actually check the IDs match...
-          diag_prop = vimsupport.DiagnosticProperty(
-              YCM_VIM_PROPERTY_ID,
-              name,
-              line,
-              column,
-              extras[ 'end_col' ] - column if 'end_col' in extras else column )
-          try:
-            props_to_remove.remove( diag_prop )
-          except ValueError:
-            extras.update( {
-              'id': YCM_VIM_PROPERTY_ID
-            } )
-            vimsupport.AddTextProperty( self._bufnr,
-                                        line,
-                                        column,
-                                        name,
-                                        extras )
-          YCM_VIM_PROPERTY_ID += 1
+    def _IsOwnDiag( diag ):
+      location_extent = diag[ 'location_extent' ]
+      start = location_extent[ 'start' ]
+      bufnr = vimsupport.GetBufferNumberForFilename( start[ 'filepath' ] )
+      return bufnr == self._bufnr
+
+    own_diags = filter( _IsOwnDiag, self._diagnostics )
+    # Insert squiggles in reverse order so that errors overlap warnings.
+    sorted_diags = sorted( own_diags,
+                           reverse = True,
+                           key = lambda diag: (
+                             diag[ 'kind' ],
+                             diag[ 'location' ][ 'column_num' ] ) )
+
+    for diag in sorted_diags:
+      for line, column, name, extras in _ConvertDiagnosticToTextProperties(
+          self._bufnr,
+          diag ):
+        global YCM_VIM_PROPERTY_ID
+
+        # Note the following .remove() works because the __eq__ on
+        # DiagnosticProperty does not actually check the IDs match...
+        diag_prop = vimsupport.DiagnosticProperty(
+            YCM_VIM_PROPERTY_ID,
+            name,
+            line,
+            column,
+            extras[ 'end_lnum' ] if 'end_lnum' in extras else line,
+            extras[ 'end_col' ] if 'end_col' in extras else column )
+        try:
+          props_to_remove.remove( diag_prop )
+        except ValueError:
+          extras.update( {
+            'id': YCM_VIM_PROPERTY_ID,
+          } )
+          vimsupport.AddTextProperty( self._bufnr,
+                                      line,
+                                      column,
+                                      name,
+                                      extras )
+        YCM_VIM_PROPERTY_ID += 1
     for prop in props_to_remove:
       vimsupport.RemoveDiagnosticProperty( self._bufnr, prop )
 

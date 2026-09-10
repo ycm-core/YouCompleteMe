@@ -281,13 +281,13 @@ def _MockVimPropEval( value ):
     return vim_prop.id
 
   if match := PROP_REMOVE_REGEX.search( value ):
-    prop, lin_num = eval( match.group( 'prop' ) )
+    prop, start_line, end_line = eval( match.group( 'prop' ) )
     vim_props = VIM_PROPS_FOR_BUFFER[ prop[ 'bufnr' ] ]
-    for index, vim_prop in enumerate( vim_props ):
-      if vim_prop.id == prop[ 'id' ]:
-        vim_props.pop( index )
-        return -1
-    return 0
+    initial_prop_count = len( vim_props )
+    # prop_remove() is always used to remove all matching text properties
+    assert prop[ 'all' ] == 1
+    vim_props[ : ] = [ p for p in vim_props if p.id != prop[ 'id' ] ]
+    return initial_prop_count - len( vim_props )
 
   return None
 
