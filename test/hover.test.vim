@@ -319,6 +319,48 @@ function! Test_Hover_Dismiss()
   call popup_clear()
 endfunction
 
+function! s:GetPopupAt( row, col )
+  redraw
+  let loc = screenpos( win_getid(), a:row, a:col )
+  return popup_locate( loc.row, loc.col )
+endfunction
+
+function! Test_Hover_Dismiss_Closes_Popup()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+
+  call setpos( '.', [ 0, 12, 3 ] )
+  normal \D
+  call s:CheckPopupVisible( 11, 3, s:python_oneline.GetDoc, '' )
+  let hover_popup = s:GetPopupAt( 11, 3 )
+
+  " Dismiss
+  normal \D
+  call s:CheckPopupNotVisible( 11, 3 )
+  call assert_equal( {}, popup_getpos( hover_popup ) )
+
+  call popup_clear()
+endfunction
+
+function! Test_Hover_Closed_On_TabLeave()
+  call youcompleteme#test#setup#OpenFile( '/test/testdata/python/doc.py', {} )
+
+  call setpos( '.', [ 0, 12, 3 ] )
+  doautocmd CursorHold
+  call s:CheckPopupVisible( 11, 3, s:python_oneline.GetDoc, '' )
+  let hover_popup = s:GetPopupAt( 11, 3 )
+
+  tab split
+  call assert_equal( {}, popup_getpos( hover_popup ) )
+
+  " The hover works in the new tab page
+  call setpos( '.', [ 0, 12, 3 ] )
+  normal \D
+  call s:CheckPopupVisible( 11, 3, s:python_oneline.GetDoc, '' )
+
+  tabclose
+  call popup_clear()
+endfunction
+
 function! SetUp_Test_Hover_Custom_Syntax()
   augroup MyYCMCustom
     autocmd!

@@ -205,6 +205,11 @@ function! youcompleteme#Enable()
     autocmd VimLeave * call s:OnVimLeave()
     autocmd CompleteDone * call s:OnCompleteDone()
     autocmd CompleteChanged * call s:OnCompleteChanged()
+    if s:enable_hover
+      " The hover popup is local to the tab page it was opened in. If it stayed
+      " open there, the hover would not work in other tab pages.
+      autocmd TabLeave * call popup_close( s:cursorhold_popup )
+    endif
   augroup END
 
   " The FileType event is not triggered for the first loaded file. We wait until
@@ -1663,7 +1668,7 @@ if exists( '*popup_atcursor' )
 
 
   function! s:ShowHoverResult( response )
-    call popup_hide( s:cursorhold_popup )
+    call popup_close( s:cursorhold_popup )
 
     if empty( a:response ) || !exists( 'b:ycm_hover' )
       return
@@ -1713,7 +1718,7 @@ if exists( '*popup_atcursor' )
   function! s:ToggleHover()
     let pos = popup_getpos( s:cursorhold_popup )
     if !empty( pos ) && pos.visible
-      call popup_hide( s:cursorhold_popup )
+      call popup_close( s:cursorhold_popup )
       let s:cursorhold_popup = -1
 
       " Disable the auto-trigger until the next cursor movement.
